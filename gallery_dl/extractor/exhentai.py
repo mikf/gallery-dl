@@ -28,17 +28,18 @@ class Extractor(BasicExtractor):
         text = self.request(url).text
 
         # extract information
-        _     , pos = e(text, '<div id="i3"><a onclick="return load_image(', '')
-        imgkey, pos = e(text, "'", "'", pos)
-        url   , pos = e(text, '<img id="img" src="', '"', pos)
-        name  , pos = e(text, '<div id="i4"><div>', ' :: ', pos)
-        orgurl, pos = e(text, 'http://exhentai.org/fullimg.php', '"', pos)
-        if orgurl: url = "http://exhentai.org/fullimg.php" + unescape(orgurl)
-        yield url, name_fmt.format(self.gid, 1, imgkey, name)
-
+        _       , pos = e(text, '<div id="i3"><a onclick="return load_image(', '')
+        imgkey  , pos = e(text, "'", "'", pos)
+        url     , pos = e(text, '<img id="img" src="', '"', pos)
+        name    , pos = e(text, '<div id="i4"><div>', ' :: ', pos)
+        orgurl  , pos = e(text, 'http://exhentai.org/fullimg.php', '"', pos)
         gid     , pos = e(text, 'var gid='      ,  ';', pos)
         startkey, pos = e(text, 'var startkey="', '";', pos)
         showkey , pos = e(text, 'var showkey="' , '";', pos)
+
+        #
+        if orgurl: url = "http://exhentai.org/fullimg.php" + unescape(orgurl)
+        yield url, self.name_fmt.format(self.gid, 1, startkey, name)
 
         # use json-api for further pages
         request = {
@@ -60,7 +61,7 @@ class Extractor(BasicExtractor):
             name  , pos = e(info["i" ], '<div>', ' :: ')
             orgurl, pos = e(info["i7"], '<a href="', '"')
             if orgurl: url = unescape(orgurl)
-            yield url, name_fmt.format(gid, request["page"], imgkey, name)
+            yield url, self.name_fmt.format(gid, request["page"], request["imgkey"], name)
 
             if request["imgkey"] == imgkey:
                 return
