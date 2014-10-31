@@ -1,5 +1,5 @@
 from .common import BasicExtractor
-from ..util import unescape
+from ..util import unescape, safe_request
 import time
 import random
 import json
@@ -52,9 +52,9 @@ class Extractor(BasicExtractor):
 
         while True:
             time.sleep( random.uniform(2, 5) )
-            info = json.loads(
-                self.session.post(self.api_url, data=json.dumps(request)).text
-            )
+            info = json.loads(safe_request(
+                self.session, self.api_url, method="POST", data=json.dumps(request)
+            ).text)
 
             imgkey, pos = e(info["i3"], "'", "'")
             url   , pos = e(info["i3"], '<img id="img" src="', '"', pos)
