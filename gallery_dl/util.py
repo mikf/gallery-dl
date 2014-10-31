@@ -2,12 +2,12 @@ import time
 import requests
 import html.parser
 
-def safe_request(session, url, *args, **kwargs):
+def safe_request(session, url, method="GET", *args, **kwargs):
     tries = 0
     while True:
         # try to connect to remote source
         try:
-            r = session.get(url, *args, **kwargs)
+            r = session.request(method, url, *args, **kwargs)
         except requests.exceptions.ConnectionError:
             tries += 1
             time.sleep(1)
