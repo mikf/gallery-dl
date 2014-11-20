@@ -4,8 +4,9 @@ class Extractor(AsyncExtractor):
 
     def __init__(self, match, config):
         AsyncExtractor.__init__(self, config)
+        title, key = self.get_title(match)
         self.category  = "imagebam"
-        self.directory = self.get_title(match)  + " - " + match.group(2)
+        self.directory = title + " - " + key
 
     def images(self):
         next_url = self.url
@@ -35,11 +36,12 @@ class Extractor(AsyncExtractor):
         if match.group(1) == "image":
             text = self.request(match.group(0)).text
             gallery_url, _ = self.extract(text, "class='gallery_title'><a href='", "'")
+            gallery_key = gallery_url.split("/")[-2]
         else:
-            gallery_url = "http://www.imagebam.com/gallery/" + match.group(2)
+            gallery_key = match.group(2)
 
-        text = self.request(gallery_url).text
+        text = self.request("http://www.imagebam.com/gallery/" + gallery_key).text
         _       , pos = self.extract(text, "<img src='/img/icons/photos.png'", "")
         title   , pos = self.extract(text, "'> ", " <", pos)
         self.url, pos = self.extract(text, "<a href='http://www.imagebam.com", "'", pos)
-        return title
+        return title, gallery_key
