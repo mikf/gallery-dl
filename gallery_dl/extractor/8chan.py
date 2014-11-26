@@ -18,4 +18,4 @@ class Extractor(BasicExtractor):
         text = self.request(url).text
         for match in re.finditer(self.regex, text):
             url, prefix, fullname, name = match.group(1, 2, 4, 5)
-            yield ("https://www.8chan.co" + url, prefix + "-" + unquote(fullname or name))
+            yield (url, prefix + "-" + unquote(fullname or name))
