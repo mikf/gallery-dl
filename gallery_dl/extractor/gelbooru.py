@@ -1,12 +1,13 @@
 from .common import AsyncExtractor
 from ..util import filename_from_url
 import xml.etree.ElementTree as ET
+import urllib.parse
 
 class BooruExtractor(AsyncExtractor):
 
     def __init__(self, match, config):
         AsyncExtractor.__init__(self, config)
-        self.tags      = match.group(1)
+        self.tags      = urllib.parse.unquote(match.group(1))
         self.category  = "booru"
         self.params    = {"tags": self.tags}
         self.page      = "page"
@@ -18,7 +19,6 @@ class BooruExtractor(AsyncExtractor):
             root = ET.fromstring(
                 self.request(self.api_url, verify=True, params=self.params).text
             )
-            # root = tree.getroot()
             if len(root) == 0:
                 return
             for item in root:
