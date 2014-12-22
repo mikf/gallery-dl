@@ -21,5 +21,5 @@ regex0 = (?:https?://)?(?:www\.)?imgbox\.com(/.*)
 regex0 = (?:https?://)?(?:www\.)?imagebam\.com/(gallery|image)/([^/]+).*
 
 [e621]
-regex0 = (?:https?://)?(?:www\.)?e621\.net/post/index/\d+/(\w+)
+regex0 = (?:https?://)?(?:www\.)?e621\.net/post/index/\d+/([^?]+)
 regex1 = e(?:621)?[.:-_](\w.+)
