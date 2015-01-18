@@ -4,7 +4,7 @@ import re
 
 class Extractor(BasicExtractor):
 
-    thread_url_fmt = "https://www.8chan.co/{0}/res/{1}.html"
+    thread_url_fmt = "https://www.8ch.net/{0}/res/{1}.html"
     regex = r'>File: <a href="([^"]+)">([^<]+)\.[^<]+<.*?<span class="postfilename"( title="([^"]+)")?>([^<]+)<'
 
     def __init__(self, match, config):
