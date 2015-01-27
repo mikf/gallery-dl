@@ -22,11 +22,11 @@ class Extractor(AsyncExtractor):
         sname_fmt  = "pixiv_{1}_{0}.{2}"
         mname_fmt  = "pixiv_{1}_{0}_p{num:02}.{2}"
 
-        singl_v1_fmt = "http://i1.pixiv.net/img{4:>02}/img/{24}/{0}.{2}"
-        manga_v1_fmt = "http://i1.pixiv.net/img{4:>02}/img/{24}/{0}{big}_p{num}.{2}"
+        singl_v1_fmt = "http://i{6[8]}.pixiv.net/img{4:>02}/img/{24}/{0}.{2}"
+        manga_v1_fmt = "http://i{6[8]}.pixiv.net/img{4:>02}/img/{24}/{0}{big}_p{num}.{2}"
 
-        singl_v2_fmt = "http://i1.pixiv.net/img-original/img/{date}/{0}_p0.{2}"
-        manga_v2_fmt = "http://i1.pixiv.net/img-original/img/{date}/{0}_p{num}.{2}"
+        singl_v2_fmt = "http://i{6[8]}.pixiv.net/img-original/img/{date}/{0}_p0.{2}"
+        manga_v2_fmt = "http://i{6[8]}.pixiv.net/img-original/img/{date}/{0}_p{num}.{2}"
 
         date = ""
         big  = ""
