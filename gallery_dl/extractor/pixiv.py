@@ -70,7 +70,7 @@ class Extractor(AsyncExtractor):
 
     def image_ids(self):
         """generator -- yield all image ids"""
-        needle = '<li class="image-item"><a href="/member_illust.php?mode=medium&amp;illust_id='
+        needle = '<a href="/member_illust.php?mode=medium&amp;illust_id='
         params = {"id": self.member_id, "p": 1}
         while True:
             text  = self.request(self.member_url, params=params).text
