@@ -1,8 +1,16 @@
-__author__     = "Mike Fährmann"
-__copyright__  = "Copyright 2014, Mike Fährmann"
+# -*- coding: utf-8 -*-
 
-__license__    = "GPLv3"
-__version__    = "0.4"
+# Copyright 2014, 2015 Mike Fährmann
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+__author__     = "Mike Fährmann"
+__copyright__  = "Copyright 2014, 2015 Mike Fährmann"
+
+__license__    = "GPLv2"
+__version__    = "0.2"
 __maintainer__ = "Mike Fährmann"
 __email__      = "mike_faehrmann@web.de"
 
@@ -11,34 +19,40 @@ import sys
 import argparse
 import configparser
 
-from . import extractor
-from . import downloader
+from download import DownloadManager
 
 def parse_cmdline_options():
-    p = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(
         description='Download images from various sources')
-    p.add_argument("-c", "--config",
-        default="~/.config/gallery/config", metavar="CFG", help="alternate configuration file")
-    p.add_argument("-d", "--dest",
-        metavar="DEST", help="destination directory")
-    p.add_argument("urls", nargs="+",
-        metavar="URL", help="url to download images from")
-    return p.parse_args()
+    parser.add_argument(
+        "-c", "--config",
+        default="~/.config/gallery/config", metavar="CFG",
+        help="alternate configuration file"
+    )
+    parser.add_argument(
+        "-d", "--dest",
+        metavar="DEST",
+        help="destination directory"
+    )
+    parser.add_argument(
+        "urls",
+        nargs="+", metavar="URL",
+        help="url to download images from"
+    )
+    return parser.parse_args()
 
 def parse_config_file(path):
     config = configparser.ConfigParser(
         interpolation=None,
     )
-    config.optionxform = lambda opt:opt
+    config.optionxform = lambda opt: opt
     config.read(os.path.expanduser(path))
     return config
 
 def main():
     opts = parse_cmdline_options()
     conf = parse_config_file(opts.config)
-    extf = extractor.ExtractorFinder(conf)
-    dlmg = downloader.DownloadManager(opts, conf)
+    dlmgr = DownloadManager(opts, conf)
 
     for url in opts.urls:
-        ex = extf.match(url)
-        dlmg.add(ex)
+        dlmgr.add(url)
