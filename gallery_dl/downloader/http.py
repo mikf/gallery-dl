@@ -40,3 +40,15 @@ class Downloader(BasicDownloader):
         for data in response.iter_content(16384):
             file.write(data)
         return tries
+
+    def set_headers(self, headers):
+        self.set_dict(self.session.headers, headers)
+
+    def set_cookies(self, cookies):
+        self.set_dict(self.session.cookies, cookies)
+
+    @staticmethod
+    def set_dict(dest, src):
+        dest.clear()
+        dest.update(src)
+
