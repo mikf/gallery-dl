@@ -19,7 +19,7 @@ class DownloadManager():
     def __init__(self, opts, conf):
         self.opts = opts
         self.conf = conf
-        self.downloaders = {}
+        self.modules = {}
         self.extractors = ExtractorFinder(conf)
 
     def add(self, url):
@@ -28,10 +28,10 @@ class DownloadManager():
 
     def get_downloader_module(self, scheme):
         """Return a downloader module suitable for 'scheme'"""
-        module = self.downloaders.get(scheme)
+        module = self.modules.get(scheme)
         if module is None:
             module = importlib.import_module(".downloader."+scheme, __package__)
-            self.downloaders[scheme] = module
+            self.modules[scheme] = module
         return module
 
     def get_base_directory(self):
@@ -57,6 +57,12 @@ class DownloadJob():
         for msg in self.extractor:
             if msg[0] == Message.Url:
                 self.download(msg)
+
+            elif msg[0] == Message.Headers:
+                self.get_downloader("http:").set_headers(msg[1])
+
+            elif msg[0] == Message.Cookies:
+                self.get_downloader("http:").set_cookies(msg[1])
 
             elif msg[0] == Message.Directory:
                 self.set_directory(msg)

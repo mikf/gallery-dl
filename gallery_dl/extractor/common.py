@@ -20,6 +20,8 @@ class Message():
     Version = 1
     Directory = 2
     Url = 3
+    Headers = 4
+    Cookies = 5
 
 
 class Extractor():
