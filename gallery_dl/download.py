@@ -12,7 +12,7 @@ import re
 import sqlite3
 import importlib
 
-from extractor.common import Message
+from .extractor.common import Message
 
 class DownloadManager():
 
@@ -55,8 +55,6 @@ class DownloadJob():
             return # TODO: error msg
 
         for msg in self.extractor:
-            print(msg)
-            print(type(msg))
             if msg[0] == Message.Url:
                 self.download(msg)
 

@@ -19,7 +19,7 @@ import sys
 import argparse
 import configparser
 
-from download import DownloadManager
+from .download import DownloadManager
 
 def parse_cmdline_options():
     parser = argparse.ArgumentParser(
