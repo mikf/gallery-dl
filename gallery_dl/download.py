@@ -34,6 +34,7 @@ class DownloadManager():
         return module
 
     def get_base_directory(self):
+        """Return the base-destination-directory for downloads"""
         if self.opts.dest:
             return self.opts.dest
         else:
@@ -122,15 +123,18 @@ class DownloadJob():
 
     @staticmethod
     def print_start(path):
+        """Print a message indicating the start of a download"""
         print(path, end="")
         sys.stdout.flush()
 
     @staticmethod
     def print_skip(path):
+        """Print a message indicating that a download has been skipped"""
         print("\033[2m", path, "\033[0m", sep="")
 
     @staticmethod
     def print_success(path, tries):
+        """Print a message indicating the completion of a download"""
         if tries == 0:
             print("\r", end="")
         print("\r\033[1;32m", path, "\033[0m", sep="")
@@ -142,6 +146,7 @@ class ExtractorFinder():
         self.config = config
 
     def get_for_url(self, url):
+        """Get an extractor-instance suitable for 'ur'"""
         name, match = self.find_pattern_match(url)
         if match:
             module = importlib.import_module(".extractor." + name, __package__)
@@ -152,6 +157,7 @@ class ExtractorFinder():
             return None
 
     def find_pattern_match(self, url):
+        """Find a pattern, that matches 'url', and return the (category,match) tuple"""
         for category in self.config:
             for key, value in self.config[category].items():
                 if key.startswith("regex"):
@@ -159,15 +165,16 @@ class ExtractorFinder():
                     match = re.match(value, url)
                     if match:
                         return category, match
-        for name, info in self.extractor_metadata():
+        for category, info in self.extractor_metadata():
             for pattern in info["pattern"]:
                 print(pattern)
                 match = re.match(pattern, url)
                 if match:
-                    return name, match
+                    return category, match
         return None, None
 
     def extractor_metadata(self):
+        """Yield all extractor-name, -metadata tuples"""
         path = os.path.join(os.path.dirname(__file__), "extractor")
         for name in os.listdir(path):
             extractor_path = os.path.join(path, name)
@@ -177,6 +184,7 @@ class ExtractorFinder():
 
     @staticmethod
     def get_info_dict(extractor_path):
+        """Get info-/metadata-dictionary for an extractor"""
         try:
             with open(extractor_path) as file:
                 for _ in range(30):
