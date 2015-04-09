@@ -9,7 +9,6 @@
 import os
 import sys
 import re
-import sqlite3
 import importlib
 
 from .extractor.common import Message
@@ -133,51 +132,57 @@ class ExtractorFinder():
 
     def __init__(self, config):
         self.config = config
-        self.match_list = list()
-        if "database" in config["general"]:
-            path = os.path.expanduser(config["general"]["database"])
-            conn = sqlite3.connect(path)
-            self.load_from_database(conn)
-        self.load_from_config(config)
 
     def get_for_url(self, url):
-        # TODO: implement general case
-        module = importlib.import_module(".extractor.8chan", __package__)
-        for pattern in module.info["pattern"]:
-            match = re.match(pattern, url)
-            if match:
-                klass = getattr(module, module.info["extractor"])
-                return klass(match, self.config), module.info
-        print("pattern mismatch")
-        sys.exit()
+        name, match = self.find_pattern_match(url)
+        if match:
+            module = importlib.import_module(".extractor." + name, __package__)
+            klass = getattr(module, module.info["extractor"])
+            return klass(match, self.config), module.info
+        else:
+            print("pattern mismatch")
+            return None
 
-    def match(self, url):
-        for category, regex in self.match_list:
-            match = regex.match(url)
-            if match:
-                module = importlib.import_module("."+category, __package__)
-                return module.Extractor(match, self.config)
+    def find_pattern_match(self, url):
+        for category in self.config:
+            for key, value in self.config[category].items():
+                if(key.startswith("regex")):
+                    print(value)
+                    match = re.match(value, url)
+                    if match:
+                        return category, match
+        for name, info in self.extractor_metadata():
+            for pattern in info["pattern"]:
+                print(pattern)
+                match = re.match(pattern, url)
+                if match:
+                    return name, match
         return None
 
-    def load_from_database(self, db):
-        query = (
-            "SELECT regex.re, category.name "
-            "FROM   regex JOIN category "
-            "ON     regex.category_id = category.id"
-        )
-        for row in db.execute(query):
-            self.add_match(row[1], row[0])
+    def extractor_metadata(self):
+        path = os.path.join(os.path.dirname(__file__), "extractor")
+        for name in os.listdir(path):
+            extractor_path = os.path.join(path, name)
+            info = self.get_info_dict(extractor_path)
+            if info is not None:
+                yield os.path.splitext(name)[0], info
 
-    def load_from_config(self, conf):
-        for category in conf:
-            for key, value in conf[category].items():
-                if(key.startswith("regex")):
-                    self.add_match(category, value)
-
-    def add_match(self, category, regex):
+    @staticmethod
+    def get_info_dict(extractor_path):
         try:
-            # print(category, regex)
-            self.match_list.append( (category, re.compile(regex)) )
-        except:
-            print("[Warning] [{0}] failed to compile regular expression '{1}'"
-                  .format(category, regex))
+            with open(extractor_path) as f:
+                for index in range(30):
+                    line = next(f)
+                    if line.startswith("info ="):
+                        break
+                else:
+                    return None
+
+                info = [line[6:]]
+                for line in f:
+                    info.append(line)
+                    if line.startswith("}"):
+                        break
+        except (StopIteration, OSError):
+            return None
+        return eval("".join(info))
