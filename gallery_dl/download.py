@@ -92,9 +92,9 @@ class DownloadJob():
         if os.path.exists(path):
             self.print_skip(path)
             return
-        dl = self.get_downloader(url)
+        downloader = self.get_downloader(url)
         self.print_start(path)
-        tries = dl.download(url, path)
+        tries = downloader.download(url, path)
         self.print_success(path, tries)
 
     def set_directory(self, msg):
@@ -154,7 +154,7 @@ class ExtractorFinder():
     def find_pattern_match(self, url):
         for category in self.config:
             for key, value in self.config[category].items():
-                if(key.startswith("regex")):
+                if key.startswith("regex"):
                     print(value)
                     match = re.match(value, url)
                     if match:
@@ -165,7 +165,7 @@ class ExtractorFinder():
                 match = re.match(pattern, url)
                 if match:
                     return name, match
-        return None
+        return None, None
 
     def extractor_metadata(self):
         path = os.path.join(os.path.dirname(__file__), "extractor")
@@ -178,16 +178,16 @@ class ExtractorFinder():
     @staticmethod
     def get_info_dict(extractor_path):
         try:
-            with open(extractor_path) as f:
-                for index in range(30):
-                    line = next(f)
+            with open(extractor_path) as file:
+                for _ in range(30):
+                    line = next(file)
                     if line.startswith("info ="):
                         break
                 else:
                     return None
 
                 info = [line[6:]]
-                for line in f:
+                for line in file:
                     info.append(line)
                     if line.startswith("}"):
                         break
