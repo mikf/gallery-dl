@@ -15,11 +15,11 @@ from .extractor.common import Message
 
 class DownloadManager():
 
-    def __init__(self, opts, conf):
+    def __init__(self, opts, config):
         self.opts = opts
-        self.conf = conf
+        self.config = config
         self.modules = {}
-        self.extractors = ExtractorFinder(conf)
+        self.extractors = ExtractorFinder(config)
 
     def add(self, url):
         job = DownloadJob(self, url)
@@ -37,7 +37,7 @@ class DownloadManager():
         if self.opts.dest:
             return self.opts.dest
         else:
-            return self.conf["general"].get("destination", "/tmp/")
+            return self.config.get("general", "destination", fallback="/tmp/")
 
 
 class DownloadJob():
@@ -47,6 +47,17 @@ class DownloadJob():
         self.extractor, self.info = mngr.extractors.get_for_url(url)
         self.directory = mngr.get_base_directory()
         self.downloaders = {}
+        self.filename_fmt = mngr.config.get(
+            self.info["category"], "filename",
+            fallback=self.info["filename"]
+        )
+        try:
+            segments = mngr.config.get(
+                self.info["category"], "directory"
+            ).split("/")
+        except Exception:
+            segments = self.info["directory"]
+        self.directory_fmt = os.path.join(*segments)
 
     def run(self):
         """Execute/Run the downlaod job"""
@@ -76,7 +87,7 @@ class DownloadJob():
     def download(self, msg):
         """Download the resource specified in 'msg'"""
         _, url, metadata = msg
-        filename = self.info["filename"].format(**metadata)
+        filename = self.filename_fmt.format(**metadata)
         path = os.path.join(self.directory, filename)
         if os.path.exists(path):
             self.print_skip(path)
@@ -88,12 +99,9 @@ class DownloadJob():
 
     def set_directory(self, msg):
         """Set and create the target directory for downloads"""
-        path = []
-        for segment in self.info["directory"]:
-            path.append(segment.format(**msg[1]))
         self.directory = os.path.join(
             self.mngr.get_base_directory(),
-            *path
+            self.directory_fmt.format(**msg[1])
         )
         os.makedirs(self.directory, exist_ok=True)
 
