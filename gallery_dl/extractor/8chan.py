@@ -18,8 +18,7 @@ info = {
     "directory": ["{category}", "{board}-{thread-id}"],
     "filename": "{timestamp}-{name}",
     "pattern": [
-        r"(?:https?://)?(?:www\.)?8chan\.co/([^/]+/res/\d+).*",
-        r"(?:https?://)?(?:www\.)?8ch\.net/([^/]+/res/\d+).*",
+        r"(?:https?://)?(?:www\.)?(?:8chan\.co|8ch\.net)/([^/]+/res/\d+).*",
     ],
 }
 
