@@ -69,11 +69,11 @@ class SequentialExtractor(Extractor):
         Extractor.__init__(self)
 
 
-class AsyncExtractor(Extractor):
+class AsynchronousExtractor(Extractor):
 
     def __init__(self, config):
         Extractor.__init__(self)
-        queue_size = int(config.get("queue-size", 5))
+        queue_size = int(config.get("general", "queue-size", fallback=5))
         self.__queue = queue.Queue(maxsize=queue_size)
         self.__thread = threading.Thread(target=self.async_items)
         # self.__thread = threading.Thread(target=self.async_images, daemon=True)
