@@ -116,7 +116,7 @@ class DownloadJob():
         downloader = self.downloaders.get(scheme)
         if downloader is None:
             module = self.mngr.get_downloader_module(scheme)
-            downloader = module.Downloader(self.extractor)
+            downloader = module.Downloader()
             self.downloaders[scheme] = downloader
 
         return downloader
