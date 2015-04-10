@@ -46,11 +46,13 @@ class PixivExtractor(AsynchronousExtractor):
         self.config = config
         self.artist_id = match.group(1)
         self.api = PixivAPI(config["pixiv-cookies"]["PHPSESSID"])
+        self.session.headers.update({"Referer": "http://www.pixiv.net/"})
+        self.session.cookies.update(self.config["pixiv-cookies"])
 
     def items(self):
         yield Message.Version, 1
-        yield Message.Headers, {"Referer": "http://www.pixiv.net/"}
-        yield Message.Cookies, self.config["pixiv-cookies"]
+        yield Message.Headers, self.session.headers
+        yield Message.Cookies, self.session.cookies
         yield Message.Directory, self.get_job_metadata()
 
         for illust_id in self.get_illust_ids():
