@@ -2,7 +2,7 @@ from .common import BasicDownloader
 
 class Downloader(BasicDownloader):
 
-    def __init__(self, extr):
+    def __init__(self):
         BasicDownloader.__init__(self)
 
     def download_impl(self, url, file):

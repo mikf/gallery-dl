@@ -4,9 +4,9 @@ import requests
 
 class Downloader(BasicDownloader):
 
-    def __init__(self, extr):
+    def __init__(self):
         BasicDownloader.__init__(self)
-        self.session = extr.session
+        self.session = requests.session()
 
     def download_impl(self, url, file):
         tries = 0
