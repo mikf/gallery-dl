@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2014, 2015 Mike Fährmann
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Downloader module for http urls"""
+
 from .common import BasicDownloader
 import time
 import requests
@@ -14,9 +24,9 @@ class Downloader(BasicDownloader):
             # try to connect to remote source
             try:
                 response = self.session.get(url, stream=True, verify=True)
-            except requests.exceptions.ConnectionError as e:
+            except requests.exceptions.ConnectionError as exptn:
                 tries += 1
-                self.print_error(file, e, tries, self.max_tries)
+                self.print_error(file, exptn, tries, self.max_tries)
                 time.sleep(1)
                 if tries == self.max_tries:
                     raise
@@ -42,13 +52,16 @@ class Downloader(BasicDownloader):
         return tries
 
     def set_headers(self, headers):
+        """Set headers for http requests"""
         self.set_dict(self.session.headers, headers)
 
     def set_cookies(self, cookies):
+        """Set cookies for http requests"""
         self.set_dict(self.session.cookies, cookies)
 
     @staticmethod
     def set_dict(dest, src):
+        """Copy the contents of dictionary 'src' to 'dest'"""
         dest.clear()
         dest.update(src)
 
