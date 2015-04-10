@@ -54,5 +54,8 @@ def main():
     conf = parse_config_file(opts.config)
     dlmgr = DownloadManager(opts, conf)
 
-    for url in opts.urls:
-        dlmgr.add(url)
+    try:
+        for url in opts.urls:
+            dlmgr.add(url)
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt")
