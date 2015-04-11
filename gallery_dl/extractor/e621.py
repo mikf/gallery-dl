@@ -25,4 +25,4 @@ class E621Extractor(JSONBooruExtractor):
 
     def __init__(self, match, config):
         JSONBooruExtractor.__init__(self, match, config, info)
-        self.api_url  = "https://e621.net/post/index.json"
+        self.api_url = "https://e621.net/post/index.json"
