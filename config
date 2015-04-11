@@ -8,18 +8,8 @@ PHPSESSID = XXXXX
 ipb_member_id = XXXXX
 ipb_pass_hash = XXXXX
 
-[8chan]
-regex0 = (?:https?://)?(?:www\.)?8chan\.co/([^/]+/res/\d+).*
+[danbooru]
+regex0 = d(?:anbooru)?[.:-_](\w.+)
 
-[batoto]
-regex0 = (?:https?://)?(?:www\.)?bato\.to/read/_/(\d+)/.*
-
-[imgbox]
-regex0 = (?:https?://)?(?:www\.)?imgbox\.com(/.*)
-
-[imagebam]
-regex0 = (?:https?://)?(?:www\.)?imagebam\.com/(gallery|image)/([^/]+).*
-
-[e621]
-regex0 = (?:https?://)?(?:www\.)?e621\.net/post/index/\d+/([^?]+)
-regex1 = e(?:621)?[.:-_](\w.+)
+[gelbooru]
+regex0 = g(?:elbooru)?[.:-_](\w.+)
