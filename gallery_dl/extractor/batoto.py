@@ -1,22 +1,73 @@
-from .common import AsyncExtractor
-from ..util import filename_from_url
-from urllib.parse import unquote
+# -*- coding: utf-8 -*-
 
-class Extractor(AsyncExtractor):
+# Copyright 2014, 2015 Mike Fährmann
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extract manga pages from http://bato.to/"""
+
+from .common import AsynchronousExtractor
+from .common import Message
+from .common import filename_from_url
+from urllib.parse import unquote
+import os.path
+import re
+
+info = {
+    "category": "batoto",
+    "extractor": "BatotoExtractor",
+    "directory": ["{category}", "{manga}",
+                  "v{volume:>02} c{chapter:>03} - {title}"],
+    "filename": "{manga}_v{volume:>02}_c{chapter:>03}_{page:>03}.{extension}",
+    "pattern": [
+        r"(?:https?://)?(?:www\.)?bato\.to/read/_/(\d+).*",
+    ],
+}
+
+class BatotoExtractor(AsynchronousExtractor):
+
+    url_base = "http://bato.to/read/_/"
 
     def __init__(self, match, config):
-        AsyncExtractor.__init__(self, config)
-        self.url = "https://bato.to/read/_/" + match.group(1) + "/_/1"
-        self.category = "batoto"
-        self.directory = match.group(1)
+        AsynchronousExtractor.__init__(self, config)
+        self.chapter_id = match.group(1)
 
-    def images(self):
-        next_url = self.url
-        while next_url:
-            text = self.request(next_url).text
-            pos  = text.find('<div id="full_image"')
+    def items(self):
+        yield Message.Version, 1
+        url = self.url_base + self.chapter_id
+        while url:
+            url, data = self.get_page_metadata(url)
+            print(data)
+            yield Message.Directory, data
+            yield Message.Url, data["image-url"], data
 
-            next_url, pos = self.extract(text, '<a href="', '"', pos)
-            url, pos = self.extract(text, 'src="', '"', pos)
-            name = unquote( filename_from_url(url) )
-            yield url, name
+    def get_page_metadata(self, page_url):
+        """Collect metadata for one manga-page"""
+        page = self.request(page_url).text
+        _    , pos = self.extract(page, 'selected="selected"', '')
+        title, pos = self.extract(page, ': ', '<', pos)
+        _    , pos = self.extract(page, 'selected="selected"', '', pos)
+        trans, pos = self.extract(page, '>', '<', pos)
+        _    , pos = self.extract(page, '<div id="full_image"', '', pos)
+        image, pos = self.extract(page, '<img src="', '"', pos)
+        url  , pos = self.extract(page, '<a href="', '"', pos)
+        mmatch = re.search(r"<title>(.+) - vol (\d+) ch (\d+) Page (\d+)", page)
+        tmatch = re.match(r"(.+) - ([^ ]+)", trans)
+        filename = unquote(filename_from_url(image))
+        name, ext = os.path.splitext(filename)
+        return url, {
+            "category": info["category"],
+            "chapter-id": self.chapter_id,
+            "manga": mmatch.group(1),
+            "volume": mmatch.group(2),
+            "chapter": mmatch.group(3),
+            "page": mmatch.group(4),
+            "group": tmatch.group(1),
+            "language": tmatch.group(2),
+            "title": title,
+            "image-url": image,
+            "name": name,
+            "extension": ext[1:],
+        }
