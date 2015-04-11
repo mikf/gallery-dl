@@ -24,4 +24,4 @@ class DanbooruExtractor(JSONBooruExtractor):
 
     def __init__(self, match, config):
         JSONBooruExtractor.__init__(self, match, config, info)
-        self.api_url  = "https://danbooru.donmai.us/posts.json"
+        self.api_url = "https://danbooru.donmai.us/posts.json"
