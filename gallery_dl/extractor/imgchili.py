@@ -1,24 +1,65 @@
-from .common import BasicExtractor
-from ..util import filename_from_url
+# -*- coding: utf-8 -*-
+
+# Copyright 2014, 2015 Mike Fährmann
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extract images from albums at http://imgchili.net/"""
+
+from .common import SequentialExtractor
+from .common import Message
+from .common import filename_from_url
 import re
 
-class Extractor(BasicExtractor):
+info = {
+    "category": "imgchili",
+    "extractor": "ImgchiliExtractor",
+    "directory": ["{category}", "{title} - {key}"],
+    "filename": "{num:>03}-{name}",
+    "pattern": [
+        r"(?:https?://)?(?:www\.)?imgchili\.net/album/([^/]+)",
+    ],
+}
+
+class ImgchiliExtractor(SequentialExtractor):
 
     def __init__(self, match, config):
-        BasicExtractor.__init__(self, config)
-        self.url  = match.group(0)
-        self.page = self.request(self.url).text;
-        self.category = "imgchili"
+        SequentialExtractor.__init__(self, config)
+        self.match = match
+        self.num = 0
 
-        title = self.get_title()
-        pos   = self.url.rindex("/")
-        self.directory = title + " - " + self.url[pos+1:]
+    def items(self):
+        page = self.request(self.match.string).text
+        yield Message.Version, 1
+        yield Message.Headers, {"Referer": "http://imgchili.net/"}
+        yield Message.Directory, self.get_job_metadata(page)
 
-    def images(self):
-        pattern = r' src="http://t(\d+\.imgchili.net/[^"]+)"'
-        for match in re.finditer(pattern, self.page):
-            url = "http://i" + match.group(1)
-            yield url, filename_from_url(url)
+        pattern = r' src="http://t(\d+\.imgchili\.net/(\d+)/(\d+)_([^/"]+))"'
+        for match in re.finditer(pattern, page):
+            yield Message.Url, self.get_file_url(match), self.get_file_metadata(match)
 
-    def get_title(self):
-        return self.extract(self.page, "<h1>", "</h1>")[0]
+    def get_job_metadata(self, page):
+        """Collect metadata for extractor-job"""
+        title = self.extract(page, "<h1>", "</h1>")[0]
+        return {
+            "category": info["category"],
+            "title": title,
+            "key": self.match.group(1),
+        }
+
+    def get_file_metadata(self, match):
+        """Collect metadata for a downloadable file"""
+        self.num += 1
+        return {
+            "album-id": match.group(2),
+            "image-id": match.group(3),
+            "name": match.group(4),
+            "num": self.num,
+        }
+
+    @staticmethod
+    def get_file_url(match):
+        """Extract download-url from 'match'"""
+        return "http://i" + match.group(1)
