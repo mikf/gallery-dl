@@ -96,9 +96,9 @@ class PixivExtractor(AsynchronousExtractor):
         needle = ('<li class="image-item "><a href="'
                   '/member_illust.php?mode=medium&amp;illust_id=')
         params = {"id": self.artist_id, "p": 1}
-        pos = 0
         while True:
             text = self.request(self.member_url, params=params).text
+            pos = 0
             found = 0
             while True:
                 illust_id, pos = self.extract(text, needle, '"', pos)
