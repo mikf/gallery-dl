@@ -27,10 +27,12 @@ class BooruExtractor(SequentialExtractor):
         self.tags = urllib.parse.unquote(match.group(1))
         self.page = "page"
         self.params = {"tags": self.tags}
+        self.headers = {}
 
     def items(self):
         yield Message.Version, 1
         yield Message.Directory, self.get_job_metadata()
+        yield Message.Headers, self.headers
         for data in self.items_impl():
             yield Message.Url, self.get_file_url(data), self.get_file_metadata(data)
 
@@ -76,7 +78,8 @@ class JSONBooruExtractor(BooruExtractor):
         self.update_page(reset=True)
         while True:
             images = json.loads(
-                self.request(self.api_url, verify=True, params=self.params).text
+                self.request(self.api_url, verify=True, params=self.params,
+                             headers=self.headers).text
             )
             if len(images) == 0:
                 return
