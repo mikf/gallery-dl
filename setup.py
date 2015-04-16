@@ -8,12 +8,24 @@ except ImportError:
 
 setup(
     name="gallery_dl",
-    version="0.1",
+    version="0.2",
     description="gallery- and image downloader",
     long_description="download image galleries from several image hosting platforms",
     url="https://github.com/mikf/gallery-dl",
     author="Mike Fährmann",
     author_email="mike_faehrmann@web.de",
+    license="GPLv2",
+    install_requires=[
+        "requests >= 2.0",
+    ],
+    scripts=[
+        "bin/gallery-dl",
+    ],
+    entry_points={
+        'console_scripts': [
+            'gallery-dl = gallery_dl:main',
+        ],
+    },
     packages=[
         "gallery_dl",
         "gallery_dl.extractor",
@@ -22,13 +34,10 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
-        "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+        "Intended Audience :: End Users/Desktop",
+        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+        "Operating System :: POSIX",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.0",
-        "Programming Language :: Python :: 3.1",
-        "Programming Language :: Python :: 3.2",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Multimedia",
         "Topic :: Multimedia :: Graphics",
