@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: gallery-dl
+Version: 0.2
+Summary: gallery- and image downloader
+Home-page: https://github.com/mikf/gallery-dl
+Author: Mike Fährmann
+Author-email: mike_faehrmann@web.de
+License: GPLv2
+Description: download image galleries from several image hosting platforms
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Topic :: Multimedia
+Classifier: Topic :: Multimedia :: Graphics
