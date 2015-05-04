@@ -16,7 +16,7 @@ info = {
     "directory": ["{category}", "{tags}"],
     "filename": "{category}_{id}_{name}",
     "pattern": [
-        r"(?:https?://)?(?:www\.)?http://behoimi\.org/post(?:/(?:index)?)?\?tags=([^&]+).*",
+        r"(?:https?://)?(?:www\.)?behoimi\.org/post(?:/(?:index)?)?\?tags=([^&]+).*",
     ],
 }
 
