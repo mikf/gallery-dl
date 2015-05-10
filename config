@@ -1,12 +1,14 @@
-[general]
-database = ~/.config/gallery/db.sqlite3
-
 [pixiv-cookies]
 PHPSESSID = XXXXX
 
 [exhentai-cookies]
 ipb_member_id = XXXXX
 ipb_pass_hash = XXXXX
+
+[nijie-cookies]
+NIJIEIJIEID = XXXXX
+nijie_email_hash = XXXXX
+nijie_login_hash = XXXXX
 
 [danbooru]
 regex0 = d(?:anbooru)?[.:-_](\w.+)
