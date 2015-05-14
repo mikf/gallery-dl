@@ -1,5 +1,6 @@
-[pixiv-cookies]
-PHPSESSID = XXXXX
+[pixiv]
+username = XXXXX
+password = XXXXX
 
 [exhentai-cookies]
 ipb_member_id = XXXXX
