@@ -52,7 +52,7 @@ class PixivExtractor(SequentialExtractor):
             work.update(metadata)
 
             if work["type"] == "ugoira":
-                url, framelist = self.parse_ugoira(work["id"])
+                url, framelist = self.parse_ugoira(work)
                 work["extension"] = "zip"
                 yield Message.Url, url, work.copy()
                 work["extension"] = "txt"
@@ -93,19 +93,22 @@ class PixivExtractor(SequentialExtractor):
                 return
             page = pinfo["next"]
 
-    def parse_ugoira(self, illust_id):
+    def parse_ugoira(self, data):
         """Parse ugoira data"""
         # get illust page
         text = self.request(
-            self.illust_url, params={"illust_id": illust_id},
+            self.illust_url, params={"illust_id": data["id"]},
         ).text
 
         # parse page
-        url   , pos = self.extract(text, 'ugokuIllustFullscreenData  = {"src":"', '"')
-        frames, pos = self.extract(text, '"frames":[', ']', pos)
+        frames, _ = self.extract(text, ',"frames":[', ']')
 
-        # fix url
-        url = url.replace("\\/", "/")
+        # build url
+        url = re.sub(
+            r"/img-original/(.+/\d+)[^/]+",
+            r"/img-zip-ugoira/\g<1>_ugoira1920x1080.zip",
+            data["url"]
+        )
 
         # build framelist
         framelist = re.sub(
