@@ -51,7 +51,7 @@ class RedHawkScansExtractor(SequentialExtractor):
         _        , pos = self.extract(page, '<h1 class="tbtitle dnone">', '')
         manga    , pos = self.extract(page, 'title="', '"', pos)
         chapter  , pos = self.extract(page, 'title="', '"', pos)
-        json_data, pos = self.extract(page, 'var pages = ', '\n', pos)
+        json_data, pos = self.extract(page, 'var pages = ', ';\r\n', pos)
         match = re.match(r"Chapter (\d+)(?:: (.*))?", chapter)
         return {
             "category": info["category"],
@@ -59,4 +59,4 @@ class RedHawkScansExtractor(SequentialExtractor):
             "chapter": match.group(1),
             "language": "English",
             "title": unescape(match.group(2) or ""),
-        }, json.loads(json_data[:-2])
+        }, json.loads(json_data)
