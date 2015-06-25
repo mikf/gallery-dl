@@ -18,10 +18,10 @@ import re
 info = {
     "category": "redhawkscans",
     "extractor": "RedHawkScansExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03} - {title}"],
-    "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
+    "directory": ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"],
+    "filename": "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}",
     "pattern": [
-        r"(?:https?://)?manga\.redhawkscans\.com/reader/read/([^/]+/[^/]+/[^/]+/[^/]+).*",
+        r"(?:https?://)?manga\.redhawkscans\.com/reader/read/(.+)(?:/page)?.*",
     ],
 }
 
@@ -47,16 +47,17 @@ class RedHawkScansExtractor(SequentialExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        page = self.request(self.url_base + self.part).text
+        page = self.request(self.url_base + self.part).content.decode("utf-8")
         _        , pos = self.extract(page, '<h1 class="tbtitle dnone">', '')
         manga    , pos = self.extract(page, 'title="', '"', pos)
-        chapter  , pos = self.extract(page, 'title="', '"', pos)
+        chapter  , pos = self.extract(page, '">', '</a>', pos)
         json_data, pos = self.extract(page, 'var pages = ', ';\r\n', pos)
-        match = re.match(r"Chapter (\d+)(?:: (.*))?", chapter)
+        match = re.match(r"(Chapter (\d+)([^:+]*)(?:: (.*))?|[^:]+)", chapter)
         return {
             "category": info["category"],
             "manga": unescape(manga),
-            "chapter": match.group(1),
+            "chapter": match.group(2) or match.group(1),
+            "chapter-minor": match.group(3) or "",
             "language": "English",
-            "title": unescape(match.group(2) or ""),
+            "title": unescape(match.group(4) or ""),
         }, json.loads(json_data)
