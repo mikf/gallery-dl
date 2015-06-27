@@ -47,7 +47,9 @@ class RedHawkScansExtractor(SequentialExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        page = self.request(self.url_base + self.part).content.decode("utf-8")
+        response = self.request(self.url_base + self.part)
+        response.encoding = "utf-8"
+        page = response.text
         _        , pos = self.extract(page, '<h1 class="tbtitle dnone">', '')
         manga    , pos = self.extract(page, 'title="', '"', pos)
         chapter  , pos = self.extract(page, '">', '</a>', pos)
