@@ -12,7 +12,6 @@ from .common import SequentialExtractor
 from .common import Message
 import re
 import json
-import requests
 
 info = {
     "category": "pixiv",
@@ -51,6 +50,13 @@ class PixivExtractor(SequentialExtractor):
         for work in self.get_works():
             work.update(metadata)
 
+            pos = work["extension"].rfind("?", -18)
+            if pos != -1:
+                timestamp = work["extension"][pos:]
+                work["extension"] = work["extension"][:pos]
+            else:
+                timestamp = ""
+
             if work["type"] == "ugoira":
                 url, framelist = self.parse_ugoira(work)
                 work["extension"] = "zip"
@@ -64,17 +70,16 @@ class PixivExtractor(SequentialExtractor):
             else:
                 url = work["url"]
                 ext = work["extension"]
+                off = url.rfind(".")
+                if url[off-2] == "p":
+                    off -= 3
                 if work["id"] > 11319935 and "/img-original/" not in url:
                     big = "_big"
                 else:
                     big = ""
-                if url[-6] == "p":
-                    part = url[:-7]
-                else:
-                    part = url[:-4]
                 for i in range(work["page_count"]):
                     work["num"] = "_p{:02}".format(i)
-                    url = "{}{}_p{}.{}".format(part, big, i, ext)
+                    url = "{}{}_p{}.{}{}".format(url[:off], big, i, ext, timestamp)
                     yield Message.Url, url, work.copy()
 
     def get_works(self):
@@ -137,8 +142,8 @@ class PixivAPI():
     - http://blog.imaou.com/opensource/2014/10/09/pixiv_api_for_ios_update.html
     """
 
-    def __init__(self, session=None):
-        self.session = session or requests.Session()
+    def __init__(self, session):
+        self.session = session
         self.session.headers.update({
             "Referer": "http://www.pixiv.net/",
             "User-Agent": "PixivIOSApp/5.1.1",
