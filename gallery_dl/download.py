@@ -8,9 +8,8 @@
 
 import os
 import sys
-import re
 import importlib
-
+from . import extractor
 from .extractor.common import Message
 
 class DownloadManager():
@@ -19,7 +18,6 @@ class DownloadManager():
         self.opts = opts
         self.config = config
         self.modules = {}
-        self.extractors = ExtractorFinder(config)
 
     def add(self, url):
         job = DownloadJob(self, url)
@@ -45,7 +43,7 @@ class DownloadJob():
 
     def __init__(self, mngr, url):
         self.mngr = mngr
-        self.extractor, self.info = mngr.extractors.get_for_url(url)
+        self.extractor, self.info = extractor.find(url, mngr.config)
         if self.extractor is None:
             return
         self.directory = mngr.get_base_directory()
@@ -140,65 +138,3 @@ class DownloadJob():
         if tries == 0:
             print("\r", end="")
         print("\r\033[1;32m", path, "\033[0m", sep="")
-
-
-class ExtractorFinder():
-
-    def __init__(self, config):
-        self.config = config
-
-    def get_for_url(self, url):
-        """Get an extractor-instance suitable for 'url'"""
-        name, match = self.find_pattern_match(url)
-        if match:
-            module = importlib.import_module(".extractor." + name, __package__)
-            klass = getattr(module, module.info["extractor"])
-            return klass(match, self.config), module.info
-        else:
-            print("no suitable extractor found")
-            return None, None
-
-    def find_pattern_match(self, url):
-        """Find a pattern, that matches 'url', and return the (category,match) tuple"""
-        for category in self.config:
-            for key, value in self.config[category].items():
-                if key.startswith("regex"):
-                    match = re.match(value, url)
-                    if match:
-                        return category, match
-        for category, info in self.extractor_metadata():
-            for pattern in info["pattern"]:
-                match = re.match(pattern, url)
-                if match:
-                    return category, match
-        return None, None
-
-    def extractor_metadata(self):
-        """Yield all extractor-name, -metadata tuples"""
-        path = os.path.join(os.path.dirname(__file__), "extractor")
-        for name in os.listdir(path):
-            extractor_path = os.path.join(path, name)
-            info = self.get_info_dict(extractor_path)
-            if info is not None:
-                yield os.path.splitext(name)[0], info
-
-    @staticmethod
-    def get_info_dict(extractor_path):
-        """Get info-/metadata-dictionary for an extractor"""
-        try:
-            with open(extractor_path) as file:
-                for _ in range(30):
-                    line = next(file)
-                    if line.startswith("info ="):
-                        break
-                else:
-                    return None
-
-                info = [line[6:]]
-                for line in file:
-                    info.append(line)
-                    if line.startswith("}"):
-                        break
-        except (StopIteration, OSError):
-            return None
-        return eval("".join(info))
