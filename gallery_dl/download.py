@@ -46,6 +46,8 @@ class DownloadJob():
     def __init__(self, mngr, url):
         self.mngr = mngr
         self.extractor, self.info = mngr.extractors.get_for_url(url)
+        if self.extractor is None:
+            return
         self.directory = mngr.get_base_directory()
         self.downloaders = {}
         self.filename_fmt = mngr.config.get(
@@ -61,7 +63,7 @@ class DownloadJob():
         self.directory_fmt = os.path.join(*segments)
 
     def run(self):
-        """Execute/Run the downlaod job"""
+        """Execute/Run the download job"""
         if self.extractor is None:
             return # TODO: error msg
 
@@ -146,28 +148,26 @@ class ExtractorFinder():
         self.config = config
 
     def get_for_url(self, url):
-        """Get an extractor-instance suitable for 'ur'"""
+        """Get an extractor-instance suitable for 'url'"""
         name, match = self.find_pattern_match(url)
         if match:
             module = importlib.import_module(".extractor." + name, __package__)
             klass = getattr(module, module.info["extractor"])
             return klass(match, self.config), module.info
         else:
-            print("pattern mismatch")
-            return None
+            print("no suitable extractor found")
+            return None, None
 
     def find_pattern_match(self, url):
         """Find a pattern, that matches 'url', and return the (category,match) tuple"""
         for category in self.config:
             for key, value in self.config[category].items():
                 if key.startswith("regex"):
-                    print(value)
                     match = re.match(value, url)
                     if match:
                         return category, match
         for category, info in self.extractor_metadata():
             for pattern in info["pattern"]:
-                print(pattern)
                 match = re.match(pattern, url)
                 if match:
                     return category, match

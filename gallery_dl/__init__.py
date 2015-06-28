@@ -58,4 +58,4 @@ def main():
         for url in opts.urls:
             dlmgr.add(url)
     except KeyboardInterrupt:
-        print("KeyboardInterrupt")
+        print("\nKeyboardInterrupt")
