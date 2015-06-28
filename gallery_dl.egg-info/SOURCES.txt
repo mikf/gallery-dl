@@ -27,6 +27,9 @@ gallery_dl/extractor/gelbooru.py
 gallery_dl/extractor/imagebam.py
 gallery_dl/extractor/imgbox.py
 gallery_dl/extractor/imgchili.py
+gallery_dl/extractor/mangareader.py
+gallery_dl/extractor/nijie.py
 gallery_dl/extractor/pixiv.py
+gallery_dl/extractor/redhawkscans.py
 gallery_dl/extractor/sankaku.py
 gallery_dl/extractor/yandere.py
