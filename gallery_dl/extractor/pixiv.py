@@ -146,7 +146,7 @@ class PixivAPI():
         self.session = session
         self.session.headers.update({
             "Referer": "http://www.pixiv.net/",
-            "User-Agent": "PixivIOSApp/5.1.1",
+            "User-Agent": "PixivIOSApp/5.8.0",
             # "Authorization": "Bearer 8mMXXWT9iuwdJvsVIvQsFYDwuZpRCMePeyagSh30ZdU",
         })
 
