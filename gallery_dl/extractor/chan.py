@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 # Copyright 2015 Mike Fährmann
@@ -10,6 +9,7 @@
 """Base classes for extractors for different Futaba Channel boards"""
 
 from .common import SequentialExtractor, Message
+import re
 
 class ChanExtractor(SequentialExtractor):
 
@@ -34,14 +34,15 @@ class ChanExtractor(SequentialExtractor):
                 continue
             post.update(self.metadata)
             yield Message.Url, self.file_url.format(**post), post
+            if "extra_files" in post:
+                for file in post["extra_files"]:
+                    post.update(file)
+                    yield Message.Url, self.file_url.format(**post), post
 
     @staticmethod
     def get_thread_title(post):
         """Return thread title from first post"""
         if "sub" in post:
             return post["sub"]
-        com = post["com"]
-        pos = com.find("<br>")
-        if pos == -1:
-            return com
-        return com[:min(pos, 50)]
+        com = re.sub("<[^>]+?>", "", post["com"])
+        return " ".join(com.split())[:50]
