@@ -13,8 +13,8 @@ from .chan import ChanExtractor
 info = {
     "category": "4chan",
     "extractor": "FourChanExtractor",
-    "directory": ["{category}", "{board}-{thread-id}"],
-    "filename": "{time}-{filename}{ext}",
+    "directory": ["{category}", "{board}-{thread}"],
+    "filename": "{tim}-{filename}{ext}",
     "pattern": [
         r"(?:https?://)?boards\.4chan\.org/([^/]+)/thread/(\d+).*",
     ],
