@@ -1,3 +1,0 @@
-[console_scripts]
-gallery-dl = gallery_dl:main
-
