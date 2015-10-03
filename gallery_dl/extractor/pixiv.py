@@ -8,8 +8,8 @@
 
 """Extract images and ugoira from http://www.pixiv.net/"""
 
-from .common import SequentialExtractor
-from .common import Message
+from .common import SequentialExtractor, Message
+from .. import text
 import re
 import json
 
@@ -84,9 +84,9 @@ class PixivExtractor(SequentialExtractor):
 
     def get_works(self):
         """Yield all work-items for a pixiv-member"""
-        page = 1
+        pagenum = 1
         while True:
-            data = self.api.user_works(self.artist_id, page)
+            data = self.api.user_works(self.artist_id, pagenum)
             for work in data["response"]:
                 url = work["image_urls"]["large"]
                 work["num"] = ""
@@ -96,17 +96,17 @@ class PixivExtractor(SequentialExtractor):
             pinfo = data["pagination"]
             if pinfo["current"] == pinfo["pages"]:
                 return
-            page = pinfo["next"]
+            pagenum = pinfo["next"]
 
     def parse_ugoira(self, data):
         """Parse ugoira data"""
         # get illust page
-        text = self.request(
+        page = self.request(
             self.illust_url, params={"illust_id": data["id"]},
         ).text
 
         # parse page
-        frames, _ = self.extract(text, ',"frames":[', ']')
+        frames, _ = text.extract(page, ',"frames":[', ']')
 
         # build url
         url = re.sub(

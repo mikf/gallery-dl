@@ -8,10 +8,8 @@
 
 """Extract manga pages from http://bato.to/"""
 
-from .common import AsynchronousExtractor
-from .common import Message
-from .common import filename_from_url, unescape
-from urllib.parse import unquote
+from .common import AsynchronousExtractor, Message
+from .. import text
 import os.path
 import re
 
@@ -44,13 +42,13 @@ class BatotoExtractor(AsynchronousExtractor):
     def get_page_metadata(self, page_url):
         """Collect next url and metadata for one manga-page"""
         page = self.request(page_url).text
-        _    , pos = self.extract(page, 'selected="selected"', '')
-        title, pos = self.extract(page, ': ', '<', pos)
-        _    , pos = self.extract(page, 'selected="selected"', '', pos)
-        trans, pos = self.extract(page, '>', '<', pos)
-        _    , pos = self.extract(page, '<div id="full_image"', '', pos)
-        image, pos = self.extract(page, '<img src="', '"', pos)
-        url  , pos = self.extract(page, '<a href="', '"', pos)
+        _    , pos = text.extract(page, 'selected="selected"', '')
+        title, pos = text.extract(page, ': ', '<', pos)
+        _    , pos = text.extract(page, 'selected="selected"', '', pos)
+        trans, pos = text.extract(page, '>', '<', pos)
+        _    , pos = text.extract(page, '<div id="full_image"', '', pos)
+        image, pos = text.extract(page, '<img src="', '"', pos)
+        url  , pos = text.extract(page, '<a href="', '"', pos)
         mmatch = re.search(
             r"<title>(.+) - (?:vol (\d+) )?"
             r"ch (\d+)[^ ]+ Page (\d+) | Batoto!</title>",
@@ -60,18 +58,18 @@ class BatotoExtractor(AsynchronousExtractor):
             r"(.+) - ([^ ]+)",
             trans
         )
-        filename = unquote(filename_from_url(image))
+        filename = text.unquote(text.filename_from_url(image))
         name, ext = os.path.splitext(filename)
         return url, {
             "category": info["category"],
             "chapter-id": self.chapter_id,
-            "manga": unescape(mmatch.group(1)),
+            "manga": text.unescape(mmatch.group(1)),
             "volume": mmatch.group(2) or "",
             "chapter": mmatch.group(3),
             "page": mmatch.group(4),
             "group": tmatch.group(1),
             "language": tmatch.group(2),
-            "title": unescape(title),
+            "title": text.unescape(title),
             "image-url": image,
             "name": name,
             "extension": ext[1:],

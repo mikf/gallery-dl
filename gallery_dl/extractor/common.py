@@ -44,24 +44,6 @@ class Extractor():
             "Mozilla/5.0 (X11; Linux x86_64; rv:24.0) Gecko/20100101 Firefox/24.0"
         )
 
-    @staticmethod
-    def extract(txt, begin, end, pos=0):
-        try:
-            first = txt.index(begin, pos) + len(begin)
-            last = txt.index(end, first)
-            return txt[first:last], last+len(end)
-        except ValueError:
-            return None, pos
-
-    @staticmethod
-    def extract_all(txt, begin, end, pos=0):
-        try:
-            first = txt.index(begin, pos)
-            last = txt.index(end, first + len(begin)) + len(end)
-            return txt[first:last], last
-        except ValueError:
-            return None, pos
-
 
 class SequentialExtractor(Extractor):
 
@@ -123,9 +105,3 @@ def safe_request(session, url, method="GET", *args, **kwargs):
 
         # everything ok -- proceed to download
         return r
-
-def filename_from_url(url):
-    pos = url.rfind("/")
-    return url[pos+1:]
-
-unescape = html.parser.HTMLParser().unescape

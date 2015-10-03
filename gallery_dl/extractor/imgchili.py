@@ -8,9 +8,8 @@
 
 """Extract images from albums at http://imgchili.net/"""
 
-from .common import SequentialExtractor
-from .common import Message
-from .common import filename_from_url
+from .common import SequentialExtractor, Message
+from .. import text
 import re
 
 info = {
@@ -42,7 +41,7 @@ class ImgchiliExtractor(SequentialExtractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        title = self.extract(page, "<h1>", "</h1>")[0]
+        title = text.extract(page, "<h1>", "</h1>")[0]
         return {
             "category": info["category"],
             "title": title,

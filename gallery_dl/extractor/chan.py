@@ -9,6 +9,7 @@
 """Base classes for extractors for different Futaba Channel boards"""
 
 from .common import SequentialExtractor, Message
+from .. import text
 import re
 
 class ChanExtractor(SequentialExtractor):
@@ -44,5 +45,4 @@ class ChanExtractor(SequentialExtractor):
         """Return thread title from first post"""
         if "sub" in post:
             return post["sub"]
-        com = re.sub("<[^>]+?>", "", post["com"])
-        return " ".join(com.split())[:50]
+        return text.remove_html(post["com"])[:50]
