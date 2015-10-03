@@ -8,14 +8,12 @@
 
 """Base classes for extractors for danbooru and co"""
 
-from .common import SequentialExtractor
-from .common import Message
-from .common import filename_from_url
+from .common import SequentialExtractor, Message
+from .. import text
 import xml.etree.ElementTree as ET
 import json
 import os.path
 import urllib.parse
-
 
 class BooruExtractor(SequentialExtractor):
 
@@ -24,7 +22,7 @@ class BooruExtractor(SequentialExtractor):
     def __init__(self, match, config, info):
         SequentialExtractor.__init__(self, config)
         self.info = info
-        self.tags = urllib.parse.unquote(match.group(1))
+        self.tags = text.unquote(match.group(1))
         self.page = "page"
         self.params = {"tags": self.tags}
         self.headers = {}
@@ -58,8 +56,8 @@ class BooruExtractor(SequentialExtractor):
     def get_file_metadata(self, data):
         """Collect metadata for a downloadable file"""
         data["category"] = self.info["category"]
-        data["name"] = urllib.parse.unquote(
-            filename_from_url(self.get_file_url(data))
+        data["name"] = text.unquote(
+            text.filename_from_url(self.get_file_url(data))
         )
         data["extension"] = os.path.splitext(data["name"])[1][1:]
         return data

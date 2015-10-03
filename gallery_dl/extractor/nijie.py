@@ -8,9 +8,8 @@
 
 """Extract images from https://nijie.info/"""
 
-from .common import AsynchronousExtractor
-from .common import Message
-from .common import filename_from_url
+from .common import AsynchronousExtractor, Message
+from ..text  import filename_from_url
 import re
 
 info = {
@@ -56,6 +55,7 @@ class NijieExtractor(AsynchronousExtractor):
         }
 
     def get_image_ids(self):
+        """Collect all image-ids for a specific artist"""
         text = self.request(self.artist_url).text
         regex = r'<a href="/view\.php\?id=(\d+)"'
         return [m.group(1) for m in re.finditer(regex, text)]

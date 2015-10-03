@@ -8,10 +8,8 @@
 
 """Extract manga pages from http://www.mangareader.net/"""
 
-from .common import AsynchronousExtractor
-from .common import Message
-from .common import unescape, filename_from_url
-from urllib.parse import unquote
+from .common import AsynchronousExtractor, Message
+from .. import text
 import os.path
 import re
 
@@ -47,7 +45,7 @@ class MangaReaderExtractor(AsynchronousExtractor):
     def get_page_metadata(self, page_url):
         """Collect next url, image-url and metadata for one manga-page"""
         page = self.request(page_url).text
-        extr = self.extract
+        extr = text.extract
         width = None
         descr, pos = extr(page, '<meta name="description" content="', '"')
         test , pos = extr(page, "document['pu']", '', pos)
@@ -62,13 +60,13 @@ class MangaReaderExtractor(AsynchronousExtractor):
             width , pos = extr(page, '<img id="img" width="', '"', pos)
             height, pos = extr(page, ' height="', '"', pos)
         image, pos = extr(page, ' src="', '"', pos)
-        filename = unquote(filename_from_url(image))
+        filename = text.unquote(text.filename_from_url(image))
         name, ext = os.path.splitext(filename)
         match = re.match(r"(.*) (\d+) - Read \1 \2 Manga Scans Page (\d+)", descr)
 
         return self.url_base + url, image, {
             "category": info["category"],
-            "manga": unescape(match.group(1)),
+            "manga": text.unescape(match.group(1)),
             "chapter": match.group(2),
             "page": match.group(3),
             "width": width,

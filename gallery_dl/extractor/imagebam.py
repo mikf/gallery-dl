@@ -8,9 +8,8 @@
 
 """Extract images from galleries at http://www.imagebam.com/"""
 
-from .common import AsynchronousExtractor
-from .common import Message
-from .common import filename_from_url
+from .common import AsynchronousExtractor, Message
+from .. import text
 
 info = {
     "category": "imagebam",
@@ -42,28 +41,28 @@ class ImagebamExtractor(AsynchronousExtractor):
         done = False
         while not done:
             # get current page
-            text = self.request(self.url_base + next_url).text
+            page = self.request(self.url_base + next_url).text
 
             # get url for next page
-            next_url, pos = self.extract(text, "<a class='buttonblue' href='", "'")
+            next_url, pos = text.extract(page, "<a class='buttonblue' href='", "'")
 
             # if the following text isn't "><span>next image" we are done
-            if not text.startswith("><span>next image", pos):
+            if not page.startswith("><span>next image", pos):
                 done = True
 
             # get image url
-            img_url, pos = self.extract(text, 'onclick="scale(this);" src="', '"', pos)
+            img_url, pos = text.extract(page, 'onclick="scale(this);" src="', '"', pos)
 
             yield Message.Url, img_url, self.get_file_metadata(img_url)
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         gallery_key = self.match.group(2)
-        text = self.request(self.url_base + "/gallery/" + gallery_key).text
-        _    , pos = self.extract(text, "<img src='/img/icons/photos.png'", "")
-        title, pos = self.extract(text, "'> ", " <", pos)
-        count, pos = self.extract(text, "'>", " images", pos)
-        url  , pos = self.extract(text, "<a href='http://www.imagebam.com", "'", pos)
+        page = self.request(self.url_base + "/gallery/" + gallery_key).text
+        _    , pos = text.extract(page, "<img src='/img/icons/photos.png'", "")
+        title, pos = text.extract(page, "'> ", " <", pos)
+        count, pos = text.extract(page, "'>", " images", pos)
+        url  , pos = text.extract(page, "<a href='http://www.imagebam.com", "'", pos)
         return {
             "category": info["category"],
             "key": gallery_key,
@@ -77,5 +76,5 @@ class ImagebamExtractor(AsynchronousExtractor):
         self.num += 1
         data = self.metadata.copy()
         data["num"] = self.num
-        data["name"] = filename_from_url(url)
+        data["name"] = text.filename_from_url(url)
         return data
