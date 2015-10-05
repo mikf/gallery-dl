@@ -17,9 +17,7 @@ __email__      = "mike_faehrmann@web.de"
 import os
 import sys
 import argparse
-import configparser
-
-from .download import DownloadManager
+from . import config, download
 
 def parse_cmdline_options():
     parser = argparse.ArgumentParser(
@@ -41,18 +39,10 @@ def parse_cmdline_options():
     )
     return parser.parse_args()
 
-def parse_config_file(path):
-    config = configparser.ConfigParser(
-        interpolation=None,
-    )
-    config.optionxform = lambda opt: opt
-    config.read(os.path.expanduser(path))
-    return config
-
 def main():
+    config.load()
     opts = parse_cmdline_options()
-    conf = parse_config_file(opts.config)
-    dlmgr = DownloadManager(opts, conf)
+    dlmgr = download.DownloadManager(opts)
 
     try:
         for url in opts.urls:

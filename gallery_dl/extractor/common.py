@@ -12,7 +12,7 @@ import time
 import queue
 import requests
 import threading
-import html.parser
+from .. import config
 
 
 class Message():
@@ -47,15 +47,15 @@ class Extractor():
 
 class SequentialExtractor(Extractor):
 
-    def __init__(self, _):
+    def __init__(self):
         Extractor.__init__(self)
 
 
 class AsynchronousExtractor(Extractor):
 
-    def __init__(self, config):
+    def __init__(self):
         Extractor.__init__(self)
-        queue_size = int(config.get("general", "queue-size", fallback=5))
+        queue_size = int(config.get(("queue-size",), default=5))
         self.__queue = queue.Queue(maxsize=queue_size)
         self.__thread = threading.Thread(target=self.async_items, daemon=True)
 

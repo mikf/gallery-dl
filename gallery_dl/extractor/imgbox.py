@@ -26,8 +26,8 @@ class ImgboxExtractor(AsynchronousExtractor):
 
     url_base = "http://imgbox.com"
 
-    def __init__(self, match, config):
-        AsynchronousExtractor.__init__(self, config)
+    def __init__(self, match):
+        AsynchronousExtractor.__init__(self)
         self.key = match.group(1)
         self.metadata = {}
 
