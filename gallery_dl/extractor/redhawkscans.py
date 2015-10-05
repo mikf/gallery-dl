@@ -8,9 +8,8 @@
 
 """Extract manga pages from http://manga.redhawkscans.com/"""
 
-from .common import SequentialExtractor
-from .common import Message
-from .common import unescape
+from .common import SequentialExtractor, Message
+from .. import text
 import os.path
 import json
 import re
@@ -29,8 +28,8 @@ class RedHawkScansExtractor(SequentialExtractor):
 
     url_base = "https://manga.redhawkscans.com/reader/read/"
 
-    def __init__(self, match, config):
-        SequentialExtractor.__init__(self, config)
+    def __init__(self, match):
+        SequentialExtractor.__init__(self)
         self.part = match.group(1)
 
     def items(self):
@@ -50,16 +49,16 @@ class RedHawkScansExtractor(SequentialExtractor):
         response = self.request(self.url_base + self.part)
         response.encoding = "utf-8"
         page = response.text
-        _        , pos = self.extract(page, '<h1 class="tbtitle dnone">', '')
-        manga    , pos = self.extract(page, 'title="', '"', pos)
-        chapter  , pos = self.extract(page, '">', '</a>', pos)
-        json_data, pos = self.extract(page, 'var pages = ', ';\r\n', pos)
+        _        , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
+        manga    , pos = text.extract(page, 'title="', '"', pos)
+        chapter  , pos = text.extract(page, '">', '</a>', pos)
+        json_data, pos = text.extract(page, 'var pages = ', ';\r\n', pos)
         match = re.match(r"(Chapter (\d+)([^:+]*)(?:: (.*))?|[^:]+)", chapter)
         return {
             "category": info["category"],
-            "manga": unescape(manga),
+            "manga": text.unescape(manga),
             "chapter": match.group(2) or match.group(1),
             "chapter-minor": match.group(3) or "",
             "language": "English",
-            "title": unescape(match.group(4) or ""),
+            "title": text.unescape(match.group(4) or ""),
         }, json.loads(json_data)

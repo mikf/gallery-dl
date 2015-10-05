@@ -8,9 +8,8 @@
 
 """Extract images from https://nijie.info/"""
 
-from .common import AsynchronousExtractor
-from .common import Message
-from .common import filename_from_url
+from .common import AsynchronousExtractor, Message
+from .. import config, text
 import re
 
 info = {
@@ -27,8 +26,8 @@ class NijieExtractor(AsynchronousExtractor):
 
     popup_url = "https://nijie.info/view_popup.php?id="
 
-    def __init__(self, match, config):
-        AsynchronousExtractor.__init__(self, config)
+    def __init__(self, match):
+        AsynchronousExtractor.__init__(self)
         self.artist_id = match.group(1)
         self.artist_url = (
             "https://nijie.info/members_illust.php?id="
@@ -37,7 +36,9 @@ class NijieExtractor(AsynchronousExtractor):
         self.session.headers["Referer"] = self.artist_url
         self.session.cookies["R18"] = "1"
         self.session.cookies["nijie_referer"] = "nijie.info"
-        self.session.cookies.update(config["nijie-cookies"])
+        self.session.cookies.update(
+            config.get(("extractor", info["category"], "cookies"))
+        )
 
     def items(self):
         data = self.get_job_metadata()
@@ -56,19 +57,20 @@ class NijieExtractor(AsynchronousExtractor):
         }
 
     def get_image_ids(self):
-        text = self.request(self.artist_url).text
+        """Collect all image-ids for a specific artist"""
+        page = self.request(self.artist_url).text
         regex = r'<a href="/view\.php\?id=(\d+)"'
-        return [m.group(1) for m in re.finditer(regex, text)]
+        return [m.group(1) for m in re.finditer(regex, page)]
 
     def get_image_data(self, image_id):
         """Get URL and metadata for images specified by 'image_id'"""
-        text = self.request(self.popup_url + image_id).text
-        matches = re.findall('<img src="([^"]+)"', text)
+        page = self.request(self.popup_url + image_id).text
+        matches = re.findall('<img src="([^"]+)"', page)
         for index, url in enumerate(matches):
             yield "https:" + url, {
                 "count": len(matches),
                 "index": index,
                 "image-id": image_id,
-                "name" : filename_from_url(url),
+                "name" : text.filename_from_url(url),
                 "extension": url[url.rfind(".")+1:],
             }

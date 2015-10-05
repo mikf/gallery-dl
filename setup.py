@@ -46,4 +46,5 @@ setup(
         "Topic :: Multimedia",
         "Topic :: Multimedia :: Graphics",
     ],
+    test_suite='test',
 )

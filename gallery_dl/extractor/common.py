@@ -12,7 +12,7 @@ import time
 import queue
 import requests
 import threading
-import html.parser
+from .. import config
 
 
 class Message():
@@ -44,36 +44,18 @@ class Extractor():
             "Mozilla/5.0 (X11; Linux x86_64; rv:24.0) Gecko/20100101 Firefox/24.0"
         )
 
-    @staticmethod
-    def extract(txt, begin, end, pos=0):
-        try:
-            first = txt.index(begin, pos) + len(begin)
-            last = txt.index(end, first)
-            return txt[first:last], last+len(end)
-        except ValueError:
-            return None, pos
-
-    @staticmethod
-    def extract_all(txt, begin, end, pos=0):
-        try:
-            first = txt.index(begin, pos)
-            last = txt.index(end, first + len(begin)) + len(end)
-            return txt[first:last], last
-        except ValueError:
-            return None, pos
-
 
 class SequentialExtractor(Extractor):
 
-    def __init__(self, _):
+    def __init__(self):
         Extractor.__init__(self)
 
 
 class AsynchronousExtractor(Extractor):
 
-    def __init__(self, config):
+    def __init__(self):
         Extractor.__init__(self)
-        queue_size = int(config.get("general", "queue-size", fallback=5))
+        queue_size = int(config.get(("queue-size",), default=5))
         self.__queue = queue.Queue(maxsize=queue_size)
         self.__thread = threading.Thread(target=self.async_items, daemon=True)
 
@@ -123,9 +105,3 @@ def safe_request(session, url, method="GET", *args, **kwargs):
 
         # everything ok -- proceed to download
         return r
-
-def filename_from_url(url):
-    pos = url.rfind("/")
-    return url[pos+1:]
-
-unescape = html.parser.HTMLParser().unescape
