@@ -8,6 +8,7 @@
 
 import re
 import importlib
+from .. import config
 
 modules = [
     "pixiv",
@@ -45,10 +46,12 @@ def _list_patterns():
     """Yield all available (pattern, module, klass) tuples"""
     for entry in _cache:
         yield entry
+
     for module_name in _module_iter:
         module = importlib.import_module("."+module_name, __package__)
         klass = getattr(module, module.info["extractor"])
-        for pattern in module.info["pattern"]:
+        userpatterns = config.get(("extractor", module_name, "pattern"), default=[])
+        for pattern in userpatterns + module.info["pattern"]:
             etuple = (pattern, module, klass)
             _cache.append(etuple)
             yield etuple
