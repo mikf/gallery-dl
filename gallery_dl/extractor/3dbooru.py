@@ -22,8 +22,8 @@ info = {
 
 class ThreeDeeBooruExtractor(JSONBooruExtractor):
 
-    def __init__(self, match, config):
-        JSONBooruExtractor.__init__(self, match, config, info)
+    def __init__(self, match):
+        JSONBooruExtractor.__init__(self, match, info)
         self.api_url = "http://behoimi.org/post/index.json"
         self.headers = {
             "Referer": "http://behoimi.org/post/show/",

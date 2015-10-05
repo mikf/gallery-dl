@@ -8,8 +8,8 @@
 
 """Extract images and ugoira from http://www.pixiv.net/"""
 
-from .common import SequentialExtractor
-from .common import Message
+from .common import SequentialExtractor, Message
+from .. import config, text
 import re
 import json
 
@@ -29,16 +29,15 @@ class PixivExtractor(SequentialExtractor):
     member_url = "http://www.pixiv.net/member_illust.php"
     illust_url = "http://www.pixiv.net/member_illust.php?mode=medium"
 
-    def __init__(self, match, config):
-        SequentialExtractor.__init__(self, config)
-        self.config = config
+    def __init__(self, match):
+        SequentialExtractor.__init__(self)
         self.artist_id = match.group(1)
         self.api = PixivAPI(self.session)
 
     def items(self):
         self.api.login(
-            self.config.get("pixiv", "username"),
-            self.config.get("pixiv", "password"),
+            config.get(("extractor", "pixiv", "username")),
+            config.get(("extractor", "pixiv", "password")),
         )
         metadata = self.get_job_metadata()
 
@@ -84,9 +83,9 @@ class PixivExtractor(SequentialExtractor):
 
     def get_works(self):
         """Yield all work-items for a pixiv-member"""
-        page = 1
+        pagenum = 1
         while True:
-            data = self.api.user_works(self.artist_id, page)
+            data = self.api.user_works(self.artist_id, pagenum)
             for work in data["response"]:
                 url = work["image_urls"]["large"]
                 work["num"] = ""
@@ -96,17 +95,17 @@ class PixivExtractor(SequentialExtractor):
             pinfo = data["pagination"]
             if pinfo["current"] == pinfo["pages"]:
                 return
-            page = pinfo["next"]
+            pagenum = pinfo["next"]
 
     def parse_ugoira(self, data):
         """Parse ugoira data"""
         # get illust page
-        text = self.request(
+        page = self.request(
             self.illust_url, params={"illust_id": data["id"]},
         ).text
 
         # parse page
-        frames, _ = self.extract(text, ',"frames":[', ']')
+        frames, _ = text.extract(page, ',"frames":[', ']')
 
         # build url
         url = re.sub(
@@ -146,7 +145,7 @@ class PixivAPI():
         self.session = session
         self.session.headers.update({
             "Referer": "http://www.pixiv.net/",
-            "User-Agent": "PixivIOSApp/5.1.1",
+            "User-Agent": "PixivIOSApp/5.8.0",
             # "Authorization": "Bearer 8mMXXWT9iuwdJvsVIvQsFYDwuZpRCMePeyagSh30ZdU",
         })
 

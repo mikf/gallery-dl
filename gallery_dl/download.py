@@ -11,12 +11,12 @@ import sys
 import importlib
 from . import extractor
 from .extractor.common import Message
+from . import config
 
 class DownloadManager():
 
-    def __init__(self, opts, config):
+    def __init__(self, opts):
         self.opts = opts
-        self.config = config
         self.modules = {}
 
     def add(self, url):
@@ -36,7 +36,7 @@ class DownloadManager():
         if self.opts.dest:
             return self.opts.dest
         else:
-            return self.config.get("general", "destination", fallback="/tmp/")
+            return config.get(("base-directory",), default="/tmp/")
 
 
 class DownloadJob():
@@ -48,16 +48,14 @@ class DownloadJob():
             return
         self.directory = mngr.get_base_directory()
         self.downloaders = {}
-        self.filename_fmt = mngr.config.get(
-            self.info["category"], "filename",
-            fallback=self.info["filename"]
+        self.filename_fmt = config.get(
+            ("extractor", self.info["category"], "filename"),
+            default=self.info["filename"]
         )
-        try:
-            segments = mngr.config.get(
-                self.info["category"], "directory"
-            ).split("/")
-        except Exception:
-            segments = self.info["directory"]
+        segments = config.get(
+            ("extractor", self.info["category"], "directory"),
+            default=self.info["directory"]
+        )
         self.directory_fmt = os.path.join(*segments)
 
     def run(self):
@@ -112,13 +110,11 @@ class DownloadJob():
         scheme = url[:pos] if pos != -1 else "http"
         if scheme == "https":
             scheme = "http"
-
         downloader = self.downloaders.get(scheme)
         if downloader is None:
             module = self.mngr.get_downloader_module(scheme)
             downloader = module.Downloader()
             self.downloaders[scheme] = downloader
-
         return downloader
 
     @staticmethod
