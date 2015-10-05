@@ -25,8 +25,8 @@ class InfinityChanExtractor(ChanExtractor):
     api_url = "https://8ch.net/{board}/res/{thread}.json"
     file_url = "https://media.8ch.net/{board}/src/{tim}{ext}"
 
-    def __init__(self, match, config):
+    def __init__(self, match):
         ChanExtractor.__init__(
-            self, config, info["category"],
+            self, info["category"],
             match.group(1), match.group(2)
         )

@@ -25,8 +25,8 @@ class FourChanExtractor(ChanExtractor):
     api_url = "https://a.4cdn.org/{board}/thread/{thread}.json"
     file_url = "https://i.4cdn.org/{board}/{tim}{ext}"
 
-    def __init__(self, match, config):
+    def __init__(self, match):
         ChanExtractor.__init__(
-            self, config, info["category"],
+            self, info["category"],
             match.group(1), match.group(2)
         )

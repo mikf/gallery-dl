@@ -25,8 +25,8 @@ class ImagebamExtractor(AsynchronousExtractor):
 
     url_base = "http://www.imagebam.com"
 
-    def __init__(self, match, config):
-        AsynchronousExtractor.__init__(self, config)
+    def __init__(self, match):
+        AsynchronousExtractor.__init__(self)
         self.match = match
         self.num = 0
         self.metadata = {}

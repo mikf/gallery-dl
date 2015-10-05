@@ -112,13 +112,11 @@ class DownloadJob():
         scheme = url[:pos] if pos != -1 else "http"
         if scheme == "https":
             scheme = "http"
-
         downloader = self.downloaders.get(scheme)
         if downloader is None:
             module = self.mngr.get_downloader_module(scheme)
             downloader = module.Downloader()
             self.downloaders[scheme] = downloader
-
         return downloader
 
     @staticmethod
@@ -148,7 +146,7 @@ class ExtractorFinder():
         if match:
             module = importlib.import_module(".extractor." + name, __package__)
             klass = getattr(module, module.info["extractor"])
-            return klass(match, {}), module.info
+            return klass(match), module.info
         else:
             print("no suitable extractor found")
             return None, None
@@ -158,9 +156,9 @@ class ExtractorFinder():
         for category in config.get(("extractor",)):
             patterns = config.get(("extractor", category, "pattern"), default=[])
             for pattern in patterns:
-                    match = re.match(pattern, url)
-                    if match:
-                        return category, match
+                match = re.match(pattern, url)
+                if match:
+                    return category, match
         for category, info in self.extractor_metadata():
             for pattern in info["pattern"]:
                 match = re.match(pattern, url)

@@ -24,8 +24,8 @@ info = {
 
 class ImgchiliExtractor(SequentialExtractor):
 
-    def __init__(self, match, config):
-        SequentialExtractor.__init__(self, config)
+    def __init__(self, match):
+        SequentialExtractor.__init__(self)
         self.match = match
         self.num = 0
 
