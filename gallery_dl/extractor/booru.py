@@ -19,8 +19,8 @@ class BooruExtractor(SequentialExtractor):
 
     api_url = ""
 
-    def __init__(self, match, config, info):
-        SequentialExtractor.__init__(self, config)
+    def __init__(self, match, info):
+        SequentialExtractor.__init__(self)
         self.info = info
         self.tags = text.unquote(match.group(1))
         self.page = "page"

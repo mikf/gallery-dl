@@ -22,8 +22,8 @@ info = {
 
 class GelbooruExtractor(XMLBooruExtractor):
 
-    def __init__(self, match, config):
-        XMLBooruExtractor.__init__(self, match, config, info)
+    def __init__(self, match):
+        XMLBooruExtractor.__init__(self, match, info)
         self.api_url = "http://gelbooru.com/"
         self.params = {"page":"dapi", "s":"post", "q":"index", "tags":self.tags}
 

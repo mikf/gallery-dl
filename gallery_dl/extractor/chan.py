@@ -10,15 +10,14 @@
 
 from .common import SequentialExtractor, Message
 from .. import text
-import re
 
 class ChanExtractor(SequentialExtractor):
 
     api_url = ""
     file_url = ""
 
-    def __init__(self, config, category, board, thread):
-        SequentialExtractor.__init__(self, config)
+    def __init__(self, category, board, thread):
+        SequentialExtractor.__init__(self)
         self.metadata = {
             "category": category,
             "board": board,
