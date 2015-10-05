@@ -25,8 +25,8 @@ info = {
 
 class DeviantArtExtractor(AsynchronousExtractor):
 
-    def __init__(self, match, config):
-        AsynchronousExtractor.__init__(self, config)
+    def __init__(self, match):
+        AsynchronousExtractor.__init__(self)
         self.session.cookies["agegate_state"] = "1"
         self.artist = match.group(1)
 
