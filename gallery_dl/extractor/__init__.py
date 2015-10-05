@@ -19,6 +19,7 @@ modules = [
     "8chan",
     "batoto",
     "danbooru",
+    "deviantart",
     "e621",
     "imagebam",
     "imgbox",
