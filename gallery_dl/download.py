@@ -9,9 +9,8 @@
 import os
 import sys
 import importlib
-from . import extractor
+from . import config, extractor
 from .extractor.common import Message
-from . import config
 
 class DownloadManager():
 
@@ -43,7 +42,7 @@ class DownloadJob():
 
     def __init__(self, mngr, url):
         self.mngr = mngr
-        self.extractor, self.info = extractor.find(url, mngr.config)
+        self.extractor, self.info = extractor.find(url)
         if self.extractor is None:
             return
         self.directory = mngr.get_base_directory()
