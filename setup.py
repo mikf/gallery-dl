@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name="gallery_dl",
-    version="0.2",
+    version="0.3",
     description="gallery- and image downloader",
     long_description="download image galleries from several image hosting platforms",
     url="https://github.com/mikf/gallery-dl",
@@ -41,8 +41,10 @@ setup(
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3 :: Only",
-        "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+        "Topic :: Internet",
+        "Topic :: Internet :: WWW/HTTP",
         "Topic :: Multimedia",
         "Topic :: Multimedia :: Graphics",
     ],
