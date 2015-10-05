@@ -11,7 +11,7 @@ import importlib
 
 modules = [
     "pixiv",
-    "exhentai",
+    # "exhentai",
     "gelbooru",
     "3dbooru",
     "4chan",
@@ -28,12 +28,12 @@ modules = [
     "yandere",
 ]
 
-def find(url, config):
+def find(url):
     """Find extractor suitable for handling the given url"""
     for pattern, module, klass in _list_patterns():
         match = re.match(pattern, url)
         if match:
-            return klass(match, config), module.info
+            return klass(match), module.info
 
 # --------------------------------------------------------------------
 # internals
