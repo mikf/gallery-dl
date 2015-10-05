@@ -8,19 +8,19 @@
 
 """Base classes for extractors for danbooru and co"""
 
-from .common import SequentialExtractor, Message
+from .common import Extractor, Message
 from .. import text
 import xml.etree.ElementTree as ET
 import json
 import os.path
 import urllib.parse
 
-class BooruExtractor(SequentialExtractor):
+class BooruExtractor(Extractor):
 
     api_url = ""
 
     def __init__(self, match, info):
-        SequentialExtractor.__init__(self)
+        Extractor.__init__(self)
         self.info = info
         self.tags = text.unquote(match.group(1))
         self.page = "page"

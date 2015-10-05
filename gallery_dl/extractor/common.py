@@ -45,12 +45,6 @@ class Extractor():
         )
 
 
-class SequentialExtractor(Extractor):
-
-    def __init__(self):
-        Extractor.__init__(self)
-
-
 class AsynchronousExtractor(Extractor):
 
     def __init__(self):

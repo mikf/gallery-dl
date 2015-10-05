@@ -8,16 +8,16 @@
 
 """Base classes for extractors for different Futaba Channel boards"""
 
-from .common import SequentialExtractor, Message
+from .common import Extractor, Message
 from .. import text
 
-class ChanExtractor(SequentialExtractor):
+class ChanExtractor(Extractor):
 
     api_url = ""
     file_url = ""
 
     def __init__(self, category, board, thread):
-        SequentialExtractor.__init__(self)
+        Extractor.__init__(self)
         self.metadata = {
             "category": category,
             "board": board,
