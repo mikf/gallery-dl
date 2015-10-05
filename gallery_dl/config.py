@@ -35,20 +35,19 @@ def clear():
     """Reset configuration to en empty state"""
     globals()["_config"] = {}
 
-def get(key, default=None):
+def get(keys, default=None):
     """Get the value of property 'key' or a default-value if it doenst exist"""
     conf = _config
     try:
-        for k in key.split("."):
+        for k in keys:
             conf = conf[k]
         return conf
     except (KeyError, AttributeError):
         return default
 
-def interpolate(key, default=None):
+def interpolate(keys, default=None):
     """Interpolate the value of 'key'"""
     conf = _config
-    keys = key.split(".")
     try:
         for k in keys:
             default = conf.get(keys[-1], default)
@@ -57,10 +56,9 @@ def interpolate(key, default=None):
     except (KeyError, AttributeError):
         return default
 
-def set(key, value):
+def set(keys, value):
     """Set the value of property 'key' for this session"""
     conf = _config
-    keys = key.split(".")
     for k in keys[:-1]:
         try:
             conf = conf[k]

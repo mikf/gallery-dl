@@ -25,25 +25,25 @@ class TestConfig(unittest.TestCase):
         os.remove(self._configfile)
 
     def test_get(self):
-        self.assertEqual(config.get("a"), "1")
-        self.assertEqual(config.get("b.c"), "text")
-        self.assertEqual(config.get("d"), None)
-        self.assertEqual(config.get("e.f.g", 123), 123)
+        self.assertEqual(config.get(["a"]), "1")
+        self.assertEqual(config.get(["b", "c"]), "text")
+        self.assertEqual(config.get(["d"]), None)
+        self.assertEqual(config.get(["e", "f", "g"], 123), 123)
 
     def test_set(self):
-        config.set("b.c", [1, 2, 3])
-        config.set("e.f.g", 234)
-        self.assertEqual(config.get("b.c"), [1, 2, 3])
-        self.assertEqual(config.get("e.f.g"), 234)
+        config.set(["b", "c"], [1, 2, 3])
+        config.set(["e", "f", "g"], value=234)
+        self.assertEqual(config.get(["b", "c"]), [1, 2, 3])
+        self.assertEqual(config.get(["e", "f", "g"]), 234)
 
     def test_interpolate(self):
-        self.assertEqual(config.interpolate("a"), "1")
-        self.assertEqual(config.interpolate("b.a"), "1")
-        self.assertEqual(config.interpolate("b.c", "2"), "text")
-        self.assertEqual(config.interpolate("b.d", "2"), "2")
-        config.set("d", 123)
-        self.assertEqual(config.interpolate("b.d", "2"), 123)
-        self.assertEqual(config.interpolate("d.d", "2"), 123)
+        self.assertEqual(config.interpolate(["a"]), "1")
+        self.assertEqual(config.interpolate(["b", "a"]), "1")
+        self.assertEqual(config.interpolate(["b", "c"], "2"), "text")
+        self.assertEqual(config.interpolate(["b", "d"], "2"), "2")
+        config.set(["d"], 123)
+        self.assertEqual(config.interpolate(["b", "d"], "2"), 123)
+        self.assertEqual(config.interpolate(["d", "d"], "2"), 123)
 
 if __name__ == '__main__':
     unittest.main()
