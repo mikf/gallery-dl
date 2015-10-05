@@ -8,7 +8,7 @@
 
 """Extract images from albums at http://imgchili.net/"""
 
-from .common import SequentialExtractor, Message
+from .common import Extractor, Message
 from .. import text
 import re
 
@@ -22,10 +22,10 @@ info = {
     ],
 }
 
-class ImgchiliExtractor(SequentialExtractor):
+class ImgchiliExtractor(Extractor):
 
     def __init__(self, match):
-        SequentialExtractor.__init__(self)
+        Extractor.__init__(self)
         self.match = match
         self.num = 0
 

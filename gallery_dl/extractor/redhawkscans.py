@@ -8,7 +8,7 @@
 
 """Extract manga pages from http://manga.redhawkscans.com/"""
 
-from .common import SequentialExtractor, Message
+from .common import Extractor, Message
 from .. import text
 import os.path
 import json
@@ -24,12 +24,12 @@ info = {
     ],
 }
 
-class RedHawkScansExtractor(SequentialExtractor):
+class RedHawkScansExtractor(Extractor):
 
     url_base = "https://manga.redhawkscans.com/reader/read/"
 
     def __init__(self, match):
-        SequentialExtractor.__init__(self)
+        Extractor.__init__(self)
         self.part = match.group(1)
 
     def items(self):

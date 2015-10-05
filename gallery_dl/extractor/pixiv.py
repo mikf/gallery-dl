@@ -8,7 +8,7 @@
 
 """Extract images and ugoira from http://www.pixiv.net/"""
 
-from .common import SequentialExtractor, Message
+from .common import Extractor, Message
 from .. import config, text
 import re
 import json
@@ -24,13 +24,13 @@ info = {
 }
 
 
-class PixivExtractor(SequentialExtractor):
+class PixivExtractor(Extractor):
 
     member_url = "http://www.pixiv.net/member_illust.php"
     illust_url = "http://www.pixiv.net/member_illust.php?mode=medium"
 
     def __init__(self, match):
-        SequentialExtractor.__init__(self)
+        Extractor.__init__(self)
         self.artist_id = match.group(1)
         self.api = PixivAPI(self.session)
 
