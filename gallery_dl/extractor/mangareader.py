@@ -28,8 +28,8 @@ class MangaReaderExtractor(AsynchronousExtractor):
 
     url_base = "http://www.mangareader.net"
 
-    def __init__(self, match, config):
-        AsynchronousExtractor.__init__(self, config)
+    def __init__(self, match):
+        AsynchronousExtractor.__init__(self)
         self.part = match.group(1)
 
     def items(self):
