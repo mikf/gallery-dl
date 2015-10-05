@@ -12,14 +12,14 @@ import re
 import importlib
 
 from .extractor.common import Message
+from . import config
 
 class DownloadManager():
 
-    def __init__(self, opts, config):
+    def __init__(self, opts):
         self.opts = opts
-        self.config = config
         self.modules = {}
-        self.extractors = ExtractorFinder(config)
+        self.extractors = ExtractorFinder()
 
     def add(self, url):
         job = DownloadJob(self, url)
@@ -38,7 +38,7 @@ class DownloadManager():
         if self.opts.dest:
             return self.opts.dest
         else:
-            return self.config.get("general", "destination", fallback="/tmp/")
+            return config.get(("base-directory",), default="/tmp/")
 
 
 class DownloadJob():
@@ -50,16 +50,14 @@ class DownloadJob():
             return
         self.directory = mngr.get_base_directory()
         self.downloaders = {}
-        self.filename_fmt = mngr.config.get(
-            self.info["category"], "filename",
-            fallback=self.info["filename"]
+        self.filename_fmt = config.get(
+            ("extractor", self.info["category"], "filename"),
+            default=self.info["filename"]
         )
-        try:
-            segments = mngr.config.get(
-                self.info["category"], "directory"
-            ).split("/")
-        except Exception:
-            segments = self.info["directory"]
+        segments = config.get(
+            ("extractor", self.info["category"], "directory"),
+            default=self.info["directory"]
+        )
         self.directory_fmt = os.path.join(*segments)
 
     def run(self):
@@ -144,26 +142,23 @@ class DownloadJob():
 
 class ExtractorFinder():
 
-    def __init__(self, config):
-        self.config = config
-
     def get_for_url(self, url):
         """Get an extractor-instance suitable for 'url'"""
         name, match = self.find_pattern_match(url)
         if match:
             module = importlib.import_module(".extractor." + name, __package__)
             klass = getattr(module, module.info["extractor"])
-            return klass(match, self.config), module.info
+            return klass(match, {}), module.info
         else:
             print("no suitable extractor found")
             return None, None
 
     def find_pattern_match(self, url):
-        """Find a pattern, that matches 'url', and return the (category,match) tuple"""
-        for category in self.config:
-            for key, value in self.config[category].items():
-                if key.startswith("regex"):
-                    match = re.match(value, url)
+        """Find a pattern that matches 'url' and return the (category,match) tuple"""
+        for category in config.get(("extractor",)):
+            patterns = config.get(("extractor", category, "pattern"), default=[])
+            for pattern in patterns:
+                    match = re.match(pattern, url)
                     if match:
                         return category, match
         for category, info in self.extractor_metadata():
