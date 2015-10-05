@@ -32,7 +32,10 @@ class BooruExtractor(Extractor):
         yield Message.Directory, self.get_job_metadata()
         yield Message.Headers, self.headers
         for data in self.items_impl():
-            yield Message.Url, self.get_file_url(data), self.get_file_metadata(data)
+            try:
+                yield Message.Url, self.get_file_url(data), self.get_file_metadata(data)
+            except KeyError:
+                continue
 
     def items_impl(self):
         pass
