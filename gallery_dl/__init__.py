@@ -10,7 +10,7 @@ __author__     = "Mike Fährmann"
 __copyright__  = "Copyright 2014, 2015 Mike Fährmann"
 
 __license__    = "GPLv2"
-__version__    = "0.2"
+__version__    = "0.3"
 __maintainer__ = "Mike Fährmann"
 __email__      = "mike_faehrmann@web.de"
 
