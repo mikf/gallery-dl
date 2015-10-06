@@ -132,7 +132,7 @@ def require_login(func):
     """Decorator: auto-login before api-calls"""
     def wrap(self, *args):
         now = time.time()
-        if now - self.last_login > 3000:
+        if now - self.last_login > PixivAPI.token_timeout:
             self.login()
             self.last_login = now
         return func(self, *args)
@@ -147,6 +147,8 @@ class PixivAPI():
     - http://blog.imaou.com/opensource/2014/10/09/pixiv_api_for_ios_update.html
     """
 
+    token_timeout = 50*60 # 50 minutes
+
     def __init__(self, session):
         self.last_login = 0
         self.session = session
@@ -154,34 +156,40 @@ class PixivAPI():
             "Referer": "http://www.pixiv.net/",
             "User-Agent": "PixivIOSApp/5.8.0",
         })
+        config.setdefault(("extractor", "pixiv"), {})
 
-    def login(self, auth=None):
+    def login(self):
         """Login and gain a Pixiv Public-API access token"""
-        if auth:
-            username, password = auth
-        else:
-            username = config.get(("extractor", "pixiv", "username"))
-            password = config.get(("extractor", "pixiv", "password"))
-        data = {
-            "username": username,
-            "password": password,
-            "grant_type": "password",
-            "client_id": "bYGKuGVw91e0NMfPGp44euvGt59s",
-            "client_secret": "HP3RmkgAmEGro0gn1x9ioawQE8WMfvLXDz3ZqxpK",
-        }
-        response = self.session.post(
-            "https://oauth.secure.pixiv.net/auth/token", data=data
-        )
-        if response.status_code not in (200, 301, 302):
-            raise Exception("login() failed! check username and password.\n"
-                            "HTTP %s: %s" % (response.status_code, response.text))
-        try:
-            token = self._parse(response)
-            self.session.headers["Authorization"] = (
-                "Bearer " + token["response"]["access_token"]
+        pconf = config.get(("extractor", "pixiv"))
+        token = pconf.get("access-token")
+        now = time.time()
+        if token:
+            timestamp = pconf.get("access-token-timestamp", 0)
+            if now - timestamp > PixivAPI.token_timeout:
+                token = None
+        if not token:
+            data = {
+                "username": pconf.get("username"),
+                "password": pconf.get("password"),
+                "grant_type": "password",
+                "client_id": "bYGKuGVw91e0NMfPGp44euvGt59s",
+                "client_secret": "HP3RmkgAmEGro0gn1x9ioawQE8WMfvLXDz3ZqxpK",
+            }
+            response = self.session.post(
+                "https://oauth.secure.pixiv.net/auth/token", data=data
             )
-        except:
-            raise Exception("Get access_token error! Response: %s" % (token))
+            if response.status_code not in (200, 301, 302):
+                raise Exception("login() failed! check username and password.\n"
+                                "HTTP %s: %s" % (response.status_code, response.text))
+            try:
+                token = self._parse(response)["response"]["access_token"]
+            except:
+                raise Exception("Get access_token error! Response: %s" % (token))
+            pconf["access-token"] = token
+            pconf["access-token-timestamp"] = now - 1
+        self.session.headers["Authorization"] = (
+            "Bearer " + token
+        )
 
     @require_login
     def user(self, user_id):
