@@ -68,6 +68,18 @@ def set(keys, value):
             conf = temp
     conf[keys[-1]] = value
 
+def setdefault(keys, value):
+    """Set the value of property 'key' if it doesn't exist"""
+    conf = _config
+    for k in keys[:-1]:
+        try:
+            conf = conf[k]
+        except KeyError:
+            temp = {}
+            conf[k] = temp
+            conf = temp
+    return conf.setdefault(keys[-1], value)
+
 
 # --------------------------------------------------------------------
 # internals
