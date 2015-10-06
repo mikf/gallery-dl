@@ -36,6 +36,12 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(config.get(["b", "c"]), [1, 2, 3])
         self.assertEqual(config.get(["e", "f", "g"]), 234)
 
+    def test_setdefault(self):
+        config.setdefault(["b", "c"], [1, 2, 3])
+        config.setdefault(["e", "f", "g"], value=234)
+        self.assertEqual(config.get(["b", "c"]), "text")
+        self.assertEqual(config.get(["e", "f", "g"]), 234)
+
     def test_interpolate(self):
         self.assertEqual(config.interpolate(["a"]), "1")
         self.assertEqual(config.interpolate(["b", "a"]), "1")
