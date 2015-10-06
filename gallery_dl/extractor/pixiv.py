@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import config, text
 import re
 import json
+import time
 
 info = {
     "category": "pixiv",
@@ -35,12 +36,7 @@ class PixivExtractor(Extractor):
         self.api = PixivAPI(self.session)
 
     def items(self):
-        self.api.login(
-            config.get(("extractor", "pixiv", "username")),
-            config.get(("extractor", "pixiv", "password")),
-        )
         metadata = self.get_job_metadata()
-
         yield Message.Version, 1
         yield Message.Headers, self.session.headers
         yield Message.Cookies, self.session.cookies
@@ -132,6 +128,16 @@ class PixivExtractor(Extractor):
         }
 
 
+def require_login(func):
+    """Decorator: auto-login before api-calls"""
+    def wrap(self, *args):
+        now = time.time()
+        if now - self.last_login > 3000:
+            self.login()
+            self.last_login = now
+        return func(self, *args)
+    return wrap
+
 class PixivAPI():
     """Minimal interface for the Pixiv Public-API for mobile devices
 
@@ -142,15 +148,20 @@ class PixivAPI():
     """
 
     def __init__(self, session):
+        self.last_login = 0
         self.session = session
         self.session.headers.update({
             "Referer": "http://www.pixiv.net/",
             "User-Agent": "PixivIOSApp/5.8.0",
-            # "Authorization": "Bearer 8mMXXWT9iuwdJvsVIvQsFYDwuZpRCMePeyagSh30ZdU",
         })
 
-    def login(self, username, password):
+    def login(self, auth=None):
         """Login and gain a Pixiv Public-API access token"""
+        if auth:
+            username, password = auth
+        else:
+            username = config.get(("extractor", "pixiv", "username"))
+            password = config.get(("extractor", "pixiv", "password"))
         data = {
             "username": username,
             "password": password,
@@ -172,6 +183,7 @@ class PixivAPI():
         except:
             raise Exception("Get access_token error! Response: %s" % (token))
 
+    @require_login
     def user(self, user_id):
         """Query information about a pixiv user"""
         response = self.session.get(
@@ -180,6 +192,7 @@ class PixivAPI():
         )
         return self._parse(response)
 
+    @require_login
     def user_works(self, user_id, page, per_page=20):
         """Query information about the works of a pixiv user"""
         params = {
