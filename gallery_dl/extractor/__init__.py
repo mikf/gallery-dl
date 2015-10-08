@@ -26,6 +26,7 @@ modules = [
     "imgchili",
     "mangareader",
     "nijie",
+    "powermanga",
     "redhawkscans",
     "yandere",
 ]
