@@ -9,7 +9,7 @@
 import os
 import sys
 import importlib
-from . import config, extractor
+from . import config, extractor, text
 from .extractor.common import Message
 
 class DownloadManager():
@@ -85,7 +85,7 @@ class DownloadJob():
     def download(self, msg):
         """Download the resource specified in 'msg'"""
         _, url, metadata = msg
-        filename = self.filename_fmt.format(**metadata)
+        filename = text.clean_path(self.filename_fmt.format(**metadata))
         path = os.path.join(self.directory, filename)
         if os.path.exists(path):
             self.print_skip(path)
@@ -99,7 +99,9 @@ class DownloadJob():
         """Set and create the target directory for downloads"""
         self.directory = os.path.join(
             self.mngr.get_base_directory(),
-            self.directory_fmt.format(**msg[1])
+            self.directory_fmt.format(**{
+                key: text.clean_path(value) for key, value in msg[1].items()
+            })
         )
         os.makedirs(self.directory, exist_ok=True)
 
