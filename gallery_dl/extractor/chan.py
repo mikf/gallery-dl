@@ -44,4 +44,4 @@ class ChanExtractor(Extractor):
         """Return thread title from first post"""
         if "sub" in post:
             return post["sub"]
-        return text.remove_html(post["com"])[:50]
+        return text.unescape(text.remove_html(post["com"]))[:50]
