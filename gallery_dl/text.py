@@ -28,11 +28,17 @@ def filename_from_url(url):
 
 def clean_path_windows(path):
     """Remove illegal characters from a path-segment (Windows)"""
-    return re.sub(r'[<>:"\\/|?*]', "_", path)
+    try:
+        return re.sub(r'[<>:"\\/|?*]', "_", path)
+    except TypeError:
+        return path
 
 def clean_path_posix(path):
     """Remove illegal characters from a path-segment (Posix)"""
-    return path.replace("/", "_")
+    try:
+        return path.replace("/", "_")
+    except AttributeError:
+        return path
 
 def extract(txt, begin, end, pos=0):
     try:
