@@ -24,6 +24,7 @@ modules = [
     "imagebam",
     "imgbox",
     "imgchili",
+    "imgur",
     "mangareader",
     "nijie",
     "powermanga",
