@@ -26,6 +26,7 @@ modules = [
     "imgchili",
     "imgur",
     "mangareader",
+    "nhentai",
     "nijie",
     "powermanga",
     "redhawkscans",
