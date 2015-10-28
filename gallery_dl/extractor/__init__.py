@@ -25,6 +25,7 @@ modules = [
     "imagebam",
     "imgbox",
     "imgchili",
+    "imgth",
     "imgur",
     "mangareader",
     "nhentai",
