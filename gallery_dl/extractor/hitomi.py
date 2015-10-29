@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 import os.path
+import string
 
 info = {
     "category": "hitomi",
@@ -44,15 +45,33 @@ class HitomiExtractor(Extractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
+        group  = ""
+        gtype  = ""
+        series = ""
         _     , pos = text.extract(page, '<h1><a href="/reader/', '')
-        title , pos = text.extract(page, '.html">', "</a></h1>", pos)
+        title , pos = text.extract(page, '.html">', "</a>", pos)
         _     , pos = text.extract(page, '<li><a href="/artist/', '', pos)
-        artist, pos = text.extract(page, '.html">', '</a</li>', pos)
+        artist, pos = text.extract(page, '.html">', '</a>', pos)
+        test  , pos = text.extract(page, '<li><a href="/group/', '', pos)
+        if test is not None:
+            group , pos = text.extract(page, '.html">', '</a>', pos)
+        test  , pos = text.extract(page, '<a href="/type/', '', pos)
+        if test is not None:
+            gtype , pos = text.extract(page, '.html">', '</a>', pos)
+        _     , pos = text.extract(page, '<tdLanguage</td>', '', pos)
+        lang  , pos = text.extract(page, '.html">', '</a>', pos)
+        test  , pos = text.extract(page, '<a href="/series/', '', pos)
+        if test is not None:
+            series, pos = text.extract(page, '.html">', '</a>', pos)
         return {
             "category": info["category"],
             "gallery-id": self.gid,
             "title": title,
-            "artist": artist,
+            "artist": string.capwords(artist),
+            "group": string.capwords(group),
+            "type": gtype[1:-1].capitalize(),
+            "lang": lang.capitalize(),
+            "series": string.capwords(series),
         }
 
     @staticmethod
