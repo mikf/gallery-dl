@@ -8,6 +8,7 @@
 # published by the Free Software Foundation.
 
 import unittest
+import sys
 import gallery_dl.text as text
 
 class TestText(unittest.TestCase):
@@ -46,6 +47,31 @@ class TestText(unittest.TestCase):
         for case, result in cases.items():
             self.assertEqual(text.clean_path_windows(case), result[0])
             self.assertEqual(text.clean_path_posix  (case), result[1])
+
+    def test_shorten_path(self):
+        cases = {
+            "dirname": "dirname",
+            "X"*255: "X"*255,
+            "X"*256: "X"*255,
+            "Ä"*255: "Ä"*127,
+        }
+        enc = sys.getfilesystemencoding()
+        for case, result in cases.items():
+            self.assertEqual(text.shorten_path(case), result)
+            self.assertTrue(len(text.shorten_path(case).encode(enc)) <= 255)
+
+    def test_shorten_filename(self):
+        self.maxDiff = None
+        cases = {
+            "filename.ext": "filename.ext",
+            "X"*251 + ".ext": "X"*251 + ".ext",
+            "X"*255 + ".ext": "X"*251 + ".ext",
+            "Ä"*251 + ".ext": "Ä"*125 + ".ext",
+        }
+        enc = sys.getfilesystemencoding()
+        for case, result in cases.items():
+            self.assertEqual(text.shorten_filename(case), result)
+            self.assertTrue(len(text.shorten_filename(case).encode(enc)) <= 255)
 
 if __name__ == '__main__':
     unittest.main()
