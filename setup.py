@@ -8,15 +8,16 @@ except ImportError:
 
 setup(
     name="gallery_dl",
-    version="0.3",
+    version="0.3.1",
     description="gallery- and image downloader",
     long_description="download image galleries from several image hosting platforms",
     url="https://github.com/mikf/gallery-dl",
+    download_url="https://codeload.github.com/mikf/gallery-dl/zip/v0.3.1",
     author="Mike Fährmann",
     author_email="mike_faehrmann@web.de",
     license="GPLv2",
     install_requires=[
-        "requests >= 2.0",
+        "requests >= 2.4.2",
     ],
     scripts=[
         "bin/gallery-dl",
