@@ -8,7 +8,9 @@
 
 """Collection of functions that work in strings/text"""
 
+import sys
 import re
+import os.path
 import html.parser
 import urllib.parse
 import platform
@@ -39,6 +41,17 @@ def clean_path_posix(path):
         return path.replace("/", "_")
     except AttributeError:
         return path
+
+def shorten_path(path, limit=255, encoding=sys.getfilesystemencoding()):
+    """Shorten a path segment to at most 'limit' bytes"""
+    return (path.encode(encoding)[:limit]).decode(encoding, "ignore")
+
+def shorten_filename(filename, limit=255, encoding=sys.getfilesystemencoding()):
+    """Shorten a filename to at most 'limit' bytes while preserving extension"""
+    name, extension = os.path.splitext(filename)
+    bext = extension.encode(encoding)
+    bname = name.encode(encoding)[:limit-len(bext)]
+    return bname.decode(encoding, "ignore") + extension
 
 def extract(txt, begin, end, pos=0):
     try:
