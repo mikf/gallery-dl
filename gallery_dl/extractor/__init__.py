@@ -12,7 +12,7 @@ from .. import config
 
 modules = [
     "pixiv",
-    # "exhentai",
+    "exhentai",
     "gelbooru",
     "3dbooru",
     "4chan",

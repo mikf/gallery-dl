@@ -1,69 +1,131 @@
-from .common import BasicExtractor
-from ..util import unescape, safe_request
+# -*- coding: utf-8 -*-
+
+# Copyright 2014, 2015 Mike Fährmann
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extract images and ugoira from http://www.pixiv.net/"""
+
+from .common import Extractor, Message
+from .. import config, text
+import re
+import os.path
 import time
 import random
-import json
 
-class Extractor(BasicExtractor):
+info = {
+    "category": "exhentai",
+    "extractor": "ExhentaiExtractor",
+    "directory": ["{category}", "{gallery-id}"],
+    "filename": "{gallery-id}_{num:>04}_{imgkey}_{name}.{extension}",
+    "pattern": [
+        r"(?:https?://)?(g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})",
+    ],
+}
+
+class ExhentaiExtractor(Extractor):
 
     api_url  = "http://exhentai.org/api.php"
-    name_fmt = "{}_{:>04}_{}_{}"
 
-    def __init__(self, match, config):
-        BasicExtractor.__init__(self, config)
+    def __init__(self, match):
+        Extractor.__init__(self)
         self.url = match.group(0)
-        self.gid, self.token = match.group(1).split("/")
-        self.category  = "exhentai"
-        self.directory = self.gid
-        self.session.cookies.update(config["exhentai-cookies"])
+        self.version, self.gid, self.token = match.groups()
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Referer": "http://exhentai.org/",
+        })
+        cookies = config.get(("extractor", "exhentai", "cookies"), {})
+        for key, value in cookies.items():
+            self.session.cookies.set(key, value, domain=".exhentai.org", path="/")
 
-    def images(self):
-        e = self.extract
+    def items(self):
+        yield Message.Version, 1
+        page = self.request(self.url).text
+        data, url = self.get_job_metadata(page)
 
-        # get gallery page
-        text = self.request(self.url).text
+        headers = self.session.headers.copy()
+        headers["Accept"] = "image/png,image/*;q=0.8,*/*;q=0.5"
+        yield Message.Headers, headers
+        yield Message.Cookies, self.session.cookies
+        yield Message.Directory, data
 
-        # get first image page
-        url, pos = self.extract_all(text, "http://exhentai.org/s/", "-1")
-        text = self.request(url).text
+        urlkey = "url"
+        if config.get(("extractor", "exhentai", "download-original"), True):
+            urlkey = "origurl"
+        for num, image in enumerate(self.get_images(url), 1):
+            image.update(data)
+            name, ext = os.path.splitext(text.filename_from_url(image["url"]))
+            image["num"] = num
+            image["name"] = name
+            image["extension"] = ext[1:]
+            if "/fullimg.php" in image[urlkey]:
+                time.sleep( random.uniform(1, 2) )
+            yield Message.Url, image[urlkey], image
 
-        # extract information
-        _       , pos = e(text, '<div id="i3"><a onclick="return load_image(', '')
-        imgkey  , pos = e(text, "'", "'", pos)
-        url     , pos = e(text, '<img id="img" src="', '"', pos)
-        name    , pos = e(text, '<div id="i4"><div>', ' :: ', pos)
-        orgurl  , pos = e(text, 'http://exhentai.org/fullimg.php', '"', pos)
-        gid     , pos = e(text, 'var gid='      ,  ';', pos)
-        startkey, pos = e(text, 'var startkey="', '";', pos)
-        showkey , pos = e(text, 'var showkey="' , '";', pos)
+    def get_job_metadata(self, page):
+        title   , pos = text.extract(page, '<h1 id="gn">', '</h1>')
+        title_jp, pos = text.extract(page, '<h1 id="gj">', '</h1>', pos)
+        date    , pos = text.extract(page, '>Posted:</td><td class="gdt2">', '</td>', pos)
+        language, pos = text.extract(page, '>Language:</td><td class="gdt2">', '</td>', pos)
+        size    , pos = text.extract(page, '>File Size:</td><td class="gdt2">', ' ', pos)
+        url     , pos = text.extract(page, 'hentai.org/s/', '"', pos)
+        return {
+            "category": info["category"],
+            "gallery-id": self.gid,
+            "gallery-token": self.token,
+            "title": title,
+            "title-jp": title_jp,
+            "date": date,
+            "language": language,
+            "size": size,
+        }, "http://exhentai.org/s/" + url
 
-        #
-        if orgurl: url = "http://exhentai.org/fullimg.php" + unescape(orgurl)
-        yield url, self.name_fmt.format(self.gid, 1, startkey, name)
+    def get_images(self, url):
+        time.sleep( random.uniform(3, 6) )
+        page = self.request(url).text
+        data = {}
+        _               , pos = text.extract(page, '<div id="i3"><a onclick="return load_image(', '')
+        data["imgkey"]  , pos = text.extract(page, "'", "'", pos)
+        data["url"]     , pos = text.extract(page, '<img id="img" src="', '"', pos)
+        data["title"]   , pos = text.extract(page, '<div id="i4"><div>', ' :: ', pos)
+        data["origurl"] , pos = text.extract(page, 'http://exhentai.org/fullimg.php', '"', pos)
+        data["gid"]     , pos = text.extract(page, 'var gid='      ,  ';', pos)
+        data["startkey"], pos = text.extract(page, 'var startkey="', '";', pos)
+        data["showkey"] , pos = text.extract(page, 'var showkey="' , '";', pos)
+        if data["origurl"]:
+            data["origurl"] = "http://exhentai.org/fullimg.php" + text.unescape(data["origurl"])
+        else:
+            data["origurl"] = data["url"]
+        yield data
 
-        # use json-api for further pages
         request = {
             "method" : "showpage",
-            "gid"    : int(gid),
             "page"   : 2,
-            "imgkey" : imgkey,
-            "showkey": showkey,
+            "gid"    : int(data["gid"]),
+            "imgkey" : data["imgkey"],
+            "showkey": data["showkey"],
         }
-
         while True:
-            time.sleep( random.uniform(2, 5) )
-            info = json.loads(safe_request(
-                self.session, self.api_url, method="POST", data=json.dumps(request)
-            ).text)
-
-            imgkey, pos = e(info["i3"], "'", "'")
-            url   , pos = e(info["i3"], '<img id="img" src="', '"', pos)
-            name  , pos = e(info["i" ], '<div>', ' :: ')
-            orgurl, pos = e(info["i7"], '<a href="', '"')
-            if orgurl: url = unescape(orgurl)
-            yield url, self.name_fmt.format(gid, request["page"], request["imgkey"], name)
-
-            if request["imgkey"] == imgkey:
+            time.sleep( random.uniform(3, 6) )
+            # page = safe_request(
+                # self.session, self.api_url, method="POST", json=request
+            # ).json
+            page = self.session.post(self.api_url, json=request).json()
+            data["imgkey"] , pos = text.extract(page["i3"], "'", "'")
+            data["url"]    , pos = text.extract(page["i3"], '<img id="img" src="', '"', pos)
+            data["title"]  , pos = text.extract(page["i" ], '<div>', ' :: ')
+            data["origurl"], pos = text.extract(page["i7"], '<a href="', '"')
+            if data["origurl"]:
+                data["origurl"] = text.unescape(data["origurl"])
+            else:
+                data["origurl"] = data["url"]
+            yield data
+            if request["imgkey"] == data["imgkey"]:
                 return
-            request["imgkey"] = imgkey
+            request["imgkey"] = data["imgkey"]
             request["page"] += 1
