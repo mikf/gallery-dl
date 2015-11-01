@@ -20,7 +20,7 @@ info = {
     "directory": ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"],
     "filename": "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}",
     "pattern": [
-        r"(?:https?://)?manga\.redhawkscans\.com/reader/read/(.+)(?:/page)?.*",
+        r"(?:https?://)?manga\.redhawkscans\.com/reader/read/(.+)(?:/page)?",
     ],
 }
 
@@ -30,6 +30,7 @@ class RedHawkScansExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self)
+        self.category = info["category"]
         self.part = match.group(1)
 
     def items(self):
@@ -52,13 +53,13 @@ class RedHawkScansExtractor(Extractor):
         _        , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
         manga    , pos = text.extract(page, 'title="', '"', pos)
         chapter  , pos = text.extract(page, '">', '</a>', pos)
-        json_data, pos = text.extract(page, 'var pages = ', ';\r\n', pos)
-        match = re.match(r"(Chapter (\d+)([^:+]*)(?:: (.*))?|[^:]+)", chapter)
+        json_data, pos = text.extract(page, 'var pages = ', ';', pos)
+        match = re.match(r"(\w+ (\d+)([^:+]*)(?:: (.*))?|[^:]+)", chapter)
         return {
-            "category": info["category"],
+            "category": self.category,
             "manga": text.unescape(manga),
             "chapter": match.group(2) or match.group(1),
             "chapter-minor": match.group(3) or "",
-            "language": "English",
+            "language": "English", #TODO: lookup table for language codes (en, it, ch, ...)
             "title": text.unescape(match.group(4) or ""),
         }, json.loads(json_data)
