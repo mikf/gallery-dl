@@ -16,7 +16,8 @@ info = {
     "directory": ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"],
     "filename": "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}",
     "pattern": [
-        r"(?:https?://)?read(?:er)?\.powermanga\.org/read/(.+)(?:/page)?",
+        (r"(?:https?://)?read(?:er)?\.powermanga\.org/read/"
+         r"(.+/([a-z]{2})/\d+/\d+)(?:/page)?"),
     ],
 }
 
