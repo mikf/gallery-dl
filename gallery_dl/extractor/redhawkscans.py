@@ -9,7 +9,7 @@
 """Extract manga pages from http://manga.redhawkscans.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, iso639_1
 import os.path
 import json
 import re
@@ -20,7 +20,8 @@ info = {
     "directory": ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"],
     "filename": "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}",
     "pattern": [
-        r"(?:https?://)?manga\.redhawkscans\.com/reader/read/(.+)(?:/page)?",
+        (r"(?:https?://)?manga\.redhawkscans\.com/reader/read/"
+         r"(.+/([a-z]{2})/\d+/\d+)(?:/page)?"),
     ],
 }
 
@@ -32,6 +33,7 @@ class RedHawkScansExtractor(Extractor):
         Extractor.__init__(self)
         self.category = info["category"]
         self.part = match.group(1)
+        self.lang = match.group(2)
 
     def items(self):
         yield Message.Version, 1
@@ -60,6 +62,7 @@ class RedHawkScansExtractor(Extractor):
             "manga": text.unescape(manga),
             "chapter": match.group(2) or match.group(1),
             "chapter-minor": match.group(3) or "",
-            "language": "English", #TODO: lookup table for language codes (en, it, ch, ...)
+            "lang": self.lang,
+            "language": iso639_1.code_to_language(self.lang),
             "title": text.unescape(match.group(4) or ""),
         }, json.loads(json_data)
