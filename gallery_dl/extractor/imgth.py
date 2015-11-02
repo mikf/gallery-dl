@@ -58,16 +58,15 @@ class ImgthExtractor(Extractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        title, pos = text.extract(page, '<h1>', '</h1>')
-        count, pos = text.extract(page, 'total of images in this gallery: ', ' ', pos)
-        date , pos = text.extract(page, 'created on ', ' by <', pos)
-        _    , pos = text.extract(page, 'href="/users/', '', pos)
-        user , pos = text.extract(page, '>', '<', pos)
-        return {
+        data = {
             "category": info["category"],
             "gallery-id": self.gid,
-            "title": title,
-            "user": user,
-            "date": date,
-            "count": count,
         }
+        data, _ = text.extract_all(page, (
+            ("title", '<h1>', '</h1>'),
+            ("count", 'total of images in this gallery: ', ' '),
+            ("date" , 'created on ', ' by <'),
+            (None   , 'href="/users/', ''),
+            ("user" , '>', '<'),
+        ), values=data)
+        return data
