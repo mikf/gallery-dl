@@ -10,10 +10,11 @@
 
 def code_to_language(code, default="English"):
     """Map an ISO 639-1 language code to its actual name"""
-    return codes.get(code, default)
+    return codes.get(code.lower(), default)
 
 def language_to_code(lang, default="en"):
     """Map a language name to its ISO 639-1 code"""
+    lang = lang.capitalize()
     for code, language in codes.items():
         if language == lang:
             return code

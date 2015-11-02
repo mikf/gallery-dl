@@ -14,10 +14,12 @@ class TestISO639_1(unittest.TestCase):
 
     def test_code_to_language(self):
         self.assertEqual(iso639_1.code_to_language("en"), "English")
+        self.assertEqual(iso639_1.code_to_language("FR"), "French")
         self.assertEqual(iso639_1.code_to_language("xx"), "English")
         self.assertEqual(iso639_1.code_to_language("xx", default=None), None)
     def test_language_to_code(self):
         self.assertEqual(iso639_1.language_to_code("English"), "en")
+        self.assertEqual(iso639_1.language_to_code("fRENch"), "fr")
         self.assertEqual(iso639_1.language_to_code("Nothing"), "en")
         self.assertEqual(iso639_1.language_to_code("Nothing", default=None), None)
 
