@@ -80,9 +80,10 @@ def extract(txt, begin, end, pos=0):
     except ValueError:
         return None, pos
 
-def extract_all(txt, rules, pos=0):
+def extract_all(txt, rules, pos=0, values=None):
     """Calls extract for each rule and returns the result in a dict"""
-    values = {}
+    if values is None:
+        values = {}
     for key, begin, end in rules:
         result, pos = extract(txt, begin, end, pos)
         if key:
