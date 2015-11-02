@@ -55,9 +55,11 @@ class ImgboxExtractor(AsynchronousExtractor):
     def get_file_metadata(self, page):
         """Collect metadata for a downloadable file"""
         data = self.metadata.copy()
-        data["num"]      , pos = text.extract(page, '</a> &nbsp; ', ' of ')
-        data["image-key"], pos = text.extract(page, '/i.imgbox.com/', '?download', pos)
-        data["name"]     , pos = text.extract(page, ' title="', '"', pos)
+        data, _ = text.extract_all(page, (
+            ("num"      , '</a> &nbsp; ', ' of '),
+            ("image-key", '/i.imgbox.com/', '?download'),
+            ("name"     , ' title="', '"'),
+        ), values=data)
         return data
 
     def get_file_url(self, page):
