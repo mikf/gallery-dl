@@ -11,16 +11,15 @@
 from .common import AsynchronousExtractor, Message
 from .. import text
 import os.path
-import re
 
 info = {
     "category": "mangareader",
     "extractor": "MangaReaderExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03}"],
+    "directory": ["{category}", "{manga}", "c{chapter:>03} - {title}"],
     "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
     "pattern": [
-        r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/]+/\d+).*",
-        r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+/[^/]+/chapter-\d+.html)",
+        r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))",
+        r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
     ],
 }
 
@@ -30,25 +29,56 @@ class MangaReaderExtractor(AsynchronousExtractor):
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
-        self.part = match.group(1)
+        self.part, self.url_title, self.chapter = match.groups()
 
     def items(self):
+        page = self.request(self.url_base + self.part).text
+        data = self.get_job_metadata(page)
         yield Message.Version, 1
-        url = self.url_base + self.part
-        while True:
-            url, image_url, data = self.get_page_metadata(url)
-            if url is None:
-                return
-            yield Message.Directory, data
-            yield Message.Url, image_url, data
+        yield Message.Directory, data
+        for i in range(1, int(data["count"])+1):
+            next_url, image_url, image_data = self.get_page_metadata(page)
+            image_data.update(data)
+            image_data["page"] = i
+            yield Message.Url, image_url, image_data
+            if next_url:
+                page = self.request(next_url).text
 
-    def get_page_metadata(self, page_url):
+    def get_job_metadata(self, chapter_page):
+        """Collect metadata for extractor-job"""
+        page = self.request(self.url_base + self.url_title).text
+        data = {
+            "category": info["category"],
+            "chapter": self.chapter,
+            "lang": "en",
+            "language": "English",
+        }
+        data, _ = text.extract_all(page, (
+            (None, '<td class="propertytitle">Name:', ''),
+            ("manga", '<h2 class="aname">', '</h2>'),
+            (None, '<td class="propertytitle">Year of Release:', ''),
+            ('manga-release', '<td>', '</td>'),
+            (None, '<td class="propertytitle">Author:', ''),
+            ('author', '<td>', '</td>'),
+            (None, '<td class="propertytitle">Artist:', ''),
+            ('artist', '<td>', '</td>'),
+            (None, '<div id="readmangasum">', ''),
+            ('title', ' ' + self.chapter + '</a> : ', '</td>'),
+            ('chapter-date', '<td>', '</td>'),
+        ), values=data)
+        data, _ = text.extract_all(chapter_page, (
+            (None, '<select id="pageMenu"', ''),
+            ('count', '</select> of ', '</div>'),
+        ), values=data)
+        for key in ("author", "artist"):
+            data[key] = text.unescape(data[key])
+        return data
+
+    def get_page_metadata(self, page):
         """Collect next url, image-url and metadata for one manga-page"""
-        page = self.request(page_url).text
         extr = text.extract
         width = None
-        descr, pos = extr(page, '<meta name="description" content="', '"')
-        test , pos = extr(page, "document['pu']", '', pos)
+        test , pos = extr(page, "document['pu']", '')
         if test is None:
             return None, None, None
         if page.find("document['imgwidth']", pos, pos+200) != -1:
@@ -62,16 +92,10 @@ class MangaReaderExtractor(AsynchronousExtractor):
         image, pos = extr(page, ' src="', '"', pos)
         filename = text.unquote(text.filename_from_url(image))
         name, ext = os.path.splitext(filename)
-        match = re.match(r"(.*) (\d+) - Read \1 \2 Manga Scans Page (\d+)", descr)
 
         return self.url_base + url, image, {
-            "category": info["category"],
-            "manga": text.unescape(match.group(1)),
-            "chapter": match.group(2),
-            "page": match.group(3),
             "width": width,
             "height": height,
-            "language": "English",
             "name": name,
             "extension": ext[1:],
         }
