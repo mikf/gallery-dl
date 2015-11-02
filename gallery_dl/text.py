@@ -61,13 +61,14 @@ def extract(txt, begin, end, pos=0):
     except ValueError:
         return None, pos
 
-def extract_all(txt, begin, end, pos=0):
-    try:
-        first = txt.index(begin, pos)
-        last = txt.index(end, first + len(begin)) + len(end)
-        return txt[first:last], last
-    except ValueError:
-        return None, pos
+def extract_all(txt, rules, pos=0):
+    """Calls extract for each rule and returns the result in a dict"""
+    values = {}
+    for key, begin, end in rules:
+        result, pos = extract(txt, begin, end, pos)
+        if key:
+            values[key] = result
+    return values, pos
 
 if platform.system() == "Windows":
     clean_path = clean_path_windows
