@@ -54,6 +54,25 @@ def shorten_filename(filename, limit=255, encoding=sys.getfilesystemencoding()):
     return bname.decode(encoding, "ignore") + extension
 
 def extract(txt, begin, end, pos=0):
+    """Extract the text between 'begin' and 'end' from 'txt'
+
+    Args:
+        txt: String to search in
+        begin: First string to be searched for
+        end: Second string to be searched for after 'begin'
+        pos: Starting position for searches in 'txt'
+
+    Returns:
+        The string between the two search-strings 'begin' and 'end' beginning
+        with position 'pos' in 'txt' as well as the position after 'end'.
+
+        If at least one of 'begin' or 'end' is not found, None and the original
+        value of 'pos' is returned
+
+    Examples:
+        extract("abcde", "b", "d")    -> "c" , 4
+        extract("abcde", "b", "d", 3) -> None, 3
+    """
     try:
         first = txt.index(begin, pos) + len(begin)
         last = txt.index(end, first)
