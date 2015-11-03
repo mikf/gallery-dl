@@ -42,5 +42,5 @@ gallery-dl searches for configuration files in the following paths:
 
 Values in later configuration files will override previous ones.
 
-.. _gallery-dl.conf: https://github.com/mikf/gallery-dl/blob/master/config.json
+.. _gallery-dl.conf: https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
 
