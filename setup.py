@@ -1,18 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
+import os.path
+
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 setup(
     name="gallery_dl",
-    version="0.3.1",
+    version="0.3.2",
     description="gallery- and image downloader",
-    long_description="download image galleries from several image hosting platforms",
+    long_description=read("README.rst"),
     url="https://github.com/mikf/gallery-dl",
-    download_url="https://codeload.github.com/mikf/gallery-dl/zip/v0.3.1",
+    download_url="https://codeload.github.com/mikf/gallery-dl/zip/v0.3.2",
     author="Mike Fährmann",
     author_email="mike_faehrmann@web.de",
     license="GPLv2",
