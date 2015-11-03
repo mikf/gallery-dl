@@ -10,14 +10,15 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text
+import os.path
 
 info = {
     "category": "imagebam",
     "extractor": "ImagebamExtractor",
-    "directory": ["{category}", "{title} - {key}"],
-    "filename": "{num:>03}-{name}",
+    "directory": ["{category}", "{title} - {gallery-key}"],
+    "filename": "{num:>03}-{filename}",
     "pattern": [
-        r"(?:https?://)?(?:www\.)?imagebam\.com/(gallery)/([^/]+).*",
+        r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([^/]+).*",
     ],
 }
 
@@ -27,54 +28,48 @@ class ImagebamExtractor(AsynchronousExtractor):
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
-        self.match = match
-        self.num = 0
-        self.metadata = {}
+        self.gkey = match.group(1)
 
     def items(self):
-        self.num = 0
-        self.metadata = self.get_job_metadata()
+        data = self.get_job_metadata()
+        data["num"] = 0
         yield Message.Version, 1
-        yield Message.Directory, self.metadata
-
-        next_url = self.metadata["first-url"]
-        done = False
-        while not done:
-            # get current page
-            page = self.request(self.url_base + next_url).text
-
-            # get url for next page
-            next_url, pos = text.extract(page, "<a class='buttonblue' href='", "'")
-
-            # if the following text isn't "><span>next image" we are done
-            if not page.startswith("><span>next image", pos):
-                done = True
-
-            # get image url
-            img_url, pos = text.extract(page, 'onclick="scale(this);" src="', '"', pos)
-
-            yield Message.Url, img_url, self.get_file_metadata(img_url)
+        yield Message.Directory, data
+        for image_url, image_id in self.get_images(data["first-url"]):
+            data["id"] = image_id
+            data["filename"] = text.unquote(text.filename_from_url(image_url))
+            name, ext = os.path.splitext(data["filename"])
+            data["num"] += 1
+            data["name"] = name
+            data["extension"] = ext[1:]
+            yield Message.Url, image_url, data.copy()
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        gallery_key = self.match.group(2)
-        page = self.request(self.url_base + "/gallery/" + gallery_key).text
-        _    , pos = text.extract(page, "<img src='/img/icons/photos.png'", "")
-        title, pos = text.extract(page, "'> ", " <", pos)
-        count, pos = text.extract(page, "'>", " images", pos)
-        url  , pos = text.extract(page, "<a href='http://www.imagebam.com", "'", pos)
-        return {
+        response = self.request(self.url_base + "/gallery/" + self.gkey)
+        response.encoding = "utf-8"
+        page = response.text
+        data = {
             "category": info["category"],
-            "key": gallery_key,
-            "title": title,
-            "count": count,
-            "first-url": url,
+            "gallery-key": self.gkey,
         }
-
-    def get_file_metadata(self, url):
-        """Collect metadata for a downloadable file"""
-        self.num += 1
-        data = self.metadata.copy()
-        data["num"] = self.num
-        data["name"] = text.filename_from_url(url)
+        data, _ = text.extract_all(page, (
+            (None       , "<img src='/img/icons/photos.png'", ""),
+            ("title"    , "'> ", " <"),
+            ("count"    , "'>", " images"),
+            ("first-url", "<a href='http://www.imagebam.com", "'"),
+        ), values=data)
         return data
+
+    def get_images(self, url):
+        done = False
+        while not done:
+            page = self.request(self.url_base + url).text
+            _  , pos = text.extract(page, 'class="btn btn-default" title="Next">', '')
+            if pos == 0:
+                done = True
+            else:
+                url, pos = text.extract(page, ' href="', '"', pos-70)
+            image_id , pos = text.extract(page, '<img class="image" id="', '"', pos)
+            image_url, pos = text.extract(page, ' src="', '"', pos)
+            yield image_url, image_id
