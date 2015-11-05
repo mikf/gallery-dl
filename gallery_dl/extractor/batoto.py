@@ -9,7 +9,7 @@
 """Extract manga pages from http://bato.to/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import text
+from .. import text, iso639_1
 import os.path
 import re
 
@@ -19,58 +19,77 @@ info = {
     "directory": ["{category}", "{manga}", "c{chapter:>03} - {title}"],
     "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
     "pattern": [
-        r"(?:https?://)?(?:www\.)?bato\.to/read/_/(\d+).*",
+        r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)",
     ],
 }
 
 class BatotoExtractor(AsynchronousExtractor):
 
-    url_base = "http://bato.to/read/_/"
+    url = "https://bato.to/areader"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
-        self.chapter_id = match.group(1)
+        self.token = match.group(1)
+        self.session.headers.update({
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "https://bato.to/reader",
+        })
 
     def items(self):
-        yield Message.Version, 1
-        url = self.url_base + self.chapter_id
-        while url:
-            url, data = self.get_page_metadata(url)
-            yield Message.Directory, data
-            yield Message.Url, data["image-url"], data
-
-    def get_page_metadata(self, page_url):
-        """Collect next url and metadata for one manga-page"""
-        page = self.request(page_url).text
-        _    , pos = text.extract(page, 'selected="selected"', '')
-        title, pos = text.extract(page, ': ', '<', pos)
-        _    , pos = text.extract(page, 'selected="selected"', '', pos)
-        trans, pos = text.extract(page, '>', '<', pos)
-        _    , pos = text.extract(page, '<div id="full_image"', '', pos)
-        image, pos = text.extract(page, '<img src="', '"', pos)
-        url  , pos = text.extract(page, '<a href="', '"', pos)
-        mmatch = re.search(
-            r"<title>(.+) - (?:vol (\d+) )?"
-            r"ch (\d+)[^ ]+ Page (\d+) | Batoto!</title>",
-            page
-        )
-        tmatch = re.match(
-            r"(.+) - ([^ ]+)",
-            trans
-        )
-        filename = text.unquote(text.filename_from_url(image))
-        name, ext = os.path.splitext(filename)
-        return url, {
-            "category": info["category"],
-            "chapter-id": self.chapter_id,
-            "manga": text.unescape(mmatch.group(1)),
-            "volume": mmatch.group(2) or "",
-            "chapter": mmatch.group(3),
-            "page": mmatch.group(4),
-            "group": tmatch.group(1),
-            "language": tmatch.group(2),
-            "title": text.unescape(title),
-            "image-url": image,
-            "name": name,
-            "extension": ext[1:],
+        params = {
+            "id": self.token,
+            "p": 1,
+            "supress_webtoon": "t",
         }
+        page = self.request(self.url, params=params).text
+        data = self.get_job_metadata(page)
+        yield Message.Version, 1
+        yield Message.Directory, data
+        for i in range(int(data["count"])):
+            next_url, image_url = self.get_page_urls(page)
+            filename = text.unquote(text.filename_from_url(image_url))
+            name, ext = os.path.splitext(filename)
+            data["page"] = i+1
+            data["name"] = name
+            data["extension"] = ext[1:]
+            yield Message.Url, image_url, data.copy()
+            if next_url:
+                params["p"] += 1
+                page = self.request(self.url, params=params).text
+
+    def get_job_metadata(self, page):
+        """Collect metadata for extractor-job"""
+        extr = text.extract
+        _    , pos = extr(page, '<select name="chapter_select"', '')
+        cinfo, pos = extr(page, 'selected="selected">', '</option>', pos)
+        _    , pos = extr(page, '<select name="group_select"', '', pos)
+        group, pos = extr(page, 'selected="selected">', ' - ', pos)
+        lang , pos = extr(page, '', '</option>', pos)
+        _    , pos = extr(page, '<select name="page_select"', '', pos)
+        _    , pos = extr(page, '</select>', '', pos)
+        count, pos = extr(page, '>page ', '<', pos-35)
+        manga, pos = extr(page, "document.title = '", " - ", pos)
+        match = re.match(r"(Vol.(\d+) )?Ch.(\d+)([^:]*)(: (.+))?", cinfo)
+        return {
+            "category": info["category"],
+            "token": self.token,
+            "manga": manga,
+            "volume": match.group(2) or "",
+            "chapter": match.group(3),
+            "chapter-extra": match.group(4),
+            "title": match.group(6) or "",
+            "group": group,
+            "lang": iso639_1.language_to_code(lang),
+            "language": lang,
+            "count": count,
+        }
+
+    @staticmethod
+    def get_page_urls(page):
+        """Collect next- and image-url for one manga-page"""
+        _   , pos = text.extract(page, 'title="Next Chapter"', '')
+        nurl, pos = text.extract(page, '<a href="', '"', pos)
+        _   , pos = text.extract(page, '<div id="full_image"', '', pos)
+        iurl, pos = text.extract(page, '<img src="', '"', pos)
+        return nurl if "_" in nurl else None, iurl
+
