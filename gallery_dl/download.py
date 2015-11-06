@@ -44,6 +44,7 @@ class DownloadJob():
         self.mngr = mngr
         self.extractor, self.info = extractor.find(url)
         if self.extractor is None:
+            print(url, ": No extractor found", sep="", file=sys.stderr)
             return
         self.directory = mngr.get_base_directory()
         self.downloaders = {}
@@ -60,7 +61,7 @@ class DownloadJob():
     def run(self):
         """Execute/Run the download job"""
         if self.extractor is None:
-            return # TODO: error msg
+            return
 
         for msg in self.extractor:
             if msg[0] == Message.Url:
