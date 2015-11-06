@@ -27,6 +27,7 @@ modules = [
     "imgchili",
     "imgth",
     "imgur",
+    "konachan",
     "mangareader",
     "nhentai",
     "nijie",
