@@ -41,6 +41,7 @@ def find(url):
         match = re.match(pattern, url)
         if match:
             return klass(match), module.info
+    return None, None
 
 # --------------------------------------------------------------------
 # internals
