@@ -14,7 +14,7 @@ info = {
     "category": "danbooru",
     "extractor": "DanbooruExtractor",
     "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{name}",
+    "filename": "{category}_{id}_{md5}.{extension}",
     "pattern": [
         r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts\?(?:utf8=%E2%9C%93&)?tags=([^&]+).*",
     ],

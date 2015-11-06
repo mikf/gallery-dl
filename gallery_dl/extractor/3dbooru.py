@@ -14,7 +14,7 @@ info = {
     "category": "3dbooru",
     "extractor": "ThreeDeeBooruExtractor",
     "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{id}_{name}",
+    "filename": "{category}_{id}_{md5}.{extension}",
     "pattern": [
         r"(?:https?://)?(?:www\.)?behoimi\.org/post(?:/(?:index)?)?\?tags=([^&]+).*",
     ],

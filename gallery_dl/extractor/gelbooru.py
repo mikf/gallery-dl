@@ -15,7 +15,7 @@ info = {
     "category": "gelbooru",
     "extractor": "GelbooruExtractor",
     "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{name}",
+    "filename": "{category}_{id}_{md5}.{extension}",
     "pattern": [
         r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?page=post&s=list&tags=([^&]+).*",
     ],

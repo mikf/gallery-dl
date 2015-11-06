@@ -14,7 +14,7 @@ info = {
     "category": "safebooru",
     "extractor": "SafebooruExtractor",
     "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{name}",
+    "filename": "{category}_{id}_{md5}.{extension}",
     "pattern": [
         r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?\?page=post&s=list&tags=([^&]+).*",
     ],

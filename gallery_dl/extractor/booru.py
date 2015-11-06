@@ -53,16 +53,18 @@ class BooruExtractor(Extractor):
         """Collect metadata for extractor-job"""
         return {
             "category": self.info["category"],
-            "tags": self.tags.replace("/", "_"),
+            "tags": self.tags
         }
 
     def get_file_metadata(self, data):
         """Collect metadata for a downloadable file"""
         data["category"] = self.info["category"]
-        data["name"] = text.unquote(
+        data["filename"] = text.unquote(
             text.filename_from_url(self.get_file_url(data))
         )
-        data["extension"] = os.path.splitext(data["name"])[1][1:]
+        name, ext = os.path.splitext(data["filename"])
+        data["name"] = name
+        data["extension"] = ext[1:]
         return data
 
     def get_file_url(self, data):

@@ -14,7 +14,7 @@ info = {
     "category": "yandere",
     "extractor": "YandereExtractor",
     "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{md5}.{extension}",
+    "filename": "{category}_{id}_{md5}.{extension}",
     "pattern": [
         r"(?:https?://)?(?:www\.)?yande\.re/post\?tags=([^&]+).*",
     ],

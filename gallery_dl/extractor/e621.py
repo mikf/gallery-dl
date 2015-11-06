@@ -14,7 +14,7 @@ info = {
     "category": "e621",
     "extractor": "E621Extractor",
     "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{name}",
+    "filename": "{category}_{id}_{md5}.{extension}",
     "pattern": [
         r"(?:https?://)?(?:www\.)?e621\.net/post/index/\d+/([^?]+)",
         r"(?:https?://)?(?:www\.)?e621\.net/post\?tags=([^&]+).*"

@@ -14,7 +14,7 @@ info = {
     "category": "konachan",
     "extractor": "KonachanExtractor",
     "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{md5}.{extension}",
+    "filename": "{category}_{id}_{md5}.{extension}",
     "pattern": [
         r"(?:https?://)?(?:www\.)?konachan\.com/post\?tags=([^&]+).*",
     ],
