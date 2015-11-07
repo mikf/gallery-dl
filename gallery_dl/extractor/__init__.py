@@ -31,6 +31,7 @@ modules = [
     "konachan",
     "mangapanda",
     "mangareader",
+    "mangastream",
     "nhentai",
     "nijie",
     "powermanga",
