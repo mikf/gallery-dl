@@ -6,41 +6,46 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+"""Methods to access sites behind Cloudflare protection"""
+
 import time
 import operator
-from urllib.parse import urljoin
+import urllib.parse
 from . import text
 
 def bypass_ddos_protection(session, url):
+    """Prepare a requests.session to access 'url' behind Cloudflare protection"""
     session.headers["Referer"] = url
     page = session.get(url).text
     params = text.extract_all(page, (
         ('jschl_vc', 'name="jschl_vc" value="', '"'),
         ('pass'    , 'name="pass" value="', '"'),
     ))[0]
-    params["jschl_answer"] = solve_jschl(page)
+    params["jschl_answer"] = solve_jschl(url, page)
     time.sleep(4)
-    session.get(urljoin(url, "/cdn-cgi/l/chk_jschl"), params=params)
+    session.get(urllib.parse.urljoin(url, "/cdn-cgi/l/chk_jschl"), params=params)
 
-def solve_jschl(page):
+def solve_jschl(url, page):
+    """Solve challenge to get 'jschl_answer' value"""
     data, pos = text.extract_all(page, (
         ('var' , 'var t,r,a,f, ', '='),
         ('key' , '"', '"'),
         ('expr', ':', '}')
     ))
-    solution = evaluate_js_expression(data["expr"])
+    solution = evaluate_expression(data["expr"])
     variable = "{}.{}".format(data["var"], data["key"])
     vlength = len(variable)
     expressions = text.extract(page, "'challenge-form');", "f.submit();", pos)[0]
     for expr in expressions.split(";")[1:]:
         if expr.startswith(variable):
             func = operator_functions[expr[vlength]]
-            value = evaluate_js_expression(expr[vlength+2:])
+            value = evaluate_expression(expr[vlength+2:])
             solution = func(solution, value)
         elif expr.startswith("a.value"):
-            return solution + len("kissmanga.com")
+            return solution + len(urllib.parse.urlparse(url).netloc)
 
-def evaluate_js_expression(expr):
+def evaluate_expression(expr):
+    """Evaluate a Javascript expression for the challange and return its value"""
     stack = []
     ranges = []
     value = ""
