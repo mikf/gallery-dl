@@ -29,6 +29,7 @@ modules = [
     "imgur",
     "kissmanga",
     "konachan",
+    "mangapanda",
     "mangareader",
     "nhentai",
     "nijie",

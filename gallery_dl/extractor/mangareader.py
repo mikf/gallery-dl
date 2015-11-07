@@ -25,6 +25,7 @@ info = {
 
 class MangaReaderExtractor(AsynchronousExtractor):
 
+    category = info["category"]
     url_base = "http://www.mangareader.net"
 
     def __init__(self, match):
@@ -48,7 +49,7 @@ class MangaReaderExtractor(AsynchronousExtractor):
         """Collect metadata for extractor-job"""
         page = self.request(self.url_base + self.url_title).text
         data = {
-            "category": info["category"],
+            "category": self.category,
             "chapter": self.chapter,
             "lang": "en",
             "language": "English",
