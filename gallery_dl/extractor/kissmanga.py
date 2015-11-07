@@ -16,8 +16,8 @@ import re
 info = {
     "category": "kissmanga",
     "extractor": "KissmangaExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03} - {title}"],
-    "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
+    "directory": ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"],
+    "filename": "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}",
     "pattern": [
         r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/.+/.+\?id=\d+",
     ],
@@ -50,13 +50,16 @@ class KissmangaExtractor(Extractor):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, "Read manga\n", "\n")
         cinfo, pos = text.extract(page, "", "\n", pos)
-        match = re.match(r"(?:Vol.0*(\d+) )?Ch.0*(\d+)(?:: (.+))", cinfo)
+        match = re.match(
+            r"(?:Vol.0*(\d+) )?(?:Ch.)?0*(\d+)(?:\.0*(\d+))?(?:: (.+))?", cinfo)
+        chminor = match.group(3)
         return {
             "category": info["category"],
             "manga": manga,
             "volume": match.group(1) or "",
             "chapter": match.group(2),
-            "title": match.group(3) or "",
+            "chapter-minor": "."+chminor if chminor else "",
+            "title": match.group(4) or "",
             "lang": "en",
             "language": "English",
         }
