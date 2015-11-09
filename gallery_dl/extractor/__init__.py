@@ -37,6 +37,7 @@ modules = [
     "powermanga",
     "redhawkscans",
     "safebooru",
+    "sankaku",
     "yandere",
 ]
 
