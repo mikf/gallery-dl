@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images and ugoira from http://www.pixiv.net/"""
+"""Extract images from galleries at http://exhentai.org/"""
 
 from .common import Extractor, Message
 from .. import config, text
