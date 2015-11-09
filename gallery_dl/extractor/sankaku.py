@@ -8,7 +8,7 @@
 
 """Extract images from https://chan.sankakucomplex.com/"""
 
-from .common import Extractor, Message
+from .common import AsynchronousExtractor, Message
 from .. import text
 import os.path
 
@@ -22,24 +22,25 @@ info = {
     ],
 }
 
-class SankakuExtractor(Extractor):
+class SankakuExtractor(AsynchronousExtractor):
 
     url = "https://chan.sankakucomplex.com/"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        AsynchronousExtractor.__init__(self)
         self.tags = text.unquote(match.group(1))
         self.session.headers["User-Agent"] = (
             "Mozilla/5.0 Gecko/20100101 Firefox/40.0"
         )
 
     def items(self):
-        yield Message.Version, 1
         data = self.get_job_metadata()
+        yield Message.Version, 1
+        yield Message.Headers, self.session.headers
         yield Message.Directory, data
         for image in self.get_images():
-            data.update(image)
-            yield Message.Url, image["file-url"], data
+            image.update(data)
+            yield Message.Url, image["file-url"], image
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
@@ -49,33 +50,40 @@ class SankakuExtractor(Extractor):
         }
 
     def get_images(self):
-        image = {}
         params = {
             "tags": self.tags,
             "page": 1,
         }
         while True:
-            pos = 0
             count = 0
             page = self.request(self.url, params=params).text
+            pos = text.extract(page, '<div id=more-popular-posts-link>', '')[1]
             while True:
-                image["id"], pos = text.extract(page,
+                image_id, pos = text.extract(page,
                     '<span class="thumb blacklisted" id=p', '>', pos)
-                if not image["id"]:
+                if not image_id:
                     break
-                url , pos = text.extract(page, ' src="//c.sankakucomplex.com/', '"', pos)
-                tags, pos = text.extract(page, ' title="', '"', pos)
-                self.get_image_metadata(image, url)
+                image = self.get_image_metadata(image_id)
                 count += 1
                 yield image
             if count < 20:
                 return
             params["page"] += 1
 
-    @staticmethod
-    def get_image_metadata(image, url):
-        image["file-url"] = "https://cs.sankakucomplex.com/data/" + url[13:]
-        filename = text.filename_from_url(url)
+    def get_image_metadata(self, image_id):
+        url = "https://chan.sankakucomplex.com/post/show/" + image_id
+        page = self.request(url).text
+        image_url, pos = text.extract(page, '<li>Original: <a href="', '"')
+        width    , pos = text.extract(page, '>', 'x', pos)
+        height   , pos = text.extract(page, '', ' ', pos)
+        filename = text.filename_from_url(image_url)
         name, ext = os.path.splitext(filename)
-        image["name"] = image["md5"] = name
-        image["extension"] = ext[1:]
+        return {
+            "id": image_id,
+            "file-url": "https:" + image_url,
+            "width": width,
+            "height": height,
+            "md5": name,
+            "name": name,
+            "extension": ext[1:],
+        }
