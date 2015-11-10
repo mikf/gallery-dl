@@ -42,6 +42,5 @@ class ChanExtractor(Extractor):
     @staticmethod
     def get_thread_title(post):
         """Return thread title from first post"""
-        if "sub" in post:
-            return post["sub"]
-        return text.unescape(text.remove_html(post["com"]))[:50]
+        title = post["sub"] if "sub" in post else text.remove_html(post["com"])
+        return text.unescape(title)[:50]
