@@ -33,6 +33,11 @@ def parse_cmdline_options():
         help="destination directory"
     )
     parser.add_argument(
+        "-o", "--option",
+        metavar="OPT", action="append",
+        help="option value",
+    )
+    parser.add_argument(
         "urls",
         nargs="+", metavar="URL",
         help="url to download images from"
@@ -40,8 +45,11 @@ def parse_cmdline_options():
     return parser.parse_args()
 
 def main():
+    args = parse_cmdline_options()
     config.load()
-    opts = parse_cmdline_options()
+    for opt in args.option:
+        key, value = opt.split("=", 1)
+        config.set(key.split("."), value)
     dlmgr = download.DownloadManager(opts)
 
     try:
