@@ -41,8 +41,7 @@ class ImgurExtractor(Extractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        _    , pos = text.extract(page, '<h1 ', '>')
-        title, pos = text.extract(page, '', '</h1>', pos)
+        title, _ = text.extract(page, '<meta property="og:title" content="', '"')
         return {
             "category": info["category"],
             "album-key": self.album,
@@ -56,10 +55,10 @@ class ImgurExtractor(Extractor):
         pos = 0
         num = 0
         while True:
-            url   , pos = text.extract(page, 'property="og:image"        content="', '"', pos)
+            url   , pos = text.extract(page, 'property="og:image" content="', '"', pos)
             if not url:
                 return images
-            width , pos = text.extract(page, 'property="og:image:width"  content="', '"', pos)
+            width , pos = text.extract(page, 'property="og:image:width" content="', '"', pos)
             height, pos = text.extract(page, 'property="og:image:height" content="', '"', pos)
             name = os.path.splitext(text.filename_from_url(url))
             num += 1
