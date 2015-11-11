@@ -29,44 +29,41 @@ class ImgurExtractor(Extractor):
         self.album = match.group(1)
 
     def items(self):
-        page = self.request("https://imgur.com/a/" + self.album).text
-        data = self.get_job_metadata(page)
-        images = self.get_images(page)
-        data["count"] = len(images)
+        data = self.get_job_metadata()
         yield Message.Version, 1
         yield Message.Directory, data
-        for image in images:
-            data.update(image)
-            yield Message.Url, image["url"], data
+        for num, url in enumerate(self.get_image_urls(), 1):
+            name, ext = os.path.splitext(url[20:])
+            data["num"] = num
+            data["name"] = name
+            data["extension"] = ext[1:]
+            yield Message.Url, url, data
 
-    def get_job_metadata(self, page):
+    def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        title, _ = text.extract(page, '<meta property="og:title" content="', '"')
-        return {
+        page = self.request("https://imgur.com/a/" + self.album).text
+        data = {
             "category": info["category"],
             "album-key": self.album,
-            "title": title,
-            # "date": ...,
         }
+        return text.extract_all(page, (
+            ('title', '<meta property="og:title" content="', '"'),
+            ('date' , '"create_datetime":"', '"'),
+            ('count', '"num_images":', ','),
+        ), values=data)[0]
 
-    def get_images(self, page):
-        """Build a list of all images in this album"""
-        images = []
-        pos = 0
+    def get_image_urls(self):
+        """Yield urls of all images in this album"""
         num = 0
         while True:
-            url   , pos = text.extract(page, 'property="og:image" content="', '"', pos)
-            if not url:
-                return images
-            width , pos = text.extract(page, 'property="og:image:width" content="', '"', pos)
-            height, pos = text.extract(page, 'property="og:image:height" content="', '"', pos)
-            name = os.path.splitext(text.filename_from_url(url))
+            url = "https://imgur.com/a/{}/all/page/{}?scrolled".format(self.album, num)
+            page = self.request(url).text
+            pos = begin = text.extract(page, '<div class="posts">', '')[1]
+            while True:
+                url, pos = text.extract(page, '<a href="', '"', pos)
+                if not url:
+                    break
+                yield "https:" + url
+            if pos == begin:
+                return
             num += 1
-            images.append({
-                "url": "https" + url[4:],
-                "width": width,
-                "height": height,
-                "name": name[0],
-                "extension": name[1][1:],
-                "num": num,
-            })
