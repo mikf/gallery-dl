@@ -17,7 +17,7 @@ __email__      = "mike_faehrmann@web.de"
 import os
 import sys
 import argparse
-from . import config, download
+from . import config, jobs
 
 def parse_cmdline_options():
     parser = argparse.ArgumentParser(
@@ -53,10 +53,8 @@ def main():
             config.set(key.split("."), value)
         except TypeError:
             pass
-    dlmgr = download.DownloadManager(args)
-
     try:
         for url in args.urls:
-            dlmgr.add(url)
+            jobs.DownloadJob(url).run()
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
