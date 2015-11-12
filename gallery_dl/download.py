@@ -8,45 +8,17 @@
 
 import os
 import sys
-import importlib
-from . import config, extractor, text
+from . import config, extractor, downloader, text
 from .extractor.common import Message
-
-class DownloadManager():
-
-    def __init__(self, opts):
-        self.opts = opts
-        self.modules = {}
-
-    def add(self, url):
-        job = DownloadJob(self, url)
-        job.run()
-
-    def get_downloader_module(self, scheme):
-        """Return a downloader module suitable for 'scheme'"""
-        module = self.modules.get(scheme)
-        if module is None:
-            module = importlib.import_module(".downloader."+scheme, __package__)
-            self.modules[scheme] = module
-        return module
-
-    def get_base_directory(self):
-        """Return the base-destination-directory for downloads"""
-        if self.opts.dest:
-            return self.opts.dest
-        else:
-            return config.get(("base-directory",), default="/tmp/")
-
 
 class DownloadJob():
 
-    def __init__(self, mngr, url):
-        self.mngr = mngr
+    def __init__(self, url):
         self.extractor, self.info = extractor.find(url)
         if self.extractor is None:
             print(url, ": No extractor found", sep="", file=sys.stderr)
             return
-        self.directory = mngr.get_base_directory()
+        self.directory = self.get_base_directory()
         self.downloaders = {}
         self.filename_fmt = config.get(
             ("extractor", self.info["category"], "filename"),
@@ -91,15 +63,15 @@ class DownloadJob():
         if os.path.exists(path):
             self.print_skip(path)
             return
-        downloader = self.get_downloader(url)
+        dlinstance = self.get_downloader(url)
         self.print_start(path)
-        tries = downloader.download(url, path)
+        tries = dlinstance.download(url, path)
         self.print_success(path, tries)
 
     def set_directory(self, msg):
         """Set and create the target directory for downloads"""
         self.directory = os.path.join(
-            self.mngr.get_base_directory(),
+            self.get_base_directory(),
             self.directory_fmt.format(**{
                 key: text.clean_path(value) for key, value in msg[1].items()
             })
@@ -112,12 +84,17 @@ class DownloadJob():
         scheme = url[:pos] if pos != -1 else "http"
         if scheme == "https":
             scheme = "http"
-        downloader = self.downloaders.get(scheme)
-        if downloader is None:
-            module = self.mngr.get_downloader_module(scheme)
-            downloader = module.Downloader()
-            self.downloaders[scheme] = downloader
-        return downloader
+        instance = self.downloaders.get(scheme)
+        if instance is None:
+            klass = downloader.find(scheme)
+            instance = klass()
+            self.downloaders[scheme] = instance
+        return instance
+
+    @staticmethod
+    def get_base_directory():
+        """Return the base-destination-directory for downloads"""
+        return config.get(("base-directory",), default="/tmp/")
 
     @staticmethod
     def print_start(path):
