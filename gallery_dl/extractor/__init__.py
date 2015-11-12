@@ -38,6 +38,7 @@ modules = [
     "redhawkscans",
     "safebooru",
     "sankaku",
+    "spectrumnexus",
     "yandere",
 ]
 
