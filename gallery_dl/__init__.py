@@ -34,7 +34,7 @@ def parse_cmdline_options():
     )
     parser.add_argument(
         "-o", "--option",
-        metavar="OPT", action="append",
+        metavar="OPT", action="append", default=[],
         help="option value",
     )
     parser.add_argument(
@@ -45,15 +45,18 @@ def parse_cmdline_options():
     return parser.parse_args()
 
 def main():
-    args = parse_cmdline_options()
     config.load()
+    args = parse_cmdline_options()
     for opt in args.option:
-        key, value = opt.split("=", 1)
-        config.set(key.split("."), value)
-    dlmgr = download.DownloadManager(opts)
+        try:
+            key, value = opt.split("=", 1)
+            config.set(key.split("."), value)
+        except TypeError:
+            pass
+    dlmgr = download.DownloadManager(args)
 
     try:
-        for url in opts.urls:
+        for url in args.urls:
             dlmgr.add(url)
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
