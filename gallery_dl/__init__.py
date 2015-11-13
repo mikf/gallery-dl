@@ -17,7 +17,7 @@ __email__      = "mike_faehrmann@web.de"
 import os
 import sys
 import argparse
-from . import config, download
+from . import config, jobs
 
 def parse_cmdline_options():
     parser = argparse.ArgumentParser(
@@ -33,6 +33,15 @@ def parse_cmdline_options():
         help="destination directory"
     )
     parser.add_argument(
+        "-o", "--option",
+        metavar="OPT", action="append", default=[],
+        help="option value",
+    )
+    parser.add_argument(
+        "--list-keywords", dest="keywords", action="store_true",
+        help="print a list of available keywords",
+    )
+    parser.add_argument(
         "urls",
         nargs="+", metavar="URL",
         help="url to download images from"
@@ -41,11 +50,16 @@ def parse_cmdline_options():
 
 def main():
     config.load()
-    opts = parse_cmdline_options()
-    dlmgr = download.DownloadManager(opts)
-
+    args = parse_cmdline_options()
+    for opt in args.option:
+        try:
+            key, value = opt.split("=", 1)
+            config.set(key.split("."), value)
+        except TypeError:
+            pass
+    jobtype = jobs.KeywordJob if args.keywords else jobs.DownloadJob
     try:
-        for url in opts.urls:
-            dlmgr.add(url)
+        for url in args.urls:
+            jobtype(url).run()
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
