@@ -38,6 +38,10 @@ def parse_cmdline_options():
         help="option value",
     )
     parser.add_argument(
+        "--list-keywords", dest="keywords", action="store_true",
+        help="print a list of available keywords",
+    )
+    parser.add_argument(
         "urls",
         nargs="+", metavar="URL",
         help="url to download images from"
@@ -53,8 +57,9 @@ def main():
             config.set(key.split("."), value)
         except TypeError:
             pass
+    jobtype = jobs.KeywordJob if args.keywords else jobs.DownloadJob
     try:
         for url in args.urls:
-            jobs.DownloadJob(url).run()
+            jobtype(url).run()
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
