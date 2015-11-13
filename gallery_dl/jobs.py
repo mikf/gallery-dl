@@ -113,3 +113,32 @@ class DownloadJob():
         if tries == 0:
             print("\r", end="")
         print("\r\033[1;32m", path, "\033[0m", sep="")
+
+
+class KeywordJob():
+
+    def __init__(self, url):
+        self.extractor, self.info = extractor.find(url)
+        if self.extractor is None:
+            print(url, ": No extractor found", sep="", file=sys.stderr)
+            return
+
+    def run(self):
+        """Execute/Run the download job"""
+        if self.extractor is None:
+            return
+        for msg in self.extractor:
+            if msg[0] == Message.Url:
+                print("Keywords for filenames:")
+                self.print_keywords(msg[2])
+                return
+            elif msg[0] == Message.Directory:
+                print("Keywords for directory names:")
+                self.print_keywords(msg[1])
+
+    @staticmethod
+    def print_keywords(keywords):
+        offset = max(map(len, keywords.keys())) + 1
+        for key, value in sorted(keywords.items()):
+            print(key, ":", " "*(offset-len(key)), value, sep="")
+        print()
