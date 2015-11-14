@@ -16,7 +16,7 @@ import platform
 # --------------------------------------------------------------------
 # public interface
 
-def load(*files):
+def load(*files, strict=False):
     """Load JSON configuration files"""
     configfiles = files or _default_configs
     for conf in configfiles:
@@ -26,6 +26,8 @@ def load(*files):
                 confdict = json.load(file)
             _config.update(confdict)
         except FileNotFoundError:
+            if strict:
+                raise
             continue
         except json.decoder.JSONDecodeError as exception:
             print("Error while loading '", path, "':", sep="", file=sys.stderr)
