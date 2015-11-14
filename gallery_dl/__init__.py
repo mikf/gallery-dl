@@ -24,13 +24,13 @@ def build_cmdline_parser():
         description='Download images from various sources')
     parser.add_argument(
         "-c", "--config",
-        default="~/.config/gallery/config", metavar="CFG",
-        help="alternate configuration file"
+        metavar="CFG", dest="cfgfiles", action="append",
+        help="additional configuration files",
     )
     parser.add_argument(
         "-d", "--dest",
         metavar="DEST",
-        help="destination directory"
+        help="destination directory",
     )
     parser.add_argument(
         "-o", "--option",
@@ -43,7 +43,7 @@ def build_cmdline_parser():
     )
     parser.add_argument(
         "--list-keywords", dest="keywords", action="store_true",
-        help="print a list of available keywords",
+        help="print a list of available keywords for the given URLs",
     )
     parser.add_argument(
         "urls",
@@ -57,6 +57,9 @@ def main():
         config.load()
         parser = build_cmdline_parser()
         args = parser.parse_args()
+
+        if args.cfgfiles:
+            config.load(*args.cfgfiles, strict=True)
 
         if args.dest:
             config.set(("base-directory",), args.dest)
