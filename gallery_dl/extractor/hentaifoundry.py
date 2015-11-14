@@ -36,17 +36,18 @@ class HentaiFoundryExtractor(Extractor):
         self.set_filters(token)
         yield Message.Version, 1
         yield Message.Directory, data
-        for image in self.get_images():
+        for url, image in self.get_images():
             image.update(data)
-            yield Message.Url, image["url"], image
+            yield Message.Url, url, image
 
     def get_images(self):
+        """Yield url and keywords for all images of one artist"""
         num = 1
         while True:
             pos = 0
             url = self.url_base + self.artist + "/page/" + str(num)
             page = self.request(url).text
-            for i in range(25):
+            for _ in range(25):
                 part, pos = text.extract(page, 'thumbTitle"><a href="/pictures/user/', '"', pos)
                 if not part:
                     return
@@ -69,15 +70,17 @@ class HentaiFoundryExtractor(Extractor):
         page = self.request(url).text
         index = text.extract(url, '/', '/', len(self.url_base) + len(self.artist))[0]
         title, pos = text.extract(page, 'Pictures</a> &raquo; <span>', '<')
-        url  , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)
-        return {
-            "url": "http://pictures.hentai-foundry.com" + url,
+        url  , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)#
+        name, ext = os.path.splitext(text.filename_from_url(url))
+        return "http://pictures.hentai-foundry.com" + url, {
             "index": index,
             "title": text.unescape(title),
-            "extension": os.path.splitext(url)[1][1:],
+            "name": name,
+            "extension": ext[1:],
         }
 
     def set_filters(self, token):
+        """Set site-internal filters to show all images"""
         formdata = {
             "YII_CSRF_TOKEN": token,
             "rating_nudity": 3,
@@ -101,8 +104,4 @@ class HentaiFoundryExtractor(Extractor):
             "filter_type": 0,
         }
         self.request("http://www.hentai-foundry.com/site/filters",
-            method="post", data=formdata)
-
-# enterAgree=1
-
-#YII_CSRF_TOKEN=388b659daeab4517ea5ca6d93b9253d4c59a12df
+                     method="post", data=formdata)
