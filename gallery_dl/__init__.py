@@ -19,7 +19,7 @@ import sys
 import argparse
 from . import config, jobs
 
-def parse_cmdline_options():
+def build_cmdline_parser():
     parser = argparse.ArgumentParser(
         description='Download images from various sources')
     parser.add_argument(
@@ -50,12 +50,13 @@ def parse_cmdline_options():
         nargs="*", metavar="URL",
         help="url to download images from"
     )
-    return parser.parse_args()
+    return parser
 
 def main():
     try:
         config.load()
-        args = parse_cmdline_options()
+        parser = build_cmdline_parser()
+        args = parser.parse_args()
 
         for opt in args.option:
             try:
@@ -68,6 +69,8 @@ def main():
             for module_name in extractor.modules:
                 print(module_name)
         else:
+            if not args.urls:
+                parser.error("the following arguments are required: URL")
             jobtype = jobs.KeywordJob if args.keywords else jobs.DownloadJob
             for url in args.urls:
                 jobtype(url).run()
