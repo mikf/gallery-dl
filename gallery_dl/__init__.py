@@ -58,6 +58,9 @@ def main():
         parser = build_cmdline_parser()
         args = parser.parse_args()
 
+        if args.dest:
+            config.set(("base-directory",), args.dest)
+
         for opt in args.option:
             try:
                 key, value = opt.split("=", 1)
