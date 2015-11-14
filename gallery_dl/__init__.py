@@ -19,18 +19,18 @@ import sys
 import argparse
 from . import config, jobs
 
-def parse_cmdline_options():
+def build_cmdline_parser():
     parser = argparse.ArgumentParser(
         description='Download images from various sources')
     parser.add_argument(
         "-c", "--config",
-        default="~/.config/gallery/config", metavar="CFG",
-        help="alternate configuration file"
+        metavar="CFG", dest="cfgfiles", action="append",
+        help="additional configuration files",
     )
     parser.add_argument(
         "-d", "--dest",
         metavar="DEST",
-        help="destination directory"
+        help="destination directory",
     )
     parser.add_argument(
         "-o", "--option",
@@ -38,28 +38,47 @@ def parse_cmdline_options():
         help="option value",
     )
     parser.add_argument(
+        "--list-modules", dest="list_modules", action="store_true",
+        help="print a list of available modules/supported sites",
+    )
+    parser.add_argument(
         "--list-keywords", dest="keywords", action="store_true",
-        help="print a list of available keywords",
+        help="print a list of available keywords for the given URLs",
     )
     parser.add_argument(
         "urls",
-        nargs="+", metavar="URL",
+        nargs="*", metavar="URL",
         help="url to download images from"
     )
-    return parser.parse_args()
+    return parser
 
 def main():
-    config.load()
-    args = parse_cmdline_options()
-    for opt in args.option:
-        try:
-            key, value = opt.split("=", 1)
-            config.set(key.split("."), value)
-        except TypeError:
-            pass
-    jobtype = jobs.KeywordJob if args.keywords else jobs.DownloadJob
     try:
-        for url in args.urls:
-            jobtype(url).run()
+        config.load()
+        parser = build_cmdline_parser()
+        args = parser.parse_args()
+
+        if args.cfgfiles:
+            config.load(*args.cfgfiles, strict=True)
+
+        if args.dest:
+            config.set(("base-directory",), args.dest)
+
+        for opt in args.option:
+            try:
+                key, value = opt.split("=", 1)
+                config.set(key.split("."), value)
+            except TypeError:
+                pass
+
+        if args.list_modules:
+            for module_name in extractor.modules:
+                print(module_name)
+        else:
+            if not args.urls:
+                parser.error("the following arguments are required: URL")
+            jobtype = jobs.KeywordJob if args.keywords else jobs.DownloadJob
+            for url in args.urls:
+                jobtype(url).run()
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
