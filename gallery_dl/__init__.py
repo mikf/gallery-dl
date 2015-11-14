@@ -38,28 +38,38 @@ def parse_cmdline_options():
         help="option value",
     )
     parser.add_argument(
+        "--list-modules", dest="list_modules", action="store_true",
+        help="print a list of available modules/supported sites",
+    )
+    parser.add_argument(
         "--list-keywords", dest="keywords", action="store_true",
         help="print a list of available keywords",
     )
     parser.add_argument(
         "urls",
-        nargs="+", metavar="URL",
+        nargs="*", metavar="URL",
         help="url to download images from"
     )
     return parser.parse_args()
 
 def main():
-    config.load()
-    args = parse_cmdline_options()
-    for opt in args.option:
-        try:
-            key, value = opt.split("=", 1)
-            config.set(key.split("."), value)
-        except TypeError:
-            pass
-    jobtype = jobs.KeywordJob if args.keywords else jobs.DownloadJob
     try:
-        for url in args.urls:
-            jobtype(url).run()
+        config.load()
+        args = parse_cmdline_options()
+
+        for opt in args.option:
+            try:
+                key, value = opt.split("=", 1)
+                config.set(key.split("."), value)
+            except TypeError:
+                pass
+
+        if args.list_modules:
+            for module_name in extractor.modules:
+                print(module_name)
+        else:
+            jobtype = jobs.KeywordJob if args.keywords else jobs.DownloadJob
+            for url in args.urls:
+                jobtype(url).run()
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
