@@ -33,6 +33,7 @@ modules = [
     "konachan",
     "mangapanda",
     "mangareader",
+    "mangashare",
     "mangastream",
     "nhentai",
     "nijie",
