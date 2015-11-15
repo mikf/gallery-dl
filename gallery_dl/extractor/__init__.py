@@ -21,6 +21,7 @@ modules = [
     "danbooru",
     "deviantart",
     "e621",
+    "hbrowse",
     "hentaifoundry",
     "hitomi",
     "imagebam",
