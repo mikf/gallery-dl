@@ -9,7 +9,7 @@
 """Extract images from https://hitomi.la/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, iso639_1
 import os.path
 import string
 
@@ -60,6 +60,7 @@ class HitomiExtractor(Extractor):
         test  , pos = text.extract(page, '<a href="/series/', '', pos)
         if test is not None:
             series, pos = text.extract(page, '.html">', '</a>', pos)
+        lang = lang.capitalize()
         return {
             "category": info["category"],
             "gallery-id": self.gid,
@@ -67,7 +68,8 @@ class HitomiExtractor(Extractor):
             "artist": string.capwords(artist),
             "group": string.capwords(group),
             "type": gtype[1:-1].capitalize(),
-            "lang": lang.capitalize(),
+            "lang": iso639_1.language_to_code(lang),
+            "language": lang,
             "series": string.capwords(series),
         }
 
