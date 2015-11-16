@@ -58,10 +58,8 @@ class ExhentaiExtractor(Extractor):
             urlkey = "origurl"
         for num, image in enumerate(self.get_images(url), 1):
             image.update(data)
-            name, ext = os.path.splitext(text.filename_from_url(image["url"]))
             image["num"] = num
-            image["name"] = name
-            image["extension"] = ext[1:]
+            text.nameext_from_url(image["url"], image)
             if "/fullimg.php" in image[urlkey]:
                 time.sleep(random.uniform(1, 2))
             yield Message.Url, image[urlkey], image

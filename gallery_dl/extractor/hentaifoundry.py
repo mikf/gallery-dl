@@ -70,14 +70,12 @@ class HentaiFoundryExtractor(Extractor):
         page = self.request(url).text
         index = text.extract(url, '/', '/', len(self.url_base) + len(self.artist))[0]
         title, pos = text.extract(page, 'Pictures</a> &raquo; <span>', '<')
-        url  , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)#
-        name, ext = os.path.splitext(text.filename_from_url(url))
-        return "http://pictures.hentai-foundry.com" + url, {
+        url  , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)
+        data = {
             "index": index,
             "title": text.unescape(title),
-            "name": name,
-            "extension": ext[1:],
         }
+        return "http://pictures.hentai-foundry.com" + url, text.nameext_from_url(url, data)
 
     def set_filters(self, token):
         """Set site-internal filters to show all images"""

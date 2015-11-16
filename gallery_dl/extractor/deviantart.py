@@ -85,17 +85,15 @@ class DeviantArtExtractor(AsynchronousExtractor):
                 url   , pos = text.extract(image, ' data-super-img="', '"', pos)
                 width , pos = text.extract(image, ' data-super-width="', '"', pos)
                 height, pos = text.extract(image, ' data-super-height="', '"', pos)
-        name, ext = os.path.splitext(text.filename_from_url(url))
-        return url, {
+        data = {
             "index": index,
             "title": match.group(1),
             "artist": match.group(2),
             "date": match.group(3),
             "width": width,
             "height": height,
-            "name": name,
-            "extension": ext[1:],
         }
+        return url, text.nameext_from_url(url, data)
 
     @staticmethod
     def extract_data(txt, attr, pattern):

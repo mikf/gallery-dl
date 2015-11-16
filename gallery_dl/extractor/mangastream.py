@@ -40,11 +40,8 @@ class MangaStreamExtractor(AsynchronousExtractor):
             if next_url:
                 page = self.request(next_url).text
             next_url, image_url = self.get_page_metadata(page)
-            filename = text.unquote(text.filename_from_url(image_url))
-            name, ext = os.path.splitext(filename)
+            text.nameext_from_url(image_url, data)
             data["page"] = i+1
-            data["name"] = name
-            data["extension"] = ext[1:]
             yield Message.Url, image_url, data.copy()
 
     def get_job_metadata(self, page):

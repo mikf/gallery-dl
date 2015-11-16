@@ -35,12 +35,8 @@ class ImgthExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, data
         for num, url in enumerate(self.get_images(page), 1):
-            name, ext = os.path.splitext(text.filename_from_url(url))
             data["num"] = num
-            data["name"] = name
-            data["extension"] = ext[1:]
-            yield Message.Url, url, data
-
+            yield Message.Url, url, text.nameext_from_url(url, data)
     def get_images(self, page):
         pnum = 0
         while True:

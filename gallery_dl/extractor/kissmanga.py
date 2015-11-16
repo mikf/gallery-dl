@@ -38,12 +38,8 @@ class KissmangaExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, data
         for num, url in enumerate(imgs, 1):
-            filename = text.unquote(text.filename_from_url(url))
-            name, ext = os.path.splitext(filename)
             data["page"] = num
-            data["name"] = name
-            data["extension"] = ext[1:]
-            yield Message.Url, url, data
+            yield Message.Url, url, text.nameext_from_url(url, data)
 
     @staticmethod
     def get_job_metadata(page):

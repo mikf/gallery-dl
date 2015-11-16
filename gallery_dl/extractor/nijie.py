@@ -67,10 +67,8 @@ class NijieExtractor(AsynchronousExtractor):
         page = self.request(self.popup_url + image_id).text
         matches = re.findall('<img src="([^"]+)"', page)
         for index, url in enumerate(matches):
-            yield "https:" + url, {
+            yield "https:" + url, text.nameext_from_url(url, {
                 "count": len(matches),
                 "index": index,
                 "image-id": image_id,
-                "name" : text.filename_from_url(url),
-                "extension": url[url.rfind(".")+1:],
-            }
+            })

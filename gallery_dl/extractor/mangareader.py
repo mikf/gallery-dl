@@ -91,12 +91,7 @@ class MangaReaderExtractor(AsynchronousExtractor):
             width , pos = extr(page, '<img id="img" width="', '"', pos)
             height, pos = extr(page, ' height="', '"', pos)
         image, pos = extr(page, ' src="', '"', pos)
-        filename = text.unquote(text.filename_from_url(image))
-        name, ext = os.path.splitext(filename)
-
-        return self.url_base + url, image, {
+        return self.url_base + url, image, text.nameext_from_url(image, {
             "width": width,
             "height": height,
-            "name": name,
-            "extension": ext[1:],
-        }
+        })

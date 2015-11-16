@@ -41,10 +41,8 @@ class SpectrumNexusExtractor(AsynchronousExtractor):
         count = int(data["count"])
         for i in range(1, count+1):
             url = self.get_image_url(page)
-            name, ext = os.path.splitext(text.filename_from_url(url))
+            text.nameext_from_url(url, data)
             data["page"] = i
-            data["name"] = name
-            data["extension"] = ext[1:]
             yield Message.Url, url, data.copy()
             if i < count:
                 params["page"] += 1
