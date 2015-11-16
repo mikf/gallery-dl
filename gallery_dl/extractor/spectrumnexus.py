@@ -19,6 +19,7 @@ info = {
     "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
     "pattern": [
         r"(?:https?://)?(view\.thespectrum\.net/series/[^\.]+.html)\?ch=Chapter\+(\d+)",
+        r"(?:https?://)?(view\.thespectrum\.net/series/[^/]+-chapter-(\d+)\.html)",
     ],
 }
 
