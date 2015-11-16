@@ -28,6 +28,15 @@ def filename_from_url(url):
     except ValueError:
         return url
 
+def nameext_from_url(url, data=None):
+    """Extract the last part of an url and fill keywords of 'data' accordingly"""
+    if data is None:
+        data = {}
+    data["filename"] = unquote(filename_from_url(url))
+    data["name"], ext = os.path.splitext(data["filename"])
+    data["extension"] = ext[1:]
+    return data
+
 def clean_path_windows(path):
     """Remove illegal characters from a path-segment (Windows)"""
     try:
