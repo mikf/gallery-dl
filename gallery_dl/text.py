@@ -34,7 +34,7 @@ def nameext_from_url(url, data=None):
         data = {}
     data["filename"] = unquote(filename_from_url(url))
     data["name"], ext = os.path.splitext(data["filename"])
-    data["extension"] = ext[1:]
+    data["extension"] = ext[1:].lower()
     return data
 
 def clean_path_windows(path):
