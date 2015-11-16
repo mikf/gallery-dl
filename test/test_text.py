@@ -36,6 +36,22 @@ class TestText(unittest.TestCase):
         for case in cases:
             self.assertEqual(text.filename_from_url(case), result)
 
+    def test_nameext_from_url(self):
+        cases = (
+            "http://example.org/v2/filename.ext",
+            "http://example.org/v2/filename.ext?param=value#fragment",
+            "example.org/filename.ext",
+            "/filename.ext",
+            "filename.ext",
+        )
+        result = {
+            "filename" : "filename.ext",
+            "name"     : "filename",
+            "extension": "ext",
+        }
+        for case in cases:
+            self.assertEqual(text.nameext_from_url(case), result)
+
     def test_clean_path(self):
         cases = {
             "Hello World." : ("Hello World.", "Hello World."),
