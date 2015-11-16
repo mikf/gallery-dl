@@ -34,12 +34,10 @@ class MangaShareExtractor(AsynchronousExtractor):
         page = self.request(self.url_fmt.format(self.part, 1)).text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
-        yield Message.Directory, data
+        yield Message.Directory, data.copy()
         for i, url in zip(range(int(data["count"])), (self.get_image_urls(page))):
-            name, ext = os.path.splitext(text.filename_from_url(url))
-            data["name"] = name
-            data["extension"] = ext[1:]
             data["page"] = i+1
+            text.nameext_from_url(url, data)
             yield Message.Url, url, data.copy()
 
     @staticmethod

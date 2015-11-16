@@ -44,14 +44,11 @@ class BatotoExtractor(AsynchronousExtractor):
         page = self.request(self.url, params=params).text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
-        yield Message.Directory, data
+        yield Message.Directory, data.copy()
         for i in range(int(data["count"])):
             next_url, image_url = self.get_page_urls(page)
-            filename = text.unquote(text.filename_from_url(image_url))
-            name, ext = os.path.splitext(filename)
+            text.nameext_from_url(image_url, data)
             data["page"] = i+1
-            data["name"] = name
-            data["extension"] = ext[1:]
             yield Message.Url, image_url, data.copy()
             if next_url:
                 params["p"] += 1

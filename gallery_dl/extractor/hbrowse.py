@@ -36,10 +36,8 @@ class HbrowseExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, data
         for num, url in enumerate(self.get_image_urls(page), 1):
-            name, ext = os.path.splitext(text.filename_from_url(url))
-            data["name"] = name
-            data["extension"] = ext[1:]
             data["num"] = num
+            text.nameext_from_url(url, data)
             yield Message.Url, url, data
 
     def get_job_metadata(self, page):

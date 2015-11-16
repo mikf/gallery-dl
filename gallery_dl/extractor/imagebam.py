@@ -37,11 +37,8 @@ class ImagebamExtractor(AsynchronousExtractor):
         yield Message.Directory, data
         for image_url, image_id in self.get_images(data["first-url"]):
             data["id"] = image_id
-            data["filename"] = text.unquote(text.filename_from_url(image_url))
-            name, ext = os.path.splitext(data["filename"])
             data["num"] += 1
-            data["name"] = name
-            data["extension"] = ext[1:]
+            text.nameext_from_url(image_url, data)
             yield Message.Url, image_url, data.copy()
 
     def get_job_metadata(self):

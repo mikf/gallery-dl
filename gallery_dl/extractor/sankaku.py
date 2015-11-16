@@ -76,14 +76,11 @@ class SankakuExtractor(AsynchronousExtractor):
         image_url, pos = text.extract(page, '<li>Original: <a href="', '"')
         width    , pos = text.extract(page, '>', 'x', pos)
         height   , pos = text.extract(page, '', ' ', pos)
-        filename = text.filename_from_url(image_url)
-        name, ext = os.path.splitext(filename)
-        return {
+        data = text.nameext_from_url(image_url, {
             "id": image_id,
             "file-url": "https:" + image_url,
             "width": width,
             "height": height,
-            "md5": name,
-            "name": name,
-            "extension": ext[1:],
-        }
+        })
+        data["md5"] = data["name"]
+        return data

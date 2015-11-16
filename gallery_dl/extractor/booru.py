@@ -59,13 +59,7 @@ class BooruExtractor(Extractor):
     def get_file_metadata(self, data):
         """Collect metadata for a downloadable file"""
         data["category"] = self.info["category"]
-        data["filename"] = text.unquote(
-            text.filename_from_url(self.get_file_url(data))
-        )
-        name, ext = os.path.splitext(data["filename"])
-        data["name"] = name
-        data["extension"] = ext[1:]
-        return data
+        return text.nameext_from_url(self.get_file_url(data), data)
 
     def get_file_url(self, data):
         """Extract download-url from 'data'"""
