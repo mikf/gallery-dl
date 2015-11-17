@@ -9,7 +9,7 @@
 """Extract images from galleries at http://exhentai.org/"""
 
 from .common import Extractor, Message
-from .. import config, text
+from .. import config, text, iso639_1
 import os.path
 import time
 import random
@@ -80,6 +80,10 @@ class ExhentaiExtractor(Extractor):
             ("count"   , '>Length:</td><td class="gdt2">', ' '),
             ("url"     , 'hentai.org/s/', '"'),
         ), values=data)
+        pos = data["language"].find(" ")
+        if pos != -1:
+            data["language"] = data["language"][:pos]
+        data["lang"] = iso639_1.language_to_code(data["language"])
         url = "http://exhentai.org/s/" + data["url"]
         del data["url"]
         return data, url
