@@ -93,15 +93,16 @@ class ExhentaiExtractor(Extractor):
         time.sleep(random.uniform(3, 6))
         page = self.request(url).text
         data, pos = text.extract_all(page, (
-            (None      , '<div id="i3"><a onclick="return load_image(', ''),
-            ("imgkey"  , "'", "'"),
-            ("url"     , '<img id="img" src="', '"'),
-            ("title"   , '<div id="i4"><div>', ' :: '),
-            ("origurl" , 'http://exhentai.org/fullimg.php', '"'),
-            ("gid"     , 'var gid=',  ';'),
-            ("startkey", 'var startkey="', '";'),
-            ("showkey" , 'var showkey="', '";'),
+            (None         , '<div id="i3"><a onclick="return load_image(', ''),
+            ("imgkey-next", "'", "'"),
+            ("url"        , '<img id="img" src="', '"'),
+            ("title"      , '<div id="i4"><div>', ' :: '),
+            ("origurl"    , 'http://exhentai.org/fullimg.php', '"'),
+            ("gid"        , 'var gid=',  ';'),
+            ("startkey"   , 'var startkey="', '";'),
+            ("showkey"    , 'var showkey="', '";'),
         ))
+        data["imgkey"] = data["startkey"]
         if data["origurl"]:
             data["origurl"] = "http://exhentai.org/fullimg.php" + text.unescape(data["origurl"])
         else:
@@ -112,22 +113,23 @@ class ExhentaiExtractor(Extractor):
             "method" : "showpage",
             "page"   : 2,
             "gid"    : int(data["gid"]),
-            "imgkey" : data["imgkey"],
+            "imgkey" : data["imgkey-next"],
             "showkey": data["showkey"],
         }
         while True:
+            if data["imgkey"] == data["imgkey-next"]:
+                return
             time.sleep(random.uniform(3, 6))
             page = self.session.post(self.api_url, json=request).json()
-            data["imgkey"] , pos = text.extract(page["i3"], "'", "'")
-            data["url"]    , pos = text.extract(page["i3"], '<img id="img" src="', '"', pos)
-            data["title"]  , pos = text.extract(page["i" ], '<div>', ' :: ')
-            data["origurl"], pos = text.extract(page["i7"], '<a href="', '"')
+            data["imgkey"] = data["imgkey-next"]
+            data["imgkey-next"], pos = text.extract(page["i3"], "'", "'")
+            data["url"]        , pos = text.extract(page["i3"], '<img id="img" src="', '"', pos)
+            data["title"]      , pos = text.extract(page["i" ], '<div>', ' :: ')
+            data["origurl"]    , pos = text.extract(page["i7"], '<a href="', '"')
             if data["origurl"]:
                 data["origurl"] = text.unescape(data["origurl"])
             else:
                 data["origurl"] = data["url"]
             yield data
-            if request["imgkey"] == data["imgkey"]:
-                return
-            request["imgkey"] = data["imgkey"]
+            request["imgkey"] = data["imgkey-next"]
             request["page"] += 1
