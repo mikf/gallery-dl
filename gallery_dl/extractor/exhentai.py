@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import config, text, iso639_1
-import os.path
 import time
 import random
 
@@ -41,6 +40,10 @@ class ExhentaiExtractor(Extractor):
         cookies = config.get(("extractor", "exhentai", "cookies"), {})
         for key, value in cookies.items():
             self.session.cookies.set(key, value, domain=".exhentai.org", path="/")
+        self.wait_min = config.interpolate(("extractor", "exhentai", "wait-min"), 3)
+        self.wait_max = config.interpolate(("extractor", "exhentai", "wait-max"), 6)
+        if self.wait_max < self.wait_min:
+            self.wait_max = self.wait_min
 
     def items(self):
         yield Message.Version, 1
@@ -54,14 +57,14 @@ class ExhentaiExtractor(Extractor):
         yield Message.Directory, data
 
         urlkey = "url"
-        if config.get(("extractor", "exhentai", "download-original"), True):
+        if config.interpolate(("extractor", "exhentai", "download-original"), True):
             urlkey = "origurl"
         for num, image in enumerate(self.get_images(url), 1):
             image.update(data)
             image["num"] = num
             text.nameext_from_url(image["url"], image)
             if "/fullimg.php" in image[urlkey]:
-                time.sleep(random.uniform(1, 2))
+                self.wait((1, 2))
             yield Message.Url, image[urlkey], image
 
     def get_job_metadata(self, page):
@@ -90,7 +93,7 @@ class ExhentaiExtractor(Extractor):
 
     def get_images(self, url):
         """Collect url and metadata for all images in this gallery"""
-        time.sleep(random.uniform(3, 6))
+        self.wait()
         page = self.request(url).text
         data, pos = text.extract_all(page, (
             (None         , '<div id="i3"><a onclick="return load_image(', ''),
@@ -119,7 +122,7 @@ class ExhentaiExtractor(Extractor):
         while True:
             if data["imgkey"] == data["imgkey-next"]:
                 return
-            time.sleep(random.uniform(3, 6))
+            self.wait()
             page = self.session.post(self.api_url, json=request).json()
             data["imgkey"] = data["imgkey-next"]
             data["imgkey-next"], pos = text.extract(page["i3"], "'", "'")
@@ -133,3 +136,11 @@ class ExhentaiExtractor(Extractor):
             yield data
             request["imgkey"] = data["imgkey-next"]
             request["page"] += 1
+
+    def wait(self, waittime=None):
+        """Wait for a randomly chosen amount of seconds"""
+        if not waittime:
+            waittime = random.uniform(self.wait_min, self.wait_max)
+        else:
+            waittime = random.uniform(*waittime)
+        time.sleep(waittime)
