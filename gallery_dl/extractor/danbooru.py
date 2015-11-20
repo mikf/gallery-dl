@@ -9,19 +9,29 @@
 """Extract image-urls from https://danbooru.donmai.us/"""
 
 from .booru import JSONBooruExtractor
+from .. import text
 
-info = {
-    "category": "danbooru",
-    "extractor": "DanbooruExtractor",
-    "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{id}_{md5}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts\?(?:utf8=%E2%9C%93&)?tags=([^&]+).*",
-    ],
-}
+class DanbooruTagExtractor(JSONBooruExtractor):
+    """Extract images bsaed on search-tags"""
 
-class DanbooruExtractor(JSONBooruExtractor):
+    info = {
+        "category": "danbooru",
+        "directory": ["{category}", "{tags}"],
+        "filename": "{category}_{id}_{md5}.{extension}",
+    }
+    pattern = [
+        r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts\?(?:utf8=%E2%9C%93&)?tags=([^&]+)",
+    ]
 
     def __init__(self, match):
-        JSONBooruExtractor.__init__(self, match, info)
+        JSONBooruExtractor.__init__(self)
         self.api_url = "https://danbooru.donmai.us/posts.json"
+        self.tags = text.unquote(match.group(1))
+        self.params = {"tags": self.tags}
+
+    def get_job_metadata(self):
+        """Collect metadata for extractor-job"""
+        return {
+            "category": self.info["category"],
+            "tags": self.tags,
+        }
