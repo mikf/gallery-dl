@@ -12,20 +12,17 @@ from .common import Extractor, Message
 from .. import text
 import xml.etree.ElementTree as ET
 import json
-import os.path
 import urllib.parse
 
 class BooruExtractor(Extractor):
 
+    info = {}
     api_url = ""
 
-    def __init__(self, match, info):
+    def __init__(self):
         Extractor.__init__(self)
-        self.info = info
-        self.tags = text.unquote(match.group(1))
         self.page = "page"
-        self.params = {"tags": self.tags}
-        self.headers = {}
+        self.headers = self.params = {}
 
     def items(self):
         yield Message.Version, 1
@@ -51,9 +48,9 @@ class BooruExtractor(Extractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
+        # Override this method in derived classes
         return {
             "category": self.info["category"],
-            "tags": self.tags
         }
 
     def get_file_metadata(self, data):
