@@ -50,8 +50,8 @@ def find(url):
     for pattern, info, klass in _list_patterns():
         match = re.match(pattern, url)
         if match:
-            return klass(match), info
-    return None, None
+            return klass(match)
+    return None
 
 # --------------------------------------------------------------------
 # internals
@@ -84,6 +84,6 @@ def _get_classes(module):
     """Return a list of all extractor classes in a module"""
     return [
         klass for klass in module.__dict__.values() if (
-            hasattr(klass, "info") and klass.__module__ == module.__name__
+            hasattr(klass, "pattern") and klass.__module__ == module.__name__
         )
     ]
