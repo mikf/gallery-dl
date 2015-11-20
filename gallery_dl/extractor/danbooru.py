@@ -8,73 +8,21 @@
 
 """Extract image-urls from https://danbooru.donmai.us/"""
 
-from .booru import JSONBooruExtractor
-from .. import text
+from . import booru
 
-class DanbooruTagExtractor(JSONBooruExtractor):
-    """Extract images bsaed on search-tags"""
+class DanbooruExtractor(booru.JSONBooruExtractor):
+    """Base class for danbooru extractors"""
+    category = "danbooru"
+    api_url = "https://danbooru.donmai.us/posts.json"
 
-    info = {
-        "category": "danbooru",
-        "directory": ["{category}", "{tags}"],
-        "filename": "{category}_{id}_{md5}.{extension}",
-    }
-    pattern = [
-        r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts\?(?:utf8=%E2%9C%93&)?tags=([^&]+)",
-    ]
+class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
+    """Extract images from danbooru based on search-tags"""
+    pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts\?(?:utf8=%E2%9C%93&)?tags=([^&]+)"]
 
-    def __init__(self, match):
-        JSONBooruExtractor.__init__(self)
-        self.api_url = "https://danbooru.donmai.us/posts.json"
-        self.tags = text.unquote(match.group(1))
-        self.params = {"tags": self.tags}
+class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
+    """Extract image-pools from danbooru"""
+    pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/pools/(\d+)"]
 
-    def get_job_metadata(self):
-        """Collect metadata for extractor-job"""
-        return {
-            "category": self.info["category"],
-            "tags": self.tags,
-        }
-
-class DanbooruPoolExtractor(JSONBooruExtractor):
-    """Extract image-pools"""
-
-    info = {
-        "category": "danbooru",
-        "directory": ["{category}", "pool", "{pool}"],
-        "filename": "{category}_{id}_{md5}.{extension}",
-    }
-    pattern = [
-        r"(?:https?://)?(?:www\.)?danbooru.donmai.us/pools/(\d+)",
-    ]
-
-    def __init__(self, match):
-        JSONBooruExtractor.__init__(self)
-        self.api_url = "https://danbooru.donmai.us/posts.json"
-        self.pool = match.group(1)
-        self.params = {"tags": "pool:" + self.pool}
-
-    def get_job_metadata(self):
-        """Collect metadata for extractor-job"""
-        return {
-            "category": self.info["category"],
-            "pool": self.pool,
-        }
-
-class DanbooruPostExtractor(JSONBooruExtractor):
-    """Extract single images"""
-
-    info = {
-        "category": "danbooru",
-        "directory": ["{category}"],
-        "filename": "{category}_{id}_{md5}.{extension}",
-    }
-    pattern = [
-        r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts/(\d+)",
-    ]
-
-    def __init__(self, match):
-        JSONBooruExtractor.__init__(self)
-        self.api_url = "https://danbooru.donmai.us/posts.json"
-        self.post = match.group(1)
-        self.params = {"tags": "id:" + self.post}
+class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
+    """Extract single images from danbooru"""
+    pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts/(\d+)"]
