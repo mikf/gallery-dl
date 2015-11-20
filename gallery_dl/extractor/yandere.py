@@ -8,20 +8,21 @@
 
 """Extract image-urls from https://yande.re/"""
 
-from .booru import JSONBooruExtractor
+from . import booru
 
-info = {
-    "category": "yandere",
-    "extractor": "YandereExtractor",
-    "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{id}_{md5}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?yande\.re/post\?tags=([^&]+).*",
-    ],
-}
+class YandereExtractor(booru.JSONBooruExtractor):
+    """Base class for yandere extractors"""
+    category = "yandere"
+    api_url = "https://yande.re/post.json"
 
-class YandereExtractor(JSONBooruExtractor):
+class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
+    """Extract images from yandere based on search-tags"""
+    pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post\?tags=([^&]+)"]
 
-    def __init__(self, match):
-        JSONBooruExtractor.__init__(self, match, info)
-        self.api_url = "https://yande.re/post.json"
+class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
+    """Extract image-pools from yandere"""
+    pattern = [r"(?:https?://)?(?:www\.)?yande.re/pool/show/(\d+)"]
+
+class YanderePostExtractor(YandereExtractor, booru.BooruPostExtractor):
+    """Extract single images from yandere"""
+    pattern = [r"(?:https?://)?(?:www\.)?yande.re/post/show/(\d+)"]
