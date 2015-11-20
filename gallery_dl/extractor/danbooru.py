@@ -60,3 +60,21 @@ class DanbooruPoolExtractor(JSONBooruExtractor):
             "category": self.info["category"],
             "pool": self.pool,
         }
+
+class DanbooruPostExtractor(JSONBooruExtractor):
+    """Extract single images"""
+
+    info = {
+        "category": "danbooru",
+        "directory": ["{category}"],
+        "filename": "{category}_{id}_{md5}.{extension}",
+    }
+    pattern = [
+        r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts/(\d+)",
+    ]
+
+    def __init__(self, match):
+        JSONBooruExtractor.__init__(self)
+        self.api_url = "https://danbooru.donmai.us/posts.json"
+        self.post = match.group(1)
+        self.params = {"tags": "id:" + self.post}
