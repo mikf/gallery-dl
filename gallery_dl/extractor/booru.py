@@ -17,13 +17,15 @@ import urllib.parse
 class BooruExtractor(Extractor):
 
     info = {}
+    params = {"limit": 50}
+    headers = {}
+    page = "page"
     api_url = ""
+    category = ""
 
     def __init__(self):
         Extractor.__init__(self)
-        self.page = "page"
         self.params = {"limit": 50}
-        self.headers = {}
 
     def items(self):
         yield Message.Version, 1
