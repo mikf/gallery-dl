@@ -10,23 +10,14 @@
 
 from .chan import ChanExtractor
 
-info = {
-    "category": "4chan",
-    "extractor": "FourChanExtractor",
-    "directory": ["{category}", "{board}-{thread}"],
-    "filename": "{tim}-{filename}{ext}",
-    "pattern": [
-        r"(?:https?://)?boards\.4chan\.org/([^/]+)/thread/(\d+).*",
-    ],
-}
-
 class FourChanExtractor(ChanExtractor):
 
+    category = "4chan"
+    pattern = [r"(?:https?://)?boards\.4chan\.org/([^/]+)/thread/(\d+)"]
     api_url = "https://a.4cdn.org/{board}/thread/{thread}.json"
     file_url = "https://i.4cdn.org/{board}/{tim}{ext}"
 
     def __init__(self, match):
         ChanExtractor.__init__(
-            self, info["category"],
-            match.group(1), match.group(2)
+            self, match.group(1), match.group(2)
         )
