@@ -10,20 +10,13 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text
-import os.path
-
-info = {
-    "category": "sankaku",
-    "extractor": "SankakuExtractor",
-    "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{id}_{md5}.{extension}",
-    "pattern": [
-        r"(?:https?://)?chan\.sankakucomplex\.com/\?tags=([^&]+)",
-    ],
-}
 
 class SankakuExtractor(AsynchronousExtractor):
 
+    category = "sankaku"
+    directory_fmt = ["{category}", "{tags}"]
+    filename_fmt = "{category}_{id}_{md5}.{extension}"
+    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/\?tags=([^&]+)"]
     url = "https://chan.sankakucomplex.com/"
 
     def __init__(self, match):
@@ -45,7 +38,7 @@ class SankakuExtractor(AsynchronousExtractor):
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         return {
-            "category": info["category"],
+            "category": self.category,
             "tags": self.tags,
         }
 

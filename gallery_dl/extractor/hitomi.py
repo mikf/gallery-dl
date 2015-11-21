@@ -10,20 +10,14 @@
 
 from .common import Extractor, Message
 from .. import text, iso639_1
-import os.path
 import string
 
-info = {
-    "category": "hitomi",
-    "extractor": "HitomiExtractor",
-    "directory": ["{category}", "{gallery-id} {title}"],
-    "filename": "{category}_{gallery-id}_{num:>03}_{name}.{extension}",
-    "pattern": [
-        r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)\.html",
-    ],
-}
-
 class HitomiExtractor(Extractor):
+
+    category = "hitomi"
+    directory_fmt = ["{category}", "{gallery-id} {title}"]
+    filename_fmt = "{category}_{gallery-id}_{num:>03}_{name}.{extension}"
+    pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)\.html"]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -62,7 +56,7 @@ class HitomiExtractor(Extractor):
             series, pos = text.extract(page, '.html">', '</a>', pos)
         lang = lang.capitalize()
         return {
-            "category": info["category"],
+            "category": self.category,
             "gallery-id": self.gid,
             "title": title,
             "artist": string.capwords(artist),

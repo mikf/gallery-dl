@@ -13,13 +13,15 @@ from .. import text
 
 class ChanExtractor(Extractor):
 
+    directory_fmt = ["{category}", "{board}-{thread}"]
+    filename_fmt = "{tim}-{filename}{ext}"
     api_url = ""
     file_url = ""
 
-    def __init__(self, category, board, thread):
+    def __init__(self, board, thread):
         Extractor.__init__(self)
         self.metadata = {
-            "category": category,
+            "category": self.category,
             "board": board,
             "thread": thread,
         }
