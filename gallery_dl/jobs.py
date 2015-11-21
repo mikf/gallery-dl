@@ -14,7 +14,6 @@ from .extractor.common import Message
 class DownloadJob():
 
     def __init__(self, url):
-        # self.extractor, self.info = extractor.find(url)
         self.extractor = extractor.find(url)
         if self.extractor is None:
             print(url, ": No extractor found", sep="", file=sys.stderr)
@@ -119,7 +118,6 @@ class DownloadJob():
 class KeywordJob():
 
     def __init__(self, url):
-        # self.extractor, self.info = extractor.find(url)
         self.extractor = extractor.find(url)
         if self.extractor is None:
             print(url, ": No extractor found", sep="", file=sys.stderr)
