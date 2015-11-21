@@ -47,7 +47,7 @@ modules = [
 
 def find(url):
     """Find extractor suitable for handling the given url"""
-    for pattern, info, klass in _list_patterns():
+    for pattern, klass in _list_patterns():
         match = re.match(pattern, url)
         if match:
             return klass(match)
@@ -66,19 +66,11 @@ def _list_patterns():
 
     for module_name in _module_iter:
         module = importlib.import_module("."+module_name, __package__)
-        try:
-            klass = getattr(module, module.info["extractor"])
-            userpatterns = config.get(("extractor", module_name, "pattern"), default=[])
-            for pattern in userpatterns + module.info["pattern"]:
-                etuple = (pattern, module.info, klass)
+        for klass in _get_classes(module):
+            for pattern in klass.pattern:
+                etuple = (pattern, klass)
                 _cache.append(etuple)
                 yield etuple
-        except AttributeError:
-            for klass in _get_classes(module):
-                for pattern in klass.pattern:
-                    etuple = (pattern, klass.info, klass)
-                    _cache.append(etuple)
-                    yield etuple
 
 def _get_classes(module):
     """Return a list of all extractor classes in a module"""
