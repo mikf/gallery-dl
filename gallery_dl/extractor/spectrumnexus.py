@@ -10,20 +10,16 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text
-import os.path
-
-info = {
-    "category": "spectrumnexus",
-    "extractor": "SpectrumNexusExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03}"],
-    "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(view\.thespectrum\.net/series/[^\.]+.html)\?ch=Chapter\+(\d+)",
-        r"(?:https?://)?(view\.thespectrum\.net/series/[^/]+-chapter-(\d+)\.html)",
-    ],
-}
 
 class SpectrumNexusExtractor(AsynchronousExtractor):
+
+    category = "spectrumnexus"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]
+    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    pattern = [
+        r"(?:https?://)?(view\.thespectrum\.net/series/[^\.]+.html)\?ch=Chapter\+(\d+)",
+        r"(?:https?://)?(view\.thespectrum\.net/series/[^/]+-chapter-(\d+)\.html)",
+    ]
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
@@ -52,7 +48,7 @@ class SpectrumNexusExtractor(AsynchronousExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category": info["category"],
+            "category": self.category,
             "chapter": self.chapter,
         }
         return text.extract_all(page, (

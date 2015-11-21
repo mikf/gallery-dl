@@ -8,20 +8,21 @@
 
 """Extract image-urls from https://danbooru.donmai.us/"""
 
-from .booru import JSONBooruExtractor
+from . import booru
 
-info = {
-    "category": "danbooru",
-    "extractor": "DanbooruExtractor",
-    "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{id}_{md5}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts\?(?:utf8=%E2%9C%93&)?tags=([^&]+).*",
-    ],
-}
+class DanbooruExtractor(booru.JSONBooruExtractor):
+    """Base class for danbooru extractors"""
+    category = "danbooru"
+    api_url = "https://danbooru.donmai.us/posts.json"
 
-class DanbooruExtractor(JSONBooruExtractor):
+class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
+    """Extract images from danbooru based on search-tags"""
+    pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts\?(?:utf8=%E2%9C%93&)?tags=([^&]+)"]
 
-    def __init__(self, match):
-        JSONBooruExtractor.__init__(self, match, info)
-        self.api_url = "https://danbooru.donmai.us/posts.json"
+class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
+    """Extract image-pools from danbooru"""
+    pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/pools/(\d+)"]
+
+class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
+    """Extract single images from danbooru"""
+    pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts/(\d+)"]

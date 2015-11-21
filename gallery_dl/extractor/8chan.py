@@ -10,23 +10,14 @@
 
 from .chan import ChanExtractor
 
-info = {
-    "category": "8chan",
-    "extractor": "InfinityChanExtractor",
-    "directory": ["{category}", "{board}-{thread}"],
-    "filename": "{tim}-{filename}{ext}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?8ch\.net/([^/]+)/res/(\d+).*",
-    ],
-}
-
 class InfinityChanExtractor(ChanExtractor):
 
+    category = "8chan"
+    pattern = [r"(?:https?://)?(?:www\.)?8ch\.net/([^/]+)/res/(\d+)"]
     api_url = "https://8ch.net/{board}/res/{thread}.json"
     file_url = "https://8ch.net/{board}/src/{tim}{ext}"
 
     def __init__(self, match):
         ChanExtractor.__init__(
-            self, info["category"],
-            match.group(1), match.group(2)
+            self, match.group(1), match.group(2)
         )

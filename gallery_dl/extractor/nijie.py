@@ -12,18 +12,12 @@ from .common import AsynchronousExtractor, Message
 from .. import config, text
 import re
 
-info = {
-    "category": "nijie",
-    "extractor": "NijieExtractor",
-    "directory": ["{category}", "{artist-id}"],
-    "filename": "{category}_{artist-id}_{image-id}_p{index:>02}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?nijie\.info/members(?:_illust)?\.php\?id=(\d+)",
-    ],
-}
-
 class NijieExtractor(AsynchronousExtractor):
 
+    category = "nijie"
+    directory_fmt = ["{category}", "{artist-id}"]
+    filename_fmt = "{category}_{artist-id}_{image-id}_p{index:>02}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?nijie\.info/members(?:_illust)?\.php\?id=(\d+)"]
     popup_url = "https://nijie.info/view_popup.php?id="
 
     def __init__(self, match):
@@ -37,7 +31,7 @@ class NijieExtractor(AsynchronousExtractor):
         self.session.cookies["R18"] = "1"
         self.session.cookies["nijie_referer"] = "nijie.info"
         self.session.cookies.update(
-            config.get(("extractor", info["category"], "cookies"))
+            config.get(("extractor", self.category, "cookies"))
         )
 
     def items(self):
@@ -52,7 +46,7 @@ class NijieExtractor(AsynchronousExtractor):
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         return {
-            "category": info["category"],
+            "category": self.category,
             "artist-id": self.artist_id,
         }
 

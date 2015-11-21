@@ -10,21 +10,14 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text, iso639_1
-import os.path
 import re
-
-info = {
-    "category": "batoto",
-    "extractor": "BatotoExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03} - {title}"],
-    "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)",
-    ],
-}
 
 class BatotoExtractor(AsynchronousExtractor):
 
+    category = "batoto"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
+    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)"]
     url = "https://bato.to/areader"
 
     def __init__(self, match):
@@ -68,7 +61,7 @@ class BatotoExtractor(AsynchronousExtractor):
         manga, pos = extr(page, "document.title = '", " - ", pos)
         match = re.match(r"(Vol.(\d+) )?Ch.(\d+)([^:]*)(: (.+))?", cinfo)
         return {
-            "category": info["category"],
+            "category": self.category,
             "token": self.token,
             "manga": manga,
             "volume": match.group(2) or "",

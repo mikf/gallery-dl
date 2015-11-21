@@ -12,20 +12,20 @@ from .common import Extractor, Message
 from .. import text
 import xml.etree.ElementTree as ET
 import json
-import os.path
 import urllib.parse
 
 class BooruExtractor(Extractor):
 
+    info = {}
+    headers = {}
+    page = "page"
     api_url = ""
+    category = ""
 
-    def __init__(self, match, info):
+    def __init__(self):
         Extractor.__init__(self)
-        self.info = info
-        self.tags = text.unquote(match.group(1))
-        self.page = "page"
-        self.params = {"tags": self.tags}
-        self.headers = {}
+        self.params = {"limit": 50}
+        self.setup()
 
     def items(self):
         yield Message.Version, 1
@@ -40,6 +40,9 @@ class BooruExtractor(Extractor):
     def items_impl(self):
         pass
 
+    def setup(self):
+        pass
+
     def update_page(self, reset=False):
         """Update the value of the 'page' parameter"""
         # Override this method in derived classes if necessary.
@@ -51,14 +54,14 @@ class BooruExtractor(Extractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
+        # Override this method in derived classes
         return {
-            "category": self.info["category"],
-            "tags": self.tags
+            "category": self.category,
         }
 
     def get_file_metadata(self, data):
         """Collect metadata for a downloadable file"""
-        data["category"] = self.info["category"]
+        data["category"] = self.category
         return text.nameext_from_url(self.get_file_url(data), data)
 
     def get_file_url(self, data):
@@ -78,10 +81,10 @@ class JSONBooruExtractor(BooruExtractor):
                 self.request(self.api_url, verify=True, params=self.params,
                              headers=self.headers).text
             )
-            if len(images) == 0:
-                return
             for data in images:
                 yield data
+            if len(images) < self.params["limit"]:
+                return
             self.update_page()
 
 
@@ -93,8 +96,56 @@ class XMLBooruExtractor(BooruExtractor):
             root = ET.fromstring(
                 self.request(self.api_url, verify=True, params=self.params).text
             )
-            if len(root) == 0:
-                return
             for item in root:
                 yield item.attrib
+            if len(root) < self.params["limit"]:
+                return
             self.update_page()
+
+
+class BooruTagExtractor(BooruExtractor):
+    """Extract images based on search-tags"""
+
+    directory_fmt = ["{category}", "{tags}"]
+    filename_fmt = "{category}_{id}_{md5}.{extension}"
+
+    def __init__(self, match):
+        BooruExtractor.__init__(self)
+        self.tags = text.unquote(match.group(1))
+        self.params["tags"] = self.tags
+
+    def get_job_metadata(self):
+        return {
+            "category": self.category,
+            "tags": self.tags,
+        }
+
+
+class BooruPoolExtractor(BooruExtractor):
+    """Extract image-pools"""
+
+    directory_fmt = ["{category}", "pool", "{pool}"]
+    filename_fmt = "{category}_{id}_{md5}.{extension}"
+
+    def __init__(self, match):
+        BooruExtractor.__init__(self)
+        self.pool = match.group(1)
+        self.params["tags"] = "pool:" + self.pool
+
+    def get_job_metadata(self):
+        return {
+            "category": self.category,
+            "pool": self.pool,
+        }
+
+
+class BooruPostExtractor(BooruExtractor):
+    """Extract single images"""
+
+    directory_fmt = ["{category}"]
+    filename_fmt = "{category}_{id}_{md5}.{extension}"
+
+    def __init__(self, match):
+        BooruExtractor.__init__(self)
+        self.post = match.group(1)
+        self.params["tags"] = "id:" + self.post

@@ -14,19 +14,19 @@ from .extractor.common import Message
 class DownloadJob():
 
     def __init__(self, url):
-        self.extractor, self.info = extractor.find(url)
+        self.extractor = extractor.find(url)
         if self.extractor is None:
             print(url, ": No extractor found", sep="", file=sys.stderr)
             return
         self.directory = self.get_base_directory()
         self.downloaders = {}
         self.filename_fmt = config.get(
-            ("extractor", self.info["category"], "filename"),
-            default=self.info["filename"]
+            ("extractor", self.extractor.category, "filename"),
+            default=self.extractor.filename_fmt
         )
         segments = config.get(
-            ("extractor", self.info["category"], "directory"),
-            default=self.info["directory"]
+            ("extractor", self.extractor.category, "directory"),
+            default=self.extractor.directory_fmt
         )
         self.directory_fmt = os.path.join(*segments)
 
@@ -51,7 +51,7 @@ class DownloadJob():
             elif msg[0] == Message.Version:
                 if msg[1] != 1:
                     raise "unsupported message-version ({}, {})".format(
-                        self.info.category, msg[1]
+                        self.extractor.category, msg[1]
                     )
                 # TODO: support for multiple message versions
 
@@ -118,7 +118,7 @@ class DownloadJob():
 class KeywordJob():
 
     def __init__(self, url):
-        self.extractor, self.info = extractor.find(url)
+        self.extractor = extractor.find(url)
         if self.extractor is None:
             print(url, ": No extractor found", sep="", file=sys.stderr)
             return

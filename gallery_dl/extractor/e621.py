@@ -8,21 +8,24 @@
 
 """Extract image-urls from https://e621.net/"""
 
-from .booru import JSONBooruExtractor
+from . import booru
 
-info = {
-    "category": "e621",
-    "extractor": "E621Extractor",
-    "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{id}_{md5}.{extension}",
-    "pattern": [
+class E621Extractor(booru.JSONBooruExtractor):
+    """Base class for e621 extractors"""
+    category = "e621"
+    api_url = "https://e621.net/post/index.json"
+
+class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
+    """Extract images from e621 based on search-tags"""
+    pattern = [
         r"(?:https?://)?(?:www\.)?e621\.net/post/index/\d+/([^?]+)",
-        r"(?:https?://)?(?:www\.)?e621\.net/post\?tags=([^&]+).*"
-    ],
-}
+        r"(?:https?://)?(?:www\.)?e621\.net/post\?tags=([^&]+)",
+    ]
 
-class E621Extractor(JSONBooruExtractor):
+class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
+    """Extract image-pools from e621"""
+    pattern = [r"(?:https?://)?(?:www\.)?e621\.net/pool/show/(\d+)"]
 
-    def __init__(self, match):
-        JSONBooruExtractor.__init__(self, match, info)
-        self.api_url = "https://e621.net/post/index.json"
+class E621PostExtractor(E621Extractor, booru.BooruPostExtractor):
+    """Extract single images from e621"""
+    pattern = [r"(?:https?://)?(?:www\.)?e621\.net/post/show/(\d+)"]

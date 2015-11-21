@@ -10,20 +10,13 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text
-import os.path
-
-info = {
-    "category": "mangastream",
-    "extractor": "MangaStreamExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"],
-    "filename": "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?readms\.com/r/([^/]*/(\d+)([^/]*)?/(\d+))",
-    ],
-}
 
 class MangaStreamExtractor(AsynchronousExtractor):
 
+    category = "mangastream"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
+    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?readms\.com/r/([^/]*/(\d+)([^/]*)?/(\d+))"]
     url_base = "https://readms.com/r/"
 
     def __init__(self, match):
@@ -47,7 +40,7 @@ class MangaStreamExtractor(AsynchronousExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category": info["category"],
+            "category": self.category,
             "chapter": self.chapter,
             "chapter-minor": self.ch_minor,
             "chapter-id": self.ch_id,
@@ -61,7 +54,8 @@ class MangaStreamExtractor(AsynchronousExtractor):
         ), values=data)
         return data
 
-    def get_page_metadata(self, page):
+    @staticmethod
+    def get_page_metadata(page):
         """Collect next url, image-url and metadata for one manga-page"""
         nurl, pos = text.extract(page, '<div class="page">\n<a href="', '"')
         iurl, pos = text.extract(page, '<img id="manga-page" src="', '"', pos)

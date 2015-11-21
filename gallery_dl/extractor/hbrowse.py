@@ -10,20 +10,13 @@
 
 from .common import Extractor, Message
 from .. import text
-import os.path
-
-info = {
-    "category": "hbrowse",
-    "extractor": "HbrowseExtractor",
-    "directory": ["{category}", "{gallery-id} {title}"],
-    "filename": "{category}_{gallery-id}_{num:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/(c\d+)",
-    ],
-}
 
 class HbrowseExtractor(Extractor):
 
+    category = "hbrowse"
+    directory_fmt = ["{category}", "{gallery-id} {title}"]
+    filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/(c\d+)"]
     url_base = "http://www.hbrowse.com/thumbnails/"
 
     def __init__(self, match):
@@ -43,7 +36,7 @@ class HbrowseExtractor(Extractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category": info["category"],
+            "category": self.category,
             'gallery-id': self.gid,
             'chapter': int(self.chapter[1:]),
         }
