@@ -38,7 +38,6 @@ modules = [
     "nhentai",
     "nijie",
     "powermanga",
-    "redhawkscans",
     "safebooru",
     "sankaku",
     "spectrumnexus",
