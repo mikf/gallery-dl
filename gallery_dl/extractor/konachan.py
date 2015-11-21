@@ -8,20 +8,21 @@
 
 """Extract image-urls from https://konachan.com/"""
 
-from .booru import JSONBooruExtractor
+from . import booru
 
-info = {
-    "category": "konachan",
-    "extractor": "KonachanExtractor",
-    "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{id}_{md5}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?konachan\.com/post\?tags=([^&]+).*",
-    ],
-}
+class KonachanExtractor(booru.JSONBooruExtractor):
+    """Base class for konachan extractors"""
+    category = "konachan"
+    api_url = "https://konachan.com/post.json"
 
-class KonachanExtractor(JSONBooruExtractor):
+class KonachanTagExtractor(KonachanExtractor, booru.BooruTagExtractor):
+    """Extract images from konachan based on search-tags"""
+    pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post\?tags=([^&]+)"]
 
-    def __init__(self, match):
-        JSONBooruExtractor.__init__(self, match, info)
-        self.api_url = "http://konachan.com/post.json"
+class KonachanPoolExtractor(KonachanExtractor, booru.BooruPoolExtractor):
+    """Extract image-pools from konachan"""
+    pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/pool/show/(\d+)"]
+
+class KonachanPostExtractor(KonachanExtractor, booru.BooruPostExtractor):
+    """Extract single images from konachan"""
+    pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post/show/(\d+)"]
