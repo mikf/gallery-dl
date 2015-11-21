@@ -10,20 +10,14 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text
-import os.path
 import re
 
-info = {
-    "category": "deviantart",
-    "extractor": "DeviantArtExtractor",
-    "directory": ["{category}", "{artist}"],
-    "filename": "{category}_{index}_{title}.{extension}",
-    "pattern": [
-        r"(?:https?://)?([^\.]+)\.deviantart\.com/gallery/.*",
-    ],
-}
-
 class DeviantArtExtractor(AsynchronousExtractor):
+
+    category = "deviantart"
+    directory_fmt = ["{category}", "{artist}"]
+    filename_fmt = "{category}_{index}_{title}.{extension}"
+    pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com/gallery/.*"]
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
@@ -57,14 +51,14 @@ class DeviantArtExtractor(AsynchronousExtractor):
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         return {
-            "category": info["category"],
+            "category": self.category,
             "artist": self.artist,
         }
 
     def get_image_metadata(self, image):
         """Collect metadata for an image"""
         match = self.extract_data(image, 'title',
-            '(.+) by (.+), ([A-Z][a-z]{2} \d+, \d{4}) in')
+            r'(.+) by (.+), ([A-Z][a-z]{2} \d+, \d{4}) in')
         if image.startswith(" ismature"):
             # adult image
             url, _ = text.extract(image, 'href="', '"')
@@ -76,7 +70,7 @@ class DeviantArtExtractor(AsynchronousExtractor):
             height, pos = text.extract(page, ' height="', '"', pos)
         else:
             # normal image
-            index = self.extract_data(image, 'href', '[^"]+-(\d+)').group(1)
+            index = self.extract_data(image, 'href', r'[^"]+-(\d+)').group(1)
             url, pos = text.extract(image, ' data-super-full-img="', '"', match.end())
             if url:
                 width , pos = text.extract(image, ' data-super-full-width="', '"', pos)

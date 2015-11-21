@@ -13,18 +13,12 @@ from .. import config, text, iso639_1
 import time
 import random
 
-info = {
-    "category": "exhentai",
-    "extractor": "ExhentaiExtractor",
-    "directory": ["{category}", "{gallery-id}"],
-    "filename": "{gallery-id}_{num:>04}_{imgkey}_{name}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})",
-    ],
-}
-
 class ExhentaiExtractor(Extractor):
 
+    category = "exhentai"
+    directory_fmt = ["{category}", "{gallery-id}"]
+    filename_fmt = "{gallery-id}_{num:>04}_{imgkey}_{name}.{extension}"
+    pattern = [r"(?:https?://)?(g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
     api_url = "http://exhentai.org/api.php"
 
     def __init__(self, match):
@@ -70,7 +64,7 @@ class ExhentaiExtractor(Extractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category"     : info["category"],
+            "category"     : self.category,
             "gallery-id"   : self.gid,
             "gallery-token": self.token,
         }

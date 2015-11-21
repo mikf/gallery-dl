@@ -10,20 +10,13 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text
-import os.path
-
-info = {
-    "category": "imagebam",
-    "extractor": "ImagebamExtractor",
-    "directory": ["{category}", "{title} - {gallery-key}"],
-    "filename": "{num:>03}-{filename}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([^/]+).*",
-    ],
-}
 
 class ImagebamExtractor(AsynchronousExtractor):
 
+    category = "imagebam"
+    directory_fmt = ["{category}", "{title} - {gallery-key}"]
+    filename_fmt = "{num:>03}-{filename}"
+    pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([^/]+).*"]
     url_base = "http://www.imagebam.com"
 
     def __init__(self, match):
@@ -47,7 +40,7 @@ class ImagebamExtractor(AsynchronousExtractor):
         response.encoding = "utf-8"
         page = response.text
         data = {
-            "category": info["category"],
+            "category": self.category,
             "gallery-key": self.gkey,
         }
         data, _ = text.extract_all(page, (

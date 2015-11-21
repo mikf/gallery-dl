@@ -12,17 +12,12 @@ from .common import Extractor, Message
 from .. import text
 import json
 
-info = {
-    "category": "nhentai",
-    "extractor": "NhentaiExtractor",
-    "directory": ["{category}", "{gallery-id} {title}"],
-    "filename": "{category}_{gallery-id}_{num:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)",
-    ],
-}
-
 class NhentaiExtractor(Extractor):
+
+    category = "nhentai"
+    directory_fmt = ["{category}", "{gallery-id} {title}"]
+    filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)"]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -57,7 +52,7 @@ class NhentaiExtractor(Extractor):
         title_en = ginfo["title"].get("english", "")
         title_ja = ginfo["title"].get("japanese", "")
         return {
-            "category": info["category"],
+            "category": self.category,
             "gallery-id": self.gid,
             "upload-date": ginfo["upload_date"],
             "media-id": ginfo["media_id"],

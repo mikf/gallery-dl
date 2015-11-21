@@ -14,19 +14,12 @@ import re
 import json
 import time
 
-info = {
-    "category": "pixiv",
-    "extractor": "PixivExtractor",
-    "directory": ["{category}", "{artist-id}-{artist-nick}"],
-    "filename": "{category}_{artist-id}_{id}{num}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php\?id=(\d+)",
-    ],
-}
-
-
 class PixivExtractor(Extractor):
 
+    category = "pixiv"
+    directory_fmt = ["{category}", "{artist-id}-{artist-nick}"]
+    filename_fmt = "{category}_{artist-id}_{id}{num}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php\?id=(\d+)"]
     member_url = "http://www.pixiv.net/member_illust.php"
     illust_url = "http://www.pixiv.net/member_illust.php?mode=medium"
 
@@ -121,7 +114,7 @@ class PixivExtractor(Extractor):
         """Collect metadata for extractor-job"""
         data = self.api.user(self.artist_id)["response"][0]
         return {
-            "category": info["category"],
+            "category": self.category,
             "artist-id": self.artist_id,
             "artist-name": data["name"],
             "artist-nick": data["account"],

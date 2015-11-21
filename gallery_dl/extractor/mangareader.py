@@ -10,22 +10,16 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text
-import os.path
-
-info = {
-    "category": "mangareader",
-    "extractor": "MangaReaderExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03} - {title}"],
-    "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))",
-        r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
-    ],
-}
 
 class MangaReaderExtractor(AsynchronousExtractor):
 
-    category = info["category"]
+    category = "mangareader"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
+    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    pattern = [
+        r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))",
+        r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
+    ]
     url_base = "http://www.mangareader.net"
 
     def __init__(self, match):

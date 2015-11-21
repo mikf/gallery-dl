@@ -12,19 +12,15 @@ from .common import Extractor, Message
 from .. import text
 import os.path
 
-info = {
-    "category": "hentaifoundry",
-    "extractor": "HentaiFoundryExtractor",
-    "directory": ["{category}", "{artist}"],
-    "filename": "{category}_{index}_{title}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/([^/]+)",
-        r"(?:https?://)?(?:www\.)?hentai-foundry\.com/user/([^/]+)/profile",
-    ],
-}
-
 class HentaiFoundryExtractor(Extractor):
 
+    category = "hentaifoundry"
+    directory_fmt = ["{category}", "{artist}"]
+    filename_fmt = "{category}_{index}_{title}.{extension}"
+    pattern = [
+        r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/([^/]+)",
+        r"(?:https?://)?(?:www\.)?hentai-foundry\.com/user/([^/]+)/profile",
+    ]
     url_base = "http://www.hentai-foundry.com/pictures/user/"
 
     def __init__(self, match):
@@ -60,7 +56,7 @@ class HentaiFoundryExtractor(Extractor):
         token, pos = text.extract(page, 'hidden" value="', '"')
         count, pos = text.extract(page, 'class="active" >Pictures (', ')', pos)
         return {
-            "category": info["category"],
+            "category": self.category,
             "artist": self.artist,
             "count": count,
         }, token
