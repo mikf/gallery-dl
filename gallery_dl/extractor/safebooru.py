@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2015 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,27 +8,27 @@
 
 """Extract image-urls from http://safebooru.org/"""
 
-from .booru import XMLBooruExtractor
+from . import booru
 
-info = {
-    "category": "safebooru",
-    "extractor": "SafebooruExtractor",
-    "directory": ["{category}", "{tags}"],
-    "filename": "{category}_{id}_{md5}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?\?page=post&s=list&tags=([^&]+).*",
-    ],
-}
+class SafebooruExtractor(booru.XMLBooruExtractor):
+    """Base class for safebooru extractors"""
 
-class SafebooruExtractor(XMLBooruExtractor):
+    category = "safebooru"
+    api_url = "http://safebooru.org/index.php"
 
-    def __init__(self, match):
-        XMLBooruExtractor.__init__(self, match, info)
-        self.api_url = "http://safebooru.org/index.php"
-        self.params = {"page":"dapi", "s":"post", "q":"index", "tags":self.tags}
+    def setup(self):
+        self.params.update({"page":"dapi", "s":"post", "q":"index"})
 
     def update_page(self, reset=False):
         if reset is False:
             self.params["pid"] += 1
         else:
             self.params["pid"] = 0
+
+class SafebooruTagExtractor(SafebooruExtractor, booru.BooruTagExtractor):
+    """Extract images from safebooru based on search-tags"""
+    pattern = [r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?\?page=post&s=list&tags=([^&]+)"]
+
+class SafebooruPostExtractor(SafebooruExtractor, booru.BooruPostExtractor):
+    """Extract single images from safebooru"""
+    pattern = [r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?\?page=post&s=view&id=(\d+)"]
