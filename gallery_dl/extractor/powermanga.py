@@ -14,22 +14,18 @@ import os.path
 import json
 import re
 
-info = {
-    "category": "powermanga",
-    "extractor": "PowerMangaExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"],
-    "filename": "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}",
-    "pattern": [
+class PowerMangaExtractor(Extractor):
+
+    category = "powermanga"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
+    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    pattern = [
         (r"(?:https?://)?read(?:er)?\.powermanga\.org/read/"
          r"(.+/([a-z]{2})/\d+/\d+)(?:/page)?"),
-    ],
-}
-
-class PowerMangaExtractor(Extractor):
+    ]
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.category = info["category"]
         self.part = match.group(1)
         self.lang = match.group(2)
         extra = "er" if "://reader" in match.string else ""
