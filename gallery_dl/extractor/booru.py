@@ -17,7 +17,6 @@ import urllib.parse
 class BooruExtractor(Extractor):
 
     info = {}
-    params = {"limit": 50}
     headers = {}
     page = "page"
     api_url = ""
@@ -26,6 +25,7 @@ class BooruExtractor(Extractor):
     def __init__(self):
         Extractor.__init__(self)
         self.params = {"limit": 50}
+        self.setup()
 
     def items(self):
         yield Message.Version, 1
@@ -38,6 +38,9 @@ class BooruExtractor(Extractor):
                 continue
 
     def items_impl(self):
+        pass
+
+    def setup(self):
         pass
 
     def update_page(self, reset=False):
