@@ -10,19 +10,13 @@
 
 from .common import Extractor, Message
 from .. import text
-import os.path
-
-info = {
-    "category": "imgth",
-    "extractor": "ImgthExtractor",
-    "directory": ["{category}", "{gallery-id} {title}"],
-    "filename": "{category}_{gallery-id}_{num:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?imgth\.com/gallery/(\d+)",
-    ],
-}
 
 class ImgthExtractor(Extractor):
+
+    category = "imgth"
+    directory_fmt = ["{category}", "{gallery-id} {title}"]
+    filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
+    pattern = [r"(?:https?://)?imgth\.com/gallery/(\d+)"]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -55,7 +49,7 @@ class ImgthExtractor(Extractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category": info["category"],
+            "category": self.category,
             "gallery-id": self.gid,
         }
         data, _ = text.extract_all(page, (

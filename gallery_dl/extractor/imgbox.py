@@ -12,18 +12,12 @@ from .common import AsynchronousExtractor, Message
 from .. import text
 import re
 
-info = {
-    "category": "imgbox",
-    "extractor": "ImgboxExtractor",
-    "directory": ["{category}", "{title} - {gallery-key}"],
-    "filename": "{num:>03}-{name}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?imgbox\.com/g/(.+)",
-    ],
-}
-
 class ImgboxExtractor(AsynchronousExtractor):
 
+    category = "imgbox"
+    directory_fmt = ["{category}", "{title} - {gallery-key}"]
+    filename_fmt = "{num:>03}-{name}"
+    pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/(.+)"]
     url_base = "http://imgbox.com"
 
     def __init__(self, match):
@@ -44,7 +38,7 @@ class ImgboxExtractor(AsynchronousExtractor):
         """Collect metadata for extractor-job"""
         match = re.search(r"<h1>(.+) \(([^ ]+) ([^ ]+) \w+\) - (\d+)", page)
         return {
-            "category": info["category"],
+            "category": self.category,
             "gallery-key": self.key,
             "title": match.group(1),
             "date": match.group(2),
@@ -62,7 +56,8 @@ class ImgboxExtractor(AsynchronousExtractor):
         ), values=data)
         return data
 
-    def get_file_url(self, page):
+    @staticmethod
+    def get_file_url(page):
         """Extract download-url"""
         base = "http://i.imgbox.com/"
         path, _ = text.extract(page, base, '"')

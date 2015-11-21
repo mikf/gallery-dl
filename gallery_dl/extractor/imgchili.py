@@ -12,17 +12,12 @@ from .common import Extractor, Message
 from .. import text
 import re
 
-info = {
-    "category": "imgchili",
-    "extractor": "ImgchiliExtractor",
-    "directory": ["{category}", "{title} - {key}"],
-    "filename": "{num:>03}-{name}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?imgchili\.net/album/([^/]+)",
-    ],
-}
-
 class ImgchiliExtractor(Extractor):
+
+    category = "imgchili"
+    directory_fmt = ["{category}", "{title} - {key}"]
+    filename_fmt = "{num:>03}-{name}"
+    pattern = [r"(?:https?://)?(?:www\.)?imgchili\.net/album/([^/]+)"]
 
     def __init__(self, match):
         Extractor.__init__(self)

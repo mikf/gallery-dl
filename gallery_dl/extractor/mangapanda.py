@@ -10,18 +10,13 @@
 
 from .mangareader import MangaReaderExtractor
 
-info = {
-    "category": "mangapanda",
-    "extractor": "MangaPandaExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03} - {title}"],
-    "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?mangapanda\.com((/[^/]+)/(\d+))",
-        r"(?:https?://)?(?:www\.)?mangapanda\.com(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
-    ],
-}
-
 class MangaPandaExtractor(MangaReaderExtractor):
 
-    category = info["category"]
+    category = "mangapanda"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
+    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    pattern = [
+        r"(?:https?://)?(?:www\.)?mangapanda\.com((/[^/]+)/(\d+))",
+        r"(?:https?://)?(?:www\.)?mangapanda\.com(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
+    ]
     url_base = "http://www.mangapanda.com"

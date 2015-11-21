@@ -10,20 +10,14 @@
 
 from .common import Extractor, Message
 from .. import text, cloudflare
-import os.path
 import re
 
-info = {
-    "category": "kissmanga",
-    "extractor": "KissmangaExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"],
-    "filename": "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/.+/.+\?id=\d+",
-    ],
-}
-
 class KissmangaExtractor(Extractor):
+
+    category = "kissmanga"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
+    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/.+/.+\?id=\d+"]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -41,8 +35,7 @@ class KissmangaExtractor(Extractor):
             data["page"] = num
             yield Message.Url, url, text.nameext_from_url(url, data)
 
-    @staticmethod
-    def get_job_metadata(page):
+    def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, "Read manga\n", "\n")
         cinfo, pos = text.extract(page, "", "\n", pos)
@@ -50,7 +43,7 @@ class KissmangaExtractor(Extractor):
             r"(?:Vol.0*(\d+) )?(?:Ch.)?0*(\d+)(?:\.0*(\d+))?(?:: (.+))?", cinfo)
         chminor = match.group(3)
         return {
-            "category": info["category"],
+            "category": self.category,
             "manga": manga,
             "volume": match.group(1) or "",
             "chapter": match.group(2),

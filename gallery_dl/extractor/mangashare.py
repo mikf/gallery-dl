@@ -10,20 +10,13 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text
-import os
-
-info = {
-    "category": "mangashare",
-    "extractor": "MangaShareExtractor",
-    "directory": ["{category}", "{manga}", "c{chapter:>03} - {title}"],
-    "filename": "{manga}_c{chapter:>03}_{page:>03}.{extension}",
-    "pattern": [
-        r"(?:https?://)?read\.mangashare\.com/([^/]+/chapter-\d+)",
-    ],
-}
 
 class MangaShareExtractor(AsynchronousExtractor):
 
+    category = "mangashare"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
+    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    pattern = [r"(?:https?://)?read\.mangashare\.com/([^/]+/chapter-\d+)"]
     url_fmt = "http://read.mangashare.com/{}/page{:>03}.html"
 
     def __init__(self, match):
@@ -40,11 +33,10 @@ class MangaShareExtractor(AsynchronousExtractor):
             text.nameext_from_url(url, data)
             yield Message.Url, url, data.copy()
 
-    @staticmethod
-    def get_job_metadata(page):
+    def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category": info["category"],
+            "category": self.category,
             "lang": "en",
             "language": "English",
         }

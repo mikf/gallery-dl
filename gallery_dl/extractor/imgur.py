@@ -12,17 +12,12 @@ from .common import Extractor, Message
 from .. import text
 import os.path
 
-info = {
-    "category": "imgur",
-    "extractor": "ImgurExtractor",
-    "directory": ["{category}", "{album-key} - {title}"],
-    "filename": "{category}_{album-key}_{num:>03}_{name}.{extension}",
-    "pattern": [
-        r"(?:https?://)?(?:www\.)?imgur\.com/(?:a|gallery)/([^/?&#]+)",
-    ],
-}
-
 class ImgurExtractor(Extractor):
+
+    category = "imgur"
+    directory_fmt = ["{category}", "{album-key} - {title}"]
+    filename_fmt = "{category}_{album-key}_{num:>03}_{name}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?imgur\.com/(?:a|gallery)/([^/?&#]+)"]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -43,7 +38,7 @@ class ImgurExtractor(Extractor):
         """Collect metadata for extractor-job"""
         page = self.request("https://imgur.com/a/" + self.album).text
         data = {
-            "category": info["category"],
+            "category": self.category,
             "album-key": self.album,
         }
         return text.extract_all(page, (
