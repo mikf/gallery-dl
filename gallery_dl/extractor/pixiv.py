@@ -111,14 +111,15 @@ class PixivUserExtractor(Extractor):
         )
         return url, framelist
 
-    def get_job_metadata(self):
+    def get_job_metadata(self, user=None):
         """Collect metadata for extractor-job"""
-        data = self.api.user(self.artist_id)["response"][0]
+        if not user:
+            user = self.api.user(self.artist_id)["response"][0]
         return {
             "category": self.category,
-            "artist-id": self.artist_id,
-            "artist-name": data["name"],
-            "artist-nick": data["account"],
+            "artist-id": user["id"],
+            "artist-name": user["name"],
+            "artist-nick": user["account"],
         }
 
 
@@ -143,8 +144,7 @@ class PixivWorkExtractor(PixivUserExtractor):
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         self.work = self.api.work(self.illust_id)["response"][0]
-        self.artist_id = self.work["user"]["id"]
-        return PixivUserExtractor.get_job_metadata(self)
+        return PixivUserExtractor.get_job_metadata(self, self.work["user"])
 
 
 def require_login(func):
