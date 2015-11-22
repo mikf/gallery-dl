@@ -14,7 +14,8 @@ import re
 import json
 import time
 
-class PixivExtractor(Extractor):
+class PixivUserExtractor(Extractor):
+    """Extract all works of a single pixiv-user"""
 
     category = "pixiv"
     directory_fmt = ["{category}", "{artist-id}-{artist-nick}"]
@@ -121,6 +122,31 @@ class PixivExtractor(Extractor):
         }
 
 
+class PixivWorkExtractor(PixivUserExtractor):
+    """Extract a single pixiv work/illustration"""
+
+    pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
+                r"\?(?:[^&]+&)*illust_id=(\d+)")]
+
+    def __init__(self, match):
+        PixivUserExtractor.__init__(self, match)
+        self.illust_id = match.group(1)
+        self.work = None
+
+    def get_works(self):
+        url = self.work["image_urls"]["large"]
+        self.work["num"] = ""
+        self.work["url"] = url
+        self.work["extension"] = url[url.rfind(".")+1:]
+        return (self.work,)
+
+    def get_job_metadata(self):
+        """Collect metadata for extractor-job"""
+        self.work = self.api.work(self.illust_id)["response"][0]
+        self.artist_id = self.work["user"]["id"]
+        return PixivUserExtractor.get_job_metadata(self)
+
+
 def require_login(func):
     """Decorator: auto-login before api-calls"""
     def wrap(self, *args):
@@ -190,6 +216,18 @@ class PixivAPI():
         response = self.session.get(
             "https://public-api.secure.pixiv.net/v1/users/"
             "{user}.json".format(user=user_id)
+        )
+        return self._parse(response)
+
+    @require_login
+    def work(self, illust_id):
+        """Query information about a single pixiv work/illustration"""
+        params = {
+            'image_sizes': 'large',
+        }
+        response = self.session.get(
+            "https://public-api.secure.pixiv.net/v1/works/"
+            "{illust}.json".format(illust=illust_id), params=params
         )
         return self._parse(response)
 
