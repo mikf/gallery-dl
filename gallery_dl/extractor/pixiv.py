@@ -28,6 +28,7 @@ class PixivUserExtractor(Extractor):
         Extractor.__init__(self)
         self.artist_id = match.group(1)
         self.api = PixivAPI(self.session)
+        self.api_call = self.api.user_works
 
     def items(self):
         metadata = self.get_job_metadata()
@@ -37,8 +38,6 @@ class PixivUserExtractor(Extractor):
         yield Message.Directory, metadata
 
         for work in self.get_works():
-            work.update(metadata)
-
             pos = work["extension"].rfind("?", -18)
             if pos != -1:
                 timestamp = work["extension"][pos:]
@@ -49,7 +48,7 @@ class PixivUserExtractor(Extractor):
             if work["type"] == "ugoira":
                 url, framelist = self.parse_ugoira(work)
                 work["extension"] = "zip"
-                yield Message.Url, url, work.copy()
+                yield Message.Url, url, work
                 work["extension"] = "txt"
                 yield Message.Url, "text://"+framelist, work
 
@@ -69,23 +68,32 @@ class PixivUserExtractor(Extractor):
                 for i in range(work["page_count"]):
                     work["num"] = "_p{:02}".format(i)
                     url = "{}{}_p{}.{}{}".format(url[:off], big, i, ext, timestamp)
-                    yield Message.Url, url, work.copy()
+                    yield Message.Url, url, work
 
     def get_works(self):
         """Yield all work-items for a pixiv-member"""
         pagenum = 1
         while True:
-            data = self.api.user_works(self.artist_id, pagenum)
+            data = self.api_call(self.artist_id, pagenum)
             for work in data["response"]:
-                url = work["image_urls"]["large"]
-                work["num"] = ""
-                work["url"] = url
-                work["extension"] = url[url.rfind(".")+1:]
-                yield work
+                yield self.prepare_work(work)
             pinfo = data["pagination"]
             if pinfo["current"] == pinfo["pages"]:
                 return
             pagenum = pinfo["next"]
+
+    def prepare_work(self, work):
+        """Prepare a work-dictionary with additional keywords"""
+        user = work["user"]
+        url = work["image_urls"]["large"]
+        work["category"] = self.category
+        work["artist-id"] = user["id"]
+        work["artist-name"] = user["name"]
+        work["artist-nick"] = user["account"]
+        work["num"] = ""
+        work["url"] = url
+        work["extension"] = url[url.rfind(".")+1:]
+        return work
 
     def parse_ugoira(self, data):
         """Parse ugoira data"""
@@ -135,16 +143,26 @@ class PixivWorkExtractor(PixivUserExtractor):
         self.work = None
 
     def get_works(self):
-        url = self.work["image_urls"]["large"]
-        self.work["num"] = ""
-        self.work["url"] = url
-        self.work["extension"] = url[url.rfind(".")+1:]
-        return (self.work,)
+        return (self.prepare_work(self.work),)
 
-    def get_job_metadata(self):
+    def get_job_metadata(self, user=None):
         """Collect metadata for extractor-job"""
         self.work = self.api.work(self.illust_id)["response"][0]
         return PixivUserExtractor.get_job_metadata(self, self.work["user"])
+
+
+class PixivFavoriteExtractor(PixivUserExtractor):
+    """Extract all favorites/bookmarks of a single pixiv-user"""
+
+    directory_fmt = ["{category}", "bookmarks", "{artist-id}-{artist-nick}"]
+    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php\?id=(\d+)"]
+
+    def __init__(self, match):
+        PixivUserExtractor.__init__(self, match)
+        self.api_call = self.api.user_favorite_works
+
+    def prepare_work(self, work):
+        return PixivUserExtractor.prepare_work(self, work["work"])
 
 
 def require_login(func):
@@ -223,7 +241,7 @@ class PixivAPI():
     def work(self, illust_id):
         """Query information about a single pixiv work/illustration"""
         params = {
-            'image_sizes': 'large',
+            "image_sizes": "large",
         }
         response = self.session.get(
             "https://public-api.secure.pixiv.net/v1/works/"
@@ -235,13 +253,28 @@ class PixivAPI():
     def user_works(self, user_id, page, per_page=20):
         """Query information about the works of a pixiv user"""
         params = {
-            'page': page,
-            'per_page': per_page,
-            'image_sizes': 'large',
+            "page": page,
+            "per_page": per_page,
+            "image_sizes": "large",
         }
         response = self.session.get(
             "https://public-api.secure.pixiv.net/v1/users/"
             "{user}/works.json".format(user=user_id), params=params
+        )
+        return self._parse(response)
+
+    @require_login
+    def user_favorite_works(self, user_id, page, per_page=20):
+        """Query information about the favorites works of a pixiv user"""
+        params = {
+            "page": page,
+            "per_page": per_page,
+            "include_stats": False,
+            "image_sizes": "large",
+        }
+        response = self.session.get(
+            "https://public-api.secure.pixiv.net/v1/users/"
+            "{user}/favorite_works.json".format(user=user_id), params=params
         )
         return self._parse(response)
 
