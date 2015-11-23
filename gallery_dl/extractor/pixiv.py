@@ -165,6 +165,17 @@ class PixivFavoriteExtractor(PixivUserExtractor):
         return PixivUserExtractor.prepare_work(self, work["work"])
 
 
+class PixivBookmarkExtractor(PixivFavoriteExtractor):
+    """Extract all favorites/bookmarks of your own account"""
+
+    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php()$"]
+
+    def __init__(self, match):
+        PixivFavoriteExtractor.__init__(self, match)
+        self.api.login()
+        self.artist_id = self.api.user_id
+
+
 def require_login(func):
     """Decorator: auto-login before api-calls"""
     def wrap(self, *args):
@@ -219,7 +230,10 @@ class PixivAPI():
                 raise Exception("login() failed! check username and password.\n"
                                 "HTTP %s: %s" % (response.status_code, response.text))
             try:
-                token = self._parse(response)["response"]["access_token"]
+                response = self._parse(response)["response"]
+                token = response["access_token"]
+                self.token_timeout = response["expires_in"]
+                self.user_id = response["user"]["id"]
             except:
                 raise Exception("Get access_token error! Response: %s" % (token))
             pconf["access-token"] = token
