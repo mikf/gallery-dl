@@ -17,7 +17,7 @@ __email__      = "mike_faehrmann@web.de"
 import os
 import sys
 import argparse
-from . import config, jobs
+from . import config, extractor, jobs
 
 def build_cmdline_parser():
     parser = argparse.ArgumentParser(
