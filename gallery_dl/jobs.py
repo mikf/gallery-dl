@@ -9,7 +9,7 @@
 import os
 import sys
 from . import config, extractor, downloader, text
-from .extractor.common import Message
+from .extractor.message import Message
 
 class DownloadJob():
 
