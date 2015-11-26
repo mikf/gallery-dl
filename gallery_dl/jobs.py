@@ -20,6 +20,7 @@ class DownloadJob():
             return
         self.directory = self.get_base_directory()
         self.downloaders = {}
+        self.queue = None
         self.filename_fmt = config.get(
             ("extractor", self.extractor.category, "filename"),
             default=self.extractor.filename_fmt
@@ -48,12 +49,19 @@ class DownloadJob():
             elif msg[0] == Message.Directory:
                 self.set_directory(msg)
 
+            elif msg[0] == Message.Queue:
+                self.enqueue(msg[1])
+
             elif msg[0] == Message.Version:
                 if msg[1] != 1:
                     raise "unsupported message-version ({}, {})".format(
                         self.extractor.category, msg[1]
                     )
                 # TODO: support for multiple message versions
+
+        if self.queue:
+            for url in self.queue:
+                DownloadJob(url).run()
 
     def download(self, msg):
         """Download the resource specified in 'msg'"""
@@ -90,6 +98,13 @@ class DownloadJob():
             instance = klass()
             self.downloaders[scheme] = instance
         return instance
+
+    def enqueue(self, url):
+        """Add url to work-queue"""
+        try:
+            self.queue.append(url)
+        except AttributeError:
+            self.queue = [url]
 
     @staticmethod
     def get_base_directory():

@@ -13,3 +13,4 @@ class Message():
     Url = 3
     Headers = 4
     Cookies = 5
+    Queue = 6
