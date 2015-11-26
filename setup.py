@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name="gallery_dl",
-    version="0.3.3",
+    version="0.4.0",
     description="gallery- and image downloader",
     long_description=read("README.rst"),
     url="https://github.com/mikf/gallery-dl",
