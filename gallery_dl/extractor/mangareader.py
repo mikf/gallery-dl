@@ -92,6 +92,7 @@ class MangaReaderChapterExtractor(MangaReaderBase, AsynchronousExtractor):
         ), values=data)
         for key in ("author", "artist"):
             data[key] = text.unescape(data[key])
+        data["manga"] = data["manga"].strip()
         return data
 
     def get_page_metadata(self, page):
