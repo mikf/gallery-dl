@@ -8,9 +8,9 @@
 
 """Extract manga pages from http://www.mangapanda.com/"""
 
-from .mangareader import MangaReaderExtractor
+from .mangareader import MangaReaderChapterExtractor
 
-class MangaPandaExtractor(MangaReaderExtractor):
+class MangaPandaExtractor(MangaReaderChapterExtractor):
 
     category = "mangapanda"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
