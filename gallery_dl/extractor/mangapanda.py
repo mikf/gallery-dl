@@ -8,15 +8,22 @@
 
 """Extract manga pages from http://www.mangapanda.com/"""
 
-from .mangareader import MangaReaderChapterExtractor
+from .mangareader import *
 
-class MangaPandaExtractor(MangaReaderChapterExtractor):
+class MangaPandaBase():
 
     category = "mangapanda"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    url_base = "http://www.mangapanda.com"
+
+
+class MangaPandaMangaExtractor(MangaPandaBase, MangaReaderMangaExtractor):
+
+    pattern = [r"(?:https?://)?(?:www\.)?mangapanda\.com(/[^/]+)"]
+
+
+class MangaPandaChapterExtractor(MangaPandaBase, MangaReaderChapterExtractor):
+
     pattern = [
         r"(?:https?://)?(?:www\.)?mangapanda\.com((/[^/]+)/(\d+))",
         r"(?:https?://)?(?:www\.)?mangapanda\.com(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
     ]
-    url_base = "http://www.mangapanda.com"
