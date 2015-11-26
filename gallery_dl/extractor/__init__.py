@@ -31,6 +31,7 @@ modules = [
     "imgur",
     "kissmanga",
     "konachan",
+    "mangahere",
     "mangamint",
     "mangapanda",
     "mangareader",
