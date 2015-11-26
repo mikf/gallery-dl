@@ -8,11 +8,35 @@
 
 """Extract manga pages from http://www.mangareader.net/"""
 
-from .common import AsynchronousExtractor, Message
+from .common import AsynchronousExtractor, Extractor, Message
 from .. import text
 
-class MangaReaderExtractor(AsynchronousExtractor):
+class MangaReaderExtractor(Extractor):
 
+    category = "mangareader"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
+    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/]+)$"]
+    url_base = "http://www.mangareader.net"
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url_title = match.group(1)
+
+    def items(self):
+        yield Message.Version, 1
+        url = self.url_base + self.url_title
+        page = self.request(url).text
+        needle = '<a href="' + self.url_title
+        pos = page.index('<div id="readmangasum">')
+        while True:
+            chapter, pos = text.extract(page, needle, '"', pos)
+            if not chapter:
+                return
+            print(url + chapter)
+            yield Message.Queue, url + chapter
+
+class MangaReaderChapterExtractor(AsynchronousExtractor):
     category = "mangareader"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
