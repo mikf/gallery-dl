@@ -11,13 +11,17 @@
 from .common import AsynchronousExtractor, Extractor, Message
 from .. import text
 
-class MangaReaderExtractor(Extractor):
+class MangaReaderBase():
 
     category = "mangareader"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/]+)$"]
     url_base = "http://www.mangareader.net"
+
+
+class MangaReaderMangaExtractor(MangaReaderBase, Extractor):
+
+    pattern = [r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/]+)$"]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -33,18 +37,15 @@ class MangaReaderExtractor(Extractor):
             chapter, pos = text.extract(page, needle, '"', pos)
             if not chapter:
                 return
-            print(url + chapter)
             yield Message.Queue, url + chapter
 
-class MangaReaderChapterExtractor(AsynchronousExtractor):
-    category = "mangareader"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+
+class MangaReaderChapterExtractor(MangaReaderBase, AsynchronousExtractor):
+
     pattern = [
         r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))",
         r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
     ]
-    url_base = "http://www.mangareader.net"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
