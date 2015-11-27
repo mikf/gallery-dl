@@ -61,17 +61,20 @@ _cache = []
 _module_iter = iter(modules)
 
 def _list_patterns():
-    """Yield all available (pattern, info, class) tuples"""
+    """Yield all available (pattern, class) tuples"""
     for entry in _cache:
         yield entry
 
     for module_name in _module_iter:
         module = importlib.import_module("."+module_name, __package__)
-        for klass in _get_classes(module):
-            for pattern in klass.pattern:
-                etuple = (pattern, klass)
-                _cache.append(etuple)
-                yield etuple
+        tuples = [
+            (pattern, klass)
+            for klass in _get_classes(module)
+            for pattern in klass.pattern
+        ]
+        _cache.extend(tuples)
+        for etuple in tuples:
+            yield etuple
 
 def _get_classes(module):
     """Return a list of all extractor classes in a module"""
