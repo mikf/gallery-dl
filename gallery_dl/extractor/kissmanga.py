@@ -12,17 +12,21 @@ from .common import Extractor, Message
 from .. import text, cloudflare
 import re
 
-class KissmangaMangaExtractor(Extractor):
+class KissmangaExtractor(Extractor):
 
     category = "kissmanga"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/[^/]+/?$"]
     url_base = "http://kissmanga.com"
 
     def __init__(self, match):
         Extractor.__init__(self)
         self.url = match.group(0)
+
+
+class KissmangaMangaExtractor(KissmangaExtractor):
+
+    pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/[^/]+/?$"]
 
     def items(self):
         cloudflare.bypass_ddos_protection(self.session, self.url_base)
@@ -43,16 +47,9 @@ class KissmangaMangaExtractor(Extractor):
             chapters.append(url)
 
 
-class KissmangaChapterExtractor(Extractor):
+class KissmangaChapterExtractor(KissmangaExtractor):
 
-    category = "kissmanga"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/.+/.+\?id=\d+"]
-
-    def __init__(self, match):
-        Extractor.__init__(self)
-        self.url = match.group(0)
 
     def items(self):
         cloudflare.bypass_ddos_protection(self.session, "http://kissmanga.com")
