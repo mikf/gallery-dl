@@ -18,7 +18,7 @@ class MangaPandaBase():
 
 class MangaPandaMangaExtractor(MangaPandaBase, MangaReaderMangaExtractor):
 
-    pattern = [r"(?:https?://)?(?:www\.)?mangapanda\.com(/[^/]+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?mangapanda\.com(/[^/]+)$"]
 
 
 class MangaPandaChapterExtractor(MangaPandaBase, MangaReaderChapterExtractor):
