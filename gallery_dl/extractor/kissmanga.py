@@ -12,7 +12,38 @@ from .common import Extractor, Message
 from .. import text, cloudflare
 import re
 
-class KissmangaExtractor(Extractor):
+class KissmangaMangaExtractor(Extractor):
+
+    category = "kissmanga"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
+    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/[^/]+/?$"]
+    url_base = "http://kissmanga.com"
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url = match.group(0)
+
+    def items(self):
+        cloudflare.bypass_ddos_protection(self.session, self.url_base)
+        yield Message.Version, 1
+        for chapter in self.get_chapters():
+            yield Message.Queue, self.url_base + chapter
+
+    def get_chapters(self):
+        """Return a list of all chapter urls"""
+        page = self.request(self.url).text
+        pos = 0
+        chapters = []
+        while True:
+            url, pos = text.extract(page, '<td>\n<a href="', '"', pos)
+            if not url:
+                chapters.reverse()
+                return chapters
+            chapters.append(url)
+
+
+class KissmangaChapterExtractor(Extractor):
 
     category = "kissmanga"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
