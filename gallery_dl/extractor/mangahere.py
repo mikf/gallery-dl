@@ -12,7 +12,35 @@ from .common import AsynchronousExtractor, Message
 from .. import text
 import re
 
-class MangaHereExtractor(AsynchronousExtractor):
+class MangaHereMangaExtractor(Extractor):
+
+    category = "mangahere"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]
+    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?mangahere\.co/manga/([^/]+)/?$"]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url = match.group(0) + "/"
+
+    def items(self):
+        yield Message.Version, 1
+        for chapter in self.get_chapters():
+            yield Message.Queue, chapter
+
+    def get_chapters(self):
+        page = self.request(self.url).text
+        pos = page.index('<div class="detail_list">')
+        chapters = []
+        while True:
+            url, pos = text.extract(page, '<a class="color_0077" href="', '"', pos)
+            if not url:
+                chapters.reverse()
+                return chapters
+            chapters.append(url)
+
+
+class MangaHereChapterExtractor(AsynchronousExtractor):
 
     category = "mangahere"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]
