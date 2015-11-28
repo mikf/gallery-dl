@@ -6,13 +6,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga pages from http://www.mangareader.net/"""
+"""Extract manga-chapters and entire manga from http://www.mangareader.net/"""
 
 from .common import AsynchronousExtractor, Extractor, Message
 from .. import text
 
 class MangaReaderBase():
-
+    """Base class for mangareader extractors"""
     category = "mangareader"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
@@ -20,7 +20,7 @@ class MangaReaderBase():
 
 
 class MangaReaderMangaExtractor(MangaReaderBase, Extractor):
-
+    """Extract all manga-chapters from mangareader"""
     pattern = [r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/]+)$"]
 
     def __init__(self, match):
@@ -38,7 +38,7 @@ class MangaReaderMangaExtractor(MangaReaderBase, Extractor):
 
 
 class MangaReaderChapterExtractor(MangaReaderBase, AsynchronousExtractor):
-
+    """Extract a single manga-chapter from mangareader"""
     pattern = [
         r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))",
         r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",

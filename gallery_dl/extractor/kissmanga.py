@@ -6,14 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga pages from http://kissmanga.com/"""
+"""Extract manga-chapters and entire manga from http://kissmanga.com/"""
 
 from .common import Extractor, Message
 from .. import text, cloudflare
 import re
 
 class KissmangaExtractor(Extractor):
-
+    """Base class for kissmanga extractors"""
     category = "kissmanga"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
@@ -25,7 +25,7 @@ class KissmangaExtractor(Extractor):
 
 
 class KissmangaMangaExtractor(KissmangaExtractor):
-
+    """Extract all manga-chapters from kissmanga"""
     pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/[^/]+/?$"]
 
     def items(self):
@@ -43,7 +43,7 @@ class KissmangaMangaExtractor(KissmangaExtractor):
 
 
 class KissmangaChapterExtractor(KissmangaExtractor):
-
+    """Extract a single manga-chapter from kissmanga"""
     pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/.+/.+\?id=\d+"]
 
     def items(self):
