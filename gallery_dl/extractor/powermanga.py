@@ -22,10 +22,16 @@ class PowerMangaExtractor(Extractor):
     pattern = [
         (r"(?:https?://)?read(?:er)?\.powermanga\.org/read/"
          r"(.+/([a-z]{2})/\d+/\d+)(?:/page)?"),
+        (r"(?:https?://)?(?:www\.)?(p)owermanga\.org/((?:[^-]+-)+[^-]+/?)"),
     ]
 
     def __init__(self, match):
         Extractor.__init__(self)
+        if match.group(1) == "p":
+            page = self.request("https://powermanga.org/" + match.group(2)).text
+            pos = page.index("class='small-button smallblack'>Download</a>")
+            url = text.extract(page, "<a href='", "'", pos)[0]
+            match = re.match(self.pattern[0], url)
         self.part = match.group(1)
         self.lang = match.group(2)
         extra = "er" if "://reader" in match.string else ""
