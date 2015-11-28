@@ -89,5 +89,37 @@ class TestText(unittest.TestCase):
             self.assertEqual(text.shorten_filename(case), result)
             self.assertTrue(len(text.shorten_filename(case).encode(enc)) <= 255)
 
+    def test_extract(self):
+        cases = {
+            ("<a><b>", "<", ">")   : ("a", 3),
+            ("<a><b>", "X", ">")   : (None, 0),
+            ("<a><b>", "<", "X")   : (None, 0),
+            ("<a><b>", "<", ">", 3): ("b", 6),
+            ("<a><b>", "X", ">", 3): (None, 3),
+            ("<a><b>", "<", "X", 3): (None, 3),
+        }
+        for case, result in cases.items():
+            self.assertEqual(text.extract(*case), result)
+
+    def test_extract_all(self):
+        txt = "[c][b][a]: xyz! [d][e"
+        result = ({
+            "A": "a",
+            "B": "b",
+            "X": "xyz",
+            "E": "xtra",
+        }, 15)
+        self.assertEqual(text.extract_all(txt, (
+            (None, "[", "]"),
+            ("B" , "[", "]"),
+            ("A" , "[", "]"),
+            ("X" , ": ", "!"),
+        ), values={"E": "xtra"}), result)
+
+    def test_extract_iter(self):
+        txt = "[c][b][a]: xyz! [d][e"
+        result = ["c", "b", "a", "d"]
+        self.assertEqual(list(text.extract_iter(txt, "[", "]")), result)
+
 if __name__ == '__main__':
     unittest.main()
