@@ -99,6 +99,14 @@ def extract_all(txt, rules, pos=0, values=None):
             values[key] = result
     return values, pos
 
+def extract_iter(txt, begin, end, pos=0):
+    """Yield all values obtained by repeated calls to text.extract"""
+    while True:
+        value, pos = extract(txt, begin, end, pos)
+        if value is None:
+            return
+        yield value
+
 if platform.system() == "Windows":
     clean_path = clean_path_windows
 else:
