@@ -10,15 +10,14 @@
 
 from .common import Extractor, Message
 from .. import text
-import os.path
 
-class HentaiFoundryExtractor(Extractor):
-
+class HentaiFoundryUserExtractor(Extractor):
+    """Extract all pictures of a hentaifoundry-user"""
     category = "hentaifoundry"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [
-        r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/([^/]+)",
+        r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/([^/]+)/?$",
         r"(?:https?://)?(?:www\.)?hentai-foundry\.com/user/([^/]+)/profile",
     ]
     url_base = "http://www.hentai-foundry.com/pictures/user/"
@@ -99,3 +98,37 @@ class HentaiFoundryExtractor(Extractor):
         }
         self.request("http://www.hentai-foundry.com/site/filters",
                      method="post", data=formdata)
+
+
+class HentaiFoundryImageExtractor(Extractor):
+    """Extract a single hentaifoundry picture"""
+    category = "hentaifoundry"
+    directory_fmt = ["{category}", "{artist}"]
+    filename_fmt = "{category}_{index}_{title}.{extension}"
+    pattern = [(r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/"
+                r"([^/]+)/(\d+)/[^/]+")]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url = match.group(0)
+        self.artist = match.group(1)
+        self.index = match.group(2)
+
+    def items(self):
+        url, data = self.get_image_metadata()
+        yield Message.Version, 1
+        yield Message.Directory, data
+        yield Message.Url, url, data
+
+    def get_image_metadata(self):
+        """Collect metadata for an image"""
+        page = self.request(self.url + "?enterAgree=1").text
+        title, pos = text.extract(page, 'Pictures</a> &raquo; <span>', '<')
+        url  , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)
+        data = {
+            "category": self.category,
+            "artist": self.artist,
+            "index": self.index,
+            "title": text.unescape(title),
+        }
+        return "http://pictures.hentai-foundry.com" + url, text.nameext_from_url(url, data)
