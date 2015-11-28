@@ -10,12 +10,45 @@
 
 from .common import Extractor, Message
 from .. import text
+import re
 
-class MangaMintExtractor(Extractor):
+class MangaMintMangaExtractor(Extractor):
 
     category = "mangamint"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?mangamint\.com(/manga/[^\?]+-manga)"]
+    url_base = "https://www.mangamint.com"
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.part = match.group(1)
+
+    def items(self):
+        yield Message.Version, 1
+        for chapter in self.get_chapters():
+            yield Message.Queue, self.url_base + chapter
+
+    def get_chapters(self):
+        """Return a list of all chapter urls"""
+        url = self.url_base + self.part
+        params = {"page": 0}
+        chapters = []
+        while True:
+            page = self.request(url, params=params).text
+            table = text.extract(page, '<table class="sticky-enabled">', '</table>')[0]
+            chapters.extend(text.extract_iter(table, '<a href="', '"'))
+            if re.match(r".+-0*1$", chapters[-1]):
+                break
+            params["page"] += 1
+        return reversed(chapters)
+
+
+class MangaMintChapterExtractor(Extractor):
+
+    category = "mangamint"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
+    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?mangamint\.com/([^\?]+-(\d+))"]
 
     def __init__(self, match):
@@ -36,19 +69,19 @@ class MangaMintExtractor(Extractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        data = {
+        manga, pos = text.extract(page, '"title":"', '"')
+        chid , pos = text.extract(page, r'"identifier":"node\/', '"', pos)
+        match = re.match(r"(.+) (\d+)(\.\d+)?$", manga)
+        return {
             "category": self.category,
-            "chapter": self.chapter,
+            "manga": match.group(1),
+            "chapter": match.group(2),
+            "chapter-minor": match.group(3) or "",
+            "chapter-id": chid,
             # "title": "",
             "lang": "en",
             "language": "English",
         }
-        return text.extract_all(page, (
-            (None, '<div class="left-corner2">', ''),
-            (None, '<a href=">', ''),
-            ('manga', '">', '<'),
-        ), values=data)[0]
-
 
     def get_image_urls(self, page):
         """Extract list of all image-urls for a manga chapter"""
@@ -61,7 +94,7 @@ class MangaMintExtractor(Extractor):
         params["howmany"]      , pos = text.extract(page, 'value="', '"', pos-25)
         _                      , pos = text.extract(page, 'name="form_build_id"', '', pos)
         params["form_build_id"], pos = text.extract(page, 'value="', '"', pos)
-        url = "http://www.mangamint.com/many/callback"
+        url = "https://www.mangamint.com/many/callback"
         page = self.request(url, method="post", data=params).json()["data"]
         imgs = []
         pos = 0
