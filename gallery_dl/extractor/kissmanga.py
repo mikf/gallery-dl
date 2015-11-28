@@ -37,14 +37,9 @@ class KissmangaMangaExtractor(KissmangaExtractor):
     def get_chapters(self):
         """Return a list of all chapter urls"""
         page = self.request(self.url).text
-        pos = 0
-        chapters = []
-        while True:
-            url, pos = text.extract(page, '<td>\n<a href="', '"', pos)
-            if not url:
-                chapters.reverse()
-                return chapters
-            chapters.append(url)
+        return reversed(list(
+            text.extract_iter(page, '<td>\n<a href="', '"')
+        ))
 
 
 class KissmangaChapterExtractor(KissmangaExtractor):

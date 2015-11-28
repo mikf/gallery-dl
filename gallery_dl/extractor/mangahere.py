@@ -30,14 +30,10 @@ class MangaHereMangaExtractor(Extractor):
 
     def get_chapters(self):
         page = self.request(self.url).text
-        pos = page.index('<div class="detail_list">')
-        chapters = []
-        while True:
-            url, pos = text.extract(page, '<a class="color_0077" href="', '"', pos)
-            if not url:
-                chapters.reverse()
-                return chapters
-            chapters.append(url)
+        return reversed(list(
+            text.extract_iter(page, '<a class="color_0077" href="', '"',
+            page.index('<div class="detail_list">'))
+        ))
 
 
 class MangaHereChapterExtractor(AsynchronousExtractor):
