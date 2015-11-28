@@ -33,10 +33,7 @@ class MangaReaderMangaExtractor(MangaReaderBase, Extractor):
         page = self.request(url).text
         needle = '<a href="' + self.url_title
         pos = page.index('<div id="readmangasum">')
-        while True:
-            chapter, pos = text.extract(page, needle, '"', pos)
-            if not chapter:
-                return
+        for chapter in text.extract_iter(page, needle, '"', pos):
             yield Message.Queue, url + chapter
 
 
