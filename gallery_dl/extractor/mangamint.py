@@ -6,14 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga pages from https://www.mangamint.com/"""
+"""Extract manga-chapters and entire manga from https://www.mangamint.com/"""
 
 from .common import Extractor, Message
 from .. import text
 import re
 
 class MangaMintMangaExtractor(Extractor):
-
+    """Extract all manga-chapters from mangamint"""
     category = "mangamint"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
@@ -45,7 +45,7 @@ class MangaMintMangaExtractor(Extractor):
 
 
 class MangaMintChapterExtractor(Extractor):
-
+    """Extract a single manga-chapter from mangamint"""
     category = "mangamint"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"

@@ -6,14 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga pages from http://www.mangahere.co/"""
+"""Extract manga-chapters and entire manga from from http://www.mangahere.co/"""
 
 from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 import re
 
 class MangaHereMangaExtractor(Extractor):
-
+    """Extract all manga-chapters from mangahere"""
     category = "mangahere"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
@@ -29,6 +29,7 @@ class MangaHereMangaExtractor(Extractor):
             yield Message.Queue, chapter
 
     def get_chapters(self):
+        """Return a list of all chapter urls"""
         page = self.request(self.url).text
         return reversed(list(
             text.extract_iter(page, '<a class="color_0077" href="', '"',
@@ -37,7 +38,7 @@ class MangaHereMangaExtractor(Extractor):
 
 
 class MangaHereChapterExtractor(AsynchronousExtractor):
-
+    """Extract a single manga-chapter from mangahere"""
     category = "mangahere"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
