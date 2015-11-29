@@ -16,7 +16,6 @@ import time
 
 class PixivUserExtractor(Extractor):
     """Extract all works of a single pixiv-user"""
-
     category = "pixiv"
     directory_fmt = ["{category}", "{artist-id}-{artist-nick}"]
     filename_fmt = "{category}_{artist-id}_{id}{num}.{extension}"
@@ -133,7 +132,6 @@ class PixivUserExtractor(Extractor):
 
 class PixivWorkExtractor(PixivUserExtractor):
     """Extract a single pixiv work/illustration"""
-
     pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
                 r"\?(?:[^&]+&)*illust_id=(\d+)")]
 
@@ -153,7 +151,6 @@ class PixivWorkExtractor(PixivUserExtractor):
 
 class PixivFavoriteExtractor(PixivUserExtractor):
     """Extract all favorites/bookmarks of a single pixiv-user"""
-
     directory_fmt = ["{category}", "bookmarks", "{artist-id}-{artist-nick}"]
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php\?id=(\d+)"]
 
@@ -167,7 +164,6 @@ class PixivFavoriteExtractor(PixivUserExtractor):
 
 class PixivBookmarkExtractor(PixivFavoriteExtractor):
     """Extract all favorites/bookmarks of your own account"""
-
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php()$"]
 
     def __init__(self, match):
@@ -194,7 +190,6 @@ class PixivAPI():
     For in-depth information regarding the Pixiv Public-API, see
     - http://blog.imaou.com/opensource/2014/10/09/pixiv_api_for_ios_update.html
     """
-
     token_timeout = 50*60 # 50 minutes
 
     def __init__(self, session):

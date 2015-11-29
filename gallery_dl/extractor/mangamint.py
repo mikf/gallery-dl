@@ -15,8 +15,6 @@ import re
 class MangaMintMangaExtractor(Extractor):
     """Extract all manga-chapters from mangamint"""
     category = "mangamint"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]
-    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?mangamint\.com(/manga/[^\?]+-manga)"]
     url_base = "https://www.mangamint.com"
 
