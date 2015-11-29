@@ -8,6 +8,7 @@
 
 import os
 import sys
+import tempfile
 from . import config, extractor, downloader, text
 from .extractor.message import Message
 
@@ -109,7 +110,8 @@ class DownloadJob():
     @staticmethod
     def get_base_directory():
         """Return the base-destination-directory for downloads"""
-        return config.get(("base-directory",), default="/tmp/")
+        bdir = config.get(("base-directory",), default=tempfile.gettempdir())
+        return os.path.expanduser(bdir)
 
     @staticmethod
     def print_start(path):
