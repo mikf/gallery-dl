@@ -22,13 +22,14 @@ class DownloadJob():
         self.directory = self.get_base_directory()
         self.downloaders = {}
         self.queue = None
-        self.filename_fmt = config.get(
-            ("extractor", self.extractor.category, "filename"),
-            default=self.extractor.filename_fmt
+        key = ["extractor", self.extractor.category]
+        if self.extractor.subcategory:
+            key.append(self.extractor.subcategory)
+        self.filename_fmt = config.interpolate(
+            key + ["filename_fmt"], default=self.extractor.filename_fmt
         )
-        segments = config.get(
-            ("extractor", self.extractor.category, "directory"),
-            default=self.extractor.directory_fmt
+        segments = config.interpolate(
+            key + ["directory_fmt"], default=self.extractor.directory_fmt
         )
         self.directory_fmt = os.path.join(*segments)
 

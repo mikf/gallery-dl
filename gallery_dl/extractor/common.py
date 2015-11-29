@@ -17,6 +17,8 @@ from .. import config
 
 class Extractor():
 
+    category = ""
+    subcategory = ""
     directory_fmt = [""]
     filename_fmt = ""
 
