@@ -14,8 +14,6 @@ from .. import text
 class MangaShareMangaExtractor(Extractor):
     """Extract all manga-chapters from mangashare"""
     category = "mangashare"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?read\.mangashare\.com/[^/]+$"]
 
     def __init__(self, match):

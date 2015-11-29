@@ -17,6 +17,9 @@ from .. import config
 
 class Extractor():
 
+    directory_fmt = [""]
+    filename_fmt = ""
+
     def __init__(self):
         self.session = requests.Session()
 
