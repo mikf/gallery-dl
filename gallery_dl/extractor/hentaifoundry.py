@@ -14,6 +14,7 @@ from .. import text
 class HentaiFoundryUserExtractor(Extractor):
     """Extract all pictures of a hentaifoundry-user"""
     category = "hentaifoundry"
+    subcategory = "user"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [
@@ -103,6 +104,7 @@ class HentaiFoundryUserExtractor(Extractor):
 class HentaiFoundryImageExtractor(Extractor):
     """Extract a single hentaifoundry picture"""
     category = "hentaifoundry"
+    subcategory = "image"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/"

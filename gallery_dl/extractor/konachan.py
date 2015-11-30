@@ -17,12 +17,15 @@ class KonachanExtractor(booru.JSONBooruExtractor):
 
 class KonachanTagExtractor(KonachanExtractor, booru.BooruTagExtractor):
     """Extract images from konachan based on search-tags"""
+    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post\?tags=([^&]+)"]
 
 class KonachanPoolExtractor(KonachanExtractor, booru.BooruPoolExtractor):
     """Extract image-pools from konachan"""
+    subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/pool/show/(\d+)"]
 
 class KonachanPostExtractor(KonachanExtractor, booru.BooruPostExtractor):
     """Extract single images from konachan"""
+    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post/show/(\d+)"]

@@ -17,6 +17,7 @@ class E621Extractor(booru.JSONBooruExtractor):
 
 class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
     """Extract images from e621 based on search-tags"""
+    subcategory = "tag"
     pattern = [
         r"(?:https?://)?(?:www\.)?e621\.net/post/index/\d+/([^?]+)",
         r"(?:https?://)?(?:www\.)?e621\.net/post\?tags=([^&]+)",
@@ -24,8 +25,10 @@ class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
 
 class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
     """Extract image-pools from e621"""
+    subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/pool/show/(\d+)"]
 
 class E621PostExtractor(E621Extractor, booru.BooruPostExtractor):
     """Extract single images from e621"""
+    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/post/show/(\d+)"]

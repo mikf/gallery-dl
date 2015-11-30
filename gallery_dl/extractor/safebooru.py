@@ -27,8 +27,10 @@ class SafebooruExtractor(booru.XMLBooruExtractor):
 
 class SafebooruTagExtractor(SafebooruExtractor, booru.BooruTagExtractor):
     """Extract images from safebooru based on search-tags"""
+    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?\?page=post&s=list&tags=([^&]+)"]
 
 class SafebooruPostExtractor(SafebooruExtractor, booru.BooruPostExtractor):
     """Extract single images from safebooru"""
+    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?\?page=post&s=view&id=(\d+)"]

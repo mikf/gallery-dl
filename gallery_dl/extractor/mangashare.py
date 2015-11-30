@@ -14,6 +14,7 @@ from .. import text
 class MangaShareMangaExtractor(Extractor):
     """Extract all manga-chapters from mangashare"""
     category = "mangashare"
+    subcategory = "manga"
     pattern = [r"(?:https?://)?read\.mangashare\.com/[^/]+$"]
 
     def __init__(self, match):
@@ -36,6 +37,7 @@ class MangaShareMangaExtractor(Extractor):
 class MangaShareChapterExtractor(AsynchronousExtractor):
     """Extract a single manga-chapter from mangashare"""
     category = "mangashare"
+    subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?read\.mangashare\.com/([^/]+/chapter-\d+)"]

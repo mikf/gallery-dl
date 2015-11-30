@@ -17,12 +17,15 @@ class YandereExtractor(booru.JSONBooruExtractor):
 
 class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
     """Extract images from yandere based on search-tags"""
+    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post\?tags=([^&]+)"]
 
 class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
     """Extract image-pools from yandere"""
+    subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?yande.re/pool/show/(\d+)"]
 
 class YanderePostExtractor(YandereExtractor, booru.BooruPostExtractor):
     """Extract single images from yandere"""
+    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?yande.re/post/show/(\d+)"]

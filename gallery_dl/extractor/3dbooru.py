@@ -21,12 +21,15 @@ class ThreeDeeBooruExtractor(booru.JSONBooruExtractor):
 
 class ThreeDeeBooruTagExtractor(ThreeDeeBooruExtractor, booru.BooruTagExtractor):
     """Extract images from 3dbooru based on search-tags"""
+    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post(?:/(?:index)?)?\?tags=([^&]+)"]
 
 class ThreeDeeBooruPoolExtractor(ThreeDeeBooruExtractor, booru.BooruPoolExtractor):
     """Extract image-pools from 3dbooru"""
+    subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/pool/show/(\d+)"]
 
 class ThreeDeeBooruPostExtractor(ThreeDeeBooruExtractor, booru.BooruPostExtractor):
     """Extract single images from 3dbooru"""
+    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post/show/(\d+)"]
