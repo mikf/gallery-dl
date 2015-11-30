@@ -21,6 +21,7 @@ class MangaReaderBase():
 
 class MangaReaderMangaExtractor(MangaReaderBase, Extractor):
     """Extract all manga-chapters from mangareader"""
+    subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/]+)$"]
 
     def __init__(self, match):
@@ -39,6 +40,7 @@ class MangaReaderMangaExtractor(MangaReaderBase, Extractor):
 
 class MangaReaderChapterExtractor(MangaReaderBase, AsynchronousExtractor):
     """Extract a single manga-chapter from mangareader"""
+    subcategory = "chapter"
     pattern = [
         r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))",
         r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",

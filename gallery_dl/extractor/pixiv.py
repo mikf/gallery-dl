@@ -17,6 +17,7 @@ import time
 class PixivUserExtractor(Extractor):
     """Extract all works of a single pixiv-user"""
     category = "pixiv"
+    subcategory = "user"
     directory_fmt = ["{category}", "{artist-id}-{artist-nick}"]
     filename_fmt = "{category}_{artist-id}_{id}{num}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php\?id=(\d+)"]
@@ -132,6 +133,7 @@ class PixivUserExtractor(Extractor):
 
 class PixivWorkExtractor(PixivUserExtractor):
     """Extract a single pixiv work/illustration"""
+    subcategory = "work"
     pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
                 r"\?(?:[^&]+&)*illust_id=(\d+)")]
 
@@ -151,6 +153,7 @@ class PixivWorkExtractor(PixivUserExtractor):
 
 class PixivFavoriteExtractor(PixivUserExtractor):
     """Extract all favorites/bookmarks of a single pixiv-user"""
+    subcategory = "favorite"
     directory_fmt = ["{category}", "bookmarks", "{artist-id}-{artist-nick}"]
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php\?id=(\d+)"]
 
@@ -164,6 +167,7 @@ class PixivFavoriteExtractor(PixivUserExtractor):
 
 class PixivBookmarkExtractor(PixivFavoriteExtractor):
     """Extract all favorites/bookmarks of your own account"""
+    subcategory = "bookmark"
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php()$"]
 
     def __init__(self, match):

@@ -15,6 +15,7 @@ import re
 class MangaHereMangaExtractor(Extractor):
     """Extract all manga-chapters from mangahere"""
     category = "mangahere"
+    subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangahere\.co/manga/([^/]+)/?$"]
 
     def __init__(self, match):
@@ -38,6 +39,7 @@ class MangaHereMangaExtractor(Extractor):
 class MangaHereChapterExtractor(AsynchronousExtractor):
     """Extract a single manga-chapter from mangahere"""
     category = "mangahere"
+    subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?mangahere\.co/manga/"

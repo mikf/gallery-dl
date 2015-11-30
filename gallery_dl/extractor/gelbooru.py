@@ -31,13 +31,16 @@ class GelbooruExtractor(booru.XMLBooruExtractor):
 
 class GelbooruTagExtractor(GelbooruExtractor, booru.BooruTagExtractor):
     """Extract images from gelbooru based on search-tags"""
+    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?page=post&s=list&tags=([^&]+)"]
 
 # TODO: find out how to access pools via gelbooru-api
 # class GelbooruPoolExtractor(GelbooruExtractor, booru.BooruPoolExtractor):
     # """Extract image-pools from gelbooru"""
+    # subcategory = "pool"
     # pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?page=pool&s=show&id=(\d+)"]
 
 class GelbooruPostExtractor(GelbooruExtractor, booru.BooruPostExtractor):
     """Extract single images from gelbooru"""
+    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?page=post&s=view&id=(\d+)"]

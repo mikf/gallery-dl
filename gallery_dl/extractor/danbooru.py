@@ -17,12 +17,15 @@ class DanbooruExtractor(booru.JSONBooruExtractor):
 
 class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
     """Extract images from danbooru based on search-tags"""
+    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts\?(?:utf8=%E2%9C%93&)?tags=([^&]+)"]
 
 class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
     """Extract image-pools from danbooru"""
+    subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/pools/(\d+)"]
 
 class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
     """Extract single images from danbooru"""
+    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts/(\d+)"]

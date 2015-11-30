@@ -18,11 +18,13 @@ class MangaPandaBase():
 
 class MangaPandaMangaExtractor(MangaPandaBase, MangaReaderMangaExtractor):
     """Extract all manga-chapters from mangapanda"""
+    subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangapanda\.com(/[^/]+)$"]
 
 
 class MangaPandaChapterExtractor(MangaPandaBase, MangaReaderChapterExtractor):
     """Extract a single manga-chapter from mangapanda"""
+    subcategory = "chapter"
     pattern = [
         r"(?:https?://)?(?:www\.)?mangapanda\.com((/[^/]+)/(\d+))",
         r"(?:https?://)?(?:www\.)?mangapanda\.com(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
