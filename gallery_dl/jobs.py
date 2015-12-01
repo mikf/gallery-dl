@@ -9,7 +9,7 @@
 import os
 import sys
 import tempfile
-from . import config, extractor, downloader, text
+from . import config, extractor, downloader, text, output
 from .extractor.message import Message
 
 class DownloadJob():
@@ -22,6 +22,7 @@ class DownloadJob():
         self.directory = self.get_base_directory()
         self.downloaders = {}
         self.queue = None
+        self.printer = output.select()
         key = ["extractor", self.extractor.category]
         if self.extractor.subcategory:
             key.append(self.extractor.subcategory)
@@ -71,12 +72,12 @@ class DownloadJob():
         filename = text.clean_path(self.filename_fmt.format(**metadata))
         path = os.path.join(self.directory, filename)
         if os.path.exists(path):
-            self.print_skip(path)
+            self.printer.skip(path)
             return
         dlinstance = self.get_downloader(url)
-        self.print_start(path)
+        self.printer.start(path)
         tries = dlinstance.download(url, path)
-        self.print_success(path, tries)
+        self.printer.success(path, tries)
 
     def set_directory(self, msg):
         """Set and create the target directory for downloads"""
@@ -97,7 +98,7 @@ class DownloadJob():
         instance = self.downloaders.get(scheme)
         if instance is None:
             klass = downloader.find(scheme)
-            instance = klass()
+            instance = klass(self.printer)
             self.downloaders[scheme] = instance
         return instance
 
@@ -113,24 +114,6 @@ class DownloadJob():
         """Return the base-destination-directory for downloads"""
         bdir = config.get(("base-directory",), default=tempfile.gettempdir())
         return os.path.expanduser(bdir)
-
-    @staticmethod
-    def print_start(path):
-        """Print a message indicating the start of a download"""
-        print(path, end="")
-        sys.stdout.flush()
-
-    @staticmethod
-    def print_skip(path):
-        """Print a message indicating that a download has been skipped"""
-        print("\033[2m", path, "\033[0m", sep="")
-
-    @staticmethod
-    def print_success(path, tries):
-        """Print a message indicating the completion of a download"""
-        if tries == 0:
-            print("\r", end="")
-        print("\r\033[1;32m", path, "\033[0m", sep="")
 
 
 class KeywordJob():
