@@ -12,7 +12,7 @@ from .common import BasicDownloader
 
 class Downloader(BasicDownloader):
 
-    def __init__(self):
+    def __init__(self, *args):
         BasicDownloader.__init__(self)
 
     def download_impl(self, url, file):

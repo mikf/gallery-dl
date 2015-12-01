@@ -28,10 +28,3 @@ class BasicDownloader():
     def download_impl(self, url, file_handle):
         """Actual implementaion of the download process"""
         pass
-
-    @staticmethod
-    def print_error(file, error, tries, max_tries=5):
-        """Print a message indicating an error during download"""
-        if tries == 1 and hasattr(file, "name"):
-            print("\r\033[1;31m", file.name, sep="")
-        print("\033[0;31m[Error]\033[0m ", error, " (", tries, "/", max_tries, ")", sep="")

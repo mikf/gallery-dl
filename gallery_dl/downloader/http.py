@@ -8,15 +8,16 @@
 
 """Downloader module for http urls"""
 
-from .common import BasicDownloader
 import time
 import requests
+from .common import BasicDownloader
 
 class Downloader(BasicDownloader):
 
-    def __init__(self):
+    def __init__(self, printer):
         BasicDownloader.__init__(self)
         self.session = requests.session()
+        self.printer = printer
 
     def download_impl(self, url, file):
         tries = 0
@@ -26,7 +27,7 @@ class Downloader(BasicDownloader):
                 response = self.session.get(url, stream=True, verify=True)
             except requests.exceptions.ConnectionError as exptn:
                 tries += 1
-                self.print_error(file, exptn, tries, self.max_tries)
+                self.printer.error(file, exptn, tries, self.max_tries)
                 time.sleep(1)
                 if tries == self.max_tries:
                     raise
@@ -35,12 +36,12 @@ class Downloader(BasicDownloader):
             # reject error-status-codes
             if response.status_code != requests.codes.ok:
                 tries += 1
-                self.print_error(file, 'HTTP status "{} {}"'.format(
+                self.printer.error(file, 'HTTP status "{} {}"'.format(
                     response.status_code, response.reason), tries, self.max_tries)
                 if response.status_code == 404:
                     return self.max_tries
                 time.sleep(1)
-                if tries == 5:
+                if tries == self.max_tries:
                     response.raise_for_status()
                 continue
 
