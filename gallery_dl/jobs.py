@@ -112,8 +112,10 @@ class DownloadJob():
     @staticmethod
     def get_base_directory():
         """Return the base-destination-directory for downloads"""
-        bdir = config.get(("base-directory",), default=tempfile.gettempdir())
-        return os.path.expanduser(bdir)
+        bdir = config.get(("base-directory",), default=(".", "gallery-dl"))
+        if not isinstance(bdir, str):
+            bdir = os.path.join(*bdir)
+        return os.path.expanduser(os.path.expandvars(bdir))
 
 
 class KeywordJob():
