@@ -10,13 +10,27 @@ import os
 import sys
 import shutil
 import platform
+from . import config
 
 def select():
     """Automatically select a suitable printer class"""
-    if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-        return ColorPrinter() if ANSI else TerminalPrinter()
+    pdict = {
+        "default": Printer,
+        "pipe": Printer,
+        "term": TerminalPrinter,
+        "terminal": TerminalPrinter,
+        "color": ColorPrinter,
+    }
+    omode = config.get(("output", "mode"), "auto").lower()
+    if omode in pdict:
+        return pdict[omode]()
+    elif omode == "auto":
+        if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
+            return ColorPrinter() if ANSI else TerminalPrinter()
+        else:
+            return Printer()
     else:
-        return Printer()
+        raise Exception("invalid output mode: " + omode)
 
 def safeprint(txt, **kwargs):
     """Handle unicode errors and replace invalid characters"""
@@ -50,7 +64,9 @@ class Printer():
 class TerminalPrinter(Printer):
 
     def __init__(self):
-        self.width = shutil.get_terminal_size().columns - OFFSET
+        self.short = config.get(("output", "shorten"), True)
+        if self.short:
+            self.width = shutil.get_terminal_size().columns - OFFSET
 
     def start(self, path):
         safeprint(self.shorten(" " + path), end="", flush=True)
@@ -72,7 +88,7 @@ class TerminalPrinter(Printer):
 
     def shorten(self, txt):
         """Reduce the length of 'txt' to the width of the terminal"""
-        if len(txt) > self.width:
+        if self.short and len(txt) > self.width:
             hwidth = self.width // 2 - OFFSET
             return "".join((txt[:hwidth-1], CHAR_ELLIPSIES, txt[-hwidth-(self.width%2):]))
         return txt
