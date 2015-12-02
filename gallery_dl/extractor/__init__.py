@@ -25,6 +25,7 @@ modules = [
     "hentaifoundry",
     "hitomi",
     "imagebam",
+    "imagetwist",
     "imgbox",
     "imgchili",
     "imgth",
