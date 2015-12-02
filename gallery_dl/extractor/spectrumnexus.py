@@ -12,7 +12,7 @@ from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 
 class SpectrumNexusMangaExtractor(Extractor):
-
+    """Extract all manga-chapters and -volumes from spectrumnexus"""
     category = "spectrumnexus"
     subcategory = "manga"
     pattern = [r"(?:https?://)?view\.thespectrum\.net/series/([^\.]+)\.html$"]
@@ -35,24 +35,27 @@ class SpectrumNexusMangaExtractor(Extractor):
 
 
 class SpectrumNexusChapterExtractor(AsynchronousExtractor):
-
+    """Extract a single manga-chapter or -volume from spectrumnexus"""
     category = "spectrumnexus"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]
-    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    directory_fmt = ["{category}", "{manga}", "{identifier}"]
+    filename_fmt = "{manga} {identifier} {page:>03}.{extension}"
     pattern = [
-        r"(?:https?://)?(view\.thespectrum\.net/series/[^\.]+\.html)\?ch=Chapter\+(\d+)",
-        r"(?:https?://)?(view\.thespectrum\.net/series/[^/]+-chapter-(\d+)\.html)",
+        (r"(?:https?://)?(view\.thespectrum\.net/series/[^\.]+\.html)"
+         r"\?ch=(Chapter\+(\d+)|Volume\+(\d+))"),
+        (r"(?:https?://)?(view\.thespectrum\.net/series/[^/]+-chapter-(\d+)\.html)"),
     ]
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
         self.url = "http://" + match.group(1)
-        self.chapter = match.group(2)
+        self.identifier = match.group(2)
+        self.chapter = match.group(3)
+        self.volume = match.group(4)
 
     def items(self):
         params = {
-            "ch": "Chapter " + self.chapter,
+            "ch": self.identifier,
             "page": 1,
         }
         page = self.request(self.url, params=params).text
@@ -73,7 +76,9 @@ class SpectrumNexusChapterExtractor(AsynchronousExtractor):
         """Collect metadata for extractor-job"""
         data = {
             "category": self.category,
-            "chapter": self.chapter,
+            "chapter": self.chapter or "",
+            "volume": self.volume or "",
+            "identifier": self.identifier.replace("+", " "),
         }
         return text.extract_all(page, (
             ('manga', '<title>', ' &#183; SPECTRUM NEXUS </title>'),
