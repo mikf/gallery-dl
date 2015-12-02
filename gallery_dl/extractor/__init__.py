@@ -46,6 +46,7 @@ modules = [
     "spectrumnexus",
     "turboimagehost",
     "yandere",
+    "generic",
 ]
 
 def find(url):
