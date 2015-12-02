@@ -8,16 +8,40 @@
 
 """Extract manga pages from http://www.thespectrum.net/manga_scans/"""
 
-from .common import AsynchronousExtractor, Message
+from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 
-class SpectrumNexusExtractor(AsynchronousExtractor):
+class SpectrumNexusMangaExtractor(Extractor):
 
     category = "spectrumnexus"
+    subcategory = "manga"
+    pattern = [r"(?:https?://)?view\.thespectrum\.net/series/([^\.]+)\.html$"]
+    url_base = "http://view.thespectrum.net/series/"
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url = self.url_base + match.group(1) + ".html"
+
+    def items(self):
+        yield Message.Version, 1
+        for chapter in self.get_chapters():
+            yield Message.Queue, self.url + "?ch=" + chapter.replace(" ", "+")
+
+    def get_chapters(self):
+        """Return a list of all chapter identifiers"""
+        page = self.request(self.url).text
+        page = text.extract(page, '<select class="selectchapter"', '</select>')[0]
+        return text.extract_iter(page, '<option value="', '"')
+
+
+class SpectrumNexusChapterExtractor(AsynchronousExtractor):
+
+    category = "spectrumnexus"
+    subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [
-        r"(?:https?://)?(view\.thespectrum\.net/series/[^\.]+.html)\?ch=Chapter\+(\d+)",
+        r"(?:https?://)?(view\.thespectrum\.net/series/[^\.]+\.html)\?ch=Chapter\+(\d+)",
         r"(?:https?://)?(view\.thespectrum\.net/series/[^/]+-chapter-(\d+)\.html)",
     ]
 
