@@ -14,99 +14,11 @@ import platform
 def select():
     """Automatically select a suitable printer class"""
     if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-        return ColorPrinter if ANSI else TerminalPrinter
+        return ColorPrinter() if ANSI else TerminalPrinter()
     else:
-        return Printer
+        return Printer()
 
-
-class Printer():
-
-    @staticmethod
-    def start(path):
-        """Print a message indicating the start of a download"""
-        pass
-
-    @staticmethod
-    def skip(path):
-        """Print a message indicating that a download has been skipped"""
-        print(CHAR_SKIP, path, sep="", flush=True)
-
-    @staticmethod
-    def success(path, tries):
-        """Print a message indicating the completion of a download"""
-        print(path, flush=True)
-
-    @staticmethod
-    def error(file, error, tries, max_tries):
-        """Print a message indicating an error during download"""
-        pass
-
-
-class TerminalPrinter():
-
-    @staticmethod
-    def start(path):
-        """Print a message indicating the start of a download"""
-        _safeprint(_shorten(" " + path), end="", flush=True)
-
-    @staticmethod
-    def skip(path):
-        """Print a message indicating that a download has been skipped"""
-        _safeprint(_shorten(CHAR_SKIP + path))
-
-    @staticmethod
-    def success(path, tries):
-        """Print a message indicating the completion of a download"""
-        print("\r", end="")
-        _safeprint(_shorten(CHAR_SUCCESS + path))
-
-    @staticmethod
-    def error(file, error, tries, max_tries):
-        """Print a message indicating an error during download"""
-        if tries <= 1 and hasattr(file, "name"):
-            print("\r", end="")
-            _safeprint(_shorten(CHAR_ERROR + file.name))
-        print("[Error] ", end="")
-        _safeprint(error, end="")
-        print(" (", tries, "/", max_tries, ")", sep="")
-
-
-class ColorPrinter():
-
-    @staticmethod
-    def start(path):
-        """Print a message indicating the start of a download"""
-        print(_shorten(path), end="", flush=True)
-
-    @staticmethod
-    def skip(path):
-        """Print a message indicating that a download has been skipped"""
-        print("\033[2m", _shorten(path), "\033[0m", sep="")
-
-    @staticmethod
-    def success(path, tries):
-        """Print a message indicating the completion of a download"""
-        if tries == 0:
-            print("\r", end="")
-        print("\r\033[1;32m", _shorten(path), "\033[0m", sep="")
-
-    @staticmethod
-    def error(file, error, tries, max_tries):
-        """Print a message indicating an error during download"""
-        if tries <= 1 and hasattr(file, "name"):
-            print("\r\033[1;31m", _shorten(file.name), sep="")
-        print("\033[0;31m[Error]\033[0m ", error, " (", tries, "/", max_tries, ")", sep="")
-
-
-def _shorten(txt):
-    """Reduce the length of 'txt' to the width of the terminal"""
-    width = shutil.get_terminal_size().columns - OFFSET
-    if len(txt) > width:
-        hwidth = width // 2 - OFFSET
-        return "".join((txt[:hwidth-1], CHAR_ELLIPSIES, txt[-hwidth-(width%2):]))
-    return txt
-
-def _safeprint(txt, **kwargs):
+def safeprint(txt, **kwargs):
     """Handle unicode errors and replace invalid characters"""
     try:
         print(txt, **kwargs)
@@ -114,6 +26,76 @@ def _safeprint(txt, **kwargs):
         enc = sys.stdout.encoding
         txt = txt.encode(enc, errors="replace").decode(enc)
         print(txt, **kwargs)
+
+
+class Printer():
+
+    def start(self, path):
+        """Print a message indicating the start of a download"""
+        pass
+
+    def skip(self, path):
+        """Print a message indicating that a download has been skipped"""
+        print(CHAR_SKIP, path, sep="", flush=True)
+
+    def success(self, path, tries):
+        """Print a message indicating the completion of a download"""
+        print(path, flush=True)
+
+    def error(self, file, error, tries, max_tries):
+        """Print a message indicating an error during download"""
+        pass
+
+
+class TerminalPrinter(Printer):
+
+    def __init__(self):
+        self.width = shutil.get_terminal_size().columns - OFFSET
+
+    def start(self, path):
+        safeprint(self.shorten(" " + path), end="", flush=True)
+
+    def skip(self, path):
+        safeprint(self.shorten(CHAR_SKIP + path))
+
+    def success(self, path, tries):
+        print("\r", end="")
+        safeprint(self.shorten(CHAR_SUCCESS + path))
+
+    def error(self, file, error, tries, max_tries):
+        if tries <= 1 and hasattr(file, "name"):
+            print("\r", end="")
+            safeprint(self.shorten(CHAR_ERROR + file.name))
+        print("[Error] ", end="")
+        safeprint(error, end="")
+        print(" (", tries, "/", max_tries, ")", sep="")
+
+    def shorten(self, txt):
+        """Reduce the length of 'txt' to the width of the terminal"""
+        if len(txt) > self.width:
+            hwidth = self.width // 2 - OFFSET
+            return "".join((txt[:hwidth-1], CHAR_ELLIPSIES, txt[-hwidth-(self.width%2):]))
+        return txt
+
+
+class ColorPrinter(TerminalPrinter):
+
+    def start(self, path):
+        print(self.shorten(path), end="", flush=True)
+
+    def skip(self, path):
+        print("\033[2m", self.shorten(path), "\033[0m", sep="")
+
+    def success(self, path, tries):
+        # if tries == 0:
+            # print("\r", end="")
+        print("\r\033[1;32m", self.shorten(path), "\033[0m", sep="")
+
+    def error(self, file, error, tries, max_tries):
+        if tries <= 1 and hasattr(file, "name"):
+            print("\r\033[1;31m", self.shorten(file.name), sep="")
+        print("\033[0;31m[Error]\033[0m ", error, " (", tries, "/", max_tries, ")", sep="")
+
 
 if platform.system() == "Windows":
     ANSI = os.environ.get("TERM") == "ANSI"
