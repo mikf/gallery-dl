@@ -44,6 +44,7 @@ modules = [
     "safebooru",
     "sankaku",
     "spectrumnexus",
+    "turboimagehost",
     "yandere",
 ]
 
