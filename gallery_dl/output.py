@@ -69,7 +69,7 @@ class TerminalPrinter(Printer):
             self.width = shutil.get_terminal_size().columns - OFFSET
 
     def start(self, path):
-        safeprint(self.shorten(" " + path), end="", flush=True)
+        safeprint(self.shorten("  " + path), end="", flush=True)
 
     def skip(self, path):
         safeprint(self.shorten(CHAR_SKIP + path))
@@ -116,14 +116,14 @@ class ColorPrinter(TerminalPrinter):
 if platform.system() == "Windows":
     ANSI = os.environ.get("TERM") == "ANSI"
     OFFSET = 1
-    CHAR_SKIP = "#"
-    CHAR_ERROR = "!"
-    CHAR_SUCCESS = "*"
+    CHAR_SKIP = "# "
+    CHAR_ERROR = "! "
+    CHAR_SUCCESS = "* "
     CHAR_ELLIPSIES = "..."
 else:
     ANSI = True
     OFFSET = 0
-    CHAR_SKIP = "#"
-    CHAR_ERROR = "❌"
-    CHAR_SUCCESS = "✔"
+    CHAR_SKIP = "# "
+    CHAR_ERROR = "❌ "
+    CHAR_SUCCESS = "✔ "
     CHAR_ELLIPSIES = "…"
