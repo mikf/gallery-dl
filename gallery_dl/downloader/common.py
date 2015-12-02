@@ -11,7 +11,7 @@
 import os
 
 class BasicDownloader():
-    """Base class for downlaoder modules"""
+    """Base class for downloader modules"""
 
     max_tries = 5
 
@@ -21,7 +21,8 @@ class BasicDownloader():
             try:
                 return self.download_impl(url, file)
             except:
-                # make sure to remove file if download failed
+                #remove file if download failed
+                file.close()
                 os.unlink(path)
                 raise
 
