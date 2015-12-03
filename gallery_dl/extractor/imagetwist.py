@@ -15,24 +15,24 @@ class ImagetwistExtractor(Extractor):
 
     category = "imagetwist"
     directory_fmt = ["{category}"]
-    filename_fmt = "{category}_{index}_{filename}"
-    pattern = [r"(?:https?://)?(?:www\.)?imagetwist\.com/([^/]+)"]
+    filename_fmt = "{category}_{user}_{filename}"
+    pattern = [r"(?:https?://)?(?:www\.)?imagetwist\.com/([a-z0-9]{12})"]
 
     def __init__(self, match):
         Extractor.__init__(self)
         self.token = match.group(1)
 
     def items(self):
-        yield Message.Version, 1
         page = self.request("http://imagetwist.com/" + self.token).text
         url     , pos = text.extract(page, '<img src="', '"')
         filename, pos = text.extract(page, ' alt="', '"', pos)
-        index   , pos = text.extract(url , '/', '/', 29)
+        userid  , pos = text.extract(url , '/', '/', 29)
         data = {
             "category": self.category,
             "token": self.token,
-            "index": index,
+            "user": userid,
         }
         text.nameext_from_url(filename, data)
+        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
