@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name="gallery_dl",
-    version="0.4.0",
+    version="0.4.1",
     description="gallery- and image downloader",
     long_description=read("README.rst"),
     url="https://github.com/mikf/gallery-dl",
@@ -37,14 +37,15 @@ setup(
         "gallery_dl.extractor",
         "gallery_dl.downloader",
     ],
+    keywords = "gallery crawler pixiv danbooru gelbooru exhentai",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
         "Intended Audience :: End Users/Desktop",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+        "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
