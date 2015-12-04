@@ -18,6 +18,7 @@ modules = [
     "4chan",
     "8chan",
     "batoto",
+    "chronos",
     "danbooru",
     "deviantart",
     "e621",
