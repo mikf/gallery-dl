@@ -8,16 +8,16 @@
 
 """Extract images from galleries at http://imgbox.com/"""
 
-from .common import AsynchronousExtractor, Message
+from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 import re
 
-class ImgboxExtractor(AsynchronousExtractor):
-
+class ImgboxGalleryExtractor(AsynchronousExtractor):
+    """Extract image galleries from imgbox"""
     category = "imgbox"
     directory_fmt = ["{category}", "{title} - {gallery-key}"]
     filename_fmt = "{num:>03}-{name}"
-    pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/(.+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"]
     url_base = "http://imgbox.com"
 
     def __init__(self, match):
@@ -48,17 +48,37 @@ class ImgboxExtractor(AsynchronousExtractor):
 
     def get_file_metadata(self, page):
         """Collect metadata for a downloadable file"""
-        data = self.metadata.copy()
-        data, _ = text.extract_all(page, (
+        return text.extract_all(page, (
             ("num"      , '</a> &nbsp; ', ' of '),
             ("image-key", '/i.imgbox.com/', '?download'),
             ("name"     , ' title="', '"'),
-        ), values=data)
-        return data
+        ), values=self.metadata.copy())[0]
 
     @staticmethod
     def get_file_url(page):
         """Extract download-url"""
         base = "http://i.imgbox.com/"
-        path, _ = text.extract(page, base, '"')
+        path = text.extract(page, base, '"')[0]
         return base + path
+
+
+class ImgboxImageExtractor(Extractor):
+    """Extract a single image from imgbox"""
+    category = "imgbox"
+    directory_fmt = ["{category}"]
+    filename_fmt = "{filename}"
+    pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.key = match.group(1)
+
+    def items(self):
+        page = self.request("http://imgbox.com/" + self.key).text
+        url     , pos = text.extract(page, 'src="http://i.', '"')
+        filename, pos = text.extract(page, ' title="', '"', pos)
+        data = {"category": self.category, "image-key": self.key}
+        text.nameext_from_url(filename, data)
+        yield Message.Version, 1
+        yield Message.Directory, data
+        yield Message.Url, "http://i." + url, data
