@@ -8,13 +8,14 @@
 
 """Extract images from http://www.deviantart.com/"""
 
-from .common import AsynchronousExtractor, Message
+from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 import re
 
-class DeviantArtExtractor(AsynchronousExtractor):
+class DeviantArtUserExtractor(AsynchronousExtractor):
     """Extract all works of an artist on deviantart"""
     category = "deviantart"
+    subcategory = "user"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
@@ -90,3 +91,35 @@ class DeviantArtExtractor(AsynchronousExtractor):
         """Extract a HTML attribute and apply a regex to it"""
         txt, _ = text.extract(txt, ' %s="' % attr, '"')
         return re.match(pattern, txt)
+
+
+class DeviantArtImageExtractor(Extractor):
+    """Extract a single image from deviantart"""
+    category = "deviantart"
+    subcategory = "image"
+    directory_fmt = ["{category}", "{artist}"]
+    filename_fmt = "{category}_{index}_{title}.{extension}"
+    pattern = [r"(?:https?://)?[^\.]+\.deviantart\.com/art/.+-(\d+)$"]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url = match.group(0)
+        self.index = match.group(1)
+
+    def items(self):
+        page = self.request(self.url).text
+        data = text.extract_all(page, (
+            ('title' , '"og:title" content="', '"'),
+            ('image' , '"og:image" content="', '"'),
+            ('width' , '"og:image:width" content="', '"'),
+            ('height', '"og:image:height" content="', '"'),
+            ('url'   , '"og:url" content="', '"'),
+            ('description', '"og:description" content="', '"'),
+            ('date'  , '<span class="cc-time"><a title="', '"'),
+        ), values={'category': self.category, "index": self.index})[0]
+        data["artist"] = text.extract(data["url"], "//", ".")[0]
+        data["date"] = text.extract(data["date"], "", ", ", 8)[0]
+        text.nameext_from_url(data["image"], data)
+        yield Message.Version, 1
+        yield Message.Directory, data
+        yield Message.Url, data["image"], data
