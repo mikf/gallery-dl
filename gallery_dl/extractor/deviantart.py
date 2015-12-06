@@ -99,7 +99,7 @@ class DeviantArtImageExtractor(Extractor):
     subcategory = "image"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    pattern = [r"(?:https?://)?[^\.]+\.deviantart\.com/art/.+-(\d+)$"]
+    pattern = [r"(?:https?://)?[^\.]+\.deviantart\.com/art/.+-(\d+)"]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -115,10 +115,12 @@ class DeviantArtImageExtractor(Extractor):
             ('height', '"og:image:height" content="', '"'),
             ('url'   , '"og:url" content="', '"'),
             ('description', '"og:description" content="', '"'),
-            ('date'  , '<span class="cc-time"><a title="', '"'),
+            (None    , '<span class="tt-w">', ''),
+            ('date'  , 'title="', '"'),
         ), values={'category': self.category, "index": self.index})[0]
+        data["description"] = text.unescape(text.unescape(data["description"]))
         data["artist"] = text.extract(data["url"], "//", ".")[0]
-        data["date"] = text.extract(data["date"], "", ", ", 8)[0]
+        data["date"] = text.extract(data["date"], ", ", " in ", len(data["title"]))[0]
         text.nameext_from_url(data["image"], data)
         yield Message.Version, 1
         yield Message.Directory, data
