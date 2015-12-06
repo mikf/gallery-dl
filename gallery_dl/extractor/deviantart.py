@@ -13,11 +13,11 @@ from .. import text
 import re
 
 class DeviantArtExtractor(AsynchronousExtractor):
-
+    """Extract all works of an artist on deviantart"""
     category = "deviantart"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com/gallery/.*"]
+    pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
@@ -57,39 +57,36 @@ class DeviantArtExtractor(AsynchronousExtractor):
 
     def get_image_metadata(self, image):
         """Collect metadata for an image"""
-        match = self.extract_data(image, 'title',
+        tmatch = self.extract_data(image, 'title',
             r'(.+) by (.+), ([A-Z][a-z]{2} \d+, \d{4}) in')
-        if image.startswith(" ismature"):
-            # adult image
-            url, _ = text.extract(image, 'href="', '"')
-            page = self.request(url).text
-            _     , pos = text.extract(page, ' class="dev-content-normal "', '')
-            url   , pos = text.extract(page, ' src="', '"', pos)
-            index , pos = text.extract(page, ' data-embed-id="', '"', pos)
-            width , pos = text.extract(page, ' width="', '"', pos)
-            height, pos = text.extract(page, ' height="', '"', pos)
+        hmatch = self.extract_data(image, 'href', r'[^"]+-(\d+)')
+
+        url, pos = text.extract(image, ' data-super-full-img="', '"', tmatch.end())
+        if url:
+            width , pos = text.extract(image, ' data-super-full-width="', '"', pos)
+            height, pos = text.extract(image, ' data-super-full-height="', '"', pos)
         else:
-            # normal image
-            index = self.extract_data(image, 'href', r'[^"]+-(\d+)').group(1)
-            url, pos = text.extract(image, ' data-super-full-img="', '"', match.end())
+            url, pos = text.extract(image, ' data-super-img="', '"', pos)
             if url:
-                width , pos = text.extract(image, ' data-super-full-width="', '"', pos)
-                height, pos = text.extract(image, ' data-super-full-height="', '"', pos)
-            else:
-                url   , pos = text.extract(image, ' data-super-img="', '"', pos)
                 width , pos = text.extract(image, ' data-super-width="', '"', pos)
                 height, pos = text.extract(image, ' data-super-height="', '"', pos)
-        data = {
-            "index": index,
-            "title": match.group(1),
-            "artist": match.group(2),
-            "date": match.group(3),
+            else:
+                page = self.request(hmatch.group(0)).text
+                _     , pos = text.extract(page, ' class="dev-content-normal "', '')
+                url   , pos = text.extract(page, ' src="', '"', pos)
+                width , pos = text.extract(page, ' width="', '"', pos)
+                height, pos = text.extract(page, ' height="', '"', pos)
+        return url, text.nameext_from_url(url, {
+            "index": hmatch.group(1),
+            "title": text.unescape(tmatch.group(1)),
+            "artist": tmatch.group(2),
+            "date": tmatch.group(3),
             "width": width,
             "height": height,
-        }
-        return url, text.nameext_from_url(url, data)
+        })
 
     @staticmethod
     def extract_data(txt, attr, pattern):
+        """Extract a HTML attribute and apply a regex to it"""
         txt, _ = text.extract(txt, ' %s="' % attr, '"')
         return re.match(pattern, txt)
