@@ -36,6 +36,7 @@ modules = [
     "mangahere",
     "mangamint",
     "mangapanda",
+    "mangapark",
     "mangareader",
     "mangashare",
     "mangastream",
