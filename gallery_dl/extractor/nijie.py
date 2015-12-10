@@ -10,10 +10,9 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import config, text
-import re
 
-class NijieExtractor(AsynchronousExtractor):
-
+class NijieUserExtractor(AsynchronousExtractor):
+    """Extract all works of a single nijie-user"""
     category = "nijie"
     directory_fmt = ["{category}", "{artist-id}"]
     filename_fmt = "{category}_{artist-id}_{image-id}_p{index:>02}.{extension}"
@@ -28,13 +27,9 @@ class NijieExtractor(AsynchronousExtractor):
             + self.artist_id
         )
         self.session.headers["Referer"] = self.artist_url
-        self.session.cookies["R18"] = "1"
-        self.session.cookies["nijie_referer"] = "nijie.info"
-        self.session.cookies.update(
-            config.get(("extractor", self.category, "cookies"))
-        )
 
     def items(self):
+        self.login()
         data = self.get_job_metadata()
         yield Message.Version, 1
         yield Message.Directory, data
@@ -53,16 +48,25 @@ class NijieExtractor(AsynchronousExtractor):
     def get_image_ids(self):
         """Collect all image-ids for a specific artist"""
         page = self.request(self.artist_url).text
-        regex = r'<a href="/view\.php\?id=(\d+)"'
-        return [m.group(1) for m in re.finditer(regex, page)]
+        return list(text.extract_iter(page, ' illust_id="', '"'))
 
     def get_image_data(self, image_id):
         """Get URL and metadata for images specified by 'image_id'"""
         page = self.request(self.popup_url + image_id).text
-        matches = re.findall('<img src="([^"]+)"', page)
-        for index, url in enumerate(matches):
-            yield "https:" + url, text.nameext_from_url(url, {
-                "count": len(matches),
+        images = list(text.extract_iter(page, '<img src="//pic', '"'))
+        for index, url in enumerate(images):
+            yield "https://pic" + url, text.nameext_from_url(url, {
+                "count": len(images),
                 "index": index,
                 "image-id": image_id,
             })
+
+    def login(self):
+        """Login and obtain session cookie"""
+        params = {
+            "email": config.get(("extractor", self.category, "email")),
+            "password": config.get(("extractor", self.category, "password")),
+        }
+        page = self.session.post("https://nijie.info/login_int.php", data=params).text
+        if "//nijie.info/login.php" in page:
+            raise Exception("login failed")
