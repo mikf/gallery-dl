@@ -8,7 +8,6 @@
 
 import os
 import sys
-import tempfile
 from . import config, extractor, downloader, text, output
 from .extractor.message import Message
 
@@ -145,3 +144,18 @@ class KeywordJob():
         for key, value in sorted(keywords.items()):
             print(key, ":", " "*(offset-len(key)), value, sep="")
         print()
+
+
+class UrlJob():
+
+    def __init__(self, url):
+        self.extractor = extractor.find(url)
+        if self.extractor is None:
+            print(url, ": No extractor found", sep="", file=sys.stderr)
+
+    def run(self):
+        if self.extractor is None:
+            return
+        for msg in self.extractor:
+            if msg[0] == Message.Url:
+                print(msg[1])

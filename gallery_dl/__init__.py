@@ -38,11 +38,15 @@ def build_cmdline_parser():
         help="option value",
     )
     parser.add_argument(
+        "-g", "--get-urls", dest="list_urls", action="store_true",
+        help="print download urls",
+    )
+    parser.add_argument(
         "--list-modules", dest="list_modules", action="store_true",
         help="print a list of available modules/supported sites",
     )
     parser.add_argument(
-        "--list-keywords", dest="keywords", action="store_true",
+        "--list-keywords", dest="list_keywords", action="store_true",
         help="print a list of available keywords for the given URLs",
     )
     parser.add_argument(
@@ -77,7 +81,12 @@ def main():
         else:
             if not args.urls:
                 parser.error("the following arguments are required: URL")
-            jobtype = jobs.KeywordJob if args.keywords else jobs.DownloadJob
+            if args.list_urls:
+                jobtype = jobs.UrlJob
+            elif args.list_keywords:
+                jobtype = jobs.KeywordJob
+            else:
+                jobtype = jobs.DownloadJob
             for url in args.urls:
                 jobtype(url).run()
     except KeyboardInterrupt:
