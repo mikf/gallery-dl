@@ -7,17 +7,27 @@
 # published by the Free Software Foundation.
 
 import os
-import sys
-from . import config, extractor, downloader, text, output
+from . import config, extractor, downloader, text, output, exceptions
 from .extractor.message import Message
 
-class DownloadJob():
+class Job():
+    """Base class for Job-types"""
 
     def __init__(self, url):
         self.extractor = extractor.find(url)
         if self.extractor is None:
-            print(url, ": No extractor found", sep="", file=sys.stderr)
-            return
+            raise exceptions.NoExtractorError(url)
+
+    def run(self):
+        """Execute or run the job"""
+        pass
+
+
+class DownloadJob(Job):
+    """Download images into appropriate directory/filename locations"""
+
+    def __init__(self, url):
+        Job.__init__(self, url)
         self.directory = self.get_base_directory()
         self.downloaders = {}
         self.queue = None
@@ -34,7 +44,6 @@ class DownloadJob():
         self.directory_fmt = os.path.join(*segments)
 
     def run(self):
-        """Execute/Run the download job"""
         if self.extractor is None:
             return
 
@@ -63,7 +72,10 @@ class DownloadJob():
 
         if self.queue:
             for url in self.queue:
-                DownloadJob(url).run()
+                try:
+                    DownloadJob(url).run()
+                except exceptions.NoExtractorError:
+                    pass
 
     def download(self, msg):
         """Download the resource specified in 'msg'"""
@@ -117,16 +129,10 @@ class DownloadJob():
         return os.path.expanduser(os.path.expandvars(bdir))
 
 
-class KeywordJob():
-
-    def __init__(self, url):
-        self.extractor = extractor.find(url)
-        if self.extractor is None:
-            print(url, ": No extractor found", sep="", file=sys.stderr)
-            return
+class KeywordJob(Job):
+    """Print available keywords"""
 
     def run(self):
-        """Execute/Run the download job"""
         if self.extractor is None:
             return
         for msg in self.extractor:
@@ -146,12 +152,8 @@ class KeywordJob():
         print()
 
 
-class UrlJob():
-
-    def __init__(self, url):
-        self.extractor = extractor.find(url)
-        if self.extractor is None:
-            print(url, ": No extractor found", sep="", file=sys.stderr)
+class UrlJob(Job):
+    """Print download urls"""
 
     def run(self):
         if self.extractor is None:
