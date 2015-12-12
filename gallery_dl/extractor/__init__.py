@@ -52,12 +52,17 @@ modules = [
 ]
 
 def find(url):
-    """Find extractor suitable for handling the given url"""
+    """Find suitable extractor for the given url"""
     for pattern, klass in _list_patterns():
         match = re.match(pattern, url)
         if match:
             return klass(match)
     return None
+
+def extractors():
+    """Yield all available extractor classes"""
+    for _, klass in _list_patterns():
+        yield klass
 
 # --------------------------------------------------------------------
 # internals
