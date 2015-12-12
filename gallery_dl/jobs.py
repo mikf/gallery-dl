@@ -7,6 +7,8 @@
 # published by the Free Software Foundation.
 
 import os
+import json
+import hashlib
 from . import config, extractor, downloader, text, output, exceptions
 from .extractor.message import Message
 
@@ -69,13 +71,17 @@ class DownloadJob(Job):
                         self.extractor.category, msg[1]
                     )
                 # TODO: support for multiple message versions
+            self.run_queue()
 
-        if self.queue:
-            for url in self.queue:
-                try:
-                    DownloadJob(url).run()
-                except exceptions.NoExtractorError:
-                    pass
+    def run_queue(self):
+        """Run all jobs stored in queue"""
+        if not self.queue:
+            return
+        for url in self.queue:
+            try:
+                DownloadJob(url).run()
+            except exceptions.NoExtractorError:
+                pass
 
     def download(self, msg):
         """Download the resource specified in 'msg'"""
@@ -146,6 +152,7 @@ class KeywordJob(Job):
 
     @staticmethod
     def print_keywords(keywords):
+        """Print key-value pairs with formatting"""
         offset = max(map(len, keywords.keys())) + 1
         for key, value in sorted(keywords.items()):
             print(key, ":", " "*(offset-len(key)), value, sep="")
@@ -161,3 +168,30 @@ class UrlJob(Job):
         for msg in self.extractor:
             if msg[0] == Message.Url:
                 print(msg[1])
+
+
+class HashJob(DownloadJob):
+    """Generate SHA1 hashes for extractor results"""
+
+    def __init__(self, url):
+        DownloadJob.__init__(self, url)
+        self.hash_url     = hashlib.sha1()
+        self.hash_keyword = hashlib.sha1()
+
+    def download(self, msg):
+        self.update_url(msg[1])
+        self.update_keyword(msg[2])
+
+    def set_directory(self, msg):
+        self.update_keyword(msg[1])
+
+    def enqueue(self, url):
+        self.update_url(url)
+
+    def update_url(self, url):
+        self.hash_url.update(url.encode())
+
+    def update_keyword(self, kwdict):
+        self.hash_keyword.update(
+            json.dumps(kwdict, sort_keys=True).encode()
+        )
