@@ -19,6 +19,10 @@ class DeviantArtUserExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
+    test = [("http://shimoda7.deviantart.com/gallery/", {
+        "url": "63bfa8efba199e27181943c9060f6770f91a8441",
+        "keyword": "c0343b41c28c87254a3f0b3241222e94f780701e",
+    })]
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
@@ -102,6 +106,10 @@ class DeviantArtImageExtractor(Extractor):
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [r"(?:https?://)?[^\.]+\.deviantart\.com/art/.+-(\d+)"]
+    test = [("http://shimoda7.deviantart.com/art/For-the-sake-of-a-memory-10073852", {
+        "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
+        "keyword": "f2dfde276a39990097935ace092811c56bc0bfec",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)

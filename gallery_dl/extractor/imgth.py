@@ -11,12 +11,16 @@
 from .common import Extractor, Message
 from .. import text
 
-class ImgthExtractor(Extractor):
-
+class ImgthGalleryExtractor(Extractor):
+    """Extract all images of a gallery"""
     category = "imgth"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
     pattern = [r"(?:https?://)?imgth\.com/gallery/(\d+)"]
+    test = [("http://imgth.com/gallery/37/wallpaper-anime", {
+        "url": "4ae1d281ca2b48952cf5cca57e9914402ad72748",
+        "keyword": "1b15726d53bc2c08d845fa60ce538396380688df",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -31,7 +35,9 @@ class ImgthExtractor(Extractor):
         for num, url in enumerate(self.get_images(page), 1):
             data["num"] = num
             yield Message.Url, url, text.nameext_from_url(url, data)
+
     def get_images(self, page):
+        """Yield all image urls for this gallery"""
         pnum = 0
         while True:
             pos = 0
@@ -48,15 +54,10 @@ class ImgthExtractor(Extractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        data = {
-            "category": self.category,
-            "gallery-id": self.gid,
-        }
-        data, _ = text.extract_all(page, (
+        return text.extract_all(page, (
             ("title", '<h1>', '</h1>'),
             ("count", 'total of images in this gallery: ', ' '),
             ("date" , 'created on ', ' by <'),
             (None   , 'href="/users/', ''),
             ("user" , '>', '<'),
-        ), values=data)
-        return data
+        ), values={"category": self.category, "gallery-id": self.gid})[0]

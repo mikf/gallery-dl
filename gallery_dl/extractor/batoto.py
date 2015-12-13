@@ -18,6 +18,10 @@ class BatotoExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)"]
+    test = [("http://bato.to/reader#df48fa98f7d41851", {
+        "url": "ab0526091f65b8eda7a8866b937adbdb468d68b1",
+        "keyword": "ef14d3230aa0872e8d9e4236ed9160755f78aeb3",
+    })]
     url = "https://bato.to/areader"
 
     def __init__(self, match):

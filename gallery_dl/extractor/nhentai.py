@@ -18,6 +18,10 @@ class NhentaiExtractor(Extractor):
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)"]
+    test = [("http://nhentai.net/g/147850/", {
+        "url": "199ddd07dded0f69282e09a372710698ea21ab8e",
+        "keyword": "926be7e9c6684a0d477fce9b48b76df747937037",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
