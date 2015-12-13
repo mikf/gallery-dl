@@ -38,14 +38,16 @@ class DeviantArtUserExtractor(AsynchronousExtractor):
         url = "http://{}.deviantart.com/gallery/".format(self.artist)
         params = {"catpath": "/", "offset": 0}
         while True:
+            num = 0
             page = self.request(url, params=params).text
             _, pos = text.extract(page, '<div data-dwait-click="GMI.wake"', '')
             while True:
                 image_info, pos = text.extract(page, '<a class="thumb', '</a>', pos)
                 if not image_info:
                     break
+                num += 1
                 yield self.get_image_metadata(image_info)
-            if pos == 0:
+            if num != 24:
                 break
             params["offset"] += 24
 
