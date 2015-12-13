@@ -61,8 +61,10 @@ def find(url):
 
 def extractors():
     """Yield all available extractor classes"""
-    for _, klass in _list_patterns():
-        yield klass
+    return sorted(
+        set(klass for _, klass in _list_patterns()),
+        key=lambda x: x.__name__
+    )
 
 # --------------------------------------------------------------------
 # internals
