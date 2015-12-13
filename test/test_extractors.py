@@ -8,12 +8,12 @@
 # published by the Free Software Foundation.
 
 import unittest
-import gallery_dl.extractor as extractor
-import gallery_dl.jobs as jobs
+from  gallery_dl import extractor, jobs, config
 
 class TestExttractors(unittest.TestCase):
 
     def test_extractors(self):
+        config.load()
         for extr in extractor.extractors():
             if not hasattr(extr, "test"):
                 continue
@@ -25,8 +25,10 @@ class TestExttractors(unittest.TestCase):
     def run_test(self, url, result):
         hjob = jobs.HashJob(url)
         hjob.run()
-        self.assertEqual(hjob.hash_url.hexdigest(), result["url"])
-        self.assertEqual(hjob.hash_keyword.hexdigest(), result["keyword"])
+        if "url" in result:
+            self.assertEqual(hjob.hash_url.hexdigest(), result["url"])
+        if "keyword" in result:
+            self.assertEqual(hjob.hash_keyword.hexdigest(), result["keyword"])
 
 if __name__ == '__main__':
     unittest.main(warnings='ignore')
