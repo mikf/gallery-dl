@@ -43,8 +43,9 @@ class ImgurExtractor(Extractor):
         }
         return text.extract_all(page, (
             ('title', '<meta property="og:title" content="', '"'),
-            ('date' , '"create_datetime":"', '"'),
-            ('count', '"num_images":', ','),
+            ('count', '"num_images":"', '"'),
+            ('date' , '"datetime":"', ' '),
+            ('time' , '', '"'),
         ), values=data)[0]
 
     def get_image_urls(self):
