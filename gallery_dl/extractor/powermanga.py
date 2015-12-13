@@ -24,6 +24,10 @@ class PowerMangaExtractor(Extractor):
          r"(.+/([a-z]{2})/\d+/\d+)(?:/page)?"),
         (r"(?:https?://)?(?:www\.)?(p)owermanga\.org/((?:[^-]+-)+[^-]+/?)"),
     ]
+    test = [("http://read.powermanga.org/read/one_piece/en/0/803/page/1", {
+        "url": "e6179c1565068f99180620281f86bdd25be166b4",
+        "keyword": "ef17bbc6a9ab0390a31f1508e825ddce35f2d2b1",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)

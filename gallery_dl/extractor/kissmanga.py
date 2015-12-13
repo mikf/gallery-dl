@@ -28,6 +28,9 @@ class KissmangaMangaExtractor(KissmangaExtractor):
     """Extract all manga-chapters from kissmanga"""
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/[^/]+/?$"]
+    test = [("http://kissmanga.com/Manga/Dropout", {
+        "url": "992befdd64e178fe5af67de53f8b510860d968ca",
+    })]
 
     def items(self):
         cloudflare.bypass_ddos_protection(self.session, self.url_base)
@@ -47,6 +50,16 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     """Extract a single manga-chapter from kissmanga"""
     subcategory = "chapter"
     pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/.+/.+\?id=\d+"]
+    test = [
+        ("http://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
+            "url": "d9ce171d3d4c0493dbb169a5641ac4cd45b0cb3a",
+            "keyword": "892c3e4df03a575a282a5695add986a49623d746",
+        }),
+        ("http://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
+            "url": "b8dbf9fca1d8c942ca5fefd10299da49e8399081",
+            "keyword": "0a98952984941cc2a11892b1cd7b237ffb20adaa",
+        })
+    ]
 
     def items(self):
         cloudflare.bypass_ddos_protection(self.session, "http://kissmanga.com")

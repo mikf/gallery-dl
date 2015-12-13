@@ -18,6 +18,10 @@ class ImgurExtractor(Extractor):
     directory_fmt = ["{category}", "{album-key} - {title}"]
     filename_fmt = "{category}_{album-key}_{num:>03}_{name}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?imgur\.com/(?:a|gallery)/([^/?&#]+)"]
+    test = [("https://imgur.com/a/TcBmP", {
+        "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
+        "keyword": "5c96eee4df5938ed37f1f95f5c4ef64444bddeb4",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)

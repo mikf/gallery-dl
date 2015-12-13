@@ -21,7 +21,7 @@ class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts\?(?:utf8=%E2%9C%93&)?tags=([^&]+)"]
     test = [("https://danbooru.donmai.us/posts?tags=heath_ledger", {
         "url": "a261c33f117c7395f0eac54091075e67c8e66fca",
-        "keyword": "86c1e0fc2879befe90cf8b4404264338b8063685",
+        "keyword": "fc4685c98aedaf2383384d47af4f7bd257c40f32",
     })]
 
 class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):

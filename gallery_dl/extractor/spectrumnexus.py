@@ -16,6 +16,9 @@ class SpectrumNexusMangaExtractor(Extractor):
     category = "spectrumnexus"
     subcategory = "manga"
     pattern = [r"(?:https?://)?view\.thespectrum\.net/series/([^\.]+)\.html$"]
+    test = [("http://view.thespectrum.net/series/kare-kano-volume-01.html", {
+        "url": "b2b175aad5ef1701cc4aee7c24f1ca3a93aba9cb",
+    })]
     url_base = "http://view.thespectrum.net/series/"
 
     def __init__(self, match):
@@ -45,6 +48,10 @@ class SpectrumNexusChapterExtractor(AsynchronousExtractor):
          r"\?ch=(Chapter\+(\d+)|Volume\+(\d+))"),
         (r"(?:https?://)?(view\.thespectrum\.net/series/[^/]+-chapter-(\d+)\.html)"),
     ]
+    test = [("http://view.thespectrum.net/series/toriko.html?ch=Chapter+343&page=1", {
+        "url": "c0fc7dc594841217cc622a67edd79f06e9900333",
+        "keyword": "bde9c95a2d0feca0574c7248ed06f1684f86b2ac",
+    })]
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)

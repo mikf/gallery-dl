@@ -17,6 +17,10 @@ class NijieUserExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{artist-id}"]
     filename_fmt = "{category}_{artist-id}_{image-id}_p{index:>02}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?nijie\.info/members(?:_illust)?\.php\?id=(\d+)"]
+    test = [("https://nijie.info/members_illust.php?id=44", {
+        "url": "585d821df4716b1098660a0be426d01db4b65f2a",
+        "keyword": "30c981b9d7351ec275b9840d8bc2b4ef3da8c4b4",
+    })]
     popup_url = "https://nijie.info/view_popup.php?id="
 
     def __init__(self, match):
