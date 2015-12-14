@@ -21,6 +21,10 @@ class HentaiFoundryUserExtractor(Extractor):
         r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/([^/]+)/?$",
         r"(?:https?://)?(?:www\.)?hentai-foundry\.com/user/([^/]+)/profile",
     ]
+    test = [("http://www.hentai-foundry.com/pictures/user/Orzy", {
+        "url": "236ac02c8f081fee44ad2c2571bf74615633b91e",
+        "keyword": "f5f1aa78ecbe390fb117a0b599f771cd47df86c6",
+    })]
     url_base = "http://www.hentai-foundry.com/pictures/user/"
 
     def __init__(self, match):
@@ -109,6 +113,10 @@ class HentaiFoundryImageExtractor(Extractor):
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/"
                 r"([^/]+)/(\d+)/[^/]+")]
+    test = [("http://www.hentai-foundry.com/pictures/user/Orzy/76940/Youmu-Konpaku", {
+        "url": "50c267b2b2983b98b18fd0d2acbec8ce5ba64c77",
+        "keyword": "8c9b7054b78fb4f52982c3f21f3ba2a9fcdd5428",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)

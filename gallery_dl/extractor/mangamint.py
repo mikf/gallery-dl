@@ -17,6 +17,9 @@ class MangaMintMangaExtractor(Extractor):
     category = "mangamint"
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangamint\.com(/manga/[^\?]+-manga)"]
+    test = [("www.mangamint.com/manga/mushishi-manga", {
+        "url": "df7a1f4224d23e392ec09d4c7bbd4fbc873327d0",
+    })]
     url_base = "https://www.mangamint.com"
 
     def __init__(self, match):
@@ -50,6 +53,10 @@ class MangaMintChapterExtractor(Extractor):
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?mangamint\.com/([^\?]+-(\d+))"]
+    test = [("http://www.mangamint.com/mushishi-1", {
+        "url": "eb1669d7043a17b79ccc92454c2676200628800c",
+        "keyword": "ca4ba6fa84367fd7c345879a17ebaad39b589da5",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)

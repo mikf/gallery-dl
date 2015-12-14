@@ -17,6 +17,9 @@ class MangaHereMangaExtractor(Extractor):
     category = "mangahere"
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangahere\.co/manga/([^/]+)/?$"]
+    test = [("http://www.mangahere.co/manga/aria/", {
+        "url": "77d96842292a6a341e8937816ed45cc09b538cf0",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -44,6 +47,10 @@ class MangaHereChapterExtractor(AsynchronousExtractor):
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?mangahere\.co/manga/"
                 r"([^/]+(?:/v0*(\d+))?/c0*(\d+)(\.\d+)?)")]
+    test = [("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", {
+        "url": "c807532e919af7600fe0ef21fb89c5062637dd87",
+        "keyword": "f342e3df9fa39eb10cf7ba5ef3300df6ad77f332",
+    })]
     url_fmt = "http://www.mangahere.co/manga/{}/{}.html"
 
     def __init__(self, match):

@@ -21,6 +21,10 @@ class PixivUserExtractor(Extractor):
     directory_fmt = ["{category}", "{artist-id}-{artist-nick}"]
     filename_fmt = "{category}_{artist-id}_{id}{num}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php\?id=(\d+)"]
+    test = [("http://www.pixiv.net/member_illust.php?id=173530", {
+        "url": "8f2fc0437e2095ab750c4340a4eba33ec6269477",
+        "keyword": "315d6fc710cddfecbe0bc030ff04930537af0ce7",
+    })]
     member_url = "http://www.pixiv.net/member_illust.php"
     illust_url = "http://www.pixiv.net/member_illust.php?mode=medium"
 
@@ -136,6 +140,10 @@ class PixivWorkExtractor(PixivUserExtractor):
     subcategory = "work"
     pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
                 r"\?(?:[^&]+&)*illust_id=(\d+)")]
+    test = [("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=966412", {
+        "url": "efb622f065b0871e92195e7bee0b4d75bd687d8d",
+        "keyword": "abc22b8d70c67e9884fdec8d851b57a9d29d5890",
+    })]
 
     def __init__(self, match):
         PixivUserExtractor.__init__(self, match)
@@ -156,6 +164,10 @@ class PixivFavoriteExtractor(PixivUserExtractor):
     subcategory = "favorite"
     directory_fmt = ["{category}", "bookmarks", "{artist-id}-{artist-nick}"]
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php\?id=(\d+)"]
+    test = [("http://www.pixiv.net/bookmark.php?id=173530", {
+        "url": "0110c5c2ee9612a0362e26f7481a8916b6f410fe",
+        "keyword": "ebf15d8fe9ce99bff61a3a6d98418d898141d9a0",
+    })]
 
     def __init__(self, match):
         PixivUserExtractor.__init__(self, match)
@@ -169,6 +181,7 @@ class PixivBookmarkExtractor(PixivFavoriteExtractor):
     """Extract all favorites/bookmarks of your own account"""
     subcategory = "bookmark"
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php()$"]
+    test = []
 
     def __init__(self, match):
         PixivFavoriteExtractor.__init__(self, match)
