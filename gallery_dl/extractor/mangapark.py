@@ -15,7 +15,7 @@ class MangaparkMangaExtractor(Extractor):
     """Extract all chapters of a manga from mangapark"""
     category = "mangapark"
     subcategory = "manga"
-    pattern = [r"(?:https?://)?(?:www\.)?mangapark\.me/manga/([^/]+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?mangapark\.me/manga/([^/]+)$"]
     url_base = "http://mangapark.me"
 
     def __init__(self, match):
@@ -25,7 +25,6 @@ class MangaparkMangaExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
         for chapter in self.get_chapters():
-            print(self.url_base + chapter)
             yield Message.Queue, self.url_base + chapter
 
     def get_chapters(self):
@@ -45,11 +44,15 @@ class MangaparkChapterExtractor(Extractor):
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me/manga/"
-                r"([^/]+/s(\d+)(?:/v(\d+))?/c(\d+)(\.\d+)?)")]
+                r"([^/]+/s(\d+)(?:/v(\d+))?/c(\d+)(?:(\.\d+)|/e(\d+))?)")]
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.part, self.version, self.volume, self.chapter, self.chminor = match.groups()
+        self.part    = match.group(1)
+        self.version = match.group(2)
+        self.volume  = match.group(3)
+        self.chapter = match.group(4)
+        self.chminor = match.group(5) or "." + match.group(6)
 
     def items(self):
         page = self.request("http://mangapark.me/manga/" + self.part + "?zoom=2").text
