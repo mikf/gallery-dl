@@ -16,6 +16,9 @@ class MangaShareMangaExtractor(Extractor):
     category = "mangashare"
     subcategory = "manga"
     pattern = [r"(?:https?://)?read\.mangashare\.com/[^/]+$"]
+    test = [("http://read.mangashare.com/Gantz", {
+        "url": "c3b9153d99200ddd2fae0194dad903ccb815e9e7",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -41,6 +44,10 @@ class MangaShareChapterExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?read\.mangashare\.com/([^/]+/chapter-\d+)"]
+    test = [("http://read.mangashare.com/Gantz/chapter-331/page001.html", {
+        "url": "2980fb9548e809dea63d104bc514dcc33bdd9ef7",
+        "keyword": "4872a5645ab79cb9ecf363a5bf4cb9062fd61eef",
+    })]
     url_fmt = "http://read.mangashare.com/{}/page{:>03}.html"
 
     def __init__(self, match):

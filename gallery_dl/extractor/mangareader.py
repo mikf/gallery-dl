@@ -23,6 +23,9 @@ class MangaReaderMangaExtractor(MangaReaderBase, Extractor):
     """Extract all manga-chapters from mangareader"""
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/]+)$"]
+    test = [("http://www.mangareader.net/mushishi", {
+        "url": "249042420b67a07b32e7f6be4c7410b6d810b808",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -45,6 +48,10 @@ class MangaReaderChapterExtractor(MangaReaderBase, AsynchronousExtractor):
         r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))",
         r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
     ]
+    test = [("http://www.mangareader.net/karate-shoukoushi-kohinata-minoru/11", {
+        "url": "84ffaab4c027ef9022695c53163c3aeabd07ca58",
+        "keyword": "0df7db81a44ef642922aab798c303d60e2b6802d",
+    })]
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)

@@ -22,13 +22,25 @@ class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
         r"(?:https?://)?(?:www\.)?e621\.net/post/index/\d+/([^?]+)",
         r"(?:https?://)?(?:www\.)?e621\.net/post\?tags=([^&]+)",
     ]
+    test = [("https://e621.net/post/index/1/anry", {
+        "url": "8021e5ea28d47c474c1ffc9bd44863c4d45700ba",
+        "keyword": "573152cda6e193f57c9042fcfc561c45865ef0c2",
+    })]
 
 class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
     """Extract image-pools from e621"""
     subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/pool/show/(\d+)"]
+    test = [("https://e621.net/pool/show/73", {
+        "url": "842f2fb065c7c339486a9b1d689020b8569888ed",
+        "keyword": "c0c7cc1e7721607dc6a94e052664c14985b1d404",
+    })]
 
 class E621PostExtractor(E621Extractor, booru.BooruPostExtractor):
     """Extract single images from e621"""
     subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/post/show/(\d+)"]
+    test = [("https://e621.net/post/show/535", {
+        "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",
+        "keyword": "f2309ce2bf1f7fb9403756a2789f71738ca71231",
+    })]

@@ -16,6 +16,9 @@ class MangaparkMangaExtractor(Extractor):
     category = "mangapark"
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangapark\.me/manga/([^/]+)$"]
+    test = [("http://mangapark.me/manga/mushishi", {
+        "url": "9902e342af71af19a5ac20fcd01950b165acf119",
+    })]
     url_base = "http://mangapark.me"
 
     def __init__(self, match):
@@ -45,6 +48,16 @@ class MangaparkChapterExtractor(Extractor):
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me/manga/"
                 r"([^/]+/s(\d+)(?:/v(\d+))?/c(\d+)(?:(\.\d+)|/e(\d+))?)")]
+    test = [
+        ("http://mangapark.me/manga/ad-astra-per-aspera-hata-kenjirou/s1/c1.2/1", {
+            "url": "f325ce264df390c5ba9607c52a7e7b0829672404",
+            "keyword": "480a114319e42c561079ffe138afd67e22a74cd3",
+        }),
+        ("http://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
+            "url": "8534c8286a18c4db47606f84a4df9f1a42bab291",
+            "keyword": "f96962442cdd5bc957603831c695159d974b7b93",
+        })
+    ]
 
     def __init__(self, match):
         Extractor.__init__(self)
