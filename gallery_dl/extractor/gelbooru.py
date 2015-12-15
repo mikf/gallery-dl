@@ -33,10 +33,6 @@ class GelbooruTagExtractor(GelbooruExtractor, booru.BooruTagExtractor):
     """Extract images from gelbooru based on search-tags"""
     subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?page=post&s=list&tags=([^&]+)"]
-    test = [("http://gelbooru.com/index.php?page=post&s=list&tags=heath_ledger", {
-        "url": "907cd80f0c1635b96eeb4b970c19f5ad9ab93414",
-        "keyword": "71a22b7434d326a44580bc933221c2c50fed8d4a",
-    })]
 
 # TODO: find out how to access pools via gelbooru-api
 # class GelbooruPoolExtractor(GelbooruExtractor, booru.BooruPoolExtractor):
