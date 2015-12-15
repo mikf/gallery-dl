@@ -10,7 +10,7 @@
 import unittest
 from  gallery_dl import extractor, jobs, config
 
-class TestExttractors(unittest.TestCase):
+class TestExtractors(unittest.TestCase):
 
     def test_extractors(self):
         config.load()

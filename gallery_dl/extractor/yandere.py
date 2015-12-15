@@ -19,10 +19,6 @@ class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
     """Extract images from yandere based on search-tags"""
     subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post\?tags=([^&]+)"]
-    test = [("https://yande.re/post?tags=yuuki_itsuka", {
-        "url": "a6df238d4657736eaae9840a0b6a68fb290aa6d5",
-        "keyword": "7699bf0fd1dad622c8806f6193fb79f12d40c138",
-    })]
 
 class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
     """Extract image-pools from yandere"""
