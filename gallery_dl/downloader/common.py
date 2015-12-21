@@ -15,16 +15,18 @@ class BasicDownloader():
 
     max_tries = 5
 
-    def download(self, url, path):
-        """Download the resource at 'url' and write it to a file given by 'path'"""
-        with open(path, "wb") as file:
+    def download(self, url, fileobj):
+        """Download the resource at 'url' and write it to a file-like object"""
+        try:
+            return self.download_impl(url, fileobj)
+        except:
+            # remove file if download failed
             try:
-                return self.download_impl(url, file)
-            except:
-                #remove file if download failed
-                file.close()
-                os.unlink(path)
-                raise
+                fileobj.close()
+                os.unlink(fileobj.name)
+            except AttributeError:
+                pass
+            raise
 
     def download_impl(self, url, file_handle):
         """Actual implementaion of the download process"""

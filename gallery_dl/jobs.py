@@ -93,7 +93,8 @@ class DownloadJob(Job):
             return
         dlinstance = self.get_downloader(url)
         self.printer.start(path)
-        tries = dlinstance.download(url, path)
+        with open(path, "wb") as file:
+            tries = dlinstance.download(url, file)
         self.printer.success(path, tries)
 
     def set_directory(self, msg):
