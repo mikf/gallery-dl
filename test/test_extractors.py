@@ -23,12 +23,14 @@ class TestExtractors(unittest.TestCase):
                 self.run_test(url, result)
 
     def run_test(self, url, result):
-        hjob = jobs.HashJob(url)
+        hjob = jobs.HashJob(url, "content" in result)
         hjob.run()
         if "url" in result:
             self.assertEqual(hjob.hash_url.hexdigest(), result["url"])
         if "keyword" in result:
             self.assertEqual(hjob.hash_keyword.hexdigest(), result["keyword"])
+        if "content" in result:
+            self.assertEqual(hjob.hash_content.hexdigest(), result["content"])
 
 if __name__ == '__main__':
     unittest.main(warnings='ignore')
