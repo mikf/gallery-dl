@@ -174,14 +174,27 @@ class UrlJob(Job):
 class HashJob(DownloadJob):
     """Generate SHA1 hashes for extractor results"""
 
-    def __init__(self, url):
+    class HashIO():
+
+        def __init__(self, hashobj):
+            self.hashobj = hashobj
+
+        def write(self, content):
+            self.hashobj.update(content)
+
+    def __init__(self, url, content=False):
         DownloadJob.__init__(self, url)
+        self.content      = content
         self.hash_url     = hashlib.sha1()
         self.hash_keyword = hashlib.sha1()
+        self.hash_content = hashlib.sha1()
+        if content:
+            self.fileobj = self.HashIO(self.hash_content)
 
     def download(self, msg):
         self.update_url(msg[1])
         self.update_keyword(msg[2])
+        self.update_content(msg[1])
 
     def set_directory(self, msg):
         self.update_keyword(msg[1])
@@ -196,3 +209,7 @@ class HashJob(DownloadJob):
         self.hash_keyword.update(
             json.dumps(kwdict, sort_keys=True).encode()
         )
+
+    def update_content(self, url):
+        if self.content:
+            self.get_downloader(url).download(url, self.fileobj)
