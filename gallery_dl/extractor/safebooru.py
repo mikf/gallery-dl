@@ -29,9 +29,9 @@ class SafebooruTagExtractor(SafebooruExtractor, booru.BooruTagExtractor):
     """Extract images from safebooru based on search-tags"""
     subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?\?page=post&s=list&tags=([^&]+)"]
-    test = [("http://safebooru.org/index.php?page=post&s=list&tags=heath_ledger", {
-        "url": "72f17ad6f8254595b56f7e5dd1947d8b51b1ba9b",
-        "keyword": "79670e1de47e39352fe71f482ece003cdf8e4512",
+    test = [("http://safebooru.org/index.php?page=post&s=list&tags=bonocho", {
+        "url": "c91e04ffbdf317fae95b2e160c8345503d9fb730",
+        "content": "e5ad4c5bf241b1def154958535bef6c2f6b733eb",
     })]
 
 class SafebooruPostExtractor(SafebooruExtractor, booru.BooruPostExtractor):
