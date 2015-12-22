@@ -23,9 +23,9 @@ class ThreeDeeBooruTagExtractor(ThreeDeeBooruExtractor, booru.BooruTagExtractor)
     """Extract images from 3dbooru based on search-tags"""
     subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post(?:/(?:index)?)?\?tags=([^&]+)"]
-    test = [("http://behoimi.org/post/index?tags=himekawa_azuru", {
-        "url": "6f6f485fb92629bc22a5df18b7cbb3ac13ae46b2",
-        "keyword": "df2f7b1fb0efb739eed55788de700a1b834d2896",
+    test = [("http://behoimi.org/post?tags=himekawa_azuru dress", {
+        "url": "ecb30c6aaaf8a6ff8f55255737a9840832a483c1",
+        "content": "11cbda40c287e026c1ce4ca430810f761f2d0b2a",
     })]
 
 class ThreeDeeBooruPoolExtractor(ThreeDeeBooruExtractor, booru.BooruPoolExtractor):
@@ -34,7 +34,7 @@ class ThreeDeeBooruPoolExtractor(ThreeDeeBooruExtractor, booru.BooruPoolExtracto
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/pool/show/(\d+)"]
     test = [("http://behoimi.org/pool/show/27", {
         "url": "da75d2d1475449d5ef0c266cb612683b110a30f2",
-        "keyword": "ea76fd6cef4430bee403d080bf173af829a4390a",
+        "content": "fd5b37c5c6c2de4b4d6f1facffdefa1e28176554",
     })]
 
 class ThreeDeeBooruPostExtractor(ThreeDeeBooruExtractor, booru.BooruPostExtractor):
@@ -43,5 +43,5 @@ class ThreeDeeBooruPostExtractor(ThreeDeeBooruExtractor, booru.BooruPostExtracto
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post/show/(\d+)"]
     test = [("http://behoimi.org/post/show/140852", {
         "url": "ce874ea26f01d6c94795f3cc3aaaaa9bc325f2f6",
-        "keyword": "ebde54ed04e1de7d1fd819728963f754b77a693e",
+        "content": "26549d55b82aa9a6c1686b96af8bfcfa50805cd4",
     })]

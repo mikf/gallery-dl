@@ -24,7 +24,7 @@ class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
     ]
     test = [("https://e621.net/post/index/1/anry", {
         "url": "8021e5ea28d47c474c1ffc9bd44863c4d45700ba",
-        "keyword": "573152cda6e193f57c9042fcfc561c45865ef0c2",
+        "content": "501d1e5d922da20ee8ff9806f5ed3ce3a684fd58",
     })]
 
 class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
@@ -33,7 +33,7 @@ class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/pool/show/(\d+)"]
     test = [("https://e621.net/pool/show/73", {
         "url": "842f2fb065c7c339486a9b1d689020b8569888ed",
-        "keyword": "c0c7cc1e7721607dc6a94e052664c14985b1d404",
+        "content": "c2c87b7a9150509496cddc75ccab08109922876a",
     })]
 
 class E621PostExtractor(E621Extractor, booru.BooruPostExtractor):
@@ -42,5 +42,5 @@ class E621PostExtractor(E621Extractor, booru.BooruPostExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/post/show/(\d+)"]
     test = [("https://e621.net/post/show/535", {
         "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",
-        "keyword": "f2309ce2bf1f7fb9403756a2789f71738ca71231",
+        "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
     })]

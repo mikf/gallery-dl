@@ -32,7 +32,11 @@ class GelbooruExtractor(booru.XMLBooruExtractor):
 class GelbooruTagExtractor(GelbooruExtractor, booru.BooruTagExtractor):
     """Extract images from gelbooru based on search-tags"""
     subcategory = "tag"
-    pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?page=post&s=list&tags=([^&]+)"]
+    pattern = [(r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
+                r"\?page=post&s=list&tags=([^&]+)")]
+    test = [("http://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
+        "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
+    })]
 
 # TODO: find out how to access pools via gelbooru-api
 # class GelbooruPoolExtractor(GelbooruExtractor, booru.BooruPoolExtractor):
@@ -43,7 +47,8 @@ class GelbooruTagExtractor(GelbooruExtractor, booru.BooruTagExtractor):
 class GelbooruPostExtractor(GelbooruExtractor, booru.BooruPostExtractor):
     """Extract single images from gelbooru"""
     subcategory = "post"
-    pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?page=post&s=view&id=(\d+)"]
+    pattern = [(r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
+                r"\?page=post&s=view&id=(\d+)")]
     test = [("http://gelbooru.com/index.php?page=post&s=view&id=313638", {
-        "url": "9154c1edad734f0bacd2445c5b7540804b59f2ef",
+        "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
     })]
