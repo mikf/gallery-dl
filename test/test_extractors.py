@@ -12,15 +12,8 @@ from  gallery_dl import extractor, jobs, config
 
 class TestExtractors(unittest.TestCase):
 
-    def test_extractors(self):
+    def setUp(self):
         config.load()
-        for extr in extractor.extractors():
-            if not hasattr(extr, "test"):
-                continue
-            print(extr)
-            for url, result in extr.test:
-                print(url)
-                self.run_test(url, result)
 
     def run_test(self, url, result):
         hjob = jobs.HashJob(url, "content" in result)
@@ -32,5 +25,25 @@ class TestExtractors(unittest.TestCase):
         if "content" in result:
             self.assertEqual(hjob.hash_content.hexdigest(), result["content"])
 
+
+def generate_test(extr):
+    def test(self):
+        print(extr.__name__)
+        for url, result in extr.test:
+            print(url)
+            self.run_test(url, result)
+    return test
+
+
 if __name__ == '__main__':
+    import sys
+    extractors = extractor.extractors()
+    if len(sys.argv) > 1:
+        extractors = filter(lambda x: x.category in sys.argv, extractors)
+    for extr in extractors:
+        if hasattr(extr, "test"):
+            name = "test_" + extr.__name__
+            test = generate_test(extr)
+            setattr(TestExtractors, name, test)
+    del sys.argv[1:]
     unittest.main(warnings='ignore')
