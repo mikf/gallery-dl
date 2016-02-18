@@ -11,7 +11,7 @@
 import sys
 import re
 import os.path
-import html.parser
+import html
 import urllib.parse
 import platform
 
@@ -114,4 +114,4 @@ else:
 
 unquote = urllib.parse.unquote
 
-unescape = html.parser.HTMLParser().unescape
+unescape = html.unescape
