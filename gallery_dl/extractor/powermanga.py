@@ -24,9 +24,9 @@ class PowerMangaExtractor(Extractor):
          r"(.+/([a-z]{2})/\d+/\d+)(?:/page)?"),
         (r"(?:https?://)?(?:www\.)?(p)owermanga\.org/((?:[^-]+-)+[^-]+/?)"),
     ]
-    test = [("http://read.powermanga.org/read/one_piece/en/0/803/page/1", {
+    test = [("https://read.powermanga.org/read/one_piece/en/0/803/page/1", {
         "url": "e6179c1565068f99180620281f86bdd25be166b4",
-        "keyword": "ef17bbc6a9ab0390a31f1508e825ddce35f2d2b1",
+        "keyword": "1c8593087f4a2e3343966a2900fc67be8e6401f1",
     })]
 
     def __init__(self, match):
@@ -51,7 +51,7 @@ class PowerMangaExtractor(Extractor):
             page_data["page"] = page_index
             page_data["name"] = name
             page_data["extension"] = ext[1:]
-            yield Message.Url, "https" + page_data["url"][4:], page_data
+            yield Message.Url, "http" + page_data["url"][4:], page_data
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
