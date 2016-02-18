@@ -71,7 +71,7 @@ class DownloadJob(Job):
                         self.extractor.category, msg[1]
                     )
                 # TODO: support for multiple message versions
-            self.run_queue()
+        self.run_queue()
 
     def run_queue(self):
         """Run all jobs stored in queue"""
