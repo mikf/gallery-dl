@@ -20,7 +20,7 @@ class NhentaiExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)"]
     test = [("http://nhentai.net/g/147850/", {
         "url": "199ddd07dded0f69282e09a372710698ea21ab8e",
-        "keyword": "926be7e9c6684a0d477fce9b48b76df747937037",
+        "keyword": "e00678567c8335289ffcbb2e6980b28d332ee6a7",
     })]
 
     def __init__(self, match):
@@ -60,7 +60,6 @@ class NhentaiExtractor(Extractor):
             "gallery-id": self.gid,
             "upload-date": ginfo["upload_date"],
             "media-id": ginfo["media_id"],
-            "favorites": ginfo["num_favorites"],
             "scanlator": ginfo["scanlator"],
             "count": ginfo["num_pages"],
             "title": title_en or title_ja,
