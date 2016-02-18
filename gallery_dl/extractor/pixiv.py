@@ -23,7 +23,7 @@ class PixivUserExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php\?id=(\d+)"]
     test = [("http://www.pixiv.net/member_illust.php?id=173530", {
         "url": "8f2fc0437e2095ab750c4340a4eba33ec6269477",
-        "keyword": "315d6fc710cddfecbe0bc030ff04930537af0ce7",
+        "keyword": "f01fc2a04e1f9351583f03d4584957808665677e",
     })]
     member_url = "http://www.pixiv.net/member_illust.php"
     illust_url = "http://www.pixiv.net/member_illust.php?mode=medium"
