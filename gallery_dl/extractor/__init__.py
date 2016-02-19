@@ -23,6 +23,7 @@ modules = [
     "deviantart",
     "e621",
     "hbrowse",
+    "hentai2read",
     "hentaifoundry",
     "hitomi",
     "imagebam",
