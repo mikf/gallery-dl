@@ -28,6 +28,8 @@ class TumblrUserExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.user = match.group(1)
+        self.api_url = "https://{}.tumblr.com/api/read/json".format(self.user)
+        self.api_params = {"start": 0, "type": "photo"}
 
     def items(self):
         images = self.get_image_data()
@@ -52,24 +54,45 @@ class TumblrUserExtractor(Extractor):
         return data
 
     def get_image_data(self):
-        """Yield metadata for all images"""
-        params = {"start": 0, "type": "photo"}
-        url = "https://{}.tumblr.com/api/read/json".format(self.user)
+        """Yield metadata for all images from a user"""
+        params = self.api_params.copy()
         while True:
-            page = self.request(url, params=params).text
+            page = self.request(self.api_url, params=params).text
             data = json.loads(page[22:-2])
             if params["start"] == 0:
                 yield data["tumblelog"]
             for post in data["posts"]:
-                photos = post["photos"]
-                del post["photos"]
-                if photos:
-                    for photo in photos:
-                        post.update(photo)
-                        yield post
-                else:
-                    post["offset"] = "o1"
-                    yield post
+                yield from self.get_images_from_post(post)
             if len(data["posts"]) < 20:
                 break
             params["start"] += 20
+
+    @staticmethod
+    def get_images_from_post(post):
+        """Yield all images from a single post"""
+        try:
+            photos = post["photos"]
+        except KeyError:
+            return
+        del post["photos"]
+        if photos:
+            for photo in photos:
+                post.update(photo)
+                yield post
+        else:
+            post["offset"] = "o1"
+            yield post
+
+
+class TumblrPostExtractor(TumblrUserExtractor):
+    """Extract images from a single post on tumblr"""
+    subcategory = "post"
+    pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/post/(\d+)"]
+    test = [("http://demo.tumblr.com/post/459265350", {
+        "url": "a62b4f5dcb838645342b3ec0eb2dfb0342779699",
+        "keyword": "2ea10536a046dafaaf5ccf2c2e9cce870bf4f7b2",
+    })]
+
+    def __init__(self, match):
+        TumblrUserExtractor.__init__(self, match)
+        self.api_params["id"] = match.group(2)
