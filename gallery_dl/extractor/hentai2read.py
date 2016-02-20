@@ -13,15 +13,16 @@ from .. import text
 import json
 import re
 
-class Hentai2ReadExtractor(Extractor):
+class Hentai2ReadChapterExtractor(Extractor):
 
     category = "hentai2read"
-    directory_fmt = ["{category}", "{gallery-id}"]
-    filename_fmt = "{category}_{gallery-id}_{num:>03}_{name}.{extension}"
+    subcategory = "chapter"
+    directory_fmt = ["{category}", "{gallery-id} {title}"]
+    filename_fmt = "{category}_{gallery-id}_{chapter:>02}_{num:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/(\d+)"]
     test = [("http://hentai2read.com/amazon_elixir/1/", {
         "url": "fb5fc4d7cc194116960eaa648c7e045a6e6f0c11",
-        "keyword": "4ab36b0cc426747c347fe563caba601455222a78",
+        "keyword": "03435037539d57ca084c457b5ac4d48928487521",
     })]
 
     def __init__(self, match):
@@ -29,7 +30,8 @@ class Hentai2ReadExtractor(Extractor):
         self.url_title, self.chapter = match.groups()
 
     def items(self):
-        page = self.request("http://hentai2read.com/" + self.url_title + "/1").text
+        url = "http://hentai2read.com/{}/{}/".format(self.url_title, self.chapter)
+        page = self.request(url).text
         images = self.get_image_urls(page)
         data = self.get_job_metadata(page, images)
         yield Message.Version, 1
@@ -40,11 +42,15 @@ class Hentai2ReadExtractor(Extractor):
 
     def get_job_metadata(self, page, images):
         """Collect metadata for extractor-job"""
+        title = text.extract(page, "<title>", "</title>")[0]
+        match = re.match(r"Reading (?:(.+) dj - )?(.+) Hentai - \d+: ", title)
         return {
             "category": self.category,
             "gallery-id": images[0].split("/")[-3],
             "chapter": self.chapter,
             "count": len(images),
+            "series": match.group(1) or "",
+            "title": match.group(2),
             "lang": "en",
             "language": "English",
         }
