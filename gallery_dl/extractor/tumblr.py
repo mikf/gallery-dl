@@ -96,3 +96,17 @@ class TumblrPostExtractor(TumblrUserExtractor):
     def __init__(self, match):
         TumblrUserExtractor.__init__(self, match)
         self.api_params["id"] = match.group(2)
+
+
+class TumblrTagExtractor(TumblrUserExtractor):
+    """Extract images from a tumblr-user by tag"""
+    subcategory = "tag"
+    pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/tagged/(.+)"]
+    test = [("http://demo.tumblr.com/tagged/Times Square", {
+        "url": "a62b4f5dcb838645342b3ec0eb2dfb0342779699",
+        "keyword": "97e812ffa3319d4e46a91f09ddfbd24c9b97015a",
+    })]
+
+    def __init__(self, match):
+        TumblrUserExtractor.__init__(self, match)
+        self.api_params["tagged"] = match.group(2)
