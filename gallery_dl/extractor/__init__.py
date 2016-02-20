@@ -47,6 +47,7 @@ modules = [
     "safebooru",
     "sankaku",
     "spectrumnexus",
+    "tumblr",
     "turboimagehost",
     "yandere",
     "generic",
