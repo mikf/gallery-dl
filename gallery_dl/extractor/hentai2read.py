@@ -13,6 +13,38 @@ from .. import text
 import json
 import re
 
+class Hentai2ReadMangaExtractor(Extractor):
+
+    category = "hentai2read"
+    subcategory = "manga"
+    pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/?$"]
+    test = [
+        ("http://hentai2read.com/amazon_elixir/", {
+            "url": "d1f87b71d3c97b49a478cdfb6ae96b2d9520ab78",
+        }),
+        ("http://hentai2read.com/oshikage_riot/", {
+            "url": "672f34cce7bf5a855c6c38e8bc9c5117a4b3061c",
+        })
+    ]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url_title = match.group(1)
+
+    def items(self):
+        yield Message.Version, 1
+        for chapter in self.get_chapters():
+            yield Message.Queue, chapter
+
+    def get_chapters(self):
+        """Return a list of all chapter urls"""
+        page = self.request("http://hentai2read.com/" + self.url_title).text
+        page = text.extract(page, '<div class="text">\n<ul>', '</ul>')[0]
+        needle = '<a href="'
+        return reversed(list(
+            text.extract_iter(page, needle, '"')
+        ))
+
 class Hentai2ReadChapterExtractor(Extractor):
 
     category = "hentai2read"
