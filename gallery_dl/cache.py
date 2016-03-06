@@ -20,27 +20,31 @@ def init_database():
     global _db
     path_default = os.path.join(tempfile.gettempdir(), ".gallery-dl.cache")
     path = config.get(("cache", "file"), path_default)
-    # timeout = config.get(("cache", "timeout"), 30)
-    _db = sqlite3.connect(path, timeout=30)
+    _db = sqlite3.connect(path, timeout=30, check_same_thread=False)
     _db.execute("CREATE TABLE IF NOT EXISTS data ("
                     "key TEXT PRIMARY KEY,"
                     "value TEXT,"
                     "expires INTEGER"
                 ")")
 
-def cache(max_age=3600):
+def cache(maxage=3600, keyarg=None):
     """decorator - cache function return values in memory and database"""
     def wrap(func):
-        key = "{}.{}".format(func.__module__, func.__name__)
+        gkey = "{}.{}".format(func.__module__, func.__name__)
 
         def wrapped(*args):
             timestamp = time.time()
+            if keyarg is not None:
+                key = "{}-{}".format(gkey, args[keyarg])
+            else:
+                key = gkey
+
             try:
-                result = lookup_cache(timestamp)
+                result = lookup_cache(key, timestamp)
             except CacheInvalidError:
                 try:
                     result = func(*args)
-                    expires = int(timestamp+max_age)
+                    expires = int(timestamp+maxage)
                     _cache[key] = (result, expires)
                     _db.execute("INSERT OR REPLACE INTO data VALUES (?,?,?)",
                                 (key, pickle.dumps(result), expires))
@@ -48,18 +52,18 @@ def cache(max_age=3600):
                     _db.commit()
             return result
 
-        def lookup_cache(timestamp):
+        def lookup_cache(key, timestamp):
             try:
                 result, expires = _cache[key]
                 if timestamp < expires:
                     return result
             except KeyError:
                 pass
-            result, expires = lookup_database(timestamp)
+            result, expires = lookup_database(key, timestamp)
             _cache[key] = (result, expires)
             return result
 
-        def lookup_database(timestamp):
+        def lookup_database(key, timestamp):
             try:
                 cursor = _db.cursor()
                 cursor.execute("BEGIN EXCLUSIVE")
@@ -69,8 +73,8 @@ def cache(max_age=3600):
                 if timestamp < expires:
                     _db.commit()
                     return pickle.loads(result), expires
-            except Exception as e:
-                print(e)
+            except TypeError:
+                pass
             raise CacheInvalidError()
 
         return wrapped
@@ -81,16 +85,3 @@ def cache(max_age=3600):
 
 _db = None
 _cache = {}
-
-# @cache(50)
-# def f():
-    # time.sleep(15)
-    # print("called f()")
-    # return 1
-
-# init_database()
-
-# for i in range(10):
-    # print(f())
-    # time.sleep(1)
-# print(f())
