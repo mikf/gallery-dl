@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2014-2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 __author__     = "Mike Fährmann"
-__copyright__  = "Copyright 2014, 2015 Mike Fährmann"
+__copyright__  = "Copyright 2014-2016 Mike Fährmann"
 
 __license__    = "GPLv2"
 __version__    = "0.4.1"
@@ -15,9 +15,8 @@ __maintainer__ = "Mike Fährmann"
 __email__      = "mike_faehrmann@web.de"
 
 import os
-import sys
 import argparse
-from . import config, extractor, jobs
+from . import config, extractor, jobs, cache
 
 def build_cmdline_parser():
     parser = argparse.ArgumentParser(
@@ -81,6 +80,7 @@ def main():
         else:
             if not args.urls:
                 parser.error("the following arguments are required: URL")
+            cache.init_database()
             if args.list_urls:
                 jobtype = jobs.UrlJob
             elif args.list_keywords:
