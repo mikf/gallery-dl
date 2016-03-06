@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import config, text
+from ..cache import cache
 
 class NijieUserExtractor(AsynchronousExtractor):
     """Extract all works of a single nijie-user"""
@@ -33,7 +34,10 @@ class NijieUserExtractor(AsynchronousExtractor):
         self.session.headers["Referer"] = self.artist_url
 
     def items(self):
-        self.login()
+        self.session.cookies = self.login(
+            config.interpolate(("extractor", self.category, "email")),
+            config.interpolate(("extractor", self.category, "password"))
+        )
         data = self.get_job_metadata()
         yield Message.Version, 1
         yield Message.Directory, data
@@ -65,12 +69,11 @@ class NijieUserExtractor(AsynchronousExtractor):
                 "image-id": image_id,
             })
 
-    def login(self):
+    @cache(maxage=30*24*60*60, keyarg=1)
+    def login(self, email, password):
         """Login and obtain session cookie"""
-        params = {
-            "email": config.get(("extractor", self.category, "email")),
-            "password": config.get(("extractor", self.category, "password")),
-        }
+        params = {"email": email, "password": password}
         page = self.session.post("https://nijie.info/login_int.php", data=params).text
         if "//nijie.info/login.php" in page:
             raise Exception("login failed")
+        return self.session.cookies
