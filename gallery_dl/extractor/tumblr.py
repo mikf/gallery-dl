@@ -58,7 +58,7 @@ class TumblrUserExtractor(Extractor):
         params = self.api_params.copy()
         while True:
             page = self.request(self.api_url, params=params).text
-            data = json.loads(page[22:-2])
+            data = json.loads(page[22:-1])
             if params["start"] == 0:
                 yield data["tumblelog"]
             for post in data["posts"]:
