@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,13 +12,16 @@ import time
 import operator
 import urllib.parse
 from . import text
+from .cache import cache
 
 def bypass_ddos_protection(session, url):
     """Prepare a requests.session to access 'url' behind Cloudflare protection"""
+    session.cookies = solve_challenge(session, url)
+    return session
+
+@cache(maxage=24*60*60, keyarg=1)
+def solve_challenge(session, url):
     session.headers["Referer"] = url
-    if url in _cache:
-        session.cookies.update(_cache[url])
-        return
     page = session.get(url).text
     params = text.extract_all(page, (
         ('jschl_vc', 'name="jschl_vc" value="', '"'),
@@ -27,7 +30,7 @@ def bypass_ddos_protection(session, url):
     params["jschl_answer"] = solve_jschl(url, page)
     time.sleep(4)
     session.get(urllib.parse.urljoin(url, "/cdn-cgi/l/chk_jschl"), params=params)
-    _cache[url] = session.cookies.copy()
+    return session.cookies
 
 def solve_jschl(url, page):
     """Solve challenge to get 'jschl_answer' value"""
@@ -79,5 +82,3 @@ expression_values = {
     "!+": 1,
     "+!!": 1,
 }
-
-_cache = {}
