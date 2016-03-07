@@ -13,7 +13,6 @@ from .. import config, text
 from ..cache import cache
 import re
 import json
-import time
 
 class PixivUserExtractor(Extractor):
     """Extract all works of a single pixiv-user"""
@@ -24,7 +23,6 @@ class PixivUserExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php\?id=(\d+)"]
     test = [("http://www.pixiv.net/member_illust.php?id=173530", {
         "url": "8f2fc0437e2095ab750c4340a4eba33ec6269477",
-        "keyword": "f01fc2a04e1f9351583f03d4584957808665677e",
     })]
     member_url = "http://www.pixiv.net/member_illust.php"
     illust_url = "http://www.pixiv.net/member_illust.php?mode=medium"
@@ -143,7 +141,6 @@ class PixivWorkExtractor(PixivUserExtractor):
                 r"\?(?:[^&]+&)*illust_id=(\d+)")]
     test = [("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=966412", {
         "url": "efb622f065b0871e92195e7bee0b4d75bd687d8d",
-        "keyword": "abc22b8d70c67e9884fdec8d851b57a9d29d5890",
     })]
 
     def __init__(self, match):
@@ -167,7 +164,6 @@ class PixivFavoriteExtractor(PixivUserExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php\?id=(\d+)"]
     test = [("http://www.pixiv.net/bookmark.php?id=173530", {
         "url": "0110c5c2ee9612a0362e26f7481a8916b6f410fe",
-        "keyword": "ebf15d8fe9ce99bff61a3a6d98418d898141d9a0",
     })]
 
     def __init__(self, match):
@@ -211,6 +207,7 @@ class PixivAPI():
             "Referer": "http://www.pixiv.net/",
             "User-Agent": "PixivIOSApp/5.8.0",
         })
+        self.user_id  = -1
         self.username = config.interpolate(("extractor", "pixiv", "username"))
         self.password = config.interpolate(("extractor", "pixiv", "password"))
 
@@ -271,6 +268,7 @@ class PixivAPI():
 
     @cache(maxage=50*60, keyarg=1)
     def _do_login(self, username, password):
+        """Actual login implementation"""
         data = {
             "username": username,
             "password": password,
