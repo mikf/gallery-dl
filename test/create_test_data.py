@@ -30,6 +30,7 @@ def main():
     for url in args.urls:
         job = jobs.HashJob(url, content=args.content)
         job.run()
+        print(job.extractor.__class__.__name__)
         print(TESTDATA_FMT.format(url, job.hash_url.hexdigest(),
             job.hash_keyword.hexdigest(), job.hash_content.hexdigest()))
 
