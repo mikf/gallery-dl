@@ -39,8 +39,8 @@ class Hentai2ReadMangaExtractor(Extractor):
     def get_chapters(self):
         """Return a list of all chapter urls"""
         page = self.request("http://hentai2read.com/" + self.url_title).text
-        page = text.extract(page, '<div class="text">\n<ul>', '</ul>')[0]
-        needle = '<a href="'
+        page = text.extract(page, '<ul class="nav-chapters remove-margin-b">', '</ul>\n</div>')[0]
+        needle = '<li>\n<a href="'
         return reversed(list(
             text.extract_iter(page, needle, '"')
         ))
@@ -68,8 +68,9 @@ class Hentai2ReadChapterExtractor(Extractor):
         data = self.get_job_metadata(page, images)
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, url in enumerate(images, 1):
+        for num, part in enumerate(images, 1):
             data["num"] = num
+            url = "http://hentaicdn.com/hentai" + part
             yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_job_metadata(self, page, images):
@@ -90,5 +91,5 @@ class Hentai2ReadChapterExtractor(Extractor):
     @staticmethod
     def get_image_urls(page):
         """Extract and return a list of all image-urls"""
-        images = text.extract(page, "var wpm_mng_rdr_img_lst = ", ";")[0]
+        images = text.extract(page, "var rff_imageList = ", ";")[0]
         return json.loads(images)
