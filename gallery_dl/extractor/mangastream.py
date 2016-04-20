@@ -14,14 +14,14 @@ from .. import text
 class MangaStreamExtractor(AsynchronousExtractor):
 
     category = "mangastream"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?readms\.com/r/([^/]*/(\d+)([^/]*)?/(\d+))"]
+    directory_fmt = ["{category}", "{manga}", "c{chapter} - {title}"]
+    filename_fmt = "{manga}_c{chapter}_{page:>03}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?readms\.com/r/([^/]*/([^/]+)/(\d+))"]
     url_base = "https://readms.com/r/"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
-        self.part, self.chapter, self.ch_minor,self.ch_id = match.groups()
+        self.part, self.chapter, self.ch_id = match.groups()
 
     def items(self):
         page = self.request(self.url_base + self.part).text
@@ -41,8 +41,7 @@ class MangaStreamExtractor(AsynchronousExtractor):
         """Collect metadata for extractor-job"""
         data = {
             "category": self.category,
-            "chapter": self.chapter,
-            "chapter-minor": self.ch_minor,
+            "chapter": text.unquote(self.chapter),
             "chapter-id": self.ch_id,
             "lang": "en",
             "language": "English",
