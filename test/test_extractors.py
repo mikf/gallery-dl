@@ -15,7 +15,6 @@ class TestExtractors(unittest.TestCase):
     def setUp(self):
         config.load()
         config.set(("cache", "file"), ":memory:")
-        cache.init_database()
 
     def run_test(self, extr, url, result):
         hjob = jobs.HashJob(url, "content" in result)

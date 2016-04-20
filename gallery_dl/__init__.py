@@ -16,7 +16,7 @@ __email__      = "mike_faehrmann@web.de"
 
 import os
 import argparse
-from . import config, extractor, jobs, cache
+from . import config, extractor, jobs
 
 def build_cmdline_parser():
     parser = argparse.ArgumentParser(
@@ -80,7 +80,6 @@ def main():
         else:
             if not args.urls:
                 parser.error("the following arguments are required: URL")
-            cache.init_database()
             if args.list_urls:
                 jobtype = jobs.UrlJob
             elif args.list_keywords:
