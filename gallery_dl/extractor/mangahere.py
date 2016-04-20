@@ -95,6 +95,7 @@ class MangaHereChapterExtractor(AsynchronousExtractor):
             url, pos = text.extract(page, '<img src="', '"')
             yield url
             _  , pos = text.extract(page, '<img src="', '"', pos)
+            _  , pos = text.extract(page, '<img src="', '"', pos)
             url, pos = text.extract(page, '<img src="', '"', pos)
             yield url
             pnum += 2
