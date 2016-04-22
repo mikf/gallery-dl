@@ -16,7 +16,8 @@ class MangaStreamExtractor(AsynchronousExtractor):
     category = "mangastream"
     directory_fmt = ["{category}", "{manga}", "c{chapter} - {title}"]
     filename_fmt = "{manga}_c{chapter}_{page:>03}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?readms\.com/r/([^/]*/([^/]+)/(\d+))"]
+    pattern = [(r"(?:https?://)?(?:www\.)?(?:readms|mangastream)\.com/"
+                r"r(?:ead)?/([^/]*/([^/]+)/(\d+))")]
     url_base = "https://readms.com/r/"
 
     def __init__(self, match):
