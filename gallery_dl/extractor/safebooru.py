@@ -40,5 +40,5 @@ class SafebooruPostExtractor(SafebooruExtractor, booru.BooruPostExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?\?page=post&s=view&id=(\d+)"]
     test = [("http://safebooru.org/index.php?page=post&s=view&id=1169132", {
         "url": "bcb6047665729c7c9db243a27f41cbef9af1ecef",
-        "keyword": "e2d9a87a66d89eb68d3e3420075c3be3c7ca530a",
+        "content": "93b293b27dabd198afafabbaf87c49863ac82f27",
     })]

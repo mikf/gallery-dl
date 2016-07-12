@@ -54,7 +54,7 @@ class MangaMintChapterExtractor(Extractor):
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?mangamint\.com/([^\?]+-(\d+))"]
     test = [("http://www.mangamint.com/mushishi-1", {
-        "url": "eb1669d7043a17b79ccc92454c2676200628800c",
+        "url": "337f46c4dab50f544e9196ced723ac8f70400dd0",
         "keyword": "ca4ba6fa84367fd7c345879a17ebaad39b589da5",
     })]
 

@@ -20,8 +20,8 @@ class TumblrUserExtractor(Extractor):
     filename_fmt = "{category}_{user}_{id}{offset}.{extension}"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com(?:/page/\d+)?/?$"]
     test = [("http://demo.tumblr.com/", {
-        "url": "a62b4f5dcb838645342b3ec0eb2dfb0342779699",
-        "keyword": "97e812ffa3319d4e46a91f09ddfbd24c9b97015a",
+        "url": "33ef388847dfa9d2b64232e4a3a5e193355ff2a5",
+        "keyword": "6c7010ef2e7c9c2df13c3233e57e7ec93ee9d6cd",
         "content": "31495fdb9f84edbb7f67972746a1521456f649e2",
     })]
 
@@ -89,8 +89,8 @@ class TumblrPostExtractor(TumblrUserExtractor):
     subcategory = "post"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/post/(\d+)"]
     test = [("http://demo.tumblr.com/post/459265350", {
-        "url": "a62b4f5dcb838645342b3ec0eb2dfb0342779699",
-        "keyword": "2ea10536a046dafaaf5ccf2c2e9cce870bf4f7b2",
+        "url": "33ef388847dfa9d2b64232e4a3a5e193355ff2a5",
+        "keyword": "4f2ffeb2732955436fbc208741abf63fd0dfa777",
     })]
 
     def __init__(self, match):
@@ -103,8 +103,8 @@ class TumblrTagExtractor(TumblrUserExtractor):
     subcategory = "tag"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/tagged/(.+)"]
     test = [("http://demo.tumblr.com/tagged/Times Square", {
-        "url": "a62b4f5dcb838645342b3ec0eb2dfb0342779699",
-        "keyword": "97e812ffa3319d4e46a91f09ddfbd24c9b97015a",
+        "url": "33ef388847dfa9d2b64232e4a3a5e193355ff2a5",
+        "keyword": "6c7010ef2e7c9c2df13c3233e57e7ec93ee9d6cd",
     })]
 
     def __init__(self, match):
