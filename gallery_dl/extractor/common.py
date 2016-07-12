@@ -32,13 +32,10 @@ class Extractor():
         yield Message.Version, 1
         return
 
-    def request(self, url, *args, **kwargs):
-        return safe_request(self.session, url, *args, **kwargs)
-
-    def enable_useragent(self):
-        self.session.headers["User-Agent"] = (
-            "Mozilla/5.0 (X11; Linux x86_64; rv:24.0) Gecko/20100101 Firefox/24.0"
-        )
+    def request(self, url, encoding=None, *args, **kwargs):
+        response = safe_request(self.session, url, *args, **kwargs)
+        response.encoding = encoding
+        return response
 
 
 class AsynchronousExtractor(Extractor):
