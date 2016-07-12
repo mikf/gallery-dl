@@ -36,9 +36,8 @@ class ImagebamExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        response = self.request(self.url_base + "/gallery/" + self.gkey)
-        response.encoding = "utf-8"
-        page = response.text
+        url = self.url_base + "/gallery/" + self.gkey
+        page = self.request(url, encoding="utf-8").text
         data = {
             "category": self.category,
             "gallery-key": self.gkey,

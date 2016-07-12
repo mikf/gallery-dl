@@ -55,9 +55,7 @@ class PowerMangaExtractor(Extractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        response = self.request(self.url_base + self.part)
-        response.encoding = "utf-8"
-        page = response.text
+        page = self.request(self.url_base + self.part, encoding="utf-8").text
         _        , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
         manga    , pos = text.extract(page, 'title="', '"', pos)
         chapter  , pos = text.extract(page, '">', '</a>', pos)

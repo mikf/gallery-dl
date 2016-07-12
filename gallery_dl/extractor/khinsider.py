@@ -24,7 +24,7 @@ class KhinsiderExtractor(AsynchronousExtractor):
 
     def items(self):
         url = "http://downloads.khinsider.com/game-soundtracks/album/" + self.album
-        page = self.request(url).text
+        page = self.request(url, encoding="utf-8").text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
@@ -44,8 +44,8 @@ class KhinsiderExtractor(AsynchronousExtractor):
     def get_album_tracks(self, page):
         pos = page.index("Download all songs at once:")
         num = 0
-        for url in text.extract_iter(page, '<tr>\r\n\t\t<td><a href="', '"'):
-            page = self.request(url).text
+        for url in text.extract_iter(page, '<tr>\r\n\t\t<td><a href="', '"', pos):
+            page = self.request(url, encoding="utf-8").text
             name, pos = text.extract(page, "Song name: <b>", "</b>")
             url , pos = text.extract(page, '<p><a style="color: #21363f;" href="', '"', pos)
             num += 1
