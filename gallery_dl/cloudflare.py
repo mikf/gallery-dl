@@ -35,7 +35,7 @@ def solve_challenge(session, url):
 def solve_jschl(url, page):
     """Solve challenge to get 'jschl_answer' value"""
     data, pos = text.extract_all(page, (
-        ('var' , 'var t,r,a,f, ', '='),
+        ('var' , ',f, ', '='),
         ('key' , '"', '"'),
         ('expr', ':', '}')
     ))
