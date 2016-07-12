@@ -18,9 +18,9 @@ class BatotoExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)"]
-    test = [("http://bato.to/reader#df48fa98f7d41851", {
-        "url": "ab0526091f65b8eda7a8866b937adbdb468d68b1",
-        "keyword": "ef14d3230aa0872e8d9e4236ed9160755f78aeb3",
+    test = [("https://bato.to/reader#41c311af0d317c73", {
+        "url": "5b40e121dce03918db52d05be820bec14e75b7ac",
+        "keyword": "dfe033b8d3df5bf8e037c709675ef449cba75867",
     })]
     url = "https://bato.to/areader"
 
@@ -67,7 +67,7 @@ class BatotoExtractor(AsynchronousExtractor):
         return {
             "category": self.category,
             "token": self.token,
-            "manga": manga,
+            "manga": text.unescape(manga),
             "volume": match.group(2) or "",
             "chapter": match.group(3),
             "chapter-extra": match.group(4),
