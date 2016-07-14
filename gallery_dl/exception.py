@@ -8,3 +8,6 @@
 
 class NoExtractorError(Exception):
     pass
+
+class AuthenticationError(Exception):
+    pass

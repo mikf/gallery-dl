@@ -9,7 +9,7 @@
 """Extract images and ugoira from http://www.pixiv.net/"""
 
 from .common import Extractor, Message
-from .. import config, text
+from .. import config, text, exception
 from ..cache import cache
 import re
 import json
@@ -213,8 +213,8 @@ class PixivAPI():
 
     def login(self):
         """Login and gain a Pixiv Public-API access token"""
-        self.user_id, token = self._do_login(self.username, self.password)
-        self.session.headers["Authorization"] = "Bearer " + token
+        self.user_id, auth_header = self._do_login(self.username, self.password)
+        self.session.headers["Authorization"] = auth_header
 
     @require_login
     def user(self, user_id):
@@ -280,15 +280,14 @@ class PixivAPI():
             "https://oauth.secure.pixiv.net/auth/token", data=data
         )
         if response.status_code not in (200, 301, 302):
-            raise Exception("login() failed! check username and password.\n"
-                            "HTTP %s: %s" % (response.status_code, response.text))
+            raise exception.AuthenticationError()
         try:
             response = self._parse(response)["response"]
             token = response["access_token"]
             user = response["user"]["id"]
         except:
             raise Exception("Get access_token error! Response: %s" % (token))
-        return user, token
+        return user, "Bearer " + token
 
     @staticmethod
     def _parse(response):
