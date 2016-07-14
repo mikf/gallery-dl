@@ -9,7 +9,7 @@
 import os
 import json
 import hashlib
-from . import config, extractor, downloader, text, output, exceptions
+from . import config, extractor, downloader, text, output, exception
 from .extractor.message import Message
 
 class Job():
@@ -18,7 +18,7 @@ class Job():
     def __init__(self, url):
         self.extractor = extractor.find(url)
         if self.extractor is None:
-            raise exceptions.NoExtractorError(url)
+            raise exception.NoExtractorError(url)
 
     def run(self):
         """Execute or run the job"""
@@ -80,7 +80,7 @@ class DownloadJob(Job):
         for url in self.queue:
             try:
                 DownloadJob(url).run()
-            except exceptions.NoExtractorError:
+            except exception.NoExtractorError:
                 pass
 
     def download(self, msg):

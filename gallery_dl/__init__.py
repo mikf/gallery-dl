@@ -16,7 +16,7 @@ __email__      = "mike_faehrmann@web.de"
 
 import os
 import argparse
-from . import config, extractor, jobs
+from . import config, extractor, job
 
 def build_cmdline_parser():
     parser = argparse.ArgumentParser(
@@ -81,11 +81,11 @@ def main():
             if not args.urls:
                 parser.error("the following arguments are required: URL")
             if args.list_urls:
-                jobtype = jobs.UrlJob
+                jobtype = job.UrlJob
             elif args.list_keywords:
-                jobtype = jobs.KeywordJob
+                jobtype = job.KeywordJob
             else:
-                jobtype = jobs.DownloadJob
+                jobtype = job.DownloadJob
             for url in args.urls:
                 jobtype(url).run()
     except KeyboardInterrupt:
