@@ -87,6 +87,12 @@ def main():
             else:
                 jobtype = job.DownloadJob
             for url in args.urls:
-                jobtype(url).run()
+                try:
+                    jobtype(url).run()
+                except exception.NoExtractorError:
+                    print("No suitable extractor found for URL '", url, "'", sep="")
+                except exception.AuthenticationError:
+                    print("Authentication failed. Please provide a valid "
+                          "username/password pair.")
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
