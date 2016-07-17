@@ -18,7 +18,7 @@ class MangaStreamExtractor(AsynchronousExtractor):
     filename_fmt = "{manga}_c{chapter}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?(?:readms|mangastream)\.com/"
                 r"r(?:ead)?/([^/]*/([^/]+)/(\d+))")]
-    url_base = "https://readms.com/r/"
+    url_base = "https://mangastream.com/r/"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
@@ -40,18 +40,20 @@ class MangaStreamExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
+        manga, pos = text.extract(page, '<span class="hidden-xs hidden-sm">', "<")
+        pos = page.find(self.part, pos)
+        title, pos = text.extract(page, ' - ', '<', pos)
+        count, pos = text.extract(page, 'Last Page (', ')', pos)
         data = {
             "category": self.category,
+            "manga": manga,
             "chapter": text.unquote(self.chapter),
             "chapter-id": self.ch_id,
+            "title": title,
+            "count": count,
             "lang": "en",
             "language": "English",
         }
-        data, _ = text.extract_all(page, (
-            ('manga', 'visible-tablet">', '</span>'),
-            ('title', 'visible-tablet"> - ', '</span>'),
-            ('count', 'Last Page (', ')'),
-        ), values=data)
         return data
 
     @staticmethod
