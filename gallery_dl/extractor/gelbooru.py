@@ -13,18 +13,21 @@ from .. import config
 
 class GelbooruExtractor(booru.XMLBooruExtractor):
     """Base class for gelbooru extractors"""
-
     category = "gelbooru"
     api_url = "http://gelbooru.com/"
 
     def setup(self):
         self.params.update({"page":"dapi", "s":"post", "q":"index"})
-        self.session.cookies.update(
-            config.get(("extractor", self.category, "cookies"))
-        )
+        try:
+            cookies = config.get(("extractor", self.category, "cookies"))
+            self.session.cookies.update({
+                key: str(value) for key, value in cookies.items()
+            })
+        except AttributeError:
+            pass
 
     def update_page(self, reset=False):
-        if reset is False:
+        if not reset:
             self.params["pid"] += 1
         else:
             self.params["pid"] = 0
