@@ -32,6 +32,7 @@ class PixivUserExtractor(Extractor):
         self.artist_id = match.group(1)
         self.api = PixivAPI(self.session)
         self.api_call = self.api.user_works
+        self.load_ugoira = config.interpolate(("extractor", "pixiv", "ugoira"), True)
 
     def items(self):
         metadata = self.get_job_metadata()
@@ -49,6 +50,8 @@ class PixivUserExtractor(Extractor):
                 timestamp = ""
 
             if work["type"] == "ugoira":
+                if not self.load_ugoira:
+                    continue
                 url, framelist = self.parse_ugoira(work)
                 work["extension"] = "zip"
                 yield Message.Url, url, work
@@ -146,6 +149,7 @@ class PixivWorkExtractor(PixivUserExtractor):
     def __init__(self, match):
         PixivUserExtractor.__init__(self, match)
         self.illust_id = match.group(1)
+        self.load_ugoira = True
         self.work = None
 
     def get_works(self):
