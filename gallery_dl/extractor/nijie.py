@@ -9,7 +9,7 @@
 """Extract images from https://nijie.info/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import config, text
+from .. import config, text, exception
 from ..cache import cache
 
 class NijieUserExtractor(AsynchronousExtractor):
@@ -75,5 +75,5 @@ class NijieUserExtractor(AsynchronousExtractor):
         params = {"email": email, "password": password}
         page = self.session.post("https://nijie.info/login_int.php", data=params).text
         if "//nijie.info/login.php" in page:
-            raise Exception("login failed")
+            raise exception.AuthenticationError()
         return self.session.cookies
