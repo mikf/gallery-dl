@@ -16,6 +16,7 @@ __email__      = "mike_faehrmann@web.de"
 
 import os
 import argparse
+import json
 from . import config, extractor, job
 
 def build_cmdline_parser():
@@ -34,7 +35,7 @@ def build_cmdline_parser():
     parser.add_argument(
         "-o", "--option",
         metavar="OPT", action="append", default=[],
-        help="option value",
+        help="additional 'key=value' option values",
     )
     parser.add_argument(
         "-g", "--get-urls", dest="list_urls", action="store_true",
@@ -55,6 +56,18 @@ def build_cmdline_parser():
     )
     return parser
 
+
+def parse_option(opt):
+    try:
+        key, value = opt.split("=", 1)
+        try:
+            value = json.loads(value)
+        except json.decoder.JSONDecodeError:
+            pass
+        config.set(key.split("."), value)
+    except ValueError:
+        print("Invalid 'key=value' pair:", opt)
+
 def main():
     try:
         config.load()
@@ -68,11 +81,7 @@ def main():
             config.set(("base-directory",), args.dest)
 
         for opt in args.option:
-            try:
-                key, value = opt.split("=", 1)
-                config.set(key.split("."), value)
-            except TypeError:
-                pass
+            parse_option(opt)
 
         if args.list_modules:
             for module_name in extractor.modules:
@@ -80,12 +89,14 @@ def main():
         else:
             if not args.urls:
                 parser.error("the following arguments are required: URL")
+
             if args.list_urls:
                 jobtype = job.UrlJob
             elif args.list_keywords:
                 jobtype = job.KeywordJob
             else:
                 jobtype = job.DownloadJob
+
             for url in args.urls:
                 try:
                     jobtype(url).run()
@@ -94,5 +105,6 @@ def main():
                 except exception.AuthenticationError:
                     print("Authentication failed. Please provide a valid "
                           "username/password pair.")
+
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
