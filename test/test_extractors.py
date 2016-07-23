@@ -8,7 +8,7 @@
 # published by the Free Software Foundation.
 
 import unittest
-from  gallery_dl import extractor, jobs, config, cache
+from  gallery_dl import extractor, job, config, cache
 
 class TestExtractors(unittest.TestCase):
 
@@ -17,7 +17,7 @@ class TestExtractors(unittest.TestCase):
         config.set(("cache", "file"), ":memory:")
 
     def run_test(self, extr, url, result):
-        hjob = jobs.HashJob(url, "content" in result)
+        hjob = job.HashJob(url, "content" in result)
         self.assertEqual(extr, hjob.extractor.__class__)
         hjob.run()
         if "url" in result:

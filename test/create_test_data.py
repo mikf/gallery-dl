@@ -10,7 +10,7 @@
 """Create testdata for extractor tests"""
 
 import argparse
-from  gallery_dl import jobs, config
+from  gallery_dl import job, config
 
 TESTDATA_FMT = """
     test = [("{}", {{
@@ -28,11 +28,11 @@ def main():
 
     config.load()
     for url in args.urls:
-        job = jobs.HashJob(url, content=args.content)
-        job.run()
-        print(job.extractor.__class__.__name__)
-        print(TESTDATA_FMT.format(url, job.hash_url.hexdigest(),
-            job.hash_keyword.hexdigest(), job.hash_content.hexdigest()))
+        hjob = job.HashJob(url, content=args.content)
+        hjob.run()
+        print(hjob.extractor.__class__.__name__)
+        print(TESTDATA_FMT.format(url, hjob.hash_url.hexdigest(),
+            hjob.hash_keyword.hexdigest(), hjob.hash_content.hexdigest()))
 
 if __name__ == '__main__':
     main()
