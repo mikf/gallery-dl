@@ -9,7 +9,8 @@
 """Extract images from galleries at http://exhentai.org/"""
 
 from .common import Extractor, Message
-from .. import config, text, iso639_1
+from .. import config, text, iso639_1, exception
+from ..cache import cache
 import time
 import random
 
@@ -25,15 +26,13 @@ class ExhentaiExtractor(Extractor):
         Extractor.__init__(self)
         self.url = match.group(0)
         self.version, self.gid, self.token = match.groups()
+        self.login()
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
             "Referer": "http://exhentai.org/",
         })
-        cookies = config.get(("extractor", "exhentai", "cookies"), {})
-        for key, value in cookies.items():
-            self.session.cookies.set(key, value, domain=".exhentai.org", path="/")
         self.wait_min = config.interpolate(("extractor", "exhentai", "wait-min"), 3)
         self.wait_max = config.interpolate(("extractor", "exhentai", "wait-max"), 6)
         if self.wait_max < self.wait_min:
@@ -138,3 +137,37 @@ class ExhentaiExtractor(Extractor):
         else:
             waittime = random.uniform(*waittime)
         time.sleep(waittime)
+
+    def login(self):
+        """Login and set necessary cookies"""
+        cookies = self._login_impl()
+        for key, value in cookies.items():
+            self.session.cookies.set(key, value, domain=".exhentai.org", path="/")
+
+    @cache(maxage=360*24*60*60)
+    def _login_impl(self):
+        """Actual login implementation"""
+        cnames = ["ipb_member_id", "ipb_pass_hash"]
+
+        try:
+            cookies = config.get(("extractor", "exhentai", "cookies"))
+            if isinstance(cookies, dict) and all(c in cookies for c in cnames):
+                return cookies
+        except TypeError:
+            pass
+
+        url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
+        params = {
+            "CookieDate": "1",
+            "b": "d",
+            "bt": "1-1",
+            "UserName": config.interpolate(("extractor", "exhentai", "username")),
+            "PassWord": config.interpolate(("extractor", "exhentai", "password")),
+            "ipb_login_submit": "Login!",
+        }
+        self.session.headers["Referer"] = "http://e-hentai.org/bounce_login.php?b=d&bt=1-1"
+        response = self.session.post(url, data=params)
+
+        if "You are now logged in as:" not in response.text:
+            raise exception.AuthenticationError()
+        return {c: response.cookies[c] for c in cnames}

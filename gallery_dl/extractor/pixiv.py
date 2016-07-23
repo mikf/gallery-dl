@@ -217,7 +217,7 @@ class PixivAPI():
 
     def login(self):
         """Login and gain a Pixiv Public-API access token"""
-        self.user_id, auth_header = self._do_login(self.username, self.password)
+        self.user_id, auth_header = self._login_impl(self.username, self.password)
         self.session.headers["Authorization"] = auth_header
 
     @require_login
@@ -271,7 +271,7 @@ class PixivAPI():
         return self._parse(response)
 
     @cache(maxage=50*60, keyarg=1)
-    def _do_login(self, username, password):
+    def _login_impl(self, username, password):
         """Actual login implementation"""
         data = {
             "username": username,
