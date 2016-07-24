@@ -33,6 +33,14 @@ def build_cmdline_parser():
         help="destination directory",
     )
     parser.add_argument(
+        "-u", "--username",
+        metavar="USER"
+    )
+    parser.add_argument(
+        "-p", "--password",
+        metavar="PASS"
+    )
+    parser.add_argument(
         "-o", "--option",
         metavar="OPT", action="append", default=[],
         help="additional 'key=value' option values",
@@ -79,6 +87,10 @@ def main():
 
         if args.dest:
             config.set(("base-directory",), args.dest)
+        if args.username:
+            config.set(("username",), args.username)
+        if args.password:
+            config.set(("password",), args.password)
 
         for opt in args.option:
             parse_option(opt)
