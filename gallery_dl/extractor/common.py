@@ -55,6 +55,8 @@ class AsynchronousExtractor(Extractor):
             task = get()
             if task is None:
                 return
+            if isinstance(task, Exception):
+                raise task
             yield task
             done()
 
@@ -63,9 +65,8 @@ class AsynchronousExtractor(Extractor):
         try:
             for task in self.items():
                 put(task)
-        except Exception:
-            import traceback
-            print(traceback.format_exc())
+        except Exception as e:
+            put(e)
         put(None)
 
 
