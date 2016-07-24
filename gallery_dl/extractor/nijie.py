@@ -35,7 +35,7 @@ class NijieUserExtractor(AsynchronousExtractor):
 
     def items(self):
         self.session.cookies = self.login(
-            config.interpolate(("extractor", self.category, "email")),
+            config.interpolate(("extractor", self.category, "username")),
             config.interpolate(("extractor", self.category, "password"))
         )
         data = self.get_job_metadata()
@@ -70,9 +70,9 @@ class NijieUserExtractor(AsynchronousExtractor):
             })
 
     @cache(maxage=30*24*60*60, keyarg=1)
-    def login(self, email, password):
+    def login(self, username, password):
         """Login and obtain session cookie"""
-        params = {"email": email, "password": password}
+        params = {"email": username, "password": password}
         page = self.session.post("https://nijie.info/login_int.php", data=params).text
         if "//nijie.info/login.php" in page:
             raise exception.AuthenticationError()
