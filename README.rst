@@ -2,7 +2,9 @@
 gallery-dl
 ==========
 
-*gallery-dl* is a small command-line tool to download images and entire image galleries from several image hosting platforms.
+*gallery-dl* is a small command-line tool to download images and entire image
+galleries from several image hosting platforms.
+
 
 Installation
 ============
@@ -21,14 +23,6 @@ or directly from github:
     $ cd gallery-dl
     $ python3 setup.py install
 
-Supported Sites
-===============
-
-* images (and ugoira) per artist from pixiv, nijie, deviantart
-* images per tag from booru-like sites (danbooru, gelbooru, chan.sankakucomplex, yandere, konachan, safebooru, 3dbooru, e621)
-* manga chapters from batoto, kissmanga, mangapanda, mangareader, mangastream, powermanga, redhawkscans
-* galleries from exhentai, nhentai, hitomi
-* images and videos from threads on Futaba Channel-like boards (4chan, 8chan)
 
 Usage
 =====
@@ -37,21 +31,76 @@ Usage
 
     $ gallery-dl URL [URL...]
 
-Certain supported sites require authentication to download images from. This currently includes pixiv, exhentai, gelbooru and nijie. To make these sites accessible to *gallery-dl* you need to specify the necessary login credentials or cookies in the configuration files.
+
+Supported Sites
+===============
+
+* Booru:
+    behoimi.org, danbooru.donmai.us, e621.net, gelbooru.com, konachan.com,
+    safebooru.org, chan.sankakucomplex.com, yande.re
+* Manga:
+    bato.to, kissmanga.com, mangahere.co, mangamint.com, mangapanda.com,
+    mangapark.me, mangareader.net, mangashare.com, mangastream.com,
+    powermanga.org, thespectrum.net
+* Hentai:
+    exhentai.org, hbrowse.com, hentai2read.com, hentai-foundry.com, hitomi.la,
+    nhentai.net,
+* Japanese:
+    pixiv.net, nijie.info
+* Western:
+    deviantart.com, imgth.com, imgur.com, tumblr.com
+* Futaba Channel-like:
+    4chan.org, 8ch.net
+* Image Hosts:
+    chronos.to, imagebam.com, imagetwist.com, imgbox.com, imgchili.net,
+    turboimagehost.com
+
 
 Configuration
 =============
 
-Configuration files for gallery-dl use a JSON-based file format. For a (more or less) complete example, see gallery-dl.conf_.
+Configuration files for gallery-dl use a JSON-based file format.
+For a (more or less) complete example, see gallery-dl.conf_.
 
 *gallery-dl* searches for configuration files in the following paths:
 
-* /etc/gallery-dl.conf
-* ~/.config/gallery/config.json
-* ~/.config/gallery-dl.conf
-* ~/.gallery-dl.conf
+* ``/etc/gallery-dl.conf``
+* ``~/.config/gallery-dl/config.json``
+* ``~/.gallery-dl.conf``
 
 Values in later configuration files will override previous ones.
 
-.. _gallery-dl.conf: https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
 
+Authentication
+==============
+
+Some extractors require you to provide valid login-credentials.
+This currently includes ``pixiv``, ``exhentai`` and ``nijie``.
+
+You can set the necessary information in your configuration file
+(cf. gallery-dl.conf_)
+
+.. code::
+
+    {
+        "extractor": {
+            ...
+            "pixiv:" {
+                "username": "<username>",
+                "password": "<password>"
+            }
+            ...
+        }
+    }
+
+or you can provide them directly via the
+:code:`-u/--username` and :code:`-p/--password` or via the
+:code:`-o/--option` command-line options
+
+.. code:: bash
+
+    $ gallery-dl -u <username> -p <password> URL
+    $ gallery-dl -o username=<username> -o password=<password> URL
+
+
+.. _gallery-dl.conf: https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
