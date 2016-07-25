@@ -90,13 +90,13 @@ _config = {}
 
 if platform.system() == "Windows":
     _default_configs = [
-        r"~\.config\gallery-dl.conf",
+        r"~\.config\gallery-dl\config.json",
         r"~\.gallery-dl.conf",
     ]
 else:
     _default_configs = [
         "/etc/gallery-dl.conf",
         "~/.config/gallery/config.json",
-        "~/.config/gallery-dl.conf",
+        "~/.config/gallery-dl/config.json",
         "~/.gallery-dl.conf",
     ]
