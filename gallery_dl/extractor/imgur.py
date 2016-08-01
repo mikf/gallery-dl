@@ -10,11 +10,13 @@
 
 from .common import Extractor, Message
 from .. import text
+from urllib.parse import urljoin
 import os.path
 
-class ImgurExtractor(Extractor):
-
+class ImgurAlbumExtractor(Extractor):
+    """Extract albums from imgur"""
     category = "imgur"
+    subcategory = "album"
     directory_fmt = ["{category}", "{album-key} - {title}"]
     filename_fmt = "{category}_{album-key}_{num:>03}_{name}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?imgur\.com/(?:a|gallery)/([^/?&#]+)"]
@@ -45,12 +47,14 @@ class ImgurExtractor(Extractor):
             "category": self.category,
             "album-key": self.album,
         }
-        return text.extract_all(page, (
+        text.extract_all(page, (
             ('title', '<meta property="og:title" content="', '"'),
             ('count', '"num_images":"', '"'),
             ('date' , '"datetime":"', ' '),
             ('time' , '', '"'),
-        ), values=data)[0]
+        ), values=data)
+        data["title"] = text.unescape(data["title"])
+        return data
 
     def get_image_urls(self):
         """Yield urls of all images in this album"""
@@ -63,7 +67,7 @@ class ImgurExtractor(Extractor):
                 url, pos = text.extract(page, '<a href="', '"', pos)
                 if not url:
                     break
-                yield "https:" + url
+                yield urljoin("https:", url)
             if pos == begin:
                 return
             num += 1
