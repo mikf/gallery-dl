@@ -44,7 +44,7 @@ Supported Sites
     powermanga.org, thespectrum.net
 * Hentai:
     exhentai.org, hbrowse.com, hentai2read.com, hentai-foundry.com, hitomi.la,
-    nhentai.net,
+    luscious.net, nhentai.net
 * Japanese:
     pixiv.net, nijie.info
 * Western:
