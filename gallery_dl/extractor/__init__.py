@@ -35,6 +35,7 @@ modules = [
     "khinsider",
     "kissmanga",
     "konachan",
+    "luscious",
     "mangahere",
     "mangamint",
     "mangapanda",
