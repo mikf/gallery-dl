@@ -48,7 +48,7 @@ class MangaHereChapterExtractor(AsynchronousExtractor):
     pattern = [(r"(?:https?://)?(?:www\.)?mangahere\.co/manga/"
                 r"([^/]+(?:/v0*(\d+))?/c0*(\d+)(\.\d+)?)")]
     test = [("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", {
-        "url": "c807532e919af7600fe0ef21fb89c5062637dd87",
+        "url": "68efaeed3bc6abb0a0b6f75a5c649c17979e31f1",
         "keyword": "f342e3df9fa39eb10cf7ba5ef3300df6ad77f332",
     })]
     url_fmt = "http://www.mangahere.co/manga/{}/{}.html"
@@ -70,7 +70,7 @@ class MangaHereChapterExtractor(AsynchronousExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, '<title>', '</title>')
-        chid , pos = text.extract(page, 'a.mhcdn.net/store/manga/', '/', pos)
+        chid , pos = text.extract(page, 'h.mhcdn.net/store/manga/', '/', pos)
         _    , pos = text.extract(page, '<select class="wid60"', '', pos)
         _    , pos = text.extract(page, '</select>', '', pos)
         count, pos = text.extract(page, '>', '<', pos-30)
