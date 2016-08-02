@@ -48,6 +48,7 @@ modules = [
     "powermanga",
     "safebooru",
     "sankaku",
+    "senmanga",
     "spectrumnexus",
     "tumblr",
     "turboimagehost",
