@@ -32,6 +32,7 @@ modules = [
     "imgchili",
     "imgth",
     "imgur",
+    "imgyt",
     "khinsider",
     "kissmanga",
     "konachan",
