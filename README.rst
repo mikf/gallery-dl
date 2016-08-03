@@ -41,7 +41,7 @@ Supported Sites
 * Manga:
     bato.to, kissmanga.com, mangahere.co, mangamint.com, mangapanda.com,
     mangapark.me, mangareader.net, mangashare.com, mangastream.com,
-    powermanga.org, thespectrum.net
+    powermanga.org, raw.senmanga.com, thespectrum.net
 * Hentai:
     exhentai.org, hbrowse.com, hentai2read.com, hentai-foundry.com, hitomi.la,
     luscious.net, nhentai.net
@@ -52,7 +52,7 @@ Supported Sites
 * Futaba Channel-like:
     4chan.org, 8ch.net
 * Image Hosts:
-    chronos.to, imagebam.com, imagetwist.com, imgbox.com, imgchili.net,
+    chronos.to, imagebam.com, imagetwist.com, imgbox.com, imgchili.net, img.yt,
     turboimagehost.com
 
 
