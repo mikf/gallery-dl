@@ -12,8 +12,6 @@ from .. import config
 
 modules = [
     "pixiv",
-    "exhentai",
-    "gelbooru",
     "3dbooru",
     "4chan",
     "8chan",
@@ -21,7 +19,10 @@ modules = [
     "chronos",
     "danbooru",
     "deviantart",
+    "doujinmode",
     "e621",
+    "exhentai",
+    "gelbooru",
     "hbrowse",
     "hentai2read",
     "hentaifoundry",
