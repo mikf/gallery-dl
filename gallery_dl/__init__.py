@@ -17,7 +17,7 @@ __email__      = "mike_faehrmann@web.de"
 import os
 import argparse
 import json
-from . import config, extractor, job
+from . import config, extractor, job, exception
 
 def build_cmdline_parser():
     parser = argparse.ArgumentParser(
@@ -120,3 +120,9 @@ def main():
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt")
+    except BrokenPipeError:
+        pass
+    except IOError as e:
+        import errno
+        if e.errno != errno.EPIPE:
+            raise
