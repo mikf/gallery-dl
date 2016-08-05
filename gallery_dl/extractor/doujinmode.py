@@ -17,7 +17,13 @@ class DoujinmodeChapterExtractor(Extractor):
     category = "doujinmode"
     directory_fmt = ["{category}", "{title}"]
     filename_fmt = "{num:>03}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?doujinmode\.net/(?:hentai/)?mangas/([0-9a-f]{36})"]
+    pattern = [(r"(?:https?://)?(?:www\.)?doujinmode\.net/"
+                r"(?:hentai/|yaoi/|western/)?mangas/([0-9a-f]{36})")]
+    test = [("http://doujinmode.net/mangas/967836c988a716e9efca06998b7838d09eb5", {
+        "url": "be5d48a9fd48f09cfcc5d4e51f24bf1100e75502",
+        "keyword": "710cc9599faf563b0cad836bbc7d85b288fcda3a",
+        "content": "a041114e2a8af54d42a4a46a69cae4ebf2641cb1",
+    })]
     url_base = "http://doujinmode.net/mangas/"
 
     def __init__(self, match):
@@ -40,7 +46,7 @@ class DoujinmodeChapterExtractor(Extractor):
         return {
             "category": self.category,
             "gallery-id": self.gid,
-            "title": title,
+            "title": text.unescape(title),
             "count": count,
         }
 
