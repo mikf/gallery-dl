@@ -43,8 +43,8 @@ Supported Sites
     mangapark.me, mangareader.net, mangashare.com, mangastream.com,
     powermanga.org, raw.senmanga.com, thespectrum.net
 * Hentai:
-    exhentai.org, hbrowse.com, hentai2read.com, hentai-foundry.com, hitomi.la,
-    luscious.net, nhentai.net
+    doujinmode.net, exhentai.org, hbrowse.com, hentai2read.com,
+    hentai-foundry.com, hitomi.la, luscious.net, nhentai.net
 * Japanese:
     pixiv.net, nijie.info
 * Western:
