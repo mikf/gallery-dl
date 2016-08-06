@@ -25,6 +25,7 @@ modules = [
     "gelbooru",
     "hbrowse",
     "hentai2read",
+    "hentaibox",
     "hentaifoundry",
     "hitomi",
     "imagebam",
