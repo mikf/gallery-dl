@@ -15,6 +15,7 @@ __maintainer__ = "Mike Fährmann"
 __email__      = "mike_faehrmann@web.de"
 
 import os
+import sys
 import argparse
 import json
 from . import config, extractor, job, exception
@@ -74,7 +75,7 @@ def parse_option(opt):
             pass
         config.set(key.split("."), value)
     except ValueError:
-        print("Invalid 'key=value' pair:", opt)
+        print("Invalid 'key=value' pair:", opt, file=sys.stderr)
 
 def main():
     try:
@@ -113,13 +114,14 @@ def main():
                 try:
                     jobtype(url).run()
                 except exception.NoExtractorError:
-                    print("No suitable extractor found for URL '", url, "'", sep="")
+                    print("No suitable extractor found for URL '", url, "'",
+                          sep="", file=sys.stderr)
                 except exception.AuthenticationError:
                     print("Authentication failed. Please provide a valid "
-                          "username/password pair.")
+                          "username/password pair.", file=sys.stderr)
 
     except KeyboardInterrupt:
-        print("\nKeyboardInterrupt")
+        print("\nKeyboardInterrupt", file=sys.stderr)
     except BrokenPipeError:
         pass
     except IOError as e:
