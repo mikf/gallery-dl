@@ -44,15 +44,15 @@ Supported Sites
     powermanga.org, raw.senmanga.com, thespectrum.net
 * Hentai:
     doujinmode.net, exhentai.org, hbrowse.com, hentai2read.com,
-    hentai-foundry.com, hitomi.la, luscious.net, nhentai.net
+    hentaibox.net, hitomi.la, luscious.net, nhentai.net
 * Japanese:
-    pixiv.net, nijie.info
+    nijie.info, pixiv.net
 * Western:
-    deviantart.com, imgth.com, imgur.com, tumblr.com
+    deviantart.com, hentai-foundry.com, imgth.com, imgur.com, tumblr.com
 * Futaba Channel-like:
     4chan.org, 8ch.net
 * Image Hosts:
-    chronos.to, imagebam.com, imagetwist.com, imgbox.com, imgchili.net, img.yt,
+    chronos.to, imagebam.com, imagetwist.com, img.yt, imgbox.com, imgchili.net,
     turboimagehost.com
 
 
