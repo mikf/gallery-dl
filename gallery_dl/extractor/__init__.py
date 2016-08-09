@@ -52,6 +52,7 @@ modules = [
     "powermanga",
     "safebooru",
     "sankaku",
+    "seiga",
     "senmanga",
     "spectrumnexus",
     "tumblr",
