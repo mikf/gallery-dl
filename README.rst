@@ -46,7 +46,7 @@ Supported Sites
     doujinmode.net, exhentai.org, hbrowse.com, hentai2read.com,
     hentaibox.net, hitomi.la, luscious.net, nhentai.net
 * Japanese:
-    nijie.info, pixiv.net
+    pixiv.net, nijie.info, seiga.nicovideo.jp
 * Western:
     deviantart.com, hentai-foundry.com, imagefap,com, imgth.com, imgur.com,
     tumblr.com
@@ -76,7 +76,7 @@ Authentication
 ==============
 
 Some extractors require you to provide valid login-credentials.
-This currently includes ``pixiv``, ``exhentai`` and ``nijie``.
+This currently includes ``pixiv``, ``exhentai``, ``nijie`` and ``seiga``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
