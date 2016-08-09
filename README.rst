@@ -48,7 +48,8 @@ Supported Sites
 * Japanese:
     nijie.info, pixiv.net
 * Western:
-    deviantart.com, hentai-foundry.com, imgth.com, imgur.com, tumblr.com
+    deviantart.com, hentai-foundry.com, imagefap,com, imgth.com, imgur.com,
+    tumblr.com
 * Futaba Channel-like:
     4chan.org, 8ch.net
 * Image Hosts:
