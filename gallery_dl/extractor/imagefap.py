@@ -10,9 +10,10 @@
 
 from .common import Extractor, Message
 from .. import text
+import json
 
 class ImagefapGalleryExtractor(Extractor):
-
+    """Extract all images from a gallery at imagefap.com"""
     category = "imagefap"
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
@@ -64,3 +65,55 @@ class ImagefapGalleryExtractor(Extractor):
             name , pos = text.extract(page, '<i>', '</i>', pos)
             num += 1
             yield text.nameext_from_url(name, {"image-id": imgid, "num": num})
+
+
+
+class ImagefapImageExtractor(Extractor):
+    """Extract a single image from imagefap.com"""
+    category = "imagefap"
+    subcategory = "image"
+    directory_fmt = ["{category}", "{gallery-id} {title}"]
+    filename_fmt = "{category}_{gallery-id}_{name}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"]
+    test = [("http://www.imagefap.com/photo/776391972/", {
+        "url": "d814dc37efcfd3723c30cfe86fd9e51415e7eecf",
+        "keyword": "c7e2f9bf70e2357d35c21b2602faf0416a5c39d0",
+        "content": "ead241b083da2e1d01c4c28a5faa1aa32c01700f",
+    })]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.image_id = match.group(1)
+
+    def items(self):
+        info = self.load_json()
+        data = self.get_job_metadata(info)
+        yield Message.Version, 1
+        yield Message.Directory, data
+        yield Message.Url, info["contentUrl"], data
+
+    def get_job_metadata(self, info):
+        """Collect metadata for extractor-job"""
+        parts = info["contentUrl"].rsplit("/", 3)
+        return text.nameext_from_url(parts[3], {
+            "category": self.category,
+            "title": text.unescape(info["name"]),
+            "section": info["section"],
+            "uploader": info["author"],
+            "date": info["datePublished"],
+            "width": info["width"],
+            "height": info["height"],
+            "gallery-id": parts[1],
+            "image-id": parts[2],
+        })
+
+    def load_json(self):
+        """Load the JSON dictionary associated with the image"""
+        url  = "http://www.imagefap.com/photo/" + self.image_id + "/"
+        page = self.request(url).text
+        section  , pos = text.extract(page, '<meta name="description" content="', '"')
+        json_data, pos = text.extract(page,
+            '<script type="application/ld+json">', '</script>', pos)
+        json_dict = json.loads(json_data)
+        json_dict["section"] = section
+        return json_dict
