@@ -20,10 +20,10 @@ class ImagefapGalleryExtractor(Extractor):
     filename_fmt = "{category}_{gallery-id}_{name}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
                 r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")]
-    test = [("http://www.imagefap.com/gallery/6316217", {
-        "url": "d814dc37efcfd3723c30cfe86fd9e51415e7eecf",
-        "keyword": "b55344341b1b79f8eb803098d24551bb79cada0f",
-        "content": "ead241b083da2e1d01c4c28a5faa1aa32c01700f",
+    test = [("http://www.imagefap.com/gallery/6318447", {
+        "url": "f63e6876df83a40e1a98dad70e46952dd9edb7a7",
+        "keyword": "eb26d0e62defc1a547b6b854fe0de693055d9f20",
+        "content": "38e50699db9518ae68648c45ecdd6be614efc324",
     })]
 
     def __init__(self, match):
@@ -75,10 +75,10 @@ class ImagefapImageExtractor(Extractor):
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{name}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"]
-    test = [("http://www.imagefap.com/photo/776391972/", {
-        "url": "d814dc37efcfd3723c30cfe86fd9e51415e7eecf",
-        "keyword": "c7e2f9bf70e2357d35c21b2602faf0416a5c39d0",
-        "content": "ead241b083da2e1d01c4c28a5faa1aa32c01700f",
+    test = [("http://www.imagefap.com/photo/1616331218/", {
+        "url": "8a05c0ccdcf84e63c962803bc41d247628c549ea",
+        "keyword": "401ded07ae0b3a8f718e553e506898b34cd92020",
+        "content": "964b8c62c9d5c2a039a2fccf1b1e10aaf7a18a96",
     })]
 
     def __init__(self, match):
@@ -117,3 +117,52 @@ class ImagefapImageExtractor(Extractor):
         json_dict = json.loads(json_data)
         json_dict["section"] = section
         return json_dict
+
+
+
+class ImagefapUserExtractor(Extractor):
+    """Extract all images from all galleries from a user at imagefap.com"""
+    category = "imagefap"
+    subcategory = "user"
+    directory_fmt = ["{category}", "{gallery-id} {title}"]
+    filename_fmt = "{category}_{gallery-id}_{name}.{extension}"
+    pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/profile(?:\.php\?user=|/)([^/]+)",
+               r"(?:https?://)?(?:www\.)?imagefap\.com/usergallery\.php\?userid=(\d+)"]
+    test = [("http://www.imagefap.com/profile/Mr Bad Example/galleries", {
+        "url": "145e98a8648c7695c150800ff8fd578ab26c28c1",
+    })]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        try:
+            self.user_id = int(match.group(1))
+            self.user = None
+        except ValueError:
+            self.user_id = None
+            self.user = match.group(1)
+
+    def items(self):
+        yield Message.Version, 1
+        for gallery in self.get_gallery_ids():
+            yield Message.Queue, "http://www.imagefap.com/gallery/" + gallery
+
+    def get_gallery_ids(self):
+        """Yield all gallery-ids of a specific user"""
+        folders = self.get_gallery_folders()
+        url = "http://www.imagefap.com/ajax_usergallery_folder.php"
+        params = {"userid": self.user_id}
+        for folder_id in folders:
+            params["id"] = folder_id
+            page = self.request(url, params=params).text
+            yield from text.extract_iter(page, '<a  href="/gallery/', '"')
+
+    def get_gallery_folders(self):
+        """Create a list of all folder-ids of a specific user"""
+        if self.user:
+            url = "http://www.imagefap.com/profile/" + self.user + "/galleries"
+        else:
+            url = "http://www.imagefap.com/usergallery.php?userid=" + str(self.user_id)
+        page = self.request(url).text
+        self.user_id, pos = text.extract(page, '?userid=', '"')
+        folders     , pos = text.extract(page, ' id="tgl_all" value="', '"', pos)
+        return folders.split("|")[:-1]
