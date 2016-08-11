@@ -46,9 +46,6 @@ class DownloadJob(Job):
         self.directory_fmt = os.path.join(*segments)
 
     def run(self):
-        if self.extractor is None:
-            return
-
         for msg in self.extractor:
             if msg[0] == Message.Url:
                 self.download(msg)
@@ -140,8 +137,6 @@ class KeywordJob(Job):
     """Print available keywords"""
 
     def run(self):
-        if self.extractor is None:
-            return
         for msg in self.extractor:
             if msg[0] == Message.Url:
                 print("Keywords for filenames:")
@@ -164,11 +159,15 @@ class UrlJob(Job):
     """Print download urls"""
 
     def run(self):
-        if self.extractor is None:
-            return
         for msg in self.extractor:
             if msg[0] == Message.Url:
                 print(msg[1])
+            elif msg[0] == Message.Queue:
+                try:
+                    UrlJob(msg[1]).run()
+                except exception.NoExtractorError:
+                    pass
+
 
 
 class HashJob(DownloadJob):
