@@ -3,7 +3,8 @@ gallery-dl
 ==========
 
 *gallery-dl* is a small command-line tool to download images and entire image
-galleries from several image hosting platforms.
+galleries from several image hosting platforms. It requires Python 3.3+ to run
+and works on Unix-like systems as well as Windows.
 
 
 Installation
