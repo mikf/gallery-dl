@@ -64,7 +64,7 @@ modules = [
 def find(url):
     """Find suitable extractor for the given url"""
     for pattern, klass in _list_patterns():
-        match = re.match(pattern, url)
+        match = pattern.match(url)
         if match:
             return klass(match)
     return None
@@ -84,19 +84,17 @@ _module_iter = iter(modules)
 
 def _list_patterns():
     """Yield all available (pattern, class) tuples"""
-    for entry in _cache:
-        yield entry
+    yield from _cache
 
     for module_name in _module_iter:
         module = importlib.import_module("."+module_name, __package__)
         tuples = [
-            (pattern, klass)
+            (re.compile(pattern), klass)
             for klass in _get_classes(module)
             for pattern in klass.pattern
         ]
         _cache.extend(tuples)
-        for etuple in tuples:
-            yield etuple
+        yield from tuples
 
 def _get_classes(module):
     """Return a list of all extractor classes in a module"""
