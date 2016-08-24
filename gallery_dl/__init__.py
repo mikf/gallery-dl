@@ -59,6 +59,10 @@ def build_cmdline_parser():
         help="print a list of available keywords for the given URLs",
     )
     parser.add_argument(
+        "--version", action="version", version=__version__,
+        help="print program version and exit"
+    )
+    parser.add_argument(
         "urls",
         nargs="*", metavar="URL",
         help="url to download images from"
