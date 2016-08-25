@@ -141,10 +141,19 @@ class PixivWorkExtractor(PixivUserExtractor):
     """Extract a single pixiv work/illustration"""
     subcategory = "work"
     pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
-                r"\?(?:[^&]+&)*illust_id=(\d+)")]
-    test = [("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=966412", {
-        "url": "efb622f065b0871e92195e7bee0b4d75bd687d8d",
-    })]
+                r"\?(?:[^&]+&)*illust_id=(\d+)"),
+               (r"(?:https?://)?i\d+\.pixiv\.net(?:/.*)?/img-[^/]+/img"
+                r"/\d{4}(?:/\d\d){5}/(\d+)"),
+                r"(?:https?://)?img\d+\.pixiv\.net/img/[^/]+/(\d+)"]
+    test = [
+        ("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=966412", {
+            "url": "efb622f065b0871e92195e7bee0b4d75bd687d8d",
+            "content": "69a8edfb717400d1c2e146ab2b30d2c235440c5a",
+        }),
+        ("http://i1.pixiv.net/c/600x600/img-master/img/2008/06/13/00/29/13/966412_p0_master1200.jpg", {
+            "url": "efb622f065b0871e92195e7bee0b4d75bd687d8d",
+        }),
+    ]
 
     def __init__(self, match):
         PixivUserExtractor.__init__(self, match)
