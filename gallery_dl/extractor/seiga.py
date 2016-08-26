@@ -18,7 +18,9 @@ class SeigaImageExtractor(Extractor):
     subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{category}_{image-id}.jpg"
-    pattern = [r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/seiga/im(\d+)"]
+    pattern = [(r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/"
+                r"(?:seiga/im|image/source/)(\d+)"),
+                r"(?:https?://)?lohas\.nicoseiga\.jp/(?:priv|o)/[^/]+/\d+/(\d+)"]
     test = [("http://seiga.nicovideo.jp/seiga/im5977527", {
         "keyword": "e2ea59186c47beb71484ba35d550cf6511ac185a",
         "content": "d9202292012178374d57fb0126f6124387265297",
