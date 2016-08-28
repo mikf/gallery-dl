@@ -303,6 +303,9 @@ class PixivAPI():
         return user, "Bearer " + token
 
     @staticmethod
-    def _parse(response):
+    def _parse(response, empty=[None]):
         """Parse a Pixiv Public-API response"""
-        return json.loads(response.text)
+        data = json.loads(response.text)
+        if data["status"] == "failure" or data["response"] == empty:
+            raise exception.NotFoundError()
+        return data
