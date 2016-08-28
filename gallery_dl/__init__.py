@@ -123,12 +123,16 @@ def main():
                 except exception.AuthenticationError:
                     print("Authentication failed. Please provide a valid "
                           "username/password pair.", file=sys.stderr)
+                except exception.NotFoundError as err:
+                    res = str(err) or "resource (gallery/image/user)"
+                    print("The ", res, " at '", url, "' does not exist",
+                          sep="", file=sys.stderr)
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt", file=sys.stderr)
     except BrokenPipeError:
         pass
-    except IOError as e:
+    except IOError as err:
         import errno
-        if e.errno != errno.EPIPE:
+        if err.errno != errno.EPIPE:
             raise
