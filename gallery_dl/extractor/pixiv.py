@@ -306,6 +306,6 @@ class PixivAPI():
     def _parse(response, empty=[None]):
         """Parse a Pixiv Public-API response"""
         data = json.loads(response.text)
-        if data["status"] == "failure" or data["response"] == empty:
+        if data.get("status") == "failure" or data.get("response", empty) == empty:
             raise exception.NotFoundError()
         return data
