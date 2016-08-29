@@ -52,6 +52,8 @@ class SeigaImageExtractor(Extractor):
         """Get url for an image with id 'image_id'"""
         url = "http://seiga.nicovideo.jp/image/source/" + image_id
         response = self.session.head(url)
+        if response.status_code == 404:
+            raise exception.NotFoundError("image")
         return response.headers["Location"].replace("/o/", "/priv/", 1)
 
     @cache(maxage=30*24*60*60, keyarg=1)
