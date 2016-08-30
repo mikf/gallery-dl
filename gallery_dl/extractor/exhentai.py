@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from galleries at http://exhentai.org/"""
+"""Extract images from galleries at https://exhentai.org/"""
 
 from .common import Extractor, Message
 from .. import config, text, iso639_1, exception
@@ -20,7 +20,7 @@ class ExhentaiExtractor(Extractor):
     directory_fmt = ["{category}", "{gallery-id}"]
     filename_fmt = "{gallery-id}_{num:>04}_{imgkey}_{name}.{extension}"
     pattern = [r"(?:https?://)?(g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
-    api_url = "http://exhentai.org/api.php"
+    api_url = "https://exhentai.org/api.php"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -31,7 +31,7 @@ class ExhentaiExtractor(Extractor):
             "User-Agent": "Mozilla/5.0",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
-            "Referer": "http://exhentai.org/",
+            "Referer": "https://exhentai.org/",
         })
         self.wait_min = config.interpolate(("extractor", "exhentai", "wait-min"), 3)
         self.wait_max = config.interpolate(("extractor", "exhentai", "wait-max"), 6)
@@ -41,6 +41,9 @@ class ExhentaiExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
         page = self.request(self.url).text
+        if page.startswith("Key missing") \
+        or page.startswith("Gallery not found"):
+            raise exception.NotFoundError("gallery")
         data, url = self.get_job_metadata(page)
 
         headers = self.session.headers.copy()
@@ -80,7 +83,7 @@ class ExhentaiExtractor(Extractor):
         if pos != -1:
             data["language"] = data["language"][:pos]
         data["lang"] = iso639_1.language_to_code(data["language"])
-        url = "http://exhentai.org/s/" + data["url"]
+        url = "https://exhentai.org/s/" + data["url"]
         del data["url"]
         return data, url
 
@@ -93,14 +96,14 @@ class ExhentaiExtractor(Extractor):
             ("imgkey-next", "'", "'"),
             ("url"        , '<img id="img" src="', '"'),
             ("title"      , '<div id="i4"><div>', ' :: '),
-            ("origurl"    , 'http://exhentai.org/fullimg.php', '"'),
+            ("origurl"    , 'https://exhentai.org/fullimg.php', '"'),
             ("gid"        , 'var gid=',  ';'),
             ("startkey"   , 'var startkey="', '";'),
             ("showkey"    , 'var showkey="', '";'),
         ))
         data["imgkey"] = data["startkey"]
         if data["origurl"]:
-            data["origurl"] = "http://exhentai.org/fullimg.php" + text.unescape(data["origurl"])
+            data["origurl"] = "https://exhentai.org/fullimg.php" + text.unescape(data["origurl"])
         else:
             data["origurl"] = data["url"]
         yield data
