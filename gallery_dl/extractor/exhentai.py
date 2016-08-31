@@ -83,6 +83,8 @@ class ExhentaiExtractor(Extractor):
         if pos != -1:
             data["language"] = data["language"][:pos]
         data["lang"] = iso639_1.language_to_code(data["language"])
+        data["title"] = text.unescape(data["title"])
+        data["title_jp"] = text.unescape(data["title_jp"])
         url = "https://exhentai.org/s/" + data["url"]
         del data["url"]
         return data, url
