@@ -49,6 +49,7 @@ modules = [
     "mangastream",
     "nhentai",
     "nijie",
+    "pinterest",
     "powermanga",
     "safebooru",
     "sankaku",

@@ -50,7 +50,7 @@ Supported Sites
     pixiv.net, nijie.info, seiga.nicovideo.jp
 * Western:
     deviantart.com, hentai-foundry.com, imagefap,com, imgth.com, imgur.com,
-    tumblr.com
+    pinterest.com, tumblr.com
 * Futaba Channel-like:
     4chan.org, 8ch.net
 * Image Hosts:
