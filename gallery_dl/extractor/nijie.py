@@ -39,9 +39,10 @@ class NijieUserExtractor(AsynchronousExtractor):
             config.interpolate(("extractor", self.category, "password"))
         )
         data = self.get_job_metadata()
+        images = self.get_image_ids()
         yield Message.Version, 1
         yield Message.Directory, data
-        for image_id in self.get_image_ids():
+        for image_id in images:
             for image_url, image_data in self.get_image_data(image_id):
                 image_data.update(data)
                 yield Message.Url, image_url, image_data
@@ -55,8 +56,10 @@ class NijieUserExtractor(AsynchronousExtractor):
 
     def get_image_ids(self):
         """Collect all image-ids for a specific artist"""
-        page = self.request(self.artist_url).text
-        return list(text.extract_iter(page, ' illust_id="', '"'))
+        response = self.session.get(self.artist_url)
+        if response.status_code == 404:
+            raise exception.NotFoundError("artist")
+        return list(text.extract_iter(response.text, ' illust_id="', '"'))
 
     def get_image_data(self, image_id):
         """Get URL and metadata for images specified by 'image_id'"""
