@@ -9,7 +9,7 @@
 """Extract images from https://www.pinterest.com"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
@@ -40,6 +40,11 @@ class PinterestPinExtractor(PinterestExtractor):
     """Extract an image from a single pin from https://www.pinterest.com"""
     subcategory = "pin"
     pattern = [r"(?:https?://)?(?:www\.)?pinterest\.com/pin/([^/]+)"]
+    test = [("https://www.pinterest.com/pin/858146903966145189/", {
+        "url": "7abf2be76bf03d452feacf6e000b040fc2706b80",
+        "keyword": "e1a2ce625ece86f0b31f0ae94a3af3d72e6454b9",
+        "content": "d3e24bc9f7af585e8c23b9136956bd45a4d9b947",
+    })]
 
     def __init__(self, match):
         PinterestExtractor.__init__(self)
@@ -59,6 +64,11 @@ class PinterestBoardExtractor(PinterestExtractor):
     subcategory = "board"
     directory_fmt = ["{category}", "{user}", "{board}"]
     pattern = [r"(?:https?://)?(?:www\.)?pinterest\.com/(?!pin/)([^/]+)/([^/]+)"]
+    test = [("https://www.pinterest.com/g1952849/test-/", {
+        "url": "705ee521630a5d613b0449d694a5345e684572a9",
+        "keyword": "2815716747f84fa0a4047d29d71df8ae96a0e177",
+        "content": "30897fb5d5616765bb2c9c26cb84f54499424fb4",
+    })]
 
     def __init__(self, match):
         PinterestExtractor.__init__(self)
@@ -129,6 +139,11 @@ class PinterestAPI():
                 return
             params["cursor"] = cursor
 
-    def _parse(self, response):
+    @staticmethod
+    def _parse(response):
         """Parse an API response"""
-        return response.json()
+        data = response.json()
+        if "data" not in data and data.get("type") == "api":
+            msg = data.get("message", "").split(maxsplit=1)[0].lower()
+            raise exception.NotFoundError(msg)
+        return data
