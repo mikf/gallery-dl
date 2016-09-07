@@ -12,11 +12,12 @@ from .common import Extractor, Message
 from .. import text
 
 class ChronosImageExtractor(Extractor):
-
+    """Extractor for single images from chronos.to"""
     category = "chronos"
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?chronos\.to/([a-z0-9]{12})"]
+    url_base = "http://chronos.to/"
     test = [("http://chronos.to/bdrmq7rw7v4y", {
         "url": "7fcb3fe315c94283644d25ef47a644c2dc8da944",
         "keyword": "9c364ef9bd962fe70eca49ef74c1c424486514f9",
@@ -38,7 +39,7 @@ class ChronosImageExtractor(Extractor):
             "pre": 1,
             "next": "Continue+to+image.",
         }
-        page = self.request("http://chronos.to/" + self.token, method="post",
+        page = self.request(self.url_base + self.token, method="post",
                             data=params).text
         url     , pos = text.extract(page, '<br><img src="', '"')
         filename, pos = text.extract(page, ' alt="', '"', pos)

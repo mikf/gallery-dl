@@ -17,6 +17,7 @@ modules = [
     "8chan",
     "batoto",
     "chronos",
+    "coreimg",
     "danbooru",
     "deviantart",
     "doujinmode",
