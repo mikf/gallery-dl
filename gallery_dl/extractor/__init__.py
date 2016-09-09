@@ -36,6 +36,7 @@ modules = [
     "imgcandy",
     "imgchili",
     "imgth",
+    "imgtrex",
     "imgur",
     "imgyt",
     "khinsider",

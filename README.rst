@@ -54,8 +54,8 @@ Supported Sites
 * Futaba Channel-like:
     4chan.org, 8ch.net
 * Image Hosts:
-    chronos.to, imagebam.com, imagetwist.com, img.yt, imgbox.com, imgchili.net,
-    turboimagehost.com
+    chronos.to, coreimg.net, imagebam.com, imagetwist.com, img.yt, imgbox.com,
+    imgcandy.net, imgchili.net, imgtrex.com. turboimagehost.com
 
 
 Configuration
