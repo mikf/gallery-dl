@@ -6,14 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://img.yt/"""
+"""Extract images from https://img.yt/"""
 
 from .common import Extractor, Message
 from .. import text
 from os.path import splitext
 
 class ImgytImageExtractor(Extractor):
-
+    """Extractor for single images from img.yt"""
     category = "imgyt"
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
