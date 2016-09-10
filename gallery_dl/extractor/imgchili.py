@@ -43,7 +43,7 @@ class ImgchiliExtractor(Extractor):
 
 
 class ImgchiliImageExtractor(ImgchiliExtractor):
-    """Extractor for single images from imgchili"""
+    """Extractor for single images from imgchili.net"""
     subcategory = "image"
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgchili\.net/show/\d+/(\d+)_[^/]+"]
@@ -54,15 +54,17 @@ class ImgchiliImageExtractor(ImgchiliExtractor):
     })]
 
     def get_job_metadata(self, page):
-        name       , pos = text.extract(page, 'An image called ', '" />\n')
+        name1      , pos = text.extract(page, 'name="description" content="', '. An ')
+        name2      , pos = text.extract(page, 'image called ', '" />\n', pos)
         _          , pos = text.extract(page, '<link rel="image_src"', '', pos)
         self.imgurl, pos = text.extract(page, ' href="', '"', pos)
-        name = name.split("in the gallery ")
-        return text.nameext_from_url(name[0], {
+        parts = name2.split("in the gallery ")
+        name = parts[0] if not parts[0].endswith("...") else name1
+        return text.nameext_from_url(name, {
             "category": self.category,
             "subcategory": self.subcategory,
             "image-id": self.match.group(1),
-            "title": text.unescape(name[-1]) if len(name) > 1 else ""
+            "title": text.unescape(parts[-1]) if len(parts) > 1 else ""
         })
 
     def get_images(self, page):
@@ -70,7 +72,7 @@ class ImgchiliImageExtractor(ImgchiliExtractor):
 
 
 class ImgchiliAlbumExtractor(ImgchiliExtractor):
-    """Extractor for image-albums from imgchili"""
+    """Extractor for image-albums from imgchili.net"""
     subcategory = "album"
     directory_fmt = ["{category}", "{title} - {key}"]
     filename_fmt = "{num:>03} {filename}"
