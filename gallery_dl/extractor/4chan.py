@@ -6,13 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract image- and video-urls from threads on https://www.4chan.org/"""
+"""Extract images and videos from https://www.4chan.org/"""
 
 from .chan import ChanExtractor
 
-class FourChanExtractor(ChanExtractor):
-
+class FourchanThreadExtractor(ChanExtractor):
+    """Extractor for images from threads from 4chan.org"""
     category = "4chan"
+    subcategory = "thread"
     pattern = [r"(?:https?://)?boards\.4chan\.org/([^/]+)/thread/(\d+)"]
     api_url = "https://a.4cdn.org/{board}/thread/{thread}.json"
     file_url = "https://i.4cdn.org/{board}/{tim}{ext}"

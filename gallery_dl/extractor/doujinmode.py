@@ -13,8 +13,9 @@ from .. import text
 import re
 
 class DoujinmodeChapterExtractor(Extractor):
-
+    """Extractor for manga-/doujinshi-chapters from doujinmode.net"""
     category = "doujinmode"
+    subcategory = "chapter"
     directory_fmt = ["{category}", "{title}"]
     filename_fmt = "{num:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?doujinmode\.net/"

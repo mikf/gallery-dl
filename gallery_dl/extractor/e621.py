@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract image-urls from https://e621.net/"""
+"""Extract images from https://e621.net/"""
 
 from . import booru
 
@@ -16,7 +16,7 @@ class E621Extractor(booru.JSONBooruExtractor):
     api_url = "https://e621.net/post/index.json"
 
 class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
-    """Extract images from e621 based on search-tags"""
+    """Extractor for images from e621.net based on search-tags"""
     subcategory = "tag"
     pattern = [
         r"(?:https?://)?(?:www\.)?e621\.net/post/index/\d+/([^?]+)",
@@ -28,7 +28,7 @@ class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
     })]
 
 class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
-    """Extract image-pools from e621"""
+    """Extractor for image-pools from e621.net"""
     subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/pool/show/(\d+)"]
     test = [("https://e621.net/pool/show/73", {
@@ -37,7 +37,7 @@ class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
     })]
 
 class E621PostExtractor(E621Extractor, booru.BooruPostExtractor):
-    """Extract single images from e621"""
+    """Extractor for single images from e621.net"""
     subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/post/show/(\d+)"]
     test = [("https://e621.net/post/show/535", {

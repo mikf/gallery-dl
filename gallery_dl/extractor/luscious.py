@@ -12,9 +12,10 @@ from .common import Extractor, Message
 from .. import text, iso639_1
 from urllib.parse import urljoin
 
-class LusciousExtractor(Extractor):
-
+class LusciousAlbumExtractor(Extractor):
+    """Extractor for image albums from luscious.net"""
     category = "luscious"
+    subcategory = "album"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?luscious\.net/c/([^/]+)/"

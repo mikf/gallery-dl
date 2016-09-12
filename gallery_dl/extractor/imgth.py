@@ -12,8 +12,9 @@ from .common import Extractor, Message
 from .. import text
 
 class ImgthGalleryExtractor(Extractor):
-    """Extract all images of a gallery"""
+    """Extractor for image galleries from imgth.com"""
     category = "imgth"
+    subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
     pattern = [r"(?:https?://)?imgth\.com/gallery/(\d+)"]

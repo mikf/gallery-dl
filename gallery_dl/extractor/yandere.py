@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract image-urls from https://yande.re/"""
+"""Extract images from https://yande.re/"""
 
 from . import booru
 
@@ -16,7 +16,7 @@ class YandereExtractor(booru.JSONBooruExtractor):
     api_url = "https://yande.re/post.json"
 
 class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
-    """Extract images from yandere based on search-tags"""
+    """Extractor for images from yande.re based on search-tags"""
     subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post\?tags=([^&]+)"]
     test = [("https://yande.re/post?tags=ouzoku armor", {
@@ -24,7 +24,7 @@ class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
     })]
 
 class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
-    """Extract image-pools from yandere"""
+    """Extractor for image-pools from yande.re"""
     subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?yande.re/pool/show/(\d+)"]
     test = [("https://yande.re/pool/show/318", {
@@ -32,7 +32,7 @@ class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
     })]
 
 class YanderePostExtractor(YandereExtractor, booru.BooruPostExtractor):
-    """Extract single images from yandere"""
+    """Extractor for single images from yande.re"""
     subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?yande.re/post/show/(\d+)"]
     test = [("https://yande.re/post/show/51824", {

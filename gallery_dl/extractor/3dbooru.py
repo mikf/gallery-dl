@@ -6,11 +6,11 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract image-urls from http://behoimi.org/"""
+"""Extract images from http://behoimi.org/"""
 
 from . import booru
 
-class ThreeDeeBooruExtractor(booru.JSONBooruExtractor):
+class ThreedeebooruExtractor(booru.JSONBooruExtractor):
     """Base class for 3dbooru extractors"""
     category = "3dbooru"
     api_url = "http://behoimi.org/post/index.json"
@@ -19,8 +19,8 @@ class ThreeDeeBooruExtractor(booru.JSONBooruExtractor):
         "User-Agent": "Mozilla/5.0",
     }
 
-class ThreeDeeBooruTagExtractor(ThreeDeeBooruExtractor, booru.BooruTagExtractor):
-    """Extract images from 3dbooru based on search-tags"""
+class ThreedeebooruTagExtractor(ThreedeebooruExtractor, booru.BooruTagExtractor):
+    """Extractor for images from behoimi.org based on search-tags"""
     subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post(?:/(?:index)?)?\?tags=([^&]+)"]
     test = [("http://behoimi.org/post?tags=himekawa_azuru dress", {
@@ -28,8 +28,8 @@ class ThreeDeeBooruTagExtractor(ThreeDeeBooruExtractor, booru.BooruTagExtractor)
         "content": "11cbda40c287e026c1ce4ca430810f761f2d0b2a",
     })]
 
-class ThreeDeeBooruPoolExtractor(ThreeDeeBooruExtractor, booru.BooruPoolExtractor):
-    """Extract image-pools from 3dbooru"""
+class ThreedeebooruPoolExtractor(ThreedeebooruExtractor, booru.BooruPoolExtractor):
+    """Extractor for image-pools from behoimi.org"""
     subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/pool/show/(\d+)"]
     test = [("http://behoimi.org/pool/show/27", {
@@ -37,8 +37,8 @@ class ThreeDeeBooruPoolExtractor(ThreeDeeBooruExtractor, booru.BooruPoolExtracto
         "content": "fd5b37c5c6c2de4b4d6f1facffdefa1e28176554",
     })]
 
-class ThreeDeeBooruPostExtractor(ThreeDeeBooruExtractor, booru.BooruPostExtractor):
-    """Extract single images from 3dbooru"""
+class ThreedeebooruPostExtractor(ThreedeebooruExtractor, booru.BooruPostExtractor):
+    """Extractor for single images from behoimi.org"""
     subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post/show/(\d+)"]
     test = [("http://behoimi.org/post/show/140852", {

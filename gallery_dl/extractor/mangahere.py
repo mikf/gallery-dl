@@ -6,14 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from from http://www.mangahere.co/"""
+"""Extract manga-chapters and entire manga from http://www.mangahere.co/"""
 
 from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 import re
 
-class MangaHereMangaExtractor(Extractor):
-    """Extract all manga-chapters from mangahere"""
+class MangahereMangaExtractor(Extractor):
+    """Extractor for mangas from mangahere.co"""
     category = "mangahere"
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangahere\.co/manga/([^/]+)/?$"]
@@ -39,8 +39,8 @@ class MangaHereMangaExtractor(Extractor):
         ))
 
 
-class MangaHereChapterExtractor(AsynchronousExtractor):
-    """Extract a single manga-chapter from mangahere"""
+class MangahereChapterExtractor(AsynchronousExtractor):
+    """Extractor for manga-chapters from mangahere.co"""
     category = "mangahere"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]

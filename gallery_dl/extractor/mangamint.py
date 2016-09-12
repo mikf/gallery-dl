@@ -12,8 +12,8 @@ from .common import Extractor, Message
 from .. import text
 import re
 
-class MangaMintMangaExtractor(Extractor):
-    """Extract all manga-chapters from mangamint"""
+class MangamintMangaExtractor(Extractor):
+    """Extractor for mangas from mangamint.com"""
     category = "mangamint"
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangamint\.com(/manga/[^\?]+-manga)"]
@@ -46,8 +46,8 @@ class MangaMintMangaExtractor(Extractor):
         return reversed(chapters)
 
 
-class MangaMintChapterExtractor(Extractor):
-    """Extract a single manga-chapter from mangamint"""
+class MangamintChapterExtractor(Extractor):
+    """Extractor for manga-chapters from mangamint.com"""
     category = "mangamint"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]

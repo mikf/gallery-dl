@@ -13,8 +13,9 @@ from .. import config, text, exception
 from ..cache import cache
 
 class NijieUserExtractor(AsynchronousExtractor):
-    """Extract all works of a single nijie-user"""
+    """Extractor for works of a nijie-user"""
     category = "nijie"
+    subcategory = "user"
     directory_fmt = ["{category}", "{artist-id}"]
     filename_fmt = "{category}_{artist-id}_{image-id}_p{index:>02}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?nijie\.info/members(?:_illust)?\.php\?id=(\d+)"]

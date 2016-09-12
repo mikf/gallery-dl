@@ -6,15 +6,16 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga pages from http://bato.to/"""
+"""Extract manga chapters from http://bato.to/"""
 
 from .common import AsynchronousExtractor, Message
 from .. import text, iso639_1
 import re
 
-class BatotoExtractor(AsynchronousExtractor):
-
+class BatotoChapterExtractor(AsynchronousExtractor):
+    """Extractor for manga-chapters from bato.to"""
     category = "batoto"
+    subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)"]

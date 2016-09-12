@@ -14,6 +14,7 @@ from .. import text
 class ImgcandyImageExtractor(Extractor):
     """Extractor for single images from imgcandy.net"""
     category = "imgcandy"
+    subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     pattern = [(r"(?:https?://)?(?:www\.)?imgcandy\.net/img-([a-z0-9]+)"

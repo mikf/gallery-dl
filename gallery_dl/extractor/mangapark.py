@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text
 
 class MangaparkMangaExtractor(Extractor):
-    """Extract all chapters of a manga from mangapark"""
+    """Extractor for mangas from mangapark.me"""
     category = "mangapark"
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangapark\.me/manga/([^/]+)$"]
@@ -41,7 +41,7 @@ class MangaparkMangaExtractor(Extractor):
 
 
 class MangaparkChapterExtractor(Extractor):
-    """Extract a single manga-chapter from mangapark"""
+    """Extractor for manga-chapters from mangapark.me"""
     category = "mangapark"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]

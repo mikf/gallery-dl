@@ -15,7 +15,7 @@ import re
 import json
 
 class PixivUserExtractor(Extractor):
-    """Extract all works of a single pixiv-user"""
+    """Extractor for works of a pixiv-user"""
     category = "pixiv"
     subcategory = "user"
     directory_fmt = ["{category}", "{artist-id}-{artist-nick}"]
@@ -138,7 +138,7 @@ class PixivUserExtractor(Extractor):
 
 
 class PixivWorkExtractor(PixivUserExtractor):
-    """Extract a single pixiv work/illustration"""
+    """Extractor for a single pixiv work/illustration"""
     subcategory = "work"
     pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
                 r"\?(?:[^&]+&)*illust_id=(\d+)"),
@@ -171,7 +171,7 @@ class PixivWorkExtractor(PixivUserExtractor):
 
 
 class PixivFavoriteExtractor(PixivUserExtractor):
-    """Extract all favorites/bookmarks of a single pixiv-user"""
+    """Extractor for all favorites/bookmarks of a pixiv-user"""
     subcategory = "favorite"
     directory_fmt = ["{category}", "bookmarks", "{artist-id}-{artist-nick}"]
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php\?id=(\d+)"]
@@ -188,7 +188,7 @@ class PixivFavoriteExtractor(PixivUserExtractor):
 
 
 class PixivBookmarkExtractor(PixivFavoriteExtractor):
-    """Extract all favorites/bookmarks of your own account"""
+    """Extractor for all favorites/bookmarks of your own account"""
     subcategory = "bookmark"
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php()$"]
     test = []

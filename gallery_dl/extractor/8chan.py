@@ -6,13 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract image- and video-urls from threads on https://8ch.net/"""
+"""Extract images and videos from https://8ch.net/"""
 
 from .chan import ChanExtractor
 
-class InfinityChanExtractor(ChanExtractor):
-
+class InfinitychanThreadExtractor(ChanExtractor):
+    """Extractor for images from threads from 8ch.net"""
     category = "8chan"
+    subcategory = "thread"
     pattern = [r"(?:https?://)?(?:www\.)?8ch\.net/([^/]+)/res/(\d+)"]
     api_url = "https://8ch.net/{board}/res/{thread}.json"
     file_url = "https://8ch.net/{board}/src/{tim}{ext}"

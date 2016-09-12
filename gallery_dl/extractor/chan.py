@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text
 
 class ChanExtractor(Extractor):
-
+    """Base class for extractors for Futaba Channel boards"""
     directory_fmt = ["{category}", "{board}-{thread}"]
     filename_fmt = "{tim}-{filename}{ext}"
     api_url = ""

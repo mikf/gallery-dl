@@ -14,7 +14,7 @@ from urllib.parse import urljoin
 import os.path
 
 class ImgurAlbumExtractor(Extractor):
-    """Extract albums from imgur"""
+    """Extractor for image albums from imgur.com"""
     category = "imgur"
     subcategory = "album"
     directory_fmt = ["{category}", "{album-key} - {title}"]

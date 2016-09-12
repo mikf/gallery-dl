@@ -6,14 +6,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga pages from https://www.mangastream.com/"""
+"""Extract manga-chapters from https://www.mangastream.com/"""
 
 from .common import AsynchronousExtractor, Message
 from .. import text
 
-class MangaStreamExtractor(AsynchronousExtractor):
-
+class MangastreamChapterExtractor(AsynchronousExtractor):
+    """Extractor for manga-chapters from mangastream.com"""
     category = "mangastream"
+    subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter} - {title}"]
     filename_fmt = "{manga}_c{chapter}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?(?:readms|mangastream)\.com/"

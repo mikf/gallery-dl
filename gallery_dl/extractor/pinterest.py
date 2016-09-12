@@ -37,7 +37,7 @@ class PinterestExtractor(Extractor):
 
 
 class PinterestPinExtractor(PinterestExtractor):
-    """Extract an image from a single pin from https://www.pinterest.com"""
+    """Extractor for images from a single pin from pinterest.com"""
     subcategory = "pin"
     pattern = [r"(?:https?://)?(?:www\.)?pinterest\.com/pin/([^/]+)"]
     test = [("https://www.pinterest.com/pin/858146903966145189/", {
@@ -59,7 +59,7 @@ class PinterestPinExtractor(PinterestExtractor):
 
 
 class PinterestBoardExtractor(PinterestExtractor):
-    """Extract an image from a single pin from https://www.pinterest.com"""
+    """Extractor for images from a board from pinterest.com"""
     category = "pinterest"
     subcategory = "board"
     directory_fmt = ["{category}", "{user}", "{board}"]

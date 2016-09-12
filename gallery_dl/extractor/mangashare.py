@@ -11,8 +11,8 @@
 from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 
-class MangaShareMangaExtractor(Extractor):
-    """Extract all manga-chapters from mangashare"""
+class MangashareMangaExtractor(Extractor):
+    """Extractor for mangas from mangashare.com"""
     category = "mangashare"
     subcategory = "manga"
     pattern = [r"(?:https?://)?read\.mangashare\.com/[^/]+$"]
@@ -37,8 +37,8 @@ class MangaShareMangaExtractor(Extractor):
         ))
 
 
-class MangaShareChapterExtractor(AsynchronousExtractor):
-    """Extract a single manga-chapter from mangashare"""
+class MangashareChapterExtractor(AsynchronousExtractor):
+    """Extractor for manga-chapters from mangashare.com"""
     category = "mangashare"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]

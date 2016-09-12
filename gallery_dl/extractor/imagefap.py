@@ -13,7 +13,7 @@ from .. import text
 import json
 
 class ImagefapGalleryExtractor(Extractor):
-    """Extract all images from a gallery at imagefap.com"""
+    """Extractor for image galleries from imagefap.com"""
     category = "imagefap"
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
@@ -29,6 +29,7 @@ class ImagefapGalleryExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.gid = match.group(1)
+        self.image_id = ""
 
     def items(self):
         url  = "http://www.imagefap.com/pictures/" + self.gid + "/"
@@ -60,7 +61,7 @@ class ImagefapGalleryExtractor(Extractor):
         while True:
             pos = 0
             page = self.request(url, params=params).text
-            for i in range(24):
+            for _ in range(24):
                 imgurl, pos = text.extract(page, '<a href="', '"', pos)
                 num += 1
                 _, imgid, name = imgurl.rsplit("/", 2)
@@ -73,7 +74,7 @@ class ImagefapGalleryExtractor(Extractor):
 
 
 class ImagefapImageExtractor(Extractor):
-    """Extract a single image from imagefap.com"""
+    """Extractor for single images from imagefap.com"""
     category = "imagefap"
     subcategory = "image"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
@@ -125,7 +126,7 @@ class ImagefapImageExtractor(Extractor):
 
 
 class ImagefapUserExtractor(Extractor):
-    """Extract all images from all galleries from a user at imagefap.com"""
+    """Extractor for all galleries from a user at imagefap.com"""
     category = "imagefap"
     subcategory = "user"
     directory_fmt = ["{category}", "{gallery-id} {title}"]

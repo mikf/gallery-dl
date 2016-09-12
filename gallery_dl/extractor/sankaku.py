@@ -11,9 +11,10 @@
 from .common import AsynchronousExtractor, Message
 from .. import text
 
-class SankakuExtractor(AsynchronousExtractor):
-
+class SankakuTagExtractor(AsynchronousExtractor):
+    """Extractor for images from chan.sankakucomplex.com based on search-tags"""
     category = "sankaku"
+    subcategory = "tag"
     directory_fmt = ["{category}", "{tags}"]
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/\?tags=([^&]+)"]

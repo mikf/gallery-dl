@@ -13,7 +13,7 @@ from .. import text
 import json
 
 class TumblrUserExtractor(Extractor):
-    """Extract all images from a tumblr-user"""
+    """Extractor for all images from a tumblr-user"""
     category = "tumblr"
     subcategory = "user"
     directory_fmt = ["{category}", "{user}"]
@@ -85,7 +85,7 @@ class TumblrUserExtractor(Extractor):
 
 
 class TumblrPostExtractor(TumblrUserExtractor):
-    """Extract images from a single post on tumblr"""
+    """Extractor for images from a single post on tumblr"""
     subcategory = "post"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/post/(\d+)"]
     test = [("http://demo.tumblr.com/post/459265350", {
@@ -99,7 +99,7 @@ class TumblrPostExtractor(TumblrUserExtractor):
 
 
 class TumblrTagExtractor(TumblrUserExtractor):
-    """Extract images from a tumblr-user by tag"""
+    """Extractor for images from a tumblr-user by tag"""
     subcategory = "tag"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/tagged/(.+)"]
     test = [("http://demo.tumblr.com/tagged/Times Square", {

@@ -12,7 +12,7 @@ from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 
 class ImagebamGalleryExtractor(AsynchronousExtractor):
-
+    """Extractor for image galleries from imagebam.com"""
     category = "imagebam"
     subcategory = "gallery"
     directory_fmt = ["{category}", "{title} - {gallery-key}"]
@@ -57,6 +57,7 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
         return data
 
     def get_images(self, url):
+        """Yield all image-urls and -ids for a gallery"""
         done = False
         while not done:
             page = self.request(self.url_base + url).text
@@ -72,7 +73,7 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
 
 
 class ImagebamImageExtractor(Extractor):
-
+    """Extractor for single images from imagebam.com"""
     category = "imagebam"
     subcategory = "image"
     directory_fmt = ["{category}"]

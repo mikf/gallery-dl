@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract image-urls from https://danbooru.donmai.us/"""
+"""Extract images from https://danbooru.donmai.us/"""
 
 from . import booru
 
@@ -16,7 +16,7 @@ class DanbooruExtractor(booru.JSONBooruExtractor):
     api_url = "https://danbooru.donmai.us/posts.json"
 
 class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
-    """Extract images from danbooru based on search-tags"""
+    """Extractor for images from danbooru based on search-tags"""
     subcategory = "tag"
     pattern = [(r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts"
                 r"\?(?:utf8=%E2%9C%93&)?tags=([^&]+)")]
@@ -26,7 +26,7 @@ class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
     })]
 
 class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
-    """Extract image-pools from danbooru"""
+    """Extractor for image-pools from danbooru"""
     subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/pools/(\d+)"]
     test = [("https://danbooru.donmai.us/pools/7659", {
@@ -35,7 +35,7 @@ class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
     })]
 
 class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
-    """Extract single images from danbooru"""
+    """Extractor for single images from danbooru"""
     subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts/(\d+)"]
     test = [("https://danbooru.donmai.us/posts/294929", {
