@@ -15,6 +15,7 @@ from os.path import splitext
 class ImgytImageExtractor(Extractor):
     """Extractor for single images from img.yt"""
     category = "imgyt"
+    subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?img\.yt/img-([a-z0-9]+)\.html"]

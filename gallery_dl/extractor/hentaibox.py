@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text, iso639_1
 
 class HentaiboxChapterExtractor(Extractor):
-
+    """Extractor for a single manga chapter from hentaibox.net"""
     category = "hentaibox"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{series}", "{title}"]

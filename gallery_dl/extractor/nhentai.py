@@ -12,9 +12,10 @@ from .common import Extractor, Message
 from .. import text
 import json
 
-class NhentaiExtractor(Extractor):
-
+class NhentaiGalleryExtractor(Extractor):
+    """Extractor for image-galleries from nhentai.net"""
     category = "nhentai"
+    subcategory = "nijie"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)"]

@@ -10,10 +10,9 @@
 
 from .common import Extractor, Message
 from .. import text
-import re
 
-class SenmangaRawChapterExtractor(Extractor):
-    """Extract a single manga-chapter from raw.senmanga.com"""
+class SenmangaChapterExtractor(Extractor):
+    """Extractor for manga-chapters from raw.senmanga.com"""
     category = "senmanga"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}"]

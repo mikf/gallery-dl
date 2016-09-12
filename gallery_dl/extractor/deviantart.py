@@ -12,8 +12,8 @@ from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 import re
 
-class DeviantArtUserExtractor(AsynchronousExtractor):
-    """Extract all works of an artist on deviantart"""
+class DeviantartUserExtractor(AsynchronousExtractor):
+    """Extractor for all works from an artist on deviantart.com"""
     category = "deviantart"
     subcategory = "user"
     directory_fmt = ["{category}", "{artist}"]
@@ -99,8 +99,8 @@ class DeviantArtUserExtractor(AsynchronousExtractor):
         return re.match(pattern, txt)
 
 
-class DeviantArtImageExtractor(Extractor):
-    """Extract a single image from deviantart"""
+class DeviantartImageExtractor(Extractor):
+    """Extractor for single images from deviantart.com"""
     category = "deviantart"
     subcategory = "image"
     directory_fmt = ["{category}", "{artist}"]

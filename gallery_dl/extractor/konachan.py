@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract image-urls from https://konachan.com/"""
+"""Extract images from https://konachan.com/"""
 
 from . import booru
 
@@ -16,7 +16,7 @@ class KonachanExtractor(booru.JSONBooruExtractor):
     api_url = "https://konachan.com/post.json"
 
 class KonachanTagExtractor(KonachanExtractor, booru.BooruTagExtractor):
-    """Extract images from konachan based on search-tags"""
+    """Extractor for images from konachan.com based on search-tags"""
     subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post\?tags=([^&]+)"]
     test = [("http://konachan.com/post?tags=patata", {
@@ -24,7 +24,7 @@ class KonachanTagExtractor(KonachanExtractor, booru.BooruTagExtractor):
     })]
 
 class KonachanPoolExtractor(KonachanExtractor, booru.BooruPoolExtractor):
-    """Extract image-pools from konachan"""
+    """Extractor for image-pools from konachan.com"""
     subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/pool/show/(\d+)"]
     test = [("http://konachan.com/pool/show/95", {
@@ -32,7 +32,7 @@ class KonachanPoolExtractor(KonachanExtractor, booru.BooruPoolExtractor):
     })]
 
 class KonachanPostExtractor(KonachanExtractor, booru.BooruPostExtractor):
-    """Extract single images from konachan"""
+    """Extractor for single images from konachan.com"""
     subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post/show/(\d+)"]
     test = [("http://konachan.com/post/show/205189", {

@@ -11,7 +11,7 @@
 from .common import AsynchronousExtractor, Extractor, Message
 from .. import text
 
-class MangaReaderBase():
+class MangareaderBase():
     """Base class for mangareader extractors"""
     category = "mangareader"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
@@ -19,8 +19,8 @@ class MangaReaderBase():
     url_base = "http://www.mangareader.net"
 
 
-class MangaReaderMangaExtractor(MangaReaderBase, Extractor):
-    """Extract all manga-chapters from mangareader"""
+class MangareaderMangaExtractor(MangareaderBase, Extractor):
+    """Extractor for mangas from mangareader.net"""
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/]+)$"]
     test = [("http://www.mangareader.net/mushishi", {
@@ -41,8 +41,8 @@ class MangaReaderMangaExtractor(MangaReaderBase, Extractor):
             yield Message.Queue, url + chapter
 
 
-class MangaReaderChapterExtractor(MangaReaderBase, AsynchronousExtractor):
-    """Extract a single manga-chapter from mangareader"""
+class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
+    """Extractor for manga-chapters from mangareader.net"""
     subcategory = "chapter"
     pattern = [
         r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))",

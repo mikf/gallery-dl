@@ -13,8 +13,9 @@ from .. import text
 import re
 
 class ImgboxGalleryExtractor(AsynchronousExtractor):
-    """Extract image galleries from imgbox"""
+    """Extractor for image galleries from imgbox.com"""
     category = "imgbox"
+    subcategory = "gallery"
     directory_fmt = ["{category}", "{title} - {gallery-key}"]
     filename_fmt = "{num:>03}-{name}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"]
@@ -63,8 +64,9 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
 
 
 class ImgboxImageExtractor(Extractor):
-    """Extract a single image from imgbox"""
+    """Extractor for single images from imgbox.com"""
     category = "imgbox"
+    subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"]

@@ -11,8 +11,8 @@
 from .common import Extractor, Message
 from .. import text
 
-class HentaiFoundryUserExtractor(Extractor):
-    """Extract all pictures of a hentaifoundry-user"""
+class HentaifoundryUserExtractor(Extractor):
+    """Extractor for all images of a hentai-foundry-user"""
     category = "hentaifoundry"
     subcategory = "user"
     directory_fmt = ["{category}", "{artist}"]
@@ -105,8 +105,8 @@ class HentaiFoundryUserExtractor(Extractor):
                      method="post", data=formdata)
 
 
-class HentaiFoundryImageExtractor(Extractor):
-    """Extract a single hentaifoundry picture"""
+class HentaifoundryImageExtractor(Extractor):
+    """Extractor for a single image from hentaifoundry.com"""
     category = "hentaifoundry"
     subcategory = "image"
     directory_fmt = ["{category}", "{artist}"]

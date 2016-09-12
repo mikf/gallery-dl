@@ -11,8 +11,8 @@
 from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 
-class SpectrumNexusMangaExtractor(Extractor):
-    """Extract all manga-chapters and -volumes from spectrumnexus"""
+class SpectrumnexusMangaExtractor(Extractor):
+    """Extractor for mangas from thespectrum.net"""
     category = "spectrumnexus"
     subcategory = "manga"
     pattern = [r"(?:https?://)?view\.thespectrum\.net/series/([^\.]+)\.html$"]
@@ -37,8 +37,8 @@ class SpectrumNexusMangaExtractor(Extractor):
         return text.extract_iter(page, '<option value="', '"')
 
 
-class SpectrumNexusChapterExtractor(AsynchronousExtractor):
-    """Extract a single manga-chapter or -volume from spectrumnexus"""
+class SpectrumnexusChapterExtractor(AsynchronousExtractor):
+    """Extractor for manga-chapters or -volumes from thespectrum.net"""
     category = "spectrumnexus"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "{identifier}"]

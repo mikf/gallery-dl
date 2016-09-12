@@ -14,6 +14,7 @@ from .. import text
 class ImgtrexImageExtractor(Extractor):
     """Extractor for single images from imgtrex.com"""
     category = "imgtrex"
+    subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgtrex\.com/([^/]+)"]

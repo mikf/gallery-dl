@@ -13,14 +13,15 @@ from .. import config, exception
 from ..cache import cache
 
 class SeigaImageExtractor(Extractor):
-    """Extract a single image from seiga.nicovideo.jp"""
+    """Extractor for single images from seiga.nicovideo.jp"""
     category = "seiga"
     subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{category}_{image-id}.jpg"
     pattern = [(r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/"
                 r"(?:seiga/im|image/source/)(\d+)"),
-                r"(?:https?://)?lohas\.nicoseiga\.jp/(?:priv|o)/[^/]+/\d+/(\d+)"]
+               (r"(?:https?://)?lohas\.nicoseiga\.jp/"
+                r"(?:priv|o)/[^/]+/\d+/(\d+)")]
     test = [("http://seiga.nicovideo.jp/seiga/im5977527", {
         "keyword": "e2ea59186c47beb71484ba35d550cf6511ac185a",
         "content": "d9202292012178374d57fb0126f6124387265297",

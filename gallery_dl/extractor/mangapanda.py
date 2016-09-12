@@ -8,24 +8,24 @@
 
 """Extract manga-chapters and entire manga from http://www.mangapanda.com/"""
 
-from .mangareader import MangaReaderMangaExtractor, MangaReaderChapterExtractor
+from .mangareader import MangareaderMangaExtractor, MangareaderChapterExtractor
 
-class MangaPandaBase():
+class MangapandaBase():
     """Base class for mangapanda extractors"""
     category = "mangapanda"
     url_base = "http://www.mangapanda.com"
 
 
-class MangaPandaMangaExtractor(MangaPandaBase, MangaReaderMangaExtractor):
-    """Extract all manga-chapters from mangapanda"""
+class MangapandaMangaExtractor(MangapandaBase, MangareaderMangaExtractor):
+    """Extractor for mangas from mangapanda.com"""
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?mangapanda\.com(/[^/]+)$"]
     test = [("http://www.mangapanda.com/mushishi", {
         "url": "50a1ba730b85426b904da256c80f68ba6a8a2566",
     })]
 
-class MangaPandaChapterExtractor(MangaPandaBase, MangaReaderChapterExtractor):
-    """Extract a single manga-chapter from mangapanda"""
+class MangapandaChapterExtractor(MangapandaBase, MangareaderChapterExtractor):
+    """Extractor for manga-chapters from mangapanda.com"""
     subcategory = "chapter"
     pattern = [
         r"(?:https?://)?(?:www\.)?mangapanda\.com((/[^/]+)/(\d+))",

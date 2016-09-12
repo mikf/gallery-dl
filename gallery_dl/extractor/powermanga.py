@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga pages from http://powermanga.org/"""
+"""Extract manga-chapters from http://powermanga.org/"""
 
 from .common import Extractor, Message
 from .. import text, iso639_1
@@ -14,9 +14,10 @@ import os.path
 import json
 import re
 
-class PowerMangaExtractor(Extractor):
-
+class PowermangaChapterExtractor(Extractor):
+    """Extractor for manga-chapters from powermanga.org"""
     category = "powermanga"
+    subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [

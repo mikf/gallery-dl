@@ -12,9 +12,10 @@ from .common import Extractor, Message
 from .. import text, iso639_1
 import string
 
-class HitomiExtractor(Extractor):
-
+class HitomiGalleryExtractor(Extractor):
+    """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
+    subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{num:>03}_{name}.{extension}"
     pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)\.html"]

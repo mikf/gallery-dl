@@ -13,8 +13,8 @@ from .. import text
 import json
 import re
 
-class Hentai2ReadMangaExtractor(Extractor):
-
+class Hentai2readMangaExtractor(Extractor):
+    """Extractor for mangas from hentai2read.com"""
     category = "hentai2read"
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/?$"]
@@ -45,8 +45,8 @@ class Hentai2ReadMangaExtractor(Extractor):
             text.extract_iter(page, needle, '"')
         ))
 
-class Hentai2ReadChapterExtractor(Extractor):
-
+class Hentai2readChapterExtractor(Extractor):
+    """Extractor for a single manga chapter from hentai2read.com"""
     category = "hentai2read"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{gallery-id} {title}"]

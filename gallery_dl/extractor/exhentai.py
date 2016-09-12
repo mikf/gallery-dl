@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2014-2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,9 +14,10 @@ from ..cache import cache
 import time
 import random
 
-class ExhentaiExtractor(Extractor):
-
+class ExhentaiGalleryExtractor(Extractor):
+    """Extractor for image-galleries from exhentai.org"""
     category = "exhentai"
+    subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery-id}"]
     filename_fmt = "{gallery-id}_{num:>04}_{imgkey}_{name}.{extension}"
     pattern = [r"(?:https?://)?(g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]

@@ -14,6 +14,7 @@ from .. import text
 class ChronosImageExtractor(Extractor):
     """Extractor for single images from chronos.to"""
     category = "chronos"
+    subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?chronos\.to/([a-z0-9]{12})"]

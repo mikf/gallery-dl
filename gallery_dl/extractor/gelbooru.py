@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract image-urls from http://gelbooru.com/"""
+"""Extract images from http://gelbooru.com/"""
 
 from . import booru
 from .. import config
@@ -33,7 +33,7 @@ class GelbooruExtractor(booru.XMLBooruExtractor):
             self.params["pid"] = 0
 
 class GelbooruTagExtractor(GelbooruExtractor, booru.BooruTagExtractor):
-    """Extract images from gelbooru based on search-tags"""
+    """Extractor for images from gelbooru.com based on search-tags"""
     subcategory = "tag"
     pattern = [(r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                 r"\?page=post&s=list&tags=([^&]+)")]
@@ -43,12 +43,12 @@ class GelbooruTagExtractor(GelbooruExtractor, booru.BooruTagExtractor):
 
 # TODO: find out how to access pools via gelbooru-api
 # class GelbooruPoolExtractor(GelbooruExtractor, booru.BooruPoolExtractor):
-    # """Extract image-pools from gelbooru"""
+    # """Extractor for image-pools from gelbooru.com"""
     # subcategory = "pool"
     # pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?page=pool&s=show&id=(\d+)"]
 
 class GelbooruPostExtractor(GelbooruExtractor, booru.BooruPostExtractor):
-    """Extract single images from gelbooru"""
+    """Extractor for single images from gelbooru.com"""
     subcategory = "post"
     pattern = [(r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                 r"\?page=post&s=view&id=(\d+)")]

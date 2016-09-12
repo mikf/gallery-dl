@@ -11,9 +11,10 @@
 from .common import Extractor, Message
 from .. import text
 
-class TurboimagehostExtractor(Extractor):
-
+class TurboimagehostImageExtractor(Extractor):
+    """Extractor for single images from turboimagehost.com"""
     category = "turboimagehost"
+    subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{category}_{index}_{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?turboimagehost\.com/p/((\d+)/[^/]+\.html)"]

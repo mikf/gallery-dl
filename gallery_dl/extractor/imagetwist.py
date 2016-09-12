@@ -11,9 +11,10 @@
 from .common import Extractor, Message
 from .. import text
 
-class ImagetwistExtractor(Extractor):
-
+class ImagetwistImageExtractor(Extractor):
+    """Extractor for single images from imagetwist.com"""
     category = "imagetwist"
+    subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{category}_{user}_{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imagetwist\.com/([a-z0-9]{12})"]

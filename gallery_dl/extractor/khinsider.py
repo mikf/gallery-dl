@@ -6,14 +6,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://nijie.info/"""
+"""Extract soundtracks from https://khinsider.com/"""
 
 from .common import AsynchronousExtractor, Message
 from .. import text
 
-class KhinsiderExtractor(AsynchronousExtractor):
-
+class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
+    """Extractor for soundtracks from khinsider.com"""
     category = "khinsider"
+    subcategory = "soundtrack"
     directory_fmt = ["{category}", "{album}"]
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?downloads\.khinsider\.com/game-soundtracks/album/(.+)"]

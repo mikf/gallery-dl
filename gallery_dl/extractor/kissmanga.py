@@ -25,7 +25,7 @@ class KissmangaExtractor(Extractor):
 
 
 class KissmangaMangaExtractor(KissmangaExtractor):
-    """Extract all manga-chapters from kissmanga"""
+    """Extractor for mangas from kissmanga.com"""
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/[^/]+/?$"]
     test = [("http://kissmanga.com/Manga/Dropout", {
@@ -47,7 +47,7 @@ class KissmangaMangaExtractor(KissmangaExtractor):
 
 
 class KissmangaChapterExtractor(KissmangaExtractor):
-    """Extract a single manga-chapter from kissmanga"""
+    """Extractor for manga-chapters from kissmanga.com"""
     subcategory = "chapter"
     pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/.+/.+\?id=\d+"]
     test = [

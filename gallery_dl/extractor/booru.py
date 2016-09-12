@@ -15,7 +15,7 @@ import json
 import urllib.parse
 
 class BooruExtractor(Extractor):
-
+    """Base class for all booru extractors"""
     info = {}
     headers = {}
     page = "page"
@@ -73,7 +73,7 @@ class BooruExtractor(Extractor):
 
 
 class JSONBooruExtractor(BooruExtractor):
-
+    """Base class for JSON based API responses"""
     def items_impl(self):
         self.update_page(reset=True)
         while True:
@@ -89,7 +89,7 @@ class JSONBooruExtractor(BooruExtractor):
 
 
 class XMLBooruExtractor(BooruExtractor):
-
+    """Base class for XML based API responses"""
     def items_impl(self):
         self.update_page(reset=True)
         while True:
@@ -104,8 +104,7 @@ class XMLBooruExtractor(BooruExtractor):
 
 
 class BooruTagExtractor(BooruExtractor):
-    """Extract images based on search-tags"""
-
+    """Extractor for images based on search-tags"""
     directory_fmt = ["{category}", "{tags}"]
     filename_fmt = "{category}_{id}_{md5}.{extension}"
 
@@ -122,8 +121,7 @@ class BooruTagExtractor(BooruExtractor):
 
 
 class BooruPoolExtractor(BooruExtractor):
-    """Extract image-pools"""
-
+    """Extractor for image-pools"""
     directory_fmt = ["{category}", "pool", "{pool}"]
     filename_fmt = "{category}_{id}_{md5}.{extension}"
 
@@ -140,8 +138,7 @@ class BooruPoolExtractor(BooruExtractor):
 
 
 class BooruPostExtractor(BooruExtractor):
-    """Extract single images"""
-
+    """Extractor for single images"""
     directory_fmt = ["{category}"]
     filename_fmt = "{category}_{id}_{md5}.{extension}"
 
