@@ -19,6 +19,11 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{title} - {gallery-key}"]
     filename_fmt = "{num:>03}-{name}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"]
+    test = [("http://imgbox.com/g/JaX5V5HX7g", {
+        "url": "c7c3466dde31d4308833816961104c7d1100368d",
+        "keyword": "23deb783d3afee090f61472b495e797c8f262b93",
+        "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
+    })]
     url_base = "http://imgbox.com"
 
     def __init__(self, match):
@@ -33,26 +38,28 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
         yield Message.Directory, self.metadata
         for match in re.finditer(r'<a href="([^"]+)"><img alt="', page):
             imgpage = self.request(self.url_base + match.group(1)).text
-            yield Message.Url, self.get_file_url(imgpage), self.get_file_metadata(imgpage)
+            data = self.get_file_metadata(imgpage)
+            data = text.nameext_from_url(data["filename"], data)
+            yield Message.Url, self.get_file_url(imgpage), data
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        match = re.search(r"<h1>(.+) \(([^ ]+) ([^ ]+) \w+\) - (\d+)", page)
+        title = text.extract(page, "<h1>", "</h1>")[0]
+        parts = title.rsplit(" - ", maxsplit=1)
         return {
             "category": self.category,
             "gallery-key": self.key,
-            "title": match.group(1),
-            "date": match.group(2),
-            "time": match.group(3),
-            "count": match.group(4),
+            "title": text.unescape(parts[0]),
+            "count": parts[1][:-7],
         }
 
     def get_file_metadata(self, page):
         """Collect metadata for a downloadable file"""
         return text.extract_all(page, (
             ("num"      , '</a> &nbsp; ', ' of '),
-            ("image-key", '/i.imgbox.com/', '?download'),
-            ("name"     , ' title="', '"'),
+            (None       , 'class="image-container"', ''),
+            ("image-key", 'alt="', '"'),
+            ("filename" , ' title="', '"'),
         ), values=self.metadata.copy())[0]
 
     @staticmethod
@@ -70,6 +77,11 @@ class ImgboxImageExtractor(Extractor):
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"]
+    test = [("http://imgbox.com/qHhw7lpG", {
+        "url": "d96990ea12223895287d139695077b70dfa0abe4",
+        "keyword": "c5e87be93fec3122151edf85b6424d1871279590",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
