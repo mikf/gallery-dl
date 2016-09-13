@@ -16,18 +16,23 @@ class TurboimagehostImageExtractor(Extractor):
     category = "turboimagehost"
     subcategory = "image"
     directory_fmt = ["{category}"]
-    filename_fmt = "{category}_{index}_{filename}"
+    filename_fmt = "{category}_{token}_{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?turboimagehost\.com/p/((\d+)/[^/]+\.html)"]
+    test = [("http://www.turboimagehost.com/p/29690902/test--.png.html", {
+        "url": "c624dc7784de515342117a2678fee6ecf1032d79",
+        "keyword": "32b27364c3137786ffec8e90b8de453e489abf93",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.part, self.index = match.groups()
+        self.part, self.token = match.groups()
 
     def items(self):
         page = self.request("http://www.turboimagehost.com/p/" + self.part).text
         data = {
             "category": self.category,
-            "index": self.index,
+            "token": self.token,
         }
         text.extract_all(page, (
             ('width' , 'var imWidth = ', ';'),
