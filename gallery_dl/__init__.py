@@ -24,9 +24,8 @@ def build_cmdline_parser():
     parser = argparse.ArgumentParser(
         description='Download images from various sources')
     parser.add_argument(
-        "-c", "--config",
-        metavar="CFG", dest="cfgfiles", action="append",
-        help="additional configuration files",
+        "-g", "--get-urls", dest="list_urls", action="store_true",
+        help="print download urls",
     )
     parser.add_argument(
         "-d", "--dest",
@@ -42,21 +41,26 @@ def build_cmdline_parser():
         metavar="PASS"
     )
     parser.add_argument(
+        "-c", "--config",
+        metavar="CFG", dest="cfgfiles", action="append",
+        help="additional configuration files",
+    )
+    parser.add_argument(
         "-o", "--option",
         metavar="OPT", action="append", default=[],
         help="additional 'key=value' option values",
     )
     parser.add_argument(
-        "-g", "--get-urls", dest="list_urls", action="store_true",
-        help="print download urls",
-    )
-    parser.add_argument(
-        "--list-modules", dest="list_modules", action="store_true",
-        help="print a list of available modules/supported sites",
+        "--list-extractors", dest="list_extractors", action="store_true",
+        help="print a list of extractor classes with description and example URL",
     )
     parser.add_argument(
         "--list-keywords", dest="list_keywords", action="store_true",
         help="print a list of available keywords for the given URLs",
+    )
+    parser.add_argument(
+        "--list-modules", dest="list_modules", action="store_true",
+        help="print a list of available modules/supported sites",
     )
     parser.add_argument(
         "--version", action="version", version=__version__,
@@ -103,6 +107,14 @@ def main():
         if args.list_modules:
             for module_name in extractor.modules:
                 print(module_name)
+        elif args.list_extractors:
+            for extr in extractor.extractors():
+                print(extr.__name__)
+                if extr.__doc__:
+                    print(extr.__doc__)
+                if hasattr(extr, "test") and extr.test:
+                    print("Example:", extr.test[0][0])
+                print()
         else:
             if not args.urls:
                 parser.error("the following arguments are required: URL")
