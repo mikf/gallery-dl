@@ -21,7 +21,7 @@ class TumblrUserExtractor(Extractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com(?:/page/\d+)?/?$"]
     test = [("http://demo.tumblr.com/", {
         "url": "d3d2bb185230e537314a0036814050634c730f74",
-        "keyword": "9d2f21c77604c131c503236ffa138d4481f54a7b",
+        "keyword": "2ab87097ecafce595dd53d8469b2337ec541bcde",
         "content": "31495fdb9f84edbb7f67972746a1521456f649e2",
     })]
 
@@ -38,6 +38,7 @@ class TumblrUserExtractor(Extractor):
         yield Message.Directory, data
         for image in images:
             url = image["photo-url-1280"]
+            self.delete_urls(image)
             image.update(data)
             image = text.nameext_from_url(url, image)
             image["hash"] = text.extract(image["name"], "_", "_")[0]
@@ -58,7 +59,7 @@ class TumblrUserExtractor(Extractor):
         params = self.api_params.copy()
         while True:
             page = self.request(self.api_url, params=params).text
-            data = json.loads(page[22:-1])
+            data = json.loads(page[22:-2])
             if params["start"] == 0:
                 yield data["tumblelog"]
             for post in data["posts"]:
@@ -83,6 +84,12 @@ class TumblrUserExtractor(Extractor):
             post["offset"] = "o1"
             yield post
 
+    @staticmethod
+    def delete_urls(data):
+        for key in [k for k in data.keys() if k.startswith("photo-url-")]:
+            del data[key]
+        return data
+
 
 class TumblrPostExtractor(TumblrUserExtractor):
     """Extractor for images from a single post on tumblr"""
@@ -90,7 +97,7 @@ class TumblrPostExtractor(TumblrUserExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/post/(\d+)"]
     test = [("http://demo.tumblr.com/post/459265350", {
         "url": "d3d2bb185230e537314a0036814050634c730f74",
-        "keyword": "1728fc3a67efa9a209457d1904fd4b471828f043",
+        "keyword": "a6a0d99eddfba835e710a584d59b19df1ea5c1ab",
     })]
 
     def __init__(self, match):
@@ -104,7 +111,7 @@ class TumblrTagExtractor(TumblrUserExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/tagged/(.+)"]
     test = [("http://demo.tumblr.com/tagged/Times Square", {
         "url": "d3d2bb185230e537314a0036814050634c730f74",
-        "keyword": "9d2f21c77604c131c503236ffa138d4481f54a7b",
+        "keyword": "2ab87097ecafce595dd53d8469b2337ec541bcde",
     })]
 
     def __init__(self, match):
