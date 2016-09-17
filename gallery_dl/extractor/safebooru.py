@@ -12,7 +12,6 @@ from . import booru
 
 class SafebooruExtractor(booru.XMLBooruExtractor):
     """Base class for safebooru extractors"""
-
     category = "safebooru"
     api_url = "http://safebooru.org/index.php"
 
