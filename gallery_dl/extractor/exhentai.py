@@ -21,6 +21,10 @@ class ExhentaiGalleryExtractor(Extractor):
     directory_fmt = ["{category}", "{gallery-id}"]
     filename_fmt = "{gallery-id}_{num:>04}_{imgkey}_{name}.{extension}"
     pattern = [r"(?:https?://)?(g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
+    test = [("https://exhentai.org/g/960460/4f0e369d82/", {
+        "keyword": "aaac45cad1897a9815384bc3a743ce7502c692f6",
+        "content": "493d759de534355c9f55f8e365565b62411de146",
+    })]
     api_url = "https://exhentai.org/api.php"
 
     def __init__(self, match):

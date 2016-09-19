@@ -18,6 +18,10 @@ class SankakuTagExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{tags}"]
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/\?tags=([^&]+)"]
+    test = [("https://chan.sankakucomplex.com/?tags=bonocho", {
+        "url": "2561ca0d8482ead48f22a7abcd23919cd78344a1",
+        "keyword": "6282e9a2d5223d635d9be7515f59d87d4b9be732",
+    })]
     url = "https://chan.sankakucomplex.com/"
 
     def __init__(self, match):
