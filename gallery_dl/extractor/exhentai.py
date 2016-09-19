@@ -60,9 +60,12 @@ class ExhentaiGalleryExtractor(Extractor):
             image.update(data)
             image["num"] = num
             text.nameext_from_url(image["url"], image)
-            if "/fullimg.php" in image[urlkey]:
+            url = image[urlkey]
+            del image["url"]
+            del image["origurl"]
+            if "/fullimg.php" in url:
                 self.wait((1, 2))
-            yield Message.Url, image[urlkey], image
+            yield Message.Url, url, image
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
@@ -100,24 +103,26 @@ class ExhentaiGalleryExtractor(Extractor):
             ("url"        , '<img id="img" src="', '"'),
             ("title"      , '<div id="i4"><div>', ' :: '),
             ("origurl"    , 'https://exhentai.org/fullimg.php', '"'),
-            ("gid"        , 'var gid=',  ';'),
             ("startkey"   , 'var startkey="', '";'),
             ("showkey"    , 'var showkey="', '";'),
         ))
         data["imgkey"] = data["startkey"]
+
+        request = {
+            "method" : "showpage",
+            "page"   : 2,
+            "gid"    : int(self.gid),
+            "imgkey" : data["imgkey-next"],
+            "showkey": data["showkey"],
+        }
+        del data["showkey"]
+
         if data["origurl"]:
             data["origurl"] = "https://exhentai.org/fullimg.php" + text.unescape(data["origurl"])
         else:
             data["origurl"] = data["url"]
         yield data
 
-        request = {
-            "method" : "showpage",
-            "page"   : 2,
-            "gid"    : int(data["gid"]),
-            "imgkey" : data["imgkey-next"],
-            "showkey": data["showkey"],
-        }
         while True:
             if data["imgkey"] == data["imgkey-next"]:
                 return
