@@ -50,8 +50,8 @@ class MangaparkChapterExtractor(Extractor):
                 r"([^/]+/s(\d+)(?:/v(\d+))?/c(\d+)(?:(\.\d+)|/e(\d+))?)")]
     test = [
         ("http://mangapark.me/manga/ad-astra-per-aspera-hata-kenjirou/s1/c1.2/1", {
-            "url": "f325ce264df390c5ba9607c52a7e7b0829672404",
-            "keyword": "480a114319e42c561079ffe138afd67e22a74cd3",
+            "url": "25d998a70df1fa559afc189ebd17df300b54dc28",
+            "keyword": "40d60961d7aaf24454d2ab23fbc83f4c55cd4174",
         }),
         ("http://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
             "url": "8534c8286a18c4db47606f84a4df9f1a42bab291",
