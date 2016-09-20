@@ -38,7 +38,7 @@ Supported Sites
 
 * Booru:
     behoimi.org, danbooru.donmai.us, e621.net, gelbooru.com, konachan.com,
-    safebooru.org, chan.sankakucomplex.com, yande.re
+    rule34.xxx, safebooru.org, chan.sankakucomplex.com, yande.re
 * Manga:
     bato.to, kissmanga.com, mangahere.co, mangamint.com, mangapanda.com,
     mangapark.me, mangareader.net, mangashare.com, mangastream.com,
@@ -55,7 +55,7 @@ Supported Sites
     4chan.org, 8ch.net
 * Image Hosts:
     chronos.to, coreimg.net, imagebam.com, imagetwist.com, img.yt, imgbox.com,
-    imgcandy.net, imgchili.net, imgtrex.com. turboimagehost.com
+    imgcandy.net, imgchili.net, imgtrex.com, turboimagehost.com
 
 
 Configuration
@@ -77,7 +77,8 @@ Authentication
 ==============
 
 Some extractors require you to provide valid login-credentials.
-This currently includes ``pixiv``, ``exhentai``, ``nijie`` and ``seiga``.
+This currently includes ``pixiv``, ``exhentai``, ``nijie``, ``seiga``
+and ``batoto``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
