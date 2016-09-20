@@ -19,57 +19,54 @@ class ExhentaiGalleryExtractor(Extractor):
     category = "exhentai"
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery-id}"]
-    filename_fmt = "{gallery-id}_{num:>04}_{imgkey}_{name}.{extension}"
-    pattern = [r"(?:https?://)?(g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
+    filename_fmt = "{gallery-id}_{num:>04}_{image-token}_{name}.{extension}"
+    pattern = [r"(?:https?://)?(?:g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
     test = [("https://exhentai.org/g/960460/4f0e369d82/", {
-        "keyword": "aaac45cad1897a9815384bc3a743ce7502c692f6",
+        "keyword": "c1282ffbe5d452c62dec9dbde4ecb7037525cd64",
         "content": "493d759de534355c9f55f8e365565b62411de146",
     })]
     api_url = "https://exhentai.org/api.php"
 
     def __init__(self, match):
         Extractor.__init__(self)
+        self.key = {}
         self.url = match.group(0)
-        self.version, self.gid, self.token = match.groups()
-        self.login()
-        self.session.headers.update({
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Referer": "https://exhentai.org/",
-        })
+        self.gid, self.token = match.groups()
+        self.original = config.interpolate(("extractor", "exhentai", "download-original"), True)
         self.wait_min = config.interpolate(("extractor", "exhentai", "wait-min"), 3)
         self.wait_max = config.interpolate(("extractor", "exhentai", "wait-max"), 6)
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
 
     def items(self):
+        self.login()
         yield Message.Version, 1
-        page = self.request(self.url).text
-        if page.startswith("Key missing") \
-        or page.startswith("Gallery not found"):
-            raise exception.NotFoundError("gallery")
-        data, url = self.get_job_metadata(page)
-
-        headers = self.session.headers.copy()
-        headers["Accept"] = "image/png,image/*;q=0.8,*/*;q=0.5"
-        yield Message.Headers, headers
+        yield Message.Headers, self.setup_headers()
         yield Message.Cookies, self.session.cookies
+
+        page = self.request(self.url).text
+        if page.startswith(("Key missing", "Gallery not found")):
+            raise exception.NotFoundError("gallery")
+        data = self.get_job_metadata(page)
         yield Message.Directory, data
 
-        urlkey = "url"
-        if config.interpolate(("extractor", "exhentai", "download-original"), True):
-            urlkey = "origurl"
-        for num, image in enumerate(self.get_images(url), 1):
-            image.update(data)
-            image["num"] = num
-            text.nameext_from_url(image["url"], image)
-            url = image[urlkey]
-            del image["url"]
-            del image["origurl"]
+        for url, image in self.get_images(page):
+            data.update(image)
             if "/fullimg.php" in url:
                 self.wait((1, 2))
-            yield Message.Url, url, image
+            yield Message.Url, url, data
+
+    def setup_headers(self):
+        """Initialize headers"""
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Referer": "https://exhentai.org/",
+        })
+        headers = self.session.headers.copy()
+        headers["Accept"] = "image/png,image/*;q=0.8,*/*;q=0.5"
+        return headers
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
@@ -78,71 +75,74 @@ class ExhentaiGalleryExtractor(Extractor):
             "gallery-id"   : self.gid,
             "gallery-token": self.token,
         }
-        data, _ = text.extract_all(page, (
-            ("title"   , '<h1 id="gn">', '</h1>'),
-            ("title_jp", '<h1 id="gj">', '</h1>'),
-            ("date"    , '>Posted:</td><td class="gdt2">', '</td>'),
-            ("language", '>Language:</td><td class="gdt2">', '</td>'),
-            ("size"    , '>File Size:</td><td class="gdt2">', ' '),
-            ("count"   , '>Length:</td><td class="gdt2">', ' '),
-            ("url"     , 'hentai.org/s/', '"'),
+        text.extract_all(page, (
+            ("title"     , '<h1 id="gn">', '</h1>'),
+            ("title_jp"  , '<h1 id="gj">', '</h1>'),
+            ("date"      , '>Posted:</td><td class="gdt2">', '</td>'),
+            ("language"  , '>Language:</td><td class="gdt2">', ' '),
+            ("size"      , '>File Size:</td><td class="gdt2">', ' '),
+            ("size-units", '', '<'),
+            ("count"     , '>Length:</td><td class="gdt2">', ' '),
         ), values=data)
-        pos = data["language"].find(" ")
-        if pos != -1:
-            data["language"] = data["language"][:pos]
         data["lang"] = iso639_1.language_to_code(data["language"])
         data["title"] = text.unescape(data["title"])
         data["title_jp"] = text.unescape(data["title_jp"])
-        url = "https://exhentai.org/s/" + data["url"]
-        del data["url"]
-        return data, url
+        return data
 
-    def get_images(self, url):
+    def get_images(self, page):
         """Collect url and metadata for all images in this gallery"""
+        url = "https://exhentai.org/s/" + text.extract(page, 'hentai.org/s/', '"')[0]
+        yield self.image_from_page(url)
+        yield from self.images_from_api()
+
+    def image_from_page(self, url):
+        """Get image url and data from webpage"""
         self.wait()
         page = self.request(url).text
-        data, pos = text.extract_all(page, (
-            (None         , '<div id="i3"><a onclick="return load_image(', ''),
-            ("imgkey-next", "'", "'"),
-            ("url"        , '<img id="img" src="', '"'),
-            ("title"      , '<div id="i4"><div>', ' :: '),
-            ("origurl"    , 'https://exhentai.org/fullimg.php', '"'),
-            ("startkey"   , 'var startkey="', '";'),
-            ("showkey"    , 'var showkey="', '";'),
-        ))
-        data["imgkey"] = data["startkey"]
+        data = text.extract_all(page, (
+            (None      , '<div id="i3"><a onclick="return load_image(', ''),
+            ("nextkey" , "'", "'"),
+            ("url"     , '<img id="img" src="', '"'),
+            ("origurl" , 'https://exhentai.org/fullimg.php', '"'),
+            ("startkey", 'var startkey="', '";'),
+            ("showkey" , 'var showkey="', '";'),
+        ))[0]
+        self.key["start"] = data["startkey"]
+        self.key["show" ] = data["showkey"]
+        self.key["next" ] = data["nextkey"]
+        url = ("https://exhentai.org/fullimg.php" + text.unescape(data["origurl"])
+               if self.original and data["origurl"] else data["url"])
+        return url, text.nameext_from_url(data["url"], {
+            "num": 1,
+            "image-token": data["startkey"],
+        })
 
+    def images_from_api(self):
+        """Get image url and data from api calls"""
+        imgkey  = self.key["start"]
+        nextkey = self.key["next" ]
         request = {
             "method" : "showpage",
             "page"   : 2,
             "gid"    : int(self.gid),
-            "imgkey" : data["imgkey-next"],
-            "showkey": data["showkey"],
+            "imgkey" : nextkey,
+            "showkey": self.key["show"],
         }
-        del data["showkey"]
-
-        if data["origurl"]:
-            data["origurl"] = "https://exhentai.org/fullimg.php" + text.unescape(data["origurl"])
-        else:
-            data["origurl"] = data["url"]
-        yield data
-
         while True:
-            if data["imgkey"] == data["imgkey-next"]:
+            if imgkey == nextkey:
                 return
             self.wait()
             page = self.session.post(self.api_url, json=request).json()
-            data["imgkey"] = data["imgkey-next"]
-            data["imgkey-next"], pos = text.extract(page["i3"], "'", "'")
-            data["url"]        , pos = text.extract(page["i3"], '<img id="img" src="', '"', pos)
-            data["title"]      , pos = text.extract(page["i" ], '<div>', ' :: ')
-            data["origurl"]    , pos = text.extract(page["i7"], '<a href="', '"')
-            if data["origurl"]:
-                data["origurl"] = text.unescape(data["origurl"])
-            else:
-                data["origurl"] = data["url"]
-            yield data
-            request["imgkey"] = data["imgkey-next"]
+            imgkey = nextkey
+            nextkey, pos = text.extract(page["i3"], "'", "'")
+            imgurl , pos = text.extract(page["i3"], '<img id="img" src="', '"', pos)
+            origurl, pos = text.extract(page["i7"], '<a href="', '"')
+            url = text.unescape(origurl) if self.original and origurl else imgurl
+            yield url, text.nameext_from_url(imgurl, {
+                "num": request["page"],
+                "image-token": imgkey
+            })
+            request["imgkey"] = nextkey
             request["page"] += 1
 
     def wait(self, waittime=None):
