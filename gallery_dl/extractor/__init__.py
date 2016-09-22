@@ -21,6 +21,7 @@ modules = [
     "danbooru",
     "deviantart",
     "doujinmode",
+    "dynastyscans",
     "e621",
     "exhentai",
     "gelbooru",
