@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015,2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,7 @@ class HitomiGalleryExtractor(Extractor):
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{num:>03}_{name}.{extension}"
     pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)\.html"]
-    test = [("http://hitomi.la/galleries/867789.html", {
+    test = [("https://hitomi.la/galleries/867789.html", {
         "url": "23fd59894c3db65aec826aa5efb85f96d2384883",
         "keyword": "80395a06b6ba24842c15121d142830bb467ae68b",
     })]
@@ -63,10 +63,10 @@ class HitomiGalleryExtractor(Extractor):
         return {
             "category": self.category,
             "gallery-id": self.gid,
-            "title": title,
+            "title": " ".join(title.split()),
             "artist": string.capwords(artist),
             "group": string.capwords(group),
-            "type": gtype[1:-1].capitalize(),
+            "type": gtype.strip().capitalize(),
             "lang": iso639_1.language_to_code(lang),
             "language": lang,
             "series": string.capwords(series),
@@ -75,10 +75,9 @@ class HitomiGalleryExtractor(Extractor):
     @staticmethod
     def get_image_urls(page):
         """Extract and return a list of all image-urls"""
-        pos = 0
-        images = list()
-        while True:
-            urlpart, pos = text.extract(page, "'//tn.hitomi.la/smalltn/", ".jpg',", pos)
-            if not urlpart:
-                return images
-            images.append("https://g.hitomi.la/galleries/" + urlpart)
+        return [
+            "https://g.hitomi.la/galleries/" + urlpart
+            for urlpart in text.extract_iter(
+                page, "'//tn.hitomi.la/smalltn/", ".jpg',"
+            )
+        ]
