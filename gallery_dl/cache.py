@@ -12,7 +12,7 @@ import sqlite3
 import pickle
 import time
 import tempfile
-import os
+import os.path
 import functools
 from . import config
 
@@ -98,6 +98,7 @@ class DatabaseCache(CacheModule):
         path = config.get(("cache", "file"), path_default)
         if path is None:
             raise RuntimeError()
+        path = os.path.expanduser(os.path.expandvars(path))
         self.db = sqlite3.connect(path, timeout=30, check_same_thread=False)
         self.db.execute("CREATE TABLE IF NOT EXISTS data ("
                             "key TEXT PRIMARY KEY,"
