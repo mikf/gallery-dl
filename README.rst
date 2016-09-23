@@ -30,7 +30,7 @@ Usage
 
 .. code:: bash
 
-    $ gallery-dl URL [URL...]
+    $ gallery-dl [URL]...
 
 
 Supported Sites
