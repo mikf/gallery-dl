@@ -29,7 +29,7 @@ def load(*files, strict=False):
             if strict:
                 raise
             continue
-        except json.decoder.JSONDecodeError as exception:
+        except ValueError as exception:
             print("Error while loading '", path, "':", sep="", file=sys.stderr)
             print(exception, file=sys.stderr)
 
