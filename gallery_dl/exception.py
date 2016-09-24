@@ -12,5 +12,8 @@ class NoExtractorError(Exception):
 class AuthenticationError(Exception):
     """Invalid or missing login information"""
 
+class AuthorizationError(Exception):
+    """Insufficient privileges to access a resource"""
+
 class NotFoundError(Exception):
     """Requested resource (gallery/image) does not exist"""

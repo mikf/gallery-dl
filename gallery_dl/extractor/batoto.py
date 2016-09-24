@@ -42,7 +42,16 @@ class BatotoChapterExtractor(AsynchronousExtractor):
             "p": 1,
             "supress_webtoon": "t",
         }
-        page = self.request(self.reader_url, params=params).text
+        response = self.session.get(self.reader_url, params=params)
+        if response.status_code == 405:
+            error = text.extract(response.text, "ERROR [", "]")[0]
+            if error == "10030":
+                raise exception.AuthorizationError()
+            elif error == "10020":
+                raise exception.NotFoundError("chapter")
+            else:
+                raise Exception("[batoto] unexpected error code: " + error)
+        page = response.text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data.copy()
@@ -119,7 +128,7 @@ class BatotoChapterExtractor(AsynchronousExtractor):
             "anonymous": "1",
         }
         response = self.request(self.url + "forums/index.php",
-                                 method="POST", params=params, data=data)
+                                method="POST", params=params, data=data)
         if "Sign In - " in response.text:
             raise exception.AuthenticationError()
         return {c: response.cookies[c] for c in ("member_id", "pass_hash")}
