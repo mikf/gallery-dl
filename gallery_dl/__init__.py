@@ -135,6 +135,9 @@ def main():
                 except exception.AuthenticationError:
                     print("Authentication failed. Please provide a valid "
                           "username/password pair.", file=sys.stderr)
+                except exception.AuthorizationError:
+                    print("You do not have permission to access the resource ",
+                          "at '", url, "'", sep="", file=sys.stderr)
                 except exception.NotFoundError as err:
                     res = str(err) or "resource (gallery/image/user)"
                     print("The ", res, " at '", url, "' does not exist",
