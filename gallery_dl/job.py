@@ -40,10 +40,9 @@ class DownloadJob(Job):
         self.filename_fmt = config.interpolate(
             key + ["filename_fmt"], default=self.extractor.filename_fmt
         )
-        segments = config.interpolate(
+        self.directory_fmt = config.interpolate(
             key + ["directory_fmt"], default=self.extractor.directory_fmt
         )
-        self.directory_fmt = os.path.join(*segments)
 
     def run(self):
         for msg in self.extractor:
@@ -96,11 +95,13 @@ class DownloadJob(Job):
 
     def set_directory(self, msg):
         """Set and create the target directory for downloads"""
+        segments = [
+            text.clean_path(segment.format(**msg[1]).strip())
+            for segment in self.directory_fmt
+        ]
         self.directory = os.path.join(
             self.get_base_directory(),
-            self.directory_fmt.format(**{
-                key: text.clean_path(value) for key, value in msg[1].items()
-            })
+            *segments
         )
         os.makedirs(self.directory, exist_ok=True)
 
