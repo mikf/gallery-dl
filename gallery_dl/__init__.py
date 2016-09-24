@@ -79,7 +79,7 @@ def parse_option(opt):
         key, value = opt.split("=", 1)
         try:
             value = json.loads(value)
-        except json.decoder.JSONDecodeError:
+        except ValueError:
             pass
         config.set(key.split("."), value)
     except ValueError:
