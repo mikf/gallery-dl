@@ -46,7 +46,7 @@ class MangashareChapterExtractor(AsynchronousExtractor):
     pattern = [r"(?:https?://)?read\.mangashare\.com/([^/]+/chapter-\d+)"]
     test = [("http://read.mangashare.com/Gantz/chapter-331/page001.html", {
         "url": "2980fb9548e809dea63d104bc514dcc33bdd9ef7",
-        "keyword": "4872a5645ab79cb9ecf363a5bf4cb9062fd61eef",
+        "keyword": "8afc1c2a3e64efa3d2b9ed2359885343f89bdfa9",
     })]
     url_fmt = "http://read.mangashare.com/{}/page{:>03}.html"
 
@@ -67,7 +67,6 @@ class MangashareChapterExtractor(AsynchronousExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category": self.category,
             "lang": "en",
             "language": "English",
         }

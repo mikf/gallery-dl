@@ -20,7 +20,7 @@ class ImgtrexImageExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?imgtrex\.com/([^/]+)"]
     test = [("http://imgtrex.com/im0ypxq0rke4/test-テスト-&<a>.png", {
         "url": "c000618bddda42bd599a590b7972c7396d19d8fe",
-        "keyword": "4d766eae04aa5457bca4992290aa28b76239d287",
+        "keyword": "58905795a9cd3f17d5ff024fc4d63645795ba23c",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
 
@@ -29,11 +29,10 @@ class ImgtrexImageExtractor(Extractor):
         self.token = match.group(1)
 
     def items(self):
-        data = {"category": self.category, "token": self.token}
         page = self.request("http://imgtrex.com/" + self.token).text
         filename, pos = text.extract(page, '<title>ImgTrex: ', '</title>')
         url     , pos = text.extract(page, '<br>\n<img src="', '"', pos)
-        text.nameext_from_url(filename, data)
+        data = text.nameext_from_url(filename, {"token": self.token})
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data

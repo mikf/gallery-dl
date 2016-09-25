@@ -53,11 +53,11 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     test = [
         ("http://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
             "url": "4136bcd1c6cecbca8cc2bc965d54f33ef0a97cc0",
-            "keyword": "892c3e4df03a575a282a5695add986a49623d746",
+            "keyword": "ab332093a4f2e473a468235bfd624cbe3b19fd7f",
         }),
         ("http://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
             "url": "de074848f6c1245204bb9214c12bcc3ecfd65019",
-            "keyword": "0a98952984941cc2a11892b1cd7b237ffb20adaa",
+            "keyword": "013aad80e578c6ccd2e1fe47cdc27c12a64f6db2",
         })
     ]
 
@@ -81,7 +81,6 @@ class KissmangaChapterExtractor(KissmangaExtractor):
             r"(?:Vol.0*(\d+) )?(?:Ch.)?0*(\d+)(?:\.0*(\d+))?(?:: (.+))?", cinfo)
         chminor = match.group(3)
         return {
-            "category": self.category,
             "manga": manga,
             "volume": match.group(1) or "",
             "chapter": match.group(2),

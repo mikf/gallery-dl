@@ -21,7 +21,7 @@ class HitomiGalleryExtractor(Extractor):
     pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)\.html"]
     test = [("https://hitomi.la/galleries/867789.html", {
         "url": "23fd59894c3db65aec826aa5efb85f96d2384883",
-        "keyword": "80395a06b6ba24842c15121d142830bb467ae68b",
+        "keyword": "03a64d67584afd7b8ad96ecb47acae08ea14d90f",
     })]
 
     def __init__(self, match):
@@ -61,7 +61,6 @@ class HitomiGalleryExtractor(Extractor):
             series, pos = text.extract(page, '.html">', '</a>', pos)
         lang = lang.capitalize()
         return {
-            "category": self.category,
             "gallery-id": self.gid,
             "title": " ".join(title.split()),
             "artist": string.capwords(artist),

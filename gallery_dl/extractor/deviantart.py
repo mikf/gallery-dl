@@ -21,7 +21,7 @@ class DeviantartUserExtractor(AsynchronousExtractor):
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
     test = [("http://shimoda7.deviantart.com/gallery/", {
         "url": "63bfa8efba199e27181943c9060f6770f91a8441",
-        "keyword": "c0343b41c28c87254a3f0b3241222e94f780701e",
+        "keyword": "741bbea4891a23335bb5d119c4a42aeb54702c50",
     })]
 
     def __init__(self, match):
@@ -57,10 +57,7 @@ class DeviantartUserExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        return {
-            "category": self.category,
-            "artist": self.artist,
-        }
+        return {"artist": self.artist}
 
     def get_image_metadata(self, image):
         """Collect metadata for an image"""
@@ -108,7 +105,7 @@ class DeviantartImageExtractor(Extractor):
     pattern = [r"(?:https?://)?[^\.]+\.deviantart\.com/art/.+-(\d+)"]
     test = [("http://shimoda7.deviantart.com/art/For-the-sake-of-a-memory-10073852", {
         "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-        "keyword": "f2dfde276a39990097935ace092811c56bc0bfec",
+        "keyword": "ccac27b8f740fc943afca9460608e02c6cbcdf96",
     })]
 
     def __init__(self, match):
@@ -127,7 +124,7 @@ class DeviantartImageExtractor(Extractor):
             ('description', '"og:description" content="', '"'),
             (None    , '<span class="tt-w">', ''),
             ('date'  , 'title="', '"'),
-        ), values={'category': self.category, "index": self.index})[0]
+        ), values={"index": self.index})[0]
         data["description"] = text.unescape(text.unescape(data["description"]))
         data["artist"] = text.extract(data["url"], "//", ".")[0]
         data["date"] = text.extract(data["date"], ", ", " in ", len(data["title"]))[0]

@@ -23,7 +23,7 @@ class HentaifoundryUserExtractor(Extractor):
     ]
     test = [("http://www.hentai-foundry.com/pictures/user/Orzy", {
         "url": "236ac02c8f081fee44ad2c2571bf74615633b91e",
-        "keyword": "f5f1aa78ecbe390fb117a0b599f771cd47df86c6",
+        "keyword": "9f334f635b71c915b026cf20a65eee065237d452",
     })]
     url_base = "http://www.hentai-foundry.com/pictures/user/"
 
@@ -60,7 +60,6 @@ class HentaifoundryUserExtractor(Extractor):
         token, pos = text.extract(page, 'hidden" value="', '"')
         count, pos = text.extract(page, 'class="active" >Pictures (', ')', pos)
         return {
-            "category": self.category,
             "artist": self.artist,
             "count": count,
         }, token
@@ -115,7 +114,7 @@ class HentaifoundryImageExtractor(Extractor):
                 r"([^/]+)/(\d+)/[^/]+")]
     test = [("http://www.hentai-foundry.com/pictures/user/Orzy/76940/Youmu-Konpaku", {
         "url": "50c267b2b2983b98b18fd0d2acbec8ce5ba64c77",
-        "keyword": "8c9b7054b78fb4f52982c3f21f3ba2a9fcdd5428",
+        "keyword": "6cee38ac0817783feb6db9944da997bec13d0e19",
     })]
 
     def __init__(self, match):
@@ -136,7 +135,6 @@ class HentaifoundryImageExtractor(Extractor):
         title, pos = text.extract(page, 'Pictures</a> &raquo; <span>', '<')
         url  , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)
         data = {
-            "category": self.category,
             "artist": self.artist,
             "index": self.index,
             "title": text.unescape(title),

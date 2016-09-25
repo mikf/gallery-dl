@@ -61,8 +61,6 @@ class ImgchiliImageExtractor(ImgchiliExtractor):
         parts = name2.split("in the gallery ")
         name = parts[0] if not parts[0].endswith("...") else name1
         return text.nameext_from_url(name, {
-            "category": self.category,
-            "subcategory": self.subcategory,
             "image-id": self.match.group(1),
             "title": text.unescape(parts[-1]) if len(parts) > 1 else ""
         })
@@ -86,8 +84,6 @@ class ImgchiliAlbumExtractor(ImgchiliExtractor):
     def get_job_metadata(self, page):
         title = text.extract(page, "<h1>", "</h1>")[0]
         return {
-            "category": self.category,
-            "subcategory": self.subcategory,
             "title": text.unescape(title),
             "key": self.match.group(1),
         }

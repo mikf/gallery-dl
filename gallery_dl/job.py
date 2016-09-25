@@ -23,7 +23,50 @@ class Job():
 
     def run(self):
         """Execute or run the job"""
-        pass
+        for msg in self.extractor:
+            if msg[0] == Message.Url:
+                self.update_kwdict(msg[2])
+                self.handle_url(msg[1], msg[2])
+
+            elif msg[0] == Message.Directory:
+                self.update_kwdict(msg[1])
+                self.handle_directory(msg[1])
+
+            elif msg[0] == Message.Queue:
+                self.handle_queue(msg[1])
+
+            elif msg[0] == Message.Headers:
+                self.handle_headers(msg[1])
+
+            elif msg[0] == Message.Cookies:
+                self.handle_cookies(msg[1])
+
+            elif msg[0] == Message.Version:
+                if msg[1] != 1:
+                    raise "unsupported message-version ({}, {})".format(
+                        self.extractor.category, msg[1]
+                    )
+                # TODO: support for multiple message versions
+
+    def handle_url(self, url, kexwords):
+        """Handle Message.Url"""
+
+    def handle_directory(self, keywords):
+        """Handle Message.Directory"""
+
+    def handle_queue(self, url):
+        """Handle Message.Queue"""
+
+    def handle_headers(self, headers):
+        """Handle Message.Headers"""
+
+    def handle_cookies(self, cookies):
+        """Handle Message.Cookies"""
+
+    def update_kwdict(self, kwdict):
+        """Add 'category' and 'subcategory' keywords"""
+        kwdict["category"] = self.extractor.category
+        kwdict["subcategory"] = self.extractor.subcategory
 
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
@@ -45,44 +88,17 @@ class DownloadJob(Job):
         )
 
     def run(self):
-        for msg in self.extractor:
-            if msg[0] == Message.Url:
-                self.download(msg)
+        Job.run(self)
+        if self.queue:
+            for url in self.queue:
+                try:
+                    DownloadJob(url).run()
+                except exception.NoExtractorError:
+                    pass
 
-            elif msg[0] == Message.Headers:
-                self.get_downloader("http:").set_headers(msg[1])
-
-            elif msg[0] == Message.Cookies:
-                self.get_downloader("http:").set_cookies(msg[1])
-
-            elif msg[0] == Message.Directory:
-                self.set_directory(msg)
-
-            elif msg[0] == Message.Queue:
-                self.enqueue(msg[1])
-
-            elif msg[0] == Message.Version:
-                if msg[1] != 1:
-                    raise "unsupported message-version ({}, {})".format(
-                        self.extractor.category, msg[1]
-                    )
-                # TODO: support for multiple message versions
-        self.run_queue()
-
-    def run_queue(self):
-        """Run all jobs stored in queue"""
-        if not self.queue:
-            return
-        for url in self.queue:
-            try:
-                DownloadJob(url).run()
-            except exception.NoExtractorError:
-                pass
-
-    def download(self, msg):
-        """Download the resource specified in 'msg'"""
-        _, url, metadata = msg
-        filename = text.clean_path(self.filename_fmt.format(**metadata))
+    def handle_url(self, url, keywords):
+        """Download the resource specified in 'url'"""
+        filename = text.clean_path(self.filename_fmt.format(**keywords))
         path = os.path.join(self.directory, filename)
         realpath = self.adjust_path(path)
         if os.path.exists(realpath):
@@ -94,10 +110,10 @@ class DownloadJob(Job):
             tries = dlinstance.download(url, file)
         self.printer.success(path, tries)
 
-    def set_directory(self, msg):
+    def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
         segments = [
-            text.clean_path(segment.format(**msg[1]).strip())
+            text.clean_path(segment.format(**keywords).strip())
             for segment in self.directory_fmt
         ]
         self.directory = os.path.join(
@@ -105,6 +121,19 @@ class DownloadJob(Job):
             *segments
         )
         os.makedirs(self.adjust_path(self.directory), exist_ok=True)
+
+    def handle_queue(self, url):
+        """Add url to work-queue"""
+        try:
+            self.queue.append(url)
+        except AttributeError:
+            self.queue = [url]
+
+    def handle_headers(self, headers):
+        self.get_downloader("http:").set_headers(headers)
+
+    def handle_cookies(self, cookies):
+        self.get_downloader("http:").set_cookies(cookies)
 
     def get_downloader(self, url):
         """Return, and possibly construct, a downloader suitable for 'url'"""
@@ -118,13 +147,6 @@ class DownloadJob(Job):
             instance = klass(self.printer)
             self.downloaders[scheme] = instance
         return instance
-
-    def enqueue(self, url):
-        """Add url to work-queue"""
-        try:
-            self.queue.append(url)
-        except AttributeError:
-            self.queue = [url]
 
     @staticmethod
     def get_base_directory():
@@ -147,10 +169,12 @@ class KeywordJob(Job):
         for msg in self.extractor:
             if msg[0] == Message.Url:
                 print("Keywords for filenames:")
+                self.update_kwdict(msg[2])
                 self.print_keywords(msg[2])
                 return
             elif msg[0] == Message.Directory:
                 print("Keywords for directory names:")
+                self.update_kwdict(msg[1])
                 self.print_keywords(msg[1])
 
     @staticmethod
@@ -165,27 +189,27 @@ class KeywordJob(Job):
 class UrlJob(Job):
     """Print download urls"""
 
-    def run(self):
-        for msg in self.extractor:
-            if msg[0] == Message.Url:
-                print(msg[1])
-            elif msg[0] == Message.Queue:
-                try:
-                    UrlJob(msg[1]).run()
-                except exception.NoExtractorError:
-                    pass
+    def handle_url(self, url, _):
+        print(url)
 
+    def handle_queue(self, url):
+        try:
+            UrlJob(url).run()
+        except exception.NoExtractorError:
+            pass
 
 
 class HashJob(DownloadJob):
     """Generate SHA1 hashes for extractor results"""
 
     class HashIO():
+        """Minimal file-like interface"""
 
         def __init__(self, hashobj):
             self.hashobj = hashobj
 
         def write(self, content):
+            """Update SHA1 hash"""
             self.hashobj.update(content)
 
     def __init__(self, url, content=False):
@@ -197,25 +221,28 @@ class HashJob(DownloadJob):
         if content:
             self.fileobj = self.HashIO(self.hash_content)
 
-    def download(self, msg):
-        self.update_url(msg[1])
-        self.update_keyword(msg[2])
-        self.update_content(msg[1])
+    def handle_url(self, url, keywords):
+        self.update_url(url)
+        self.update_keyword(keywords)
+        self.update_content(url)
 
-    def set_directory(self, msg):
-        self.update_keyword(msg[1])
+    def handle_directory(self, keywords):
+        self.update_keyword(keywords)
 
-    def enqueue(self, url):
+    def handle_queue(self, url):
         self.update_url(url)
 
     def update_url(self, url):
+        """Update the URL hash"""
         self.hash_url.update(url.encode())
 
     def update_keyword(self, kwdict):
+        """Update the keyword hash"""
         self.hash_keyword.update(
             json.dumps(kwdict, sort_keys=True).encode()
         )
 
     def update_content(self, url):
+        """Update the content hash"""
         if self.content:
             self.get_downloader(url).download(url, self.fileobj)

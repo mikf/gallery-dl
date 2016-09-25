@@ -51,11 +51,11 @@ class MangaparkChapterExtractor(Extractor):
     test = [
         ("http://mangapark.me/manga/ad-astra-per-aspera-hata-kenjirou/s1/c1.2/1", {
             "url": "25d998a70df1fa559afc189ebd17df300b54dc28",
-            "keyword": "40d60961d7aaf24454d2ab23fbc83f4c55cd4174",
+            "keyword": "aa0dfbd21a5174b1497bce98182324e5120dd4ff",
         }),
         ("http://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
             "url": "8534c8286a18c4db47606f84a4df9f1a42bab291",
-            "keyword": "f96962442cdd5bc957603831c695159d974b7b93",
+            "keyword": "df83f2ccde8dd58d6b906a65ae1ecf3bec801567",
         })
     ]
 
@@ -80,7 +80,6 @@ class MangaparkChapterExtractor(Extractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category": self.category,
             "version": self.version,
             "volume": self.volume or "",
             "chapter": self.chapter,
