@@ -45,7 +45,6 @@ class DoujinmodeChapterExtractor(Extractor):
         count, pos = text.extract(page, ' class="manga-count">', '</span>')
         title, pos = text.extract(page, '<h2>', ' Images List</h2>', pos)
         return {
-            "category": self.category,
             "gallery-id": self.gid,
             "title": text.unescape(title),
             "count": count,

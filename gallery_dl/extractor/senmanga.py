@@ -52,7 +52,6 @@ class SenmangaChapterExtractor(Extractor):
         manga, pos = text.extract(title, '| Raw | ', '  |  Chapter ')
         chapter, pos = text.extract(title, '', ' |  Page ', pos)
         return {
-            "category": self.category,
             "manga": text.unescape(manga.replace("-", " ")),
             "chapter": chapter,
             "count": count,

@@ -47,7 +47,6 @@ class TumblrUserExtractor(Extractor):
     def get_job_metadata(self, image_data):
         """Collect metadata for extractor-job"""
         data = next(image_data)
-        data["category"] = self.category
         data["user"] = self.user
         del data["cname"]
         del data["description"]

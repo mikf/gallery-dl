@@ -55,13 +55,10 @@ class BooruExtractor(Extractor):
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         # Override this method in derived classes
-        return {
-            "category": self.category,
-        }
+        return {}
 
     def get_file_metadata(self, data):
         """Collect metadata for a downloadable file"""
-        data["category"] = self.category
         return text.nameext_from_url(self.get_file_url(data), data)
 
     def get_file_url(self, data):
@@ -114,10 +111,7 @@ class BooruTagExtractor(BooruExtractor):
         self.params["tags"] = self.tags
 
     def get_job_metadata(self):
-        return {
-            "category": self.category,
-            "tags": self.tags,
-        }
+        return {"tags": self.tags}
 
 
 class BooruPoolExtractor(BooruExtractor):
@@ -131,10 +125,7 @@ class BooruPoolExtractor(BooruExtractor):
         self.params["tags"] = "pool:" + self.pool
 
     def get_job_metadata(self):
-        return {
-            "category": self.category,
-            "pool": self.pool,
-        }
+        return {"pool": self.pool}
 
 
 class BooruPostExtractor(BooruExtractor):

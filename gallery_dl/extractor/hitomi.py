@@ -61,7 +61,6 @@ class HitomiGalleryExtractor(Extractor):
             series, pos = text.extract(page, '.html">', '</a>', pos)
         lang = lang.capitalize()
         return {
-            "category": self.category,
             "gallery-id": self.gid,
             "title": " ".join(title.split()),
             "artist": string.capwords(artist),

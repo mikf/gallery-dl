@@ -82,7 +82,6 @@ class SpectrumnexusChapterExtractor(AsynchronousExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category": self.category,
             "chapter": self.chapter or "",
             "volume": self.volume or "",
             "identifier": self.identifier.replace("+", " "),

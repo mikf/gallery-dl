@@ -63,7 +63,6 @@ class PowermangaChapterExtractor(Extractor):
         json_data, pos = text.extract(page, 'var pages = ', ';', pos)
         match = re.match(r"(\w+ (\d+)([^:+]*)(?:: (.*))?|[^:]+)", chapter)
         return {
-            "category": self.category,
             "manga": text.unescape(manga),
             "chapter": match.group(2) or match.group(1),
             "chapter-minor": match.group(3) or "",

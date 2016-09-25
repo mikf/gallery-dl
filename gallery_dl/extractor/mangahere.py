@@ -76,7 +76,6 @@ class MangahereChapterExtractor(AsynchronousExtractor):
         count, pos = text.extract(page, '>', '<', pos-30)
         manga = re.match(r"(.+) \d+(\.\d+)? - Read .+ Chapter \d+(\.\d+)? Online", manga).group(1)
         return {
-            "category": self.category,
             "manga": text.unescape(manga),
             # "title": TODO,
             "volume": self.volume or "",

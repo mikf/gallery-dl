@@ -60,7 +60,6 @@ class HentaifoundryUserExtractor(Extractor):
         token, pos = text.extract(page, 'hidden" value="', '"')
         count, pos = text.extract(page, 'class="active" >Pictures (', ')', pos)
         return {
-            "category": self.category,
             "artist": self.artist,
             "count": count,
         }, token
@@ -136,7 +135,6 @@ class HentaifoundryImageExtractor(Extractor):
         title, pos = text.extract(page, 'Pictures</a> &raquo; <span>', '<')
         url  , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)
         data = {
-            "category": self.category,
             "artist": self.artist,
             "index": self.index,
             "title": text.unescape(title),

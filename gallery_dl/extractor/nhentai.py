@@ -57,7 +57,6 @@ class NhentaiGalleryExtractor(Extractor):
         title_en = ginfo["title"].get("english", "")
         title_ja = ginfo["title"].get("japanese", "")
         return {
-            "category": self.category,
             "gallery-id": self.gid,
             "upload-date": ginfo["upload_date"],
             "media-id": ginfo["media_id"],

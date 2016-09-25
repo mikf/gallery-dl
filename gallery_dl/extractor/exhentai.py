@@ -71,7 +71,6 @@ class ExhentaiGalleryExtractor(Extractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category"     : self.category,
             "gallery-id"   : self.gid,
             "gallery-token": self.token,
         }

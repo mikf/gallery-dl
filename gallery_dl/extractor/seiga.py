@@ -44,10 +44,7 @@ class SeigaImageExtractor(Extractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        return {
-            "category": self.category,
-            "image-id": self.image_id,
-        }
+        return {"image-id": self.image_id}
 
     def get_image_url(self, image_id):
         """Get url for an image with id 'image_id'"""

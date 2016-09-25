@@ -44,7 +44,7 @@ class HentaiboxChapterExtractor(Extractor):
             ("title"   , 'content="Read or Download ', ' hentai manga from'),
             ("series"  , ' the series ', ' with ' + self.count),
             ("language", ' translated pages to ', '.'),
-        ), values={"category": self.category, "count": self.count})[0]
+        ), values={"count": self.count})[0]
         data["lang"] = iso639_1.language_to_code(data["language"])
         return data
 

@@ -30,15 +30,11 @@ class TurboimagehostImageExtractor(Extractor):
 
     def items(self):
         page = self.request("http://www.turboimagehost.com/p/" + self.part).text
-        data = {
-            "category": self.category,
-            "token": self.token,
-        }
-        text.extract_all(page, (
+        data = text.extract_all(page, (
             ('width' , 'var imWidth = ', ';'),
             ('height', 'var imHeight = ', ';'),
             ('url'   , '<a href="http://www.turboimagehost.com"><img src="', '"'),
-        ), values=data)
+        ), values={"token": self.token})[0]
         text.nameext_from_url(data["url"], data)
         yield Message.Version, 1
         yield Message.Directory, data

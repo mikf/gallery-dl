@@ -50,7 +50,7 @@ class LusciousAlbumExtractor(Extractor):
             (None      , '<p>Language:', ''),
             ("language", '\n                            ', ' '),
             ("artist"  , 'rtist: ', '\n'),
-        ), values={"category": self.category, "gallery-id": self.gid})[0]
+        ), values={"gallery-id": self.gid})[0]
         data["lang"] = iso639_1.language_to_code(data["language"])
         return data
 

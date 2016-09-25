@@ -29,11 +29,10 @@ class ImgtrexImageExtractor(Extractor):
         self.token = match.group(1)
 
     def items(self):
-        data = {"category": self.category, "token": self.token}
         page = self.request("http://imgtrex.com/" + self.token).text
         filename, pos = text.extract(page, '<title>ImgTrex: ', '</title>')
         url     , pos = text.extract(page, '<br>\n<img src="', '"', pos)
-        text.nameext_from_url(filename, data)
+        data = text.nameext_from_url(filename, {"token": self.token})
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data

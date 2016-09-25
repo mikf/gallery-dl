@@ -43,16 +43,12 @@ class ImgurAlbumExtractor(Extractor):
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         page = self.request("https://imgur.com/a/" + self.album).text
-        data = {
-            "category": self.category,
-            "album-key": self.album,
-        }
-        text.extract_all(page, (
+        data = text.extract_all(page, (
             ('title', '<meta property="og:title" content="', '"'),
             ('count', '"num_images":"', '"'),
             ('date' , '"datetime":"', ' '),
             ('time' , '', '"'),
-        ), values=data)
+        ), values={"album-key": self.album})[0]
         data["title"] = text.unescape(data["title"])
         return data
 
