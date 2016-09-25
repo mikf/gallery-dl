@@ -22,7 +22,7 @@ class ExhentaiGalleryExtractor(Extractor):
     filename_fmt = "{gallery-id}_{num:>04}_{image-token}_{name}.{extension}"
     pattern = [r"(?:https?://)?(?:g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
     test = [("https://exhentai.org/g/960460/4f0e369d82/", {
-        "keyword": "c1282ffbe5d452c62dec9dbde4ecb7037525cd64",
+        "keyword": "623f8c86c9fe38e964682dd4309b96922655b900",
         "content": "493d759de534355c9f55f8e365565b62411de146",
     })]
     api_url = "https://exhentai.org/api.php"

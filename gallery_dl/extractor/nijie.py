@@ -80,7 +80,7 @@ class NijieUserExtractor(NijieExtractor):
                 r"members(?:_illust)?\.php\?id=(\d+)")]
     test = [("https://nijie.info/members_illust.php?id=44", {
         "url": "585d821df4716b1098660a0be426d01db4b65f2a",
-        "keyword": "30c981b9d7351ec275b9840d8bc2b4ef3da8c4b4",
+        "keyword": "7a2dbf8fc0dfdb2af208ecdb8ec7f3186bdc31ab",
     })]
 
     def __init__(self, match):
@@ -102,7 +102,7 @@ class NijieImageExtractor(NijieExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?nijie\.info/view\.php\?id=(\d+)"]
     test = [("https://nijie.info/view.php?id=70720", {
         "url": "a10d4995645b5f260821e32c60a35f73546c2699",
-        "keyword": "1c0b1a2e447d8e1cd4f93c21f71d7fe7de0eeed3",
+        "keyword": "e454c2bad9b636b90d569881bf4fe8438506e0d2",
         "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
     })]
 

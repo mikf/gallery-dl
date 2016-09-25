@@ -21,7 +21,7 @@ class ImgytImageExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?img\.yt/img-([a-z0-9]+)\.html"]
     test = [("http://img.yt/img-57a2050547b97.html", {
         "url": "6801fac1ff8335bd27a1665ad27ad64cace2cd84",
-        "keyword": "a20aa2215a4a6d5f4605d6370a8d605b525fc4bc",
+        "keyword": "7548cc9915f90f5d7ffbafa079085457ae34562c",
         "content": "54592f2635674c25677c6872db3709d343cdf92f",
     })]
 

@@ -21,7 +21,7 @@ class NhentaiGalleryExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)"]
     test = [("http://nhentai.net/g/147850/", {
         "url": "199ddd07dded0f69282e09a372710698ea21ab8e",
-        "keyword": "e00678567c8335289ffcbb2e6980b28d332ee6a7",
+        "keyword": "c7e37dfe80ca5eee69210c690a1340ea78a932a4",
     })]
 
     def __init__(self, match):

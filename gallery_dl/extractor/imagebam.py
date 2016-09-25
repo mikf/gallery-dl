@@ -20,7 +20,7 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([^/]+).*"]
     test = [("http://www.imagebam.com/gallery/adz2y0f9574bjpmonaismyrhtjgvey4o", {
         "url": "d7a4483b6d5ebba81950a349aad58ae034c60eda",
-        "keyword": "9f54ab808d77f2517444411dfbf8686189c20b43",
+        "keyword": "e4a9395dbd06d4af3172a6a61c90601bc47ee18c",
         "content": "596e6bfa157f2c7169805d50075c2986549973a8",
     })]
     url_base = "http://www.imagebam.com"
@@ -75,7 +75,7 @@ class ImagebamImageExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/image/([0-9a-f]{15})"]
     test = [("http://www.imagebam.com/image/94d56c502511890", {
         "url": "94add9417c685d113a91bcdda4916e9538b5f8a9",
-        "keyword": "046f049533126bb0ee7f81419f59371c6903df9e",
+        "keyword": "fd99b2f45b761d0b639af46740aacd976f5dfcc7",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
 

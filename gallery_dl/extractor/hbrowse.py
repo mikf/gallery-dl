@@ -46,7 +46,7 @@ class HbrowseChapterExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/(c\d+)"]
     test = [("http://www.hbrowse.com/10363/c00000", {
         "url": "634f4800858913f097bc3b62a8fedaf74b5254bd",
-        "keyword": "e6263b71f791000ad4bca58bc4d90f79e42e6be6",
+        "keyword": "c7dc22a10699dee5cf466406fecee6ffa2e6277e",
         "content": "44578ebbe176c2c27434966aef22945787e2781e",
     })]
     url_base = "http://www.hbrowse.com"

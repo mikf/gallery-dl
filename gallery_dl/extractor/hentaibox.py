@@ -20,7 +20,7 @@ class HentaiboxChapterExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?hentaibox\.net/[^/]+/(\d+)_\d+_([^/&]+)"]
     test = [("http://www.hentaibox.net/hentai-manga/16_18_Original_Amazon-No-Hiyaku-Amazon-Elixir-Decensored", {
         "url": "d1a50a9b289d284f178971e01cf312791888e057",
-        "keyword": "294eda384689d4f1178ec952560d0dedd3e38647",
+        "keyword": "b4b100f800b716e573e072f01b5d604d9b436b70",
     })]
 
     def __init__(self, match):

@@ -22,7 +22,7 @@ class ImgurAlbumExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?imgur\.com/(?:a|gallery)/([^/?&#]+)"]
     test = [("https://imgur.com/a/TcBmP", {
         "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
-        "keyword": "5c96eee4df5938ed37f1f95f5c4ef64444bddeb4",
+        "keyword": "c76bbf86f8f114cdaadab396c0ea4acf47aa44eb",
     })]
 
     def __init__(self, match):

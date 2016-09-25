@@ -21,7 +21,7 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"]
     test = [("http://imgbox.com/g/JaX5V5HX7g", {
         "url": "c7c3466dde31d4308833816961104c7d1100368d",
-        "keyword": "23deb783d3afee090f61472b495e797c8f262b93",
+        "keyword": "cebd7f6868cf84ff492341c936cb6dbe5cde4682",
         "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
     })]
     url_base = "http://imgbox.com"
@@ -78,7 +78,7 @@ class ImgboxImageExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"]
     test = [("http://imgbox.com/qHhw7lpG", {
         "url": "d96990ea12223895287d139695077b70dfa0abe4",
-        "keyword": "c5e87be93fec3122151edf85b6424d1871279590",
+        "keyword": "ff0524dba869a4b3292d7d4f72f5da4024b4f002",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
 

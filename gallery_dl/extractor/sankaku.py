@@ -20,7 +20,7 @@ class SankakuTagExtractor(AsynchronousExtractor):
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/\?tags=([^&]+)"]
     test = [("https://chan.sankakucomplex.com/?tags=bonocho", {
         "url": "2561ca0d8482ead48f22a7abcd23919cd78344a1",
-        "keyword": "6282e9a2d5223d635d9be7515f59d87d4b9be732",
+        "keyword": "5e3a39fdc6698e63ed0054478ebd4ca632ce643e",
     })]
     url = "https://chan.sankakucomplex.com/"
 

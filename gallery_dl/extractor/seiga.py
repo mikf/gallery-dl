@@ -23,7 +23,7 @@ class SeigaImageExtractor(Extractor):
                (r"(?:https?://)?lohas\.nicoseiga\.jp/"
                 r"(?:priv|o)/[^/]+/\d+/(\d+)")]
     test = [("http://seiga.nicovideo.jp/seiga/im5977527", {
-        "keyword": "e2ea59186c47beb71484ba35d550cf6511ac185a",
+        "keyword": "fd2628b573d15d1bbdefb219a99b993365b214ed",
         "content": "d9202292012178374d57fb0126f6124387265297",
     })]
 
