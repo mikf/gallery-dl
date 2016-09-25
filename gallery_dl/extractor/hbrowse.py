@@ -68,7 +68,6 @@ class HbrowseChapterExtractor(Extractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "category": self.category,
             'gallery-id': self.gid,
             "chapter": int(self.chapter[1:]),
         }

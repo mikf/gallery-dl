@@ -30,12 +30,11 @@ class ImgcandyImageExtractor(Extractor):
         self.token, self.filename = match.groups()
 
     def items(self):
-        data = {"category": self.category, "token": self.token}
         params = {"imgContinue": "Continue+to+image+...+"}
         page = self.request("http://imgcandy.net/img-" + self.token + ".html",
                             method="post", data=params).text
         url = text.extract(page, "<img class='centred' src='", "'")[0]
-        text.nameext_from_url(self.filename or url, data)
+        data = text.nameext_from_url(self.filename or url, {"token": self.token})
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data

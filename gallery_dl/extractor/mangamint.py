@@ -80,7 +80,6 @@ class MangamintChapterExtractor(Extractor):
         chid , pos = text.extract(page, r'"identifier":"node\/', '"', pos)
         match = re.match(r"(.+) (\d+)(\.\d+)?$", manga)
         return {
-            "category": self.category,
             "manga": match.group(1),
             "chapter": match.group(2),
             "chapter-minor": match.group(3) or "",

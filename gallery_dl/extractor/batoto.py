@@ -69,7 +69,6 @@ class BatotoChapterExtractor(AsynchronousExtractor):
         manga, pos = extr(page, "document.title = '", " - ", pos)
         match = re.match(r"(Vol.(\d+) )?Ch\.([^:]+)(: (.+))?", cinfo)
         return {
-            "category": self.category,
             "token": self.token,
             "manga": text.unescape(manga),
             "volume": match.group(2) or "",

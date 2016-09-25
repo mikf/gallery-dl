@@ -61,4 +61,4 @@ class ImgthGalleryExtractor(Extractor):
             ("date" , 'created on ', ' by <'),
             (None   , 'href="/users/', ''),
             ("user" , '>', '<'),
-        ), values={"category": self.category, "gallery-id": self.gid})[0]
+        ), values={"gallery-id": self.gid})[0]

@@ -47,7 +47,6 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
         title = text.extract(page, "<h1>", "</h1>")[0]
         parts = title.rsplit(" - ", maxsplit=1)
         return {
-            "category": self.category,
             "gallery-key": self.key,
             "title": text.unescape(parts[0]),
             "count": parts[1][:-7],
@@ -91,8 +90,7 @@ class ImgboxImageExtractor(Extractor):
         page = self.request("http://imgbox.com/" + self.key).text
         url     , pos = text.extract(page, 'src="http://i.', '"')
         filename, pos = text.extract(page, ' title="', '"', pos)
-        data = {"category": self.category, "image-key": self.key}
-        text.nameext_from_url(filename, data)
+        data = text.nameext_from_url(filename, {"image-key": self.key})
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, "http://i." + url, data

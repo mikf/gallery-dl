@@ -78,7 +78,6 @@ class Hentai2readChapterExtractor(Extractor):
         title = text.extract(page, "<title>", "</title>")[0]
         match = re.match(r"Reading (?:(.+) dj - )?(.+) Hentai - \d+: ", title)
         return {
-            "category": self.category,
             "gallery-id": images[0].split("/")[-3],
             "chapter": self.chapter,
             "count": len(images),

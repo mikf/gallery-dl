@@ -40,10 +40,7 @@ class NijieExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        return {
-            "category": self.category,
-            "artist-id": self.artist_id,
-        }
+        return {"artist-id": self.artist_id}
 
     def get_image_ids(self):
         """Collect all image-ids for a specific artist"""

@@ -30,10 +30,6 @@ class ChronosImageExtractor(Extractor):
         self.token = match.group(1)
 
     def items(self):
-        data = {
-            "category": self.category,
-            "token": self.token,
-        }
         params = {
             "op": "view",
             "id": self.token,
@@ -44,7 +40,7 @@ class ChronosImageExtractor(Extractor):
                             data=params).text
         url     , pos = text.extract(page, '<br><img src="', '"')
         filename, pos = text.extract(page, ' alt="', '"', pos)
-        text.nameext_from_url(filename, data)
+        data = text.nameext_from_url(filename, {"token": self.token})
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data

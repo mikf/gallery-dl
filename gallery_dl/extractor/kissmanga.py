@@ -81,7 +81,6 @@ class KissmangaChapterExtractor(KissmangaExtractor):
             r"(?:Vol.0*(\d+) )?(?:Ch.)?0*(\d+)(?:\.0*(\d+))?(?:: (.+))?", cinfo)
         chminor = match.group(3)
         return {
-            "category": self.category,
             "manga": manga,
             "volume": match.group(1) or "",
             "chapter": match.group(2),

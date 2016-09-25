@@ -61,7 +61,6 @@ class DynastyscansChapterExtractor(Extractor):
             info
         )
         return {
-            "category": self.category,
             "manga": text.unescape(match.group(1)),
             "chapter": match.group(2) or "",
             "title": text.unescape(match.group(3) or ""),

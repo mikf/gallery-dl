@@ -74,7 +74,6 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
         """Collect metadata for extractor-job"""
         page = self.request(self.url_base + self.url_title).text
         data = {
-            "category": self.category,
             "chapter": self.chapter,
             "lang": "en",
             "language": "English",

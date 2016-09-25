@@ -34,7 +34,6 @@ class ImagetwistImageExtractor(Extractor):
         filename, pos = text.extract(page, ' alt="', '"', pos)
         userid  , pos = text.extract(url , '/', '/', 29)
         data = {
-            "category": self.category,
             "token": self.token,
             "user": userid,
         }

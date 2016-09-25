@@ -46,7 +46,6 @@ class MangastreamChapterExtractor(AsynchronousExtractor):
         title, pos = text.extract(page, ' - ', '<', pos)
         count, pos = text.extract(page, 'Last Page (', ')', pos)
         data = {
-            "category": self.category,
             "manga": manga,
             "chapter": text.unquote(self.chapter),
             "chapter-id": self.ch_id,

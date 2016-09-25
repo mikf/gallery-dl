@@ -42,10 +42,7 @@ class SankakuTagExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        return {
-            "category": self.category,
-            "tags": self.tags,
-        }
+        return {"tags": self.tags}
 
     def get_images(self):
         params = {

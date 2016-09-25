@@ -48,7 +48,7 @@ class ImagefapGalleryExtractor(Extractor):
             ("title"   , '<title>Porn pics of ', ' (Page 1)</title>'),
             ("uploader", '>Uploaded by ', '</font>'),
             ("count"   , ' 1 of ', ' pics"'),
-        ), values={"category": self.category, "gallery-id": self.gid})
+        ), values={"gallery-id": self.gid})
         self.image_id = text.extract(page, 'id="img_ed_', '"', pos)[0]
         data["title"] = text.unescape(data["title"])
         return data
@@ -101,7 +101,6 @@ class ImagefapImageExtractor(Extractor):
         """Collect metadata for extractor-job"""
         parts = info["contentUrl"].rsplit("/", 3)
         return text.nameext_from_url(parts[3], {
-            "category": self.category,
             "title": text.unescape(info["name"]),
             "section": info["section"],
             "uploader": info["author"],

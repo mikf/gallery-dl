@@ -44,17 +44,12 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
         """Collect metadata for extractor-job"""
         url = self.url_base + "/gallery/" + self.gkey
         page = self.request(url, encoding="utf-8").text
-        data = {
-            "category": self.category,
-            "gallery-key": self.gkey,
-        }
-        data, _ = text.extract_all(page, (
+        return text.extract_all(page, (
             (None       , "<img src='/img/icons/photos.png'", ""),
             ("title"    , "'> ", " <"),
             ("count"    , "'>", " images"),
             ("first-url", "<a href='http://www.imagebam.com", "'"),
-        ), values=data)
-        return data
+        ), values={"gallery-key": self.gkey})[0]
 
     def get_images(self, url):
         """Yield all image-urls and -ids for a gallery"""
@@ -69,7 +64,6 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
             image_id , pos = text.extract(page, '<img class="image" id="', '"', pos)
             image_url, pos = text.extract(page, ' src="', '"', pos)
             yield image_url, image_id
-
 
 
 class ImagebamImageExtractor(Extractor):
@@ -90,10 +84,9 @@ class ImagebamImageExtractor(Extractor):
         self.token = match.group(1)
 
     def items(self):
-        data = {"category": self.category, "token": self.token}
         page = self.request("http://www.imagebam.com/image/" + self.token).text
-        url = text.extract(page, 'property="og:image" content="', '"')[0]
-        text.nameext_from_url(url, data)
+        url  = text.extract(page, 'property="og:image" content="', '"')[0]
+        data = text.nameext_from_url(url, {"token": self.token})
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data

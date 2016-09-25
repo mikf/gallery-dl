@@ -30,12 +30,12 @@ class ImgytImageExtractor(Extractor):
         self.token = match.group(1)
 
     def items(self):
-        data = {"category": self.category, "token": self.token}
         params = {"imgContinue": "Continue+to+image+...+"}
         page = self.request("https://img.yt/img-" + self.token + ".html",
                             method="post", data=params).text
         url     , pos = text.extract(page, "<img class='centred' src='", "'")
         filename, pos = text.extract(page, " alt='", "'", pos)
+        data = {"token": self.token}
         text.nameext_from_url(filename + splitext(url)[1], data)
         if url.startswith("http:"):
             url = "https:" + url[5:]

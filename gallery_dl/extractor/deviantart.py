@@ -57,10 +57,7 @@ class DeviantartUserExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        return {
-            "category": self.category,
-            "artist": self.artist,
-        }
+        return {"artist": self.artist}
 
     def get_image_metadata(self, image):
         """Collect metadata for an image"""
@@ -127,7 +124,7 @@ class DeviantartImageExtractor(Extractor):
             ('description', '"og:description" content="', '"'),
             (None    , '<span class="tt-w">', ''),
             ('date'  , 'title="', '"'),
-        ), values={'category': self.category, "index": self.index})[0]
+        ), values={"index": self.index})[0]
         data["description"] = text.unescape(text.unescape(data["description"]))
         data["artist"] = text.extract(data["url"], "//", ".")[0]
         data["date"] = text.extract(data["date"], ", ", " in ", len(data["title"]))[0]
