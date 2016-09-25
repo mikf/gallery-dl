@@ -92,7 +92,6 @@ class PixivUserExtractor(Extractor):
         """Prepare a work-dictionary with additional keywords"""
         user = work["user"]
         url = work["image_urls"]["large"]
-        work["category"] = self.category
         work["artist-id"] = user["id"]
         work["artist-name"] = user["name"]
         work["artist-nick"] = user["account"]
@@ -130,7 +129,6 @@ class PixivUserExtractor(Extractor):
         if not user:
             user = self.api.user(self.artist_id)["response"][0]
         return {
-            "category": self.category,
             "artist-id": user["id"],
             "artist-name": user["name"],
             "artist-nick": user["account"],

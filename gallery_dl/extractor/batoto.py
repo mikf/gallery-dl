@@ -22,7 +22,7 @@ class BatotoChapterExtractor(AsynchronousExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)"]
     test = [("http://bato.to/reader#459878c8fda07502", {
         "url": "432d7958506ad913b0a9e42664a89e46a63e9296",
-        "keyword": "7a3e03c40c8b3c7137c4ebe723b1b9c95a303d81",
+        "keyword": "75a3a86d32aecfc21c44865b4043490757f73d77",
     })]
     url = "https://bato.to/"
     reader_url = "https://bato.to/areader"
@@ -78,7 +78,6 @@ class BatotoChapterExtractor(AsynchronousExtractor):
         manga, pos = extr(page, "document.title = '", " - ", pos)
         match = re.match(r"(Vol.(\d+) )?Ch\.([^:]+)(: (.+))?", cinfo)
         return {
-            "category": self.category,
             "token": self.token,
             "manga": text.unescape(manga),
             "volume": match.group(2) or "",

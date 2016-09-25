@@ -20,7 +20,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
     pattern = [r"(?:https?://)?downloads\.khinsider\.com/game-soundtracks/album/(.+)"]
     test = [("http://downloads.khinsider.com/game-soundtracks/album/horizon-riders-wii-", {
         "url": "35ff4c8310884664408dc5560fda3b06157f7606",
-        "keyword": "dde50e1f5dbed5ee3f13df4e1bffc58bb9563f22",
+        "keyword": "d91cf3edee6713b536eaf3995743f0be7dc72f68",
     })]
 
     def __init__(self, match):
@@ -45,7 +45,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
             ("size" , "Total Filesize: <b>", "</b>"),
             ("date" , "Date added: <b>", "</b>"),
             ("type" , "Album type: <b>", "</b>"),
-        ), values={"category": self.category})[0]
+        ))[0]
 
     def get_album_tracks(self, page):
         """Collect url and metadata for all tracks of a soundtrack"""

@@ -26,8 +26,6 @@ class PinterestExtractor(Extractor):
         img = pin["image"]["original"]
         url = img["url"]
         data = {
-            "category": self.category,
-            "subcategory": self.subcategory,
             "pin-id": pin["id"],
             "note": pin["note"],
             "width": img["width"],
@@ -90,8 +88,6 @@ class PinterestBoardExtractor(PinterestExtractor):
     def data_from_board(self, board):
         """Get metadata from a board-object"""
         data = {
-            "category": self.category,
-            "subcategory": self.subcategory,
             "user": self.user,
             "board-id": board["id"],
             "board": board["name"],

@@ -21,7 +21,6 @@ class ChanExtractor(Extractor):
     def __init__(self, board, thread):
         Extractor.__init__(self)
         self.metadata = {
-            "category": self.category,
             "board": board,
             "thread": thread,
         }
