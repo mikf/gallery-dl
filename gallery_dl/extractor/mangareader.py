@@ -50,7 +50,7 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
     ]
     test = [("http://www.mangareader.net/karate-shoukoushi-kohinata-minoru/11", {
         "url": "84ffaab4c027ef9022695c53163c3aeabd07ca58",
-        "keyword": "0df7db81a44ef642922aab798c303d60e2b6802d",
+        "keyword": "09b4ad57a082eb371dec027ccfc8ed1157c6eac6",
     })]
 
     def __init__(self, match):

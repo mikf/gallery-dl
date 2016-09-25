@@ -21,7 +21,7 @@ class DeviantartUserExtractor(AsynchronousExtractor):
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
     test = [("http://shimoda7.deviantart.com/gallery/", {
         "url": "63bfa8efba199e27181943c9060f6770f91a8441",
-        "keyword": "c0343b41c28c87254a3f0b3241222e94f780701e",
+        "keyword": "741bbea4891a23335bb5d119c4a42aeb54702c50",
     })]
 
     def __init__(self, match):
@@ -105,7 +105,7 @@ class DeviantartImageExtractor(Extractor):
     pattern = [r"(?:https?://)?[^\.]+\.deviantart\.com/art/.+-(\d+)"]
     test = [("http://shimoda7.deviantart.com/art/For-the-sake-of-a-memory-10073852", {
         "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-        "keyword": "f2dfde276a39990097935ace092811c56bc0bfec",
+        "keyword": "ccac27b8f740fc943afca9460608e02c6cbcdf96",
     })]
 
     def __init__(self, match):

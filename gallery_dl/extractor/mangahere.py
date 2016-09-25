@@ -49,7 +49,7 @@ class MangahereChapterExtractor(AsynchronousExtractor):
                 r"([^/]+(?:/v0*(\d+))?/c0*(\d+)(\.\d+)?)")]
     test = [("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", {
         "url": "68efaeed3bc6abb0a0b6f75a5c649c17979e31f1",
-        "keyword": "f342e3df9fa39eb10cf7ba5ef3300df6ad77f332",
+        "keyword": "d3fe470e934a9f02ed00d4391b1743970eae82fa",
     })]
     url_fmt = "http://www.mangahere.co/manga/{}/{}.html"
 

@@ -22,7 +22,7 @@ class ImagefapGalleryExtractor(Extractor):
                 r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")]
     test = [("http://www.imagefap.com/gallery/6318447", {
         "url": "f63e6876df83a40e1a98dad70e46952dd9edb7a7",
-        "keyword": "eb26d0e62defc1a547b6b854fe0de693055d9f20",
+        "keyword": "715f99ad154c4cf608afc7cd77dd1e896030646a",
         "content": "38e50699db9518ae68648c45ecdd6be614efc324",
     })]
 
@@ -82,7 +82,7 @@ class ImagefapImageExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"]
     test = [("http://www.imagefap.com/photo/1616331218/", {
         "url": "8a05c0ccdcf84e63c962803bc41d247628c549ea",
-        "keyword": "401ded07ae0b3a8f718e553e506898b34cd92020",
+        "keyword": "c9880c6731b3fdc6d98d25dbff56f4342c11683e",
         "content": "964b8c62c9d5c2a039a2fccf1b1e10aaf7a18a96",
     })]
 

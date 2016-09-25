@@ -21,7 +21,7 @@ class TumblrUserExtractor(Extractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com(?:/page/\d+)?/?$"]
     test = [("http://demo.tumblr.com/", {
         "url": "d3d2bb185230e537314a0036814050634c730f74",
-        "keyword": "2ab87097ecafce595dd53d8469b2337ec541bcde",
+        "keyword": "8704a9bbb65b6e52dc1ccdf2c2449bd4abe3d389",
         "content": "31495fdb9f84edbb7f67972746a1521456f649e2",
     })]
 
@@ -96,7 +96,7 @@ class TumblrPostExtractor(TumblrUserExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/post/(\d+)"]
     test = [("http://demo.tumblr.com/post/459265350", {
         "url": "d3d2bb185230e537314a0036814050634c730f74",
-        "keyword": "a6a0d99eddfba835e710a584d59b19df1ea5c1ab",
+        "keyword": "821236db342fb0d1bf8a177ca3108349168e6cd0",
     })]
 
     def __init__(self, match):
@@ -110,7 +110,7 @@ class TumblrTagExtractor(TumblrUserExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/tagged/(.+)"]
     test = [("http://demo.tumblr.com/tagged/Times Square", {
         "url": "d3d2bb185230e537314a0036814050634c730f74",
-        "keyword": "2ab87097ecafce595dd53d8469b2337ec541bcde",
+        "keyword": "e182759d3a26c9f72ccc8ddc22a382aad598d6dc",
     })]
 
     def __init__(self, match):

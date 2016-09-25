@@ -33,5 +33,5 @@ class MangapandaChapterExtractor(MangapandaBase, MangareaderChapterExtractor):
     ]
     test = [("http://www.mangapanda.com/red-storm/2", {
         "url": "4bf4ddf6c50105ec8a37675495ab80c46608275d",
-        "keyword": "dcb8d655e3f461738c821819bbb8d017bd916713",
+        "keyword": "89c712f7ed255ec9c1d8e84dcb5a160b6cb4498c",
     })]

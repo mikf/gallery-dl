@@ -20,7 +20,7 @@ class ImgthGalleryExtractor(Extractor):
     pattern = [r"(?:https?://)?imgth\.com/gallery/(\d+)"]
     test = [("http://imgth.com/gallery/37/wallpaper-anime", {
         "url": "4ae1d281ca2b48952cf5cca57e9914402ad72748",
-        "keyword": "1b15726d53bc2c08d845fa60ce538396380688df",
+        "keyword": "3f268fcc18d49ac3799a8f25cc08053e90891955",
     })]
 
     def __init__(self, match):

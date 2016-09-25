@@ -20,7 +20,7 @@ class SenmangaChapterExtractor(Extractor):
     pattern = [r"(?:https?://)?raw\.senmanga\.com/([^/]+/[^/]+)"]
     test = [("http://raw.senmanga.com/Bokura-wa-Minna-Kawaisou/37A/1", {
         "url": "32d88382fcad66859d089cd9a61249f375492ec5",
-        "keyword": "9554ccc7bc32c358b2491c255e614ae908d7d593",
+        "keyword": "465905e0b69998656f9d59462a9560319941c58d",
         "content": "a791dda85ac0d37e3b36d754560cbb65b8dab5b9",
     })]
     url_base = "http://raw.senmanga.com"

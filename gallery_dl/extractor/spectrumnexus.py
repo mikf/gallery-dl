@@ -50,7 +50,7 @@ class SpectrumnexusChapterExtractor(AsynchronousExtractor):
     ]
     test = [("http://view.thespectrum.net/series/toriko.html?ch=Chapter+343&page=1", {
         "url": "c0fc7dc594841217cc622a67edd79f06e9900333",
-        "keyword": "bde9c95a2d0feca0574c7248ed06f1684f86b2ac",
+        "keyword": "8499166b62db0c87e7109cc5f9aa837b4815dd9c",
     })]
 
     def __init__(self, match):
