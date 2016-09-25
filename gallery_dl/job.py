@@ -9,6 +9,7 @@
 import os
 import json
 import hashlib
+import platform
 from . import config, extractor, downloader, text, output, exception
 from .extractor.message import Message
 
@@ -23,7 +24,6 @@ class Job():
     def run(self):
         """Execute or run the job"""
         pass
-
 
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
@@ -84,12 +84,13 @@ class DownloadJob(Job):
         _, url, metadata = msg
         filename = text.clean_path(self.filename_fmt.format(**metadata))
         path = os.path.join(self.directory, filename)
-        if os.path.exists(path):
+        realpath = self.adjust_path(path)
+        if os.path.exists(realpath):
             self.printer.skip(path)
             return
         dlinstance = self.get_downloader(url)
         self.printer.start(path)
-        with open(path, "wb") as file:
+        with open(realpath, "wb") as file:
             tries = dlinstance.download(url, file)
         self.printer.success(path, tries)
 
@@ -103,7 +104,7 @@ class DownloadJob(Job):
             self.get_base_directory(),
             *segments
         )
-        os.makedirs(self.directory, exist_ok=True)
+        os.makedirs(self.adjust_path(self.directory), exist_ok=True)
 
     def get_downloader(self, url):
         """Return, and possibly construct, a downloader suitable for 'url'"""
@@ -132,6 +133,11 @@ class DownloadJob(Job):
         if not isinstance(bdir, str):
             bdir = os.path.join(*bdir)
         return os.path.expanduser(os.path.expandvars(bdir))
+
+    @staticmethod
+    def adjust_path(path, longpaths=platform.system() == "Windows"):
+        """Enable longer-than-260-character paths on windows"""
+        return "\\\\?\\" + os.path.abspath(path) if longpaths else path
 
 
 class KeywordJob(Job):
