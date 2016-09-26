@@ -20,6 +20,7 @@ modules = [
     "coreimg",
     "danbooru",
     "deviantart",
+    "dokireader",
     "doujinmode",
     "dynastyscans",
     "e621",

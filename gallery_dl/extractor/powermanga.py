@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015,2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -27,7 +27,7 @@ class PowermangaChapterExtractor(Extractor):
     ]
     test = [("https://read.powermanga.org/read/one_piece/en/0/803/page/1", {
         "url": "e6179c1565068f99180620281f86bdd25be166b4",
-        "keyword": "ab66c38e31f1b716ed360ee8c78fd973d7d8693a",
+        "keyword": "17f56ecad0e718735cd832abe84cb3c808cb2a5d",
     })]
 
     def __init__(self, match):
@@ -52,11 +52,15 @@ class PowermangaChapterExtractor(Extractor):
             page_data["page"] = page_index
             page_data["name"] = name
             page_data["extension"] = ext[1:]
-            yield Message.Url, "http" + page_data["url"][4:], page_data
+            url = page_data["url"]
+            del page_data["thumb_url"]
+            del page_data["url"]
+            yield Message.Url, url, page_data
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        page = self.request(self.url_base + self.part, encoding="utf-8").text
+        page = self.request(self.url_base + self.part, encoding="utf-8",
+                            method="post", data={"adult": "true"}).text
         _        , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
         manga    , pos = text.extract(page, 'title="', '"', pos)
         chapter  , pos = text.extract(page, '">', '</a>', pos)
