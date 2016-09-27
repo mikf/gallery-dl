@@ -38,7 +38,7 @@ class TumblrUserExtractor(Extractor):
         yield Message.Directory, data
         for image in images:
             url = image["photo-url-1280"]
-            self.delete_urls(image)
+            self.delete_keywords(image)
             image.update(data)
             image = text.nameext_from_url(url, image)
             image["hash"] = text.extract(image["name"], "_", "_")[0]
@@ -84,10 +84,14 @@ class TumblrUserExtractor(Extractor):
             yield post
 
     @staticmethod
-    def delete_urls(data):
-        for key in [k for k in data.keys() if k.startswith("photo-url-")]:
+    def delete_keywords(data):
+        """Delete unnecessary keywords from dict"""
+        keys = [
+            k for k in data.keys()
+            if k.startswith("photo-url-") or k.endswith("-button")
+        ]
+        for key in keys:
             del data[key]
-        return data
 
 
 class TumblrPostExtractor(TumblrUserExtractor):
