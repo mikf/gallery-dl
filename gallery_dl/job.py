@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import os
 import json
 import hashlib
-import platform
-from . import config, extractor, downloader, text, output, exception
+from . import extractor, downloader, path, output, exception
 from .extractor.message import Message
 
 class Job():
@@ -73,19 +71,10 @@ class DownloadJob(Job):
 
     def __init__(self, url):
         Job.__init__(self, url)
-        self.directory = self.get_base_directory()
+        self.pathfmt = path.PathFormat(self.extractor)
         self.downloaders = {}
         self.queue = None
-        self.printer = output.select()
-        key = ["extractor", self.extractor.category]
-        if self.extractor.subcategory:
-            key.append(self.extractor.subcategory)
-        self.filename_fmt = config.interpolate(
-            key + ["filename_fmt"], default=self.extractor.filename_fmt
-        )
-        self.directory_fmt = config.interpolate(
-            key + ["directory_fmt"], default=self.extractor.directory_fmt
-        )
+        self.out = output.select()
 
     def run(self):
         Job.run(self)
@@ -98,29 +87,16 @@ class DownloadJob(Job):
 
     def handle_url(self, url, keywords):
         """Download the resource specified in 'url'"""
-        filename = text.clean_path(self.filename_fmt.format(**keywords))
-        path = os.path.join(self.directory, filename)
-        realpath = self.adjust_path(path)
-        if os.path.exists(realpath):
-            self.printer.skip(path)
+        self.pathfmt.set_keywords(keywords)
+        if self.pathfmt.exists():
+            self.out.skip(self.pathfmt.path)
             return
         dlinstance = self.get_downloader(url)
-        self.printer.start(path)
-        with open(realpath, "wb") as file:
-            tries = dlinstance.download(url, file)
-        self.printer.success(path, tries)
+        dlinstance.download(url, self.pathfmt)
 
     def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
-        segments = [
-            text.clean_path(segment.format(**keywords).strip())
-            for segment in self.directory_fmt
-        ]
-        self.directory = os.path.join(
-            self.get_base_directory(),
-            *segments
-        )
-        os.makedirs(self.adjust_path(self.directory), exist_ok=True)
+        self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url):
         """Add url to work-queue"""
@@ -144,22 +120,9 @@ class DownloadJob(Job):
         instance = self.downloaders.get(scheme)
         if instance is None:
             klass = downloader.find(scheme)
-            instance = klass(self.printer)
+            instance = klass(self.out)
             self.downloaders[scheme] = instance
         return instance
-
-    @staticmethod
-    def get_base_directory():
-        """Return the base-destination-directory for downloads"""
-        bdir = config.get(("base-directory",), default=(".", "gallery-dl"))
-        if not isinstance(bdir, str):
-            bdir = os.path.join(*bdir)
-        return os.path.expanduser(os.path.expandvars(bdir))
-
-    @staticmethod
-    def adjust_path(path, longpaths=platform.system() == "Windows"):
-        """Enable longer-than-260-character paths on windows"""
-        return "\\\\?\\" + os.path.abspath(path) if longpaths else path
 
 
 class KeywordJob(Job):
@@ -207,6 +170,17 @@ class HashJob(DownloadJob):
 
         def __init__(self, hashobj):
             self.hashobj = hashobj
+            self.path = ""
+            self.has_extension = True
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def open(self):
+            return self
 
         def write(self, content):
             """Update SHA1 hash"""

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2014-2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,16 +15,15 @@ class BasicDownloader():
 
     max_tries = 5
 
-    def download(self, url, fileobj):
+    def download(self, url, pathfmt):
         """Download the resource at 'url' and write it to a file-like object"""
         try:
-            return self.download_impl(url, fileobj)
+            return self.download_impl(url, pathfmt)
         except:
             # remove file if download failed
             try:
-                fileobj.close()
-                os.unlink(fileobj.name)
-            except AttributeError:
+                os.unlink(pathfmt.realpath)
+            except (AttributeError, FileNotFoundError):
                 pass
             raise
 
