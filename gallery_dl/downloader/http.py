@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2014-2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,16 +10,17 @@
 
 import time
 import requests
+import mimetypes
 from .common import BasicDownloader
 
 class Downloader(BasicDownloader):
 
-    def __init__(self, printer):
+    def __init__(self, output):
         BasicDownloader.__init__(self)
         self.session = requests.session()
-        self.printer = printer
+        self.out = output
 
-    def download_impl(self, url, file):
+    def download_impl(self, url, pathfmt):
         tries = 0
         while True:
             # try to connect to remote source
@@ -27,7 +28,7 @@ class Downloader(BasicDownloader):
                 response = self.session.get(url, stream=True, verify=True)
             except requests.exceptions.ConnectionError as exptn:
                 tries += 1
-                self.printer.error(file, exptn, tries, self.max_tries)
+                self.out.error(pathfmt.path, exptn, tries, self.max_tries)
                 time.sleep(1)
                 if tries == self.max_tries:
                     raise
@@ -36,10 +37,8 @@ class Downloader(BasicDownloader):
             # reject error-status-codes
             if response.status_code != requests.codes.ok:
                 tries += 1
-                self.printer.error(file, 'HTTP status "{} {}"'.format(
+                self.out.error(pathfmt.path, 'HTTP status "{} {}"'.format(
                     response.status_code, response.reason), tries, self.max_tries)
-                if response.status_code == 404:
-                    return self.max_tries
                 time.sleep(1)
                 if tries == self.max_tries:
                     response.raise_for_status()
@@ -48,9 +47,22 @@ class Downloader(BasicDownloader):
             # everything ok -- proceed to download
             break
 
-        for data in response.iter_content(16384):
-            file.write(data)
-        return tries
+        if not pathfmt.has_extension:
+            # set 'extension' keyword from Content-Type header
+            mtype = response.headers.get("Content-Type", "image/jpeg")
+            extensions = mimetypes.guess_all_extensions(mtype)
+            extensions.sort()
+            pathfmt.set_extension(extensions[-1][1:])
+            if pathfmt.exists():
+                self.out.skip(pathfmt.path)
+                response.close()
+                return
+
+        self.out.start(pathfmt.path)
+        with pathfmt.open() as file:
+            for data in response.iter_content(16384):
+                file.write(data)
+        self.out.success(pathfmt.path, tries)
 
     def set_headers(self, headers):
         """Set headers for http requests"""
@@ -65,4 +77,3 @@ class Downloader(BasicDownloader):
         """Copy the contents of dictionary 'src' to 'dest'"""
         dest.clear()
         dest.update(src)
-
