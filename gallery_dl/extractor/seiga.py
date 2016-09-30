@@ -17,7 +17,7 @@ class SeigaImageExtractor(Extractor):
     category = "seiga"
     subcategory = "image"
     directory_fmt = ["{category}"]
-    filename_fmt = "{category}_{image-id}.jpg"
+    filename_fmt = "{category}_{image-id}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/"
                 r"(?:seiga/im|image/source/)(\d+)"),
                (r"(?:https?://)?lohas\.nicoseiga\.jp/"

@@ -53,6 +53,7 @@ class ExhentaiGalleryExtractor(Extractor):
         for url, image in self.get_images(page):
             data.update(image)
             if "/fullimg.php" in url:
+                data["extension"] = ""
                 self.wait((1, 2))
             yield Message.Url, url, data
 
