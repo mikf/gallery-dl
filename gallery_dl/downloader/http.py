@@ -50,7 +50,7 @@ class Downloader(BasicDownloader):
         if not pathfmt.has_extension:
             # set 'extension' keyword from Content-Type header
             mtype = response.headers.get("Content-Type", "image/jpeg")
-            extensions = mimetypes.guess_all_extensions(mtype)
+            extensions = mimetypes.guess_all_extensions(mtype, strict=False)
             extensions.sort()
             pathfmt.set_extension(extensions[-1][1:])
             if pathfmt.exists():
