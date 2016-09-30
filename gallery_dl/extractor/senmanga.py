@@ -20,7 +20,7 @@ class SenmangaChapterExtractor(Extractor):
     pattern = [r"(?:https?://)?raw\.senmanga\.com/([^/]+/[^/]+)"]
     test = [("http://raw.senmanga.com/Bokura-wa-Minna-Kawaisou/37A/1", {
         "url": "32d88382fcad66859d089cd9a61249f375492ec5",
-        "keyword": "465905e0b69998656f9d59462a9560319941c58d",
+        "keyword": "bd25a8d00c8507faa5cdd6146a872797486fbf93",
         "content": "a791dda85ac0d37e3b36d754560cbb65b8dab5b9",
     })]
     url_base = "http://raw.senmanga.com"
@@ -38,10 +38,10 @@ class SenmangaChapterExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Headers, self.session.headers
-        data["extension"] = "jpg" #TODO
         for i in range(int(data["count"])):
             page = str(i+1)
             data["page"] = page
+            data["extension"] = ""
             yield Message.Url, self.img_url + page, data
 
     def get_job_metadata(self):
