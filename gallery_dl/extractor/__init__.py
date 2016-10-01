@@ -65,7 +65,7 @@ modules = [
     "tumblr",
     "turboimagehost",
     "yandere",
-    "generic",
+    "recursive",
 ]
 
 def find(url):
