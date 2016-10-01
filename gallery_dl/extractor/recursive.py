@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Generic extractor"""
+"""Recursive extractor"""
 
 import re
 from .common import Extractor, Message
 
-class GenericExtractor(Extractor):
+class RecursiveExtractor(Extractor):
 
-    category = "generic"
-    pattern = ["generic:(.+)"]
+    category = "recursive"
+    pattern = ["r(?:ecursive)?:(.+)"]
+    test = [("recursive:https://pastebin.com/raw/FLwrCYsT", {
+        "url": "eee86d65c346361b818e8f4b2b307d9429f136a2",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -23,5 +26,5 @@ class GenericExtractor(Extractor):
     def items(self):
         page = self.request(self.url).text
         yield Message.Version, 1
-        for match in re.finditer("https?://[^ \"']+", page):
+        for match in re.finditer(r"https?://[^\s\"']+", page):
             yield Message.Queue, match.group(0)
