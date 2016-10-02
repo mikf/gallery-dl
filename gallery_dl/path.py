@@ -39,7 +39,7 @@ class PathFormat():
     def set_directory(self, keywords):
         """Build directory path and create it if necessary"""
         segments = [
-            text.clean_path(segment.format(**keywords).strip())
+            text.clean_path(segment.format_map(keywords).strip())
             for segment in self.directory_fmt
         ]
         self.directory = os.path.join(
@@ -64,7 +64,7 @@ class PathFormat():
 
     def build_path(self, sep=os.path.sep):
         """Use filename-keywords and directory to build a full path"""
-        filename = text.clean_path(self.filename_fmt.format(**self.keywords))
+        filename = text.clean_path(self.filename_fmt.format_map(self.keywords))
         self.path = self.directory + sep + filename
         self.realpath = self.realdirectory + sep + filename
 
