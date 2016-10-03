@@ -56,6 +56,7 @@ modules = [
     "nijie",
     "pinterest",
     "powermanga",
+    "rapidimg",
     "rule34",
     "safebooru",
     "sankaku",
