@@ -51,11 +51,11 @@ class MangaparkChapterExtractor(Extractor):
     test = [
         ("http://mangapark.me/manga/ad-astra-per-aspera-hata-kenjirou/s1/c1.2/1", {
             "url": "25d998a70df1fa559afc189ebd17df300b54dc28",
-            "keyword": "aa0dfbd21a5174b1497bce98182324e5120dd4ff",
+            "keyword": "b24e88efb79159e8fd510cfd8a2fb7d4ed2b466a",
         }),
         ("http://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
-            "url": "8534c8286a18c4db47606f84a4df9f1a42bab291",
-            "keyword": "df83f2ccde8dd58d6b906a65ae1ecf3bec801567",
+            "url": "f8915e25895d4b336892f8a6bd27d26cdb337045",
+            "keyword": "7f533dc292bbd139469b21fe7f7472a85a54b014",
         })
     ]
 
@@ -72,10 +72,9 @@ class MangaparkChapterExtractor(Extractor):
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, image in enumerate(self.get_images(page), 1):
+        for url, image in self.get_images(page):
             data.update(image)
-            data["page"] = num
-            yield Message.Url, data["url"], text.nameext_from_url(data["url"], data)
+            yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
@@ -102,14 +101,16 @@ class MangaparkChapterExtractor(Extractor):
     def get_images(page):
         """Collect image-urls, -widths and -heights"""
         pos = 0
+        num = 0
         while True:
             url   , pos = text.extract(page, ' target="_blank" href="', '"', pos)
             if not url:
                 return
+            num += 1
             width , pos = text.extract(page, ' width="', '"', pos)
             height, pos = text.extract(page, ' _heighth="', '"', pos)
-            yield {
-                "url": url,
+            yield url, {
+                "page": num,
                 "width": width,
                 "height": height,
             }
