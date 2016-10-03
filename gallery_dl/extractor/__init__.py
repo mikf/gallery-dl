@@ -54,6 +54,7 @@ modules = [
     "mangastream",
     "nhentai",
     "nijie",
+    "picmaniac",
     "pinterest",
     "powermanga",
     "rapidimg",
