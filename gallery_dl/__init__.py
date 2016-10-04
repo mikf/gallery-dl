@@ -6,6 +6,8 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+from __future__ import unicode_literals, print_function
+
 __author__     = "Mike Fährmann"
 __copyright__  = "Copyright 2014-2016 Mike Fährmann"
 
@@ -14,8 +16,13 @@ __version__    = "0.5.2"
 __maintainer__ = "Mike Fährmann"
 __email__      = "mike_faehrmann@web.de"
 
-import os
 import sys
+
+if sys.hexversion < 0x3030000:
+    print("Python 3.3+ required", file=sys.stderr)
+    sys.exit(1)
+
+import os
 import argparse
 import json
 from . import config, extractor, job, exception
