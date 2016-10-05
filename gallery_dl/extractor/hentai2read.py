@@ -6,17 +6,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://hentai2read.com/"""
+"""Extract hentaimanga from https://hentai2read.com/"""
 
-from .common import Extractor, Message
 from .. import text
-import json
+from . import hentaicdn
 import re
 
-class Hentai2readMangaExtractor(Extractor):
+class Hentai2readMangaExtractor(hentaicdn.HentaicdnMangaExtractor):
     """Extractor for mangas from hentai2read.com"""
     category = "hentai2read"
-    subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/?$"]
     test = [
         ("http://hentai2read.com/amazon_elixir/", {
@@ -28,29 +26,20 @@ class Hentai2readMangaExtractor(Extractor):
     ]
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        hentaicdn.HentaicdnMangaExtractor.__init__(self)
         self.url_title = match.group(1)
 
-    def items(self):
-        yield Message.Version, 1
-        for chapter in self.get_chapters():
-            yield Message.Queue, chapter
-
     def get_chapters(self):
-        """Return a list of all chapter urls"""
-        page = self.request("http://hentai2read.com/" + self.url_title).text
-        page = text.extract(page, '<ul class="nav-chapters remove-margin-b">', '</ul>\n</div>')[0]
-        needle = '<li>\n<a href="'
-        return reversed(list(
-            text.extract_iter(page, needle, '"')
-        ))
+        page = text.extract(
+            self.request("http://hentai2read.com/" + self.url_title).text,
+            '<ul class="nav-chapters remove-margin-b">', '</ul>\n</div>'
+        )[0]
+        return text.extract_iter(page, '<li>\n<a href="', '"')
 
-class Hentai2readChapterExtractor(Extractor):
+
+class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
     """Extractor for a single manga chapter from hentai2read.com"""
     category = "hentai2read"
-    subcategory = "chapter"
-    directory_fmt = ["{category}", "{gallery-id} {title}"]
-    filename_fmt = "{category}_{gallery-id}_{chapter:>02}_{num:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/(\d+)"]
     test = [("http://hentai2read.com/amazon_elixir/1/", {
         "url": "fb5fc4d7cc194116960eaa648c7e045a6e6f0c11",
@@ -58,23 +47,11 @@ class Hentai2readChapterExtractor(Extractor):
     })]
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        hentaicdn.HentaicdnChapterExtractor.__init__(self)
         self.url_title, self.chapter = match.groups()
-
-    def items(self):
-        url = "http://hentai2read.com/{}/{}/".format(self.url_title, self.chapter)
-        page = self.request(url).text
-        images = self.get_image_urls(page)
-        data = self.get_job_metadata(page, images)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for num, part in enumerate(images, 1):
-            data["num"] = num
-            url = "http://hentaicdn.com/hentai" + part
-            yield Message.Url, url, text.nameext_from_url(url, data)
+        self.url = "http://hentai2read.com/{}/{}/".format(self.url_title, self.chapter)
 
     def get_job_metadata(self, page, images):
-        """Collect metadata for extractor-job"""
         title = text.extract(page, "<title>", "</title>")[0]
         match = re.match(r"Reading (?:(.+) dj - )?(.+) Hentai - \d+: ", title)
         return {
@@ -86,9 +63,3 @@ class Hentai2readChapterExtractor(Extractor):
             "lang": "en",
             "language": "English",
         }
-
-    @staticmethod
-    def get_image_urls(page):
-        """Extract and return a list of all image-urls"""
-        images = text.extract(page, "var rff_imageList = ", ";")[0]
-        return json.loads(images)
