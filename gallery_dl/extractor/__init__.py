@@ -30,6 +30,7 @@ modules = [
     "hentai2read",
     "hentaibox",
     "hentaifoundry",
+    "hentaihere",
     "hitomi",
     "imagebam",
     "imagefap",
