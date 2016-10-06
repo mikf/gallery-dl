@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,20 +9,18 @@
 """Extract images from albums at https://imgur.com/"""
 
 from .common import Extractor, Message
-from .. import text
-from urllib.parse import urljoin
-import os.path
+from .. import text, exception
 
 class ImgurAlbumExtractor(Extractor):
     """Extractor for image albums from imgur.com"""
     category = "imgur"
     subcategory = "album"
     directory_fmt = ["{category}", "{album-key} - {title}"]
-    filename_fmt = "{category}_{album-key}_{num:>03}_{name}.{extension}"
+    filename_fmt = "{category}_{album-key}_{num:>03}_{hash}{ext}"
     pattern = [r"(?:https?://)?(?:www\.)?imgur\.com/(?:a|gallery)/([^/?&#]+)"]
     test = [("https://imgur.com/a/TcBmP", {
         "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
-        "keyword": "c76bbf86f8f114cdaadab396c0ea4acf47aa44eb",
+        "keyword": "8301572a22c139b5e0704ccaf2bcf49a111e2384",
     })]
 
     def __init__(self, match):
@@ -30,15 +28,15 @@ class ImgurAlbumExtractor(Extractor):
         self.album = match.group(1)
 
     def items(self):
+        imgs = self.get_images()
         data = self.get_job_metadata()
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, url in enumerate(self.get_image_urls(), 1):
-            name, ext = os.path.splitext(url[20:])
-            data["num"] = num
-            data["name"] = name
-            data["extension"] = ext[1:]
-            yield Message.Url, url, data
+        for num, image in enumerate(imgs, 1):
+            image["num"] = num
+            image.update(data)
+            url = "https://i.imgur.com/" + image["hash"] + image["ext"]
+            yield Message.Url, url, image
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
@@ -46,24 +44,15 @@ class ImgurAlbumExtractor(Extractor):
         data = text.extract_all(page, (
             ('title', '<meta property="og:title" content="', '"'),
             ('count', '"num_images":"', '"'),
-            ('date' , '"datetime":"', ' '),
-            ('time' , '', '"'),
         ), values={"album-key": self.album})[0]
         data["title"] = text.unescape(data["title"])
         return data
 
-    def get_image_urls(self):
-        """Yield urls of all images in this album"""
-        num = 0
-        while True:
-            url = "https://imgur.com/a/{}/all/page/{}?scrolled".format(self.album, num)
-            page = self.request(url).text
-            pos = begin = text.extract(page, '<div class="posts">', '')[1]
-            while True:
-                url, pos = text.extract(page, '<a href="', '"', pos)
-                if not url:
-                    break
-                yield urljoin("https:", url)
-            if pos == begin:
-                return
-            num += 1
+    def get_images(self):
+        """Return a list of all images in this album"""
+        url = ("https://imgur.com/ajaxalbums/getimages/"
+               + self.album + "/hit.json")
+        data = self.request(url).json()["data"]
+        if not data:
+            raise exception.NotFoundError("album")
+        return data["images"]
