@@ -40,22 +40,24 @@ Supported Sites
     behoimi.org, danbooru.donmai.us, e621.net, gelbooru.com, konachan.com,
     rule34.xxx, safebooru.org, chan.sankakucomplex.com, yande.re
 * Manga:
-    bato.to, dynasty-scans.com, kissmanga.com, mangahere.co, mangamint.com,
-    mangapanda.com, mangapark.me, mangareader.net, mangashare.com,
-    mangastream.com, powermanga.org, raw.senmanga.com, thespectrum.net
+    bato.to, dynasty-scans.com, kissmanga.com, kobato.hologfx.com,
+    mangahere.co, mangamint.com, mangapanda.com, mangapark.me, mangareader.net,
+    mangashare.com, mangastream.com, powermanga.org, raw.senmanga.com,
+    thespectrum.net
 * Hentai:
     doujinmode.net, exhentai.org, hbrowse.com, hentai2read.com,
-    hentaibox.net, hitomi.la, luscious.net, nhentai.net
+    hentaibox.net, hentaihere.com, hitomi.la, luscious.net, nhentai.net
 * Japanese:
     pixiv.net, nijie.info, seiga.nicovideo.jp
 * Western:
     deviantart.com, hentai-foundry.com, imagefap,com, imgth.com, imgur.com,
-    pinterest.com, tumblr.com
+    pinterest.com, tumblr.com, twitter.com
 * Futaba Channel-like:
     4chan.org, 8ch.net
 * Image Hosts:
     chronos.to, coreimg.net, imagebam.com, imagetwist.com, img.yt, imgbox.com,
-    imgcandy.net, imgchili.net, imgtrex.com, turboimagehost.com
+    imgcandy.net, imgchili.net, imgtrex.com, pic-maniac.com, rapidimg.net,
+    turboimagehost.com
 
 
 Configuration
@@ -88,7 +90,7 @@ You can set the necessary information in your configuration file
     {
         "extractor": {
             ...
-            "pixiv:" {
+            "pixiv": {
                 "username": "<username>",
                 "password": "<password>"
             }
