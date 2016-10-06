@@ -67,6 +67,7 @@ modules = [
     "spectrumnexus",
     "tumblr",
     "turboimagehost",
+    "twitter",
     "yandere",
     "recursive",
 ]
