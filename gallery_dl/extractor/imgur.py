@@ -20,7 +20,7 @@ class ImgurAlbumExtractor(Extractor):
     pattern = [r"(?:https?://)?(?:www\.)?imgur\.com/(?:a|gallery)/([^/?&#]+)"]
     test = [("https://imgur.com/a/TcBmP", {
         "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
-        "keyword": "8301572a22c139b5e0704ccaf2bcf49a111e2384",
+        "keyword": "21723f47bf4a42599d39fbf29c5f79323d420898",
     })]
 
     def __init__(self, match):
@@ -34,6 +34,7 @@ class ImgurAlbumExtractor(Extractor):
         yield Message.Directory, data
         for num, image in enumerate(imgs, 1):
             image["num"] = num
+            image["extension"] = image["ext"][1:]
             image.update(data)
             url = "https://i.imgur.com/" + image["hash"] + image["ext"]
             yield Message.Url, url, image

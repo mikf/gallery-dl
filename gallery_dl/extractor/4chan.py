@@ -16,7 +16,7 @@ class FourchanThreadExtractor(chan.ChanThreadExtractor):
     pattern = [r"(?:https?://)?boards\.4chan\.org/([^/]+)/thread/(\d+)"]
     test = [("https://boards.4chan.org/tg/thread/15396072/", {
         "url": "39082ad166161966d7ba8e37f2173a824eb540f0",
-        "keyword": "38679a7c8054f535cba67cae13eef1ea7dbc8085",
+        "keyword": "7ae2f4049adf0d2f835eb91b6b26b7f4ec882e0a",
         "content": "3081ed85a5afaeb3f430f42540e7bb5eec1908cc",
     })]
     api_url = "https://a.4cdn.org/{board}/thread/{thread}.json"
