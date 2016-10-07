@@ -14,5 +14,6 @@ class RapidimgImageExtractor(imgyt.ImgytImageExtractor):
     """Extractor for single images from rapidimg.net"""
     category = "rapidimg"
     pattern = [r"(?:https?://)?(?:www\.)?rapidimg\.net/img-([a-z0-9]+)\.html"]
+    test = []
     url = "http://rapidimg.net"
     https = False
