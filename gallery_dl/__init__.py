@@ -12,7 +12,6 @@ __author__     = "Mike Fährmann"
 __copyright__  = "Copyright 2014-2016 Mike Fährmann"
 
 __license__    = "GPLv2"
-__version__    = "0.5.2"
 __maintainer__ = "Mike Fährmann"
 __email__      = "mike_faehrmann@web.de"
 
@@ -26,6 +25,7 @@ import os
 import argparse
 import json
 from . import config, extractor, job, exception
+from .version import __version__
 
 def build_cmdline_parser():
     parser = argparse.ArgumentParser(
