@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 
 import os.path
 
@@ -11,15 +11,20 @@ except ImportError:
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+# get version without importing the package
+exec(read("gallery_dl/version.py"))
+
 setup(
     name="gallery_dl",
-    version="0.5.2",
+    version=__version__,
     description="gallery- and image downloader",
     long_description=read("README.rst"),
     url="https://github.com/mikf/gallery-dl",
     download_url="https://github.com/mikf/gallery-dl/releases/latest",
     author="Mike Fährmann",
     author_email="mike_faehrmann@web.de",
+    maintainer="Mike Fährmann",
+    maintainer_email="mike_faehrmann@web.de",
     license="GPLv2",
     install_requires=[
         "requests >= 2.4.2",
