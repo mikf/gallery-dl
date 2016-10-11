@@ -13,6 +13,7 @@ from .. import config, text, iso639_1, exception
 from ..cache import cache
 import time
 import random
+import requests
 
 class ExhentaiGalleryExtractor(Extractor):
     """Extractor for image-galleries from exhentai.org"""
@@ -132,7 +133,14 @@ class ExhentaiGalleryExtractor(Extractor):
             if imgkey == nextkey:
                 return
             self.wait()
-            page = self.session.post(self.api_url, json=request).json()
+
+            while True:
+                try:
+                    page = self.session.post(self.api_url, json=request).json()
+                    break
+                except requests.exceptions.ConnectionError as e:
+                    self.wait((5, 10))
+
             imgkey = nextkey
             nextkey, pos = text.extract(page["i3"], "'", "'")
             imgurl , pos = text.extract(page["i3"], '<img id="img" src="', '"', pos)
