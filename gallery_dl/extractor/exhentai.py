@@ -31,7 +31,7 @@ class ExhentaiGalleryExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.key = {}
-        self.url = match.group(0)
+        self.count = 0
         self.gid, self.token = match.groups()
         self.original = config.interpolate(("extractor", "exhentai", "download-original"), True)
         self.wait_min = config.interpolate(("extractor", "exhentai", "wait-min"), 3)
@@ -45,10 +45,12 @@ class ExhentaiGalleryExtractor(Extractor):
         yield Message.Headers, self.setup_headers()
         yield Message.Cookies, self.session.cookies
 
-        page = self.request(self.url).text
+        url = "https://exhentai.org/g/{}/{}/".format(self.gid, self.token)
+        page = self.request(url).text
         if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
         data = self.get_job_metadata(page)
+        self.count = int(data["count"])
         yield Message.Directory, data
 
         for url, image in self.get_images(page):
@@ -120,27 +122,21 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def images_from_api(self):
         """Get image url and data from api calls"""
-        imgkey  = self.key["start"]
         nextkey = self.key["next" ]
         request = {
             "method" : "showpage",
-            "page"   : 2,
             "gid"    : int(self.gid),
             "imgkey" : nextkey,
             "showkey": self.key["show"],
         }
-        while True:
-            if imgkey == nextkey:
-                return
-            self.wait()
-
+        for request["page"] in range(2, self.count+1):
             while True:
                 try:
+                    self.wait()
                     page = self.session.post(self.api_url, json=request).json()
                     break
-                except requests.exceptions.ConnectionError as e:
-                    self.wait((5, 10))
-
+                except requests.exceptions.ConnectionError:
+                    pass
             imgkey = nextkey
             nextkey, pos = text.extract(page["i3"], "'", "'")
             imgurl , pos = text.extract(page["i3"], '<img id="img" src="', '"', pos)
@@ -151,7 +147,6 @@ class ExhentaiGalleryExtractor(Extractor):
                 "image-token": imgkey
             })
             request["imgkey"] = nextkey
-            request["page"] += 1
 
     def wait(self, waittime=None):
         """Wait for a randomly chosen amount of seconds"""
