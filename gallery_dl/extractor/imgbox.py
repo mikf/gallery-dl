@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from galleries at http://imgbox.com/"""
+"""Extract images from galleries at https://imgbox.com/"""
 
 from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
@@ -17,14 +17,14 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
     category = "imgbox"
     subcategory = "gallery"
     directory_fmt = ["{category}", "{title} - {gallery-key}"]
-    filename_fmt = "{num:>03}-{name}"
+    filename_fmt = "{num:>03}-{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"]
-    test = [("http://imgbox.com/g/JaX5V5HX7g", {
-        "url": "c7c3466dde31d4308833816961104c7d1100368d",
+    test = [("https://imgbox.com/g/JaX5V5HX7g", {
+        "url": "6eafdeebaf0774238dddc9227e2ba315e40e9b7c",
         "keyword": "cebd7f6868cf84ff492341c936cb6dbe5cde4682",
         "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
     })]
-    url_base = "http://imgbox.com"
+    url_base = "https://imgbox.com"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
@@ -64,7 +64,7 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
     @staticmethod
     def get_file_url(page):
         """Extract download-url"""
-        base = "http://i.imgbox.com/"
+        base = "https://i.imgbox.com/"
         path = text.extract(page, base, '"')[0]
         return base + path
 
@@ -76,8 +76,8 @@ class ImgboxImageExtractor(Extractor):
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"]
-    test = [("http://imgbox.com/qHhw7lpG", {
-        "url": "d96990ea12223895287d139695077b70dfa0abe4",
+    test = [("https://imgbox.com/qHhw7lpG", {
+        "url": "b9556dc307edf88e016fbced6d354702bc236070",
         "keyword": "ff0524dba869a4b3292d7d4f72f5da4024b4f002",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
@@ -87,10 +87,10 @@ class ImgboxImageExtractor(Extractor):
         self.key = match.group(1)
 
     def items(self):
-        page = self.request("http://imgbox.com/" + self.key).text
-        url     , pos = text.extract(page, 'src="http://i.', '"')
+        page = self.request("https://imgbox.com/" + self.key).text
+        url     , pos = text.extract(page, 'src="https://i.', '"')
         filename, pos = text.extract(page, ' title="', '"', pos)
         data = text.nameext_from_url(filename, {"image-key": self.key})
         yield Message.Version, 1
         yield Message.Directory, data
-        yield Message.Url, "http://i." + url, data
+        yield Message.Url, "https://i." + url, data
