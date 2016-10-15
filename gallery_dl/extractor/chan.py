@@ -37,16 +37,20 @@ class ChanThreadExtractor(Extractor):
             if "filename" not in post:
                 continue
             self.update(post)
-            yield Message.Url, self.file_url.format_map(post), post
+            yield Message.Url, self.build_url(post), post
             if "extra_files" in post:
                 for file in post["extra_files"]:
                     self.update(post, file)
-                    yield Message.Url, self.file_url.format_map(post), post
+                    yield Message.Url, self.build_url(post), post
 
     def update(self, post, data=None):
         """Update keyword dictionary"""
         post.update(data or self.metadata)
         post["extension"] = post["ext"][1:]
+
+    def build_url(self, post):
+        """Construct an image url out of a post object"""
+        return self.file_url.format_map(post)
 
     @staticmethod
     def get_thread_title(post):
