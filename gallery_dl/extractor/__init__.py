@@ -68,6 +68,7 @@ modules = [
     "tumblr",
     "turboimagehost",
     "twitter",
+    "whentai",
     "yandere",
     "recursive",
 ]
