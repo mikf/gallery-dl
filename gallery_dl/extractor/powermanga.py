@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015,2016 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,18 +8,12 @@
 
 """Extract manga-chapters from http://powermanga.org/"""
 
-from .common import Extractor, Message
-from .. import text, iso639_1
-import os.path
-import json
-import re
+from .foolslide import FoolslideChapterExtractor
+from .. import text
 
-class PowermangaChapterExtractor(Extractor):
+class PowermangaChapterExtractor(FoolslideChapterExtractor):
     """Extractor for manga-chapters from powermanga.org"""
     category = "powermanga"
-    subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [
         (r"(?:https?://)?read(?:er)?\.powermanga\.org/read/"
          r"(.+/([a-z]{2})/\d+/\d+)(?:/page)?"),
@@ -31,46 +25,11 @@ class PowermangaChapterExtractor(Extractor):
     })]
 
     def __init__(self, match):
-        Extractor.__init__(self)
         if match.group(1) == "p":
             page = self.request("https://powermanga.org/" + match.group(2)).text
             pos = page.index("class='small-button smallblack'>Download</a>")
             url = text.extract(page, "<a href='", "'", pos)[0]
             match = re.match(self.pattern[0], url)
-        self.part = match.group(1)
-        self.lang = match.group(2)
         extra = "er" if "://reader" in match.string else ""
-        self.url_base = "https://read" + extra + ".powermanga.org/read/"
-
-    def items(self):
-        yield Message.Version, 1
-        data, pages = self.get_job_metadata()
-        yield Message.Directory, data
-        for page_index, page_data in enumerate(pages, 1):
-            name, ext = os.path.splitext(page_data["filename"])
-            page_data.update(data)
-            page_data["page"] = page_index
-            page_data["name"] = name
-            page_data["extension"] = ext[1:]
-            url = page_data["url"]
-            del page_data["thumb_url"]
-            del page_data["url"]
-            yield Message.Url, url, page_data
-
-    def get_job_metadata(self):
-        """Collect metadata for extractor-job"""
-        page = self.request(self.url_base + self.part, encoding="utf-8",
-                            method="post", data={"adult": "true"}).text
-        _        , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
-        manga    , pos = text.extract(page, 'title="', '"', pos)
-        chapter  , pos = text.extract(page, '">', '</a>', pos)
-        json_data, pos = text.extract(page, 'var pages = ', ';', pos)
-        match = re.match(r"(\w+ (\d+)([^:+]*)(?:: (.*))?|[^:]+)", chapter)
-        return {
-            "manga": text.unescape(manga),
-            "chapter": match.group(2) or match.group(1),
-            "chapter-minor": match.group(3) or "",
-            "lang": self.lang,
-            "language": iso639_1.code_to_language(self.lang),
-            "title": text.unescape(match.group(4) or ""),
-        }, json.loads(json_data)
+        url = "https://read" + extra + ".powermanga.org/read/" + match.group(1)
+        FoolslideChapterExtractor.__init__(self, url, match.group(2))
