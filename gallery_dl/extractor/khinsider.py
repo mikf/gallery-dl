@@ -39,13 +39,15 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        return text.extract_all(page, (
+        data = text.extract_all(page, (
             ("album", "Album name: <b>", "</b>"),
             ("count", "Number of Files: <b>", "</b>"),
             ("size" , "Total Filesize: <b>", "</b>"),
             ("date" , "Date added: <b>", "</b>"),
             ("type" , "Album type: <b>", "</b>"),
         ))[0]
+        data["album"] = text.unescape(data["album"])
+        return data
 
     def get_album_tracks(self, page):
         """Collect url and metadata for all tracks of a soundtrack"""
