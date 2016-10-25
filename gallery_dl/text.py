@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,7 +13,6 @@ import re
 import os.path
 import html
 import urllib.parse
-import platform
 
 def remove_html(text):
     """Remove html-tags from a string"""
@@ -107,7 +106,7 @@ def extract_iter(txt, begin, end, pos=0):
             return
         yield value
 
-if platform.system() == "Windows":
+if os.name == "nt":
     clean_path = clean_path_windows
 else:
     clean_path = clean_path_posix

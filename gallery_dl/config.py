@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 import sys
 import json
 import os.path
-import platform
 
 # --------------------------------------------------------------------
 # public interface
@@ -88,7 +87,7 @@ def setdefault(keys, value):
 
 _config = {}
 
-if platform.system() == "Windows":
+if os.name == "nt":
     _default_configs = [
         r"~\.config\gallery-dl\config.json",
         r"~\.gallery-dl.conf",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,6 @@
 import os
 import sys
 import shutil
-import platform
 from . import config
 
 def select():
@@ -113,7 +112,7 @@ class ColorPrinter(TerminalPrinter):
         print("\033[0;31m[Error]\033[0m ", error, " (", tries, "/", max_tries, ")", sep="")
 
 
-if platform.system() == "Windows":
+if os.name == "nt":
     ANSI = os.environ.get("TERM") == "ANSI"
     OFFSET = 1
     CHAR_SKIP = "# "
