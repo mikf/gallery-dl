@@ -43,7 +43,7 @@ Supported Sites
     bato.to, dynasty-scans.com, kissmanga.com, kobato.hologfx.com,
     mangahere.co, mangamint.com, mangapanda.com, mangapark.me, mangareader.net,
     mangashare.com, mangastream.com, powermanga.org, raw.senmanga.com,
-    thespectrum.net
+    reader.sensescans.com, thespectrum.net
 * Hentai:
     doujinmode.net, exhentai.org, hbrowse.com, hentai2read.com,
     hentaibox.net, hentaihere.com, hitomi.la, luscious.net, nhentai.net
@@ -51,7 +51,7 @@ Supported Sites
     pixiv.net, nijie.info, seiga.nicovideo.jp
 * Western:
     deviantart.com, hentai-foundry.com, imagefap,com, imgth.com, imgur.com,
-    pinterest.com, tumblr.com, twitter.com
+    pinterest.com, tumblr.com, twitter.com, whentai.com
 * Futaba Channel-like:
     4chan.org, 8ch.net
 * Image Hosts:

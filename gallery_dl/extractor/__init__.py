@@ -64,6 +64,7 @@ modules = [
     "sankaku",
     "seiga",
     "senmanga",
+    "sensescans",
     "spectrumnexus",
     "tumblr",
     "turboimagehost",
