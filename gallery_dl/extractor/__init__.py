@@ -70,6 +70,7 @@ modules = [
     "turboimagehost",
     "twitter",
     "whentai",
+    "worldthree",
     "yandere",
     "recursive",
 ]
