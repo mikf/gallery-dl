@@ -21,7 +21,7 @@ class PowermangaChapterExtractor(FoolslideChapterExtractor):
     ]
     test = [("https://read.powermanga.org/read/one_piece/en/0/803/page/1", {
         "url": "e6179c1565068f99180620281f86bdd25be166b4",
-        "keyword": "17f56ecad0e718735cd832abe84cb3c808cb2a5d",
+        "keyword": "51cabad8995727334e5ca9773c18d709b3868f02",
     })]
 
     def __init__(self, match):

@@ -16,8 +16,8 @@ import re
 class FoolslideChapterExtractor(Extractor):
     """Base class for chapter extractors on foolslide based sites"""
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    directory_fmt = ["{category}", "{manga}", "{chapter:>03} - {title}"]
+    filename_fmt = "{manga}_{chapter:>03}_{page:>03}.{extension}"
 
     def __init__(self, url, lang):
         Extractor.__init__(self)
@@ -46,14 +46,19 @@ class FoolslideChapterExtractor(Extractor):
         _        , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
         manga    , pos = text.extract(page, 'title="', '"', pos)
         chapter  , pos = text.extract(page, '">', '</a>', pos)
-        match = re.match(r"(\w+ (\d+)([^:+]*)(?:: (.*))?|[^:]+)", chapter)
+
+        parts = chapter.split(":", maxsplit=1)
+        match = re.match(r"(?:Vol.(\d+) )?(?:Chapter (\d+)$|(.+))", parts[0])
+        volume = match.group(1) or ""
+        chapter = match.group(2) or match.group(3).strip()
+
         return {
             "manga": text.unescape(manga),
-            "chapter": match.group(2) or match.group(1),
-            "chapter-minor": match.group(3) or "",
+            "chapter": chapter,
+            "volume": volume,
             "lang": self.lang,
             "language": iso639_1.code_to_language(self.lang),
-            "title": text.unescape(match.group(4) or ""),
+            "title": text.unescape(parts[1].strip() if len(parts) > 1 else ""),
         }
 
     @staticmethod
