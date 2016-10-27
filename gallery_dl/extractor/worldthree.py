@@ -15,6 +15,10 @@ class WorldthreeChapterExtractor(FoolslideChapterExtractor):
     category = "worldthree"
     pattern = [(r"(?:https?://)?(?:www\.)?(slide\.world-three\.org/read/"
                 r"[^/]+/([a-z]{2})/\d+/\d+)")]
+    test = [("http://www.slide.world-three.org/read/black_bullet/en/2/7/page/1", {
+        "url": "be2f04f6e2d311b35188094cfd3e768583271584",
+        "keyword": "6d77d9fc806d76d881491a52ccd8dfd875c47d05",
+    })]
 
     def __init__(self, match):
         url = "http://" + match.group(1)
