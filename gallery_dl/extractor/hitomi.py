@@ -20,7 +20,7 @@ class HitomiGalleryExtractor(Extractor):
     filename_fmt = "{category}_{gallery-id}_{num:>03}_{name}.{extension}"
     pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)\.html"]
     test = [("https://hitomi.la/galleries/867789.html", {
-        "url": "23fd59894c3db65aec826aa5efb85f96d2384883",
+        "url": "e42a47dfadda93e4bf37e82b1dc9ad29edfa9130",
         "keyword": "03a64d67584afd7b8ad96ecb47acae08ea14d90f",
     })]
 
@@ -75,7 +75,7 @@ class HitomiGalleryExtractor(Extractor):
     def get_image_urls(page):
         """Extract and return a list of all image-urls"""
         return [
-            "https://g.hitomi.la/galleries/" + urlpart
+            "https://la.hitomi.la/galleries/" + urlpart
             for urlpart in text.extract_iter(
                 page, "'//tn.hitomi.la/smalltn/", ".jpg',"
             )
