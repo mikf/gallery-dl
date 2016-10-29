@@ -17,7 +17,7 @@ class ImgurAlbumExtractor(Extractor):
     subcategory = "album"
     directory_fmt = ["{category}", "{album-key} - {title}"]
     filename_fmt = "{category}_{album-key}_{num:>03}_{hash}{ext}"
-    pattern = [r"(?:https?://)?(?:www\.)?imgur\.com/(?:a|gallery)/([^/?&#]+)"]
+    pattern = [r"(?:https?://)?(?:m\.|www\.)?imgur\.com/(?:a|gallery)/([^/?&#]+)"]
     test = [("https://imgur.com/a/TcBmP", {
         "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
         "keyword": "21723f47bf4a42599d39fbf29c5f79323d420898",
