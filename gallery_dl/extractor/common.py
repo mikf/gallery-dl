@@ -30,11 +30,11 @@ class Extractor():
 
     def items(self):
         yield Message.Version, 1
-        return
 
     def request(self, url, encoding=None, *args, **kwargs):
         response = safe_request(self.session, url, *args, **kwargs)
-        response.encoding = encoding
+        if encoding:
+            response.encoding = encoding
         return response
 
 
