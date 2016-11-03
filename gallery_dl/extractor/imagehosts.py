@@ -6,14 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://img.yt/"""
+"""Collection of extractors for various imagehosts"""
 
 from .common import Extractor, Message
 from .. import text
 from os.path import splitext
 
 class ImagehostImageExtractor(Extractor):
-    """Base class for single-image extractors from various imagehosts"""
+    """Base class for single-image extractors for various imagehosts"""
     subcategory = "image"
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
@@ -50,6 +50,10 @@ class ImagehostImageExtractor(Extractor):
         yield Message.Directory, data
         yield Message.Url, url, data
 
+    def get_info(self, page):
+        """Find image-url and string to get filename from"""
+        return "url", "filename"
+
 #
 
 class ImgytImageExtractor(ImagehostImageExtractor):
@@ -74,6 +78,41 @@ class RapidimgImageExtractor(ImgytImageExtractor):
     pattern = [r"(?:https?://)?((?:www\.)?rapidimg\.net/img-([a-z0-9]+)\.html)"]
     test = []
     https = False
+
+#
+
+class ChronosImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from chronos.to"""
+    category = "chronos"
+    pattern = [r"(?:https?://)?((?:www\.)?chronos\.to/([a-z0-9]{12}))"]
+    test = [("http://chronos.to/bdrmq7rw7v4y", {
+        "url": "7fcb3fe315c94283644d25ef47a644c2dc8da944",
+        "keyword": "04dbc71a1154728d01c931308184050d61c5da55",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
+    https = False
+    params = "complex"
+
+    def get_info(self, page):
+        url     , pos = text.extract(page, '<br><img src="', '"')
+        filename, pos = text.extract(page, ' alt="', '"', pos)
+        return url, filename
+
+class CoreimgImageExtractor(ChronosImageExtractor):
+    """Extractor for single images from coreimg.net"""
+    category = "coreimg"
+    pattern = [r"(?:https?://)?((?:www\.)?coreimg\.net/([a-z0-9]{12}))"]
+    test = [("http://coreimg.net/ykcl5al8uzvg", {
+        "url": "2b32596a2ea66b7cc784e20f3749f75f20998d78",
+        "keyword": "8d71e5b820bc7177baee33ca529c91ae4521299f",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
+
+class PicmaniacImageExtractor(ChronosImageExtractor):
+    """Extractor for single images from pic-maniac.com"""
+    category = "picmaniac"
+    pattern = [r"(?:https?://)?((?:www\.)?pic-maniac\.com/([a-z0-9]{12}))"]
+    test = []
 
 #
 
