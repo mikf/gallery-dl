@@ -41,7 +41,6 @@ modules = [
     "imgth",
     "imgtrex",
     "imgur",
-    "imgyt",
     "khinsider",
     "kissmanga",
     "konachan",
@@ -58,7 +57,6 @@ modules = [
     "picmaniac",
     "pinterest",
     "powermanga",
-    "rapidimg",
     "rule34",
     "safebooru",
     "sankaku",
@@ -72,6 +70,7 @@ modules = [
     "whentai",
     "worldthree",
     "yandere",
+    "imagehosts",
     "recursive",
 ]
 
