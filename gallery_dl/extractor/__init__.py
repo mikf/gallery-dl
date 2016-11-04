@@ -19,7 +19,6 @@ modules = [
     "danbooru",
     "deviantart",
     "dokireader",
-    "doujinmode",
     "dynastyscans",
     "e621",
     "exhentai",
