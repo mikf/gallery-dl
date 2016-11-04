@@ -45,7 +45,7 @@ Supported Sites
     mangashare.com, mangastream.com, powermanga.org, raw.senmanga.com,
     reader.sensescans.com, thespectrum.net
 * Hentai:
-    doujinmode.net, exhentai.org, hbrowse.com, hentai2read.com,
+    exhentai.org, hbrowse.com, hentai2read.com,
     hentaibox.net, hentaihere.com, hitomi.la, luscious.net, nhentai.net
 * Japanese:
     pixiv.net, nijie.info, seiga.nicovideo.jp
@@ -55,9 +55,10 @@ Supported Sites
 * Futaba Channel-like:
     4chan.org, 8ch.net
 * Image Hosts:
-    chronos.to, coreimg.net, imagebam.com, imagetwist.com, img.yt, imgbox.com,
-    imgcandy.net, imgchili.net, imgtrex.com, pic-maniac.com, rapidimg.net,
-    turboimagehost.com
+    chronos.to, coreimg.net, hosturimage.com, imagebam.com, imageontime.org,
+    imagetwist.com, img.yt, imgbox.com, imgcandy.net, imgchili.net,
+    imgclick.net, imgspice.com, imgtrex.com, imgupload.yt, pic-maniac.com,
+    rapidimg.net, turboimagehost.com
 
 
 Configuration
