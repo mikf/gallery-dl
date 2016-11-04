@@ -39,6 +39,7 @@ class ImagehostImageExtractor(Extractor):
             }
         else:
             self.params = {}
+            self.method = "get"
 
     def items(self):
         page = self.request(self.url, method=self.method, data=self.params).text
@@ -54,7 +55,6 @@ class ImagehostImageExtractor(Extractor):
         """Find image-url and string to get filename from"""
         return "url", "filename"
 
-#
 
 class ImgytImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from img.yt"""
@@ -79,7 +79,6 @@ class RapidimgImageExtractor(ImgytImageExtractor):
     test = []
     https = False
 
-#
 
 class ChronosImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from chronos.to"""
@@ -114,7 +113,6 @@ class PicmaniacImageExtractor(ChronosImageExtractor):
     pattern = [r"(?:https?://)?((?:www\.)?pic-maniac\.com/([a-z0-9]{12}))"]
     test = []
 
-#
 
 class HosturimageImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from hosturimage.com"""
@@ -139,22 +137,40 @@ class ImguploadImageExtractor(HosturimageImageExtractor):
     pattern = [r"(?:https?://)?((?:www\.)?imgupload\.yt/img-([a-z0-9]+)\.html)"]
     https = True
 
-#
 
-class ImgspiceImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from imgspice.com"""
-    category = "imgspice"
-    pattern = [r"(?:https?://)?((?:www\.)?imgspice\.com/([^/]+))"]
-    https = True
-    method = "get"
+class ImagetwistImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imagetwist.com"""
+    category = "imagetwist"
+    pattern = [r"(?:https?://)?((?:www\.)?imagetwist\.com/([a-z0-9]{12}))"]
+    test = [("http://imagetwist.com/4e46hv31tu0q/test.jpg", {
+        "url": "6b3fc0bd1105b698d2d5844658ca674d66b1e2e7",
+        "keyword": "30dd34dcb06b5b51c6cfff199c610b24edb7b9bc",
+        "content": "96b1fd099b06faad5879fce23a7e4eb8290d8810",
+    })]
     params = None
 
     def get_info(self, page):
-        filename, pos = text.extract(page, '<td nowrap>', '</td>')
-        url     , pos = text.extract(page, '<img src="', '"', pos)
+        url     , pos = text.extract(page, 'center;"><img src="', '"')
+        filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, filename
 
-#
+
+class ImgcandyImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgcandy.net"""
+    category = "imgcandy"
+    pattern = [(r"(?:https?://)?((?:www\.)?imgcandy\.net/img-([a-z0-9]+)"
+                r"(?:_.+)?\.html)")]
+    test = [("http://imgcandy.net/img-57d02527efee8_test-テスト.png.html", {
+        "url": "bc3c9207b10dbfe8e65ccef5b9e3194a7427b4fa",
+        "keyword": "1ed1587ef38a6b26ce28b35857a78417239d197a",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
+
+    def get_info(self, page):
+        url = text.extract(page, "<img class='centred' src='", "'")[0]
+        pos = self.url.find("_")
+        return url, self.url[pos+1:-5] if pos != -1 else url
+
 
 class ImgclickImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgclick.net"""
@@ -166,3 +182,51 @@ class ImgclickImageExtractor(ImagehostImageExtractor):
         url     , pos = text.extract(page, '<img  src="', '"')
         filename, pos = text.extract(page, 'alt="', '"', pos)
         return url, filename
+
+
+class ImgspiceImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgspice.com"""
+    category = "imgspice"
+    pattern = [r"(?:https?://)?((?:www\.)?imgspice\.com/([^/]+))"]
+    https = True
+    params = None
+
+    def get_info(self, page):
+        filename, pos = text.extract(page, '<td nowrap>', '</td>')
+        url     , pos = text.extract(page, '<img src="', '"', pos)
+        return url, filename
+
+
+class ImgtrexImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgtrex.com"""
+    category = "imgtrex"
+    pattern = [r"(?:https?://)?((?:www\.)?imgtrex\.com/([^/]+))"]
+    test = [("http://imgtrex.com/im0ypxq0rke4/test-テスト-&<a>.png", {
+        "url": "c000618bddda42bd599a590b7972c7396d19d8fe",
+        "keyword": "58905795a9cd3f17d5ff024fc4d63645795ba23c",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
+    params = None
+
+
+    def get_info(self, page):
+        filename, pos = text.extract(page, '<title>ImgTrex: ', '</title>')
+        url     , pos = text.extract(page, '<br>\n<img src="', '"', pos)
+        return url, filename
+
+
+class TurboimagehostImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from turboimagehost.com"""
+    category = "turboimagehost"
+    pattern = [r"(?:https?://)?((?:www\.)?turboimagehost\.com/p/(\d+)/[^/]+\.html)"]
+    test = [("http://www.turboimagehost.com/p/29690902/test--.png.html", {
+        "url": "c624dc7784de515342117a2678fee6ecf1032d79",
+        "keyword": "a4527f14675e4512ef317ee0401940c711fbe012",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
+    params = None
+
+    def get_info(self, page):
+        needle = '<a href="http://www.turboimagehost.com"><img src="'
+        url = text.extract(page, needle, '"')[0]
+        return url, url
