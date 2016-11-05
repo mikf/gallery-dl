@@ -21,8 +21,9 @@ class LusciousAlbumExtractor(Extractor):
     pattern = [(r"(?:https?://)?(?:www\.)?luscious\.net/c/([^/]+)/"
                 r"(?:pictures/album|albums)/([^/\d]+(\d+))")]
     test = [("https://luscious.net/c/incest_manga/albums/amazon-no-hiyaku-amazon-elixir-english-decensored_261127/view/", {
-        "url": "af4aef350612ece66a7b02f0f9b2cd4a4dd8fb53",
+        "url": "9493f84868445135d0024818016100b2c80abfe6",
         "keyword": "e10c7c070ad730e305024fb37cc70af6b05378dd",
+        "content": "57825d189e17c43dc5a8ecdc3fa2d9d544fc62b1",
     })]
 
     def __init__(self, match):
