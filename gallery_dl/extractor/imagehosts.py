@@ -117,24 +117,34 @@ class PicmaniacImageExtractor(ChronosImageExtractor):
 class HosturimageImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from hosturimage.com"""
     category = "hosturimage"
-    pattern = [r"(?:https?://)?((?:www\.)?hosturimage\.com/img-([a-z0-9]+)\.html)"]
+    pattern = [(r"(?:https?://)?((?:www\.)?hosturimage\.com/"
+                r"img-([a-z0-9]+)\.html)")]
+    test = [("https://hosturimage.com/img-581ca97112bf8.html", {
+        "url": "c672a3fd7fd48e5506d020aa19c4ac91ba078671",
+        "keyword": "c3c94340b8e395e07b5145cf17534b5871ec8593",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
     https = True
 
     def get_info(self, page):
         _  , pos = text.extract(page, '<div id="image_details">', '')
-        url, pos = text.extract(page, "href='", "'", pos)
+        url, pos = text.extract(page, "src='", "'", pos)
         return url, url
 
 class ImageontimeImageExtractor(HosturimageImageExtractor):
     """Extractor for single images from imageontime.org"""
     category = "imageontime"
-    pattern = [r"(?:https?://)?((?:www\.)?imageontime\.org/img-([a-z0-9]+)\.html)"]
+    pattern = [(r"(?:https?://)?((?:www\.)?imageontime\.org/"
+                r"img-([a-z0-9]+)\.html)")]
+    test = []
     https = False
 
 class ImguploadImageExtractor(HosturimageImageExtractor):
     """Extractor for single images from imgupload.yt"""
     category = "imgupload"
-    pattern = [r"(?:https?://)?((?:www\.)?imgupload\.yt/img-([a-z0-9]+)\.html)"]
+    pattern = [(r"(?:https?://)?((?:www\.)?imgupload\.yt/"
+                r"img-([a-z0-9]+)\.html)")]
+    test = []
     https = True
 
 
@@ -176,6 +186,11 @@ class ImgclickImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgclick.net"""
     category = "imgclick"
     pattern = [r"(?:https?://)?((?:www\.)?imgclick\.net/([^/]+))"]
+    test = [("http://imgclick.net/4tbrre1oxew9/test-_-_.png.html", {
+        "url": "140dcb250a325f2d26b2d918c18b8ac6a2a0f6ab",
+        "keyword": "c086439336eea3bdf773d761c32b0edb29af0ebd",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
     params = "complex"
 
     def get_info(self, page):
@@ -188,13 +203,18 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgspice.com"""
     category = "imgspice"
     pattern = [r"(?:https?://)?((?:www\.)?imgspice\.com/([^/]+))"]
+    test = [("https://imgspice.com/zop38mvvq29u/", {
+        "url": "a45833733c02b64d105363ffd8fd19f06992a2f7",
+        "keyword": "5218f63195e6a487c0881fd1cda78c535c61b462",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
     https = True
     params = None
 
     def get_info(self, page):
         filename, pos = text.extract(page, '<td nowrap>', '</td>')
         url     , pos = text.extract(page, '<img src="', '"', pos)
-        return url, filename
+        return url, text.unescape(filename)
 
 
 class ImgtrexImageExtractor(ImagehostImageExtractor):
@@ -208,7 +228,6 @@ class ImgtrexImageExtractor(ImagehostImageExtractor):
     })]
     params = None
 
-
     def get_info(self, page):
         filename, pos = text.extract(page, '<title>ImgTrex: ', '</title>')
         url     , pos = text.extract(page, '<br>\n<img src="', '"', pos)
@@ -218,7 +237,8 @@ class ImgtrexImageExtractor(ImagehostImageExtractor):
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from turboimagehost.com"""
     category = "turboimagehost"
-    pattern = [r"(?:https?://)?((?:www\.)?turboimagehost\.com/p/(\d+)/[^/]+\.html)"]
+    pattern = [(r"(?:https?://)?((?:www\.)?turboimagehost\.com/p/(\d+)"
+                r"/[^/]+\.html)")]
     test = [("http://www.turboimagehost.com/p/29690902/test--.png.html", {
         "url": "c624dc7784de515342117a2678fee6ecf1032d79",
         "keyword": "a4527f14675e4512ef317ee0401940c711fbe012",
