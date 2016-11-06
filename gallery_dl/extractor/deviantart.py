@@ -102,33 +102,75 @@ class DeviantartImageExtractor(Extractor):
     subcategory = "image"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    pattern = [r"(?:https?://)?[^\.]+\.deviantart\.com/art/.+-(\d+)"]
+    pattern = [r"(?:https?://)?([^\.]+\.deviantart\.com/art/.+-(\d+))"]
     test = [("http://shimoda7.deviantart.com/art/For-the-sake-of-a-memory-10073852", {
         "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
         "keyword": "ccac27b8f740fc943afca9460608e02c6cbcdf96",
+        "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
     })]
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.url = match.group(0)
-        self.index = match.group(1)
+        self.url = "https://" + match.group(1)
+        self.index = match.group(2)
+        self.session.cookies["agegate_state"] = "1"
 
     def items(self):
         page = self.request(self.url).text
-        data = text.extract_all(page, (
-            ('title' , '"og:title" content="', '"'),
-            ('image' , '"og:image" content="', '"'),
-            ('width' , '"og:image:width" content="', '"'),
-            ('height', '"og:image:height" content="', '"'),
-            ('url'   , '"og:url" content="', '"'),
-            ('description', '"og:description" content="', '"'),
-            (None    , '<span class="tt-w">', ''),
-            ('date'  , 'title="', '"'),
-        ), values={"index": self.index})[0]
+        data = self.get_data(page)
+        data.update(self.get_image(page))
+
+        text.nameext_from_url(data["image"], data)
+        data["title"] = text.unescape(data["title"])
         data["description"] = text.unescape(text.unescape(data["description"]))
         data["artist"] = text.extract(data["url"], "//", ".")[0]
         data["date"] = text.extract(data["date"], ", ", " in ", len(data["title"]))[0]
-        text.nameext_from_url(data["image"], data)
+
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, data["image"], data
+
+    def get_data(self, page):
+        """Collect metadata for extractor-job"""
+        return text.extract_all(page, (
+            ('title'      , '"og:title" content="', '"'),
+            ('url'        , '"og:url" content="', '"'),
+            ('description', '"og:description" content="', '"'),
+            (None         , '<span class="tt-w">', ''),
+            ('date'       , 'title="', '"'),
+        ), values={"index": self.index})[0]
+
+    def get_image(self, page):
+        """Find image-url and -dimensions"""
+        # try preview
+        data, pos = text.extract_all(page, (
+            ('image' , '"og:image" content="', '"'),
+            ('width' , '"og:image:width" content="', '"'),
+            ('height', '"og:image:height" content="', '"'),
+        ))
+        if data["image"].startswith("https://orig"):
+            return data
+
+        # try main image
+        data, pos = text.extract_all(page, (
+            (None    , 'class="dev-content-normal "', ''),
+            ('image' , ' src="', '"'),
+            ('width' , ' width="', '"'),
+            ('height', ' height="', '"'),
+        ), pos)
+        if data["image"].startswith("https://orig"):
+            return data
+
+        # try download
+        test, pos = text.extract(page, 'dev-page-download', '', pos)
+        if test is not None:
+            data, pos = text.extract_all(page, (
+                ('image' , 'href="', '"'),
+                (None    , '<span class="text">', ' '),
+                ('width' , '', ' '),
+                ('height', ' ', '<'),
+            ), pos)
+            response = self.session.head(text.unescape(data["image"]))
+            data["image"] = response.headers["Location"]
+
+        return data
