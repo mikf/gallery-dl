@@ -107,6 +107,13 @@ class CoreimgImageExtractor(ChronosImageExtractor):
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
 
+class ImgmaidImageExtractor(ChronosImageExtractor):
+    """Extractor for single images from imgmaid.net"""
+    category = "imgmaid"
+    pattern = [r"(?:https?://)?((?:www\.)?imgmaid\.net/([a-z0-9]{12}))"]
+    test = []
+    https = True
+
 class PicmaniacImageExtractor(ChronosImageExtractor):
     """Extractor for single images from pic-maniac.com"""
     category = "picmaniac"
