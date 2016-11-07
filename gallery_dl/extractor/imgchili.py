@@ -24,7 +24,7 @@ class ImgchiliExtractor(Extractor):
         self.session.headers["Referer"] = self.url_base
 
     def items(self):
-        page = self.request(self.url).text
+        page = self.request(self.url, encoding="utf-8").text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Headers, self.session.headers
