@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -62,15 +62,14 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     ]
 
     def items(self):
-        cloudflare.bypass_ddos_protection(self.session, "http://kissmanga.com")
+        cloudflare.bypass_ddos_protection(self.session, self.url_base)
         page = self.request(self.url).text
         data = self.get_job_metadata(page)
         imgs = self.get_image_urls(page)
         data["count"] = len(imgs)
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, url in enumerate(imgs, 1):
-            data["page"] = num
+        for data["page"], url in enumerate(imgs, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_job_metadata(self, page):
@@ -93,10 +92,4 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     @staticmethod
     def get_image_urls(page):
         """Extract list of all image-urls for a manga chapter"""
-        pos = 0
-        images = []
-        while True:
-            url, pos = text.extract(page, 'lstImages.push("', '"', pos)
-            if not url:
-                return images
-            images.append(url)
+        return list(text.extract_iter(page, 'lstImages.push("', '"'))
