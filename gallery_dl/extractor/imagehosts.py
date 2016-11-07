@@ -139,6 +139,14 @@ class ImageontimeImageExtractor(HosturimageImageExtractor):
     test = []
     https = False
 
+class Img4everImageExtractor(HosturimageImageExtractor):
+    """Extractor for single images from img4ever.net"""
+    category = "img4ever"
+    pattern = [(r"(?:https?://)?((?:www\.)?img4ever\.net/"
+                r"img-([a-z0-9]+)\.html)")]
+    test = []
+    https = True
+
 class ImguploadImageExtractor(HosturimageImageExtractor):
     """Extractor for single images from imgupload.yt"""
     category = "imgupload"
