@@ -9,7 +9,7 @@
 """Extract images from galleries at https://imgbox.com/"""
 
 from .common import Extractor, AsynchronousExtractor, Message
-from .. import text
+from .. import text, exception
 import re
 
 class ImgboxGalleryExtractor(AsynchronousExtractor):
@@ -33,14 +33,17 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
 
     def items(self):
         page = self.request(self.url_base + "/g/" + self.key).text
+        if "The specified gallery could not be found." in page:
+            raise exception.NotFoundError("gallery")
         self.metadata = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, self.metadata
         for match in re.finditer(r'<a href="([^"]+)"><img alt="', page):
             imgpage = self.request(self.url_base + match.group(1)).text
             data = self.get_file_metadata(imgpage)
-            data = text.nameext_from_url(data["filename"], data)
-            yield Message.Url, self.get_file_url(imgpage), data
+            if data["filename"]:
+                data = text.nameext_from_url(data["filename"], data)
+                yield Message.Url, self.get_file_url(imgpage), data
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
@@ -88,7 +91,9 @@ class ImgboxImageExtractor(Extractor):
 
     def items(self):
         page = self.request("https://imgbox.com/" + self.key).text
-        url     , pos = text.extract(page, 'src="https://i.', '"')
+        url , pos = text.extract(page, 'src="https://i.', '"')
+        if not url:
+            raise exception.NotFoundError("image")
         filename, pos = text.extract(page, ' title="', '"', pos)
         data = text.nameext_from_url(filename, {"image-key": self.key})
         yield Message.Version, 1
