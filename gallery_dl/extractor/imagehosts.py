@@ -20,6 +20,7 @@ class ImagehostImageExtractor(Extractor):
     https = False
     method = "post"
     params = "simple"
+    cookies = None
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -42,7 +43,8 @@ class ImagehostImageExtractor(Extractor):
             self.method = "get"
 
     def items(self):
-        page = self.request(self.url, method=self.method, data=self.params).text
+        page = self.request(self.url, method=self.method, data=self.params,
+                            cookies=self.cookies).text
         url, filename = self.get_info(page)
         data = text.nameext_from_url(filename, {"token": self.token})
         if self.https and url.startswith("http:"):
@@ -247,6 +249,21 @@ class ImgtrexImageExtractor(ImagehostImageExtractor):
         filename, pos = text.extract(page, '<title>ImgTrex: ', '</title>')
         url     , pos = text.extract(page, '<br>\n<img src="', '"', pos)
         return url, filename
+
+
+class PixhostImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from pixhost.org"""
+    category = "pixhost"
+    pattern = [(r"(?:https?://)?((?:www\.)?pixhost\.org/show/"
+                r"\d+/(\d+)_[^/]+)")]
+    params = None
+    cookies = {"pixhostads": "1", "pixhosttest": "1"}
+
+    def get_info(self, page):
+        filename, pos = text.extract(page, '<div id="text">\n<h2>', '</h2>')
+        url     , pos = text.extract(page, '<img id="show_image" src="', '"', pos)
+        pos = filename.find("_")
+        return url, filename[pos+1:] if pos != -1 else url
 
 
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
