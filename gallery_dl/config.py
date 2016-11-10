@@ -20,7 +20,7 @@ def load(*files, strict=False):
     configfiles = files or _default_configs
     for conf in configfiles:
         try:
-            path = os.path.expanduser(conf)
+            path = os.path.expanduser(os.path.expandvars(conf))
             with open(path) as file:
                 confdict = json.load(file)
             _config.update(confdict)
@@ -90,12 +90,14 @@ _config = {}
 if os.name == "nt":
     _default_configs = [
         r"~\.config\gallery-dl\config.json",
+        r"%USERPROFILE%\gallery-dl\config.json",
         r"~\.gallery-dl.conf",
+        r"%USERPROFILE%\gallery-dl.conf",
     ]
 else:
     _default_configs = [
         "/etc/gallery-dl.conf",
-        "~/.config/gallery/config.json",
-        "~/.config/gallery-dl/config.json",
-        "~/.gallery-dl.conf",
+        "${HOME}/.config/gallery/config.json",
+        "${HOME}/.config/gallery-dl/config.json",
+        "${HOME}/.gallery-dl.conf",
     ]
