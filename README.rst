@@ -3,20 +3,25 @@ gallery-dl
 ==========
 
 *gallery-dl* is a small command-line tool to download images and entire image
-galleries from several image hosting platforms. It requires Python 3.3+ to run
-and works on Unix-like systems as well as Windows.
+galleries from several `image hosting platforms`_. It requires Python 3.3+ to
+run and works on Unix-like systems as well as Windows.
 
+Dependencies
+============
+
+- Python_ 3.3+
+- Requests_ 2.4.2+
 
 Installation
 ============
 
-You can install *gallery-dl* with pip:
+You can install *gallery-dl* from PyPI with pip_:
 
 .. code:: bash
 
     $ pip install gallery-dl
 
-or directly from github:
+or directly from GitHub:
 
 .. code:: bash
 
@@ -24,14 +29,19 @@ or directly from github:
     $ cd gallery-dl
     $ python3 setup.py install
 
-
 Usage
 =====
 
+To download collections of images, simply call *gallery-dl* with the URLs
+pointing to them:
+
 .. code:: bash
 
-    $ gallery-dl [URL]...
+    $ gallery-dl https://imgur.com/a/cMUxc
 
+See also :code:`gallery-dl --help`.
+
+.. _image hosting platforms:
 
 Supported Sites
 ===============
@@ -69,12 +79,18 @@ For a (more or less) complete example, see gallery-dl.conf_.
 
 *gallery-dl* searches for configuration files in the following paths:
 
-* ``/etc/gallery-dl.conf``
-* ``~/.config/gallery-dl/config.json``
-* ``~/.gallery-dl.conf``
++--------------------------------------------+------------------------------------------+
+| Linux                                      | Windows                                  |
++--------------------------------------------+------------------------------------------+
+|* ``/etc/gallery-dl.conf``                  |*                                         |
+|* ``${HOME}/.config/gallery-dl/config.json``|* ``%USERPROFILE%\gallery-dl\config.json``|
+|* ``${HOME}/.gallery-dl.conf``              |* ``%USERPROFILE%\gallery-dl.conf``       |
++--------------------------------------------+------------------------------------------+
+
+(``%USERPROFILE%`` usually refers to the users home directory,
+i.e. ``C:\Users\<username>\``)
 
 Values in later configuration files will override previous ones.
-
 
 Authentication
 ==============
@@ -108,5 +124,7 @@ or you can provide them directly via the
     $ gallery-dl -u <username> -p <password> URL
     $ gallery-dl -o username=<username> -o password=<password> URL
 
-
 .. _gallery-dl.conf: https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
+.. _Python:   https://www.python.org/downloads/
+.. _Requests: https://pypi.python.org/pypi/requests/
+.. _pip:      https://pip.pypa.io/en/stable/
