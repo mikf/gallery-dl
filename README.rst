@@ -41,8 +41,6 @@ pointing to them:
 
 See also :code:`gallery-dl --help`.
 
-.. _image hosting platforms:
-
 Supported Sites
 ===============
 
@@ -67,9 +65,8 @@ Supported Sites
 * Image Hosts:
     chronos.to, coreimg.net, hosturimage.com, imagebam.com, imageontime.org,
     imagetwist.com, img.yt, imgbox.com, imgcandy.net, imgchili.net,
-    imgclick.net, imgspice.com, imgtrex.com, imgupload.yt, pic-maniac.com,
-    rapidimg.net, turboimagehost.com
-
+    imgclick.net, imgmaid.net, imgspice.com, imgtrex.com, imgupload.yt,
+    img4ever.net, pic-maniac.com, pixhost.org, rapidimg.net, turboimagehost.com
 
 Configuration
 =============
@@ -124,6 +121,7 @@ or you can provide them directly via the
     $ gallery-dl -u <username> -p <password> URL
     $ gallery-dl -o username=<username> -o password=<password> URL
 
+.. _image hosting platforms: #supported-sites
 .. _gallery-dl.conf: https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
 .. _Python:   https://www.python.org/downloads/
 .. _Requests: https://pypi.python.org/pypi/requests/
