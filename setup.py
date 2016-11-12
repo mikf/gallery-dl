@@ -26,6 +26,7 @@ setup(
     maintainer="Mike Fährmann",
     maintainer_email="mike_faehrmann@web.de",
     license="GPLv2",
+    python_requires=">=3.3",
     install_requires=[
         "requests >= 2.4.2",
     ],
@@ -42,7 +43,7 @@ setup(
         "gallery_dl.extractor",
         "gallery_dl.downloader",
     ],
-    keywords = "gallery crawler pixiv danbooru gelbooru exhentai",
+    keywords="image gallery downloader crawler scraper",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
