@@ -70,8 +70,7 @@ class MangamintChapterExtractor(Extractor):
         data["count"] = len(imgs)
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, url in enumerate(imgs, 1):
-            data["page"] = num
+        for data["page"], url in enumerate(imgs, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_job_metadata(self, page):
@@ -84,7 +83,6 @@ class MangamintChapterExtractor(Extractor):
             "chapter": match.group(2),
             "chapter-minor": match.group(3) or "",
             "chapter-id": chid,
-            # "title": "",
             "lang": "en",
             "language": "English",
         }
@@ -102,10 +100,4 @@ class MangamintChapterExtractor(Extractor):
         params["form_build_id"], pos = text.extract(page, 'value="', '"', pos)
         url = "https://www.mangamint.com/many/callback"
         page = self.request(url, method="post", data=params).json()["data"]
-        imgs = []
-        pos = 0
-        while True:
-            url, pos = text.extract(page, r'<img src ="', r'"', pos)
-            if not url:
-                return imgs
-            imgs.append(url)
+        return list(text.extract_iter(page, r'<img src ="', r'"'))
