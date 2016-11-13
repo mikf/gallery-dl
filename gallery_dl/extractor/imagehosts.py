@@ -165,6 +165,17 @@ class ImguploadImageExtractor(HosturimageImageExtractor):
     https = True
 
 
+class ImgspotImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgspot.org"""
+    category = "imgspot"
+    pattern = [r"(?:https?://)?((?:www\.)?imgspot\.org/img-([a-z0-9]+)\.html)"]
+    https = False
+
+    def get_info(self, page):
+        url = text.extract(page, "<img class='centred_resized' src='", "'")[0]
+        return url, url
+
+
 class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
     category = "imagetwist"
