@@ -175,6 +175,11 @@ class ImgspotImageExtractor(ImagehostImageExtractor):
         url = text.extract(page, "<img class='centred_resized' src='", "'")[0]
         return url, url
 
+class ImgtrialImageExtractor(ImgspotImageExtractor):
+    """Extractor for single images from imgtrial.com"""
+    category = "imgtrial"
+    pattern = [r"(?:https?://)?((?:www\.)?imgtrial\.com/img-([a-z0-9]+)\.html)"]
+
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
