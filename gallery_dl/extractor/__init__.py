@@ -50,6 +50,7 @@ modules = [
     "nijie",
     "pinterest",
     "powermanga",
+    "readcomiconline",
     "rule34",
     "safebooru",
     "sankaku",

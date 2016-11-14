@@ -19,7 +19,8 @@ def bypass_ddos_protection(session, url):
     session.cookies = solve_challenge(session, url)
     return session
 
-@cache(maxage=24*60*60, keyarg=1)
+# TODO: this is only a temporary workaround for readcomiconline.to
+@cache(maxage=30*60, keyarg=1)
 def solve_challenge(session, url):
     session.headers["Referer"] = url
     page = session.get(url).text
