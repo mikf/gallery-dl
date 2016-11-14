@@ -52,6 +52,8 @@ Supported Sites
     mangahere.co, mangamint.com, mangapanda.com, mangapark.me, mangareader.net,
     mangashare.com, mangastream.com, powermanga.org, raw.senmanga.com,
     reader.sensescans.com, thespectrum.net
+* Comic:
+    readcomiconline.to
 * Hentai:
     exhentai.org, hbrowse.com, hentai2read.com,
     hentaibox.net, hentaihere.com, hitomi.la, luscious.net, nhentai.net
