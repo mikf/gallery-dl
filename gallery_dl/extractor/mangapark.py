@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -44,18 +44,22 @@ class MangaparkChapterExtractor(Extractor):
     """Extractor for manga-chapters from mangapark.me"""
     category = "mangapark"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me/manga/"
-                r"([^/]+/s(\d+)(?:/v(\d+))?/c(\d+)(?:(\.\d+)|/e(\d+))?)")]
+                r"([^/]+/s(\d+)(?:/v([^/]+))?/c(\d+)(?:([^/]+)|/e(\d+))?)")]
     test = [
-        ("http://mangapark.me/manga/ad-astra-per-aspera-hata-kenjirou/s1/c1.2/1", {
-            "url": "25d998a70df1fa559afc189ebd17df300b54dc28",
-            "keyword": "b24e88efb79159e8fd510cfd8a2fb7d4ed2b466a",
+        ("http://mangapark.me/manga/gosu/s2/c55", {
+            "url": "fefe84492d9118de5962563fbecb9362051c52d5",
+            "keyword": "652b38c40bdfb5592456b6e7524a3acfdef9fae6",
+        }),
+        ("http://mangapark.me/manga/ad-astra-per-aspera-hata-kenjirou/s1/c1.2", {
+            "url": "64b47f9837d50c3e57793ff6703d840ef7808c52",
+            "keyword": "f28eb26b4966bebda0e761f241c2dd49e505ce13",
         }),
         ("http://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
             "url": "f8915e25895d4b336892f8a6bd27d26cdb337045",
-            "keyword": "7f533dc292bbd139469b21fe7f7472a85a54b014",
+            "keyword": "34aa6ca3bdf5078f839cbf68ff68e39728cf248b",
         })
     ]
 
@@ -65,10 +69,14 @@ class MangaparkChapterExtractor(Extractor):
         self.version = match.group(2)
         self.volume  = match.group(3)
         self.chapter = match.group(4)
-        self.chminor = match.group(5) or "." + match.group(6)
+        try:
+            self.chminor = match.group(5) or "v" + match.group(6)
+        except TypeError:
+            self.chminor = ""
 
     def items(self):
-        page = self.request("http://mangapark.me/manga/" + self.part + "?zoom=2").text
+        page = self.request("http://mangapark.me/manga/" + self.part
+                            + "?zoom=2").text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
@@ -90,11 +98,14 @@ class MangaparkChapterExtractor(Extractor):
             ("manga-id"  , "var _manga_id = '", "'"),
             ("chapter-id", "var _book_id = '", "'"),
             ("manga"     , "<h2>", "</h2>"),
+            ("title"     , "</a>", "<"),
             (None        , 'target="_blank" href="', ''),
             ("count"     , 'page 1">1 / ', '<'),
         ), values=data)[0]
-        pos = data["manga"].rfind(" ")
-        data["manga"] = data["manga"][:pos]
+        data["manga"], data["type"] = data["manga"].rsplit(" ", maxsplit=1)
+        data["manga"] = text.unescape(data["manga"])
+        pos = data["title"].find(": ")
+        data["title"] = data["title"][pos+2:] if pos != -1 else ""
         return data
 
     @staticmethod
