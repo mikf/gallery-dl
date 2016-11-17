@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,22 +9,34 @@
 """Extract manga-chapters and entire manga from https://www.mangamint.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 import re
 
-class MangamintMangaExtractor(Extractor):
-    """Extractor for mangas from mangamint.com"""
+class MangamintExtractor(Extractor):
+    """Base class for mangamint extractors"""
     category = "mangamint"
-    subcategory = "manga"
-    pattern = [r"(?:https?://)?(?:www\.)?mangamint\.com(/manga/[^\?]+-manga)"]
-    test = [("www.mangamint.com/manga/mushishi-manga", {
-        "url": "df7a1f4224d23e392ec09d4c7bbd4fbc873327d0",
-    })]
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
+    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
     url_base = "https://www.mangamint.com"
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.part = match.group(1)
+        self.url = self.url_base + match.group(1)
+
+
+class MangamintMangaExtractor(MangamintExtractor):
+    """Extractor for mangas from mangamint.com"""
+    subcategory = "manga"
+    pattern = [(r"(?:https?://)?(?:www\.)?mangamint\.com"
+                r"(/manga/[^/\?]+)")]
+    test = [
+        ("www.mangamint.com/manga/mushishi-manga", {
+            "url": "df7a1f4224d23e392ec09d4c7bbd4fbc873327d0",
+        }),
+        ("https://www.mangamint.com/manga/gosu-manhwa", {
+            "url": "f846bfb51c0714c056ae4b2dccd6b49f15148514",
+        }),
+    ]
 
     def items(self):
         yield Message.Version, 1
@@ -33,55 +45,62 @@ class MangamintMangaExtractor(Extractor):
 
     def get_chapters(self):
         """Return a list of all chapter urls"""
-        url = self.url_base + self.part
         params = {"page": 0}
         chapters = []
         while True:
-            page = self.request(url, params=params).text
-            table = text.extract(page, '<table class="sticky-enabled">', '</table>')[0]
+            response = self.session.get(self.url, params=params)
+            if response.status_code == 404:
+                raise exception.NotFoundError("manga")
+            page = response.text
+            table, pos = text.extract(page, '<table class="sticky-enabled">', '</table>')
             chapters.extend(text.extract_iter(table, '<a href="', '"'))
-            if re.match(r".+-0*1$", chapters[-1]):
+            if page.find("pager-last", pos) == -1:
                 break
             params["page"] += 1
         return reversed(chapters)
 
 
-class MangamintChapterExtractor(Extractor):
+class MangamintChapterExtractor(MangamintExtractor):
     """Extractor for manga-chapters from mangamint.com"""
-    category = "mangamint"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?mangamint\.com/([^\?]+-(\d+))"]
-    test = [("http://www.mangamint.com/mushishi-1", {
-        "url": "337f46c4dab50f544e9196ced723ac8f70400dd0",
-        "keyword": "de9ea839d231cb9f1590a2a93ca9ab2f8743b39d",
-    })]
-
-    def __init__(self, match):
-        Extractor.__init__(self)
-        self.url = match.group(0)
-        self.chapter = match.group(2)
+    pattern = [(r"(?:https?://)?(?:www\.)?mangamint\.com"
+                r"(/[^/\?]+-\d+(?:[^/\?]+)?)")]
+    test = [
+        ("http://www.mangamint.com/mushishi-1", {
+            "url": "f854310a15c6b6ad7e4a2a923a612756a62c0b3e",
+            "keyword": "de9ea839d231cb9f1590a2a93ca9ab2f8743b39d",
+        }),
+        ("https://www.mangamint.com/gosu-551", {
+            "url": "56a16d2560830a4e53bfe60590c21b0a1c4069e7",
+            "keyword": "f862c1d927d331a016e306305534d38d877aa3fe",
+            "content": "8d7ae90e932dc2fa48163497fca78729b2c7a759",
+        }),
+    ]
 
     def items(self):
-        page = self.request(self.url).text
+        response = self.session.get(self.url)
+        if response.status_code == 404:
+            raise exception.NotFoundError("chapter")
+        page = response.text
         data = self.get_job_metadata(page)
         imgs = self.get_image_urls(page)
         data["count"] = len(imgs)
         yield Message.Version, 1
         yield Message.Directory, data
         for data["page"], url in enumerate(imgs, 1):
+            if url.startswith("http:"):
+                url = "https:" + url[5:]
             yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, '"title":"', '"')
         chid , pos = text.extract(page, r'"identifier":"node\/', '"', pos)
-        match = re.match(r"(.+) (\d+)(\.\d+)?$", manga)
+        match = re.match(r"(.+) (\d+)([^ ]*)$", manga)
         return {
             "manga": match.group(1),
             "chapter": match.group(2),
-            "chapter-minor": match.group(3) or "",
+            "chapter-minor": match.group(3),
             "chapter-id": chid,
             "lang": "en",
             "language": "English",
@@ -98,6 +117,6 @@ class MangamintChapterExtractor(Extractor):
         params["howmany"]      , pos = text.extract(page, 'value="', '"', pos-25)
         _                      , pos = text.extract(page, 'name="form_build_id"', '', pos)
         params["form_build_id"], pos = text.extract(page, 'value="', '"', pos)
-        url = "https://www.mangamint.com/many/callback"
+        url = self.url_base + "/many/callback"
         page = self.request(url, method="post", data=params).json()["data"]
         return list(text.extract_iter(page, r'<img src ="', r'"'))
