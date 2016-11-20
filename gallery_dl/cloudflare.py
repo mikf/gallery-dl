@@ -14,13 +14,20 @@ import urllib.parse
 from . import text
 from .cache import cache
 
+def bypass(url, maxage):
+    def decorator(func):
+        solve = cache(maxage=maxage, keyarg=1)(solve_challenge)
+        def wrap(self, *args):
+            self.session.cookies = solve(self.session, url)
+            return func(self, *args)
+        return wrap
+    return decorator
+
 def bypass_ddos_protection(session, url):
     """Prepare a requests.session to access 'url' behind Cloudflare protection"""
     session.cookies = solve_challenge(session, url)
     return session
 
-# TODO: this is only a temporary workaround for readcomiconline.to
-@cache(maxage=30*60, keyarg=1)
 def solve_challenge(session, url):
     session.headers["Referer"] = url
     page = session.get(url).text
@@ -30,7 +37,8 @@ def solve_challenge(session, url):
     ))[0]
     params["jschl_answer"] = solve_jschl(url, page)
     time.sleep(4)
-    session.get(urllib.parse.urljoin(url, "/cdn-cgi/l/chk_jschl"), params=params)
+    url = urllib.parse.urljoin(url, "/cdn-cgi/l/chk_jschl")
+    session.get(url, params=params)
     return session.cookies
 
 def solve_jschl(url, page):
@@ -50,7 +58,7 @@ def solve_jschl(url, page):
             value = evaluate_expression(expr[vlength+2:])
             solution = func(solution, value)
         elif expr.startswith("a.value"):
-            return solution + len(urllib.parse.urlparse(url).netloc)
+            return solution + len(urllib.parse.urlsplit(url).netloc)
 
 def evaluate_expression(expr):
     """Evaluate a Javascript expression for the challange and return its value"""

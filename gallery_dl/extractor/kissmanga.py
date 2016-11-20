@@ -22,6 +22,9 @@ class KissmangaExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.url = match.group(0)
+        self.session.headers["Referer"] = self.url_base
+
+    request = cloudflare.bypass(url_base, 24*60*60)(Extractor.request)
 
 
 class KissmangaMangaExtractor(KissmangaExtractor):
@@ -33,7 +36,6 @@ class KissmangaMangaExtractor(KissmangaExtractor):
     })]
 
     def items(self):
-        cloudflare.bypass_ddos_protection(self.session, self.url_base)
         yield Message.Version, 1
         for chapter in self.get_chapters():
             yield Message.Queue, self.url_base + chapter
@@ -62,7 +64,6 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     ]
 
     def items(self):
-        cloudflare.bypass_ddos_protection(self.session, self.url_base)
         page = self.request(self.url).text
         data = self.get_job_metadata(page)
         imgs = self.get_image_urls(page)
