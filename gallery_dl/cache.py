@@ -25,12 +25,15 @@ class CacheInvalidError(Exception):
 class CacheModule():
     """Base class for cache modules"""
     def __init__(self):
-        self.child = None
+        pass
 
     def __getitem__(self, key):
         raise CacheInvalidError()
 
     def __setitem__(self, key, item):
+        pass
+
+    def __delitem__(self, key):
         pass
 
     def __enter__(self):
@@ -65,6 +68,10 @@ class CacheChain(CacheModule):
         for module in self.modules:
             module.__setitem__(key, item)
 
+    def __delitem__(self, key):
+        for module in self.modules:
+            module.__delitem__(key)
+
     def __exit__(self, exc_type, exc_value, exc_traceback):
         for module in self.modules:
             module.__exit__(exc_type, exc_value, exc_traceback)
@@ -88,6 +95,12 @@ class MemoryCache(CacheModule):
 
     def __setitem__(self, key, item):
         self.cache[key] = item
+
+    def __delitem__(self, key):
+        try:
+            del self.cache[key]
+        except KeyError:
+            pass
 
 
 class DatabaseCache(CacheModule):
@@ -125,6 +138,9 @@ class DatabaseCache(CacheModule):
         self.db.execute("INSERT OR REPLACE INTO data VALUES (?,?,?)",
                         (key, pickle.dumps(value), expires))
 
+    def __delitem__(self, key):
+        self.db.execute("DELETE FROM data WHERE key=?", (key,))
+
     def __exit__(self, *exc_info):
         self.commit()
 
@@ -159,6 +175,13 @@ class CacheDecorator():
     def __get__(self, obj, objtype):
         """Support instance methods."""
         return functools.partial(self.__call__, obj)
+
+    def invalidate(self, key=None):
+        if key is None:
+            key = self.key
+        else:
+            key = "%s-%s" % (self.key, key)
+        del self.cache[key]
 
 
 def build_cache_decorator(*modules):
