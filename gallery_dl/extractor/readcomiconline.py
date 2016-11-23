@@ -8,25 +8,16 @@
 
 """Extract comic-issues and entire comics from http://readcomiconline.to/"""
 
-from .common import Extractor
-from .. import text, cloudflare
+from .. import text
 from . import kissmanga
 import re
 
-class ReadcomiconlineExtractor(Extractor):
+class ReadcomiconlineExtractor(kissmanga.KissmangaExtractor):
     """Base class for readcomiconline extractors"""
     category = "readcomiconline"
     directory_fmt = ["{category}", "{comic}", "{issue:>03}"]
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     url_base = "http://readcomiconline.to"
-
-    def __init__(self, match):
-        Extractor.__init__(self)
-        self.url = match.group(0)
-        self.session.headers["Referer"] = self.url_base
-
-
-    request = cloudflare.bypass(url_base, 30*60)(Extractor.request)
 
 
 class ReadcomiconlineComicExtractor(ReadcomiconlineExtractor,

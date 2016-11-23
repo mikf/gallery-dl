@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://kissmanga.com/"""
 
 from .common import Extractor, Message
-from .. import text, cloudflare
+from .. import text, cloudflare, cache
 import re
 
 class KissmangaExtractor(Extractor):
@@ -23,8 +23,18 @@ class KissmangaExtractor(Extractor):
         Extractor.__init__(self)
         self.url = match.group(0)
         self.session.headers["Referer"] = self.url_base
+        self.cookies = cache.cache(maxage=365*24*60*60, keyarg=0)(_cache_helper)
 
-    request = cloudflare.bypass(url_base, 24*60*60)(Extractor.request)
+    def request(self, url, cookies=None):
+        cookies = self.cookies(self.url_base, cookies)
+        if cookies:
+            self.session.cookies = cookies
+        response = self.session.get(url)
+        if response.status_code != 200:
+            self.cookies.invalidate(self.url_base)
+            cookies = cloudflare.solve_challenge(self.session, self.url_base)
+            response = self.request(url, cookies)
+        return response
 
 
 class KissmangaMangaExtractor(KissmangaExtractor):
@@ -94,3 +104,7 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     def get_image_urls(page):
         """Extract list of all image-urls for a manga chapter"""
         return list(text.extract_iter(page, 'lstImages.push("', '"'))
+
+
+def _cache_helper(key, item=None):
+    return item
