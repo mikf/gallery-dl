@@ -31,7 +31,7 @@ class Downloader(BasicDownloader):
                 self.out.error(pathfmt.path, exptn, tries, self.max_tries)
                 time.sleep(1)
                 if tries == self.max_tries:
-                    raise
+                    return tries
                 continue
 
             # reject error-status-codes
@@ -39,9 +39,11 @@ class Downloader(BasicDownloader):
                 tries += 1
                 self.out.error(pathfmt.path, 'HTTP status "{} {}"'.format(
                     response.status_code, response.reason), tries, self.max_tries)
+                if response.status_code == 404:
+                    return self.max_tries
                 time.sleep(1)
                 if tries == self.max_tries:
-                    response.raise_for_status()
+                    return tries
                 continue
 
             # everything ok -- proceed to download
