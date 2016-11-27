@@ -24,6 +24,8 @@ class Downloader(BasicDownloader):
                 return
 
         self.out.start(pathfmt.path)
+        self.downloading = True
         with pathfmt.open() as file:
             file.write(bytes(url[7:], "utf-8"))
+        self.downloading = False
         self.out.success(pathfmt.path, 0)

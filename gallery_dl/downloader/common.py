@@ -15,6 +15,9 @@ class BasicDownloader():
 
     max_tries = 5
 
+    def __init__(self):
+        self.downloading = False
+
     def download(self, url, pathfmt):
         """Download the resource at 'url' and write it to a file-like object"""
         try:
@@ -22,7 +25,8 @@ class BasicDownloader():
         except:
             # remove file if download failed
             try:
-                os.unlink(pathfmt.realpath)
+                if self.downloading:
+                    os.unlink(pathfmt.realpath)
             except (AttributeError, FileNotFoundError):
                 pass
             raise

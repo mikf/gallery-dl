@@ -61,9 +61,11 @@ class Downloader(BasicDownloader):
                 return
 
         self.out.start(pathfmt.path)
+        self.downloading = True
         with pathfmt.open() as file:
             for data in response.iter_content(16384):
                 file.write(data)
+        self.downloading = False
         self.out.success(pathfmt.path, tries)
 
     def set_headers(self, headers):
