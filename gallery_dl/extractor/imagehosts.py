@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 from os.path import splitext
+from urllib.parse import urljoin
 
 class ImagehostImageExtractor(Extractor):
     """Base class for single-image extractors for various imagehosts"""
@@ -179,6 +180,19 @@ class ImgtrialImageExtractor(ImgspotImageExtractor):
     """Extractor for single images from imgtrial.com"""
     category = "imgtrial"
     pattern = [r"(?:https?://)?((?:www\.)?imgtrial\.com/img-([a-z0-9]+)\.html)"]
+
+
+class ImagevenueImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imagevenue.com"""
+    category = "imagevenue"
+    pattern = [(r"(?:https?://)?(img\d+\.imagevenue\.com/"
+                r"img\.php\?image=(\d+)_.+)")]
+    params = None
+
+    def get_info(self, page):
+        url = text.extract(page, 'SRC="', '"')[0]
+        url = urljoin(self.url, url)
+        return url, url
 
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):
