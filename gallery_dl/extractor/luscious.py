@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, iso639_1
 from urllib.parse import urljoin
+import re
 
 class LusciousAlbumExtractor(Extractor):
     """Extractor for image albums from luscious.net"""
@@ -19,11 +20,11 @@ class LusciousAlbumExtractor(Extractor):
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?luscious\.net/c/([^/]+)/"
-                r"(?:pictures/album|albums)/([^/\d]+(\d+))")]
-    test = [("https://luscious.net/c/incest_manga/albums/amazon-no-hiyaku-amazon-elixir-english-decensored_261127/view/", {
-        "url": "9493f84868445135d0024818016100b2c80abfe6",
-        "keyword": "e10c7c070ad730e305024fb37cc70af6b05378dd",
-        "content": "57825d189e17c43dc5a8ecdc3fa2d9d544fc62b1",
+                r"(?:pictures/album|albums)/([^/]+_(\d+))")]
+    test = [("https://luscious.net/c/hentai_manga/albums/okinami-no-koigokoro_277031/view/", {
+        "url": "f26ec88844a053dba598c213ea7185ecb6b4566a",
+        "keyword": "b9281277ab062d95ed0713ea88ed15569d29bf84",
+        "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
     })]
 
     def __init__(self, match):
@@ -56,14 +57,17 @@ class LusciousAlbumExtractor(Extractor):
         return data
 
     def get_images(self):
+        """Collect image-urls and -metadata"""
         pnum = 1
         inum = 1
-        apiurl = ("https://luscious.net/c/{}/pictures/album/{}/page/{{}}/.json"
-                  "/?style=default").format(self.section, self.gpart)
+        apiurl = ("https://luscious.net/c/{}/pictures/album/{}/"
+                  "page/{{}}/.json/").format(self.section, self.gpart)
         while True:
             data = self.request(apiurl.format(pnum)).json()
             for doc in data["documents"]:
-                width, height, _, url = doc["sizes"][-1]
+                width, height, size, url = doc["sizes"][-1]
+                if size != "original":
+                    url = re.sub(r"\.\d+x\d+(\.[a-z]+)$", r"\1", url)
                 yield urljoin("https:", url), {
                     "width": width,
                     "height": height,
