@@ -34,7 +34,7 @@ class MangamintMangaExtractor(MangamintExtractor):
             "url": "df7a1f4224d23e392ec09d4c7bbd4fbc873327d0",
         }),
         ("https://www.mangamint.com/manga/gosu-manhwa", {
-            "url": "f846bfb51c0714c056ae4b2dccd6b49f15148514",
+            "url": "b58bae06a8d14c1f11f518fef2dc99aeb6ee3ee4",
         }),
     ]
 
