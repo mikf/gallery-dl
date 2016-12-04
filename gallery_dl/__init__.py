@@ -48,6 +48,11 @@ def build_cmdline_parser():
         metavar="PASS"
     )
     parser.add_argument(
+        "-i", "--input-file",
+        metavar="FILE", dest="inputfile",
+        help="download URLs found in local FILE",
+    )
+    parser.add_argument(
         "-c", "--config",
         metavar="CFG", dest="cfgfiles", action="append",
         help="additional configuration files",
@@ -92,6 +97,12 @@ def parse_option(opt):
     except ValueError:
         print("Invalid 'key=value' pair:", opt, file=sys.stderr)
 
+def sanatize_input(file):
+    for line in file:
+        line = line.strip()
+        if line:
+            yield line
+
 def main():
     try:
         config.load()
@@ -123,7 +134,7 @@ def main():
                     print("Example:", extr.test[0][0])
                 print()
         else:
-            if not args.urls:
+            if not args.urls and not args.inputfile:
                 parser.error("the following arguments are required: URL")
 
             if args.list_urls:
@@ -133,7 +144,19 @@ def main():
             else:
                 jobtype = job.DownloadJob
 
-            for url in args.urls:
+            urls = args.urls
+            if args.inputfile:
+                try:
+                    if args.inputfile == "-":
+                        file = sys.stdin
+                    else:
+                        file = open(args.inputfile)
+                    import itertools
+                    urls = itertools.chain(urls, sanatize_input(file))
+                except OSError as e:
+                    print(e)
+
+            for url in urls:
                 try:
                     jobtype(url).run()
                 except exception.NoExtractorError:
