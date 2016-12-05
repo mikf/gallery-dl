@@ -10,6 +10,7 @@
 
 import re
 from .common import Extractor, Message
+from .. import adapter
 
 class RecursiveExtractor(Extractor):
 
@@ -21,6 +22,7 @@ class RecursiveExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self)
+        self.session.mount("file://", adapter.FileAdapter())
         self.url = match.group(1)
 
     def items(self):
