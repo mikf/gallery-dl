@@ -286,14 +286,14 @@ class PixhostImageExtractor(ImagehostImageExtractor):
     category = "pixhost"
     pattern = [(r"(?:https?://)?((?:www\.)?pixhost\.org/show/"
                 r"\d+/(\d+)_[^/]+)")]
+    https = True
     params = None
     cookies = {"pixhostads": "1", "pixhosttest": "1"}
 
     def get_info(self, page):
-        filename, pos = text.extract(page, '<div id="text">\n<h2>', '</h2>')
-        url     , pos = text.extract(page, '<img id="show_image" src="', '"', pos)
-        pos = filename.find("_")
-        return url, filename[pos+1:] if pos != -1 else url
+        url     , pos = text.extract(page, "src: '", "'")
+        filename, pos = text.extract(page, "title: '", "'", pos)
+        return url, filename
 
 
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
