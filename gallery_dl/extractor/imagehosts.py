@@ -296,6 +296,19 @@ class PixhostImageExtractor(ImagehostImageExtractor):
         return url, filename
 
 
+class PostimgImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from postimg.org"""
+    category = "postimg"
+    pattern = [(r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.org/"
+                r"image/([^/]+)/?)")]
+    https = True
+    params = None
+
+    def get_info(self, page):
+        url = "https:" + text.extract(page, 'data-full="', '"')[0]
+        return url, url
+
+
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from turboimagehost.com"""
     category = "turboimagehost"
