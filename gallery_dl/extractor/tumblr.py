@@ -20,7 +20,7 @@ class TumblrUserExtractor(Extractor):
     filename_fmt = "{category}_{user}_{id}{offset}.{extension}"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com(?:/page/\d+)?/?$"]
     test = [("http://demo.tumblr.com/", {
-        "url": "d3d2bb185230e537314a0036814050634c730f74",
+        "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
         "keyword": "8704a9bbb65b6e52dc1ccdf2c2449bd4abe3d389",
         "content": "31495fdb9f84edbb7f67972746a1521456f649e2",
     })]
@@ -99,7 +99,7 @@ class TumblrPostExtractor(TumblrUserExtractor):
     subcategory = "post"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/post/(\d+)"]
     test = [("http://demo.tumblr.com/post/459265350", {
-        "url": "d3d2bb185230e537314a0036814050634c730f74",
+        "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
         "keyword": "821236db342fb0d1bf8a177ca3108349168e6cd0",
     })]
 
@@ -113,7 +113,7 @@ class TumblrTagExtractor(TumblrUserExtractor):
     subcategory = "tag"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/tagged/(.+)"]
     test = [("http://demo.tumblr.com/tagged/Times Square", {
-        "url": "d3d2bb185230e537314a0036814050634c730f74",
+        "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
         "keyword": "e182759d3a26c9f72ccc8ddc22a382aad598d6dc",
     })]
 

@@ -22,7 +22,7 @@ class LusciousAlbumExtractor(Extractor):
     pattern = [(r"(?:https?://)?(?:www\.)?luscious\.net/c/([^/]+)/"
                 r"(?:pictures/album|albums)/([^/]+_(\d+))")]
     test = [("https://luscious.net/c/hentai_manga/albums/okinami-no-koigokoro_277031/view/", {
-        "url": "f26ec88844a053dba598c213ea7185ecb6b4566a",
+        "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
         "keyword": "b9281277ab062d95ed0713ea88ed15569d29bf84",
         "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
     })]

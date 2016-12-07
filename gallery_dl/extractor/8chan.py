@@ -17,7 +17,7 @@ class InfinitychanThreadExtractor(chan.ChanThreadExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?8ch\.net/([^/]+)/res/(\d+)"]
     test = [("https://8ch.net/tg/res/175887.html", {
         "url": "646d4230b40f9cff3f8674e3efe44bba3af4924b",
-        "keyword": "d313fa77f689ddcd45736f1e86bf63cf58614786",
+        "keyword": "cdb061d01e415631b79649d297dd7f995d48f8c4",
         "content": "81e21a3cc87f64f224a966f207e8e1731216c345",
     })]
     api_url = "https://8ch.net/{board}/res/{thread}.json"
