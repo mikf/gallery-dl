@@ -10,7 +10,7 @@
 """Create testdata for extractor tests"""
 
 import argparse
-from  gallery_dl import job, config
+from  gallery_dl import job, config, extractor
 
 TESTDATA_FMT = """
     test = [("{}", {{
@@ -23,11 +23,21 @@ TESTDATA_FMT = """
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--content", action="store_true")
+    parser.add_argument("--recreate", action="store_true")
     parser.add_argument("urls", nargs="*")
     args = parser.parse_args()
 
+    if args.recreate:
+        urls = [
+            test[0]
+            for extr in extractor.extractors() if extr.category in args.urls
+            for test in extr.test
+        ]
+    else:
+        urls = args.urls
+
     config.load()
-    for url in args.urls:
+    for url in urls:
         hjob = job.HashJob(url, content=args.content)
         hjob.run()
         print(hjob.extractor.__class__.__name__)
