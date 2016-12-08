@@ -236,23 +236,6 @@ class ImgcandyImageExtractor(ImagehostImageExtractor):
         return url, self.url[pos+1:-5] if pos != -1 else url
 
 
-class ImgclickImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from imgclick.net"""
-    category = "imgclick"
-    pattern = [r"(?:https?://)?((?:www\.)?imgclick\.net/([^/]+))"]
-    test = [("http://imgclick.net/4tbrre1oxew9/test-_-_.png.html", {
-        "url": "140dcb250a325f2d26b2d918c18b8ac6a2a0f6ab",
-        "keyword": "c086439336eea3bdf773d761c32b0edb29af0ebd",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
-    params = "complex"
-
-    def get_info(self, page):
-        url     , pos = text.extract(page, '<img  src="', '"')
-        filename, pos = text.extract(page, 'alt="', '"', pos)
-        return url, filename
-
-
 class ImgspiceImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgspice.com"""
     category = "imgspice"
