@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015, 2016 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -30,7 +30,7 @@ class TestExtractors(unittest.TestCase):
 
 def generate_test(extr):
     def test(self):
-        print(extr.__name__)
+        print("\n", extr.__name__, sep="")
         for url, result in extr.test:
             print(url)
             self.run_test(extr, url, result)
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         extractors = filter(lambda x: x.category in sys.argv, extractors)
     for extr in extractors:
-        if hasattr(extr, "test"):
+        if hasattr(extr, "test") and extr.test:
             name = "test_" + extr.__name__
             test = generate_test(extr)
             setattr(TestExtractors, name, test)
