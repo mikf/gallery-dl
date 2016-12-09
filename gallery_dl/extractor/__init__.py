@@ -65,6 +65,7 @@ modules = [
     "yandere",
     "imagehosts",
     "recursive",
+    "test",
 ]
 
 def find(url):
