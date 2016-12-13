@@ -23,7 +23,7 @@ class LusciousAlbumExtractor(Extractor):
                 r"(?:pictures/album|albums)/([^/]+_(\d+))")]
     test = [("https://luscious.net/c/hentai_manga/albums/okinami-no-koigokoro_277031/view/", {
         "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
-        "keyword": "b9281277ab062d95ed0713ea88ed15569d29bf84",
+        "keyword": "026f4dc2e17aa59f97c9b9d8e68fc52b7c900603",
         "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
     })]
 
@@ -43,7 +43,8 @@ class LusciousAlbumExtractor(Extractor):
         """Collect metadata for extractor-job"""
         url = "https://luscious.net/c/{}/albums/{}/view/".format(
             self.section, self.gpart)
-        data = text.extract_all(self.request(url).text, (
+        page = self.request(url).text
+        data, pos = text.extract_all(page, (
             ("title"   , '"og:title" content="', '"'),
             (None      , '<li class="user_info">', ''),
             ("count"   , '<p>', ' '),
@@ -52,30 +53,31 @@ class LusciousAlbumExtractor(Extractor):
             (None      , '<p>Language:', ''),
             ("language", '\n                            ', ' '),
             ("artist"  , 'rtist: ', '\n'),
-        ), values={"gallery-id": self.gid})[0]
+        ), values={"gallery-id": self.gid})
         data["lang"] = iso639_1.language_to_code(data["language"])
+        _, pos = text.extract(page, 'ic_container', '')
+        self.imageurl = text.extract(page, '<a href="', '"', pos)[0]
         return data
 
     def get_images(self):
         """Collect image-urls and -metadata"""
-        pnum = 1
-        inum = 1
-        apiurl = ("https://luscious.net/c/{}/pictures/album/{}/"
-                  "page/{{}}/.json/").format(self.section, self.gpart)
+        url = self.imageurl
+        num = 1
         while True:
-            data = self.request(apiurl.format(pnum)).json()
-            for doc in data["documents"]:
-                width, height, size, url = doc["sizes"][-1]
-                if size != "original":
-                    url = re.sub(r"\.\d+x\d+(\.[a-z]+)$", r"\1", url)
-                yield urljoin("https:", url), {
-                    "width": width,
-                    "height": height,
-                    "num": inum,
-                    "name": doc["title"],
-                    "extension": url[url.rfind(".")+1:],
-                }
-                inum += 1
-            if data["paginator_complete"]:
+            page = self.request(urljoin("https://luscious.net", url)).text
+            url, pos = text.extract(page, '<link rel="next" href="', '"')
+            data = text.extract_all(page, (
+                (None    , '<img id="single_picture"', ''),
+                ("width" , 'width="', '"'),
+                ("height", 'height="', '"'),
+                ("name"  , 'title="', '"'),
+                (None    , 'image_option_icons', ''),
+                (None    , '<a href="', '"'),
+                ("image" , '<a href="', '"'),
+            ), pos, values={"num": num})[0]
+            image = data["image"]
+            data["extension"] = image[image.rfind(".")+1:]
+            yield urljoin("https:", image), data
+            if url.startswith("/c/-/"):
                 return
-            pnum += 1
+            num += 1
