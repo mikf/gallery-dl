@@ -36,6 +36,7 @@ modules = [
     "imgth",
     "imgur",
     "khinsider",
+    "kisscomic",
     "kissmanga",
     "konachan",
     "luscious",

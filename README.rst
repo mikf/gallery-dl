@@ -54,7 +54,7 @@ Supported Sites
     reader.sensescans.com, thespectrum.net, slide.world-three.org,
     yonkouprod.com
 * Comic:
-    readcomiconline.to
+    kisscomic.us, readcomiconline.to
 * Hentai:
     exhentai.org, hbrowse.com, hentai2read.com,
     hentaibox.net, hentaihere.com, hitomi.la, luscious.net, nhentai.net
