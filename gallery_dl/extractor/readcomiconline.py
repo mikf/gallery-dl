@@ -8,8 +8,8 @@
 
 """Extract comic-issues and entire comics from http://readcomiconline.to/"""
 
-from .. import text
 from . import kissmanga
+from .. import text
 import re
 
 class ReadcomiconlineExtractor(kissmanga.KissmangaExtractor):
@@ -17,7 +17,7 @@ class ReadcomiconlineExtractor(kissmanga.KissmangaExtractor):
     category = "readcomiconline"
     directory_fmt = ["{category}", "{comic}", "{issue:>03}"]
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
-    url_base = "http://readcomiconline.to"
+    root = "http://readcomiconline.to"
 
 
 class ReadcomiconlineComicExtractor(ReadcomiconlineExtractor,
