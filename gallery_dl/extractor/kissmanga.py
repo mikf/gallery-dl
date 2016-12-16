@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://kissmanga.com/"""
 
 from .common import Extractor, Message
-from .. import text, cloudflare, cache
+from .. import text, cloudflare
 import re
 
 class KissmangaExtractor(Extractor):
@@ -17,24 +17,14 @@ class KissmangaExtractor(Extractor):
     category = "kissmanga"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
-    url_base = "http://kissmanga.com"
+    root = "http://kissmanga.com"
 
     def __init__(self, match):
         Extractor.__init__(self)
         self.url = match.group(0)
-        self.session.headers["Referer"] = self.url_base
-        self.cookies = cache.cache(maxage=365*24*60*60, keyarg=0)(_cache_helper)
+        self.session.headers["Referer"] = self.root
 
-    def request(self, url, cookies=None):
-        cookies = self.cookies(self.url_base, cookies)
-        if cookies:
-            self.session.cookies = cookies
-        response = self.session.get(url)
-        if response.status_code != 200:
-            self.cookies.invalidate(self.url_base)
-            cookies = cloudflare.solve_challenge(self.session, self.url_base)
-            response = self.request(url, cookies)
-        return response
+    request = cloudflare.request_func
 
 
 class KissmangaMangaExtractor(KissmangaExtractor):
@@ -48,7 +38,7 @@ class KissmangaMangaExtractor(KissmangaExtractor):
     def items(self):
         yield Message.Version, 1
         for chapter in self.get_chapters():
-            yield Message.Queue, self.url_base + chapter
+            yield Message.Queue, self.root + chapter
 
     def get_chapters(self):
         """Return a list of all chapter urls"""
@@ -104,7 +94,3 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     def get_image_urls(page):
         """Extract list of all image-urls for a manga chapter"""
         return list(text.extract_iter(page, 'lstImages.push("', '"'))
-
-
-def _cache_helper(key, item=None):
-    return item

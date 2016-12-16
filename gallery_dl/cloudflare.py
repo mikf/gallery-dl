@@ -14,32 +14,28 @@ import urllib.parse
 from . import text
 from .cache import cache
 
-def bypass(url, maxage):
-    def decorator(func):
-        solve = cache(maxage=maxage, keyarg=1)(solve_challenge)
-        def wrap(self, *args):
-            self.session.cookies = solve(self.session, url)
-            return func(self, *args)
-        return wrap
-    return decorator
+def request_func(self, *args):
+    cookies = _cookiecache(self.root)
+    if cookies:
+        self.session.cookies = cookies
+    response = self.session.get(*args)
+    if response.status_code != 200:
+        _cookiecache.invalidate(self.root)
+        response = solve_challenge(self.session, response)
+        _cookiecache(self.root, self.session.cookies)
+    return response
 
-def bypass_ddos_protection(session, url):
-    """Prepare a requests.session to access 'url' behind Cloudflare protection"""
-    session.cookies = solve_challenge(session, url)
-    return session
-
-def solve_challenge(session, url):
-    session.headers["Referer"] = url
-    page = session.get(url).text
+def solve_challenge(session, response):
+    session.headers["Referer"] = response.url
+    page = response.text
     params = text.extract_all(page, (
         ('jschl_vc', 'name="jschl_vc" value="', '"'),
         ('pass'    , 'name="pass" value="', '"'),
     ))[0]
-    params["jschl_answer"] = solve_jschl(url, page)
+    params["jschl_answer"] = solve_jschl(response.url, page)
     time.sleep(4)
-    url = urllib.parse.urljoin(url, "/cdn-cgi/l/chk_jschl")
-    session.get(url, params=params)
-    return session.cookies
+    url = urllib.parse.urljoin(response.url, "/cdn-cgi/l/chk_jschl")
+    return session.get(url, params=params)
 
 def solve_jschl(url, page):
     """Solve challenge to get 'jschl_answer' value"""
@@ -91,3 +87,7 @@ expression_values = {
     "!+": 1,
     "+!!": 1,
 }
+
+@cache(maxage=365*24*60*60, keyarg=0)
+def _cookiecache(key, item=None):
+    return item
