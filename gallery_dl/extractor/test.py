@@ -59,7 +59,11 @@ class TestExtractor(Extractor):
                 if len(klass.test) > index
             ]
         else:
-            tests = [test for klass in klasses for test in klass.test]
+            tests = [
+                test
+                for klass in klasses if hasattr(klass, "test")
+                for test in klass.test
+            ]
 
         if not tests:
             raise exception.NotFoundError("test")
