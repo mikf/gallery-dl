@@ -6,17 +6,20 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract comic issues from http://readcomics.tv/"""
+"""Extract comic issues and entire comics from http://readcomics.tv/"""
 
 from .common import Extractor, Message
 from .. import text
 
-class ReadcomicComicExtractor(Extractor):
+class ReadcomicsComicExtractor(Extractor):
     """Extractor for comics from readcomics.tv"""
     category = "readcomics"
     subcategory = "comic"
     pattern = [(r"(?:https?://)?(?:www\.)?(readcomics\.(?:tv|net)/"
                 r"comic/[^/]+)/?$")]
+    test = [("http://readcomics.tv/comic/hellboy", {
+        "url": "f3d53c45a08e068210bc1d5b24810f325d115383",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -41,15 +44,19 @@ class ReadcomicsIssueExtractor(Extractor):
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?readcomics\.(?:tv|net)/"
                 r"([^/]+)/chapter-(\d+)")]
-    root = "https://readcomics.tv"
+    test = [("http://readcomics.tv/hellboy/chapter-1", {
+        "url": "22c216fce559cdc9151261d5a76c270a2f7729ca",
+        "keyword": "8cc155230e643df67cc863ac5c4742ef4a92e2fd",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.comic, self.chapter = match.groups()
+        self.url = "https://readcomics.tv/{}/chapter-{}/full".format(
+            *match.groups()
+        )
 
     def items(self):
-        url = "{}/{}/chapter-{}/full".format(self.root, self.comic, self.chapter)
-        page = self.request(url).text
+        page = self.request(self.url).text
         data = self.get_job_metadata(page)
         imgs = self.get_image_urls(page)
         data["count"] = len(imgs)
@@ -58,7 +65,8 @@ class ReadcomicsIssueExtractor(Extractor):
         for data["page"], url in enumerate(imgs, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
-    def get_job_metadata(self, page):
+    @staticmethod
+    def get_job_metadata(page):
         """Collect metadata for extractor-job"""
         info = text.extract(page, "<title>", " - Read ")[0].rsplit(maxsplit=1)
         return {
