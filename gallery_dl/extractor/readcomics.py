@@ -11,6 +11,27 @@
 from .common import Extractor, Message
 from .. import text
 
+class ReadcomicComicExtractor(Extractor):
+    """Extractor for comics from readcomics.tv"""
+    category = "readcomics"
+    subcategory = "comic"
+    pattern = [(r"(?:https?://)?(?:www\.)?(readcomics\.(?:tv|net)/"
+                r"comic/[^/]+)/?$")]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url = "https://" + match.group(1)
+
+    def items(self):
+        yield Message.Version, 1
+        for issue in self.get_issues():
+            yield Message.Queue, issue
+
+    def get_issues(self):
+        """Return a list of all comic-issue urls"""
+        page = self.request(self.url).text
+        return text.extract_iter(page, '<a  class="ch-name" href="', '"')
+
 
 class ReadcomicsIssueExtractor(Extractor):
     """Extractor for comic-issues from readcomics.tv"""
