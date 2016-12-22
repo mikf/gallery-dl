@@ -46,8 +46,11 @@ class ExhentaiGalleryExtractor(Extractor):
         yield Message.Cookies, self.session.cookies
 
         url = "https://exhentai.org/g/{}/{}/".format(self.gid, self.token)
-        page = self.request(url).text
-        if page.startswith(("Key missing", "Gallery not found")):
+        response = self.session.get(url)
+        page = response.text
+        if response.status_code == 404 and "Gallery Not Available" in page:
+            raise exception.AuthorizationError()
+        if page.startswith(("\ufeffKey missing", "\ufeffGallery not found")):
             raise exception.NotFoundError("gallery")
         data = self.get_job_metadata(page)
         self.count = int(data["count"])
