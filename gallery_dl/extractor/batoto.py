@@ -8,14 +8,84 @@
 
 """Extract manga chapters from https://bato.to/"""
 
-from .common import AsynchronousExtractor, Message
+from .common import Extractor, AsynchronousExtractor, Message
 from .. import text, iso639_1, config, exception
 from ..cache import cache
 import re
 
-class BatotoChapterExtractor(AsynchronousExtractor):
-    """Extractor for manga-chapters from bato.to"""
+
+class BatotoExtractor(Extractor):
+    """Base class for batoto extractors"""
     category = "batoto"
+    root = "https://bato.to"
+
+    def login(self):
+        """Login and set necessary cookies"""
+        username = config.interpolate(("extractor", "batoto", "username"))
+        password = config.interpolate(("extractor", "batoto", "password"))
+        if username and password:
+            cookies = self._login_impl(username, password)
+            for key, value in cookies.items():
+                self.session.cookies.set(key, value, domain=".bato.to", path="/")
+
+    @cache(maxage=360*24*60*60, keyarg=1)
+    def _login_impl(self, username, password):
+        """Actual login implementation"""
+        page = self.request(self.root).text
+        auth = text.extract(page, "name='auth_key' value='", "'")[0]
+        params = {
+            "app": "core",
+            "module": "global",
+            "section": "login",
+            "do": "process",
+        }
+        data = {
+            "auth_key": auth,
+            "referer": self.root,
+            "ips_username": username,
+            "ips_password": password,
+            "rememberMe": "1",
+            "anonymous": "1",
+        }
+        response = self.request(self.root + "/forums/index.php",
+                                method="POST", params=params, data=data)
+        if "Sign In - " in response.text:
+            raise exception.AuthenticationError()
+        return {c: response.cookies[c] for c in ("member_id", "pass_hash")}
+
+
+class BatotoMangaExtractor(BatotoExtractor):
+    """Extractor for mangas from bato.to"""
+    subcategory = "manga"
+    pattern = [r"(?:https?://)?(?:www\.)?bato\.to/comic/_/comics/.*-r\d+"]
+    test = [("http://bato.to/comic/_/comics/cashero-r18146", {
+        "url": "8bcf5541a45b900865c399399974048b0e0dfc53",
+    })]
+
+    def __init__(self, match):
+        BatotoExtractor.__init__(self)
+        self.url = match.group(0)
+
+    def items(self):
+        self.login()
+        yield Message.Version, 1
+        for chapter in self.get_chapters():
+            yield Message.Queue, chapter
+
+    def get_chapters(self):
+        """Return a list of all chapter urls"""
+        # TODO: filter by language / translator
+        needle = ('<td style="border-top:0;">\n           '
+                  '<a href="http://bato.to/reader#')
+        page = self.request(self.url).text
+        return reversed([
+            self.root + "/reader#" + mangahash
+            for mangahash in text.extract_iter(page, needle, '"')
+        ])
+
+
+class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
+    """Extractor for manga-chapters from bato.to"""
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
@@ -24,18 +94,17 @@ class BatotoChapterExtractor(AsynchronousExtractor):
         "url": "432d7958506ad913b0a9e42664a89e46a63e9296",
         "keyword": "75a3a86d32aecfc21c44865b4043490757f73d77",
     })]
-    url = "https://bato.to/"
     reader_url = "https://bato.to/areader"
 
     def __init__(self, match):
-        AsynchronousExtractor.__init__(self)
+        super().__init__()
         self.token = match.group(1)
 
     def items(self):
         self.login()
         self.session.headers.update({
             "X-Requested-With": "XMLHttpRequest",
-            "Referer": self.url + "reader",
+            "Referer": self.root + "/reader",
         })
         params = {
             "id": self.token,
@@ -97,37 +166,3 @@ class BatotoChapterExtractor(AsynchronousExtractor):
         _   , pos = text.extract(page, '<div id="full_image"', '', pos)
         iurl, pos = text.extract(page, '<img src="', '"', pos)
         return nurl if "_" in nurl else None, iurl
-
-    def login(self):
-        """Login and set necessary cookies"""
-        username = config.interpolate(("extractor", "batoto", "username"))
-        password = config.interpolate(("extractor", "batoto", "password"))
-        if username and password:
-            cookies = self._login_impl(username, password)
-            for key, value in cookies.items():
-                self.session.cookies.set(key, value, domain=".bato.to", path="/")
-
-    @cache(maxage=360*24*60*60, keyarg=1)
-    def _login_impl(self, username, password):
-        """Actual login implementation"""
-        page = self.request(self.url).text
-        auth = text.extract(page, "name='auth_key' value='", "'")[0]
-        params = {
-            "app": "core",
-            "module": "global",
-            "section": "login",
-            "do": "process",
-        }
-        data = {
-            "auth_key": auth,
-            "referer": self.url,
-            "ips_username": username,
-            "ips_password": password,
-            "rememberMe": "1",
-            "anonymous": "1",
-        }
-        response = self.request(self.url + "forums/index.php",
-                                method="POST", params=params, data=data)
-        if "Sign In - " in response.text:
-            raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in ("member_id", "pass_hash")}
