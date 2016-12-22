@@ -19,7 +19,7 @@ class KisscomicExtractor(kissmanga.KissmangaExtractor):
     root = "http://kisscomic.us"
 
 
-class KisscomicMangaExtractor(KisscomicExtractor,
+class KisscomicComicExtractor(KisscomicExtractor,
                               kissmanga.KissmangaMangaExtractor):
     """Extractor for comics from kisscomic.us"""
     subcategory = "comic"
@@ -60,5 +60,5 @@ class KisscomicIssueExtractor(KisscomicExtractor,
 
     @staticmethod
     def get_image_urls(page):
-        """Extract list of all image-urls for a manga chapter"""
+        """Extract list of all image-urls for a comic issue"""
         return list(text.extract_iter(page, '<li><img src="', '"'))
