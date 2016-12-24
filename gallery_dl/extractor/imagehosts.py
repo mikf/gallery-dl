@@ -73,7 +73,8 @@ class ImgytImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         url     , pos = text.extract(page, "<img class='centred' src='", "'")
         filename, pos = text.extract(page, " alt='", "'", pos)
-        return url, filename + splitext(url)[1]
+        filename += splitext(url)[1] if filename else url
+        return url, filename
 
 class RapidimgImageExtractor(ImgytImageExtractor):
     """Extractor for single images from rapidimg.net"""
