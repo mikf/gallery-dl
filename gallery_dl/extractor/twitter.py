@@ -19,9 +19,9 @@ class TwitterTweetExtractor(Extractor):
     filename_fmt = "{tweet-id}_{num}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/(([^/]+)/status/(\d+))"]
     test = [("https://twitter.com/PicturesEarth/status/672897688871018500", {
-        "url": "ec37d74e63fc751b9d1838415e3fe60d4e8cbe43",
+        "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
         "keyword": "3cd8e27026a2112008985b1b53f5e4baf4616177",
-        "content": "f0fe8f9cd428580cf082fda3e31c0cc436764693",
+        "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
     })]
 
     def __init__(self, match):
@@ -39,9 +39,8 @@ class TwitterTweetExtractor(Extractor):
         data["count"] = len(imgs)
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, url in enumerate(imgs, 1):
-            data["num"] = num
-            yield Message.Url, url + ":large", text.nameext_from_url(url, data)
+        for data["num"], url in enumerate(imgs, 1):
+            yield Message.Url, url + ":orig", text.nameext_from_url(url, data)
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
