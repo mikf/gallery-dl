@@ -17,7 +17,7 @@ exec(read("gallery_dl/version.py"))
 setup(
     name="gallery_dl",
     version=__version__,
-    description="gallery- and image downloader",
+    description="Command-line program to download image galleries and collections from pixiv, exhentai, danbooru, gelbooru, nijie and more",
     long_description=read("README.rst"),
     url="https://github.com/mikf/gallery-dl",
     download_url="https://github.com/mikf/gallery-dl/releases/latest",
