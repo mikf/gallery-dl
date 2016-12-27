@@ -109,8 +109,9 @@ class HentaifoundryImageExtractor(Extractor):
     subcategory = "image"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    pattern = [(r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/"
-                r"([^/]+)/(\d+)/[^/]+")]
+    pattern = [(r"(?:https?://)?(?:www\.|pictures\.)?hentai-foundry\.com/"
+                r"(?:pictures/user/([^/]+)/(\d+)"
+                r"|[^/]/([^/]+)/(\d+))")]
     test = [("http://www.hentai-foundry.com/pictures/user/Tenpura/340854/notitle", {
         "url": "f3c0739bf86543697deabbed4bf99eb95a04582b",
         "keyword": "96217c5becc1369c36dafa201c3c208518de8f1f",
@@ -119,9 +120,8 @@ class HentaifoundryImageExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.url = match.group(0)
-        self.artist = match.group(1)
-        self.index = match.group(2)
+        self.artist = match.group(1) or match.group(3)
+        self.index = match.group(2) or match.group(4)
 
     def items(self):
         url, data = self.get_image_metadata()
@@ -131,7 +131,9 @@ class HentaifoundryImageExtractor(Extractor):
 
     def get_image_metadata(self):
         """Collect metadata for an image"""
-        response = self.session.get(self.url + "?enterAgree=1")
+        url = "http://www.hentai-foundry.com/pictures/user/{}/{}".format(
+            self.artist, self.index)
+        response = self.session.get(url + "?enterAgree=1")
         if response.status_code == 404:
             raise exception.NotFoundError("image")
         page = response.text
