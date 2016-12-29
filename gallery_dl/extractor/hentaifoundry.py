@@ -137,10 +137,11 @@ class HentaifoundryImageExtractor(Extractor):
         if response.status_code == 404:
             raise exception.NotFoundError("image")
         page = response.text
-        title, pos = text.extract(page, 'Pictures</a> &raquo; <span>', '<')
-        url  , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)
+        artist, pos = text.extract(page, '<a href="/pictures/user/', '"')
+        title , pos = text.extract(page, 'Pictures</a> &raquo; <span>', '<', pos)
+        url   , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)
         data = {
-            "artist": self.artist,
+            "artist": artist,
             "index": self.index,
             "title": text.unescape(title),
         }
