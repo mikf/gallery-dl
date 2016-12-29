@@ -35,6 +35,7 @@ modules = [
     "imgchili",
     "imgth",
     "imgur",
+    "jaiminisbox",
     "khinsider",
     "kisscomic",
     "kissmanga",
