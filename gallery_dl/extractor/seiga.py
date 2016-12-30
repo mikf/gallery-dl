@@ -22,10 +22,15 @@ class SeigaImageExtractor(Extractor):
                 r"(?:seiga/im|image/source/)(\d+)"),
                (r"(?:https?://)?lohas\.nicoseiga\.jp/"
                 r"(?:priv|o)/[^/]+/\d+/(\d+)")]
-    test = [("http://seiga.nicovideo.jp/seiga/im5977527", {
-        "keyword": "fd2628b573d15d1bbdefb219a99b993365b214ed",
-        "content": "d9202292012178374d57fb0126f6124387265297",
-    })]
+    test = [
+        ("http://seiga.nicovideo.jp/seiga/im5977527", {
+            "keyword": "fd2628b573d15d1bbdefb219a99b993365b214ed",
+            "content": "d9202292012178374d57fb0126f6124387265297",
+        }),
+        ("http://seiga.nicovideo.jp/seiga/im123", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
 
     def __init__(self, match):
         Extractor.__init__(self)
