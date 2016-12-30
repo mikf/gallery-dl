@@ -90,10 +90,15 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)"]
-    test = [("http://bato.to/reader#459878c8fda07502", {
-        "url": "432d7958506ad913b0a9e42664a89e46a63e9296",
-        "keyword": "75a3a86d32aecfc21c44865b4043490757f73d77",
-    })]
+    test = [
+        ("http://bato.to/reader#459878c8fda07502", {
+            "url": "432d7958506ad913b0a9e42664a89e46a63e9296",
+            "keyword": "75a3a86d32aecfc21c44865b4043490757f73d77",
+        }),
+        ("http://bato.to/reader#459878c8fda07503", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
     reader_url = "https://bato.to/areader"
 
     def __init__(self, match):

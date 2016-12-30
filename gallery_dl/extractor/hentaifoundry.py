@@ -21,10 +21,15 @@ class HentaifoundryUserExtractor(Extractor):
         r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/([^/]+)/?$",
         r"(?:https?://)?(?:www\.)?hentai-foundry\.com/user/([^/]+)/profile",
     ]
-    test = [("http://www.hentai-foundry.com/pictures/user/Tenpura", {
-        "url": "95d44a26498ae4a73963e6fd03ea5e0e624f14a0",
-        "keyword": "6937c20b3afe5a0af741cc1c419994dd041c8395",
-    })]
+    test = [
+        ("http://www.hentai-foundry.com/pictures/user/Tenpura", {
+            "url": "95d44a26498ae4a73963e6fd03ea5e0e624f14a0",
+            "keyword": "6937c20b3afe5a0af741cc1c419994dd041c8395",
+        }),
+        ("http://www.hentai-foundry.com/user/asdq/profile", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
     url_base = "http://www.hentai-foundry.com/pictures/user/"
 
     def __init__(self, match):
@@ -112,11 +117,16 @@ class HentaifoundryImageExtractor(Extractor):
     pattern = [(r"(?:https?://)?(?:www\.|pictures\.)?hentai-foundry\.com/"
                 r"(?:pictures/user/([^/]+)/(\d+)"
                 r"|[^/]/([^/]+)/(\d+))")]
-    test = [("http://www.hentai-foundry.com/pictures/user/Tenpura/340854/notitle", {
-        "url": "f3c0739bf86543697deabbed4bf99eb95a04582b",
-        "keyword": "96217c5becc1369c36dafa201c3c208518de8f1f",
-        "content": "5c14cd10deaad79a5152f9de45c9203cf76165a0",
-    })]
+    test = [
+        ("http://www.hentai-foundry.com/pictures/user/Tenpura/340854/notitle", {
+            "url": "f3c0739bf86543697deabbed4bf99eb95a04582b",
+            "keyword": "96217c5becc1369c36dafa201c3c208518de8f1f",
+            "content": "5c14cd10deaad79a5152f9de45c9203cf76165a0",
+        }),
+        ("http://www.hentai-foundry.com/pictures/user/Tenpura/340853/", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
 
     def __init__(self, match):
         Extractor.__init__(self)

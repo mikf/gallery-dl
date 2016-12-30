@@ -22,10 +22,18 @@ class ExhentaiGalleryExtractor(Extractor):
     directory_fmt = ["{category}", "{gallery-id}"]
     filename_fmt = "{gallery-id}_{num:>04}_{image-token}_{name}.{extension}"
     pattern = [r"(?:https?://)?(?:g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
-    test = [("https://exhentai.org/g/960460/4f0e369d82/", {
-        "keyword": "623f8c86c9fe38e964682dd4309b96922655b900",
-        "content": "493d759de534355c9f55f8e365565b62411de146",
-    })]
+    test = [
+        ("https://exhentai.org/g/960460/4f0e369d82/", {
+            "keyword": "623f8c86c9fe38e964682dd4309b96922655b900",
+            "content": "493d759de534355c9f55f8e365565b62411de146",
+        }),
+        ("https://exhentai.org/g/960461/4f0e369d82/", {
+            "exception": exception.NotFoundError,
+        }),
+        ("http://exhentai.org/g/962698/7f02358e00/", {
+            "exception": exception.AuthorizationError,
+        }),
+    ]
     api_url = "https://exhentai.org/api.php"
 
     def __init__(self, match):
