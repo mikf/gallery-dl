@@ -19,6 +19,9 @@ class TestExtractors(unittest.TestCase):
     def run_test(self, extr, url, result):
         hjob = job.HashJob(url, "content" in result)
         self.assertEqual(extr, hjob.extractor.__class__)
+        if "exception" in result:
+            self.assertRaises(result["exception"], hjob.run)
+            return
         hjob.run()
         if "url" in result:
             self.assertEqual(hjob.hash_url.hexdigest(), result["url"])
