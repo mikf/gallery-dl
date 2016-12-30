@@ -78,10 +78,15 @@ class NijieUserExtractor(NijieExtractor):
     subcategory = "user"
     pattern = [(r"(?:https?://)?(?:www\.)?nijie\.info/"
                 r"members(?:_illust)?\.php\?id=(\d+)")]
-    test = [("https://nijie.info/members_illust.php?id=44", {
-        "url": "585d821df4716b1098660a0be426d01db4b65f2a",
-        "keyword": "7a2dbf8fc0dfdb2af208ecdb8ec7f3186bdc31ab",
-    })]
+    test = [
+        ("https://nijie.info/members_illust.php?id=44", {
+            "url": "585d821df4716b1098660a0be426d01db4b65f2a",
+            "keyword": "7a2dbf8fc0dfdb2af208ecdb8ec7f3186bdc31ab",
+        }),
+        ("https://nijie.info/members_illust.php?id=43", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
 
     def __init__(self, match):
         NijieExtractor.__init__(self)
@@ -90,7 +95,7 @@ class NijieUserExtractor(NijieExtractor):
                            + self.artist_id)
 
     def get_image_ids(self):
-        response = self.request(self.artist_url)
+        response = self.session.get(self.artist_url)
         if response.status_code == 404:
             raise exception.NotFoundError("artist")
         return list(text.extract_iter(response.text, ' illust_id="', '"'))
@@ -100,11 +105,16 @@ class NijieImageExtractor(NijieExtractor):
     """Extractor for a work/image from nijie.info"""
     subcategory = "image"
     pattern = [r"(?:https?://)?(?:www\.)?nijie\.info/view\.php\?id=(\d+)"]
-    test = [("https://nijie.info/view.php?id=70720", {
-        "url": "a10d4995645b5f260821e32c60a35f73546c2699",
-        "keyword": "e454c2bad9b636b90d569881bf4fe8438506e0d2",
-        "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
-    })]
+    test = [
+        ("https://nijie.info/view.php?id=70720", {
+            "url": "a10d4995645b5f260821e32c60a35f73546c2699",
+            "keyword": "e454c2bad9b636b90d569881bf4fe8438506e0d2",
+            "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
+        }),
+        ("https://nijie.info/view.php?id=70724", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
 
     def __init__(self, match):
         NijieExtractor.__init__(self)

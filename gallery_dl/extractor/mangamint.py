@@ -34,7 +34,10 @@ class MangamintMangaExtractor(MangamintExtractor):
             "url": "df7a1f4224d23e392ec09d4c7bbd4fbc873327d0",
         }),
         ("https://www.mangamint.com/manga/gosu-manhwa", {
-            "url": "555a2e42a1e10c54ce3439090807af9c2354d890",
+            "url": "6d06633cf3d5f9bd9f2c2b42918be853d6e0c395",
+        }),
+        ("https://www.mangamint.com/manga/gosu", {
+            "exception": exception.NotFoundError,
         }),
     ]
 
@@ -74,6 +77,9 @@ class MangamintChapterExtractor(MangamintExtractor):
             "url": "56a16d2560830a4e53bfe60590c21b0a1c4069e7",
             "keyword": "f862c1d927d331a016e306305534d38d877aa3fe",
             "content": "8d7ae90e932dc2fa48163497fca78729b2c7a759",
+        }),
+        ("https://www.mangamint.com/gosu-552", {
+            "exception": exception.NotFoundError,
         }),
     ]
 
