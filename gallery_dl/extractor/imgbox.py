@@ -19,11 +19,16 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{title} - {gallery-key}"]
     filename_fmt = "{num:>03}-{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"]
-    test = [("https://imgbox.com/g/JaX5V5HX7g", {
-        "url": "6eafdeebaf0774238dddc9227e2ba315e40e9b7c",
-        "keyword": "cebd7f6868cf84ff492341c936cb6dbe5cde4682",
-        "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
-    })]
+    test = [
+        ("https://imgbox.com/g/JaX5V5HX7g", {
+            "url": "6eafdeebaf0774238dddc9227e2ba315e40e9b7c",
+            "keyword": "cebd7f6868cf84ff492341c936cb6dbe5cde4682",
+            "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
+        }),
+        ("https://imgbox.com/g/JaX5V5HX7h", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
     url_base = "https://imgbox.com"
 
     def __init__(self, match):
@@ -79,11 +84,16 @@ class ImgboxImageExtractor(Extractor):
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"]
-    test = [("https://imgbox.com/qHhw7lpG", {
-        "url": "b9556dc307edf88e016fbced6d354702bc236070",
-        "keyword": "ff0524dba869a4b3292d7d4f72f5da4024b4f002",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
+    test = [
+        ("https://imgbox.com/qHhw7lpG", {
+            "url": "b9556dc307edf88e016fbced6d354702bc236070",
+            "keyword": "ff0524dba869a4b3292d7d4f72f5da4024b4f002",
+            "content": "0c8768055e4e20e7c7259608b67799171b691140",
+        }),
+        ("https://imgbox.com/qHhw7lpH", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
 
     def __init__(self, match):
         Extractor.__init__(self)
