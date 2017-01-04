@@ -66,7 +66,7 @@ modules = [
     "whentai",
     "worldthree",
     "yandere",
-    "yonkou",
+    "yonkouprod",
     "imagehosts",
     "recursive",
     "test",
