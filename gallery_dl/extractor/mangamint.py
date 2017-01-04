@@ -33,10 +33,7 @@ class MangamintMangaExtractor(MangamintExtractor):
         ("www.mangamint.com/manga/mushishi-manga", {
             "url": "df7a1f4224d23e392ec09d4c7bbd4fbc873327d0",
         }),
-        ("https://www.mangamint.com/manga/gosu-manhwa", {
-            "url": "6d06633cf3d5f9bd9f2c2b42918be853d6e0c395",
-        }),
-        ("https://www.mangamint.com/manga/gosu", {
+        ("https://www.mangamint.com/manga/mushishi", {
             "exception": exception.NotFoundError,
         }),
     ]
