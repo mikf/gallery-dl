@@ -15,10 +15,10 @@ class InfinitychanThreadExtractor(chan.ChanThreadExtractor):
     category = "8chan"
     filename_fmt = "{time}-{filename}{ext}"
     pattern = [r"(?:https?://)?(?:www\.)?8ch\.net/([^/]+)/res/(\d+)"]
-    test = [("https://8ch.net/tg/res/175887.html", {
-        "url": "646d4230b40f9cff3f8674e3efe44bba3af4924b",
-        "keyword": "923a6abc046cb618af8f9fd3bbb63c4cd6d73542",
-        "content": "81e21a3cc87f64f224a966f207e8e1731216c345",
+    test = [("https://8ch.net/wh40k/res/1.html", {
+        "url": "9220c79950d3f9cdd2c0436e816aec6b8342fac1",
+        "keyword": "df5773339c5864c71b63fc26ca60ea7098b83cb1",
+        "content": "0533b95bee50c616e3c1a8c50e4087e170cfd950",
     })]
     api_url = "https://8ch.net/{board}/res/{thread}.json"
     file_url = "https://media.8ch.net/{board}/src/{tim}{ext}"
