@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016, 2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,9 +10,9 @@
 
 from .foolslide import FoolslideChapterExtractor
 
-class YonkouChapterExtractor(FoolslideChapterExtractor):
+class YonkouprodChapterExtractor(FoolslideChapterExtractor):
     """Extractor for manga-chapters from yonkouprod.com"""
-    category = "yonkou"
+    category = "yonkouprod"
     pattern = [(r"(?:https?://)?(?:www\.)?(yonkouprod\.com/reader/read/"
                 r"[^/]+/([a-z]{2})/\d+/\d+)")]
     test = [("http://yonkouprod.com/reader/read/fairy-tail/en/0/512/", {
