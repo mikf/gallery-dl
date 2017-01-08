@@ -58,8 +58,8 @@ class BatotoMangaExtractor(BatotoExtractor):
     """Extractor for mangas from bato.to"""
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?bato\.to/comic/_/comics/.*-r\d+"]
-    test = [("http://bato.to/comic/_/comics/cashero-r18146", {
-        "url": "8bcf5541a45b900865c399399974048b0e0dfc53",
+    test = [("http://bato.to/comic/_/comics/aria-r2007", {
+        "url": "a38585b0339587666d772ee06f2a60abdbf42a97",
     })]
 
     def __init__(self, match):

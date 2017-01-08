@@ -17,7 +17,7 @@ class YonkouprodChapterExtractor(FoolslideChapterExtractor):
                 r"[^/]+/([a-z]{2})/\d+/\d+)")]
     test = [("http://yonkouprod.com/reader/read/fairy-tail/en/0/512/", {
         "url": "7647850e2b1ad11c2baa9628755bf7f186350a0b",
-        "keyword": "2e3519670694bd851149f8004a00320b9e962044",
+        "keyword": "d079c718d6620478fa72a700fdd027f9a0f0760b",
     })]
 
     def __init__(self, match):
