@@ -169,12 +169,14 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
-        cookies = self._login_impl()
+        username = config.interpolate(("extractor", "exhentai", "username"))
+        password = config.interpolate(("extractor", "exhentai", "password"))
+        cookies = self._login_impl(username, password)
         for key, value in cookies.items():
             self.session.cookies.set(key, value, domain=".exhentai.org", path="/")
 
-    @cache(maxage=360*24*60*60)
-    def _login_impl(self):
+    @cache(maxage=360*24*60*60, keyarg=1)
+    def _login_impl(self, username, password):
         """Actual login implementation"""
         cnames = ["ipb_member_id", "ipb_pass_hash"]
 
@@ -190,8 +192,8 @@ class ExhentaiGalleryExtractor(Extractor):
             "CookieDate": "1",
             "b": "d",
             "bt": "1-1",
-            "UserName": config.interpolate(("extractor", "exhentai", "username")),
-            "PassWord": config.interpolate(("extractor", "exhentai", "password")),
+            "UserName": username,
+            "PassWord": password,
             "ipb_login_submit": "Login!",
         }
         self.session.headers["Referer"] = "http://e-hentai.org/bounce_login.php?b=d&bt=1-1"
