@@ -226,14 +226,7 @@ class PixivAPI():
             "Referer": "http://www.pixiv.net/",
             "User-Agent": "PixivIOSApp/5.8.0",
         })
-        self.user_id  = -1
-        self.username = config.interpolate(("extractor", "pixiv", "username"))
-        self.password = config.interpolate(("extractor", "pixiv", "password"))
-
-    def login(self):
-        """Login and gain a Pixiv Public-API access token"""
-        self.user_id, auth_header = self._login_impl(self.username, self.password)
-        self.session.headers["Authorization"] = auth_header
+        self.user_id = -1
 
     @require_login
     def user(self, user_id):
@@ -284,6 +277,13 @@ class PixivAPI():
             "{user}/favorite_works.json".format(user=user_id), params=params
         )
         return self._parse(response)
+
+    def login(self):
+        """Login and gain a Pixiv Public-API access token"""
+        username = config.interpolate(("extractor", "pixiv", "username"))
+        password = config.interpolate(("extractor", "pixiv", "password"))
+        self.user_id, auth_header = self._login_impl(username, password)
+        self.session.headers["Authorization"] = auth_header
 
     @cache(maxage=50*60, keyarg=1)
     def _login_impl(self, username, password):

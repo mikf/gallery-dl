@@ -25,10 +25,7 @@ class NijieExtractor(AsynchronousExtractor):
         self.artist_id = ""
 
     def items(self):
-        self.session.cookies = self.login(
-            config.interpolate(("extractor", self.category, "username")),
-            config.interpolate(("extractor", self.category, "password"))
-        )
+        self.login()
         data = self.get_job_metadata()
         images = self.get_image_ids()
         yield Message.Version, 1
@@ -62,9 +59,15 @@ class NijieExtractor(AsynchronousExtractor):
                 "image-id": image_id,
             })
 
-    @cache(maxage=30*24*60*60, keyarg=1)
-    def login(self, username, password):
+    def login(self):
         """Login and obtain session cookie"""
+        username = config.interpolate(("extractor", "nijie", "username"))
+        password = config.interpolate(("extractor", "nijie", "password"))
+        self.session.cookies = self._login_impl(username, password)
+
+    @cache(maxage=30*24*60*60, keyarg=1)
+    def _login_impl(self, username, password):
+        """Actual login implementation"""
         params = {"email": username, "password": password}
         page = self.session.post("https://nijie.info/login_int.php",
                                  data=params).text
