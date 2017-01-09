@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015, 2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 import unittest
-from  gallery_dl import extractor, job, config, cache
+from gallery_dl import extractor, job, config
+
 
 class TestExtractors(unittest.TestCase):
 
@@ -16,7 +17,7 @@ class TestExtractors(unittest.TestCase):
         config.load()
         config.set(("cache", "file"), ":memory:")
 
-    def run_test(self, extr, url, result):
+    def _run_test(self, extr, url, result):
         hjob = job.HashJob(url, "content" in result)
         self.assertEqual(extr, hjob.extractor.__class__)
         if "exception" in result:
@@ -31,24 +32,26 @@ class TestExtractors(unittest.TestCase):
             self.assertEqual(hjob.hash_content.hexdigest(), result["content"])
 
 
-def generate_test(extr):
+# dynamically genetate tests
+def _generate_test(extr, tcase):
     def test(self):
-        print("\n", extr.__name__, sep="")
-        for url, result in extr.test:
-            print(url)
-            self.run_test(extr, url, result)
+        url, result = tcase
+        print("\n", url, sep="")
+        self._run_test(extr, url, result)
     return test
 
 
+for extr in extractor.extractors():
+    # disable extractors that require authentication for now
+    if hasattr(extr, "login"):
+        continue
+    if hasattr(extr, "test") and extr.test:
+        name = "test_" + extr.__name__ + "_"
+        for num, tcase in enumerate(extr.test, 1):
+            test = _generate_test(extr, tcase)
+            test.__name__ = name + str(num)
+            setattr(TestExtractors, test.__name__, test)
+del test
+
 if __name__ == '__main__':
-    import sys
-    extractors = extractor.extractors()
-    if len(sys.argv) > 1:
-        extractors = filter(lambda x: x.category in sys.argv, extractors)
-    for extr in extractors:
-        if hasattr(extr, "test") and extr.test:
-            name = "test_" + extr.__name__
-            test = generate_test(extr)
-            setattr(TestExtractors, name, test)
-    del sys.argv[1:]
     unittest.main(warnings='ignore')
