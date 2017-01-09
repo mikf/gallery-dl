@@ -23,6 +23,7 @@ modules = [
     "e621",
     "exhentai",
     "gelbooru",
+    "gomanga",
     "hbrowse",
     "hentai2read",
     "hentaibox",
