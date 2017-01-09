@@ -18,6 +18,7 @@ class FoolslideChapterExtractor(Extractor):
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "{chapter:>03} - {title}"]
     filename_fmt = "{manga}_{chapter:>03}_{page:>03}.{extension}"
+    single = True
 
     def __init__(self, url, lang):
         Extractor.__init__(self)
@@ -61,7 +62,12 @@ class FoolslideChapterExtractor(Extractor):
             "title": text.unescape(parts[1].strip() if len(parts) > 1 else ""),
         }
 
-    @staticmethod
-    def get_images(page):
+    def get_images(self, page):
         """Return a list of all images in this chapter"""
-        return json.loads(text.extract(page, 'var pages = ', ';')[0])
+        if self.single:
+            pos = 0
+            needle = "var pages = "
+        else:
+            pos = page.find("[{")
+            needle = " = "
+        return json.loads(text.extract(page, needle, ";", pos)[0])
