@@ -18,7 +18,6 @@ class InfinitychanThreadExtractor(chan.ChanThreadExtractor):
     test = [("https://8ch.net/wh40k/res/1.html", {
         "url": "9220c79950d3f9cdd2c0436e816aec6b8342fac1",
         "keyword": "df5773339c5864c71b63fc26ca60ea7098b83cb1",
-        "content": "0533b95bee50c616e3c1a8c50e4087e170cfd950",
     })]
     api_url = "https://8ch.net/{board}/res/{thread}.json"
     file_url = "https://media.8ch.net/{board}/src/{tim}{ext}"

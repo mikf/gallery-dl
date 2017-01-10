@@ -7,6 +7,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import sys
 import unittest
 from gallery_dl import extractor, job, config
 
@@ -14,8 +15,13 @@ from gallery_dl import extractor, job, config
 class TestExtractors(unittest.TestCase):
 
     def setUp(self):
-        config.load()
+        name = "gallerydl"
+        email = "gallerydl@openaliasbox.org"
         config.set(("cache", "file"), ":memory:")
+        config.set(("username",), name)
+        config.set(("password",), name)
+        config.set(("extractor", "nijie", "username"), email)
+        config.set(("extractor", "seiga", "username"), email)
 
     def _run_test(self, extr, url, result):
         hjob = job.HashJob(url, "content" in result)
@@ -40,10 +46,19 @@ def _generate_test(extr, tcase):
         self._run_test(extr, url, result)
     return test
 
+# enable selective testing for direct calls
+extractors = extractor.extractors()
+if __name__ == '__main__' and len(sys.argv) > 1:
+    print(sys.argv)
+    extractors = [
+        extr for extr in extractors
+        if extr.category in sys.argv
+    ]
+    del sys.argv[1:]
 
-for extr in extractor.extractors():
-    # disable extractors that require authentication for now
-    if hasattr(extr, "login"):
+skip = ("exhentai", "kissmanga")
+for extr in extractors:
+    if extr.category in skip:
         continue
     if hasattr(extr, "test") and extr.test:
         name = "test_" + extr.__name__ + "_"
@@ -51,7 +66,7 @@ for extr in extractor.extractors():
             test = _generate_test(extr, tcase)
             test.__name__ = name + str(num)
             setattr(TestExtractors, test.__name__, test)
-del test
+            del test
 
 if __name__ == '__main__':
     unittest.main(warnings='ignore')
