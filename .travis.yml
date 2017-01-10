@@ -7,4 +7,5 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - nosetests --verbose test
+  - if [[ $TRAVIS_PYTHON_VERSION != '3.3' ]]; then nosetests --ignore-files=test_extractors --verbose test; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.3' ]]; then nosetests --verbose test; fi
