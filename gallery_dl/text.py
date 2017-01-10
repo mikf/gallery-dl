@@ -116,5 +116,5 @@ unquote = urllib.parse.unquote
 try:
     unescape = html.unescape
 except AttributeError:
-    import html.parse
-    unescape = html.parse.HTMLParser().unescape
+    import html.parser
+    unescape = html.parser.HTMLParser().unescape
