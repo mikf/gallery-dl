@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -123,7 +123,10 @@ class DatabaseCache(CacheModule):
         key, timestamp = key
         try:
             cursor = self.db.cursor()
-            cursor.execute("BEGIN EXCLUSIVE")
+            try:
+                cursor.execute("BEGIN EXCLUSIVE")
+            except sqlite3.OperationalError:
+                """workaround for python 3.6"""
             cursor.execute("SELECT value, expires FROM data WHERE key=?", (key,))
             value, expires = cursor.fetchone()
             if timestamp < expires:
