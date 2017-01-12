@@ -243,8 +243,6 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
     pattern = [r"(?:https?://)?((?:www\.)?imgspice\.com/([^/]+))"]
     test = [("https://imgspice.com/zop38mvvq29u/", {
         "url": "a45833733c02b64d105363ffd8fd19f06992a2f7",
-        "keyword": "5218f63195e6a487c0881fd1cda78c535c61b462",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
     https = True
     params = None
