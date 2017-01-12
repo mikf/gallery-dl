@@ -49,14 +49,13 @@ def _generate_test(extr, tcase):
 # enable selective testing for direct calls
 extractors = extractor.extractors()
 if __name__ == '__main__' and len(sys.argv) > 1:
-    print(sys.argv)
     extractors = [
         extr for extr in extractors
         if extr.category in sys.argv
     ]
     del sys.argv[1:]
 
-skip = ("deviantart"1, "kissmanga")
+skip = ["kissmanga"]
 for extr in extractors:
     if extr.category in skip:
         continue
