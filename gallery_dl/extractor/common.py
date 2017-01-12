@@ -10,13 +10,10 @@
 
 import time
 import queue
-import logging
 import requests
 import threading
 from .message import Message
 from .. import config
-
-log = logging.getLogger(__name__)
 
 
 class Extractor():
@@ -96,7 +93,4 @@ def safe_request(session, url, method="GET", *args, **kwargs):
             continue
 
         # everything ok -- proceed to download
-        log.debug(url)
-        log.debug(r.headers)
-        log.debug(r.text)
         return r

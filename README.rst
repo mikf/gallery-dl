@@ -49,10 +49,10 @@ Supported Sites
     rule34.xxx, safebooru.org, chan.sankakucomplex.com, yande.re
 * Manga:
     bato.to, dynasty-scans.com, kissmanga.com, kobato.hologfx.com,
-    mangahere.co, mangamint.com, mangapanda.com, mangapark.me, mangareader.net,
-    mangashare.com, mangastream.com, powermanga.org, raw.senmanga.com,
-    reader.sensescans.com, thespectrum.net, slide.world-three.org,
-    yonkouprod.com
+    gomanga.co, mangahere.co, mangamint.com, mangapanda.com, mangapark.me,
+    mangareader.net, mangashare.com, mangastream.com, powermanga.org,
+    raw.senmanga.com, reader.sensescans.com, thespectrum.net,
+    slide.world-three.org, yomanga.co, yonkouprod.com
 * Comic:
     kisscomic.us, readcomiconline.to, readcomics.tv
 * Hentai:
