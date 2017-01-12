@@ -55,7 +55,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
     ]
     del sys.argv[1:]
 
-skip = ["kissmanga"]
+skip = []
 for extr in extractors:
     if extr.category in skip:
         continue
