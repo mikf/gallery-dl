@@ -8,92 +8,38 @@
 
 """Extract images from http://www.deviantart.com/"""
 
-from .common import Extractor, AsynchronousExtractor, Message
-from .. import text
-import re
+from .common import Extractor, Message
+from .. import text, exception
+from ..cache import cache
 
-class DeviantartUserExtractor(AsynchronousExtractor):
+
+class DeviantartUserExtractor(Extractor):
     """Extractor for all works from an artist on deviantart.com"""
     category = "deviantart"
     subcategory = "user"
-    directory_fmt = ["{category}", "{artist}"]
+    directory_fmt = ["{category}", "{username}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
     test = [("http://shimoda7.deviantart.com/gallery/", {
         "url": "63bfa8efba199e27181943c9060f6770f91a8441",
-        "keyword": "741bbea4891a23335bb5d119c4a42aeb54702c50",
+        "keyword": "4ffe227a50f373faf643d7e5ae89a04859af8d19",
     })]
 
     def __init__(self, match):
-        AsynchronousExtractor.__init__(self)
-        self.session.cookies["agegate_state"] = "1"
-        self.artist = match.group(1)
+        Extractor.__init__(self)
+        self.api = DeviantartAPI(self.session)
+        self.user = match.group(1)
 
     def items(self):
-        metadata = self.get_job_metadata()
+        first = True
         yield Message.Version, 1
-        yield Message.Directory, metadata
-        for url, data in self.get_works():
-            data.update(metadata)
-            yield Message.Url, url, data
-
-    def get_works(self):
-        """Yield all work-items for a deviantart-artist"""
-        url = "http://{}.deviantart.com/gallery/".format(self.artist)
-        params = {"catpath": "/", "offset": 0}
-        while True:
-            num = 0
-            page = self.request(url, params=params).text
-            _, pos = text.extract(page, '<div data-dwait-click="GMI.wake"', '')
-            while True:
-                image_info, pos = text.extract(page, '<a class="thumb', '</a>', pos)
-                if not image_info:
-                    break
-                num += 1
-                yield self.get_image_metadata(image_info)
-            if num != 24:
-                break
-            params["offset"] += 24
-
-    def get_job_metadata(self):
-        """Collect metadata for extractor-job"""
-        return {"artist": self.artist}
-
-    def get_image_metadata(self, image):
-        """Collect metadata for an image"""
-        tmatch = self.extract_data(image, 'title',
-            r'(.+) by (.+), ([A-Z][a-z]{2} \d+, \d{4}) in')
-        hmatch = self.extract_data(image, 'href', r'[^"]+-(\d+)')
-
-        url, pos = text.extract(image, ' data-super-full-img="', '"', tmatch.end())
-        if url:
-            width , pos = text.extract(image, ' data-super-full-width="', '"', pos)
-            height, pos = text.extract(image, ' data-super-full-height="', '"', pos)
-        else:
-            url, pos = text.extract(image, ' data-super-img="', '"', pos)
-            if url:
-                width , pos = text.extract(image, ' data-super-width="', '"', pos)
-                height, pos = text.extract(image, ' data-super-height="', '"', pos)
-            else:
-                page = self.request(hmatch.group(0)).text
-                _     , pos = text.extract(page, ' class="dev-content-normal "', '')
-                url   , pos = text.extract(page, ' src="', '"', pos)
-                width , pos = text.extract(page, ' width="', '"', pos)
-                height, pos = text.extract(page, ' height="', '"', pos)
-        return url, text.nameext_from_url(url, {
-            "index": hmatch.group(1),
-            "title": text.unescape(tmatch.group(1)),
-            "artist": tmatch.group(2),
-            "date": tmatch.group(3),
-            "width": width,
-            "height": height,
-        })
-
-    @staticmethod
-    def extract_data(txt, attr, pattern):
-        """Extract a HTML attribute and apply a regex to it"""
-        txt, _ = text.extract(txt, ' %s="' % attr, '"')
-        return re.match(pattern, txt)
+        for deviation in self.api.gallery_all(self.user):
+            del deviation["stats"]
+            if first:
+                yield Message.Directory, deviation["author"]
+                first = False
+            deviation["index"] = deviation["url"].rsplit("-", maxsplit=1)[-1]
+            yield Message.Url, deviation["content"]["src"], deviation
 
 
 class DeviantartImageExtractor(Extractor):
@@ -174,3 +120,44 @@ class DeviantartImageExtractor(Extractor):
             data["image"] = response.headers["Location"]
 
         return data
+
+
+class DeviantartAPI():
+    """Minimal interface for the deviantart API"""
+    def __init__(self, session, client_id="5388",
+                 client_secret="76b08c69cfb27f26d6161f9ab6d061a1"):
+        self.session = session
+        self.client_id = client_id
+        self.client_secret = client_secret
+
+    def gallery_all(self, username, offset=0):
+        """Yield all Deviation-objects of a specific user """
+        self.authenticate()
+        url = "https://www.deviantart.com/api/v1/oauth2/gallery/all"
+        params = {"username": username, "offset": offset}
+        while True:
+            data = self.session.get(url, params=params).json()
+            yield from data["results"]
+            if not data["has_more"]:
+                return
+            params["offset"] = data["next_offset"]
+
+    def authenticate(self):
+        """Authenticate the application by requesting a bearer token"""
+        bearer_token = self._authenticate_impl(
+            self.client_id, self.client_secret
+        )
+        self.session.headers["Authorization"] = bearer_token
+
+    @cache(maxage=3600, keyarg=1)
+    def _authenticate_impl(self, client_id, client_secret):
+        url = "https://www.deviantart.com/oauth2/token"
+        data = {
+            "grant_type": "client_credentials",
+            "client_id": client_id,
+            "client_secret": client_secret,
+        }
+        response = self.session.post(url, data=data)
+        if response.status_code != 200:
+            raise exception.AuthenticationError
+        return "Bearer " + response.json()["access_token"]
