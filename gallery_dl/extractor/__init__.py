@@ -42,6 +42,7 @@ modules = [
     "kissmanga",
     "konachan",
     "luscious",
+    "mangafox",
     "mangahere",
     "mangamint",
     "mangapanda",
