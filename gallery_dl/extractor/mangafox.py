@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://www.mangafox.me/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import text
+from .. import text, exception
 import re
 
 
@@ -32,6 +32,8 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
 
     def items(self):
         page = self.request(self.url + "/1.html").text
+        if "Sorry, its licensed, and not available." in page:
+            raise exception.AuthorizationError()
         data = self.get_metadata(page)
         urls = zip(
             range(1, int(data["count"])+1),
