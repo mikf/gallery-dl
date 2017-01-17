@@ -1,24 +1,74 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import os.path
+
 
 try:
     from setuptools import setup
+    has_setuptools = True
 except ImportError:
     from distutils.core import setup
+    has_setuptools = False
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+
 # get version without importing the package
 exec(read("gallery_dl/version.py"))
+
+DESCRIPTION = ("Command-line program to download image galleries and "
+               "collections from pixiv, exhentai, danbooru, gelbooru, nijie "
+               "and more")
+LONG_DESCRIPTION = read("README.rst")
+
+if "py2exe" in sys.argv:
+    try:
+        import py2exe
+    except ImportError:
+        print("Error importing 'py2exe'", file=sys.stderr)
+        sys.exit(1)
+    params = {
+        "console": [{
+            "script": "./gallery_dl/__main__.py",
+            "dest_base": "gallery-dl",
+            "version": __version__,
+            "description": DESCRIPTION,
+            "comments": LONG_DESCRIPTION,
+            "product_name": "gallery-dl",
+            "product_version": __version__,
+        }],
+        "options": {"py2exe": {
+            "bundle_files": 1,
+            "compressed": 1,
+            "optimize": 2,
+            "dist_dir": ".",
+            "packages": ["gallery_dl"],
+            "dll_excludes": ["w9xpopen.exe", "crypt32.dll"],
+        }},
+        "zipfile": None
+    }
+elif has_setuptools:
+    params = {
+        "entry_points": {
+            "console_scripts": [
+                "gallery-dl = gallery_dl:main"
+            ]
+        }
+    }
+else:
+    params = {
+        "scripts": ["bin/gallery-dl"]
+    }
 
 setup(
     name="gallery_dl",
     version=__version__,
-    description="Command-line program to download image galleries and collections from pixiv, exhentai, danbooru, gelbooru, nijie and more",
-    long_description=read("README.rst"),
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
     url="https://github.com/mikf/gallery-dl",
     download_url="https://github.com/mikf/gallery-dl/releases/latest",
     author="Mike Fährmann",
@@ -30,14 +80,6 @@ setup(
     install_requires=[
         "requests >= 2.4.2",
     ],
-    scripts=[
-        "bin/gallery-dl",
-    ],
-    entry_points={
-        'console_scripts': [
-            'gallery-dl = gallery_dl:main',
-        ],
-    },
     packages=[
         "gallery_dl",
         "gallery_dl.extractor",
@@ -61,5 +103,6 @@ setup(
         "Topic :: Multimedia",
         "Topic :: Multimedia :: Graphics",
     ],
-    test_suite='test',
+    test_suite="test",
+    **params
 )
