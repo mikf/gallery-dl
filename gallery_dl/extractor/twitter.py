@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text
 
 class TwitterTweetExtractor(Extractor):
-    """Extractor for images from twitter tweets"""
+    """Extractor for images from tweets on twitter.com"""
     category = "twitter"
     subcategory = "tweet"
     directory_fmt = ["{category}", "{user}"]
