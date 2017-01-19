@@ -19,6 +19,10 @@ class WhentaiUserExtractor(Extractor):
     filename_fmt = "{category}_{image-id:>05}_{title}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?whentai\.com/"
                 r"(?:users|uploads)/(\d+)(?:/([^/?]+))?")]
+    test = [("http://whentai.com/users/234/Evulchibi", {
+        "url": "6e7dd2378c8132bc4be343f1ddbd9d64eeb57b6a",
+        "keyword": "3d385c12ce95d343cc4b2443dab7b44b652ba808",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -73,6 +77,11 @@ class WhentaiImageExtractor(Extractor):
     directory_fmt = ["{category}", "{user}"]
     filename_fmt = "{category}_{image-id:>05}_{title}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?whentai\.com/view/(\d+)"]
+    test = [("http://whentai.com/view/2089/", {
+        "url": "116761cdd3a4d78f9ebe22c18efae1465b2e4d1b",
+        "keyword": "686bb5af1694efb326d597d4c98ee12d88078455",
+        "content": "b4545aaeb3bc7d94c8941bdfdcb768261f2579b3",
+    })]
 
     def __init__(self, match):
         Extractor.__init__(self)
