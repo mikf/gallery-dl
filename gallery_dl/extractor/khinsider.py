@@ -19,7 +19,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?downloads\.khinsider\.com/game-soundtracks/album/(.+)"]
     test = [("http://downloads.khinsider.com/game-soundtracks/album/horizon-riders-wii-", {
-        "url": "35ff4c8310884664408dc5560fda3b06157f7606",
+        "url": "732639e9e72e169f8ec36a71609471aaf67451e0",
         "keyword": "d91cf3edee6713b536eaf3995743f0be7dc72f68",
     })]
 
