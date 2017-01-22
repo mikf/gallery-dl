@@ -8,6 +8,7 @@
 
 """Common classes and constants used by extractor modules."""
 
+import os
 import time
 import queue
 import requests
@@ -94,3 +95,21 @@ def safe_request(session, url, method="GET", *args, **kwargs):
 
         # everything ok -- proceed to download
         return r
+
+
+# The first import of requests happens inside this file.
+# If we are running on Windows and the from requests expected certificate file
+# is missing (which happens in a standalone executable from py2exe), the
+# requests.Session object gets monkey patched to always set its 'verify'
+# attribute to False to avoid an exception being thrown when attempting to
+# access https:// URLs.
+
+if os.name == "nt":
+    import os.path
+    import requests.certs
+    if not os.path.isfile(requests.certs.where()):
+        def patched_init(self):
+            session_init(self)
+            self.verify = False
+        session_init = requests.Session.__init__
+        requests.Session.__init__ = patched_init

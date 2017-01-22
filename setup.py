@@ -30,7 +30,7 @@ if "py2exe" in sys.argv:
         import py2exe
     except ImportError:
         print("Error importing 'py2exe'", file=sys.stderr)
-        sys.exit(1)
+        exit(1)
     params = {
         "console": [{
             "script": "./gallery_dl/__main__.py",
@@ -42,14 +42,14 @@ if "py2exe" in sys.argv:
             "product_version": __version__,
         }],
         "options": {"py2exe": {
-            "bundle_files": 1,
+            "bundle_files": 0,
             "compressed": 1,
             "optimize": 2,
             "dist_dir": ".",
             "packages": ["gallery_dl"],
-            "dll_excludes": ["w9xpopen.exe", "crypt32.dll"],
+            "dll_excludes": ["w9xpopen.exe"],
         }},
-        "zipfile": None
+        "zipfile": None,
     }
 elif has_setuptools:
     params = {
