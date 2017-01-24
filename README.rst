@@ -2,24 +2,21 @@
 gallery-dl
 ==========
 
-*gallery-dl* is a small command-line tool to download images and entire image
-galleries from several `image hosting platforms`_. It requires Python 3.3+ to
-run and works on Unix-like systems as well as Windows.
+**gallery-dl** is a command-line program to download image-galleries and
+-collections from several image hosting sites such as pixiv.net, exhentai.org,
+gelbooru.com and several more (see `Supported Sites`_). It requires Python 3.3+
+to run and works on Unix-like systems as well as Windows.
 
-Dependencies
-============
-
-- Python_ 3.3+
-- Requests_ 2.4.2+
 
 Installation
 ============
 
-You can install *gallery-dl* from PyPI with pip_:
+You can install the latest stable version of **gallery-dl** from PyPI_
+with pip_:
 
 .. code:: bash
 
-    $ pip install gallery-dl
+    $ pip install --upgrade gallery-dl
 
 or directly from GitHub:
 
@@ -29,55 +26,73 @@ or directly from GitHub:
     $ cd gallery-dl
     $ python3 setup.py install
 
+
 Usage
 =====
 
-To download collections of images, simply call *gallery-dl* with the URLs
-pointing to them:
+To use **gallery-dl** simply call it with the URLs you wish to download images
+from:
 
 .. code:: bash
 
-    $ gallery-dl https://imgur.com/a/cMUxc
+    $ gallery-dl [OPTION]... URL...
 
 See also :code:`gallery-dl --help`.
+
+
+Examples
+--------
+
+Download images from gelbooru found via tag search for 'bonocho':
+
+.. code:: bash
+
+    $ gallery-dl "http://gelbooru.com/index.php?page=post&s=list&tags=bonocho"
+
+
+Get the direct URL of an image from a site that requires authentication:
+
+.. code:: bash
+
+    $ gallery-dl -g -u <USER> -p <PASS> http://seiga.nicovideo.jp/seiga/im3211703
+
+
+| Search a remote resource for URLs and download images from them:
+| (URLs for which no extractor can be found will be silently ignored)
+
+.. code:: bash
+
+    $ gallery-dl r:https://pastebin.com/raw/FLwrCYsT
+
 
 Supported Sites
 ===============
 
-* Booru:
-    behoimi.org, danbooru.donmai.us, e621.net, gelbooru.com, konachan.com,
-    rule34.xxx, safebooru.org, chan.sankakucomplex.com, yande.re
-* Manga:
-    bato.to, dynasty-scans.com, kissmanga.com, kobato.hologfx.com,
-    gomanga.co, mangahere.co, mangamint.com, mangapanda.com, mangapark.me,
-    mangareader.net, mangashare.com, mangastream.com, powermanga.org,
-    raw.senmanga.com, reader.sensescans.com, thespectrum.net,
-    slide.world-three.org, yomanga.co, yonkouprod.com
-* Comic:
-    kisscomic.us, readcomiconline.to, readcomics.tv
-* Hentai:
-    exhentai.org, hbrowse.com, hentai2read.com,
-    hentaibox.net, hentaihere.com, hitomi.la, luscious.net, nhentai.net
-* Japanese:
-    pixiv.net, nijie.info, seiga.nicovideo.jp
-* Western:
-    deviantart.com, hentai-foundry.com, imagefap,com, imgth.com, imgur.com,
-    pinterest.com, tumblr.com, twitter.com, whentai.com
-* Futaba Channel-like:
-    4chan.org, 8ch.net
-* Image Hosts:
-    chronos.to, coreimg.net, hosturimage.com, imagebam.com, imageontime.org,
-    imagetwist.com, img.yt, imgbox.com, imgcandy.net, imgchili.net,
-    imgclick.net, imgmaid.net, imgspice.com, imgtrex.com, imgupload.yt,
-    img4ever.net, pic-maniac.com, pixhost.org, rapidimg.net, turboimagehost.com
+* pixiv.net
+* seiga.nicovideo.jp
+* nijie.info
+* bato.to
+* mangastream.com
+* kissmanga.com
+* readcomiconline.to
+* danbooru.donmai.us
+* gelbooru.com
+* exhentai.org
+* nhentai.net
+* luscious.net
+* hentaifoundry.com
+* deviantart.com
+* tumblr.com
+* `Complete List`_
+
 
 Configuration
 =============
 
-Configuration files for gallery-dl use a JSON-based file format.
+Configuration files for **gallery-dl** use a JSON-based file format.
 For a (more or less) complete example, see gallery-dl.conf_.
 
-*gallery-dl* searches for configuration files in the following paths:
+**gallery-dl** searches for configuration files in the following paths:
 
 +--------------------------------------------+------------------------------------------+
 | Linux                                      | Windows                                  |
@@ -91,6 +106,7 @@ For a (more or less) complete example, see gallery-dl.conf_.
 i.e. ``C:\Users\<username>\``)
 
 Values in later configuration files will override previous ones.
+
 
 Authentication
 ==============
@@ -119,13 +135,15 @@ or you can provide them directly via the
 :code:`-u/--username` and :code:`-p/--password` or via the
 :code:`-o/--option` command-line options
 
+
 .. code:: bash
 
     $ gallery-dl -u <username> -p <password> URL
     $ gallery-dl -o username=<username> -o password=<password> URL
 
-.. _image hosting platforms: #supported-sites
 .. _gallery-dl.conf: https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
+.. _Complete List:   https://github.com/mikf/gallery-dl/blob/master/supportedsites.rst
 .. _Python:   https://www.python.org/downloads/
 .. _Requests: https://pypi.python.org/pypi/requests/
+.. _PyPI:     https://pypi.python.org/pypi
 .. _pip:      https://pip.pypa.io/en/stable/
