@@ -8,6 +8,11 @@ gelbooru.com and several more (see `Supported Sites`_). It requires Python 3.3+
 to run and works on Unix-like systems as well as Windows.
 
 
+|pypi| |build|
+
+.. section-numbering::
+
+
 Installation
 ============
 
@@ -25,6 +30,8 @@ or directly from GitHub:
     $ git clone https://github.com/mikf/gallery-dl.git
     $ cd gallery-dl
     $ python3 setup.py install
+
+Windows users can also download a `standalone executable`_.
 
 
 Usage
@@ -54,7 +61,7 @@ Get the direct URL of an image from a site that requires authentication:
 
 .. code:: bash
 
-    $ gallery-dl -g -u <USER> -p <PASS> http://seiga.nicovideo.jp/seiga/im3211703
+    $ gallery-dl -g -u <username> -p <password> http://seiga.nicovideo.jp/seiga/im3211703
 
 
 | Search a remote resource for URLs and download images from them:
@@ -141,9 +148,18 @@ or you can provide them directly via the
     $ gallery-dl -u <username> -p <password> URL
     $ gallery-dl -o username=<username> -o password=<password> URL
 
-.. _gallery-dl.conf: https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
-.. _Complete List:   https://github.com/mikf/gallery-dl/blob/master/supportedsites.rst
+
+.. _gallery-dl.conf:       https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
+.. _Complete List:         https://github.com/mikf/gallery-dl/blob/master/supportedsites.rst
+.. _standalone executable: https://github.com/mikf/gallery-dl/releases/download/v0.6.3/gallery-dl.exe
 .. _Python:   https://www.python.org/downloads/
 .. _Requests: https://pypi.python.org/pypi/requests/
 .. _PyPI:     https://pypi.python.org/pypi
 .. _pip:      https://pip.pypa.io/en/stable/
+
+
+.. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
+    :target: https://pypi.python.org/pypi/gallery-dl
+
+.. |build| image:: https://travis-ci.org/mikf/gallery-dl.svg?branch=master
+    :target: https://travis-ci.org/mikf/gallery-dl
