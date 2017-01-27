@@ -63,7 +63,6 @@ class PinterestPinExtractor(PinterestExtractor):
 
 class PinterestBoardExtractor(PinterestExtractor):
     """Extractor for images from a board from pinterest.com"""
-    category = "pinterest"
     subcategory = "board"
     directory_fmt = ["{category}", "{user}", "{board}"]
     pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.com/(?!pin/)([^/]+)/([^/]+)"]
@@ -104,6 +103,30 @@ class PinterestBoardExtractor(PinterestExtractor):
             "count": board["counts"]["pins"],
         }
         return data
+
+
+class PinterestPinitExtractor(PinterestExtractor):
+    subcategory = "pinit"
+    pattern = [r"(?:https?://)?(pin\.it/[^/]+)"]
+    test = [
+        ("https://pin.it/Hvt8hgT", {
+            "url": "8daad8558382c68f0868bdbd17d05205184632fa",
+        }),
+        ("https://pin.it/Hvt8hgS", {
+            "exception": exception.NotFoundError,
+        })
+    ]
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self)
+        self.url = "https://" + match.group(1)
+
+    def items(self):
+        response = self.session.head(self.url)
+        location = response.headers.get("Location")
+        if not location or location == "https://www.pinterest.com":
+            raise exception.NotFoundError("pin")
+        yield Message.Queue, location
 
 
 class PinterestAPI():
