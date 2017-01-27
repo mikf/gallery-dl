@@ -20,7 +20,7 @@ class NhentaiGalleryExtractor(Extractor):
     filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)"]
     test = [("http://nhentai.net/g/147850/", {
-        "url": "199ddd07dded0f69282e09a372710698ea21ab8e",
+        "url": "5179dbf0f96af44005a0ff705a0ad64ac26547d0",
         "keyword": "574e36436a1c01c82e5779207e44e4e78d0e1726",
     })]
 
@@ -31,17 +31,16 @@ class NhentaiGalleryExtractor(Extractor):
     def items(self):
         ginfo = self.get_gallery_info()
         data = self.get_job_metadata(ginfo)
-        urlbase = "http:{}galleries/{}/".format(ginfo["media_url"], data["media-id"])
+        urlfmt = ginfo["media_url"] + "galleries/" + data["media-id"] + "/{}.{}"
         extdict = {"j": "jpg", "p": "png", "g": "gif"}
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, image in enumerate(ginfo["images"]["pages"], 1):
+        for data["num"], image in enumerate(ginfo["images"]["pages"], 1):
             ext = extdict.get(image["t"], "jpg")
-            data["num"] = num
             data["width"] = image["w"]
             data["height"] = image["h"]
             data["extension"] = ext
-            yield Message.Url, "{}{}.{}".format(urlbase, num, ext), data
+            yield Message.Url, urlfmt.format(data["num"], ext), data
 
     def get_gallery_info(self):
         """Extract and return gallery-info"""
