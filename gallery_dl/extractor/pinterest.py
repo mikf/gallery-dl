@@ -124,7 +124,8 @@ class PinterestPinitExtractor(PinterestExtractor):
     def items(self):
         response = self.session.head(self.url)
         location = response.headers.get("Location")
-        if not location or location == "https://www.pinterest.com":
+        if not location or location in ("https://api.pinterest.com/None",
+                                        "https://www.pinterest.com"):
             raise exception.NotFoundError("pin")
         yield Message.Queue, location
 
