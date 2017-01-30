@@ -9,6 +9,7 @@
 import os
 from . import config, text
 
+
 class PathFormat():
 
     def __init__(self, extractor):

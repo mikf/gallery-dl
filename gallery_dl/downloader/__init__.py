@@ -8,6 +8,7 @@
 
 import importlib
 
+
 def find(scheme):
     """Return downloader class suitable for handling the given scheme"""
     try:
@@ -20,6 +21,7 @@ def find(scheme):
             return klass
         except ImportError:
             return None
+
 
 # --------------------------------------------------------------------
 # internals

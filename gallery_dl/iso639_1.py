@@ -8,9 +8,11 @@
 
 """Conversion between language names and ISO 639-1 codes"""
 
+
 def code_to_language(code, default="English"):
     """Map an ISO 639-1 language code to its actual name"""
     return codes.get(code.lower(), default)
+
 
 def language_to_code(lang, default="en"):
     """Map a language name to its ISO 639-1 code"""
@@ -19,6 +21,7 @@ def language_to_code(lang, default="en"):
         if language == lang:
             return code
     return default
+
 
 codes = {
     "ar": "Arabic",

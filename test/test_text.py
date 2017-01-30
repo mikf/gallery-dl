@@ -11,6 +11,7 @@ import unittest
 import sys
 import gallery_dl.text as text
 
+
 class TestText(unittest.TestCase):
 
     def test_remove_html(self):
@@ -62,7 +63,7 @@ class TestText(unittest.TestCase):
         }
         for case, result in cases.items():
             self.assertEqual(text.clean_path_windows(case), result[0])
-            self.assertEqual(text.clean_path_posix  (case), result[1])
+            self.assertEqual(text.clean_path_posix(case), result[1])
 
     def test_shorten_path(self):
         cases = {
@@ -86,8 +87,9 @@ class TestText(unittest.TestCase):
         }
         enc = sys.getfilesystemencoding()
         for case, result in cases.items():
-            self.assertEqual(text.shorten_filename(case), result)
-            self.assertTrue(len(text.shorten_filename(case).encode(enc)) <= 255)
+            fname = text.shorten_filename(case)
+            self.assertEqual(fname, result)
+            self.assertTrue(len(fname.encode(enc)) <= 255)
 
     def test_extract(self):
         cases = {
@@ -120,6 +122,7 @@ class TestText(unittest.TestCase):
         txt = "[c][b][a]: xyz! [d][e"
         result = ["c", "b", "a", "d"]
         self.assertEqual(list(text.extract_iter(txt, "[", "]")), result)
+
 
 if __name__ == '__main__':
     unittest.main()

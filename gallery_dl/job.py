@@ -11,6 +11,7 @@ import hashlib
 from . import extractor, downloader, path, output, exception
 from .extractor.message import Message
 
+
 class Job():
     """Base class for Job-types"""
 
@@ -65,6 +66,7 @@ class Job():
         """Add 'category' and 'subcategory' keywords"""
         kwdict["category"] = self.extractor.category
         kwdict["subcategory"] = self.extractor.subcategory
+
 
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
@@ -188,8 +190,8 @@ class HashJob(DownloadJob):
 
     def __init__(self, url, content=False):
         DownloadJob.__init__(self, url)
-        self.content      = content
-        self.hash_url     = hashlib.sha1()
+        self.content = content
+        self.hash_url = hashlib.sha1()
         self.hash_keyword = hashlib.sha1()
         self.hash_content = hashlib.sha1()
         if content:

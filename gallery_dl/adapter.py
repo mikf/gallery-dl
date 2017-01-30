@@ -12,6 +12,7 @@ from requests.adapters import BaseAdapter
 from requests import Response, codes
 import io
 
+
 class FileAdapter(BaseAdapter):
 
     def send(self, request, **kwargs):

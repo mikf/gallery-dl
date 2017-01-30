@@ -12,6 +12,7 @@ import sys
 import json
 import os.path
 
+
 # --------------------------------------------------------------------
 # public interface
 
@@ -32,9 +33,11 @@ def load(*files, strict=False):
             print("Error while loading '", path, "':", sep="", file=sys.stderr)
             print(exception, file=sys.stderr)
 
+
 def clear():
     """Reset configuration to en empty state"""
     globals()["_config"] = {}
+
 
 def get(keys, default=None):
     """Get the value of property 'key' or a default-value if it doenst exist"""
@@ -45,6 +48,7 @@ def get(keys, default=None):
         return conf
     except (KeyError, AttributeError):
         return default
+
 
 def interpolate(keys, default=None):
     """Interpolate the value of 'key'"""
@@ -57,6 +61,7 @@ def interpolate(keys, default=None):
     except (KeyError, AttributeError):
         return default
 
+
 def set(keys, value):
     """Set the value of property 'key' for this session"""
     conf = _config
@@ -68,6 +73,7 @@ def set(keys, value):
             conf[k] = temp
             conf = temp
     conf[keys[-1]] = value
+
 
 def setdefault(keys, value):
     """Set the value of property 'key' if it doesn't exist"""

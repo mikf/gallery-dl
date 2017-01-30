@@ -10,6 +10,7 @@
 
 from .common import BasicDownloader
 
+
 class Downloader(BasicDownloader):
 
     def __init__(self, output):

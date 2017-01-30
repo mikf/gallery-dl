@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2016 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,12 +8,11 @@
 
 from __future__ import unicode_literals, print_function
 
-__author__     = "Mike Fährmann"
-__copyright__  = "Copyright 2014-2016 Mike Fährmann"
-
-__license__    = "GPLv2"
+__author__ = "Mike Fährmann"
+__copyright__ = "Copyright 2014-2017 Mike Fährmann"
+__license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
-__email__      = "mike_faehrmann@web.de"
+__email__ = "mike_faehrmann@web.de"
 
 import sys
 
@@ -21,11 +20,11 @@ if sys.hexversion < 0x3030000:
     print("Python 3.3+ required", file=sys.stderr)
     sys.exit(1)
 
-import os
 import argparse
 import json
 from . import config, extractor, job, exception
 from .version import __version__
+
 
 def build_cmdline_parser():
     parser = argparse.ArgumentParser(
@@ -64,7 +63,8 @@ def build_cmdline_parser():
     )
     parser.add_argument(
         "--list-extractors", dest="list_extractors", action="store_true",
-        help="print a list of extractor classes with description and example URL",
+        help=("print a list of extractor classes "
+              "with description and example URL"),
     )
     parser.add_argument(
         "--list-keywords", dest="list_keywords", action="store_true",
@@ -97,11 +97,13 @@ def parse_option(opt):
     except ValueError:
         print("Invalid 'key=value' pair:", opt, file=sys.stderr)
 
+
 def sanatize_input(file):
     for line in file:
         line = line.strip()
         if line:
             yield line
+
 
 def main():
     try:

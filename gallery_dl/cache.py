@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Decorator to keep function results in a combined in-memory and database cache"""
+"""Decorator to keep function results in a in-memory and database cache"""
 
 import sqlite3
 import pickle
@@ -113,11 +113,13 @@ class DatabaseCache(CacheModule):
             raise RuntimeError()
         path = os.path.expanduser(os.path.expandvars(path))
         self.db = sqlite3.connect(path, timeout=30, check_same_thread=False)
-        self.db.execute("CREATE TABLE IF NOT EXISTS data ("
-                            "key TEXT PRIMARY KEY,"
-                            "value TEXT,"
-                            "expires INTEGER"
-                        ")")
+        self.db.execute(
+            "CREATE TABLE IF NOT EXISTS data ("
+            "key TEXT PRIMARY KEY,"
+            "value TEXT,"
+            "expires INTEGER"
+            ")"
+        )
 
     def __getitem__(self, key):
         key, timestamp = key
@@ -127,7 +129,12 @@ class DatabaseCache(CacheModule):
                 cursor.execute("BEGIN EXCLUSIVE")
             except sqlite3.OperationalError:
                 """workaround for python 3.6"""
-            cursor.execute("SELECT value, expires FROM data WHERE key=?", (key,))
+            cursor.execute(
+                "SELECT value, expires "
+                "FROM data "
+                "WHERE key=?",
+                (key,)
+            )
             value, expires = cursor.fetchone()
             if timestamp < expires:
                 self.commit()
@@ -192,6 +199,7 @@ def build_cache_decorator(*modules):
         module = CacheChain(modules)
     else:
         module = modules[0]
+
     def decorator(maxage=3600, keyarg=None):
         def wrap(func):
             return CacheDecorator(func, module, maxage, keyarg)

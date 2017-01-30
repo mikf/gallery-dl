@@ -12,6 +12,7 @@ import gallery_dl.config as config
 import os
 import tempfile
 
+
 class TestConfig(unittest.TestCase):
 
     def setUp(self):
@@ -50,6 +51,7 @@ class TestConfig(unittest.TestCase):
         config.set(["d"], 123)
         self.assertEqual(config.interpolate(["b", "d"], "2"), 123)
         self.assertEqual(config.interpolate(["d", "d"], "2"), 123)
+
 
 if __name__ == '__main__':
     unittest.main()
