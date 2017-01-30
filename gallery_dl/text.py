@@ -14,9 +14,11 @@ import os.path
 import html
 import urllib.parse
 
+
 def remove_html(text):
     """Remove html-tags from a string"""
     return " ".join(re.sub("<[^>]+?>", " ", text).split())
+
 
 def filename_from_url(url):
     """Extract the last part of an url to use as a filename"""
@@ -27,14 +29,16 @@ def filename_from_url(url):
     except ValueError:
         return url
 
+
 def nameext_from_url(url, data=None):
-    """Extract the last part of an url and fill keywords of 'data' accordingly"""
+    """Extract the last part of an url and fill 'data' accordingly"""
     if data is None:
         data = {}
     data["filename"] = unquote(filename_from_url(url))
     data["name"], ext = os.path.splitext(data["filename"])
     data["extension"] = ext[1:].lower()
     return data
+
 
 def clean_path_windows(path):
     """Remove illegal characters from a path-segment (Windows)"""
@@ -43,6 +47,7 @@ def clean_path_windows(path):
     except TypeError:
         return path
 
+
 def clean_path_posix(path):
     """Remove illegal characters from a path-segment (Posix)"""
     try:
@@ -50,16 +55,19 @@ def clean_path_posix(path):
     except AttributeError:
         return path
 
+
 def shorten_path(path, limit=255, encoding=sys.getfilesystemencoding()):
     """Shorten a path segment to at most 'limit' bytes"""
     return (path.encode(encoding)[:limit]).decode(encoding, "ignore")
 
-def shorten_filename(filename, limit=255, encoding=sys.getfilesystemencoding()):
-    """Shorten a filename to at most 'limit' bytes while preserving extension"""
-    name, extension = os.path.splitext(filename)
+
+def shorten_filename(fname, limit=255, encoding=sys.getfilesystemencoding()):
+    """Shorten filename to at most 'limit' bytes while preserving extension"""
+    name, extension = os.path.splitext(fname)
     bext = extension.encode(encoding)
     bname = name.encode(encoding)[:limit-len(bext)]
     return bname.decode(encoding, "ignore") + extension
+
 
 def extract(txt, begin, end, pos=0):
     """Extract the text between 'begin' and 'end' from 'txt'
@@ -88,6 +96,7 @@ def extract(txt, begin, end, pos=0):
     except ValueError:
         return None, pos
 
+
 def extract_all(txt, rules, pos=0, values=None):
     """Calls extract for each rule and returns the result in a dict"""
     if values is None:
@@ -98,6 +107,7 @@ def extract_all(txt, rules, pos=0, values=None):
             values[key] = result
     return values, pos
 
+
 def extract_iter(txt, begin, end, pos=0):
     """Yield all values obtained by repeated calls to text.extract"""
     while True:
@@ -105,6 +115,7 @@ def extract_iter(txt, begin, end, pos=0):
         if value is None:
             return
         yield value
+
 
 if os.name == "nt":
     clean_path = clean_path_windows

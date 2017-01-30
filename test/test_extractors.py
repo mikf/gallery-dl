@@ -38,13 +38,14 @@ class TestExtractors(unittest.TestCase):
             self.assertEqual(hjob.hash_content.hexdigest(), result["content"])
 
 
-# dynamically genetate tests
+# dynamically genertate tests
 def _generate_test(extr, tcase):
     def test(self):
         url, result = tcase
         print("\n", url, sep="")
         self._run_test(extr, url, result)
     return test
+
 
 # enable selective testing for direct calls
 extractors = extractor.extractors()

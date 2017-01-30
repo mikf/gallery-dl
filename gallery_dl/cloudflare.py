@@ -14,6 +14,7 @@ import urllib.parse
 from . import text
 from .cache import cache
 
+
 def request_func(self, *args):
     cookies = _cookiecache(self.root)
     if cookies:
@@ -24,6 +25,7 @@ def request_func(self, *args):
         response = solve_challenge(self.session, response)
         _cookiecache(self.root, self.session.cookies)
     return response
+
 
 def solve_challenge(session, response):
     session.headers["Referer"] = response.url
@@ -37,17 +39,20 @@ def solve_challenge(session, response):
     url = urllib.parse.urljoin(response.url, "/cdn-cgi/l/chk_jschl")
     return session.get(url, params=params)
 
+
 def solve_jschl(url, page):
     """Solve challenge to get 'jschl_answer' value"""
     data, pos = text.extract_all(page, (
         ('var' , ',f, ', '='),
         ('key' , '"', '"'),
-        ('expr', ':', '}')
+        ('expr', ':', '}'),
     ))
     solution = evaluate_expression(data["expr"])
     variable = "{}.{}".format(data["var"], data["key"])
     vlength = len(variable)
-    expressions = text.extract(page, "'challenge-form');", "f.submit();", pos)[0]
+    expressions = text.extract(
+        page, "'challenge-form');", "f.submit();", pos
+    )[0]
     for expr in expressions.split(";")[1:]:
         if expr.startswith(variable):
             func = operator_functions[expr[vlength]]
@@ -56,8 +61,9 @@ def solve_jschl(url, page):
         elif expr.startswith("a.value"):
             return solution + len(urllib.parse.urlsplit(url).netloc)
 
+
 def evaluate_expression(expr):
-    """Evaluate a Javascript expression for the challange and return its value"""
+    """Evaluate a Javascript expression for the challenge"""
     stack = []
     ranges = []
     value = ""
@@ -75,6 +81,7 @@ def evaluate_expression(expr):
         value += str(num)
     return int(value)
 
+
 operator_functions = {
     "+": operator.add,
     "-": operator.sub,
@@ -87,6 +94,7 @@ expression_values = {
     "!+": 1,
     "+!!": 1,
 }
+
 
 @cache(maxage=365*24*60*60, keyarg=0)
 def _cookiecache(key, item=None):

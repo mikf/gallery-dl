@@ -10,6 +10,7 @@
 
 import os
 
+
 class BasicDownloader():
     """Base class for downloader modules"""
 

@@ -6,12 +6,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Downloader module for http urls"""
+"""Downloader module for http:// and https:// urls"""
 
 import time
 import requests
 import mimetypes
 from .common import BasicDownloader
+
 
 class Downloader(BasicDownloader):
 
@@ -38,7 +39,9 @@ class Downloader(BasicDownloader):
             if response.status_code != requests.codes.ok:
                 tries += 1
                 self.out.error(pathfmt.path, 'HTTP status "{} {}"'.format(
-                    response.status_code, response.reason), tries, self.max_tries)
+                    response.status_code, response.reason),
+                    tries, self.max_tries
+                )
                 if response.status_code == 404:
                     return self.max_tries
                 time.sleep(1)

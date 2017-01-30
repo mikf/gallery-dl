@@ -11,6 +11,7 @@ import sys
 import shutil
 from . import config
 
+
 def select():
     """Automatically select a suitable printer class"""
     pdict = {
@@ -30,6 +31,7 @@ def select():
             return Printer()
     else:
         raise Exception("invalid output mode: " + omode)
+
 
 def safeprint(txt, **kwargs):
     """Handle unicode errors and replace invalid characters"""
@@ -89,7 +91,11 @@ class TerminalPrinter(Printer):
         """Reduce the length of 'txt' to the width of the terminal"""
         if self.short and len(txt) > self.width:
             hwidth = self.width // 2 - OFFSET
-            return "".join((txt[:hwidth-1], CHAR_ELLIPSIES, txt[-hwidth-(self.width%2):]))
+            return "".join((
+                txt[:hwidth-1],
+                CHAR_ELLIPSIES,
+                txt[-hwidth-(self.width % 2):]
+            ))
         return txt
 
 
@@ -109,7 +115,8 @@ class ColorPrinter(TerminalPrinter):
     def error(self, file, error, tries, max_tries):
         if tries <= 1 and hasattr(file, "name"):
             print("\r\033[1;31m", self.shorten(file.name), sep="")
-        print("\033[0;31m[Error]\033[0m ", error, " (", tries, "/", max_tries, ")", sep="")
+        print("\033[0;31m[Error]\033[0m ", error,
+              " (", tries, "/", max_tries, ")", sep="")
 
 
 if os.name == "nt":
