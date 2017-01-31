@@ -97,8 +97,8 @@ class MangamintChapterExtractor(MangamintExtractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        manga, pos = text.extract(page, '"title":"', '"')
-        chid , pos = text.extract(page, r'"identifier":"node\/', '"', pos)
+        manga, pos = text.extract(page, 'selected="selected">', '<')
+        chid , pos = text.extract(page, 'id="node-', '"', pos)
         match = re.match(r"(.+) (\d+)([^ ]*)$", manga)
         return {
             "manga": match.group(1),
