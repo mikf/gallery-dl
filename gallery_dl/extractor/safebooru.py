@@ -10,19 +10,21 @@
 
 from . import booru
 
+
 class SafebooruExtractor(booru.XMLBooruExtractor):
     """Base class for safebooru extractors"""
     category = "safebooru"
     api_url = "http://safebooru.org/index.php"
 
     def setup(self):
-        self.params.update({"page":"dapi", "s":"post", "q":"index"})
+        self.params.update({"page": "dapi", "s": "post", "q": "index"})
 
     def update_page(self, reset=False):
         if reset is False:
             self.params["pid"] += 1
         else:
             self.params["pid"] = 0
+
 
 class SafebooruTagExtractor(SafebooruExtractor, booru.BooruTagExtractor):
     """Extractor for images from safebooru.org based on search-tags"""
@@ -33,6 +35,7 @@ class SafebooruTagExtractor(SafebooruExtractor, booru.BooruTagExtractor):
         "url": "c91e04ffbdf317fae95b2e160c8345503d9fb730",
         "content": "e5ad4c5bf241b1def154958535bef6c2f6b733eb",
     })]
+
 
 class SafebooruPostExtractor(SafebooruExtractor, booru.BooruPostExtractor):
     """Extractor for single images from safebooru.org"""

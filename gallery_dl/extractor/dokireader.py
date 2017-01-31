@@ -10,12 +10,14 @@
 
 from .foolslide import FoolslideChapterExtractor
 
+
 class DokireaderChapterExtractor(FoolslideChapterExtractor):
     """Extractor for manga-chapters from kobato.hologfx.com"""
     category = "dokireader"
     pattern = [(r"(?:https?://)?(kobato\.hologfx\.com/reader/read/"
                 r"[^/]+/([a-z]{2})/\d+/\d+)")]
-    test = [("https://kobato.hologfx.com/reader/read/hitoribocchi_no_oo_seikatsu/en/3/34", {
+    test = [(("https://kobato.hologfx.com/reader/read/"
+              "hitoribocchi_no_oo_seikatsu/en/3/34"), {
         "keyword": "4ee981ae14c6643f6a03a14c9f2c0d4898202671",
     })]
 

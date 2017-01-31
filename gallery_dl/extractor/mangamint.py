@@ -12,11 +12,13 @@ from .common import Extractor, Message
 from .. import text, exception
 import re
 
+
 class MangamintExtractor(Extractor):
     """Base class for mangamint extractors"""
     category = "mangamint"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
+                    "{page:>03}.{extension}")
     url_base = "https://www.mangamint.com"
 
     def __init__(self, match):
@@ -52,7 +54,8 @@ class MangamintMangaExtractor(MangamintExtractor):
             if response.status_code == 404:
                 raise exception.NotFoundError("manga")
             page = response.text
-            table, pos = text.extract(page, '<table class="sticky-enabled">', '</table>')
+            table, pos = text.extract(
+                page, '<table class="sticky-enabled">', '</table>')
             chapters.extend(text.extract_iter(table, '<a href="', '"'))
             if page.find("pager-last", pos) == -1:
                 break
@@ -115,11 +118,12 @@ class MangamintChapterExtractor(MangamintExtractor):
             "manga_page": 0,
             "form_id": "select_similar_node_widget",
         }
-        params["select_node"]  , pos = text.extract(page, r'"identifier":"node\/', '"')
-        _                      , pos = text.extract(page, '>All pages<', '', pos)
-        params["howmany"]      , pos = text.extract(page, 'value="', '"', pos-25)
-        _                      , pos = text.extract(page, 'name="form_build_id"', '', pos)
-        params["form_build_id"], pos = text.extract(page, 'value="', '"', pos)
+        e = text.extract
+        params["select_node"]  , pos = e(page, r'"identifier":"node\/', '"')
+        _                      , pos = e(page, '>All pages<', '', pos)
+        params["howmany"]      , pos = e(page, 'value="', '"', pos-25)
+        _                      , pos = e(page, 'name="form_build_id"', '', pos)
+        params["form_build_id"], pos = e(page, 'value="', '"', pos)
         url = self.url_base + "/many/callback"
         page = self.request(url, method="post", data=params).json()["data"]
         return list(text.extract_iter(page, r'<img src ="', r'"'))

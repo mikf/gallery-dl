@@ -11,13 +11,15 @@
 from .common import Extractor, Message
 from .. import text
 
+
 class TwitterTweetExtractor(Extractor):
     """Extractor for images from tweets on twitter.com"""
     category = "twitter"
     subcategory = "tweet"
     directory_fmt = ["{category}", "{user}"]
     filename_fmt = "{tweet-id}_{num}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/(([^/]+)/status/(\d+))"]
+    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/"
+               r"(([^/]+)/status/(\d+))"]
     test = [("https://twitter.com/PicturesEarth/status/672897688871018500", {
         "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
         "keyword": "3cd8e27026a2112008985b1b53f5e4baf4616177",

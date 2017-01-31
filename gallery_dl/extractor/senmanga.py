@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 
+
 class SenmangaChapterExtractor(Extractor):
     """Extractor for manga-chapters from raw.senmanga.com"""
     category = "senmanga"

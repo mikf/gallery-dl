@@ -11,6 +11,7 @@
 from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 
+
 class ImagebamGalleryExtractor(AsynchronousExtractor):
     """Extractor for image galleries from imagebam.com"""
     category = "imagebam"
@@ -18,7 +19,8 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{title} - {gallery-key}"]
     filename_fmt = "{num:>03}-{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([^/]+).*"]
-    test = [("http://www.imagebam.com/gallery/adz2y0f9574bjpmonaismyrhtjgvey4o", {
+    test = [(("http://www.imagebam.com/"
+              "gallery/adz2y0f9574bjpmonaismyrhtjgvey4o"), {
         "url": "d7a4483b6d5ebba81950a349aad58ae034c60eda",
         "keyword": "e4a9395dbd06d4af3172a6a61c90601bc47ee18c",
         "content": "596e6bfa157f2c7169805d50075c2986549973a8",
@@ -56,13 +58,15 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
         done = False
         while not done:
             page = self.request(self.url_base + url).text
-            _  , pos = text.extract(page, 'class="btn btn-default" title="Next">', '')
+            pos = text.extract(
+                page, 'class="btn btn-default" title="Next">', ''
+            )[1]
             if pos == 0:
                 done = True
             else:
                 url, pos = text.extract(page, ' href="', '"', pos-70)
-            image_id , pos = text.extract(page, '<img class="image" id="', '"', pos)
-            image_url, pos = text.extract(page, ' src="', '"', pos)
+            image_id , pos = text.extract(page, 'class="image" id="', '"', pos)
+            image_url, pos = text.extract(page, 'src="', '"', pos)
             yield image_url, image_id
 
 
@@ -85,8 +89,8 @@ class ImagebamImageExtractor(Extractor):
 
     def items(self):
         page = self.request("http://www.imagebam.com/image/" + self.token).text
-        url  = text.extract(page, 'property="og:image" content="', '"')[0]
-        data = text.nameext_from_url(url, {"token": self.token})
+        iurl = text.extract(page, 'property="og:image" content="', '"')[0]
+        data = text.nameext_from_url(iurl, {"token": self.token})
         yield Message.Version, 1
         yield Message.Directory, data
-        yield Message.Url, url, data
+        yield Message.Url, iurl, data

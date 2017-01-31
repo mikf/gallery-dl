@@ -10,6 +10,8 @@
 
 from .foolslide import FoolslideChapterExtractor
 from .. import text
+import re
+
 
 class PowermangaChapterExtractor(FoolslideChapterExtractor):
     """Extractor for manga-chapters from powermanga.org"""
@@ -26,7 +28,8 @@ class PowermangaChapterExtractor(FoolslideChapterExtractor):
 
     def __init__(self, match):
         if match.group(1) == "p":
-            page = self.request("https://powermanga.org/" + match.group(2)).text
+            url = "https://powermanga.org/" + match.group(2)
+            page = self.request(url).text
             pos = page.index("class='small-button smallblack'>Download</a>")
             url = text.extract(page, "<a href='", "'", pos)[0]
             match = re.match(self.pattern[0], url)

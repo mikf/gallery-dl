@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text
 import json
 
+
 class TumblrUserExtractor(Extractor):
     """Extractor for all images from a tumblr-user"""
     category = "tumblr"

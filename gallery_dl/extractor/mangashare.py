@@ -11,6 +11,7 @@
 from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 
+
 class MangashareMangaExtractor(Extractor):
     """Extractor for mangas from mangashare.com"""
     category = "mangashare"
@@ -57,10 +58,13 @@ class MangashareChapterExtractor(AsynchronousExtractor):
     def items(self):
         page = self.request(self.url_fmt.format(self.part, 1)).text
         data = self.get_job_metadata(page)
+        urls = zip(
+            range(1, int(data["count"])+1),
+            self.get_image_urls(page),
+        )
         yield Message.Version, 1
         yield Message.Directory, data.copy()
-        for i, url in zip(range(int(data["count"])), (self.get_image_urls(page))):
-            data["page"] = i+1
+        for data["page"], url in urls:
             text.nameext_from_url(url, data)
             yield Message.Url, url, data.copy()
 

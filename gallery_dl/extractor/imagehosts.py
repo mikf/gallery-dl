@@ -13,6 +13,7 @@ from .. import text
 from os.path import splitext
 from urllib.parse import urljoin
 
+
 class ImagehostImageExtractor(Extractor):
     """Base class for single-image extractors for various imagehosts"""
     subcategory = "image"
@@ -76,12 +77,15 @@ class ImgytImageExtractor(ImagehostImageExtractor):
         filename += splitext(url)[1] if filename else url
         return url, filename
 
+
 class RapidimgImageExtractor(ImgytImageExtractor):
     """Extractor for single images from rapidimg.net"""
     category = "rapidimg"
-    pattern = [r"(?:https?://)?((?:www\.)?rapidimg\.net/img-([a-z0-9]+)\.html)"]
+    pattern = [r"(?:https?://)?((?:www\.)?rapidimg\.net/"
+               r"img-([a-z0-9]+)\.html)"]
     test = []
     https = False
+
 
 class FapatImageExtractor(ImgytImageExtractor):
     """Extractor for single images from fapat.me"""
@@ -108,6 +112,7 @@ class ChronosImageExtractor(ImagehostImageExtractor):
         filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, filename
 
+
 class CoreimgImageExtractor(ChronosImageExtractor):
     """Extractor for single images from coreimg.net"""
     category = "coreimg"
@@ -118,12 +123,14 @@ class CoreimgImageExtractor(ChronosImageExtractor):
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
 
+
 class ImgmaidImageExtractor(ChronosImageExtractor):
     """Extractor for single images from imgmaid.net"""
     category = "imgmaid"
     pattern = [r"(?:https?://)?((?:www\.)?imgmaid\.net/([a-z0-9]{12}))"]
     test = []
     https = True
+
 
 class PicmaniacImageExtractor(ChronosImageExtractor):
     """Extractor for single images from pic-maniac.com"""
@@ -149,6 +156,7 @@ class HosturimageImageExtractor(ImagehostImageExtractor):
         url, pos = text.extract(page, "src='", "'", pos)
         return url, url
 
+
 class ImageontimeImageExtractor(HosturimageImageExtractor):
     """Extractor for single images from imageontime.org"""
     category = "imageontime"
@@ -157,6 +165,7 @@ class ImageontimeImageExtractor(HosturimageImageExtractor):
     test = []
     https = False
 
+
 class Img4everImageExtractor(HosturimageImageExtractor):
     """Extractor for single images from img4ever.net"""
     category = "img4ever"
@@ -164,6 +173,7 @@ class Img4everImageExtractor(HosturimageImageExtractor):
                 r"img-([a-z0-9]+)\.html)")]
     test = []
     https = True
+
 
 class ImguploadImageExtractor(HosturimageImageExtractor):
     """Extractor for single images from imgupload.yt"""
@@ -184,10 +194,12 @@ class ImgspotImageExtractor(ImagehostImageExtractor):
         url = text.extract(page, "<img class='centred_resized' src='", "'")[0]
         return url, url
 
+
 class ImgtrialImageExtractor(ImgspotImageExtractor):
     """Extractor for single images from imgtrial.com"""
     category = "imgtrial"
-    pattern = [r"(?:https?://)?((?:www\.)?imgtrial\.com/img-([a-z0-9]+)\.html)"]
+    pattern = [r"(?:https?://)?((?:www\.)?imgtrial\.com"
+               r"/img-([a-z0-9]+)\.html)"]
 
 
 class ImagevenueImageExtractor(ImagehostImageExtractor):

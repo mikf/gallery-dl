@@ -11,6 +11,7 @@
 from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 
+
 class SpectrumnexusMangaExtractor(Extractor):
     """Extractor for mangas from thespectrum.net"""
     category = "spectrumnexus"
@@ -33,7 +34,9 @@ class SpectrumnexusMangaExtractor(Extractor):
     def get_chapters(self):
         """Return a list of all chapter identifiers"""
         page = self.request(self.url).text
-        page = text.extract(page, '<select class="selectchapter"', '</select>')[0]
+        page = text.extract(
+            page, '<select class="selectchapter"', '</select>'
+        )[0]
         return text.extract_iter(page, '<option value="', '"')
 
 
@@ -44,11 +47,13 @@ class SpectrumnexusChapterExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{manga}", "{identifier}"]
     filename_fmt = "{manga} {identifier} {page:>03}.{extension}"
     pattern = [
-        (r"(?:https?://)?(view\.thespectrum\.net/series/[^\.]+\.html)"
-         r"\?ch=(Chapter\+(\d+)|Volume\+(\d+))"),
-        (r"(?:https?://)?(view\.thespectrum\.net/series/[^/]+-chapter-(\d+)\.html)"),
+        (r"(?:https?://)?(view\.thespectrum\.net/series/"
+         r"[^\.]+\.html)\?ch=(Chapter\+(\d+)|Volume\+(\d+))"),
+        (r"(?:https?://)?(view\.thespectrum\.net/series/"
+         r"[^/]+-chapter-(\d+)\.html)"),
     ]
-    test = [("http://view.thespectrum.net/series/toriko.html?ch=Chapter+343&page=1", {
+    test = [(("http://view.thespectrum.net/series/"
+              "toriko.html?ch=Chapter+343&page=1"), {
         "url": "c0fc7dc594841217cc622a67edd79f06e9900333",
         "keyword": "8499166b62db0c87e7109cc5f9aa837b4815dd9c",
     })]

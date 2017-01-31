@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 
+
 class MangaparkMangaExtractor(Extractor):
     """Extractor for mangas from mangapark.me"""
     category = "mangapark"
@@ -44,8 +45,10 @@ class MangaparkChapterExtractor(Extractor):
     """Extractor for manga-chapters from mangapark.me"""
     category = "mangapark"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    directory_fmt = ["{category}", "{manga}",
+                     "c{chapter:>03}{chapter-minor} - {title}"]
+    filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
+                    "{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me/manga/"
                 r"([^/]+/s(\d+)(?:/v([^/]+))?/c(\d+)(?:([^/]+)|/e(\d+))?)")]
     test = [
@@ -53,7 +56,8 @@ class MangaparkChapterExtractor(Extractor):
             "url": "fefe84492d9118de5962563fbecb9362051c52d5",
             "keyword": "652b38c40bdfb5592456b6e7524a3acfdef9fae6",
         }),
-        ("http://mangapark.me/manga/ad-astra-per-aspera-hata-kenjirou/s1/c1.2", {
+        (("http://mangapark.me/manga/"
+          "ad-astra-per-aspera-hata-kenjirou/s1/c1.2"), {
             "url": "64b47f9837d50c3e57793ff6703d840ef7808c52",
             "keyword": "f28eb26b4966bebda0e761f241c2dd49e505ce13",
         }),
@@ -65,9 +69,9 @@ class MangaparkChapterExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.part    = match.group(1)
+        self.part = match.group(1)
         self.version = match.group(2)
-        self.volume  = match.group(3)
+        self.volume = match.group(3)
         self.chapter = match.group(4)
         try:
             self.chminor = match.group(5) or "v" + match.group(6)
@@ -75,8 +79,8 @@ class MangaparkChapterExtractor(Extractor):
             self.chminor = ""
 
     def items(self):
-        page = self.request("http://mangapark.me/manga/" + self.part
-                            + "?zoom=2").text
+        page = self.request("http://mangapark.me/manga/" + self.part +
+                            "?zoom=2").text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
@@ -114,7 +118,7 @@ class MangaparkChapterExtractor(Extractor):
         pos = 0
         num = 0
         while True:
-            url   , pos = text.extract(page, ' target="_blank" href="', '"', pos)
+            url, pos = text.extract(page, ' target="_blank" href="', '"', pos)
             if not url:
                 return
             num += 1

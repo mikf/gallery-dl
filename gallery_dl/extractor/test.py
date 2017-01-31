@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import extractor, exception
 
+
 class TestExtractor(Extractor):
     """Extractor to select and run the test URLs of other extractors
 

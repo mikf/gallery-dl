@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 import json
 import urllib.parse
 
+
 class BooruExtractor(Extractor):
     """Base class for all booru extractors"""
     info = {}
@@ -33,7 +34,9 @@ class BooruExtractor(Extractor):
         yield Message.Headers, self.headers
         for data in self.items_impl():
             try:
-                yield Message.Url, self.get_file_url(data), self.get_file_metadata(data)
+                url = self.get_file_url(data)
+                data = self.get_file_metadata(data)
+                yield Message.Url, url, data
             except KeyError:
                 continue
 
@@ -75,7 +78,7 @@ class JSONBooruExtractor(BooruExtractor):
         self.update_page(reset=True)
         while True:
             images = json.loads(
-                self.request(self.api_url, verify=True, params=self.params,
+                self.request(self.api_url, params=self.params,
                              headers=self.headers).text
             )
             for data in images:
@@ -91,7 +94,7 @@ class XMLBooruExtractor(BooruExtractor):
         self.update_page(reset=True)
         while True:
             root = ET.fromstring(
-                self.request(self.api_url, verify=True, params=self.params).text
+                self.request(self.api_url, params=self.params).text
             )
             for item in root:
                 yield item.attrib

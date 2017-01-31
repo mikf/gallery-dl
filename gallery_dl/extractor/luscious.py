@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, iso639_1
 import re
 
+
 class LusciousAlbumExtractor(Extractor):
     """Extractor for image albums from luscious.net"""
     category = "luscious"
@@ -21,7 +22,8 @@ class LusciousAlbumExtractor(Extractor):
     pattern = [(r"(?:https?://)?(?:www\.)?luscious\.net/"
                 r"(?:c/[^/]+/)?(?:pictures/album|albums)/([^/]+_(\d+))")]
     test = [
-        ("https://luscious.net/c/hentai_manga/albums/okinami-no-koigokoro_277031/view/", {
+        (("https://luscious.net/c/hentai_manga/albums/"
+          "okinami-no-koigokoro_277031/view/"), {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
             "keyword": "3b3d36b355fa6a1a6c24be374ae16e6e9b0c729e",
             "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
@@ -74,7 +76,7 @@ class LusciousAlbumExtractor(Extractor):
         while True:
             data = self.request(apiurl.format(pnum)).json()
             page = data["html"]
-            pos  = 0
+            pos = 0
             while True:
                 imgid, pos = text.extract(page, 'container" id="', '"', pos)
                 if not imgid:

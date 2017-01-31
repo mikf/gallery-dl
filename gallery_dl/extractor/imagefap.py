@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text
 import json
 
+
 class ImagefapGalleryExtractor(Extractor):
     """Extractor for image galleries from imagefap.com"""
     category = "imagefap"
@@ -32,7 +33,7 @@ class ImagefapGalleryExtractor(Extractor):
         self.image_id = ""
 
     def items(self):
-        url  = "http://www.imagefap.com/pictures/" + self.gid + "/"
+        url = "http://www.imagefap.com/pictures/" + self.gid + "/"
         page = self.request(url).text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
@@ -70,7 +71,6 @@ class ImagefapGalleryExtractor(Extractor):
                 if num >= count:
                     return
             params["idx"] += 24
-
 
 
 class ImagefapImageExtractor(Extractor):
@@ -113,15 +113,17 @@ class ImagefapImageExtractor(Extractor):
 
     def load_json(self):
         """Load the JSON dictionary associated with the image"""
-        url  = "http://www.imagefap.com/photo/" + self.image_id + "/"
+        url = "http://www.imagefap.com/photo/" + self.image_id + "/"
         page = self.request(url).text
-        section  , pos = text.extract(page, '<meta name="description" content="', '"')
-        json_data, pos = text.extract(page,
-            '<script type="application/ld+json">', '</script>', pos)
+        section  , pos = text.extract(
+            page, '<meta name="description" content="', '"'
+        )
+        json_data, pos = text.extract(
+            page, '<script type="application/ld+json">', '</script>', pos
+        )
         json_dict = json.loads(json_data)
         json_dict["section"] = section
         return json_dict
-
 
 
 class ImagefapUserExtractor(Extractor):
@@ -130,8 +132,10 @@ class ImagefapUserExtractor(Extractor):
     subcategory = "user"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
     filename_fmt = "{category}_{gallery-id}_{name}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/profile(?:\.php\?user=|/)([^/]+)",
-               r"(?:https?://)?(?:www\.)?imagefap\.com/usergallery\.php\?userid=(\d+)"]
+    pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
+                r"profile(?:\.php\?user=|/)([^/]+)"),
+               (r"(?:https?://)?(?:www\.)?imagefap\.com/"
+                r"usergallery\.php\?userid=(\d+)")]
     test = [("http://www.imagefap.com/profile/Mr Bad Example/galleries", {
         "url": "145e98a8648c7695c150800ff8fd578ab26c28c1",
     })]
@@ -165,8 +169,9 @@ class ImagefapUserExtractor(Extractor):
         if self.user:
             url = "http://www.imagefap.com/profile/" + self.user + "/galleries"
         else:
-            url = "http://www.imagefap.com/usergallery.php?userid=" + str(self.user_id)
+            url = ("http://www.imagefap.com/usergallery.php?userid=" +
+                   str(self.user_id))
         page = self.request(url).text
         self.user_id, pos = text.extract(page, '?userid=', '"')
-        folders     , pos = text.extract(page, ' id="tgl_all" value="', '"', pos)
+        folders, pos = text.extract(page, ' id="tgl_all" value="', '"', pos)
         return folders.split("|")[:-1]

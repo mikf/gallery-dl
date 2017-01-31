@@ -10,10 +10,12 @@
 
 from . import booru
 
+
 class YandereExtractor(booru.JSONBooruExtractor):
     """Base class for yandere extractors"""
     category = "yandere"
     api_url = "https://yande.re/post.json"
+
 
 class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
     """Extractor for images from yande.re based on search-tags"""
@@ -23,6 +25,7 @@ class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
         "content": "59201811c728096b2d95ce6896fd0009235fe683",
     })]
 
+
 class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
     """Extractor for image-pools from yande.re"""
     subcategory = "pool"
@@ -30,6 +33,7 @@ class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
     test = [("https://yande.re/pool/show/318", {
         "content": "2a35b9d6edecce11cc2918c6dce4de2198342b68",
     })]
+
 
 class YanderePostExtractor(YandereExtractor, booru.BooruPostExtractor):
     """Extractor for single images from yande.re"""

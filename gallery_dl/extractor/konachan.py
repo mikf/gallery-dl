@@ -10,10 +10,12 @@
 
 from . import booru
 
+
 class KonachanExtractor(booru.JSONBooruExtractor):
     """Base class for konachan extractors"""
     category = "konachan"
     api_url = "https://konachan.com/post.json"
+
 
 class KonachanTagExtractor(KonachanExtractor, booru.BooruTagExtractor):
     """Extractor for images from konachan.com based on search-tags"""
@@ -23,6 +25,7 @@ class KonachanTagExtractor(KonachanExtractor, booru.BooruTagExtractor):
         "content": "838cfb815e31f48160855435655ddf7bfc4ecb8d",
     })]
 
+
 class KonachanPoolExtractor(KonachanExtractor, booru.BooruPoolExtractor):
     """Extractor for image-pools from konachan.com"""
     subcategory = "pool"
@@ -30,6 +33,7 @@ class KonachanPoolExtractor(KonachanExtractor, booru.BooruPoolExtractor):
     test = [("http://konachan.com/pool/show/95", {
         "content": "cf0546e38a93c2c510a478f8744e60687b7a8426",
     })]
+
 
 class KonachanPostExtractor(KonachanExtractor, booru.BooruPostExtractor):
     """Extractor for single images from konachan.com"""

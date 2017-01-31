@@ -10,6 +10,7 @@
 
 from .foolslide import FoolslideChapterExtractor
 
+
 class YomangaChapterExtractor(FoolslideChapterExtractor):
     """Extractor for manga-chapters from yomanga.co"""
     category = "yomanga"

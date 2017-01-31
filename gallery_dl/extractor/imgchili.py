@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 
+
 class ImgchiliExtractor(Extractor):
     """Base class for imgchili extractors"""
     category = "imgchili"
@@ -47,16 +48,17 @@ class ImgchiliImageExtractor(ImgchiliExtractor):
     subcategory = "image"
     filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgchili\.net/show/\d+/(\d+)_[^/]+"]
-    test = [("http://imgchili.net/show/89427/89427136_test___quot;___gt;.png", {
+    test = [(("http://imgchili.net/show/89427/"
+              "89427136_test___quot;___gt;.png"), {
         "url": "b93d92a6b58eb30a7ff6f9729cb748d25fea0c86",
         "keyword": "376c4584dfae7d7d2e88687d4ee9618bbfd0a35c",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
 
     def get_job_metadata(self, page):
-        name1      , pos = text.extract(page, 'name="description" content="', '. An ')
-        name2      , pos = text.extract(page, 'image called ', '" />\n', pos)
-        _          , pos = text.extract(page, '<link rel="image_src"', '', pos)
+        name1, pos = text.extract(page, '="description" content="', '. An ')
+        name2, pos = text.extract(page, 'image called ', '" />\n', pos)
+        _    , pos = text.extract(page, '<link rel="image_src"', '', pos)
         self.imgurl, pos = text.extract(page, ' href="', '"', pos)
         parts = name2.split("in the gallery ")
         name = parts[0] if not parts[0].endswith("...") else name1

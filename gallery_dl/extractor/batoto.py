@@ -26,7 +26,8 @@ class BatotoExtractor(Extractor):
         if username and password:
             cookies = self._login_impl(username, password)
             for key, value in cookies.items():
-                self.session.cookies.set(key, value, domain=".bato.to", path="/")
+                self.session.cookies.set(
+                    key, value, domain=".bato.to", path="/")
 
     @cache(maxage=360*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
