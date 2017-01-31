@@ -14,13 +14,15 @@ from ..cache import cache
 import re
 import json
 
+
 class PixivUserExtractor(Extractor):
     """Extractor for works of a pixiv-user"""
     category = "pixiv"
     subcategory = "user"
     directory_fmt = ["{category}", "{artist-id}-{artist-nick}"]
     filename_fmt = "{category}_{artist-id}_{id}{num}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php\?id=(\d+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/"
+               r"member(?:_illust)?\.php\?id=(\d+)"]
     test = [
         ("http://www.pixiv.net/member_illust.php?id=173530", {
             "url": "8f2fc0437e2095ab750c4340a4eba33ec6269477",
@@ -37,7 +39,9 @@ class PixivUserExtractor(Extractor):
         self.artist_id = match.group(1)
         self.api = PixivAPI(self.session)
         self.api_call = self.api.user_works
-        self.load_ugoira = config.interpolate(("extractor", "pixiv", "ugoira"), True)
+        self.load_ugoira = config.interpolate(
+            ("extractor", "pixiv", "ugoira"), True
+        )
 
     def items(self):
         metadata = self.get_job_metadata()
@@ -78,7 +82,9 @@ class PixivUserExtractor(Extractor):
                     big = ""
                 for i in range(work["page_count"]):
                     work["num"] = "_p{:02}".format(i)
-                    url = "{}{}_p{}.{}{}".format(url[:off], big, i, ext, timestamp)
+                    url = "{}{}_p{}.{}{}".format(
+                        url[:off], big, i, ext, timestamp
+                    )
                     yield Message.Url, url, work
 
     def get_works(self):
@@ -147,16 +153,19 @@ class PixivWorkExtractor(PixivUserExtractor):
                 r"\?(?:[^&]+&)*illust_id=(\d+)"),
                (r"(?:https?://)?i\d+\.pixiv\.net(?:/.*)?/img-[^/]+/img"
                 r"/\d{4}(?:/\d\d){5}/(\d+)"),
-                r"(?:https?://)?img\d+\.pixiv\.net/img/[^/]+/(\d+)"]
+               (r"(?:https?://)?img\d+\.pixiv\.net/img/[^/]+/(\d+)")]
     test = [
-        ("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=966412", {
+        (("http://www.pixiv.net/member_illust.php"
+          "?mode=medium&illust_id=966412"), {
             "url": "efb622f065b0871e92195e7bee0b4d75bd687d8d",
             "content": "69a8edfb717400d1c2e146ab2b30d2c235440c5a",
         }),
-        ("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=966411", {
+        (("http://www.pixiv.net/member_illust.php"
+          "?mode=medium&illust_id=966411"), {
             "exception": exception.NotFoundError,
         }),
-        ("http://i1.pixiv.net/c/600x600/img-master/img/2008/06/13/00/29/13/966412_p0_master1200.jpg", {
+        (("http://i1.pixiv.net/c/600x600/img-master/"
+          "img/2008/06/13/00/29/13/966412_p0_master1200.jpg"), {
             "url": "efb622f065b0871e92195e7bee0b4d75bd687d8d",
         }),
     ]
@@ -211,6 +220,7 @@ def require_login(func):
         self.login()
         return func(self, *args)
     return wrap
+
 
 class PixivAPI():
     """Minimal interface for the Pixiv Public-API for mobile devices
@@ -312,6 +322,8 @@ class PixivAPI():
     def _parse(response, empty=[None]):
         """Parse a Pixiv Public-API response"""
         data = json.loads(response.text)
-        if data.get("status") == "failure" or data.get("response", empty) == empty:
+        status = data.get("status")
+        response = data.get("response", empty)
+        if status == "failure" or response == empty:
             raise exception.NotFoundError()
         return data

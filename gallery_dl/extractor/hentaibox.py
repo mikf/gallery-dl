@@ -11,21 +11,24 @@
 from .common import Extractor, Message
 from .. import text, iso639_1
 
+
 class HentaiboxChapterExtractor(Extractor):
     """Extractor for a single manga chapter from hentaibox.net"""
     category = "hentaibox"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{series}", "{title}"]
     filename_fmt = "{num:>03}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?hentaibox\.net/[^/]+/(\d+)_\d+_([^/&]+)"]
-    test = [("http://www.hentaibox.net/hentai-manga/16_18_Original_Amazon-No-Hiyaku-Amazon-Elixir-Decensored", {
+    pattern = [r"(?:https?://)?(?:www\.)?hentaibox\.net/"
+               r"[^/]+/(\d+)_\d+_([^/&]+)"]
+    test = [(("http://www.hentaibox.net/hentai-manga/"
+              "16_18_Original_Amazon-No-Hiyaku-Amazon-Elixir-Decensored"), {
         "url": "d1a50a9b289d284f178971e01cf312791888e057",
         "keyword": "b4b100f800b716e573e072f01b5d604d9b436b70",
     })]
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.url   = match.group(0)
+        self.url = match.group(0)
         self.count = match.group(1)
 
     def items(self):
@@ -51,4 +54,6 @@ class HentaiboxChapterExtractor(Extractor):
     @staticmethod
     def get_image_urls(page):
         """Extract and return a list of all image-urls"""
-        yield from text.extract_iter(page, '<span class="slideshow_path">', '</span>')
+        yield from text.extract_iter(
+            page, '<span class="slideshow_path">', '</span>'
+        )

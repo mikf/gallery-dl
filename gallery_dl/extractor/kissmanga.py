@@ -12,11 +12,14 @@ from .common import Extractor, Message
 from .. import text, cloudflare
 import re
 
+
 class KissmangaExtractor(Extractor):
     """Base class for kissmanga extractors"""
     category = "kissmanga"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    directory_fmt = ["{category}", "{manga}",
+                     "c{chapter:>03}{chapter-minor} - {title}"]
+    filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
+                    "{page:>03}.{extension}")
     root = "http://kissmanga.com"
 
     def __init__(self, match):
@@ -77,8 +80,8 @@ class KissmangaChapterExtractor(KissmangaExtractor):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, "Read manga\n", "\n")
         cinfo, pos = text.extract(page, "", "\n", pos)
-        match = re.match(
-            r"(?:Vol.0*(\d+) )?(?:Ch.)?0*(\d+)(?:\.0*(\d+))?(?:: (.+))?", cinfo)
+        match = re.match((r"(?:Vol.0*(\d+) )?(?:Ch.)?0*(\d+)"
+                          r"(?:\.0*(\d+))?(?:: (.+))?"), cinfo)
         chminor = match.group(3)
         return {
             "manga": manga,

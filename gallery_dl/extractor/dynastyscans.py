@@ -13,6 +13,7 @@ from .. import text
 import re
 import json
 
+
 class DynastyscansChapterExtractor(Extractor):
     """Extractor for manga-chapters from dynasty-scans.com"""
     category = "dynastyscans"
@@ -21,11 +22,13 @@ class DynastyscansChapterExtractor(Extractor):
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?dynasty-scans\.com/chapters/([^/]+)"]
     test = [
-        ("http://dynasty-scans.com/chapters/hitoribocchi_no_oo_seikatsu_ch33", {
+        (("http://dynasty-scans.com/chapters/"
+          "hitoribocchi_no_oo_seikatsu_ch33"), {
             "url": "63950fa1dfdef58ab842c1b9b854c5c1d650cfa0",
             "keyword": "81bfda5b98b34ac2a7324bd9e2abad3df9cc7673",
         }),
-        ("http://dynasty-scans.com/chapters/new_game_the_spinoff_special_13", {
+        (("http://dynasty-scans.com/chapters/"
+          "new_game_the_spinoff_special_13"), {
             "url": "6b28c733481ac498da341e85a9eb155864491731",
             "keyword": "93b75d0c0aaeb849c99f2225a4b97f466bc3ace9",
         }),
@@ -55,7 +58,7 @@ class DynastyscansChapterExtractor(Extractor):
         """Collect metadata for extractor-job"""
         info  , pos = text.extract(page, "<h3 id='chapter-title'><b>", "</b>")
         author, pos = text.extract(page, " by ", "</a>", pos)
-        date  , pos = text.extract(page, '<i class="icon-calendar"></i> ', '<', pos)
+        date  , pos = text.extract(page, '"icon-calendar"></i> ', '<', pos)
         match = re.match(
             r"(?:<a [^>]+>)?([^<]+)(?:</a>)?(?: ch(\d+))?(?:: (.+))?",
             info

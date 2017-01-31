@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text
 import json
 
+
 class HbrowseMangaExtractor(Extractor):
     """Extractor for mangas from hbrowse.com"""
     category = "hbrowse"
@@ -42,7 +43,8 @@ class HbrowseChapterExtractor(Extractor):
     category = "hbrowse"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{gallery-id} {title}", "c{chapter:>05}"]
-    filename_fmt = "{category}_{gallery-id}_{chapter:>05}_{num:>03}.{extension}"
+    filename_fmt = ("{category}_{gallery-id}_{chapter:>05}_"
+                    "{num:>03}.{extension}")
     pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/(c\d+)"]
     test = [("http://www.hbrowse.com/10363/c00000", {
         "url": "634f4800858913f097bc3b62a8fedaf74b5254bd",

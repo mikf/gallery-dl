@@ -10,10 +10,12 @@
 
 from . import booru
 
+
 class DanbooruExtractor(booru.JSONBooruExtractor):
     """Base class for danbooru extractors"""
     category = "danbooru"
     api_url = "https://danbooru.donmai.us/posts.json"
+
 
 class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
     """Extractor for images from danbooru based on search-tags"""
@@ -25,6 +27,7 @@ class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
         "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
     })]
 
+
 class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
     """Extractor for image-pools from danbooru"""
     subcategory = "pool"
@@ -33,6 +36,7 @@ class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
         "url": "73c02ec3d67ffd46d489dd6cfd7b35fee053865c",
         "content": "b16bab12bea5f7ea9e0a836bf8045f280e113d99",
     })]
+
 
 class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
     """Extractor for single images from danbooru"""

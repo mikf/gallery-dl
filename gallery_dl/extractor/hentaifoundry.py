@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 
+
 class HentaifoundryUserExtractor(Extractor):
     """Extractor for all images of a hentai-foundry-user"""
     category = "hentaifoundry"
@@ -18,8 +19,10 @@ class HentaifoundryUserExtractor(Extractor):
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [
-        r"(?:https?://)?(?:www\.)?hentai-foundry\.com/pictures/user/([^/]+)/?$",
-        r"(?:https?://)?(?:www\.)?hentai-foundry\.com/user/([^/]+)/profile",
+        (r"(?:https?://)?(?:www\.)?hentai-foundry\.com/"
+         r"pictures/user/([^/]+)/?$"),
+        (r"(?:https?://)?(?:www\.)?hentai-foundry\.com/"
+         r"user/([^/]+)/profile"),
     ]
     test = [
         ("http://www.hentai-foundry.com/pictures/user/Tenpura", {
@@ -62,7 +65,8 @@ class HentaifoundryUserExtractor(Extractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        response = self.session.get(self.url_base + self.artist + "?enterAgree=1")
+        url = self.url_base + self.artist + "?enterAgree=1"
+        response = self.session.get(url)
         if response.status_code == 404:
             raise exception.NotFoundError("user")
         page = response.text
@@ -73,9 +77,12 @@ class HentaifoundryUserExtractor(Extractor):
     def get_image_metadata(self, url):
         """Collect metadata for an image"""
         page = self.request(url).text
-        index = text.extract(url, '/', '/', len(self.url_base) + len(self.artist))[0]
-        title, pos = text.extract(page, 'Pictures</a> &raquo; <span>', '<')
-        url  , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)
+        offset = len(self.url_base) + len(self.artist)
+        index = text.extract(url, '/', '/', offset)[0]
+        title, pos = text.extract(
+            page, 'Pictures</a> &raquo; <span>', '<')
+        url, pos = text.extract(
+            page, '//pictures.hentai-foundry.com', '"', pos)
         data = {"index": index, "title": text.unescape(title)}
         text.nameext_from_url(url, data)
         return "http://pictures.hentai-foundry.com" + url, data
@@ -118,7 +125,8 @@ class HentaifoundryImageExtractor(Extractor):
                 r"(?:pictures/user/([^/]+)/(\d+)"
                 r"|[^/]/([^/]+)/(\d+))")]
     test = [
-        ("http://www.hentai-foundry.com/pictures/user/Tenpura/340854/notitle", {
+        (("http://www.hentai-foundry.com/"
+          "pictures/user/Tenpura/340854/notitle"), {
             "url": "f3c0739bf86543697deabbed4bf99eb95a04582b",
             "keyword": "96217c5becc1369c36dafa201c3c208518de8f1f",
             "content": "5c14cd10deaad79a5152f9de45c9203cf76165a0",
@@ -146,10 +154,11 @@ class HentaifoundryImageExtractor(Extractor):
         response = self.session.get(url + "?enterAgree=1")
         if response.status_code == 404:
             raise exception.NotFoundError("image")
+        extr = text.extract
         page = response.text
-        artist, pos = text.extract(page, '<a href="/pictures/user/', '"')
-        title , pos = text.extract(page, 'Pictures</a> &raquo; <span>', '<', pos)
-        url   , pos = text.extract(page, '//pictures.hentai-foundry.com', '"', pos)
+        artist, pos = extr(page, '<a href="/pictures/user/', '"')
+        title , pos = extr(page, 'Pictures</a> &raquo; <span>', '<', pos)
+        url   , pos = extr(page, '//pictures.hentai-foundry.com', '"', pos)
         data = {
             "artist": artist,
             "index": self.index,

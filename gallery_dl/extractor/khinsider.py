@@ -11,14 +11,17 @@
 from .common import AsynchronousExtractor, Message
 from .. import text, exception
 
+
 class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
     """Extractor for soundtracks from khinsider.com"""
     category = "khinsider"
     subcategory = "soundtrack"
     directory_fmt = ["{category}", "{album}"]
     filename_fmt = "{filename}"
-    pattern = [r"(?:https?://)?downloads\.khinsider\.com/game-soundtracks/album/(.+)"]
-    test = [("http://downloads.khinsider.com/game-soundtracks/album/horizon-riders-wii-", {
+    pattern = [r"(?:https?://)?downloads\.khinsider\.com/"
+               r"game-soundtracks/album/(.+)"]
+    test = [(("http://downloads.khinsider.com/game-soundtracks/"
+              "album/horizon-riders-wii-"), {
         "url": "732639e9e72e169f8ec36a71609471aaf67451e0",
         "keyword": "d91cf3edee6713b536eaf3995743f0be7dc72f68",
     })]
@@ -28,7 +31,8 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
         self.album = match.group(1)
 
     def items(self):
-        url = "http://downloads.khinsider.com/game-soundtracks/album/" + self.album
+        url = ("http://downloads.khinsider.com/game-soundtracks/album/" +
+               self.album)
         page = self.request(url, encoding="utf-8").text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
@@ -55,9 +59,12 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
         if pos == -1:
             raise exception.NotFoundError("soundtrack")
         num = 0
-        for url in text.extract_iter(page, '<tr>\r\n\t\t<td><a href="', '"', pos):
+        for url in text.extract_iter(page, '<tr>\r\n\t\t<td><a href="',
+                                     '"', pos):
             page = self.request(url, encoding="utf-8").text
             name, pos = text.extract(page, "Song name: <b>", "</b>")
-            url , pos = text.extract(page, '<p><a style="color: #21363f;" href="', '"', pos)
+            url , pos = text.extract(
+                page, '<p><a style="color: #21363f;" href="', '"', pos
+            )
             num += 1
             yield url, text.nameext_from_url(name, {"num": num})

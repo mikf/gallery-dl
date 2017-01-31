@@ -12,6 +12,7 @@ from .common import Extractor, AsynchronousExtractor, Message
 from .. import text
 import re
 
+
 class MangahereMangaExtractor(Extractor):
     """Extractor for mangas from mangahere.co"""
     category = "mangahere"
@@ -33,10 +34,10 @@ class MangahereMangaExtractor(Extractor):
     def get_chapters(self):
         """Return a list of all chapter urls"""
         page = self.request(self.url).text
-        return reversed(list(
-            text.extract_iter(page, '<a class="color_0077" href="', '"',
-            page.index('<div class="detail_list">'))
-        ))
+        return reversed(list(text.extract_iter(
+            page, '<a class="color_0077" href="', '"',
+            page.index('<div class="detail_list">')
+        )))
 
 
 class MangahereChapterExtractor(AsynchronousExtractor):
@@ -44,7 +45,8 @@ class MangahereChapterExtractor(AsynchronousExtractor):
     category = "mangahere"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
+                    "{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.)?mangahere\.co/manga/"
                 r"([^/]+(?:/v0*(\d+))?/c0*(\d+)(\.\d+)?)")]
     test = [("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", {
@@ -60,10 +62,13 @@ class MangahereChapterExtractor(AsynchronousExtractor):
     def items(self):
         page = self.request(self.url_fmt.format(self.part, 1)).text
         data = self.get_job_metadata(page)
+        urls = zip(
+            range(1, int(data["count"])+1),
+            self.get_image_urls(page),
+        )
         yield Message.Version, 1
         yield Message.Directory, data.copy()
-        for i, url in zip(range(int(data["count"])), self.get_image_urls(page)):
-            data["page"] = i+1
+        for data["page"], url in urls:
             text.nameext_from_url(url, data)
             yield Message.Url, url, data.copy()
 
@@ -74,7 +79,8 @@ class MangahereChapterExtractor(AsynchronousExtractor):
         _    , pos = text.extract(page, '<select class="wid60"', '', pos)
         _    , pos = text.extract(page, '</select>', '', pos)
         count, pos = text.extract(page, '>', '<', pos-30)
-        manga = re.match(r"(.+) \d+(\.\d+)? - Read .+ Chapter \d+(\.\d+)? Online", manga).group(1)
+        manga = re.match((r"(.+) \d+(\.\d+)? - Read .+ Chapter "
+                          r"\d+(\.\d+)? Online"), manga).group(1)
         return {
             "manga": text.unescape(manga),
             # "title": TODO,

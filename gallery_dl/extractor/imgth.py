@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 
+
 class ImgthGalleryExtractor(Extractor):
     """Extractor for image galleries from imgth.com"""
     category = "imgth"

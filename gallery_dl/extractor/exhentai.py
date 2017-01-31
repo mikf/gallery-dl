@@ -15,6 +15,7 @@ import time
 import random
 import requests
 
+
 class ExhentaiGalleryExtractor(Extractor):
     """Extractor for image-galleries from exhentai.org"""
     category = "exhentai"
@@ -41,9 +42,12 @@ class ExhentaiGalleryExtractor(Extractor):
         self.key = {}
         self.count = 0
         self.gid, self.token = match.groups()
-        self.original = config.interpolate(("extractor", "exhentai", "download-original"), True)
-        self.wait_min = config.interpolate(("extractor", "exhentai", "wait-min"), 3)
-        self.wait_max = config.interpolate(("extractor", "exhentai", "wait-max"), 6)
+        self.original = config.interpolate(
+            ("extractor", "exhentai", "download-original"), True)
+        self.wait_min = config.interpolate(
+            ("extractor", "exhentai", "wait-min"), 3)
+        self.wait_max = config.interpolate(
+            ("extractor", "exhentai", "wait-max"), 6)
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
 
@@ -75,7 +79,8 @@ class ExhentaiGalleryExtractor(Extractor):
         """Initialize headers"""
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept": "text/html,application/xhtml+xml,"
+                      "application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
             "Referer": "https://exhentai.org/",
         })
@@ -105,8 +110,8 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def get_images(self, page):
         """Collect url and metadata for all images in this gallery"""
-        url = "https://exhentai.org/s/" + text.extract(page, 'hentai.org/s/', '"')[0]
-        yield self.image_from_page(url)
+        part = text.extract(page, 'hentai.org/s/', '"')[0]
+        yield self.image_from_page("https://exhentai.org/s/" + part)
         yield from self.images_from_api()
 
     def image_from_page(self, url):
@@ -122,10 +127,15 @@ class ExhentaiGalleryExtractor(Extractor):
             ("showkey" , 'var showkey="', '";'),
         ))[0]
         self.key["start"] = data["startkey"]
-        self.key["show" ] = data["showkey"]
-        self.key["next" ] = data["nextkey"]
-        url = ("https://exhentai.org/fullimg.php" + text.unescape(data["origurl"])
-               if self.original and data["origurl"] else data["url"])
+        self.key["show"] = data["showkey"]
+        self.key["next"] = data["nextkey"]
+
+        if self.original and data["origurl"]:
+            part = text.unescape(data["origurl"])
+            url = "https://exhentai.org/fullimg.php" + part
+        else:
+            url = data["url"]
+
         return url, text.nameext_from_url(data["url"], {
             "num": 1,
             "image-token": data["startkey"],
@@ -133,14 +143,14 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def images_from_api(self):
         """Get image url and data from api calls"""
-        nextkey = self.key["next" ]
+        nextkey = self.key["next"]
         request = {
             "method" : "showpage",
             "gid"    : int(self.gid),
             "imgkey" : nextkey,
             "showkey": self.key["show"],
         }
-        for request["page"] in range(2, self.count+1):
+        for request["page"] in range(2, self.count + 1):
             while True:
                 try:
                     self.wait()
@@ -150,9 +160,14 @@ class ExhentaiGalleryExtractor(Extractor):
                     pass
             imgkey = nextkey
             nextkey, pos = text.extract(page["i3"], "'", "'")
-            imgurl , pos = text.extract(page["i3"], '<img id="img" src="', '"', pos)
+            imgurl , pos = text.extract(page["i3"], 'id="img" src="', '"', pos)
             origurl, pos = text.extract(page["i7"], '<a href="', '"')
-            url = text.unescape(origurl) if self.original and origurl else imgurl
+
+            if self.original and origurl:
+                url = text.unescape(origurl)
+            else:
+                url = imgurl
+
             yield url, text.nameext_from_url(imgurl, {
                 "num": request["page"],
                 "image-token": imgkey
@@ -173,7 +188,8 @@ class ExhentaiGalleryExtractor(Extractor):
         password = config.interpolate(("extractor", "exhentai", "password"))
         cookies = self._login_impl(username, password)
         for key, value in cookies.items():
-            self.session.cookies.set(key, value, domain=".exhentai.org", path="/")
+            self.session.cookies.set(
+                key, value, domain=".exhentai.org", path="/")
 
     @cache(maxage=360*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
@@ -196,7 +212,8 @@ class ExhentaiGalleryExtractor(Extractor):
             "PassWord": password,
             "ipb_login_submit": "Login!",
         }
-        self.session.headers["Referer"] = "http://e-hentai.org/bounce_login.php?b=d&bt=1-1"
+        referer = "http://e-hentai.org/bounce_login.php?b=d&bt=1-1"
+        self.session.headers["Referer"] = referer
         response = self.session.post(url, data=params)
 
         if "You are now logged in as:" not in response.text:

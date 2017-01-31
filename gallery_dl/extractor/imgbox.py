@@ -12,6 +12,7 @@ from .common import Extractor, AsynchronousExtractor, Message
 from .. import text, exception
 import re
 
+
 class ImgboxGalleryExtractor(AsynchronousExtractor):
     """Extractor for image galleries from imgbox.com"""
     category = "imgbox"

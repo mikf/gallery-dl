@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text
 import json
 
+
 class HentaicdnMangaExtractor(Extractor):
     """Base class for extractors for mangas"""
     subcategory = "manga"
@@ -29,7 +30,8 @@ class HentaicdnChapterExtractor(Extractor):
     """Base class for extractors for a single manga chapter"""
     subcategory = "chapter"
     directory_fmt = ["{category}", "{gallery-id} {title}"]
-    filename_fmt = "{category}_{gallery-id}_{chapter:>02}_{num:>03}.{extension}"
+    filename_fmt = ("{category}_{gallery-id}_{chapter:>02}_"
+                    "{num:>03}.{extension}")
     url = ""
 
     def items(self):

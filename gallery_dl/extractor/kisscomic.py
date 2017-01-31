@@ -11,6 +11,7 @@
 from . import kissmanga
 from .. import text
 
+
 class KisscomicExtractor(kissmanga.KissmangaExtractor):
     """Base class for kisscomic extractors"""
     category = "kisscomic"
@@ -41,7 +42,8 @@ class KisscomicIssueExtractor(KisscomicExtractor,
                               kissmanga.KissmangaChapterExtractor):
     """Extractor for comic-issues from kisscomic.us"""
     subcategory = "issue"
-    pattern = [r"(?:https?://)?(?:www\.)?kisscomic\.us/chapters/.+-chapter-\d+\.html"]
+    pattern = [r"(?:https?://)?(?:www\.)?kisscomic\.us/"
+               r"chapters/.+-chapter-\d+\.html"]
     test = [("http://kisscomic.us/chapters/47-ronin-chapter-4.html", {
         "url": "7f8e40bf04c4b36f14a60a8e45692068a9a1f88e",
         "keyword": "a685f92b6989eebf57f8981b1edd6d3de9148ad6",

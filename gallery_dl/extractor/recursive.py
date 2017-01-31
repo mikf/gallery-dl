@@ -12,6 +12,7 @@ import re
 from .common import Extractor, Message
 from .. import adapter
 
+
 class RecursiveExtractor(Extractor):
 
     category = "recursive"

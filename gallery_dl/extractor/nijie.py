@@ -12,6 +12,7 @@ from .common import AsynchronousExtractor, Message
 from .. import config, text, exception
 from ..cache import cache
 
+
 class NijieExtractor(AsynchronousExtractor):
     """Base class for nijie extractors"""
     category = "nijie"
@@ -94,8 +95,8 @@ class NijieUserExtractor(NijieExtractor):
     def __init__(self, match):
         NijieExtractor.__init__(self)
         self.artist_id = match.group(1)
-        self.artist_url = ("https://nijie.info/members_illust.php?id="
-                           + self.artist_id)
+        self.artist_url = ("https://nijie.info/members_illust.php?id=" +
+                           self.artist_id)
 
     def get_image_ids(self):
         response = self.session.get(self.artist_url)

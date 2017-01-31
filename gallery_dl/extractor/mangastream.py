@@ -11,6 +11,7 @@
 from .common import AsynchronousExtractor, Message
 from .. import text
 
+
 class MangastreamChapterExtractor(AsynchronousExtractor):
     """Extractor for manga-chapters from mangastream.com"""
     category = "mangastream"
@@ -41,7 +42,9 @@ class MangastreamChapterExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        manga, pos = text.extract(page, '<span class="hidden-xs hidden-sm">', "<")
+        manga, pos = text.extract(
+            page, '<span class="hidden-xs hidden-sm">', "<"
+        )
         pos = page.find(self.part, pos)
         title, pos = text.extract(page, ' - ', '<', pos)
         count, pos = text.extract(page, 'Last Page (', ')', pos)

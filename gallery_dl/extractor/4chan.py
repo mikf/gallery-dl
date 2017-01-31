@@ -10,6 +10,7 @@
 
 from . import chan
 
+
 class FourchanThreadExtractor(chan.ChanThreadExtractor):
     """Extractor for images from threads from 4chan.org"""
     category = "4chan"

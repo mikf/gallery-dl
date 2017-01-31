@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 
+
 class ReadcomicsComicExtractor(Extractor):
     """Extractor for comics from readcomics.tv"""
     category = "readcomics"

@@ -12,6 +12,7 @@ from . import kissmanga
 from .. import text
 import re
 
+
 class ReadcomiconlineExtractor(kissmanga.KissmangaExtractor):
     """Base class for readcomiconline extractors"""
     category = "readcomiconline"
@@ -41,7 +42,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineExtractor,
                                     kissmanga.KissmangaChapterExtractor):
     """Extractor for comic-issues from readcomiconline.to"""
     subcategory = "issue"
-    pattern = [r"(?:https?://)?(?:www\.)?readcomiconline\.to/Comic/.+/.+\?id=\d+"]
+    pattern = [r"(?:https?://)?(?:www\.)?readcomiconline\.to/"
+               r"Comic/.+/.+\?id=\d+"]
     test = [("http://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
         "url": "dd1659d9eb5f6ebb421e66316c98d71682a44c2d",
         "keyword": "bc2f937893c1204ba40e0293e86f0a8943be1304",

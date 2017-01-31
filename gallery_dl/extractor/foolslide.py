@@ -13,6 +13,7 @@ from .. import text, iso639_1
 import json
 import re
 
+
 class FoolslideChapterExtractor(Extractor):
     """Base class for chapter extractors on foolslide based sites"""
     subcategory = "chapter"

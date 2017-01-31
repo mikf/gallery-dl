@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 
+
 class ChanThreadExtractor(Extractor):
     """Base class for extractors for Futaba Channel boards"""
     category = "chan"

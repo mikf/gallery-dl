@@ -10,10 +10,12 @@
 
 from . import booru
 
+
 class E621Extractor(booru.JSONBooruExtractor):
     """Base class for e621 extractors"""
     category = "e621"
     api_url = "https://e621.net/post/index.json"
+
 
 class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
     """Extractor for images from e621.net based on search-tags"""
@@ -27,6 +29,7 @@ class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
         "content": "501d1e5d922da20ee8ff9806f5ed3ce3a684fd58",
     })]
 
+
 class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
     """Extractor for image-pools from e621.net"""
     subcategory = "pool"
@@ -35,6 +38,7 @@ class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
         "url": "842f2fb065c7c339486a9b1d689020b8569888ed",
         "content": "c2c87b7a9150509496cddc75ccab08109922876a",
     })]
+
 
 class E621PostExtractor(E621Extractor, booru.BooruPostExtractor):
     """Extractor for single images from e621.net"""

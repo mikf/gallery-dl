@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text
 import json
 
+
 class NhentaiGalleryExtractor(Extractor):
     """Extractor for image-galleries from nhentai.net"""
     category = "nhentai"
@@ -31,7 +32,8 @@ class NhentaiGalleryExtractor(Extractor):
     def items(self):
         ginfo = self.get_gallery_info()
         data = self.get_job_metadata(ginfo)
-        urlfmt = ginfo["media_url"] + "galleries/" + data["media-id"] + "/{}.{}"
+        urlfmt = "{}galleries/{}/{{}}.{{}}".format(
+            ginfo["media_url"], data["media-id"])
         extdict = {"j": "jpg", "p": "png", "g": "gif"}
         yield Message.Version, 1
         yield Message.Directory, data
@@ -45,8 +47,10 @@ class NhentaiGalleryExtractor(Extractor):
     def get_gallery_info(self):
         """Extract and return gallery-info"""
         page = self.request("http://nhentai.net/g/" + self.gid + "/1/").text
-        media_url, pos = text.extract(page, ".reader({\n\t\t\tmedia_url: '", "'")
-        json_data, pos = text.extract(page, "gallery: ", ",\n", pos)
+        media_url, pos = text.extract(
+            page, ".reader({\n\t\t\tmedia_url: '", "'")
+        json_data, pos = text.extract(
+            page, "gallery: ", ",\n", pos)
         json_dict = json.loads(json_data)
         json_dict["media_url"] = media_url
         return json_dict

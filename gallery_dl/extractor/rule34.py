@@ -10,19 +10,21 @@
 
 from . import booru
 
+
 class Rule34Extractor(booru.XMLBooruExtractor):
     """Base class for rule34 extractors"""
     category = "rule34"
     api_url = "https://rule34.xxx/index.php"
 
     def setup(self):
-        self.params.update({"page":"dapi", "s":"post", "q":"index"})
+        self.params.update({"page": "dapi", "s": "post", "q": "index"})
 
     def update_page(self, reset=False):
         if reset is False:
             self.params["pid"] += 1
         else:
             self.params["pid"] = 0
+
 
 class Rule34TagExtractor(Rule34Extractor, booru.BooruTagExtractor):
     """Extractor for images from rule34.xxx based on search-tags"""
@@ -33,6 +35,7 @@ class Rule34TagExtractor(Rule34Extractor, booru.BooruTagExtractor):
         "url": "104094495973edfe7e764c8f2dd42017163322aa",
         "content": "a01768c6f86f32eb7ebbdeb87c30b0d9968d7f97",
     })]
+
 
 class Rule34PostExtractor(Rule34Extractor, booru.BooruPostExtractor):
     """Extractor for single images from rule34.xxx"""

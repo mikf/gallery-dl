@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 
+
 class WhentaiUserExtractor(Extractor):
     """Extractor for images of a whentai-user"""
     category = "whentai"
@@ -91,14 +92,20 @@ class WhentaiImageExtractor(Extractor):
 
     def items(self):
         data = self.get_image_metadata()
-        url  = self.get_image_url(data["user"])
+        url = self.get_image_url(data["user"])
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
 
     def get_image_url(self, user):
-        data = {"type": "image", "cnt": "1", "paid": "0", "post": "1",
-                "from": str(int(self.imageid) + 1), "author": user.replace("_", " ")}
+        data = {
+            "type": "image",
+            "cnt": "1",
+            "paid": "0",
+            "post": "1",
+            "from": str(int(self.imageid) + 1),
+            "author": user.replace("_", " ")
+        }
         page = self.request("http://whentai.com/ajax/getuploadslist",
                             method="POST", data=data).text
         return text.extract(page, 'src="', '"')[0].replace("/t2", "/")

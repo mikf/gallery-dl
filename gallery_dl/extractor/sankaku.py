@@ -11,8 +11,9 @@
 from .common import AsynchronousExtractor, Message
 from .. import text
 
+
 class SankakuTagExtractor(AsynchronousExtractor):
-    """Extractor for images from chan.sankakucomplex.com based on search-tags"""
+    """Extractor for images from chan.sankakucomplex.com by search-tags"""
     category = "sankaku"
     subcategory = "tag"
     directory_fmt = ["{category}", "{tags}"]
@@ -54,8 +55,9 @@ class SankakuTagExtractor(AsynchronousExtractor):
             page = self.request(self.url, params=params).text
             pos = text.extract(page, '<div id=more-popular-posts-link>', '')[1]
             while True:
-                image_id, pos = text.extract(page,
-                    '<span class="thumb blacklisted" id=p', '>', pos)
+                image_id, pos = text.extract(
+                    page, '<span class="thumb blacklisted" id=p', '>', pos
+                )
                 if not image_id:
                     break
                 image = self.get_image_metadata(image_id)

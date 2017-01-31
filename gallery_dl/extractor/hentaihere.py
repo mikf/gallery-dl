@@ -12,6 +12,7 @@ from .. import text
 from . import hentaicdn
 import re
 
+
 class HentaihereMangaExtractor(hentaicdn.HentaicdnMangaExtractor):
     """Extractor for mangas from hentaihere.com"""
     category = "hentaihere"
@@ -32,7 +33,7 @@ class HentaihereMangaExtractor(hentaicdn.HentaicdnMangaExtractor):
     def get_chapters(self):
         return text.extract_iter(
             self.request("http://hentaihere.com/m/S" + self.gid).text,
-            '<li class="sub-chp clearfix">\n<a href="','"'
+            '<li class="sub-chp clearfix">\n<a href="', '"'
         )
 
 
@@ -48,7 +49,9 @@ class HentaihereChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
     def __init__(self, match):
         hentaicdn.HentaicdnChapterExtractor.__init__(self)
         self.gid, self.chapter = match.groups()
-        self.url = "http://hentaihere.com/m/S{}/{}/1".format(self.gid, self.chapter)
+        self.url = "http://hentaihere.com/m/S{}/{}/1".format(
+            self.gid, self.chapter
+        )
 
     def get_job_metadata(self, page, images):
         title = text.extract(page, "<title>", "</title>")[0]

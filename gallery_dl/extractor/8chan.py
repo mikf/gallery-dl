@@ -10,6 +10,7 @@
 
 from . import chan
 
+
 class InfinitychanThreadExtractor(chan.ChanThreadExtractor):
     """Extractor for images from threads from 8ch.net"""
     category = "8chan"

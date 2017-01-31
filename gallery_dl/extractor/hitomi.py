@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, iso639_1
 import string
 
+
 class HitomiGalleryExtractor(Extractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
@@ -29,7 +30,8 @@ class HitomiGalleryExtractor(Extractor):
         self.gid = match.group(1)
 
     def items(self):
-        page = self.request("https://hitomi.la/galleries/" + self.gid + ".html").text
+        url = "https://hitomi.la/galleries/" + self.gid + ".html"
+        page = self.request(url).text
         data = self.get_job_metadata(page)
         images = self.get_image_urls(page)
         data["count"] = len(images)
@@ -41,8 +43,8 @@ class HitomiGalleryExtractor(Extractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        group  = ""
-        gtype  = ""
+        group = ""
+        gtype = ""
         series = ""
         _     , pos = text.extract(page, '<h1><a href="/reader/', '')
         title , pos = text.extract(page, '.html">', "</a>", pos)

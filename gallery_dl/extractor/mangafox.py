@@ -18,10 +18,12 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
     category = "mangafox"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
-    filename_fmt = "{manga}_c{chapter:>03}{chapter-minor}_{page:>03}.{extension}"
+    filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
+                    "{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.)?(mangafox\.me/manga/"
                 r"[^/]+/(v\d+/)?c\d+[^/]*)")]
-    test = [("http://mangafox.me/manga/kidou_keisatsu_patlabor/v05/c006.2/1.html", {
+    test = [(("http://mangafox.me/manga/kidou_keisatsu_patlabor/"
+              "v05/c006.2/1.html"), {
         "keyword": "3bae0396e96868f5f24dff5e547a6bbfcbed7282",
         "content": "5c50c252dcf12ffecf68801f4db8a2167265f66c",
     })]

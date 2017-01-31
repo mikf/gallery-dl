@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 
+
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
     category = "pinterest"
@@ -65,7 +66,8 @@ class PinterestBoardExtractor(PinterestExtractor):
     """Extractor for images from a board from pinterest.com"""
     subcategory = "board"
     directory_fmt = ["{category}", "{user}", "{board}"]
-    pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.com/(?!pin/)([^/]+)/([^/]+)"]
+    pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.com/"
+               r"(?!pin/)([^/]+)/([^/]+)"]
     test = [
         ("https://www.pinterest.com/g1952849/test-/", {
             "url": "705ee521630a5d613b0449d694a5345e684572a9",
@@ -133,7 +135,8 @@ class PinterestPinitExtractor(PinterestExtractor):
 class PinterestAPI():
     """Minimal interface for the pinterest API"""
 
-    def __init__(self, session, access_token="AV2U9Oe6dyC2vfPugUnBvJ7Duxg9FHCJPXPZIvRDXv9hvwBALwAAAAA"):
+    def __init__(self, session, access_token="AV2U9Oe6dyC2vfPugUnBvJ7Duxg9"
+                                             "FHCJPXPZIvRDXv9hvwBALwAAAAA"):
         self.session = session
         self.session.params["access_token"] = access_token
 

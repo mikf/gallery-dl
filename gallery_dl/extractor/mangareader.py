@@ -11,6 +11,7 @@
 from .common import AsynchronousExtractor, Extractor, Message
 from .. import text
 
+
 class MangareaderBase():
     """Base class for mangareader extractors"""
     category = "mangareader"
@@ -45,10 +46,12 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
     """Extractor for manga-chapters from mangareader.net"""
     subcategory = "chapter"
     pattern = [
-        r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))",
-        r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+).html)",
+        (r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))"),
+        (r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/"
+         r"chapter-(\d+).html)"),
     ]
-    test = [("http://www.mangareader.net/karate-shoukoushi-kohinata-minoru/11", {
+    test = [(("http://www.mangareader.net/"
+              "karate-shoukoushi-kohinata-minoru/11"), {
         "url": "84ffaab4c027ef9022695c53163c3aeabd07ca58",
         "keyword": "09b4ad57a082eb371dec027ccfc8ed1157c6eac6",
     })]

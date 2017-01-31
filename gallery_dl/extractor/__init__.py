@@ -8,7 +8,6 @@
 
 import re
 import importlib
-from .. import config
 
 modules = [
     "pixiv",
@@ -75,6 +74,7 @@ modules = [
     "test",
 ]
 
+
 def find(url):
     """Find suitable extractor for the given url"""
     for pattern, klass in _list_patterns():
@@ -83,6 +83,7 @@ def find(url):
             return klass(match)
     return None
 
+
 def extractors():
     """Yield all available extractor classes"""
     return sorted(
@@ -90,11 +91,13 @@ def extractors():
         key=lambda x: x.__name__
     )
 
+
 # --------------------------------------------------------------------
 # internals
 
 _cache = []
 _module_iter = iter(modules)
+
 
 def _list_patterns():
     """Yield all available (pattern, class) tuples"""
@@ -109,6 +112,7 @@ def _list_patterns():
         ]
         _cache.extend(tuples)
         yield from tuples
+
 
 def _get_classes(module):
     """Return a list of all extractor classes in a module"""

@@ -49,7 +49,8 @@ class DeviantartImageExtractor(Extractor):
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [r"(?:https?://)?([^\.]+\.deviantart\.com/art/.+-(\d+))"]
-    test = [("http://shimoda7.deviantart.com/art/For-the-sake-of-a-memory-10073852", {
+    test = [(("http://shimoda7.deviantart.com/art/"
+              "For-the-sake-of-a-memory-10073852"), {
         "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
         "keyword": "ccac27b8f740fc943afca9460608e02c6cbcdf96",
         "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
@@ -66,11 +67,12 @@ class DeviantartImageExtractor(Extractor):
         data = self.get_data(page)
         data.update(self.get_image(page))
 
+        tlen = len(data["title"])
         text.nameext_from_url(data["image"], data)
         data["title"] = text.unescape(data["title"])
         data["description"] = text.unescape(text.unescape(data["description"]))
         data["artist"] = text.extract(data["url"], "//", ".")[0]
-        data["date"] = text.extract(data["date"], ", ", " in ", len(data["title"]))[0]
+        data["date"] = text.extract(data["date"], ", ", " in ", tlen)[0]
 
         yield Message.Version, 1
         yield Message.Directory, data

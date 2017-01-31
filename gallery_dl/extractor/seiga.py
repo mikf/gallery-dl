@@ -13,6 +13,7 @@ from .. import config, exception
 from ..cache import cache
 from xml.etree import ElementTree
 
+
 class SeigaExtractor(Extractor):
     """Base class for seiga extractors"""
     category = "seiga"
@@ -88,7 +89,7 @@ class SeigaUserExtractor(SeigaExtractor):
 
     def get_images(self):
         keymap = {0: "image-id", 2: "title", 3: "description",
-                  7: "summary",  8: "genre", 18: "date"}
+                  7: "summary", 8: "genre", 18: "date"}
         url = "http://seiga.nicovideo.jp/api/user/data?id=" + self.user_id
         response = self.request(url)
         root = ElementTree.fromstring(response.text)
