@@ -9,7 +9,7 @@
 """Collection of extractors for various imagehosts"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 from os.path import splitext
 from urllib.parse import urljoin
 
@@ -64,15 +64,22 @@ class ImgytImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from img.yt"""
     category = "imgyt"
     pattern = [r"(?:https?://)?((?:www\.)?img\.yt/img-([a-z0-9]+)\.html)"]
-    test = [("https://img.yt/img-57a2050547b97.html", {
-        "url": "6801fac1ff8335bd27a1665ad27ad64cace2cd84",
-        "keyword": "7548cc9915f90f5d7ffbafa079085457ae34562c",
-        "content": "54592f2635674c25677c6872db3709d343cdf92f",
-    })]
+    test = [
+        ("https://img.yt/img-57a2050547b97.html", {
+            "url": "6801fac1ff8335bd27a1665ad27ad64cace2cd84",
+            "keyword": "7548cc9915f90f5d7ffbafa079085457ae34562c",
+            "content": "54592f2635674c25677c6872db3709d343cdf92f",
+        }),
+        ("https://img.yt/img-57a2050547b98.html", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
     https = True
 
     def get_info(self, page):
-        url     , pos = text.extract(page, "<img class='centred' src='", "'")
+        url, pos = text.extract(page, "<img class='centred' src='", "'")
+        if not url:
+            raise exception.NotFoundError("image")
         filename, pos = text.extract(page, " alt='", "'", pos)
         filename += splitext(url)[1] if filename else url
         return url, filename
