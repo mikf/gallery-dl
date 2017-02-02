@@ -106,16 +106,23 @@ class ChronosImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from chronos.to"""
     category = "chronos"
     pattern = [r"(?:https?://)?((?:www\.)?chronos\.to/([a-z0-9]{12}))"]
-    test = [("http://chronos.to/bdrmq7rw7v4y", {
-        "url": "7fcb3fe315c94283644d25ef47a644c2dc8da944",
-        "keyword": "04dbc71a1154728d01c931308184050d61c5da55",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
+    test = [
+        ("http://chronos.to/bdrmq7rw7v4y", {
+            "url": "7fcb3fe315c94283644d25ef47a644c2dc8da944",
+            "keyword": "04dbc71a1154728d01c931308184050d61c5da55",
+            "content": "0c8768055e4e20e7c7259608b67799171b691140",
+        }),
+        ("http://chronos.to/bdrmq7rw7v4z", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
     https = False
     params = "complex"
 
     def get_info(self, page):
-        url     , pos = text.extract(page, '<br><img src="', '"')
+        url, pos = text.extract(page, '<br><img src="', '"')
+        if not url:
+            raise exception.NotFoundError("image")
         filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, filename
 
