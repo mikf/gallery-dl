@@ -279,23 +279,6 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
         return "http://img" + url, text.unescape(filename)
 
 
-class ImgtrexImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from imgtrex.com"""
-    category = "imgtrex"
-    pattern = [r"(?:https?://)?((?:www\.)?imgtrex\.com/([^/]+))"]
-    test = [("http://imgtrex.com/im0ypxq0rke4/test-テスト-&<a>.png", {
-        "url": "c000618bddda42bd599a590b7972c7396d19d8fe",
-        "keyword": "58905795a9cd3f17d5ff024fc4d63645795ba23c",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
-    params = None
-
-    def get_info(self, page):
-        filename, pos = text.extract(page, '<title>ImgTrex: ', '</title>')
-        url     , pos = text.extract(page, '<br>\n<img src="', '"', pos)
-        return url, filename
-
-
 class PixhostImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from pixhost.org"""
     category = "pixhost"
