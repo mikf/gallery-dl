@@ -12,6 +12,7 @@ Supported Sites
 - dynasty-scans.com
 - e621.net
 - exhentai.org
+- famatg.com
 - fapat.me
 - gelbooru.com
 - gomanga.co
@@ -36,7 +37,6 @@ Supported Sites
 - imgspice.com
 - imgspot.org
 - imgth.com
-- imgtrex.com
 - imgtrial.com
 - imgupload.yt
 - imgur.com

@@ -21,6 +21,7 @@ modules = [
     "dynastyscans",
     "e621",
     "exhentai",
+    "fallenangels",
     "gelbooru",
     "gomanga",
     "hbrowse",
