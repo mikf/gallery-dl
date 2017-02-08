@@ -67,10 +67,10 @@ Supported Sites
 - raw.senmanga.com
 - readcomiconline.to
 - readcomics.tv
-- reader.sensescans.com
 - rule34.xxx
 - safebooru.org
 - seiga.nicovideo.jp
+- sensescans.com
 - slide.world-three.org
 - thespectrum.net
 - tumblr.com
