@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+from ..cache import cache
 from os.path import splitext
 from urllib.parse import urljoin
 
@@ -239,6 +240,11 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
         "content": "96b1fd099b06faad5879fce23a7e4eb8290d8810",
     })]
     params = None
+
+    @property
+    @cache(maxage=3*60*60)
+    def cookies(self):
+        return self.request(self.url).cookies
 
     def get_info(self, page):
         url     , pos = text.extract(page, 'center;"><img src="', '"')
