@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -35,7 +35,7 @@ class TwitterTweetExtractor(Extractor):
             "Mozilla/5.0 (X11; Linux x86_64; rv:48.0) "
             "Gecko/20100101 Firefox/48.0"
         )
-        page = self.request("https://mobile.twitter.com/" + self.path).text
+        page = self.request("https://twitter.com/" + self.path).text
         data = self.get_job_metadata()
         imgs = self.get_image_urls(page)
         data["count"] = len(imgs)
@@ -54,4 +54,5 @@ class TwitterTweetExtractor(Extractor):
     @staticmethod
     def get_image_urls(page):
         """Extract and return a list of all image-urls"""
-        return list(text.extract_iter(page, 'alt="Embedded image" src="', '"'))
+        needle = '<img data-aria-label-part src="'
+        return list(text.extract_iter(page, needle, '"'))

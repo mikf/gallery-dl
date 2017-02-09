@@ -81,7 +81,7 @@ class WhentaiImageExtractor(Extractor):
     test = [("http://whentai.com/view/2089/", {
         "url": "116761cdd3a4d78f9ebe22c18efae1465b2e4d1b",
         "keyword": "686bb5af1694efb326d597d4c98ee12d88078455",
-        "content": "b4545aaeb3bc7d94c8941bdfdcb768261f2579b3",
+        "content": "31909f3d52d14ba6bf79bf303eb31d6807588f25",
     })]
 
     def __init__(self, match):
