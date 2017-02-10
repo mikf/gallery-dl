@@ -68,7 +68,6 @@ class KissmangaChapterExtractor(KissmangaExtractor):
 
     def items(self):
         page = self.request(self.url).text
-        print(page)
         data = self.get_job_metadata(page)
         imgs = self.get_image_urls(page)
         data["count"] = len(imgs)
