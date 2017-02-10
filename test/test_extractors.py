@@ -48,18 +48,21 @@ def _generate_test(extr, tcase):
 
 
 # enable selective testing for direct calls
-extractors = extractor.extractors()
+skip = ["exhentai", "mangafox"]
 if __name__ == '__main__' and len(sys.argv) > 1:
     extractors = [
-        extr for extr in extractors
+        extr for extr in extractor.extractors()
         if extr.category in sys.argv
     ]
     del sys.argv[1:]
+else:
+    extractors = [
+        extr for extr in extractor.extractors()
+        if extr.category not in skip
+    ]
 
-skip = ["exhentai", "kissmanga", "mangafox"]
+
 for extr in extractors:
-    if extr.category in skip:
-        continue
     if hasattr(extr, "test") and extr.test:
         name = "test_" + extr.__name__ + "_"
         for num, tcase in enumerate(extr.test, 1):
