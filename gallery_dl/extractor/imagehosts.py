@@ -257,9 +257,9 @@ class ImgcandyImageExtractor(ImagehostImageExtractor):
     category = "imgcandy"
     pattern = [(r"(?:https?://)?((?:www\.)?imgcandy\.net/img-([a-z0-9]+)"
                 r"(?:_.+)?\.html)")]
-    test = [("http://imgcandy.net/img-57d02527efee8_test-テスト.png.html", {
+    test = [("http://imgcandy.net/img-57d02527efee8_test.png.html", {
         "url": "bc3c9207b10dbfe8e65ccef5b9e3194a7427b4fa",
-        "keyword": "1ed1587ef38a6b26ce28b35857a78417239d197a",
+        "keyword": "6482e58492e65fcc6d6622ecc2fb19f9d35ff18b",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
 
