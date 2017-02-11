@@ -107,9 +107,11 @@ def safe_request(session, url, method="GET", *args, **kwargs):
 if os.name == "nt":
     import os.path
     import requests.certs
+    import requests.packages.urllib3 as ulib3
     if not os.path.isfile(requests.certs.where()):
         def patched_init(self):
             session_init(self)
             self.verify = False
         session_init = requests.Session.__init__
         requests.Session.__init__ = patched_init
+        ulib3.disable_warnings(ulib3.exceptions.InsecureRequestWarning)
