@@ -62,7 +62,7 @@ class ExhentaiGalleryExtractor(Extractor):
         page = response.text
         if response.status_code == 404 and "Gallery Not Available" in page:
             raise exception.AuthorizationError()
-        if page.startswith(("\ufeffKey missing", "\ufeffGallery not found")):
+        if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
         data = self.get_job_metadata(page)
         self.count = int(data["count"])
