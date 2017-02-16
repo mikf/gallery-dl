@@ -8,20 +8,21 @@
 
 """Extract manga-chapters from https://gomanga.co/"""
 
-from .foolslide import FoolslideChapterExtractor
+from . import foolslide
 
 
-class GomangaChapterExtractor(FoolslideChapterExtractor):
+class GomangaChapterExtractor(foolslide.FoolslideChapterExtractor):
     """Extractor for manga-chapters from gomanga.co"""
     category = "gomanga"
-    pattern = [(r"(?:https?://)?(?:www\.)?(gomanga\.co/reader/read/"
-                r"[^/]+/([a-z]{2})/\d+/\d+)")]
-    test = [("https://gomanga.co/reader/read/mata-kata-omou/en/0/1/page/11", {
-        "url": "5088d75bb44327fc503c85b52b1d6a371b8057f2",
-        "keyword": "63f4d2cbbcaf3e7b5c48e71c4c4d453d9a399a26",
-    })]
+    pattern = foolslide.chapter_pattern(r"(?:www\.)?gomanga\.co/reader")
+    test = [
+        ("https://gomanga.co/reader/read/mata-kata-omou/en/0/1/page/11", {
+            "url": "5088d75bb44327fc503c85b52b1d6a371b8057f2",
+            "keyword": "f534cfc4c3aef87cb0439e2a37e2ebee98077e92",
+        }),
+        ("https://gomanga.co/reader/read/pastel/en/31/144/", {
+            "url": "9cc2052fbf36344c573c754c5abe533a14b3e280",
+            "keyword": "a2ef55d26984c64baf026382f889bb013d01dc4f",
+        }),
+    ]
     single = False
-
-    def __init__(self, match):
-        url = "https://" + match.group(1)
-        FoolslideChapterExtractor.__init__(self, url, match.group(2))
