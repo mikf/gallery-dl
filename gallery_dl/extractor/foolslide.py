@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,28 +11,46 @@
 from .common import Extractor, Message
 from .. import text, iso639_1
 import json
-import re
+
+
+CHAPTER_RE = (
+    r"/read/[^/]+"
+    r"/(?P<lang>[a-z]{2})"
+    r"/(?P<volume>\d+)"
+    r"/(?P<chapter>\d+)"
+    r"(?:/(?P<chapter_minor>\d+))?)"
+)
+
+
+def chapter_pattern(domain_re):
+    return [r"(?:https?://)?(" + domain_re + CHAPTER_RE]
 
 
 class FoolslideChapterExtractor(Extractor):
     """Base class for chapter extractors on foolslide based sites"""
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "{chapter:>03} - {title}"]
+    directory_fmt = ["{category}", "{manga}", "{chapter_string}"]
     filename_fmt = "{manga}_{chapter:>03}_{page:>03}.{extension}"
+    scheme = "https"
     single = True
 
-    def __init__(self, url, lang):
+    def __init__(self, match, url=None):
         Extractor.__init__(self)
-        self.url = url
-        self.lang = lang
+        self.url = url or self.scheme + "://" + match.group(1)
+        self.data = match.groupdict(default="")
 
     def items(self):
         page = self.request(self.url, encoding="utf-8",
                             method="post", data={"adult": "true"}).text
         data = self.get_job_metadata(page)
+        imgs = self.get_images(page)
+
+        data["count"] = len(imgs)
+        data["chapter_id"] = imgs[0]["chapter_id"]
+
         yield Message.Version, 1
         yield Message.Directory, data
-        for data["page"], image in enumerate(self.get_images(page), 1):
+        for data["page"], image in enumerate(imgs, 1):
             try:
                 url = image["url"]
                 del image["url"]
@@ -45,23 +63,19 @@ class FoolslideChapterExtractor(Extractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        _        , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
-        manga    , pos = text.extract(page, 'title="', '"', pos)
-        chapter  , pos = text.extract(page, '">', '</a>', pos)
+        _      , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
+        manga  , pos = text.extract(page, 'title="', '"', pos)
+        chapter, pos = text.extract(page, 'title="', '"', pos)
 
+        chapter = text.unescape(chapter)
         parts = chapter.split(":", maxsplit=1)
-        match = re.match(r"(?:Vol.(\d+) )?(?:Chapter (\d+)$|(.+))", parts[0])
-        volume = match.group(1) or ""
-        chapter = match.group(2) or match.group(3).strip()
+        title = parts[1].strip() if len(parts) > 1 else ""
 
-        return {
-            "manga": text.unescape(manga),
-            "chapter": chapter,
-            "volume": volume,
-            "lang": self.lang,
-            "language": iso639_1.code_to_language(self.lang),
-            "title": text.unescape(parts[1].strip() if len(parts) > 1 else ""),
-        }
+        self.data["manga"] = text.unescape(manga)
+        self.data["title"] = title
+        self.data["language"] = iso639_1.code_to_language(self.data["lang"])
+        self.data["chapter_string"] = chapter
+        return self.data
 
     def get_images(self, page):
         """Return a list of all images in this chapter"""

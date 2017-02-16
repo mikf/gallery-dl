@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,20 +8,23 @@
 
 """Extract manga-chapters from http://www.slide.world-three.org/"""
 
-from .foolslide import FoolslideChapterExtractor
+from . import foolslide
 
 
-class WorldthreeChapterExtractor(FoolslideChapterExtractor):
+class WorldthreeChapterExtractor(foolslide.FoolslideChapterExtractor):
     """Extractor for manga-chapters from slide.world-three.org"""
     category = "worldthree"
-    pattern = [(r"(?:https?://)?(?:www\.)?(slide\.world-three\.org/read/"
-                r"[^/]+/([a-z]{2})/\d+/\d+)")]
-    test = [(("http://www.slide.world-three.org/"
-              "read/black_bullet/en/2/7/page/1"), {
-        "url": "be2f04f6e2d311b35188094cfd3e768583271584",
-        "keyword": "6d77d9fc806d76d881491a52ccd8dfd875c47d05",
-    })]
-
-    def __init__(self, match):
-        url = "http://" + match.group(1)
-        FoolslideChapterExtractor.__init__(self, url, match.group(2))
+    pattern = foolslide.chapter_pattern("(?:www\.)?slide\.world-three\.org")
+    test = [
+        (("http://www.slide.world-three.org"
+          "/read/black_bullet/en/2/7/page/1"), {
+            "url": "be2f04f6e2d311b35188094cfd3e768583271584",
+            "keyword": "25fd070bc93ee8ad316f5b7d1bd9011c9bcf0616",
+        }),
+        (("http://www.slide.world-three.org"
+          "/read/idolmster_cg_shuffle/en/0/4/2/"), {
+            "url": "6028ea5ca282744f925dfad92eeb98509f9cc78c",
+            "keyword": "10e3dc961ac2c9395f4d1f3ad3b9ad84113e7366",
+        }),
+    ]
+    scheme = "http"
