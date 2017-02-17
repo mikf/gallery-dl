@@ -17,5 +17,5 @@ class YonkouprodChapterExtractor(foolslide.FoolslideChapterExtractor):
     pattern = foolslide.chapter_pattern(r"(?:www\.)?yonkouprod\.com/reader")
     test = [("http://yonkouprod.com/reader/read/fairy-tail/en/0/512/", {
         "url": "7647850e2b1ad11c2baa9628755bf7f186350a0b",
-        "keyword": "d079c718d6620478fa72a700fdd027f9a0f0760b",
+        "keyword": "dc1b5764c71e9d93b2d4b18547feb372cd76f730",
     })]
