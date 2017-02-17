@@ -153,13 +153,20 @@ class KeywordJob(Job):
 
 class UrlJob(Job):
     """Print download urls"""
+    maxdepth = -1
+
+    def __init__(self, url, depth=1):
+        Job.__init__(self, url)
+        self.depth = depth
+        if depth == self.maxdepth:
+            self.handle_queue = print
 
     def handle_url(self, url, _):
         print(url)
 
     def handle_queue(self, url):
         try:
-            UrlJob(url).run()
+            UrlJob(url, self.depth + 1).run()
         except exception.NoExtractorError:
             pass
 

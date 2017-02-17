@@ -30,7 +30,7 @@ def build_cmdline_parser():
     parser = argparse.ArgumentParser(
         description='Download images from various sources')
     parser.add_argument(
-        "-g", "--get-urls", dest="list_urls", action="store_true",
+        "-g", "--get-urls", dest="list_urls", action="count",
         help="print download urls",
     )
     parser.add_argument(
@@ -141,6 +141,7 @@ def main():
 
             if args.list_urls:
                 jobtype = job.UrlJob
+                jobtype.maxdepth = args.list_urls
             elif args.list_keywords:
                 jobtype = job.KeywordJob
             else:
