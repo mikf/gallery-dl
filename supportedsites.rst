@@ -18,7 +18,6 @@ Supported Sites
 - gomanga.co
 - hbrowse.com
 - hentai2read.com
-- hentaibox.net
 - hentaifoundry.com
 - hentaihere.com
 - hitomi.la
