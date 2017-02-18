@@ -26,7 +26,6 @@ modules = [
     "gomanga",
     "hbrowse",
     "hentai2read",
-    "hentaibox",
     "hentaifoundry",
     "hentaihere",
     "hitomi",
