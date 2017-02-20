@@ -52,6 +52,13 @@ def build_cmdline_parser():
         help="download URLs found in local FILE",
     )
     parser.add_argument(
+        "--items",
+        metavar="ITEM-SPEC", dest="items",
+        help=("specify which items to download through a comma seperated list "
+              "of indices or index-ranges; for example '--items -2,4,6-8,10-' "
+              "will download items 1, 2, 4, 6, 7, 8 and 10 up to the last one")
+    )
+    parser.add_argument(
         "-c", "--config",
         metavar="CFG", dest="cfgfiles", action="append",
         help="additional configuration files",
@@ -120,6 +127,8 @@ def main():
             config.set(("username",), args.username)
         if args.password:
             config.set(("password",), args.password)
+        if args.items:
+            config.set(("items",), args.items)
 
         for opt in args.option:
             parse_option(opt)
