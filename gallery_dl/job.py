@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015, 2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 import json
 import hashlib
-from . import extractor, downloader, path, output, exception
+from . import extractor, downloader, config, util, path, output, exception
 from .extractor.message import Message
 
 
@@ -81,6 +81,9 @@ class DownloadJob(Job):
     def run(self):
         Job.run(self)
         if self.queue:
+            itemspec = config.get(("items",))
+            if itemspec:
+                self.queue = util.apply_range(self.queue, str(itemspec))
             for url in self.queue:
                 try:
                     DownloadJob(url).run()
