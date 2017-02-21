@@ -17,10 +17,10 @@ class PathFormat():
         if extractor.subcategory:
             key.append(extractor.subcategory)
         self.filename_fmt = config.interpolate(
-            key + ["filename_fmt"], default=extractor.filename_fmt
+            key + ["filename"], default=extractor.filename_fmt
         )
         self.directory_fmt = config.interpolate(
-            key + ["directory_fmt"], default=extractor.directory_fmt
+            key + ["directory"], default=extractor.directory_fmt
         )
         self.has_extension = False
         self.keywords = {}
