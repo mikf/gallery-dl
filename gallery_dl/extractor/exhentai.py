@@ -43,7 +43,7 @@ class ExhentaiGalleryExtractor(Extractor):
         self.count = 0
         self.gid, self.token = match.groups()
         self.original = config.interpolate(
-            ("extractor", "exhentai", "download-original"), True)
+            ("extractor", "exhentai", "original"), True)
         self.wait_min = config.interpolate(
             ("extractor", "exhentai", "wait-min"), 3)
         self.wait_max = config.interpolate(
