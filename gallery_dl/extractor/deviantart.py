@@ -21,8 +21,8 @@ class DeviantartUserExtractor(Extractor):
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
     test = [("http://shimoda7.deviantart.com/gallery/", {
-        "url": "63bfa8efba199e27181943c9060f6770f91a8441",
-        "keyword": "4ffe227a50f373faf643d7e5ae89a04859af8d19",
+        "url": "c3f5b4453dcb7377d4c4422e78a3322e74d4297f",
+        "keyword": "e5d78d5af447e3faf04285e96d3daf85a14ce962",
     })]
 
     def __init__(self, match):
@@ -34,10 +34,12 @@ class DeviantartUserExtractor(Extractor):
         first = True
         yield Message.Version, 1
         for deviation in self.api.gallery_all(self.user):
-            del deviation["stats"]
+            if "content" not in deviation:
+                continue
             if first:
-                yield Message.Directory, deviation["author"]
                 first = False
+                yield Message.Directory, deviation["author"]
+            del deviation["stats"]
             deviation["index"] = deviation["url"].rsplit("-", maxsplit=1)[-1]
             yield Message.Url, deviation["content"]["src"], deviation
 
