@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,12 +21,13 @@ class DeviantartUserExtractor(Extractor):
     filename_fmt = "{category}_{index}_{title}.{extension}"
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
     test = [("http://shimoda7.deviantart.com/gallery/", {
-        "url": "c3f5b4453dcb7377d4c4422e78a3322e74d4297f",
-        "keyword": "e5d78d5af447e3faf04285e96d3daf85a14ce962",
+        "url": "63bfa8efba199e27181943c9060f6770f91a8441",
+        "keyword": "4ffe227a50f373faf643d7e5ae89a04859af8d19",
     })]
 
     def __init__(self, match):
         Extractor.__init__(self)
+        self.session.headers["dA-minor-version"] = "20160316"
         self.api = DeviantartAPI(self.session)
         self.user = match.group(1)
 
