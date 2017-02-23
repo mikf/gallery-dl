@@ -8,40 +8,51 @@
 
 """Utility functions"""
 
-
-def apply_range(iterable, rangespec):
-    """Return a new iterable containing only the items specified in the given
-    integer range
-    """
-    try:
-        maxval = len(iterable)
-    except TypeError:
-        maxval = 0
-    rset = parse_range(rangespec, maxval)
-    return (
-        item
-        for index, item in enumerate(iterable, 1)
-        if index in rset
-    )
+import sys
+from . import exception
 
 
-def parse_range(rangespec, maxval=0):
-    """Parse an integer range and return the resulting set
+def parse_range(rangespec):
+    """Parse an integer range and return the resulting ranges and upper limit
 
     Examples
-        parse_range("-2,4,6-8,10-", 12)  -> set(1, 2, 4, 6, 7, 8, 10, 11, 12)
-        parse_range(" - 3 , 4-  4, 6-2") -> set(1, 2, 3, 4)
+        parse_range("-2,4,6-8,10-")
+            -> [(1,2), (4,4), (6,8), (10,INTMAX)], INTMAX
+
+        parse_range(" - 3 , 4-  4, 2-6")
+            -> [(1,3), (4,4), (2,6)], 6
     """
-    result = set()
+    ranges = []
+    limit = 0
     for group in rangespec.split(","):
         parts = group.split("-", maxsplit=1)
         try:
             if len(parts) == 1:
-                result.add(int(parts[0]))
+                beg = int(parts[0])
+                end = beg
             else:
                 beg = int(parts[0]) if parts[0].strip() else 1
-                end = int(parts[1]) if parts[1].strip() else maxval
-                result.update(range(beg, end+1))
+                end = int(parts[1]) if parts[1].strip() else sys.maxsize
+            ranges.append((beg, end))
+            limit = max(limit, end)
         except ValueError:
             pass
-    return result
+    return ranges, limit
+
+
+class RangePredicate():
+    """Predicate; is True if the current index is in the given range"""
+    def __init__(self, rangespec):
+        self.ranges, self.limit = parse_range(rangespec)
+        self.index = 0
+
+    def __bool__(self):
+        self.index += 1
+
+        if self.index > self.limit:
+            raise exception.StopExtraction()
+
+        for lower, upper in self.ranges:
+            if lower <= self.index <= upper:
+                return True
+        return False

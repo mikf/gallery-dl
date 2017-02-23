@@ -20,32 +20,41 @@ class Job():
         if self.extractor is None:
             raise exception.NoExtractorError(url)
 
+        items = config.get(("images",))
+        self.pred_url = util.RangePredicate(items) if items else True
+
+        items = config.get(("chapters",))
+        self.pred_queue = util.RangePredicate(items) if items else True
+
     def run(self):
         """Execute or run the job"""
-        for msg in self.extractor:
-            if msg[0] == Message.Url:
-                self.update_kwdict(msg[2])
-                self.handle_url(msg[1], msg[2])
+        try:
+            for msg in self.extractor:
+                if msg[0] == Message.Url and self.pred_url:
+                    self.update_kwdict(msg[2])
+                    self.handle_url(msg[1], msg[2])
 
-            elif msg[0] == Message.Directory:
-                self.update_kwdict(msg[1])
-                self.handle_directory(msg[1])
+                elif msg[0] == Message.Directory:
+                    self.update_kwdict(msg[1])
+                    self.handle_directory(msg[1])
 
-            elif msg[0] == Message.Queue:
-                self.handle_queue(msg[1])
+                elif msg[0] == Message.Queue and self.pred_queue:
+                    self.handle_queue(msg[1])
 
-            elif msg[0] == Message.Headers:
-                self.handle_headers(msg[1])
+                elif msg[0] == Message.Headers:
+                    self.handle_headers(msg[1])
 
-            elif msg[0] == Message.Cookies:
-                self.handle_cookies(msg[1])
+                elif msg[0] == Message.Cookies:
+                    self.handle_cookies(msg[1])
 
-            elif msg[0] == Message.Version:
-                if msg[1] != 1:
-                    raise "unsupported message-version ({}, {})".format(
-                        self.extractor.category, msg[1]
-                    )
-                # TODO: support for multiple message versions
+                elif msg[0] == Message.Version:
+                    if msg[1] != 1:
+                        raise "unsupported message-version ({}, {})".format(
+                            self.extractor.category, msg[1]
+                        )
+                    # TODO: support for multiple message versions
+        except exception.StopExtraction:
+            pass
 
     def handle_url(self, url, kexwords):
         """Handle Message.Url"""
@@ -81,9 +90,6 @@ class DownloadJob(Job):
     def run(self):
         Job.run(self)
         if self.queue:
-            itemspec = config.get(("items",))
-            if itemspec:
-                self.queue = util.apply_range(self.queue, str(itemspec))
             for url in self.queue:
                 try:
                     DownloadJob(url).run()

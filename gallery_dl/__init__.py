@@ -52,11 +52,17 @@ def build_cmdline_parser():
         help="download URLs found in local FILE",
     )
     parser.add_argument(
-        "--items",
-        metavar="ITEM-SPEC", dest="items",
-        help=("specify which items to download through a comma seperated list "
-              "of indices or index-ranges; for example '--items -2,4,6-8,10-' "
-              "will download items 1, 2, 4, 6, 7, 8 and 10 up to the last one")
+        "--images",
+        metavar="ITEM-SPEC", dest="images",
+        help=("specify which images to download through a comma seperated list"
+              " of indices or index-ranges; "
+              "for example '--images -2,4,6-8,10-' will download images with "
+              "index 1, 2, 4, 6, 7, 8 and 10 up to the last one")
+    )
+    parser.add_argument(
+        "--chapters",
+        metavar="ITEM-SPEC", dest="chapters",
+        help=("same as '--images' except for chapters")
     )
     parser.add_argument(
         "-c", "--config",
@@ -127,8 +133,10 @@ def main():
             config.set(("username",), args.username)
         if args.password:
             config.set(("password",), args.password)
-        if args.items:
-            config.set(("items",), args.items)
+        if args.images:
+            config.set(("images",), args.images)
+        if args.chapters:
+            config.set(("chapters",), args.chapters)
 
         for opt in args.option:
             parse_option(opt)
