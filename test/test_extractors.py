@@ -48,7 +48,7 @@ def _generate_test(extr, tcase):
 
 
 # enable selective testing for direct calls
-skip = ["3dbooru", "exhentai", "kissmanga", "mangafox"]
+skip = ["4chan", "exhentai", "kissmanga", "mangafox"]
 if __name__ == '__main__' and len(sys.argv) > 1:
     extractors = [
         extr for extr in extractor.extractors()
