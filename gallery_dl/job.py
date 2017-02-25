@@ -6,6 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import sys
 import json
 import hashlib
 from . import extractor, downloader, config, util, path, output, exception
@@ -16,6 +17,7 @@ class Job():
     """Base class for Job-types"""
 
     def __init__(self, url):
+        self.url = url
         self.extractor = extractor.find(url)
         if self.extractor is None:
             raise exception.NoExtractorError(url)
@@ -53,6 +55,16 @@ class Job():
                             self.extractor.category, msg[1]
                         )
                     # TODO: support for multiple message versions
+        except exception.AuthenticationError:
+            print("Authentication failed. Please provide a valid "
+                  "username/password pair.", file=sys.stderr)
+        except exception.AuthorizationError:
+            print("You do not have permission to access the resource ",
+                  "at '", self.url, "'", sep="", file=sys.stderr)
+        except exception.NotFoundError as err:
+            res = str(err) or "resource (gallery/image/user)"
+            print("The ", res, " at '", self.url, "' does not exist",
+                  sep="", file=sys.stderr)
         except exception.StopExtraction:
             pass
 
