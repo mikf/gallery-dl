@@ -24,18 +24,17 @@ class TestExtractors(unittest.TestCase):
         config.set(("extractor", "seiga", "username"), email)
 
     def _run_test(self, extr, url, result):
-        hjob = job.HashJob(url, "content" in result)
-        self.assertEqual(extr, hjob.extractor.__class__)
-        if "exception" in result:
-            self.assertRaises(result["exception"], hjob.run)
-            return
-        hjob.run()
+        tjob = job.TestJob(url, "content" in result)
+        self.assertEqual(extr, tjob.extractor.__class__)
+        tjob.run()
         if "url" in result:
-            self.assertEqual(hjob.hash_url.hexdigest(), result["url"])
+            self.assertEqual(tjob.hash_url.hexdigest(), result["url"])
         if "keyword" in result:
-            self.assertEqual(hjob.hash_keyword.hexdigest(), result["keyword"])
+            self.assertEqual(tjob.hash_keyword.hexdigest(), result["keyword"])
         if "content" in result:
-            self.assertEqual(hjob.hash_content.hexdigest(), result["content"])
+            self.assertEqual(tjob.hash_content.hexdigest(), result["content"])
+        if "exception" in result:
+            self.assertEqual(tjob.exception.__class__, result["exception"])
 
 
 # dynamically genertate tests

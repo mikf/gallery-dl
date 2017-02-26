@@ -32,29 +32,7 @@ class Job():
         """Execute or run the job"""
         try:
             for msg in self.extractor:
-                if msg[0] == Message.Url and self.pred_url:
-                    self.update_kwdict(msg[2])
-                    self.handle_url(msg[1], msg[2])
-
-                elif msg[0] == Message.Directory:
-                    self.update_kwdict(msg[1])
-                    self.handle_directory(msg[1])
-
-                elif msg[0] == Message.Queue and self.pred_queue:
-                    self.handle_queue(msg[1])
-
-                elif msg[0] == Message.Headers:
-                    self.handle_headers(msg[1])
-
-                elif msg[0] == Message.Cookies:
-                    self.handle_cookies(msg[1])
-
-                elif msg[0] == Message.Version:
-                    if msg[1] != 1:
-                        raise "unsupported message-version ({}, {})".format(
-                            self.extractor.category, msg[1]
-                        )
-                    # TODO: support for multiple message versions
+                self.dispatch(msg)
         except exception.AuthenticationError:
             print("Authentication failed. Please provide a valid "
                   "username/password pair.", file=sys.stderr)
@@ -67,6 +45,32 @@ class Job():
                   sep="", file=sys.stderr)
         except exception.StopExtraction:
             pass
+
+    def dispatch(self, msg):
+        """Call the appropriate message handler"""
+        if msg[0] == Message.Url and self.pred_url:
+            self.update_kwdict(msg[2])
+            self.handle_url(msg[1], msg[2])
+
+        elif msg[0] == Message.Directory:
+            self.update_kwdict(msg[1])
+            self.handle_directory(msg[1])
+
+        elif msg[0] == Message.Queue and self.pred_queue:
+            self.handle_queue(msg[1])
+
+        elif msg[0] == Message.Headers:
+            self.handle_headers(msg[1])
+
+        elif msg[0] == Message.Cookies:
+            self.handle_cookies(msg[1])
+
+        elif msg[0] == Message.Version:
+            if msg[1] != 1:
+                raise "unsupported message-version ({}, {})".format(
+                    self.extractor.category, msg[1]
+                )
+            # TODO: support for multiple message versions
 
     def handle_url(self, url, kexwords):
         """Handle Message.Url"""
@@ -192,8 +196,8 @@ class UrlJob(Job):
             pass
 
 
-class HashJob(DownloadJob):
-    """Generate SHA1 hashes for extractor results"""
+class TestJob(DownloadJob):
+    """Generate test-results for extractor runs"""
 
     class HashIO():
         """Minimal file-like interface"""
@@ -219,11 +223,19 @@ class HashJob(DownloadJob):
     def __init__(self, url, content=False):
         DownloadJob.__init__(self, url)
         self.content = content
+        self.exception = None
         self.hash_url = hashlib.sha1()
         self.hash_keyword = hashlib.sha1()
         self.hash_content = hashlib.sha1()
         if content:
             self.fileobj = self.HashIO(self.hash_content)
+
+    def run(self):
+        try:
+            for msg in self.extractor:
+                self.dispatch(msg)
+        except Exception as e:
+            self.exception = e
 
     def handle_url(self, url, keywords):
         self.update_url(url)
