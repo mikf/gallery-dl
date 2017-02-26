@@ -11,6 +11,7 @@
 from .. import text
 from . import hentaicdn
 import re
+import json
 
 
 class Hentai2readMangaExtractor(hentaicdn.HentaicdnMangaExtractor):
@@ -49,9 +50,9 @@ class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
 
     def __init__(self, match):
         hentaicdn.HentaicdnChapterExtractor.__init__(self)
-        self.url_title, self.chapter = match.groups()
+        url_title, self.chapter = match.groups()
         self.url = "http://hentai2read.com/{}/{}/".format(
-            self.url_title, self.chapter
+            url_title, self.chapter
         )
 
     def get_job_metadata(self, page, images):
@@ -66,3 +67,9 @@ class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
             "lang": "en",
             "language": "English",
         }
+
+    @staticmethod
+    def get_image_urls(page):
+        """Extract and return a list of all image-urls"""
+        images = text.extract(page, "'images' : ", ",\n")[0]
+        return json.loads(images)
