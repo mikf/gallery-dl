@@ -26,6 +26,9 @@ class TestExtractors(unittest.TestCase):
     def _run_test(self, extr, url, result):
         tjob = job.TestJob(url, "content" in result)
         self.assertEqual(extr, tjob.extractor.__class__)
+        if "exception" in result:
+            self.assertRaises(result["exception"], tjob.run)
+            return
         tjob.run()
         if "url" in result:
             self.assertEqual(tjob.hash_url.hexdigest(), result["url"])
@@ -33,8 +36,6 @@ class TestExtractors(unittest.TestCase):
             self.assertEqual(tjob.hash_keyword.hexdigest(), result["keyword"])
         if "content" in result:
             self.assertEqual(tjob.hash_content.hexdigest(), result["content"])
-        if "exception" in result:
-            self.assertEqual(tjob.exception.__class__, result["exception"])
 
 
 # dynamically genertate tests
