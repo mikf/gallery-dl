@@ -223,7 +223,6 @@ class TestJob(DownloadJob):
     def __init__(self, url, content=False):
         DownloadJob.__init__(self, url)
         self.content = content
-        self.exception = None
         self.hash_url = hashlib.sha1()
         self.hash_keyword = hashlib.sha1()
         self.hash_content = hashlib.sha1()
@@ -231,11 +230,8 @@ class TestJob(DownloadJob):
             self.fileobj = self.HashIO(self.hash_content)
 
     def run(self):
-        try:
-            for msg in self.extractor:
-                self.dispatch(msg)
-        except Exception as e:
-            self.exception = e
+        for msg in self.extractor:
+            self.dispatch(msg)
 
     def handle_url(self, url, keywords):
         self.update_url(url)
