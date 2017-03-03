@@ -23,7 +23,13 @@ class Job():
             raise exception.NoExtractorError(url)
 
         items = config.get(("images",))
-        self.pred_url = util.RangePredicate(items) if items else True
+        if items:
+            pred = util.RangePredicate(items)
+            if pred.lower > 1:
+                pred.index += self.extractor.skip(pred.lower - 1)
+            self.pred_url = pred
+        else:
+            self.pred_url = True
 
         items = config.get(("chapters",))
         self.pred_queue = util.RangePredicate(items) if items else True
