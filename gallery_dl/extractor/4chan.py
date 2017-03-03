@@ -18,7 +18,7 @@ class FourchanThreadExtractor(chan.ChanThreadExtractor):
     test = [("https://boards.4chan.org/tg/thread/15396072/", {
         "url": "39082ad166161966d7ba8e37f2173a824eb540f0",
         "keyword": "7ae2f4049adf0d2f835eb91b6b26b7f4ec882e0a",
-        "content": "3081ed85a5afaeb3f430f42540e7bb5eec1908cc",
+        "content": "20b7b51afa51c9c31a0020a0737b889532c8d7ec",
     })]
     api_url = "https://a.4cdn.org/{board}/thread/{thread}.json"
     file_url = "https://i.4cdn.org/{board}/{tim}{ext}"
