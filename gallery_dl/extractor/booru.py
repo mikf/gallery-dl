@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,8 @@ class BooruExtractor(Extractor):
     """Base class for all booru extractors"""
     info = {}
     headers = {}
-    page = "page"
+    pagestart = 1
+    pagekey = "page"
     api_url = ""
     category = ""
 
@@ -40,6 +41,12 @@ class BooruExtractor(Extractor):
             except KeyError:
                 continue
 
+    def skip(self, num):
+        limit = self.params["limit"]
+        pages = num // limit
+        self.pagestart += pages
+        return pages * limit
+
     def items_impl(self):
         pass
 
@@ -51,9 +58,9 @@ class BooruExtractor(Extractor):
         # Override this method in derived classes if necessary.
         # It is usually enough to just adjust the 'page' attribute
         if reset is False:
-            self.params[self.page] += 1
+            self.params[self.pagekey] += 1
         else:
-            self.params[self.page] = 1
+            self.params[self.pagekey] = self.pagestart
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""

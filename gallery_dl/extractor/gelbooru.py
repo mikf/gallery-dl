@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,6 +16,8 @@ class GelbooruExtractor(booru.XMLBooruExtractor):
     """Base class for gelbooru extractors"""
     category = "gelbooru"
     api_url = "http://gelbooru.com/"
+    pagestart = 0
+    pagekey = "pid"
 
     def setup(self):
         self.params.update({"page": "dapi", "s": "post", "q": "index"})
@@ -26,12 +28,6 @@ class GelbooruExtractor(booru.XMLBooruExtractor):
             })
         except AttributeError:
             pass
-
-    def update_page(self, reset=False):
-        if not reset:
-            self.params["pid"] += 1
-        else:
-            self.params["pid"] = 0
 
 
 class GelbooruTagExtractor(GelbooruExtractor, booru.BooruTagExtractor):
