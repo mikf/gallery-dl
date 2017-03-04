@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,15 +15,11 @@ class Rule34Extractor(booru.XMLBooruExtractor):
     """Base class for rule34 extractors"""
     category = "rule34"
     api_url = "https://rule34.xxx/index.php"
+    pagestart = 0
+    pagekey = "pid"
 
     def setup(self):
         self.params.update({"page": "dapi", "s": "post", "q": "index"})
-
-    def update_page(self, reset=False):
-        if reset is False:
-            self.params["pid"] += 1
-        else:
-            self.params["pid"] = 0
 
 
 class Rule34TagExtractor(Rule34Extractor, booru.BooruTagExtractor):

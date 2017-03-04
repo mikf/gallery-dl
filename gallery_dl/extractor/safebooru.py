@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,15 +15,11 @@ class SafebooruExtractor(booru.XMLBooruExtractor):
     """Base class for safebooru extractors"""
     category = "safebooru"
     api_url = "http://safebooru.org/index.php"
+    pagestart = 0
+    pagekey = "pid"
 
     def setup(self):
         self.params.update({"page": "dapi", "s": "post", "q": "index"})
-
-    def update_page(self, reset=False):
-        if reset is False:
-            self.params["pid"] += 1
-        else:
-            self.params["pid"] = 0
 
 
 class SafebooruTagExtractor(SafebooruExtractor, booru.BooruTagExtractor):
