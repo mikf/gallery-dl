@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import sys
 
 
 class DeviantartUserExtractor(Extractor):
@@ -137,11 +138,14 @@ class DeviantartAPI():
 
     def gallery_all(self, username, offset=0):
         """Yield all Deviation-objects of a specific user """
-        self.authenticate()
         url = "https://www.deviantart.com/api/v1/oauth2/gallery/all"
         params = {"username": username, "offset": offset}
         while True:
+            self.authenticate()
             data = self.session.get(url, params=params).json()
+            if "results" not in data:
+                print("Something went wrong:", data, sep="\n", file=sys.stderr)
+                return
             yield from data["results"]
             if not data["has_more"]:
                 return
