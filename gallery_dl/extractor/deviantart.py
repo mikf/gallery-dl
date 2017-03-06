@@ -144,7 +144,7 @@ class DeviantartAPI():
             self.authenticate()
             data = self.session.get(url, params=params).json()
             if "results" not in data:
-                print("Something went wrong:", data, sep="\n", file=sys.stderr)
+                print("Unexpected API response:", data, file=sys.stderr)
                 return
             yield from data["results"]
             if not data["has_more"]:
