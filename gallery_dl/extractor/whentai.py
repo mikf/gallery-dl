@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,7 +21,7 @@ class WhentaiUserExtractor(Extractor):
     pattern = [(r"(?:https?://)?(?:www\.)?whentai\.com/"
                 r"(?:users|uploads)/(\d+)(?:/([^/?]+))?")]
     test = [("http://whentai.com/users/234/Evulchibi", {
-        "url": "6e7dd2378c8132bc4be343f1ddbd9d64eeb57b6a",
+        "url": "91ed7c132ceacd1e4eb99cdb0ae06d6cf7c86fe2",
         "keyword": "3d385c12ce95d343cc4b2443dab7b44b652ba808",
     })]
 
@@ -79,7 +79,7 @@ class WhentaiImageExtractor(Extractor):
     filename_fmt = "{category}_{image-id:>05}_{title}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?whentai\.com/view/(\d+)"]
     test = [("http://whentai.com/view/2089/", {
-        "url": "116761cdd3a4d78f9ebe22c18efae1465b2e4d1b",
+        "url": "c3a36d4b9c6c672bc1771b1d2e353703d4f3ee03",
         "keyword": "686bb5af1694efb326d597d4c98ee12d88078455",
         "content": "31909f3d52d14ba6bf79bf303eb31d6807588f25",
     })]
