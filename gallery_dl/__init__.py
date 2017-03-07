@@ -21,6 +21,7 @@ if sys.hexversion < 0x3030000:
     sys.exit(1)
 
 import argparse
+import logging
 import json
 from . import config, extractor, job, exception
 from .version import __version__
@@ -111,6 +112,17 @@ def parse_option(opt):
         print("Invalid 'key=value' pair:", opt, file=sys.stderr)
 
 
+def initialize_logging():
+    logging.basicConfig(
+        format="[%(name)s][%(levelname)s] %(message)s",
+        level=logging.INFO
+    )
+    # convert levelnames to lowercase
+    for level in (10, 20, 30, 40, 50):
+        name = logging.getLevelName(level)
+        logging.addLevelName(level, name.lower())
+
+
 def sanatize_input(file):
     for line in file:
         line = line.strip()
@@ -120,6 +132,7 @@ def sanatize_input(file):
 
 def main():
     try:
+        initialize_logging()
         config.load()
         parser = build_cmdline_parser()
         args = parser.parse_args()
@@ -182,7 +195,6 @@ def main():
                 except exception.NoExtractorError:
                     print("No suitable extractor found for URL '", url, "'",
                           sep="", file=sys.stderr)
-
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt", file=sys.stderr)

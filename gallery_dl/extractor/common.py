@@ -11,6 +11,7 @@
 import os
 import time
 import queue
+import logging
 import requests
 import threading
 from .message import Message
@@ -26,6 +27,7 @@ class Extractor():
 
     def __init__(self):
         self.session = requests.Session()
+        self.log = logging.getLogger(self.category)
 
     def __iter__(self):
         return self.items()
