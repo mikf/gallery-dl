@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
-import sys
+import time
 
 
 class DeviantartUserExtractor(Extractor):
@@ -28,8 +28,7 @@ class DeviantartUserExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.session.headers["dA-minor-version"] = "20160316"
-        self.api = DeviantartAPI(self.session)
+        self.api = DeviantartAPI(self)
         self.user = match.group(1)
 
     def items(self):
@@ -130,26 +129,28 @@ class DeviantartImageExtractor(Extractor):
 
 class DeviantartAPI():
     """Minimal interface for the deviantart API"""
-    def __init__(self, session, client_id="5388",
+    def __init__(self, extractor, client_id="5388",
                  client_secret="76b08c69cfb27f26d6161f9ab6d061a1"):
-        self.session = session
+        self.session = extractor.session
+        self.session.headers["dA-minor-version"] = "20160316"
+        self.log = extractor.log
         self.client_id = client_id
         self.client_secret = client_secret
+        self.delay = 0
 
     def gallery_all(self, username, offset=0):
         """Yield all Deviation-objects of a specific user """
         url = "https://www.deviantart.com/api/v1/oauth2/gallery/all"
-        params = {"username": username, "offset": offset}
+        params = {"username": username, "offset": offset, "limit": 10}
         while True:
-            self.authenticate()
-            data = self.session.get(url, params=params).json()
-            if "results" not in data:
-                print("Unexpected API response:", data, file=sys.stderr)
-                return
-            yield from data["results"]
-            if not data["has_more"]:
-                return
-            params["offset"] = data["next_offset"]
+            data = self._call(url, params)
+            if "results" in data:
+                yield from data["results"]
+                if not data["has_more"]:
+                    return
+                params["offset"] = data["next_offset"]
+            else:
+                self.log.error("Unexpected API response: %s", data)
 
     def authenticate(self):
         """Authenticate the application by requesting a bearer token"""
@@ -160,6 +161,7 @@ class DeviantartAPI():
 
     @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, client_id, client_secret):
+        """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"
         data = {
             "grant_type": "client_credentials",
@@ -168,5 +170,30 @@ class DeviantartAPI():
         }
         response = self.session.post(url, data=data)
         if response.status_code != 200:
-            raise exception.AuthenticationError
+            raise exception.AuthenticationError()
         return "Bearer " + response.json()["access_token"]
+
+    def _call(self, url, params={}):
+        """Call an API endpoint"""
+        self.authenticate()
+        tries = 0
+        while True:
+            if self.delay:
+                time.sleep(self.delay)
+
+            response = self.session.get(url, params=params)
+
+            if response.status_code == 200:
+                break
+            elif response.status_code == 429:
+                self.delay += 1
+                self.log.debug("rate limit (delay: %d)", self.delay)
+            else:
+                self.delay = 1
+            tries += 1
+            if tries >= 3:
+                raise Exception(response.text)
+        try:
+            return response.json()
+        except ValueError:
+            return {}
