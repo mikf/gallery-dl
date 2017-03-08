@@ -71,6 +71,11 @@ def build_cmdline_parser():
         help="additional configuration files",
     )
     parser.add_argument(
+        "--config-yaml",
+        metavar="CFG", dest="yamlfiles", action="append",
+        help="additional configuration files (YAML format)",
+    )
+    parser.add_argument(
         "-o", "--option",
         metavar="OPT", action="append", default=[],
         help="additional 'key=value' option values",
@@ -139,6 +144,8 @@ def main():
 
         if args.cfgfiles:
             config.load(*args.cfgfiles, strict=True)
+        if args.yamlfiles:
+            config.load(*args.yamlfiles, format="yaml", strict=True)
 
         if args.dest:
             config.set(("base-directory",), args.dest)

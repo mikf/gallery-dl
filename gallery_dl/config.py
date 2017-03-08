@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015, 2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,27 +11,42 @@
 import sys
 import json
 import os.path
+import logging
 
 
 # --------------------------------------------------------------------
 # public interface
 
-def load(*files, strict=False):
+def load(*files, format="json", strict=False):
     """Load JSON configuration files"""
+    log = logging.getLogger("config")
     configfiles = files or _default_configs
+
+    if format == "yaml":
+        try:
+            import yaml
+            parsefunc = yaml.safe_load
+        except ImportError:
+            log.error("Could not import 'yaml' module")
+            return
+    else:
+        parsefunc = json.load
+
     for conf in configfiles:
         try:
             path = os.path.expanduser(os.path.expandvars(conf))
             with open(path) as file:
-                confdict = json.load(file)
+                confdict = parsefunc(file)
             _config.update(confdict)
         except FileNotFoundError:
             if strict:
-                raise
-            continue
-        except ValueError as exception:
-            print("Error while loading '", path, "':", sep="", file=sys.stderr)
-            print(exception, file=sys.stderr)
+                log.error("Configuration file '%s' not found", path)
+                sys.exit(1)
+        except Exception as exception:
+            log.warning("Could not parse '%s'", path)
+            log.warning(exception)
+            if strict:
+                sys.exit(2)
 
 
 def clear():
