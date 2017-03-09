@@ -21,11 +21,17 @@ class ImagefapGalleryExtractor(Extractor):
     filename_fmt = "{category}_{gallery-id}_{name}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
                 r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")]
-    test = [("http://www.imagefap.com/gallery/6318447", {
-        "url": "f63e6876df83a40e1a98dad70e46952dd9edb7a7",
-        "keyword": "715f99ad154c4cf608afc7cd77dd1e896030646a",
-        "content": "38e50699db9518ae68648c45ecdd6be614efc324",
-    })]
+    test = [
+        ("http://www.imagefap.com/gallery/6318447", {
+            "url": "f63e6876df83a40e1a98dad70e46952dd9edb7a7",
+            "keyword": "715f99ad154c4cf608afc7cd77dd1e896030646a",
+            "content": "38e50699db9518ae68648c45ecdd6be614efc324",
+        }),
+        ("http://www.imagefap.com/gallery/5486966", {
+            "url": "eace9b33be99f87f3382c87bd915cf495a865d6e",
+            "keyword": "0f14b5547adb9ffda6a6ac8ded15fc2b44d23c4a",
+        }),
+    ]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -38,7 +44,7 @@ class ImagefapGalleryExtractor(Extractor):
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
-        for url, image in self.get_images(int(data["count"])):
+        for url, image in self.get_images():
             data.update(image)
             yield Message.Url, url, data
 
@@ -54,7 +60,7 @@ class ImagefapGalleryExtractor(Extractor):
         data["title"] = text.unescape(data["title"])
         return data
 
-    def get_images(self, count):
+    def get_images(self):
         """Collect image-urls and -metadata"""
         num = 0
         url = "http://www.imagefap.com/photo/" + self.image_id + "/"
@@ -64,12 +70,12 @@ class ImagefapGalleryExtractor(Extractor):
             page = self.request(url, params=params).text
             for _ in range(24):
                 imgurl, pos = text.extract(page, '<a href="', '"', pos)
+                if not imgurl:
+                    return
                 num += 1
                 _, imgid, name = imgurl.rsplit("/", 2)
                 data = {"image-id": imgid, "num": num}
                 yield imgurl, text.nameext_from_url(name, data)
-                if num >= count:
-                    return
             params["idx"] += 24
 
 
