@@ -6,7 +6,6 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import sys
 import json
 import hashlib
 from . import extractor, downloader, config, util, path, output, exception
@@ -37,18 +36,18 @@ class Job():
     def run(self):
         """Execute or run the job"""
         try:
+            log = self.extractor.log
             for msg in self.extractor:
                 self.dispatch(msg)
         except exception.AuthenticationError:
-            print("Authentication failed. Please provide a valid "
-                  "username/password pair.", file=sys.stderr)
+            log.error("Authentication failed. Please provide a valid "
+                      "username/password pair.")
         except exception.AuthorizationError:
-            print("You do not have permission to access the resource ",
-                  "at '", self.url, "'", sep="", file=sys.stderr)
+            log.error("You do not have permission to access the resource "
+                      "at '%s'", self.url)
         except exception.NotFoundError as err:
             res = str(err) or "resource (gallery/image/user)"
-            print("The ", res, " at '", self.url, "' does not exist",
-                  sep="", file=sys.stderr)
+            log.error("The %s at '%s' does not exist", res, self.url)
         except exception.StopExtraction:
             pass
 

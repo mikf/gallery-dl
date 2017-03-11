@@ -26,6 +26,8 @@ import json
 from . import config, extractor, job, exception
 from .version import __version__
 
+log = logging.getLogger("gallery-dl")
+
 
 def build_cmdline_parser():
     parser = argparse.ArgumentParser(
@@ -114,18 +116,21 @@ def parse_option(opt):
             pass
         config.set(key.split("."), value)
     except ValueError:
-        print("Invalid 'key=value' pair:", opt, file=sys.stderr)
+        log.warning("Invalid 'key=value' pair: %s", opt)
 
 
 def initialize_logging():
-    logging.basicConfig(
-        format="[%(name)s][%(levelname)s] %(message)s",
-        level=logging.INFO
-    )
     # convert levelnames to lowercase
     for level in (10, 20, 30, 40, 50):
         name = logging.getLevelName(level)
         logging.addLevelName(level, name.lower())
+    # setup basic logging to stderr
+    formatter = logging.Formatter("[%(name)s][%(levelname)s] %(message)s")
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+    root.addHandler(handler)
 
 
 def sanatize_input(file):
@@ -139,6 +144,7 @@ def main():
     try:
         initialize_logging()
         config.load()
+
         parser = build_cmdline_parser()
         args = parser.parse_args()
 
@@ -146,7 +152,6 @@ def main():
             config.load(*args.cfgfiles, strict=True)
         if args.yamlfiles:
             config.load(*args.yamlfiles, format="yaml", strict=True)
-
         if args.dest:
             config.set(("base-directory",), args.dest)
         if args.username:
@@ -157,7 +162,6 @@ def main():
             config.set(("images",), args.images)
         if args.chapters:
             config.set(("chapters",), args.chapters)
-
         for opt in args.option:
             parse_option(opt)
 
@@ -194,14 +198,13 @@ def main():
                     import itertools
                     urls = itertools.chain(urls, sanatize_input(file))
                 except OSError as e:
-                    print(e)
+                    log.error(e)
 
             for url in urls:
                 try:
                     jobtype(url).run()
                 except exception.NoExtractorError:
-                    print("No suitable extractor found for URL '", url, "'",
-                          sep="", file=sys.stderr)
+                    log.error("No suitable extractor found for '%s'", url)
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt", file=sys.stderr)
