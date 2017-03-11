@@ -13,13 +13,14 @@ import json
 import os.path
 import logging
 
+log = logging.getLogger("config")
+
 
 # --------------------------------------------------------------------
 # public interface
 
 def load(*files, format="json", strict=False):
     """Load JSON configuration files"""
-    log = logging.getLogger("config")
     configfiles = files or _default_configs
 
     if format == "yaml":
