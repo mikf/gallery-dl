@@ -30,11 +30,16 @@ class DeviantartUserExtractor(Extractor):
         Extractor.__init__(self)
         self.api = DeviantartAPI(self)
         self.user = match.group(1)
+        self.offset = 0
+
+    def skip(self, num):
+        self.offset += num
+        return num
 
     def items(self):
         first = True
         yield Message.Version, 1
-        for deviation in self.api.gallery_all(self.user):
+        for deviation in self.api.gallery_all(self.user, self.offset):
             if "content" not in deviation:
                 continue
             if first:
@@ -151,6 +156,7 @@ class DeviantartAPI():
                 params["offset"] = data["next_offset"]
             else:
                 self.log.error("Unexpected API response: %s", data)
+                return
 
     def authenticate(self):
         """Authenticate the application by requesting a bearer token"""
@@ -175,12 +181,12 @@ class DeviantartAPI():
 
     def _call(self, url, params={}):
         """Call an API endpoint"""
-        self.authenticate()
-        tries = 0
+        tries = 1
         while True:
             if self.delay:
                 time.sleep(self.delay)
 
+            self.authenticate()
             response = self.session.get(url, params=params)
 
             if response.status_code == 200:
@@ -190,8 +196,10 @@ class DeviantartAPI():
                 self.log.debug("rate limit (delay: %d)", self.delay)
             else:
                 self.delay = 1
+                self.log.debug("http status code %d (%d/3)",
+                               response.status_code, tries)
             tries += 1
-            if tries >= 3:
+            if tries > 3:
                 raise Exception(response.text)
         try:
             return response.json()
