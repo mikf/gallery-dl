@@ -38,7 +38,7 @@ class TestExtractors(unittest.TestCase):
             self.assertEqual(tjob.hash_content.hexdigest(), result["content"])
 
 
-# dynamically genertate tests
+# dynamically generate tests
 def _generate_test(extr, tcase):
     def test(self):
         url, result = tcase
@@ -48,7 +48,7 @@ def _generate_test(extr, tcase):
 
 
 # enable selective testing for direct calls
-skip = ["exhentai", "kissmanga", "mangafox"]
+skip = ["exhentai", "kissmanga", "mangafox", "mangamint"]
 if __name__ == '__main__' and len(sys.argv) > 1:
     extractors = [
         extr for extr in extractor.extractors()

@@ -93,7 +93,7 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)"]
     test = [
         ("http://bato.to/reader#459878c8fda07502", {
-            "url": "8fd449d38018cfed2ccdb76f69087815b463f1e9",
+            "url": "432d7958506ad913b0a9e42664a89e46a63e9296",
             "keyword": "75a3a86d32aecfc21c44865b4043490757f73d77",
         }),
         ("http://bato.to/reader#459878c8fda07503", {
