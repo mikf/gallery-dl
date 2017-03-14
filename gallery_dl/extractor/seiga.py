@@ -9,7 +9,7 @@
 """Extract images from http://seiga.nicovideo.jp"""
 
 from .common import Extractor, Message
-from .. import config, exception
+from .. import text, config, exception
 from ..cache import cache
 from xml.etree import ElementTree
 
@@ -25,6 +25,7 @@ class SeigaExtractor(Extractor):
         yield Message.Directory, data
         for image in self.get_images():
             data.update(image)
+            data["extension"] = None
             url = self.get_image_url(image["image-id"])
             yield Message.Url, url, data
 
@@ -71,7 +72,7 @@ class SeigaUserExtractor(SeigaExtractor):
                 r"user/illust/(\d+)")]
     test = [
         ("http://seiga.nicovideo.jp/user/illust/39537793", {
-            "keyword": "2a18eb83fbdadaec6ace5019a7aa7a9a446c6915",
+            "keyword": "66b3309484417fb5e76b72d5bd64526fa5d9b6a3",
             "content": "40dc3b454d429108cb834b9e449229231010ddfa",
         }),
         ("http://seiga.nicovideo.jp/user/illust/79433", {
@@ -92,7 +93,12 @@ class SeigaUserExtractor(SeigaExtractor):
                   7: "summary", 8: "genre", 18: "date"}
         url = "http://seiga.nicovideo.jp/api/user/data?id=" + self.user_id
         response = self.request(url)
-        root = ElementTree.fromstring(response.text)
+        try:
+            root = ElementTree.fromstring(response.text)
+        except ElementTree.ParseError:
+            self.log.debug("xml parsing error; removing control characters")
+            xmldata = text.clean_xml(response.text)
+            root = ElementTree.fromstring(xmldata)
         if root[0].text == "0":
             return []
         return [
@@ -115,7 +121,7 @@ class SeigaImageExtractor(SeigaExtractor):
                 r"(?:priv|o)/[^/]+/\d+/(\d+)")]
     test = [
         ("http://seiga.nicovideo.jp/seiga/im5977527", {
-            "keyword": "12bbef9aef772a74681608fb1b3f0b17c180a47e",
+            "keyword": "3b61d2fc26efb74547f47c522051cf3596ff6b62",
             "content": "d9202292012178374d57fb0126f6124387265297",
         }),
         ("http://seiga.nicovideo.jp/seiga/im123", {
