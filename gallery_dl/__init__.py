@@ -29,6 +29,12 @@ from .version import __version__
 log = logging.getLogger("gallery-dl")
 
 
+class ConfigAction(argparse.Action):
+    """Set argparse results directly as config values"""
+    def __call__(self, parser, namespace, values, option_string=None):
+        config.set((self.dest,), values)
+
+
 def build_cmdline_parser():
     parser = argparse.ArgumentParser(
         description='Download images from various sources')
@@ -38,16 +44,16 @@ def build_cmdline_parser():
     )
     parser.add_argument(
         "-d", "--dest",
-        metavar="DEST",
+        metavar="DEST", action=ConfigAction, dest="base-directory",
         help="destination directory",
     )
     parser.add_argument(
         "-u", "--username",
-        metavar="USER"
+        metavar="USER", action=ConfigAction, dest="username",
     )
     parser.add_argument(
         "-p", "--password",
-        metavar="PASS"
+        metavar="PASS", action=ConfigAction, dest="password",
     )
     parser.add_argument(
         "-i", "--input-file",
@@ -56,7 +62,7 @@ def build_cmdline_parser():
     )
     parser.add_argument(
         "--images",
-        metavar="ITEM-SPEC", dest="images",
+        metavar="ITEM-SPEC", action=ConfigAction, dest="images",
         help=("specify which images to download through a comma seperated list"
               " of indices or index-ranges; "
               "for example '--images -2,4,6-8,10-' will download images with "
@@ -64,7 +70,7 @@ def build_cmdline_parser():
     )
     parser.add_argument(
         "--chapters",
-        metavar="ITEM-SPEC", dest="chapters",
+        metavar="ITEM-SPEC", action=ConfigAction, dest="chapters",
         help=("same as '--images' except for chapters")
     )
     parser.add_argument(
@@ -152,16 +158,6 @@ def main():
             config.load(*args.cfgfiles, strict=True)
         if args.yamlfiles:
             config.load(*args.yamlfiles, format="yaml", strict=True)
-        if args.dest:
-            config.set(("base-directory",), args.dest)
-        if args.username:
-            config.set(("username",), args.username)
-        if args.password:
-            config.set(("password",), args.password)
-        if args.images:
-            config.set(("images",), args.images)
-        if args.chapters:
-            config.set(("chapters",), args.chapters)
         for opt in args.option:
             parse_option(opt)
 
@@ -197,8 +193,8 @@ def main():
                         file = open(args.inputfile)
                     import itertools
                     urls = itertools.chain(urls, sanatize_input(file))
-                except OSError as e:
-                    log.error(e)
+                except OSError as err:
+                    log.error(err)
 
             for url in urls:
                 try:
