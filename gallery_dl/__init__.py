@@ -40,12 +40,12 @@ def build_cmdline_parser():
         description='Download images from various sources')
     parser.add_argument(
         "-g", "--get-urls", dest="list_urls", action="count",
-        help="print download urls",
+        help="Print download urls",
     )
     parser.add_argument(
         "-d", "--dest",
         metavar="DEST", action=ConfigAction, dest="base-directory",
-        help="destination directory",
+        help="Destination directory",
     )
     parser.add_argument(
         "-u", "--username",
@@ -58,12 +58,12 @@ def build_cmdline_parser():
     parser.add_argument(
         "-i", "--input-file",
         metavar="FILE", dest="inputfile",
-        help="download URLs found in local FILE",
+        help="Download URLs found in local FILE ('-' for stdin)",
     )
     parser.add_argument(
         "--images",
         metavar="ITEM-SPEC", action=ConfigAction, dest="images",
-        help=("specify which images to download through a comma seperated list"
+        help=("Specify which images to download through a comma seperated list"
               " of indices or index-ranges; "
               "for example '--images -2,4,6-8,10-' will download images with "
               "index 1, 2, 4, 6, 7, 8 and 10 up to the last one")
@@ -71,44 +71,54 @@ def build_cmdline_parser():
     parser.add_argument(
         "--chapters",
         metavar="ITEM-SPEC", action=ConfigAction, dest="chapters",
-        help=("same as '--images' except for chapters")
+        help=("Same as '--images' except for chapters")
+    )
+    parser.add_argument(
+        "-R", "--retries",
+        metavar="RETRIES", action=ConfigAction, dest="retries", type=int,
+        help="Number of retries (default: 5)",
+    )
+    parser.add_argument(
+        "--http-timeout",
+        metavar="SECONDS", action=ConfigAction, dest="timeout", type=int,
+        help="Timeout for HTTP connections (defaut: no timeout)",
     )
     parser.add_argument(
         "-c", "--config",
         metavar="CFG", dest="cfgfiles", action="append",
-        help="additional configuration files",
+        help="Additional configuration files",
     )
     parser.add_argument(
         "--config-yaml",
         metavar="CFG", dest="yamlfiles", action="append",
-        help="additional configuration files (YAML format)",
+        help="Additional configuration files (YAML format)",
     )
     parser.add_argument(
         "-o", "--option",
         metavar="OPT", action="append", default=[],
-        help="additional 'key=value' option values",
+        help="Additional 'key=value' option values",
     )
     parser.add_argument(
         "--list-extractors", dest="list_extractors", action="store_true",
-        help=("print a list of extractor classes "
+        help=("Print a list of extractor classes "
               "with description and example URL"),
     )
     parser.add_argument(
         "--list-keywords", dest="list_keywords", action="store_true",
-        help="print a list of available keywords for the given URLs",
+        help="Print a list of available keywords for the given URLs",
     )
     parser.add_argument(
         "--list-modules", dest="list_modules", action="store_true",
-        help="print a list of available modules/supported sites",
+        help="Print a list of available modules/supported sites",
     )
     parser.add_argument(
         "--version", action="version", version=__version__,
-        help="print program version and exit"
+        help="Print program version and exit"
     )
     parser.add_argument(
         "urls",
         nargs="*", metavar="URL",
-        help="url to download images from"
+        help="Url to download images from"
     )
     return parser
 
