@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2016 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -37,7 +37,7 @@ class PixivUserExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.artist_id = match.group(1)
-        self.api = PixivAPI(self.session)
+        self.api = PixivAPI(self)
         self.api_call = self.api.user_works
         self.load_ugoira = config.interpolate(
             ("extractor", "pixiv", "ugoira"), True
@@ -230,8 +230,9 @@ class PixivAPI():
     For in-depth information regarding the Pixiv Public-API, see
     - http://blog.imaou.com/opensource/2014/10/09/pixiv_api_for_ios_update.html
     """
-    def __init__(self, session):
-        self.session = session
+    def __init__(self, extractor):
+        self.session = extractor.session
+        self.log = extractor.log
         self.session.headers.update({
             "Referer": "http://www.pixiv.net/",
             "User-Agent": "PixivIOSApp/5.8.0",
@@ -298,6 +299,7 @@ class PixivAPI():
     @cache(maxage=50*60, keyarg=1)
     def _login_impl(self, username, password):
         """Actual login implementation"""
+        self.log.info("Logging in as %s", username)
         data = {
             "username": username,
             "password": password,

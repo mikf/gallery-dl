@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015, 2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -69,6 +69,7 @@ class NijieExtractor(AsynchronousExtractor):
     @cache(maxage=30*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
         """Actual login implementation"""
+        self.log.info("Logging in as %s", username)
         params = {"email": username, "password": password}
         page = self.session.post("https://nijie.info/login_int.php",
                                  data=params).text
