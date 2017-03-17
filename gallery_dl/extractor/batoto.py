@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2016 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,6 +32,7 @@ class BatotoExtractor(Extractor):
     @cache(maxage=360*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
         """Actual login implementation"""
+        self.log.info("Logging in as %s", username)
         page = self.request(self.root).text
         auth = text.extract(page, "name='auth_key' value='", "'")[0]
         params = {

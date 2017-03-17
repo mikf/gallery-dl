@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016, 2017 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -54,6 +54,7 @@ class SeigaExtractor(Extractor):
     @cache(maxage=30*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
         """Actual login implementation"""
+        self.log.info("Logging in as %s", username)
         url = "https://account.nicovideo.jp/api/v1/login"
         params = {"mail_tel": username, "password": password}
         self.session.post(url, data=params).close()
