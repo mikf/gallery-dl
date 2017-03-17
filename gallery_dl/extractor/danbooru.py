@@ -23,7 +23,7 @@ class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
     pattern = [(r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts"
                 r"\?(?:utf8=%E2%9C%93&)?tags=([^&]+)")]
     test = [("https://danbooru.donmai.us/posts?tags=bonocho", {
-        "url": "fb730af3f5e15650e5d924ffcda54b9ef232b89b",
+        "url": "f94774bcb5169e943efb4d7bb51c47ae786b05f3",
         "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
     })]
 
