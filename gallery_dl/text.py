@@ -15,15 +15,14 @@ import html
 import urllib.parse
 
 
-INVALID_XML_CHARS = [
-    chr(c) for c in (1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18,
+INVALID_XML_CHARS = (1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18,
                      19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31)
-]
 
 
 def clean_xml(xmldata, repl=""):
     """Replace/Remove invalid control characters in XML data"""
     for char in INVALID_XML_CHARS:
+        char = chr(char)
         if char in xmldata:
             xmldata = xmldata.replace(char, repl)
     return xmldata

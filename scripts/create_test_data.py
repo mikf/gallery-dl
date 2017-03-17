@@ -38,11 +38,11 @@ def main():
 
     config.load()
     for url in urls:
-        hjob = job.HashJob(url, content=args.content)
-        hjob.run()
-        print(hjob.extractor.__class__.__name__)
-        print(TESTDATA_FMT.format(url, hjob.hash_url.hexdigest(),
-            hjob.hash_keyword.hexdigest(), hjob.hash_content.hexdigest()))
+        tjob = job.TestJob(url, content=args.content)
+        tjob.run()
+        print(tjob.extractor.__class__.__name__)
+        print(TESTDATA_FMT.format(url, tjob.hash_url.hexdigest(),
+            tjob.hash_keyword.hexdigest(), tjob.hash_content.hexdigest()))
 
 if __name__ == '__main__':
     main()

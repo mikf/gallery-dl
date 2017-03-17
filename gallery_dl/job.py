@@ -53,16 +53,18 @@ class Job():
 
     def dispatch(self, msg):
         """Call the appropriate message handler"""
-        if msg[0] == Message.Url and self.pred_url:
-            self.update_kwdict(msg[2])
-            self.handle_url(msg[1], msg[2])
+        if msg[0] == Message.Url:
+            if self.pred_url:
+                self.update_kwdict(msg[2])
+                self.handle_url(msg[1], msg[2])
 
         elif msg[0] == Message.Directory:
             self.update_kwdict(msg[1])
             self.handle_directory(msg[1])
 
-        elif msg[0] == Message.Queue and self.pred_queue:
-            self.handle_queue(msg[1])
+        elif msg[0] == Message.Queue:
+            if self.pred_queue:
+                self.handle_queue(msg[1])
 
         elif msg[0] == Message.Headers:
             self.handle_headers(msg[1])
