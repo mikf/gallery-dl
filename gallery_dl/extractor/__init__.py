@@ -43,7 +43,6 @@ modules = [
     "luscious",
     "mangafox",
     "mangahere",
-    "mangamint",
     "mangapanda",
     "mangapark",
     "mangareader",

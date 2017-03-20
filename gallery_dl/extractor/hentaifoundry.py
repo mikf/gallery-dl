@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,8 +26,8 @@ class HentaifoundryUserExtractor(Extractor):
     ]
     test = [
         ("http://www.hentai-foundry.com/pictures/user/Tenpura", {
-            "url": "20100bca8e31c172f9034157a9833d5af2a9c097",
-            "keyword": "cd15dcfc0f5ddc259ce0752105f30f66c1895c28",
+            "url": "dee5fd22cfed3288ce1f637e405781753d7cec57",
+            "keyword": "0e47ebc68346087312e62885d9508fef7ad55503",
         }),
         ("http://www.hentai-foundry.com/user/asdq/profile", {
             "exception": exception.NotFoundError,
