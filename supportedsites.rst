@@ -48,7 +48,6 @@ Supported Sites
 - luscious.net
 - mangafox.me
 - mangahere.co
-- mangamint.com
 - mangapanda.com
 - mangapark.me
 - mangareader.net
