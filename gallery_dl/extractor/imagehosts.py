@@ -86,6 +86,23 @@ class ImgytImageExtractor(ImagehostImageExtractor):
         return url, filename
 
 
+class ImgcandyImageExtractor(ImgytImageExtractor):
+    """Extractor for single images from imgcandy.net"""
+    category = "imgcandy"
+    pattern = [(r"(?:https?://)?((?:www\.)?imgcandy\.net/img-([a-z0-9]+))"
+                r"(?:_.+)?\.html")]
+    test = [("http://imgcandy.net/img-57d02527efee8_test.png.html", {
+        "url": "bc3c9207b10dbfe8e65ccef5b9e3194a7427b4fa",
+        "keyword": "d3157ff8a33c56a8ec12931a3c098068e5a35cf5",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
+    https = False
+
+    def __init__(self, match):
+        ImgytImageExtractor.__init__(self, match)
+        self.url = "http://" + match.group(1) + ".html"
+
+
 class RapidimgImageExtractor(ImgytImageExtractor):
     """Extractor for single images from rapidimg.net"""
     category = "rapidimg"
@@ -101,6 +118,9 @@ class FapatImageExtractor(ImgytImageExtractor):
     pattern = [r"(?:https?://)?((?:www\.)?fapat\.me/img-([a-z0-9]+)\.html)"]
     test = []
     https = False
+
+
+
 
 
 class ChronosImageExtractor(ImagehostImageExtractor):
@@ -252,23 +272,6 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
         return url, filename
 
 
-class ImgcandyImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from imgcandy.net"""
-    category = "imgcandy"
-    pattern = [(r"(?:https?://)?((?:www\.)?imgcandy\.net/img-([a-z0-9]+)"
-                r"(?:_.+)?\.html)")]
-    test = [("http://imgcandy.net/img-57d02527efee8_test.png.html", {
-        "url": "bc3c9207b10dbfe8e65ccef5b9e3194a7427b4fa",
-        "keyword": "6482e58492e65fcc6d6622ecc2fb19f9d35ff18b",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
-
-    def get_info(self, page):
-        url = text.extract(page, "<img class='centred' src='", "'")[0]
-        pos = self.url.find("_")
-        return url, self.url[pos+1:-5] if pos != -1 else url
-
-
 class ImgspiceImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgspice.com"""
     category = "imgspice"
@@ -283,6 +286,23 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
         filename, pos = text.extract(page, '<td nowrap>', '</td>')
         url     , pos = text.extract(page, '<img src="http://img', '"', pos)
         return "http://img" + url, text.unescape(filename)
+
+
+class ImgtrexImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgtrex.com"""
+    category = "imgtrex"
+    pattern = [r"(?:https?://)?((?:www\.)?imgtrex\.com/([^/]+))"]
+    test = [("http://imgtrex.com/im0ypxq0rke4/test-テスト-&<a>.png", {
+        "url": "c000618bddda42bd599a590b7972c7396d19d8fe",
+        "keyword": "58905795a9cd3f17d5ff024fc4d63645795ba23c",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
+    params = None
+
+    def get_info(self, page):
+        filename, pos = text.extract(page, '<title>ImgTrex: ', '</title>')
+        url     , pos = text.extract(page, '<br>\n<img src="', '"', pos)
+        return url, filename
 
 
 class PixhostImageExtractor(ImagehostImageExtractor):
