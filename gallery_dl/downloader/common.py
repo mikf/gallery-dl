@@ -19,16 +19,14 @@ class BasicDownloader():
     def download(self, url, pathfmt):
         """Download the resource at 'url' and write it to a file-like object"""
         try:
-            return self.download_impl(url, pathfmt)
-        except:
-            # remove file if download failed
-            try:
-                if self.downloading:
-                    os.unlink(pathfmt.realpath)
-            except (AttributeError, FileNotFoundError):
-                pass
-            raise
+            self.download_impl(url, pathfmt)
+        finally:
+            # remove file from incomplete downloads
+            if self.downloading:
+                try:
+                    os.remove(pathfmt.realpath)
+                except (OSError, AttributeError):
+                    pass
 
     def download_impl(self, url, file_handle):
         """Actual implementaion of the download process"""
-        pass

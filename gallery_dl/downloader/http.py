@@ -72,14 +72,14 @@ class Downloader(BasicDownloader):
             # everything ok -- proceed to download
             self.out.start(pathfmt.path)
             self.downloading = True
-            with pathfmt.open() as file:
-                try:
-                    for data in response.iter_content(None):
+            try:
+                with pathfmt.open() as file:
+                    for data in response.iter_content(16384):
                         file.write(data)
-                except rexcepts.RequestException as exception:
-                    msg = exception
-                    response.close()
-                    continue
+            except rexcepts.RequestException as exception:
+                msg = exception
+                response.close()
+                continue
             self.downloading = False
             self.out.success(pathfmt.path, tries)
             return
