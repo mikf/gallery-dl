@@ -36,6 +36,7 @@ Supported Sites
 - imgspice.com
 - imgspot.org
 - imgth.com
+- imgtrex.com
 - imgtrial.com
 - imgupload.yt
 - imgur.com
