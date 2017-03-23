@@ -40,7 +40,7 @@ class ParseAction(argparse.Action):
 class Formatter(argparse.HelpFormatter):
     """Custom HelpFormatter class to customize help output"""
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, max_help_position=50)
+        super().__init__(max_help_position=50, *args, **kwargs)
 
     def _format_action_invocation(self, action):
         opts = action.option_strings[:]
