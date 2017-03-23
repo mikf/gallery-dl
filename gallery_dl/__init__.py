@@ -20,119 +20,11 @@ if sys.hexversion < 0x3030000:
     print("Python 3.3+ required", file=sys.stderr)
     sys.exit(1)
 
-import argparse
 import logging
-import json
-from . import config, extractor, job, exception
-from .version import __version__
+from . import version, config, option, extractor, job, exception
 
+__version = version.__version__
 log = logging.getLogger("gallery-dl")
-
-
-class ConfigAction(argparse.Action):
-    """Set argparse results directly as config values"""
-    def __call__(self, parser, namespace, values, option_string=None):
-        config.set((self.dest,), values)
-
-
-def build_cmdline_parser():
-    parser = argparse.ArgumentParser(
-        description='Download images from various sources')
-    parser.add_argument(
-        "-g", "--get-urls", dest="list_urls", action="count",
-        help="Print download urls",
-    )
-    parser.add_argument(
-        "-d", "--dest",
-        metavar="DEST", action=ConfigAction, dest="base-directory",
-        help="Destination directory",
-    )
-    parser.add_argument(
-        "-u", "--username",
-        metavar="USER", action=ConfigAction, dest="username",
-    )
-    parser.add_argument(
-        "-p", "--password",
-        metavar="PASS", action=ConfigAction, dest="password",
-    )
-    parser.add_argument(
-        "-i", "--input-file",
-        metavar="FILE", dest="inputfile",
-        help="Download URLs found in local FILE ('-' for stdin)",
-    )
-    parser.add_argument(
-        "--images",
-        metavar="ITEM-SPEC", action=ConfigAction, dest="images",
-        help=("Specify which images to download through a comma seperated list"
-              " of indices or index-ranges; "
-              "for example '--images -2,4,6-8,10-' will download images with "
-              "index 1, 2, 4, 6, 7, 8 and 10 up to the last one")
-    )
-    parser.add_argument(
-        "--chapters",
-        metavar="ITEM-SPEC", action=ConfigAction, dest="chapters",
-        help=("Same as '--images' except for chapters")
-    )
-    parser.add_argument(
-        "-R", "--retries",
-        metavar="RETRIES", action=ConfigAction, dest="retries", type=int,
-        help="Number of retries (default: 5)",
-    )
-    parser.add_argument(
-        "--http-timeout",
-        metavar="SECONDS", action=ConfigAction, dest="timeout", type=int,
-        help="Timeout for HTTP connections (defaut: no timeout)",
-    )
-    parser.add_argument(
-        "-c", "--config",
-        metavar="CFG", dest="cfgfiles", action="append",
-        help="Additional configuration files",
-    )
-    parser.add_argument(
-        "--config-yaml",
-        metavar="CFG", dest="yamlfiles", action="append",
-        help="Additional configuration files (YAML format)",
-    )
-    parser.add_argument(
-        "-o", "--option",
-        metavar="OPT", action="append", default=[],
-        help="Additional 'key=value' option values",
-    )
-    parser.add_argument(
-        "--list-extractors", dest="list_extractors", action="store_true",
-        help=("Print a list of extractor classes "
-              "with description and example URL"),
-    )
-    parser.add_argument(
-        "--list-keywords", dest="list_keywords", action="store_true",
-        help="Print a list of available keywords for the given URLs",
-    )
-    parser.add_argument(
-        "--list-modules", dest="list_modules", action="store_true",
-        help="Print a list of available modules/supported sites",
-    )
-    parser.add_argument(
-        "--version", action="version", version=__version__,
-        help="Print program version and exit"
-    )
-    parser.add_argument(
-        "urls",
-        nargs="*", metavar="URL",
-        help="Url to download images from"
-    )
-    return parser
-
-
-def parse_option(opt):
-    try:
-        key, value = opt.split("=", 1)
-        try:
-            value = json.loads(value)
-        except ValueError:
-            pass
-        config.set(key.split("."), value)
-    except ValueError:
-        log.warning("Invalid 'key=value' pair: %s", opt)
 
 
 def initialize_logging():
@@ -161,15 +53,15 @@ def main():
         initialize_logging()
         config.load()
 
-        parser = build_cmdline_parser()
+        parser = option.build_parser()
         args = parser.parse_args()
 
         if args.cfgfiles:
             config.load(*args.cfgfiles, strict=True)
         if args.yamlfiles:
             config.load(*args.yamlfiles, format="yaml", strict=True)
-        for opt in args.option:
-            parse_option(opt)
+        for key, value in args.options:
+            config.set(key, value)
 
         if args.list_modules:
             for module_name in extractor.modules:
