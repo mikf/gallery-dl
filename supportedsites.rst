@@ -43,7 +43,6 @@ Supported Sites
 - jaiminisbox.com
 - khinsider.com
 - kisscomic.us
-- kissmanga.com
 - kobato.hologfx.com
 - konachan.com
 - luscious.net
