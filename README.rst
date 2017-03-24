@@ -80,7 +80,6 @@ Supported Sites
 * nijie.info
 * bato.to
 * mangastream.com
-* kissmanga.com
 * readcomiconline.to
 * danbooru.donmai.us
 * gelbooru.com
