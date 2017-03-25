@@ -74,7 +74,6 @@ Supported Sites
 - tumblr.com
 - turboimagehost.com
 - twitter.com
-- whentai.com
 - yande.re
 - yomanga.co
 - yonkouprod.com
