@@ -62,7 +62,6 @@ modules = [
     "spectrumnexus",
     "tumblr",
     "twitter",
-    "whentai",
     "worldthree",
     "yandere",
     "yomanga",
