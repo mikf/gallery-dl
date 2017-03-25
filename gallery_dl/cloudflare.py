@@ -22,6 +22,7 @@ def request_func(self, *args):
     response = self.session.get(*args)
     if response.status_code != 200:
         _cookiecache.invalidate(self.root)
+        self.log.info("Solving Cloudflare challenge")
         response = solve_challenge(self.session, response)
         _cookiecache(self.root, self.session.cookies)
     return response
