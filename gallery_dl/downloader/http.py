@@ -18,12 +18,13 @@ from .. import config
 
 class Downloader(BasicDownloader):
 
+    max_tries = config.interpolate(("downloader", "http", "retries",), 5)
+    timeout = config.interpolate(("downloader", "http", "timeout",), None)
+
     def __init__(self, output):
         BasicDownloader.__init__(self)
         self.session = requests.session()
         self.out = output
-        self.max_tries = config.get(("retries",), 5)
-        self.timeout = config.get(("timeout",), None)
 
     def download_impl(self, url, pathfmt):
         tries = 0

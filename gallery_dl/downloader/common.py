@@ -28,5 +28,5 @@ class BasicDownloader():
                 except (OSError, AttributeError):
                     pass
 
-    def download_impl(self, url, file_handle):
+    def download_impl(self, url, pathfmt):
         """Actual implementaion of the download process"""
