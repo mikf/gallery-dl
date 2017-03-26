@@ -23,13 +23,13 @@ class BatotoExtractor(Extractor):
         """Login and set necessary cookies"""
         username = config.interpolate(("extractor", "batoto", "username"))
         password = config.interpolate(("extractor", "batoto", "password"))
-        if username and password:
+        if username:
             cookies = self._login_impl(username, password)
             for key, value in cookies.items():
                 self.session.cookies.set(
                     key, value, domain=".bato.to", path="/")
 
-    @cache(maxage=360*24*60*60, keyarg=1)
+    @cache(maxage=7*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
         """Actual login implementation"""
         self.log.info("Logging in as %s", username)
