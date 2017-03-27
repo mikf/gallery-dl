@@ -23,9 +23,7 @@ _config = {}
 
 if os.name == "nt":
     _default_configs = [
-        r"~\.config\gallery-dl\config.json",
         r"%USERPROFILE%\gallery-dl\config.json",
-        r"~\.gallery-dl.conf",
         r"%USERPROFILE%\gallery-dl.conf",
     ]
 else:
