@@ -17,6 +17,27 @@ log = logging.getLogger("config")
 
 
 # --------------------------------------------------------------------
+# internals
+
+_config = {}
+
+if os.name == "nt":
+    _default_configs = [
+        r"~\.config\gallery-dl\config.json",
+        r"%USERPROFILE%\gallery-dl\config.json",
+        r"~\.gallery-dl.conf",
+        r"%USERPROFILE%\gallery-dl.conf",
+    ]
+else:
+    _default_configs = [
+        "/etc/gallery-dl.conf",
+        "${HOME}/.config/gallery/config.json",
+        "${HOME}/.config/gallery-dl/config.json",
+        "${HOME}/.gallery-dl.conf",
+    ]
+
+
+# --------------------------------------------------------------------
 # public interface
 
 def load(*files, format="json", strict=False):
@@ -52,12 +73,11 @@ def load(*files, format="json", strict=False):
 
 def clear():
     """Reset configuration to en empty state"""
-    globals()["_config"] = {}
+    globals()["_config"].clear()
 
 
-def get(keys, default=None):
-    """Get the value of property 'key' or a default-value if it doenst exist"""
-    conf = _config
+def get(keys, default=None, conf=_config):
+    """Get the value of property 'key' or a default value"""
     try:
         for k in keys:
             conf = conf[k]
@@ -66,21 +86,23 @@ def get(keys, default=None):
         return default
 
 
-def interpolate(keys, default=None):
+def interpolate(keys, default=None, conf=_config):
     """Interpolate the value of 'key'"""
-    conf = _config
     try:
+        lkey = keys[-1]
+        if lkey in conf:
+            return conf[lkey]
         for k in keys:
-            default = conf.get(keys[-1], default)
+            if lkey in conf:
+                default = conf[lkey]
             conf = conf[k]
         return conf
     except (KeyError, AttributeError):
         return default
 
 
-def set(keys, value):
+def set(keys, value, conf=_config):
     """Set the value of property 'key' for this session"""
-    conf = _config
     for k in keys[:-1]:
         try:
             conf = conf[k]
@@ -91,9 +113,8 @@ def set(keys, value):
     conf[keys[-1]] = value
 
 
-def setdefault(keys, value):
+def setdefault(keys, value, conf=_config):
     """Set the value of property 'key' if it doesn't exist"""
-    conf = _config
     for k in keys[:-1]:
         try:
             conf = conf[k]
@@ -102,24 +123,3 @@ def setdefault(keys, value):
             conf[k] = temp
             conf = temp
     return conf.setdefault(keys[-1], value)
-
-
-# --------------------------------------------------------------------
-# internals
-
-_config = {}
-
-if os.name == "nt":
-    _default_configs = [
-        r"~\.config\gallery-dl\config.json",
-        r"%USERPROFILE%\gallery-dl\config.json",
-        r"~\.gallery-dl.conf",
-        r"%USERPROFILE%\gallery-dl.conf",
-    ]
-else:
-    _default_configs = [
-        "/etc/gallery-dl.conf",
-        "${HOME}/.config/gallery/config.json",
-        "${HOME}/.config/gallery-dl/config.json",
-        "${HOME}/.gallery-dl.conf",
-    ]
