@@ -18,7 +18,7 @@ from .. import config
 
 class Downloader(BasicDownloader):
 
-    max_tries = config.interpolate(("downloader", "http", "retries",), 5)
+    retries = config.interpolate(("downloader", "http", "retries",), 5)
     timeout = config.interpolate(("downloader", "http", "timeout",), None)
 
     def __init__(self, output):
@@ -32,8 +32,8 @@ class Downloader(BasicDownloader):
         while True:
             tries += 1
             if tries > 1:
-                self.out.error(pathfmt.path, msg, tries-1, self.max_tries)
-                if tries > self.max_tries:
+                self.out.error(pathfmt.path, msg, tries-1, self.retries)
+                if tries > self.retries:
                     return
                 time.sleep(1)
 

@@ -213,6 +213,6 @@ memcache = build_cache_decorator(MEMCACHE)
 try:
     DBCACHE = DatabaseCache()
     cache = build_cache_decorator(MEMCACHE, DBCACHE)
-except RuntimeError():
+except (RuntimeError, sqlite3.OperationalError):
     DBCACHE = None
     cache = memcache
