@@ -23,7 +23,7 @@ if sys.hexversion < 0x3030000:
 import logging
 from . import version, config, option, extractor, job, exception
 
-__version = version.__version__
+__version__ = version.__version__
 log = logging.getLogger("gallery-dl")
 
 

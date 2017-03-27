@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,7 +18,7 @@ class TestConfig(unittest.TestCase):
     def setUp(self):
         fd, self._configfile = tempfile.mkstemp()
         with os.fdopen(fd, "w") as file:
-            file.write('{"a": "1", "b": {"c": "text"}}')
+            file.write('{"a": "1", "b": {"a": 2, "c": "text"}}')
         config.load(self._configfile)
 
     def tearDown(self):
