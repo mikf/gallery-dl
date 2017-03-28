@@ -150,7 +150,7 @@ or you can provide them directly via the
 
 .. _gallery-dl.conf:       https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
 .. _Complete List:         https://github.com/mikf/gallery-dl/blob/master/supportedsites.rst
-.. _standalone executable: https://github.com/mikf/gallery-dl/releases/download/v0.7.0/gallery-dl.exe
+.. _standalone executable: https://github.com/mikf/gallery-dl/releases/download/v0.8.0/gallery-dl.exe
 .. _Python:   https://www.python.org/downloads/
 .. _Requests: https://pypi.python.org/pypi/requests/
 .. _PyPI:     https://pypi.python.org/pypi
