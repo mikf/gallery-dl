@@ -9,7 +9,7 @@
 """Extract manga chapters from https://bato.to/"""
 
 from .common import Extractor, AsynchronousExtractor, Message
-from .. import text, iso639_1, config, exception
+from .. import text, util, config, exception
 from ..cache import cache
 import re
 
@@ -160,7 +160,7 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
             "chapter": match.group(3),
             "title": match.group(5) or "",
             "group": group,
-            "lang": iso639_1.language_to_code(lang),
+            "lang": util.language_to_code(lang),
             "language": lang,
             "count": count,
         }

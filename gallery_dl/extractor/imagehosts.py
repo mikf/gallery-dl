@@ -120,9 +120,6 @@ class FapatImageExtractor(ImgytImageExtractor):
     https = False
 
 
-
-
-
 class ChronosImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from chronos.to"""
     category = "chronos"
@@ -292,7 +289,7 @@ class ImgtrexImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgtrex.com"""
     category = "imgtrex"
     pattern = [r"(?:https?://)?((?:www\.)?imgtrex\.com/([^/]+))"]
-    test = [("http://imgtrex.com/im0ypxq0rke4/test-テスト-&<a>.png", {
+    test = [("http://imgtrex.com/im0ypxq0rke4/test-&<a>.png", {
         "url": "c000618bddda42bd599a590b7972c7396d19d8fe",
         "keyword": "58905795a9cd3f17d5ff024fc4d63645795ba23c",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",

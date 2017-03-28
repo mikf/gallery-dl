@@ -9,7 +9,7 @@
 """Extract images from https://luscious.net/"""
 
 from .common import Extractor, Message
-from .. import text, iso639_1
+from .. import text, util
 import re
 
 
@@ -61,7 +61,7 @@ class LusciousAlbumExtractor(Extractor):
             ("section" , '>', '<'),
             ("language", '<p>Language:', ' '),
         ), values={"gallery-id": self.gid})[0]
-        data["lang"] = iso639_1.language_to_code(data["language"])
+        data["lang"] = util.language_to_code(data["language"])
         data["artist"] = text.extract(data["tags"], "rtist: ", ",")[0] or ""
         self.section = data["com"]
         del data["com"]

@@ -6,10 +6,11 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Utility functions"""
+"""Utility functions and classes"""
 
+import os
 import sys
-from . import exception
+from . import config, text, exception
 
 
 def parse_range(rangespec):
@@ -62,6 +63,51 @@ def optimize_range(ranges):
     return result
 
 
+def code_to_language(code, default="English"):
+    """Map an ISO 639-1 language code to its actual name"""
+    return codes.get(code.lower(), default)
+
+
+def language_to_code(lang, default="en"):
+    """Map a language name to its ISO 639-1 code"""
+    lang = lang.capitalize()
+    for code, language in codes.items():
+        if language == lang:
+            return code
+    return default
+
+
+codes = {
+    "ar": "Arabic",
+    "cs": "Czech",
+    "da": "Danish",
+    "de": "German",
+    "el": "Greek",
+    "en": "English",
+    "es": "Spanish",
+    "fi": "Finnish",
+    "fr": "French",
+    "he": "Hebrew",
+    "hu": "Hungarian",
+    "id": "Indonesian",
+    "it": "Italian",
+    "jp": "Japanese",
+    "ko": "Korean",
+    "ms": "Malay",
+    "nl": "Dutch",
+    "no": "Norwegian",
+    "pl": "Polish",
+    "pt": "Portuguese",
+    "ro": "Romanian",
+    "ru": "Russian",
+    "sv": "Swedish",
+    "th": "Thai",
+    "tr": "Turkish",
+    "vi": "Vietnamese",
+    "zh": "Chinese",
+}
+
+
 class RangePredicate():
     """Predicate; is True if the current index is in the given range"""
     def __init__(self, rangespec):
@@ -82,3 +128,76 @@ class RangePredicate():
             if lower <= self.index <= upper:
                 return True
         return False
+
+
+class PathFormat():
+
+    def __init__(self, extractor):
+        key = ["extractor", extractor.category]
+        if extractor.subcategory:
+            key.append(extractor.subcategory)
+        self.filename_fmt = config.interpolate(
+            key + ["filename"], default=extractor.filename_fmt
+        )
+        self.directory_fmt = config.interpolate(
+            key + ["directory"], default=extractor.directory_fmt
+        )
+        self.has_extension = False
+        self.keywords = {}
+        self.directory = self.realdirectory = ""
+        self.path = self.realpath = ""
+
+    def open(self):
+        """Open file ta 'realpath' and return a corresponding file object"""
+        return open(self.realpath, "wb")
+
+    def exists(self):
+        """Return True if 'path' is complete and referse to an existing path"""
+        if self.has_extension:
+            return os.path.exists(self.realpath)
+        return False
+
+    def set_directory(self, keywords):
+        """Build directory path and create it if necessary"""
+        segments = [
+            text.clean_path(segment.format_map(keywords).strip())
+            for segment in self.directory_fmt
+        ]
+        self.directory = os.path.join(
+            self.get_base_directory(),
+            *segments
+        )
+        self.realdirectory = self.adjust_path(self.directory)
+        os.makedirs(self.realdirectory, exist_ok=True)
+
+    def set_keywords(self, keywords):
+        """Set filename keywords"""
+        self.keywords = keywords
+        self.has_extension = bool(keywords.get("extension"))
+        if self.has_extension:
+            self.build_path()
+
+    def set_extension(self, extension):
+        """Set the 'extension' keyword"""
+        self.has_extension = True
+        self.keywords["extension"] = extension
+        self.build_path()
+
+    def build_path(self, sep=os.path.sep):
+        """Use filename-keywords and directory to build a full path"""
+        filename = text.clean_path(self.filename_fmt.format_map(self.keywords))
+        self.path = self.directory + sep + filename
+        self.realpath = self.realdirectory + sep + filename
+
+    @staticmethod
+    def get_base_directory():
+        """Return the base-destination-directory for downloads"""
+        bdir = config.get(("base-directory",), default=(".", "gallery-dl"))
+        if not isinstance(bdir, str):
+            bdir = os.path.join(*bdir)
+        return os.path.expanduser(os.path.expandvars(bdir))
+
+    @staticmethod
+    def adjust_path(path):
+        """Enable longer-than-260-character paths on windows"""
+        return "\\\\?\\" + os.path.abspath(path) if os.name == "nt" else path

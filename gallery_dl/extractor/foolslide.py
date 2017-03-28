@@ -9,7 +9,7 @@
 """Base classes for extractors for FoolSlide based sites"""
 
 from .common import Extractor, Message
-from .. import text, iso639_1
+from .. import text, util
 import json
 
 
@@ -73,7 +73,7 @@ class FoolslideChapterExtractor(Extractor):
 
         self.data["manga"] = text.unescape(manga)
         self.data["title"] = title
-        self.data["language"] = iso639_1.code_to_language(self.data["lang"])
+        self.data["language"] = util.code_to_language(self.data["lang"])
         self.data["chapter_string"] = chapter
         return self.data
 
