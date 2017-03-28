@@ -9,7 +9,7 @@
 """Extract images from galleries at https://exhentai.org/"""
 
 from .common import Extractor, Message
-from .. import config, text, iso639_1, exception
+from .. import config, text, util, exception
 from ..cache import cache
 import time
 import random
@@ -103,7 +103,7 @@ class ExhentaiGalleryExtractor(Extractor):
             ("size-units", '', '<'),
             ("count"     , '>Length:</td><td class="gdt2">', ' '),
         ), values=data)
-        data["lang"] = iso639_1.language_to_code(data["language"])
+        data["lang"] = util.language_to_code(data["language"])
         data["title"] = text.unescape(data["title"])
         data["title_jp"] = text.unescape(data["title_jp"])
         return data

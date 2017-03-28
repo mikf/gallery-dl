@@ -8,7 +8,7 @@
 
 import json
 import hashlib
-from . import extractor, downloader, config, util, path, output, exception
+from . import extractor, downloader, config, util, output, exception
 from .extractor.message import Message
 
 
@@ -105,7 +105,7 @@ class DownloadJob(Job):
 
     def __init__(self, url):
         Job.__init__(self, url)
-        self.pathfmt = path.PathFormat(self.extractor)
+        self.pathfmt = util.PathFormat(self.extractor)
         self.downloaders = {}
         self.queue = None
         self.out = output.select()

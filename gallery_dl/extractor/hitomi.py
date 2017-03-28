@@ -9,7 +9,7 @@
 """Extract images from https://hitomi.la/"""
 
 from .common import Extractor, Message
-from .. import text, iso639_1
+from .. import text, util
 import string
 
 
@@ -68,7 +68,7 @@ class HitomiGalleryExtractor(Extractor):
             "artist": string.capwords(artist),
             "group": string.capwords(group),
             "type": gtype.strip().capitalize(),
-            "lang": iso639_1.language_to_code(lang),
+            "lang": util.language_to_code(lang),
             "language": lang,
             "series": string.capwords(series),
         }
