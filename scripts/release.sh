@@ -12,28 +12,41 @@ prompt() {
     fi
 }
 
+cleanup() {
+    cd "${ROOTDIR}"
+    echo Removing old build directory
+    if [ -d ./build ]; then
+        rm -rf ./build
+    fi
+}
+
 update() {
     cd "${ROOTDIR}"
+    echo Updating version to ${NEWVERSION}
     sed -i "s#\"${PYVERSION}\"#\"${NEWVERSION}\"#" "gallery_dl/version.py"
     sed -i "s#/v${OLDVERSION}/#/v${NEWVERSION}/#" "README.rst"
 }
 
 update-dev() {
     cd "${ROOTDIR}"
-    sed -i "s#\"${NEWVERSION}\"#\"${NEWVERSION}-dev\"#" "gallery_dl/version.py"
+    IFS="." read MAJOR MINOR BUILD <<< "${NEWVERSION}"
+    BUILD=$((BUILD+1))
+    sed -i "s#\"${NEWVERSION}\"#\"${MAJOR}.${MINOR}.${BUILD}-dev\"#" "gallery_dl/version.py"
 }
 
 build() {
     cd "${ROOTDIR}"
 
     # build wheel and source distributions
+    echo Building bdist_wheel and sdist
     python setup.py bdist_wheel sdist
 
     # build windows exe in vm
+    echo Building Windows executable
     ln -fs "${ROOTDIR}" /tmp/
     vmstart "Windows 7" &
     disown
-    while [[ ! -e "gallery-dl.exe" ]] ; do
+    while [ ! -e "gallery-dl.exe" ] ; do
         sleep 5
     done
 
@@ -43,12 +56,15 @@ build() {
         echo "exe version mismatch: ${OUTPUT} != ${NEWVERSION}"
         exit 3
     fi
-    [ -e "dist/gallery-dl.exe" ] && mv -f "dist/gallery-dl.exe" "dist/gallery-v${OLDVERSION}-dl.exe"
+    if [ -e "dist/gallery-dl.exe" ]; then
+        mv -f "dist/gallery-dl.exe" "dist/gallery-v${OLDVERSION}-dl.exe"
+    fi
     mv "gallery-dl.exe" "./dist/"
 }
 
 sign() {
     cd "${ROOTDIR}/dist"
+    echo Signing files
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}-py3-none-any.whl
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}.tar.gz
     gpg --detach-sign gallery-dl.exe
@@ -56,15 +72,18 @@ sign() {
 
 git-upload() {
     cd "${ROOTDIR}"
+    echo Pushing changes to github
     git add "gallery_dl/version.py" "README.rst"
     git commit -S -m "release version ${NEWVERSION}"
     git tag -s -m "version ${NEWVERSION}" "v${NEWVERSION}"
-    # git push origin "v${NEWVERSION}"
+    git push
+    git push origin "v${NEWVERSION}"
 }
 
 pypi-upload() {
     cd "${ROOTDIR}/dist"
-    twine upload
+    echo Uploading to PyPI
+    twine upload gallery_dl-${NEWVERSION}*
 }
 
 
@@ -87,6 +106,7 @@ fi
 
 
 prompt
+cleanup
 update
 build
 sign
