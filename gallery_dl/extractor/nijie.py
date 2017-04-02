@@ -96,14 +96,19 @@ class NijieUserExtractor(NijieExtractor):
     def __init__(self, match):
         NijieExtractor.__init__(self)
         self.artist_id = match.group(1)
-        self.artist_url = ("https://nijie.info/members_illust.php?id=" +
-                           self.artist_id)
 
     def get_image_ids(self):
-        response = self.session.get(self.artist_url)
-        if response.status_code == 404:
-            raise exception.NotFoundError("artist")
-        return list(text.extract_iter(response.text, ' illust_id="', '"'))
+        params = {"id": self.artist_id, "p": 1}
+        url = "https://nijie.info/members_illust.php"
+        while True:
+            response = self.session.get(url, params=params)
+            if response.status_code == 404:
+                raise exception.NotFoundError("artist")
+            ids = list(text.extract_iter(response.text, ' illust_id="', '"'))
+            yield from ids
+            if len(ids) < 48:
+                return
+            params["p"] += 1
 
 
 class NijieImageExtractor(NijieExtractor):
