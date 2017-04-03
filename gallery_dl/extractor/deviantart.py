@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
 import time
+import re
 
 
 class DeviantartExtractor(Extractor):
@@ -38,18 +39,19 @@ class DeviantartExtractor(Extractor):
             if first:
                 first = False
                 yield Message.Directory, deviation["author"].copy()
-            del deviation["stats"]
-
-            # add additional metadata
-            deviation["index"] = deviation["url"].rsplit("-", 1)[1]
-            url = deviation["content"]["src"]
-            text.nameext_from_url(url, deviation)
-
-            yield Message.Url, url, deviation
+            self.prepare(deviation)
+            yield Message.Url, deviation["content"]["src"], deviation
 
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
         return []
+
+    @staticmethod
+    def prepare(deviation):
+        """Adjust the contents of a Deviation-object"""
+        del deviation["stats"]
+        deviation["index"] = deviation["url"].rsplit("-", 1)[1]
+        text.nameext_from_url(deviation["content"]["src"], deviation)
 
 
 class DeviantartUserExtractor(DeviantartExtractor):
@@ -95,6 +97,59 @@ class DeviantartImageExtractor(DeviantartExtractor):
         if response.status_code != 200 or not deviation_id:
             raise exception.NotFoundError("image")
         return (self.api.deviation(deviation_id),)
+
+
+class DeviantartFavouritesExtractor(DeviantartExtractor):
+    """Extractor for an artist's favourites from deviantart.com"""
+    subcategory = "favourites"
+    directory_fmt = ["{category}", "{subcategory}",
+                     "{collection[owner]} - {collection[title]}"]
+    pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com/favourites"
+               r"(?:/(\d+)/([^/?]+))?"]
+    test = [
+        ("http://h3813067.deviantart.com/favourites/", {
+            "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
+            "keyword": "35a275b0f737aa9bd1f32ba13604d6e9a7054a14",
+            "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
+        }),
+        ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
+            "url": "9e8d971c80db099b95d1c785399e2bc6eb96cd07",
+            "keyword": "cf65309a880799a4a82a7b2f0389e5bc88f5730f",
+        }),
+    ]
+
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self)
+        self.user, self.favid, self.favname = match.groups()
+        if not self.favname:
+            self.favname = "Featured"
+        self.collection = {
+            "owner": self.user,
+            "title": self.favname,
+            "index": self.favid or 0,
+        }
+
+    def items(self):
+        yield Message.Version, 1
+        for deviation in self.deviations():
+            if "content" not in deviation:
+                continue
+            self.prepare(deviation)
+            yield Message.Directory, deviation
+            yield Message.Url, deviation["content"]["src"], deviation
+
+    def deviations(self):
+        regex = re.compile(self.favname.replace("-", ".") + "$")
+        for folder in self.api.collections_folders(self.user):
+            if regex.match(folder["name"]):
+                self.collection["title"] = folder["name"]
+                return self.api.collections_folderid(
+                    self.user, folder["folderid"], self.offset)
+        raise exception.NotFoundError("collection")
+
+    def prepare(self, deviation):
+        DeviantartExtractor.prepare(deviation)
+        deviation["collection"] = self.collection
 
 
 class DeviantartAPI():
