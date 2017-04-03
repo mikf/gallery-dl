@@ -14,22 +14,15 @@ from ..cache import cache
 import time
 
 
-class DeviantartUserExtractor(Extractor):
-    """Extractor for all works from an artist on deviantart.com"""
+class DeviantartExtractor(Extractor):
+    """Base class for deviantart extractors"""
     category = "deviantart"
-    subcategory = "user"
     directory_fmt = ["{category}", "{username}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
-    test = [("http://shimoda7.deviantart.com/gallery/", {
-        "url": "63bfa8efba199e27181943c9060f6770f91a8441",
-        "keyword": "4ffe227a50f373faf643d7e5ae89a04859af8d19",
-    })]
 
-    def __init__(self, match):
+    def __init__(self):
         Extractor.__init__(self)
         self.api = DeviantartAPI(self)
-        self.user = match.group(1)
         self.offset = 0
 
     def skip(self, num):
@@ -39,97 +32,69 @@ class DeviantartUserExtractor(Extractor):
     def items(self):
         first = True
         yield Message.Version, 1
-        for deviation in self.api.gallery_all(self.user, self.offset):
+        for deviation in self.deviations():
             if "content" not in deviation:
                 continue
             if first:
                 first = False
-                yield Message.Directory, deviation["author"]
+                yield Message.Directory, deviation["author"].copy()
             del deviation["stats"]
-            deviation["index"] = deviation["url"].rsplit("-", maxsplit=1)[-1]
-            yield Message.Url, deviation["content"]["src"], deviation
+
+            # add additional metadata
+            deviation["index"] = deviation["url"].rsplit("-", 1)[1]
+            url = deviation["content"]["src"]
+            text.nameext_from_url(url, deviation)
+
+            yield Message.Url, url, deviation
+
+    def deviations(self):
+        """Return an iterable containing all relevant Deviation-objects"""
+        return []
 
 
-class DeviantartImageExtractor(Extractor):
-    """Extractor for single images from deviantart.com"""
-    category = "deviantart"
-    subcategory = "image"
-    directory_fmt = ["{category}", "{artist}"]
-    filename_fmt = "{category}_{index}_{title}.{extension}"
-    pattern = [r"(?:https?://)?([^\.]+\.deviantart\.com/art/.+-(\d+))"]
-    test = [(("http://shimoda7.deviantart.com/art/"
-              "For-the-sake-of-a-memory-10073852"), {
-        "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-        "keyword": "ccac27b8f740fc943afca9460608e02c6cbcdf96",
-        "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
+class DeviantartUserExtractor(DeviantartExtractor):
+    """Extractor for all works from an artist on deviantart.com"""
+    subcategory = "user"
+    pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
+    test = [("http://shimoda7.deviantart.com/gallery/", {
+        "url": "63bfa8efba199e27181943c9060f6770f91a8441",
+        "keyword": "ca77ad61f387be7dabb61eb322b5185bccec69ea",
     })]
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        DeviantartExtractor.__init__(self)
+        self.user = match.group(1)
+
+    def deviations(self):
+        return self.api.gallery_all(self.user, self.offset)
+
+
+class DeviantartImageExtractor(DeviantartExtractor):
+    """Extractor for single images from deviantart.com"""
+    subcategory = "image"
+    pattern = [r"(?:https?://)?([^\.]+\.deviantart\.com/art/.+-\d+)"]
+    test = [
+        (("http://shimoda7.deviantart.com/art/"
+          "For-the-sake-of-a-memory-10073852"), {
+            "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
+            "keyword": "65f3c66cc1c9cf33757a71b86688fde4549fb045",
+            "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
+        }),
+        ("https://zzz.deviantart.com/art/zzz-1234567890", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
+
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self)
         self.url = "https://" + match.group(1)
-        self.index = match.group(2)
-        self.session.cookies["agegate_state"] = "1"
 
-    def items(self):
-        page = self.request(self.url).text
-        data = self.get_data(page)
-        data.update(self.get_image(page))
-
-        tlen = len(data["title"])
-        text.nameext_from_url(data["image"], data)
-        data["title"] = text.unescape(data["title"])
-        data["description"] = text.unescape(text.unescape(data["description"]))
-        data["artist"] = text.extract(data["url"], "//", ".")[0]
-        data["date"] = text.extract(data["date"], ", ", " in ", tlen)[0]
-
-        yield Message.Version, 1
-        yield Message.Directory, data
-        yield Message.Url, data["image"], data
-
-    def get_data(self, page):
-        """Collect metadata for extractor-job"""
-        return text.extract_all(page, (
-            ('title'      , '"og:title" content="', '"'),
-            ('url'        , '"og:url" content="', '"'),
-            ('description', '"og:description" content="', '"'),
-            (None         , '<span class="tt-w">', ''),
-            ('date'       , 'title="', '"'),
-        ), values={"index": self.index})[0]
-
-    def get_image(self, page):
-        """Find image-url and -dimensions"""
-        # try preview
-        data, pos = text.extract_all(page, (
-            ('image' , '"og:image" content="', '"'),
-            ('width' , '"og:image:width" content="', '"'),
-            ('height', '"og:image:height" content="', '"'),
-        ))
-        if data["image"].startswith("https://orig"):
-            return data
-
-        # try main image
-        data, pos = text.extract_all(page, (
-            (None    , 'class="dev-content-normal "', ''),
-            ('image' , ' src="', '"'),
-            ('width' , ' width="', '"'),
-            ('height', ' height="', '"'),
-        ), pos)
-        if data["image"].startswith("https://orig"):
-            return data
-
-        # try download
-        test, pos = text.extract(page, 'dev-page-download', '', pos)
-        if test is not None:
-            data, pos = text.extract_all(page, (
-                ('image' , 'href="', '"'),
-                (None    , '<span class="text">', ' '),
-                ('width' , '', ' '),
-                ('height', ' ', '<'),
-            ), pos)
-            response = self.session.head(text.unescape(data["image"]))
-            data["image"] = response.headers["Location"]
-
-        return data
+    def deviations(self):
+        response = self.session.get(self.url)
+        deviation_id = text.extract(response.text, '//deviation/', '"')[0]
+        if response.status_code != 200 or not deviation_id:
+            raise exception.NotFoundError("image")
+        return (self.api.deviation(deviation_id),)
 
 
 class DeviantartAPI():
@@ -143,27 +108,35 @@ class DeviantartAPI():
         self.client_secret = client_secret
         self.delay = 0
 
+    def deviation(self, deviation_id):
+        """Query and return info about a single Deviation"""
+        endpoint = "deviation/" + deviation_id
+        return self._call(endpoint)
+
     def gallery_all(self, username, offset=0):
-        """Yield all Deviation-objects of a specific user """
-        url = "https://www.deviantart.com/api/v1/oauth2/gallery/all"
+        """Yield all Deviation-objects of a specific user"""
+        endpoint = "gallery/all"
         params = {"username": username, "offset": offset, "limit": 10}
-        while True:
-            data = self._call(url, params)
-            if "results" in data:
-                yield from data["results"]
-                if not data["has_more"]:
-                    return
-                params["offset"] = data["next_offset"]
-            else:
-                self.log.error("Unexpected API response: %s", data)
-                return
+        return self._pagination(endpoint, params)
+
+    def collections_folders(self, username, offset=0):
+        """Yield all collection folders of a specific user"""
+        endpoint = "collections/folders"
+        params = {"username": username, "offset": offset, "limit": 10}
+        return self._pagination(endpoint, params)
+
+    def collections_folderid(self, username, folder_id, offset=0):
+        """Yield all Deviation-objects contained in a collection folder"""
+        endpoint = "collections/" + folder_id
+        params = {"username": username, "offset": offset, "limit": 10}
+        return self._pagination(endpoint, params)
 
     def authenticate(self):
-        """Authenticate the application by requesting a bearer token"""
-        bearer_token = self._authenticate_impl(
+        """Authenticate the application by requesting an access token"""
+        access_token = self._authenticate_impl(
             self.client_id, self.client_secret
         )
-        self.session.headers["Authorization"] = bearer_token
+        self.session.headers["Authorization"] = access_token
 
     @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, client_id, client_secret):
@@ -179,8 +152,9 @@ class DeviantartAPI():
             raise exception.AuthenticationError()
         return "Bearer " + response.json()["access_token"]
 
-    def _call(self, url, params={}):
+    def _call(self, endpoint, params=None):
         """Call an API endpoint"""
+        url = "https://www.deviantart.com/api/v1/oauth2/" + endpoint
         tries = 1
         while True:
             if self.delay:
@@ -205,3 +179,15 @@ class DeviantartAPI():
             return response.json()
         except ValueError:
             return {}
+
+    def _pagination(self, endpoint, params=None):
+        while True:
+            data = self._call(endpoint, params)
+            if "results" in data:
+                yield from data["results"]
+                if not data["has_more"]:
+                    return
+                params["offset"] = data["next_offset"]
+            else:
+                self.log.error("Unexpected API response: %s", data)
+                return
