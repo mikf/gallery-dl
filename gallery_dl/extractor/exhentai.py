@@ -22,7 +22,7 @@ class ExhentaiGalleryExtractor(Extractor):
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery-id}"]
     filename_fmt = "{gallery-id}_{num:>04}_{image-token}_{name}.{extension}"
-    pattern = [r"(?:https?://)?(?:g\.e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
+    pattern = [r"(?:https?://)?(g\.e-|e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
     test = [
         ("https://exhentai.org/g/960460/4f0e369d82/", {
             "keyword": "623f8c86c9fe38e964682dd4309b96922655b900",
@@ -41,7 +41,7 @@ class ExhentaiGalleryExtractor(Extractor):
         Extractor.__init__(self)
         self.key = {}
         self.count = 0
-        self.gid, self.token = match.groups()
+        self.version, self.gid, self.token = match.groups()
         self.original = config.interpolate(
             ("extractor", "exhentai", "original"), True)
         self.wait_min = config.interpolate(
