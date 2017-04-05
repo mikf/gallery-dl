@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -60,3 +60,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineExtractor,
             "lang": "en",
             "language": "English",
         }
+
+    @staticmethod
+    def get_image_urls(page):
+        """Extract list of all image-urls for a manga chapter"""
+        return list(text.extract_iter(page, 'lstImages.push("', '"'))

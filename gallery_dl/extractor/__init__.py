@@ -38,6 +38,7 @@ modules = [
     "jaiminisbox",
     "khinsider",
     "kisscomic",
+    "kissmanga",
     "konachan",
     "luscious",
     "mangafox",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015, 2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,19 @@
 """Extract manga-chapters and entire manga from http://kissmanga.com/"""
 
 from .common import Extractor, Message
-from .. import text, cloudflare
+from .. import text, cloudflare, aes
 import re
+
+KEY = [
+      9, 156, 103, 232, 193, 166,  41, 125,
+    179,  74, 152, 145, 228, 219, 228,  25,
+     22, 110, 191, 123, 177,  27, 111,  71,
+    173,  92, 161,  63, 162, 175,  84,  24,
+]
+IV = [
+    165, 232, 226, 233, 194, 114,  27, 224,
+    168,  74, 214,  96, 196, 114, 193, 243,
+]
 
 
 class KissmangaExtractor(Extractor):
@@ -96,4 +107,7 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     @staticmethod
     def get_image_urls(page):
         """Extract list of all image-urls for a manga chapter"""
-        return list(text.extract_iter(page, 'lstImages.push("', '"'))
+        return [
+            aes.aes_cbc_decrypt_text(data, KEY, IV)
+            for data in text.extract_iter(page, 'lstImages.push(wrapKA("', '"')
+        ]
