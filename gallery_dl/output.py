@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015, 2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -57,7 +57,7 @@ class Printer():
         """Print a message indicating the completion of a download"""
         print(path, flush=True)
 
-    def error(self, file, error, tries, max_tries):
+    def error(self, path, error, tries, max_tries):
         """Print a message indicating an error during download"""
         pass
 
@@ -79,11 +79,11 @@ class TerminalPrinter(Printer):
         print("\r", end="")
         safeprint(self.shorten(CHAR_SUCCESS + path))
 
-    def error(self, file, error, tries, max_tries):
-        if tries <= 1 and hasattr(file, "name"):
+    def error(self, path, error, tries, max_tries):
+        if tries <= 1 and path:
             print("\r", end="")
-            safeprint(self.shorten(CHAR_ERROR + file.name))
-        print("[Error] ", end="")
+            safeprint(self.shorten(CHAR_ERROR + path))
+        print("\r[Error] ", end="")
         safeprint(error, end="")
         print(" (", tries, "/", max_tries, ")", sep="")
 
@@ -108,14 +108,12 @@ class ColorPrinter(TerminalPrinter):
         print("\033[2m", self.shorten(path), "\033[0m", sep="")
 
     def success(self, path, tries):
-        # if tries == 0:
-            # print("\r", end="")
         print("\r\033[1;32m", self.shorten(path), "\033[0m", sep="")
 
-    def error(self, file, error, tries, max_tries):
-        if tries <= 1 and hasattr(file, "name"):
-            print("\r\033[1;31m", self.shorten(file.name), sep="")
-        print("\033[0;31m[Error]\033[0m ", error,
+    def error(self, path, error, tries, max_tries):
+        if tries <= 1 and path:
+            print("\r\033[1;31m", self.shorten(path), sep="")
+        print("\r\033[0;31m[Error]\033[0m ", error,
               " (", tries, "/", max_tries, ")", sep="")
 
 
@@ -130,6 +128,6 @@ else:
     ANSI = True
     OFFSET = 0
     CHAR_SKIP = "# "
-    CHAR_ERROR = "❌ "
+    CHAR_ERROR = "✖ "
     CHAR_SUCCESS = "✔ "
     CHAR_ELLIPSIES = "…"
