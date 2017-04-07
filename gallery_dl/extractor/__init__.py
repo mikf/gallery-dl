@@ -37,6 +37,7 @@ modules = [
     "imgur",
     "jaiminisbox",
     "khinsider",
+    "kireicake",
     "kisscomic",
     "kissmanga",
     "konachan",
