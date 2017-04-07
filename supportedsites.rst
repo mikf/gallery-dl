@@ -67,6 +67,7 @@ Supported Sites
 - readcomiconline.to
 - readcomics.tv
 - reader.kireicake.com
+- reader.seaotterscans.com
 - rule34.xxx
 - safebooru.org
 - seiga.nicovideo.jp
