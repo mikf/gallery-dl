@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
     pattern = [(r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts"
                 r"\?(?:utf8=%E2%9C%93&)?tags=([^&]+)")]
     test = [("https://danbooru.donmai.us/posts?tags=bonocho", {
-        "url": "f94774bcb5169e943efb4d7bb51c47ae786b05f3",
+        "url": "04f69a187269019f6d0c32dc7685246fe99d536e",
         "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
     })]
 
@@ -43,6 +43,6 @@ class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
     subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts/(\d+)"]
     test = [("https://danbooru.donmai.us/posts/294929", {
-        "url": "9caa006a4d9eedbacbe030655ade0d3225399749",
+        "url": "954a9fec4d507c46e220c9beb4349b303b1f4433",
         "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
     })]

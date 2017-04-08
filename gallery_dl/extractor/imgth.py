@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -34,8 +34,7 @@ class ImgthGalleryExtractor(Extractor):
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, url in enumerate(self.get_images(page), 1):
-            data["num"] = num
+        for data["num"], url in enumerate(self.get_images(page), 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_images(self, page):
@@ -43,6 +42,7 @@ class ImgthGalleryExtractor(Extractor):
         pnum = 0
         while True:
             pos = 0
+            page = text.extract(page, '<ul class="thumbnails">', '</ul>')[0]
             while True:
                 url, pos = text.extract(page, '<img src="', '"', pos)
                 if not url:
