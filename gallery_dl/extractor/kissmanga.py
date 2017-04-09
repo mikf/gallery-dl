@@ -11,13 +11,8 @@
 from .common import Extractor, Message
 from .. import text, cloudflare, aes
 import re
+import hashlib
 
-KEY = [
-      9, 156, 103, 232, 193, 166,  41, 125,
-    179,  74, 152, 145, 228, 219, 228,  25,
-     22, 110, 191, 123, 177,  27, 111,  71,
-    173,  92, 161,  63, 162, 175,  84,  24,
-]
 IV = [
     165, 232, 226, 233, 194, 114,  27, 224,
     168,  74, 214,  96, 196, 114, 193, 243,
@@ -104,10 +99,32 @@ class KissmangaChapterExtractor(KissmangaExtractor):
             "language": "English",
         }
 
-    @staticmethod
-    def get_image_urls(page):
+    def get_image_urls(self, page):
         """Extract list of all image-urls for a manga chapter"""
-        return [
-            aes.aes_cbc_decrypt_text(data, KEY, IV)
-            for data in text.extract_iter(page, 'lstImages.push(wrapKA("', '"')
-        ]
+        try:
+            key = self.build_aes_key(page)
+            return [
+                aes.aes_cbc_decrypt_text(data, key, IV)
+                for data in text.extract_iter(
+                    page, 'lstImages.push(wrapKA("', '"'
+                )
+            ]
+        except UnicodeDecodeError:
+            self.log.error("Failed to decrypt image URls")
+            return []
+
+    def build_aes_key(self, page):
+        """Get and parse the AES key"""
+        try:
+            pos = page.rindex('; key = ')
+            pos = page.rindex('<script type="text/javascript">', 0, pos)
+        except ValueError:
+            self.log.error("Unable to find AES key")
+            return [0] * 32
+        try:
+            key = text.extract(page, ' = ["', '"]', pos)[0]
+            data = bytes(int(i, 16) for i in key[2:].split(r"\x"))
+        except (ValueError, TypeError):
+            self.log.error("Unable to parse AES key: '%s'", key)
+            return [0] * 32
+        return list(hashlib.sha256(data).digest())
