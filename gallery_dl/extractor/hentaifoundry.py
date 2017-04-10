@@ -26,8 +26,8 @@ class HentaifoundryUserExtractor(Extractor):
     ]
     test = [
         ("http://www.hentai-foundry.com/pictures/user/Tenpura", {
-            "url": "dee5fd22cfed3288ce1f637e405781753d7cec57",
-            "keyword": "0e47ebc68346087312e62885d9508fef7ad55503",
+            "url": "35124cf236ffec596092446322b8f0ad603571c5",
+            "keyword": "651f94f77e62368d7e8a91bcded519b9432fa3b6",
         }),
         ("http://www.hentai-foundry.com/user/asdq/profile", {
             "exception": exception.NotFoundError,
@@ -126,10 +126,10 @@ class HentaifoundryImageExtractor(Extractor):
                 r"|[^/]/([^/]+)/(\d+))")]
     test = [
         (("http://www.hentai-foundry.com/"
-          "pictures/user/Tenpura/340854/notitle"), {
-            "url": "f3c0739bf86543697deabbed4bf99eb95a04582b",
-            "keyword": "96217c5becc1369c36dafa201c3c208518de8f1f",
-            "content": "5c14cd10deaad79a5152f9de45c9203cf76165a0",
+          "pictures/user/Tenpura/407501/shimakaze"), {
+            "url": "b68d1b0121b97e01a878beeb2e43b07cb881b5a9",
+            "keyword": "304479cfe00fbb723886be78b2bd6b9306a31d8a",
+            "content": "91bf01497c39254b6dfb234a18e8f01629c77fd1",
         }),
         ("http://www.hentai-foundry.com/pictures/user/Tenpura/340853/", {
             "exception": exception.NotFoundError,
