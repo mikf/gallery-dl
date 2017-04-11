@@ -27,7 +27,7 @@ class HentaifoundryUserExtractor(Extractor):
     test = [
         ("http://www.hentai-foundry.com/pictures/user/Tenpura", {
             "url": "35124cf236ffec596092446322b8f0ad603571c5",
-            "keyword": "651f94f77e62368d7e8a91bcded519b9432fa3b6",
+            "keyword": "6e9a549feb9bafebd9d9342ef3c8ccad33a7031c",
         }),
         ("http://www.hentai-foundry.com/user/asdq/profile", {
             "exception": exception.NotFoundError,
