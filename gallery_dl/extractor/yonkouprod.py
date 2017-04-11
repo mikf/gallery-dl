@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from https://yonkouprod.com/"""
+"""Extractors for https://yonkouprod.com/"""
 
 from . import foolslide
 
@@ -18,4 +18,13 @@ class YonkouprodChapterExtractor(foolslide.FoolslideChapterExtractor):
     test = [("http://yonkouprod.com/reader/read/fairy-tail/en/0/512/", {
         "url": "7647850e2b1ad11c2baa9628755bf7f186350a0b",
         "keyword": "dc1b5764c71e9d93b2d4b18547feb372cd76f730",
+    })]
+
+
+class YonkouprodMangaExtractor(foolslide.FoolslideMangaExtractor):
+    """Extractor for manga from yonkouprod.com"""
+    category = "yonkouprod"
+    pattern = foolslide.manga_pattern(r"(?:www\.)?yonkouprod\.com/reader")
+    test = [("https://yonkouprod.com/reader/series/attack-on-titan/", {
+        "url": "33bc7a08a6fbf41cf609bdd000d16893d55a3f29",
     })]

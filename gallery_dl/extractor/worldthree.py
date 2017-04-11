@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from http://www.slide.world-three.org/"""
+"""Extractors for http://www.slide.world-three.org/"""
 
 from . import foolslide
 
@@ -27,4 +27,14 @@ class WorldthreeChapterExtractor(foolslide.FoolslideChapterExtractor):
             "keyword": "10e3dc961ac2c9395f4d1f3ad3b9ad84113e7366",
         }),
     ]
+    scheme = "http"
+
+
+class WorldthreeMangaExtractor(foolslide.FoolslideMangaExtractor):
+    """Extractor for manga from slide.world-three.org"""
+    category = "worldthree"
+    pattern = foolslide.manga_pattern("(?:www\.)?slide\.world-three\.org")
+    test = [("http://www.slide.world-three.org/series/black_bullet/", {
+        "url": "5743b93512d26e6b540d90a7a5d69208b6d4a738",
+    })]
     scheme = "http"

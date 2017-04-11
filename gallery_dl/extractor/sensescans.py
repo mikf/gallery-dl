@@ -6,14 +6,23 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from http://sensescans.com/"""
+"""Extractors for http://sensescans.com/"""
 
 from . import foolslide
 
 
-class SensescansChapterExtractor(foolslide.FoolslideChapterExtractor):
-    """Extractor for manga-chapters from sensescans.com"""
+class SensescansExtractor():
+    """Base class for extractors for sensescans.com"""
     category = "sensescans"
+
+    def __init__(self, match):
+        url = "http://sensescans.com/reader" + match.group(1)
+        super().__init__(match, url)
+
+
+class SensescansChapterExtractor(SensescansExtractor,
+                                 foolslide.FoolslideChapterExtractor):
+    """Extractor for manga-chapters from sensescans.com"""
     pattern = [(r"(?:https?://)?(?:www\.|reader\.)?sensescans\.com"
                 r"(?:/reader)?(" + foolslide.CHAPTER_RE)]
     test = [
@@ -29,6 +38,12 @@ class SensescansChapterExtractor(foolslide.FoolslideChapterExtractor):
         }),
     ]
 
-    def __init__(self, match):
-        url = "http://sensescans.com/reader" + match.group(1)
-        super().__init__(match, url)
+
+class SensescansMangaExtractor(SensescansExtractor,
+                               foolslide.FoolslideMangaExtractor):
+    """Extractor for manga from sensescans.com"""
+    pattern = [(r"(?:https?://)?(?:www\.|reader\.)?sensescans\.com"
+                r"(?:/reader)?(" + foolslide.MANGA_RE)]
+    test = [("http://sensescans.com/reader/series/hakkenden/", {
+        "url": "2360ccb0ead0ff2f5e27b7aef7eb17b9329de2f2",
+    })]

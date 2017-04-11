@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from https://kobato.hologfx.com/"""
+"""Extractors for https://kobato.hologfx.com/"""
 
 from . import foolslide
 
@@ -14,8 +14,18 @@ from . import foolslide
 class DokireaderChapterExtractor(foolslide.FoolslideChapterExtractor):
     """Extractor for manga-chapters from kobato.hologfx.com"""
     category = "dokireader"
-    pattern = foolslide.chapter_pattern("kobato\.hologfx\.com/reader")
+    pattern = foolslide.chapter_pattern(r"kobato\.hologfx\.com/reader")
     test = [(("https://kobato.hologfx.com/reader/read/"
               "hitoribocchi_no_oo_seikatsu/en/3/34"), {
         "keyword": "f28811c01b64031671108a4a3d6eea1040816b82",
+    })]
+
+
+class DokireaderMangaExtractor(foolslide.FoolslideMangaExtractor):
+    """Extractor for manga from kobato.hologfx.com"""
+    category = "dokireader"
+    pattern = foolslide.manga_pattern(r"kobato\.hologfx\.com/reader")
+    test = [(("https://kobato.hologfx.com/reader/series/"
+              "boku_ha_ohimesama_ni_narenai/"), {
+        "url": "1c1f5a7258ce4f631f5fc32be548d78a6a57990d",
     })]

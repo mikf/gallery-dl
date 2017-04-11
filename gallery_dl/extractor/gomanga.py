@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from https://gomanga.co/"""
+"""Extractors for https://gomanga.co/"""
 
 from . import foolslide
 
@@ -25,4 +25,14 @@ class GomangaChapterExtractor(foolslide.FoolslideChapterExtractor):
             "keyword": "a2ef55d26984c64baf026382f889bb013d01dc4f",
         }),
     ]
+    single = False
+
+
+class GomangaMangaExtractor(foolslide.FoolslideMangaExtractor):
+    """Extractor for manga from gomanga.co"""
+    category = "gomanga"
+    pattern = foolslide.manga_pattern(r"(?:www\.)?gomanga\.co/reader")
+    test = [("https://gomanga.co/reader/series/pastel/", {
+        "url": "bd1c82d70838d54140a8209296e789f27ceab7cd",
+    })]
     single = False
