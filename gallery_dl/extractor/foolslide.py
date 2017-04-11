@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Base classes for extractors for FoolSlide based sites"""
+"""Base classes for extractors for FoOlSlide based sites"""
 
 from .common import Extractor, Message
 from .. import text, util
@@ -21,13 +21,21 @@ CHAPTER_RE = (
     r"(?:/(?P<chapter_minor>\d+))?)"
 )
 
+MANGA_RE = (
+    r"/series/[^/]+/?$)"
+)
+
 
 def chapter_pattern(domain_re):
     return [r"(?:https?://)?(" + domain_re + CHAPTER_RE]
 
 
+def manga_pattern(domain_re):
+    return [r"(?:https?://)?(" + domain_re + MANGA_RE]
+
+
 class FoolslideChapterExtractor(Extractor):
-    """Base class for chapter extractors on foolslide based sites"""
+    """Base class for chapter extractors for FoOlSlide based sites"""
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "{chapter_string}"]
     filename_fmt = "{manga}_{chapter:>03}_{page:>03}.{extension}"
@@ -42,7 +50,7 @@ class FoolslideChapterExtractor(Extractor):
     def items(self):
         page = self.request(self.url, encoding="utf-8",
                             method="post", data={"adult": "true"}).text
-        data = self.get_job_metadata(page)
+        data = self.get_metadata(page)
         imgs = self.get_images(page)
 
         data["count"] = len(imgs)
@@ -61,7 +69,7 @@ class FoolslideChapterExtractor(Extractor):
             text.nameext_from_url(data["filename"], data)
             yield Message.Url, url, data
 
-    def get_job_metadata(self, page):
+    def get_metadata(self, page):
         """Collect metadata for extractor-job"""
         _      , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
         manga  , pos = text.extract(page, 'title="', '"', pos)
@@ -86,3 +94,26 @@ class FoolslideChapterExtractor(Extractor):
             pos = page.find("[{")
             needle = " = "
         return json.loads(text.extract(page, needle, ";", pos)[0])
+
+
+class FoolslideMangaExtractor(Extractor):
+    """Base class for manga extractors for FoOlSlide based sites"""
+    subcategory = "manga"
+    scheme = "https"
+
+    def __init__(self, match, url=None):
+        Extractor.__init__(self)
+        self.url = url or self.scheme + "://" + match.group(1)
+
+    def items(self):
+        yield Message.Version, 1
+        for url in self.chapters():
+            yield Message.Queue, url
+
+    def chapters(self):
+        """Return a list of all chapter urls"""
+        page = self.request(self.url, encoding="utf-8",
+                            method="post", data={"adult": "true"}).text
+        return reversed(list(text.extract_iter(
+            page, '<div class="title"><a href="', '"'
+        )))
