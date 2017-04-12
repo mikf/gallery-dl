@@ -6,6 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import sys
 import json
 import hashlib
 from . import extractor, downloader, config, util, output, exception
@@ -79,7 +80,7 @@ class Job():
                 )
             # TODO: support for multiple message versions
 
-    def handle_url(self, url, kexwords):
+    def handle_url(self, url, keywords):
         """Handle Message.Url"""
 
     def handle_directory(self, keywords):
@@ -265,3 +266,35 @@ class TestJob(DownloadJob):
         """Update the content hash"""
         if self.content:
             self.get_downloader(url).download(url, self.fileobj)
+
+
+class DataJob(Job):
+    """Collect extractor results and dump them"""
+
+    def __init__(self, url, file=sys.stdout):
+        Job.__init__(self, url)
+        self.file = file
+        self.data = []
+        self.ensure_ascii = config.get(("output", "ascii"), True)
+
+    def run(self):
+        # collect data
+        try:
+            for msg in self.extractor:
+                if msg[0] in (Message.Headers, Message.Cookies):
+                    copy = (msg[0], dict(msg[1]))
+                else:
+                    copy = [
+                        part.copy() if hasattr(part, "copy") else part
+                        for part in msg
+                ]
+                self.data.append(copy)
+        except Exception as exc:
+            self.data.append((exc.__class__.__name__, str(exc)))
+
+        # dump to 'file'
+        json.dump(
+            self.data, self.file,
+            sort_keys=True, indent=2, ensure_ascii=self.ensure_ascii
+        )
+        self.file.write("\n")

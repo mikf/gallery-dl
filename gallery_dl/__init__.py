@@ -83,6 +83,8 @@ def main():
                 jobtype.maxdepth = args.list_urls
             elif args.list_keywords:
                 jobtype = job.KeywordJob
+            elif args.list_data:
+                jobtype = job.DataJob
             else:
                 jobtype = job.DownloadJob
 
