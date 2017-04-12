@@ -64,6 +64,10 @@ def build_parser():
         help="Print download urls",
     )
     parser.add_argument(
+        "-j", "--dump-json", dest="list_data", action="store_true",
+        help="Print JSON information",
+    )
+    parser.add_argument(
         "-d", "--dest",
         metavar="DEST", action=ConfigAction, dest="base-directory",
         help="Destination directory",
