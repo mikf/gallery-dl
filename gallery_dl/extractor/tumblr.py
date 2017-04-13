@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,7 +22,7 @@ class TumblrUserExtractor(Extractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com(?:/page/\d+)?/?$"]
     test = [("http://demo.tumblr.com/", {
         "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
-        "keyword": "b1a2aaafa8fd0a42929b2f63a221c1790ecfa3ed",
+        "keyword": "d2cf142bcaf1cbea29291f8c8ccb5f582962d8be",
         "content": "31495fdb9f84edbb7f67972746a1521456f649e2",
     })]
 
@@ -89,7 +89,7 @@ class TumblrUserExtractor(Extractor):
         """Delete unnecessary keywords from dict"""
         keys = [
             k for k in data.keys()
-            if k.startswith("photo-url-") or k.endswith("-button")
+            if k.startswith(("photo-url-", "note-")) or k.endswith("-button")
         ]
         for key in keys:
             del data[key]
@@ -101,7 +101,7 @@ class TumblrPostExtractor(TumblrUserExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/post/(\d+)"]
     test = [("http://demo.tumblr.com/post/459265350", {
         "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
-        "keyword": "79640f28b9d736f833548aa4acd097c63f11edcf",
+        "keyword": "ce211deb8e3936e2202f3f82f38375fd14781b79",
     })]
 
     def __init__(self, match):
@@ -115,7 +115,7 @@ class TumblrTagExtractor(TumblrUserExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/tagged/(.+)"]
     test = [("http://demo.tumblr.com/tagged/Times Square", {
         "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
-        "keyword": "e870c29dcaa05e8b3f2817c711f80e4371dbbf8f",
+        "keyword": "f36901e86c5d20affbe66f78c6b5717d34466fc4",
     })]
 
     def __init__(self, match):
