@@ -25,7 +25,7 @@ class PixivUserExtractor(Extractor):
                r"member(?:_illust)?\.php\?id=(\d+)"]
     test = [
         ("http://www.pixiv.net/member_illust.php?id=173530", {
-            "url": "8f2fc0437e2095ab750c4340a4eba33ec6269477",
+            "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
         }),
         ("http://www.pixiv.net/member_illust.php?id=173531", {
             "exception": exception.NotFoundError,
@@ -157,7 +157,7 @@ class PixivWorkExtractor(PixivUserExtractor):
     test = [
         (("http://www.pixiv.net/member_illust.php"
           "?mode=medium&illust_id=966412"), {
-            "url": "efb622f065b0871e92195e7bee0b4d75bd687d8d",
+            "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
             "content": "69a8edfb717400d1c2e146ab2b30d2c235440c5a",
         }),
         (("http://www.pixiv.net/member_illust.php"
@@ -166,7 +166,7 @@ class PixivWorkExtractor(PixivUserExtractor):
         }),
         (("http://i1.pixiv.net/c/600x600/img-master/"
           "img/2008/06/13/00/29/13/966412_p0_master1200.jpg"), {
-            "url": "efb622f065b0871e92195e7bee0b4d75bd687d8d",
+            "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
         }),
     ]
 
@@ -191,7 +191,7 @@ class PixivFavoriteExtractor(PixivUserExtractor):
     directory_fmt = ["{category}", "bookmarks", "{artist-id}-{artist-nick}"]
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php\?id=(\d+)"]
     test = [("http://www.pixiv.net/bookmark.php?id=173530", {
-        "url": "0110c5c2ee9612a0362e26f7481a8916b6f410fe",
+        "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
     })]
 
     def __init__(self, match):
