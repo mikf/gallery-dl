@@ -74,7 +74,8 @@ class DeviantartUserExtractor(DeviantartExtractor):
 class DeviantartImageExtractor(DeviantartExtractor):
     """Extractor for single images from deviantart.com"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?([^\.]+\.deviantart\.com/art/.+-\d+)"]
+    pattern = [r"(?:https?://)?([^\.]+\.deviantart\.com/art/.+-\d+)",
+               r"(?:https?://)?(sta\.sh/[a-z0-9]+)"]
     test = [
         (("http://shimoda7.deviantart.com/art/"
           "For-the-sake-of-a-memory-10073852"), {
@@ -83,6 +84,13 @@ class DeviantartImageExtractor(DeviantartExtractor):
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://zzz.deviantart.com/art/zzz-1234567890", {
+            "exception": exception.NotFoundError,
+        }),
+        ("http://sta.sh/01ijs78ebagf", {
+            "url": "1692cd075059d24657a01b954413c84a56e2de8f",
+            "keyword": "3faefb555d64e220e0e5526809e79bd4b9112eb2",
+        }),
+        ("http://sta.sh/abcdefghijkl", {
             "exception": exception.NotFoundError,
         }),
     ]
