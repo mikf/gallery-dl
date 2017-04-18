@@ -137,6 +137,11 @@ def build_parser():
         help="Print a list of available modules/supported sites",
     )
     parser.add_argument(
+        "-v", "--verbose", dest="loglevel", action="store_const",
+        const=logging.DEBUG, default=logging.INFO,
+        help="Print various debugging information",
+    )
+    parser.add_argument(
         "--version", action="version", version=__version__,
         help="Print program version and exit"
     )

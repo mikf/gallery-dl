@@ -55,6 +55,7 @@ def main():
 
         parser = option.build_parser()
         args = parser.parse_args()
+        logging.getLogger().setLevel(args.loglevel)
 
         if args.cfgfiles:
             config.load(*args.cfgfiles, strict=True)
@@ -102,6 +103,7 @@ def main():
 
             for url in urls:
                 try:
+                    log.debug("Starting %s for '%s'", jobtype.__name__, url)
                     jobtype(url).run()
                 except exception.NoExtractorError:
                     log.error("No suitable extractor found for '%s'", url)
