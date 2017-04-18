@@ -21,6 +21,7 @@ class Job():
         self.extractor = extractor.find(url)
         if self.extractor is None:
             raise exception.NoExtractorError(url)
+        self.extractor.log.debug("Using %s", self.extractor.__class__.__name__)
 
         items = config.get(("images",))
         if items:
@@ -51,6 +52,15 @@ class Job():
             log.error("The %s at '%s' does not exist", res, self.url)
         except exception.StopExtraction:
             pass
+        except Exception as exc:
+            try:
+                err = ": ".join(exc.args[0].reason.args[0].split(": ")[1:])
+            except Exception:
+                err = str(exc)
+            log.error("An unexpected error occurred: %s - %s",
+                      exc.__class__.__name__, err)
+            log.debug("Traceback", exc_info=True)
+
 
     def dispatch(self, msg):
         """Call the appropriate message handler"""
