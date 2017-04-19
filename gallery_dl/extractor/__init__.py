@@ -51,6 +51,7 @@ modules = [
     "mangastream",
     "nhentai",
     "nijie",
+    "pawoo",
     "pinterest",
     "powermanga",
     "readcomiconline",

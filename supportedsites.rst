@@ -12,8 +12,8 @@ Supported Sites
 - dynasty-scans.com
 - e621.net
 - exhentai.org
-- famatg.com
 - fapat.me
+- fascans.com
 - gelbooru.com
 - gomanga.co
 - hbrowse.com
@@ -56,6 +56,7 @@ Supported Sites
 - mangastream.com
 - nhentai.net
 - nijie.info
+- pawoo.net
 - pic-maniac.com
 - pinterest.com
 - pixhost.org
