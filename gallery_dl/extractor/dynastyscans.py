@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from http://dynasty-scans.com/"""
+"""Extract manga-chapters from https://dynasty-scans.com/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -24,16 +24,16 @@ class DynastyscansChapterExtractor(Extractor):
     test = [
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {
-            "url": "63950fa1dfdef58ab842c1b9b854c5c1d650cfa0",
+            "url": "ba945116382eff26b0e52fe1804e6d58fee7734d",
             "keyword": "81bfda5b98b34ac2a7324bd9e2abad3df9cc7673",
         }),
         (("http://dynasty-scans.com/chapters/"
           "new_game_the_spinoff_special_13"), {
-            "url": "6b28c733481ac498da341e85a9eb155864491731",
+            "url": "2cd5e04bd16f842dc884c145a44cf0c64ec27a21",
             "keyword": "93b75d0c0aaeb849c99f2225a4b97f466bc3ace9",
         }),
     ]
-    url_base = "http://dynasty-scans.com/"
+    url_base = "https://dynasty-scans.com/"
 
     def __init__(self, match):
         Extractor.__init__(self)

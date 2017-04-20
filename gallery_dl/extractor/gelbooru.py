@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://gelbooru.com/"""
+"""Extract images from https://gelbooru.com/"""
 
 from . import booru
 from .. import config
@@ -15,7 +15,7 @@ from .. import config
 class GelbooruExtractor(booru.XMLBooruExtractor):
     """Base class for gelbooru extractors"""
     category = "gelbooru"
-    api_url = "http://gelbooru.com/"
+    api_url = "https://gelbooru.com/"
     pagestart = 0
     pagekey = "pid"
 

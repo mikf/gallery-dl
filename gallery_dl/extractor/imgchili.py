@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2016 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://imgchili.net/"""
+"""Extract images from https://imgchili.net/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -16,7 +16,7 @@ class ImgchiliExtractor(Extractor):
     """Base class for imgchili extractors"""
     category = "imgchili"
     directory_fmt = ["{category}"]
-    url_base = "http://imgchili.net/"
+    url_base = "https://imgchili.net/"
 
     def __init__(self, match):
         Extractor.__init__(self)

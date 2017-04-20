@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://www.hentai-foundry.com/"""
+"""Extract images from https://www.hentai-foundry.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
@@ -25,15 +25,15 @@ class HentaifoundryUserExtractor(Extractor):
          r"user/([^/]+)/profile"),
     ]
     test = [
-        ("http://www.hentai-foundry.com/pictures/user/Tenpura", {
-            "url": "35124cf236ffec596092446322b8f0ad603571c5",
+        ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
+            "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
             "keyword": "6e9a549feb9bafebd9d9342ef3c8ccad33a7031c",
         }),
         ("http://www.hentai-foundry.com/user/asdq/profile", {
             "exception": exception.NotFoundError,
         }),
     ]
-    url_base = "http://www.hentai-foundry.com/pictures/user/"
+    url_base = "https://www.hentai-foundry.com/pictures/user/"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -85,7 +85,7 @@ class HentaifoundryUserExtractor(Extractor):
             page, '//pictures.hentai-foundry.com', '"', pos)
         data = {"index": index, "title": text.unescape(title)}
         text.nameext_from_url(url, data)
-        return "http://pictures.hentai-foundry.com" + url, data
+        return "https://pictures.hentai-foundry.com" + url, data
 
     def set_filters(self, token):
         """Set site-internal filters to show all images"""
@@ -107,11 +107,14 @@ class HentaifoundryUserExtractor(Extractor):
             "rating_female": 1,
             "rating_futa": 1,
             "rating_other": 1,
+            "rating_scat": 1,
+            "rating_incest": 1,
+            "rating_rape": 1,
             "filter_media": "A",
             "filter_order": "date_new",
             "filter_type": 0,
         }
-        self.request("http://www.hentai-foundry.com/site/filters",
+        self.request("https://www.hentai-foundry.com/site/filters",
                      method="post", data=formdata)
 
 
@@ -127,7 +130,7 @@ class HentaifoundryImageExtractor(Extractor):
     test = [
         (("http://www.hentai-foundry.com/"
           "pictures/user/Tenpura/407501/shimakaze"), {
-            "url": "b68d1b0121b97e01a878beeb2e43b07cb881b5a9",
+            "url": "fbf2fd74906738094e2575d2728e8dc3de18a8a3",
             "keyword": "304479cfe00fbb723886be78b2bd6b9306a31d8a",
             "content": "91bf01497c39254b6dfb234a18e8f01629c77fd1",
         }),
@@ -149,7 +152,7 @@ class HentaifoundryImageExtractor(Extractor):
 
     def get_image_metadata(self):
         """Collect metadata for an image"""
-        url = "http://www.hentai-foundry.com/pictures/user/{}/{}".format(
+        url = "https://www.hentai-foundry.com/pictures/user/{}/{}".format(
             self.artist, self.index)
         response = self.session.get(url + "?enterAgree=1")
         if response.status_code == 404:
@@ -165,4 +168,4 @@ class HentaifoundryImageExtractor(Extractor):
             "title": text.unescape(title),
         }
         text.nameext_from_url(url, data)
-        return "http://pictures.hentai-foundry.com" + url, data
+        return "https://pictures.hentai-foundry.com" + url, data

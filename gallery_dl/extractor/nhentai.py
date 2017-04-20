@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://nhentai.net/"""
+"""Extract images from https://nhentai.net/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -46,7 +46,7 @@ class NhentaiGalleryExtractor(Extractor):
 
     def get_gallery_info(self):
         """Extract and return gallery-info"""
-        page = self.request("http://nhentai.net/g/" + self.gid + "/1/").text
+        page = self.request("https://nhentai.net/g/" + self.gid + "/1/").text
         media_url, pos = text.extract(
             page, ".reader({\n\t\t\tmedia_url: '", "'")
         json_data, pos = text.extract(
