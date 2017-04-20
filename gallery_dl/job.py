@@ -61,7 +61,6 @@ class Job():
                       exc.__class__.__name__, err)
             log.debug("Traceback", exc_info=True)
 
-
     def dispatch(self, msg):
         """Call the appropriate message handler"""
         if msg[0] == Message.Url:
@@ -297,7 +296,7 @@ class DataJob(Job):
                     copy = [
                         part.copy() if hasattr(part, "copy") else part
                         for part in msg
-                ]
+                    ]
                 self.data.append(copy)
         except Exception as exc:
             self.data.append((exc.__class__.__name__, str(exc)))

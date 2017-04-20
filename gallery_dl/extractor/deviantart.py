@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://www.deviantart.com/"""
+"""Extract images from https://www.deviantart.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
@@ -107,9 +107,9 @@ class DeviantartImageExtractor(DeviantartExtractor):
         return (self.api.deviation(deviation_id),)
 
 
-class DeviantartFavouritesExtractor(DeviantartExtractor):
+class DeviantartFavoriteExtractor(DeviantartExtractor):
     """Extractor for an artist's favourites from deviantart.com"""
-    subcategory = "favourites"
+    subcategory = "favorite"
     directory_fmt = ["{category}", "{subcategory}",
                      "{collection[owner]} - {collection[title]}"]
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com/favourites"
@@ -117,12 +117,12 @@ class DeviantartFavouritesExtractor(DeviantartExtractor):
     test = [
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-            "keyword": "35a275b0f737aa9bd1f32ba13604d6e9a7054a14",
+            "keyword": "51e88d400c3fb69ae0b5a618ef21a282697185fe",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
             "url": "9e8d971c80db099b95d1c785399e2bc6eb96cd07",
-            "keyword": "cf65309a880799a4a82a7b2f0389e5bc88f5730f",
+            "keyword": "ea42a4e238f7e54caa250fa2f5abef103cbf30ab",
         }),
     ]
 

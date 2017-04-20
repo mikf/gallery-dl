@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images and ugoira from http://www.pixiv.net/"""
+"""Extract images and ugoira from https://www.pixiv.net/"""
 
 from .common import Extractor, Message
 from .. import config, text, exception
@@ -31,8 +31,8 @@ class PixivUserExtractor(Extractor):
             "exception": exception.NotFoundError,
         }),
     ]
-    member_url = "http://www.pixiv.net/member_illust.php"
-    illust_url = "http://www.pixiv.net/member_illust.php?mode=medium"
+    member_url = "https://www.pixiv.net/member_illust.php"
+    illust_url = "https://www.pixiv.net/member_illust.php?mode=medium"
 
     def __init__(self, match):
         Extractor.__init__(self)

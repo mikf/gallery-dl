@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://safebooru.org/"""
+"""Extract images from https://safebooru.org/"""
 
 from . import booru
 
@@ -14,7 +14,7 @@ from . import booru
 class SafebooruExtractor(booru.XMLBooruExtractor):
     """Base class for safebooru extractors"""
     category = "safebooru"
-    api_url = "http://safebooru.org/index.php"
+    api_url = "https://safebooru.org/index.php"
     pagestart = 0
     pagekey = "pid"
 
@@ -28,7 +28,7 @@ class SafebooruTagExtractor(SafebooruExtractor, booru.BooruTagExtractor):
     pattern = [(r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?"
                 r"\?page=post&s=list&tags=([^&]+)")]
     test = [("http://safebooru.org/index.php?page=post&s=list&tags=bonocho", {
-        "url": "c91e04ffbdf317fae95b2e160c8345503d9fb730",
+        "url": "17c61b386530cf4c30842c9f580d15ef1cd09586",
         "content": "e5ad4c5bf241b1def154958535bef6c2f6b733eb",
     })]
 
@@ -39,6 +39,6 @@ class SafebooruPostExtractor(SafebooruExtractor, booru.BooruPostExtractor):
     pattern = [(r"(?:https?://)?(?:www\.)?safebooru\.org/(?:index\.php)?"
                 r"\?page=post&s=view&id=(\d+)")]
     test = [("http://safebooru.org/index.php?page=post&s=view&id=1169132", {
-        "url": "bcb6047665729c7c9db243a27f41cbef9af1ecef",
+        "url": "cf05e37a3c62b2d55788e2080b8eabedb00f999b",
         "content": "93b293b27dabd198afafabbaf87c49863ac82f27",
     })]

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract soundtracks from http://khinsider.com/"""
+"""Extract soundtracks from https://downloads.khinsider.com/"""
 
 from .common import AsynchronousExtractor, Message
 from .. import text, exception
@@ -31,7 +31,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
         self.album = match.group(1)
 
     def items(self):
-        url = ("http://downloads.khinsider.com/game-soundtracks/album/" +
+        url = ("https://downloads.khinsider.com/game-soundtracks/album/" +
                self.album)
         page = self.request(url, encoding="utf-8").text
         data = self.get_job_metadata(page)
