@@ -87,7 +87,7 @@ Supported Sites
 * exhentai.org
 * nhentai.net
 * luscious.net
-* hentaifoundry.com
+* hentai-foundry.com
 * deviantart.com
 * tumblr.com
 * `Complete List`_
