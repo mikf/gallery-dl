@@ -10,12 +10,14 @@
 
 from .common import Extractor, Message
 from .. import text, cloudflare, aes
+from ..cache import cache
 import re
 import hashlib
+import ast
 
 IV = [
-    165, 232, 226, 233, 194, 114,  27, 224,
-    168,  74, 214,  96, 196, 114, 193, 243,
+    0xa5, 0xe8, 0xe2, 0xe9, 0xc2, 0x72, 0x1b, 0xe0,
+    0xa8, 0x4a, 0xd6, 0x60, 0xc4, 0x72, 0xc1, 0xf3
 ]
 
 
@@ -102,29 +104,30 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     def get_image_urls(self, page):
         """Extract list of all image-urls for a manga chapter"""
         try:
-            key = self.build_aes_key(page)
+            key = self.build_aes_key()
             return [
                 aes.aes_cbc_decrypt_text(data, key, IV)
                 for data in text.extract_iter(
                     page, 'lstImages.push(wrapKA("', '"'
                 )
             ]
+        except (ValueError, IndexError):
+            self.log.error("Failed to get AES key")
         except UnicodeDecodeError:
             self.log.error("Failed to decrypt image URls")
-            return []
+        return []
 
-    def build_aes_key(self, page):
+    @cache(maxage=3600)
+    def build_aes_key(self):
         """Get and parse the AES key"""
-        try:
-            pos = page.rindex('; key = ')
-            pos = page.rindex('<script type="text/javascript">', 0, pos)
-        except ValueError:
-            self.log.error("Unable to find AES key")
-            return [0] * 32
-        try:
-            key = text.extract(page, ' = ["', '"]', pos)[0]
-            data = bytes(int(i, 16) for i in key[2:].split(r"\x"))
-        except (ValueError, TypeError):
-            self.log.error("Unable to parse AES key: '%s'", key)
-            return [0] * 32
-        return list(hashlib.sha256(data).digest())
+        script = self.request(self.root + "/Scripts/lo.js").text
+
+        pos = script.index("var chko")
+        var = text.extract(script, "=", "[", pos)[0].lstrip()
+        idx = text.extract(script, "[", "]", pos)[0]
+
+        pos = script.index(var)
+        lst = text.extract(script, "=", ";", pos)[0]
+        key = ast.literal_eval(lst.strip())[int(idx)]
+
+        return list(hashlib.sha256(key.encode("ascii")).digest())
