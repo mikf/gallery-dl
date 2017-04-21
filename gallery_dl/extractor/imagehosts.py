@@ -312,8 +312,8 @@ class PixhostImageExtractor(ImagehostImageExtractor):
     cookies = {"pixhostads": "1", "pixhosttest": "1"}
 
     def get_info(self, page):
-        url     , pos = text.extract(page, "src: '", "'")
-        filename, pos = text.extract(page, "title: '", "'", pos)
+        url     , pos = text.extract(page, "class=\"image-img\" src=\"", "\"")
+        filename, pos = text.extract(page, "alt=\"", "\"", pos)
         return url, filename
 
 
