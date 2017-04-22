@@ -42,7 +42,8 @@ class PawooExtractor(Extractor):
         for key in ("favourites_count", "reblogs_count", "reblog", "mentions"):
             del status[key]
         account = status["account"]
-        for key in ("followers_count", "following_count", "statuses_count"):
+        for key in ("followers_count", "following_count", "statuses_count",
+                    "oauth_authentications"):
             del account[key]
         attachments = status["media_attachments"]
         del status["media_attachments"]
