@@ -49,7 +49,6 @@ CATEGORY_MAP = {
     "worldthree"     : "World Three",
     "yomanga"        : "YoManga",
     "yonkouprod"     : "Yonkou Productions",
-
 }
 
 SUBCATEGORY_MAP = {
@@ -58,6 +57,7 @@ SUBCATEGORY_MAP = {
     "image"  : "individual Images",
     "issue"  : "Comic-Issues",
     "manga"  : "Manga",
+    "pinit"  : "pin.it Links",
     "status" : "Images from Statuses",
     "tag"    : "Tag-Searches",
     "user"   : "Images from Users",
@@ -115,35 +115,39 @@ class RstTable():
 
 
 def build_list():
-    exts = []
-    sub = []
+    extractors = []
+    classes = []
     last = None
-    for ex in gallery_dl.extractor.extractors():
-        c, sc = ex.category, [ex.subcategory, ex]
-        if c == last or not last:
-            sub.append(sc)
+
+    for extr in gallery_dl.extractor.extractors():
+        if extr.category == last or not last:
+            classes.append(extr)
         elif last:
-            if sub[0][0] and not (len(sub) == 1 and sub[0][0] == "image"):
-                sub.sort(key=sub_keys)
-                exts.append([last, sub])
-            sub = [sc]
-        last = c
-    exts.append([last, sorted(sub)])
+            if classes[0].subcategory:
+                extractors.append(classes)
+            classes = [extr]
+        last = extr.category
+    extractors.append(classes)
 
-    for ext in exts:
-        ext[0] = map_category(ext[0])
-        for sub in ext[1]:
-            sub[0] = map_subcategory(sub[0])
-    exts.sort(key=lambda x: x[0].lower())
+    for extrlist in extractors:
+        extrlist.sort(key=subcategory_key)
+        for extr in extrlist:
+            extr.category = map_category(extr.category)
+            extr.subcat   = map_subcategory(extr.subcategory)
+    extractors.sort(key=category_key)
 
-    return exts
+    return extractors
 
 
 def get_domain(classes):
     try:
-        url = sys.modules[classes[0].__module__].__doc__.split()[-1]
+        cls = classes[0]
+        url = sys.modules[cls.__module__].__doc__.split()[-1]
         if url.startswith("http"):
             return url
+        scheme = "https" if hasattr(cls, "https") and cls.https else "http"
+        host = cls.__doc__.split()[-1]
+        return scheme + "://" + host + "/"
     except (IndexError, AttributeError):
         pass
     return ""
@@ -157,25 +161,32 @@ def map_subcategory(sc):
     return SUBCATEGORY_MAP.get(sc, sc.capitalize() + "s")
 
 
-def sub_keys(sc):
-    if sc[0] == "user":
+def category_key(extrlist):
+    key = extrlist[0].category.lower()
+    if len(extrlist) == 1 and extrlist[0].subcat == "individual Images":
+        key = "zz" + key
+    return key
+
+
+def subcategory_key(cls):
+    if cls.subcategory in ("user", "issue"):
         return "A"
-    return sc[0]
+    return cls.subcategory
 
 
-exts = build_list()
+extractors = build_list()
 columns = [
     RstColumn("Site", [
-        ext[0]
-        for ext in exts
+        extrlist[0].category
+        for extrlist in extractors
     ]),
     RstColumn("URL", [
-        get_domain([subc[1] for subc in ext[1]])
-        for ext in exts
+        get_domain(extrlist)
+        for extrlist in extractors
     ]),
     RstColumn("Capabilities", [
-        ", ".join(subc[0] for subc in ext[1])
-        for ext in exts
+        ", ".join(extr.subcat for extr in extrlist)
+        for extrlist in extractors
     ]),
 ]
 
