@@ -51,7 +51,7 @@ class SeigaExtractor(Extractor):
         password = config.interpolate(("extractor", self.category, "password"))
         self.session.cookies = self._login_impl(username, password)
 
-    @cache(maxage=30*24*60*60, keyarg=1)
+    @cache(maxage=7*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
         """Actual login implementation"""
         self.log.info("Logging in as %s", username)
