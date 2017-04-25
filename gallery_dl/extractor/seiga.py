@@ -9,7 +9,7 @@
 """Extract images from http://seiga.nicovideo.jp"""
 
 from .common import Extractor, Message
-from .. import text, config, exception
+from .. import text, exception
 from ..cache import cache
 from xml.etree import ElementTree
 
@@ -47,8 +47,8 @@ class SeigaExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
-        username = config.interpolate(("extractor", self.category, "username"))
-        password = config.interpolate(("extractor", self.category, "password"))
+        username = self.config("username")
+        password = self.config("password")
         self.session.cookies = self._login_impl(username, password)
 
     @cache(maxage=7*24*60*60, keyarg=1)

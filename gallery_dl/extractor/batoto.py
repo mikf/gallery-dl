@@ -9,7 +9,7 @@
 """Extract manga chapters from https://bato.to/"""
 
 from .common import Extractor, AsynchronousExtractor, Message
-from .. import text, util, config, exception
+from .. import text, util, exception
 from ..cache import cache
 import re
 
@@ -21,8 +21,8 @@ class BatotoExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
-        username = config.interpolate(("extractor", "batoto", "username"))
-        password = config.interpolate(("extractor", "batoto", "password"))
+        username = self.config("username")
+        password = self.config("password")
         if username:
             cookies = self._login_impl(username, password)
             for key, value in cookies.items():
