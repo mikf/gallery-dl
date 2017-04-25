@@ -119,6 +119,10 @@ def build_parser():
         help="Additional configuration files (YAML format)",
     )
     parser.add_argument(
+        "--ignore-config", dest="load_config", action="store_false",
+        help="Do not read the default configuration files",
+    )
+    parser.add_argument(
         "-o", "--option",
         metavar="OPT", action=ParseAction, dest="options", default=[],
         help="Additional '<key>=<value>' option values",

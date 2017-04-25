@@ -51,12 +51,12 @@ def sanatize_input(file):
 def main():
     try:
         initialize_logging()
-        config.load()
-
         parser = option.build_parser()
         args = parser.parse_args()
         logging.getLogger().setLevel(args.loglevel)
 
+        if args.load_config:
+            config.load()
         if args.cfgfiles:
             config.load(*args.cfgfiles, strict=True)
         if args.yamlfiles:
