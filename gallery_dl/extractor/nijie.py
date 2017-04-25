@@ -9,7 +9,7 @@
 """Extract images from https://nijie.info/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import config, text, exception
+from .. import text, exception
 from ..cache import cache
 
 
@@ -62,8 +62,8 @@ class NijieExtractor(AsynchronousExtractor):
 
     def login(self):
         """Login and obtain session cookie"""
-        username = config.interpolate(("extractor", "nijie", "username"))
-        password = config.interpolate(("extractor", "nijie", "password"))
+        username = self.config("username")
+        password = self.config("password")
         self.session.cookies = self._login_impl(username, password)
 
     @cache(maxage=30*24*60*60, keyarg=1)

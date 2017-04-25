@@ -9,7 +9,7 @@
 """Extract images from galleries at https://exhentai.org/"""
 
 from .common import Extractor, Message
-from .. import config, text, util, exception
+from .. import text, util, exception
 from ..cache import cache
 import time
 import random
@@ -42,12 +42,9 @@ class ExhentaiGalleryExtractor(Extractor):
         self.key = {}
         self.count = 0
         self.version, self.gid, self.token = match.groups()
-        self.original = config.interpolate(
-            ("extractor", "exhentai", "original"), True)
-        self.wait_min = config.interpolate(
-            ("extractor", "exhentai", "wait-min"), 3)
-        self.wait_max = config.interpolate(
-            ("extractor", "exhentai", "wait-max"), 6)
+        self.original = self.config("original", True)
+        self.wait_min = self.config("wait-min", 3)
+        self.wait_max = self.config("wait-max", 6)
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
 
@@ -184,8 +181,8 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
-        username = config.interpolate(("extractor", "exhentai", "username"))
-        password = config.interpolate(("extractor", "exhentai", "password"))
+        username = self.config("username")
+        password = self.config("password")
         cookies = self._login_impl(username, password)
         for key, value in cookies.items():
             self.session.cookies.set(
@@ -198,7 +195,7 @@ class ExhentaiGalleryExtractor(Extractor):
         cnames = ["ipb_member_id", "ipb_pass_hash"]
 
         try:
-            cookies = config.get(("extractor", "exhentai", "cookies"))
+            cookies = self.config("cookies")
             if isinstance(cookies, dict) and all(c in cookies for c in cnames):
                 return cookies
         except TypeError:
@@ -213,7 +210,7 @@ class ExhentaiGalleryExtractor(Extractor):
             "PassWord": password,
             "ipb_login_submit": "Login!",
         }
-        referer = "http://e-hentai.org/bounce_login.php?b=d&bt=1-1"
+        referer = "https://e-hentai.org/bounce_login.php?b=d&bt=1-1"
         self.session.headers["Referer"] = referer
         response = self.session.post(url, data=params)
 

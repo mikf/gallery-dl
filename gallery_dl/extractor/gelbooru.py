@@ -9,7 +9,6 @@
 """Extract images from https://gelbooru.com/"""
 
 from . import booru
-from .. import config
 
 
 class GelbooruExtractor(booru.XMLBooruExtractor):
@@ -22,7 +21,7 @@ class GelbooruExtractor(booru.XMLBooruExtractor):
     def setup(self):
         self.params.update({"page": "dapi", "s": "post", "q": "index"})
         try:
-            cookies = config.get(("extractor", self.category, "cookies"))
+            cookies = self.config("cookies")
             self.session.cookies.update({
                 key: str(value) for key, value in cookies.items()
             })

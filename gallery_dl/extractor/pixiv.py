@@ -9,10 +9,9 @@
 """Extract images and ugoira from https://www.pixiv.net/"""
 
 from .common import Extractor, Message
-from .. import config, text, exception
+from .. import text, exception
 from ..cache import cache
 import re
-import json
 
 
 class PixivUserExtractor(Extractor):
@@ -39,9 +38,7 @@ class PixivUserExtractor(Extractor):
         self.artist_id = match.group(1)
         self.api = PixivAPI(self)
         self.api_call = self.api.user_works
-        self.load_ugoira = config.interpolate(
-            ("extractor", "pixiv", "ugoira"), True
-        )
+        self.load_ugoira = self.config("ugoira", True)
 
     def items(self):
         metadata = self.get_job_metadata()
@@ -233,6 +230,8 @@ class PixivAPI():
     def __init__(self, extractor):
         self.session = extractor.session
         self.log = extractor.log
+        self.username = extractor.config("username")
+        self.password = extractor.config("password")
         self.session.headers.update({
             "Referer": "http://www.pixiv.net/",
             "User-Agent": "PixivIOSApp/5.8.0",
@@ -291,9 +290,8 @@ class PixivAPI():
 
     def login(self):
         """Login and gain a Pixiv Public-API access token"""
-        username = config.interpolate(("extractor", "pixiv", "username"))
-        password = config.interpolate(("extractor", "pixiv", "password"))
-        self.user_id, auth_header = self._login_impl(username, password)
+        self.user_id, auth_header = self._login_impl(
+            self.username, self.password)
         self.session.headers["Authorization"] = auth_header
 
     @cache(maxage=50*60, keyarg=1)
@@ -323,7 +321,7 @@ class PixivAPI():
     @staticmethod
     def _parse(response, empty=[None]):
         """Parse a Pixiv Public-API response"""
-        data = json.loads(response.text)
+        data = response.json()
         status = data.get("status")
         response = data.get("response", empty)
         if status == "failure" or response == empty:

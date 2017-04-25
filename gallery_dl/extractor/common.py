@@ -38,6 +38,10 @@ class Extractor():
     def skip(self, num):
         return 0
 
+    def config(self, key, default=None):
+        return config.interpolate(
+            ("extractor", self.category, self.subcategory, key), default)
+
     def request(self, url, encoding=None, *args, **kwargs):
         response = safe_request(self.session, url, *args, **kwargs)
         if encoding:
