@@ -13,22 +13,23 @@ from . import config
 
 
 def select():
-    """Automatically select a suitable printer class"""
+    """Automatically select a suitable output class"""
     pdict = {
-        "default": Printer,
-        "pipe": Printer,
-        "term": TerminalPrinter,
-        "terminal": TerminalPrinter,
-        "color": ColorPrinter,
+        "default": PipeOutput,
+        "pipe": PipeOutput,
+        "term": TerminalOutput,
+        "terminal": TerminalOutput,
+        "color": ColorOutput,
+        "null": NullOutput,
     }
     omode = config.get(("output", "mode"), "auto").lower()
     if omode in pdict:
         return pdict[omode]()
     elif omode == "auto":
         if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-            return ColorPrinter() if ANSI else TerminalPrinter()
+            return ColorOutput() if ANSI else TerminalOutput()
         else:
-            return Printer()
+            return PipeOutput()
     else:
         raise Exception("invalid output mode: " + omode)
 
@@ -43,26 +44,31 @@ def safeprint(txt, **kwargs):
         print(txt, **kwargs)
 
 
-class Printer():
+class NullOutput():
 
     def start(self, path):
         """Print a message indicating the start of a download"""
-        pass
 
     def skip(self, path):
         """Print a message indicating that a download has been skipped"""
-        print(CHAR_SKIP, path, sep="", flush=True)
 
     def success(self, path, tries):
         """Print a message indicating the completion of a download"""
-        print(path, flush=True)
 
     def error(self, path, error, tries, max_tries):
         """Print a message indicating an error during download"""
-        pass
 
 
-class TerminalPrinter(Printer):
+class PipeOutput(NullOutput):
+
+    def skip(self, path):
+        print(CHAR_SKIP, path, sep="", flush=True)
+
+    def success(self, path, tries):
+        print(path, flush=True)
+
+
+class TerminalOutput(NullOutput):
 
     def __init__(self):
         self.short = config.get(("output", "shorten"), True)
@@ -99,7 +105,7 @@ class TerminalPrinter(Printer):
         return txt
 
 
-class ColorPrinter(TerminalPrinter):
+class ColorOutput(TerminalOutput):
 
     def start(self, path):
         print(self.shorten(path), end="", flush=True)

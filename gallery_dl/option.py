@@ -141,6 +141,11 @@ def build_parser():
         help="Print a list of available modules/supported sites",
     )
     parser.add_argument(
+        "-q", "--quiet", dest="loglevel", action="store_const",
+        const=logging.ERROR, default=logging.INFO,
+        help="Activate quiet mode",
+    )
+    parser.add_argument(
         "-v", "--verbose", dest="loglevel", action="store_const",
         const=logging.DEBUG, default=logging.INFO,
         help="Print various debugging information",
