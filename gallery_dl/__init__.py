@@ -63,6 +63,8 @@ def main():
             config.load(*args.yamlfiles, format="yaml", strict=True)
         for key, value in args.options:
             config.set(key, value)
+        if args.loglevel >= logging.ERROR:
+            config.set(("output", "mode"), "null")
 
         if args.list_modules:
             for module_name in extractor.modules:
