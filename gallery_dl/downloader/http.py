@@ -12,8 +12,11 @@ import time
 import requests
 import requests.exceptions as rexcepts
 import mimetypes
+import logging
 from .common import BasicDownloader
 from .. import config
+
+log = logging.getLogger("http")
 
 
 class Downloader(BasicDownloader):
@@ -63,8 +66,13 @@ class Downloader(BasicDownloader):
                 # set 'extension' keyword from Content-Type header
                 mtype = response.headers.get("Content-Type", "image/jpeg")
                 exts = mimetypes.guess_all_extensions(mtype, strict=False)
-                exts.sort()
-                pathfmt.set_extension(exts[-1][1:])
+                if exts:
+                    exts.sort()
+                    pathfmt.set_extension(exts[-1][1:])
+                else:
+                    log.warning("No file extension found for MIME type '%s'",
+                                mtype)
+                    pathfmt.set_extension("txt")
                 if pathfmt.exists():
                     self.out.skip(pathfmt.path)
                     response.close()
