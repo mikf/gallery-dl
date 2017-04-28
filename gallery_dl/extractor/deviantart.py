@@ -122,7 +122,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
         }),
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
             "url": "9e8d971c80db099b95d1c785399e2bc6eb96cd07",
-            "keyword": "ea42a4e238f7e54caa250fa2f5abef103cbf30ab",
+            "keyword": "623dc7cf7178bcce57290931b2f99e21ba318bfd",
         }),
     ]
 

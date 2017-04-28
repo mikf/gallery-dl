@@ -19,7 +19,7 @@ class HbrowseMangaExtractor(Extractor):
     subcategory = "manga"
     pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/?$"]
     test = [("http://www.hbrowse.com/10363", {
-        "url": "4d9def5df21c23f8c3d36de2076c189c02ea43bd",
+        "url": "b89682bfb86c11d2af0dc47463804ec3ac4aadd6",
     })]
 
     def __init__(self, match):
