@@ -35,7 +35,7 @@ class ExhentaiGalleryExtractor(Extractor):
             "exception": exception.AuthorizationError,
         }),
     ]
-    api_url = "https://exhentai.org/api.php"
+    root = "https://exhentai.org"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -54,7 +54,7 @@ class ExhentaiGalleryExtractor(Extractor):
         yield Message.Headers, self.setup_headers()
         yield Message.Cookies, self.session.cookies
 
-        url = "https://exhentai.org/g/{}/{}/".format(self.gid, self.token)
+        url = "{}/g/{}/{}/".format(self.root, self.gid, self.token)
         response = self.session.get(url)
         page = response.text
         if response.status_code == 404 and "Gallery Not Available" in page:
@@ -79,7 +79,7 @@ class ExhentaiGalleryExtractor(Extractor):
             "Accept": "text/html,application/xhtml+xml,"
                       "application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
-            "Referer": "https://exhentai.org/",
+            "Referer": self.root + "/",
         })
         headers = self.session.headers.copy()
         headers["Accept"] = "image/png,image/*;q=0.8,*/*;q=0.5"
@@ -108,7 +108,7 @@ class ExhentaiGalleryExtractor(Extractor):
     def get_images(self, page):
         """Collect url and metadata for all images in this gallery"""
         part = text.extract(page, 'hentai.org/s/', '"')[0]
-        yield self.image_from_page("https://exhentai.org/s/" + part)
+        yield self.image_from_page(self.root + "/s/" + part)
         yield from self.images_from_api()
 
     def image_from_page(self, url):
@@ -119,7 +119,7 @@ class ExhentaiGalleryExtractor(Extractor):
             (None      , '<div id="i3"><a onclick="return load_image(', ''),
             ("nextkey" , "'", "'"),
             ("url"     , '<img id="img" src="', '"'),
-            ("origurl" , 'https://exhentai.org/fullimg.php', '"'),
+            ("origurl" , 'hentai.org/fullimg.php', '"'),
             ("startkey", 'var startkey="', '";'),
             ("showkey" , 'var showkey="', '";'),
         ))[0]
@@ -129,7 +129,7 @@ class ExhentaiGalleryExtractor(Extractor):
 
         if self.original and data["origurl"]:
             part = text.unescape(data["origurl"])
-            url = "https://exhentai.org/fullimg.php" + part
+            url = self.root + "/fullimg.php" + part
         else:
             url = data["url"]
 
@@ -140,6 +140,7 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def images_from_api(self):
         """Get image url and data from api calls"""
+        api_url = self.root + "/api.php"
         nextkey = self.key["next"]
         request = {
             "method" : "showpage",
@@ -151,7 +152,7 @@ class ExhentaiGalleryExtractor(Extractor):
             while True:
                 try:
                     self.wait()
-                    page = self.session.post(self.api_url, json=request).json()
+                    page = self.session.post(api_url, json=request).json()
                     break
                 except requests.exceptions.ConnectionError:
                     pass
@@ -182,6 +183,11 @@ class ExhentaiGalleryExtractor(Extractor):
     def login(self):
         """Login and set necessary cookies"""
         username = self.config("username")
+        if not username:
+            self.log.info("no username given; using e-hentai.org")
+            self.root = "https://e-hentai.org"
+            self.original = False
+            return
         password = self.config("password")
         cookies = self._login_impl(username, password)
         for key, value in cookies.items():
