@@ -104,22 +104,65 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     def get_image_urls(self, page):
         """Extract list of all image-urls for a manga chapter"""
         try:
-            key = self.build_aes_key()
+            key = self.build_aes_key(page)
             return [
                 aes.aes_cbc_decrypt_text(data, key, IV)
                 for data in text.extract_iter(
                     page, 'lstImages.push(wrapKA("', '"'
                 )
             ]
-        except (ValueError, IndexError):
-            self.log.error("Failed to get AES key")
         except UnicodeDecodeError:
             self.log.error("Failed to decrypt image URls")
+        except (ValueError, IndexError) as e:
+            self.log.error("Failed to get AES key")
         return []
 
+    def build_aes_key(self, page):
+        chko = ""
+        for script in self._scripts(page):
+            for part in [p.strip() for p in script.split(";")]:
+
+                if part.startswith("var _"):
+                    name, _, value = part[4:].partition(" = ")
+                    name += "[0]"
+                    value = ast.literal_eval(value)[0]
+
+                elif part.startswith("chko = "):
+                    part = part[7:]
+                    if part == name:
+                        chko = value
+                    elif part == "chko + " + name:
+                        if not chko:
+                            chko = self._chko_from_external_script()
+                        chko = chko + value
+                    elif part == name + " + chko":
+                        if not chko:
+                            chko = self._chko_from_external_script()
+                        chko = value + chko
+                    else:
+                        self.log.warning("unrecognized expression: '%s'", part)
+
+                elif part.startswith("key = "):
+                    pass
+
+                else:
+                    self.log.warning("unrecognized statement: '%s'", part)
+
+        return list(hashlib.sha256(chko.encode("ascii")).digest())
+
+    @staticmethod
+    def _scripts(page):
+        end = 0
+        while True:
+            pos = page.find("key = ", end)
+            if pos == -1:
+                return
+            beg = page.rindex('<script type="text/javascript">', 0, pos) + 31
+            end = page.index('</script>', pos)
+            yield page[beg:end]
+
     @cache(maxage=3600)
-    def build_aes_key(self):
-        """Get and parse the AES key"""
+    def _chko_from_external_script(self):
         script = self.request(self.root + "/Scripts/lo.js").text
 
         pos = script.index("var chko")
@@ -128,6 +171,4 @@ class KissmangaChapterExtractor(KissmangaExtractor):
 
         pos = script.index(var)
         lst = text.extract(script, "=", ";", pos)[0]
-        key = ast.literal_eval(lst.strip())[int(idx)]
-
-        return list(hashlib.sha256(key.encode("ascii")).digest())
+        return ast.literal_eval(lst.strip())[int(idx)]
