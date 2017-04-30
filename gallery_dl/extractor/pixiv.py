@@ -148,8 +148,8 @@ class PixivWorkExtractor(PixivUserExtractor):
     subcategory = "work"
     pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
                 r"\?(?:[^&]+&)*illust_id=(\d+)"),
-               (r"(?:https?://)?i\d+\.pixiv\.net(?:/.*)?/img-[^/]+/img"
-                r"/\d{4}(?:/\d\d){5}/(\d+)"),
+               (r"(?:https?://)?i(?:\d+\.pixiv|\.pximg)\.net(?:/.*)?/img-[^/]+"
+                r"/img/\d{4}(?:/\d\d){5}/(\d+)"),
                (r"(?:https?://)?img\d+\.pixiv\.net/img/[^/]+/(\d+)")]
     test = [
         (("http://www.pixiv.net/member_illust.php"
@@ -164,6 +164,10 @@ class PixivWorkExtractor(PixivUserExtractor):
         (("http://i1.pixiv.net/c/600x600/img-master/"
           "img/2008/06/13/00/29/13/966412_p0_master1200.jpg"), {
             "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
+        }),
+        (("https://i.pximg.net/img-original/"
+          "img/2017/04/25/07/33/29/62568267_p0.png"), {
+            "url": "71b8bbd070d6b03a75ca4afb89f64d1445b2278d",
         }),
     ]
 
