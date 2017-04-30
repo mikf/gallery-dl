@@ -118,35 +118,32 @@ class KissmangaChapterExtractor(KissmangaExtractor):
         return []
 
     def build_aes_key(self, page):
-        chko = ""
-        for script in self._scripts(page):
-            for part in [p.strip() for p in script.split(";")]:
+        chko = self._chko_from_external_script()
 
-                if part.startswith("var _"):
-                    name, _, value = part[4:].partition(" = ")
+        for script in self._scripts(page):
+            for stmt in [s.strip() for s in script.split(";")]:
+
+                if stmt.startswith("var _"):
+                    name, _, value = stmt[4:].partition(" = ")
                     name += "[0]"
                     value = ast.literal_eval(value)[0]
 
-                elif part.startswith("chko = "):
-                    part = part[7:]
-                    if part == name:
+                elif stmt.startswith("chko = "):
+                    stmt = stmt[7:]
+                    if stmt == name:
                         chko = value
-                    elif part == "chko + " + name:
-                        if not chko:
-                            chko = self._chko_from_external_script()
+                    elif stmt == "chko + " + name:
                         chko = chko + value
-                    elif part == name + " + chko":
-                        if not chko:
-                            chko = self._chko_from_external_script()
+                    elif stmt == name + " + chko":
                         chko = value + chko
                     else:
-                        self.log.warning("unrecognized expression: '%s'", part)
+                        self.log.warning("unrecognized expression: '%s'", stmt)
 
-                elif part.startswith("key = "):
+                elif stmt.startswith("key = "):
                     pass
 
                 else:
-                    self.log.warning("unrecognized statement: '%s'", part)
+                    self.log.warning("unrecognized statement: '%s'", stmt)
 
         return list(hashlib.sha256(chko.encode("ascii")).digest())
 
