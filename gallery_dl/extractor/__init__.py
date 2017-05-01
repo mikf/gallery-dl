@@ -47,7 +47,6 @@ modules = [
     "mangapanda",
     "mangapark",
     "mangareader",
-    "mangashare",
     "mangastream",
     "nhentai",
     "nijie",
