@@ -54,7 +54,6 @@ modules = [
     "pinterest",
     "powermanga",
     "readcomiconline",
-    "readcomics",
     "rule34",
     "safebooru",
     "sankaku",
