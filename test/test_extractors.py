@@ -51,7 +51,7 @@ skip = [
     # dont work on travis-ci
     "exhentai", "kissmanga", "mangafox", "dynastyscans",
     # temporary issues
-    "fallenangels",
+
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:
