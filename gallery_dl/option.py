@@ -22,6 +22,12 @@ class ConfigAction(argparse.Action):
         namespace.options.append(((self.dest,), values))
 
 
+class ConfigConstAction(argparse.Action):
+    """Set argparse const values as config values"""
+    def __call__(self, parser, namespace, values, option_string=None):
+        namespace.options.append(((self.dest,), self.const))
+
+
 class ParseAction(argparse.Action):
     """Parse <key>=<value> options and set them as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
@@ -99,13 +105,19 @@ def build_parser():
         help=("Same as '--images' except for chapters")
     )
     parser.add_argument(
+        "--abort-on-skip",
+        action=ConfigConstAction, nargs=0, dest="skip", const="abort",
+        help=("Abort extractor run if a file download would normally be "
+              "skipped, i.e. if a file with the same filename already exists")
+    )
+    parser.add_argument(
         "-R", "--retries",
         metavar="RETRIES", action=ConfigAction, dest="retries", type=int,
         help="Number of retries (default: 5)",
     )
     parser.add_argument(
         "--http-timeout",
-        metavar="SECONDS", action=ConfigAction, dest="timeout", type=int,
+        metavar="SECONDS", action=ConfigAction, dest="timeout", type=float,
         help="Timeout for HTTP connections (defaut: no timeout)",
     )
     parser.add_argument(

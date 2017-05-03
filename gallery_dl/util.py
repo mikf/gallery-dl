@@ -133,26 +133,27 @@ class RangePredicate():
 class PathFormat():
 
     def __init__(self, extractor):
-        key = ["extractor", extractor.category]
-        if extractor.subcategory:
-            key.append(extractor.subcategory)
-        self.filename_fmt = config.interpolate(
-            key + ["filename"], default=extractor.filename_fmt
-        )
-        self.directory_fmt = config.interpolate(
-            key + ["directory"], default=extractor.directory_fmt
-        )
+        self.filename_fmt = extractor.config(
+            "filename", extractor.filename_fmt)
+        self.directory_fmt = extractor.config(
+            "directory", extractor.directory_fmt)
         self.has_extension = False
         self.keywords = {}
         self.directory = self.realdirectory = ""
         self.path = self.realpath = ""
 
+        skipmode = extractor.config("skip", True)
+        if skipmode == "abort":
+            self.exists = self._exists_abort
+        elif not skipmode:
+            self.exists = self._exists_false
+
     def open(self):
-        """Open file ta 'realpath' and return a corresponding file object"""
+        """Open file to 'realpath' and return a corresponding file object"""
         return open(self.realpath, "wb")
 
     def exists(self):
-        """Return True if 'path' is complete and referse to an existing path"""
+        """Return True if 'path' is complete and refers to an existing path"""
         if self.has_extension:
             return os.path.exists(self.realpath)
         return False
@@ -188,6 +189,15 @@ class PathFormat():
         filename = text.clean_path(self.filename_fmt.format_map(self.keywords))
         self.path = self.directory + sep + filename
         self.realpath = self.realdirectory + sep + filename
+
+    def _exists_abort(self):
+        if self.has_extension and os.path.exists(self.realpath):
+            raise exception.StopExtraction()
+        return False
+
+    @staticmethod
+    def _exists_false():
+        return False
 
     @staticmethod
     def get_base_directory():
