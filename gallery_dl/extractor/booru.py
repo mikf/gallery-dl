@@ -117,7 +117,7 @@ class BooruTagExtractor(BooruExtractor):
 
     def __init__(self, match):
         BooruExtractor.__init__(self)
-        self.tags = text.unquote(match.group(1))
+        self.tags = text.unquote(match.group(1).replace("+", " "))
         self.params["tags"] = self.tags
 
     def get_job_metadata(self):
