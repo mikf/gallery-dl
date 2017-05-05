@@ -237,8 +237,11 @@ class PixivAPI():
         self.username = extractor.config("username")
         self.password = extractor.config("password")
         self.session.headers.update({
-            "Referer": "http://www.pixiv.net/",
-            "User-Agent": "PixivIOSApp/5.8.0",
+            "Referer": "https://www.pixiv.net/",
+            'App-OS': 'ios',
+            'App-OS-Version': '10.3.1',
+            'App-Version': '6.7.1',
+            'User-Agent': 'PixivIOSApp/6.7.1 (iOS 10.3.1; iPhone8,1)',
         })
         self.user_id = -1
 
@@ -308,6 +311,7 @@ class PixivAPI():
             "grant_type": "password",
             "client_id": "bYGKuGVw91e0NMfPGp44euvGt59s",
             "client_secret": "HP3RmkgAmEGro0gn1x9ioawQE8WMfvLXDz3ZqxpK",
+            'get_secure_url': 1,
         }
         response = self.session.post(
             "https://oauth.secure.pixiv.net/auth/token", data=data
