@@ -145,8 +145,10 @@ class PathFormat():
         skipmode = extractor.config("skip", True)
         if skipmode == "abort":
             self.exists = self._exists_abort
+        elif skipmode == "exit":
+            self.exists = self._exists_exit
         elif not skipmode:
-            self.exists = self._exists_false
+            self.exists = lambda: False
 
     def open(self):
         """Open file to 'realpath' and return a corresponding file object"""
@@ -195,8 +197,9 @@ class PathFormat():
             raise exception.StopExtraction()
         return False
 
-    @staticmethod
-    def _exists_false():
+    def _exists_exit(self):
+        if self.has_extension and os.path.exists(self.realpath):
+            exit()
         return False
 
     @staticmethod
