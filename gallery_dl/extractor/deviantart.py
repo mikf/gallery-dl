@@ -115,14 +115,14 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com/favourites"
                r"(?:/(\d+)/([^/?]+))?"]
     test = [
+        ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
+            "url": "9e8d971c80db099b95d1c785399e2bc6eb96cd07",
+            "keyword": "808f6c5e411c984b35c911dbf61b648627acda93",
+        }),
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
             "keyword": "51e88d400c3fb69ae0b5a618ef21a282697185fe",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
-        }),
-        ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-            "url": "9e8d971c80db099b95d1c785399e2bc6eb96cd07",
-            "keyword": "623dc7cf7178bcce57290931b2f99e21ba318bfd",
         }),
     ]
 
@@ -179,19 +179,22 @@ class DeviantartAPI():
     def gallery_all(self, username, offset=0):
         """Yield all Deviation-objects of a specific user"""
         endpoint = "gallery/all"
-        params = {"username": username, "offset": offset, "limit": 10}
+        params = {"username": username, "offset": offset, "limit": 10,
+                  "mature_content": "true"}
         return self._pagination(endpoint, params)
 
     def collections_folders(self, username, offset=0):
         """Yield all collection folders of a specific user"""
         endpoint = "collections/folders"
-        params = {"username": username, "offset": offset, "limit": 10}
+        params = {"username": username, "offset": offset, "limit": 10,
+                  "mature_content": "true"}
         return self._pagination(endpoint, params)
 
     def collections_folderid(self, username, folder_id, offset=0):
         """Yield all Deviation-objects contained in a collection folder"""
         endpoint = "collections/" + folder_id
-        params = {"username": username, "offset": offset, "limit": 10}
+        params = {"username": username, "offset": offset, "limit": 10,
+                  "mature_content": "true"}
         return self._pagination(endpoint, params)
 
     def authenticate(self):
