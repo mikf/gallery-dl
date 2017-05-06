@@ -113,11 +113,15 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     directory_fmt = ["{category}", "{subcategory}",
                      "{collection[owner]} - {collection[title]}"]
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com/favourites"
-               r"(?:/(\d+)/([^/?]+))?"]
+               r"(?:/((\d+)/([^/?]+)|\?catpath=/))?"]
     test = [
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
             "url": "9e8d971c80db099b95d1c785399e2bc6eb96cd07",
             "keyword": "808f6c5e411c984b35c911dbf61b648627acda93",
+        }),
+        ("http://gendo0032.deviantart.com/favourites/?catpath=/", {
+            "url": "6f3dc026a8391b29cc67aec880b3a0d705787572",
+            "keyword": "646c3d156b0cc7a0739c2170c524570733cc24ff",
         }),
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
@@ -128,9 +132,13 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self)
-        self.user, self.favid, self.favname = match.groups()
+        self.user, path, self.favid, self.favname = match.groups()
         if not self.favname:
-            self.favname = "Featured"
+            if path == "?catpath=/":
+                self.favname = "All"
+                self.deviations = self._deviations_all
+            else:
+                self.favname = "Featured"
         self.collection = {
             "owner": self.user,
             "title": self.favname,
@@ -155,6 +163,14 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                     self.user, folder["folderid"], self.offset)
         raise exception.NotFoundError("collection")
 
+    def _deviations_all(self):
+        import itertools
+        return itertools.chain.from_iterable([
+            self.api.collections_folderid(
+                self.user, folder["folderid"], self.offset)
+            for folder in self.api.collections_folders(self.user)
+        ])
+
     def prepare(self, deviation):
         DeviantartExtractor.prepare(deviation)
         deviation["collection"] = self.collection
@@ -170,6 +186,9 @@ class DeviantartAPI():
         self.client_id = client_id
         self.client_secret = client_secret
         self.delay = 0
+        self.mature = extractor.config("mature", True)
+        if not isinstance(self.mature, str):
+            self.mature = "true" if self.mature else "false"
 
     def deviation(self, deviation_id):
         """Query and return info about a single Deviation"""
@@ -180,21 +199,21 @@ class DeviantartAPI():
         """Yield all Deviation-objects of a specific user"""
         endpoint = "gallery/all"
         params = {"username": username, "offset": offset, "limit": 10,
-                  "mature_content": "true"}
+                  "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
     def collections_folders(self, username, offset=0):
         """Yield all collection folders of a specific user"""
         endpoint = "collections/folders"
         params = {"username": username, "offset": offset, "limit": 10,
-                  "mature_content": "true"}
+                  "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
     def collections_folderid(self, username, folder_id, offset=0):
         """Yield all Deviation-objects contained in a collection folder"""
         endpoint = "collections/" + folder_id
         params = {"username": username, "offset": offset, "limit": 10,
-                  "mature_content": "true"}
+                  "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
     def authenticate(self):
