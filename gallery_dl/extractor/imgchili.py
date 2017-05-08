@@ -52,7 +52,7 @@ class ImgchiliImageExtractor(ImgchiliExtractor):
               "89427136_test___quot;___gt;.png"), {
         "url": "b93d92a6b58eb30a7ff6f9729cb748d25fea0c86",
         "keyword": "376c4584dfae7d7d2e88687d4ee9618bbfd0a35c",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+        "content": "3b2a74be551b0b5549c831c9994760ef35138b22",
     })]
 
     def get_job_metadata(self, page):
@@ -80,7 +80,7 @@ class ImgchiliAlbumExtractor(ImgchiliExtractor):
     test = [("http://imgchili.net/album/7a3824c59f77c8d39b260f9168d4b49b", {
         "url": "995e32b62c36d48b02ef4c7a7a19463924391e2a",
         "keyword": "2d065bd7f822de4c0b7598679f2730e0082a617e",
-        "content": "6c596851567a68c2a68456b3abd959eae3d21c32",
+        "content": "6ec31d9c250810cf5d3e10e8559c69e91ccb74d4",
     })]
 
     def get_job_metadata(self, page):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -38,7 +38,7 @@ class PinterestExtractor(Extractor):
 class PinterestPinExtractor(PinterestExtractor):
     """Extractor for images from a single pin from pinterest.com"""
     subcategory = "pin"
-    pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.com/pin/([^/]+)"]
+    pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.[^/]+/pin/([^/?#&]+)"]
     test = [
         ("https://www.pinterest.com/pin/858146903966145189/", {
             "url": "7abf2be76bf03d452feacf6e000b040fc2706b80",
@@ -66,8 +66,8 @@ class PinterestBoardExtractor(PinterestExtractor):
     """Extractor for images from a board from pinterest.com"""
     subcategory = "board"
     directory_fmt = ["{category}", "{user}", "{board}"]
-    pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.com/"
-               r"(?!pin/)([^/]+)/([^/]+)"]
+    pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.[^/]+/"
+               r"(?!pin/)([^/?#&]+)/([^/?#&]+)"]
     test = [
         ("https://www.pinterest.com/g1952849/test-/", {
             "url": "705ee521630a5d613b0449d694a5345e684572a9",
@@ -108,15 +108,16 @@ class PinterestBoardExtractor(PinterestExtractor):
 
 
 class PinterestPinitExtractor(PinterestExtractor):
+    """Extractor for images from a pin.it URL"""
     subcategory = "pinit"
-    pattern = [r"(?:https?://)?(pin\.it/[^/]+)"]
+    pattern = [r"(?:https?://)?(pin\.it/[^/?#&]+)"]
     test = [
         ("https://pin.it/Hvt8hgT", {
             "url": "8daad8558382c68f0868bdbd17d05205184632fa",
         }),
         ("https://pin.it/Hvt8hgS", {
             "exception": exception.NotFoundError,
-        })
+        }),
     ]
 
     def __init__(self, match):

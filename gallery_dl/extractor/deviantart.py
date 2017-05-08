@@ -117,11 +117,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     test = [
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
             "url": "9e8d971c80db099b95d1c785399e2bc6eb96cd07",
-            "keyword": "808f6c5e411c984b35c911dbf61b648627acda93",
-        }),
-        ("http://gendo0032.deviantart.com/favourites/?catpath=/", {
-            "url": "6f3dc026a8391b29cc67aec880b3a0d705787572",
-            "keyword": "646c3d156b0cc7a0739c2170c524570733cc24ff",
+            "keyword": "75dbc47956cec308e7c467943986d9d84502b0b0",
         }),
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
