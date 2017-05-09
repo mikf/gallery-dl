@@ -191,7 +191,7 @@ columns = [
 ]
 
 outfile = sys.argv[1] if len(sys.argv) > 1 else "supportedsites.rst"
-with open(os.path.join(ROOTDIR, outfile), "w") as file:
+with open(os.path.join(ROOTDIR, "docs", outfile), "w") as file:
     file.write("Supported Sites\n"
                "===============\n")
     for line in RstTable(columns):
