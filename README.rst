@@ -2,10 +2,10 @@
 gallery-dl
 ==========
 
-**gallery-dl** is a command-line program to download image-galleries and
+*gallery-dl* is a command-line program to download image-galleries and
 -collections from several image hosting sites such as pixiv.net, exhentai.org,
 gelbooru.com and several more (see `Supported Sites`_). It requires Python 3.3+
-to run and works on Unix-like systems as well as Windows.
+to run and works on Unix-like systems as well as on Windows.
 
 
 |pypi| |build|
@@ -16,28 +16,51 @@ to run and works on Unix-like systems as well as Windows.
 Installation
 ============
 
-You can install the latest stable version of **gallery-dl** from PyPI_
-with pip_:
+Installation via pip
+--------------------
+
+The stable releases of *gallery-dl* are distributed on PyPI_ and can be
+easily installed using pip_:
 
 .. code:: bash
 
-    $ pip install --upgrade gallery-dl
+    $ pip install gallery-dl
 
-or directly from GitHub:
+Installing the latest develop-version directly from GitHub can be done via
+pip as well:
+
+.. code:: bash
+
+    $ pip install https://github.com/mikf/gallery-dl/archive/master.zip
+
+
+Manual installation via Python
+------------------------------
+
+Get the code by downloading either the stable_ or develop_ archives and unpack
+them, or via `git clone`. Navigate into the respective directory and run the
+`setup.py` file.
 
 .. code:: bash
 
     $ git clone https://github.com/mikf/gallery-dl.git
     $ cd gallery-dl
-    $ python3 setup.py install
+    $ python setup.py install
 
-Windows users can also download a `standalone executable`_.
+
+Standalone executable (Windows only)
+------------------------------------
+
+Windows users can download a `standalone executable`_, which comes with a
+Python interpreter and all required packages included.
+Put this file in your PATH or use it from the current directory and you are
+good to go,
 
 
 Usage
 =====
 
-To use **gallery-dl** simply call it with the URLs you wish to download images
+To use *gallery-dl* simply call it with the URLs you wish to download images
 from:
 
 .. code:: bash
@@ -96,10 +119,10 @@ Supported Sites
 Configuration
 =============
 
-Configuration files for **gallery-dl** use a JSON-based file format.
+Configuration files for *gallery-dl* use a JSON-based file format.
 For a (more or less) complete example, see gallery-dl.conf_.
 
-**gallery-dl** searches for configuration files in the following paths:
+*gallery-dl* searches for configuration files in the following paths:
 
 +--------------------------------------------+------------------------------------------+
 | Linux                                      | Windows                                  |
@@ -149,14 +172,15 @@ or you can provide them directly via the
     $ gallery-dl -o username=<username> -o password=<password> URL
 
 
-.. _gallery-dl.conf:       https://github.com/mikf/gallery-dl/blob/master/gallery-dl.conf
-.. _Complete List:         https://github.com/mikf/gallery-dl/blob/master/supportedsites.rst
+.. _gallery-dl.conf:       https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
+.. _Complete List:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
 .. _standalone executable: https://github.com/mikf/gallery-dl/releases/download/v0.8.3/gallery-dl.exe
 .. _Python:   https://www.python.org/downloads/
 .. _Requests: https://pypi.python.org/pypi/requests/
 .. _PyPI:     https://pypi.python.org/pypi
 .. _pip:      https://pip.pypa.io/en/stable/
-
+.. _stable:   https://github.com/mikf/gallery-dl/archive/v0.8.3.zip
+.. _develop:  https://github.com/mikf/gallery-dl/archive/master.zip
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.python.org/pypi/gallery-dl
