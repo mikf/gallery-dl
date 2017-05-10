@@ -18,7 +18,7 @@ import re
 class DeviantartExtractor(Extractor):
     """Base class for deviantart extractors"""
     category = "deviantart"
-    directory_fmt = ["{category}", "{username}"]
+    directory_fmt = ["{category}", "{author[username]}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
 
     def __init__(self):
@@ -31,16 +31,45 @@ class DeviantartExtractor(Extractor):
         return num
 
     def items(self):
-        first = True
+        last_author = None
         yield Message.Version, 1
         for deviation in self.deviations():
-            if "content" not in deviation:
-                continue
-            if first:
-                first = False
-                yield Message.Directory, deviation["author"].copy()
             self.prepare(deviation)
-            yield Message.Url, deviation["content"]["src"], deviation
+
+            try:
+                author = deviation["author"]
+            except KeyError:
+                author = None
+                deviation["author"] = {"username": "", "userid": "",
+                                       "usericon": "", "type": ""}
+            if author != last_author:
+                yield Message.Directory, deviation
+                last_author = author
+
+            if "content" in deviation:
+                yield self.commit(deviation, deviation["content"])
+
+            if "videos" in deviation:
+                video = max(deviation["videos"],
+                            key=lambda x: int(x["quality"][:-1]))
+                yield self.commit(deviation, video)
+
+            if "flash" in deviation:
+                yield self.commit(deviation, deviation["flash"])
+
+            if "excerpt" in deviation:
+                dev = self.api.deviation_content(deviation["deviationid"])
+                deviation["extension"] = "htm"
+
+                html = JOURNAL_TEMPLATE.format(
+                    title=text.escape(deviation["title"]),
+                    html=dev["html"],
+                    css=dev["css"] if "css" in dev else "",
+                )
+                yield Message.Url, html, deviation
+
+            if "html" in deviation:
+                self.log.info("skipping journal")
 
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
@@ -49,18 +78,29 @@ class DeviantartExtractor(Extractor):
     @staticmethod
     def prepare(deviation):
         """Adjust the contents of a Deviation-object"""
-        del deviation["stats"]
-        deviation["index"] = deviation["url"].rsplit("-", 1)[1]
-        text.nameext_from_url(deviation["content"]["src"], deviation)
+        for key in ("stats", "preview", "thumbs"):
+            if key in deviation:
+                del deviation[key]
+        try:
+            deviation["index"] = deviation["url"].rsplit("-", 1)[1]
+        except KeyError:
+            deviation["index"] = 0
+
+    @staticmethod
+    def commit(deviation, target):
+        url = target["src"]
+        deviation["target"] = text.nameext_from_url(url, target.copy())
+        deviation["extension"] = deviation["target"]["extension"]
+        return Message.Url, url, deviation
 
 
-class DeviantartUserExtractor(DeviantartExtractor):
-    """Extractor for all works from an artist on deviantart.com"""
-    subcategory = "user"
+class DeviantartGalleryExtractor(DeviantartExtractor):
+    """Extractor for all deviations from an artist's gallery"""
+    subcategory = "gallery"
     pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
     test = [("http://shimoda7.deviantart.com/gallery/", {
         "url": "63bfa8efba199e27181943c9060f6770f91a8441",
-        "keyword": "ca77ad61f387be7dabb61eb322b5185bccec69ea",
+        "keyword": "b02f5487481142ca44c22542333191aa2cdfb7ee",
     })]
 
     def __init__(self, match):
@@ -71,16 +111,16 @@ class DeviantartUserExtractor(DeviantartExtractor):
         return self.api.gallery_all(self.user, self.offset)
 
 
-class DeviantartImageExtractor(DeviantartExtractor):
-    """Extractor for single images from deviantart.com"""
-    subcategory = "image"
+class DeviantartDeviationExtractor(DeviantartExtractor):
+    """Extractor for single deviations"""
+    subcategory = "deviation"
     pattern = [r"(?:https?://)?([^\.]+\.deviantart\.com/art/.+-\d+)",
                r"(?:https?://)?(sta\.sh/[a-z0-9]+)"]
     test = [
         (("http://shimoda7.deviantart.com/art/"
           "For-the-sake-of-a-memory-10073852"), {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-            "keyword": "65f3c66cc1c9cf33757a71b86688fde4549fb045",
+            "keyword": "655b09c8719e40f623050df23cc7877093f0a449",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://zzz.deviantart.com/art/zzz-1234567890", {
@@ -88,7 +128,7 @@ class DeviantartImageExtractor(DeviantartExtractor):
         }),
         ("http://sta.sh/01ijs78ebagf", {
             "url": "1692cd075059d24657a01b954413c84a56e2de8f",
-            "keyword": "3faefb555d64e220e0e5526809e79bd4b9112eb2",
+            "keyword": "d62ba4e75bccf250672d06ab49c64c44a275e4f2",
         }),
         ("http://sta.sh/abcdefghijkl", {
             "exception": exception.NotFoundError,
@@ -108,7 +148,7 @@ class DeviantartImageExtractor(DeviantartExtractor):
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
-    """Extractor for an artist's favourites from deviantart.com"""
+    """Extractor for an artist's favourites"""
     subcategory = "favorite"
     directory_fmt = ["{category}", "{subcategory}",
                      "{collection[owner]} - {collection[title]}"]
@@ -116,12 +156,12 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                r"(?:/((\d+)/([^/?]+)|\?catpath=/))?"]
     test = [
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-            "url": "9e8d971c80db099b95d1c785399e2bc6eb96cd07",
-            "keyword": "75dbc47956cec308e7c467943986d9d84502b0b0",
+            "url": "2545427f52012a8b9b07c95ca5c91002d5bf4f18",
+            "keyword": "7ba0e75aeeb0f51541c4a2411410f8e3b3717641",
         }),
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-            "keyword": "51e88d400c3fb69ae0b5a618ef21a282697185fe",
+            "keyword": "5469fc8c4701b13a9ca1c8b0450c6ac47c7f0e85",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
     ]
@@ -141,29 +181,19 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
             "index": self.favid or 0,
         }
 
-    def items(self):
-        yield Message.Version, 1
-        for deviation in self.deviations():
-            if "content" not in deviation:
-                continue
-            self.prepare(deviation)
-            yield Message.Directory, deviation
-            yield Message.Url, deviation["content"]["src"], deviation
-
     def deviations(self):
         regex = re.compile(self.favname.replace("-", ".") + "$")
         for folder in self.api.collections_folders(self.user):
             if regex.match(folder["name"]):
                 self.collection["title"] = folder["name"]
-                return self.api.collections_folderid(
+                return self.api.collections(
                     self.user, folder["folderid"], self.offset)
         raise exception.NotFoundError("collection")
 
     def _deviations_all(self):
         import itertools
         return itertools.chain.from_iterable([
-            self.api.collections_folderid(
-                self.user, folder["folderid"], self.offset)
+            self.api.collections(self.user, folder["folderid"], self.offset)
             for folder in self.api.collections_folders(self.user)
         ])
 
@@ -182,18 +212,13 @@ class DeviantartAPI():
         self.client_id = client_id
         self.client_secret = client_secret
         self.delay = 0
-        self.mature = extractor.config("mature", True)
+        self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
 
-    def deviation(self, deviation_id):
-        """Query and return info about a single Deviation"""
-        endpoint = "deviation/" + deviation_id
-        return self._call(endpoint)
-
-    def gallery_all(self, username, offset=0):
-        """Yield all Deviation-objects of a specific user"""
-        endpoint = "gallery/all"
+    def collections(self, username, folder_id, offset=0):
+        """Yield all Deviation-objects contained in a collection folder"""
+        endpoint = "collections/" + folder_id
         params = {"username": username, "offset": offset, "limit": 10,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
@@ -205,9 +230,20 @@ class DeviantartAPI():
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
-    def collections_folderid(self, username, folder_id, offset=0):
-        """Yield all Deviation-objects contained in a collection folder"""
-        endpoint = "collections/" + folder_id
+    def deviation(self, deviation_id):
+        """Query and return info about a single Deviation"""
+        endpoint = "deviation/" + deviation_id
+        return self._call(endpoint)
+
+    def deviation_content(self, deviation_id):
+        """Query and return info about a single Deviation"""
+        endpoint = "deviation/content"
+        params = {"deviationid": deviation_id}
+        return self._call(endpoint, params)
+
+    def gallery_all(self, username, offset=0):
+        """Yield all Deviation-objects of a specific user"""
+        endpoint = "gallery/all"
         params = {"username": username, "offset": offset, "limit": 10,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
@@ -272,3 +308,51 @@ class DeviantartAPI():
             else:
                 self.log.error("Unexpected API response: %s", data)
                 return
+
+
+JOURNAL_TEMPLATE = """text://<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{title}</title>
+    <link rel="stylesheet" href="http://st.deviantart.net/\
+css/deviantart-network_lc.css?3843780832">
+    <link rel="stylesheet" href="http://st.deviantart.net/\
+css/group_secrets_lc.css?3250492874">
+    <link rel="stylesheet" href="http://st.deviantart.net/\
+css/v6core_lc.css?4246581581">
+    <link rel="stylesheet" href="http://st.deviantart.net/\
+css/sidebar_lc.css?1490570941">
+    <link rel="stylesheet" href="http://st.deviantart.net/\
+css/writer_lc.css?3090682151">
+    <link rel="stylesheet" href="http://st.deviantart.net/\
+css/v6loggedin_lc.css?3001430805">
+    <style>{css}</style>
+    <link rel="stylesheet" href="http://st.deviantart.net/\
+roses/cssmin/core.css?1488405371919" >
+    <link rel="stylesheet" href="http://st.deviantart.net/\
+roses/cssmin/peeky.css?1487067424177" >
+    <link rel="stylesheet" href="http://st.deviantart.net/\
+roses/cssmin/desktop.css?1491362542749" >
+</head>
+<body id="deviantART-v7" class="bubble no-apps loggedout w960 deviantart">
+    <div id="output">
+    <div class="dev-page-container bubbleview">
+    <div class="dev-page-view view-mode-normal">
+    <div class="dev-view-main-content">
+    <div class="dev-view-deviation">
+    <div class="journal-wrapper tt-a">
+    <div class="journal-wrapper2">
+    <div class="journal withskin">
+    {html}
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+</body>
+</html>
+"""

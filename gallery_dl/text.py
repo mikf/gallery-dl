@@ -136,6 +136,7 @@ else:
     clean_path = clean_path_posix
 
 unquote = urllib.parse.unquote
+escape = html.escape
 
 try:
     unescape = html.unescape
