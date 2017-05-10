@@ -13,7 +13,7 @@ Supported Sites
 +-------------------+---------------------------------------+----------------------------------------------------------+
 |Danbooru           |https://danbooru.donmai.us/            |Pools, Posts, Tag-Searches                                |
 +-------------------+---------------------------------------+----------------------------------------------------------+
-|DeviantArt         |https://www.deviantart.com/            |Images from Users, Favorites, individual Images           |
+|DeviantArt         |https://www.deviantart.com/            |Deviations, Favorites, Galleries, Journals                |
 +-------------------+---------------------------------------+----------------------------------------------------------+
 |Doki Reader        |https://kobato.hologfx.com/            |Chapters, Manga                                           |
 +-------------------+---------------------------------------+----------------------------------------------------------+

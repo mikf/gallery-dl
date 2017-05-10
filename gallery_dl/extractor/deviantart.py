@@ -61,10 +61,18 @@ class DeviantartExtractor(Extractor):
                 dev = self.api.deviation_content(deviation["deviationid"])
                 deviation["extension"] = "htm"
 
+                if "css" in dev:
+                    css = dev["css"]
+                    cssclass = "withskin"
+                else:
+                    css = ""
+                    cssclass = "journal-green"
+
                 html = JOURNAL_TEMPLATE.format(
                     title=text.escape(deviation["title"]),
                     html=dev["html"],
-                    css=dev["css"] if "css" in dev else "",
+                    css=css,
+                    cls=cssclass,
                 )
                 yield Message.Url, html, deviation
 
@@ -97,7 +105,7 @@ class DeviantartExtractor(Extractor):
 class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
-    pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com(?:/gallery)?/?$"]
+    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com(?:/gallery)?/?$"]
     test = [("http://shimoda7.deviantart.com/gallery/", {
         "url": "63bfa8efba199e27181943c9060f6770f91a8441",
         "keyword": "b02f5487481142ca44c22542333191aa2cdfb7ee",
@@ -114,7 +122,8 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
 class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
-    pattern = [r"(?:https?://)?([^\.]+\.deviantart\.com/art/.+-\d+)",
+    pattern = [(r"(?:https?://)?([^\.]+\.deviantart\.com/"
+                r"(?:art|journal)/[^/?&#]+-\d+)"),
                r"(?:https?://)?(sta\.sh/[a-z0-9]+)"]
     test = [
         (("http://shimoda7.deviantart.com/art/"
@@ -202,6 +211,23 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
         deviation["collection"] = self.collection
 
 
+class DeviantartJournalExtractor(DeviantartExtractor):
+    """Extractor for single deviations"""
+    subcategory = "journal"
+    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/journal/?$"]
+    test = [("http://shimoda7.deviantart.com/journal/", {
+        "url": "05204bddf5ebba330d73cec76bcd55b1249c6159",
+        "keyword": "8434f8bdd4b38634e206c8689a0906ac10c3fa77",
+    })]
+
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self)
+        self.user = match.group(1)
+
+    def deviations(self):
+        return self.api.browse_user_journals(self.user, self.offset)
+
+
 class DeviantartAPI():
     """Minimal interface for the deviantart API"""
     def __init__(self, extractor, client_id="5388",
@@ -215,6 +241,13 @@ class DeviantartAPI():
         self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
+
+    def browse_user_journals(self, username, offset=0):
+        """Yield all journal entries of a specific user"""
+        endpoint = "browse/user/journals"
+        params = {"username": username, "offset": offset, "limit": 10,
+                  "mature_content": self.mature, "featured": "false"}
+        return self._pagination(endpoint, params)
 
     def collections(self, username, folder_id, offset=0):
         """Yield all Deviation-objects contained in a collection folder"""
@@ -343,7 +376,7 @@ roses/cssmin/desktop.css?1491362542749" >
     <div class="dev-view-deviation">
     <div class="journal-wrapper tt-a">
     <div class="journal-wrapper2">
-    <div class="journal withskin">
+    <div class="journal {cls}">
     {html}
     </div>
     </div>
