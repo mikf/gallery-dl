@@ -80,7 +80,6 @@ class ImgchiliAlbumExtractor(ImgchiliExtractor):
     test = [("http://imgchili.net/album/7a3824c59f77c8d39b260f9168d4b49b", {
         "url": "995e32b62c36d48b02ef4c7a7a19463924391e2a",
         "keyword": "2d065bd7f822de4c0b7598679f2730e0082a617e",
-        "content": "6ec31d9c250810cf5d3e10e8559c69e91ccb74d4",
     })]
 
     def get_job_metadata(self, page):
