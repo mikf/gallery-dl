@@ -26,7 +26,7 @@ easily installed using pip_:
 
     $ pip install gallery-dl
 
-Installing the latest develop-version directly from GitHub can be done via
+Installing the latest dev-version directly from GitHub can be done via
 pip as well:
 
 .. code:: bash
@@ -37,9 +37,9 @@ pip as well:
 Manual installation via Python
 ------------------------------
 
-Get the code by downloading either the stable_ or develop_ archives and unpack
-them, or via `git clone`. Navigate into the respective directory and run the
-`setup.py` file.
+Get the code by downloading either the stable_ or dev_ archives and unpacking
+them, or via :code:`git clone`. Navigate into the respective directory and run
+the :code:`setup.py` file.
 
 .. code:: bash
 
@@ -180,7 +180,7 @@ or you can provide them directly via the
 .. _PyPI:     https://pypi.python.org/pypi
 .. _pip:      https://pip.pypa.io/en/stable/
 .. _stable:   https://github.com/mikf/gallery-dl/archive/v0.8.3.zip
-.. _develop:  https://github.com/mikf/gallery-dl/archive/master.zip
+.. _dev:      https://github.com/mikf/gallery-dl/archive/master.zip
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.python.org/pypi/gallery-dl
