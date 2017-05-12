@@ -150,9 +150,9 @@ class PathFormat():
         elif not skipmode:
             self.exists = lambda: False
 
-    def open(self):
+    def open(self, mode="wb"):
         """Open file to 'realpath' and return a corresponding file object"""
-        return open(self.realpath, "wb")
+        return open(self.realpath, mode)
 
     def exists(self):
         """Return True if 'path' is complete and refers to an existing path"""

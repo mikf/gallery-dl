@@ -165,8 +165,8 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                r"(?:/((\d+)/([^/?]+)|\?catpath=/))?"]
     test = [
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-            "url": "2545427f52012a8b9b07c95ca5c91002d5bf4f18",
-            "keyword": "7ba0e75aeeb0f51541c4a2411410f8e3b3717641",
+            "url": "85d1dd231be0b880c69dc947b564595fe3dd8248",
+            "keyword": "9ae736fd906d7b3a41d81dd5f2488fd8537a5858",
         }),
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
@@ -216,7 +216,7 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     subcategory = "journal"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/journal/?$"]
     test = [("http://shimoda7.deviantart.com/journal/", {
-        "url": "05204bddf5ebba330d73cec76bcd55b1249c6159",
+        "url": "d046614f41849e4a2a8d8a20c5d00cbe814ca6f2",
         "keyword": "8434f8bdd4b38634e206c8689a0906ac10c3fa77",
     })]
 
@@ -343,7 +343,7 @@ class DeviantartAPI():
                 return
 
 
-JOURNAL_TEMPLATE = """text://<!DOCTYPE html>
+JOURNAL_TEMPLATE = """text:<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
