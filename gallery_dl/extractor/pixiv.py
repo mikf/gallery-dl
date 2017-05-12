@@ -62,7 +62,7 @@ class PixivUserExtractor(Extractor):
                 work["extension"] = "zip"
                 yield Message.Url, url, work
                 work["extension"] = "txt"
-                yield Message.Url, "text://"+framelist, work
+                yield Message.Url, "text:"+framelist, work
 
             elif work["page_count"] == 1:
                 yield Message.Url, work["url"], work

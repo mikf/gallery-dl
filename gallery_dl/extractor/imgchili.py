@@ -52,7 +52,6 @@ class ImgchiliImageExtractor(ImgchiliExtractor):
               "89427136_test___quot;___gt;.png"), {
         "url": "b93d92a6b58eb30a7ff6f9729cb748d25fea0c86",
         "keyword": "376c4584dfae7d7d2e88687d4ee9618bbfd0a35c",
-        "content": "3b2a74be551b0b5549c831c9994760ef35138b22",
     })]
 
     def get_job_metadata(self, page):

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2016 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Downloader module for text:// urls"""
+"""Downloader module for text: urls"""
 
 from .common import BasicDownloader
 
@@ -26,7 +26,7 @@ class Downloader(BasicDownloader):
 
         self.out.start(pathfmt.path)
         self.downloading = True
-        with pathfmt.open() as file:
-            file.write(bytes(url[7:], "utf-8"))
+        with pathfmt.open("w") as file:
+            file.write(url[5:])
         self.downloading = False
         self.out.success(pathfmt.path, 0)
