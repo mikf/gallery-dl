@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import datetime
 import time
 import re
 
@@ -58,26 +59,7 @@ class DeviantartExtractor(Extractor):
                 yield self.commit(deviation, deviation["flash"])
 
             if "excerpt" in deviation:
-                dev = self.api.deviation_content(deviation["deviationid"])
-                deviation["extension"] = "htm"
-
-                if "css" in dev:
-                    css = dev["css"]
-                    cssclass = "withskin"
-                else:
-                    css = ""
-                    cssclass = "journal-green"
-
-                html = JOURNAL_TEMPLATE.format(
-                    title=text.escape(deviation["title"]),
-                    html=dev["html"],
-                    css=css,
-                    cls=cssclass,
-                )
-                yield Message.Url, html, deviation
-
-            if "html" in deviation:
-                self.log.info("skipping journal")
+                yield self.commit_journal(deviation)
 
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
@@ -101,6 +83,41 @@ class DeviantartExtractor(Extractor):
         deviation["extension"] = deviation["target"]["extension"]
         return Message.Url, url, deviation
 
+    def commit_journal(self, deviation):
+        journal = self.api.deviation_content(deviation["deviationid"])
+
+        if "css" in journal:
+            css, cls = journal["css"], "withskin"
+        else:
+            css, cls = "", "journal-green"
+
+        title = text.escape(deviation["title"])
+        date = datetime.datetime.fromtimestamp(deviation["published_time"])
+        url = deviation["url"]
+
+        categories = " / ".join(
+            ('<span class="crumb"><a href="http://www.deviantart.com/{}'
+             '/"><span>{}</span></a></span>').format(cat, cat.capitalize())
+            for cat in deviation["category_path"].split("/")
+        )
+        header = HEADER_TEMPLATE.format(
+            title=title,
+            url=url,
+            userurl=url[:url.find("/", 8)],
+            username=deviation["author"]["username"],
+            date=str(date),
+            categories=categories,
+        )
+        html = JOURNAL_TEMPLATE.format(
+            title=title,
+            html=journal["html"].replace('<div usr class="gr">', header, 1),
+            css=css,
+            cls=cls,
+        )
+
+        deviation["extension"] = "htm"
+        return Message.Url, html, deviation
+
 
 class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
@@ -122,7 +139,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
 class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
-    pattern = [(r"(?:https?://)?([^\.]+\.deviantart\.com/"
+    pattern = [(r"(?:https?://)?([^.]+\.deviantart\.com/"
                 r"(?:art|journal)/[^/?&#]+-\d+)"),
                r"(?:https?://)?(sta\.sh/[a-z0-9]+)"]
     test = [
@@ -161,11 +178,11 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     subcategory = "favorite"
     directory_fmt = ["{category}", "{subcategory}",
                      "{collection[owner]} - {collection[title]}"]
-    pattern = [r"(?:https?://)?([^\.]+)\.deviantart\.com/favourites"
+    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/favourites"
                r"(?:/((\d+)/([^/?]+)|\?catpath=/))?"]
     test = [
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-            "url": "85d1dd231be0b880c69dc947b564595fe3dd8248",
+            "url": "13c72f436f8324e52660a16b7bccedab92ce8186",
             "keyword": "9ae736fd906d7b3a41d81dd5f2488fd8537a5858",
         }),
         ("http://h3813067.deviantart.com/favourites/", {
@@ -216,7 +233,7 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     subcategory = "journal"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/journal/?$"]
     test = [("http://shimoda7.deviantart.com/journal/", {
-        "url": "d046614f41849e4a2a8d8a20c5d00cbe814ca6f2",
+        "url": "05c8998dfc5fb4737e220edc2aa1090efaa9a71d",
         "keyword": "8434f8bdd4b38634e206c8689a0906ac10c3fa77",
     })]
 
@@ -269,7 +286,7 @@ class DeviantartAPI():
         return self._call(endpoint)
 
     def deviation_content(self, deviation_id):
-        """Query and return info about a single Deviation"""
+        """Get extended content of a single Deviation"""
         endpoint = "deviation/content"
         params = {"deviationid": deviation_id}
         return self._call(endpoint, params)
@@ -343,6 +360,24 @@ class DeviantartAPI():
                 return
 
 
+HEADER_TEMPLATE = """<div usr class="gr">
+<div class="metadata">
+    <h2><a href="{url}">{title}</a></h2>
+    <ul>
+        <li class="author">
+            by <span class="name"><span class="username-with-symbol u">
+            <a class="u regular username" href="{userurl}">{username}</a>\
+<span class="user-symbol regular"></span></span></span>,
+            <span>{date}</span>
+        </li>
+        <li class="category">
+            {categories}
+        </li>
+    </ul>
+</div>
+"""
+
+
 JOURNAL_TEMPLATE = """text:<!DOCTYPE html>
 <html>
 <head>
@@ -376,7 +411,7 @@ roses/cssmin/desktop.css?1491362542749" >
     <div class="dev-view-deviation">
     <div class="journal-wrapper tt-a">
     <div class="journal-wrapper2">
-    <div class="journal {cls}">
+    <div class="journal {cls} journalcontrol">
     {html}
     </div>
     </div>
