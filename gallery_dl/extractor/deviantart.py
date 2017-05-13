@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import itertools
 import datetime
 import time
 import re
@@ -59,7 +60,8 @@ class DeviantartExtractor(Extractor):
                 yield self.commit(deviation, deviation["flash"])
 
             if "excerpt" in deviation:
-                yield self.commit_journal(deviation)
+                journal = self.api.deviation_content(deviation["deviationid"])
+                yield self.commit_journal(deviation, journal)
 
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
@@ -68,7 +70,7 @@ class DeviantartExtractor(Extractor):
     @staticmethod
     def prepare(deviation):
         """Adjust the contents of a Deviation-object"""
-        for key in ("stats", "preview", "thumbs"):
+        for key in ("stats", "preview", "is_favourited", "allows_comments"):
             if key in deviation:
                 del deviation[key]
         try:
@@ -83,22 +85,27 @@ class DeviantartExtractor(Extractor):
         deviation["extension"] = deviation["target"]["extension"]
         return Message.Url, url, deviation
 
-    def commit_journal(self, deviation):
-        journal = self.api.deviation_content(deviation["deviationid"])
+    @staticmethod
+    def commit_journal(deviation, journal):
+        title = text.escape(deviation["title"])
+        date = datetime.datetime.utcfromtimestamp(deviation["published_time"])
+        url = deviation["url"]
+        thumbs = deviation["thumbs"]
+        shadow = SHADOW_TEMPLATE.format_map(thumbs[0]) if thumbs else ""
+        catlist = deviation["category_path"].split("/")
 
         if "css" in journal:
             css, cls = journal["css"], "withskin"
         else:
             css, cls = "", "journal-green"
 
-        title = text.escape(deviation["title"])
-        date = datetime.datetime.fromtimestamp(deviation["published_time"])
-        url = deviation["url"]
-
         categories = " / ".join(
-            ('<span class="crumb"><a href="http://www.deviantart.com/{}'
-             '/"><span>{}</span></a></span>').format(cat, cat.capitalize())
-            for cat in deviation["category_path"].split("/")
+            ('<span class="crumb"><a href="http://www.deviantart.com/{}/">'
+             '<span>{}</span></a></span>').format(catpath, cat.capitalize())
+            for cat, catpath in zip(
+                catlist,
+                itertools.accumulate(catlist, lambda t, c: t + "/" + c)
+            )
         )
         header = HEADER_TEMPLATE.format(
             title=title,
@@ -111,6 +118,7 @@ class DeviantartExtractor(Extractor):
         html = JOURNAL_TEMPLATE.format(
             title=title,
             html=journal["html"].replace('<div usr class="gr">', header, 1),
+            shadow=shadow,
             css=css,
             cls=cls,
         )
@@ -125,7 +133,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com(?:/gallery)?/?$"]
     test = [("http://shimoda7.deviantart.com/gallery/", {
         "url": "63bfa8efba199e27181943c9060f6770f91a8441",
-        "keyword": "b02f5487481142ca44c22542333191aa2cdfb7ee",
+        "keyword": "e017b1eec5d052dedbb219259ae8c01d0db678a3",
     })]
 
     def __init__(self, match):
@@ -146,7 +154,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         (("http://shimoda7.deviantart.com/art/"
           "For-the-sake-of-a-memory-10073852"), {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-            "keyword": "655b09c8719e40f623050df23cc7877093f0a449",
+            "keyword": "597be070582e105489e82cce531888d07f9d45b1",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://zzz.deviantart.com/art/zzz-1234567890", {
@@ -154,7 +162,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         }),
         ("http://sta.sh/01ijs78ebagf", {
             "url": "1692cd075059d24657a01b954413c84a56e2de8f",
-            "keyword": "d62ba4e75bccf250672d06ab49c64c44a275e4f2",
+            "keyword": "659fdf02d7de2e9181468286de19c526348ca1a1",
         }),
         ("http://sta.sh/abcdefghijkl", {
             "exception": exception.NotFoundError,
@@ -182,12 +190,12 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                r"(?:/((\d+)/([^/?]+)|\?catpath=/))?"]
     test = [
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-            "url": "13c72f436f8324e52660a16b7bccedab92ce8186",
-            "keyword": "9ae736fd906d7b3a41d81dd5f2488fd8537a5858",
+            "url": "1ca1c56a1ed2e3df2f8fed267c0497cba4717cab",
+            "keyword": "44fe61c5b20db8d90d4e06b86346630289f1db7d",
         }),
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-            "keyword": "5469fc8c4701b13a9ca1c8b0450c6ac47c7f0e85",
+            "keyword": "f0c557470ca850da65ec94804a20551b7bda7af5",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
     ]
@@ -217,7 +225,6 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
         raise exception.NotFoundError("collection")
 
     def _deviations_all(self):
-        import itertools
         return itertools.chain.from_iterable([
             self.api.collections(self.user, folder["folderid"], self.offset)
             for folder in self.api.collections_folders(self.user)
@@ -233,8 +240,8 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     subcategory = "journal"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/journal/?$"]
     test = [("http://shimoda7.deviantart.com/journal/", {
-        "url": "05c8998dfc5fb4737e220edc2aa1090efaa9a71d",
-        "keyword": "8434f8bdd4b38634e206c8689a0906ac10c3fa77",
+        "url": "f081eb4f6807e77aac9fa0d4d1e62702d23acff5",
+        "keyword": "9ddc2e130198395c1dfaa55c65b6bf63713ec0a8",
     })]
 
     def __init__(self, match):
@@ -360,6 +367,14 @@ class DeviantartAPI():
                 return
 
 
+SHADOW_TEMPLATE = """
+<span class="shadow">
+    <img src="{src}" class="smshadow" width="{width}" height="{height}">
+</span>
+<br><br>
+"""
+
+
 HEADER_TEMPLATE = """<div usr class="gr">
 <div class="metadata">
     <h2><a href="{url}">{title}</a></h2>
@@ -409,6 +424,7 @@ roses/cssmin/desktop.css?1491362542749" >
     <div class="dev-page-view view-mode-normal">
     <div class="dev-view-main-content">
     <div class="dev-view-deviation">
+    {shadow}
     <div class="journal-wrapper tt-a">
     <div class="journal-wrapper2">
     <div class="journal {cls} journalcontrol">
