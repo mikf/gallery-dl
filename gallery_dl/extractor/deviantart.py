@@ -88,36 +88,45 @@ class DeviantartExtractor(Extractor):
     @staticmethod
     def commit_journal(deviation, journal):
         title = text.escape(deviation["title"])
-        date = datetime.datetime.utcfromtimestamp(deviation["published_time"])
         url = deviation["url"]
         thumbs = deviation["thumbs"]
+        html = journal["html"]
+        date = datetime.datetime.utcfromtimestamp(deviation["published_time"])
         shadow = SHADOW_TEMPLATE.format_map(thumbs[0]) if thumbs else ""
-        catlist = deviation["category_path"].split("/")
 
         if "css" in journal:
             css, cls = journal["css"], "withskin"
         else:
             css, cls = "", "journal-green"
 
-        categories = " / ".join(
-            ('<span class="crumb"><a href="http://www.deviantart.com/{}/">'
-             '<span>{}</span></a></span>').format(catpath, cat.capitalize())
-            for cat, catpath in zip(
-                catlist,
-                itertools.accumulate(catlist, lambda t, c: t + "/" + c)
+        if html.find('<div class="boxtop journaltop">', 0, 250) != -1:
+            needle = '<div class="boxtop journaltop">'
+            header = HEADER_CUSTOM_TEMPLATE.format(
+                title=title, url=url, date=str(date),
             )
-        )
-        header = HEADER_TEMPLATE.format(
-            title=title,
-            url=url,
-            userurl=url[:url.find("/", 8)],
-            username=deviation["author"]["username"],
-            date=str(date),
-            categories=categories,
-        )
+        else:
+            needle = '<div usr class="gr">'
+            catlist = deviation["category_path"].split("/")
+            categories = " / ".join(
+                ('<span class="crumb"><a href="http://www.deviantart.com/{}/">'
+                 '<span>{}</span></a></span>').format(cpath, cat.capitalize())
+                for cat, cpath in zip(
+                    catlist,
+                    itertools.accumulate(catlist, lambda t, c: t + "/" + c)
+                )
+            )
+            header = HEADER_TEMPLATE.format(
+                title=title,
+                url=url,
+                userurl=url[:url.find("/", 8)],
+                username=deviation["author"]["username"],
+                date=str(date),
+                categories=categories,
+            )
+
         html = JOURNAL_TEMPLATE.format(
             title=title,
-            html=journal["html"].replace('<div usr class="gr">', header, 1),
+            html=html.replace(needle, header, 1),
             shadow=shadow,
             css=css,
             cls=cls,
@@ -190,7 +199,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                r"(?:/((\d+)/([^/?]+)|\?catpath=/))?"]
     test = [
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-            "url": "1ca1c56a1ed2e3df2f8fed267c0497cba4717cab",
+            "url": "6a10e8e05401d61696ecf7a54c174e1c8ece7ba1",
             "keyword": "44fe61c5b20db8d90d4e06b86346630289f1db7d",
         }),
         ("http://h3813067.deviantart.com/favourites/", {
@@ -240,7 +249,7 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     subcategory = "journal"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/journal/?$"]
     test = [("http://shimoda7.deviantart.com/journal/", {
-        "url": "f081eb4f6807e77aac9fa0d4d1e62702d23acff5",
+        "url": "448d14df6b8398273d8e9437ad45dc3f9cdaf68d",
         "keyword": "9ddc2e130198395c1dfaa55c65b6bf63713ec0a8",
     })]
 
@@ -390,6 +399,14 @@ HEADER_TEMPLATE = """<div usr class="gr">
         </li>
     </ul>
 </div>
+"""
+
+HEADER_CUSTOM_TEMPLATE = """<div class='boxtop journaltop'>
+<h2>
+    <img src="http://st.deviantart.net/minish/gruzecontrol/icons/journal.gif?2" style="vertical-align:middle" alt=""/>
+    <a href="{url}">{title}</a>
+</h2>
+Journal Entry: <span>{date}</span>
 """
 
 
