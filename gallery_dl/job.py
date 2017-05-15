@@ -175,22 +175,39 @@ class KeywordJob(Job):
     def run(self):
         for msg in self.extractor:
             if msg[0] == Message.Url:
-                print("Keywords for filenames:")
+                print("\nKeywords for filenames:")
+                print("-----------------------")
                 self.update_kwdict(msg[2])
                 self.print_keywords(msg[2])
                 return
             elif msg[0] == Message.Directory:
                 print("Keywords for directory names:")
+                print("-----------------------------")
                 self.update_kwdict(msg[1])
                 self.print_keywords(msg[1])
 
     @staticmethod
-    def print_keywords(keywords):
+    def print_keywords(keywords, prefix="", suffix=""):
         """Print key-value pairs with formatting"""
-        offset = max(map(len, keywords.keys())) + 1
         for key, value in sorted(keywords.items()):
-            print(key, ":", " "*(offset-len(key)), value, sep="")
-        print()
+
+            if isinstance(value, dict):
+                nprefix = prefix + key + "["
+                KeywordJob.print_keywords(value, nprefix, suffix + "]")
+
+            elif isinstance(value, list):
+                if value and isinstance(value[0], dict):
+                    nprefix = prefix + key + "[][",
+                    KeywordJob.print_keywords(value[0], nprefix, suffix + "]")
+                else:
+                    print(prefix, key, "[]", suffix, sep="")
+                    for val in value:
+                        print("  - ", val, sep="")
+
+            else:
+                # string or number
+                print(prefix, key, suffix, sep="")
+                print("  ", value, sep="")
 
 
 class UrlJob(Job):
