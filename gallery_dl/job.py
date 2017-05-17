@@ -172,42 +172,38 @@ class DownloadJob(Job):
 class KeywordJob(Job):
     """Print available keywords"""
 
-    def run(self):
-        for msg in self.extractor:
-            if msg[0] == Message.Url:
-                print("\nKeywords for filenames:")
-                print("-----------------------")
-                self.update_kwdict(msg[2])
-                self.print_keywords(msg[2])
-                return
-            elif msg[0] == Message.Directory:
-                print("Keywords for directory names:")
-                print("-----------------------------")
-                self.update_kwdict(msg[1])
-                self.print_keywords(msg[1])
+    def handle_url(self, url, keywords):
+        print("\nKeywords for filenames:")
+        print("-----------------------")
+        self.print_keywords(keywords)
+        raise exception.StopExtraction()
+
+    def handle_directory(self, keywords):
+        print("Keywords for directory names:")
+        print("-----------------------------")
+        self.print_keywords(keywords)
 
     @staticmethod
-    def print_keywords(keywords, prefix="", suffix=""):
+    def print_keywords(keywords, prefix=""):
         """Print key-value pairs with formatting"""
+        suffix = "]" if prefix else ""
         for key, value in sorted(keywords.items()):
+            key = prefix + key + suffix
 
             if isinstance(value, dict):
-                nprefix = prefix + key + "["
-                KeywordJob.print_keywords(value, nprefix, suffix + "]")
+                KeywordJob.print_keywords(value, key + "[")
 
             elif isinstance(value, list):
                 if value and isinstance(value[0], dict):
-                    nprefix = prefix + key + "[][",
-                    KeywordJob.print_keywords(value[0], nprefix, suffix + "]")
+                    KeywordJob.print_keywords(value[0], key + "[][")
                 else:
-                    print(prefix, key, "[]", suffix, sep="")
+                    print(key, "[]", sep="")
                     for val in value:
-                        print("  - ", val, sep="")
+                        print("  -", val)
 
             else:
                 # string or number
-                print(prefix, key, suffix, sep="")
-                print("  ", value, sep="")
+                print(key, "\n  ", value, sep="")
 
 
 class UrlJob(Job):
