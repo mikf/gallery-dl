@@ -9,7 +9,7 @@
 """Extract manga-chapters from https://fascans.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 import json
 
 
@@ -19,19 +19,26 @@ class FallenangelsChapterExtractor(Extractor):
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "{chapter:>03} - {title}"]
     filename_fmt = "{manga}_{chapter:>03}_{page:>03}.{extension}"
-    pattern = [r"(?:https?://)?manga\.fascans\.com/manga/([^/]+)/(\d+)"]
-    test = [("https://manga.fascans.com/manga/chronos-ruler/20/1", {
-        "url": "4604a7914566cc2da0ff789aa178e2d1c8c241e3",
-        "keyword": "b2b9c7fd4696b9369d230c3069b5333b476f35d6",
-    })]
+    pattern = [(r"(?:https?://)?(manga|truyen)\.fascans\.com/"
+                r"manga/([^/]+)/(\d+)")]
+    test = [
+        ("https://manga.fascans.com/manga/chronos-ruler/20/1", {
+            "url": "4604a7914566cc2da0ff789aa178e2d1c8c241e3",
+            "keyword": "b2b9c7fd4696b9369d230c3069b5333b476f35d6",
+        }),
+        ("http://truyen.fascans.com/manga/hungry-marie/8", {
+            "url": "1f923d9cb337d5e7bbf4323719881794a951c6ae",
+            "keyword": "5520691dbaa26248bcd994e6c6a87bb39710f6c3",
+        }),
+    ]
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.manga, self.chapter = match.groups()
+        self.version, self.manga, self.chapter = match.groups()
 
     def items(self):
-        url = "https://manga.fascans.com/manga/{}/{}/1".format(
-            self.manga, self.chapter)
+        url = "https://{}.fascans.com/manga/{}/{}/1".format(
+            self.version, self.manga, self.chapter)
         page = self.request(url).text
         data = self.get_metadata(page)
         imgs = self.get_images(page)
@@ -44,10 +51,11 @@ class FallenangelsChapterExtractor(Extractor):
 
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""
+        lang = "vi" if self.version == "truyen" else "en"
         data = {
             "chapter": self.chapter,
-            "lang": "en",
-            "language": "English",
+            "lang": lang,
+            "language": util.code_to_language(lang),
         }
         return text.extract_all(page, (
             ("manga", 'name="description" content="', ' Chapter '),
