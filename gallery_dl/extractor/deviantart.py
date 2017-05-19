@@ -403,7 +403,8 @@ HEADER_TEMPLATE = """<div usr class="gr">
 
 HEADER_CUSTOM_TEMPLATE = """<div class='boxtop journaltop'>
 <h2>
-    <img src="http://st.deviantart.net/minish/gruzecontrol/icons/journal.gif?2" style="vertical-align:middle" alt=""/>
+    <img src="http://st.deviantart.net/minish/gruzecontrol/icons/journal.gif\
+?2" style="vertical-align:middle" alt=""/>
     <a href="{url}">{title}</a>
 </h2>
 Journal Entry: <span>{date}</span>
