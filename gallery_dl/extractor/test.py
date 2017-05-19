@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,56 +15,54 @@ from .. import extractor, exception
 class TestExtractor(Extractor):
     """Extractor to select and run the test URLs of other extractors
 
+    The general form is 'test:<categories>:<subcategories>:<indices>', where
+    <categories> and <subcategories> are comma-separated (sub)category names
+    and <indices> is a comma-seperated list of array indices.
+    To select all possible values for a field use the star '*' character or
+    leave the field empty.
+
     Examples:
-        - apply all test URLs of all pixiv extractors:
-            test:pixiv
+        - test:pixiv
+            run all pixiv tests
 
-        - apply all test URLs of the PixivWorkExtractor:
-            test:pixiv:work
+        - test:pixiv:user,favorite:0
+            run the first test of the PixivUser- and PixivFavoriteExtractor
 
-        - apply only the first test URL of the PixivWorkExtractor:
-            test:pixiv:work:0
-
-        - apply all second test URLs of all pixiv extractors:
-            test:pixiv:*:1
+        - test:
+            run all tests
     """
     category = "test"
-    pattern = [r"t(?:est)?:([^:]+)(?::([^:]*)(?::(\*|\d*))?)?$"]
+    pattern = [r"t(?:est)?:([^:]*)(?::([^:]*)(?::(\*|[\d,]*))?)?$"]
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.tcategory, self.tsubcategory, self.tindex = match.groups()
+        categories, subcategories, indices = match.groups()
+        self.categories = self._split(categories)
+        self.subcategories = self._split(subcategories)
+        self.indices = self._split(indices) or self
 
     def items(self):
-        # get all extractor classes matching the category
-        klasses = [
-            klass for klass in extractor.extractors()
-            if klass.category == self.tcategory
+        extractors = extractor.extractors()
+
+        if self.categories:
+            extractors = [
+                extr for extr in extractors
+                if extr.category in self.categories
+            ]
+
+        if self.subcategories:
+            extractors = [
+                extr for extr in extractors
+                if extr.subcategory in self.subcategories
+            ]
+
+        tests = [
+            test
+            for extr in extractors
+            if hasattr(extr, "test")
+            for index, test in enumerate(extr.test)
+            if str(index) in self.indices
         ]
-
-        # if a subcategory is given, find the respective class
-        if self.tsubcategory and self.tsubcategory != "*":
-            for klass in klasses:
-                if klass.subcategory == self.tsubcategory:
-                    klasses = (klass,)
-                    break
-            else:
-                raise exception.NotFoundError("test")
-
-        # if an index is given, only consider tests at this array position
-        if self.tindex and self.tindex != "*":
-            index = int(self.tindex)
-            tests = [
-                klass.test[index]
-                for klass in klasses
-                if len(klass.test) > index
-            ]
-        else:
-            tests = [
-                test
-                for klass in klasses if hasattr(klass, "test")
-                for test in klass.test
-            ]
 
         if not tests:
             raise exception.NotFoundError("test")
@@ -72,3 +70,13 @@ class TestExtractor(Extractor):
         yield Message.Version, 1
         for test in tests:
             yield Message.Queue, test[0]
+
+    @staticmethod
+    def __contains__(_):
+        return True
+
+    @staticmethod
+    def _split(value):
+        if value and value != "*":
+            return value.split(",")
+        return None
