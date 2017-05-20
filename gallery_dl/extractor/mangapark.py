@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015, 2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,37 +8,23 @@
 
 """Extract manga-chapters and entire manga from http://mangapark.me/"""
 
-from .common import Extractor, Message
+from .common import Extractor, MangaExtractor, Message
 from .. import text
 
 
-class MangaparkMangaExtractor(Extractor):
-    """Extractor for mangas from mangapark.me"""
+class MangaparkMangaExtractor(MangaExtractor):
+    """Extractor for manga from mangapark.me"""
     category = "mangapark"
-    subcategory = "manga"
-    pattern = [r"(?:https?://)?(?:www\.)?mangapark\.me/manga/([^/]+)$"]
+    pattern = [r"(?:https?://)?(?:www\.)?(mangapark\.me/manga/[^/]+)$"]
+    root = "http://mangapark.me"
     test = [("http://mangapark.me/manga/mushishi", {
         "url": "9902e342af71af19a5ac20fcd01950b165acf119",
     })]
-    url_base = "http://mangapark.me"
 
-    def __init__(self, match):
-        Extractor.__init__(self)
-        self.url_title = match.group(1)
-
-    def items(self):
-        yield Message.Version, 1
-        for chapter in self.get_chapters():
-            yield Message.Queue, self.url_base + chapter
-
-    def get_chapters(self):
-        """Return a list of all chapter urls"""
-        page = self.request(self.url_base + "/manga/" + self.url_title).text
+    def chapter_paths(self, page):
         needle = '<a class="ch sts sts_1" target="_blank" href="'
         pos = page.index('<div id="list" class="book-list">')
-        return reversed(list(
-            text.extract_iter(page, needle, '"', pos)
-        ))
+        return text.extract_iter(page, needle, '"', pos)
 
 
 class MangaparkChapterExtractor(Extractor):

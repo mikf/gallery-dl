@@ -8,7 +8,7 @@
 
 """Extract manga-chapters and entire manga from http://kissmanga.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, MangaExtractor, Message
 from .. import text, cloudflare, aes
 from ..cache import cache
 import re
@@ -38,25 +38,15 @@ class KissmangaExtractor(Extractor):
     request = cloudflare.request_func
 
 
-class KissmangaMangaExtractor(KissmangaExtractor):
-    """Extractor for mangas from kissmanga.com"""
-    subcategory = "manga"
+class KissmangaMangaExtractor(KissmangaExtractor, MangaExtractor):
+    """Extractor for manga from kissmanga.com"""
     pattern = [r"(?:https?://)?(?:www\.)?kissmanga\.com/Manga/[^/]+/?$"]
     test = [("http://kissmanga.com/Manga/Dropout", {
         "url": "992befdd64e178fe5af67de53f8b510860d968ca",
     })]
 
-    def items(self):
-        yield Message.Version, 1
-        for chapter in self.get_chapters():
-            yield Message.Queue, self.root + chapter
-
-    def get_chapters(self):
-        """Return a list of all chapter urls"""
-        page = self.request(self.url).text
-        return reversed(list(
-            text.extract_iter(page, '<td>\n<a href="', '"')
-        ))
+    def chapter_paths(self, page):
+        return text.extract_iter(page, '<td>\n<a href="', '"')
 
 
 class KissmangaChapterExtractor(KissmangaExtractor):

@@ -8,7 +8,7 @@
 
 """Base classes for extractors for FoOlSlide based sites"""
 
-from .common import Extractor, Message
+from .common import Extractor, MangaExtractor, Message
 from .. import text, util
 import json
 
@@ -96,24 +96,17 @@ class FoolslideChapterExtractor(Extractor):
         return json.loads(text.extract(page, needle, ";", pos)[0])
 
 
-class FoolslideMangaExtractor(Extractor):
+class FoolslideMangaExtractor(MangaExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
-    subcategory = "manga"
     scheme = "https"
 
-    def __init__(self, match, url=None):
-        Extractor.__init__(self)
-        self.url = url or self.scheme + "://" + match.group(1)
+    def request(self, url):
+        return MangaExtractor.request(
+            self, url, encoding="utf-8", method="post", data={"adult": "true"}
+        )
 
-    def items(self):
-        yield Message.Version, 1
-        for url in self.chapters():
-            yield Message.Queue, url
-
-    def chapters(self):
+    def chapters(self, page):
         """Return a list of all chapter urls"""
-        page = self.request(self.url, encoding="utf-8",
-                            method="post", data={"adult": "true"}).text
-        return reversed(list(text.extract_iter(
+        return list(text.extract_iter(
             page, '<div class="title"><a href="', '"'
-        )))
+        ))

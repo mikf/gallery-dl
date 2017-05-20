@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,19 +11,6 @@
 from .common import Extractor, Message
 from .. import text
 import json
-
-
-class HentaicdnMangaExtractor(Extractor):
-    """Base class for extractors for mangas"""
-    subcategory = "manga"
-
-    def items(self):
-        yield Message.Version, 1
-        for chapter in reversed(list(self.get_chapters())):
-            yield Message.Queue, chapter
-
-    def get_chapters(self):
-        """Return a list of all chapter urls"""
 
 
 class HentaicdnChapterExtractor(Extractor):

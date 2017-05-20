@@ -6,17 +6,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract hentaimanga from https://hentaihere.com/"""
+"""Extract hentai-manga from https://hentaihere.com/"""
 
+from .common import MangaExtractor
 from .. import text
 from . import hentaicdn
 import re
 
 
-class HentaihereMangaExtractor(hentaicdn.HentaicdnMangaExtractor):
-    """Extractor for mangas from hentaihere.com"""
+class HentaihereMangaExtractor(MangaExtractor):
+    """Extractor for hmanga from hentaihere.com"""
     category = "hentaihere"
-    pattern = [r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/?$"]
+    pattern = [r"(?:https?://)?(?:www\.)?(hentaihere\.com/m/S\d+)/?$"]
+    scheme = "https"
     test = [
         ("https://hentaihere.com/m/S13812", {
             "url": "d1ba6e28bb2162e844f8559c2b2725ba0a093559",
@@ -26,15 +28,10 @@ class HentaihereMangaExtractor(hentaicdn.HentaicdnMangaExtractor):
         }),
     ]
 
-    def __init__(self, match):
-        hentaicdn.HentaicdnMangaExtractor.__init__(self)
-        self.gid = match.group(1)
-
-    def get_chapters(self):
-        return text.extract_iter(
-            self.request("https://hentaihere.com/m/S" + self.gid).text,
-            '<li class="sub-chp clearfix">\n<a href="', '"'
-        )
+    def chapters(self, page):
+        return list(text.extract_iter(
+            page, '<li class="sub-chp clearfix">\n<a href="', '"'
+        ))
 
 
 class HentaihereChapterExtractor(hentaicdn.HentaicdnChapterExtractor):

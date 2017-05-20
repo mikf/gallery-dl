@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,13 +14,12 @@ from .mangareader import MangareaderMangaExtractor, MangareaderChapterExtractor
 class MangapandaBase():
     """Base class for mangapanda extractors"""
     category = "mangapanda"
-    url_base = "http://www.mangapanda.com"
+    root = "http://www.mangapanda.com"
 
 
 class MangapandaMangaExtractor(MangapandaBase, MangareaderMangaExtractor):
-    """Extractor for mangas from mangapanda.com"""
-    subcategory = "manga"
-    pattern = [r"(?:https?://)?(?:www\.)?mangapanda\.com(/[^/]+)$"]
+    """Extractor for manga from mangapanda.com"""
+    pattern = [r"(?:https?://)?((?:www\.)?mangapanda\.com/[^/]+)$"]
     test = [("http://www.mangapanda.com/mushishi", {
         "url": "50a1ba730b85426b904da256c80f68ba6a8a2566",
     })]

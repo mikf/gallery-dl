@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,36 +8,25 @@
 
 """Extract manga pages from http://www.thespectrum.net/manga_scans/"""
 
-from .common import Extractor, AsynchronousExtractor, Message
+from .common import MangaExtractor, AsynchronousExtractor, Message
 from .. import text
 
 
-class SpectrumnexusMangaExtractor(Extractor):
-    """Extractor for mangas from thespectrum.net"""
+class SpectrumnexusMangaExtractor(MangaExtractor):
+    """Extractor for manga from thespectrum.net"""
     category = "spectrumnexus"
-    subcategory = "manga"
-    pattern = [r"(?:https?://)?view\.thespectrum\.net/series/([^\.]+)\.html$"]
+    pattern = [r"(?:https?://)?(view\.thespectrum\.net/series/[^.]+\.html)#?$"]
+    reverse = False
     test = [("http://view.thespectrum.net/series/kare-kano-volume-01.html", {
         "url": "b2b175aad5ef1701cc4aee7c24f1ca3a93aba9cb",
     })]
-    url_base = "http://view.thespectrum.net/series/"
 
-    def __init__(self, match):
-        Extractor.__init__(self)
-        self.url = self.url_base + match.group(1) + ".html"
-
-    def items(self):
-        yield Message.Version, 1
-        for chapter in self.get_chapters():
-            yield Message.Queue, self.url + "?ch=" + chapter.replace(" ", "+")
-
-    def get_chapters(self):
-        """Return a list of all chapter identifiers"""
-        page = self.request(self.url).text
-        page = text.extract(
-            page, '<select class="selectchapter"', '</select>'
-        )[0]
-        return text.extract_iter(page, '<option value="', '"')
+    def chapters(self, page):
+        page = text.extract(page, 'class="selectchapter"', '</select>')[0]
+        return [
+            self.url + "?ch=" + chapter.replace(" ", "+")
+            for chapter in text.extract_iter(page, '<option value="', '"')
+        ]
 
 
 class SpectrumnexusChapterExtractor(AsynchronousExtractor):

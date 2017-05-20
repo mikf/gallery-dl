@@ -81,6 +81,40 @@ class AsynchronousExtractor(Extractor):
         put(None)
 
 
+class MangaExtractor(Extractor):
+
+    subcategory = "manga"
+    scheme = "http"
+    root = ""
+    reverse = True
+
+    def __init__(self, match, url=None):
+        Extractor.__init__(self)
+        self.url = url or self.scheme + "://" + match.group(1)
+
+    def items(self):
+        self.login()
+        page = self.request(self.url).text
+
+        chapters = self.chapters(page)
+        if self.reverse:
+            chapters.reverse()
+
+        yield Message.Version, 1
+        for chapter in chapters:
+            yield Message.Queue, chapter
+
+    def login(self):
+        """Login and set necessary cookies"""
+
+    def chapters(self, page):
+        """Return a list of all chapter urls"""
+        return [self.root + path for path in self.chapter_paths(page)]
+
+    def chapter_paths(self, page):
+        return []
+
+
 def safe_request(session, url, method="GET", *args, **kwargs):
     tries = 0
     while True:
