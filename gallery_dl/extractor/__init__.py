@@ -66,7 +66,6 @@ modules = [
     "twitter",
     "worldthree",
     "yandere",
-    "yomanga",
     "yonkouprod",
     "imagehosts",
     "recursive",
