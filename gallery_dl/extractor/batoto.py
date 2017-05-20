@@ -8,15 +8,16 @@
 
 """Extract manga chapters from https://bato.to/"""
 
-from .common import Extractor, AsynchronousExtractor, Message
+from .common import MangaExtractor, AsynchronousExtractor, Message
 from .. import text, util, exception
 from ..cache import cache
 import re
 
 
-class BatotoExtractor(Extractor):
+class BatotoExtractor():
     """Base class for batoto extractors"""
     category = "batoto"
+    scheme = "https"
     root = "https://bato.to"
 
     def login(self):
@@ -56,34 +57,19 @@ class BatotoExtractor(Extractor):
         return {c: response.cookies[c] for c in ("member_id", "pass_hash")}
 
 
-class BatotoMangaExtractor(BatotoExtractor):
-    """Extractor for mangas from bato.to"""
-    subcategory = "manga"
-    pattern = [r"(?:https?://)?(?:www\.)?bato\.to/comic/_/comics/.*-r\d+"]
+class BatotoMangaExtractor(BatotoExtractor, MangaExtractor):
+    """Extractor for manga from bato.to"""
+    pattern = [r"(?:https?://)?(?:www\.)?(bato\.to/comic/_/comics/.*-r\d+)"]
     test = [("http://bato.to/comic/_/comics/aria-r2007", {
         "url": "a38585b0339587666d772ee06f2a60abdbf42a97",
     })]
 
-    def __init__(self, match):
-        BatotoExtractor.__init__(self)
-        self.url = match.group(0)
-
-    def items(self):
-        self.login()
-        yield Message.Version, 1
-        for chapter in self.get_chapters():
-            yield Message.Queue, chapter
-
-    def get_chapters(self):
-        """Return a list of all chapter urls"""
+    def chapters(self, page):
         # TODO: filter by language / translator
         needle = ('<td style="border-top:0;">\n           '
                   '<a href="http://bato.to/reader#')
-        page = self.request(self.url).text
-        return reversed([
-            self.root + "/reader#" + mangahash
-            for mangahash in text.extract_iter(page, needle, '"')
-        ])
+        return [self.root + "/reader#" + mangahash
+                for mangahash in text.extract_iter(page, needle, '"')]
 
 
 class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):

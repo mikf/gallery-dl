@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,36 +8,24 @@
 
 """Extract manga-chapters and entire manga from http://www.mangahere.co/"""
 
-from .common import Extractor, AsynchronousExtractor, Message
+from .common import MangaExtractor, AsynchronousExtractor, Message
 from .. import text
 import re
 
 
-class MangahereMangaExtractor(Extractor):
-    """Extractor for mangas from mangahere.co"""
+class MangahereMangaExtractor(MangaExtractor):
+    """Extractor for manga from mangahere.co"""
     category = "mangahere"
-    subcategory = "manga"
-    pattern = [r"(?:https?://)?(?:www\.)?mangahere\.co/manga/([^/]+)/?$"]
+    pattern = [r"(?:https?://)?((?:www\.)?mangahere\.co/manga/[^/]+/?)$"]
     test = [("http://www.mangahere.co/manga/aria/", {
         "url": "77d96842292a6a341e8937816ed45cc09b538cf0",
     })]
 
-    def __init__(self, match):
-        Extractor.__init__(self)
-        self.url = match.group(0) + "/"
-
-    def items(self):
-        yield Message.Version, 1
-        for chapter in self.get_chapters():
-            yield Message.Queue, chapter
-
-    def get_chapters(self):
-        """Return a list of all chapter urls"""
-        page = self.request(self.url).text
-        return reversed(list(text.extract_iter(
+    def chapters(self, page):
+        return list(text.extract_iter(
             page, '<a class="color_0077" href="', '"',
             page.index('<div class="detail_list">')
-        )))
+        ))
 
 
 class MangahereChapterExtractor(AsynchronousExtractor):

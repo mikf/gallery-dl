@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015,2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,32 +8,21 @@
 
 """Extract images from http://www.hbrowse.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, MangaExtractor, Message
 from .. import text
 import json
 
 
-class HbrowseMangaExtractor(Extractor):
-    """Extractor for mangas from hbrowse.com"""
+class HbrowseMangaExtractor(MangaExtractor):
+    """Extractor for manga from hbrowse.com"""
     category = "hbrowse"
-    subcategory = "manga"
-    pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/?$"]
+    pattern = [r"(?:https?://)?((?:www\.)?hbrowse\.com/\d+)/?$"]
+    reverse = False
     test = [("http://www.hbrowse.com/10363", {
         "url": "4d9def5df21c23f8c3d36de2076c189c02ea43bd",
     })]
 
-    def __init__(self, match):
-        Extractor.__init__(self)
-        self.gid = match.group(1)
-
-    def items(self):
-        yield Message.Version, 1
-        for url in self.get_chapters():
-            yield Message.Queue, url
-
-    def get_chapters(self):
-        """Return a list of all chapter urls"""
-        page = self.request("http://www.hbrowse.com/" + self.gid).text
+    def chapters(self, page):
         needle = '<td class="listMiddle">\n<a class="listLink" href="'
         return list(text.extract_iter(page, needle, '"'))
 

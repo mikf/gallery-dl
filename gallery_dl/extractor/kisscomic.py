@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,13 +29,9 @@ class KisscomicComicExtractor(KisscomicExtractor,
         "url": "8c180e2ec2492712b089ca091c54909cb0fe3d4a",
     })]
 
-    def get_chapters(self):
-        """Return a list of all chapter urls"""
-        page = self.request(self.url).text
+    def chapter_paths(self, page):
         pos = page.find('<div class="list-chapter mCustomScrollbar">')
-        return reversed(list(
-            text.extract_iter(page, '<li><a href="', '"', pos)
-        ))
+        return text.extract_iter(page, '<li><a href="', '"', pos)
 
 
 class KisscomicIssueExtractor(KisscomicExtractor,

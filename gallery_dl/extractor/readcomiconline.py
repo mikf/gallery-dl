@@ -30,12 +30,8 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineExtractor,
         "url": "c5a530538a30b176916e30cbe223a93d83cb2691",
     })]
 
-    def get_chapters(self):
-        """Return a list of all chapter urls"""
-        page = self.request(self.url).text
-        return reversed(list(
-            text.extract_iter(page, '                <li><a href="', '"')
-        ))
+    def chapter_paths(self, page):
+        return text.extract_iter(page, '                <li><a href="', '"')
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineExtractor,

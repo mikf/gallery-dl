@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract hentaimanga from https://hentai2read.com/"""
+"""Extract hentai-manga from https://hentai2read.com/"""
 
+from .common import MangaExtractor
 from .. import text
 from . import hentaicdn
 import re
 import json
 
 
-class Hentai2readMangaExtractor(hentaicdn.HentaicdnMangaExtractor):
-    """Extractor for mangas from hentai2read.com"""
+class Hentai2readMangaExtractor(MangaExtractor):
+    """Extractor for hmanga from hentai2read.com"""
     category = "hentai2read"
-    pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/?$"]
+    pattern = [r"(?:https?://)?(?:www\.)?(hentai2read\.com/[^/]+/?)$"]
     test = [
         ("http://hentai2read.com/amazon_elixir/", {
             "url": "d1f87b71d3c97b49a478cdfb6ae96b2d9520ab78",
@@ -27,16 +28,11 @@ class Hentai2readMangaExtractor(hentaicdn.HentaicdnMangaExtractor):
         })
     ]
 
-    def __init__(self, match):
-        hentaicdn.HentaicdnMangaExtractor.__init__(self)
-        self.url_title = match.group(1)
-
-    def get_chapters(self):
+    def chapters(self, page):
         page = text.extract(
-            self.request("http://hentai2read.com/" + self.url_title).text,
-            '<ul class="nav-chapters remove-margin-b">', '</ul>\n</div>'
+            page, '<ul class="nav-chapters remove-margin-b">', '</ul>\n</div>'
         )[0]
-        return text.extract_iter(page, '<li>\n<a href="', '"')
+        return list(text.extract_iter(page, '<li>\n<a href="', '"'))
 
 
 class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
