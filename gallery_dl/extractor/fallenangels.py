@@ -6,10 +6,11 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from https://fascans.com/"""
+"""Extract manga-chapters from https://www.fascans.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, MangaExtractor, Message
 from .. import text, util
+import re
 import json
 
 
@@ -66,3 +67,22 @@ class FallenangelsChapterExtractor(Extractor):
     def get_images(page):
         """Return a list of all images in this chapter"""
         return json.loads(text.extract(page, "var pages = ", ";")[0])
+
+
+class FallenangelsMangaExtractor(MangaExtractor):
+    """Extractor for manga from fascans.com"""
+    category = "fallenangels"
+    pattern = [r"(?:https?://)?((manga|truyen)\.fascans\.com/manga/[^/]+)/?$"]
+    scheme = "https"
+    test = [
+        ("http://manga.fascans.com/manga/trinity-seven", {
+            "url": "8da3d4bcbadc173e5b23c141a0e646b35f41b9b0",
+        }),
+        ("https://truyen.fascans.com/manga/rakudai-kishi-no-eiyuutan", {
+            "url": "d332d08ce522c7943cd80d3fd361391190444a26",
+        }),
+    ]
+
+    def chapters(self, page):
+        pattern = r'<h3 class="chapter-title-rtl">\s+<a href="([^"]+)"'
+        return re.findall(pattern, page)
