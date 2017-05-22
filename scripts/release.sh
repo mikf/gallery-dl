@@ -24,7 +24,7 @@ update() {
     cd "${ROOTDIR}"
     echo Updating version to ${NEWVERSION}
     sed -i "s#\"${PYVERSION}\"#\"${NEWVERSION}\"#" "gallery_dl/version.py"
-    sed -i "s#/v${OLDVERSION}/#/v${NEWVERSION}/#" "README.rst"
+    sed -i "s#v${OLDVERSION}#v${NEWVERSION}#" "README.rst"
 }
 
 update-dev() {

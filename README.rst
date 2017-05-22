@@ -179,7 +179,7 @@ or you can provide them directly via the
 .. _Requests: https://pypi.python.org/pypi/requests/
 .. _PyPI:     https://pypi.python.org/pypi
 .. _pip:      https://pip.pypa.io/en/stable/
-.. _stable:   https://github.com/mikf/gallery-dl/archive/v0.8.3.zip
+.. _stable:   https://github.com/mikf/gallery-dl/archive/v0.8.4.zip
 .. _dev:      https://github.com/mikf/gallery-dl/archive/master.zip
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
