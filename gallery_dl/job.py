@@ -53,13 +53,14 @@ class Job():
         except exception.StopExtraction:
             pass
         except Exception as exc:
+            msg = "An unexpected error occurred:"
             try:
                 err = ": ".join(exc.args[0].reason.args[0].split(": ")[1:])
+                log.error("%s: %s - %s", msg, exc.__class__.__name__, err)
+                return
             except Exception:
-                err = str(exc)
-            log.error("An unexpected error occurred: %s - %s",
-                      exc.__class__.__name__, err)
-            log.debug("Traceback", exc_info=True)
+                pass
+            log.error(msg, exc_info=True)
 
     def dispatch(self, msg):
         """Call the appropriate message handler"""
