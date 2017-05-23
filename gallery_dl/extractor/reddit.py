@@ -34,7 +34,11 @@ class RedditExtractor(Extractor):
                 )
             )
             for url in urls:
-                if regex.match(url):
+                if url[0] == "#":
+                    continue
+                elif url[0] == "/":
+                    url = "nofollow:https://www.reddit.com" + url
+                elif regex.match(url):
                     url = "nofollow:" + url
                 yield Message.Queue, url
 
@@ -61,7 +65,8 @@ class RedditSubmissionExtractor(RedditExtractor):
     """Extractor for images from a submission on reddit.com"""
     subcategory = "subreddit"
     pattern = [(r"(?:https?://)?(?:m\.|www\.)?reddit\.com/r/[^/]+"
-                r"/comments/([^/]+)")]
+                r"/comments/([a-z0-9]+)"),
+               (r"(?:https?://)?redd\.it/([a-z0-9]+)")]
 
     def __init__(self, match):
         RedditExtractor.__init__(self)

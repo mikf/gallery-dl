@@ -214,9 +214,10 @@ class UrlJob(Job):
         Job.__init__(self, url)
         self.depth = depth
         if depth == self.maxdepth:
-            self.handle_queue = print
+            self.handle_queue = self._print
 
-    def handle_url(self, url, _):
+    @staticmethod
+    def handle_url(url, _):
         print(url)
 
     def handle_queue(self, url):
@@ -224,6 +225,12 @@ class UrlJob(Job):
             UrlJob(url, self.depth + 1).run()
         except exception.NoExtractorError:
             pass
+
+    @staticmethod
+    def _print(url):
+        if url.startswith("nofollow:"):
+            url = url[9:]
+        print(url)
 
 
 class TestJob(DownloadJob):
