@@ -10,7 +10,7 @@
 
 import re
 from .common import Extractor, Message
-from .. import adapter
+from .. import extractor, adapter
 
 
 class RecursiveExtractor(Extractor):
@@ -29,5 +29,6 @@ class RecursiveExtractor(Extractor):
     def items(self):
         page = self.request(self.url).text
         yield Message.Version, 1
-        for match in re.finditer(r"https?://[^\s\"']+", page):
-            yield Message.Queue, match.group(0)
+        with extractor.blacklist("directlink"):
+            for match in re.finditer(r"https?://[^\s\"']+", page):
+                yield Message.Queue, match.group(0)

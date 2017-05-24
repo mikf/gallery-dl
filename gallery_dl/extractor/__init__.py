@@ -69,6 +69,7 @@ modules = [
     "yandere",
     "yonkouprod",
     "imagehosts",
+    "directlink",
     "recursive",
     "test",
 ]
