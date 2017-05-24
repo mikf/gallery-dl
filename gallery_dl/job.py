@@ -118,17 +118,7 @@ class DownloadJob(Job):
         Job.__init__(self, url)
         self.pathfmt = util.PathFormat(self.extractor)
         self.downloaders = {}
-        self.queue = None
         self.out = output.select()
-
-    def run(self):
-        Job.run(self)
-        if self.queue:
-            for url in self.queue:
-                try:
-                    DownloadJob(url).run()
-                except exception.NoExtractorError:
-                    pass
 
     def handle_url(self, url, keywords):
         """Download the resource specified in 'url'"""
@@ -144,11 +134,10 @@ class DownloadJob(Job):
         self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url):
-        """Add url to work-queue"""
         try:
-            self.queue.append(url)
-        except AttributeError:
-            self.queue = [url]
+            DownloadJob(url).run()
+        except exception.NoExtractorError:
+            pass
 
     def handle_headers(self, headers):
         self.get_downloader("http:").set_headers(headers)
