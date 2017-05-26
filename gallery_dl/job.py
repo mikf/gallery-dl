@@ -21,7 +21,8 @@ class Job():
         self.extractor = extractor.find(url)
         if self.extractor is None:
             raise exception.NoExtractorError(url)
-        self.extractor.log.debug("Using %s", self.extractor.__class__.__name__)
+        self.extractor.log.debug("Using %s for %s",
+            self.extractor.__class__.__name__, url)
 
         items = config.get(("images",))
         if items:
