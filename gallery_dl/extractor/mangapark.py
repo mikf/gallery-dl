@@ -39,8 +39,8 @@ class MangaparkChapterExtractor(Extractor):
                 r"([^/]+/s(\d+)(?:/v([^/]+))?/c(\d+)(?:([^/]+)|/e(\d+))?)")]
     test = [
         ("http://mangapark.me/manga/gosu/s2/c55", {
-            "url": "482d4a27c1e7f03cff8afac145d06f3ddeac82bb",
-            "keyword": "bd97ca24ef344b44292910384215ef3f1005ea2e",
+            "url": "fefe84492d9118de5962563fbecb9362051c52d5",
+            "keyword": "652b38c40bdfb5592456b6e7524a3acfdef9fae6",
         }),
         (("http://mangapark.me/manga/"
           "ad-astra-per-aspera-hata-kenjirou/s1/c1.2"), {
