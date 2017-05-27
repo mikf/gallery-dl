@@ -20,6 +20,12 @@ TESTDATA_FMT = """
     }})]
 """
 
+TESTDATA_EXCEPTION_FMT = """
+    test = [("{}", {{
+        "exception": "{}",
+    }})]
+"""
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--content", action="store_true")
@@ -39,10 +45,18 @@ def main():
     config.load()
     for url in urls:
         tjob = job.TestJob(url, content=args.content)
-        tjob.run()
+        try:
+            tjob.run()
+        except Exception as exc:
+            fmt = TESTDATA_EXCEPTION_FMT
+            data = (exc.__class__.__name__,)
+        else:
+            fmt = TESTDATA_FMT
+            data = (tjob.hash_url.hexdigest(),
+                    tjob.hash_keyword.hexdigest(),
+                    tjob.hash_content.hexdigest())
         print(tjob.extractor.__class__.__name__)
-        print(TESTDATA_FMT.format(url, tjob.hash_url.hexdigest(),
-            tjob.hash_keyword.hexdigest(), tjob.hash_content.hexdigest()))
+        print(fmt.format(url, *data))
 
 if __name__ == '__main__':
     main()
