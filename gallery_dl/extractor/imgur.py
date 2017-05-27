@@ -30,6 +30,8 @@ class ImgurExtractor(Extractor):
 
     @staticmethod
     def _prepare(image):
+        if image["prefer_video"]:
+            image["ext"] = ".mp4"
         url = "https://i.imgur.com/" + image["hash"] + image["ext"]
         image["extension"] = image["ext"][1:]
         return url
@@ -40,6 +42,7 @@ class ImgurExtractor(Extractor):
             del data["views"]
             del data["adConfig"]
             del data["isAd"]
+            del data["date"]
         except KeyError:
             pass
         return data
@@ -57,12 +60,17 @@ class ImgurImageExtractor(ImgurExtractor):
     test = [
         ("https://imgur.com/21yMxCS", {
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
-            "keyword": "2270c7a1365c43012231359d2d74d506be6b1a19",
+            "keyword": "834b6714d6daf0f8df99f6261e9bb5f3ccbbcfdb",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
         }),
-        ("https://i.imgur.com/21yMxCS.png", {
+        ("https://i.imgur.com/21yMxCS.png", {  # direct link
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
-            "keyword": "2270c7a1365c43012231359d2d74d506be6b1a19",
+            "keyword": "834b6714d6daf0f8df99f6261e9bb5f3ccbbcfdb",
+        }),
+        ("http://imgur.com/0gybAXR", {  # gifv/mp4 video
+            "url": "a2220eb265a55b0c95e0d3d721ec7665460e3fd7",
+            "keyword": "94c3d9df06db5ffd1840be3b94c100ced19b4751",
+            "content": "a3c080e43f58f55243ab830569ba02309d59abfc",
         }),
         ("https://imgur.com/zzzzzzz", {
             "exception": exception.NotFoundError,
