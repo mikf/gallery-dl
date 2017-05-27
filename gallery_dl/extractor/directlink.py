@@ -17,11 +17,11 @@ class DirectlinkExtractor(Extractor):
     category = "directlink"
     directory_fmt = []
     filename_fmt = "{filename}"
-    pattern = [r"https?://[^?&#]+\.(?:jpe?g|png|gifv?|webm|mp4)"]
-    test = [("https://i.imgur.com/21yMxCS.png", {
-        "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
-        "keyword": "6a9636d8dd6f71f14d6d20d24153fc83a9895ed9",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    pattern = [r"https?://[^?&#]+\.(?:jpe?g|png|gif|webm|mp4|ogg)"]
+    test = [(("https://photos.smugmug.com/The-World/Hawaii/"
+              "i-SWz2K6n/2/X3/IMG_0311-X3.jpg"), {
+        "url": "32ee1045881e17ef3f13a9958595afa42421ec6c",
+        "keyword": "5bd7871a6957e1693c43abf31d7c0a38e39a81de",
     })]
 
     def __init__(self, match):
