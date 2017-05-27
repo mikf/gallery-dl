@@ -15,6 +15,7 @@ from .extractor.message import Message
 
 class Job():
     """Base class for Job-types"""
+    ufile = None
 
     def __init__(self, url):
         self.url = url
@@ -111,6 +112,10 @@ class Job():
         kwdict["category"] = self.extractor.category
         kwdict["subcategory"] = self.extractor.subcategory
 
+    def _write_unsupported(self, url):
+        if self.ufile:
+            print(url, file=self.ufile, flush=True)
+
 
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
@@ -138,7 +143,7 @@ class DownloadJob(Job):
         try:
             DownloadJob(url).run()
         except exception.NoExtractorError:
-            pass
+            self._write_unsupported(url)
 
     def handle_headers(self, headers):
         self.get_downloader("http:").set_headers(headers)
@@ -205,7 +210,7 @@ class UrlJob(Job):
         Job.__init__(self, url)
         self.depth = depth
         if depth == self.maxdepth:
-            self.handle_queue = self._print
+            self.handle_queue = print
 
     @staticmethod
     def handle_url(url, _):
@@ -215,13 +220,7 @@ class UrlJob(Job):
         try:
             UrlJob(url, self.depth + 1).run()
         except exception.NoExtractorError:
-            pass
-
-    @staticmethod
-    def _print(url):
-        if url.startswith("nofollow:"):
-            url = url[9:]
-        print(url)
+            self._write_unsupported(url)
 
 
 class TestJob(DownloadJob):

@@ -100,8 +100,14 @@ def main():
                         file = open(args.inputfile)
                     import itertools
                     urls = itertools.chain(urls, sanatize_input(file))
-                except OSError as err:
-                    log.error(err)
+                except OSError as exc:
+                    log.warning("input-file: %s", exc)
+
+            if args.unsupportedfile:
+                try:
+                    job.Job.ufile = open(args.unsupportedfile, "w")
+                except OSError as exc:
+                    log.warning("unsupported-URL file: %s", exc)
 
             for url in urls:
                 try:

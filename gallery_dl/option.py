@@ -67,7 +67,7 @@ def build_parser():
     )
     parser.add_argument(
         "-g", "--get-urls", dest="list_urls", action="count",
-        help="Print download urls",
+        help="Print URLs instead of downloading",
     )
     parser.add_argument(
         "-j", "--dump-json", dest="list_data", action="store_true",
@@ -138,6 +138,11 @@ def build_parser():
         "-o", "--option",
         metavar="OPT", action=ParseAction, dest="options", default=[],
         help="Additional '<key>=<value>' option values",
+    )
+    parser.add_argument(
+        "--write-unsupported", metavar="FILE", dest="unsupportedfile",
+        help=("Write URLs, which get emitted by other extractors but cannot "
+              "be handled, to FILE"),
     )
     parser.add_argument(
         "--list-extractors", dest="list_extractors", action="store_true",
