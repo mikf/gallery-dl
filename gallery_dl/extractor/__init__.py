@@ -23,6 +23,7 @@ modules = [
     "exhentai",
     "fallenangels",
     "gelbooru",
+    "gfycat",
     "gomanga",
     "hbrowse",
     "hentai2read",
