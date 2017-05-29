@@ -69,14 +69,18 @@ class RedditExtractor(Extractor):
 class RedditSubredditExtractor(RedditExtractor):
     """Extractor for images from subreddits on reddit.com"""
     subcategory = "subreddit"
-    pattern = [r"(?:https?://)?(?:m\.|www\.)?reddit\.com/r/([^/]+)/?$"]
+    pattern = [r"(?:https?://)?(?:m\.|www\.)?reddit\.com/r/([^/?&#]+)"
+               r"(/[a-z]+)?/?"
+               r"(?:\?.*?(?:\bt=([a-z]+))?)?$"]
 
     def __init__(self, match):
         RedditExtractor.__init__(self)
-        self.subreddit = match.group(1)
+        self.subreddit, self.order, self.timeframe = match.groups()
 
     def submissions(self):
-        return self.api.submissions_subreddit(self.subreddit)
+        subreddit = self.subreddit + (self.order or "")
+        params = {"t": self.timeframe} if self.timeframe else {}
+        return self.api.submissions_subreddit(subreddit, params)
 
 
 class RedditSubmissionExtractor(RedditExtractor):
@@ -111,10 +115,11 @@ class RedditAPI():
         return (submission["data"]["children"][0]["data"],
                 self._unfold(comments))
 
-    def submissions_subreddit(self, subreddit):
+    def submissions_subreddit(self, subreddit, params):
         """Collect all (submission, comments)-tuples of a subreddit"""
         endpoint = "/r/" + subreddit + "/.json"
-        params = {"raw_json": 1, "limit": 100}
+        params["raw_json"] = 1
+        params["limit"] = 100
         return self._pagination(endpoint, params)
 
     def authenticate(self):
@@ -130,7 +135,6 @@ class RedditAPI():
             "grant_type": "https://oauth.reddit.com/grants/installed_client",
             "device_id": "DO_NOT_TRACK_THIS_DEVICE",
         }
-        self.log.info("Requesting access token")
         response = self.session.post(url, data=data, auth=(client_id, ""))
         if response.status_code != 200:
             raise exception.AuthenticationError()
