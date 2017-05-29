@@ -199,8 +199,8 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                r"(?:/((\d+)/([^/?]+)|\?catpath=/))?"]
     test = [
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-            "url": "6a10e8e05401d61696ecf7a54c174e1c8ece7ba1",
-            "keyword": "44fe61c5b20db8d90d4e06b86346630289f1db7d",
+            "url": "65d070eae215b9375b4437a1ab4659efdad204e3",
+            "keyword": "e5f3aaf35274e976ae81c5b151e650eea1dde775",
         }),
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
