@@ -20,6 +20,7 @@ class ImgurExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.item_id = match.group(1)
+        self.mp4 = self.config("mp4", True)
 
     def _get_data(self, urlpart):
         response = self.session.get("https://imgur.com/" + urlpart)
@@ -28,9 +29,10 @@ class ImgurExtractor(Extractor):
         data = text.extract(response.text, "image               : ", ",\n")[0]
         return self._clean(json.loads(data))
 
-    @staticmethod
-    def _prepare(image):
-        if image["prefer_video"]:
+    def _prepare(self, image):
+        if image["ext"] == ".gif" and (
+            (self.mp4 and image["prefer_video"]) or self.mp4 == "always"
+        ):
             image["ext"] = ".mp4"
         url = "https://i.imgur.com/" + image["hash"] + image["ext"]
         image["extension"] = image["ext"][1:]
