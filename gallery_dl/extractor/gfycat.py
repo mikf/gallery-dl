@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import exception
-from ..cache import cache
 
 
 class GfycatExtractor(Extractor):
@@ -19,12 +18,20 @@ class GfycatExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.api = GfycatAPI(self)
         self.item_id = match.group(1)
+        self.formats = (self.config("format", "mp4"), "mp4", "webm", "gif")
+
+    def _select_format(self, gfycat):
+        for fmt in self.formats:
+            key = fmt + "Url"
+            if key in gfycat:
+                url = gfycat[key]
+                gfycat["extension"] = url[url.rfind(".")+1:]
+                return url
 
     @staticmethod
     def _clean(image):
-        for key in ("dislikes", "likes", "views"):
+        for key in ("dislikes", "likes", "views", "viewsNewEpoch"):
             del image[key]
         return image
 
@@ -35,60 +42,31 @@ class GfycatImageExtractor(GfycatExtractor):
     directory_fmt = ["{category}"]
     filename_fmt = "{category}_{gfyName}.{extension}"
     pattern = [r"(?:https?://)?(?:[a-z]+\.)?gfycat\.com/"
-               r"(?:detail/)?((?:[A-Z][a-z]+)+)"]
+               r"(?:(?:gifs/)?detail/|ifr/)?([A-Za-z]+)"]
     test = [
         ("https://gfycat.com/GrayGenerousCowrie", {
-            "url": "6a9eca1d7f4d9a2c590c92ec723fd63dc12140c6",
-            "keyword": "5887d4582c0b848440e4d21f0ff941927df18fa9",
-            "content": "4c2ccc216ac579271d136ed58453be75e776ddad",
+            "url": "e0b5e1d7223108249b15c3c7898dd358dbfae045",
+            "keyword": "77a65049939823071b532cbdb7dec77582c6ee5b",
+            "content": "3157cd8b3799205c5a0df98a7ee31aa85bf6491e",
         }),
         (("https://thumbs.gfycat.com/SillyLameIsabellinewheatear"
           "-size_restricted.gif"), {
-            "url": "96d61307fcf95e6d8e08bea66fd36a1a20b342f0",
+            "url": "13b32e6cc169d086577d7dd3fd36ee6cdbc02726",
         }),
         ("https://gfycat.com/detail/UnequaledHastyAnkole?tagname=aww", {
-            "url": "1063429f09463128ce93cfbd885229a4e9f1b383",
+            "url": "e24c9f69897fd223343782425a429c5cab6a768e",
         }),
     ]
 
     def items(self):
-        image = self._clean(self.api.gfycats(self.item_id))
+        gfycat = self._clean(self._get_info(self.item_id))
         yield Message.Version, 1
-        yield Message.Directory, image
-        # TODO: support other formats (gif, mp4)
-        yield Message.Url, image["webmUrl"], image
+        yield Message.Directory, gfycat
+        yield Message.Url, self._select_format(gfycat), gfycat
 
-
-class GfycatAPI():
-    """Minimal interface for the gfycat API"""
-    def __init__(self, extractor):
-        self.session = extractor.session
-
-    def gfycats(self, gfycat_id):
-        """Return information about a gfycat object"""
-        return self._call("gfycats/" + gfycat_id)["gfyItem"]
-
-    def authenticate(self):
-        """Authenticate the application by requesting an access token"""
-        token = self._authenticate_impl()
-        self.session.headers["Authorization"] = token
-
-    @cache(maxage=3600)
-    def _authenticate_impl(self):
-        """Actual authenticate implementation"""
-        url = "https://api.gfycat.com/v1/oauth/token"
-        data = {"grant_type": "client_credentials",
-                "client_id": "2_TFs1Nh",
-                "client_secret": ("IZ6qLQ0t7LzxY9P8Rm8Ao4S0sm91o-"
-                                  "o2yVkyO4QgDQK2QbVQNMuXks-M3fuwcs3r")}
-        response = self.session.post(url, json=data)
-        if response.status_code != 200:
-            raise exception.AuthenticationError()
-        return "Bearer " + response.json()["access_token"]
-
-    def _call(self, endpoint):
-        self.authenticate()
-        response = self.session.get("https://api.gfycat.com/v1/" + endpoint)
-        if response.status_code == 404:
+    def _get_info(self, gfycat_id):
+        url = "https://gfycat.com/cajax/get/" + gfycat_id
+        data = self.session.get(url).json()
+        if "error" in data:
             raise exception.NotFoundError()
-        return response.json()
+        return data["gfyItem"]
