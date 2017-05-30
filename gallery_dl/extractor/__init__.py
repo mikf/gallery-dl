@@ -22,6 +22,7 @@ modules = [
     "e621",
     "exhentai",
     "fallenangels",
+    "flickr",
     "gelbooru",
     "gfycat",
     "gomanga",
