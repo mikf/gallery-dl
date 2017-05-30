@@ -39,7 +39,6 @@ class GfycatExtractor(Extractor):
 class GfycatImageExtractor(GfycatExtractor):
     """Extractor for individual images from gfycat.com"""
     subcategory = "image"
-    directory_fmt = ["{category}"]
     filename_fmt = "{category}_{gfyName}.{extension}"
     pattern = [r"(?:https?://)?(?:[a-z]+\.)?gfycat\.com/"
                r"(?:(?:gifs/)?detail/|ifr/)?([A-Za-z]+)"]

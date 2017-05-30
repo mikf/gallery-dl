@@ -22,8 +22,8 @@ class Extractor():
 
     category = ""
     subcategory = ""
-    directory_fmt = [""]
-    filename_fmt = ""
+    directory_fmt = ["{category}"]
+    filename_fmt = "{filename}"
 
     def __init__(self):
         self.session = requests.Session()

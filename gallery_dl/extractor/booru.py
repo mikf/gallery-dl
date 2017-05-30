@@ -17,6 +17,7 @@ import urllib.parse
 
 class BooruExtractor(Extractor):
     """Base class for all booru extractors"""
+    filename_fmt = "{category}_{id}_{md5}.{extension}"
     info = {}
     headers = {}
     pagestart = 1
@@ -113,7 +114,6 @@ class XMLBooruExtractor(BooruExtractor):
 class BooruTagExtractor(BooruExtractor):
     """Extractor for images based on search-tags"""
     directory_fmt = ["{category}", "{tags}"]
-    filename_fmt = "{category}_{id}_{md5}.{extension}"
 
     def __init__(self, match):
         BooruExtractor.__init__(self)
@@ -127,7 +127,6 @@ class BooruTagExtractor(BooruExtractor):
 class BooruPoolExtractor(BooruExtractor):
     """Extractor for image-pools"""
     directory_fmt = ["{category}", "pool", "{pool}"]
-    filename_fmt = "{category}_{id}_{md5}.{extension}"
 
     def __init__(self, match):
         BooruExtractor.__init__(self)
@@ -140,9 +139,6 @@ class BooruPoolExtractor(BooruExtractor):
 
 class BooruPostExtractor(BooruExtractor):
     """Extractor for single images"""
-    directory_fmt = ["{category}"]
-    filename_fmt = "{category}_{id}_{md5}.{extension}"
-
     def __init__(self, match):
         BooruExtractor.__init__(self)
         self.post = match.group(1)

@@ -15,7 +15,6 @@ from .. import text
 class ImgchiliExtractor(Extractor):
     """Base class for imgchili extractors"""
     category = "imgchili"
-    directory_fmt = ["{category}"]
     url_base = "https://imgchili.net/"
 
     def __init__(self, match):
@@ -46,7 +45,6 @@ class ImgchiliExtractor(Extractor):
 class ImgchiliImageExtractor(ImgchiliExtractor):
     """Extractor for single images from imgchili.net"""
     subcategory = "image"
-    filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgchili\.net/show/\d+/(\d+)_[^/]+"]
     test = [(("http://imgchili.net/show/89427/"
               "89427136_test___quot;___gt;.png"), {

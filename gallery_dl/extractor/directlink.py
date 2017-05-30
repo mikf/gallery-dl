@@ -15,8 +15,6 @@ from .. import text
 class DirectlinkExtractor(Extractor):
     """Extractor for direct links to images"""
     category = "directlink"
-    directory_fmt = []
-    filename_fmt = "{filename}"
     pattern = [r"https?://[^?&#]+\.(?:jpe?g|png|gif|webm|mp4|ogg)"]
     test = [(("https://photos.smugmug.com/The-World/Hawaii/"
               "i-SWz2K6n/2/X3/IMG_0311-X3.jpg"), {

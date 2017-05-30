@@ -82,8 +82,6 @@ class ImgboxImageExtractor(Extractor):
     """Extractor for single images from imgbox.com"""
     category = "imgbox"
     subcategory = "image"
-    directory_fmt = ["{category}"]
-    filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"]
     test = [
         ("https://imgbox.com/qHhw7lpG", {
