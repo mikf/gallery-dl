@@ -22,7 +22,7 @@ TESTDATA_FMT = """
 
 TESTDATA_EXCEPTION_FMT = """
     test = [("{}", {{
-        "exception": "{}",
+        "exception": exception.{},
     }})]
 """
 
