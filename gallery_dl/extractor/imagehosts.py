@@ -18,8 +18,6 @@ from urllib.parse import urljoin
 class ImagehostImageExtractor(Extractor):
     """Base class for single-image extractors for various imagehosts"""
     subcategory = "image"
-    directory_fmt = ["{category}"]
-    filename_fmt = "{filename}"
     https = False
     method = "post"
     params = "simple"

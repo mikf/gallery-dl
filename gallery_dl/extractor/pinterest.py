@@ -15,7 +15,6 @@ from .. import text, exception
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
     category = "pinterest"
-    directory_fmt = ["{category}"]
     filename_fmt = "{category}_{pin-id}.{extension}"
 
     def __init__(self):

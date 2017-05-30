@@ -74,8 +74,6 @@ class ImagebamImageExtractor(Extractor):
     """Extractor for single images from imagebam.com"""
     category = "imagebam"
     subcategory = "image"
-    directory_fmt = ["{category}"]
-    filename_fmt = "{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/image/([0-9a-f]{15})"]
     test = [("http://www.imagebam.com/image/94d56c502511890", {
         "url": "94add9417c685d113a91bcdda4916e9538b5f8a9",
