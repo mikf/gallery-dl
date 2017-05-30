@@ -79,7 +79,7 @@ class FallenangelsMangaExtractor(MangaExtractor):
             "url": "8da3d4bcbadc173e5b23c141a0e646b35f41b9b0",
         }),
         ("https://truyen.fascans.com/manga/rakudai-kishi-no-eiyuutan", {
-            "url": "d332d08ce522c7943cd80d3fd361391190444a26",
+            "url": "51a731a6b82d5eb7a335fbae6b02d06aeb2ab07b",
         }),
     ]
 
