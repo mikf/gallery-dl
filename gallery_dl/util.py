@@ -43,7 +43,7 @@ def optimize_range(ranges):
 
     Examples
         optimize_range([(2,4), (4,6), (5,8)])         -> [(2,8)]
-        optimize_range([(1,1), (2,2), (3,6), (8,9))]) -> [(1,6), (8-9)]
+        optimize_range([(1,1), (2,2), (3,6), (8,9))]) -> [(1,6), (8,9)]
     """
     if len(ranges) <= 1:
         return ranges
@@ -61,6 +61,16 @@ def optimize_range(ranges):
             end = upper
     result.append((beg, end))
     return result
+
+
+def bdecode(data, alphabet="0123456789"):
+    """Decode a base-N encoded string ( N = len(alphabet) )"""
+    num = 0
+    base = len(alphabet)
+    for c in data:
+        num *= base
+        num += alphabet.index(c)
+    return num
 
 
 def code_to_language(code, default="English"):

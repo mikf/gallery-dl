@@ -9,7 +9,7 @@
 """Extract images from https://www.flickr.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 
 
 class FlickrExtractor(Extractor):
@@ -21,28 +21,14 @@ class FlickrExtractor(Extractor):
         Extractor.__init__(self)
         self.api = FlickrAPI(self)
         self.item_id = match.group(1)
-        self.metadata = self.config("metadata", False)
-
-    @staticmethod
-    def _clean(photo):
-        del photo["comments"]
-        del photo["views"]
-
-        photo["title"] = photo["title"]["_content"]
-        photo["tags"] = [t["raw"] for t in photo["tags"]["tag"]]
-
-        if "location" in photo:
-            location = photo["location"]
-            for key, value in location.items():
-                if isinstance(value, dict):
-                    location[key] = value["_content"]
 
 
 class FlickrImageExtractor(FlickrExtractor):
     """Extractor for individual images from flickr.com"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/photos/[^/]+/(\d+)",
-               r"(?:https?://)?[^.]+\.staticflickr\.com/(?:\d+/)+(\d+)_"]
+    pattern = [r"(?:https?://)?(?:www\.|m\.)?flickr\.com/photos/[^/]+/(\d+)",
+               r"(?:https?://)?[^.]+\.static\.?flickr\.com/(?:\d+/)+(\d+)_",
+               r"(?:https?://)?flic\.kr/(p)/([A-Za-z1-9]+)"]
     test = [
         ("https://www.flickr.com/photos/departingyyz/16089302239", {
             "url": "7f0887f5953f61c8b79a695cb102ea309c0346b0",
@@ -50,12 +36,22 @@ class FlickrImageExtractor(FlickrExtractor):
             "content": "6aaad7512d335ca93286fe2046e7fe3bb93d808e",
         }),
         ("http://c2.staticflickr.com/2/1475/24531000464_9a7503ae68_b.jpg", {
-            "url": "40f5163488522ca5d918750ed7bd7fcf437982fe",
-        }),
+            "url": "40f5163488522ca5d918750ed7bd7fcf437982fe"}),
+        ("https://farm2.static.flickr.com/1035/1188352415_cb139831d0.jpg", {
+            "url": "ef217b4fdcb148a0cc9eae44b9342d4a65f6d697"}),
+        ("https://flic.kr/p/FPVo9U", {
+            "url": "92c54a00f31040c349cb2abcb1b9abe30cc508ae"}),
         ("https://www.flickr.com/photos/zzz/16089302238", {
-            "exception": exception.NotFoundError,
-        }),
+            "exception": exception.NotFoundError}),
     ]
+
+    def __init__(self, match):
+        FlickrExtractor.__init__(self, match)
+        if self.item_id == "p":
+            alphabet = ("123456789abcdefghijkmnopqrstu"
+                        "vwxyzABCDEFGHJKLMNPQRSTUVWXYZ")
+            self.item_id = util.bdecode(match.group(2), alphabet)
+        self.metadata = self.config("metadata", False)
 
     def items(self):
         size = self.api.photos_getSizes(self.item_id)[-1]
@@ -73,6 +69,20 @@ class FlickrImageExtractor(FlickrExtractor):
         yield Message.Version, 1
         yield Message.Directory, info
         yield Message.Url, url, info
+
+    @staticmethod
+    def _clean(photo):
+        del photo["comments"]
+        del photo["views"]
+
+        photo["title"] = photo["title"]["_content"]
+        photo["tags"] = [t["raw"] for t in photo["tags"]["tag"]]
+
+        if "location" in photo:
+            location = photo["location"]
+            for key, value in location.items():
+                if isinstance(value, dict):
+                    location[key] = value["_content"]
 
 
 class FlickrAlbumExtractor(FlickrExtractor):
