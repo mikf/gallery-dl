@@ -37,13 +37,22 @@ pip as well:
 Manual installation via Python
 ------------------------------
 
-Get the code by downloading either the stable_ or dev_ archives and unpacking
-them, or via :code:`git clone`. Navigate into the respective directory and run
-the :code:`setup.py` file.
+You can also install *gallery-dl* manually:
+
+Get the code by either
+
+* Downloading a stable_ or dev_ archive and unpacking it
+* Or via :code:`git clone`
+
+Navigate into the respective directory and run the :code:`setup.py` file.
 
 .. code:: bash
 
+    $ wget https://github.com/mikf/gallery-dl/archive/master.zip
+    $ unzip master.zip
+    # or
     $ git clone https://github.com/mikf/gallery-dl.git
+
     $ cd gallery-dl
     $ python setup.py install
 
@@ -53,6 +62,7 @@ Standalone executable (Windows only)
 
 Windows users can download a `standalone executable`_, which comes with a
 Python interpreter and all required packages included.
+
 Put this file in your PATH or use it from the current directory and you are
 good to go,
 
@@ -73,7 +83,7 @@ See also :code:`gallery-dl --help`.
 Examples
 --------
 
-Download images from gelbooru found via tag search for 'bonocho':
+Download images; in this case from gelbooru via tag search for 'bonocho':
 
 .. code:: bash
 
@@ -164,7 +174,6 @@ You can set the necessary information in your configuration file
 or you can provide them directly via the
 :code:`-u/--username` and :code:`-p/--password` or via the
 :code:`-o/--option` command-line options
-
 
 .. code:: bash
 
