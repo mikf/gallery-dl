@@ -108,6 +108,26 @@ class FlickrAlbumExtractor(FlickrExtractor):
             yield Message.Url, url, text.nameext_from_url(url, photo)
 
 
+class FlickrFavoriteExtractor(FlickrExtractor):
+    """Extractor for favorite photos of a flickr user"""
+    subcategory = "favorite"
+    directory_fmt = ["{category}", "{subcategory}s", "{user[username]}"]
+    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/favorites"]
+    test = [("https://www.flickr.com/photos/shona_s/favorites", {
+        "url": "5129b3f5bfa83cc25bdae3ce476036de1488dad2",
+        "keyword": "0e1c9521b6051411b585c9b41a4dc0bcde20e616",
+    })]
+
+    def items(self):
+        user = self.api.urls_lookupUser(self.item_id)
+        yield Message.Version, 1
+        yield Message.Directory, {"user": user}
+        for photo in self.api.favorites_getList(user["nsid"]):
+            photo["user"] = user
+            url = photo["photo"]["source"]
+            yield Message.Url, url, text.nameext_from_url(url, photo)
+
+
 class FlickrAPI():
     """Minimal interface for the flickr API"""
     api_url = "https://api.flickr.com/services/rest/"
@@ -119,6 +139,13 @@ class FlickrAPI():
         self.subcategory = extractor.subcategory
         self.api_key = api_key
 
+    def favorites_getList(self, user_id):
+        params = {"user_id": user_id}
+        for photos in self._pagination("favorites.getList", params):
+            for photo in photos["photo"]:
+                self._extract_format(photo)
+                yield photo
+
     def photos_getInfo(self, photo_id):
         params = {"photo_id": photo_id}
         return self._call("photos.getInfo", params)["photo"]
@@ -128,51 +155,21 @@ class FlickrAPI():
         return self._call("photos.getSizes", params)["sizes"]["size"]
 
     def photosets_getPhotos(self, photoset_id):
-        method = "photosets.getPhotos"
-        params = {"photoset_id": photoset_id, "page": 1,
-                  "extras": "url_o,url_k,url_h,url_l"}
-        while True:
-            photoset = self._call(method, params)["photoset"]
-
+        params = {"photoset_id": photoset_id}
+        for photoset in self._pagination("photosets.getPhotos", params):
             photos = photoset["photo"]
             del photoset["photo"]
-            del photoset["page"]
-            del photoset["perpage"]
-            del photoset["per_page"]
-
             for photo in photos:
-
-                for fmt, fmtname in self.formats:
-                    key = "url_" + fmt
-                    if key in photo:
-                        # generate photo info
-                        photo["photo"] = {
-                            "source": photo[key],
-                            "width" : photo["width_" + fmt],
-                            "height": photo["height_" + fmt],
-                            "label" : fmtname,
-                            "media" : "photo",
-                        }
-                        # remove excess data
-                        keys = [
-                            key for key in photo.keys()
-                            if key.startswith(("url_", "width_", "height_"))
-                        ]
-                        for key in keys:
-                            del photo[key]
-                        break
-
-                else:
-                    # extra API call to get photo url and size
-                    print(photo["id"])
-                    photo["photo"] = self.photos_getSizes(photo["id"])[-1]
-
+                self._extract_format(photo)
                 photo["photoset"] = photoset
                 yield photo
 
-            if params["page"] == photoset["pages"]:
-                break
-            params["page"] += 1
+    def urls_lookupUser(self, username):
+        params = {"url": "https://www.flickr.com/photos/" + username}
+        user = self._call("urls.lookupUser", params)["user"]
+        return {"nsid": user["id"],
+                "path_alias": username,
+                "username": user["username"]["_content"]}
 
     def _call(self, method, params):
         params["method"] = "flickr." + method
@@ -183,3 +180,48 @@ class FlickrAPI():
         if "code" in data and data["code"] == 1:
             raise exception.NotFoundError(self.subcategory)
         return data
+
+    def _pagination(self, method, params):
+        params["extras"] = "url_o,url_k,url_h,url_l"
+        params["page"] = 1
+
+        while True:
+            data = self._call(method, params)
+
+            for key, obj in data.items():
+                if key != "stats":
+                    break
+            del obj["page"]
+            del obj["perpage"]
+            if "per_page" in obj:
+                del obj["per_page"]
+
+            yield obj
+
+            if params["page"] == obj["pages"]:
+                break
+            params["page"] += 1
+
+    def _extract_format(self, photo):
+        for fmt, fmtname in self.formats:
+            key = "url_" + fmt
+            if key in photo:
+                # generate photo info
+                photo["photo"] = {
+                    "source": photo[key],
+                    "width" : photo["width_" + fmt],
+                    "height": photo["height_" + fmt],
+                    "label" : fmtname,
+                    "media" : "photo",
+                }
+                # remove excess data
+                keys = [
+                    key for key in photo.keys()
+                    if key.startswith(("url_", "width_", "height_"))
+                ]
+                for key in keys:
+                    del photo[key]
+                break
+        else:
+            # extra API call to get photo url and size
+            photo["photo"] = self.photos_getSizes(photo["id"])[-1]
