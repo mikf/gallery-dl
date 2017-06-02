@@ -36,7 +36,10 @@ class PixivUserExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.artist_id = match.group(1)
-        self.tag = match.group(2)
+        if (len(match.groups) > 2):
+            self.tag = match.group(2)
+        else:
+            self.tag = None
         self.api = PixivAPI(self)
         self.api_call = self.api.user_works
         self.load_ugoira = self.config("ugoira", True)
