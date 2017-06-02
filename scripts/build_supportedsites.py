@@ -163,7 +163,7 @@ def map_subcategory(sc):
 
 def category_key(extrlist):
     key = extrlist[0].category.lower()
-    if len(extrlist) == 1 and extrlist[0].subcat == "individual Images":
+    if len(extrlist) == 1 and extrlist[0].__module__.endswith(".imagehosts"):
         key = "zz" + key
     return key
 

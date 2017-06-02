@@ -23,7 +23,6 @@ class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
     pattern = [(r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts"
                 r"\?(?:utf8=%E2%9C%93&)?tags=([^&]+)")]
     test = [("https://danbooru.donmai.us/posts?tags=bonocho", {
-        "url": "04f69a187269019f6d0c32dc7685246fe99d536e",
         "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
     })]
 
@@ -33,7 +32,6 @@ class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
     subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/pools/(\d+)"]
     test = [("https://danbooru.donmai.us/pools/7659", {
-        "url": "73c02ec3d67ffd46d489dd6cfd7b35fee053865c",
         "content": "b16bab12bea5f7ea9e0a836bf8045f280e113d99",
     })]
 
@@ -43,6 +41,5 @@ class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
     subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?danbooru.donmai.us/posts/(\d+)"]
     test = [("https://danbooru.donmai.us/posts/294929", {
-        "url": "954a9fec4d507c46e220c9beb4349b303b1f4433",
         "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
     })]

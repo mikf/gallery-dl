@@ -24,8 +24,8 @@ class DynastyscansChapterExtractor(Extractor):
     test = [
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {
-            "url": "ba945116382eff26b0e52fe1804e6d58fee7734d",
-            "keyword": "81bfda5b98b34ac2a7324bd9e2abad3df9cc7673",
+            "url": "ff79ea9956522a8dafd261c1fbe3c74aa8470dc5",
+            "keyword": "eb837477565ee7e647d08ae0ac60c1108234cb80",
         }),
         (("http://dynasty-scans.com/chapters/"
           "new_game_the_spinoff_special_13"), {
