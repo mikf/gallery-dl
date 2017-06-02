@@ -108,7 +108,32 @@ class FlickrAlbumExtractor(FlickrExtractor):
             yield Message.Url, url, text.nameext_from_url(url, photo)
 
 
-class FlickrFavoriteExtractor(FlickrExtractor):
+class FlickrUserExtractor(FlickrExtractor):
+    """Extractor for the photostream of a flickr user"""
+    subcategory = "user"
+    directory_fmt = ["{category}", "{user[username]}"]
+    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/?$"]
+    test = [("https://www.flickr.com/photos/shona_s/", {
+        "url": "d125b536cd8c4229363276b6c84579c394eec3a2",
+        "keyword": "3b55f7ac63fce6f8a8307f3bc4fa5911d80db4fe",
+    })]
+
+    def __init__(self, match):
+        FlickrExtractor.__init__(self, match)
+        self.api_call = self.api.people_getPublicPhotos
+        self.user_key = "owner"
+
+    def items(self):
+        user = self.api.urls_lookupUser(self.item_id)
+        yield Message.Version, 1
+        yield Message.Directory, {"user": user}
+        for photo in self.api_call(user["nsid"]):
+            photo[self.user_key] = user
+            url = photo["photo"]["source"]
+            yield Message.Url, url, text.nameext_from_url(url, photo)
+
+
+class FlickrFavoriteExtractor(FlickrUserExtractor):
     """Extractor for favorite photos of a flickr user"""
     subcategory = "favorite"
     directory_fmt = ["{category}", "{subcategory}s", "{user[username]}"]
@@ -118,14 +143,10 @@ class FlickrFavoriteExtractor(FlickrExtractor):
         "keyword": "0e1c9521b6051411b585c9b41a4dc0bcde20e616",
     })]
 
-    def items(self):
-        user = self.api.urls_lookupUser(self.item_id)
-        yield Message.Version, 1
-        yield Message.Directory, {"user": user}
-        for photo in self.api.favorites_getList(user["nsid"]):
-            photo["user"] = user
-            url = photo["photo"]["source"]
-            yield Message.Url, url, text.nameext_from_url(url, photo)
+    def __init__(self, match):
+        FlickrExtractor.__init__(self, match)
+        self.api_call = self.api.favorites_getPublicList
+        self.user_key = "user"
 
 
 class FlickrAPI():
@@ -139,22 +160,28 @@ class FlickrAPI():
         self.subcategory = extractor.subcategory
         self.api_key = api_key
 
-    def favorites_getList(self, user_id):
+    def favorites_getPublicList(self, user_id):
+        """Returns a list of favorite public photos for the given user."""
         params = {"user_id": user_id}
-        for photos in self._pagination("favorites.getList", params):
-            for photo in photos["photo"]:
-                self._extract_format(photo)
-                yield photo
+        return self._listing("favorites.getPublicList", params)
+
+    def people_getPublicPhotos(self, user_id):
+        """Get a list of public photos for the given user."""
+        params = {"user_id": user_id}
+        return self._listing("people.getPublicPhotos", params)
 
     def photos_getInfo(self, photo_id):
+        """Get information about a photo."""
         params = {"photo_id": photo_id}
         return self._call("photos.getInfo", params)["photo"]
 
     def photos_getSizes(self, photo_id):
+        """Returns the available sizes for a photo."""
         params = {"photo_id": photo_id}
         return self._call("photos.getSizes", params)["sizes"]["size"]
 
     def photosets_getPhotos(self, photoset_id):
+        """Get the list of photos in a set."""
         params = {"photoset_id": photoset_id}
         for photoset in self._pagination("photosets.getPhotos", params):
             photos = photoset["photo"]
@@ -165,6 +192,7 @@ class FlickrAPI():
                 yield photo
 
     def urls_lookupUser(self, username):
+        """Returns a user NSID, given the url to a user's photos or profile."""
         params = {"url": "https://www.flickr.com/photos/" + username}
         user = self._call("urls.lookupUser", params)["user"]
         return {"nsid": user["id"],
@@ -201,6 +229,12 @@ class FlickrAPI():
             if params["page"] == obj["pages"]:
                 break
             params["page"] += 1
+
+    def _listing(self, method, params):
+        for photos in self._pagination(method, params):
+            for photo in photos["photo"]:
+                self._extract_format(photo)
+                yield photo
 
     def _extract_format(self, photo):
         for fmt, fmtname in self.formats:
