@@ -21,7 +21,7 @@ class PixivUserExtractor(Extractor):
     directory_fmt = ["{category}", "{artist-id}-{artist-nick}"]
     filename_fmt = "{category}_{artist-id}_{id}{num}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/"
-               r"member(?:_illust)?\.php\?id=(\d+)"]
+               r"member(?:_illust)?\.php\?id=(\d+)(?:&tag=(.*))?"]
     test = [
         ("http://www.pixiv.net/member_illust.php?id=173530", {
             "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
@@ -36,6 +36,7 @@ class PixivUserExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.artist_id = match.group(1)
+        self.tag = match.group(2)
         self.api = PixivAPI(self)
         self.api_call = self.api.user_works
         self.load_ugoira = self.config("ugoira", True)
@@ -90,7 +91,9 @@ class PixivUserExtractor(Extractor):
         while True:
             data = self.api_call(self.artist_id, pagenum)
             for work in data["response"]:
-                yield self.prepare_work(work)
+                if self.tag is None or \
+                        self.tag.lower() in [x.lower() for x in work["tags"]]:
+                    yield self.prepare_work(work)
             pinfo = data["pagination"]
             if pinfo["current"] == pinfo["pages"]:
                 return
