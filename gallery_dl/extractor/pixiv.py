@@ -36,7 +36,7 @@ class PixivUserExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.artist_id = match.group(1)
-        if (len(match.groups) > 2):
+        if (len(match.groups()) > 2):
             self.tag = match.group(2)
         else:
             self.tag = None
