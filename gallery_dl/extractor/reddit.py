@@ -20,7 +20,7 @@ class RedditExtractor(Extractor):
 
     def __init__(self):
         Extractor.__init__(self)
-        self.api = RedditAPI(self.session, self.log)
+        self.api = RedditAPI(self)
         self.max_depth = int(self.config("recursion", 0))
         self._visited = set()
 
@@ -101,24 +101,25 @@ class RedditSubmissionExtractor(RedditExtractor):
 
 class RedditAPI():
     """Minimal interface for the reddit API"""
-    def __init__(self, session, log, client_id="6N9uN0krSDE-ig"):
-        self.session = session
-        self.log = log
+    def __init__(self, extractor, client_id="6N9uN0krSDE-ig"):
+        self.session = extractor.session
+        self.date_min = int(extractor.config("date-min", 0))
+        # 253402210800 == datetime.max.timestamp()
+        self.date_max = int(extractor.config("date-max", 253402210800))
         self.client_id = client_id
-        session.headers["User-Agent"] = "Python:gallery-dl:0.8.4 (by /u/mikf1)"
+        self.session.headers["User-Agent"] = ("Python:gallery-dl:0.8.4"
+                                              " (by /u/mikf1)")
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
         endpoint = "/comments/" + submission_id + "/.json"
-        params = {"raw_json": 1, "limit": 100}
-        submission, comments = self._call(endpoint, params)
+        submission, comments = self._call(endpoint, {"limit": 500})
         return (submission["data"]["children"][0]["data"],
                 self._unfold(comments))
 
     def submissions_subreddit(self, subreddit, params):
         """Collect all (submission, comments)-tuples of a subreddit"""
         endpoint = "/r/" + subreddit + "/.json"
-        params["raw_json"] = 1
         params["limit"] = 100
         return self._pagination(endpoint, params)
 
@@ -142,6 +143,7 @@ class RedditAPI():
 
     def _call(self, endpoint, params):
         url = "https://oauth.reddit.com" + endpoint
+        params["raw_json"] = 1
         self.authenticate()
         data = self.session.get(url, params=params).json()
         if "error" in data:
@@ -158,10 +160,11 @@ class RedditAPI():
 
             for submission in data["children"]:
                 submission = submission["data"]
-                if submission["num_comments"]:
-                    yield self.submission(submission["id"])
-                else:
-                    yield submission, _empty
+                if self.date_min <= submission["created_utc"] <= self.date_max:
+                    if submission["num_comments"]:
+                        yield self.submission(submission["id"])
+                    else:
+                        yield submission, _empty
 
             if not data["after"]:
                 return
