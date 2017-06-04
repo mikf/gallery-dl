@@ -14,44 +14,30 @@ from ..cache import cache
 import re
 
 
-class PixivUserExtractor(Extractor):
-    """Extractor for works of a pixiv-user"""
+class PixivExtractor(Extractor):
+    """Base class for pixiv extractors"""
     category = "pixiv"
-    subcategory = "user"
-    directory_fmt = ["{category}", "{artist-id}-{artist-nick}"]
-    filename_fmt = "{category}_{artist-id}_{id}{num}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/"
-               r"member(?:_illust)?\.php\?id=(\d+)(?:&tag=(.*))?"]
-    test = [
-        ("http://www.pixiv.net/member_illust.php?id=173530", {
-            "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
-        }),
-        ("http://www.pixiv.net/member_illust.php?id=173531", {
-            "exception": exception.NotFoundError,
-        }),
-    ]
-    member_url = "https://www.pixiv.net/member_illust.php"
+    directory_fmt = ["{category}", "{user[id]} {user[account]}"]
+    filename_fmt = "{category}_{user[id]}_{id}{num}.{extension}"
     illust_url = "https://www.pixiv.net/member_illust.php?mode=medium"
 
-    def __init__(self, match):
+    def __init__(self):
         Extractor.__init__(self)
-        self.artist_id = match.group(1)
-        if (len(match.groups()) > 2):
-            self.tag = match.group(2)
-        else:
-            self.tag = None
         self.api = PixivAPI(self)
-        self.api_call = self.api.user_works
+        self.user_id = -1
         self.load_ugoira = self.config("ugoira", True)
 
     def items(self):
-        metadata = self.get_job_metadata()
+        metadata = self.get_metadata()
+
         yield Message.Version, 1
         yield Message.Headers, self.session.headers
         yield Message.Cookies, self.session.cookies
         yield Message.Directory, metadata
 
-        for work in self.get_works():
+        for work in self.works():
+            work = self.prepare_work(work)
+
             pos = work["extension"].rfind("?", -18)
             if pos != -1:
                 timestamp = work["extension"][pos:]
@@ -88,27 +74,13 @@ class PixivUserExtractor(Extractor):
                     )
                     yield Message.Url, url, work
 
-    def get_works(self):
-        """Yield all work-items for a pixiv-member"""
-        pagenum = 1
-        while True:
-            data = self.api_call(self.artist_id, pagenum)
-            for work in data["response"]:
-                if self.tag is None or \
-                        self.tag.lower() in [x.lower() for x in work["tags"]]:
-                    yield self.prepare_work(work)
-            pinfo = data["pagination"]
-            if pinfo["current"] == pinfo["pages"]:
-                return
-            pagenum = pinfo["next"]
+    def works(self):
+        """Return all work-items for a pixiv-member"""
+        return []
 
     def prepare_work(self, work):
         """Prepare a work-dictionary with additional keywords"""
-        user = work["user"]
         url = work["image_urls"]["large"]
-        work["artist-id"] = user["id"]
-        work["artist-name"] = user["name"]
-        work["artist-nick"] = user["account"]
         work["num"] = ""
         work["url"] = url
         work["extension"] = url[url.rfind(".")+1:]
@@ -122,7 +94,7 @@ class PixivUserExtractor(Extractor):
         ).text
 
         # parse page
-        frames, _ = text.extract(page, ',"frames":[', ']')
+        frames = text.extract(page, ',"frames":[', ']')[0]
 
         # build url
         url = re.sub(
@@ -136,20 +108,46 @@ class PixivUserExtractor(Extractor):
             r'\{"file":"([^"]+)","delay":(\d+)\},?',
             r'\1 \2\n', frames
         )
+
         return url, framelist
 
-    def get_job_metadata(self, user=None):
+    def get_metadata(self, user=None):
         """Collect metadata for extractor-job"""
         if not user:
-            user = self.api.user(self.artist_id)["response"][0]
-        return {
-            "artist-id": user["id"],
-            "artist-name": user["name"],
-            "artist-nick": user["account"],
-        }
+            user = self.api.user(self.user_id)[0]
+        return {"user": user}
 
 
-class PixivWorkExtractor(PixivUserExtractor):
+class PixivUserExtractor(PixivExtractor):
+    """Extractor for works of a pixiv-user"""
+    subcategory = "user"
+    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/"
+               r"member(?:_illust)?\.php\?id=(\d+)(?:.*&tag=([^&#]+))?"]
+    test = [
+        ("http://www.pixiv.net/member_illust.php?id=173530", {
+            "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
+        }),
+        ("https://www.pixiv.net/member_illust.php?id=173530&tag=HITMAN", {
+            "url": "3ecb4970dd91ce1de0a9449671b42db5e3fe2b08",
+        }),
+        ("http://www.pixiv.net/member_illust.php?id=173531", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self)
+        self.user_id, tag = match.groups()
+        self.tag = tag.lower() if tag else None
+
+    def works(self):
+        for work in self.api.user_works(self.user_id):
+            if (not self.tag or
+                    self.tag in [tag.lower() for tag in work["tags"]]):
+                yield work
+
+
+class PixivWorkExtractor(PixivExtractor):
     """Extractor for a single pixiv work/illustration"""
     subcategory = "work"
     pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
@@ -178,35 +176,37 @@ class PixivWorkExtractor(PixivUserExtractor):
     ]
 
     def __init__(self, match):
-        PixivUserExtractor.__init__(self, match)
+        PixivExtractor.__init__(self)
         self.illust_id = match.group(1)
         self.load_ugoira = True
         self.work = None
 
-    def get_works(self):
-        return (self.prepare_work(self.work),)
+    def works(self):
+        return (self.work,)
 
-    def get_job_metadata(self, user=None):
-        """Collect metadata for extractor-job"""
-        self.work = self.api.work(self.illust_id)["response"][0]
-        return PixivUserExtractor.get_job_metadata(self, self.work["user"])
+    def get_metadata(self, user=None):
+        self.work = self.api.work(self.illust_id)[0]
+        return PixivExtractor.get_metadata(self, self.work["user"])
 
 
-class PixivFavoriteExtractor(PixivUserExtractor):
+class PixivFavoriteExtractor(PixivExtractor):
     """Extractor for all favorites/bookmarks of a pixiv-user"""
     subcategory = "favorite"
-    directory_fmt = ["{category}", "bookmarks", "{artist-id}-{artist-nick}"]
+    directory_fmt = ["{category}", "bookmarks", "{user[id]} {user[account]}"]
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php\?id=(\d+)"]
     test = [("http://www.pixiv.net/bookmark.php?id=173530", {
         "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
     })]
 
     def __init__(self, match):
-        PixivUserExtractor.__init__(self, match)
-        self.api_call = self.api.user_favorite_works
+        PixivExtractor.__init__(self)
+        self.user_id = match.group(1)
+
+    def works(self):
+        return self.api.user_favorite_works(self.user_id)
 
     def prepare_work(self, work):
-        return PixivUserExtractor.prepare_work(self, work["work"])
+        return PixivExtractor.prepare_work(self, work["work"])
 
 
 class PixivBookmarkExtractor(PixivFavoriteExtractor):
@@ -215,18 +215,11 @@ class PixivBookmarkExtractor(PixivFavoriteExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php()$"]
     test = []
 
-    def __init__(self, match):
-        PixivFavoriteExtractor.__init__(self, match)
+    def get_metadata(self, user=None):
         self.api.login()
-        self.artist_id = self.api.user_id
-
-
-def require_login(func):
-    """Decorator: auto-login before api-calls"""
-    def wrap(self, *args):
-        self.login()
-        return func(self, *args)
-    return wrap
+        user = self.api.user_info
+        self.user_id = user["id"]
+        return PixivExtractor.get_metadata(self, user)
 
 
 class PixivAPI():
@@ -242,6 +235,7 @@ class PixivAPI():
         self.log = extractor.log
         self.username = extractor.config("username")
         self.password = extractor.config("password")
+        self.user_info = None
         self.session.headers.update({
             "Referer": "https://www.pixiv.net/",
             'App-OS': 'ios',
@@ -249,63 +243,35 @@ class PixivAPI():
             'App-Version': '6.7.1',
             'User-Agent': 'PixivIOSApp/6.7.1 (iOS 10.3.1; iPhone8,1)',
         })
-        self.user_id = -1
 
-    @require_login
     def user(self, user_id):
         """Query information about a pixiv user"""
-        response = self.session.get(
-            "https://public-api.secure.pixiv.net/v1/users/"
-            "{user}.json".format(user=user_id)
-        )
-        return self._parse(response)
+        endpoint = "users/" + user_id
+        return self._call(endpoint, {})["response"]
 
-    @require_login
     def work(self, illust_id):
         """Query information about a single pixiv work/illustration"""
-        params = {
-            "image_sizes": "large",
-        }
-        response = self.session.get(
-            "https://public-api.secure.pixiv.net/v1/works/"
-            "{illust}.json".format(illust=illust_id), params=params
-        )
-        return self._parse(response)
+        endpoint = "works/" + illust_id
+        params = {"image_sizes": "large"}
+        return self._call(endpoint, params)["response"]
 
-    @require_login
-    def user_works(self, user_id, page, per_page=20):
+    def user_works(self, user_id):
         """Query information about the works of a pixiv user"""
-        params = {
-            "page": page,
-            "per_page": per_page,
-            "image_sizes": "large",
-        }
-        response = self.session.get(
-            "https://public-api.secure.pixiv.net/v1/users/"
-            "{user}/works.json".format(user=user_id), params=params
-        )
-        return self._parse(response)
+        endpoint = "users/{user}/works".format(user=user_id)
+        params = {"image_sizes": "large"}
+        return self._pagination(endpoint, params)
 
-    @require_login
-    def user_favorite_works(self, user_id, page, per_page=20):
-        """Query information about the favorites works of a pixiv user"""
-        params = {
-            "page": page,
-            "per_page": per_page,
-            "include_stats": False,
-            "image_sizes": "large",
-        }
-        response = self.session.get(
-            "https://public-api.secure.pixiv.net/v1/users/"
-            "{user}/favorite_works.json".format(user=user_id), params=params
-        )
-        return self._parse(response)
+    def user_favorite_works(self, user_id):
+        """Query information about the favorite works of a pixiv user"""
+        endpoint = "users/{user}/favorite_works".format(user=user_id)
+        params = {"image_sizes": "large", "include_stats": False}
+        return self._pagination(endpoint, params)
 
     def login(self):
         """Login and gain a Pixiv Public-API access token"""
-        self.user_id, auth_header = self._login_impl(
+        self.user_info, access_token = self._login_impl(
             self.username, self.password)
-        self.session.headers["Authorization"] = auth_header
+        self.session.headers["Authorization"] = access_token
 
     @cache(maxage=50*60, keyarg=1)
     def _login_impl(self, username, password):
@@ -317,27 +283,39 @@ class PixivAPI():
             "grant_type": "password",
             "client_id": "bYGKuGVw91e0NMfPGp44euvGt59s",
             "client_secret": "HP3RmkgAmEGro0gn1x9ioawQE8WMfvLXDz3ZqxpK",
-            'get_secure_url': 1,
+            "get_secure_url": 1,
         }
         response = self.session.post(
             "https://oauth.secure.pixiv.net/auth/token", data=data
         )
-        if response.status_code not in (200, 301, 302):
+        if response.status_code != 200:
             raise exception.AuthenticationError()
         try:
-            response = self._parse(response)["response"]
+            response = response.json()["response"]
             token = response["access_token"]
-            user = response["user"]["id"]
-        except:
-            raise Exception("Get access_token error! Response: %s" % (token))
+            user = response["user"]
+        except KeyError:
+            raise Exception("Get token error! Response: %s" % (response))
         return user, "Bearer " + token
 
-    @staticmethod
-    def _parse(response, empty=[None]):
-        """Parse a Pixiv Public-API response"""
-        data = response.json()
+    def _call(self, endpoint, params, _empty=[None]):
+        url = "https://public-api.secure.pixiv.net/v1/" + endpoint + ".json"
+
+        self.login()
+        data = self.session.get(url, params=params).json()
+
         status = data.get("status")
-        response = data.get("response", empty)
-        if status == "failure" or response == empty:
+        response = data.get("response", _empty)
+        if status == "failure" or response == _empty:
             raise exception.NotFoundError()
         return data
+
+    def _pagination(self, endpoint, params):
+        while True:
+            data = self._call(endpoint, params)
+            yield from data["response"]
+
+            pinfo = data["pagination"]
+            if pinfo["current"] == pinfo["pages"]:
+                return
+            params["page"] = pinfo["next"]
