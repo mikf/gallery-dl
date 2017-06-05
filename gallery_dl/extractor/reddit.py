@@ -102,18 +102,17 @@ class RedditSubmissionExtractor(RedditExtractor):
 class RedditAPI():
     """Minimal interface for the reddit API"""
     def __init__(self, extractor, client_id="6N9uN0krSDE-ig"):
+        self.extractor = extractor
+        self.client_id = extractor.config("client-id", client_id)
+        self.comments  = extractor.config("comments", 200)
         self.session = extractor.session
-        self.date_min = int(extractor.config("date-min", 0))
-        # 253402210800 == datetime.max.timestamp()
-        self.date_max = int(extractor.config("date-max", 253402210800))
-        self.client_id = client_id
         self.session.headers["User-Agent"] = ("Python:gallery-dl:0.8.4"
                                               " (by /u/mikf1)")
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
         endpoint = "/comments/" + submission_id + "/.json"
-        submission, comments = self._call(endpoint, {"limit": 500})
+        submission, comments = self._call(endpoint, {"limit": self.comments})
         return (submission["data"]["children"][0]["data"],
                 self._unfold(comments))
 
@@ -155,14 +154,20 @@ class RedditAPI():
         return data
 
     def _pagination(self, endpoint, params, _empty=()):
+        date_min = int(self.extractor.config("date-min", 0))
+        date_max = int(self.extractor.config("date-max", 253402210800))
+
         while True:
             data = self._call(endpoint, params)["data"]
 
             for submission in data["children"]:
                 submission = submission["data"]
-                if self.date_min <= submission["created_utc"] <= self.date_max:
-                    if submission["num_comments"]:
-                        yield self.submission(submission["id"])
+                if date_min <= submission["created_utc"] <= date_max:
+                    if submission["num_comments"] and self.comments:
+                        try:
+                            yield self.submission(submission["id"])
+                        except exception.AuthorizationError:
+                            pass
                     else:
                         yield submission, _empty
 
