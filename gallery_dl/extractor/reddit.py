@@ -104,7 +104,7 @@ class RedditAPI():
     def __init__(self, extractor, client_id="6N9uN0krSDE-ig"):
         self.extractor = extractor
         self.client_id = extractor.config("client-id", client_id)
-        self.comments  = extractor.config("comments", 200)
+        self.comments  = extractor.config("comments", 500)
         self.session = extractor.session
         self.session.headers["User-Agent"] = ("Python:gallery-dl:0.8.4"
                                               " (by /u/mikf1)")
