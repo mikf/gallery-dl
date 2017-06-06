@@ -137,14 +137,14 @@ class FlickrAlbumExtractor(FlickrExtractor):
 
 
 class FlickrGalleryExtractor(FlickrExtractor):
-    """Extractor for favorite photos of a flickr user"""
+    """Extractor for photo galleries from flickr.com"""
     subcategory = "gallery"
     directory_fmt = ["{category}", "galleries",
                      "{user[username]} {gallery[id]}"]
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/"
                r"photos/([^/]+)/galleries/(\d+)"]
-    test = [("https://www.flickr.com/photos/flickr/"
-             "galleries/72157681572514792/", {
+    test = [(("https://www.flickr.com/photos/flickr/"
+              "galleries/72157681572514792/"), {
         "url": "97dd9640b09384f313845b784046da410f70aee6",
         "keyword": "8b11026066ec86290ae18833859623ee5b52d363",
     })]
@@ -163,6 +163,24 @@ class FlickrGalleryExtractor(FlickrExtractor):
 
     def photos(self):
         return self.api.galleries_getPhotos(self.gallery_id)
+
+
+class FlickrGroupExtractor(FlickrExtractor):
+    """Extractor for group pools from flickr.com"""
+    subcategory = "group"
+    directory_fmt = ["{category}", "{subcategory}s", "{group[groupname]}"]
+    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/groups/([^/]+)"]
+    test = [("https://www.flickr.com/groups/bird_headshots/", {
+        "url": "40b5586fa0cd1578c3b8cc874fc6e3ae7af70786",
+        "keyword": "24e721cc510c1f74bc3d8f7bd6130773ba3faef4",
+    })]
+
+    def data(self):
+        self.group = self.api.urls_lookupGroup(self.item_id)
+        return {"group": self.group}
+
+    def photos(self):
+        return self.api.groups_pools_getPhotos(self.group["nsid"])
 
 
 class FlickrUserExtractor(FlickrExtractor):
@@ -224,6 +242,11 @@ class FlickrAPI():
         params = {"gallery_id": gallery_id}
         return self._listing("galleries.getPhotos", params)
 
+    def groups_pools_getPhotos(self, group_id):
+        """Returns a list of pool photos for a given group."""
+        params = {"group_id": group_id}
+        return self._listing("groups.pools.getPhotos", params)
+
     def people_getPublicPhotos(self, user_id):
         """Get a list of public photos for the given user."""
         params = {"user_id": user_id}
@@ -243,6 +266,14 @@ class FlickrAPI():
         """Get the list of photos in a set."""
         params = {"photoset_id": photoset_id}
         return self._pagination("photosets.getPhotos", params)
+
+    def urls_lookupGroup(self, groupname):
+        """Returns a group NSID, given the url to a group's page."""
+        params = {"url": "https://www.flickr.com/groups/" + groupname}
+        group = self._call("urls.lookupGroup", params)["group"]
+        return {"nsid": group["id"],
+                "path_alias": groupname,
+                "groupname": group["groupname"]["_content"]}
 
     def urls_lookupUser(self, username):
         """Returns a user NSID, given the url to a user's photos or profile."""
