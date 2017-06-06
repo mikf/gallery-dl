@@ -21,6 +21,24 @@ class FlickrExtractor(Extractor):
         Extractor.__init__(self)
         self.api = FlickrAPI(self)
         self.item_id = match.group(1)
+        self.user = None
+        self.load_extra = self.config("metadata", False)
+
+    def items(self):
+        info = self.data()
+        yield Message.Version, 1
+        yield Message.Directory, info
+        for photo in self.photos():
+            photo.update(info)
+            url = photo["photo"]["source"]
+            yield Message.Url, url, text.nameext_from_url(url, photo)
+
+    def data(self):
+        self.user = self.api.urls_lookupUser(self.item_id)
+        return {"user": self.user}
+
+    def photos(self):
+        return []
 
 
 class FlickrImageExtractor(FlickrExtractor):
@@ -51,12 +69,11 @@ class FlickrImageExtractor(FlickrExtractor):
             alphabet = ("123456789abcdefghijkmnopqrstu"
                         "vwxyzABCDEFGHJKLMNPQRSTUVWXYZ")
             self.item_id = util.bdecode(match.group(2), alphabet)
-        self.metadata = self.config("metadata", False)
 
     def items(self):
         size = self.api.photos_getSizes(self.item_id)[-1]
 
-        if self.metadata:
+        if self.load_extra:
             info = self.api.photos_getInfo(self.item_id)
             self._clean(info)
         else:
@@ -88,24 +105,64 @@ class FlickrImageExtractor(FlickrExtractor):
 class FlickrAlbumExtractor(FlickrExtractor):
     """Extractor for photo albums from flickr.com"""
     subcategory = "album"
-    directory_fmt = ["{category}", "{id} - {title}"]
+    directory_fmt = ["{category}", "{subcategory}s",
+                     "{album[id]} - {album[title]}"]
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/"
-               r"photos/[^/]+/(?:album|set)s/(\d+)"]
+               r"photos/([^/]+)/(?:album|set)s/(\d+)"]
     test = [("https://www.flickr.com/photos/flickr/albums/72157656845052880", {
         "url": "517db3faa55e88686f1d00a379f8f0daf4c7b837",
-        "keyword": "504ca926fe520dc6e4a98e7ee590c3498a3c3392",
+        "keyword": "001fb1c99a6331cf69d72392af3badf95e8fe51e",
     })]
 
-    def items(self):
-        first = True
-        yield Message.Version, 1
+    def __init__(self, match):
+        FlickrExtractor.__init__(self, match)
+        self.album_id = match.group(2)
 
-        for photo in self.api.photosets_getPhotos(self.item_id):
-            if first:
-                first = False
-                yield Message.Directory, photo["photoset"].copy()
-            url = photo["photo"]["source"]
-            yield Message.Url, url, text.nameext_from_url(url, photo)
+    def data(self):
+        self._generator = self.api.photosets_getPhotos(self.album_id)
+        self._first = next(self._generator)
+        photoset = self._first.copy()
+        del photoset["photo"]
+        return {"album": photoset}
+
+    def photos(self):
+        for photo in self._photos():
+            self.api._extract_format(photo)
+            yield photo
+
+    def _photos(self):
+        yield from self._first["photo"]
+        for photoset in self._generator:
+            yield from photoset["photo"]
+
+
+class FlickrGalleryExtractor(FlickrExtractor):
+    """Extractor for favorite photos of a flickr user"""
+    subcategory = "gallery"
+    directory_fmt = ["{category}", "galleries",
+                     "{user[username]} {gallery[id]}"]
+    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/"
+               r"photos/([^/]+)/galleries/(\d+)"]
+    test = [("https://www.flickr.com/photos/flickr/"
+             "galleries/72157681572514792/", {
+        "url": "97dd9640b09384f313845b784046da410f70aee6",
+        "keyword": "8b11026066ec86290ae18833859623ee5b52d363",
+    })]
+
+    def __init__(self, match):
+        FlickrExtractor.__init__(self, match)
+        self.gallery_id = match.group(2)
+
+    def data(self):
+        info = FlickrExtractor.data(self)
+        if self.load_extra:
+            info["gallery"] = self.api.galleries_getInfo(self.gallery_id)
+        else:
+            info["gallery"] = {"id": self.gallery_id}
+        return info
+
+    def photos(self):
+        return self.api.galleries_getPhotos(self.gallery_id)
 
 
 class FlickrUserExtractor(FlickrExtractor):
@@ -115,25 +172,14 @@ class FlickrUserExtractor(FlickrExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/?$"]
     test = [("https://www.flickr.com/photos/shona_s/", {
         "url": "d125b536cd8c4229363276b6c84579c394eec3a2",
-        "keyword": "3b55f7ac63fce6f8a8307f3bc4fa5911d80db4fe",
+        "keyword": "2cdeae22cd9c3ff19ce905215f3782a7494d8264",
     })]
 
-    def __init__(self, match):
-        FlickrExtractor.__init__(self, match)
-        self.api_call = self.api.people_getPublicPhotos
-        self.user_key = "owner"
-
-    def items(self):
-        user = self.api.urls_lookupUser(self.item_id)
-        yield Message.Version, 1
-        yield Message.Directory, {"user": user}
-        for photo in self.api_call(user["nsid"]):
-            photo[self.user_key] = user
-            url = photo["photo"]["source"]
-            yield Message.Url, url, text.nameext_from_url(url, photo)
+    def photos(self):
+        return self.api.people_getPublicPhotos(self.user["nsid"])
 
 
-class FlickrFavoriteExtractor(FlickrUserExtractor):
+class FlickrFavoriteExtractor(FlickrExtractor):
     """Extractor for favorite photos of a flickr user"""
     subcategory = "favorite"
     directory_fmt = ["{category}", "{subcategory}s", "{user[username]}"]
@@ -143,10 +189,8 @@ class FlickrFavoriteExtractor(FlickrUserExtractor):
         "keyword": "0e1c9521b6051411b585c9b41a4dc0bcde20e616",
     })]
 
-    def __init__(self, match):
-        FlickrExtractor.__init__(self, match)
-        self.api_call = self.api.favorites_getPublicList
-        self.user_key = "user"
+    def photos(self):
+        return self.api.favorites_getPublicList(self.user["nsid"])
 
 
 class FlickrAPI():
@@ -164,6 +208,21 @@ class FlickrAPI():
         """Returns a list of favorite public photos for the given user."""
         params = {"user_id": user_id}
         return self._listing("favorites.getPublicList", params)
+
+    def galleries_getInfo(self, gallery_id):
+        """Gets information about a gallery."""
+        params = {"gallery_id": gallery_id}
+        gallery = self._call("galleries.getInfo", params)["gallery"]
+        del gallery["count_views"]
+        del gallery["count_comments"]
+        gallery["title"] = gallery["title"]["_content"]
+        gallery["description"] = gallery["description"]["_content"]
+        return gallery
+
+    def galleries_getPhotos(self, gallery_id):
+        """Return the list of photos for a gallery."""
+        params = {"gallery_id": gallery_id}
+        return self._listing("galleries.getPhotos", params)
 
     def people_getPublicPhotos(self, user_id):
         """Get a list of public photos for the given user."""
@@ -183,13 +242,7 @@ class FlickrAPI():
     def photosets_getPhotos(self, photoset_id):
         """Get the list of photos in a set."""
         params = {"photoset_id": photoset_id}
-        for photoset in self._pagination("photosets.getPhotos", params):
-            photos = photoset["photo"]
-            del photoset["photo"]
-            for photo in photos:
-                self._extract_format(photo)
-                photo["photoset"] = photoset
-                yield photo
+        return self._pagination("photosets.getPhotos", params)
 
     def urls_lookupUser(self, username):
         """Returns a user NSID, given the url to a user's photos or profile."""
