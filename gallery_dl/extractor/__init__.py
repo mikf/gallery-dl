@@ -73,6 +73,7 @@ modules = [
     "imagehosts",
     "directlink",
     "recursive",
+    "oauth",
     "test",
 ]
 

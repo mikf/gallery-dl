@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, extractor, exception
 from ..cache import cache
+import time
 import re
 
 
@@ -101,13 +102,16 @@ class RedditSubmissionExtractor(RedditExtractor):
 
 class RedditAPI():
     """Minimal interface for the reddit API"""
-    def __init__(self, extractor, client_id="6N9uN0krSDE-ig"):
+    CLIENT_ID = "6N9uN0krSDE-ig"
+    USER_AGENT = "Python:gallery-dl:0.8.4 (by /u/mikf1)"
+
+    def __init__(self, extractor):
         self.extractor = extractor
-        self.client_id = extractor.config("client-id", client_id)
-        self.comments  = extractor.config("comments", 500)
+        self.comments = extractor.config("comments", 500)
+        self.refresh_token = extractor.config("refresh-token")
+        self.log = extractor.log
         self.session = extractor.session
-        self.session.headers["User-Agent"] = ("Python:gallery-dl:0.8.4"
-                                              " (by /u/mikf1)")
+        self.session.headers["User-Agent"] = self.USER_AGENT
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
@@ -124,18 +128,23 @@ class RedditAPI():
 
     def authenticate(self):
         """Authenticate the application by requesting an access token"""
-        access_token = self._authenticate_impl(self.client_id)
+        access_token = self._authenticate_impl(self.refresh_token)
         self.session.headers["Authorization"] = access_token
 
-    @cache(maxage=3600, keyarg=1)
-    def _authenticate_impl(self, client_id):
+    @cache(maxage=3590, keyarg=1)
+    def _authenticate_impl(self, refresh_token=None):
         """Actual authenticate implementation"""
         url = "https://www.reddit.com/api/v1/access_token"
-        data = {
-            "grant_type": "https://oauth.reddit.com/grants/installed_client",
-            "device_id": "DO_NOT_TRACK_THIS_DEVICE",
-        }
-        response = self.session.post(url, data=data, auth=(client_id, ""))
+        if refresh_token:
+            self.log.info("Refreshing access token")
+            data = {"grant_type": "refresh_token",
+                    "refresh_token": refresh_token}
+        else:
+            self.log.info("Requesting public access token")
+            data = {"grant_type": ("https://oauth.reddit.com/"
+                                   "grants/installed_client"),
+                    "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
+        response = self.session.post(url, data=data, auth=(self.CLIENT_ID, ""))
         if response.status_code != 200:
             raise exception.AuthenticationError()
         return "Bearer " + response.json()["access_token"]
@@ -144,7 +153,13 @@ class RedditAPI():
         url = "https://oauth.reddit.com" + endpoint
         params["raw_json"] = 1
         self.authenticate()
-        data = self.session.get(url, params=params).json()
+        response = self.session.get(url, params=params)
+        remaining = response.headers.get("x-ratelimit-remaining")
+        if remaining and float(remaining) < 2:
+            wait = int(response.headers["x-ratelimit-reset"])
+            self.log.info("Waiting %d seconds for ratelimit reset", wait)
+            time.sleep(wait)
+        data = response.json()
         if "error" in data:
             if data["error"] == 403:
                 raise exception.AuthorizationError()
