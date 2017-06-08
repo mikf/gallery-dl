@@ -77,7 +77,10 @@ class OAuthReddit(OAuthBase):
         }
         url = "https://www.reddit.com/api/v1/authorize?"
         url += urllib.parse.urlencode(params)
-        webbrowser.open(url)
+
+        if not webbrowser.open(url):
+            print("Please open this URL in your browser:")
+            print(url, end="\n\n", flush=True)
 
         params = self.recv()
 
