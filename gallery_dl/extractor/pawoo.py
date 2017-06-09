@@ -57,7 +57,7 @@ class PawooAccountExtractor(PawooExtractor):
     test = [
         ("https://pawoo.net/@kuroda", {
             "url": "a3f9e7555f2b024554c0e9b6cbcc7991af13cf99",
-            "keyword": "81e084503755d564ef15ef0db88ae1d9cf89f258",
+            "keyword": "1b4e0dc5ac6c22ce9485ba12ecc200d0aaa2ffae",
         }),
         ("https://pawoo.net/@zZzZz/", {
             "exception": exception.NotFoundError,
@@ -85,7 +85,7 @@ class PawooStatusExtractor(PawooExtractor):
     test = [
         ("https://pawoo.net/@takehana_note/559043", {
             "url": "f95cc8c0274c4143e7e21dbdc693b90c65b596e3",
-            "keyword": "590105849b0435e17ca65258b9150cd0502d24da",
+            "keyword": "7d060d9c4572b381aa423797ad48d89a12daac77",
             "content": "3b148cf90174173355fe34179741ce476921b2fc",
         }),
         ("https://pawoo.net/@zZzZz/12346", {

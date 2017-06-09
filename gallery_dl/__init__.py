@@ -41,6 +41,15 @@ def initialize_logging():
     root.addHandler(handler)
 
 
+def progress(urls, pformat):
+    if pformat is True:
+        pformat = "[{current}/{total}] {url}"
+    pinfo = {"total": len(urls)}
+    for pinfo["current"], pinfo["url"] in enumerate(urls, 1):
+        print(pformat.format_map(pinfo), file=sys.stderr)
+        yield pinfo["url"]
+
+
 def sanatize_input(file):
     for line in file:
         line = line.strip()
@@ -98,8 +107,7 @@ def main():
                         file = sys.stdin
                     else:
                         file = open(args.inputfile)
-                    import itertools
-                    urls = itertools.chain(urls, sanatize_input(file))
+                    urls += sanatize_input(file)
                 except OSError as exc:
                     log.warning("input-file: %s", exc)
 
@@ -108,6 +116,10 @@ def main():
                     job.Job.ufile = open(args.unsupportedfile, "w")
                 except OSError as exc:
                     log.warning("unsupported-URL file: %s", exc)
+
+            pformat = config.get(("output", "progress"), True)
+            if pformat and len(urls) > 1 and args.loglevel < logging.ERROR:
+                urls = progress(urls, pformat)
 
             for url in urls:
                 try:
