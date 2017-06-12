@@ -195,7 +195,7 @@ class FlickrUserExtractor(FlickrExtractor):
     })]
 
     def photos(self):
-        return self.api.people_getPublicPhotos(self.user["nsid"])
+        return self.api.people_getPhotos(self.user["nsid"])
 
 
 class FlickrFavoriteExtractor(FlickrExtractor):
@@ -209,7 +209,7 @@ class FlickrFavoriteExtractor(FlickrExtractor):
     })]
 
     def photos(self):
-        return self.api.favorites_getPublicList(self.user["nsid"])
+        return self.api.favorites_getList(self.user["nsid"])
 
 
 class FlickrAPI():
@@ -232,10 +232,10 @@ class FlickrAPI():
             self.session = extractor.session
         self.subcategory = extractor.subcategory
 
-    def favorites_getPublicList(self, user_id):
-        """Returns a list of favorite public photos for the given user."""
+    def favorites_getList(self, user_id):
+        """Returns a list of the user's favorite photos."""
         params = {"user_id": user_id}
-        return self._listing("favorites.getPublicList", params)
+        return self._listing("favorites.getList", params)
 
     def galleries_getInfo(self, gallery_id):
         """Gets information about a gallery."""
@@ -257,10 +257,10 @@ class FlickrAPI():
         params = {"group_id": group_id}
         return self._listing("groups.pools.getPhotos", params)
 
-    def people_getPublicPhotos(self, user_id):
-        """Get a list of public photos for the given user."""
+    def people_getPhotos(self, user_id):
+        """Return photos from the given user's photostream."""
         params = {"user_id": user_id}
-        return self._listing("people.getPublicPhotos", params)
+        return self._listing("people.getPhotos", params)
 
     def photos_getInfo(self, photo_id):
         """Get information about a photo."""
