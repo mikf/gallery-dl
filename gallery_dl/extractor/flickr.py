@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
+from . import oauth
 
 
 class FlickrExtractor(Extractor):
@@ -213,14 +214,23 @@ class FlickrFavoriteExtractor(FlickrExtractor):
 
 class FlickrAPI():
     """Minimal interface for the flickr API"""
-    api_url = "https://api.flickr.com/services/rest/"
-    formats = [("o", "Original"), ("k", "Large 2048"),
+    API_URL = "https://api.flickr.com/services/rest/"
+    API_KEY = "ac4fd7aa98585b9eee1ba761c209de68"
+    API_SECRET = "3adb0f568dc68393"
+    FORMATS = [("o", "Original"), ("k", "Large 2048"),
                ("h", "Large 1600"), ("l", "Large")]
 
-    def __init__(self, extractor, api_key="ac4fd7aa98585b9eee1ba761c209de68"):
-        self.session = extractor.session
+    def __init__(self, extractor):
+        token = extractor.config("access-token")
+        token_secret = extractor.config("access-token-secret")
+        if token and token_secret:
+            self.session = oauth.OAuthSession(
+                extractor.session,
+                self.API_KEY, self.API_SECRET, token, token_secret)
+            self.API_KEY = None
+        else:
+            self.session = extractor.session
         self.subcategory = extractor.subcategory
-        self.api_key = api_key
 
     def favorites_getPublicList(self, user_id):
         """Returns a list of favorite public photos for the given user."""
@@ -285,10 +295,11 @@ class FlickrAPI():
 
     def _call(self, method, params):
         params["method"] = "flickr." + method
-        params["api_key"] = self.api_key
         params["format"] = "json"
         params["nojsoncallback"] = "1"
-        data = self.session.get(self.api_url, params=params).json()
+        if self.API_KEY:
+            params["api_key"] = self.API_KEY
+        data = self.session.get(self.API_URL, params=params).json()
         if "code" in data and data["code"] == 1:
             raise exception.NotFoundError(self.subcategory)
         return data
@@ -310,7 +321,7 @@ class FlickrAPI():
 
             yield obj
 
-            if params["page"] == obj["pages"]:
+            if params["page"] >= obj["pages"]:
                 break
             params["page"] += 1
 
@@ -321,7 +332,7 @@ class FlickrAPI():
                 yield photo
 
     def _extract_format(self, photo):
-        for fmt, fmtname in self.formats:
+        for fmt, fmtname in self.FORMATS:
             key = "url_" + fmt
             if key in photo:
                 # generate photo info
