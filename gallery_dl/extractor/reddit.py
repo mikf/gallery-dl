@@ -108,6 +108,7 @@ class RedditAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.comments = extractor.config("comments", 500)
+        self.morecomments = extractor.config("morecomments", False)
         self.refresh_token = extractor.config("refresh-token")
         self.log = extractor.log
         self.session = extractor.session
@@ -116,15 +117,34 @@ class RedditAPI():
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
         endpoint = "/comments/" + submission_id + "/.json"
+        link_id = "t3_" + submission_id if self.morecomments else None
         submission, comments = self._call(endpoint, {"limit": self.comments})
         return (submission["data"]["children"][0]["data"],
-                self._unfold(comments))
+                self._flatten(comments, link_id))
 
     def submissions_subreddit(self, subreddit, params):
         """Collect all (submission, comments)-tuples of a subreddit"""
         endpoint = "/r/" + subreddit + "/.json"
         params["limit"] = 100
         return self._pagination(endpoint, params)
+
+    def morechildren(self, link_id, children):
+        """Load additional comments from a submission"""
+        endpoint = "/api/morechildren"
+        params = {"link_id": link_id, "api_type": "json"}
+        index, done = 0, False
+        while not done:
+            if len(children) - index < 100:
+                done = True
+            params["children"] = ",".join(children[index:index + 100])
+            index += 100
+
+            data = self._call(endpoint, params)["json"]
+            for thing in data["data"]["things"]:
+                if thing["kind"] == "more":
+                    children.extend(thing["data"]["children"])
+                else:
+                    yield thing["data"]
 
     def authenticate(self):
         """Authenticate the application by requesting an access token"""
@@ -190,15 +210,18 @@ class RedditAPI():
                 return
             params["after"] = data["after"]
 
-    @staticmethod
-    def _unfold(comments):
-        # TODO: order?
+    def _flatten(self, comments, link_id=None):
+        extra = []
         queue = comments["data"]["children"]
         while queue:
-            comment = queue.pop()
+            comment = queue.pop(0)
             if comment["kind"] == "more":
+                if link_id:
+                    extra.extend(comment["data"]["children"])
                 continue
             comment = comment["data"]
             yield comment
             if comment["replies"]:
                 queue += comment["replies"]["data"]["children"]
+        if link_id and extra:
+            yield from self.morechildren(link_id, extra)
