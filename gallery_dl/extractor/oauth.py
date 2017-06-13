@@ -45,7 +45,7 @@ class OAuthSession():
         message = self.concat("GET", url, query).encode()
         key = self.concat(self.consumer_secret, self.token_secret).encode()
         signature = hmac.new(key, message, hashlib.sha1).digest()
-        return base64.b64encode(signature)
+        return base64.b64encode(signature).decode()
 
     @staticmethod
     def concat(*args):
