@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from . import oauth
+import urllib.parse
 
 
 class FlickrExtractor(Extractor):
@@ -173,7 +174,7 @@ class FlickrGroupExtractor(FlickrExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/groups/([^/]+)"]
     test = [("https://www.flickr.com/groups/bird_headshots/", {
         "url": "40b5586fa0cd1578c3b8cc874fc6e3ae7af70786",
-        "keyword": "24e721cc510c1f74bc3d8f7bd6130773ba3faef4",
+        "keyword": "cd056422203e0a6cae93cd866a6ee0920cebb3be",
     })]
 
     def data(self):
@@ -210,6 +211,32 @@ class FlickrFavoriteExtractor(FlickrExtractor):
 
     def photos(self):
         return self.api.favorites_getList(self.user["nsid"])
+
+
+class FlickrSearchExtractor(FlickrExtractor):
+    subcategory = "search"
+    directory_fmt = ["{category}", "{subcategory}", "{search[text]}"]
+    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/search/?\?([^#]+)"]
+    test = [(("https://flickr.com/search/?text=tree%20cloud%20house"
+              "&color_codes=4&styles=minimalism"), {
+        "url": "ba7ca5a0da857775f68ab63ff5653bf4b16f2ceb",
+        "keyword": "20cd3b153f52ec88e949d1167439583461a515b3",
+    })]
+
+    def __init__(self, match):
+        FlickrExtractor.__init__(self, match)
+        self.search = {
+            key: vlist[0]
+            for key, vlist in urllib.parse.parse_qs(match.group(1)).items()
+        }
+        if "text" not in self.search:
+            self.search["text"] = ""
+
+    def data(self):
+        return {"search": self.search}
+
+    def photos(self):
+        return self.api.photos_search(self.search)
 
 
 class FlickrAPI():
@@ -271,6 +298,10 @@ class FlickrAPI():
         """Returns the available sizes for a photo."""
         params = {"photo_id": photo_id}
         return self._call("photos.getSizes", params)["sizes"]["size"]
+
+    def photos_search(self, params):
+        """Return a list of photos matching some criteria."""
+        return self._listing("photos.search", params.copy())
 
     def photosets_getPhotos(self, photoset_id):
         """Get the list of photos in a set."""
