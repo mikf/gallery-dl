@@ -24,8 +24,11 @@ class TestExtractors(unittest.TestCase):
         config.set(("extractor", "seiga", "username"), email)
 
     def _run_test(self, extr, url, result):
-        tjob = job.TestJob(url, "content" in result)
+        content = "content" in result if result else False
+        tjob = job.TestJob(url, content)
         self.assertEqual(extr, tjob.extractor.__class__)
+        if not result:
+            return
         if "exception" in result:
             self.assertRaises(result["exception"], tjob.run)
             return
@@ -51,7 +54,7 @@ skip = [
     # dont work on travis-ci
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     # temporary issues
-    "gomanga", "mangapark",
+    "imagefap"
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:
