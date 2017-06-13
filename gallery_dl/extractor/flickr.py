@@ -174,7 +174,6 @@ class FlickrGroupExtractor(FlickrExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/groups/([^/]+)"]
     test = [("https://www.flickr.com/groups/bird_headshots/", {
         "url": "40b5586fa0cd1578c3b8cc874fc6e3ae7af70786",
-        "keyword": "cd056422203e0a6cae93cd866a6ee0920cebb3be",
     })]
 
     def data(self):
@@ -217,11 +216,11 @@ class FlickrSearchExtractor(FlickrExtractor):
     subcategory = "search"
     directory_fmt = ["{category}", "{subcategory}", "{search[text]}"]
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/search/?\?([^#]+)"]
-    test = [(("https://flickr.com/search/?text=tree%20cloud%20house"
-              "&color_codes=4&styles=minimalism"), {
-        "url": "ba7ca5a0da857775f68ab63ff5653bf4b16f2ceb",
-        "keyword": "20cd3b153f52ec88e949d1167439583461a515b3",
-    })]
+    test = [
+        (("https://flickr.com/search/?text=mountain"), None),
+        (("https://flickr.com/search/?text=tree%20cloud%20house"
+          "&color_codes=4&styles=minimalism"), None),
+    ]
 
     def __init__(self, match):
         FlickrExtractor.__init__(self, match)
