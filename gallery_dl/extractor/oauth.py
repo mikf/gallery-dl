@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from . import reddit, flickr
+import os
 import time
 import hmac
 import base64
@@ -73,7 +74,16 @@ class OAuthBase(Extractor):
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server.bind(("localhost", 6414))
         server.listen(1)
-        self.client = server.accept()[0]
+
+        # workaround for ctrl+c not working during server.accept on Windows
+        if os.name == "nt":
+            server.settimeout(1.0)
+        while True:
+            try:
+                self.client = server.accept()[0]
+                break
+            except socket.timeout:
+                pass
         server.close()
 
         data = self.client.recv(1024).decode()
