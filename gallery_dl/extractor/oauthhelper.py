@@ -6,55 +6,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Utility classes to setup OAuth"""
+"""Utility classes to setup OAuth and link a users account to gallery-dl"""
 
 from .common import Extractor, Message
 from . import reddit, flickr
+from .. import oauth
 import os
-import time
-import hmac
-import base64
-import random
-import string
-import hashlib
 import urllib.parse
-
-
-class OAuthSession():
-    """Minimal wrapper for requests.session objects to support OAuth 1.0"""
-    def __init__(self, session, consumer_key, consumer_secret,
-                 token=None, token_secret=None):
-        self.session = session
-        self.consumer_secret = consumer_secret
-        self.token_secret = token_secret or ""
-        self.params = session.params
-        self.params["oauth_consumer_key"] = consumer_key
-        self.params["oauth_token"] = token
-        self.params["oauth_signature_method"] = "HMAC-SHA1"
-        self.params["oauth_version"] = "1.0"
-
-    def get(self, url, params):
-        params.update(self.params)
-        params["oauth_nonce"] = self.nonce(16)
-        params["oauth_timestamp"] = int(time.time())
-        params["oauth_signature"] = self.signature(url, params)
-        return self.session.get(url, params=params)
-
-    def signature(self, url, params):
-        """Generate 'oauth_signature' value"""
-        query = urllib.parse.urlencode(sorted(params.items()))
-        message = self.concat("GET", url, query).encode()
-        key = self.concat(self.consumer_secret, self.token_secret).encode()
-        signature = hmac.new(key, message, hashlib.sha1).digest()
-        return base64.b64encode(signature).decode()
-
-    @staticmethod
-    def concat(*args):
-        return "&".join(urllib.parse.quote(item, "") for item in args)
-
-    @staticmethod
-    def nonce(N, alphabet=string.ascii_letters):
-        return "".join(random.choice(alphabet) for _ in range(N))
 
 
 class OAuthBase(Extractor):
@@ -122,7 +80,7 @@ class OAuthReddit(OAuthBase):
         self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
         self.client_id = reddit.RedditAPI.CLIENT_ID
         self.state = "gallery-dl:{}:{}".format(
-            self.subcategory, OAuthSession.nonce(8))
+            self.subcategory, oauth.OAuthSession.nonce(8))
 
     def items(self):
         yield Message.Version, 1
@@ -170,9 +128,10 @@ class OAuthFlickr(OAuthBase):
 
     def __init__(self, match):
         OAuthBase.__init__(self)
-        self.session = OAuthSession(self.session,
-                                    flickr.FlickrAPI.API_KEY,
-                                    flickr.FlickrAPI.API_SECRET)
+        self.session = oauth.OAuthSession(
+            self.session,
+            flickr.FlickrAPI.API_KEY, flickr.FlickrAPI.API_SECRET
+        )
         del self.session.params["oauth_token"]
 
     def items(self):

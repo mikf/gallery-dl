@@ -9,8 +9,7 @@
 """Extract images from https://www.flickr.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
-from . import oauth
+from .. import text, util, oauth, exception
 import urllib.parse
 
 
