@@ -58,11 +58,26 @@ SUBCATEGORY_MAP = {
     "issue"  : "Comic-Issues",
     "manga"  : "Manga",
     "pinit"  : "pin.it Links",
+    "search" : "Search Results",
     "status" : "Images from Statuses",
     "tag"    : "Tag-Searches",
     "user"   : "Images from Users",
     "work"   : "Individual Images",
 }
+
+AUTH_MAP = {
+    "batoto"  : "Optional",
+    "exhentai": "Optional",
+    "flickr"  : "Optional (OAuth)",
+    "nijie"   : "Required",
+    "pixiv"   : "Required",
+    "reddit"  : "Optional (OAuth)",
+    "seiga"   : "Required",
+}
+
+IGNORE_LIST = (
+    "oauth",
+)
 
 
 class RstColumn():
@@ -120,6 +135,8 @@ def build_list():
     last = None
 
     for extr in gallery_dl.extractor.extractors():
+        if extr.category in IGNORE_LIST:
+            continue
         if extr.category == last or not last:
             classes.append(extr)
         elif last:
@@ -132,8 +149,8 @@ def build_list():
     for extrlist in extractors:
         extrlist.sort(key=subcategory_key)
         for extr in extrlist:
-            extr.category = map_category(extr.category)
-            extr.subcat   = map_subcategory(extr.subcategory)
+            extr.cat    = map_category(extr.category)
+            extr.subcat = map_subcategory(extr.subcategory)
     extractors.sort(key=category_key)
 
     return extractors
@@ -162,7 +179,7 @@ def map_subcategory(sc):
 
 
 def category_key(extrlist):
-    key = extrlist[0].category.lower()
+    key = extrlist[0].cat.lower()
     if len(extrlist) == 1 and extrlist[0].__module__.endswith(".imagehosts"):
         key = "zz" + key
     return key
@@ -177,7 +194,7 @@ def subcategory_key(cls):
 extractors = build_list()
 columns = [
     RstColumn("Site", [
-        extrlist[0].category
+        extrlist[0].cat
         for extrlist in extractors
     ]),
     RstColumn("URL", [
@@ -186,6 +203,10 @@ columns = [
     ]),
     RstColumn("Capabilities", [
         ", ".join(extr.subcat for extr in extrlist)
+        for extrlist in extractors
+    ]),
+    RstColumn("Authentication", [
+        AUTH_MAP.get(extrlist[0].category, "")
         for extrlist in extractors
     ]),
 ]
