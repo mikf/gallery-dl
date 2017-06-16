@@ -9,7 +9,7 @@
 """Extract images subreddits at https://reddit.com/"""
 
 from .common import Extractor, Message
-from .. import text, extractor, exception
+from .. import text, util, extractor, exception
 from ..cache import cache
 import time
 import re
@@ -31,7 +31,7 @@ class RedditExtractor(Extractor):
         depth = 0
 
         yield Message.Version, 1
-        with extractor.blacklist("reddit"):
+        with extractor.blacklist(("reddit",) + util.SPECIAL_EXTRACTORS):
             while True:
                 extra = []
                 for url in self._urls(submissions):

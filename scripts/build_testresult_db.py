@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.realpath(ROOTDIR))
 from gallery_dl import extractor, job, config
 
 tests = [
-   ([url[0] for url in extr.test], extr)
+   ([url[0] for url in extr.test if url[1]], extr)
    for extr in extractor.extractors()
    if hasattr(extr, "test")
 ]
