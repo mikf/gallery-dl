@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from . import reddit, flickr
-from .. import oauth
+from .. import util
 import os
 import urllib.parse
 
@@ -80,7 +80,7 @@ class OAuthReddit(OAuthBase):
         self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
         self.client_id = reddit.RedditAPI.CLIENT_ID
         self.state = "gallery-dl:{}:{}".format(
-            self.subcategory, oauth.OAuthSession.nonce(8))
+            self.subcategory, util.OAuthSession.nonce(8))
 
     def items(self):
         yield Message.Version, 1
@@ -128,7 +128,7 @@ class OAuthFlickr(OAuthBase):
 
     def __init__(self, match):
         OAuthBase.__init__(self)
-        self.session = oauth.OAuthSession(
+        self.session = util.OAuthSession(
             self.session,
             flickr.FlickrAPI.API_KEY, flickr.FlickrAPI.API_SECRET
         )

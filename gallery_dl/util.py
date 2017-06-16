@@ -10,6 +10,13 @@
 
 import os
 import sys
+import hmac
+import time
+import base64
+import random
+import string
+import hashlib
+import urllib.parse
 from . import config, text, exception
 
 
@@ -75,19 +82,19 @@ def bdecode(data, alphabet="0123456789"):
 
 def code_to_language(code, default="English"):
     """Map an ISO 639-1 language code to its actual name"""
-    return codes.get(code.lower(), default)
+    return CODES.get(code.lower(), default)
 
 
 def language_to_code(lang, default="en"):
     """Map a language name to its ISO 639-1 code"""
     lang = lang.capitalize()
-    for code, language in codes.items():
+    for code, language in CODES.items():
         if language == lang:
             return code
     return default
 
 
-codes = {
+CODES = {
     "ar": "Arabic",
     "cs": "Czech",
     "da": "Danish",
@@ -116,6 +123,8 @@ codes = {
     "vi": "Vietnamese",
     "zh": "Chinese",
 }
+
+SPECIAL_EXTRACTORS = ("oauth", "recursive", "test")
 
 
 class RangePredicate():
@@ -224,3 +233,40 @@ class PathFormat():
     def adjust_path(path):
         """Enable longer-than-260-character paths on windows"""
         return "\\\\?\\" + os.path.abspath(path) if os.name == "nt" else path
+
+
+class OAuthSession():
+    """Minimal wrapper for requests.session objects to support OAuth 1.0"""
+    def __init__(self, session, consumer_key, consumer_secret,
+                 token=None, token_secret=None):
+        self.session = session
+        self.consumer_secret = consumer_secret
+        self.token_secret = token_secret or ""
+        self.params = session.params
+        self.params["oauth_consumer_key"] = consumer_key
+        self.params["oauth_token"] = token
+        self.params["oauth_signature_method"] = "HMAC-SHA1"
+        self.params["oauth_version"] = "1.0"
+
+    def get(self, url, params):
+        params.update(self.params)
+        params["oauth_nonce"] = self.nonce(16)
+        params["oauth_timestamp"] = int(time.time())
+        params["oauth_signature"] = self.signature(url, params)
+        return self.session.get(url, params=params)
+
+    def signature(self, url, params):
+        """Generate 'oauth_signature' value"""
+        query = urllib.parse.urlencode(sorted(params.items()))
+        message = self.concat("GET", url, query).encode()
+        key = self.concat(self.consumer_secret, self.token_secret).encode()
+        signature = hmac.new(key, message, hashlib.sha1).digest()
+        return base64.b64encode(signature).decode()
+
+    @staticmethod
+    def concat(*args):
+        return "&".join(urllib.parse.quote(item, "") for item in args)
+
+    @staticmethod
+    def nonce(N, alphabet=string.ascii_letters):
+        return "".join(random.choice(alphabet) for _ in range(N))

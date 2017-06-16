@@ -9,7 +9,7 @@
 """Extract images from https://www.flickr.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, oauth, exception
+from .. import text, util, exception
 import urllib.parse
 
 
@@ -249,7 +249,7 @@ class FlickrAPI():
         token = extractor.config("access-token")
         token_secret = extractor.config("access-token-secret")
         if token and token_secret:
-            self.session = oauth.OAuthSession(
+            self.session = util.OAuthSession(
                 extractor.session,
                 self.API_KEY, self.API_SECRET, token, token_secret)
             self.API_KEY = None

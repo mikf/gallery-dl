@@ -97,7 +97,7 @@ def extractors():
 
 class blacklist():
     """Context Manager to blacklist extractor modules"""
-    def __init__(self, *categories):
+    def __init__(self, categories):
         self.categories = categories
 
     def __enter__(self):
