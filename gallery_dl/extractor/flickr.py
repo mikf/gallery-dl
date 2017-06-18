@@ -242,8 +242,17 @@ class FlickrAPI():
     API_URL = "https://api.flickr.com/services/rest/"
     API_KEY = "ac4fd7aa98585b9eee1ba761c209de68"
     API_SECRET = "3adb0f568dc68393"
-    FORMATS = [("o", "Original"), ("k", "Large 2048"),
-               ("h", "Large 1600"), ("l", "Large")]
+    FORMATS = [
+        ("o", "Original", None),
+        ("k", "Large 2048", 2048),
+        ("h", "Large 1600", 1600),
+        ("l", "Large", 1024),
+        ("c", "Medium 800", 800),
+        ("z", "Medium 640", 640),
+        ("m", "Medium", 500),
+        ("n", "Small 320", 320),
+        ("s", "Small", 240),
+    ]
 
     def __init__(self, extractor):
         token = extractor.config("access-token")
@@ -255,6 +264,14 @@ class FlickrAPI():
             self.API_KEY = None
         else:
             self.session = extractor.session
+
+        self.maxwidth = extractor.config("width-max")
+        if self.maxwidth:
+            self.formats = [fmt for fmt in self.FORMATS
+                            if not fmt[2] or fmt[2] < self.maxwidth]
+        else:
+            self.formats = self.FORMATS
+        self.formats = self.formats[:4]
         self.subcategory = extractor.subcategory
 
     def favorites_getList(self, user_id):
@@ -295,7 +312,13 @@ class FlickrAPI():
     def photos_getSizes(self, photo_id):
         """Returns the available sizes for a photo."""
         params = {"photo_id": photo_id}
-        return self._call("photos.getSizes", params)["sizes"]["size"]
+        sizes = self._call("photos.getSizes", params)["sizes"]["size"]
+        if self.maxwidth:
+            for index, size in enumerate(sizes):
+                if int(size["width"]) > self.maxwidth and index > 0:
+                    del sizes[index:]
+                    break
+        return sizes
 
     def photos_search(self, params):
         """Return a list of photos matching some criteria."""
@@ -334,7 +357,7 @@ class FlickrAPI():
         return data
 
     def _pagination(self, method, params):
-        params["extras"] = "url_o,url_k,url_h,url_l"
+        params["extras"] = ",".join("url_" + fmt[0] for fmt in self.formats)
         params["page"] = 1
 
         while True:
@@ -361,13 +384,16 @@ class FlickrAPI():
                 yield photo
 
     def _extract_format(self, photo):
-        for fmt, fmtname in self.FORMATS:
+        for fmt, fmtname, fmtwidth in self.formats:
             key = "url_" + fmt
             if key in photo:
+                width = photo["width_" + fmt]
+                if self.maxwidth and int(width) > self.maxwidth:
+                    continue
                 # generate photo info
                 photo["photo"] = {
                     "source": photo[key],
-                    "width" : photo["width_" + fmt],
+                    "width" : width,
                     "height": photo["height_" + fmt],
                     "label" : fmtname,
                     "media" : "photo",
