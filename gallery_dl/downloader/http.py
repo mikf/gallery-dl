@@ -65,6 +65,7 @@ class Downloader(BasicDownloader):
             if not pathfmt.has_extension:
                 # set 'extension' keyword from Content-Type header
                 mtype = response.headers.get("Content-Type", "image/jpeg")
+                mtype = mtype.partition(";")[0]
                 exts = mimetypes.guess_all_extensions(mtype, strict=False)
                 if exts:
                     exts.sort()
