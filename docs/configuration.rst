@@ -172,8 +172,6 @@ Extractor-specific Options
 
 extractor.deviantart.mature
 ---------------------------
-extractor.exhentai.original
----------------------------
 =========== =====
 Type        ``bool``
 Default     ``true``
