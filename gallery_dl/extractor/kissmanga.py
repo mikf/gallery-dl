@@ -61,7 +61,11 @@ class KissmangaChapterExtractor(KissmangaExtractor):
         ("http://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
             "url": "de074848f6c1245204bb9214c12bcc3ecfd65019",
             "keyword": "013aad80e578c6ccd2e1fe47cdc27c12a64f6db2",
-        })
+        }),
+        ("http://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
+            "url": "6abec8178f35fe7846586280ca9e38eacc32452c",
+            "keyword": "ca7a07ecfd9525c0f825dc747f520306611d6af9",
+        }),
     ]
 
     def items(self):
@@ -78,13 +82,14 @@ class KissmangaChapterExtractor(KissmangaExtractor):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, "Read manga\n", "\n")
         cinfo, pos = text.extract(page, "", "\n", pos)
-        match = re.match((r"(?:Vol.0*(\d+) )?(?:Ch.)?0*(\d+)"
-                          r"(?:\.0*(\d+))?(?:: (.+))?"), cinfo)
-        chminor = match.group(3)
+        match = re.match((
+            r"(?:[Vv]ol.0*(\d+) )?(?:[Cc]h.)?0*(\d+)(?:\.0*(\d+))?(?:: (.+))?|"
+            r"[\w ]+?(?: -)? 0*(\d+)(?: (.+))?"), cinfo)
+        chminor = match.group(3) or match.group(6)
         return {
             "manga": manga,
             "volume": match.group(1) or "",
-            "chapter": match.group(2),
+            "chapter": match.group(2) or match.group(5),
             "chapter-minor": "."+chminor if chminor else "",
             "title": match.group(4) or "",
             "lang": "en",
