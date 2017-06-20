@@ -65,7 +65,8 @@ class OAuthBase(Extractor):
         """Open 'url' in browser amd return response parameters"""
         import webbrowser
         url += "?" + urllib.parse.urlencode(params)
-        if not webbrowser.open(url):
+        browser = self.config("browser", True)
+        if not browser or (browser and not webbrowser.open(url)):
             print("Please open this URL in your browser:")
             print(url, end="\n\n", flush=True)
         return self.recv()
