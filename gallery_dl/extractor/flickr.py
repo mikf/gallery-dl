@@ -252,6 +252,9 @@ class FlickrAPI():
         ("m", "Medium", 500),
         ("n", "Small 320", 320),
         ("s", "Small", 240),
+        ("q", "Large Square", 150),
+        ("t", "Thumbnail", 100),
+        ("s", "Square", 75),
     ]
 
     def __init__(self, extractor):
@@ -265,10 +268,19 @@ class FlickrAPI():
         else:
             self.session = extractor.session
 
-        self.maxwidth = extractor.config("width-max")
-        if self.maxwidth:
+        self.maxsize = extractor.config("size-max")
+        if isinstance(self.maxsize, str):
+            for fmt, fmtname, fmtwidth in self.FORMATS:
+                if self.maxsize == fmt or self.maxsize == fmtname:
+                    self.maxsize = fmtwidth
+                    break
+            else:
+                self.maxsize = None
+                extractor.log.warning(
+                    "Could not match '%s' to any format", self.maxsize)
+        if self.maxsize:
             self.formats = [fmt for fmt in self.FORMATS
-                            if not fmt[2] or fmt[2] < self.maxwidth]
+                            if not fmt[2] or fmt[2] < self.maxsize]
         else:
             self.formats = self.FORMATS
         self.formats = self.formats[:4]
@@ -313,9 +325,15 @@ class FlickrAPI():
         """Returns the available sizes for a photo."""
         params = {"photo_id": photo_id}
         sizes = self._call("photos.getSizes", params)["sizes"]["size"]
-        if self.maxwidth:
+        if sizes[-1]["media"] == "video":
+            # filter all non-video and mobile entries
+            sizes = [size for size in sizes
+                     if size["media"] == "video" and
+                     not size["label"].startswith(("Mobile ", "Video "))]
+        if self.maxsize:
             for index, size in enumerate(sizes):
-                if int(size["width"]) > self.maxwidth and index > 0:
+                if index > 0 and (int(size["width"]) > self.maxsize or
+                                  int(size["height"]) > self.maxsize):
                     del sizes[index:]
                     break
         return sizes
@@ -387,14 +405,15 @@ class FlickrAPI():
         for fmt, fmtname, fmtwidth in self.formats:
             key = "url_" + fmt
             if key in photo:
-                width = photo["width_" + fmt]
-                if self.maxwidth and int(width) > self.maxwidth:
+                width, height = photo["width_" + fmt], photo["height_" + fmt]
+                if self.maxsize and (int(width) > self.maxsize or
+                                     int(height) > self.maxsize):
                     continue
                 # generate photo info
                 photo["photo"] = {
                     "source": photo[key],
                     "width" : width,
-                    "height": photo["height_" + fmt],
+                    "height": height,
                     "label" : fmtname,
                     "media" : "photo",
                 }
