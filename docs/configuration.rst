@@ -216,15 +216,6 @@ Description Maximum wait time in seconds
 =========== =====
 
 
-extractor.exhentai.cookies
----------------------------
-=========== =====
-Type        ``object``
-Default     ``null``
-Description
-=========== =====
-
-
 extractor.flickr.access-token
 -----------------------------
 =========== =====
@@ -253,6 +244,21 @@ Description Load additional metadata when using the single-image extractor.
 =========== =====
 
 
+extractor.flickr.size-max
+--------------------------
+=========== =====
+Type        ``integer`` or ``string``
+Default     ``null``
+Description Sets the maximum allowed size for downloaded images.
+
+            * If this is an ``integer``, it specifies the maximum image dimension
+              (width and height) in pixels.
+            * If this is a ``string``, it should be one of Flickr's format specifiers
+              (``"Original"``, ``"Large"``, ... or ``o``, ``k``, ``h``, ``l``, ...)
+              to use these as an upper limit.
+=========== =====
+
+
 extractor.gfycat.format
 -----------------------
 =========== =====
@@ -274,10 +280,23 @@ Type        ``bool`` or ``string``
 Default     ``true``
 Description Controls whether to choose the GIF or MP4 version of an animation
 
-            * ``true``: Follow Imgur's advice and only choose MP4 if the
+            * ``true``: Follow Imgur's advice and choose MP4 if the
               ``prefer_video`` flag in an image's metadata is set.
-            * ``false``: Always choose GIF
-            * ``"always"``: Always choose MP4
+            * ``false``: Always choose GIF.
+            * ``"always"``: Always choose MP4.
+=========== =====
+
+
+extractor.oauth.browser
+-----------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Controls how a user is directed to a OAuth authorization site.
+
+            * ``true``: Use Python's `webbrowser.open()`_ method to automatically
+              open the URL in the user's browser.
+            * ``false``: Ask the user to copy & paste an URL from the terminal.
 =========== =====
 
 
@@ -355,7 +374,8 @@ Description The ``refresh_token`` value you get from linking your Reddit account
 =========== =====
 
 
-.. _`requests.get()`: http://docs.python-requests.org/en/latest/user/advanced/#timeouts
-.. _format string:    https://docs.python.org/3/library/string.html#formatstrings
-.. _format strings:   https://docs.python.org/3/library/string.html#formatstrings
-.. _Authentication:   https://github.com/mikf/gallery-dl#5authentication
+.. _requests.get():    http://docs.python-requests.org/en/latest/user/advanced/#timeouts
+.. _format string:     https://docs.python.org/3/library/string.html#formatstrings
+.. _format strings:    https://docs.python.org/3/library/string.html#formatstrings
+.. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
+.. _Authentication:    https://github.com/mikf/gallery-dl#5authentication
