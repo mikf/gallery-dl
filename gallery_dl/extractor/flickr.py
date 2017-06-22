@@ -110,9 +110,10 @@ class FlickrAlbumExtractor(FlickrExtractor):
                      "{album[id]} - {album[title]}"]
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/"
                r"photos/([^/]+)/(?:album|set)s/(\d+)"]
-    test = [("https://www.flickr.com/photos/flickr/albums/72157656845052880", {
-        "url": "517db3faa55e88686f1d00a379f8f0daf4c7b837",
-        "keyword": "001fb1c99a6331cf69d72392af3badf95e8fe51e",
+    test = [(("https://www.flickr.com/photos/"
+              "shona_s/albums/72157633471741607"), {
+        "url": "baf4a3d1b15afcecf9638000a12c0eb3d5df9024",
+        "keyword": "40605c5b22feafcd029d1121f4dc8786b0aa7dcc",
     })]
 
     def __init__(self, match):
@@ -280,7 +281,7 @@ class FlickrAPI():
                     "Could not match '%s' to any format", self.maxsize)
         if self.maxsize:
             self.formats = [fmt for fmt in self.FORMATS
-                            if not fmt[2] or fmt[2] < self.maxsize]
+                            if not fmt[2] or fmt[2] <= self.maxsize]
         else:
             self.formats = self.FORMATS
         self.formats = self.formats[:4]

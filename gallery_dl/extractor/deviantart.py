@@ -249,7 +249,7 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     subcategory = "journal"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/journal/?$"]
     test = [("http://shimoda7.deviantart.com/journal/", {
-        "url": "1637f60bd94dc21da9130c8d84f85009b754cd70",
+        "url": "f7960ae06e774d6931c61ad309c95a10710658b2",
         "keyword": "9ddc2e130198395c1dfaa55c65b6bf63713ec0a8",
     })]
 
