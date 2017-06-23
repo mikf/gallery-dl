@@ -27,9 +27,9 @@ cache.file
 ----------
 =========== =====
 Type        ``string``
-Default     ``tempfile.gettempdir() + ".gallery-dl.cache"``
+Default     |tempfile.gettempdir()|_ + ``".gallery-dl.cache"``
 Description Path of the SQLite3 database used to cache login sessions,
-            smaller cookies and API tokens.
+            cookies and API tokens.
 
             Set this value to an invalid path or simply ``null`` to disable
             this cache.
@@ -101,7 +101,7 @@ Description Amount of time (in seconds) to wait for a successful connection
             and a response from a remote server.
 
             This value gets internally used as the ``timeout`` parameter for the
-            `requests.get()`_ method.
+            |requests.get()|_ method.
 =========== =====
 
 
@@ -177,7 +177,7 @@ Type        ``bool``
 Default     ``true``
 Description Enable mature content.
 
-            This option simply sets the ``mature_content`` parameter for API
+            This option simply sets the |mature_content|_ parameter for API
             calls to either ``"true"`` or ``"false"`` and does not do any other
             form of content filtering.
 =========== =====
@@ -294,7 +294,7 @@ Type        ``bool``
 Default     ``true``
 Description Controls how a user is directed to a OAuth authorization site.
 
-            * ``true``: Use Python's `webbrowser.open()`_ method to automatically
+            * ``true``: Use Python's |webbrowser.open()|_ method to automatically
               open the URL in the user's browser.
             * ``false``: Ask the user to copy & paste an URL from the terminal.
 =========== =====
@@ -327,6 +327,18 @@ Description The value of the ``limit`` parameter when loading
 
             The value `0` ignores all comments and significantly reduces to time
             required when scanning a subreddit.
+=========== =====
+
+
+extractor.reddit.morecomments
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Retrieve additional comments by resolving the ``more`` comment
+            stubs in the base commment tree.
+
+            This requires 1 additional API call for every 100 extra comments.
 =========== =====
 
 
@@ -371,11 +383,24 @@ Type        ``string``
 Default     ``null``
 Description The ``refresh_token`` value you get from linking your Reddit account
             to ``gallery-dl``.
+
+            Using the ``refresh_token`` allows you to access private or otherwise
+            not publicly available subreddits, given that your account is
+            authorized to do so,
+            but requests to the reddit API are going to be rate limited
+            at 600 requests every 10 minutes/600 seconds.
 =========== =====
 
 
-.. _requests.get():    http://docs.python-requests.org/en/latest/user/advanced/#timeouts
+.. |tempfile.gettempdir()| replace:: ``tempfile.gettempdir()``
+.. |requests.get()| replace:: ``requests.get()``
+.. |mature_content| replace:: ``mature_content``
+.. |webbrowser.open()| replace:: ``webbrowser.open()``
+
+.. _tempfile.gettempdir(): https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
+.. _requests.get():    https://docs.python-requests.org/en/latest/user/advanced/#timeouts
 .. _format string:     https://docs.python.org/3/library/string.html#formatstrings
 .. _format strings:    https://docs.python.org/3/library/string.html#formatstrings
+.. _mature_content:    https://www.deviantart.com/developers/http/v1/20160316/object/deviation
 .. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
 .. _Authentication:    https://github.com/mikf/gallery-dl#5authentication
