@@ -130,7 +130,9 @@ Configuration
 =============
 
 Configuration files for *gallery-dl* use a JSON-based file format.
-For a (more or less) complete example, see gallery-dl.conf_.
+For a (more or less) complete example of a configuration file, see
+gallery-dl.conf_. A list of all available configuration options and their
+descriptions can be found in configuration.rst_.
 
 *gallery-dl* searches for configuration files in the following paths:
 
@@ -151,9 +153,13 @@ Values in later configuration files will override previous ones.
 Authentication
 ==============
 
-Some extractors require you to provide valid login-credentials.
-This currently includes ``pixiv``, ``exhentai``, ``nijie``, ``seiga``
-and ``batoto``.
+Username & Password
+-------------------
+
+Some extractors require you to provide valid login-credentials in the form of
+a username & password pair.
+This is necessary for ``pixiv``, ``nijie`` and ``seiga`` and optional
+(but strongly recommended) for ``exhentai`` and ``batoto``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
@@ -180,8 +186,28 @@ or you can provide them directly via the
     $ gallery-dl -u <username> -p <password> URL
     $ gallery-dl -o username=<username> -o password=<password> URL
 
+OAuth
+-----
+
+*gallery-dl* supports user authentication via OAuth_ for ``flickr`` and
+``reddit``. This is entirely optional, but grants *gallery-dl* the ability
+to issue requests on your account's behalf and enables it to access resources
+which would otherwise be unavailable to a public user.
+
+To link your account to *gallery-dl*, start by invoking it with
+``oauth:<site-name>`` as an argument. For example:
+
+.. code:: bash
+
+    $ gallery-dl oauth:flickr
+
+You will be sent to the site's authorization page and asked to grant read
+access to *gallery-dl*. Authorize it and you will he shown one or more
+"tokens", which should be added to your configuration file.
+
 
 .. _gallery-dl.conf:       https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
+.. _configuration.rst:     https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Complete List:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
 .. _standalone executable: https://github.com/mikf/gallery-dl/releases/download/v0.8.4/gallery-dl.exe
 .. _Python:   https://www.python.org/downloads/
@@ -190,6 +216,7 @@ or you can provide them directly via the
 .. _pip:      https://pip.pypa.io/en/stable/
 .. _stable:   https://github.com/mikf/gallery-dl/archive/v0.8.4.zip
 .. _dev:      https://github.com/mikf/gallery-dl/archive/master.zip
+.. _OAuth:    https://en.wikipedia.org/wiki/OAuth
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.python.org/pypi/gallery-dl
