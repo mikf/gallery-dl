@@ -250,10 +250,11 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
     category = "imagetwist"
     pattern = [r"(?:https?://)?((?:www\.)?imagetwist\.com/([a-z0-9]{12}))"]
     test = [("http://imagetwist.com/4e46hv31tu0q/test.jpg", {
-        "url": "6b3fc0bd1105b698d2d5844658ca674d66b1e2e7",
+        "url": "c999dc1a5dec0525ac9eb8c092f173dfe6dba0b0",
         "keyword": "30dd34dcb06b5b51c6cfff199c610b24edb7b9bc",
         "content": "96b1fd099b06faad5879fce23a7e4eb8290d8810",
     })]
+    https = True
     params = None
 
     @property
