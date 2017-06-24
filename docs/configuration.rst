@@ -23,6 +23,15 @@ Description Directory path used as the base for all download destinations.
 =========== =====
 
 
+netrc
+-----
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Enable the use of |.netrc|_ authentication data.
+=========== =====
+
+
 cache.file
 ----------
 =========== =====
@@ -331,7 +340,7 @@ Description The value of the ``limit`` parameter when loading
 
 
 extractor.reddit.morecomments
--------------------------
+-----------------------------
 =========== =====
 Type        ``bool``
 Default     ``false``
@@ -392,11 +401,13 @@ Description The ``refresh_token`` value you get from linking your Reddit account
 =========== =====
 
 
+.. |.netrc| replace:: ``.netrc``
 .. |tempfile.gettempdir()| replace:: ``tempfile.gettempdir()``
 .. |requests.get()| replace:: ``requests.get()``
 .. |mature_content| replace:: ``mature_content``
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
 
+.. _.netrc:            https://stackoverflow.com/tags/.netrc/info
 .. _tempfile.gettempdir(): https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
 .. _requests.get():    https://docs.python-requests.org/en/latest/user/advanced/#timeouts
 .. _format string:     https://docs.python.org/3/library/string.html#formatstrings

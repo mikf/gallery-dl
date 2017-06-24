@@ -22,8 +22,7 @@ class BatotoExtractor():
 
     def login(self):
         """Login and set necessary cookies"""
-        username = self.config("username")
-        password = self.config("password")
+        username, password = self.auth_info()
         if username:
             cookies = self._login_impl(username, password)
             for key, value in cookies.items():

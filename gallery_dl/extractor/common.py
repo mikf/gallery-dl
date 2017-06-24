@@ -10,6 +10,7 @@
 
 import os
 import time
+import netrc
 import queue
 import logging
 import requests
@@ -41,6 +42,24 @@ class Extractor():
     def config(self, key, default=None):
         return config.interpolate(
             ("extractor", self.category, self.subcategory, key), default)
+
+    def auth_info(self):
+        """Return authentication information as (username, password) tuple"""
+        username = self.config("username")
+        password = None
+
+        if username:
+            password = self.config("password")
+        elif config.get(("netrc",), False):
+            try:
+                info = netrc.netrc().authenticators(self.category)
+                username, _, password = info
+            except (OSError, netrc.NetrcParseError) as exc:
+                self.log.error("netrc: %s", exc)
+            except TypeError:
+                self.log.warning("netrc: No authentication info")
+
+        return username, password
 
     def request(self, url, encoding=None, *args, **kwargs):
         response = safe_request(self.session, url, *args, **kwargs)
