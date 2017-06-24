@@ -87,6 +87,11 @@ def build_parser():
         metavar="PASS", action=ConfigAction, dest="password",
     )
     parser.add_argument(
+        "--netrc",
+        action=ConfigConstAction, nargs=0, dest="netrc", const=True,
+        help="Use .netrc authentication data",
+    )
+    parser.add_argument(
         "-i", "--input-file",
         metavar="FILE", dest="inputfile",
         help="Download URLs found in local FILE ('-' for stdin)",

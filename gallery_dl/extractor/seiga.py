@@ -47,8 +47,7 @@ class SeigaExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
-        username = self.config("username")
-        password = self.config("password")
+        username, password = self.auth_info()
         self.session.cookies = self._login_impl(username, password)
 
     @cache(maxage=7*24*60*60, keyarg=1)
