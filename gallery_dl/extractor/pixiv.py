@@ -121,8 +121,9 @@ class PixivExtractor(Extractor):
 class PixivUserExtractor(PixivExtractor):
     """Extractor for works of a pixiv-user"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/"
-               r"member(?:_illust)?\.php\?id=(\d+)(?:.*&tag=([^&#]+))?"]
+    pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/"
+                r"member(?:_illust)?\.php\?id=(\d+)(?:.*&tag=([^&#]+))?"),
+               (r"(?:https?://)?(?:www\.)?pixiv\.net/u/(\d+)()")]
     test = [
         ("http://www.pixiv.net/member_illust.php?id=173530", {
             "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
@@ -133,6 +134,7 @@ class PixivUserExtractor(PixivExtractor):
         ("http://www.pixiv.net/member_illust.php?id=173531", {
             "exception": exception.NotFoundError,
         }),
+        ("https://www.pixiv.net/u/173530", None),
     ]
 
     def __init__(self, match):
@@ -152,9 +154,11 @@ class PixivWorkExtractor(PixivExtractor):
     subcategory = "work"
     pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
                 r"\?(?:[^&]+&)*illust_id=(\d+)"),
-               (r"(?:https?://)?i(?:\d+\.pixiv|\.pximg)\.net(?:/.*)?/img-[^/]+"
-                r"/img/\d{4}(?:/\d\d){5}/(\d+)"),
-               (r"(?:https?://)?img\d+\.pixiv\.net/img/[^/]+/(\d+)")]
+               (r"(?:https?://)?i(?:\d+\.pixiv|\.pximg)\.net/"
+                r"(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}"
+                r"|img\d+/img/[^/]+)/(\d+)"),
+               (r"(?:https?://)?img\d*\.pixiv\.net/img/[^/]+/(\d+)"),
+               (r"(?:https?://)?(?:www\.)?pixiv\.net/i/(\d+)"),]
     test = [
         (("http://www.pixiv.net/member_illust.php"
           "?mode=medium&illust_id=966412"), {
@@ -173,6 +177,9 @@ class PixivWorkExtractor(PixivExtractor):
           "img/2017/04/25/07/33/29/62568267_p0.png"), {
             "url": "71b8bbd070d6b03a75ca4afb89f64d1445b2278d",
         }),
+        ("https://www.pixiv.net/i/966412", None),
+        ("http://img.pixiv.net/img/soundcross/42626136.jpg", None),
+        ("http://i2.pixiv.net/img76/img/snailrin/42672235.jpg", None),
     ]
 
     def __init__(self, match):
