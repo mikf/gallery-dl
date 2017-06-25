@@ -140,13 +140,42 @@ class PixivUserExtractor(PixivExtractor):
     def __init__(self, match):
         PixivExtractor.__init__(self)
         self.user_id, tag = match.groups()
-        self.tag = tag.lower() if tag else None
+        if tag:
+            self.tag = tag.lower()
+            self.works = self._tagged_works
 
     def works(self):
+        return self.api.user_works(self.user_id)
+
+    def _tagged_works(self):
         for work in self.api.user_works(self.user_id):
-            if (not self.tag or
-                    self.tag in [tag.lower() for tag in work["tags"]]):
+            if self.tag in [tag.lower() for tag in work["tags"]]:
                 yield work
+
+
+class PixivMeExtractor(PixivExtractor):
+    """Extractor for pixiv.me URLs"""
+    subcategory = "me"
+    pattern = [r"(?:https?://)?pixiv\.me/([^/?&#]+)"]
+    test = [
+        ("https://pixiv.me/del_shannon", {
+            "url": "0b1a18c3e3553c44ee6e0ccc36a7fd906c498e8f",
+        }),
+        ("https://pixiv.me/del_shanno", {
+            "exception": exception.NotFoundError,
+        }),
+    ]
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self)
+        self.account = match.group(1)
+
+    def items(self):
+        response = self.session.head("https://pixiv.me/" + self.account)
+        if response.status_code == 404:
+            raise exception.NotFoundError("user")
+        yield Message.Version, 1
+        yield Message.Queue, response.headers["Location"]
 
 
 class PixivWorkExtractor(PixivExtractor):
@@ -158,7 +187,7 @@ class PixivWorkExtractor(PixivExtractor):
                 r"(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}"
                 r"|img\d+/img/[^/]+)/(\d+)"),
                (r"(?:https?://)?img\d*\.pixiv\.net/img/[^/]+/(\d+)"),
-               (r"(?:https?://)?(?:www\.)?pixiv\.net/i/(\d+)"),]
+               (r"(?:https?://)?(?:www\.)?pixiv\.net/i/(\d+)")]
     test = [
         (("http://www.pixiv.net/member_illust.php"
           "?mode=medium&illust_id=966412"), {
