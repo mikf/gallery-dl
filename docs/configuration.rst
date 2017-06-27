@@ -117,6 +117,32 @@ Description Amount of time (in seconds) to wait for a successful connection
 Extractor Options
 =================
 
+| Each extractor is identified by its ``category`` and ``subcategory``.
+| The ``category`` is the lowercase site name without any spaces or special
+  characters, which is usually just the module name
+  (``pixiv``, ``batoto``, ...).
+| The ``subcategory`` is a lowercase word describing the general functionality
+  of that extractor (``user``, ``favorite``, ``manga``, ...).
+
+Each one of the following options can be specified on multiple levels of the
+configuration tree:
+
+================== =====
+Base level:        ``extractor.<option-name>``
+Category level:    ``extractor.<category>.<option-name>``
+Subcategory level: ``extractor.<category>.<subcategory>.<option-name>``
+================== =====
+
+A value in a "deeper" level hereby overrides a value of the same name on a
+lower level. Setting the ``extractor.pixiv.filename`` value, for example, lets
+you specify a general filename pattern for all the different pixiv extractors.
+Using the ``extractor.pixiv.user.filename`` value lets you override this
+general pattern specifically for ``PixivUserExtractor`` instances.
+
+The ``category`` and ``subcategory`` of an extractor used for a specific URL
+can be determined by using the ``--list-keywords`` command-line option
+(see the example below).
+
 extractor.*.filename
 --------------------
 =========== =====
@@ -124,6 +150,37 @@ Type        ``string``
 Example     ``"{manga}_c{chapter}_{page:>03}.{extension}"``
 Description A `format string`_ to build the resulting filename
             for a downloaded file.
+
+            The available replacement keys depend on the extractor used. A list
+            of keys for a specific one can be acquired by calling *gallery-dl*
+            with the ``--list-keywords`` command-line option.
+            For example:
+
+            .. code::
+
+                $ gallery-dl --list-keywords http://seiga.nicovideo.jp/seiga/im5977527
+                Keywords for directory names:
+                -----------------------------
+                category
+                  seiga
+                subcategory
+                  image
+
+                Keywords for filenames:
+                -----------------------
+                category
+                  seiga
+                extension
+                  None
+                image-id
+                  5977527
+                subcategory
+                  image
+
+            Note that even if the value of the ``extension`` key is missing or
+            ``None``, it will filled in later when the file download is
+            starting. This key is therefore always available to provide
+            a valid filename extension.
 =========== =====
 
 
@@ -133,6 +190,10 @@ extractor.*.directory
 Type        ``list`` of ``strings``
 Example     ``["{category}", "{manga}", "c{chapter} - {title}"]``
 Description A list of `format strings`_ for the resulting target directory.
+
+            Each individual string in such a list represents a single path
+            segment, which will be joined together and prepended with the
+            base-directory_ to form the complete target directory path.
 =========== =====
 
 
@@ -158,12 +219,13 @@ Type        ``string``
 Default     ``null``
 Description The username to use when attempting to log in to another site.
 
-            This value is required for the ``pixiv``, ``nijie`` and ``seiga``
-            modules and optional (but strongly recommended) for ``batoto`` and
-            ``exhentai``.
+            Specifying a username is required for the ``pixiv``, ``nijie`` and
+            ``seiga`` modules and optional (but strongly recommended) for
+            ``batoto`` and ``exhentai``.
 
-            This value can also be specified via the ``-u/--username``
-            command-line option (see Authentication_)
+            This value can also be given via the ``-u/--username``
+            command-line option or by using a |.netrc|_ file.
+            (see Authentication_)
 =========== =====
 
 
@@ -345,7 +407,7 @@ extractor.reddit.morecomments
 Type        ``bool``
 Default     ``false``
 Description Retrieve additional comments by resolving the ``more`` comment
-            stubs in the base commment tree.
+            stubs in the base comment tree.
 
             This requires 1 additional API call for every 100 extra comments.
 =========== =====
