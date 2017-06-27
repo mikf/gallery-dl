@@ -67,7 +67,7 @@ output.shorten
 --------------
 =========== =====
 Type        ``bool``
-Default     ``"true"``
+Default     ``true``
 Description Controls whether the output strings should be shortened to fit
             on one console line.
 =========== =====
@@ -121,8 +121,9 @@ Extractor Options
 | The ``category`` is the lowercase site name without any spaces or special
   characters, which is usually just the module name
   (``pixiv``, ``batoto``, ...).
-| The ``subcategory`` is a lowercase word describing the general functionality
+  The ``subcategory`` is a lowercase word describing the general functionality
   of that extractor (``user``, ``favorite``, ``manga``, ...).
+
 
 Each one of the following options can be specified on multiple levels of the
 configuration tree:
@@ -142,6 +143,11 @@ general pattern specifically for ``PixivUserExtractor`` instances.
 The ``category`` and ``subcategory`` of an extractor used for a specific URL
 can be determined by using the ``--list-keywords`` command-line option
 (see the example below).
+If that does not work, then the extractor names, which can be obtained from
+``gallery-dl --list-extractors``, provide an alternativ:
+Each extractor name is structured as ``CategorySubcategoryExtractor``.
+An extractor called ``PixivUserExtractor`` has therefore the category ``pixiv``
+and the subcategory ``user``.
 
 extractor.*.filename
 --------------------
@@ -325,8 +331,8 @@ Description Sets the maximum allowed size for downloaded images.
             * If this is an ``integer``, it specifies the maximum image dimension
               (width and height) in pixels.
             * If this is a ``string``, it should be one of Flickr's format specifiers
-              (``"Original"``, ``"Large"``, ... or ``o``, ``k``, ``h``, ``l``, ...)
-              to use these as an upper limit.
+              (``"Original"``, ``"Large"``, ... or ``"o"``, ``"k"``, ``"h"``,
+              ``"l"``, ...) to use these as an upper limit.
 =========== =====
 
 
@@ -363,7 +369,7 @@ extractor.oauth.browser
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description Controls how a user is directed to a OAuth authorization site.
+Description Controls how a user is directed to an OAuth authorization site.
 
             * ``true``: Use Python's |webbrowser.open()|_ method to automatically
               open the URL in the user's browser.
