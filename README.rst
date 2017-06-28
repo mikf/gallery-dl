@@ -130,8 +130,8 @@ Configuration
 =============
 
 Configuration files for *gallery-dl* use a JSON-based file format.
-For a (more or less) complete example of a configuration file, see
-gallery-dl.conf_. A list of all available configuration options and their
+For a (more or less) complete example, see gallery-dl.conf_.
+A list of all available configuration options and their
 descriptions can be found in configuration.rst_.
 
 *gallery-dl* searches for configuration files in the following paths:

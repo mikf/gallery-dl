@@ -40,7 +40,9 @@ build() {
     # build wheel and source distributions
     echo Building bdist_wheel and sdist
     python setup.py bdist_wheel sdist
+}
 
+build_windows() {
     # build windows exe in vm
     echo Building Windows executable
     ln -fs "${ROOTDIR}" /tmp/
@@ -109,6 +111,7 @@ prompt
 cleanup
 update
 build
+build_windows
 sign
 git-upload
 pypi-upload
