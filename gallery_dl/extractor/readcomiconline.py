@@ -41,8 +41,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineExtractor,
     pattern = [r"(?:https?://)?(?:www\.)?readcomiconline\.to/"
                r"Comic/.+/.+\?id=\d+"]
     test = [("http://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
-        "url": "dd1659d9eb5f6ebb421e66316c98d71682a44c2d",
-        "keyword": "bc2f937893c1204ba40e0293e86f0a8943be1304",
+        "url": "a45c77f8fbde66091fe2346d6341f9cf3c6b1bc5",
+        "keyword": "dee8a8a44659825afe1d69e1d809a48b03e98c68",
     })]
 
     def get_job_metadata(self, page):
