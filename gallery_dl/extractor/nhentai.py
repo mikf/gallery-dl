@@ -14,7 +14,7 @@ import json
 
 
 class NhentaiGalleryExtractor(Extractor):
-    """Extractor for image-galleries from nhentai.net"""
+    """Extractor for image galleries from nhentai.net"""
     category = "nhentai"
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery-id} {title}"]

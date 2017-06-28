@@ -50,9 +50,9 @@ class PawooExtractor(Extractor):
         return attachments
 
 
-class PawooAccountExtractor(PawooExtractor):
+class PawooUserExtractor(PawooExtractor):
     """Extractor for all images of an account/user on pawoo.net"""
-    subcategory = "account"
+    subcategory = "user"
     pattern = [r"(?:https?://)?pawoo\.net/(@[^/]+)/?$"]
     test = [
         ("https://pawoo.net/@kuroda", {

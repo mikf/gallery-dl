@@ -52,11 +52,11 @@ CATEGORY_MAP = {
 }
 
 SUBCATEGORY_MAP = {
-    "account": "Images from Users",
     "gallery": "Galleries",
     "image"  : "individual Images",
     "issue"  : "Comic-Issues",
     "manga"  : "Manga",
+    "me"     : "pixiv.me Links",
     "pinit"  : "pin.it Links",
     "search" : "Search Results",
     "status" : "Images from Statuses",

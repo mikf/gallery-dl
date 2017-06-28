@@ -17,7 +17,7 @@ import requests
 
 
 class ExhentaiGalleryExtractor(Extractor):
-    """Extractor for image-galleries from exhentai.org"""
+    """Extractor for image galleries from exhentai.org"""
     category = "exhentai"
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery-id}"]
