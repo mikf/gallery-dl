@@ -213,6 +213,7 @@ class FlickrFavoriteExtractor(FlickrExtractor):
 
 
 class FlickrSearchExtractor(FlickrExtractor):
+    """Extractor for flickr photos based on search results"""
     subcategory = "search"
     directory_fmt = ["{category}", "{subcategory}", "{search[text]}"]
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/search/?\?([^#]+)"]

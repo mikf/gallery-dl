@@ -191,7 +191,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
-    """Extractor for an artist's favourites"""
+    """Extractor for an artist's favorites"""
     subcategory = "favorite"
     directory_fmt = ["{category}", "{subcategory}",
                      "{collection[owner]} - {collection[title]}"]
@@ -245,7 +245,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
 
 
 class DeviantartJournalExtractor(DeviantartExtractor):
-    """Extractor for single deviations"""
+    """Extractor for an artist's journals"""
     subcategory = "journal"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/journal/?$"]
     test = [("http://shimoda7.deviantart.com/journal/", {
