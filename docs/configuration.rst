@@ -143,8 +143,9 @@ general pattern specifically for ``PixivUserExtractor`` instances.
 The ``category`` and ``subcategory`` of an extractor used for a specific URL
 can be determined by using the ``--list-keywords`` command-line option
 (see the example below).
-If that does not work, then the extractor names, which can be obtained from
-``gallery-dl --list-extractors``, provide an alternativ:
+
+If that does not work, the extractor names, which can be obtained from
+``gallery-dl --list-extractors``, provide an alternative:
 Each extractor name is structured as ``CategorySubcategoryExtractor``.
 An extractor called ``PixivUserExtractor`` has therefore the category ``pixiv``
 and the subcategory ``user``.
