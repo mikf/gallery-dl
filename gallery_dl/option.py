@@ -152,7 +152,7 @@ def build_parser():
     parser.add_argument(
         "--list-extractors", dest="list_extractors", action="store_true",
         help=("Print a list of extractor classes "
-              "with description and example URL"),
+              "with description, (sub)category and example URL"),
     )
     parser.add_argument(
         "--list-keywords", dest="list_keywords", action="store_true",

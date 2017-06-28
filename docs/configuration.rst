@@ -117,13 +117,12 @@ Description Amount of time (in seconds) to wait for a successful connection
 Extractor Options
 =================
 
-| Each extractor is identified by its ``category`` and ``subcategory``.
-| The ``category`` is the lowercase site name without any spaces or special
-  characters, which is usually just the module name
-  (``pixiv``, ``batoto``, ...).
-  The ``subcategory`` is a lowercase word describing the general functionality
-  of that extractor (``user``, ``favorite``, ``manga``, ...).
-
+Each extractor is identified by its ``category`` and ``subcategory``.
+The ``category`` is the lowercase site name without any spaces or special
+characters, which is usually just the module name
+(``pixiv``, ``batoto``, ...).
+The ``subcategory`` is a lowercase word describing the general functionality
+of that extractor (``user``, ``favorite``, ``manga``, ...).
 
 Each one of the following options can be specified on multiple levels of the
 configuration tree:
@@ -140,15 +139,10 @@ you specify a general filename pattern for all the different pixiv extractors.
 Using the ``extractor.pixiv.user.filename`` value lets you override this
 general pattern specifically for ``PixivUserExtractor`` instances.
 
-The ``category`` and ``subcategory`` of an extractor used for a specific URL
-can be determined by using the ``--list-keywords`` command-line option
+The ``category`` and ``subcategory`` of all extractors are included in the
+output of ``gallery-dl --list-extractors``. For a specific URL these values
+can also be determined by using the ``--list-keywords`` command-line option
 (see the example below).
-
-If that does not work, the extractor names, which can be obtained from
-``gallery-dl --list-extractors``, provide an alternative:
-Each extractor name is structured as ``CategorySubcategoryExtractor``.
-An extractor called ``PixivUserExtractor`` has therefore the category ``pixiv``
-and the subcategory ``user``.
 
 extractor.*.filename
 --------------------
