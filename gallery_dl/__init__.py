@@ -80,11 +80,14 @@ def main():
                 print(module_name)
         elif args.list_extractors:
             for extr in extractor.extractors():
+                if not extr.__doc__:
+                    continue
                 print(extr.__name__)
-                if extr.__doc__:
-                    print(extr.__doc__)
+                print(extr.__doc__)
+                print("Category:", extr.category,
+                      "- Subcategory:", extr.subcategory)
                 if hasattr(extr, "test") and extr.test:
-                    print("Example:", extr.test[0][0])
+                    print("Example :", extr.test[0][0])
                 print()
         else:
             if not args.urls and not args.inputfile:
