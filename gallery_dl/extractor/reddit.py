@@ -189,15 +189,16 @@ class RedditAPI():
         return data
 
     def _pagination(self, endpoint, params, _empty=()):
-        date_min = int(self.extractor.config("date-min", 0))
-        date_max = int(self.extractor.config("date-max", 253402210800))
+        ts_min, ts_max = self._parse_timestamps()
+        id_min, id_max = self._parse_ids()
 
         while True:
             data = self._call(endpoint, params)["data"]
 
             for submission in data["children"]:
                 submission = submission["data"]
-                if date_min <= submission["created_utc"] <= date_max:
+                if (ts_min <= submission["created_utc"] <= ts_max and
+                        id_min <= self._decode(submission["id"]) <= id_max):
                     if submission["num_comments"] and self.comments:
                         try:
                             yield self.submission(submission["id"])
@@ -225,3 +226,21 @@ class RedditAPI():
                 queue += comment["replies"]["data"]["children"]
         if link_id and extra:
             yield from self.morechildren(link_id, extra)
+
+    def _parse_timestamps(self):
+        return (
+            int(self.extractor.config("date-min", 0)),
+            int(self.extractor.config("date-max", 253402210800)),
+        )
+
+    def _parse_ids(self):
+        id_min = self.extractor.config("id-min")
+        id_max = self.extractor.config("id-max")
+        return (
+            self._decode(id_min.rpartition("_")[2]) if id_min else 0,
+            self._decode(id_max.rpartition("_")[2]) if id_max else 2147483647,
+        )
+
+    @staticmethod
+    def _decode(sid):
+        return util.bdecode(sid, "0123456789abcdefghijklmnopqrstuvwxyz")
