@@ -57,7 +57,7 @@ class PawooUserExtractor(PawooExtractor):
     test = [
         ("https://pawoo.net/@kuroda", {
             "url": "a3f9e7555f2b024554c0e9b6cbcc7991af13cf99",
-            "keyword": "1b4e0dc5ac6c22ce9485ba12ecc200d0aaa2ffae",
+            "keyword": "b8cde3b6c148a94a2d40d9a590fdae020a34aca5",
         }),
         ("https://pawoo.net/@zZzZz/", {
             "exception": exception.NotFoundError,
