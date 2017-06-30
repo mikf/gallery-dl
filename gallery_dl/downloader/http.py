@@ -6,10 +6,9 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Downloader module for http:// and https:// urls"""
+"""Downloader module for http:// and https:// URLs"""
 
 import time
-import requests
 import requests.exceptions as rexcepts
 import mimetypes
 import logging
@@ -24,9 +23,9 @@ class Downloader(BasicDownloader):
     retries = config.interpolate(("downloader", "http", "retries",), 5)
     timeout = config.interpolate(("downloader", "http", "timeout",), None)
 
-    def __init__(self, output):
+    def __init__(self, session, output):
         BasicDownloader.__init__(self)
-        self.session = requests.session()
+        self.session = session
         self.out = output
 
     def download_impl(self, url, pathfmt):
@@ -96,17 +95,3 @@ class Downloader(BasicDownloader):
 
         # output for unrecoverable errors
         self.out.error(pathfmt.path, msg, tries, 0)
-
-    def set_headers(self, headers):
-        """Set headers for http requests"""
-        self.set_dict(self.session.headers, headers)
-
-    def set_cookies(self, cookies):
-        """Set cookies for http requests"""
-        self.set_dict(self.session.cookies, cookies)
-
-    @staticmethod
-    def set_dict(dest, src):
-        """Copy the contents of dictionary 'src' to 'dest'"""
-        dest.clear()
-        dest.update(src)

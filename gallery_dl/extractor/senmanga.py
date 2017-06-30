@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -38,7 +38,6 @@ class SenmangaChapterExtractor(Extractor):
         data = self.get_job_metadata()
         yield Message.Version, 1
         yield Message.Directory, data
-        yield Message.Headers, self.session.headers
         for i in range(int(data["count"])):
             page = str(i+1)
             data["page"] = page

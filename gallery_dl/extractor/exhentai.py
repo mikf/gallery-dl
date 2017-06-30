@@ -50,9 +50,8 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def items(self):
         self.login()
+        self.setup_headers()
         yield Message.Version, 1
-        yield Message.Headers, self.setup_headers()
-        yield Message.Cookies, self.session.cookies
 
         url = "{}/g/{}/{}/".format(self.root, self.gid, self.token)
         response = self.session.get(url)
@@ -76,14 +75,9 @@ class ExhentaiGalleryExtractor(Extractor):
         """Initialize headers"""
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0",
-            "Accept": "text/html,application/xhtml+xml,"
-                      "application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
             "Referer": self.root + "/",
         })
-        headers = self.session.headers.copy()
-        headers["Accept"] = "image/png,image/*;q=0.8,*/*;q=0.5"
-        return headers
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""

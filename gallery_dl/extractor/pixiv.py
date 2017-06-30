@@ -31,8 +31,6 @@ class PixivExtractor(Extractor):
         metadata = self.get_metadata()
 
         yield Message.Version, 1
-        yield Message.Headers, self.session.headers
-        yield Message.Cookies, self.session.cookies
         yield Message.Directory, metadata
 
         for work in self.works():
