@@ -17,7 +17,7 @@ class DokireaderChapterExtractor(foolslide.FoolslideChapterExtractor):
     pattern = foolslide.chapter_pattern(r"kobato\.hologfx\.com/reader")
     test = [(("https://kobato.hologfx.com/reader/read/"
               "hitoribocchi_no_oo_seikatsu/en/3/34"), {
-        "keyword": "f28811c01b64031671108a4a3d6eea1040816b82",
+        "keyword": "1dc1ec8264df4126552dbe53f42c5643fd2a4cf3",
     })]
 
 
