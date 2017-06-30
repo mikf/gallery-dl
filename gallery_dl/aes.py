@@ -49,7 +49,7 @@ def aes_cbc_decrypt_text(data, key, iv):
     data = base64.standard_b64decode(bytes(data, "ascii"))
     charcodes = aes_cbc_decrypt(list(data), key, iv)
     last = charcodes[-1]
-    if last < 16:
+    if last <= 16:
         charcodes = charcodes[:-last]
     return bytes(charcodes).decode()
 
