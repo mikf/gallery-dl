@@ -79,12 +79,6 @@ class Job():
             if self.pred_queue:
                 self.handle_queue(msg[1])
 
-        elif msg[0] == Message.Headers:
-            self.handle_headers(msg[1])
-
-        elif msg[0] == Message.Cookies:
-            self.handle_cookies(msg[1])
-
         elif msg[0] == Message.Version:
             if msg[1] != 1:
                 raise "unsupported message-version ({}, {})".format(
@@ -100,12 +94,6 @@ class Job():
 
     def handle_queue(self, url):
         """Handle Message.Queue"""
-
-    def handle_headers(self, headers):
-        """Handle Message.Headers"""
-
-    def handle_cookies(self, cookies):
-        """Handle Message.Cookies"""
 
     def update_kwdict(self, kwdict):
         """Add 'category' and 'subcategory' keywords"""
@@ -145,12 +133,6 @@ class DownloadJob(Job):
         except exception.NoExtractorError:
             self._write_unsupported(url)
 
-    def handle_headers(self, headers):
-        self.get_downloader("http:").set_headers(headers)
-
-    def handle_cookies(self, cookies):
-        self.get_downloader("http:").set_cookies(cookies)
-
     def get_downloader(self, url):
         """Return, and possibly construct, a downloader suitable for 'url'"""
         pos = url.find(":")
@@ -160,7 +142,7 @@ class DownloadJob(Job):
         instance = self.downloaders.get(scheme)
         if instance is None:
             klass = downloader.find(scheme)
-            instance = klass(self.out)
+            instance = klass(self.extractor.session, self.out)
             self.downloaders[scheme] = instance
         return instance
 
@@ -300,13 +282,10 @@ class DataJob(Job):
         # collect data
         try:
             for msg in self.extractor:
-                if msg[0] in (Message.Headers, Message.Cookies):
-                    copy = (msg[0], dict(msg[1]))
-                else:
-                    copy = [
-                        part.copy() if hasattr(part, "copy") else part
-                        for part in msg
-                    ]
+                copy = [
+                    part.copy() if hasattr(part, "copy") else part
+                    for part in msg
+                ]
                 self.data.append(copy)
         except Exception as exc:
             self.data.append((exc.__class__.__name__, str(exc)))
