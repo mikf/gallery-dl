@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, extractor, exception
 from ..cache import cache
+import datetime
 import time
 import re
 
@@ -189,15 +190,19 @@ class RedditAPI():
         return data
 
     def _pagination(self, endpoint, params, _empty=()):
-        ts_min, ts_max = self._parse_timestamps()
-        id_min, id_max = self._parse_ids()
+        date_fmt = self.extractor.config("date-format", "%Y-%m-%dT%H:%M:%S")
+        date_min = self._parse_datetime("date-min", 0, date_fmt)
+        date_max = self._parse_datetime("date-max", 253402210800, date_fmt)
+
+        id_min = self._parse_id("id-min", 0)
+        id_max = self._parse_id("id-max", 2147483647)
 
         while True:
             data = self._call(endpoint, params)["data"]
 
             for submission in data["children"]:
                 submission = submission["data"]
-                if (ts_min <= submission["created_utc"] <= ts_max and
+                if (date_min <= submission["created_utc"] <= date_max and
                         id_min <= self._decode(submission["id"]) <= id_max):
                     if submission["num_comments"] and self.comments:
                         try:
@@ -227,19 +232,18 @@ class RedditAPI():
         if link_id and extra:
             yield from self.morechildren(link_id, extra)
 
-    def _parse_timestamps(self):
-        return (
-            int(self.extractor.config("date-min", 0)),
-            int(self.extractor.config("date-max", 253402210800)),
-        )
+    def _parse_datetime(self, key, default, fmt):
+        ts = self.extractor.config(key, default)
+        if isinstance(ts, str):
+            try:
+                ts = int(datetime.datetime.strptime(ts, fmt).timestamp())
+            except ValueError as exc:
+                self.warning("Unable to parse '%s': %s", key, exc)
+        return ts
 
-    def _parse_ids(self):
-        id_min = self.extractor.config("id-min")
-        id_max = self.extractor.config("id-max")
-        return (
-            self._decode(id_min.rpartition("_")[2]) if id_min else 0,
-            self._decode(id_max.rpartition("_")[2]) if id_max else 2147483647,
-        )
+    def _parse_id(self, key, default):
+        sid = self.extractor.config(key)
+        return self._decode(sid.rpartition("_")[2]) if sid else default
 
     @staticmethod
     def _decode(sid):

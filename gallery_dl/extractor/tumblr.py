@@ -23,7 +23,6 @@ class TumblrUserExtractor(Extractor):
     test = [("http://demo.tumblr.com/", {
         "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
         "keyword": "d2cf142bcaf1cbea29291f8c8ccb5f582962d8be",
-        "content": "31495fdb9f84edbb7f67972746a1521456f649e2",
     })]
 
     def __init__(self, match):
