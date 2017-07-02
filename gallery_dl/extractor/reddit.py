@@ -238,7 +238,8 @@ class RedditAPI():
             try:
                 ts = int(datetime.datetime.strptime(ts, fmt).timestamp())
             except ValueError as exc:
-                self.warning("Unable to parse '%s': %s", key, exc)
+                self.log.warning("Unable to parse '%s': %s", key, exc)
+                ts = default
         return ts
 
     def _parse_id(self, key, default):
