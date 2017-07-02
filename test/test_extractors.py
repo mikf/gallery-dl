@@ -51,17 +51,20 @@ def _generate_test(extr, tcase):
 
 
 skip = [
-    # dont work on travis-ci
+    # don't work on travis-ci
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     # temporary issues
-    "chronos", "coreimg",
+    "chronos", "coreimg", "imgbox",
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:
-    extractors = [
-        extr for extr in extractor.extractors()
-        if extr.category in sys.argv
-    ]
+    if sys.argv[1].lower() == "all":
+        extractors = extractor.extractors()
+    else:
+        extractors = [
+            extr for extr in extractor.extractors()
+            if extr.category in sys.argv
+        ]
     del sys.argv[1:]
 else:
     extractors = [
