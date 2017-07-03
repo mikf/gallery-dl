@@ -18,12 +18,8 @@ class HentaifoundryUserExtractor(Extractor):
     subcategory = "user"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    pattern = [
-        (r"(?:https?://)?(?:www\.)?hentai-foundry\.com/"
-         r"pictures/user/([^/]+)/?$"),
-        (r"(?:https?://)?(?:www\.)?hentai-foundry\.com/"
-         r"user/([^/]+)/profile"),
-    ]
+    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com/"
+               r"(?:pictures/user/([^/]+)/?$|user/([^/]+)/profile)"]
     test = [
         ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
             "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
@@ -37,22 +33,22 @@ class HentaifoundryUserExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.artist = match.group(1)
+        self.artist = match.group(1) or match.group(2)
 
     def items(self):
         data, token = self.get_job_metadata()
         self.set_filters(token)
         yield Message.Version, 1
         yield Message.Directory, data
-        for url, image in self.get_images():
+        for url, image in self.get_images(int(data["count"])):
             image.update(data)
             yield Message.Url, url, image
 
-    def get_images(self):
+    def get_images(self, count):
         """Yield url and keywords for all images of one artist"""
         num = 1
         needle = 'thumbTitle"><a href="/pictures/user/'
-        while True:
+        for _ in range((count-1) // 25 + 1):
             pos = 0
             url = self.url_base + self.artist + "/page/" + str(num)
             page = self.request(url).text
