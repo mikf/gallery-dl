@@ -15,6 +15,7 @@ import queue
 import logging
 import requests
 import threading
+import http.cookiejar
 from .message import Message
 from .. import config
 
@@ -29,6 +30,15 @@ class Extractor():
     def __init__(self):
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
+
+        cookies = self.config("cookies")
+        if cookies:
+            try:
+                cj = http.cookiejar.MozillaCookieJar()
+                cj.load(cookies)
+                self.session.cookies = cj
+            except OSError as exc:
+                self.log.warning("cookies: %s", exc)
 
     def __iter__(self):
         return self.items()

@@ -126,6 +126,11 @@ def build_parser():
         help="Timeout for HTTP connections (defaut: no timeout)",
     )
     parser.add_argument(
+        "--cookies",
+        metavar="FILE", action=ConfigAction, dest="cookies",
+        help="File to load additional cookies from",
+    )
+    parser.add_argument(
         "-c", "--config",
         metavar="CFG", dest="cfgfiles", action="append",
         help="Additional configuration files",
