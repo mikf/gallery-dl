@@ -135,6 +135,14 @@ class DeviantartExtractor(Extractor):
         deviation["extension"] = "htm"
         return Message.Url, html, deviation
 
+    @staticmethod
+    def _find(folders, name):
+        regex = re.compile(name.replace("-", ".") + "$")
+        for folder in folders:
+            if regex.match(folder["name"]):
+                return folder
+        raise exception.NotFoundError("folder")
+
 
 class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
@@ -151,6 +159,33 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
 
     def deviations(self):
         return self.api.gallery_all(self.user, self.offset)
+
+
+class DeviantartFolderExtractor(DeviantartExtractor):
+    """Extractor for deviations inside an artist's gallery folder"""
+    subcategory = "folder"
+    directory_fmt = ["{category}", "{folder[owner]}", "{folder[title]}"]
+    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+               r"/gallery/(\d+)/([^/?&#]+)"]
+    test = [("http://shimoda7.deviantart.com/gallery/722019/Miscellaneous", {
+        "url": "545563beae71743f9584c3c6ded5f72bc549cd44",
+        "keyword": "f19a596aef5286f0572fa03bbd8201ec133b4b35",
+    })]
+
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self)
+        self.user, fid, self.fname = match.groups()
+        self.folder = {"owner": self.user, "index": fid}
+
+    def deviations(self):
+        folders = self.api.gallery_folders(self.user)
+        folder = self._find(folders, self.fname)
+        self.folder["title"] = folder["name"]
+        return self.api.gallery(self.user, folder["folderid"], self.offset)
+
+    def prepare(self, deviation):
+        DeviantartExtractor.prepare(deviation)
+        deviation["folder"] = self.folder
 
 
 class DeviantartDeviationExtractor(DeviantartExtractor):
@@ -196,7 +231,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     directory_fmt = ["{category}", "{subcategory}",
                      "{collection[owner]} - {collection[title]}"]
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/favourites"
-               r"(?:/((\d+)/([^/?]+)|\?catpath=/))?"]
+               r"(?:/((\d+)/([^/?&#]+)|\?catpath=/))?"]
     test = [
         ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
             "url": "65d070eae215b9375b4437a1ab4659efdad204e3",
@@ -225,17 +260,14 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
         }
 
     def deviations(self):
-        regex = re.compile(self.favname.replace("-", ".") + "$")
-        for folder in self.api.collections_folders(self.user):
-            if regex.match(folder["name"]):
-                self.collection["title"] = folder["name"]
-                return self.api.collections(
-                    self.user, folder["folderid"], self.offset)
-        raise exception.NotFoundError("collection")
+        folders = self.api.collections_folders(self.user)
+        folder = self._find(folders, self.favname)
+        self.collection["title"] = folder["name"]
+        return self.api.collections(self.user, folder["folderid"], self.offset)
 
     def _deviations_all(self):
         return itertools.chain.from_iterable([
-            self.api.collections(self.user, folder["folderid"], self.offset)
+            self.api.collections(self.user, folder["folderid"])
             for folder in self.api.collections_folders(self.user)
         ])
 
@@ -247,7 +279,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
 class DeviantartJournalExtractor(DeviantartExtractor):
     """Extractor for an artist's journals"""
     subcategory = "journal"
-    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/journal/?$"]
+    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/(?:journal|blog)/?$"]
     test = [("http://shimoda7.deviantart.com/journal/", {
         "url": "f7960ae06e774d6931c61ad309c95a10710658b2",
         "keyword": "9ddc2e130198395c1dfaa55c65b6bf63713ec0a8",
@@ -292,7 +324,7 @@ class DeviantartAPI():
     def collections_folders(self, username, offset=0):
         """Yield all collection folders of a specific user"""
         endpoint = "collections/folders"
-        params = {"username": username, "offset": offset, "limit": 10,
+        params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
@@ -307,9 +339,23 @@ class DeviantartAPI():
         params = {"deviationid": deviation_id}
         return self._call(endpoint, params)
 
+    def gallery(self, username, folder_id="", offset=0):
+        """Yield all Deviation-objects contained in a gallery folder"""
+        endpoint = "gallery/" + folder_id
+        params = {"username": username, "offset": offset, "limit": 10,
+                  "mature_content": self.mature, "mode": "newest"}
+        return self._pagination(endpoint, params)
+
     def gallery_all(self, username, offset=0):
         """Yield all Deviation-objects of a specific user"""
         endpoint = "gallery/all"
+        params = {"username": username, "offset": offset, "limit": 10,
+                  "mature_content": self.mature}
+        return self._pagination(endpoint, params)
+
+    def gallery_folders(self, username, offset=0):
+        """Yield all gallery folders of a specific user"""
+        endpoint = "gallery/folders"
         params = {"username": username, "offset": offset, "limit": 10,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
@@ -321,7 +367,7 @@ class DeviantartAPI():
         )
         self.session.headers["Authorization"] = access_token
 
-    @cache(maxage=3600, keyarg=1)
+    @cache(maxage=3590, keyarg=1)
     def _authenticate_impl(self, client_id, client_secret):
         """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"
@@ -383,7 +429,6 @@ SHADOW_TEMPLATE = """
 <br><br>
 """
 
-
 HEADER_TEMPLATE = """<div usr class="gr">
 <div class="metadata">
     <h2><a href="{url}">{title}</a></h2>
@@ -409,7 +454,6 @@ HEADER_CUSTOM_TEMPLATE = """<div class='boxtop journaltop'>
 </h2>
 Journal Entry: <span>{date}</span>
 """
-
 
 JOURNAL_TEMPLATE = """text:<!DOCTYPE html>
 <html>
