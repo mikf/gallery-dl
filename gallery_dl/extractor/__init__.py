@@ -13,6 +13,7 @@ modules = [
     "pixiv",
     "3dbooru",
     "4chan",
+    "4plebs",
     "8chan",
     "batoto",
     "danbooru",
