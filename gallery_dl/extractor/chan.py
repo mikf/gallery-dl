@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015, 2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -58,3 +58,38 @@ class ChanThreadExtractor(Extractor):
         """Return thread title from first post"""
         title = post["sub"] if "sub" in post else text.remove_html(post["com"])
         return text.unescape(title)[:50]
+
+
+class FoolfuukaThreadExtractor(Extractor):
+    """Base extractor for FoolFuuka based boards/archives"""
+    category = "foolfuuka"
+    subcategory = "thread"
+    directory_fmt = ["{category}", "{board[shortname]}",
+                     "{thread_num} - {title}"]
+    filename_fmt = "{media[media]}"
+    root = ""
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.board, self.thread = match.groups()
+
+    def items(self):
+        op = True
+        yield Message.Version, 1
+        for post in self.posts():
+            if op:
+                yield Message.Directory, post
+                op = False
+            if not post["media"]:
+                continue
+            url = post["media"]["media_link"]
+            post["extension"] = url.rpartition(".")[2]
+            yield Message.Url, url, post
+
+    def posts(self):
+        url = self.root + "/_/api/chan/thread/"
+        params = {"board": self.board, "num": self.thread}
+        data = self.request(url, params=params).json()[self.thread]
+
+        yield data["op"]
+        yield from data["posts"].values()
