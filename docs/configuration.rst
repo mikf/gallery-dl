@@ -384,6 +384,16 @@ Description Download Pixiv's Ugoira animations or ignore them.
 =========== =====
 
 
+extractor.recursive.blacklist
+-----------------------------
+=========== =====
+Type        ``list`` of ``strings``
+Default     ``["directlink", "oauth", "recursive", "test"]``
+Description A list of extractor categories which should be ignored when using
+            the ``recursive`` extractor.
+=========== =====
+
+
 extractor.reddit.comments
 -------------------------
 =========== =====
@@ -417,18 +427,50 @@ Description Retrieve additional comments by resolving the ``more`` comment
 extractor.reddit.date-min
 -------------------------
 =========== =====
-Type        ``integer`` (UTC timestamp)
+Type        ``integer`` or ``string``
 Default     ``0``
-Description Ignore all submissions posted before this timestamp.
+Description Ignore all submissions posted before this date.
+
+            * If this is an ``integer``, it represents the date as UTC timestamp.
+            * If this is a ``string``, it will get parsed according to date-format_.
 =========== =====
 
 
 extractor.reddit.date-max
 -------------------------
 =========== =====
-Type        ``integer`` (UTC timestamp)
-Default     ``253402210800`` (timestamp of ``datetime.max``)
-Description Ignore all submissions posted after this timestamp.
+Type        ``integer`` or ``string``
+Default     ``253402210800`` (timestamp of |datetime.max|_)
+Description Ignore all submissions posted after this date. (See date-min_)
+=========== =====
+
+
+extractor.reddit.date-format
+----------------------------
+=========== =====
+Type        ``string``
+Default     ``"%Y-%m-%dT%H:%M:%S"``
+Description An explicit format string used to parse the ``string`` values of
+            date-min_ and date-max_.
+
+            See |strptime|_ for a list of formatting directives.
+=========== =====
+
+
+extractor.reddit.id-min
+-----------------------
+=========== =====
+Type        ``string``
+Example     ``"6kmzv2"``
+Description Ignore all submissions posted before the submission with this ID.
+=========== =====
+
+
+extractor.reddit.id-max
+-----------------------
+=========== =====
+Type        ``string``
+Description Ignore all submissions posted after the submission with this ID.
 =========== =====
 
 
@@ -469,12 +511,20 @@ Description The ``refresh_token`` value you get from linking your Reddit account
 .. |requests.get()| replace:: ``requests.get()``
 .. |mature_content| replace:: ``mature_content``
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
+.. |datetime.max| replace:: ``datetime.max``
+.. |strptime| replace:: strftime() and strptime() Behavior
+
+.. _date-min:    extractor.reddit.date-min_
+.. _date-max:    extractor.reddit.date-max_
+.. _date-format: extractor.reddit.date-format_
 
 .. _.netrc:            https://stackoverflow.com/tags/.netrc/info
 .. _tempfile.gettempdir(): https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
 .. _requests.get():    https://docs.python-requests.org/en/latest/user/advanced/#timeouts
 .. _format string:     https://docs.python.org/3/library/string.html#formatstrings
 .. _format strings:    https://docs.python.org/3/library/string.html#formatstrings
+.. _strptime:          https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _mature_content:    https://www.deviantart.com/developers/http/v1/20160316/object/deviation
 .. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
+.. _datetime.max:      https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _Authentication:    https://github.com/mikf/gallery-dl#5authentication
