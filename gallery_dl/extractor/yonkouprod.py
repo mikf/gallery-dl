@@ -26,5 +26,5 @@ class YonkouprodMangaExtractor(foolslide.FoolslideMangaExtractor):
     category = "yonkouprod"
     pattern = foolslide.manga_pattern(r"(?:www\.)?yonkouprod\.com/reader")
     test = [("https://yonkouprod.com/reader/series/attack-on-titan/", {
-        "url": "0573665fc91e56d9e7f05bf7a4415af2c59cb43b",
+        "url": "f8ec412bd0996d95548b6ad8c415419cf37a942c",
     })]
