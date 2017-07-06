@@ -147,11 +147,15 @@ class DeviantartExtractor(Extractor):
 class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
-    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com(?:/gallery)?/?$"]
-    test = [("http://shimoda7.deviantart.com/gallery/", {
-        "url": "63bfa8efba199e27181943c9060f6770f91a8441",
-        "keyword": "e017b1eec5d052dedbb219259ae8c01d0db678a3",
-    })]
+    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+               r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"]
+    test = [
+        ("http://shimoda7.deviantart.com/gallery/", {
+            "url": "63bfa8efba199e27181943c9060f6770f91a8441",
+            "keyword": "e017b1eec5d052dedbb219259ae8c01d0db678a3",
+        }),
+        ("http://shimoda7.deviantart.com/gallery/?catpath=/", None),
+    ]
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self)
@@ -279,11 +283,15 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
 class DeviantartJournalExtractor(DeviantartExtractor):
     """Extractor for an artist's journals"""
     subcategory = "journal"
-    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/(?:journal|blog)/?$"]
-    test = [("http://shimoda7.deviantart.com/journal/", {
-        "url": "f7960ae06e774d6931c61ad309c95a10710658b2",
-        "keyword": "9ddc2e130198395c1dfaa55c65b6bf63713ec0a8",
-    })]
+    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+               r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
+    test = [
+        ("http://shimoda7.deviantart.com/journal/", {
+            "url": "f7960ae06e774d6931c61ad309c95a10710658b2",
+            "keyword": "9ddc2e130198395c1dfaa55c65b6bf63713ec0a8",
+        }),
+        ("http://shimoda7.deviantart.com/journal/?catpath=/", None),
+    ]
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self)
@@ -310,14 +318,14 @@ class DeviantartAPI():
     def browse_user_journals(self, username, offset=0):
         """Yield all journal entries of a specific user"""
         endpoint = "browse/user/journals"
-        params = {"username": username, "offset": offset, "limit": 10,
+        params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature, "featured": "false"}
         return self._pagination(endpoint, params)
 
     def collections(self, username, folder_id, offset=0):
         """Yield all Deviation-objects contained in a collection folder"""
         endpoint = "collections/" + folder_id
-        params = {"username": username, "offset": offset, "limit": 10,
+        params = {"username": username, "offset": offset, "limit": 24,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
@@ -342,21 +350,21 @@ class DeviantartAPI():
     def gallery(self, username, folder_id="", offset=0):
         """Yield all Deviation-objects contained in a gallery folder"""
         endpoint = "gallery/" + folder_id
-        params = {"username": username, "offset": offset, "limit": 10,
+        params = {"username": username, "offset": offset, "limit": 24,
                   "mature_content": self.mature, "mode": "newest"}
         return self._pagination(endpoint, params)
 
     def gallery_all(self, username, offset=0):
         """Yield all Deviation-objects of a specific user"""
         endpoint = "gallery/all"
-        params = {"username": username, "offset": offset, "limit": 10,
+        params = {"username": username, "offset": offset, "limit": 24,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
     def gallery_folders(self, username, offset=0):
         """Yield all gallery folders of a specific user"""
         endpoint = "gallery/folders"
-        params = {"username": username, "offset": offset, "limit": 10,
+        params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
