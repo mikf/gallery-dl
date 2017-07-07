@@ -33,12 +33,15 @@ class Extractor():
 
         cookies = self.config("cookies")
         if cookies:
-            try:
-                cj = http.cookiejar.MozillaCookieJar()
-                cj.load(cookies)
-                self.session.cookies = cj
-            except OSError as exc:
-                self.log.warning("cookies: %s", exc)
+            if isinstance(cookies, dict):
+                cj = cookies
+            else:
+                try:
+                    cj = http.cookiejar.MozillaCookieJar()
+                    cj.load(cookies)
+                except OSError as exc:
+                    self.log.warning("cookies: %s", exc)
+            self.session.cookies.update(cj)
 
     def __iter__(self):
         return self.items()
