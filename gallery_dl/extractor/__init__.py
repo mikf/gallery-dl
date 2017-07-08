@@ -53,6 +53,7 @@ modules = [
     "mangastream",
     "nhentai",
     "nijie",
+    "nyafuu",
     "pawoo",
     "pinterest",
     "powermanga",
