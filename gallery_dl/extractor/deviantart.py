@@ -20,12 +20,13 @@ import re
 class DeviantartExtractor(Extractor):
     """Base class for deviantart extractors"""
     category = "deviantart"
-    directory_fmt = ["{category}", "{author[username]}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
+    directory_fmt = ["{category}", "{author[urlname]}"]
 
-    def __init__(self):
+    def __init__(self, match=None):
         Extractor.__init__(self)
         self.api = DeviantartAPI(self)
+        self.user = match.group(1) if match else ""
         self.offset = 0
 
     def skip(self, num):
@@ -33,20 +34,10 @@ class DeviantartExtractor(Extractor):
         return num
 
     def items(self):
-        last_author = None
         yield Message.Version, 1
         for deviation in self.deviations():
             self.prepare(deviation)
-
-            try:
-                author = deviation["author"]
-            except KeyError:
-                author = None
-                deviation["author"] = {"username": "", "userid": "",
-                                       "usericon": "", "type": ""}
-            if author != last_author:
-                yield Message.Directory, deviation
-                last_author = author
+            yield Message.Directory, deviation
 
             if "content" in deviation:
                 yield self.commit(deviation, deviation["content"])
@@ -67,8 +58,7 @@ class DeviantartExtractor(Extractor):
         """Return an iterable containing all relevant Deviation-objects"""
         return []
 
-    @staticmethod
-    def prepare(deviation):
+    def prepare(self, deviation):
         """Adjust the contents of a Deviation-object"""
         for key in ("stats", "preview", "is_favourited", "allows_comments"):
             if key in deviation:
@@ -77,6 +67,12 @@ class DeviantartExtractor(Extractor):
             deviation["index"] = deviation["url"].rsplit("-", 1)[1]
         except KeyError:
             deviation["index"] = 0
+
+        if self.user:
+            deviation["username"] = self.user
+        author = deviation["author"]
+        author["urlname"] = author["username"].lower()
+        deviation["da-category"] = deviation["category"]
 
     @staticmethod
     def commit(deviation, target):
@@ -136,8 +132,8 @@ class DeviantartExtractor(Extractor):
         return Message.Url, html, deviation
 
     @staticmethod
-    def _find(folders, name):
-        regex = re.compile(name.replace("-", ".") + "$")
+    def _find_folder(folders, name):
+        regex = re.compile("[^\w]*" + name.replace("-", "[^\w]+") + "[^\w]*$")
         for folder in folders:
             if regex.match(folder["name"]):
                 return folder
@@ -152,14 +148,10 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     test = [
         ("http://shimoda7.deviantart.com/gallery/", {
             "url": "63bfa8efba199e27181943c9060f6770f91a8441",
-            "keyword": "e017b1eec5d052dedbb219259ae8c01d0db678a3",
+            "keyword": "9342c2a7a2bd6eb9f4a6ea539d04d75248ebe05f",
         }),
         ("http://shimoda7.deviantart.com/gallery/?catpath=/", None),
     ]
-
-    def __init__(self, match):
-        DeviantartExtractor.__init__(self)
-        self.user = match.group(1)
 
     def deviations(self):
         return self.api.gallery_all(self.user, self.offset)
@@ -171,10 +163,16 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     directory_fmt = ["{category}", "{folder[owner]}", "{folder[title]}"]
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/gallery/(\d+)/([^/?&#]+)"]
-    test = [("http://shimoda7.deviantart.com/gallery/722019/Miscellaneous", {
-        "url": "545563beae71743f9584c3c6ded5f72bc549cd44",
-        "keyword": "f19a596aef5286f0572fa03bbd8201ec133b4b35",
-    })]
+    test = [
+        ("http://shimoda7.deviantart.com/gallery/722019/Miscellaneous", {
+            "url": "545563beae71743f9584c3c6ded5f72bc549cd44",
+            "keyword": "a0d7093148b9bab8ee0efa6213139efd99f23394",
+        }),
+        ("http://majestic-da.deviantart.com/gallery/63419606/CHIBI-KAWAII", {
+            "url": "de479556e0dde5b8639a1254b90fe4e4ae5d1bb5",
+            "keyword": "2cd937a33f1f9bf0d9d8807b89a25de22338edb2",
+        }),
+    ]
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self)
@@ -183,12 +181,12 @@ class DeviantartFolderExtractor(DeviantartExtractor):
 
     def deviations(self):
         folders = self.api.gallery_folders(self.user)
-        folder = self._find(folders, self.fname)
+        folder = self._find_folder(folders, self.fname)
         self.folder["title"] = folder["name"]
         return self.api.gallery(self.user, folder["folderid"], self.offset)
 
     def prepare(self, deviation):
-        DeviantartExtractor.prepare(deviation)
+        DeviantartExtractor.prepare(self, deviation)
         deviation["folder"] = self.folder
 
 
@@ -197,12 +195,12 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     subcategory = "deviation"
     pattern = [(r"(?:https?://)?([^.]+\.deviantart\.com/"
                 r"(?:art|journal)/[^/?&#]+-\d+)"),
-               r"(?:https?://)?(sta\.sh/[a-z0-9]+)"]
+               (r"(?:https?://)?(sta\.sh/[a-z0-9]+)")]
     test = [
         (("http://shimoda7.deviantart.com/art/"
           "For-the-sake-of-a-memory-10073852"), {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-            "keyword": "597be070582e105489e82cce531888d07f9d45b1",
+            "keyword": "5f58ecdce9b9ebb51f65d0e24e0f7efe00a74a55",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://zzz.deviantart.com/art/zzz-1234567890", {
@@ -210,7 +208,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         }),
         ("http://sta.sh/01ijs78ebagf", {
             "url": "1692cd075059d24657a01b954413c84a56e2de8f",
-            "keyword": "659fdf02d7de2e9181468286de19c526348ca1a1",
+            "keyword": "00246726d49f51ab35ea88d66467067f05b10bc9",
         }),
         ("http://sta.sh/abcdefghijkl", {
             "exception": exception.NotFoundError,
@@ -232,70 +230,66 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 class DeviantartFavoriteExtractor(DeviantartExtractor):
     """Extractor for an artist's favorites"""
     subcategory = "favorite"
-    directory_fmt = ["{category}", "{subcategory}",
-                     "{collection[owner]} - {collection[title]}"]
-    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com/favourites"
-               r"(?:/((\d+)/([^/?&#]+)|\?catpath=/))?"]
+    directory_fmt = ["{category}", "{username}", "Favourites"]
+    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+               r"/favourites/?(?:\?catpath=/)?$"]
     test = [
-        ("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-            "url": "65d070eae215b9375b4437a1ab4659efdad204e3",
-            "keyword": "e5f3aaf35274e976ae81c5b151e650eea1dde775",
-        }),
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
-            "keyword": "f0c557470ca850da65ec94804a20551b7bda7af5",
+            "keyword": "c7d0a3bacc1e4c5625dda703e25affe047cbbc3f",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
+        ("http://h3813067.deviantart.com/favourites/?catpath=/", None),
     ]
 
-    def __init__(self, match):
-        DeviantartExtractor.__init__(self)
-        self.user, path, self.favid, self.favname = match.groups()
-        if not self.favname:
-            if path == "?catpath=/":
-                self.favname = "All"
-                self.deviations = self._deviations_all
-            else:
-                self.favname = "Featured"
-        self.collection = {
-            "owner": self.user,
-            "title": self.favname,
-            "index": self.favid or 0,
-        }
-
     def deviations(self):
-        folders = self.api.collections_folders(self.user)
-        folder = self._find(folders, self.favname)
-        self.collection["title"] = folder["name"]
-        return self.api.collections(self.user, folder["folderid"], self.offset)
-
-    def _deviations_all(self):
         return itertools.chain.from_iterable([
             self.api.collections(self.user, folder["folderid"])
             for folder in self.api.collections_folders(self.user)
         ])
 
+
+class DeviantartCollectionExtractor(DeviantartExtractor):
+    """Extractor for a single favorite collection"""
+    subcategory = "collection"
+    directory_fmt = ["{category}", "{collection[owner]}",
+                     "Favourites", "{collection[title]}"]
+    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+               r"/favourites/(\d+)/([^/?&#]+)"]
+    test = [("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
+        "url": "65d070eae215b9375b4437a1ab4659efdad204e3",
+        "keyword": "a8b7b7c8ef9a4eba87c96cfaf098a7ef1c1e8be5",
+    })]
+
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self)
+        self.user, cid, self.cname = match.groups()
+        self.collection = {"owner": self.user, "index": cid}
+
+    def deviations(self):
+        folders = self.api.collections_folders(self.user)
+        folder = self._find_folder(folders, self.cname)
+        self.collection["title"] = folder["name"]
+        return self.api.collections(self.user, folder["folderid"], self.offset)
+
     def prepare(self, deviation):
-        DeviantartExtractor.prepare(deviation)
+        DeviantartExtractor.prepare(self, deviation)
         deviation["collection"] = self.collection
 
 
 class DeviantartJournalExtractor(DeviantartExtractor):
     """Extractor for an artist's journals"""
     subcategory = "journal"
+    directory_fmt = ["{category}", "{username}", "Journal"]
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
     test = [
         ("http://shimoda7.deviantart.com/journal/", {
             "url": "f7960ae06e774d6931c61ad309c95a10710658b2",
-            "keyword": "9ddc2e130198395c1dfaa55c65b6bf63713ec0a8",
+            "keyword": "6444966c703e63470a5fdd8f460993b68955c32c",
         }),
         ("http://shimoda7.deviantart.com/journal/?catpath=/", None),
     ]
-
-    def __init__(self, match):
-        DeviantartExtractor.__init__(self)
-        self.user = match.group(1)
 
     def deviations(self):
         return self.api.browse_user_journals(self.user, self.offset)
