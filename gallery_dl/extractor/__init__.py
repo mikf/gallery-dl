@@ -17,6 +17,7 @@ modules = [
     "8chan",
     "batoto",
     "danbooru",
+    "desuarchive",
     "deviantart",
     "dokireader",
     "dynastyscans",
