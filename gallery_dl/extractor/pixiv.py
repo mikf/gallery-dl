@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import urllib.parse
 import re
 
 
@@ -128,8 +129,9 @@ class PixivUserExtractor(PixivExtractor):
         ("http://www.pixiv.net/member_illust.php?id=173530", {
             "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
         }),
-        ("https://www.pixiv.net/member_illust.php?id=173530&tag=HITMAN", {
-            "url": "3ecb4970dd91ce1de0a9449671b42db5e3fe2b08",
+        (("https://www.pixiv.net/member_illust.php?id=173530"
+          "&tag=%E6%89%8B%E3%81%B6%E3%82%8D"), {
+            "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
         }),
         ("http://www.pixiv.net/member_illust.php?id=173531", {
             "exception": exception.NotFoundError,
@@ -141,7 +143,7 @@ class PixivUserExtractor(PixivExtractor):
         PixivExtractor.__init__(self)
         self.user_id, tag = match.groups()
         if tag:
-            self.tag = tag.lower()
+            self.tag = urllib.parse.unquote(tag).lower()
             self.works = self._tagged_works
 
     def works(self):
