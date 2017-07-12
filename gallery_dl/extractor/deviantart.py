@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache
+from ..cache import cache, memcache
 import itertools
 import datetime
 import time
@@ -36,6 +36,10 @@ class DeviantartExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
         for deviation in self.deviations():
+            if isinstance(deviation, str):
+                yield Message.Queue, deviation
+                continue
+
             self.prepare(deviation)
             yield Message.Directory, deviation
 
@@ -151,10 +155,20 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
             "keyword": "9342c2a7a2bd6eb9f4a6ea539d04d75248ebe05f",
         }),
         ("http://shimoda7.deviantart.com/gallery/?catpath=/", None),
+        ("https://yakuzafc.deviantart.com/", {
+            "url": "fa6ecb2c3aa78872f762d43f7809b7f0580debc1",
+        }),
     ]
 
     def deviations(self):
-        return self.api.gallery_all(self.user, self.offset)
+        if self.api.user_profile(self.user):
+            return self.api.gallery_all(self.user, self.offset)
+        else:
+            urlfmt = "https://{}.deviantart.com/gallery/0/{}"
+            return [
+                urlfmt.format(self.user, folder["name"])
+                for folder in self.api.gallery_folders(self.user)
+            ]
 
 
 class DeviantartFolderExtractor(DeviantartExtractor):
@@ -323,12 +337,13 @@ class DeviantartAPI():
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
+    @memcache(keyarg=1)
     def collections_folders(self, username, offset=0):
         """Yield all collection folders of a specific user"""
         endpoint = "collections/folders"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
-        return self._pagination(endpoint, params)
+        return self._pagination_list(endpoint, params)
 
     def deviation(self, deviation_id):
         """Query and return info about a single Deviation"""
@@ -355,12 +370,18 @@ class DeviantartAPI():
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
+    @memcache(keyarg=1)
     def gallery_folders(self, username, offset=0):
         """Yield all gallery folders of a specific user"""
         endpoint = "gallery/folders"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
-        return self._pagination(endpoint, params)
+        return self._pagination_list(endpoint, params)
+
+    def user_profile(self, username):
+        """Get user profile information"""
+        endpoint = "user/profile/" + username
+        return self._call(endpoint, expect_error=True)
 
     def authenticate(self):
         """Authenticate the application by requesting an access token"""
@@ -383,7 +404,7 @@ class DeviantartAPI():
             raise exception.AuthenticationError()
         return "Bearer " + response.json()["access_token"]
 
-    def _call(self, endpoint, params=None):
+    def _call(self, endpoint, params=None, expect_error=False):
         """Call an API endpoint"""
         url = "https://www.deviantart.com/api/v1/oauth2/" + endpoint
         tries = 1
@@ -400,6 +421,8 @@ class DeviantartAPI():
                 self.delay += 1
                 self.log.debug("rate limit (delay: %d)", self.delay)
             else:
+                if expect_error:
+                    return None
                 self.delay = 1
                 self.log.debug("http status code %d (%d/3)",
                                response.status_code, tries)
@@ -422,6 +445,11 @@ class DeviantartAPI():
             else:
                 self.log.error("Unexpected API response: %s", data)
                 return
+
+    def _pagination_list(self, endpoint, params=None):
+        result = []
+        result.extend(self._pagination(endpoint, params))
+        return result
 
 
 SHADOW_TEMPLATE = """
