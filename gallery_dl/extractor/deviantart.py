@@ -135,6 +135,10 @@ class DeviantartExtractor(Extractor):
         deviation["extension"] = "htm"
         return Message.Url, html, deviation
 
+    @property
+    def flat(self):
+        return self.config("flat", True)
+
     @staticmethod
     def _find_folder(folders, name):
         regex = re.compile("[^\w]*" + name.replace("-", "[^\w]+") + "[^\w]*$")
@@ -142,6 +146,13 @@ class DeviantartExtractor(Extractor):
             if regex.match(folder["name"]):
                 return folder
         raise exception.NotFoundError("folder")
+
+    def _folder_urls(self, folders, category):
+        urlfmt = "https://{}.deviantart.com/{}/0/{}"
+        return [
+            urlfmt.format(self.user, category, folder["name"])
+            for folder in folders
+        ]
 
 
 class DeviantartGalleryExtractor(DeviantartExtractor):
@@ -154,21 +165,18 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
             "url": "63bfa8efba199e27181943c9060f6770f91a8441",
             "keyword": "9342c2a7a2bd6eb9f4a6ea539d04d75248ebe05f",
         }),
-        ("http://shimoda7.deviantart.com/gallery/?catpath=/", None),
         ("https://yakuzafc.deviantart.com/", {
             "url": "fa6ecb2c3aa78872f762d43f7809b7f0580debc1",
         }),
+        ("http://shimoda7.deviantart.com/gallery/?catpath=/", None),
     ]
 
     def deviations(self):
-        if self.api.user_profile(self.user):
+        if self.api.user_profile(self.user) and self.flat:
             return self.api.gallery_all(self.user, self.offset)
         else:
-            urlfmt = "https://{}.deviantart.com/gallery/0/{}"
-            return [
-                urlfmt.format(self.user, folder["name"])
-                for folder in self.api.gallery_folders(self.user)
-            ]
+            folders = self.api.gallery_folders(self.user)
+            return self._folder_urls(folders, "gallery")
 
 
 class DeviantartFolderExtractor(DeviantartExtractor):
@@ -257,10 +265,14 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     ]
 
     def deviations(self):
-        return itertools.chain.from_iterable([
-            self.api.collections(self.user, folder["folderid"])
-            for folder in self.api.collections_folders(self.user)
-        ])
+        folders = self.api.collections_folders(self.user)
+        if self.flat:
+            return itertools.chain.from_iterable([
+                self.api.collections(self.user, folder["folderid"])
+                for folder in folders
+            ])
+        else:
+            return self._folder_urls(folders, "favourites")
 
 
 class DeviantartCollectionExtractor(DeviantartExtractor):

@@ -242,6 +242,22 @@ Description The password belonging to the username.
 Extractor-specific Options
 ==========================
 
+extractor.deviantart.flat
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Select the directory structure created by the Gallery- and
+            Favorite-Extractors.
+
+            * ``true``: Use a flat directory structure.
+            * ``false``: Collect a list of all gallery-folders or
+              favorites-collections and defere any further work to other
+              extractors (``folder`` or ``collection``), which will then
+              create individual subdirectories for each of them.
+=========== =====
+
+
 extractor.deviantart.mature
 ---------------------------
 =========== =====
@@ -261,7 +277,7 @@ extractor.exhentai.original
 Type        ``bool``
 Default     ``true``
 Description | Always download the original image or
-            | download the down-sampled version for larger images.
+            | download the down-sampled version of larger images.
 =========== =====
 
 
