@@ -172,7 +172,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     ]
 
     def deviations(self):
-        if self.api.user_profile(self.user) and self.flat:
+        if self.flat and self.api.user_profile(self.user):
             return self.api.gallery_all(self.user, self.offset)
         else:
             folders = self.api.gallery_folders(self.user)
