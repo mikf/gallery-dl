@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import itertools
 
 
 class ChanThreadExtractor(Extractor):
@@ -76,13 +77,22 @@ class FoolfuukaThreadExtractor(Extractor):
     def items(self):
         op = True
         yield Message.Version, 1
+        yield Message.Headers, self.session.headers
         for post in self.posts():
             if op:
                 yield Message.Directory, post
                 op = False
             if not post["media"]:
                 continue
-            url = post["media"]["media_link"]
+
+            media = post["media"]
+            url = media["media_link"]
+
+            if not url and "remote_media_link" in media:
+                needle = '<meta http-equiv="Refresh" content="0; url='
+                page = self.request(media["remote_media_link"]).text
+                url = text.extract(page, needle, '"')[0]
+
             post["extension"] = url.rpartition(".")[2]
             yield Message.Url, url, post
 
@@ -90,6 +100,4 @@ class FoolfuukaThreadExtractor(Extractor):
         url = self.root + "/_/api/chan/thread/"
         params = {"board": self.board, "num": self.thread}
         data = self.request(url, params=params).json()[self.thread]
-
-        yield data["op"]
-        yield from data["posts"].values()
+        return itertools.chain((data["op"],), data["posts"].values())

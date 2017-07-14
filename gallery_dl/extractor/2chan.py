@@ -75,12 +75,12 @@ class FutabaThreadExtractor(Extractor):
     @staticmethod
     def _extract_post(post):
         return text.extract_all(post, (
-            ("no"      , 'name="', '"'),
-            ("post"    , '<b>', '</b>'),
-            ("name"    , '<b>', ' </b>'),
-            ("now"     , '</font> ', ' '),
-            (None      , '<blockquote', ''),
-            ("com"     , '>', '</blockquote>'),
+            ("no"  , 'name="', '"'),
+            ("post", '<b>', '</b>'),
+            ("name", '<b>', ' </b>'),
+            ("now" , '</font> ', ' '),
+            (None  , '<blockquote', ''),
+            ("com" , '>', '</blockquote>'),
         ))[0]
 
     @staticmethod
