@@ -16,6 +16,7 @@ modules = [
     "4chan",
     "4plebs",
     "8chan",
+    "archivedmoe",
     "batoto",
     "danbooru",
     "desuarchive",
