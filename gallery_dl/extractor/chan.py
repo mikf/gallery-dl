@@ -6,14 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Base classes for extractors for different Futaba Channel boards"""
+"""Base classes for extractors for different Futaba Channel-like boards"""
 
 from .common import Extractor, Message
 from .. import text
 
 
 class ChanThreadExtractor(Extractor):
-    """Base class for extractors for Futaba Channel boards"""
+    """Base class for extractors for Futaba Channel-like boards"""
     category = "chan"
     subcategory = "thread"
     directory_fmt = ["{category}", "{board}-{thread}"]

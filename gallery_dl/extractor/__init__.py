@@ -11,6 +11,7 @@ import importlib
 
 modules = [
     "pixiv",
+    "2chan",
     "3dbooru",
     "4chan",
     "4plebs",
