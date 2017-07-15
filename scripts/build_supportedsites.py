@@ -9,6 +9,9 @@ import gallery_dl.extractor
 
 
 CATEGORY_MAP = {
+    "2chan"          : "Futaba Channel",
+    "archivedmoe"    : "Archived.Moe",
+    "archiveofsins"  : "Archive of Sins",
     "deviantart"     : "DeviantArt",
     "dokireader"     : "Doki Reader",
     "dynastyscans"   : "Dynasty Reader",
@@ -31,12 +34,14 @@ CATEGORY_MAP = {
     "kireicake"      : "Kirei Cake",
     "kisscomic"      : "KissComic",
     "kissmanga"      : "KissManga",
+    "loveisover"     : "Love is Over Archive",
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
     "mangapark"      : "MangaPark",
     "mangastream"    : "Manga Stream",
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
+    "nyafuu"         : "Nyafuu Archive",
     "powermanga"     : "PowerManga",
     "readcomiconline": "Read Comic Online",
     "rule34"         : "Rule 34",
@@ -82,10 +87,13 @@ IGNORE_LIST = (
 
 class RstColumn():
 
-    def __init__(self, title, data):
+    def __init__(self, title, data, size=None):
         self.title = title
         self.data = self._transform(data)
-        self.size = max(len(value) for value in data + [title])
+        if not size:
+            self.size = max(len(value) for value in data + [title])
+        else:
+            self.size = size
 
         self.title = self._pad(self.title)
         for i, value in enumerate(self.data):
@@ -107,7 +115,10 @@ class RstColumn():
         ]
 
     def _pad(self, s):
-        return s + " " * (self.size - len(s))
+        if len(s) <= self.size:
+            return s + " " * (self.size - len(s))
+        else:
+            return substitute(s, self.size)
 
 
 class RstTable():
@@ -115,18 +126,26 @@ class RstTable():
     def __init__(self, columns):
         self.columns = columns
         self.rowcount = max(len(col) for col in columns)
-        self.sep = "+" + "+".join("-" * col.size for col in columns) + "+"
+        self.sep = " ".join("=" * col.size for col in columns)
 
     def __iter__(self):
         yield self.sep
-        yield "|" + "|".join(col.title for col in self.columns) + "|"
-        yield self.sep.replace("-", "=")
+        yield " ".join(col.title for col in self.columns)
+        yield self.sep
         for i in range(self.rowcount):
             yield self._format_row(i)
-            yield self.sep
+        yield self.sep
 
     def _format_row(self, row):
-        return "|" + "|".join(col[row] for col in self.columns) + "|"
+        return " ".join(col[row] for col in self.columns)
+
+
+_subs = []
+
+def substitute(value, size):
+    sub = "|{}-{}|".format(value[:15], len(_subs))
+    _subs.append((value, sub))
+    return sub + " " * (size - len(sub))
 
 
 def build_list():
@@ -196,15 +215,15 @@ columns = [
     RstColumn("Site", [
         extrlist[0].cat
         for extrlist in extractors
-    ]),
+    ], 20),
     RstColumn("URL", [
         get_domain(extrlist)
         for extrlist in extractors
-    ]),
+    ], 35),
     RstColumn("Capabilities", [
         ", ".join(extr.subcat for extr in extrlist)
         for extrlist in extractors
-    ]),
+    ], 50),
     RstColumn("Authentication", [
         AUTH_MAP.get(extrlist[0].category, "")
         for extrlist in extractors
@@ -216,4 +235,7 @@ with open(os.path.join(ROOTDIR, "docs", outfile), "w") as file:
     file.write("Supported Sites\n"
                "===============\n")
     for line in RstTable(columns):
-        file.write(line + "\n")
+        file.write(line.rstrip() + "\n")
+    file.write("\n")
+    for val, sub in _subs:
+        file.write(".. {} replace:: {}\n".format(sub, val))
