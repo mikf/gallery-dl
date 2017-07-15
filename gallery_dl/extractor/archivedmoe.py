@@ -25,8 +25,3 @@ class ArchivedmoeThreadExtractor(chan.FoolfuukaThreadExtractor):
             "url": "ffec05a1a1b906b5ca85992513671c9155ee9e87",
         }),
     ]
-
-    def __init__(self, match):
-        chan.FoolfuukaThreadExtractor.__init__(self, match)
-        self.session.headers["User-Agent"] = "Mozilla 5.0"
-        self.session.headers["Referer"] = self.root

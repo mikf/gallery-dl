@@ -73,6 +73,8 @@ class FoolfuukaThreadExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.board, self.thread = match.groups()
+        self.session.headers["User-Agent"] = "Mozilla 5.0"
+        self.session.headers["Referer"] = self.root
 
     def items(self):
         op = True
