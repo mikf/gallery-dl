@@ -80,6 +80,15 @@ class Extractor():
             response.encoding = encoding
         return response
 
+    def _check_cookies(self, cookienames, domain=None):
+        """Return True if all 'cookienames' exist in the current session"""
+        for name in cookienames:
+            try:
+                self.session.cookies._find(name, domain)
+            except KeyError:
+                return False
+        return True
+
 
 class AsynchronousExtractor(Extractor):
 
