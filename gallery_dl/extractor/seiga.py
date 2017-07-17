@@ -47,6 +47,8 @@ class SeigaExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
+        if self._check_cookies(("user_session",), ".nicovideo.jp"):
+            return
         username, password = self.auth_info()
         self.session.cookies = self._login_impl(username, password)
 
