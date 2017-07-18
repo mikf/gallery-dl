@@ -97,7 +97,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
             "keyword": "e2eaae0e62d3c5d76df9c870140d1ef466bbec59",
         }),
-        ("https://imgur.com/gallery/eD9CT", { # large album
+        ("https://imgur.com/gallery/eD9CT", {  # large album
             "url": "4ee94de31ff26be416271bc0b1ea27b9349c9937",
             "keyword": "1faeff8abbc555eb1b390c25e16b6df8d8ea22a1",
         }),
@@ -107,7 +107,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
     ]
 
     def items(self):
-        album = self._get_data("a/" + self.item_id)
+        album = self._get_data("a/" + self.item_id + "/all")
         images = album["album_images"]["images"]
         del album["album_images"]
 
