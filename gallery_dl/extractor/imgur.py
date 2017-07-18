@@ -31,8 +31,7 @@ class ImgurExtractor(Extractor):
 
     def _prepare(self, image):
         if image["ext"] == ".gif" and (
-            (self.mp4 and image["prefer_video"]) or self.mp4 == "always"
-        ):
+                (self.mp4 and image["prefer_video"]) or self.mp4 == "always"):
             image["ext"] = ".mp4"
         url = "https://i.imgur.com/" + image["hash"] + image["ext"]
         image["extension"] = image["ext"][1:]
@@ -98,6 +97,10 @@ class ImgurAlbumExtractor(ImgurExtractor):
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
             "keyword": "e2eaae0e62d3c5d76df9c870140d1ef466bbec59",
         }),
+        ("https://imgur.com/gallery/eD9CT", { # large album
+            "url": "4ee94de31ff26be416271bc0b1ea27b9349c9937",
+            "keyword": "1faeff8abbc555eb1b390c25e16b6df8d8ea22a1",
+        }),
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.NotFoundError,
         }),
@@ -107,6 +110,11 @@ class ImgurAlbumExtractor(ImgurExtractor):
         album = self._get_data("a/" + self.item_id)
         images = album["album_images"]["images"]
         del album["album_images"]
+
+        if int(album["num_images"]) > len(images):
+            url = ("https://imgur.com/ajaxalbums/getimages/" +
+                   self.item_id + "/hit.json")
+            images = self.request(url).json()["data"]["images"]
 
         yield Message.Version, 1
         yield Message.Directory, {"album": album, "count": len(images)}
