@@ -57,6 +57,7 @@ modules = [
     "mangapark",
     "mangareader",
     "mangastream",
+    "mangazuki",
     "nhentai",
     "nijie",
     "nyafuu",
