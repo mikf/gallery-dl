@@ -99,7 +99,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
         }),
         ("https://imgur.com/gallery/eD9CT", {  # large album
             "url": "4ee94de31ff26be416271bc0b1ea27b9349c9937",
-            "keyword": "1faeff8abbc555eb1b390c25e16b6df8d8ea22a1",
+            "keyword": "c73a4a7e0fb2c3f00b30f9798327c34a8fbf1aac",
         }),
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.NotFoundError,

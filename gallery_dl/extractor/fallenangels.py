@@ -76,7 +76,7 @@ class FallenangelsMangaExtractor(MangaExtractor):
     scheme = "https"
     test = [
         ("http://manga.fascans.com/manga/trinity-seven", {
-            "url": "8da3d4bcbadc173e5b23c141a0e646b35f41b9b0",
+            "url": "8f8373d645e6702b7b692bac3c04bd6e4c562af1",
         }),
         ("https://truyen.fascans.com/manga/rakudai-kishi-no-eiyuutan", {
             "url": "51a731a6b82d5eb7a335fbae6b02d06aeb2ab07b",
@@ -84,5 +84,5 @@ class FallenangelsMangaExtractor(MangaExtractor):
     ]
 
     def chapters(self, page):
-        pattern = r'<h3 class="chapter-title-rtl">\s+<a href="([^"]+)"'
+        pattern = r'<h\d class="chapter-title-rtl">\s+<a href="([^"]+)"'
         return re.findall(pattern, page)
