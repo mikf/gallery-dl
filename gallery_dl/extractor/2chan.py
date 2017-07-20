@@ -86,6 +86,7 @@ class FutabaThreadExtractor(Extractor):
     @staticmethod
     def _extract_image(post, data):
         text.extract_all(post, (
-            ("filename", '_blank">', '<'),
+            (None      , '_blank', ''),
+            ("filename", '>', '<'),
             ("fsize"   , '(', ' '),
         ), 0, data)
