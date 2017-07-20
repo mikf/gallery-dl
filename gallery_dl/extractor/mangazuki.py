@@ -8,7 +8,7 @@
 
 """Extract manga-chapters and entire manga from https://mangazuki.co/"""
 
-from .common import Extractor, Message
+from .common import Extractor, MangaExtractor, Message
 from .. import text, exception
 
 
@@ -58,3 +58,27 @@ class MangazukiChapterExtractor(Extractor):
     def get_images(page):
         """Return a list of all image-urls"""
         return list(text.extract_iter(page, 'data-src="', '"'))
+
+
+class MangazukiMangaExtractor(MangaExtractor):
+    """Extractor for manga from mangazuki.co"""
+    category = "mangazuki"
+    pattern = [r"(?:https?://)?(?:www\.)?(mangazuki\.co/series/[^/?&#]+)"]
+    scheme = "https"
+    test = [("https://mangazuki.co/series/Double-Casting", {
+        "url": "aab747414191b14e768f4a1eb148448d83ef2e14",
+    })]
+
+    def chapters(self, page):
+        params = {"page": 1}
+        chlist = []
+
+        while True:
+            chlist.extend(
+                text.extract_iter(page, '<li class="media"><a href="', '"'))
+            if 'class="next disabled"' in page:
+                break
+            params["page"] += 1
+            page = self.request(self.url, params=params).text
+
+        return chlist
