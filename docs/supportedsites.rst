@@ -49,7 +49,7 @@ Manga Stream         https://mangastream.com/            Chapters
 Mangapanda           http://www.mangapanda.com/          Chapters, Manga
 MangaPark            http://mangapark.me/                Chapters, Manga
 Mangareader          http://www.mangareader.net/         Chapters, Manga
-Mangazuki            https://mangazuki.co/               Chapters
+Mangazuki            https://mangazuki.co/               Chapters, Manga
 nhentai              https://nhentai.net/                Galleries
 Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
 nijie                https://nijie.info/                 Images from Users, individual Images               Required
