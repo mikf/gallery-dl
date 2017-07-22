@@ -18,6 +18,7 @@ class NijieExtractor(AsynchronousExtractor):
     category = "nijie"
     directory_fmt = ["{category}", "{artist-id}"]
     filename_fmt = "{category}_{artist-id}_{image-id}_p{index:>02}.{extension}"
+    cookiedomain = "nijie.info"
     popup_url = "https://nijie.info/view_popup.php?id="
 
     def __init__(self):
@@ -62,7 +63,7 @@ class NijieExtractor(AsynchronousExtractor):
 
     def login(self):
         """Login and obtain session cookie"""
-        if self._check_cookies(("nemail", "nlogin"), "nijie.info"):
+        if self._check_cookies(("nemail", "nlogin")):
             return
         username, password = self.auth_info()
         self.session.cookies = self._login_impl(username, password)
