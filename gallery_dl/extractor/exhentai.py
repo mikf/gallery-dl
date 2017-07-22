@@ -37,6 +37,7 @@ class ExhentaiGalleryExtractor(Extractor):
     ]
     root = "https://exhentai.org"
     cookienames = ("ipb_member_id", "ipb_pass_hash")
+    cookiedomain = ".exhentai.org"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -177,7 +178,7 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
-        if self._check_cookies(self.cookienames, ".exhentai.org"):
+        if self._check_cookies(self.cookienames):
             return
         username, password = self.auth_info()
         if not username:
@@ -188,7 +189,7 @@ class ExhentaiGalleryExtractor(Extractor):
         cookies = self._login_impl(username, password)
         for key, value in cookies.items():
             self.session.cookies.set(
-                key, value, domain=".exhentai.org", path="/")
+                key, value, domain=self.cookiedomain)
 
     @cache(maxage=90*24*60*60, keyarg=1)
     def _login_impl(self, username, password):

@@ -26,6 +26,7 @@ class Extractor():
     subcategory = ""
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
+    cookiedomain = ""
 
     def __init__(self):
         self.session = requests.Session()
@@ -34,14 +35,16 @@ class Extractor():
         cookies = self.config("cookies")
         if cookies:
             if isinstance(cookies, dict):
-                cj = cookies
+                setcookie = self.session.cookies.set
+                for name, value in cookies.items():
+                    setcookie(name, value, domain=self.cookiedomain)
             else:
                 try:
                     cj = http.cookiejar.MozillaCookieJar()
                     cj.load(cookies)
+                    self.session.cookies.update(cj)
                 except OSError as exc:
                     self.log.warning("cookies: %s", exc)
-            self.session.cookies.update(cj)
 
     def __iter__(self):
         return self.items()
@@ -82,6 +85,8 @@ class Extractor():
 
     def _check_cookies(self, cookienames, domain=None):
         """Return True if all 'cookienames' exist in the current session"""
+        if not domain and self.cookiedomain:
+            domain = self.cookiedomain
         for name in cookienames:
             try:
                 self.session.cookies._find(name, domain)
