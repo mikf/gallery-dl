@@ -65,6 +65,7 @@ modules = [
     "pinterest",
     "powermanga",
     "readcomiconline",
+    "rebeccablacktech",
     "reddit",
     "rule34",
     "safebooru",
