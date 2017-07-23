@@ -75,6 +75,7 @@ modules = [
     "senmanga",
     "sensescans",
     "spectrumnexus",
+    "thebarchive",
     "tumblr",
     "twitter",
     "worldthree",
