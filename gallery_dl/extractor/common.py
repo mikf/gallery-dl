@@ -9,6 +9,7 @@
 """Common classes and constants used by extractor modules."""
 
 import os
+import re
 import time
 import netrc
 import queue
@@ -184,6 +185,13 @@ def safe_request(session, url, method="GET", *args, **kwargs):
 
         # everything ok -- proceed to download
         return r
+
+
+# Reduce strictness of the expected magic string in cookie jar files.
+# (This allows the use of Wget-generated cookiejar files without modification)
+
+http.cookiejar.MozillaCookieJar.magic_re = re.compile(
+    "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
 
 
 # The first import of requests happens inside this file.
