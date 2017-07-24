@@ -53,6 +53,7 @@ def _generate_test(extr, tcase):
 skip = [
     # don't work on travis-ci
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
+    "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
 
 ]
