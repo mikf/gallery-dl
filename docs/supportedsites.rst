@@ -59,6 +59,7 @@ Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Li
 Pixiv                https://www.pixiv.net/              |Images from Use-3|                                Required
 PowerManga           https://powermanga.org/             Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
+RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://reddit.com/                 Submissions, Subreddits                            Optional (OAuth)
 Rule 34              https://rule34.xxx/                 Posts, Tag-Searches
 Safebooru            https://safebooru.org/              Posts, Tag-Searches
@@ -67,6 +68,7 @@ Sea Otter Scans      https://reader.seaotterscans.com/   Chapters, Manga
 Sen Manga            http://raw.senmanga.com/            Chapters
 Sense-Scans          http://sensescans.com/              Chapters, Manga
 Spectrum Nexus       |http://www.thes-0|                 Chapters, Manga
+The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Posts, Tag-Searches
 Twitter              https://twitter.com/                Tweets
 World Three          http://www.slide.world-three.org/   Chapters, Manga
