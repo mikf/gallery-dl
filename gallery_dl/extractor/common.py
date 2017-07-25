@@ -9,12 +9,14 @@
 """Common classes and constants used by extractor modules."""
 
 import os
+import re
 import time
 import netrc
 import queue
 import logging
 import requests
 import threading
+import http.cookiejar
 from .message import Message
 from .. import config
 
@@ -25,10 +27,25 @@ class Extractor():
     subcategory = ""
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
+    cookiedomain = ""
 
     def __init__(self):
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
+
+        cookies = self.config("cookies")
+        if cookies:
+            if isinstance(cookies, dict):
+                setcookie = self.session.cookies.set
+                for name, value in cookies.items():
+                    setcookie(name, value, domain=self.cookiedomain)
+            else:
+                try:
+                    cj = http.cookiejar.MozillaCookieJar()
+                    cj.load(cookies)
+                    self.session.cookies.update(cj)
+                except OSError as exc:
+                    self.log.warning("cookies: %s", exc)
 
     def __iter__(self):
         return self.items()
@@ -66,6 +83,17 @@ class Extractor():
         if encoding:
             response.encoding = encoding
         return response
+
+    def _check_cookies(self, cookienames, domain=None):
+        """Return True if all 'cookienames' exist in the current session"""
+        if not domain and self.cookiedomain:
+            domain = self.cookiedomain
+        for name in cookienames:
+            try:
+                self.session.cookies._find(name, domain)
+            except KeyError:
+                return False
+        return True
 
 
 class AsynchronousExtractor(Extractor):
@@ -157,6 +185,13 @@ def safe_request(session, url, method="GET", *args, **kwargs):
 
         # everything ok -- proceed to download
         return r
+
+
+# Reduce strictness of the expected magic string in cookie jar files.
+# (This allows the use of Wget-generated cookiejar files without modification)
+
+http.cookiejar.MozillaCookieJar.magic_re = re.compile(
+    "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
 
 
 # The first import of requests happens inside this file.

@@ -19,15 +19,19 @@ class BatotoExtractor():
     category = "batoto"
     scheme = "https"
     root = "https://bato.to"
+    cookienames = ("member_id", "pass_hash")
+    cookiedomain = ".bato.to"
 
     def login(self):
         """Login and set necessary cookies"""
+        if self._check_cookies(self.cookienames):
+            return
         username, password = self.auth_info()
         if username:
             cookies = self._login_impl(username, password)
             for key, value in cookies.items():
                 self.session.cookies.set(
-                    key, value, domain=".bato.to", path="/")
+                    key, value, domain=self.cookiedomain)
 
     @cache(maxage=7*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
@@ -53,7 +57,7 @@ class BatotoExtractor():
                                 method="POST", params=params, data=data)
         if "Sign In - " in response.text:
             raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in ("member_id", "pass_hash")}
+        return {c: response.cookies[c] for c in self.cookienames}
 
 
 class BatotoMangaExtractor(BatotoExtractor, MangaExtractor):

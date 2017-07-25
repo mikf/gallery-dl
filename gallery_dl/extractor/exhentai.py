@@ -36,6 +36,8 @@ class ExhentaiGalleryExtractor(Extractor):
         }),
     ]
     root = "https://exhentai.org"
+    cookienames = ("ipb_member_id", "ipb_pass_hash")
+    cookiedomain = ".exhentai.org"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -50,9 +52,8 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def items(self):
         self.login()
+        self.setup_headers()
         yield Message.Version, 1
-        yield Message.Headers, self.setup_headers()
-        yield Message.Cookies, self.session.cookies
 
         url = "{}/g/{}/{}/".format(self.root, self.gid, self.token)
         response = self.session.get(url)
@@ -76,14 +77,9 @@ class ExhentaiGalleryExtractor(Extractor):
         """Initialize headers"""
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0",
-            "Accept": "text/html,application/xhtml+xml,"
-                      "application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
             "Referer": self.root + "/",
         })
-        headers = self.session.headers.copy()
-        headers["Accept"] = "image/png,image/*;q=0.8,*/*;q=0.5"
-        return headers
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
@@ -182,6 +178,8 @@ class ExhentaiGalleryExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
+        if self._check_cookies(self.cookienames):
+            return
         username, password = self.auth_info()
         if not username:
             self.log.info("no username given; using e-hentai.org")
@@ -191,21 +189,12 @@ class ExhentaiGalleryExtractor(Extractor):
         cookies = self._login_impl(username, password)
         for key, value in cookies.items():
             self.session.cookies.set(
-                key, value, domain=".exhentai.org", path="/")
+                key, value, domain=self.cookiedomain)
 
     @cache(maxage=90*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
         """Actual login implementation"""
         self.log.info("Logging in as %s", username)
-        cnames = ["ipb_member_id", "ipb_pass_hash"]
-
-        try:
-            cookies = self.config("cookies")
-            if isinstance(cookies, dict) and all(c in cookies for c in cnames):
-                return cookies
-        except TypeError:
-            pass
-
         url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
         params = {
             "CookieDate": "1",
@@ -221,4 +210,4 @@ class ExhentaiGalleryExtractor(Extractor):
 
         if "You are now logged in as:" not in response.text:
             raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in cnames}
+        return {c: response.cookies[c] for c in self.cookienames}

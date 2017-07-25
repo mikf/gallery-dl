@@ -224,7 +224,7 @@ Description The username to use when attempting to log in to another site.
             ``seiga`` modules and optional (but strongly recommended) for
             ``batoto`` and ``exhentai``.
 
-            This value can also be given via the ``-u/--username``
+            This value can also be set via the ``-u/--username``
             command-line option or by using a |.netrc|_ file.
             (see Authentication_)
 =========== =====
@@ -236,6 +236,20 @@ extractor.*.password
 Type        ``string``
 Default     ``null``
 Description The password belonging to the username.
+=========== =====
+
+
+extractor.*.cookies
+-------------------
+=========== =====
+Type        ``string`` or ``object``
+Default     ``null``
+Description Source to read additional cookies from.
+
+            * If this is a ``string``, it specifies the path of a
+              Mozilla/Netscape format cookies.txt file.
+            * If this is an ``object``, its key-value pairs, which should both
+              be ``strings``, will be used as cookie-names and -values.
 =========== =====
 
 
