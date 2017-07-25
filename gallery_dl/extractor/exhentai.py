@@ -180,7 +180,7 @@ class ExhentaiGalleryExtractor(Extractor):
         """Login and set necessary cookies"""
         if self._check_cookies(self.cookienames):
             return
-        username, password = self.auth_info()
+        username, password = self._get_auth_info()
         if not username:
             self.log.info("no username given; using e-hentai.org")
             self.root = "https://e-hentai.org"

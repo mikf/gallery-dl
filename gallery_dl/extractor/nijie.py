@@ -63,10 +63,9 @@ class NijieExtractor(AsynchronousExtractor):
 
     def login(self):
         """Login and obtain session cookie"""
-        if self._check_cookies(("nemail", "nlogin")):
-            return
-        username, password = self.auth_info()
-        self.session.cookies = self._login_impl(username, password)
+        if not self._check_cookies(("nemail", "nlogin")):
+            username, password = self._get_auth_info()
+            self.session.cookies = self._login_impl(username, password)
 
     @cache(maxage=30*24*60*60, keyarg=1)
     def _login_impl(self, username, password):

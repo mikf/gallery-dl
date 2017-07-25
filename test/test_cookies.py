@@ -43,6 +43,7 @@ class TestCookiejar(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.path.cleanup()
+        config.clear()
 
     def test_cookiefile(self):
         config.set(CKEY, self.cookiefile)
@@ -79,6 +80,9 @@ class TestCookiedict(unittest.TestCase):
         self.cdict = {"NAME1": "VALUE1", "NAME2": "VALUE2"}
         config.set(CKEY, self.cdict)
 
+    def tearDown(self):
+        config.clear()
+
     def test_dict(self):
         cookies = extractor.find("test:").session.cookies
         self.assertEqual(len(cookies), len(self.cdict))
@@ -96,6 +100,9 @@ class TestCookiedict(unittest.TestCase):
 
 
 class TestCookieLogin(unittest.TestCase):
+
+    def tearDown(self):
+        config.clear()
 
     def test_cookie_login(self):
         extr_cookies = {

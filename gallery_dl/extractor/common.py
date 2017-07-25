@@ -32,20 +32,7 @@ class Extractor():
     def __init__(self):
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
-
-        cookies = self.config("cookies")
-        if cookies:
-            if isinstance(cookies, dict):
-                setcookie = self.session.cookies.set
-                for name, value in cookies.items():
-                    setcookie(name, value, domain=self.cookiedomain)
-            else:
-                try:
-                    cj = http.cookiejar.MozillaCookieJar()
-                    cj.load(cookies)
-                    self.session.cookies.update(cj)
-                except OSError as exc:
-                    self.log.warning("cookies: %s", exc)
+        self._set_cookies(self.config("cookies"))
 
     def __iter__(self):
         return self.items()
@@ -60,7 +47,13 @@ class Extractor():
         return config.interpolate(
             ("extractor", self.category, self.subcategory, key), default)
 
-    def auth_info(self):
+    def request(self, url, encoding=None, *args, **kwargs):
+        response = safe_request(self.session, url, *args, **kwargs)
+        if encoding:
+            response.encoding = encoding
+        return response
+
+    def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
         username = self.config("username")
         password = None
@@ -78,14 +71,23 @@ class Extractor():
 
         return username, password
 
-    def request(self, url, encoding=None, *args, **kwargs):
-        response = safe_request(self.session, url, *args, **kwargs)
-        if encoding:
-            response.encoding = encoding
-        return response
+    def _set_cookies(self, cookies):
+        """Populate the cookiejar with 'cookies'"""
+        if cookies:
+            if isinstance(cookies, dict):
+                setcookie = self.session.cookies.set
+                for name, value in cookies.items():
+                    setcookie(name, value, domain=self.cookiedomain)
+            else:
+                try:
+                    cj = http.cookiejar.MozillaCookieJar()
+                    cj.load(cookies)
+                    self.session.cookies.update(cj)
+                except OSError as exc:
+                    self.log.warning("cookies: %s", exc)
 
     def _check_cookies(self, cookienames, domain=None):
-        """Return True if all 'cookienames' exist in the current session"""
+        """Check if all 'cookienames' are in the session's cookiejar"""
         if not domain and self.cookiedomain:
             domain = self.cookiedomain
         for name in cookienames:

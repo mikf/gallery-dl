@@ -269,7 +269,7 @@ class PixivAPI():
     def __init__(self, extractor):
         self.session = extractor.session
         self.log = extractor.log
-        self.username, self.password = extractor.auth_info()
+        self.username, self.password = extractor._get_auth_info()
         self.user_info = None
         self.session.headers.update({
             "Referer": "https://www.pixiv.net/",

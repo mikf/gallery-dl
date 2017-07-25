@@ -79,7 +79,6 @@ class FoolfuukaThreadExtractor(Extractor):
     def items(self):
         op = True
         yield Message.Version, 1
-        yield Message.Headers, self.session.headers
         for post in self.posts():
             if op:
                 yield Message.Directory, post

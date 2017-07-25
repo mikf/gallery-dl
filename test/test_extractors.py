@@ -23,6 +23,9 @@ class TestExtractors(unittest.TestCase):
         config.set(("extractor", "nijie", "username"), email)
         config.set(("extractor", "seiga", "username"), email)
 
+    def tearDown(self):
+        config.clear()
+
     def _run_test(self, extr, url, result):
         content = "content" in result if result else False
         tjob = job.TestJob(url, content)

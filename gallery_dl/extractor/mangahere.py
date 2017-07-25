@@ -63,7 +63,7 @@ class MangahereChapterExtractor(AsynchronousExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, '<title>', '</title>')
-        chid , pos = text.extract(page, 'h.mhcdn.net/store/manga/', '/', pos)
+        chid , pos = text.extract(page, '.mhcdn.net/store/manga/', '/', pos)
         _    , pos = text.extract(page, '<select class="wid60"', '', pos)
         _    , pos = text.extract(page, '</select>', '', pos)
         count, pos = text.extract(page, '>', '<', pos-30)
