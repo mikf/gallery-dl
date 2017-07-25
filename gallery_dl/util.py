@@ -242,7 +242,7 @@ class OAuthSession():
         self.session = session
         self.consumer_secret = consumer_secret
         self.token_secret = token_secret or ""
-        self.params = session.params
+        self.params = {}
         self.params["oauth_consumer_key"] = consumer_key
         self.params["oauth_token"] = token
         self.params["oauth_signature_method"] = "HMAC-SHA1"

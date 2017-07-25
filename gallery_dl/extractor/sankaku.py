@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -35,7 +35,6 @@ class SankakuTagExtractor(AsynchronousExtractor):
     def items(self):
         data = self.get_job_metadata()
         yield Message.Version, 1
-        yield Message.Headers, self.session.headers
         yield Message.Directory, data
         for image in self.get_images():
             image.update(data)

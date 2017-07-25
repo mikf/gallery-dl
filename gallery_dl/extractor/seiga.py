@@ -17,6 +17,7 @@ from xml.etree import ElementTree
 class SeigaExtractor(Extractor):
     """Base class for seiga extractors"""
     category = "seiga"
+    cookiedomain = ".nicovideo.jp"
 
     def items(self):
         self.login()
@@ -47,6 +48,8 @@ class SeigaExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
+        if self._check_cookies(("user_session",)):
+            return
         username, password = self.auth_info()
         self.session.cookies = self._login_impl(username, password)
 

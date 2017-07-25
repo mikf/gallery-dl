@@ -27,13 +27,13 @@ class BooruExtractor(Extractor):
 
     def __init__(self):
         Extractor.__init__(self)
+        self.session.headers.update(self.headers)
         self.params = {"limit": 50}
         self.setup()
 
     def items(self):
         yield Message.Version, 1
         yield Message.Directory, self.get_job_metadata()
-        yield Message.Headers, self.headers
         for data in self.items_impl():
             try:
                 url = self.get_file_url(data)

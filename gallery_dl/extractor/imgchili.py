@@ -27,7 +27,6 @@ class ImgchiliExtractor(Extractor):
         page = self.request(self.url, encoding="utf-8").text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
-        yield Message.Headers, self.session.headers
         yield Message.Directory, data
         for url, image in self.get_images(page):
             data.update(image)
