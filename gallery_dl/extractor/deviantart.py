@@ -141,9 +141,9 @@ class DeviantartExtractor(Extractor):
 
     @staticmethod
     def _find_folder(folders, name):
-        regex = re.compile("[^\w]*" + name.replace("-", "[^\w]+") + "[^\w]*$")
+        pattern = r"[^\w]*" + name.replace("-", r"[^\w]+") + r"[^\w]*$"
         for folder in folders:
-            if regex.match(folder["name"]):
+            if re.match(pattern, folder["name"]):
                 return folder
         raise exception.NotFoundError("folder")
 
