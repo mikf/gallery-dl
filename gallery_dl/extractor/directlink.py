@@ -13,10 +13,11 @@ from .. import text
 
 
 class DirectlinkExtractor(Extractor):
-    """Extractor for direct links to images"""
+    """Extractor for direct links to images and other media files"""
     category = "directlink"
     filename_fmt = "{domain}/{path}"
-    pattern = [r"https?://([^/]+)/([^?&#]+\.(?:jpe?g?|png|gif|webp|webm|mp4|mkv|ogg|ogm|ogv|opus))"]
+    pattern = [r"https?://([^/]+)/([^?&#]+\."
+               r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus))"]
     test = [(("https://photos.smugmug.com/The-World/Hawaii/"
               "i-SWz2K6n/2/X3/IMG_0311-X3.jpg"), {
         "url": "32ee1045881e17ef3f13a9958595afa42421ec6c",
