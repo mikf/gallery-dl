@@ -29,7 +29,7 @@ class HentaicdnChapterExtractor(Extractor):
         yield Message.Directory, data
         for num, part in enumerate(images, 1):
             data["num"] = num
-            url = "http://hentaicdn.com/hentai" + part
+            url = "https://hentaicdn.com/hentai" + part
             yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_job_metadata(self, page, images):

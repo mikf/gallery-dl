@@ -18,14 +18,15 @@ import json
 class Hentai2readMangaExtractor(MangaExtractor):
     """Extractor for hmanga from hentai2read.com"""
     category = "hentai2read"
+    scheme = "https"
     pattern = [r"(?:https?://)?(?:www\.)?(hentai2read\.com/[^/]+/?)$"]
     test = [
         ("http://hentai2read.com/amazon_elixir/", {
-            "url": "d1f87b71d3c97b49a478cdfb6ae96b2d9520ab78",
+            "url": "273073752d418ec887d7f7211e42b832e8c403ba",
         }),
         ("http://hentai2read.com/oshikage_riot/", {
-            "url": "672f34cce7bf5a855c6c38e8bc9c5117a4b3061c",
-        })
+            "url": "6595f920a3088a15c2819c502862d45f8eb6bea6",
+        }),
     ]
 
     def chapters(self, page):
@@ -40,14 +41,14 @@ class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
     category = "hentai2read"
     pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/(\d+)"]
     test = [("http://hentai2read.com/amazon_elixir/1/", {
-        "url": "fb5fc4d7cc194116960eaa648c7e045a6e6f0c11",
+        "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
         "keyword": "c05d0d0bbe188926b15a43df1f8f65b8ac11c3fd",
     })]
 
     def __init__(self, match):
         hentaicdn.HentaicdnChapterExtractor.__init__(self)
         url_title, self.chapter = match.groups()
-        self.url = "http://hentai2read.com/{}/{}/".format(
+        self.url = "https://hentai2read.com/{}/{}/".format(
             url_title, self.chapter
         )
 
