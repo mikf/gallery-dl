@@ -39,7 +39,7 @@ class HentaihereChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
     category = "hentaihere"
     pattern = [r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/(\d+)"]
     test = [("https://hentaihere.com/m/S13812/1/1/", {
-        "url": "fb5fc4d7cc194116960eaa648c7e045a6e6f0c11",
+        "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
         "keyword": "e8625ccca8466a5dee089394fc29efea6d6e2950",
     })]
 
