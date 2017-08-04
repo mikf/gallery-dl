@@ -62,7 +62,10 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
             ("language", '<p>Language:', ' '),
         ), values={"gallery-id": self.gid})[0]
         data["lang"] = util.language_to_code(data["language"] or "", None)
-        data["artist"] = text.extract(data["tags"], "rtist: ", ",")[0] or None
+        try:
+            data["artist"] = text.extract(data["tags"], "rtist: ", ",")[0] or None
+        except AttributeError:
+            data["artist"] = None
         self.section = data["com"]
         del data["com"]
         return data

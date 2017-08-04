@@ -87,6 +87,8 @@ def code_to_language(code, default="English"):
 
 def language_to_code(lang, default="en"):
     """Map a language name to its ISO 639-1 code"""
+    if lang is None:
+        return None
     lang = lang.capitalize()
     for code, language in CODES.items():
         if language == lang:
