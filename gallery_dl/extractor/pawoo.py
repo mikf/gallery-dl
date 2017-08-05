@@ -135,12 +135,10 @@ class MastodonAPI():
         """Get an account's statuses"""
         url = "{}/api/v1/accounts/{}/statuses?only_media=1".format(
             self.root, account_id)
-        while True:
+        while url:
             response = self.session.get(url)
             yield from self._parse(response)
             url = response.links.get("next", {}).get("url")
-            if not url:
-                break
 
     @staticmethod
     def _parse(response):

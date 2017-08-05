@@ -57,8 +57,8 @@ class SeigaExtractor(Extractor):
         """Actual login implementation"""
         self.log.info("Logging in as %s", username)
         url = "https://account.nicovideo.jp/api/v1/login"
-        params = {"mail_tel": username, "password": password}
-        self.session.post(url, data=params).close()
+        data = {"mail_tel": username, "password": password}
+        self.request(url, method="POST", data=data)
         if "user_session" not in self.session.cookies:
             raise exception.AuthenticationError()
         del self.session.cookies["nicosid"]

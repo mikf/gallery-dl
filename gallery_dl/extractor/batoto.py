@@ -107,7 +107,7 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
             "p": 1,
             "supress_webtoon": "t",
         }
-        response = self.session.get(self.reader_url, params=params)
+        response = self.request(self.reader_url, params=params, fatal=False)
         if response.status_code == 405:
             error = text.extract(response.text, "ERROR [", "]")[0]
             if error == "10030":

@@ -71,9 +71,9 @@ class NijieExtractor(AsynchronousExtractor):
     def _login_impl(self, username, password):
         """Actual login implementation"""
         self.log.info("Logging in as %s", username)
-        params = {"email": username, "password": password}
-        page = self.session.post("https://nijie.info/login_int.php",
-                                 data=params).text
+        data = {"email": username, "password": password}
+        page = self.request("https://nijie.info/login_int.php",
+                            method="POST", data=data).text
         if "//nijie.info/login.php" in page:
             raise exception.AuthenticationError()
         return self.session.cookies
@@ -102,7 +102,7 @@ class NijieUserExtractor(NijieExtractor):
         params = {"id": self.artist_id, "p": 1}
         url = "https://nijie.info/members_illust.php"
         while True:
-            response = self.session.get(url, params=params)
+            response = self.request(url, params=params, fatal=False)
             if response.status_code == 404:
                 raise exception.NotFoundError("artist")
             ids = list(text.extract_iter(response.text, ' illust_id="', '"'))
@@ -133,8 +133,8 @@ class NijieImageExtractor(NijieExtractor):
         self.page = ""
 
     def get_job_metadata(self):
-        response = self.session.get(self.popup_url + self.image_id,
-                                    allow_redirects=False)
+        response = self.request(self.popup_url + self.image_id,
+                                allow_redirects=False)
         if 300 <= response.status_code < 400:
             raise exception.NotFoundError("image")
         self.page = response.text

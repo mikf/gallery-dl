@@ -65,7 +65,7 @@ class GfycatImageExtractor(GfycatExtractor):
 
     def _get_info(self, gfycat_id):
         url = "https://gfycat.com/cajax/get/" + gfycat_id
-        data = self.session.get(url).json()
+        data = self.request(url).json()
         if "error" in data:
-            raise exception.NotFoundError()
+            raise exception.NotFoundError("animation")
         return data["gfyItem"]
