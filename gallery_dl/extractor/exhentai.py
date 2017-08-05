@@ -56,7 +56,7 @@ class ExhentaiGalleryExtractor(Extractor):
         yield Message.Version, 1
 
         url = "{}/g/{}/{}/".format(self.root, self.gid, self.token)
-        response = self.session.get(url)
+        response = self.request(url, fatal=False)
         page = response.text
         if response.status_code == 404 and "Gallery Not Available" in page:
             raise exception.AuthorizationError()
@@ -196,7 +196,7 @@ class ExhentaiGalleryExtractor(Extractor):
         """Actual login implementation"""
         self.log.info("Logging in as %s", username)
         url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
-        params = {
+        data = {
             "CookieDate": "1",
             "b": "d",
             "bt": "1-1",
@@ -206,7 +206,7 @@ class ExhentaiGalleryExtractor(Extractor):
         }
         referer = "https://e-hentai.org/bounce_login.php?b=d&bt=1-1"
         self.session.headers["Referer"] = referer
-        response = self.session.post(url, data=params)
+        response = self.request(url, method="POST", data=data)
 
         if "You are now logged in as:" not in response.text:
             raise exception.AuthenticationError()

@@ -23,7 +23,7 @@ class ImgurExtractor(Extractor):
         self.mp4 = self.config("mp4", True)
 
     def _get_data(self, urlpart):
-        response = self.session.get("https://imgur.com/" + urlpart)
+        response = self.request("https://imgur.com/" + urlpart, fatal=False)
         if response.status_code == 404:
             raise exception.NotFoundError(self.subcategory)
         data = text.extract(response.text, "image               : ", ",\n")[0]

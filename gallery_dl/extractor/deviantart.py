@@ -242,7 +242,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         self.url = "https://" + match.group(1)
 
     def deviations(self):
-        response = self.session.get(self.url)
+        response = self.request(self.url, fatal=False)
         deviation_id = text.extract(response.text, '//deviation/', '"')[0]
         if response.status_code != 200 or not deviation_id:
             raise exception.NotFoundError("image")

@@ -18,7 +18,7 @@ import requests
 import threading
 import http.cookiejar
 from .message import Message
-from .. import config
+from .. import config, exception
 
 
 class Extractor():
@@ -47,11 +47,22 @@ class Extractor():
         return config.interpolate(
             ("extractor", self.category, self.subcategory, key), default)
 
-    def request(self, url, encoding=None, *args, **kwargs):
-        response = safe_request(self.session, url, *args, **kwargs)
-        if encoding:
-            response.encoding = encoding
-        return response
+    def request(self, url, method="GET", encoding=None, fatal=True, retries=3,
+                *args, **kwargs):
+        while True:
+            try:
+                response = self.session.request(method, url, *args, **kwargs)
+                if fatal:
+                    response.raise_for_status()
+                if encoding:
+                    response.encoding = encoding
+                return response
+            except requests.exceptions.RequestException as exc:
+                msg = exc
+            retries -= 1
+            if not retries:
+                raise exception.HttpError(msg)
+            time.sleep(1)
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
@@ -164,33 +175,8 @@ class MangaExtractor(Extractor):
         return []
 
 
-def safe_request(session, url, method="GET", *args, **kwargs):
-    tries = 0
-    while True:
-        # try to connect to remote source
-        try:
-            r = session.request(method, url, *args, **kwargs)
-        except requests.exceptions.ConnectionError:
-            tries += 1
-            time.sleep(1)
-            if tries == 5:
-                raise
-            continue
-
-        # reject error-status-codes
-        if r.status_code != requests.codes.ok:
-            tries += 1
-            time.sleep(1)
-            if tries == 5:
-                r.raise_for_status()
-            continue
-
-        # everything ok -- proceed to download
-        return r
-
-
-# Reduce strictness of the expected magic string in cookie jar files.
-# (This allows the use of Wget-generated cookiejar files without modification)
+# Reduce strictness of the expected magic string in cookiejar files.
+# (This allows the use of Wget-generated cookiejars without modification)
 
 http.cookiejar.MozillaCookieJar.magic_re = re.compile(
     "#( Netscape)? HTTP Cookie File", re.IGNORECASE)

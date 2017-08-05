@@ -62,7 +62,7 @@ class HentaifoundryUserExtractor(Extractor):
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         url = self.url_base + self.artist + "?enterAgree=1"
-        response = self.session.get(url)
+        response = self.request(url, fatal=False)
         if response.status_code == 404:
             raise exception.NotFoundError("user")
         page = response.text
@@ -150,7 +150,7 @@ class HentaifoundryImageExtractor(Extractor):
         """Collect metadata for an image"""
         url = "https://www.hentai-foundry.com/pictures/user/{}/{}".format(
             self.artist, self.index)
-        response = self.session.get(url + "?enterAgree=1")
+        response = self.request(url + "?enterAgree=1", fatal=False)
         if response.status_code == 404:
             raise exception.NotFoundError("image")
         extr = text.extract

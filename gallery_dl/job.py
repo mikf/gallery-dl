@@ -49,9 +49,11 @@ class Job():
         except exception.AuthorizationError:
             log.error("You do not have permission to access the resource "
                       "at '%s'", self.url)
-        except exception.NotFoundError as err:
-            res = str(err) or "resource (gallery/image/user)"
+        except exception.NotFoundError as exc:
+            res = str(exc) or "resource (gallery/image/user)"
             log.error("The %s at '%s' does not exist", res, self.url)
+        except exception.HttpError as exc:
+            log.error("HTTP request failed:\n%s", exc)
         except exception.StopExtraction:
             pass
         except Exception as exc:
