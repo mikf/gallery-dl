@@ -20,11 +20,17 @@ class TwitterTweetExtractor(Extractor):
     filename_fmt = "{tweet-id}_{num}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/"
                r"(([^/]+)/status/(\d+))"]
-    test = [("https://twitter.com/PicturesEarth/status/672897688871018500", {
-        "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
-        "keyword": "3cd8e27026a2112008985b1b53f5e4baf4616177",
-        "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
-    })]
+    test = [
+        ("https://twitter.com/PicturesEarth/status/672897688871018500", {
+            "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
+            "keyword": "3cd8e27026a2112008985b1b53f5e4baf4616177",
+            "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
+        }),
+        ("https://twitter.com/perrypumas/status/894001459754180609", {
+            "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
+            "keyword": "8438551b34caf2f580ba23f6014509c8dd5e1e0f",
+        }),
+    ]
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -54,5 +60,7 @@ class TwitterTweetExtractor(Extractor):
     @staticmethod
     def get_image_urls(page):
         """Extract and return a list of all image-urls"""
-        needle = '<img data-aria-label-part src="'
-        return list(text.extract_iter(page, needle, '"'))
+        tweet = text.extract(
+            page, '<div class="follow-bar">', '<ul class="stats" ')[0]
+        return list(text.extract_iter(
+            tweet, '<img data-aria-label-part src="', '"'))

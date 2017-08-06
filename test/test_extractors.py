@@ -58,8 +58,6 @@ skip = [
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
-    "readcomiconline",  # server down
-    "twitter",  # ads
     "yonkouprod",  # everything is gone
 ]
 # enable selective testing for direct calls
