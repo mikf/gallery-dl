@@ -20,18 +20,18 @@ Installation via pip
 --------------------
 
 The stable releases of *gallery-dl* are distributed on PyPI_ and can be
-easily installed using pip_:
+easily installed or upgraded to the latest version using pip_:
 
 .. code:: bash
 
-    $ pip install gallery-dl
+    $ pip install --upgrade gallery-dl
 
 Installing the latest dev-version directly from GitHub can be done via
 pip as well:
 
 .. code:: bash
 
-    $ pip install https://github.com/mikf/gallery-dl/archive/master.zip
+    $ pip install --upgrade https://github.com/mikf/gallery-dl/archive/master.zip
 
 
 Manual installation via Python
