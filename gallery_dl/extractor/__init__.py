@@ -46,7 +46,6 @@ modules = [
     "jaiminisbox",
     "khinsider",
     "kireicake",
-    "kisscomic",
     "kissmanga",
     "konachan",
     "loveisover",
