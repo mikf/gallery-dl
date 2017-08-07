@@ -79,7 +79,6 @@ modules = [
     "twitter",
     "worldthree",
     "yandere",
-    "yonkouprod",
     "imagehosts",
     "directlink",
     "recursive",
