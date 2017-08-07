@@ -38,7 +38,6 @@ imgur                https://imgur.com/                  Albums, individual Imag
 Jaimini's Box        https://jaiminisbox.com/            Chapters, Manga
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
-KissComic            http://kisscomic.us/                Comic-Issues, Comics
 KissManga            http://kissmanga.com/               Chapters, Manga
 Konachan             https://konachan.com/               Pools, Posts, Tag-Searches
 Love is Over Archive https://archive.loveisover.me/      Threads
@@ -73,7 +72,6 @@ Tumblr               https://www.tumblr.com/             Images from Users, Post
 Twitter              https://twitter.com/                Tweets
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 Yandere              https://yande.re/                   Pools, Posts, Tag-Searches
-Yonkou Productions   https://yonkouprod.com/             Chapters, Manga
 Chronos              http://chronos.to/                  individual Images
 Coreimg              http://coreimg.net/                 individual Images
 Fapat                http://fapat.me/                    individual Images
