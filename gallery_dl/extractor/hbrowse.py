@@ -65,10 +65,10 @@ class HbrowseChapterExtractor(Extractor):
         return text.extract_all(page, (
             ('title'      , '<td class="listLong">', '</td>'),
             (None         , '<td class="listLong">', ''),
-            ('artist'     , 'title="">', '<'),
+            ('artist'     , '>', '<'),
             ('count-total', '<td class="listLong">', ' '),
             (None         , '<td class="listLong">', ''),
-            ('origin'     , 'title="">', '<'),
+            ('origin'     , '>', '<'),
         ), values=data)[0]
 
     def get_image_urls(self, page):

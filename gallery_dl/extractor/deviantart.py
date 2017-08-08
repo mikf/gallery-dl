@@ -284,7 +284,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
                r"/favourites/(\d+)/([^/?&#]+)"]
     test = [("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
         "url": "65d070eae215b9375b4437a1ab4659efdad204e3",
-        "keyword": "a8b7b7c8ef9a4eba87c96cfaf098a7ef1c1e8be5",
+        "keyword": "b4abbad60f87a42fb6c1a021cb3a8efd9d31bfb7",
     })]
 
     def __init__(self, match):
