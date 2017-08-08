@@ -80,15 +80,15 @@ def bdecode(data, alphabet="0123456789"):
     return num
 
 
-def code_to_language(code, default="English"):
+def code_to_language(code, default=None):
     """Map an ISO 639-1 language code to its actual name"""
-    return CODES.get(code.lower(), default)
+    return CODES.get((code or "").lower(), default)
 
 
-def language_to_code(lang, default="en"):
+def language_to_code(lang, default=None):
     """Map a language name to its ISO 639-1 code"""
     if lang is None:
-        return None
+        return default
     lang = lang.capitalize()
     for code, language in CODES.items():
         if language == lang:
