@@ -76,11 +76,11 @@ class ImgytImageExtractor(ImagehostImageExtractor):
     https = True
 
     def get_info(self, page):
-        url, pos = text.extract(page, "<img class='centred' src='", "'")
+        url, pos = text.extract(page, '<img class="centred" src="', '"')
         if not url:
             raise exception.NotFoundError("image")
-        filename, pos = text.extract(page, " alt='", "'", pos)
-        filename += splitext(url)[1] if filename else url
+        filename, pos = text.extract(page, ' alt="', '"', pos)
+        filename = (filename + splitext(url)[1]) if filename else url
         return url, filename
 
 
@@ -183,7 +183,7 @@ class HosturimageImageExtractor(ImagehostImageExtractor):
 
     def get_info(self, page):
         _  , pos = text.extract(page, '<div id="image_details">', '')
-        url, pos = text.extract(page, "src='", "'", pos)
+        url, pos = text.extract(page, 'src="', '"', pos)
         return url, url
 
 
