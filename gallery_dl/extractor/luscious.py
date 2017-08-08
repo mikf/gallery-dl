@@ -37,7 +37,6 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
         self.gpart, self.gid = match.groups()
-        self.section = "x"
 
     def items(self):
         url = "https://luscious.net/albums/" + self.gpart + "/"
@@ -54,20 +53,17 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         data = text.extract_all(page, (
             ("title"   , '"og:title" content="', '"'),
             ("tags"    , '<meta name="keywords" content="', '"'),
-            ("com"     , "'community': '", "'"),
             (None      , '<li class="user_info">', ''),
             ("count"   , '<p>', ' '),
             (None      , '<p>Section:', ''),
             ("section" , '>', '<'),
             ("language", '<p>Language:', ' '),
         ), values={"gallery-id": self.gid})[0]
-        data["lang"] = util.language_to_code(data["language"] or "", None)
+        data["lang"] = util.language_to_code(data["language"])
         try:
-            data["artist"] = text.extract(data["tags"], "rtist: ", ",")[0] or None
+            data["artist"] = text.extract(data["tags"], "rtist: ", ",")[0]
         except AttributeError:
             data["artist"] = None
-        self.section = data["com"]
-        del data["com"]
         return data
 
     def get_images(self, page):
