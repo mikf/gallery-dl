@@ -163,6 +163,12 @@ class KeywordJob(Job):
         print("-----------------------------")
         self.print_keywords(keywords)
 
+    def handle_queue(self, url):
+        print("This extractor transfers work to other extractors and does not "
+              "provide any keywords on its own. Try "
+              "'gallery-dl --list-keywords \"", url, "\"' instead.", sep="")
+        raise exception.StopExtraction()
+
     @staticmethod
     def print_keywords(keywords, prefix=""):
         """Print key-value pairs with formatting"""
