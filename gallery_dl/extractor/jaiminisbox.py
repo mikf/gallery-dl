@@ -17,7 +17,6 @@ class JaiminisboxChapterExtractor(foolslide.FoolslideChapterExtractor):
     pattern = foolslide.chapter_pattern(r"(?:www\.)?jaiminisbox\.com/reader")
     test = [
         ("https://jaiminisbox.com/reader/read/uratarou/en/0/1/", {
-            "url": "f021de7f31ee3a3f688fdf3e8183aef4226c2b50",
             "keyword": "d187df3e3b6dbe09ec163626f6fd7c57133ab163",
         }),
         ("https://jaiminisbox.com/reader/read/dr-stone/en/0/16/", {
