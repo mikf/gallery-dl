@@ -266,7 +266,7 @@ Description Select the directory structure created by the Gallery- and
 
             * ``true``: Use a flat directory structure.
             * ``false``: Collect a list of all gallery-folders or
-              favorites-collections and defere any further work to other
+              favorites-collections and transfer any further work to other
               extractors (``folder`` or ``collection``), which will then
               create individual subdirectories for each of them.
 =========== =====
