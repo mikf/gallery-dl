@@ -74,8 +74,7 @@ class SeigaUserExtractor(SeigaExtractor):
                 r"user/illust/(\d+)")]
     test = [
         ("http://seiga.nicovideo.jp/user/illust/39537793", {
-            "keyword": "66b3309484417fb5e76b72d5bd64526fa5d9b6a3",
-            "content": "40dc3b454d429108cb834b9e449229231010ddfa",
+            "keyword": "15e4158164f9309c75c0f97169e0026b13a642ed",
         }),
         ("http://seiga.nicovideo.jp/user/illust/79433", {
             "url": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
