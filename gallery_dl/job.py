@@ -54,6 +54,10 @@ class Job():
             log.error("The %s at '%s' does not exist", res, self.url)
         except exception.HttpError as exc:
             log.error("HTTP request failed:\n%s", exc)
+        except exception.FormatError as exc:
+            err, obj = exc.args
+            log.error("Applying %s format string failed:\n%s: %s",
+                      obj, err.__class__.__name__, err)
         except exception.StopExtraction:
             pass
         except OSError as exc:

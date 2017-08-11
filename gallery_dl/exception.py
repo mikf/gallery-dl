@@ -18,6 +18,7 @@ Exception
       |    +-- NotFoundError
       |    +-- HttpError
       +-- NoExtractorError
+      +-- FormatError
       +-- StopExtraction
 """
 
@@ -48,6 +49,10 @@ class HttpError(ExtractionError):
 
 class NoExtractorError(GalleryDLException):
     """No extractor can handle the given URL"""
+
+
+class FormatError(GalleryDLException):
+    """Error while building output path"""
 
 
 class StopExtraction(GalleryDLException):
