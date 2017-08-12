@@ -384,7 +384,7 @@ class FlickrAPI():
             data = self._call(method, params)
 
             for key, obj in data.items():
-                if key != "stats":
+                if not key.startswith("stat"):
                     break
             del obj["page"]
             del obj["perpage"]
