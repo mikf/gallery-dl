@@ -80,6 +80,15 @@ def bdecode(data, alphabet="0123456789"):
     return num
 
 
+def combine_dict(a, b):
+    """Recursively combine the contents of b into a"""
+    for key, value in b.items():
+        if key in a and isinstance(value, dict) and isinstance(a[key], dict):
+            combine_dict(a[key], value)
+        else:
+            a[key] = value
+
+
 def code_to_language(code, default=None):
     """Map an ISO 639-1 language code to its actual name"""
     return CODES.get((code or "").lower(), default)
