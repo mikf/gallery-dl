@@ -12,6 +12,7 @@ import sys
 import json
 import os.path
 import logging
+from . import util
 
 log = logging.getLogger("config")
 
@@ -57,7 +58,10 @@ def load(*files, format="json", strict=False):
             path = os.path.expanduser(os.path.expandvars(conf))
             with open(path) as file:
                 confdict = parsefunc(file)
-            _config.update(confdict)
+            if not _config:
+                _config.update(confdict)
+            else:
+                util.combine_dict(_config, confdict)
         except FileNotFoundError:
             if strict:
                 log.error("Configuration file '%s' not found", path)
