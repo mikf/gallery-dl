@@ -17,7 +17,7 @@ import random
 import string
 import hashlib
 import urllib.parse
-from . import config, text, exception
+from . import text, exception
 
 
 def parse_range(rangespec):
@@ -172,6 +172,11 @@ class PathFormat():
         self.directory = self.realdirectory = ""
         self.path = self.realpath = ""
 
+        bdir = extractor.config("base-directory", (".", "gallery-dl"))
+        if not isinstance(bdir, str):
+            bdir = os.path.join(*bdir)
+        self.basedirectory = os.path.expanduser(os.path.expandvars(bdir))
+
         skipmode = extractor.config("skip", True)
         if skipmode == "abort":
             self.exists = self._exists_abort
@@ -201,7 +206,7 @@ class PathFormat():
             raise exception.FormatError(exc, "directory")
 
         self.directory = os.path.join(
-            self.get_base_directory(),
+            self.basedirectory,
             *segments
         )
         self.realdirectory = self.adjust_path(self.directory)
@@ -240,14 +245,6 @@ class PathFormat():
         if self.has_extension and os.path.exists(self.realpath):
             exit()
         return False
-
-    @staticmethod
-    def get_base_directory():
-        """Return the base-destination-directory for downloads"""
-        bdir = config.get(("base-directory",), default=(".", "gallery-dl"))
-        if not isinstance(bdir, str):
-            bdir = os.path.join(*bdir)
-        return os.path.expanduser(os.path.expandvars(bdir))
 
     @staticmethod
     def adjust_path(path):
