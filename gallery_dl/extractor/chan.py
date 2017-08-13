@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 import itertools
+import operator
 
 
 class ChanThreadExtractor(Extractor):
@@ -101,4 +102,9 @@ class FoolfuukaThreadExtractor(Extractor):
         url = self.root + "/_/api/chan/thread/"
         params = {"board": self.board, "num": self.thread}
         data = self.request(url, params=params).json()[self.thread]
-        return itertools.chain((data["op"],), data["posts"].values())
+
+        # sort post-objects by their key
+        posts = sorted(data["posts"].items(), key=operator.itemgetter(0))
+        posts = map(operator.itemgetter(1), posts)
+
+        return itertools.chain((data["op"],), posts)
