@@ -311,7 +311,7 @@ class DeviantartJournalExtractor(DeviantartExtractor):
                r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
     test = [
         ("http://shimoda7.deviantart.com/journal/", {
-            "url": "b1a3460e7da0f34c8f6c286a3b5428fd4d3bc64b",
+            "url": "f7960ae06e774d6931c61ad309c95a10710658b2",
             "keyword": "6444966c703e63470a5fdd8f460993b68955c32c",
         }),
         ("http://shimoda7.deviantart.com/journal/?catpath=/", None),
