@@ -74,6 +74,12 @@ def main():
             config.set(key, value)
         if args.loglevel >= logging.ERROR:
             config.set(("output", "mode"), "null")
+        elif args.loglevel <= logging.DEBUG:
+            import platform
+            log.debug("Version %s", __version__)
+            log.debug("Python %s - %s",
+                      platform.python_version(), platform.platform())
+            print(file=sys.stderr)
 
         if args.list_modules:
             for module_name in extractor.modules:
@@ -91,7 +97,9 @@ def main():
                 print()
         else:
             if not args.urls and not args.inputfile:
-                parser.error("the following arguments are required: URL")
+                parser.error(
+                    "The following arguments are required: URL\n"
+                    "Use 'gallery-dl --help' to get a list of all options.")
 
             if args.list_urls:
                 jobtype = job.UrlJob
@@ -135,7 +143,7 @@ def main():
         print("\nKeyboardInterrupt", file=sys.stderr)
     except BrokenPipeError:
         pass
-    except IOError as err:
+    except IOError as exc:
         import errno
-        if err.errno != errno.EPIPE:
+        if exc.errno != errno.EPIPE:
             raise
