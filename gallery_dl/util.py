@@ -87,6 +87,7 @@ def combine_dict(a, b):
             combine_dict(a[key], value)
         else:
             a[key] = value
+    return a
 
 
 def code_to_language(code, default=None):
