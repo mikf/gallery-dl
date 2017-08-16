@@ -68,7 +68,7 @@ class DeviantartExtractor(Extractor):
             if key in deviation:
                 del deviation[key]
         try:
-            deviation["index"] = deviation["url"].rsplit("-", 1)[1]
+            deviation["index"] = deviation["url"].rpartition("-")[2]
         except KeyError:
             deviation["index"] = 0
 
@@ -83,6 +83,8 @@ class DeviantartExtractor(Extractor):
         url = target["src"]
         deviation["target"] = text.nameext_from_url(url, target.copy())
         deviation["extension"] = deviation["target"]["extension"]
+        if url.startswith("http:"):
+            url = "https:" + url[5:]
         return Message.Url, url, deviation
 
     @staticmethod
@@ -108,8 +110,8 @@ class DeviantartExtractor(Extractor):
             needle = '<div usr class="gr">'
             catlist = deviation["category_path"].split("/")
             categories = " / ".join(
-                ('<span class="crumb"><a href="http://www.deviantart.com/{}/">'
-                 '<span>{}</span></a></span>').format(cpath, cat.capitalize())
+                ('<span class="crumb"><a href="https://www.deviantart.com/{}/"'
+                 '><span>{}</span></a></span>').format(cpath, cat.capitalize())
                 for cat, cpath in zip(
                     catlist,
                     itertools.accumulate(catlist, lambda t, c: t + "/" + c)
@@ -162,7 +164,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
                r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"]
     test = [
         ("http://shimoda7.deviantart.com/gallery/", {
-            "url": "63bfa8efba199e27181943c9060f6770f91a8441",
+            "url": "f95b222d939c1e6aa8b9aabe89eaa2d364f06d38",
             "keyword": "9342c2a7a2bd6eb9f4a6ea539d04d75248ebe05f",
         }),
         ("https://yakuzafc.deviantart.com/", {
@@ -187,11 +189,11 @@ class DeviantartFolderExtractor(DeviantartExtractor):
                r"/gallery/(\d+)/([^/?&#]+)"]
     test = [
         ("http://shimoda7.deviantart.com/gallery/722019/Miscellaneous", {
-            "url": "545563beae71743f9584c3c6ded5f72bc549cd44",
+            "url": "1ee23a0bd8f7099d375afe8a29ea1a3bf394ba1e",
             "keyword": "a0d7093148b9bab8ee0efa6213139efd99f23394",
         }),
         ("http://majestic-da.deviantart.com/gallery/63419606/CHIBI-KAWAII", {
-            "url": "de479556e0dde5b8639a1254b90fe4e4ae5d1bb5",
+            "url": "1df6f4312f124b0ad9f2a905c8f9e94e89c84370",
             "keyword": "2cd937a33f1f9bf0d9d8807b89a25de22338edb2",
         }),
     ]
@@ -221,7 +223,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     test = [
         (("http://shimoda7.deviantart.com/art/"
           "For-the-sake-of-a-memory-10073852"), {
-            "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
+            "url": "393dc581ca9e6938dbf0a3db8e9eea6243eb35f4",
             "keyword": "5f58ecdce9b9ebb51f65d0e24e0f7efe00a74a55",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
@@ -229,7 +231,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "exception": exception.NotFoundError,
         }),
         ("http://sta.sh/01ijs78ebagf", {
-            "url": "1692cd075059d24657a01b954413c84a56e2de8f",
+            "url": "3a15ed9201e665172b1daece8ef6d42f6a7ad3d5",
             "keyword": "00246726d49f51ab35ea88d66467067f05b10bc9",
         }),
         ("http://sta.sh/abcdefghijkl", {
@@ -257,7 +259,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                r"/favourites/?(?:\?catpath=/)?$"]
     test = [
         ("http://h3813067.deviantart.com/favourites/", {
-            "url": "71345ce3bef5b19bd2a56d7b96e6b5ddba747c2e",
+            "url": "393dc581ca9e6938dbf0a3db8e9eea6243eb35f4",
             "keyword": "c7d0a3bacc1e4c5625dda703e25affe047cbbc3f",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
@@ -283,7 +285,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/favourites/(\d+)/([^/?&#]+)"]
     test = [("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-        "url": "65d070eae215b9375b4437a1ab4659efdad204e3",
+        "url": "22a3858a1efb150d11c3f4e63cf9082ad70c6ea0",
         "keyword": "b4abbad60f87a42fb6c1a021cb3a8efd9d31bfb7",
     })]
 
@@ -310,9 +312,9 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
     test = [
-        ("http://shimoda7.deviantart.com/journal/", {
-            "url": "f7960ae06e774d6931c61ad309c95a10710658b2",
-            "keyword": "6444966c703e63470a5fdd8f460993b68955c32c",
+        ("https://angrywhitewanker.deviantart.com/journal/", {
+            "url": "6474f49fbb4d01637ff0762708953252a52dc9c1",
+            "keyword": "5306515383a7ec26b22a2de42045718e6d630f25",
         }),
         ("http://shimoda7.deviantart.com/journal/?catpath=/", None),
     ]
@@ -326,7 +328,6 @@ class DeviantartAPI():
     def __init__(self, extractor, client_id="5388",
                  client_secret="76b08c69cfb27f26d6161f9ab6d061a1"):
         self.session = extractor.session
-        self.session.headers["dA-minor-version"] = "20160316"
         self.log = extractor.log
         self.client_id = client_id
         self.client_secret = client_secret
@@ -490,7 +491,7 @@ HEADER_TEMPLATE = """<div usr class="gr">
 
 HEADER_CUSTOM_TEMPLATE = """<div class='boxtop journaltop'>
 <h2>
-    <img src="http://st.deviantart.net/minish/gruzecontrol/icons/journal.gif\
+    <img src="https://st.deviantart.net/minish/gruzecontrol/icons/journal.gif\
 ?2" style="vertical-align:middle" alt=""/>
     <a href="{url}">{title}</a>
 </h2>
@@ -502,24 +503,24 @@ JOURNAL_TEMPLATE = """text:<!DOCTYPE html>
 <head>
     <meta charset="utf-8">
     <title>{title}</title>
-    <link rel="stylesheet" href="http://st.deviantart.net/\
+    <link rel="stylesheet" href="https://st.deviantart.net/\
 css/deviantart-network_lc.css?3843780832">
-    <link rel="stylesheet" href="http://st.deviantart.net/\
+    <link rel="stylesheet" href="https://st.deviantart.net/\
 css/group_secrets_lc.css?3250492874">
-    <link rel="stylesheet" href="http://st.deviantart.net/\
+    <link rel="stylesheet" href="https://st.deviantart.net/\
 css/v6core_lc.css?4246581581">
-    <link rel="stylesheet" href="http://st.deviantart.net/\
+    <link rel="stylesheet" href="https://st.deviantart.net/\
 css/sidebar_lc.css?1490570941">
-    <link rel="stylesheet" href="http://st.deviantart.net/\
+    <link rel="stylesheet" href="https://st.deviantart.net/\
 css/writer_lc.css?3090682151">
-    <link rel="stylesheet" href="http://st.deviantart.net/\
+    <link rel="stylesheet" href="https://st.deviantart.net/\
 css/v6loggedin_lc.css?3001430805">
     <style>{css}</style>
-    <link rel="stylesheet" href="http://st.deviantart.net/\
+    <link rel="stylesheet" href="https://st.deviantart.net/\
 roses/cssmin/core.css?1488405371919" >
-    <link rel="stylesheet" href="http://st.deviantart.net/\
+    <link rel="stylesheet" href="https://st.deviantart.net/\
 roses/cssmin/peeky.css?1487067424177" >
-    <link rel="stylesheet" href="http://st.deviantart.net/\
+    <link rel="stylesheet" href="https://st.deviantart.net/\
 roses/cssmin/desktop.css?1491362542749" >
 </head>
 <body id="deviantART-v7" class="bubble no-apps loggedout w960 deviantart">
