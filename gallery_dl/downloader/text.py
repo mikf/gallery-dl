@@ -13,7 +13,7 @@ from .common import BasicDownloader
 
 class Downloader(BasicDownloader):
 
-    def __init__(self, output):
+    def __init__(self, session, output):
         BasicDownloader.__init__(self)
         self.out = output
 
