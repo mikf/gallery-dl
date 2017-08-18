@@ -80,7 +80,7 @@ class MangazukiMangaExtractor(MangaExtractor):
             "url": "aab747414191b14e768f4a1eb148448d83ef2e14",
         }),
         ("https://raws.mangazuki.co/series/Rakujitsu-no-Pathos", {
-            "url": "4c5fcee4ad306faa3cfe952f7474293a99d11787",
+            "url": "57ac10ce4f4a93a313c80542bbc5bd6fd922b055",
         }),
     ]
 
