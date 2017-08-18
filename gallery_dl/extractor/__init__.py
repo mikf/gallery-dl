@@ -77,6 +77,7 @@ modules = [
     "thebarchive",
     "tumblr",
     "twitter",
+    "warosu",
     "worldthree",
     "yandere",
     "imagehosts",
