@@ -249,13 +249,69 @@ class PixivBookmarkExtractor(PixivFavoriteExtractor):
     """Extractor for all favorites/bookmarks of your own account"""
     subcategory = "bookmark"
     pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php()$"]
-    test = []
+    test = [("https://www.pixiv.net/bookmark.php", None)]
 
     def get_metadata(self, user=None):
         self.api.login()
         user = self.api.user_info
         self.user_id = user["id"]
         return PixivExtractor.get_metadata(self, user)
+
+
+class PixivRankingExtractor(PixivExtractor):
+    """Extractor for pixiv ranking pages"""
+    subcategory = "ranking"
+    directory_fmt = ["{category}", "rankings", "{mode}", "{date}"]
+    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/"
+               r"ranking\.php(?:\?([^#]*))?"]
+    test = [
+        (("https://www.pixiv.net/ranking.php"
+          "?mode=daily&content=illust&date=20170818"), {
+            "url": "83a3809e52a58f39f5cf5878fa8fcd9d8df6c760",
+        }),
+        ("https://www.pixiv.net/ranking.php", None),
+    ]
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self)
+        self._iter = None
+        self._first = None
+
+        query = {
+            key: vlist[0]
+            for key, vlist in urllib.parse.parse_qs(match.group(1)).items()
+        }
+        self.mode = query.get("mode", "daily")
+        self.content = query.get("content", "all")
+        self.date = query.get("date")
+
+        if self.date and len(self.date) >= 8:
+            self.date = (self.date[0:4] + "-" +
+                         self.date[4:6] + "-" +
+                         self.date[6:8])
+
+        if self.content:
+            if self.content in ("all", "illust", "manga", "ugoira"):
+                return
+            else:
+                self.log.warning("unrecognized type '%s' - falling back to "
+                                 "'all'", self.content)
+        self.content = "all"
+
+    def works(self):
+        yield from self._first
+        for page in self._iter:
+            yield from page["works"]
+
+    def get_metadata(self, user=None):
+        self._iter = self.api.ranking(self.mode, self.content, self.date)
+        first = next(self._iter)
+        self._first = first["works"]
+        return {k: first[k] for k in ("mode", "content", "date")}
+
+    def prepare_work(self, work):
+        work["work"]["rank"] = work["rank"]
+        return PixivExtractor.prepare_work(self, work["work"])
 
 
 class PixivAPI():
@@ -300,6 +356,12 @@ class PixivAPI():
         """Query information about the favorite works of a pixiv user"""
         endpoint = "users/{user}/favorite_works".format(user=user_id)
         params = {"image_sizes": "large", "include_stats": False}
+        return self._pagination(endpoint, params)
+
+    def ranking(self, mode, content="all", date=None):
+        """Query pixiv's ranking lists"""
+        endpoint = "ranking/" + content
+        params = {"image_sizes": "large", "mode": mode, "date": date}
         return self._pagination(endpoint, params)
 
     def login(self):
