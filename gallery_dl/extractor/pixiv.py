@@ -82,7 +82,7 @@ class PixivExtractor(Extractor):
         url = work["image_urls"]["large"]
         work["num"] = ""
         work["url"] = url
-        work["extension"] = url[url.rfind(".")+1:]
+        work["extension"] = url.rpartition(".")[2]
         return work
 
     def parse_ugoira(self, data):

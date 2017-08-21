@@ -76,11 +76,9 @@ class FoolslideChapterExtractor(Extractor):
         chapter, pos = text.extract(page, 'title="', '"', pos)
 
         chapter = text.unescape(chapter)
-        parts = chapter.split(":", maxsplit=1)
-        title = parts[1].strip() if len(parts) > 1 else ""
 
         self.data["manga"] = text.unescape(manga).strip()
-        self.data["title"] = title
+        self.data["title"] = chapter.partition(":")[2].strip()
         self.data["language"] = util.code_to_language(self.data["lang"])
         self.data["chapter_string"] = chapter
         return self.data

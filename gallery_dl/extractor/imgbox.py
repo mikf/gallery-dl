@@ -54,11 +54,11 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         title = text.extract(page, "<h1>", "</h1>")[0]
-        parts = title.rsplit(" - ", maxsplit=1)
+        title, _, count = title.rpartition(" - ")
         return {
             "gallery-key": self.key,
-            "title": text.unescape(parts[0]),
-            "count": parts[1][:-7],
+            "title": text.unescape(title),
+            "count": count[:-7],
         }
 
     def get_file_metadata(self, page):
