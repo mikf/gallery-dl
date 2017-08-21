@@ -285,29 +285,29 @@ class PixivRankingExtractor(PixivExtractor):
         self.content = query.get("content", "all")
         self.date = query.get("date")
 
-        if self.date and len(self.date) >= 8:
-            self.date = (self.date[0:4] + "-" +
-                         self.date[4:6] + "-" +
-                         self.date[6:8])
-
-        if self.content:
-            if self.content in ("all", "illust", "manga", "ugoira"):
-                return
+        if self.date:
+            if len(self.date) == 8 and self.date.isdecimal():
+                self.date = (self.date[0:4] + "-" +
+                             self.date[4:6] + "-" +
+                             self.date[6:8])
             else:
-                self.log.warning("unrecognized type '%s' - falling back to "
-                                 "'all'", self.content)
-        self.content = "all"
+                self.log.warning("invalid date '%s'", self.date)
+                self.date = None
+
+        if self.content not in ("all", "illust", "manga", "ugoira"):
+                self.log.warning("unrecognized content value '%s' - "
+                                 "falling back to 'all'", self.content)
+                self.content = "all"
 
     def works(self):
-        yield from self._first
+        yield from self._first["works"]
         for page in self._iter:
             yield from page["works"]
 
     def get_metadata(self, user=None):
         self._iter = self.api.ranking(self.mode, self.content, self.date)
-        first = next(self._iter)
-        self._first = first["works"]
-        return {k: first[k] for k in ("mode", "content", "date")}
+        self._first = next(self._iter)
+        return {k: self._first[k] for k in ("mode", "content", "date")}
 
     def prepare_work(self, work):
         work["work"]["rank"] = work["rank"]
