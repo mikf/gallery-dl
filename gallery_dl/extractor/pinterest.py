@@ -178,7 +178,7 @@ class PinterestAPI():
         data = response.json()
         if "data" not in data or data["data"] is None:
             try:
-                msg = data["message"].split(maxsplit=1)[0].lower()
+                msg = data["message"].partition(" ")[0].lower()
             except KeyError:
                 msg = ""
             raise exception.NotFoundError(msg)

@@ -26,7 +26,7 @@ class GfycatExtractor(Extractor):
             key = fmt + "Url"
             if key in gfycat:
                 url = gfycat[key]
-                gfycat["extension"] = url[url.rfind(".")+1:]
+                gfycat["extension"] = url.rpartition(".")[2]
                 return url
 
     @staticmethod

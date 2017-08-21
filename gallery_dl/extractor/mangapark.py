@@ -89,10 +89,9 @@ class MangaparkChapterExtractor(Extractor):
             (None        , 'target="_blank" href="', ''),
             ("count"     , 'page 1">1 / ', '<'),
         ), values=data)[0]
-        data["manga"], data["type"] = data["manga"].rsplit(" ", maxsplit=1)
+        data["manga"], _, data["type"] = data["manga"].rpartition(" ")
         data["manga"] = text.unescape(data["manga"])
-        pos = data["title"].find(": ")
-        data["title"] = data["title"][pos+2:] if pos != -1 else ""
+        data["title"] = data["title"].partition(": ")[2]
         return data
 
     @staticmethod

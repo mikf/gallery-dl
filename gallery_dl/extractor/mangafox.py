@@ -60,7 +60,7 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
         data["volume"] = match.group(2) or ""
         data["chapter"] = match.group(3)
         data["chapter-minor"] = match.group(4) or ""
-        data["manga"] = data["manga"].rsplit(maxsplit=1)[0]
+        data["manga"] = data["manga"].rpartition(" ")[0]
         return data
 
     def get_image_urls(self, page):
