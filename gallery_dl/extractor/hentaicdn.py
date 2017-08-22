@@ -16,8 +16,8 @@ import json
 class HentaicdnChapterExtractor(Extractor):
     """Base class for extractors for a single manga chapter"""
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{gallery-id} {title}"]
-    filename_fmt = ("{category}_{gallery-id}_{chapter:>02}_"
+    directory_fmt = ["{category}", "{manga-id} {title}"]
+    filename_fmt = ("{category}_{manga-id}_{chapter:>02}_"
                     "{num:>03}.{extension}")
     url = ""
 
@@ -27,8 +27,7 @@ class HentaicdnChapterExtractor(Extractor):
         data = self.get_job_metadata(page, images)
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, part in enumerate(images, 1):
-            data["num"] = num
+        for data["num"], part in enumerate(images, 1):
             url = "https://hentaicdn.com/hentai" + part
             yield Message.Url, url, text.nameext_from_url(url, data)
 
