@@ -42,7 +42,7 @@ class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/(\d+)"]
     test = [("http://hentai2read.com/amazon_elixir/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-        "keyword": "c05d0d0bbe188926b15a43df1f8f65b8ac11c3fd",
+        "keyword": "fc79e4c70d61ae476aea2b63a75324e3d96f4497",
     })]
 
     def __init__(self, match):
@@ -54,13 +54,16 @@ class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
 
     def get_job_metadata(self, page, images):
         title = text.extract(page, "<title>", "</title>")[0]
-        match = re.match(r"Reading (?:(.+) dj - )?(.+) Hentai - \d+: ", title)
+        match = re.match(r"Reading (.+) \(([^)]+)\) Hentai(?: by (.+))? - "
+                         r"(\d+): (.+) . Page 1 ", title)
         return {
-            "gallery-id": images[0].split("/")[-3],
+            "manga-id": images[0].split("/")[-3],
             "chapter": self.chapter,
             "count": len(images),
-            "series": match.group(1) or "",
-            "title": match.group(2),
+            "manga": match.group(1),
+            "type": match.group(2),
+            "author": match.group(3),
+            "title": match.group(5),
             "lang": "en",
             "language": "English",
         }
