@@ -26,8 +26,16 @@ class DeviantartExtractor(Extractor):
     def __init__(self, match=None):
         Extractor.__init__(self)
         self.api = DeviantartAPI(self)
-        self.user = match.group(1) if match else ""
         self.offset = 0
+
+        if match:
+            self.user = match.group(1)
+            self.group = not self.api.user_profile(self.user)
+            if self.group:
+                self.subcategory = "group-" + self.subcategory
+        else:
+            self.user = None
+            self.group = False
 
     def skip(self, num):
         self.offset += num
@@ -150,11 +158,8 @@ class DeviantartExtractor(Extractor):
         raise exception.NotFoundError("folder")
 
     def _folder_urls(self, folders, category):
-        urlfmt = "https://{}.deviantart.com/{}/0/{}"
-        return [
-            urlfmt.format(self.user, category, folder["name"])
-            for folder in folders
-        ]
+        url = "https://{}.deviantart.com/{}/0/".format(self.user, category)
+        return [url + folder["name"] for folder in folders]
 
 
 class DeviantartGalleryExtractor(DeviantartExtractor):
@@ -174,7 +179,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     ]
 
     def deviations(self):
-        if self.flat and self.api.user_profile(self.user):
+        if self.flat and not self.group:
             return self.api.gallery_all(self.user, self.offset)
         else:
             folders = self.api.gallery_folders(self.user)
@@ -194,12 +199,12 @@ class DeviantartFolderExtractor(DeviantartExtractor):
         }),
         ("http://majestic-da.deviantart.com/gallery/63419606/CHIBI-KAWAII", {
             "url": "1df6f4312f124b0ad9f2a905c8f9e94e89c84370",
-            "keyword": "2cd937a33f1f9bf0d9d8807b89a25de22338edb2",
+            "keyword": "b651f5d540aaaf7974fa7e181e4cc54151a65e9e",
         }),
     ]
 
     def __init__(self, match):
-        DeviantartExtractor.__init__(self)
+        DeviantartExtractor.__init__(self, match)
         self.user, fid, self.fname = match.groups()
         self.folder = {"owner": self.user, "index": fid}
 
@@ -290,7 +295,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     })]
 
     def __init__(self, match):
-        DeviantartExtractor.__init__(self)
+        DeviantartExtractor.__init__(self, match)
         self.user, cid, self.cname = match.groups()
         self.collection = {"owner": self.user, "index": cid}
 
@@ -391,6 +396,7 @@ class DeviantartAPI():
                   "mature_content": self.mature}
         return self._pagination_list(endpoint, params)
 
+    @memcache(keyarg=1)
     def user_profile(self, username):
         """Get user profile information"""
         endpoint = "user/profile/" + username
