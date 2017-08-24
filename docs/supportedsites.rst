@@ -10,7 +10,7 @@ Site                 URL                                 Capabilities           
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 Batoto               https://bato.to/                    Chapters, Manga                                    Optional
-Danbooru             https://danbooru.donmai.us/         Pools, Posts, Tag-Searches
+Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches
 Desuarchive          https://desuarchive.org/            Threads
 DeviantArt           https://www.deviantart.com/         |Collections, De-1|
 Doki Reader          https://kobato.hologfx.com/         Chapters, Manga
@@ -72,7 +72,7 @@ Tumblr               https://www.tumblr.com/             Images from Users, Post
 Twitter              https://twitter.com/                Tweets
 Warosu               https://warosu.org/                 Threads
 World Three          http://www.slide.world-three.org/   Chapters, Manga
-Yandere              https://yande.re/                   Pools, Posts, Tag-Searches
+Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
 Chronos              http://chronos.to/                  individual Images
 Coreimg              http://coreimg.net/                 individual Images
 Fapat                http://fapat.me/                    individual Images
@@ -99,4 +99,4 @@ Turboimagehost       http://turboimagehost.com/          individual Images
 .. |http://www.thes-0| replace:: http://www.thespectrum.net/manga_scans/
 .. |Collections, De-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals
 .. |Images from Use-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
-.. |Images from Use-3| replace:: Images from Users, Bookmarks, Favorites, pixiv.me Links, Individual Images
+.. |Images from Use-3| replace:: Images from Users, Bookmarks, Favorites, pixiv.me Links, Rankings, Individual Images
