@@ -65,6 +65,7 @@ SUBCATEGORY_MAP = {
     "manga"  : "Manga",
     "me"     : "pixiv.me Links",
     "pinit"  : "pin.it Links",
+    "popular": "Popular Images",
     "search" : "Search Results",
     "status" : "Images from Statuses",
     "tag"    : "Tag-Searches",

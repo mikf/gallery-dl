@@ -29,7 +29,7 @@ class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
 class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
     """Extractor for image-pools from yande.re"""
     subcategory = "pool"
-    pattern = [r"(?:https?://)?(?:www\.)?yande.re/pool/show/(\d+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?yande\.re/pool/show/(\d+)"]
     test = [("https://yande.re/pool/show/318", {
         "content": "2a35b9d6edecce11cc2918c6dce4de2198342b68",
     })]
@@ -38,7 +38,24 @@ class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
 class YanderePostExtractor(YandereExtractor, booru.BooruPostExtractor):
     """Extractor for single images from yande.re"""
     subcategory = "post"
-    pattern = [r"(?:https?://)?(?:www\.)?yande.re/post/show/(\d+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post/show/(\d+)"]
     test = [("https://yande.re/post/show/51824", {
         "content": "59201811c728096b2d95ce6896fd0009235fe683",
     })]
+
+
+class YanderePopularExtractor(YandereExtractor, booru.BooruPopularExtractor):
+    """Extractor for popular images from yande.re"""
+    subcategory = "popular"
+    pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post/popular_"
+               r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
+    test = [
+        ("https://yande.re/post/popular_by_day?day=20&month=8&year=2017", {
+            "url": "3fb32f7108d43d70681a38366443ec825d324108",
+        }),
+        ("https://yande.re/post/popular_recent", None),
+    ]
+
+    @property
+    def api_url(self):
+        return "https://yande.re/post/popular_" + self.scale + ".json"
