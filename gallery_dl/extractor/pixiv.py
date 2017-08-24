@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
-import urllib.parse
 import re
 
 
@@ -141,7 +140,7 @@ class PixivUserExtractor(PixivExtractor):
         PixivExtractor.__init__(self)
         self.user_id, tag = match.groups()
         if tag:
-            self.tag = urllib.parse.unquote(tag).lower()
+            self.tag = text.unquote(tag).lower()
             self.works = self._tagged_works
 
     def works(self):
@@ -267,7 +266,7 @@ class PixivRankingExtractor(PixivExtractor):
     test = [
         (("https://www.pixiv.net/ranking.php"
           "?mode=daily&content=illust&date=20170818"), {
-            "url": "7fdffbecfbd420b1d202fa417d79317240be30bc",
+            "url": "b073c74e3a6633dbdc9ba4122448f66e5211c771",
         }),
         ("https://www.pixiv.net/ranking.php", None),
     ]
@@ -277,10 +276,7 @@ class PixivRankingExtractor(PixivExtractor):
         self._iter = None
         self._first = None
 
-        query = {
-            key: vlist[0]
-            for key, vlist in urllib.parse.parse_qs(match.group(1)).items()
-        }
+        query = text.parse_query(match.group(1))
         self.mode = query.get("mode", "daily")
         self.content = query.get("content", "all")
         self.date = query.get("date")

@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-import urllib.parse
 
 
 class FlickrExtractor(Extractor):
@@ -225,10 +224,7 @@ class FlickrSearchExtractor(FlickrExtractor):
 
     def __init__(self, match):
         FlickrExtractor.__init__(self, match)
-        self.search = {
-            key: vlist[0]
-            for key, vlist in urllib.parse.parse_qs(match.group(1)).items()
-        }
+        self.search = text.parse_query(match.group(1))
         if "text" not in self.search:
             self.search["text"] = ""
 
