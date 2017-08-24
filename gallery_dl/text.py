@@ -130,6 +130,11 @@ def extract_iter(txt, begin, end, pos=0):
         yield value
 
 
+def parse_query(qs):
+    """Parse a query string into key-value pairs"""
+    return {key: vlist[0] for key, vlist in urllib.parse.parse_qs(qs).items()}
+
+
 if os.name == "nt":
     clean_path = clean_path_windows
 else:
