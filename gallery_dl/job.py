@@ -244,6 +244,7 @@ class TestJob(DownloadJob):
     def __init__(self, url, content=False):
         DownloadJob.__init__(self, url)
         self.content = content
+        self.urllist = []
         self.hash_url = hashlib.sha1()
         self.hash_keyword = hashlib.sha1()
         self.hash_content = hashlib.sha1()
@@ -267,6 +268,7 @@ class TestJob(DownloadJob):
 
     def update_url(self, url):
         """Update the URL hash"""
+        self.urllist.append(url)
         self.hash_url.update(url.encode())
 
     def update_keyword(self, kwdict):

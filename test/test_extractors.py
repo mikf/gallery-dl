@@ -37,11 +37,16 @@ class TestExtractors(unittest.TestCase):
             return
         tjob.run()
         if "url" in result:
-            self.assertEqual(tjob.hash_url.hexdigest(), result["url"])
+            self.assertEqual(result["url"], tjob.hash_url.hexdigest())
         if "keyword" in result:
-            self.assertEqual(tjob.hash_keyword.hexdigest(), result["keyword"])
+            self.assertEqual(result["keyword"], tjob.hash_keyword.hexdigest())
         if "content" in result:
-            self.assertEqual(tjob.hash_content.hexdigest(), result["content"])
+            self.assertEqual(result["content"], tjob.hash_content.hexdigest())
+        if "count" in result:
+            self.assertEqual(len(tjob.urllist), int(result["count"]))
+        if "pattern" in result:
+            for url in tjob.urllist:
+                self.assertRegex(url, result["pattern"])
 
 
 # dynamically generate tests

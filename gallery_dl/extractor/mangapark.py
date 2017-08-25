@@ -39,15 +39,18 @@ class MangaparkChapterExtractor(Extractor):
                 r"([^/]+/s(\d+)(?:/v([^/]+))?/c(\d+)(?:([^/]+)|/e(\d+))?)")]
     test = [
         ("http://mangapark.me/manga/gosu/s2/c55", {
+            "count": 50,
             "keyword": "bd97ca24ef344b44292910384215ef3f1005ea2e",
         }),
         (("http://mangapark.me/manga/"
           "ad-astra-per-aspera-hata-kenjirou/s1/c1.2"), {
-            "keyword": "6e56986610cb2da9917d0d9d3217d700fbc48665",
+            "count": 40,
+            "keyword": "f28eb26b4966bebda0e761f241c2dd49e505ce13",
         }),
         ("http://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
-            "keyword": "46a332caa65ef646c9405f69947c27f0dbc5430e",
-        })
+            "count": 15,
+            "keyword": "34aa6ca3bdf5078f839cbf68ff68e39728cf248b",
+        }),
     ]
 
     def __init__(self, match):

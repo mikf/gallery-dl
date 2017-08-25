@@ -51,7 +51,7 @@ class YanderePopularExtractor(YandereExtractor, booru.BooruPopularExtractor):
                r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
     test = [
         ("https://yande.re/post/popular_by_day?day=20&month=8&year=2017", {
-            "url": "3fb32f7108d43d70681a38366443ec825d324108",
+            "count": 40,
         }),
         ("https://yande.re/post/popular_recent", None),
     ]
