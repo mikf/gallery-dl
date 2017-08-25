@@ -51,10 +51,10 @@ class DanbooruPopularExtractor(DanbooruExtractor, booru.BooruPopularExtractor):
     pattern = [r"(?:https?://)?danbooru\.donmai\.us/"
                r"explore/posts/popular()(?:\?([^#]*))?"]
     test = [
+        ("https://danbooru.donmai.us/explore/posts/popular", None),
         (("https://danbooru.donmai.us/explore/posts/popular"
           "?date=2017-07-17+14%3A13%3A05+-0400&scale=week"), {
-            "url": "2c1bafa62a587d881b709a8aea6549986fe4605b",
+            "count": 20,
         }),
-        ("https://danbooru.donmai.us/explore/posts/popular", None),
     ]
     api_url = "https://danbooru.donmai.us/explore/posts/popular.json"

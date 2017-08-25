@@ -266,7 +266,7 @@ class PixivRankingExtractor(PixivExtractor):
     test = [
         (("https://www.pixiv.net/ranking.php"
           "?mode=daily&content=illust&date=20170818"), {
-            "url": "b073c74e3a6633dbdc9ba4122448f66e5211c771",
+            "pattern": r"^https?://i\d*\.pixiv\.net/img-original/img/.+/\d+_p",
         }),
         ("https://www.pixiv.net/ranking.php", None),
     ]
