@@ -77,6 +77,14 @@ class FoolfuukaThreadExtractor(Extractor):
         self.session.headers["User-Agent"] = "Mozilla 5.0"
         self.session.headers["Referer"] = self.root
 
+    def config(self, key, default=None, sentinel=object()):
+        value = Extractor.config(self, key, sentinel)
+        if value is sentinel:
+            cat, self.category = self.category, "foolfuuka"
+            value = Extractor.config(self, key, default)
+            self.category = cat
+        return value
+
     def items(self):
         op = True
         yield Message.Version, 1
