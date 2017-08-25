@@ -49,19 +49,29 @@ class ExhentaiGalleryExtractor(Extractor):
         self.wait_max = self.config("wait-max", 6)
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Referer": self.root + "/",
+        })
 
     def items(self):
         self.login()
-        self.setup_headers()
         yield Message.Version, 1
 
         url = "{}/g/{}/{}/".format(self.root, self.gid, self.token)
         response = self.request(url, fatal=False)
-        page = response.text
+        page, headers = response.text, response.headers
+
         if response.status_code == 404 and "Gallery Not Available" in page:
+            raise exception.AuthorizationError()
+        if (headers.get("Content-Length") == "9615" and
+                "sadpanda.jpg" in headers.get("Content-Disposition", "")):
+            self.log.info("sadpanda.jpg")
             raise exception.AuthorizationError()
         if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
+
         data = self.get_job_metadata(page)
         self.count = int(data["count"])
         yield Message.Directory, data
@@ -72,14 +82,6 @@ class ExhentaiGalleryExtractor(Extractor):
                 data["extension"] = ""
                 self.wait((1, 2))
             yield Message.Url, url, data
-
-    def setup_headers(self):
-        """Initialize headers"""
-        self.session.headers.update({
-            "User-Agent": "Mozilla/5.0",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Referer": self.root + "/",
-        })
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
@@ -204,10 +206,12 @@ class ExhentaiGalleryExtractor(Extractor):
             "PassWord": password,
             "ipb_login_submit": "Login!",
         }
-        referer = "https://e-hentai.org/bounce_login.php?b=d&bt=1-1"
-        self.session.headers["Referer"] = referer
-        response = self.request(url, method="POST", data=data)
+        headers = {
+            "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1"
+        }
+        response = self.request(url, method="POST", data=data, headers=headers)
 
         if "You are now logged in as:" not in response.text:
+            self.log.debug(response.text)
             raise exception.AuthenticationError()
         return {c: response.cookies[c] for c in self.cookienames}
