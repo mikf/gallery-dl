@@ -69,10 +69,10 @@ class BatotoMangaExtractor(BatotoExtractor, MangaExtractor):
 
     def chapters(self, page):
         # TODO: filter by language / translator
-        needle = ('<td style="border-top:0;">\n           '
-                  '<a href="https://bato.to/reader#')
+        pattern = (r'<td style="border-top:0;">\s+'
+                   r'<a href="https?://bato\.to/reader#([^"]+)')
         return [self.root + "/reader#" + mangahash
-                for mangahash in text.extract_iter(page, needle, '"')]
+                for mangahash in re.findall(pattern, page)]
 
 
 class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
