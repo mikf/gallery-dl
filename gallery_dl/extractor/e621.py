@@ -45,3 +45,17 @@ class E621PostExtractor(E621Extractor, booru.BooruPostExtractor):
         "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",
         "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
     })]
+
+
+class E621PopularExtractor(E621Extractor, booru.BooruPopularExtractor):
+    """Extractor for popular images from 621.net"""
+    pattern = [r"(?:https?://)?(?:www\.)?e621\.net/post/popular_by_"
+               r"(day|week|month)(?:\?([^#]*))?"]
+    test = [("https://e621.net/post/popular_by_month?month=6&year=2017", {
+        "url": "e09aba8e7f2026e7925e7f7b74c1ea9da2a1682d",
+        "count": 32,
+    })]
+
+    @property
+    def api_url(self):
+        return "https://e621.net/post/popular_by_" + self.scale + ".json"
