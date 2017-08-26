@@ -19,7 +19,6 @@ class DanbooruExtractor(booru.JSONBooruExtractor):
 
 class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
     """Extractor for images from danbooru based on search-tags"""
-    subcategory = "tag"
     pattern = [r"(?:https?://)?danbooru\.donmai\.us/posts"
                r"\?(?:utf8=%E2%9C%93&)?tags=([^&]+)"]
     test = [("https://danbooru.donmai.us/posts?tags=bonocho", {
@@ -29,7 +28,6 @@ class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
 
 class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
     """Extractor for image-pools from danbooru"""
-    subcategory = "pool"
     pattern = [r"(?:https?://)?danbooru\.donmai\.us/pools/(\d+)"]
     test = [("https://danbooru.donmai.us/pools/7659", {
         "content": "b16bab12bea5f7ea9e0a836bf8045f280e113d99",
@@ -38,7 +36,6 @@ class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
 
 class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
     """Extractor for single images from danbooru"""
-    subcategory = "post"
     pattern = [r"(?:https?://)?danbooru\.donmai\.us/posts/(\d+)"]
     test = [("https://danbooru.donmai.us/posts/294929", {
         "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
@@ -47,7 +44,6 @@ class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
 
 class DanbooruPopularExtractor(DanbooruExtractor, booru.BooruPopularExtractor):
     """Extractor for popular images from danbooru"""
-    subcategory = "popular"
     pattern = [r"(?:https?://)?danbooru\.donmai\.us/"
                r"explore/posts/popular()(?:\?([^#]*))?"]
     test = [

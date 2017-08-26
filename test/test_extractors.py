@@ -63,7 +63,6 @@ skip = [
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
-    "mangapark", "danbooru", "yandere", "pixiv",
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:

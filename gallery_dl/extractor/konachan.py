@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,6 @@ class KonachanExtractor(booru.JSONBooruExtractor):
 
 class KonachanTagExtractor(KonachanExtractor, booru.BooruTagExtractor):
     """Extractor for images from konachan.com based on search-tags"""
-    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post\?tags=([^&]+)"]
     test = [("http://konachan.com/post?tags=patata", {
         "content": "838cfb815e31f48160855435655ddf7bfc4ecb8d",
@@ -28,7 +27,6 @@ class KonachanTagExtractor(KonachanExtractor, booru.BooruTagExtractor):
 
 class KonachanPoolExtractor(KonachanExtractor, booru.BooruPoolExtractor):
     """Extractor for image-pools from konachan.com"""
-    subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/pool/show/(\d+)"]
     test = [("http://konachan.com/pool/show/95", {
         "content": "cf0546e38a93c2c510a478f8744e60687b7a8426",
@@ -37,7 +35,6 @@ class KonachanPoolExtractor(KonachanExtractor, booru.BooruPoolExtractor):
 
 class KonachanPostExtractor(KonachanExtractor, booru.BooruPostExtractor):
     """Extractor for single images from konachan.com"""
-    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post/show/(\d+)"]
     test = [("http://konachan.com/post/show/205189", {
         "content": "674e75a753df82f5ad80803f575818b8e46e4b65",

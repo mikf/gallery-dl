@@ -24,7 +24,6 @@ class ThreedeebooruExtractor(booru.JSONBooruExtractor):
 class ThreedeebooruTagExtractor(ThreedeebooruExtractor,
                                 booru.BooruTagExtractor):
     """Extractor for images from behoimi.org based on search-tags"""
-    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post"
                r"(?:/(?:index)?)?\?tags=([^&]+)"]
     test = [("http://behoimi.org/post?tags=himekawa_azuru dress", {
@@ -36,7 +35,6 @@ class ThreedeebooruTagExtractor(ThreedeebooruExtractor,
 class ThreedeebooruPoolExtractor(ThreedeebooruExtractor,
                                  booru.BooruPoolExtractor):
     """Extractor for image-pools from behoimi.org"""
-    subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/pool/show/(\d+)"]
     test = [("http://behoimi.org/pool/show/27", {
         "url": "da75d2d1475449d5ef0c266cb612683b110a30f2",
@@ -47,7 +45,6 @@ class ThreedeebooruPoolExtractor(ThreedeebooruExtractor,
 class ThreedeebooruPostExtractor(ThreedeebooruExtractor,
                                  booru.BooruPostExtractor):
     """Extractor for single images from behoimi.org"""
-    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post/show/(\d+)"]
     test = [("http://behoimi.org/post/show/140852", {
         "url": "ce874ea26f01d6c94795f3cc3aaaaa9bc325f2f6",

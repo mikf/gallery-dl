@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,6 @@ class YandereExtractor(booru.JSONBooruExtractor):
 
 class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
     """Extractor for images from yande.re based on search-tags"""
-    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post\?tags=([^&]+)"]
     test = [("https://yande.re/post?tags=ouzoku armor", {
         "content": "59201811c728096b2d95ce6896fd0009235fe683",
@@ -28,7 +27,6 @@ class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
 
 class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
     """Extractor for image-pools from yande.re"""
-    subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?yande\.re/pool/show/(\d+)"]
     test = [("https://yande.re/pool/show/318", {
         "content": "2a35b9d6edecce11cc2918c6dce4de2198342b68",
@@ -37,7 +35,6 @@ class YanderePoolExtractor(YandereExtractor, booru.BooruPoolExtractor):
 
 class YanderePostExtractor(YandereExtractor, booru.BooruPostExtractor):
     """Extractor for single images from yande.re"""
-    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post/show/(\d+)"]
     test = [("https://yande.re/post/show/51824", {
         "content": "59201811c728096b2d95ce6896fd0009235fe683",
@@ -46,7 +43,6 @@ class YanderePostExtractor(YandereExtractor, booru.BooruPostExtractor):
 
 class YanderePopularExtractor(YandereExtractor, booru.BooruPopularExtractor):
     """Extractor for popular images from yande.re"""
-    subcategory = "popular"
     pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post/popular_"
                r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
     test = [
