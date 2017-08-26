@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,6 @@ class E621Extractor(booru.JSONBooruExtractor):
 
 class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
     """Extractor for images from e621.net based on search-tags"""
-    subcategory = "tag"
     pattern = [
         r"(?:https?://)?(?:www\.)?e621\.net/post/index/\d+/([^?]+)",
         r"(?:https?://)?(?:www\.)?e621\.net/post\?tags=([^&]+)",
@@ -32,7 +31,6 @@ class E621TagExtractor(E621Extractor, booru.BooruTagExtractor):
 
 class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
     """Extractor for image-pools from e621.net"""
-    subcategory = "pool"
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/pool/show/(\d+)"]
     test = [("https://e621.net/pool/show/73", {
         "url": "842f2fb065c7c339486a9b1d689020b8569888ed",
@@ -42,7 +40,6 @@ class E621PoolExtractor(E621Extractor, booru.BooruPoolExtractor):
 
 class E621PostExtractor(E621Extractor, booru.BooruPostExtractor):
     """Extractor for single images from e621.net"""
-    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/post/show/(\d+)"]
     test = [("https://e621.net/post/show/535", {
         "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",

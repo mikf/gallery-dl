@@ -20,18 +20,10 @@ class GelbooruExtractor(booru.XMLBooruExtractor):
 
     def setup(self):
         self.params.update({"page": "dapi", "s": "post", "q": "index"})
-        try:
-            cookies = self.config("cookies")
-            self.session.cookies.update({
-                key: str(value) for key, value in cookies.items()
-            })
-        except AttributeError:
-            pass
 
 
 class GelbooruTagExtractor(GelbooruExtractor, booru.BooruTagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
-    subcategory = "tag"
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=list&tags=([^&]+)"]
     test = [("http://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
@@ -42,14 +34,12 @@ class GelbooruTagExtractor(GelbooruExtractor, booru.BooruTagExtractor):
 # TODO: find out how to access pools via gelbooru-api
 # class GelbooruPoolExtractor(GelbooruExtractor, booru.BooruPoolExtractor):
     # """Extractor for image-pools from gelbooru.com"""
-    # subcategory = "pool"
     # pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
     #            r"\?page=pool&s=show&id=(\d+)"]
 
 
 class GelbooruPostExtractor(GelbooruExtractor, booru.BooruPostExtractor):
     """Extractor for single images from gelbooru.com"""
-    subcategory = "post"
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=view&id=(\d+)"]
     test = [("http://gelbooru.com/index.php?page=post&s=view&id=313638", {

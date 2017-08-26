@@ -107,6 +107,7 @@ class XMLBooruExtractor(BooruExtractor):
 
 class BooruTagExtractor(BooruExtractor):
     """Extractor for images based on search-tags"""
+    subcategory = "tag"
     directory_fmt = ["{category}", "{tags}"]
 
     def __init__(self, match):
@@ -120,6 +121,7 @@ class BooruTagExtractor(BooruExtractor):
 
 class BooruPoolExtractor(BooruExtractor):
     """Extractor for image-pools"""
+    subcategory = "pool"
     directory_fmt = ["{category}", "pool", "{pool}"]
 
     def __init__(self, match):
@@ -133,6 +135,8 @@ class BooruPoolExtractor(BooruExtractor):
 
 class BooruPostExtractor(BooruExtractor):
     """Extractor for single images"""
+    subcategory = "post"
+
     def __init__(self, match):
         BooruExtractor.__init__(self)
         self.post = match.group(1)
@@ -141,6 +145,7 @@ class BooruPostExtractor(BooruExtractor):
 
 class BooruPopularExtractor(BooruExtractor):
     """Extractor for popular images"""
+    subcategory = "popular"
     directory_fmt = ["{category}", "popular", "{scale}", "{date}"]
 
     def __init__(self, match):

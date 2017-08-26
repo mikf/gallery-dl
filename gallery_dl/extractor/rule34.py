@@ -24,7 +24,6 @@ class Rule34Extractor(booru.XMLBooruExtractor):
 
 class Rule34TagExtractor(Rule34Extractor, booru.BooruTagExtractor):
     """Extractor for images from rule34.xxx based on search-tags"""
-    subcategory = "tag"
     pattern = [(r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
                 r"\?page=post&s=list&tags=([^&]+)")]
     test = [("http://rule34.xxx/index.php?page=post&s=list&tags=danraku", {
@@ -35,7 +34,6 @@ class Rule34TagExtractor(Rule34Extractor, booru.BooruTagExtractor):
 
 class Rule34PostExtractor(Rule34Extractor, booru.BooruPostExtractor):
     """Extractor for single images from rule34.xxx"""
-    subcategory = "post"
     pattern = [(r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
                 r"\?page=post&s=view&id=(\d+)")]
     test = [("http://rule34.xxx/index.php?page=post&s=view&id=1974854", {
