@@ -39,3 +39,16 @@ class KonachanPostExtractor(KonachanExtractor, booru.BooruPostExtractor):
     test = [("http://konachan.com/post/show/205189", {
         "content": "674e75a753df82f5ad80803f575818b8e46e4b65",
     })]
+
+
+class KonachanPopularExtractor(KonachanExtractor, booru.BooruPopularExtractor):
+    """Extractor for popular images from konachan.com"""
+    pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post/popular_"
+               r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
+    test = [("https://konachan.com/post/popular_by_month?month=11&year=2016", {
+        "count": 20,
+    })]
+
+    @property
+    def api_url(self):
+        return "https://konachan.com/post/popular_" + self.scale + ".json"

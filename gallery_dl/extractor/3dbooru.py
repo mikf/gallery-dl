@@ -50,3 +50,18 @@ class ThreedeebooruPostExtractor(ThreedeebooruExtractor,
         "url": "ce874ea26f01d6c94795f3cc3aaaaa9bc325f2f6",
         "content": "26549d55b82aa9a6c1686b96af8bfcfa50805cd4",
     })]
+
+
+class ThreedeebooruPopularExtractor(ThreedeebooruExtractor,
+                                    booru.BooruPopularExtractor):
+    """Extractor for popular images from behoimi.org"""
+    pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post/popular_"
+               r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
+    test = [("http://behoimi.org/post/popular_by_month?month=6&year=2017", {
+        "url": "d2f8b04e54b12b8daaa4ba5fbea84d7dabe8a5df",
+        "count": 20,
+    })]
+
+    @property
+    def api_url(self):
+        return "http://behoimi.org/post/popular_" + self.scale + ".json"
