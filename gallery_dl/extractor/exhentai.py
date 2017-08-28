@@ -61,12 +61,11 @@ class ExhentaiGalleryExtractor(Extractor):
 
         url = "{}/g/{}/{}/".format(self.root, self.gid, self.token)
         response = self.request(url, fatal=False)
-        page, headers = response.text, response.headers
+        page = response.text
 
         if response.status_code == 404 and "Gallery Not Available" in page:
             raise exception.AuthorizationError()
-        if (headers.get("Content-Length") == "9615" and
-                "sadpanda.jpg" in headers.get("Content-Disposition", "")):
+        if self._is_sadpanda(response):
             self.log.info("sadpanda.jpg")
             raise exception.AuthorizationError()
         if page.startswith(("Key missing", "Gallery not found")):
@@ -80,7 +79,7 @@ class ExhentaiGalleryExtractor(Extractor):
             data.update(image)
             if "/fullimg.php" in url:
                 data["extension"] = ""
-                self.wait((1, 2))
+                self.wait(1.5)
             yield Message.Url, url, data
 
     def get_job_metadata(self, page):
@@ -175,7 +174,7 @@ class ExhentaiGalleryExtractor(Extractor):
         if not waittime:
             waittime = random.uniform(self.wait_min, self.wait_max)
         else:
-            waittime = random.uniform(*waittime)
+            waittime = random.uniform(waittime * 0.66, waittime * 1.33)
         time.sleep(waittime)
 
     def login(self):
@@ -197,6 +196,11 @@ class ExhentaiGalleryExtractor(Extractor):
     def _login_impl(self, username, password):
         """Actual login implementation"""
         self.log.info("Logging in as %s", username)
+
+        # visit "home.php" to get "__cfduid" cookie
+        response = self.request("https://e-hentai.org/home.php")
+
+        # send login form
         url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
         data = {
             "CookieDate": "1",
@@ -207,11 +211,30 @@ class ExhentaiGalleryExtractor(Extractor):
             "ipb_login_submit": "Login!",
         }
         headers = {
-            "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1"
+            "Referer": response.url
         }
         response = self.request(url, method="POST", data=data, headers=headers)
 
-        if "You are now logged in as:" not in response.text:
-            self.log.debug(response.text)
+        # visit "exhentai.org" to transfer cookies
+        self.wait(1.5)
+        response = self.request("https://exhentai.org")
+        if self._is_sadpanda(response):
             raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in self.cookienames}
+
+        # collect exhentai cookies in dict (this should yield
+        # "ipb_member_id", "ipb_pass_hash", "igneous", and "yay")
+        cookies = {
+            c.name: c.value
+            for c in self.session.cookies
+            if c.domain == self.cookiedomain
+        }
+
+        return cookies
+
+    @staticmethod
+    def _is_sadpanda(response):
+        """Return True if the response object contains a sad panda"""
+        return (
+            response.headers.get("Content-Length") == "9615" and
+            "sadpanda.jpg" in response.headers.get("Content-Disposition", "")
+        )
