@@ -8,7 +8,7 @@
 
 """Base classes for extractors for FoOlSlide based sites"""
 
-from .common import Extractor, MangaExtractor, Message
+from .common import SharedConfigExtractor, MangaExtractor, Message
 from .. import text, util
 import json
 
@@ -34,8 +34,9 @@ def manga_pattern(domain_re):
     return [r"(?:https?://)?(" + domain_re + MANGA_RE]
 
 
-class FoolslideChapterExtractor(Extractor):
+class FoolslideChapterExtractor(SharedConfigExtractor):
     """Base class for chapter extractors for FoOlSlide based sites"""
+    basecategory = "foolslide"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "{chapter_string}"]
     filename_fmt = "{manga}_{chapter:>03}_{page:>03}.{extension}"
@@ -43,7 +44,7 @@ class FoolslideChapterExtractor(Extractor):
     single = True
 
     def __init__(self, match, url=None):
-        Extractor.__init__(self)
+        SharedConfigExtractor.__init__(self)
         self.url = url or self.scheme + "://" + match.group(1)
         self.data = match.groupdict(default="")
 
@@ -94,7 +95,7 @@ class FoolslideChapterExtractor(Extractor):
         return json.loads(text.extract(page, needle, ";", pos)[0])
 
 
-class FoolslideMangaExtractor(MangaExtractor):
+class FoolslideMangaExtractor(MangaExtractor, SharedConfigExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
     scheme = "https"
 

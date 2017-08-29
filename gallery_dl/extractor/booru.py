@@ -8,15 +8,16 @@
 
 """Base classes for extractors for danbooru and co"""
 
-from .common import Extractor, Message
+from .common import SharedConfigExtractor, Message
 from .. import text
 import xml.etree.ElementTree as ET
 import urllib.parse
 import datetime
 
 
-class BooruExtractor(Extractor):
+class BooruExtractor(SharedConfigExtractor):
     """Base class for all booru extractors"""
+    basecategory = "booru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     headers = {}
     pagestart = 1
@@ -24,7 +25,7 @@ class BooruExtractor(Extractor):
     api_url = ""
 
     def __init__(self):
-        Extractor.__init__(self)
+        SharedConfigExtractor.__init__(self)
         self.session.headers.update(self.headers)
         self.params = {"limit": 50}
         self.setup()
