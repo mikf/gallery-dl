@@ -175,6 +175,19 @@ class MangaExtractor(Extractor):
         return []
 
 
+class SharedConfigExtractor(Extractor):
+
+    basecategory = ""
+
+    def config(self, key, default=None, sentinel=object()):
+        value = Extractor.config(self, key, sentinel)
+        if value is sentinel:
+            cat, self.category = self.category, self.basecategory
+            value = Extractor.config(self, key, default)
+            self.category = cat
+        return value
+
+
 # Reduce strictness of the expected magic string in cookiejar files.
 # (This allows the use of Wget-generated cookiejars without modification)
 

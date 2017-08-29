@@ -8,7 +8,7 @@
 
 """Base classes for extractors for different Futaba Channel-like boards"""
 
-from .common import Extractor, Message
+from .common import Extractor, SharedConfigExtractor, Message
 from .. import text
 import itertools
 import operator
@@ -62,9 +62,9 @@ class ChanThreadExtractor(Extractor):
         return text.unescape(title)[:50]
 
 
-class FoolfuukaThreadExtractor(Extractor):
+class FoolfuukaThreadExtractor(SharedConfigExtractor):
     """Base extractor for FoolFuuka based boards/archives"""
-    category = "foolfuuka"
+    basecategory = "foolfuuka"
     subcategory = "thread"
     directory_fmt = ["{category}", "{board[shortname]}",
                      "{thread_num} - {title}"]
@@ -72,18 +72,10 @@ class FoolfuukaThreadExtractor(Extractor):
     root = ""
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        SharedConfigExtractor.__init__(self)
         self.board, self.thread = match.groups()
         self.session.headers["User-Agent"] = "Mozilla 5.0"
         self.session.headers["Referer"] = self.root
-
-    def config(self, key, default=None, sentinel=object()):
-        value = Extractor.config(self, key, sentinel)
-        if value is sentinel:
-            cat, self.category = self.category, "foolfuuka"
-            value = Extractor.config(self, key, default)
-            self.category = cat
-        return value
 
     def items(self):
         op = True
