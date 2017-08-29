@@ -63,7 +63,7 @@ skip = [
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
-    "jaiminisbox",  # 522
+    "imgtrex",  # 504
     "e621",
     "3dbooru",
 ]
