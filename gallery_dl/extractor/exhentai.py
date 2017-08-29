@@ -196,11 +196,6 @@ class ExhentaiGalleryExtractor(Extractor):
     def _login_impl(self, username, password):
         """Actual login implementation"""
         self.log.info("Logging in as %s", username)
-
-        # visit "home.php" to get "__cfduid" cookie
-        response = self.request("https://e-hentai.org/home.php")
-
-        # send login form
         url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
         data = {
             "CookieDate": "1",
@@ -211,25 +206,13 @@ class ExhentaiGalleryExtractor(Extractor):
             "ipb_login_submit": "Login!",
         }
         headers = {
-            "Referer": response.url
+            "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1"
         }
         response = self.request(url, method="POST", data=data, headers=headers)
 
-        # visit "exhentai.org" to transfer cookies
-        self.wait(1.5)
-        response = self.request("https://exhentai.org")
-        if self._is_sadpanda(response):
+        if "You are now logged in as:" not in response.text:
             raise exception.AuthenticationError()
-
-        # collect exhentai cookies in dict (this should yield
-        # "ipb_member_id", "ipb_pass_hash", "igneous", and "yay")
-        cookies = {
-            c.name: c.value
-            for c in self.session.cookies
-            if c.domain == self.cookiedomain
-        }
-
-        return cookies
+        return {c: response.cookies[c] for c in self.cookienames}
 
     @staticmethod
     def _is_sadpanda(response):
