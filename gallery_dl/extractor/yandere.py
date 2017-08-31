@@ -46,7 +46,7 @@ class YanderePopularExtractor(YandereExtractor, booru.BooruPopularExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post/popular_"
                r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
     test = [
-        ("https://yande.re/post/popular_by_day?day=20&month=8&year=2017", {
+        ("https://yande.re/post/popular_by_month?month=6&year=2014", {
             "count": 40,
         }),
         ("https://yande.re/post/popular_recent", None),

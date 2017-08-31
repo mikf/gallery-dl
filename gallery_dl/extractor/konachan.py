@@ -45,7 +45,7 @@ class KonachanPopularExtractor(KonachanExtractor, booru.BooruPopularExtractor):
     """Extractor for popular images from konachan.com"""
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post/popular_"
                r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
-    test = [("https://konachan.com/post/popular_by_month?month=11&year=2016", {
+    test = [("https://konachan.com/post/popular_by_month?month=11&year=2010", {
         "count": 20,
     })]
 

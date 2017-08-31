@@ -51,8 +51,7 @@ class E621PopularExtractor(E621Extractor, booru.BooruPopularExtractor):
     """Extractor for popular images from 621.net"""
     pattern = [r"(?:https?://)?(?:www\.)?e621\.net/post/popular_by_"
                r"(day|week|month)(?:\?([^#]*))?"]
-    test = [("https://e621.net/post/popular_by_month?month=6&year=2017", {
-        "url": "e09aba8e7f2026e7925e7f7b74c1ea9da2a1682d",
+    test = [("https://e621.net/post/popular_by_month?month=6&year=2013", {
         "count": 32,
     })]
 

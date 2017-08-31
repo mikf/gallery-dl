@@ -49,7 +49,7 @@ class DanbooruPopularExtractor(DanbooruExtractor, booru.BooruPopularExtractor):
     test = [
         ("https://danbooru.donmai.us/explore/posts/popular", None),
         (("https://danbooru.donmai.us/explore/posts/popular"
-          "?date=2017-07-17+14%3A13%3A05+-0400&scale=week"), {
+          "?date=2013-06-06+03%3A34%3A22+-0400&scale=week"), {
             "count": 20,
         }),
     ]
