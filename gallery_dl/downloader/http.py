@@ -21,7 +21,8 @@ log = logging.getLogger("http")
 class Downloader(BasicDownloader):
 
     retries = config.interpolate(("downloader", "http", "retries",), 5)
-    timeout = config.interpolate(("downloader", "http", "timeout",), None)
+    timeout = config.interpolate(("downloader", "http", "timeout",), 30)
+    verify = config.interpolate(("downloader", "http", "verify",), True)
 
     def __init__(self, session, output):
         BasicDownloader.__init__(self)
@@ -42,7 +43,7 @@ class Downloader(BasicDownloader):
             # try to connect to remote source
             try:
                 response = self.session.get(
-                    url, stream=True, timeout=self.timeout
+                    url, stream=True, timeout=self.timeout, verify=self.verify,
                 )
             except (rexcepts.ConnectionError, rexcepts.Timeout) as exception:
                 msg = exception

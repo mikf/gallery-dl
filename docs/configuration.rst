@@ -105,12 +105,27 @@ downloader.http.timeout
 -----------------------
 =========== =====
 Type        ``float`` or ``null``
-Default     ``null``
+Default     ``30``
 Description Amount of time (in seconds) to wait for a successful connection
-            and a response from a remote server.
+            and response from a remote server.
 
-            This value gets internally used as the ``timeout`` parameter for the
-            |requests.get()|_ method.
+            This value gets internally used as the |timeout|_ parameter for the
+            |requests.request()|_ method during downloads.
+=========== =====
+
+
+downloader.http.verify
+----------------------
+=========== =====
+Type        ``bool`` or ``string``
+Default     ``true``
+Description Controls whether to verify SSL/TLS certificates for HTTPS requests.
+
+            If this is a ``string``, it must be the path to a CA bundle to use
+            instead of the default certificates.
+
+            This value gets internally used as the |verify|_ parameter for the
+            |requests.request()|_ method during downloads.
 =========== =====
 
 
@@ -302,7 +317,7 @@ Type        ``float``
 Default     ``3.0``
 Description Minimum wait time in seconds between each image
 
-            Exhentai detects and blocks automated downloaders.
+            ExHentai detects and blocks automated downloaders.
             ``gallery-dl`` waits a randomly selected number of
             seconds between ``wait-min`` and ``wait-max`` after
             each image to prevent getting blocked.
@@ -380,7 +395,7 @@ extractor.imgur.mp4
 =========== =====
 Type        ``bool`` or ``string``
 Default     ``true``
-Description Controls whether to choose the GIF or MP4 version of an animation
+Description Controls whether to choose the GIF or MP4 version of an animation.
 
             * ``true``: Follow Imgur's advice and choose MP4 if the
               ``prefer_video`` flag in an image's metadata is set.
@@ -538,7 +553,9 @@ Description The ``refresh_token`` value you get from linking your Reddit account
 
 .. |.netrc| replace:: ``.netrc``
 .. |tempfile.gettempdir()| replace:: ``tempfile.gettempdir()``
-.. |requests.get()| replace:: ``requests.get()``
+.. |requests.request()| replace:: ``requests.request()``
+.. |timeout| replace:: ``timeout``
+.. |verify| replace:: ``verify``
 .. |mature_content| replace:: ``mature_content``
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
 .. |datetime.max| replace:: ``datetime.max``
@@ -550,7 +567,9 @@ Description The ``refresh_token`` value you get from linking your Reddit account
 
 .. _.netrc:            https://stackoverflow.com/tags/.netrc/info
 .. _tempfile.gettempdir(): https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
-.. _requests.get():    https://docs.python-requests.org/en/latest/user/advanced/#timeouts
+.. _requests.request(): https://docs.python-requests.org/en/master/api/#requests.request
+.. _timeout:           https://docs.python-requests.org/en/latest/user/advanced/#timeouts
+.. _verify:            https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
 .. _format string:     https://docs.python.org/3/library/string.html#formatstrings
 .. _format strings:    https://docs.python.org/3/library/string.html#formatstrings
 .. _strptime:          https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
