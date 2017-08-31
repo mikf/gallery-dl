@@ -32,6 +32,9 @@ class TestExtractors(unittest.TestCase):
         self.assertEqual(extr, tjob.extractor.__class__)
         if not result:
             return
+        if "options" in result:
+            for key, value in result["options"]:
+                config.set(key, value)
         if "exception" in result:
             self.assertRaises(result["exception"], tjob.run)
             return
@@ -63,9 +66,7 @@ skip = [
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
-    "imgtrex",  # 504
-    "e621",
-    "3dbooru",
+    "luscious",  # ssl cert issues
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:
