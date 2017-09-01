@@ -51,8 +51,8 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = text.extract_all(page, (
-            ("title"   , '"og:title" content="', '"'),
             ("tags"    , '<meta name="keywords" content="', '"'),
+            ("title"   , '"og:title" content="', '"'),
             (None      , '<li class="user_info">', ''),
             ("count"   , '<p>', ' '),
             (None      , '<p>Section:', ''),
