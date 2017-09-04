@@ -20,8 +20,9 @@ class SankakuTagExtractor(AsynchronousExtractor):
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/\?tags=([^&]+)"]
     test = [("https://chan.sankakucomplex.com/?tags=bonocho", {
-        "url": "2561ca0d8482ead48f22a7abcd23919cd78344a1",
-        "keyword": "5e3a39fdc6698e63ed0054478ebd4ca632ce643e",
+        "count": 5,
+        "pattern": (r"https://cs\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
+                    r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+"),
     })]
     url = "https://chan.sankakucomplex.com/"
 
@@ -74,7 +75,7 @@ class SankakuTagExtractor(AsynchronousExtractor):
         height   , pos = text.extract(page, '', ' ', pos)
         data = text.nameext_from_url(image_url, {
             "id": image_id,
-            "file-url": "https:" + image_url,
+            "file-url": "https:" + text.unescape(image_url),
             "width": width,
             "height": height,
         })
