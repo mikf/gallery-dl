@@ -139,8 +139,17 @@ CODES = {
 SPECIAL_EXTRACTORS = ("oauth", "recursive", "test")
 
 
+def build_predicate(predicates):
+    if not predicates:
+        return lambda url, kwds: True
+    elif len(predicates) == 1:
+        return predicates[0]
+    else:
+        return ChainPredicate(predicates)
+
+
 class RangePredicate():
-    """Predicate; is True if the current index is in the given range"""
+    """Predicate; True if the current index is in the given range"""
     def __init__(self, rangespec):
         self.ranges = optimize_range(parse_range(rangespec))
         self.index = 0
@@ -149,7 +158,7 @@ class RangePredicate():
         else:
             self.lower, self.upper = 0, 0
 
-    def __bool__(self):
+    def __call__(self, url, kwds):
         self.index += 1
 
         if self.index > self.upper:
@@ -159,6 +168,30 @@ class RangePredicate():
             if lower <= self.index <= upper:
                 return True
         return False
+
+
+class UniquePredicate():
+    """Predicate; True if given URL has not been encountered before"""
+    def __init__(self):
+        self.urls = set()
+
+    def __call__(self, url, kwds):
+        if url not in self.urls:
+            self.urls.add(url)
+            return True
+        return False
+
+
+class ChainPredicate():
+    """Predicate; True if all of its predicates return True"""
+    def __init__(self, predicates):
+        self.predicates = predicates
+
+    def __call__(self, url, kwds):
+        for pred in self.predicates:
+            if not pred(url, kwds):
+                return False
+        return True
 
 
 class PathFormat():
