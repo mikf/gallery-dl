@@ -25,17 +25,26 @@ class Job():
         self.extractor.log.debug(
             "Using %s for %s", self.extractor.__class__.__name__, url)
 
+        # url predicates
+        predicates = [util.UniquePredicate()]
+
         items = config.get(("images",))
         if items:
             pred = util.RangePredicate(items)
             if pred.lower > 1:
                 pred.index += self.extractor.skip(pred.lower - 1)
-            self.pred_url = pred
-        else:
-            self.pred_url = True
+            predicates.append(pred)
+
+        self.pred_url = util.build_predicate(predicates)
+
+        # queue predicates
+        predicates = []
 
         items = config.get(("chapters",))
-        self.pred_queue = util.RangePredicate(items) if items else True
+        if items:
+            predicates.append(util.RangePredicate(items))
+
+        self.pred_queue = util.build_predicate(predicates)
 
     def run(self):
         """Execute or run the job"""
@@ -73,16 +82,17 @@ class Job():
     def dispatch(self, msg):
         """Call the appropriate message handler"""
         if msg[0] == Message.Url:
-            if self.pred_url:
-                self.update_kwdict(msg[2])
-                self.handle_url(msg[1], msg[2])
+            _, url, kwds = msg
+            if self.pred_url(url, kwds):
+                self.update_kwdict(kwds)
+                self.handle_url(url, kwds)
 
         elif msg[0] == Message.Directory:
             self.update_kwdict(msg[1])
             self.handle_directory(msg[1])
 
         elif msg[0] == Message.Queue:
-            if self.pred_queue:
+            if self.pred_queue(msg[1], None):
                 self.handle_queue(msg[1])
 
         elif msg[0] == Message.Version:
