@@ -49,25 +49,52 @@ class TestRange(unittest.TestCase):
             util.optimize_range([(1, 1), (2, 2), (3, 6), (8, 9)]),
             [(1, 6), (8, 9)])
 
+
+class TestPredicate(unittest.TestCase):
+
     def test_range_predicate(self):
+        dummy = None
+
         pred = util.RangePredicate(" - 3 , 4-  4, 2-6")
         for i in range(6):
-            self.assertTrue(pred)
+            self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
-            bool(pred)
+            bool(pred(dummy, dummy))
 
         pred = util.RangePredicate("1, 3, 5")
-        self.assertTrue(pred)
-        self.assertFalse(pred)
-        self.assertTrue(pred)
-        self.assertFalse(pred)
-        self.assertTrue(pred)
+        self.assertTrue(pred(dummy, dummy))
+        self.assertFalse(pred(dummy, dummy))
+        self.assertTrue(pred(dummy, dummy))
+        self.assertFalse(pred(dummy, dummy))
+        self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
-            bool(pred)
+            bool(pred(dummy, dummy))
 
         pred = util.RangePredicate("")
         with self.assertRaises(exception.StopExtraction):
-            bool(pred)
+            bool(pred(dummy, dummy))
+
+    def test_unique_predicate(self):
+        dummy = None
+
+        pred = util.UniquePredicate()
+        self.assertTrue(pred("1", dummy))
+        self.assertTrue(pred("2", dummy))
+        self.assertFalse(pred("1", dummy))
+        self.assertFalse(pred("2", dummy))
+        self.assertTrue(pred("3", dummy))
+        self.assertFalse(pred("3", dummy))
+
+    def test_build_predicate(self):
+        pred = util.build_predicate([])
+        self.assertIsInstance(pred, type(lambda: True))
+
+        pred = util.build_predicate([util.UniquePredicate()])
+        self.assertIsInstance(pred, util.UniquePredicate)
+
+        pred = util.build_predicate([util.UniquePredicate(),
+                                     util.UniquePredicate()])
+        self.assertIsInstance(pred, util.ChainPredicate)
 
 
 class TestISO639_1(unittest.TestCase):
