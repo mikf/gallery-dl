@@ -13,6 +13,7 @@ from .. import text
 import xml.etree.ElementTree as ET
 import urllib.parse
 import datetime
+import operator
 
 
 class BooruExtractor(SharedConfigExtractor):
@@ -81,10 +82,15 @@ class BooruExtractor(SharedConfigExtractor):
 
 class JSONBooruExtractor(BooruExtractor):
     """Base class for JSON based API responses"""
+    sort = False
+
     def items_impl(self):
         self.update_page(reset=True)
         while True:
             images = self.request(self.api_url, params=self.params).json()
+            if self.sort:
+                images.sort(key=operator.itemgetter("score", "id"),
+                            reverse=True)
             yield from images
             if len(images) < self.params["limit"]:
                 return
@@ -151,6 +157,7 @@ class BooruPopularExtractor(BooruExtractor):
 
     def __init__(self, match):
         BooruExtractor.__init__(self)
+        self.sort = True
         self.scale = match.group(1)
         self.params.update(text.parse_query(match.group(2)))
 

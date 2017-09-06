@@ -95,11 +95,11 @@ class ImgurAlbumExtractor(ImgurExtractor):
     test = [
         ("https://imgur.com/a/TcBmP", {
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
-            "keyword": "e2eaae0e62d3c5d76df9c870140d1ef466bbec59",
+            "keyword": "4fb9d3089810ce5d230f2706b3b37edf529061bf",
         }),
         ("https://imgur.com/gallery/eD9CT", {  # large album
             "url": "4ee94de31ff26be416271bc0b1ea27b9349c9937",
-            "keyword": "c73a4a7e0fb2c3f00b30f9798327c34a8fbf1aac",
+            "keyword": "577f15a6320b7717bd9fd04e7fde56f9519e3def",
         }),
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.NotFoundError,
