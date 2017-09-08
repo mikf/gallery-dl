@@ -150,8 +150,8 @@ def build_predicate(predicates):
 
 class RangePredicate():
     """Predicate; True if the current index is in the given range"""
-    def __init__(self, rangespec):
-        self.ranges = optimize_range(parse_range(rangespec))
+    def __init__(self, ranges):
+        self.ranges = ranges
         self.index = 0
         if self.ranges:
             self.lower, self.upper = self.ranges[0][0], self.ranges[-1][1]
@@ -180,6 +180,20 @@ class UniquePredicate():
             self.urls.add(url)
             return True
         return False
+
+
+class FilterPredicate():
+    """Predicate; True if evaluating the given expression returns True"""
+    globalsdict = {"__builtins__": {}}
+
+    def __init__(self, codeobj):
+        self.codeobj = codeobj
+
+    def __call__(self, url, kwds):
+        try:
+            return eval(self.codeobj, self.globalsdict, kwds)
+        except Exception as exc:
+            raise exception.FilterError(exc)
 
 
 class ChainPredicate():

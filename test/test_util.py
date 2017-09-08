@@ -55,13 +55,13 @@ class TestPredicate(unittest.TestCase):
     def test_range_predicate(self):
         dummy = None
 
-        pred = util.RangePredicate(" - 3 , 4-  4, 2-6")
+        pred = util.RangePredicate(util.parse_range(" - 3 , 4-  4, 2-6"))
         for i in range(6):
             self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
             bool(pred(dummy, dummy))
 
-        pred = util.RangePredicate("1, 3, 5")
+        pred = util.RangePredicate(util.parse_range("1, 3, 5"))
         self.assertTrue(pred(dummy, dummy))
         self.assertFalse(pred(dummy, dummy))
         self.assertTrue(pred(dummy, dummy))
@@ -70,7 +70,7 @@ class TestPredicate(unittest.TestCase):
         with self.assertRaises(exception.StopExtraction):
             bool(pred(dummy, dummy))
 
-        pred = util.RangePredicate("")
+        pred = util.RangePredicate(util.parse_range(""))
         with self.assertRaises(exception.StopExtraction):
             bool(pred(dummy, dummy))
 

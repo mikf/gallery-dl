@@ -190,16 +190,30 @@ def build_parser():
     selection = parser.add_argument_group("Selection Options")
     selection.add_argument(
         "--images",
-        metavar="ITEM-SPEC", action=ConfigAction, dest="images",
+        metavar="ITEM-SPEC", dest="image_range",
         help=("Specify which images to download through a comma seperated list"
               " of indices or index-ranges; "
               "for example '--images -2,4,6-8,10-' will download images with "
-              "index 1, 2, 4, 6, 7, 8 and 10 up to the last one")
+              "index 1, 2, 4, 6, 7, 8 and 10 up to the last one"),
     )
     selection.add_argument(
         "--chapters",
-        metavar="ITEM-SPEC", action=ConfigAction, dest="chapters",
-        help=("Same as '--images' except for chapters")
+        metavar="ITEM-SPEC", dest="chapter_range",
+        help="Same as '--images' except for chapters",
+    )
+    selection.add_argument(
+        "--filter",
+        metavar="EXPR", dest="image_filter",
+        help=("Python expression controlling which images to download. Images "
+              "for which the expression evaluates to False are ignored. "
+              "Available keys are the filename-specific ones listed by "
+              "'--list-keywords'. Example: --filter \"image_width >= 1000 and "
+              "rating in ('s', 'q')\""),
+    )
+    selection.add_argument(
+        "--chapter-filter",
+        metavar="EXPR", dest="chapter_filter",
+        help="Same as '--filter' except for chapters (not yet implemented)",
     )
 
     parser.add_argument(

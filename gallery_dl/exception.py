@@ -19,6 +19,7 @@ Exception
       |    +-- HttpError
       +-- NoExtractorError
       +-- FormatError
+      +-- FilterError
       +-- StopExtraction
 """
 
@@ -53,6 +54,10 @@ class NoExtractorError(GalleryDLException):
 
 class FormatError(GalleryDLException):
     """Error while building output path"""
+
+
+class FilterError(GalleryDLException):
+    """Error while evaluating a filter expression"""
 
 
 class StopExtraction(GalleryDLException):

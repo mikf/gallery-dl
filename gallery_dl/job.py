@@ -27,23 +27,23 @@ class Job():
 
         # url predicates
         predicates = [util.UniquePredicate()]
-
-        items = config.get(("images",))
-        if items:
-            pred = util.RangePredicate(items)
+        image = config.get(("_", "image"), {})
+        if "range" in image:
+            pred = util.RangePredicate(image["range"])
             if pred.lower > 1:
                 pred.index += self.extractor.skip(pred.lower - 1)
             predicates.append(pred)
-
+        if "filter" in image:
+            predicates.append(util.FilterPredicate(image["filter"]))
         self.pred_url = util.build_predicate(predicates)
 
         # queue predicates
         predicates = []
-
-        items = config.get(("chapters",))
-        if items:
-            predicates.append(util.RangePredicate(items))
-
+        chapter = config.get(("_", "chapter"), {})
+        if "range" in chapter:
+            predicates.append(util.RangePredicate(chapter["range"]))
+        if "filter" in chapter:
+            predicates.append(util.FilterPredicate(chapter["filter"]))
         self.pred_queue = util.build_predicate(predicates)
 
     def run(self):
@@ -65,8 +65,12 @@ class Job():
             log.error("HTTP request failed:\n%s", exc)
         except exception.FormatError as exc:
             err, obj = exc.args
-            log.error("Applying %s format string failed:\n%s: %s",
+            log.error("Applying %s format string failed:  %s: %s",
                       obj, err.__class__.__name__, err)
+        except exception.FilterError as exc:
+            err = exc.args[0]
+            log.error("Evaluating filter expression failed:  %s: %s",
+                      err.__class__.__name__, err)
         except exception.StopExtraction:
             pass
         except OSError as exc:
