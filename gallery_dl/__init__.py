@@ -57,6 +57,25 @@ def sanatize_input(file):
             yield line
 
 
+def prepare_range(rangespec, target):
+    if rangespec:
+        range = util.optimize_range(util.parse_range(rangespec))
+        if range:
+            config.set(("_", target, "range"), range)
+        else:
+            log.warning("invalid/empty %s range", target)
+
+
+def prepare_filter(filterexpr, target):
+    if filterexpr:
+        try:
+            name = "<{} filter>".format(target)
+            codeobj = compile(filterexpr, name, "eval")
+            config.set(("_", target, "filter"), codeobj)
+        except (SyntaxError, ValueError, TypeError) as exc:
+            log.warning(exc)
+
+
 def main():
     try:
         initialize_logging()
@@ -64,6 +83,7 @@ def main():
         args = parser.parse_args()
         logging.getLogger().setLevel(args.loglevel)
 
+        # configuration
         if args.load_config:
             config.load()
         if args.cfgfiles:
@@ -72,6 +92,9 @@ def main():
             config.load(*args.yamlfiles, format="yaml", strict=True)
         for key, value in args.options:
             config.set(key, value)
+        config.set(("_",), {})
+
+        # logging
         if args.loglevel >= logging.ERROR:
             config.set(("output", "mode"), "null")
         elif args.loglevel <= logging.DEBUG:
@@ -127,6 +150,11 @@ def main():
                     job.Job.ufile = open(args.unsupportedfile, "w")
                 except OSError as exc:
                     log.warning("unsupported-URL file: %s", exc)
+
+            prepare_range(args.image_range, "image")
+            prepare_range(args.chapter_range, "chapter")
+            prepare_filter(args.image_filter, "image")
+            # prepare_filter(args.chapter_filter, "chapter")
 
             pformat = config.get(("output", "progress"), True)
             if pformat and len(urls) > 1 and args.loglevel < logging.ERROR:
