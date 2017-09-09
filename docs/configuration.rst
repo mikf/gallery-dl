@@ -156,8 +156,8 @@ general pattern specifically for ``PixivUserExtractor`` instances.
 
 The ``category`` and ``subcategory`` of all extractors are included in the
 output of ``gallery-dl --list-extractors``. For a specific URL these values
-can also be determined by using the ``--list-keywords`` command-line option
-(see the example below).
+can also be determined by using the ``-K``/``--list-keywords`` command-line
+option (see the example below).
 
 extractor.*.filename
 --------------------
@@ -169,12 +169,12 @@ Description A `format string`_ to build the resulting filename
 
             The available replacement keys depend on the extractor used. A list
             of keys for a specific one can be acquired by calling *gallery-dl*
-            with the ``--list-keywords`` command-line option.
+            with the ``-K``/``--list-keywords`` command-line option.
             For example:
 
             .. code::
 
-                $ gallery-dl --list-keywords http://seiga.nicovideo.jp/seiga/im5977527
+                $ gallery-dl -K http://seiga.nicovideo.jp/seiga/im5977527
                 Keywords for directory names:
                 -----------------------------
                 category
