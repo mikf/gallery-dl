@@ -28,22 +28,22 @@ class Job():
         # url predicates
         predicates = [util.UniquePredicate()]
         image = config.get(("_", "image"), {})
+        if "filter" in image:
+            predicates.append(util.FilterPredicate(image["filter"]))
         if "range" in image:
             pred = util.RangePredicate(image["range"])
             if pred.lower > 1:
                 pred.index += self.extractor.skip(pred.lower - 1)
             predicates.append(pred)
-        if "filter" in image:
-            predicates.append(util.FilterPredicate(image["filter"]))
         self.pred_url = util.build_predicate(predicates)
 
         # queue predicates
         predicates = []
         chapter = config.get(("_", "chapter"), {})
-        if "range" in chapter:
-            predicates.append(util.RangePredicate(chapter["range"]))
         if "filter" in chapter:
             predicates.append(util.FilterPredicate(chapter["filter"]))
+        if "range" in chapter:
+            predicates.append(util.RangePredicate(chapter["range"]))
         self.pred_queue = util.build_predicate(predicates)
 
     def run(self):
