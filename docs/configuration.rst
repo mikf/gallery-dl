@@ -9,7 +9,7 @@ Contents
 3) `Downloader Options`_
 4) `Extractor Options`_
 5) `Extractor-specific Options`_
-
+6) `API Tokens & IDs`_
 
 General Options
 ===============
@@ -548,6 +548,49 @@ Description The ``refresh_token`` value you get from linking your Reddit account
             authorized to do so,
             but requests to the reddit API are going to be rate limited
             at 600 requests every 10 minutes/600 seconds.
+=========== =====
+
+
+API Tokens & IDs
+================
+
+extractor.deviantart.client-id & .client-secret
+-----------------------------------------------
+=========== =====
+Type        ``string``
+Description
+=========== =====
+
+
+extractor.flickr.api-key & .api-secret
+--------------------------------------
+=========== =====
+Type        ``string``
+Description
+=========== =====
+
+
+extractor.pawoo.access-token
+----------------------------
+=========== =====
+Type        ``string``
+Description
+=========== =====
+
+
+extractor.pinterest.access-token
+--------------------------------
+=========== =====
+Type        ``string``
+Description
+=========== =====
+
+
+extractor.reddit.client-id
+--------------------------
+=========== =====
+Type        ``string``
+Description
 =========== =====
 
 

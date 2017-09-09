@@ -20,7 +20,7 @@ class PawooExtractor(Extractor):
 
     def __init__(self):
         Extractor.__init__(self)
-        self.api = MastodonAPI(self.session, self.log)
+        self.api = MastodonAPI(self)
 
     def items(self):
         yield Message.Version, 1
@@ -108,12 +108,12 @@ class MastodonAPI():
     https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md
     """
 
-    def __init__(self, session, log, root="https://pawoo.net",
+    def __init__(self, extractor, root="https://pawoo.net",
                  access_token=("0f04191976cf22a5319c1e91a73cbcb2"
                                "510b589e2757efcca922f9b3173d119b")):
-        self.session = session
+        access_token = extractor.config("access-token", access_token)
+        self.session = extractor.session
         self.session.headers["Authorization"] = "Bearer " + access_token
-        self.log = log
         self.root = root
 
     def search(self, searchterm):
