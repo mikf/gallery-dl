@@ -110,6 +110,7 @@ class RedditAPI():
         self.extractor = extractor
         self.comments = extractor.config("comments", 500)
         self.morecomments = extractor.config("morecomments", False)
+        self.client_id = extractor.config("client-id", self.CLIENT_ID)
         self.refresh_token = extractor.config("refresh-token")
         self.log = extractor.log
         self.session = extractor.session
@@ -165,7 +166,7 @@ class RedditAPI():
             data = {"grant_type": ("https://oauth.reddit.com/"
                                    "grants/installed_client"),
                     "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
-        response = self.session.post(url, data=data, auth=(self.CLIENT_ID, ""))
+        response = self.session.post(url, data=data, auth=(self.client_id, ""))
         if response.status_code != 200:
             raise exception.AuthenticationError()
         return "Bearer " + response.json()["access_token"]

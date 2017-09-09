@@ -256,13 +256,15 @@ class FlickrAPI():
     ]
 
     def __init__(self, extractor):
+        self.api_key = extractor.config("api-key", self.API_KEY)
+        self.api_secret = extractor.config("api-secret", self.API_SECRET)
         token = extractor.config("access-token")
         token_secret = extractor.config("access-token-secret")
         if token and token_secret:
             self.session = util.OAuthSession(
                 extractor.session,
-                self.API_KEY, self.API_SECRET, token, token_secret)
-            self.API_KEY = None
+                self.api_key, self.api_secret, token, token_secret)
+            self.api_key = None
         else:
             self.session = extractor.session
 
@@ -365,8 +367,8 @@ class FlickrAPI():
         params["method"] = "flickr." + method
         params["format"] = "json"
         params["nojsoncallback"] = "1"
-        if self.API_KEY:
-            params["api_key"] = self.API_KEY
+        if self.api_key:
+            params["api_key"] = self.api_key
         data = self.session.get(self.API_URL, params=params).json()
         if "code" in data and data["code"] == 1:
             raise exception.NotFoundError(self.subcategory)

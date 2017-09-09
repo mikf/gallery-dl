@@ -19,7 +19,7 @@ class PinterestExtractor(Extractor):
 
     def __init__(self):
         Extractor.__init__(self)
-        self.api = PinterestAPI(self.session)
+        self.api = PinterestAPI(self)
 
     def data_from_pin(self, pin):
         """Get image url and metadata from a pin-object"""
@@ -135,9 +135,10 @@ class PinterestPinitExtractor(PinterestExtractor):
 class PinterestAPI():
     """Minimal interface for the pinterest API"""
 
-    def __init__(self, session, access_token="AV2U9Oe6dyC2vfPugUnBvJ7Duxg9"
-                                             "FHCJPXPZIvRDXv9hvwBALwAAAAA"):
-        self.session = session
+    def __init__(self, extractor, access_token="AV2U9Oe6dyC2vfPugUnBvJ7Duxg9"
+                                               "FHCJPXPZIvRDXv9hvwBALwAAAAA"):
+        access_token = extractor.config("access-token", access_token)
+        self.session = extractor.session
         self.session.params["access_token"] = access_token
 
     def pin(self, pin_id, fields="id,image,note"):

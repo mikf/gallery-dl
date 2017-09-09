@@ -334,8 +334,8 @@ class DeviantartAPI():
                  client_secret="76b08c69cfb27f26d6161f9ab6d061a1"):
         self.session = extractor.session
         self.log = extractor.log
-        self.client_id = client_id
-        self.client_secret = client_secret
+        self.client_id = extractor.config("client-id", client_id)
+        self.client_secret = extractor.config("client-secret", client_secret)
         self.delay = 0
         self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
