@@ -120,6 +120,10 @@ def build_parser():
         help="Print JSON information",
     )
     output.add_argument(
+        "-K", "--list-keywords", dest="list_keywords", action="store_true",
+        help="Print a list of available keywords for the given URLs",
+    )
+    output.add_argument(
         "--list-modules", dest="list_modules", action="store_true",
         help="Print a list of available extractor modules",
     )
@@ -127,10 +131,6 @@ def build_parser():
         "--list-extractors", dest="list_extractors", action="store_true",
         help=("Print a list of extractor classes "
               "with description, (sub)category and example URL"),
-    )
-    output.add_argument(
-        "--list-keywords", dest="list_keywords", action="store_true",
-        help="Print a list of available keywords for the given URLs",
     )
 
     downloader = parser.add_argument_group("Downloader Options")
