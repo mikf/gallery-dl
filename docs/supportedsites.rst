@@ -3,7 +3,7 @@ Supported Sites
 ==================== =================================== ================================================== ================
 Site                 URL                                 Capabilities                                       Authentication
 ==================== =================================== ================================================== ================
-3dbooru              http://behoimi.org/                 Pools, Posts, Tag-Searches
+3dbooru              http://behoimi.org/                 Pools, Popular Images, Posts, Tag-Searches
 4chan                https://www.4chan.org/              Threads
 4plebs               https://archive.4plebs.org/         Threads
 8chan                https://8ch.net/                    Threads
@@ -15,7 +15,7 @@ Desuarchive          https://desuarchive.org/            Threads
 DeviantArt           https://www.deviantart.com/         |Collections, De-1|
 Doki Reader          https://kobato.hologfx.com/         Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters
-e621                 https://e621.net/                   Pools, Posts, Tag-Searches
+e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches
 ExHentai             https://exhentai.org/               Galleries                                          Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fireden              https://boards.fireden.net/         Threads
@@ -39,7 +39,7 @@ Jaimini's Box        https://jaiminisbox.com/            Chapters, Manga
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
 KissManga            http://kissmanga.com/               Chapters, Manga
-Konachan             https://konachan.com/               Pools, Posts, Tag-Searches
+Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag-Searches
 Love is Over Archive https://archive.loveisover.me/      Threads
 Luscious             https://luscious.net/               Albums
 Manga Fox            http://www.mangafox.me/             Chapters
@@ -73,6 +73,7 @@ Twitter              https://twitter.com/                Tweets
 Warosu               https://warosu.org/                 Threads
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
+Acidimg              https://acidimg.cc/                 individual Images
 Chronos              http://chronos.to/                  individual Images
 Coreimg              http://coreimg.net/                 individual Images
 Fapat                http://fapat.me/                    individual Images

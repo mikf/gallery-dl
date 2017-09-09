@@ -118,6 +118,13 @@ class FapatImageExtractor(ImgytImageExtractor):
     https = False
 
 
+class AcidimgImageExtractor(ImgytImageExtractor):
+    """Extractor for single images from acidimg.cc"""
+    category = "acidimg"
+    pattern = [r"(?:https?://)?((?:www\.)?acidimg\.cc/img-([a-z0-9]+)\.html)"]
+    test = []
+
+
 class ChronosImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from chronos.to"""
     category = "chronos"
