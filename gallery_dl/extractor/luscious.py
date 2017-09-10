@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016 Mike Fährmann
+# Copyright 2016-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,20 +16,20 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
     """Extractor for image albums from luscious.net"""
     category = "luscious"
     subcategory = "album"
-    directory_fmt = ["{category}", "{gallery-id} {title}"]
-    filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
+    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?luscious\.net/"
                 r"(?:c/[^/]+/)?(?:pictures/album|albums)/([^/]+_(\d+))")]
     test = [
         (("https://luscious.net/c/hentai_manga/albums/"
           "okinami-no-koigokoro_277031/view/"), {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
-            "keyword": "8533c72ff85578240cf7594eb617d907bebf87ab",
+            "keyword": "76e099479b180420fd5cf820f00c52fe07fda884",
             "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
             "url": "01e2d7dd6eecea0152610f2446a6b1d60519c8bd",
-            "keyword": "6c8750df7f38ff4e15cabc9a3a2e876b84a328d6",
+            "keyword": "02624ff1097260e2a3c1b220afc92ea4c6b109b3",
         }),
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", None),
     ]
@@ -58,7 +58,7 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
             (None      , '<p>Section:', ''),
             ("section" , '>', '<'),
             ("language", '<p>Language:', ' '),
-        ), values={"gallery-id": self.gid})[0]
+        ), values={"gallery_id": self.gid})[0]
         data["lang"] = util.language_to_code(data["language"])
         try:
             data["artist"] = text.extract(data["tags"], "rtist: ", ",")[0]
@@ -84,6 +84,6 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
                 "num": num,
                 "name": name,
                 "extension": iurl.rpartition(".")[2],
-                "image-id": imgid,
+                "image_id": imgid,
             }
             num += 1

@@ -25,8 +25,8 @@ class KissmangaExtractor(Extractor):
     """Base class for kissmanga extractors"""
     category = "kissmanga"
     directory_fmt = ["{category}", "{manga}",
-                     "c{chapter:>03}{chapter-minor} - {title}"]
-    filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
+                     "c{chapter:>03}{chapter_minor} - {title}"]
+    filename_fmt = ("{manga}_c{chapter:>03}{chapter_minor}_"
                     "{page:>03}.{extension}")
     root = "http://kissmanga.com"
 
@@ -60,15 +60,15 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     test = [
         ("http://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
             "url": "4136bcd1c6cecbca8cc2bc965d54f33ef0a97cc0",
-            "keyword": "ab332093a4f2e473a468235bfd624cbe3b19fd7f",
+            "keyword": "97cc9e513953e20d6309648df57a52a7ced59ae0",
         }),
         ("http://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
             "url": "de074848f6c1245204bb9214c12bcc3ecfd65019",
-            "keyword": "013aad80e578c6ccd2e1fe47cdc27c12a64f6db2",
+            "keyword": "3d96653188b761752c38b60d6e397e2ace0ea04c",
         }),
         ("http://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
             "url": "6abec8178f35fe7846586280ca9e38eacc32452c",
-            "keyword": "ca7a07ecfd9525c0f825dc747f520306611d6af9",
+            "keyword": "2ae18e456a4a7e4a2889af49d5f2e9c10fbc45e6",
         }),
         ("http://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608", None),
     ]
@@ -95,7 +95,7 @@ class KissmangaChapterExtractor(KissmangaExtractor):
             "manga": manga,
             "volume": match.group(1) or "",
             "chapter": match.group(2) or match.group(5),
-            "chapter-minor": "."+chminor if chminor else "",
+            "chapter_minor": "."+chminor if chminor else "",
             "title": match.group(4) or "",
             "lang": "en",
             "language": "English",

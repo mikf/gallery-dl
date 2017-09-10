@@ -16,8 +16,8 @@ from ..cache import cache
 class NijieExtractor(AsynchronousExtractor):
     """Base class for nijie extractors"""
     category = "nijie"
-    directory_fmt = ["{category}", "{artist-id}"]
-    filename_fmt = "{category}_{artist-id}_{image-id}_p{index:>02}.{extension}"
+    directory_fmt = ["{category}", "{artist_id}"]
+    filename_fmt = "{category}_{artist_id}_{image_id}_p{index:>02}.{extension}"
     cookiedomain = "nijie.info"
     popup_url = "https://nijie.info/view_popup.php?id="
 
@@ -39,7 +39,7 @@ class NijieExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        return {"artist-id": self.artist_id}
+        return {"artist_id": self.artist_id}
 
     def get_image_ids(self):
         """Collect all image-ids for a specific artist"""
@@ -58,7 +58,7 @@ class NijieExtractor(AsynchronousExtractor):
             yield "https://pic" + url, text.nameext_from_url(url, {
                 "count": len(images),
                 "index": index,
-                "image-id": image_id,
+                "image_id": image_id,
             })
 
     def login(self):
@@ -87,7 +87,7 @@ class NijieUserExtractor(NijieExtractor):
     test = [
         ("https://nijie.info/members_illust.php?id=44", {
             "url": "585d821df4716b1098660a0be426d01db4b65f2a",
-            "keyword": "7a2dbf8fc0dfdb2af208ecdb8ec7f3186bdc31ab",
+            "keyword": "804d3a9bb8205048ac0d1fe8eec39266b50f1e8e",
         }),
         ("https://nijie.info/members_illust.php?id=43", {
             "exception": exception.NotFoundError,
@@ -119,7 +119,7 @@ class NijieImageExtractor(NijieExtractor):
     test = [
         ("https://nijie.info/view.php?id=70720", {
             "url": "a10d4995645b5f260821e32c60a35f73546c2699",
-            "keyword": "e454c2bad9b636b90d569881bf4fe8438506e0d2",
+            "keyword": "4ecfd46460761b7a89fdba815eece10e917032c2",
             "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
         }),
         ("https://nijie.info/view.php?id=70724", {

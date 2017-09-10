@@ -22,7 +22,7 @@ class TumblrUserExtractor(Extractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com(?:/page/\d+)?/?$"]
     test = [("http://demo.tumblr.com/", {
         "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
-        "keyword": "d2cf142bcaf1cbea29291f8c8ccb5f582962d8be",
+        "keyword": "8f1b06c2a0a562b10df3e62ab2a8156e3da1855b",
     })]
 
     def __init__(self, match):
@@ -42,6 +42,8 @@ class TumblrUserExtractor(Extractor):
             image.update(data)
             image = text.nameext_from_url(url, image)
             image["hash"] = text.extract(image["name"], "_", "_")[0]
+            image = {key.replace("-", "_"): value
+                     for key, value in image.items()}
             yield Message.Url, url, image
 
     def get_job_metadata(self, image_data):
@@ -100,7 +102,7 @@ class TumblrPostExtractor(TumblrUserExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/post/(\d+)"]
     test = [("http://demo.tumblr.com/post/459265350", {
         "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
-        "keyword": "ce211deb8e3936e2202f3f82f38375fd14781b79",
+        "keyword": "4d5bc44bf8ec334fdaf78696edf215574fa6d998",
     })]
 
     def __init__(self, match):
@@ -114,7 +116,7 @@ class TumblrTagExtractor(TumblrUserExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/tagged/(.+)"]
     test = [("http://demo.tumblr.com/tagged/Times Square", {
         "url": "5c113da25a605b7449de8ca1606eec5502b4dc9f",
-        "keyword": "f36901e86c5d20affbe66f78c6b5717d34466fc4",
+        "keyword": "b0465d131ecb097633127b79805432dacae06d14",
     })]
 
     def __init__(self, match):

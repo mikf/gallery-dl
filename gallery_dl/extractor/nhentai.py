@@ -17,12 +17,12 @@ class NhentaiGalleryExtractor(Extractor):
     """Extractor for image galleries from nhentai.net"""
     category = "nhentai"
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{gallery-id} {title}"]
-    filename_fmt = "{category}_{gallery-id}_{num:>03}.{extension}"
+    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)"]
     test = [("http://nhentai.net/g/147850/", {
         "url": "5179dbf0f96af44005a0ff705a0ad64ac26547d0",
-        "keyword": "574e36436a1c01c82e5779207e44e4e78d0e1726",
+        "keyword": "82751294e75fc203b019ffd94d8c1f94a5b86494",
     })]
 
     def __init__(self, match):
@@ -33,7 +33,7 @@ class NhentaiGalleryExtractor(Extractor):
         ginfo = self.get_gallery_info()
         data = self.get_job_metadata(ginfo)
         urlfmt = "{}galleries/{}/{{}}.{{}}".format(
-            ginfo["media_url"], data["media-id"])
+            ginfo["media_url"], data["media_id"])
         extdict = {"j": "jpg", "p": "png", "g": "gif"}
         yield Message.Version, 1
         yield Message.Directory, data
@@ -60,12 +60,12 @@ class NhentaiGalleryExtractor(Extractor):
         title_en = ginfo["title"].get("english", "")
         title_ja = ginfo["title"].get("japanese", "")
         return {
-            "gallery-id": self.gid,
-            "upload-date": ginfo["upload_date"],
-            "media-id": ginfo["media_id"],
+            "gallery_id": self.gid,
+            "upload_date": ginfo["upload_date"],
+            "media_id": ginfo["media_id"],
             "scanlator": ginfo["scanlator"],
             "count": ginfo["num_pages"],
             "title": title_en or title_ja,
-            "title-en": title_en,
-            "title-ja": title_ja,
+            "title_en": title_en,
+            "title_ja": title_ja,
         }

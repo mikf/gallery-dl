@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015,2016 Mike Fährmann
+# Copyright 2015-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,12 +17,12 @@ class HitomiGalleryExtractor(Extractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{gallery-id} {title}"]
-    filename_fmt = "{category}_{gallery-id}_{num:>03}_{name}.{extension}"
+    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    filename_fmt = "{category}_{gallery_id}_{num:>03}_{name}.{extension}"
     pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)\.html"]
     test = [("https://hitomi.la/galleries/867789.html", {
         "url": "e42a47dfadda93e4bf37e82b1dc9ad29edfa9130",
-        "keyword": "03a64d67584afd7b8ad96ecb47acae08ea14d90f",
+        "keyword": "c007cd41229d727b2ced3b364350561444738351",
     })]
 
     def __init__(self, match):
@@ -37,8 +37,7 @@ class HitomiGalleryExtractor(Extractor):
         data["count"] = len(images)
         yield Message.Version, 1
         yield Message.Directory, data
-        for num, url in enumerate(images, 1):
-            data["num"] = num
+        for data["num"], url in enumerate(images, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_job_metadata(self, page):
@@ -63,7 +62,7 @@ class HitomiGalleryExtractor(Extractor):
             series, pos = text.extract(page, '.html">', '</a>', pos)
         lang = lang.capitalize()
         return {
-            "gallery-id": self.gid,
+            "gallery_id": self.gid,
             "title": " ".join(title.split()),
             "artist": string.capwords(artist),
             "group": string.capwords(group),

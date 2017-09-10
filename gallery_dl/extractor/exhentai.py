@@ -20,12 +20,12 @@ class ExhentaiGalleryExtractor(Extractor):
     """Extractor for image galleries from exhentai.org"""
     category = "exhentai"
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{gallery-id}"]
-    filename_fmt = "{gallery-id}_{num:>04}_{image-token}_{name}.{extension}"
+    directory_fmt = ["{category}", "{gallery_id}"]
+    filename_fmt = "{gallery_id}_{num:>04}_{image_token}_{name}.{extension}"
     pattern = [r"(?:https?://)?(g\.e-|e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
     test = [
         ("https://exhentai.org/g/960460/4f0e369d82/", {
-            "keyword": "623f8c86c9fe38e964682dd4309b96922655b900",
+            "keyword": "d837276b02c4e91e96c1b40fe4415cbb73b56577",
             "content": "493d759de534355c9f55f8e365565b62411de146",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -85,8 +85,8 @@ class ExhentaiGalleryExtractor(Extractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "gallery-id"   : self.gid,
-            "gallery-token": self.token,
+            "gallery_id"   : self.gid,
+            "gallery_token": self.token,
         }
         text.extract_all(page, (
             ("title"     , '<h1 id="gn">', '</h1>'),
@@ -94,7 +94,7 @@ class ExhentaiGalleryExtractor(Extractor):
             ("date"      , '>Posted:</td><td class="gdt2">', '</td>'),
             ("language"  , '>Language:</td><td class="gdt2">', ' '),
             ("size"      , '>File Size:</td><td class="gdt2">', ' '),
-            ("size-units", '', '<'),
+            ("size_units", '', '<'),
             ("count"     , '>Length:</td><td class="gdt2">', ' '),
         ), values=data)
         data["lang"] = util.language_to_code(data["language"])
@@ -132,7 +132,7 @@ class ExhentaiGalleryExtractor(Extractor):
 
         return url, text.nameext_from_url(data["url"], {
             "num": 1,
-            "image-token": data["startkey"],
+            "image_token": data["startkey"],
         })
 
     def images_from_api(self):
@@ -165,7 +165,7 @@ class ExhentaiGalleryExtractor(Extractor):
 
             yield url, text.nameext_from_url(imgurl, {
                 "num": request["page"],
-                "image-token": imgkey
+                "image_token": imgkey
             })
             request["imgkey"] = nextkey
 

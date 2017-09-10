@@ -32,13 +32,13 @@ class MangahereChapterExtractor(AsynchronousExtractor):
     """Extractor for manga-chapters from mangahere.co"""
     category = "mangahere"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
-    filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter_minor}"]
+    filename_fmt = ("{manga}_c{chapter:>03}{chapter_minor}_"
                     "{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.)?mangahere\.co/manga/"
                 r"([^/]+(?:/v0*(\d+))?/c0*(\d+)(\.\d+)?)")]
     test = [("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", {
-        "keyword": "d3fe470e934a9f02ed00d4391b1743970eae82fa",
+        "keyword": "8cb9f9512b68d2cdcbea2419592b9247304c149b",
         "content": "dd8454469429c6c717cbc3cad228e76ef8c6e420",
     })]
     url_fmt = "http://www.mangahere.co/manga/{}/{}.html"
@@ -74,8 +74,8 @@ class MangahereChapterExtractor(AsynchronousExtractor):
             # "title": TODO,
             "volume": self.volume or "",
             "chapter": self.chapter,
-            "chapter-minor": self.chminor or "",
-            "chapter-id": chid,
+            "chapter_minor": self.chminor or "",
+            "chapter_id": chid,
             "count": count,
             "lang": "en",
             "language": "English",

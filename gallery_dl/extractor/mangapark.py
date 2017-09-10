@@ -32,24 +32,24 @@ class MangaparkChapterExtractor(Extractor):
     category = "mangapark"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}",
-                     "c{chapter:>03}{chapter-minor} - {title}"]
-    filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
+                     "c{chapter:>03}{chapter_minor} - {title}"]
+    filename_fmt = ("{manga}_c{chapter:>03}{chapter_minor}_"
                     "{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me/manga/"
                 r"([^/]+/s(\d+)(?:/v([^/]+))?/c(\d+)(?:([^/]+)|/e(\d+))?)")]
     test = [
         ("http://mangapark.me/manga/gosu/s2/c55", {
             "count": 50,
-            "keyword": "bd97ca24ef344b44292910384215ef3f1005ea2e",
+            "keyword": "b2216c0b8621a86be51eced72a2a61ba9f47e11e",
         }),
         (("http://mangapark.me/manga/"
           "ad-astra-per-aspera-hata-kenjirou/s1/c1.2"), {
             "count": 40,
-            "keyword": "f28eb26b4966bebda0e761f241c2dd49e505ce13",
+            "keyword": "257d90d582b8f259380a61a0774ff2c4ae5b3986",
         }),
         ("http://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
             "count": 15,
-            "keyword": "34aa6ca3bdf5078f839cbf68ff68e39728cf248b",
+            "keyword": "cf5329984c062058133e12ee3fe4a53fb734ed4c",
         }),
     ]
 
@@ -80,13 +80,13 @@ class MangaparkChapterExtractor(Extractor):
             "version": self.version,
             "volume": self.volume or "",
             "chapter": self.chapter,
-            "chapter-minor": self.chminor or "",
+            "chapter_minor": self.chminor or "",
             "lang": "en",
             "language": "English",
         }
         data = text.extract_all(page, (
-            ("manga-id"  , "var _manga_id = '", "'"),
-            ("chapter-id", "var _book_id = '", "'"),
+            ("manga_id"  , "var _manga_id = '", "'"),
+            ("chapter_id", "var _book_id = '", "'"),
             ("manga"     , "<h2>", "</h2>"),
             ("title"     , "</a>", "<"),
             (None        , 'target="_blank" href="', ''),

@@ -48,7 +48,7 @@ class ImgchiliImageExtractor(ImgchiliExtractor):
     test = [(("http://imgchili.net/show/89427/"
               "89427136_test___quot;___gt;.png"), {
         "url": "b93d92a6b58eb30a7ff6f9729cb748d25fea0c86",
-        "keyword": "376c4584dfae7d7d2e88687d4ee9618bbfd0a35c",
+        "keyword": "9c584f848766e4cc71d9e7f5f1f849e296ec05ae",
     })]
 
     def get_job_metadata(self, page):
@@ -59,7 +59,7 @@ class ImgchiliImageExtractor(ImgchiliExtractor):
         parts = name2.split("in the gallery ")
         name = parts[0] if not parts[0].endswith("...") else name1
         return text.nameext_from_url(name, {
-            "image-id": self.match.group(1),
+            "image_id": self.match.group(1),
             "title": text.unescape(parts[-1]) if len(parts) > 1 else ""
         })
 
@@ -75,7 +75,7 @@ class ImgchiliAlbumExtractor(ImgchiliExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?imgchili\.net/album/([^/]+)"]
     test = [("http://imgchili.net/album/7a3824c59f77c8d39b260f9168d4b49b", {
         "url": "995e32b62c36d48b02ef4c7a7a19463924391e2a",
-        "keyword": "2d065bd7f822de4c0b7598679f2730e0082a617e",
+        "keyword": "ae0c56cfd1fe032e5bc22f1188767b2a923ae25e",
     })]
 
     def get_job_metadata(self, page):
@@ -95,5 +95,5 @@ class ImgchiliAlbumExtractor(ImgchiliExtractor):
                 return
             imgid, pos = text.extract(page, ' alt="', '_', pos)
             name , pos = text.extract(page, '<strong>', '</strong>', pos)
-            data = text.nameext_from_url(name, {"image-id": imgid, "num": num})
+            data = text.nameext_from_url(name, {"image_id": imgid, "num": num})
             yield "http://i" + url + data["extension"], data

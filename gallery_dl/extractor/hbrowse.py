@@ -31,13 +31,13 @@ class HbrowseChapterExtractor(Extractor):
     """Extractor for manga-chapters from hbrowse.com"""
     category = "hbrowse"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{gallery-id} {title}", "c{chapter:>05}"]
-    filename_fmt = ("{category}_{gallery-id}_{chapter:>05}_"
+    directory_fmt = ["{category}", "{gallery_id} {title}", "c{chapter:>05}"]
+    filename_fmt = ("{category}_{gallery_id}_{chapter:>05}_"
                     "{num:>03}.{extension}")
     pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/(c\d+)"]
     test = [("http://www.hbrowse.com/10363/c00000", {
         "url": "634f4800858913f097bc3b62a8fedaf74b5254bd",
-        "keyword": "c7dc22a10699dee5cf466406fecee6ffa2e6277e",
+        "keyword": "f0f96cefda19e5aee1a19454f63ffe3a425602ab",
         "content": "44578ebbe176c2c27434966aef22945787e2781e",
     })]
     url_base = "http://www.hbrowse.com"
@@ -59,14 +59,14 @@ class HbrowseChapterExtractor(Extractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            'gallery-id': self.gid,
+            'gallery_id': self.gid,
             "chapter": int(self.chapter[1:]),
         }
         return text.extract_all(page, (
             ('title'      , '<td class="listLong">', '</td>'),
             (None         , '<td class="listLong">', ''),
             ('artist'     , '>', '<'),
-            ('count-total', '<td class="listLong">', ' '),
+            ('count_total', '<td class="listLong">', ' '),
             (None         , '<td class="listLong">', ''),
             ('origin'     , '>', '<'),
         ), values=data)[0]

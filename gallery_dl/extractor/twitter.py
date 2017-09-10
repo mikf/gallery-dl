@@ -17,18 +17,18 @@ class TwitterTweetExtractor(Extractor):
     category = "twitter"
     subcategory = "tweet"
     directory_fmt = ["{category}", "{user}"]
-    filename_fmt = "{tweet-id}_{num}.{extension}"
+    filename_fmt = "{tweet_id}_{num}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/"
                r"(([^/]+)/status/(\d+))"]
     test = [
         ("https://twitter.com/PicturesEarth/status/672897688871018500", {
             "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
-            "keyword": "3cd8e27026a2112008985b1b53f5e4baf4616177",
+            "keyword": "7a6eac2bc88bbf16d0671ebb38e31f708d940ee8",
             "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
         }),
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "8438551b34caf2f580ba23f6014509c8dd5e1e0f",
+            "keyword": "334cd0c1f85c3e66923b44740f17407ce444931e",
         }),
     ]
 
@@ -54,7 +54,7 @@ class TwitterTweetExtractor(Extractor):
         """Collect metadata for extractor-job"""
         return {
             "user": self.user,
-            "tweet-id": self.tid,
+            "tweet_id": self.tid,
         }
 
     @staticmethod

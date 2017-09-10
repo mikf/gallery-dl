@@ -27,7 +27,7 @@ class SeigaExtractor(Extractor):
         for image in self.get_images():
             data.update(image)
             data["extension"] = None
-            url = self.get_image_url(image["image-id"])
+            url = self.get_image_url(image["image_id"])
             yield Message.Url, url, data
 
     def get_metadata(self):
@@ -68,17 +68,17 @@ class SeigaExtractor(Extractor):
 class SeigaUserExtractor(SeigaExtractor):
     """Extractor for images of a user from seiga.nicovideo.jp"""
     subcategory = "user"
-    directory_fmt = ["{category}", "{user-id}"]
-    filename_fmt = "{category}_{user-id}_{image-id}.{extension}"
+    directory_fmt = ["{category}", "{user_id}"]
+    filename_fmt = "{category}_{user_id}_{image_id}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/"
                 r"user/illust/(\d+)")]
     test = [
         ("http://seiga.nicovideo.jp/user/illust/39537793", {
-            "keyword": "15e4158164f9309c75c0f97169e0026b13a642ed",
+            "keyword": "a716bf534b4191dc58ddbff51494b72a9cf58285",
         }),
         ("http://seiga.nicovideo.jp/user/illust/79433", {
             "url": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-            "keyword": "82b330a4d1e8a2cd47ee934a0a40829232b49cdc",
+            "keyword": "187b77728381d072466af7f7ebcc479a0830ce25",
         }),
     ]
 
@@ -87,10 +87,10 @@ class SeigaUserExtractor(SeigaExtractor):
         self.user_id = match.group(1)
 
     def get_metadata(self):
-        return {"user-id": self.user_id}
+        return {"user_id": self.user_id}
 
     def get_images(self):
-        keymap = {0: "image-id", 2: "title", 3: "description",
+        keymap = {0: "image_id", 2: "title", 3: "description",
                   7: "summary", 8: "genre", 18: "date"}
         url = "http://seiga.nicovideo.jp/api/user/data?id=" + self.user_id
         response = self.request(url)
@@ -114,14 +114,14 @@ class SeigaUserExtractor(SeigaExtractor):
 class SeigaImageExtractor(SeigaExtractor):
     """Extractor for single images from seiga.nicovideo.jp"""
     subcategory = "image"
-    filename_fmt = "{category}_{image-id}.{extension}"
+    filename_fmt = "{category}_{image_id}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/"
                 r"(?:seiga/im|image/source/)(\d+)"),
                (r"(?:https?://)?lohas\.nicoseiga\.jp/"
                 r"(?:priv|o)/[^/]+/\d+/(\d+)")]
     test = [
         ("http://seiga.nicovideo.jp/seiga/im5977527", {
-            "keyword": "3b61d2fc26efb74547f47c522051cf3596ff6b62",
+            "keyword": "6ff7564b35890e333ff7413cb633ddb58339912f",
             "content": "d9202292012178374d57fb0126f6124387265297",
         }),
         ("http://seiga.nicovideo.jp/seiga/im123", {
@@ -134,4 +134,4 @@ class SeigaImageExtractor(SeigaExtractor):
         self.image_id = match.group(1)
 
     def get_images(self):
-        return ({"image-id": self.image_id},)
+        return ({"image_id": self.image_id},)
