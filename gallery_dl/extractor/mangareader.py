@@ -45,7 +45,7 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
     test = [(("http://www.mangareader.net/"
               "karate-shoukoushi-kohinata-minoru/11"), {
         "url": "84ffaab4c027ef9022695c53163c3aeabd07ca58",
-        "keyword": "09b4ad57a082eb371dec027ccfc8ed1157c6eac6",
+        "keyword": "05ef372e80257726166f78625cb78a09e6d9b1d1",
     })]
 
     def __init__(self, match):
@@ -77,14 +77,14 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
             (None, '<td class="propertytitle">Name:', ''),
             ("manga", '<h2 class="aname">', '</h2>'),
             (None, '<td class="propertytitle">Year of Release:', ''),
-            ('manga-release', '<td>', '</td>'),
+            ('release', '<td>', '</td>'),
             (None, '<td class="propertytitle">Author:', ''),
             ('author', '<td>', '</td>'),
             (None, '<td class="propertytitle">Artist:', ''),
             ('artist', '<td>', '</td>'),
             (None, '<div id="readmangasum">', ''),
             ('title', ' ' + self.chapter + '</a> : ', '</td>'),
-            ('chapter-date', '<td>', '</td>'),
+            ('date', '<td>', '</td>'),
         ), values=data)
         data, _ = text.extract_all(chapter_page, (
             (None, '<select id="pageMenu"', ''),

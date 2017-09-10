@@ -16,12 +16,12 @@ class FutabaThreadExtractor(Extractor):
     """Extractor for images from threads on www.2chan.net"""
     category = "2chan"
     subcategory = "thread"
-    directory_fmt = ["{category}", "{board-name}", "{thread}"]
+    directory_fmt = ["{category}", "{board_name}", "{thread}"]
     pattern = [r"(?:https?://)?(([^.]+)\.2chan\.net/([^/]+)/res/(\d+))"]
     urlfmt = "https://{server}.2chan.net/{board}/src/{filename}"
     test = [("http://dec.2chan.net/70/res/947.htm", {
         "url": "c5c12b80b290e224b6758507b3bb952044f4595b",
-        "keyword": "e1295c0a96f733898e92742bcc1a4c4b320e3748",
+        "keyword": "4bd22e7a9c3636faecd6ea7082509e8655e10dd0",
     })]
 
     def __init__(self, match):
@@ -49,7 +49,7 @@ class FutabaThreadExtractor(Extractor):
             "server": self.server,
             "title": title,
             "board": self.board,
-            "board-name": boardname[:-4],
+            "board_name": boardname[:-4],
             "thread": self.thread,
         }
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2016 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,13 +16,13 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
     """Extractor for image galleries from imagebam.com"""
     category = "imagebam"
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{title} - {gallery-key}"]
+    directory_fmt = ["{category}", "{title} - {gallery_key}"]
     filename_fmt = "{num:>03}-{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([^/]+).*"]
     test = [(("http://www.imagebam.com/"
               "gallery/adz2y0f9574bjpmonaismyrhtjgvey4o"), {
         "url": "d7a4483b6d5ebba81950a349aad58ae034c60eda",
-        "keyword": "e4a9395dbd06d4af3172a6a61c90601bc47ee18c",
+        "keyword": "0ab7bef5cf995d9229dc900dc508311cefb32306",
         "content": "596e6bfa157f2c7169805d50075c2986549973a8",
     })]
     url_base = "http://www.imagebam.com"
@@ -32,12 +32,12 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
         self.gkey = match.group(1)
 
     def items(self):
-        data = self.get_job_metadata()
-        data["num"] = 0
+        data, url = self.get_job_metadata()
         yield Message.Version, 1
         yield Message.Directory, data
-        for image_url, image_id in self.get_images(data["first-url"]):
-            data["id"] = image_id
+        data["num"] = 0
+        for image_url, image_id in self.get_images(url):
+            data["image_id"] = image_id
             data["num"] += 1
             text.nameext_from_url(image_url, data)
             yield Message.Url, image_url, data.copy()
@@ -46,12 +46,14 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
         """Collect metadata for extractor-job"""
         url = self.url_base + "/gallery/" + self.gkey
         page = self.request(url, encoding="utf-8").text
-        return text.extract_all(page, (
+        data, pos = text.extract_all(page, (
             (None       , "<img src='/img/icons/photos.png'", ""),
             ("title"    , "'> ", " <"),
             ("count"    , "'>", " images"),
-            ("first-url", "<a href='http://www.imagebam.com", "'"),
-        ), values={"gallery-key": self.gkey})[0]
+        ), values={"gallery_key": self.gkey})
+        url, pos = text.extract(
+            page, "<a href='http://www.imagebam.com", "'", pos)
+        return data, url
 
     def get_images(self, url):
         """Yield all image-urls and -ids for a gallery"""

@@ -15,7 +15,7 @@ from .. import text, exception
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
     category = "pinterest"
-    filename_fmt = "{category}_{pin-id}.{extension}"
+    filename_fmt = "{category}_{pin_id}.{extension}"
 
     def __init__(self):
         Extractor.__init__(self)
@@ -26,7 +26,7 @@ class PinterestExtractor(Extractor):
         img = pin["image"]["original"]
         url = img["url"]
         data = {
-            "pin-id": pin["id"],
+            "pin_id": pin["id"],
             "note": pin["note"],
             "width": img["width"],
             "height": img["height"],
@@ -41,7 +41,7 @@ class PinterestPinExtractor(PinterestExtractor):
     test = [
         ("https://www.pinterest.com/pin/858146903966145189/", {
             "url": "7abf2be76bf03d452feacf6e000b040fc2706b80",
-            "keyword": "e1a2ce625ece86f0b31f0ae94a3af3d72e6454b9",
+            "keyword": "5aac8028244b865824c61667f6cadd51e8765853",
             "content": "d3e24bc9f7af585e8c23b9136956bd45a4d9b947",
         }),
         ("https://www.pinterest.com/pin/858146903966145188/", {
@@ -70,7 +70,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     test = [
         ("https://www.pinterest.com/g1952849/test-/", {
             "url": "705ee521630a5d613b0449d694a5345e684572a9",
-            "keyword": "2815716747f84fa0a4047d29d71df8ae96a0e177",
+            "keyword": "1650dd31c4dedd940cef399135e485400625ec0b",
             "content": "30897fb5d5616765bb2c9c26cb84f54499424fb4",
         }),
         ("https://www.pinterest.com/g1952848/test/", {
@@ -99,7 +99,7 @@ class PinterestBoardExtractor(PinterestExtractor):
         """Get metadata from a board-object"""
         data = {
             "user": self.user,
-            "board-id": board["id"],
+            "board_id": board["id"],
             "board": board["name"],
             "count": board["counts"]["pins"],
         }

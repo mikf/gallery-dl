@@ -22,11 +22,11 @@ class WarosuThreadExtractor(Extractor):
     test = [
         ("https://warosu.org/jp/thread/16656025", {
             "url": "889d57246ed67e491e5b8f7f124e50ea7991e770",
-            "keyword": "dab56209e31634b44eb99a2cdd85fa922c726b4f",
+            "keyword": "65607b4630d87767465a5985c81cfa594913c073",
         }),
         ("https://warosu.org/jp/thread/16658073", {
             "url": "4500cf3184b067424fd9883249bd543c905fbecd",
-            "keyword": "084369b27b8cfc08a2276e00a4be6ffd7b1e5088",
+            "keyword": "d88ea2280201a7b04256c852733faff7272d7d11",
             "content": "d48df0a701e6599312bfff8674f4aa5d4fb8db1c",
         }),
     ]
@@ -59,7 +59,7 @@ class WarosuThreadExtractor(Extractor):
         title = text.extract(page, 'filetitle" itemprop="name">', '<')[0]
         return {
             "board": self.board,
-            "board-name": boardname.rpartition(" - ")[2],
+            "board_name": boardname.rpartition(" - ")[2],
             "thread": self.thread,
             "title": title,
         }

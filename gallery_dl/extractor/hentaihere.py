@@ -40,7 +40,7 @@ class HentaihereChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/(\d+)"]
     test = [("https://hentaihere.com/m/S13812/1/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-        "keyword": "fd6e515ccf073e3b57d39c5cb472692858bddb88",
+        "keyword": "7b31d19668b353f7be73b330a52ec6a7e56d23ea",
     })]
 
     def __init__(self, match):
@@ -55,7 +55,7 @@ class HentaihereChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
         pattern = r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by (.+) at "
         match = re.match(pattern, title)
         return {
-            "manga-id": self.gid,
+            "manga_id": self.gid,
             "manga": match.group(1),
             "type": match.group(2),
             "chapter": self.chapter,

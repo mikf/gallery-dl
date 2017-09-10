@@ -39,7 +39,7 @@ class SankakuTagExtractor(AsynchronousExtractor):
         yield Message.Directory, data
         for image in self.get_images():
             image.update(data)
-            yield Message.Url, image["file-url"], image
+            yield Message.Url, image["file_url"], image
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
@@ -75,7 +75,7 @@ class SankakuTagExtractor(AsynchronousExtractor):
         height   , pos = text.extract(page, '', ' ', pos)
         data = text.nameext_from_url(image_url, {
             "id": image_id,
-            "file-url": "https:" + text.unescape(image_url),
+            "file_url": "https:" + text.unescape(image_url),
             "width": width,
             "height": height,
         })

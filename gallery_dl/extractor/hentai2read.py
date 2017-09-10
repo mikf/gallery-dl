@@ -42,7 +42,7 @@ class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/(\d+)"]
     test = [("http://hentai2read.com/amazon_elixir/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-        "keyword": "fc79e4c70d61ae476aea2b63a75324e3d96f4497",
+        "keyword": "a159017295546e2647d80a4a4165c702662abe1e",
     })]
 
     def __init__(self, match):
@@ -57,7 +57,7 @@ class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
         match = re.match(r"Reading (.+) \(([^)]+)\) Hentai(?: by (.+))? - "
                          r"(\d+): (.+) . Page 1 ", title)
         return {
-            "manga-id": images[0].split("/")[-3],
+            "manga_id": images[0].split("/")[-3],
             "chapter": self.chapter,
             "count": len(images),
             "manga": match.group(1),

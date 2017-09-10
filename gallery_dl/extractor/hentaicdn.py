@@ -16,8 +16,8 @@ import json
 class HentaicdnChapterExtractor(Extractor):
     """Base class for extractors for a single manga chapter"""
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga-id} {title}"]
-    filename_fmt = ("{category}_{manga-id}_{chapter:>02}_"
+    directory_fmt = ["{category}", "{manga_id} {title}"]
+    filename_fmt = ("{category}_{manga_id}_{chapter:>02}_"
                     "{num:>03}.{extension}")
     url = ""
 

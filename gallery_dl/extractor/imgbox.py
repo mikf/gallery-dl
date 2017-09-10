@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014, 2015 Mike Fährmann
+# Copyright 2014-2017 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,13 +17,13 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
     """Extractor for image galleries from imgbox.com"""
     category = "imgbox"
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{title} - {gallery-key}"]
+    directory_fmt = ["{category}", "{title} - {gallery_key}"]
     filename_fmt = "{num:>03}-{filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"]
     test = [
         ("https://imgbox.com/g/JaX5V5HX7g", {
             "url": "6eafdeebaf0774238dddc9227e2ba315e40e9b7c",
-            "keyword": "cebd7f6868cf84ff492341c936cb6dbe5cde4682",
+            "keyword": "abe510221e1dc8c804296be25adf1498fb93f892",
             "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
         }),
         ("https://imgbox.com/g/JaX5V5HX7h", {
@@ -56,7 +56,7 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
         title = text.extract(page, "<h1>", "</h1>")[0]
         title, _, count = title.rpartition(" - ")
         return {
-            "gallery-key": self.key,
+            "gallery_key": self.key,
             "title": text.unescape(title),
             "count": count[:-7],
         }
@@ -66,7 +66,7 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
         return text.extract_all(page, (
             ("num"      , '</a> &nbsp; ', ' of '),
             (None       , 'class="image-container"', ''),
-            ("image-key", 'alt="', '"'),
+            ("image_key", 'alt="', '"'),
             ("filename" , ' title="', '"'),
         ), values=self.metadata.copy())[0]
 
@@ -86,7 +86,7 @@ class ImgboxImageExtractor(Extractor):
     test = [
         ("https://imgbox.com/qHhw7lpG", {
             "url": "b9556dc307edf88e016fbced6d354702bc236070",
-            "keyword": "ff0524dba869a4b3292d7d4f72f5da4024b4f002",
+            "keyword": "a5cdcdf6e784bb186ed65a0cd7978ae2d0e17a12",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
         }),
         ("https://imgbox.com/qHhw7lpH", {
@@ -104,7 +104,7 @@ class ImgboxImageExtractor(Extractor):
         if not url:
             raise exception.NotFoundError("image")
         filename, pos = text.extract(page, ' title="', '"', pos)
-        data = text.nameext_from_url(filename, {"image-key": self.key})
+        data = text.nameext_from_url(filename, {"image_key": self.key})
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, "https://i." + url, data

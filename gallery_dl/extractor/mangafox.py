@@ -17,14 +17,14 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
     """Extractor for manga-chapters from mangafox.me"""
     category = "mangafox"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter-minor}"]
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter_minor}"]
     filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
                     "{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.)?(mangafox\.me/manga/"
                 r"[^/]+/(v\d+/)?c\d+[^/]*)")]
     test = [(("http://mangafox.me/manga/kidou_keisatsu_patlabor/"
               "v05/c006.2/1.html"), {
-        "keyword": "3bae0396e96868f5f24dff5e547a6bbfcbed7282",
+        "keyword": "ef2757d6136ef6b02eafe12d98a05f189fe8b2ba",
         "content": "5c50c252dcf12ffecf68801f4db8a2167265f66c",
     })]
 
@@ -59,7 +59,7 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
         match = re.match(r"(v0*(\d+)/)?c0*(\d+)(.*)", data["chapter"])
         data["volume"] = match.group(2) or ""
         data["chapter"] = match.group(3)
-        data["chapter-minor"] = match.group(4) or ""
+        data["chapter_minor"] = match.group(4) or ""
         data["manga"] = data["manga"].rpartition(" ")[0]
         return data
 
