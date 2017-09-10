@@ -18,7 +18,7 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
     category = "mangafox"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{chapter_minor}"]
-    filename_fmt = ("{manga}_c{chapter:>03}{chapter-minor}_"
+    filename_fmt = ("{manga}_c{chapter:>03}{chapter_minor}_"
                     "{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.)?(mangafox\.me/manga/"
                 r"[^/]+/(v\d+/)?c\d+[^/]*)")]

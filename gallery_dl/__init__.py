@@ -102,7 +102,6 @@ def main():
             log.debug("Version %s", __version__)
             log.debug("Python %s - %s",
                       platform.python_version(), platform.platform())
-            print(file=sys.stderr)
 
         if args.list_modules:
             for module_name in extractor.modules:
