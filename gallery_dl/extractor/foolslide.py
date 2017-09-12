@@ -106,6 +106,26 @@ class FoolslideMangaExtractor(MangaExtractor, SharedConfigExtractor):
 
     def chapters(self, page):
         """Return a list of all chapter urls"""
-        return list(text.extract_iter(
-            page, '<div class="title"><a href="', '"'
-        ))
+        manga , pos = text.extract(page, '<h1 class="title">', '</h1>')
+        author, pos = text.extract(page, '<b>Author</b>: ', '<br', pos)
+        artist, pos = text.extract(page, '<b>Artist</b>: ', '<br', pos)
+        manga = manga.strip()
+
+        results = []
+        while True:
+            url, pos = text.extract(
+                page, '<div class="title"><a href="', '"', pos)
+            if not url:
+                return results
+            info = url.partition("/read/")[2].split("/")
+
+            chapter, pos = text.extract(page, 'title="', '"', pos)
+            group  , pos = text.extract(page, 'title="', '"', pos)
+            results.append((url, {
+                "manga": manga, "author": author, "artist": artist,
+                "group": group, "chapter_string": chapter,
+                "title": chapter.partition(": ")[2] or "",
+                "lang": info[1], "language": util.code_to_language(info[1]),
+                "volume": int(info[2]), "chapter": int(info[3]),
+                "chapter_minor": int(info[4]) if len(info) >= 6 else 0
+            }))
