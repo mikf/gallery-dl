@@ -9,7 +9,7 @@
 """Extract images from https://luscious.net/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import text, util
+from .. import text, util, exception
 
 
 class LusciousAlbumExtractor(AsynchronousExtractor):
@@ -72,10 +72,12 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         num = 1
         pos = page.find('<div class="album_cover_item">')
         url = extr(page, '<a href="', '"', pos)[0]
-        while not url.endswith("/more_like_this/"):
+        self._check_high_load(page, url)
+        while url and not url.endswith("/more_like_this/"):
             page = self.request("https://luscious.net" + url).text
             imgid, pos = extr(url , '/id/', '/')
             url  , pos = extr(page, '<link rel="next" href="', '"')
+            self._check_high_load(page, url)
             name , pos = extr(page, '<h1 id="picture_title">', '</h1>', pos)
             _    , pos = extr(page, '<ul class="image_option_icons">', '', pos)
             iurl , pos = extr(page, '<li><a href="', '"', pos+100)
@@ -87,3 +89,8 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
                 "image_id": imgid,
             }
             num += 1
+
+    def _check_high_load(self, page, url):
+        if not url and "<h1>High Load</h1>" in page:
+            self.log.error('"High Load!" - unable to continue')
+            raise exception.StopExtraction()
