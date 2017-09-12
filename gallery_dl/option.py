@@ -213,7 +213,7 @@ def build_parser():
     selection.add_argument(
         "--chapter-filter",
         metavar="EXPR", dest="chapter_filter",
-        help="Same as '--filter' except for chapters (not yet implemented)",
+        help="Same as '--filter' except for chapters",
     )
 
     parser.add_argument(

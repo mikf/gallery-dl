@@ -69,7 +69,7 @@ class TestExtractor(Extractor):
 
         yield Message.Version, 1
         for test in tests:
-            yield Message.Queue, test[0]
+            yield Message.Queue, test[0], {}
 
     @staticmethod
     def __contains__(_):

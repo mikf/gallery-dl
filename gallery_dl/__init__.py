@@ -153,7 +153,7 @@ def main():
             prepare_range(args.image_range, "image")
             prepare_range(args.chapter_range, "chapter")
             prepare_filter(args.image_filter, "image")
-            # prepare_filter(args.chapter_filter, "chapter")
+            prepare_filter(args.chapter_filter, "chapter")
 
             pformat = config.get(("output", "progress"), True)
             if pformat and len(urls) > 1 and args.loglevel < logging.ERROR:

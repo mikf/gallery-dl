@@ -161,8 +161,12 @@ class MangaExtractor(Extractor):
             chapters.reverse()
 
         yield Message.Version, 1
-        for chapter in chapters:
-            yield Message.Queue, chapter
+        try:
+            for chapter, data in chapters:
+                yield Message.Queue, chapter, data
+        except ValueError:
+            for chapter in chapters:
+                yield Message.Queue, chapter, {}
 
     def login(self):
         """Login and set necessary cookies"""

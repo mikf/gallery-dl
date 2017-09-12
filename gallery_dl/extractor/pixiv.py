@@ -174,7 +174,7 @@ class PixivMeExtractor(PixivExtractor):
         if response.status_code == 404:
             raise exception.NotFoundError("user")
         yield Message.Version, 1
-        yield Message.Queue, response.headers["Location"]
+        yield Message.Queue, response.headers["Location"], {}
 
 
 class PixivWorkExtractor(PixivExtractor):
