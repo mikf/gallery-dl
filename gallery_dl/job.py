@@ -96,8 +96,9 @@ class Job():
             self.handle_directory(msg[1])
 
         elif msg[0] == Message.Queue:
-            if self.pred_queue(msg[1], None):
-                self.handle_queue(msg[1])
+            _, url, kwds = msg
+            if self.pred_queue(url, kwds):
+                self.handle_queue(url, kwds)
 
         elif msg[0] == Message.Version:
             if msg[1] != 1:
@@ -112,7 +113,7 @@ class Job():
     def handle_directory(self, keywords):
         """Handle Message.Directory"""
 
-    def handle_queue(self, url):
+    def handle_queue(self, url, keywords):
         """Handle Message.Queue"""
 
     def update_kwdict(self, kwdict):
@@ -147,7 +148,7 @@ class DownloadJob(Job):
         """Set and create the target directory for downloads"""
         self.pathfmt.set_directory(keywords)
 
-    def handle_queue(self, url):
+    def handle_queue(self, url, keywords):
         try:
             DownloadJob(url).run()
         except exception.NoExtractorError:
@@ -181,10 +182,10 @@ class KeywordJob(Job):
         print("-----------------------------")
         self.print_keywords(keywords)
 
-    def handle_queue(self, url):
-        print("This extractor transfers work to other extractors and does not "
-              "provide any keywords on its own. Try "
-              "'gallery-dl --list-keywords \"", url, "\"' instead.", sep="")
+    def handle_queue(self, url, keywords):
+        print("Keywords for chapter filters:")
+        print("-----------------------------")
+        self.print_keywords(keywords)
         raise exception.StopExtraction()
 
     @staticmethod
@@ -218,13 +219,13 @@ class UrlJob(Job):
         Job.__init__(self, url)
         self.depth = depth
         if depth == self.maxdepth:
-            self.handle_queue = print
+            self.handle_queue = self.handle_url
 
     @staticmethod
     def handle_url(url, _):
         print(url)
 
-    def handle_queue(self, url):
+    def handle_queue(self, url, _):
         try:
             UrlJob(url, self.depth + 1).run()
         except exception.NoExtractorError:
@@ -277,8 +278,9 @@ class TestJob(DownloadJob):
     def handle_directory(self, keywords):
         self.update_keyword(keywords)
 
-    def handle_queue(self, url):
+    def handle_queue(self, url, keywords):
         self.update_url(url)
+        self.update_keyword(keywords)
 
     def update_url(self, url):
         """Update the URL hash"""

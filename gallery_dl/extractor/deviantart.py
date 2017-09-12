@@ -44,8 +44,9 @@ class DeviantartExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
         for deviation in self.deviations():
-            if isinstance(deviation, str):
-                yield Message.Queue, deviation
+            if isinstance(deviation, tuple):
+                url, data = deviation
+                yield Message.Queue, url, data
                 continue
 
             self.prepare(deviation)
@@ -159,7 +160,7 @@ class DeviantartExtractor(Extractor):
 
     def _folder_urls(self, folders, category):
         url = "https://{}.deviantart.com/{}/0/".format(self.user, category)
-        return [url + folder["name"] for folder in folders]
+        return [(url + folder["name"], folder) for folder in folders]
 
 
 class DeviantartGalleryExtractor(DeviantartExtractor):

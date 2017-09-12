@@ -33,4 +33,4 @@ class RecursiveExtractor(Extractor):
         yield Message.Version, 1
         with extractor.blacklist(blist):
             for match in re.finditer(r"https?://[^\s\"']+", page):
-                yield Message.Queue, match.group(0)
+                yield Message.Queue, match.group(0), {}

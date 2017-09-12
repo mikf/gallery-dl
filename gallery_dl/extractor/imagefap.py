@@ -157,10 +157,12 @@ class ImagefapUserExtractor(Extractor):
 
     def items(self):
         yield Message.Version, 1
-        for gallery in self.get_gallery_ids():
-            yield Message.Queue, "http://www.imagefap.com/gallery/" + gallery
+        for gid, name in self.get_gallery_data():
+            url = "http://www.imagefap.com/gallery/" + gid
+            data = {"gallery_id": int(gid), "name": name}
+            yield Message.Queue, url, data
 
-    def get_gallery_ids(self):
+    def get_gallery_data(self):
         """Yield all gallery_ids of a specific user"""
         folders = self.get_gallery_folders()
         url = "http://www.imagefap.com/ajax_usergallery_folder.php"
@@ -168,7 +170,14 @@ class ImagefapUserExtractor(Extractor):
         for folder_id in folders:
             params["id"] = folder_id
             page = self.request(url, params=params).text
-            yield from text.extract_iter(page, '<a  href="/gallery/', '"')
+
+            pos = 0
+            while True:
+                gid, pos = text.extract(page, '<a  href="/gallery/', '"', pos)
+                if not gid:
+                    break
+                name, pos = text.extract(page, "<b>", "<", pos)
+                yield gid, name
 
     def get_gallery_folders(self):
         """Create a list of all folder_ids of a specific user"""
