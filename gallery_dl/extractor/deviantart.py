@@ -170,11 +170,12 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
                r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"]
     test = [
         ("http://shimoda7.deviantart.com/gallery/", {
-            "url": "f95b222d939c1e6aa8b9aabe89eaa2d364f06d38",
-            "keyword": "af266348c6bf2bfb9219f94e505ff346db9b6321",
+            "url": "2b80b212717da6971b92670de15a29f68429a067",
+            "keyword": "a519a3f4af010d17f2b9b98042e88942cda14e73",
         }),
         ("https://yakuzafc.deviantart.com/", {
             "url": "fa6ecb2c3aa78872f762d43f7809b7f0580debc1",
+            "keyword": "b29746bac291d8c8e339f0256a2bd7bb3ebe1741",
         }),
         ("http://shimoda7.deviantart.com/gallery/?catpath=/", None),
     ]
@@ -195,12 +196,12 @@ class DeviantartFolderExtractor(DeviantartExtractor):
                r"/gallery/(\d+)/([^/?&#]+)"]
     test = [
         ("http://shimoda7.deviantart.com/gallery/722019/Miscellaneous", {
-            "url": "1ee23a0bd8f7099d375afe8a29ea1a3bf394ba1e",
-            "keyword": "96f4a766180d9eac96c5904a5c9cb29613401aac",
+            "url": "12c331eeff84bd47350af5a199cecc187ae03832",
+            "keyword": "2b1f373e9a9f6b440ea4a55615b0dc0a1a3e8c4d",
         }),
         ("http://majestic-da.deviantart.com/gallery/63419606/CHIBI-KAWAII", {
-            "url": "1df6f4312f124b0ad9f2a905c8f9e94e89c84370",
-            "keyword": "3eb4e7f10c49ab23d783a825bd934dbf98e8ff88",
+            "url": "2ea2a3df9591c26568b09291acb453fb87ce9920",
+            "keyword": "4c46822e62d3ca104a6dc38d74fadb93504a8b4b",
         }),
     ]
 
@@ -229,16 +230,16 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     test = [
         (("http://shimoda7.deviantart.com/art/"
           "For-the-sake-of-a-memory-10073852"), {
-            "url": "393dc581ca9e6938dbf0a3db8e9eea6243eb35f4",
-            "keyword": "e9373cda1d3e2a5b6ece82325f8f8e08b202ce10",
+            "url": "eef0c01b3808c535ea673e7b3654ab5209b910b7",
+            "keyword": "0c11a915cfba98aefbb0cab4303d5573a1720735",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://zzz.deviantart.com/art/zzz-1234567890", {
             "exception": exception.NotFoundError,
         }),
         ("http://sta.sh/01ijs78ebagf", {
-            "url": "3a15ed9201e665172b1daece8ef6d42f6a7ad3d5",
-            "keyword": "8213960fd651e1c8e2622a514d2482078341948e",
+            "url": "35c0cd0e51494a1e01bddf5414a0d1585cd9fb0e",
+            "keyword": "140963a04cf5b1e17e6379b4f446d9f0f1ea0680",
         }),
         ("http://sta.sh/abcdefghijkl", {
             "exception": exception.NotFoundError,
@@ -265,8 +266,8 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                r"/favourites/?(?:\?catpath=/)?$"]
     test = [
         ("http://h3813067.deviantart.com/favourites/", {
-            "url": "393dc581ca9e6938dbf0a3db8e9eea6243eb35f4",
-            "keyword": "76b34daf4bde433897ef1f230b036182da118413",
+            "url": "eef0c01b3808c535ea673e7b3654ab5209b910b7",
+            "keyword": "6e4f3c2863caf59fde7fba0d64c039ee10a545fa",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("http://h3813067.deviantart.com/favourites/?catpath=/", None),
@@ -291,8 +292,8 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/favourites/(\d+)/([^/?&#]+)"]
     test = [("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-        "url": "f0c12581060aab9699289817b39804d9eb88f675",
-        "keyword": "868ff18de9e3dd2af6ae95b0fb73d6556f051e17",
+        "url": "d5d930374c0f993437c70624c5e0348e9f23f601",
+        "keyword": "996ad6afb7c85448428318e9a035736de1cfcc3c",
     })]
 
     def __init__(self, match):
@@ -319,8 +320,8 @@ class DeviantartJournalExtractor(DeviantartExtractor):
                r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
     test = [
         ("https://angrywhitewanker.deviantart.com/journal/", {
-            "url": "6474f49fbb4d01637ff0762708953252a52dc9c1",
-            "keyword": "5b29c0fb9af34d35f069bfe8fd448c8ca0dd8a9d",
+            "url": "2a7dba8f18e0d7cb791cd8c78e35376f98933f9e",
+            "keyword": "937ec705c11f3689c244eeab3865312e22d8d089",
         }),
         ("http://shimoda7.deviantart.com/journal/?catpath=/", None),
     ]
