@@ -59,20 +59,53 @@ class BatotoExtractor():
             raise exception.AuthenticationError()
         return {c: response.cookies[c] for c in self.cookienames}
 
+    @staticmethod
+    def _parse_chapter_string(data):
+        data["chapter_string"] = text.unescape(data["chapter_string"])
+        pattern = r"(?:Vol.(\d+) )?Ch\.(\d+)([^ :]*)(?::? (.+))"
+        match = re.match(pattern, data["chapter_string"])
+
+        volume, chapter, data["chapter_minor"], title = match.groups()
+        data["volume"] = int(volume) if volume else 0
+        data["chapter"] = int(chapter)
+        data["title"] = title if title != "Read Online" else ""
+
 
 class BatotoMangaExtractor(BatotoExtractor, MangaExtractor):
     """Extractor for manga from bato.to"""
     pattern = [r"(?:https?://)?(?:www\.)?(bato\.to/comic/_/comics/.*-r\d+)"]
     test = [("http://bato.to/comic/_/comics/aria-r2007", {
         "url": "a38585b0339587666d772ee06f2a60abdbf42a97",
+        "keyword": "c33ea7b97e3714530384e2411fae62ae51aae50d",
     })]
 
     def chapters(self, page):
-        # TODO: filter by language / translator
-        pattern = (r'<td style="border-top:0;">\s+'
-                   r'<a href="https?://bato\.to/reader#([^"]+)')
-        return [self.root + "/reader#" + mangahash
-                for mangahash in re.findall(pattern, page)]
+        pos = 0
+        results = []
+        page = text.extract(
+            page, '<h3 class="maintitle">Chapters</h3>', '</tbody>')[0]
+
+        while True:
+            data, pos = text.extract_all(page, (
+                ("language"   , '<tr class="row lang_', ' '),
+                ("token"      , '/reader#', '"'),
+                ("chapter_string", 'title="', ' | Sort: '),
+                (None         , '<a href="https://bato.to/group/', ''),
+                ("group"      , '>', '<'),
+                (None         , '<a href="https://bato.to/forums/user/', ''),
+                ("contributor", '>', '<'),
+            ), pos)
+
+            if not data["token"]:
+                return results
+
+            self._parse_chapter_string(data)
+            data["lang"] = util.language_to_code(data["language"])
+            data["group"] = text.unescape(data["group"])
+            data["contributor"] = text.unescape(data["contributor"])
+            url = self.root + "/reader#" + data["token"]
+
+            results.append((url, data))
 
 
 class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
@@ -84,7 +117,7 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
     test = [
         ("http://bato.to/reader#459878c8fda07502", {
             "url": "432d7958506ad913b0a9e42664a89e46a63e9296",
-            "keyword": "75a3a86d32aecfc21c44865b4043490757f73d77",
+            "keyword": "a6ca65532ad5653d0690b0ccc83f53b6e952f1bf",
         }),
         ("http://bato.to/reader#459878c8fda07503", {
             "exception": exception.NotFoundError,
@@ -141,18 +174,17 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
         _    , pos = extr(page, '</select>', '', pos)
         count, pos = extr(page, '>page ', '<', pos-35)
         manga, pos = extr(page, "document.title = '", " - ", pos)
-        match = re.match(r"(Vol.(\d+) )?Ch\.([^:]+)(: (.+))?", cinfo)
-        return {
+        data = {
             "token": self.token,
             "manga": text.unescape(manga),
-            "volume": match.group(2) or "",
-            "chapter": match.group(3),
-            "title": match.group(5) or "",
-            "group": group,
+            "chapter_string": cinfo,
+            "group": text.unescape(group),
             "lang": util.language_to_code(lang),
             "language": lang,
             "count": count,
         }
+        self._parse_chapter_string(data)
+        return data
 
     @staticmethod
     def get_page_urls(page):
