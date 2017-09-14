@@ -99,7 +99,7 @@ class WarosuThreadExtractor(Extractor):
             ("w"       , '', 'x'),
             ("h"       , '', ', '),
             ("filename", '', '<'),
-            ("image"   , '<br/>\n<a href="', '"'),
+            ("image"   , '<br />\n<a href="', '"'),
         ), 0, data)
         data["filename"] = data["filename"].rpartition(".")[0]
         data["image"] = "https:" + data["image"]
