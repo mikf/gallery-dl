@@ -21,7 +21,8 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
                r"game-soundtracks/album/(.+)"]
     test = [(("http://downloads.khinsider.com/game-soundtracks/"
               "album/horizon-riders-wii-"), {
-        "url": "732639e9e72e169f8ec36a71609471aaf67451e0",
+        "pattern": ("https?://\d+\.\d+\.\d+\.\d+/ost/horizon-riders-wii-/"
+                    "[^/]+/horizon-riders-wii-full-soundtrack\.mp3"),
         "keyword": "d91cf3edee6713b536eaf3995743f0be7dc72f68",
     })]
 
