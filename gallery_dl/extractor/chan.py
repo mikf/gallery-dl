@@ -70,12 +70,14 @@ class FoolfuukaThreadExtractor(SharedConfigExtractor):
                      "{thread_num} - {title}"]
     filename_fmt = "{media[media]}"
     root = ""
+    referer = True
 
     def __init__(self, match):
         SharedConfigExtractor.__init__(self)
         self.board, self.thread = match.groups()
         self.session.headers["User-Agent"] = "Mozilla 5.0"
-        self.session.headers["Referer"] = self.root
+        if self.referer:
+            self.session.headers["Referer"] = self.root
 
     def items(self):
         op = True
@@ -91,9 +93,9 @@ class FoolfuukaThreadExtractor(SharedConfigExtractor):
             url = media["media_link"]
 
             if not url and "remote_media_link" in media:
-                needle = '<meta http-equiv="Refresh" content="0; url='
-                page = self.request(media["remote_media_link"]).text
-                url = text.extract(page, needle, '"')[0]
+                url = self.remote(media)
+            if url.startswith("/"):
+                url = self.root + url
 
             post["extension"] = url.rpartition(".")[2]
             yield Message.Url, url, post
@@ -104,7 +106,12 @@ class FoolfuukaThreadExtractor(SharedConfigExtractor):
         data = self.request(url, params=params).json()[self.thread]
 
         # sort post-objects by their key
-        posts = sorted(data["posts"].items(), key=operator.itemgetter(0))
+        posts = sorted(data.get("posts", {}).items())
         posts = map(operator.itemgetter(1), posts)
 
         return itertools.chain((data["op"],), posts)
+
+    def remote(self, media):
+        needle = '<meta http-equiv="Refresh" content="0; url='
+        page = self.request(media["remote_media_link"]).text
+        return text.extract(page, needle, '"')[0]
