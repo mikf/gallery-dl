@@ -7,6 +7,7 @@ Site                 URL                                 Capabilities           
 4chan                https://www.4chan.org/              Threads
 4plebs               https://archive.4plebs.org/         Threads
 8chan                https://8ch.net/                    Threads
+arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 Batoto               https://bato.to/                    Chapters, Manga                                    Optional
@@ -73,6 +74,7 @@ Twitter              https://twitter.com/                Tweets
 Warosu               https://warosu.org/                 Threads
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
+YEET Archive         https://archive.yeet.net/           Threads
 Acidimg              https://acidimg.cc/                 individual Images
 Chronos              http://chronos.to/                  individual Images
 Coreimg              http://coreimg.net/                 individual Images

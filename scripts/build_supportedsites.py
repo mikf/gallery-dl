@@ -12,6 +12,7 @@ CATEGORY_MAP = {
     "2chan"          : "Futaba Channel",
     "archivedmoe"    : "Archived.Moe",
     "archiveofsins"  : "Archive of Sins",
+    "b4k"            : "arch.b4k.co",
     "deviantart"     : "DeviantArt",
     "dokireader"     : "Doki Reader",
     "dynastyscans"   : "Dynasty Reader",
@@ -54,6 +55,7 @@ CATEGORY_MAP = {
     "spectrumnexus"  : "Spectrum Nexus",
     "thebarchive"    : "The /b/ Archive",
     "worldthree"     : "World Three",
+    "yeet"           : "YEET Archive",
     "yomanga"        : "YoManga",
     "yonkouprod"     : "Yonkou Productions",
 }
@@ -85,6 +87,7 @@ AUTH_MAP = {
 
 IGNORE_LIST = (
     "oauth",
+    "whatisthisimnotgoodwithcomputers",
 )
 
 
