@@ -26,12 +26,31 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineExtractor,
     """Extractor for comics from readcomiconline.to"""
     subcategory = "comic"
     pattern = [r"(?:https?://)?(?:www\.)?readcomiconline\.to/Comic/[^/]+/?$"]
-    test = [("http://readcomiconline.to/Comic/W-i-t-c-h", {
-        "url": "c5a530538a30b176916e30cbe223a93d83cb2691",
-    })]
+    test = [
+        ("http://readcomiconline.to/Comic/W-i-t-c-h", {
+            "url": "c5a530538a30b176916e30cbe223a93d83cb2691",
+            "keyword": "51097f2b65da683160dbea4de128dbec1cbf9357",
+        }),
+        ("http://readcomiconline.to/Comic/Bazooka-Jules", {
+            "url": "e517dca61dff489f18ca781084f59a9eeb60a6b6",
+            "keyword": "7d4877d1215650a768097a8626a2f0c6083119a4",
+        }),
+    ]
 
-    def chapter_paths(self, page):
-        return text.extract_iter(page, '                <li><a href="', '"')
+    def chapters(self, page):
+        results = []
+        comic, pos = text.extract(page, '<div class="heading"><h3>', '<')
+        page , pos = text.extract(page, '<ul class="list">', '</ul>', pos)
+
+        for item in text.extract_iter(page, '<a href="', '</span>'):
+            url, _, issue = item.partition('"><span>')
+            if issue.startswith('Issue #'):
+                issue = issue[7:]
+            results.append((self.root + url, {
+                "comic": comic, "issue": issue, "id": url.rpartition("=")[2],
+                "lang": "en", "language": "English",
+            }))
+        return results
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineExtractor,
