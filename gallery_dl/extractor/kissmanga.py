@@ -37,6 +37,29 @@ class KissmangaExtractor(Extractor):
 
     request = cloudflare.request_func
 
+    @staticmethod
+    def _parse_chapter_string(data):
+        data["chapter_string"] = text.unescape(data["chapter_string"])
+
+        match = re.match((
+            r"(?:[Vv]ol\.0*(\d+) )?"
+            r"(?:[Cc]h\.)?0*(\d+)"
+            r"(?:[.:]0*(\d+))?"
+            r"(?: *[:-]? *(.+))?"
+        ), data["chapter_string"])
+
+        if not match:
+            match = re.match((
+                r"[\w ]+?(?: -)? 0*()(\d+)()(?: *[:-]? *(.+))?"
+                # r"[\w ]+?(?: -)? 0*()(\d+)(?: (.+))?(?: - (.+))?"
+            ), data["chapter_string"])
+
+        volume, chapter, minor, title = match.groups()
+        data["volume"] = int(volume) if volume else 0
+        data["chapter"] = int(chapter) if chapter else 0
+        data["chapter_minor"] = "." + minor if minor else ""
+        data["title"] = title if title and title != "Read Online" else ""
+
 
 class KissmangaMangaExtractor(KissmangaExtractor, MangaExtractor):
     """Extractor for manga from kissmanga.com"""
@@ -44,12 +67,29 @@ class KissmangaMangaExtractor(KissmangaExtractor, MangaExtractor):
     test = [
         ("http://kissmanga.com/Manga/Dropout", {
             "url": "992befdd64e178fe5af67de53f8b510860d968ca",
+            "keyword": "1d23ea07296e004b33bee17fe2f5cd5177c58680",
         }),
         ("http://kissmanga.com/manga/feng-shen-ji", None),
     ]
 
-    def chapter_paths(self, page):
-        return text.extract_iter(page, '<td>\n<a href="', '"')
+    def chapters(self, page):
+        results = []
+        manga, pos = text.extract(
+            page, '<div class="barTitle">\n', '\n')
+        page, pos = text.extract(
+            page, '<table class="listing">', '</table>', pos)
+        needle = '" title="Read ' + manga + ' '
+        manga = text.unescape(manga)
+
+        for item in text.extract_iter(page, '<a href="', ' online">'):
+            url, _, chapter = item.partition(needle)
+            data = {
+                "manga": manga, "id": url.rpartition("=")[2],
+                "chapter_string": chapter, "lang": "en", "language": "English",
+            }
+            self._parse_chapter_string(data)
+            results.append((self.root + url, data))
+        return results
 
 
 class KissmangaChapterExtractor(KissmangaExtractor):
@@ -60,15 +100,15 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     test = [
         ("http://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
             "url": "4136bcd1c6cecbca8cc2bc965d54f33ef0a97cc0",
-            "keyword": "97cc9e513953e20d6309648df57a52a7ced59ae0",
+            "keyword": "68384c1167858fb4aa475c4596f0a685c45fff36",
         }),
         ("http://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
             "url": "de074848f6c1245204bb9214c12bcc3ecfd65019",
-            "keyword": "3d96653188b761752c38b60d6e397e2ace0ea04c",
+            "keyword": "089158338b4cde43b2ff244814effeb13297de33",
         }),
         ("http://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
             "url": "6abec8178f35fe7846586280ca9e38eacc32452c",
-            "keyword": "2ae18e456a4a7e4a2889af49d5f2e9c10fbc45e6",
+            "keyword": "558da596e86ca544eb72cf303f3694bbf0b1f2f5",
         }),
         ("http://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608", None),
     ]
@@ -87,19 +127,14 @@ class KissmangaChapterExtractor(KissmangaExtractor):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, "Read manga\n", "\n")
         cinfo, pos = text.extract(page, "", "\n", pos)
-        match = re.match((
-            r"(?:[Vv]ol.0*(\d+) )?(?:[Cc]h.)?0*(\d+)(?:\.0*(\d+))?(?:: (.+))?|"
-            r"[\w ]+?(?: -)? 0*(\d+)(?: (.+))?"), cinfo)
-        chminor = match.group(3) or match.group(6)
-        return {
+        data = {
             "manga": manga,
-            "volume": match.group(1) or "",
-            "chapter": match.group(2) or match.group(5),
-            "chapter_minor": "."+chminor if chminor else "",
-            "title": match.group(4) or "",
+            "chapter_string": cinfo,
             "lang": "en",
             "language": "English",
         }
+        self._parse_chapter_string(data)
+        return data
 
     def get_image_urls(self, page):
         """Extract list of all image-urls for a manga chapter"""
