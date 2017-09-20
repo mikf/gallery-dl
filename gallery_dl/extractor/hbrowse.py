@@ -54,10 +54,9 @@ class HbrowseMangaExtractor(MangaExtractor, HbrowseExtractor):
             if not url:
                 return results
             title, pos = text.extract(page, '>View ', '<', pos)
-            results.append((url, {
-                "chapter": int(url.rpartition("/")[2][1:]),
-                "title": title, **data
-            }))
+            data["chapter"] = int(url.rpartition("/")[2][1:])
+            data["title"] = title
+            results.append((url, data.copy()))
 
 
 class HbrowseChapterExtractor(HbrowseExtractor):
