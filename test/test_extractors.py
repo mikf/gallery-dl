@@ -66,9 +66,9 @@ skip = [
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
-    "imgtrex",  # 504
-    "hentaifoundry",  # SSL cert expired
+    "luscious",  # "high load"
     "pawoo",
+    "seaotterscans",  # "Name or service not known"
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:
