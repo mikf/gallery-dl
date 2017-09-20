@@ -22,16 +22,35 @@ class HentaihereMangaExtractor(MangaExtractor):
     test = [
         ("https://hentaihere.com/m/S13812", {
             "url": "d1ba6e28bb2162e844f8559c2b2725ba0a093559",
+            "keyword": "13c1ce7e15cbb941f01c843b0e89adc993d939ac",
         }),
         ("https://hentaihere.com/m/S7608", {
             "url": "6c5239758dc93f6b1b4175922836c10391b174f7",
+            "keyword": "675c7b7a4fa52cf569c283553bd16b4200a5cd36",
         }),
     ]
 
     def chapters(self, page):
-        return list(text.extract_iter(
-            page, '<li class="sub-chp clearfix">\n<a href="', '"'
-        ))
+        results = []
+        manga_id = int(self.url.rstrip("/").rpartition("/")[2][1:])
+        manga, pos = text.extract(
+            page, '<span itemprop="name">', '</span>')
+        mtype, pos = text.extract(
+            page, '<span class="mngType text-danger">[', ']</span>', pos)
+
+        while True:
+            url, pos = text.extract(
+                page, '<li class="sub-chp clearfix">\n<a href="', '"', pos)
+            if not url:
+                return results
+            chapter, pos = text.extract(page, 'title="Tagged: -">\n', '<', pos)
+            chapter_id, pos = text.extract(page, '/C', '"', pos)
+            chapter, _, title = text.unescape(chapter).strip().partition(" - ")
+            results.append((url, {
+                "manga_id": manga_id, "manga": manga, "type": mtype,
+                "chapter_id": int(chapter_id), "chapter": int(chapter),
+                "title": title, "lang": "en", "language": "English",
+            }))
 
 
 class HentaihereChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
@@ -40,7 +59,7 @@ class HentaihereChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/(\d+)"]
     test = [("https://hentaihere.com/m/S13812/1/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-        "keyword": "7b31d19668b353f7be73b330a52ec6a7e56d23ea",
+        "keyword": "a07753f655210525a80ff62607261715746f3273",
     })]
 
     def __init__(self, match):
@@ -52,12 +71,14 @@ class HentaihereChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
 
     def get_job_metadata(self, page, images):
         title = text.extract(page, "<title>", "</title>")[0]
+        chapter_id = text.extract(page, 'report/C', '"')[0]
         pattern = r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by (.+) at "
         match = re.match(pattern, title)
         return {
             "manga_id": self.gid,
             "manga": match.group(1),
             "type": match.group(2),
+            "chapter_id": chapter_id,
             "chapter": self.chapter,
             "title": match.group(3),
             "author": match.group(4),
