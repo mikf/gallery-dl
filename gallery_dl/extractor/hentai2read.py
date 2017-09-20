@@ -23,17 +23,37 @@ class Hentai2readMangaExtractor(MangaExtractor):
     test = [
         ("http://hentai2read.com/amazon_elixir/", {
             "url": "273073752d418ec887d7f7211e42b832e8c403ba",
+            "keyword": "13c1ce7e15cbb941f01c843b0e89adc993d939ac",
         }),
         ("http://hentai2read.com/oshikage_riot/", {
             "url": "6595f920a3088a15c2819c502862d45f8eb6bea6",
+            "keyword": "675c7b7a4fa52cf569c283553bd16b4200a5cd36",
         }),
     ]
 
     def chapters(self, page):
-        page = text.extract(
-            page, '<ul class="nav-chapters remove-margin-b">', '</ul>\n</div>'
-        )[0]
-        return list(text.extract_iter(page, '<li>\n<a href="', '"'))
+        results = []
+        manga, pos = text.extract(
+            page, '<span itemprop="itemreviewed">', '</span>')
+        mtype, pos = text.extract(
+            page, '<small class="text-danger">[', ']</small>', pos)
+        manga_id = int(text.extract(page, 'data-mid="', '"', pos)[0])
+        page, pos = text.extract(
+            page, '<ul class="nav-chapters remove-margin-b">', '</ul>\n</div>')
+
+        pos = 0
+        while True:
+            url, pos = text.extract(page, '<li>\n<a href="', '"', pos)
+            if not url:
+                return results
+            chapter_id, pos = text.extract(page, 'data-cid="', '"', pos)
+            chapter, pos = text.extract(page, '\n', '<', pos)
+            chapter, _, title = text.unescape(chapter).strip().partition(" - ")
+            results.append((url, {
+                "manga_id": manga_id, "manga": manga, "type": mtype,
+                "chapter_id": int(chapter_id), "chapter": int(chapter),
+                "title": title, "lang": "en", "language": "English",
+            }))
 
 
 class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
@@ -42,7 +62,7 @@ class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/(\d+)"]
     test = [("http://hentai2read.com/amazon_elixir/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-        "keyword": "a159017295546e2647d80a4a4165c702662abe1e",
+        "keyword": "0f6408d462a14bfe58030117dc295b84666843d0",
     })]
 
     def __init__(self, match):
@@ -54,16 +74,18 @@ class Hentai2readChapterExtractor(hentaicdn.HentaicdnChapterExtractor):
 
     def get_job_metadata(self, page, images):
         title = text.extract(page, "<title>", "</title>")[0]
+        chapter_id = text.extract(page, 'data-cid="', '"')[0]
         match = re.match(r"Reading (.+) \(([^)]+)\) Hentai(?: by (.+))? - "
                          r"(\d+): (.+) . Page 1 ", title)
         return {
             "manga_id": images[0].split("/")[-3],
-            "chapter": self.chapter,
-            "count": len(images),
             "manga": match.group(1),
             "type": match.group(2),
+            "chapter_id": chapter_id,
+            "chapter": self.chapter,
             "author": match.group(3),
             "title": match.group(5),
+            "count": len(images),
             "lang": "en",
             "language": "English",
         }
