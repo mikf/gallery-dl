@@ -16,16 +16,40 @@ import re
 class MangahereMangaExtractor(MangaExtractor):
     """Extractor for manga from mangahere.co"""
     category = "mangahere"
-    pattern = [r"(?:https?://)?((?:www\.)?mangahere\.co/manga/[^/]+/?)$"]
-    test = [("http://www.mangahere.co/manga/aria/", {
-        "url": "77d96842292a6a341e8937816ed45cc09b538cf0",
-    })]
+    pattern = [r"(?:https?://)?((?:www\.)?mangahere\.co/manga/"
+               r"[^/]+)/?(?:#.*)?$"]
+    test = [
+        ("http://www.mangahere.co/manga/aria/", {
+            "url": "77d96842292a6a341e8937816ed45cc09b538cf0",
+            "keyword": "951eef36a3775525a31ca78c9d9cea546f4cf2f5",
+        }),
+        ("http://www.mangahere.co/manga/hiyokoi#50", {
+            "url": "f33cff8616dbc382a76034d9604e7671506ac02a",
+            "keyword": "9542283639bd082fabf3a14b6695697d3ef15111",
+        })
+    ]
 
     def chapters(self, page):
-        return list(text.extract_iter(
-            page, '<a class="color_0077" href="', '"',
-            page.index('<div class="detail_list">')
-        ))
+        results = []
+        pos = page.index('<div class="detail_list">')
+        manga, pos = text.extract(page, '<h3>Read ', ' Online</h3>', pos)
+        manga = text.unescape(manga)
+
+        while True:
+            url, pos = text.extract(
+                page, '<a class="color_0077" href="', '"', pos)
+            if not url:
+                return results
+            chapter, dot, minor = url[:-1].rpartition("/c")[2].partition(".")
+            volume, pos = text.extract(page, 'span class="mr6">', '<', pos)
+            title, pos = text.extract(page, '/span>', '<', pos)
+            date, pos = text.extract(page, 'class="right">', '</span>', pos)
+            results.append((url, {
+                "manga": manga, "title": title, "date": date,
+                "chapter": int(chapter), "chapter_minor": dot + minor,
+                "volume": int(volume.rpartition(" ")[2]) if volume else 0,
+                "lang": "en", "language": "English",
+            }))
 
 
 class MangahereChapterExtractor(AsynchronousExtractor):
