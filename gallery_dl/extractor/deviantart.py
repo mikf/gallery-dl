@@ -171,7 +171,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     test = [
         ("http://shimoda7.deviantart.com/gallery/", {
             "url": "2b80b212717da6971b92670de15a29f68429a067",
-            "keyword": "a519a3f4af010d17f2b9b98042e88942cda14e73",
+            "keyword": "cbba21ea69aae0ddece93bbabb53a80c062ae7d7",
         }),
         ("https://yakuzafc.deviantart.com/", {
             "url": "fa6ecb2c3aa78872f762d43f7809b7f0580debc1",
@@ -197,11 +197,11 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     test = [
         ("http://shimoda7.deviantart.com/gallery/722019/Miscellaneous", {
             "url": "12c331eeff84bd47350af5a199cecc187ae03832",
-            "keyword": "2b1f373e9a9f6b440ea4a55615b0dc0a1a3e8c4d",
+            "keyword": "1054257e241780aeb09402bf4e1a901c43a5e0f4",
         }),
         ("http://majestic-da.deviantart.com/gallery/63419606/CHIBI-KAWAII", {
             "url": "2ea2a3df9591c26568b09291acb453fb87ce9920",
-            "keyword": "4c46822e62d3ca104a6dc38d74fadb93504a8b4b",
+            "keyword": "d7b1915632736d7124148b85b05179c47dc4859b",
         }),
     ]
 
@@ -231,7 +231,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         (("http://shimoda7.deviantart.com/art/"
           "For-the-sake-of-a-memory-10073852"), {
             "url": "eef0c01b3808c535ea673e7b3654ab5209b910b7",
-            "keyword": "0c11a915cfba98aefbb0cab4303d5573a1720735",
+            "keyword": "405765edfd0abb0492431d9ff230d0562b0b482f",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://zzz.deviantart.com/art/zzz-1234567890", {
@@ -239,7 +239,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         }),
         ("http://sta.sh/01ijs78ebagf", {
             "url": "35c0cd0e51494a1e01bddf5414a0d1585cd9fb0e",
-            "keyword": "140963a04cf5b1e17e6379b4f446d9f0f1ea0680",
+            "keyword": "36f733338575e6ba737c20c5a524ad79d4a7cdf8",
         }),
         ("http://sta.sh/abcdefghijkl", {
             "exception": exception.NotFoundError,
@@ -267,7 +267,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     test = [
         ("http://h3813067.deviantart.com/favourites/", {
             "url": "eef0c01b3808c535ea673e7b3654ab5209b910b7",
-            "keyword": "6e4f3c2863caf59fde7fba0d64c039ee10a545fa",
+            "keyword": "e6a95ebf832d18ce9092ab25fa8e590038f3c281",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("http://h3813067.deviantart.com/favourites/?catpath=/", None),
@@ -293,7 +293,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
                r"/favourites/(\d+)/([^/?&#]+)"]
     test = [("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
         "url": "d5d930374c0f993437c70624c5e0348e9f23f601",
-        "keyword": "996ad6afb7c85448428318e9a035736de1cfcc3c",
+        "keyword": "36f8e18cf6cf59c4eb17141b7f56fc075ab3b68c",
     })]
 
     def __init__(self, match):
