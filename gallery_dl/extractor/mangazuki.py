@@ -73,27 +73,42 @@ class MangazukiChapterExtractor(Extractor):
 class MangazukiMangaExtractor(MangaExtractor):
     """Extractor for manga from mangazuki.co"""
     category = "mangazuki"
-    pattern = [r"(?:https?://)?((?:raws\.)?mangazuki\.co/series/[^/?&#]+)"]
+    pattern = [r"(?:https?://)?((raws\.)?mangazuki\.co/series/[^/?&#]+)"]
     scheme = "https"
     test = [
         ("https://mangazuki.co/series/Double-Casting", {
             "url": "aab747414191b14e768f4a1eb148448d83ef2e14",
+            "keyword": "99e64728381e110379703ef28511b45c1c850f86",
         }),
-        ("https://raws.mangazuki.co/series/Rakujitsu-no-Pathos", {
-            "url": "0b85292b096909e8419632f35d3e2680d468c12c",
+        ("https://raws.mangazuki.co/series/Hyulla-s-Clan", {
+            "url": "56ab020798c7a7b5b717166fe999455801a84f25",
+            "keyword": "9067b2f614d45f399240a93cb9a187ccb25ebde2",
         }),
     ]
 
+    def __init__(self, match):
+        MangaExtractor.__init__(self, match)
+        self.lang = "" if match.group(2) else "en"
+
     def chapters(self, page):
         params = {"page": 1}
-        chlist = []
+        results = []
+        manga = text.extract(
+            page, '<meta property="og:title" content="', '"')[0]
+        data = {
+            "manga": manga, "lang": self.lang,
+            "language": util.code_to_language(self.lang, self.lang)
+        }
 
         while True:
-            chlist.extend(
-                text.extract_iter(page, '<li class="media"><a href="', '"'))
+            urls = text.extract_iter(page, '<li class="media"><a href="', '"')
+            for url in urls:
+                chapter = url.rpartition("/")[2]
+                chapter, dot, minor = chapter.partition(".")
+                data["chapter"] = int(chapter)
+                data["chapter_minor"] = dot + minor
+                results.append((url, data.copy()))
             if 'class="next disabled"' in page:
-                break
+                return results
             params["page"] += 1
             page = self.request(self.url, params=params).text
-
-        return chlist
