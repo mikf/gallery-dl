@@ -150,6 +150,17 @@ def main():
                 except OSError as exc:
                     log.warning("unsupported-URL file: %s", exc)
 
+            if args.depr_images is not None:
+                log.warning("--images is deprecated. "
+                            "Use --range instead.")
+                if args.image_range is None:
+                    args.image_range = args.depr_images
+            if args.depr_chapters is not None:
+                log.warning("--chapters is deprecated. "
+                            "Use --chapter-range instead.")
+                if args.chapter_range is None:
+                    args.chapter_range = args.depr_chapters
+
             prepare_range(args.image_range, "image")
             prepare_range(args.chapter_range, "chapter")
             prepare_filter(args.image_filter, "image")
