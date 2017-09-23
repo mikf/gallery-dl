@@ -19,9 +19,10 @@ class MangapandaBase():
 
 class MangapandaMangaExtractor(MangapandaBase, MangareaderMangaExtractor):
     """Extractor for manga from mangapanda.com"""
-    pattern = [r"(?:https?://)?((?:www\.)?mangapanda\.com/[^/]+)$"]
+    pattern = [r"(?:https?://)?((?:www\.)?mangapanda\.com/[^/]+)/?$"]
     test = [("http://www.mangapanda.com/mushishi", {
         "url": "50a1ba730b85426b904da256c80f68ba6a8a2566",
+        "keyword": "031b3ea085921c552de017ecbb9b906e462229c9",
     })]
 
 
@@ -35,5 +36,5 @@ class MangapandaChapterExtractor(MangapandaBase, MangareaderChapterExtractor):
     ]
     test = [("http://www.mangapanda.com/red-storm/2", {
         "url": "4bf4ddf6c50105ec8a37675495ab80c46608275d",
-        "keyword": "16c881a09f5cf0f2c1c374665b667d1f26b20c22",
+        "keyword": "367d2694b49cc7cac82d68530d7d467a62453502",
     })]
