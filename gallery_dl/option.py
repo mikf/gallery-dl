@@ -142,7 +142,7 @@ def build_parser():
     downloader.add_argument(
         "--http-timeout",
         metavar="SECONDS", action=ConfigAction, dest="timeout", type=float,
-        help="Timeout for HTTP connections (defaut: no timeout)",
+        help="Timeout for HTTP connections (defaut: 30s)",
     )
     downloader.add_argument(
         "--abort-on-skip",
@@ -189,17 +189,17 @@ def build_parser():
 
     selection = parser.add_argument_group("Selection Options")
     selection.add_argument(
-        "--images",
-        metavar="ITEM-SPEC", dest="image_range",
+        "--range",
+        metavar="RANGE", dest="image_range",
         help=("Specify which images to download through a comma seperated list"
               " of indices or index-ranges; "
               "for example '--images -2,4,6-8,10-' will download images with "
               "index 1, 2, 4, 6, 7, 8 and 10 up to the last one"),
     )
     selection.add_argument(
-        "--chapters",
-        metavar="ITEM-SPEC", dest="chapter_range",
-        help="Same as '--images' except for chapters",
+        "--chapter-range",
+        metavar="RANGE", dest="chapter_range",
+        help="Same as '--range' except for chapters and other delegated URLs",
     )
     selection.add_argument(
         "--filter",
@@ -213,7 +213,15 @@ def build_parser():
     selection.add_argument(
         "--chapter-filter",
         metavar="EXPR", dest="chapter_filter",
-        help="Same as '--filter' except for chapters",
+        help="Same as '--filter' except for chapters and other delegated URLs",
+    )
+    selection.add_argument(
+        "--images", dest="depr_images",
+        help=argparse.SUPPRESS,
+    )
+    selection.add_argument(
+        "--chapters", dest="depr_chapters",
+        help=argparse.SUPPRESS,
     )
 
     parser.add_argument(
