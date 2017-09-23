@@ -19,19 +19,43 @@ class MangareaderBase():
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     root = "http://www.mangareader.net"
 
+    @staticmethod
+    def _parse_page(page, data):
+        text.extract_all(page, (
+            ("manga"  , '<h2 class="aname">', '</h2>'),
+            ("release", '>Year of Release:</td>\n<td>', '</td>'),
+            ('author' , '>Author:</td>\n<td>', '</td>'),
+            ('artist' , '>Artist:</td>\n<td>', '</td>'),
+        ), values=data)
+        data["manga"] = data["manga"].strip()
+        data["author"] = text.unescape(data["author"])
+        data["artist"] = text.unescape(data["artist"])
+
 
 class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
     """Extractor for manga from mangareader.net"""
-    pattern = [r"(?:https?://)?((?:www\.)?mangareader\.net/[^/]+)$"]
+    pattern = [r"(?:https?://)?((?:www\.)?mangareader\.net/[^/]+)/?$"]
     reverse = False
     test = [("http://www.mangareader.net/mushishi", {
         "url": "249042420b67a07b32e7f6be4c7410b6d810b808",
+        "keyword": "031b3ea085921c552de017ecbb9b906e462229c9",
     })]
 
-    def chapter_paths(self, page):
+    def chapters(self, page):
+        results = []
+        data = {"lang": "en", "language": "English"}
+        self._parse_page(page, data)
+
         needle = '<div class="chico_manga"></div>\n<a href="'
-        pos = page.index('<div id="readmangasum">')
-        return text.extract_iter(page, needle, '"', pos)
+        pos = page.index('<div id="chapterlist">')
+        while True:
+            url, pos = text.extract(page, needle, '"', pos)
+            if not url:
+                return results
+            data["title"], pos = text.extract(page, '</a> : ', '</td>', pos)
+            data["date"] , pos = text.extract(page, '<td>', '</td>', pos)
+            data["chapter"] = int(url.rpartition("/")[2])
+            results.append((self.root + url, data.copy()))
 
 
 class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
@@ -45,7 +69,7 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
     test = [(("http://www.mangareader.net/"
               "karate-shoukoushi-kohinata-minoru/11"), {
         "url": "84ffaab4c027ef9022695c53163c3aeabd07ca58",
-        "keyword": "05ef372e80257726166f78625cb78a09e6d9b1d1",
+        "keyword": "2038e6a780a0028eee0067985b55debb1d4a6aab",
     })]
 
     def __init__(self, match):
@@ -57,10 +81,9 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
-        for i in range(1, int(data["count"])+1):
+        for data["page"] in range(1, data["count"]+1):
             next_url, image_url, image_data = self.get_page_metadata(page)
             image_data.update(data)
-            image_data["page"] = i
             yield Message.Url, image_url, image_data
             if next_url:
                 page = self.request(next_url).text
@@ -69,30 +92,18 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
         """Collect metadata for extractor-job"""
         page = self.request(self.root + self.url_title).text
         data = {
-            "chapter": self.chapter,
+            "chapter": int(self.chapter),
             "lang": "en",
             "language": "English",
         }
-        data, _ = text.extract_all(page, (
-            (None, '<td class="propertytitle">Name:', ''),
-            ("manga", '<h2 class="aname">', '</h2>'),
-            (None, '<td class="propertytitle">Year of Release:', ''),
-            ('release', '<td>', '</td>'),
-            (None, '<td class="propertytitle">Author:', ''),
-            ('author', '<td>', '</td>'),
-            (None, '<td class="propertytitle">Artist:', ''),
-            ('artist', '<td>', '</td>'),
-            (None, '<div id="readmangasum">', ''),
+        self._parse_page(page, data)
+        text.extract_all(page, (
             ('title', ' ' + self.chapter + '</a> : ', '</td>'),
             ('date', '<td>', '</td>'),
-        ), values=data)
-        data, _ = text.extract_all(chapter_page, (
-            (None, '<select id="pageMenu"', ''),
-            ('count', '</select> of ', '</div>'),
-        ), values=data)
-        for key in ("author", "artist"):
-            data[key] = text.unescape(data[key])
-        data["manga"] = data["manga"].strip()
+        ), page.index('<div id="chapterlist">'), data)
+        data["count"] = int(text.extract(
+            chapter_page, '</select> of ', '<')[0]
+        )
         return data
 
     def get_page_metadata(self, page):
@@ -112,6 +123,6 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
             height, pos = extr(page, ' height="', '"', pos)
         image, pos = extr(page, ' src="', '"', pos)
         return self.root + url, image, text.nameext_from_url(image, {
-            "width": width,
-            "height": height,
+            "width": int(width),
+            "height": int(height),
         })
