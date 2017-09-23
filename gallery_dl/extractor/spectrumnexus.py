@@ -22,11 +22,14 @@ class SpectrumnexusMangaExtractor(MangaExtractor):
     })]
 
     def chapters(self, page):
+        results = []
+        manga = text.extract(page, '<title>', ' &#183; ')[0]
         page = text.extract(page, 'class="selectchapter"', '</select>')[0]
-        return [
-            self.url + "?ch=" + chapter.replace(" ", "+")
-            for chapter in text.extract_iter(page, '<option value="', '"')
-        ]
+        for chapter in text.extract_iter(page, '<option value="', '"'):
+            results.append((self.url + "?ch=" + chapter.replace(" ", "+"), {
+                "manga": manga, "chapter_string": chapter,
+            }))
+        return results
 
 
 class SpectrumnexusChapterExtractor(AsynchronousExtractor):
