@@ -9,7 +9,7 @@
 """Extract hentai-manga from https://hentaihere.com/"""
 
 from .common import MangaExtractor
-from .. import text
+from .. import text, util
 from . import hentaicdn
 import re
 
@@ -32,7 +32,8 @@ class HentaihereMangaExtractor(MangaExtractor):
 
     def chapters(self, page):
         results = []
-        manga_id = int(self.url.rstrip("/").rpartition("/")[2][1:])
+        manga_id = util.safe_int(
+            self.url.rstrip("/").rpartition("/")[2][1:])
         manga, pos = text.extract(
             page, '<span itemprop="name">', '</span>')
         mtype, pos = text.extract(
@@ -48,7 +49,8 @@ class HentaihereMangaExtractor(MangaExtractor):
             chapter, _, title = text.unescape(chapter).strip().partition(" - ")
             results.append((url, {
                 "manga_id": manga_id, "manga": manga, "type": mtype,
-                "chapter_id": int(chapter_id), "chapter": int(chapter),
+                "chapter_id": util.safe_int(chapter_id),
+                "chapter": util.safe_int(chapter),
                 "title": title, "lang": "en", "language": "English",
             }))
 

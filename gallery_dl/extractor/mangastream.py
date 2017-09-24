@@ -9,7 +9,7 @@
 """Extract manga-chapters from https://mangastream.com/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import text
+from .. import text, util
 from urllib.parse import urljoin
 
 
@@ -32,8 +32,8 @@ class MangastreamChapterExtractor(AsynchronousExtractor):
         data = self.get_job_metadata(page)
         next_url = None
         yield Message.Version, 1
-        yield Message.Directory, data
-        for data["page"] in range(1, int(data["count"])+1):
+        yield Message.Directory, data.copy()
+        for data["page"] in range(1, data["count"]+1):
             if next_url:
                 page = self.request(next_url).text
             next_url, image_url = self.get_page_metadata(page)
@@ -44,21 +44,19 @@ class MangastreamChapterExtractor(AsynchronousExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(
-            page, '<span class="hidden-xs hidden-sm">', "<"
-        )
+            page, '<span class="hidden-xs hidden-sm">', "<")
         pos = page.find(self.part, pos)
         title, pos = text.extract(page, ' - ', '<', pos)
         count, pos = text.extract(page, 'Last Page (', ')', pos)
-        data = {
+        return {
             "manga": manga,
             "chapter": text.unquote(self.chapter),
-            "chapter-id": self.ch_id,
+            "chapter_id": util.safe_int(self.ch_id),
             "title": title,
-            "count": count,
+            "count": util.safe_int(count, 1),
             "lang": "en",
             "language": "English",
         }
-        return data
 
     @staticmethod
     def get_page_metadata(page):

@@ -9,7 +9,7 @@
 """Extract images from http://www.hbrowse.com/"""
 
 from .common import Extractor, MangaExtractor, Message
-from .. import text
+from .. import text, util
 import json
 
 
@@ -19,7 +19,8 @@ class HbrowseExtractor(Extractor):
     root = "http://www.hbrowse.com"
 
     @staticmethod
-    def _parse_page(page, data):
+    def parse_page(page, data):
+        """Parse metadata on 'page' and add it to 'data'"""
         text.extract_all(page, (
             ('manga' , '<td class="listLong">', '</td>'),
             ('artist', '<td class="listLong">', '</td>'),
@@ -28,9 +29,10 @@ class HbrowseExtractor(Extractor):
         ), values=data)
 
         data["manga"] = text.unescape(data["manga"])
-        data["total"] = int(data["total"])
+        data["total"] = util.safe_int(data["total"])
         data["artist"] = text.remove_html(data["artist"])
         data["origin"] = text.remove_html(data["origin"])
+        return data
 
 
 class HbrowseMangaExtractor(MangaExtractor, HbrowseExtractor):
@@ -44,8 +46,10 @@ class HbrowseMangaExtractor(MangaExtractor, HbrowseExtractor):
 
     def chapters(self, page):
         results = []
-        data = {"manga_id": int(self.url.rstrip("/").rpartition("/")[2])}
-        self._parse_page(page, data)
+        data = self.parse_page(page, {
+            "manga_id": util.safe_int(
+                self.url.rstrip("/").rpartition("/")[2])
+        })
 
         pos = 0
         needle = '<td class="listMiddle">\n<a class="listLink" href="'
@@ -54,7 +58,7 @@ class HbrowseMangaExtractor(MangaExtractor, HbrowseExtractor):
             if not url:
                 return results
             title, pos = text.extract(page, '>View ', '<', pos)
-            data["chapter"] = int(url.rpartition("/")[2][1:])
+            data["chapter"] = util.safe_int(url.rpartition("/")[2][1:])
             data["title"] = title
             results.append((url, data.copy()))
 
@@ -87,9 +91,10 @@ class HbrowseChapterExtractor(HbrowseExtractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        data = {"manga_id": int(self.gid), "chapter": int(self.chapter)}
-        self._parse_page(page, data)
-        return data
+        return self.parse_page(page, {
+            "manga_id": util.safe_int(self.gid),
+            "chapter": util.safe_int(self.chapter)
+        })
 
     def get_image_urls(self, page):
         """Yield all image-urls for a 'chapter'"""

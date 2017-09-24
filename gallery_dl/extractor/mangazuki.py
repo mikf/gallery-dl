@@ -105,7 +105,7 @@ class MangazukiMangaExtractor(MangaExtractor):
             for url in urls:
                 chapter = url.rpartition("/")[2]
                 chapter, dot, minor = chapter.partition(".")
-                data["chapter"] = int(chapter)
+                data["chapter"] = util.safe_int(chapter)
                 data["chapter_minor"] = dot + minor
                 results.append((url, data.copy()))
             if 'class="next disabled"' in page:

@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://www.mangafox.me/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import text, exception
+from .. import text, util, exception
 import re
 
 
@@ -24,7 +24,7 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
                 r"[^/]+/(v\d+/)?c\d+[^/]*)")]
     test = [(("http://mangafox.me/manga/kidou_keisatsu_patlabor/"
               "v05/c006.2/1.html"), {
-        "keyword": "ef2757d6136ef6b02eafe12d98a05f189fe8b2ba",
+        "keyword": "36b570e9ef11b4748407324fe08bebbe4856e6fd",
         "content": "5c50c252dcf12ffecf68801f4db8a2167265f66c",
     })]
 
@@ -38,7 +38,7 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
             raise exception.AuthorizationError()
         data = self.get_metadata(page)
         urls = zip(
-            range(1, int(data["count"])+1),
+            range(1, data["count"]+1),
             self.get_image_urls(page),
         )
         yield Message.Version, 1
@@ -50,17 +50,19 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = text.extract_all(page, (
-            ("manga"  , " - Read ", " Manga Scans "),
-            ("sid"    , "var sid=", ";"),
-            ("cid"    , "var cid=", ";"),
-            ("count"  , "var total_pages=", ";"),
-            ("chapter", 'var current_chapter="', '";'),
+            ("manga"         , " - Read ", " Manga Scans "),
+            ("sid"           , "var sid=", ";"),
+            ("cid"           , "var cid=", ";"),
+            ("count"         , "var total_pages=", ";"),
+            ("chapter_string", 'var current_chapter="', '"'),
         ))[0]
-        match = re.match(r"(v0*(\d+)/)?c0*(\d+)(.*)", data["chapter"])
-        data["volume"] = match.group(2) or ""
+        match = re.match(r"(v0*(\d+)/)?c0*(\d+)(.*)", data["chapter_string"])
+        data["volume"] = match.group(2)
         data["chapter"] = match.group(3)
         data["chapter_minor"] = match.group(4) or ""
         data["manga"] = data["manga"].rpartition(" ")[0]
+        for key in ("sid", "cid", "count", "volume", "chapter"):
+            data[key] = util.safe_int(data[key])
         return data
 
     def get_image_urls(self, page):

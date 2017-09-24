@@ -90,6 +90,16 @@ def combine_dict(a, b):
     return a
 
 
+def safe_int(value, default=0):
+    """Safely convert value to integer"""
+    if value is None or value == "":
+        return default
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+
 def code_to_language(code, default=None):
     """Map an ISO 639-1 language code to its actual name"""
     return CODES.get((code or "").lower(), default)

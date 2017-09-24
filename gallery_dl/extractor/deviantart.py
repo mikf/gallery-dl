@@ -9,7 +9,7 @@
 """Extract images from https://www.deviantart.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import datetime
@@ -57,7 +57,7 @@ class DeviantartExtractor(Extractor):
 
             if "videos" in deviation:
                 video = max(deviation["videos"],
-                            key=lambda x: int(x["quality"][:-1]))
+                            key=lambda x: util.safe_int(x["quality"][:-1]))
                 yield self.commit(deviation, video)
 
             if "flash" in deviation:
