@@ -19,12 +19,12 @@ class WorldthreeChapterExtractor(foolslide.FoolslideChapterExtractor):
         (("http://www.slide.world-three.org"
           "/read/black_bullet/en/2/7/page/1"), {
             "url": "be2f04f6e2d311b35188094cfd3e768583271584",
-            "keyword": "25fd070bc93ee8ad316f5b7d1bd9011c9bcf0616",
+            "keyword": "28edfeccc92f7ea29546d5616e689dcfcbac59d9",
         }),
         (("http://www.slide.world-three.org"
           "/read/idolmster_cg_shuffle/en/0/4/2/"), {
             "url": "6028ea5ca282744f925dfad92eeb98509f9cc78c",
-            "keyword": "10e3dc961ac2c9395f4d1f3ad3b9ad84113e7366",
+            "keyword": "5710e9c862c53d89268d68f353c1fe5836a323d1",
         }),
     ]
     scheme = "http"
@@ -36,5 +36,6 @@ class WorldthreeMangaExtractor(foolslide.FoolslideMangaExtractor):
     pattern = foolslide.manga_pattern("(?:www\.)?slide\.world-three\.org")
     test = [("http://www.slide.world-three.org/series/black_bullet/", {
         "url": "5743b93512d26e6b540d90a7a5d69208b6d4a738",
+        "keyword": "3a24f1088b4d7f3b798a96163f21ca251293a120",
     })]
     scheme = "http"

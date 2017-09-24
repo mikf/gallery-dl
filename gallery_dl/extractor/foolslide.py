@@ -34,28 +34,44 @@ def manga_pattern(domain_re):
     return [r"(?:https?://)?(" + domain_re + MANGA_RE]
 
 
-class FoolslideChapterExtractor(SharedConfigExtractor):
-    """Base class for chapter extractors for FoOlSlide based sites"""
+class FoolslideExtractor(SharedConfigExtractor):
+    """Base class for FoOlSlide extractors"""
     basecategory = "foolslide"
+    scheme = "https"
+
+    def request(self, url):
+        return SharedConfigExtractor.request(
+            self, url, encoding="utf-8", method="post", data={"adult": "true"})
+
+    @staticmethod
+    def parse_chapter_url(url, data):
+        info = url.partition("/read/")[2].split("/")
+        data["lang"] = info[1]
+        data["language"] = util.code_to_language(info[1])
+        data["volume"] = util.safe_int(info[2])
+        data["chapter"] = util.safe_int(info[3])
+        data["chapter_minor"] = "." + info[4] if len(info) >= 6 else ""
+        return data
+
+
+class FoolslideChapterExtractor(FoolslideExtractor):
+    """Base class for chapter extractors for FoOlSlide based sites"""
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "{chapter_string}"]
     filename_fmt = "{manga}_{chapter:>03}_{page:>03}.{extension}"
-    scheme = "https"
     single = True
 
     def __init__(self, match, url=None):
-        SharedConfigExtractor.__init__(self)
+        FoolslideExtractor.__init__(self)
         self.url = url or self.scheme + "://" + match.group(1)
-        self.data = match.groupdict(default="")
 
     def items(self):
-        page = self.request(self.url, encoding="utf-8",
-                            method="post", data={"adult": "true"}).text
+        page = self.request(self.url).text
         data = self.get_metadata(page)
         imgs = self.get_images(page)
 
         data["count"] = len(imgs)
-        data["chapter_id"] = imgs[0]["chapter_id"]
+        data["chapter_id"] = util.safe_int(imgs[0]["chapter_id"])
 
         yield Message.Version, 1
         yield Message.Directory, data
@@ -63,9 +79,12 @@ class FoolslideChapterExtractor(SharedConfigExtractor):
             try:
                 url = image["url"]
                 del image["url"]
+                del image["chapter_id"]
                 del image["thumb_url"]
             except KeyError:
                 pass
+            for key in ("height", "id", "size", "width"):
+                image[key] = util.safe_int(image[key])
             data.update(image)
             text.nameext_from_url(data["filename"], data)
             yield Message.Url, url, data
@@ -75,14 +94,12 @@ class FoolslideChapterExtractor(SharedConfigExtractor):
         _      , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
         manga  , pos = text.extract(page, 'title="', '"', pos)
         chapter, pos = text.extract(page, 'title="', '"', pos)
-
         chapter = text.unescape(chapter)
-
-        self.data["manga"] = text.unescape(manga).strip()
-        self.data["title"] = chapter.partition(":")[2].strip()
-        self.data["language"] = util.code_to_language(self.data["lang"])
-        self.data["chapter_string"] = chapter
-        return self.data
+        return self.parse_chapter_url(self.url, {
+            "manga": text.unescape(manga).strip(),
+            "title": chapter.partition(":")[2].strip(),
+            "chapter_string": chapter,
+        })
 
     def get_images(self, page):
         """Return a list of all images in this chapter"""
@@ -95,21 +112,15 @@ class FoolslideChapterExtractor(SharedConfigExtractor):
         return json.loads(text.extract(page, needle, ";", pos)[0])
 
 
-class FoolslideMangaExtractor(MangaExtractor, SharedConfigExtractor):
+class FoolslideMangaExtractor(FoolslideExtractor, MangaExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
-    scheme = "https"
-
-    def request(self, url):
-        return MangaExtractor.request(
-            self, url, encoding="utf-8", method="post", data={"adult": "true"}
-        )
 
     def chapters(self, page):
         """Return a list of all chapter urls"""
         manga , pos = text.extract(page, '<h1 class="title">', '</h1>')
         author, pos = text.extract(page, '<b>Author</b>: ', '<br', pos)
         artist, pos = text.extract(page, '<b>Artist</b>: ', '<br', pos)
-        manga = manga.strip()
+        manga = text.unescape(manga).strip()
 
         results = []
         while True:
@@ -117,15 +128,12 @@ class FoolslideMangaExtractor(MangaExtractor, SharedConfigExtractor):
                 page, '<div class="title"><a href="', '"', pos)
             if not url:
                 return results
-            info = url.partition("/read/")[2].split("/")
 
             chapter, pos = text.extract(page, 'title="', '"', pos)
             group  , pos = text.extract(page, 'title="', '"', pos)
-            results.append((url, {
+
+            results.append((url, self.parse_chapter_url(url, {
                 "manga": manga, "author": author, "artist": artist,
                 "group": group, "chapter_string": chapter,
                 "title": chapter.partition(": ")[2] or "",
-                "lang": info[1], "language": util.code_to_language(info[1]),
-                "volume": int(info[2]), "chapter": int(info[3]),
-                "chapter_minor": int(info[4]) if len(info) >= 6 else 0
-            }))
+            })))

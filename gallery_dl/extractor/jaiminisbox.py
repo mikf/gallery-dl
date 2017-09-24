@@ -17,10 +17,10 @@ class JaiminisboxChapterExtractor(foolslide.FoolslideChapterExtractor):
     pattern = foolslide.chapter_pattern(r"(?:www\.)?jaiminisbox\.com/reader")
     test = [
         ("https://jaiminisbox.com/reader/read/uratarou/en/0/1/", {
-            "keyword": "d187df3e3b6dbe09ec163626f6fd7c57133ab163",
+            "keyword": "d8919bc8f0351b44e938862214e654401962b5a5",
         }),
         ("https://jaiminisbox.com/reader/read/dr-stone/en/0/16/", {
-            "keyword": "6b6896d98a2eb8f38e9b7f5242a547b826da2599",
+            "keyword": "faa77b1f6ff462cd5e01511ab55b8c2d6ec42c3e",
         }),
     ]
 
@@ -31,4 +31,5 @@ class JaiminisboxMangaExtractor(foolslide.FoolslideMangaExtractor):
     pattern = foolslide.manga_pattern(r"(?:www\.)?jaiminisbox\.com/reader")
     test = [("https://jaiminisbox.com/reader/series/sora_no_kian/", {
         "url": "66612be177dc3b3fa1d1f537ef02f4f701b163ea",
+        "keyword": "0908a4145bb03acc4210f5d01169988969f5acd1",
     })]
