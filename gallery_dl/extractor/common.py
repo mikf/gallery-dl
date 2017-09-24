@@ -161,21 +161,14 @@ class MangaExtractor(Extractor):
             chapters.reverse()
 
         yield Message.Version, 1
-        try:
-            for chapter, data in chapters:
-                yield Message.Queue, chapter, data
-        except ValueError:
-            for chapter in chapters:
-                yield Message.Queue, chapter, {}
+        for chapter, data in chapters:
+            yield Message.Queue, chapter, data
 
     def login(self):
         """Login and set necessary cookies"""
 
     def chapters(self, page):
-        """Return a list of all chapter urls"""
-        return [self.root + path for path in self.chapter_paths(page)]
-
-    def chapter_paths(self, page):
+        """Return a list of all (url, metadata)-tuples"""
         return []
 
 
