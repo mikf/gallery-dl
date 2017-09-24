@@ -9,7 +9,7 @@
 """Extract images from http://imagefap.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 import json
 
 
@@ -159,7 +159,7 @@ class ImagefapUserExtractor(Extractor):
         yield Message.Version, 1
         for gid, name in self.get_gallery_data():
             url = "http://www.imagefap.com/gallery/" + gid
-            data = {"gallery_id": int(gid), "name": name}
+            data = {"gallery_id": util.safe_int(gid), "name": name}
             yield Message.Queue, url, data
 
     def get_gallery_data(self):

@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://kissmanga.com/"""
 
 from .common import Extractor, MangaExtractor, Message
-from .. import text, cloudflare, aes
+from .. import text, util, cloudflare, aes
 from ..cache import cache
 import re
 import hashlib
@@ -38,7 +38,8 @@ class KissmangaExtractor(Extractor):
     request = cloudflare.request_func
 
     @staticmethod
-    def _parse_chapter_string(data):
+    def parse_chapter_string(data):
+        """Parse 'chapter_string' value contained in 'data'"""
         data["chapter_string"] = text.unescape(data["chapter_string"])
 
         match = re.match((
@@ -49,16 +50,16 @@ class KissmangaExtractor(Extractor):
         ), data["chapter_string"])
 
         if not match:
-            match = re.match((
-                r"[\w ]+?(?: -)? 0*()(\d+)()(?: *[:-]? *(.+))?"
-                # r"[\w ]+?(?: -)? 0*()(\d+)(?: (.+))?(?: - (.+))?"
-            ), data["chapter_string"])
+            match = re.match(
+                r"[\w ]+?(?: -)? 0*()(\d+)()(?: *[:-]? *(.+))?",
+                data["chapter_string"])
 
         volume, chapter, minor, title = match.groups()
-        data["volume"] = int(volume) if volume else 0
-        data["chapter"] = int(chapter) if chapter else 0
+        data["volume"] = util.safe_int(volume)
+        data["chapter"] = util.safe_int(chapter)
         data["chapter_minor"] = "." + minor if minor else ""
         data["title"] = title if title and title != "Read Online" else ""
+        return data
 
 
 class KissmangaMangaExtractor(KissmangaExtractor, MangaExtractor):
@@ -87,7 +88,7 @@ class KissmangaMangaExtractor(KissmangaExtractor, MangaExtractor):
                 "manga": manga, "id": url.rpartition("=")[2],
                 "chapter_string": chapter, "lang": "en", "language": "English",
             }
-            self._parse_chapter_string(data)
+            self.parse_chapter_string(data)
             results.append((self.root + url, data))
         return results
 
@@ -133,8 +134,7 @@ class KissmangaChapterExtractor(KissmangaExtractor):
             "lang": "en",
             "language": "English",
         }
-        self._parse_chapter_string(data)
-        return data
+        return self.parse_chapter_string(data)
 
     def get_image_urls(self, page):
         """Extract list of all image-urls for a manga chapter"""
@@ -148,7 +148,7 @@ class KissmangaChapterExtractor(KissmangaExtractor):
             ]
         except UnicodeDecodeError:
             self.log.error("Failed to decrypt image URls")
-        except (ValueError, IndexError) as e:
+        except (ValueError, IndexError):
             self.log.error("Failed to get AES key")
         return []
 

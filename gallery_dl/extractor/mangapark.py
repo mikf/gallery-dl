@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://mangapark.me/"""
 
 from .common import Extractor, MangaExtractor, Message
-from .. import text
+from .. import text, util
 
 
 class MangaparkExtractor(Extractor):
@@ -18,17 +18,18 @@ class MangaparkExtractor(Extractor):
     root = "http://mangapark.me"
 
     @staticmethod
-    def _parse_chapter_path(path, data):
+    def parse_chapter_path(path, data):
+        """Get volume/chapter information from url-path of a chapter"""
         data["volume"], data["chapter_minor"] = 0, ""
         for part in path.split("/")[3:]:
             key, value = part[0], part[1:]
             if key == "s":
-                data["version"] = int(value)
+                data["version"] = util.safe_int(value)
             elif key == "v":
-                data["volume"] = int(value)
+                data["volume"] = util.safe_int(value)
             elif key == "c":
                 chapter, dot, minor = value.partition(".")
-                data["chapter"] = int(chapter)
+                data["chapter"] = util.safe_int(chapter)
                 data["chapter_minor"] = dot + minor
             elif key == "e":
                 data["chapter_minor"] = "v" + value
@@ -59,10 +60,10 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
             date , pos = text.extract(page, '<i>', '</i>', pos)
             count, pos = text.extract(page, '\tof ', ' ', pos)
 
-            self._parse_chapter_path(path, data)
+            self.parse_chapter_path(path, data)
             data["title"] = title[3:].strip()
             data["date"] = date
-            data["count"] = int(count)
+            data["count"] = util.safe_int(count)
             results.append((self.root + path, data.copy()))
 
 
@@ -107,7 +108,7 @@ class MangaparkChapterExtractor(MangaparkExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {"lang": "en", "language": "English"}
-        self._parse_chapter_path(self.path, data)
+        self.parse_chapter_path(self.path, data)
         text.extract_all(page, (
             ("manga_id"  , "var _manga_id = '", "'"),
             ("chapter_id", "var _book_id = '", "'"),
@@ -119,7 +120,7 @@ class MangaparkChapterExtractor(MangaparkExtractor):
         data["manga"], _, data["type"] = data["manga"].rpartition(" ")
         data["manga"] = text.unescape(data["manga"])
         data["title"] = data["title"].partition(": ")[2]
-        data["count"] = int(data["count"])
+        data["count"] = util.safe_int(data["count"])
         return data
 
     @staticmethod

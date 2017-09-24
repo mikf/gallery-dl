@@ -9,7 +9,7 @@
 """Extract manga pages from http://www.thespectrum.net/manga_scans/"""
 
 from .common import MangaExtractor, AsynchronousExtractor, Message
-from .. import text
+from .. import text, util
 
 
 class SpectrumnexusMangaExtractor(MangaExtractor):
@@ -19,6 +19,7 @@ class SpectrumnexusMangaExtractor(MangaExtractor):
     reverse = False
     test = [("http://view.thespectrum.net/series/kare-kano-volume-01.html", {
         "url": "b2b175aad5ef1701cc4aee7c24f1ca3a93aba9cb",
+        "keyword": "5ed9d5c7c69d2d03417c853c4e8eae30f1e5febf",
     })]
 
     def chapters(self, page):
@@ -47,7 +48,7 @@ class SpectrumnexusChapterExtractor(AsynchronousExtractor):
     test = [(("http://view.thespectrum.net/series/"
               "toriko.html?ch=Chapter+343&page=1"), {
         "url": "c0fc7dc594841217cc622a67edd79f06e9900333",
-        "keyword": "8499166b62db0c87e7109cc5f9aa837b4815dd9c",
+        "keyword": "3d0cb57b6b1c2cbecc7aed33f83c24891a4ff53f",
     })]
 
     def __init__(self, match):
@@ -66,27 +67,28 @@ class SpectrumnexusChapterExtractor(AsynchronousExtractor):
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data.copy()
-        count = int(data["count"])
-        for i in range(1, count+1):
+        for i in range(1, data["count"]+1):
             url = self.get_image_url(page)
             text.nameext_from_url(url, data)
             data["page"] = i
             yield Message.Url, url, data.copy()
-            if i < count:
+            if i < data["count"]:
                 params["page"] += 1
                 page = self.request(self.url, params=params).text
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         data = {
-            "chapter": self.chapter or "",
-            "volume": self.volume or "",
+            "chapter": util.safe_int(self.chapter),
+            "volume": util.safe_int(self.volume),
             "identifier": self.identifier.replace("+", " "),
         }
-        return text.extract_all(page, (
+        data = text.extract_all(page, (
             ('manga', '<title>', ' &#183; SPECTRUM NEXUS </title>'),
             ('count', '<div class="viewerLabel"> of ', '<'),
         ), values=data)[0]
+        data["count"] = util.safe_int(data["count"])
+        return data
 
     @staticmethod
     def get_image_url(page):

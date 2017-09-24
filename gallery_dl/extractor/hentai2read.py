@@ -9,7 +9,7 @@
 """Extract hentai-manga from https://hentai2read.com/"""
 
 from .common import MangaExtractor
-from .. import text
+from .. import text, util
 from . import hentaicdn
 import re
 import json
@@ -37,7 +37,7 @@ class Hentai2readMangaExtractor(MangaExtractor):
             page, '<span itemprop="itemreviewed">', '</span>')
         mtype, pos = text.extract(
             page, '<small class="text-danger">[', ']</small>', pos)
-        manga_id = int(text.extract(page, 'data-mid="', '"', pos)[0])
+        manga_id = util.safe_int(text.extract(page, 'data-mid="', '"', pos)[0])
         page, pos = text.extract(
             page, '<ul class="nav-chapters remove-margin-b">', '</ul>\n</div>')
 
@@ -51,7 +51,8 @@ class Hentai2readMangaExtractor(MangaExtractor):
             chapter, _, title = text.unescape(chapter).strip().partition(" - ")
             results.append((url, {
                 "manga_id": manga_id, "manga": manga, "type": mtype,
-                "chapter_id": int(chapter_id), "chapter": int(chapter),
+                "chapter_id": util.safe_int(chapter_id),
+                "chapter": util.safe_int(chapter),
                 "title": title, "lang": "en", "language": "English",
             }))
 

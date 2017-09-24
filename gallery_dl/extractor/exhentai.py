@@ -25,7 +25,7 @@ class ExhentaiGalleryExtractor(Extractor):
     pattern = [r"(?:https?://)?(g\.e-|e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
     test = [
         ("https://exhentai.org/g/960460/4f0e369d82/", {
-            "keyword": "d837276b02c4e91e96c1b40fe4415cbb73b56577",
+            "keyword": "173277161e28162dcc755d2e7a88e6cd750f2477",
             "content": "493d759de534355c9f55f8e365565b62411de146",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -44,6 +44,7 @@ class ExhentaiGalleryExtractor(Extractor):
         self.key = {}
         self.count = 0
         self.version, self.gid, self.token = match.groups()
+        self.gid = util.safe_int(self.gid)
         self.original = self.config("original", True)
         self.wait_min = self.config("wait-min", 3)
         self.wait_max = self.config("wait-max", 6)
@@ -72,7 +73,7 @@ class ExhentaiGalleryExtractor(Extractor):
             raise exception.NotFoundError("gallery")
 
         data = self.get_job_metadata(page)
-        self.count = int(data["count"])
+        self.count = data["count"]
         yield Message.Directory, data
 
         for url, image in self.get_images(page):
@@ -100,6 +101,7 @@ class ExhentaiGalleryExtractor(Extractor):
         data["lang"] = util.language_to_code(data["language"])
         data["title"] = text.unescape(data["title"])
         data["title_jp"] = text.unescape(data["title_jp"])
+        data["count"] = util.safe_int(data["count"])
         return data
 
     def get_images(self, page):
@@ -141,7 +143,7 @@ class ExhentaiGalleryExtractor(Extractor):
         nextkey = self.key["next"]
         request = {
             "method" : "showpage",
-            "gid"    : int(self.gid),
+            "gid"    : self.gid,
             "imgkey" : nextkey,
             "showkey": self.key["show"],
         }

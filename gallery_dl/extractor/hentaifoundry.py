@@ -9,7 +9,7 @@
 """Extract images from https://www.hentai-foundry.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 
 
 class HentaifoundryUserExtractor(Extractor):
@@ -23,7 +23,7 @@ class HentaifoundryUserExtractor(Extractor):
     test = [
         ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
             "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
-            "keyword": "6e9a549feb9bafebd9d9342ef3c8ccad33a7031c",
+            "keyword": "f8fecc8aa89978ecf402ec221243978fe791bd54",
         }),
         ("http://www.hentai-foundry.com/user/asdq/profile", {
             "exception": exception.NotFoundError,
@@ -40,7 +40,7 @@ class HentaifoundryUserExtractor(Extractor):
         self.set_filters(token)
         yield Message.Version, 1
         yield Message.Directory, data
-        for url, image in self.get_images(int(data["count"])):
+        for url, image in self.get_images(data["count"]):
             image.update(data)
             yield Message.Url, url, image
 
@@ -68,7 +68,7 @@ class HentaifoundryUserExtractor(Extractor):
         page = response.text
         token, pos = text.extract(page, 'hidden" value="', '"')
         count, pos = text.extract(page, 'class="active" >Pictures (', ')', pos)
-        return {"artist": self.artist, "count": count}, token
+        return {"artist": self.artist, "count": util.safe_int(count)}, token
 
     def get_image_metadata(self, url):
         """Collect metadata for an image"""
@@ -79,7 +79,7 @@ class HentaifoundryUserExtractor(Extractor):
             page, 'Pictures</a> &raquo; <span>', '<')
         url, pos = text.extract(
             page, '//pictures.hentai-foundry.com', '"', pos)
-        data = {"index": index, "title": text.unescape(title)}
+        data = {"index": util.safe_int(index), "title": text.unescape(title)}
         text.nameext_from_url(url, data)
         return "https://pictures.hentai-foundry.com" + url, data
 
@@ -127,7 +127,7 @@ class HentaifoundryImageExtractor(Extractor):
         (("http://www.hentai-foundry.com/"
           "pictures/user/Tenpura/407501/shimakaze"), {
             "url": "fbf2fd74906738094e2575d2728e8dc3de18a8a3",
-            "keyword": "304479cfe00fbb723886be78b2bd6b9306a31d8a",
+            "keyword": "85b8e26fa93d00ae1333cb7b418078f1792dc4a8",
             "content": "91bf01497c39254b6dfb234a18e8f01629c77fd1",
         }),
         ("http://www.hentai-foundry.com/pictures/user/Tenpura/340853/", {
@@ -160,7 +160,7 @@ class HentaifoundryImageExtractor(Extractor):
         url   , pos = extr(page, '//pictures.hentai-foundry.com', '"', pos)
         data = {
             "artist": artist,
-            "index": self.index,
+            "index": util.safe_int(self.index),
             "title": text.unescape(title),
         }
         text.nameext_from_url(url, data)

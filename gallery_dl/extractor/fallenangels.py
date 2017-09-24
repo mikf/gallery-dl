@@ -108,9 +108,11 @@ class FallenangelsMangaExtractor(MangaExtractor):
             title  , pos = text.extract(page, '<em>', '</em>', pos)
 
             manga, _, chapter = chapter.rpartition(" ")
-            chapter, _, minor = chapter.partition(".")
+            chapter, dot, minor = chapter.partition(".")
             results.append((url, {
-                "manga": manga, "title": title, "volume": int(volume),
-                "chapter": int(chapter), "chapter_minor": minor,
+                "manga": manga, "title": title,
+                "volume": util.safe_int(volume),
+                "chapter": util.safe_int(chapter),
+                "chapter_minor": dot + minor,
                 "lang": self.lang, "language": language,
             }))

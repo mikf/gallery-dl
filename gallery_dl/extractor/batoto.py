@@ -60,15 +60,17 @@ class BatotoExtractor():
         return {c: response.cookies[c] for c in self.cookienames}
 
     @staticmethod
-    def _parse_chapter_string(data):
+    def parse_chapter_string(data):
+        """Parse 'chapter_string' value contained in 'data'"""
         data["chapter_string"] = text.unescape(data["chapter_string"])
         pattern = r"(?:Vol.(\d+) )?Ch\.(\d+)([^ :]*)(?::? (.+))"
         match = re.match(pattern, data["chapter_string"])
 
         volume, chapter, data["chapter_minor"], title = match.groups()
-        data["volume"] = int(volume) if volume else 0
-        data["chapter"] = int(chapter)
+        data["volume"] = util.safe_int(volume)
+        data["chapter"] = util.safe_int(chapter)
         data["title"] = title if title != "Read Online" else ""
+        return data
 
 
 class BatotoMangaExtractor(BatotoExtractor, MangaExtractor):
@@ -99,7 +101,7 @@ class BatotoMangaExtractor(BatotoExtractor, MangaExtractor):
             if not data["token"]:
                 return results
 
-            self._parse_chapter_string(data)
+            self.parse_chapter_string(data)
             data["lang"] = util.language_to_code(data["language"])
             data["group"] = text.unescape(data["group"])
             data["contributor"] = text.unescape(data["contributor"])
@@ -117,7 +119,7 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
     test = [
         ("http://bato.to/reader#459878c8fda07502", {
             "url": "432d7958506ad913b0a9e42664a89e46a63e9296",
-            "keyword": "a6ca65532ad5653d0690b0ccc83f53b6e952f1bf",
+            "keyword": "96598b6f94d2b26d11c2780f8173cd6ab5fe9906",
         }),
         ("http://bato.to/reader#459878c8fda07503", {
             "exception": exception.NotFoundError,
@@ -148,15 +150,14 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
             elif error == "10020":
                 raise exception.NotFoundError("chapter")
             else:
-                raise Exception("[batoto] unexpected error code: " + error)
+                raise Exception("error code: " + error)
         page = response.text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data.copy()
-        for i in range(int(data["count"])):
+        for data["page"] in range(1, data["count"]+1):
             next_url, image_url = self.get_page_urls(page)
             text.nameext_from_url(image_url, data)
-            data["page"] = i+1
             yield Message.Url, image_url, data.copy()
             if next_url:
                 params["p"] += 1
@@ -181,10 +182,9 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
             "group": text.unescape(group),
             "lang": util.language_to_code(lang),
             "language": lang,
-            "count": count,
+            "count": util.safe_int(count),
         }
-        self._parse_chapter_string(data)
-        return data
+        return self.parse_chapter_string(data)
 
     @staticmethod
     def get_page_urls(page):

@@ -160,6 +160,16 @@ class TestOther(unittest.TestCase):
                 {1: {2: {3: {4: {"1": "A", "3": "C"}}}}}),
             {1: {2: {3: {4: {"1": "A", "2": "b", "3": "C"}}}}})
 
+    def test_safe_int(self):
+        self.assertEqual(util.safe_int(123), 123)
+        self.assertEqual(util.safe_int("123"), 123)
+        self.assertEqual(util.safe_int("zzz"), 0)
+        self.assertEqual(util.safe_int(""), 0)
+        self.assertEqual(util.safe_int(None), 0)
+        self.assertEqual(util.safe_int("zzz", "default"), "default")
+        self.assertEqual(util.safe_int("", "default"), "default")
+        self.assertEqual(util.safe_int(None, "default"), "default")
+
 
 if __name__ == '__main__':
     unittest.main()

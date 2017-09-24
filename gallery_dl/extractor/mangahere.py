@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://www.mangahere.co/"""
 
 from .common import MangaExtractor, AsynchronousExtractor, Message
-from .. import text
+from .. import text, util
 import re
 
 
@@ -46,8 +46,9 @@ class MangahereMangaExtractor(MangaExtractor):
             date, pos = text.extract(page, 'class="right">', '</span>', pos)
             results.append((url, {
                 "manga": manga, "title": title, "date": date,
-                "chapter": int(chapter), "chapter_minor": dot + minor,
-                "volume": int(volume.rpartition(" ")[2]) if volume else 0,
+                "volume": util.safe_int(volume.rpartition(" ")[2]),
+                "chapter": util.safe_int(chapter),
+                "chapter_minor": dot + minor,
                 "lang": "en", "language": "English",
             }))
 
@@ -62,7 +63,7 @@ class MangahereChapterExtractor(AsynchronousExtractor):
     pattern = [(r"(?:https?://)?(?:www\.)?mangahere\.co/manga/"
                 r"([^/]+(?:/v0*(\d+))?/c0*(\d+)(\.\d+)?)")]
     test = [("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", {
-        "keyword": "8cb9f9512b68d2cdcbea2419592b9247304c149b",
+        "keyword": "0c263b83f803524baa8717d2b4d841617aa8d775",
         "content": "dd8454469429c6c717cbc3cad228e76ef8c6e420",
     })]
     url_fmt = "http://www.mangahere.co/manga/{}/{}.html"
@@ -75,7 +76,7 @@ class MangahereChapterExtractor(AsynchronousExtractor):
         page = self.request(self.url_fmt.format(self.part, 1)).text
         data = self.get_job_metadata(page)
         urls = zip(
-            range(1, int(data["count"])+1),
+            range(1, data["count"]+1),
             self.get_image_urls(page),
         )
         yield Message.Version, 1
@@ -96,11 +97,11 @@ class MangahereChapterExtractor(AsynchronousExtractor):
         return {
             "manga": text.unescape(manga),
             # "title": TODO,
-            "volume": self.volume or "",
-            "chapter": self.chapter,
+            "volume": util.safe_int(self.volume),
+            "chapter": util.safe_int(self.chapter),
             "chapter_minor": self.chminor or "",
-            "chapter_id": chid,
-            "count": count,
+            "chapter_id": util.safe_int(chid),
+            "count": util.safe_int(count),
             "lang": "en",
             "language": "English",
         }
