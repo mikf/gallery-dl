@@ -52,7 +52,7 @@ class ImgurExtractor(Extractor):
 class ImgurImageExtractor(ImgurExtractor):
     """Extractor for individual images from imgur.com"""
     subcategory = "image"
-    filename_fmt = "{category}_{hash}.{extension}"
+    filename_fmt = "{category}_{hash}_{title}.{extension}"
     pattern = [(r"(?:https?://)?(?:m\.|www\.)?imgur\.com/"
                 r"(?:gallery/)?((?!gallery)[^/?&#]{7})/?"),
                (r"(?:https?://)?i\.imgur\.com/([^/?&#.]{5,7})\.")]
