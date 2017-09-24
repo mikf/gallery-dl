@@ -29,12 +29,12 @@ class SensescansChapterExtractor(SensescansExtractor,
         (("http://reader.sensescans.com/read/"
           "magi__labyrinth_of_magic/en/33/319/page/1"), {
               "url": "cc192cbeed36127d374926c50c3a4bd06092b760",
-              "keyword": "f80104d205e3f537ca11fef9e761393c956768f0",
+              "keyword": "fcc1ff4a902f222364df9c39db2f8e7dcbcd53da",
         }),
         (("http://sensescans.com/reader/read/"
           "magi__labyrinth_of_magic/en/33/319/page/1"), {
               "url": "cc192cbeed36127d374926c50c3a4bd06092b760",
-              "keyword": "f80104d205e3f537ca11fef9e761393c956768f0",
+              "keyword": "fcc1ff4a902f222364df9c39db2f8e7dcbcd53da",
         }),
     ]
 
@@ -46,4 +46,5 @@ class SensescansMangaExtractor(SensescansExtractor,
                 r"(?:/reader)?(" + foolslide.MANGA_RE)]
     test = [("http://sensescans.com/reader/series/hakkenden/", {
         "url": "2360ccb0ead0ff2f5e27b7aef7eb17b9329de2f2",
+        "keyword": "122cf92c32e6428c50f56ffaf29d06b96750ed71",
     })]

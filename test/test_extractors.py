@@ -68,7 +68,6 @@ skip = [
     # temporary issues
     "luscious",  # "high load"
     "pawoo",
-    "seaotterscans",  # "Name or service not known"
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:
@@ -77,7 +76,8 @@ if __name__ == '__main__' and len(sys.argv) > 1:
     else:
         extractors = [
             extr for extr in extractor.extractors()
-            if extr.category in sys.argv
+            if extr.category in sys.argv or
+            hasattr(extr, "basecategory") and extr.basecategory in sys.argv
         ]
     del sys.argv[1:]
 else:
