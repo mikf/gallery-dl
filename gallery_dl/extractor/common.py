@@ -48,7 +48,8 @@ class Extractor():
             ("extractor", self.category, self.subcategory, key), default)
 
     def request(self, url, method="GET", encoding=None, fatal=True, retries=3,
-                *args, **kwargs):
+                allow_empty=False, *args, **kwargs):
+        max_retries = retries
         while True:
             try:
                 response = self.session.request(method, url, *args, **kwargs)
@@ -56,13 +57,15 @@ class Extractor():
                     response.raise_for_status()
                 if encoding:
                     response.encoding = encoding
-                return response
+                if response.content or allow_empty:
+                    return response
+                msg = "empty response body"
             except requests.exceptions.RequestException as exc:
                 msg = exc
-            retries -= 1
             if not retries:
                 raise exception.HttpError(msg)
-            time.sleep(1)
+            time.sleep(1 + max_retries - retries)
+            retries -= 1
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""

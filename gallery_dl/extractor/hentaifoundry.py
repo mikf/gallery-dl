@@ -111,7 +111,7 @@ class HentaifoundryUserExtractor(Extractor):
             "filter_type": 0,
         }
         self.request("https://www.hentai-foundry.com/site/filters",
-                     method="post", data=formdata)
+                     method="post", data=formdata, allow_empty=True)
 
 
 class HentaifoundryImageExtractor(Extractor):
