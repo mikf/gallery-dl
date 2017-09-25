@@ -45,12 +45,12 @@ class FoolslideExtractor(SharedConfigExtractor):
 
     @staticmethod
     def parse_chapter_url(url, data):
-        info = url.partition("/read/")[2].split("/")
+        info = url.partition("/read/")[2].rstrip("/").split("/")
         data["lang"] = info[1]
         data["language"] = util.code_to_language(info[1])
         data["volume"] = util.safe_int(info[2])
         data["chapter"] = util.safe_int(info[3])
-        data["chapter_minor"] = "." + info[4] if len(info) >= 6 else ""
+        data["chapter_minor"] = "." + info[4] if len(info) >= 5 else ""
         return data
 
 

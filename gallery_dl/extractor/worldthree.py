@@ -24,7 +24,7 @@ class WorldthreeChapterExtractor(foolslide.FoolslideChapterExtractor):
         (("http://www.slide.world-three.org"
           "/read/idolmster_cg_shuffle/en/0/4/2/"), {
             "url": "6028ea5ca282744f925dfad92eeb98509f9cc78c",
-            "keyword": "5710e9c862c53d89268d68f353c1fe5836a323d1",
+            "keyword": "d478e9f20847deb1844dba318acaa8b91c19468a",
         }),
     ]
     scheme = "http"
