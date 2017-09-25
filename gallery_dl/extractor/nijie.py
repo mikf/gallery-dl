@@ -134,7 +134,7 @@ class NijieImageExtractor(NijieExtractor):
 
     def get_job_metadata(self):
         response = self.request(self.popup_url + self.image_id,
-                                allow_redirects=False)
+                                allow_redirects=False, allow_empty=True)
         if 300 <= response.status_code < 400:
             raise exception.NotFoundError("image")
         self.page = response.text
