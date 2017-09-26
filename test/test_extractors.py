@@ -66,8 +66,11 @@ skip = [
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
+    "imgtrex",
     "luscious",  # "high load"
     "pawoo",
+    "coreimg",  # "Name or service not known"
+    "mangahere",  # unstable; sometimes sends empty responses
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:
