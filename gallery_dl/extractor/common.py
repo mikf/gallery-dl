@@ -25,6 +25,7 @@ class Extractor():
 
     category = ""
     subcategory = ""
+    categorytransfer = False
     directory_fmt = ["{category}"]
     filename_fmt = "{filename}"
     cookiedomain = ""
@@ -147,6 +148,7 @@ class AsynchronousExtractor(Extractor):
 class MangaExtractor(Extractor):
 
     subcategory = "manga"
+    categorytransfer = True
     scheme = "http"
     root = ""
     reverse = True

@@ -136,8 +136,7 @@ class ImagefapUserExtractor(Extractor):
     """Extractor for all galleries from a user at imagefap.com"""
     category = "imagefap"
     subcategory = "user"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
-    filename_fmt = "{category}_{gallery_id}_{name}.{extension}"
+    categorytransfer = True
     pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
                 r"profile(?:\.php\?user=|/)([^/]+)"),
                (r"(?:https?://)?(?:www\.)?imagefap\.com/"
