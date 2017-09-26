@@ -286,7 +286,7 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
 
     def get_info(self, page):
         filename, pos = text.extract(page, '<td nowrap>', '</td>')
-        url     , pos = text.extract(page, '<img src="http://img', '"', pos)
+        url     , pos = text.extract(page, '<img src="https://img', '"', pos)
         return "http://img" + url, text.unescape(filename)
 
 
