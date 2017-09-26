@@ -121,6 +121,12 @@ class Job():
         kwdict["category"] = self.extractor.category
         kwdict["subcategory"] = self.extractor.subcategory
 
+    def _prepare(self, job):
+        if self.extractor.categorytransfer:
+            job.extractor.category = self.extractor.category
+            job.extractor.subcategory = self.extractor.subcategory
+        return job
+
     def _write_unsupported(self, url):
         if self.ufile:
             print(url, file=self.ufile, flush=True)
@@ -150,7 +156,7 @@ class DownloadJob(Job):
 
     def handle_queue(self, url, keywords):
         try:
-            DownloadJob(url).run()
+            self._prepare(DownloadJob(url)).run()
         except exception.NoExtractorError:
             self._write_unsupported(url)
 
@@ -183,9 +189,18 @@ class KeywordJob(Job):
         self.print_keywords(keywords)
 
     def handle_queue(self, url, keywords):
-        print("Keywords for chapter filters:")
-        print("-----------------------------")
-        self.print_keywords(keywords)
+        if not keywords:
+            self.extractor.log.info(
+                "This extractor transfers work to other extractors "
+                "and does not provide any keywords on its own. Try "
+                "'gallery-dl -K \"%s\"' instead.", url)
+        else:
+            print("Keywords for --chapter-filter:")
+            print("------------------------------")
+            self.print_keywords(keywords)
+            if self.extractor.categorytransfer:
+                print()
+                self._prepare(KeywordJob(url)).run()
         raise exception.StopExtraction()
 
     @staticmethod
@@ -227,7 +242,7 @@ class UrlJob(Job):
 
     def handle_queue(self, url, _):
         try:
-            UrlJob(url, self.depth + 1).run()
+            self._prepare(UrlJob(url, self.depth + 1)).run()
         except exception.NoExtractorError:
             self._write_unsupported(url)
 
