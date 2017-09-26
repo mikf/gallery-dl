@@ -10,6 +10,7 @@
 
 from .common import MangaExtractor, AsynchronousExtractor, Message
 from .. import text, util
+from urllib.parse import urljoin
 import re
 
 
@@ -44,7 +45,7 @@ class MangahereMangaExtractor(MangaExtractor):
             volume, pos = text.extract(page, 'span class="mr6">', '<', pos)
             title, pos = text.extract(page, '/span>', '<', pos)
             date, pos = text.extract(page, 'class="right">', '</span>', pos)
-            results.append((url, {
+            results.append((urljoin("http:", url), {
                 "manga": manga, "title": title, "date": date,
                 "volume": util.safe_int(volume.rpartition(" ")[2]),
                 "chapter": util.safe_int(chapter),
@@ -88,7 +89,7 @@ class MangahereChapterExtractor(AsynchronousExtractor):
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, '<title>', '</title>')
-        chid , pos = text.extract(page, '.mhcdn.net/store/manga/', '/', pos)
+        chid , pos = text.extract(page, '.net/store/manga/', '/', pos)
         _    , pos = text.extract(page, '<select class="wid60"', '', pos)
         _    , pos = text.extract(page, '</select>', '', pos)
         count, pos = text.extract(page, '>', '<', pos-30)
