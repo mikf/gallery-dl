@@ -134,6 +134,53 @@ class TestISO639_1(unittest.TestCase):
             self.assertEqual(func(*args), result)
 
 
+class TestFormatter(unittest.TestCase):
+
+    kwdict = {
+        "a": "hElLo wOrLd",
+        "b": "äöü",
+        "name": "Name",
+        "title1": "Title",
+        "title2": "",
+        "title3": None,
+        "title4": 0,
+    }
+
+    def test_conversions(self):
+        self._run_test("{a!l}", "hello world")
+        self._run_test("{a!u}", "HELLO WORLD")
+        self._run_test("{a!c}", "Hello world")
+        self._run_test("{a!C}", "Hello World")
+        self._run_test("{a!s}", self.kwdict["a"])
+        self._run_test("{a!r}", "'" + self.kwdict["a"] + "'")
+        self._run_test("{a!a}", "'" + self.kwdict["a"] + "'")
+        self._run_test("{b!a}", "'\\xe4\\xf6\\xfc'")
+        with self.assertRaises(KeyError):
+            self._run_test("{a!q}", "hello world")
+
+    def test_optional(self):
+        self._run_test("{name}{title1}", "NameTitle")
+        self._run_test("{name}{title1:?//}", "NameTitle")
+        self._run_test("{name}{title1:? **/''/}", "Name **Title''")
+
+        self._run_test("{name}{title2}", "Name")
+        self._run_test("{name}{title2:?//}", "Name")
+        self._run_test("{name}{title2:? **/''/}", "Name")
+
+        self._run_test("{name}{title3}", "NameNone")
+        self._run_test("{name}{title3:?//}", "Name")
+        self._run_test("{name}{title3:? **/''/}", "Name")
+
+        self._run_test("{name}{title4}", "Name0")
+        self._run_test("{name}{title4:?//}", "Name")
+        self._run_test("{name}{title4:? **/''/}", "Name")
+
+    def _run_test(self, format_string, result):
+        formatter = util.Formatter(format_string)
+        output = formatter.format_map(self.kwdict)
+        self.assertEqual(output, result, format_string)
+
+
 class TestOther(unittest.TestCase):
 
     def test_bdecode(self):
