@@ -59,8 +59,8 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
         if pos == -1:
             raise exception.NotFoundError("soundtrack")
         num = 0
-        for url in text.extract_iter(page, '<tr>\r\n\t\t<td><a href="',
-                                     '"', pos):
+        for url in text.extract_iter(
+                page, '<tr>\r\n\r\n\t \t<td><a href="', '"', pos):
             page = self.request(url, encoding="utf-8").text
             name, pos = text.extract(page, "Song name: <b>", "</b>")
             url , pos = text.extract(
