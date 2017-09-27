@@ -69,7 +69,6 @@ skip = [
     "imgtrex",
     "luscious",  # "high load"
     "pawoo",
-    "coreimg",  # "Name or service not known"
     "mangahere",  # unstable; sometimes sends empty responses
 ]
 # enable selective testing for direct calls
