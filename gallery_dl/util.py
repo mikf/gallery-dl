@@ -15,6 +15,7 @@ import time
 import base64
 import random
 import string
+import _string
 import hashlib
 import urllib.parse
 from . import text, exception
@@ -218,6 +219,90 @@ class ChainPredicate():
         return True
 
 
+class Formatter():
+    """Custom, trimmed-down version of string.Formatter
+
+    This string formatter implementation is a mostly performance-optimized
+    variant of the original string.Formatter class. Unnecessary features have
+    been removed (positional arguments, unused argument check) and new
+    formatting options have been added.
+
+    Extra Conversions:
+    - "l": calls str.lower on the target value
+    - "u": calls str.upper
+    - "c": calls str.capitalize
+    - "C": calls string.capwords
+    - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
+
+    Extra Format Specifiers:
+    - "?<before>/<after>/":
+        Adds <before> and <after> to the actual value if it evaluates to True.
+        Otherwise the whole replacement field beomes an empty string.
+        Example: {f:?-+/+-/} -> "-+Example+-" (if "f" contains "Example")
+                             -> ""            (if "f" is None, 0, "")
+    """
+    conversions = {
+        "l": str.lower,
+        "u": str.upper,
+        "c": str.capitalize,
+        "C": string.capwords,
+        "s": str,
+        "r": repr,
+        "a": ascii,
+    }
+
+    def __init__(self, format_string):
+        self.formatter_rules = tuple(_string.formatter_parser(format_string))
+
+    def format_map(self, kwargs):
+        """Apply 'kwargs' to the initial format_string and return its result"""
+        result = []
+        append = result.append
+
+        for literal_text, field_name, format_spec, conversion in \
+                self.formatter_rules:
+
+            if literal_text:
+                append(literal_text)
+
+            if field_name:
+                obj = self.get_field(field_name, kwargs)
+                if conversion:
+                    obj = self.conversions[conversion](obj)
+                if format_spec:
+                    format_spec = format_spec.format_map(kwargs)
+                    obj = self.format_field(obj, format_spec)
+                else:
+                    obj = str(obj)
+                append(obj)
+
+        return "".join(result)
+
+    @staticmethod
+    def format_field(value, format_spec):
+        """Format 'value' according to 'format_spec'"""
+        if format_spec[0] == "?":
+            if not value:
+                return ""
+            before, after, format_spec = format_spec.split("/", 2)
+            return before[1:] + format(value, format_spec) + after
+        return format(value, format_spec)
+
+    @staticmethod
+    def get_field(field_name, kwargs):
+        """Return value called 'field_name' from 'kwargs'"""
+        first, rest = _string.formatter_field_name_split(field_name)
+
+        obj = kwargs[first]
+        for is_attr, i in rest:
+            if is_attr:
+                obj = getattr(obj, i)
+            else:
+                obj = obj[i]
+
+        return obj
+
+
 class PathFormat():
 
     def __init__(self, extractor):
@@ -225,6 +310,7 @@ class PathFormat():
             "filename", extractor.filename_fmt)
         self.directory_fmt = extractor.config(
             "directory", extractor.directory_fmt)
+        self.filename_formatter = Formatter(self.filename_fmt)
         self.has_extension = False
         self.keywords = {}
         self.directory = self.realdirectory = ""
@@ -257,7 +343,8 @@ class PathFormat():
         """Build directory path and create it if necessary"""
         try:
             segments = [
-                text.clean_path(segment.format_map(keywords).strip())
+                text.clean_path(
+                    Formatter(segment).format_map(keywords).strip())
                 for segment in self.directory_fmt
             ]
         except Exception as exc:
@@ -287,7 +374,7 @@ class PathFormat():
         """Use filename-keywords and directory to build a full path"""
         try:
             filename = text.clean_path(
-                self.filename_fmt.format_map(self.keywords))
+                self.filename_formatter.format_map(self.keywords))
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
