@@ -18,7 +18,7 @@ class ChanThreadExtractor(Extractor):
     """Base class for extractors for Futaba Channel-like boards"""
     category = "chan"
     subcategory = "thread"
-    directory_fmt = ["{category}", "{board}-{thread}"]
+    directory_fmt = ["{category}", "{board}", "{thread} - {title}"]
     filename_fmt = "{tim}-{filename}{ext}"
     api_url = ""
     file_url = ""
@@ -67,7 +67,7 @@ class FoolfuukaThreadExtractor(SharedConfigExtractor):
     basecategory = "foolfuuka"
     subcategory = "thread"
     directory_fmt = ["{category}", "{board[shortname]}",
-                     "{thread_num} - {title}"]
+                     "{thread_num}{title:? - //}"]
     filename_fmt = "{media[media]}"
     root = ""
     referer = True
