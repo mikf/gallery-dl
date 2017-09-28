@@ -81,8 +81,8 @@ class FallenangelsMangaExtractor(MangaExtractor):
     scheme = "https"
     test = [
         ("http://manga.fascans.com/manga/trinity-seven", {
-            "url": "17acbfb97fcad16fea32009ec580b7e5931313a3",
-            "keyword": "707975dfb95855c8cba2e18a7405a77444c9280b",
+            "url": "b4904e25f023cff7174dd3f73000db4d4e81a4e2",
+            "keyword": "042eabfa6067fde9e3502edb7e9c8df2dbed8ac6",
         }),
         ("https://truyen.fascans.com/manga/rakudai-kishi-no-eiyuutan", {
             "url": "51a731a6b82d5eb7a335fbae6b02d06aeb2ab07b",

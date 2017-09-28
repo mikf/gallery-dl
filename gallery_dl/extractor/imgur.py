@@ -52,7 +52,7 @@ class ImgurExtractor(Extractor):
 class ImgurImageExtractor(ImgurExtractor):
     """Extractor for individual images from imgur.com"""
     subcategory = "image"
-    filename_fmt = "{category}_{hash}_{title}.{extension}"
+    filename_fmt = "{category}_{hash}{title:?_//}.{extension}"
     pattern = [(r"(?:https?://)?(?:m\.|www\.)?imgur\.com/"
                 r"(?:gallery/)?((?!gallery)[^/?&#]{7})/?"),
                (r"(?:https?://)?i\.imgur\.com/([^/?&#.]{5,7})\.")]
@@ -88,7 +88,7 @@ class ImgurImageExtractor(ImgurExtractor):
 class ImgurAlbumExtractor(ImgurExtractor):
     """Extractor for image albums from imgur.com"""
     subcategory = "album"
-    directory_fmt = ["{category}", "{album[hash]} - {album[title]}"]
+    directory_fmt = ["{category}", "{album[hash]}{album[title]:? - //}"]
     filename_fmt = "{category}_{album[hash]}_{num:>03}_{hash}.{extension}"
     pattern = [r"(?:https?://)?(?:m\.|www\.)?imgur\.com/"
                r"(?:a|gallery)/([^/?&#]{5})/?$"]
