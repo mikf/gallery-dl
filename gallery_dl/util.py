@@ -237,7 +237,7 @@ class Formatter():
     Extra Format Specifiers:
     - "?<before>/<after>/":
         Adds <before> and <after> to the actual value if it evaluates to True.
-        Otherwise the whole replacement field beomes an empty string.
+        Otherwise the whole replacement field becomes an empty string.
         Example: {f:?-+/+-/} -> "-+Example+-" (if "f" contains "Example")
                              -> ""            (if "f" is None, 0, "")
     """

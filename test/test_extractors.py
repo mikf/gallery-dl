@@ -69,7 +69,6 @@ skip = [
     "imgtrex",
     "luscious",  # "high load"
     "pawoo",
-    "mangahere",  # unstable; sometimes sends empty responses
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:

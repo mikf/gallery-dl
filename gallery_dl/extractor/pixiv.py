@@ -268,9 +268,7 @@ class PixivRankingExtractor(PixivExtractor):
                r"ranking\.php(?:\?([^#]*))?"]
     test = [
         (("https://www.pixiv.net/ranking.php"
-          "?mode=daily&content=illust&date=20170818"), {
-            "pattern": r"^https?://i\d*\.pixiv\.net/img-original/img/.+/\d+_p",
-        }),
+          "?mode=daily&content=illust&date=20170818"), None),
         ("https://www.pixiv.net/ranking.php", None),
     ]
 

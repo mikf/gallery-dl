@@ -71,7 +71,7 @@ def build_parser():
     general.add_argument(
         "-h", "--help",
         action="help",
-        help="Print this help message and exit"
+        help="Print this help message and exit",
     )
     general.add_argument(
         "--version",
@@ -121,7 +121,8 @@ def build_parser():
     )
     output.add_argument(
         "-K", "--list-keywords", dest="list_keywords", action="store_true",
-        help="Print a list of available keywords for the given URLs",
+        help=("Print a list of available keywords and example values "
+              "for the given URLs"),
     )
     output.add_argument(
         "--list-modules", dest="list_modules", action="store_true",
@@ -148,7 +149,7 @@ def build_parser():
         "--abort-on-skip",
         action=ConfigConstAction, nargs=0, dest="skip", const="abort",
         help=("Abort extractor run if a file download would normally be "
-              "skipped, i.e. if a file with the same filename already exists")
+              "skipped, i.e. if a file with the same filename already exists"),
     )
 
     configuration = parser.add_argument_group("Configuration Options")
@@ -193,13 +194,14 @@ def build_parser():
         metavar="RANGE", dest="image_range",
         help=("Specify which images to download through a comma seperated list"
               " of indices or index-ranges; "
-              "for example '--images -2,4,6-8,10-' will download images with "
+              "for example '--range -2,4,6-8,10-' will download images with "
               "index 1, 2, 4, 6, 7, 8 and 10 up to the last one"),
     )
     selection.add_argument(
         "--chapter-range",
         metavar="RANGE", dest="chapter_range",
-        help="Same as '--range' except for chapters and other delegated URLs",
+        help=("Same as '--range' except for chapters "
+              "and other transferred URLs"),
     )
     selection.add_argument(
         "--filter",
@@ -213,7 +215,8 @@ def build_parser():
     selection.add_argument(
         "--chapter-filter",
         metavar="EXPR", dest="chapter_filter",
-        help="Same as '--filter' except for chapters and other delegated URLs",
+        help=("Same as '--filter' except for chapters "
+              "and other transferred URLs"),
     )
     selection.add_argument(
         "--images", dest="depr_images",
