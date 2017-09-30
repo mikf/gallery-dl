@@ -66,9 +66,8 @@ def load(*files, format="json", strict=False):
             if strict:
                 log.error("Configuration file '%s' not found", path)
                 sys.exit(1)
-        except Exception as exception:
-            log.warning("Could not parse '%s'", path)
-            log.warning(exception)
+        except Exception as exc:
+            log.warning("Could not parse '%s':  %s", path, exc)
             if strict:
                 sys.exit(2)
 

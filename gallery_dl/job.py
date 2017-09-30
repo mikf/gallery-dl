@@ -17,7 +17,7 @@ class Job():
     """Base class for Job-types"""
     ufile = None
 
-    def __init__(self, url):
+    def __init__(self, url, parent=None):
         self.url = url
         self.extractor = extractor.find(url)
         if self.extractor is None:
@@ -45,6 +45,11 @@ class Job():
         if "range" in chapter:
             predicates.append(util.RangePredicate(chapter["range"]))
         self.pred_queue = util.build_predicate(predicates)
+
+        # category transfer
+        if parent and parent.extractor.categorytransfer:
+            self.extractor.category = parent.extractor.category
+            self.extractor.subcategory = parent.extractor.subcategory
 
     def run(self):
         """Execute or run the job"""
@@ -121,12 +126,6 @@ class Job():
         kwdict["category"] = self.extractor.category
         kwdict["subcategory"] = self.extractor.subcategory
 
-    def _prepare(self, job):
-        if self.extractor.categorytransfer:
-            job.extractor.category = self.extractor.category
-            job.extractor.subcategory = self.extractor.subcategory
-        return job
-
     def _write_unsupported(self, url):
         if self.ufile:
             print(url, file=self.ufile, flush=True)
@@ -135,7 +134,7 @@ class Job():
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
 
-    def __init__(self, url):
+    def __init__(self, url, parent=None):
         Job.__init__(self, url)
         self.pathfmt = util.PathFormat(self.extractor)
         self.downloaders = {}
@@ -156,7 +155,7 @@ class DownloadJob(Job):
 
     def handle_queue(self, url, keywords):
         try:
-            self._prepare(DownloadJob(url)).run()
+            DownloadJob(url, self).run()
         except exception.NoExtractorError:
             self._write_unsupported(url)
 
@@ -178,8 +177,8 @@ class KeywordJob(Job):
     """Print available keywords"""
 
     def handle_url(self, url, keywords):
-        print("\nKeywords for filenames:")
-        print("-----------------------")
+        print("\nKeywords for filenames and --filter:")
+        print("------------------------------------")
         self.print_keywords(keywords)
         raise exception.StopExtraction()
 
@@ -200,7 +199,7 @@ class KeywordJob(Job):
             self.print_keywords(keywords)
             if self.extractor.categorytransfer:
                 print()
-                self._prepare(KeywordJob(url)).run()
+                KeywordJob(url, self).run()
         raise exception.StopExtraction()
 
     @staticmethod
@@ -230,8 +229,8 @@ class UrlJob(Job):
     """Print download urls"""
     maxdepth = -1
 
-    def __init__(self, url, depth=1):
-        Job.__init__(self, url)
+    def __init__(self, url, parent=None, depth=1):
+        Job.__init__(self, url, parent)
         self.depth = depth
         if depth == self.maxdepth:
             self.handle_queue = self.handle_url
@@ -242,7 +241,7 @@ class UrlJob(Job):
 
     def handle_queue(self, url, _):
         try:
-            self._prepare(UrlJob(url, self.depth + 1)).run()
+            UrlJob(url, self, self.depth + 1).run()
         except exception.NoExtractorError:
             self._write_unsupported(url)
 

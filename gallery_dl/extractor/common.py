@@ -117,8 +117,8 @@ class AsynchronousExtractor(Extractor):
 
     def __init__(self):
         Extractor.__init__(self)
-        queue_size = int(config.get(("queue-size",), default=5))
-        self.__queue = queue.Queue(maxsize=queue_size)
+        queue_size = int(config.get(("queue-size",), 5))
+        self.__queue = queue.Queue(queue_size)
         self.__thread = threading.Thread(target=self.async_items, daemon=True)
 
     def __iter__(self):
@@ -140,8 +140,8 @@ class AsynchronousExtractor(Extractor):
         try:
             for task in self.items():
                 put(task)
-        except Exception as e:
-            put(e)
+        except Exception as exc:
+            put(exc)
         put(None)
 
 
