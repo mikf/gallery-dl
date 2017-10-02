@@ -18,9 +18,9 @@ class FallenangelsChapterExtractor(Extractor):
     category = "fallenangels"
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}",
-                     "c{chapter:>03}{chapter_minor} - {title}"]
-    filename_fmt = ("{manga}_c{chapter:>03}{chapter_minor}_"
-                    "{page:>03}.{extension}")
+                     "c{chapter:>03}{chapter_minor}{title:?: //}"]
+    filename_fmt = (
+        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(manga|truyen)\.fascans\.com/"
                 r"manga/([^/]+)/(\d+)(\.[^/?&#]+)?")]
     test = [

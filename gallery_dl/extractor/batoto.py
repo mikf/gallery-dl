@@ -113,8 +113,11 @@ class BatotoMangaExtractor(BatotoExtractor, MangaExtractor):
 class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
     """Extractor for manga-chapters from bato.to"""
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    directory_fmt = [
+        "{category}", "{manga}",
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}"]
+    filename_fmt = (
+        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     pattern = [r"(?:https?://)?(?:www\.)?bato\.to/reader#([0-9a-f]+)"]
     test = [
         ("http://bato.to/reader#459878c8fda07502", {

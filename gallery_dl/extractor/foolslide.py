@@ -58,7 +58,8 @@ class FoolslideChapterExtractor(FoolslideExtractor):
     """Base class for chapter extractors for FoOlSlide based sites"""
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "{chapter_string}"]
-    filename_fmt = "{manga}_{chapter:>03}_{page:>03}.{extension}"
+    filename_fmt = (
+        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     single = True
 
     def __init__(self, match, url=None):

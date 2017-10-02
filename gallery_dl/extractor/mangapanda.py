@@ -28,7 +28,6 @@ class MangapandaMangaExtractor(MangapandaBase, MangareaderMangaExtractor):
 
 class MangapandaChapterExtractor(MangapandaBase, MangareaderChapterExtractor):
     """Extractor for manga-chapters from mangapanda.com"""
-    subcategory = "chapter"
     pattern = [
         (r"(?:https?://)?(?:www\.)?mangapanda\.com((/[^/]+)/(\d+))"),
         (r"(?:https?://)?(?:www\.)?mangapanda\.com"

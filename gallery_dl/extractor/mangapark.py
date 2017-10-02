@@ -70,10 +70,11 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
 class MangaparkChapterExtractor(MangaparkExtractor):
     """Extractor for manga-chapters from mangapark.me"""
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}",
-                     "c{chapter:>03}{chapter_minor} - {title}"]
-    filename_fmt = ("{manga}_c{chapter:>03}{chapter_minor}_"
-                    "{page:>03}.{extension}")
+    directory_fmt = [
+        "{category}", "{manga}",
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}"]
+    filename_fmt = (
+        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me(/manga/[^/]+"
                 r"/s\d+(?:/v\d+)?/c\d+[^/]*(?:/e\d+)?)")]
     test = [
