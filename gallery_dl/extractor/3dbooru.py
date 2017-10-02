@@ -58,7 +58,7 @@ class ThreedeebooruPopularExtractor(ThreedeebooruExtractor,
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post/popular_"
                r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
     test = [("http://behoimi.org/post/popular_by_month?month=2&year=2013", {
-        "url": "e5a75f8fa6cbe96109bceca25af3745a25102f3f",
+        "url": "a447e115fdab60c25ab71c4fdb1b9f509bc23f99",
         "count": 20,
     })]
 

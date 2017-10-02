@@ -67,8 +67,6 @@ skip = [
     "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
     "imgtrex",
-    "luscious",  # "high load"
-    "pawoo",
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:
