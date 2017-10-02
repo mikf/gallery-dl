@@ -39,7 +39,8 @@ class PawooExtractor(Extractor):
     @staticmethod
     def prepare(status):
         """Prepare a status object"""
-        for key in ("favourites_count", "reblogs_count", "reblog", "mentions"):
+        for key in ("favourites_count", "reblogs_count", "reblog", "mentions",
+                    "favourited", "muted", "reblogged"):
             del status[key]
         account = status["account"]
         for key in ("followers_count", "following_count", "statuses_count",
@@ -57,7 +58,7 @@ class PawooUserExtractor(PawooExtractor):
     test = [
         ("https://pawoo.net/@kuroda", {
             "url": "a3f9e7555f2b024554c0e9b6cbcc7991af13cf99",
-            "keyword": "b8cde3b6c148a94a2d40d9a590fdae020a34aca5",
+            "keyword": "2aca914a8cf312c4fb63084abbe348aef90e3dc3",
         }),
         ("https://pawoo.net/@zZzZz/", {
             "exception": exception.NotFoundError,
@@ -69,8 +70,8 @@ class PawooUserExtractor(PawooExtractor):
         self.account_name = match.group(1)
 
     def statuses(self):
-        results = self.api.search(self.account_name)
-        for account in results["accounts"]:
+        results = self.api.account_search(self.account_name, 1)
+        for account in results:
             if account["username"] == self.account_name[1:]:
                 break
         else:
@@ -85,7 +86,7 @@ class PawooStatusExtractor(PawooExtractor):
     test = [
         ("https://pawoo.net/@takehana_note/559043", {
             "url": "f95cc8c0274c4143e7e21dbdc693b90c65b596e3",
-            "keyword": "7d060d9c4572b381aa423797ad48d89a12daac77",
+            "keyword": "5cbd6ca68fe6efd679fcccf2bc1a7f3ee7573352",
             "content": "3b148cf90174173355fe34179741ce476921b2fc",
         }),
         ("https://pawoo.net/@zZzZz/12346", {
@@ -109,25 +110,18 @@ class MastodonAPI():
     """
 
     def __init__(self, extractor, root="https://pawoo.net",
-                 access_token=("0f04191976cf22a5319c1e91a73cbcb2"
-                               "510b589e2757efcca922f9b3173d119b")):
+                 access_token=("286462927198d0cf3e24683e91c8259a"
+                               "ac4367233064e0570ca18df2ac65b226")):
         access_token = extractor.config("access-token", access_token)
         self.session = extractor.session
         self.session.headers["Authorization"] = "Bearer " + access_token
         self.root = root
 
-    def search(self, searchterm):
+    def account_search(self, query, limit=40):
         """Search for content"""
         response = self.session.get(
-            self.root + "/api/v1/search",
-            params={"q": searchterm},
-        )
-        return self._parse(response)
-
-    def status(self, status_id):
-        """Fetch a Status"""
-        response = self.session.get(
-            self.root + "/api/v1/statuses/" + status_id
+            self.root + "/api/v1/accounts/search",
+            params={"q": query, "limit": limit},
         )
         return self._parse(response)
 
@@ -139,6 +133,13 @@ class MastodonAPI():
             response = self.session.get(url)
             yield from self._parse(response)
             url = response.links.get("next", {}).get("url")
+
+    def status(self, status_id):
+        """Fetch a Status"""
+        response = self.session.get(
+            self.root + "/api/v1/statuses/" + status_id
+        )
+        return self._parse(response)
 
     @staticmethod
     def _parse(response):
