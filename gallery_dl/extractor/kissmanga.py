@@ -24,10 +24,11 @@ IV = [
 class KissmangaExtractor(Extractor):
     """Base class for kissmanga extractors"""
     category = "kissmanga"
-    directory_fmt = ["{category}", "{manga}",
-                     "c{chapter:>03}{chapter_minor} - {title}"]
-    filename_fmt = ("{manga}_c{chapter:>03}{chapter_minor}_"
-                    "{page:>03}.{extension}")
+    directory_fmt = [
+        "{category}", "{manga}",
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}"]
+    filename_fmt = (
+        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     root = "http://kissmanga.com"
 
     def __init__(self, match):

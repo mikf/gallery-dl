@@ -15,8 +15,6 @@ from .. import text, util
 class MangareaderBase():
     """Base class for mangareader extractors"""
     category = "mangareader"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03} - {title}"]
-    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     root = "http://www.mangareader.net"
 
     @staticmethod
@@ -62,6 +60,8 @@ class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
 class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
     """Extractor for manga-chapters from mangareader.net"""
     subcategory = "chapter"
+    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{title:?: //}"]
+    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [
         (r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))"),
         (r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/"

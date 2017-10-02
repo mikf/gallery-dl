@@ -17,7 +17,7 @@ class MangastreamChapterExtractor(AsynchronousExtractor):
     """Extractor for manga-chapters from mangastream.com"""
     category = "mangastream"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter} - {title}"]
+    directory_fmt = ["{category}", "{manga}", "c{chapter}{title:?: //}"]
     filename_fmt = "{manga}_c{chapter}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?(?:readms|mangastream)\.(?:com|net)/"
                 r"r(?:ead)?/([^/]*/([^/]+)/(\d+))")]
