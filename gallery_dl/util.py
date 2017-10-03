@@ -17,6 +17,7 @@ import random
 import string
 import _string
 import hashlib
+import datetime
 import urllib.parse
 from . import text, exception
 
@@ -195,7 +196,7 @@ class UniquePredicate():
 
 class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
-    globalsdict = {"__builtins__": {}}
+    globalsdict = {"safe_int": safe_int, "datetime": datetime.datetime}
 
     def __init__(self, codeobj):
         self.codeobj = codeobj
