@@ -30,4 +30,4 @@ for urls, extr in tests:
         name = "%s-%s-%d.json" % (extr.category, extr.subcategory, i)
         print(name)
         with open(os.path.join(path, name), "w") as outfile:
-            job.DataJob(url, outfile).run()
+            job.DataJob(url, file=outfile).run()

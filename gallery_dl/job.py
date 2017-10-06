@@ -135,7 +135,7 @@ class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
 
     def __init__(self, url, parent=None):
-        Job.__init__(self, url)
+        Job.__init__(self, url, parent)
         self.pathfmt = util.PathFormat(self.extractor)
         self.downloaders = {}
         self.out = output.select()
@@ -270,8 +270,8 @@ class TestJob(DownloadJob):
             """Update SHA1 hash"""
             self.hashobj.update(content)
 
-    def __init__(self, url, content=False):
-        DownloadJob.__init__(self, url)
+    def __init__(self, url, parent=None, content=False):
+        DownloadJob.__init__(self, url, parent)
         self.content = content
         self.urllist = []
         self.hash_url = hashlib.sha1()
@@ -316,8 +316,8 @@ class TestJob(DownloadJob):
 class DataJob(Job):
     """Collect extractor results and dump them"""
 
-    def __init__(self, url, file=sys.stdout):
-        Job.__init__(self, url)
+    def __init__(self, url, parent=None, file=sys.stdout):
+        Job.__init__(self, url, parent)
         self.file = file
         self.data = []
         self.ensure_ascii = config.get(("output", "ascii"), True)

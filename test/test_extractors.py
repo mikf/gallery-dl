@@ -28,7 +28,7 @@ class TestExtractors(unittest.TestCase):
 
     def _run_test(self, extr, url, result):
         content = "content" in result if result else False
-        tjob = job.TestJob(url, content)
+        tjob = job.TestJob(url, content=content)
         self.assertEqual(extr, tjob.extractor.__class__)
         if not result:
             return
