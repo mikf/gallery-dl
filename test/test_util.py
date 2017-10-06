@@ -176,8 +176,8 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{name}{title4:? **/''/}", "Name")
 
     def _run_test(self, format_string, result):
-        formatter = util.Formatter(format_string)
-        output = formatter.format_map(self.kwdict)
+        formatter = util.Formatter()
+        output = formatter.vformat(format_string, self.kwdict)
         self.assertEqual(output, result, format_string)
 
 

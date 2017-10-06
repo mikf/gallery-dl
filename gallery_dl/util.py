@@ -252,16 +252,13 @@ class Formatter():
         "a": ascii,
     }
 
-    def __init__(self, format_string):
-        self.formatter_rules = tuple(_string.formatter_parser(format_string))
-
-    def format_map(self, kwargs):
+    def vformat(self, format_string, kwargs):
         """Apply 'kwargs' to the initial format_string and return its result"""
         result = []
         append = result.append
 
         for literal_text, field_name, format_spec, conversion in \
-                self.formatter_rules:
+                _string.formatter_parser(format_string):
 
             if literal_text:
                 append(literal_text)
@@ -311,7 +308,8 @@ class PathFormat():
             "filename", extractor.filename_fmt)
         self.directory_fmt = extractor.config(
             "directory", extractor.directory_fmt)
-        self.filename_formatter = Formatter(self.filename_fmt)
+        self.formatter = Formatter()
+
         self.has_extension = False
         self.keywords = {}
         self.directory = self.realdirectory = ""
@@ -345,7 +343,7 @@ class PathFormat():
         try:
             segments = [
                 text.clean_path(
-                    Formatter(segment).format_map(keywords).strip())
+                    self.formatter.vformat(segment, keywords).strip())
                 for segment in self.directory_fmt
             ]
         except Exception as exc:
@@ -375,7 +373,7 @@ class PathFormat():
         """Use filename-keywords and directory to build a full path"""
         try:
             filename = text.clean_path(
-                self.filename_formatter.format_map(self.keywords))
+                self.formatter.vformat(self.filename_fmt, self.keywords))
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
