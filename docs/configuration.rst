@@ -287,6 +287,19 @@ Description Select the directory structure created by the Gallery- and
 =========== =====
 
 
+extractor.deviantart.original
+-----------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Request full-sized original images if available.
+
+            Some of DeviantArt's images require an additional API call to get
+            their actual original version, which is being hosted on
+            Amazon Web Services (AWS) servers.
+=========== =====
+
+
 extractor.deviantart.mature
 ---------------------------
 =========== =====

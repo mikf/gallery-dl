@@ -27,17 +27,23 @@ class TestExtractors(unittest.TestCase):
         config.clear()
 
     def _run_test(self, extr, url, result):
-        content = "content" in result if result else False
+        if result:
+            if "options" in result:
+                for key, value in result["options"]:
+                    config.set(key.split("."), value)
+            content = "content" in result
+        else:
+            content = False
+
         tjob = job.TestJob(url, content=content)
         self.assertEqual(extr, tjob.extractor.__class__)
+
         if not result:
             return
-        if "options" in result:
-            for key, value in result["options"]:
-                config.set(key, value)
         if "exception" in result:
             self.assertRaises(result["exception"], tjob.run)
             return
+
         tjob.run()
         if "url" in result:
             self.assertEqual(result["url"], tjob.hash_url.hexdigest())

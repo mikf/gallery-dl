@@ -27,6 +27,8 @@ class DeviantartExtractor(Extractor):
         Extractor.__init__(self)
         self.api = DeviantartAPI(self)
         self.offset = 0
+        self.flat = self.config("flat", True)
+        self.original = self.config("original", True)
 
         if match:
             self.user = match.group(1)
@@ -53,7 +55,12 @@ class DeviantartExtractor(Extractor):
             yield Message.Directory, deviation
 
             if "content" in deviation:
-                yield self.commit(deviation, deviation["content"])
+                content = deviation["content"]
+                if (self.original and deviation["is_downloadable"] and
+                        content["filesize"] != deviation["download_filesize"]):
+                    content.update(
+                        self.api.deviation_download(deviation["deviationid"]))
+                yield self.commit(deviation, content)
 
             if "videos" in deviation:
                 video = max(deviation["videos"],
@@ -144,10 +151,6 @@ class DeviantartExtractor(Extractor):
         deviation["extension"] = "htm"
         return Message.Url, html, deviation
 
-    @property
-    def flat(self):
-        return self.config("flat", True)
-
     @staticmethod
     def _find_folder(folders, name):
         pattern = r"[^\w]*" + name.replace("-", r"[^\w]+") + r"[^\w]*$"
@@ -200,6 +203,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
         ("http://majestic-da.deviantart.com/gallery/63419606/CHIBI-KAWAII", {
             "url": "2ea2a3df9591c26568b09291acb453fb87ce9920",
             "keyword": "160b891599aa4ba1c799cd9e1696bcb1ddefeef4",
+            "options": (("original", False),),
         }),
     ]
 
@@ -241,6 +245,11 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         }),
         ("http://sta.sh/abcdefghijkl", {
             "exception": exception.NotFoundError,
+        }),
+        (("https://myria-moon.deviantart.com/art/"
+          "Aime-Moi-part-en-vadrouille-261986576"), {
+            "pattern": (r"https?://s3\.amazonaws\.com/origin-orig\."
+                        r"deviantart\.net/a383/f/2013/135/e/7/[^.]+\.jpg\?"),
         }),
     ]
 
@@ -292,6 +301,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     test = [("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
         "url": "f43b202011483e06998db1891e4b62381fabd64a",
         "keyword": "629eb627747b3f0ae35541d0725cc345b3ac5aca",
+        "options": (("original", False),),
     })]
 
     def __init__(self, match):
@@ -333,6 +343,7 @@ class DeviantartAPI():
     def __init__(self, extractor, client_id="5388",
                  client_secret="76b08c69cfb27f26d6161f9ab6d061a1"):
         self.session = extractor.session
+        self.headers = {}
         self.log = extractor.log
         self.client_id = extractor.config("client-id", client_id)
         self.client_secret = extractor.config("client-secret", client_secret)
@@ -374,6 +385,12 @@ class DeviantartAPI():
         params = {"deviationid": deviation_id}
         return self._call(endpoint, params)
 
+    def deviation_download(self, deviation_id):
+        """Get the original file download (if allowed)"""
+        endpoint = "deviation/download/" + deviation_id
+        params = {"mature_content": self.mature}
+        return self._call(endpoint, params)
+
     def gallery(self, username, folder_id="", offset=0):
         """Yield all Deviation-objects contained in a gallery folder"""
         endpoint = "gallery/" + folder_id
@@ -407,7 +424,7 @@ class DeviantartAPI():
         access_token = self._authenticate_impl(
             self.client_id, self.client_secret
         )
-        self.session.headers["Authorization"] = access_token
+        self.headers["Authorization"] = access_token
 
     @cache(maxage=3590, keyarg=1)
     def _authenticate_impl(self, client_id, client_secret):
@@ -432,7 +449,8 @@ class DeviantartAPI():
                 time.sleep(self.delay)
 
             self.authenticate()
-            response = self.session.get(url, params=params)
+            response = self.session.get(
+                url, headers=self.headers, params=params)
 
             if response.status_code == 200:
                 break
