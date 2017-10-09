@@ -201,7 +201,7 @@ def build_parser():
         "--chapter-range",
         metavar="RANGE", dest="chapter_range",
         help=("Same as '--range' except for chapters "
-              "and other transferred URLs"),
+              "and other delegated URLs"),
     )
     selection.add_argument(
         "--filter",
@@ -216,7 +216,7 @@ def build_parser():
         "--chapter-filter",
         metavar="EXPR", dest="chapter_filter",
         help=("Same as '--filter' except for chapters "
-              "and other transferred URLs"),
+              "and other delegated URLs"),
     )
     selection.add_argument(
         "--images", dest="depr_images",

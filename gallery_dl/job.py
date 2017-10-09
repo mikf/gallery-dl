@@ -190,7 +190,7 @@ class KeywordJob(Job):
     def handle_queue(self, url, keywords):
         if not keywords:
             self.extractor.log.info(
-                "This extractor transfers work to other extractors "
+                "This extractor delegates work to other extractors "
                 "and does not provide any keywords on its own. Try "
                 "'gallery-dl -K \"%s\"' instead.", url)
         else:
