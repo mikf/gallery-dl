@@ -18,7 +18,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
     subcategory = "soundtrack"
     directory_fmt = ["{category}", "{album}"]
     pattern = [r"(?:https?://)?downloads\.khinsider\.com/"
-               r"game-soundtracks/album/(.+)"]
+               r"game-soundtracks/album/([^/?&#]+)"]
     test = [(("http://downloads.khinsider.com/game-soundtracks/"
               "album/horizon-riders-wii-"), {
         "pattern": ("https?://\d+\.\d+\.\d+\.\d+/ost/horizon-riders-wii-/"

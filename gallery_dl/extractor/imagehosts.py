@@ -242,7 +242,7 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagevenue.com"""
     category = "imagevenue"
     pattern = [(r"(?:https?://)?(img\d+\.imagevenue\.com/"
-                r"img\.php\?image=(\d+)_.+)")]
+                r"img\.php\?image=(\d+)_[^&#]+)")]
     params = None
 
     def get_info(self, page):

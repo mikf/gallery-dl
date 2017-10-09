@@ -25,7 +25,8 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineExtractor,
                                     kissmanga.KissmangaMangaExtractor):
     """Extractor for comics from readcomiconline.to"""
     subcategory = "comic"
-    pattern = [r"(?:https?://)?(?:www\.)?readcomiconline\.to/Comic/[^/]+/?$"]
+    pattern = [r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to/"
+               r"Comic/[^/?&#]+/?$"]
     test = [
         ("http://readcomiconline.to/Comic/W-i-t-c-h", {
             "url": "c5a530538a30b176916e30cbe223a93d83cb2691",
@@ -57,8 +58,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineExtractor,
                                     kissmanga.KissmangaChapterExtractor):
     """Extractor for comic-issues from readcomiconline.to"""
     subcategory = "issue"
-    pattern = [r"(?:https?://)?(?:www\.)?readcomiconline\.to/"
-               r"Comic/.+/.+\?id=\d+"]
+    pattern = [r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to/"
+               r"Comic/[^/?&#]+/[^/?&#]+\?id=\d+"]
     test = [("http://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
         "url": "a45c77f8fbde66091fe2346d6341f9cf3c6b1bc5",
         "keyword": "dee8a8a44659825afe1d69e1d809a48b03e98c68",
