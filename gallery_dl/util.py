@@ -8,6 +8,7 @@
 
 """Utility functions and classes"""
 
+import re
 import os
 import sys
 import hmac
@@ -196,7 +197,12 @@ class UniquePredicate():
 
 class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
-    globalsdict = {"safe_int": safe_int, "datetime": datetime.datetime}
+    globalsdict = {
+        "safe_int": safe_int,
+        "urlsplit": urllib.parse.urlsplit,
+        "datetime": datetime.datetime,
+        "re": re,
+    }
 
     def __init__(self, codeobj):
         self.codeobj = codeobj
