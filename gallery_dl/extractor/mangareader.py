@@ -34,7 +34,7 @@ class MangareaderBase():
 
 class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
     """Extractor for manga from mangareader.net"""
-    pattern = [r"(?:https?://)?((?:www\.)?mangareader\.net/[^/]+)/?$"]
+    pattern = [r"(?:https?://)?((?:www\.)?mangareader\.net/[^/?&#]+)/?$"]
     reverse = False
     test = [("http://www.mangareader.net/mushishi", {
         "url": "249042420b67a07b32e7f6be4c7410b6d810b808",
@@ -63,9 +63,9 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{title:?: //}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [
-        (r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/]+)/(\d+))"),
-        (r"(?:https?://)?(?:www\.)?mangareader\.net(/\d+-\d+-\d+(/[^/]+)/"
-         r"chapter-(\d+).html)"),
+        (r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/?&#]+)/(\d+))"),
+        (r"(?:https?://)?(?:www\.)?mangareader\.net"
+         r"(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+)\.html)"),
     ]
     test = [(("http://www.mangareader.net/"
               "karate-shoukoushi-kohinata-minoru/11"), {

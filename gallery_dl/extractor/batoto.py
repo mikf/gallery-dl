@@ -63,7 +63,7 @@ class BatotoExtractor():
     def parse_chapter_string(data):
         """Parse 'chapter_string' value contained in 'data'"""
         data["chapter_string"] = text.unescape(data["chapter_string"])
-        pattern = r"(?:Vol.(\d+) )?Ch\.(\d+)([^ :]*)(?::? (.+))"
+        pattern = r"(?:Vol\.(\d+) )?Ch\.(\d+)([^ :]*)(?::? (.+))"
         match = re.match(pattern, data["chapter_string"])
 
         volume, chapter, data["chapter_minor"], title = match.groups()
@@ -75,7 +75,8 @@ class BatotoExtractor():
 
 class BatotoMangaExtractor(BatotoExtractor, MangaExtractor):
     """Extractor for manga from bato.to"""
-    pattern = [r"(?:https?://)?(?:www\.)?(bato\.to/comic/_/comics/.*-r\d+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?(bato\.to"
+               r"/comic/_/comics/[^/?&#]*-r\d+)"]
     test = [("http://bato.to/comic/_/comics/aria-r2007", {
         "url": "a38585b0339587666d772ee06f2a60abdbf42a97",
         "keyword": "c33ea7b97e3714530384e2411fae62ae51aae50d",

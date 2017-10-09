@@ -65,7 +65,8 @@ class KissmangaExtractor(Extractor):
 
 class KissmangaMangaExtractor(KissmangaExtractor, MangaExtractor):
     """Extractor for manga from kissmanga.com"""
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com/Manga/[^/]+/?$"]
+    pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com/"
+               r"Manga/[^/?&#]+/?$"]
     test = [
         ("http://kissmanga.com/Manga/Dropout", {
             "url": "992befdd64e178fe5af67de53f8b510860d968ca",
@@ -98,7 +99,7 @@ class KissmangaChapterExtractor(KissmangaExtractor):
     """Extractor for manga-chapters from kissmanga.com"""
     subcategory = "chapter"
     pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com/"
-               r"Manga/.+/.+\?id=\d+"]
+               r"Manga/[^/?&#]+/[^/?&#]+\?id=\d+"]
     test = [
         ("http://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
             "url": "4136bcd1c6cecbca8cc2bc965d54f33ef0a97cc0",
