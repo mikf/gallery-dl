@@ -121,7 +121,7 @@ class RedditAPI():
             self.client_id = None
             self.log.warning(
                 "Conflicting values for 'client-id' and 'user-agent': "
-                "override either both or non of them.")
+                "override either both or none of them.")
         else:
             self.client_id = client_id
             self.session.headers["User-Agent"] = user_agent
