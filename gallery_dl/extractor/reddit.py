@@ -110,11 +110,21 @@ class RedditAPI():
         self.extractor = extractor
         self.comments = extractor.config("comments", 500)
         self.morecomments = extractor.config("morecomments", False)
-        self.client_id = extractor.config("client-id", self.CLIENT_ID)
         self.refresh_token = extractor.config("refresh-token")
         self.log = extractor.log
         self.session = extractor.session
-        self.session.headers["User-Agent"] = self.USER_AGENT
+
+        client_id = extractor.config("client-id", self.CLIENT_ID)
+        user_agent = extractor.config("user-agent", self.USER_AGENT)
+
+        if (client_id == self.CLIENT_ID) ^ (user_agent == self.USER_AGENT):
+            self.client_id = None
+            self.log.warning(
+                "Conflicting values for 'client-id' and 'user-agent': "
+                "override either both or non of them.")
+        else:
+            self.client_id = client_id
+            self.session.headers["User-Agent"] = user_agent
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
