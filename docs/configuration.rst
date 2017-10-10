@@ -599,8 +599,8 @@ Description
 =========== =====
 
 
-extractor.reddit.client-id
---------------------------
+extractor.reddit.client-id & .user-agent
+----------------------------------------
 =========== =====
 Type        ``string``
 Description
