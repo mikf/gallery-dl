@@ -78,9 +78,10 @@ class KissmangaMangaExtractor(KissmangaExtractor, MangaExtractor):
     def chapters(self, page):
         results = []
         manga, pos = text.extract(
-            page, '<div class="barTitle">\n', '\n')
+            page, '<div class="barTitle">', '\ninformation')
         page, pos = text.extract(
             page, '<table class="listing">', '</table>', pos)
+        manga = manga.strip()
         needle = '" title="Read ' + manga + ' '
         manga = text.unescape(manga)
 
@@ -128,11 +129,11 @@ class KissmangaChapterExtractor(KissmangaExtractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        manga, pos = text.extract(page, "Read manga\n", "\n")
-        cinfo, pos = text.extract(page, "", "\n", pos)
+        title = text.extract(page, "<title>", "</title>")[0].strip()
+        manga, cinfo = title.split("\n")[1:3]
         data = {
-            "manga": manga,
-            "chapter_string": cinfo,
+            "manga": manga.strip(),
+            "chapter_string": cinfo.strip(),
             "lang": "en",
             "language": "English",
         }
