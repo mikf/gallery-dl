@@ -77,7 +77,7 @@ output.progress
 =========== =====
 Type        ``bool`` or ``string``
 Default     ``true``
-Description Controls the progress indicator when ``gallery-dl`` is run with
+Description Controls the progress indicator when *gallery-dl* is run with
             multiple URLs as arguments.
 
             * ``true``: Show the default progress indicator
@@ -228,29 +228,21 @@ Description Controls the behavior when downloading a file whose filename
 =========== =====
 
 
-extractor.*.username
---------------------
+extractor.*.username & .password
+--------------------------------
 =========== =====
 Type        ``string``
 Default     ``null``
-Description The username to use when attempting to log in to another site.
+Description The username and password to use when attempting to log in to
+            another site.
 
-            Specifying a username is required for the ``pixiv``, ``nijie`` and
-            ``seiga`` modules and optional (but strongly recommended) for
-            ``batoto`` and ``exhentai``.
+            Specifying username and password is
+            required for the ``pixiv``, ``nijie`` and ``seiga`` modules and
+            optional (but strongly recommended) for ``batoto`` and ``exhentai``.
 
-            This value can also be set via the ``-u/--username``
-            command-line option or by using a |.netrc|_ file.
+            These values can also be set via the ``-u/--username`` and
+            ``-p/--password`` command-line options or by using a |.netrc|_ file.
             (see Authentication_)
-=========== =====
-
-
-extractor.*.password
---------------------
-=========== =====
-Type        ``string``
-Default     ``null``
-Description The password belonging to the username.
 =========== =====
 
 
@@ -323,45 +315,27 @@ Description | Always download the original image or
 =========== =====
 
 
-extractor.exhentai.wait-min
----------------------------
+extractor.exhentai.wait-min & .wait-max
+---------------------------------------
 =========== =====
 Type        ``float``
-Default     ``3.0``
-Description Minimum wait time in seconds between each image
+Default     ``3.0`` and ``6.0``
+Description Minimum and maximum wait time in seconds between each image
 
             ExHentai detects and blocks automated downloaders.
-            ``gallery-dl`` waits a randomly selected number of
+            *gallery-dl* waits a randomly selected number of
             seconds between ``wait-min`` and ``wait-max`` after
             each image to prevent getting blocked.
 =========== =====
 
 
-extractor.exhentai.wait-max
----------------------------
-=========== =====
-Type        ``float``
-Default     ``6.0``
-Description Maximum wait time in seconds
-=========== =====
-
-
-extractor.flickr.access-token
------------------------------
+extractor.flickr.access-token & .access-token-secret
+----------------------------------------------------
 =========== =====
 Type        ``string``
 Default     ``null``
-Description The ``access_token`` value you get from linking your Flickr account
-            to ``gallery-dl``.
-=========== =====
-
-
-extractor.flickr.access-token-secret
-------------------------------------
-=========== =====
-Type        ``string``
-Default     ``null``
-Description The ``access_token_secret`` belonging to the ``access_token``.
+Description The ``access_token`` and ``access_token_secret`` values you get
+            from linking your Flickr account to *gallery-dl*.
 =========== =====
 
 
@@ -385,7 +359,7 @@ Description Sets the maximum allowed size for downloaded images.
               (width and height) in pixels.
             * If this is a ``string``, it should be one of Flickr's format specifiers
               (``"Original"``, ``"Large"``, ... or ``"o"``, ``"k"``, ``"h"``,
-              ``"l"``, ...) to use these as an upper limit.
+              ``"l"``, ...) to use as an upper limit.
 =========== =====
 
 
@@ -482,24 +456,15 @@ Description Retrieve additional comments by resolving the ``more`` comment
 =========== =====
 
 
-extractor.reddit.date-min
--------------------------
+extractor.reddit.date-min & .date-max
+-------------------------------------
 =========== =====
 Type        ``integer`` or ``string``
-Default     ``0``
-Description Ignore all submissions posted before this date.
+Default     ``0`` and ``253402210800`` (timestamp of |datetime.max|_)
+Description Ignore all submissions posted before/after this date.
 
             * If this is an ``integer``, it represents the date as UTC timestamp.
             * If this is a ``string``, it will get parsed according to date-format_.
-=========== =====
-
-
-extractor.reddit.date-max
--------------------------
-=========== =====
-Type        ``integer`` or ``string``
-Default     ``253402210800`` (timestamp of |datetime.max|_)
-Description Ignore all submissions posted after this date. (See date-min_)
 =========== =====
 
 
@@ -509,26 +474,19 @@ extractor.reddit.date-format
 Type        ``string``
 Default     ``"%Y-%m-%dT%H:%M:%S"``
 Description An explicit format string used to parse the ``string`` values of
-            date-min_ and date-max_.
+            `date-min and date-max`_.
 
             See |strptime|_ for a list of formatting directives.
 =========== =====
 
 
-extractor.reddit.id-min
------------------------
+extractor.reddit.id-min & .id-max
+---------------------------------
 =========== =====
 Type        ``string``
 Example     ``"6kmzv2"``
-Description Ignore all submissions posted before the submission with this ID.
-=========== =====
-
-
-extractor.reddit.id-max
------------------------
-=========== =====
-Type        ``string``
-Description Ignore all submissions posted after the submission with this ID.
+Description Ignore all submissions posted before/after the submission with
+            this ID.
 =========== =====
 
 
@@ -554,7 +512,7 @@ extractor.reddit.refresh-token
 Type        ``string``
 Default     ``null``
 Description The ``refresh_token`` value you get from linking your Reddit account
-            to ``gallery-dl``.
+            to *gallery-dl*.
 
             Using the ``refresh_token`` allows you to access private or otherwise
             not publicly available subreddits, given that your account is
@@ -567,11 +525,20 @@ Description The ``refresh_token`` value you get from linking your Reddit account
 API Tokens & IDs
 ================
 
+All configuration keys listed in this section have fully functional default
+values embedded into *gallery-dl* itself, but if things unexpectedly break
+or you want to use your own personal client credentials, you can follow these
+instructions to get an alternative set of API tokens and IDs.
+
 extractor.deviantart.client-id & .client-secret
 -----------------------------------------------
 =========== =====
 Type        ``string``
-Description
+How To      - login and visit DeviantArt's `Applications & Keys`_ section
+            - click "Register your Application"
+            - click "Save" (top right; default settings are fine)
+            - copy ``client_id`` and ``client_secret`` of your new "Untitled"
+              application and put them in your configuration file
 =========== =====
 
 
@@ -579,7 +546,12 @@ extractor.flickr.api-key & .api-secret
 --------------------------------------
 =========== =====
 Type        ``string``
-Description
+How To      - login and `Create an App`_ in Flickr's `App Garden`_
+            - click "APPLY FOR A NON-COMMERCIAL KEY"
+            - fill out the form with a random name and description
+              and click "SUBMIT"
+            - copy ``Key`` and ``Secret`` and put them in your configuration
+              file
 =========== =====
 
 
@@ -587,7 +559,7 @@ extractor.pawoo.access-token
 ----------------------------
 =========== =====
 Type        ``string``
-Description
+How To
 =========== =====
 
 
@@ -595,7 +567,7 @@ extractor.pinterest.access-token
 --------------------------------
 =========== =====
 Type        ``string``
-Description
+How To
 =========== =====
 
 
@@ -603,7 +575,16 @@ extractor.reddit.client-id & .user-agent
 ----------------------------------------
 =========== =====
 Type        ``string``
-Description
+How To      - login and visit the apps_ section of your account's preferences
+            - click the "are you a developer? create an app..." button
+            - fill out the form, choose "installed app", preferably set
+              "http://localhost:6414/" as "redirect uri" and finally click
+              "create app"
+            - copy the client id (third line, under your application's name and
+              "installed app") and put it in your configuration file
+            - use "``Python:<application name>:v1.0 (by /u/<username>)``" as
+              user-agent and replace ``<application name>`` and ``<username>``
+              accordingly (see Reddit's `API access rules`_)
 =========== =====
 
 
@@ -617,8 +598,7 @@ Description
 .. |datetime.max| replace:: ``datetime.max``
 .. |strptime| replace:: strftime() and strptime() Behavior
 
-.. _date-min:    extractor.reddit.date-min_
-.. _date-max:    extractor.reddit.date-max_
+.. _`date-min and date-max`: `extractor.reddit.date-min & .date-max`_
 .. _date-format: extractor.reddit.date-format_
 
 .. _.netrc:            https://stackoverflow.com/tags/.netrc/info
@@ -633,3 +613,9 @@ Description
 .. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
 .. _datetime.max:      https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _Authentication:    https://github.com/mikf/gallery-dl#5authentication
+
+.. _`Applications & Keys`: https://www.deviantart.com/developers/apps
+.. _`Create an App`:       https://www.flickr.com/services/apps/create/apply/
+.. _`App Garden`:          https://www.flickr.com/services/
+.. _apps:                  https://www.reddit.com/prefs/apps/
+.. _`API access rules`:    https://github.com/reddit/reddit/wiki/API
