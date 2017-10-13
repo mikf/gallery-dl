@@ -65,8 +65,12 @@ class Extractor():
                 msg = exc
             if not retries:
                 raise exception.HttpError(msg)
-            time.sleep(1 + max_retries - retries)
+            if response.status_code == 429:  # Too Many Requests
+                waittime = float(response.headers.get("Retry-After", 10.0))
+            else:
+                waittime = 1
             retries -= 1
+            time.sleep(waittime * (max_retries - retries))
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
