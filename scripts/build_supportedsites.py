@@ -82,6 +82,7 @@ AUTH_MAP = {
     "nijie"   : "Required",
     "pixiv"   : "Required",
     "reddit"  : "Optional (OAuth)",
+    "sankaku" : "Optional",
     "seiga"   : "Required",
 }
 
