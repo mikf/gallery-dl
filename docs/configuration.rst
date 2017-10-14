@@ -238,7 +238,8 @@ Description The username and password to use when attempting to log in to
 
             Specifying username and password is
             required for the ``pixiv``, ``nijie`` and ``seiga`` modules and
-            optional (but strongly recommended) for ``batoto`` and ``exhentai``.
+            optional (but strongly recommended) for ``batoto``, ``exhentai``
+            and ``sankaku``.
 
             These values can also be set via the ``-u/--username`` and
             ``-p/--password`` command-line options or by using a |.netrc|_ file.
@@ -520,6 +521,20 @@ Description The ``refresh_token`` value you get from linking your Reddit account
             but requests to the reddit API are going to be rate limited
             at 600 requests every 10 minutes/600 seconds.
 =========== =====
+
+
+extractor.sankaku.wait-min & .wait-max
+--------------------------------------
+=========== =====
+Type        ``float``
+Default     ``2.0`` and ``4.0``
+Description Minimum and maximum wait time in seconds between each image
+
+            Sankaku Channel responds with ``429 Too Many Requests`` if it
+            receives too many HTTP requests in a certain amount of time.
+            Waiting a few seconds between each request tries to prevent that.
+=========== =====
+
 
 
 API Tokens & IDs

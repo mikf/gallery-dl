@@ -8,11 +8,14 @@
 
 """Extract images from https://chan.sankakucomplex.com/"""
 
-from .common import AsynchronousExtractor, Message
-from .. import text
+from .common import Extractor, Message
+from .. import text, util, exception
+from ..cache import cache
+import time
+import random
 
 
-class SankakuTagExtractor(AsynchronousExtractor):
+class SankakuTagExtractor(Extractor):
     """Extractor for images from chan.sankakucomplex.com by search-tags"""
     category = "sankaku"
     subcategory = "tag"
@@ -24,16 +27,30 @@ class SankakuTagExtractor(AsynchronousExtractor):
         "pattern": (r"https://cs\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
                     r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+"),
     })]
-    url = "https://chan.sankakucomplex.com/"
+    root = "https://chan.sankakucomplex.com"
+    cookienames = ("login", "pass_hash")
+    cookiedomain = "chan.sankakucomplex.com"
 
     def __init__(self, match):
-        AsynchronousExtractor.__init__(self)
-        self.tags = text.unquote(match.group(1))
+        Extractor.__init__(self)
+        self.logged_in = True
+        self.pagestart = 1
+        self.tags = text.unquote(match.group(1).replace("+", " "))
+        self.wait_min = self.config("wait-min", 2)
+        self.wait_max = self.config("wait-max", 4)
+        if self.wait_max < self.wait_min:
+            self.wait_max = self.wait_min
         self.session.headers["User-Agent"] = (
             "Mozilla/5.0 Gecko/20100101 Firefox/40.0"
         )
 
+    def skip(self, num):
+        pages = min(num // 20, 49)
+        self.pagestart += pages
+        return pages * 20
+
     def items(self):
+        self.login()
         data = self.get_job_metadata()
         yield Message.Version, 1
         yield Message.Directory, data
@@ -48,36 +65,67 @@ class SankakuTagExtractor(AsynchronousExtractor):
     def get_images(self):
         params = {
             "tags": self.tags,
-            "page": 1,
+            "page": self.pagestart,
         }
-        while True:
-            count = 0
-            page = self.request(self.url, params=params).text
+        while self.logged_in or params["page"] <= 25:
+            image = None
+            page = self.request(self.root, params=params, retries=10).text
             pos = text.extract(page, '<div id=more-popular-posts-link>', '')[1]
-            while True:
-                image_id, pos = text.extract(
-                    page, '<span class="thumb blacklisted" id=p', '>', pos
-                )
-                if not image_id:
-                    break
+            for image_id in text.extract_iter(
+                    page, '<span class="thumb blacklisted" id=p', '>', pos):
+                self.wait()
                 image = self.get_image_metadata(image_id)
-                count += 1
                 yield image
-            if count < 20:
+            if not image:
                 return
             params["page"] += 1
+            params["next"] = image["id"] - 1
 
     def get_image_metadata(self, image_id):
         url = "https://chan.sankakucomplex.com/post/show/" + image_id
-        page = self.request(url).text
+        page = self.request(url, retries=10).text
         image_url, pos = text.extract(page, '<li>Original: <a href="', '"')
         width    , pos = text.extract(page, '>', 'x', pos)
         height   , pos = text.extract(page, '', ' ', pos)
         data = text.nameext_from_url(image_url, {
-            "id": image_id,
+            "id": util.safe_int(image_id),
             "file_url": "https:" + text.unescape(image_url),
-            "width": width,
-            "height": height,
+            "width": util.safe_int(width),
+            "height": util.safe_int(height),
         })
         data["md5"] = data["name"]
         return data
+
+    def wait(self):
+        """Wait for a randomly chosen amount of seconds"""
+        time.sleep(random.uniform(self.wait_min, self.wait_max))
+
+    def login(self):
+        """Login and set necessary cookies"""
+        if self._check_cookies(self.cookienames):
+            return
+        username, password = self._get_auth_info()
+        if username:
+            cookies = self._login_impl(username, password)
+            for key, value in cookies.items():
+                self.session.cookies.set(
+                    key, value, domain=self.cookiedomain)
+        else:
+            self.logged_in = False
+
+    @cache(maxage=90*24*60*60, keyarg=1)
+    def _login_impl(self, username, password):
+        """Actual login implementation"""
+        self.log.info("Logging in as %s", username)
+        params = {
+            "url": "",
+            "user[name]": username,
+            "user[password]": password,
+            "commit": "Login",
+        }
+        response = self.request(self.root + "/user/authenticate",
+                                method="POST", params=params)
+        if not response.history or response.url != self.root + "/user/home":
+            raise exception.AuthenticationError()
+        response = response.history[0]
+        return {c: response.cookies[c] for c in self.cookienames}
