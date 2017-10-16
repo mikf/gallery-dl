@@ -21,7 +21,8 @@ class SankakuTagExtractor(Extractor):
     subcategory = "tag"
     directory_fmt = ["{category}", "{tags}"]
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/\?tags=([^&]+)"]
+    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com"
+               r"/\?(?:[^&#]*&)*tags=([^&#]+)"]
     test = [("https://chan.sankakucomplex.com/?tags=bonocho", {
         "count": 5,
         "pattern": (r"https://cs\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
@@ -63,6 +64,7 @@ class SankakuTagExtractor(Extractor):
         return {"tags": self.tags}
 
     def get_images(self):
+        """Yield all available images for the given tags"""
         params = {
             "tags": self.tags,
             "page": self.pagestart,
@@ -80,8 +82,13 @@ class SankakuTagExtractor(Extractor):
                 return
             params["page"] += 1
             params["next"] = image["id"] - 1
+        self.log.warning(
+            "Unauthenticated users may only access the first 500 images / 25 "
+            "pages. (Use '--range 501-' to continue downloading from this "
+            "point onwards after setting up an account.)")
 
     def get_image_metadata(self, image_id):
+        """Collect metadata for a single image"""
         url = "https://chan.sankakucomplex.com/post/show/" + image_id
         page = self.request(url, retries=10).text
         image_url, pos = text.extract(page, '<li>Original: <a href="', '"')
@@ -127,5 +134,5 @@ class SankakuTagExtractor(Extractor):
                                 method="POST", params=params)
         if not response.history or response.url != self.root + "/user/home":
             raise exception.AuthenticationError()
-        response = response.history[0]
-        return {c: response.cookies[c] for c in self.cookienames}
+        cookies = response.history[0].cookies
+        return {c: cookies[c] for c in self.cookienames}
