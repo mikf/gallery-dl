@@ -10,7 +10,6 @@ import re
 import importlib
 
 modules = [
-    "pixiv",
     "2chan",
     "3dbooru",
     "4chan",
@@ -63,6 +62,7 @@ modules = [
     "nyafuu",
     "pawoo",
     "pinterest",
+    "pixiv",
     "powermanga",
     "readcomiconline",
     "rebeccablacktech",
