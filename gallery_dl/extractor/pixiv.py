@@ -119,10 +119,10 @@ class PixivExtractor(Extractor):
 class PixivUserExtractor(PixivExtractor):
     """Extractor for works of a pixiv-user"""
     subcategory = "user"
-    pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/"
-                r"member(?:_illust)?\.php\?id=(\d+)(?:.*&tag=([^&#]+))?"),
-               (r"(?:https?://)?(?:www\.)?pixiv\.net/"
-                r"(?:u/|(?:mypage\.php)?#id=)(\d+)()")]
+    pattern = [(r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+                r"/member(?:_illust)?\.php\?id=(\d+)(?:.*&tag=([^&#]+))?"),
+               (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+                r"/(?:u/|(?:mypage\.php)?#id=)(\d+)()")]
     test = [
         ("http://www.pixiv.net/member_illust.php?id=173530", {
             "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
@@ -137,6 +137,7 @@ class PixivUserExtractor(PixivExtractor):
         ("https://www.pixiv.net/u/173530", None),
         ("https://www.pixiv.net/mypage.php#id=173530", None),
         ("https://www.pixiv.net/#id=173530", None),
+        ("https://touch.pixiv.net/member_illust.php?id=173530", None),
     ]
 
     def __init__(self, match):
@@ -183,10 +184,10 @@ class PixivMeExtractor(PixivExtractor):
 class PixivWorkExtractor(PixivExtractor):
     """Extractor for a single pixiv work/illustration"""
     subcategory = "work"
-    pattern = [(r"(?:https?://)?(?:www\.)?pixiv\.net/member(?:_illust)?\.php"
-                r"\?(?:[^&]+&)*illust_id=(\d+)"),
-               (r"(?:https?://)?i(?:\d+\.pixiv|\.pximg)\.net/"
-                r"(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}"
+    pattern = [(r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+                r"/member(?:_illust)?\.php\?(?:[^&]+&)*illust_id=(\d+)"),
+               (r"(?:https?://)?i(?:\d+\.pixiv|\.pximg)\.net"
+                r"/(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}"
                 r"|img\d+/img/[^/]+)/(\d+)"),
                (r"(?:https?://)?img\d*\.pixiv\.net/img/[^/]+/(\d+)"),
                (r"(?:https?://)?(?:www\.)?pixiv\.net/i/(\d+)")]
@@ -231,10 +232,14 @@ class PixivFavoriteExtractor(PixivExtractor):
     """Extractor for all favorites/bookmarks of a pixiv-user"""
     subcategory = "favorite"
     directory_fmt = ["{category}", "bookmarks", "{user[id]} {user[account]}"]
-    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php\?id=(\d+)"]
-    test = [("http://www.pixiv.net/bookmark.php?id=173530", {
-        "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
-    })]
+    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/bookmark\.php\?id=(\d+)"]
+    test = [
+        ("https://www.pixiv.net/bookmark.php?id=173530", {
+            "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
+        }),
+        ("https://touch.pixiv.net/bookmark.php?id=173530", None),
+    ]
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
@@ -250,8 +255,11 @@ class PixivFavoriteExtractor(PixivExtractor):
 class PixivBookmarkExtractor(PixivFavoriteExtractor):
     """Extractor for all favorites/bookmarks of your own account"""
     subcategory = "bookmark"
-    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/bookmark\.php()$"]
-    test = [("https://www.pixiv.net/bookmark.php", None)]
+    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/bookmark\.php()$"]
+    test = [
+        ("https://www.pixiv.net/bookmark.php", None),
+        ("https://touch.pixiv.net/bookmark.php", None),
+    ]
 
     def get_metadata(self, user=None):
         self.api.login()
@@ -264,12 +272,13 @@ class PixivRankingExtractor(PixivExtractor):
     """Extractor for pixiv ranking pages"""
     subcategory = "ranking"
     directory_fmt = ["{category}", "rankings", "{mode}", "{date}"]
-    pattern = [r"(?:https?://)?(?:www\.)?pixiv\.net/"
-               r"ranking\.php(?:\?([^#]*))?"]
+    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/ranking\.php(?:\?([^#]*))?"]
     test = [
         (("https://www.pixiv.net/ranking.php"
           "?mode=daily&content=illust&date=20170818"), None),
         ("https://www.pixiv.net/ranking.php", None),
+        ("https://touch.pixiv.net/ranking.php", None),
     ]
 
     def __init__(self, match):
