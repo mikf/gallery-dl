@@ -298,9 +298,10 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
                      "Favourites", "{collection[title]}"]
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/favourites/(\d+)/([^/?&#]+)"]
-    test = [("http://rosuuri.deviantart.com/favourites/58951174/Useful", {
-        "url": "f43b202011483e06998db1891e4b62381fabd64a",
-        "keyword": "1cd7172d3542a365620b8f103e47e4ef864e5156",
+    test = [(("https://pencilshadings.deviantart.com"
+              "/favourites/70595441/3D-Favorites"), {
+        "url": "36ea299132a6b0a0cd319318e9bf18ad32e9b8cc",
+        "keyword": "6aada4e3159ca09ff8de9bae880952ce3b46d529",
         "options": (("original", False),),
     })]
 
