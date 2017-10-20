@@ -53,6 +53,7 @@ class Extractor():
         max_retries = retries
         while True:
             try:
+                response = None
                 response = self.session.request(method, url, *args, **kwargs)
                 if fatal:
                     response.raise_for_status()
@@ -65,7 +66,7 @@ class Extractor():
                 msg = exc
             if not retries:
                 raise exception.HttpError(msg)
-            if response.status_code == 429:  # Too Many Requests
+            if response and response.status_code == 429:  # Too Many Requests
                 waittime = float(response.headers.get("Retry-After", 10.0))
             else:
                 waittime = 1
