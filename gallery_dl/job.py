@@ -255,6 +255,7 @@ class TestJob(DownloadJob):
         def __init__(self, hashobj):
             self.hashobj = hashobj
             self.path = ""
+            self.size = 0
             self.has_extension = True
 
         def __enter__(self):
@@ -264,11 +265,16 @@ class TestJob(DownloadJob):
             pass
 
         def open(self):
+            self.size = 0
             return self
 
         def write(self, content):
             """Update SHA1 hash"""
+            self.size += len(content)
             self.hashobj.update(content)
+
+        def tell(self):
+            return self.size
 
     def __init__(self, url, parent=None, content=False):
         DownloadJob.__init__(self, url, parent)
