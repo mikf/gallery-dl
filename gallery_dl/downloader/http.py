@@ -13,7 +13,7 @@ import requests.exceptions as rexcepts
 import mimetypes
 import logging
 from .common import BasicDownloader
-from .. import config
+from .. import config, util
 
 log = logging.getLogger("http")
 
@@ -30,8 +30,10 @@ class Downloader(BasicDownloader):
         self.out = output
 
     def download_impl(self, url, pathfmt):
+        partial = False
         tries = 0
         msg = ""
+
         while True:
             tries += 1
             if tries > 1:
@@ -53,7 +55,7 @@ class Downloader(BasicDownloader):
                 break
 
             # reject error-status-codes
-            if response.status_code != 200:
+            if response.status_code not in (200, 206):
                 msg = 'HTTP status "{} {}"'.format(
                     response.status_code, response.reason
                 )
@@ -79,6 +81,13 @@ class Downloader(BasicDownloader):
                     response.close()
                     return
 
+            #
+            if partial and "Content-Range" in response.headers:
+                size = response.headers["Content-Range"].rpartition("/")[2]
+            else:
+                size = response.headers.get("Content-Length")
+            size = util.safe_int(size)
+
             # everything ok -- proceed to download
             self.out.start(pathfmt.path)
             self.downloading = True
@@ -86,6 +95,10 @@ class Downloader(BasicDownloader):
                 with pathfmt.open() as file:
                     for data in response.iter_content(16384):
                         file.write(data)
+                    if size and file.tell() != size:
+                        msg = "filesize mismatch ({} != {})".format(
+                            file.tell(), size)
+                        continue
             except rexcepts.RequestException as exception:
                 msg = exception
                 response.close()
