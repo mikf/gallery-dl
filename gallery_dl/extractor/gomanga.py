@@ -25,7 +25,7 @@ class GomangaChapterExtractor(foolslide.FoolslideChapterExtractor):
             "keyword": "a355cd3197e70c24b84d3885e8a5ff0ac22537bf",
         }),
     ]
-    single = False
+    method = "double"
 
 
 class GomangaMangaExtractor(foolslide.FoolslideMangaExtractor):
@@ -36,4 +36,3 @@ class GomangaMangaExtractor(foolslide.FoolslideMangaExtractor):
         "url": "bd1c82d70838d54140a8209296e789f27ceab7cd",
         "keyword": "fb1fd14548602dbe4f6e70a633429762972c1d5d",
     })]
-    single = False

@@ -10,6 +10,7 @@
 
 from .common import SharedConfigExtractor, MangaExtractor, Message
 from .. import text, util
+import base64
 import json
 
 
@@ -60,7 +61,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
     directory_fmt = ["{category}", "{manga}", "{chapter_string}"]
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
-    single = True
+    method = "default"
 
     def __init__(self, match, url=None):
         FoolslideExtractor.__init__(self)
@@ -104,13 +105,15 @@ class FoolslideChapterExtractor(FoolslideExtractor):
 
     def get_images(self, page):
         """Return a list of all images in this chapter"""
-        if self.single:
-            pos = 0
-            needle = "var pages = "
-        else:
+        if self.method == "base64":
+            base64_data = text.extract(page, 'atob("', '"')[0].encode()
+            data = base64.b64decode(base64_data).decode()
+        elif self.method == "double":
             pos = page.find("[{")
-            needle = " = "
-        return json.loads(text.extract(page, needle, ";", pos)[0])
+            data = text.extract(page, " = ", ";", pos)[0]
+        else:
+            data = text.extract(page, "var pages = ", ";")[0]
+        return json.loads(data)
 
 
 class FoolslideMangaExtractor(FoolslideExtractor, MangaExtractor):

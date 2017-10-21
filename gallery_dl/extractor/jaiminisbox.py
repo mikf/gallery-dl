@@ -23,6 +23,7 @@ class JaiminisboxChapterExtractor(foolslide.FoolslideChapterExtractor):
             "keyword": "faa77b1f6ff462cd5e01511ab55b8c2d6ec42c3e",
         }),
     ]
+    method = "base64"
 
 
 class JaiminisboxMangaExtractor(foolslide.FoolslideMangaExtractor):
