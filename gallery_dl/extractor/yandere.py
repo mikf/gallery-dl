@@ -20,7 +20,7 @@ class YandereExtractor(booru.JSONBooruExtractor):
 class YandereTagExtractor(YandereExtractor, booru.BooruTagExtractor):
     """Extractor for images from yande.re based on search-tags"""
     pattern = [r"(?:https?://)?(?:www\.)?yande\.re/post\?tags=([^&]+)"]
-    test = [("https://yande.re/post?tags=ouzoku armor", {
+    test = [("https://yande.re/post?tags=ouzoku+armor", {
         "content": "59201811c728096b2d95ce6896fd0009235fe683",
     })]
 
