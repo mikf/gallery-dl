@@ -141,7 +141,7 @@ class ImagefapUserExtractor(Extractor):
                 r"profile(?:\.php\?user=|/)([^/]+)"),
                (r"(?:https?://)?(?:www\.)?imagefap\.com/"
                 r"usergallery\.php\?userid=(\d+)")]
-    test = [("http://www.imagefap.com/profile/Mr Bad Example/galleries", {
+    test = [("http://www.imagefap.com/profile/Mr%20Bad%20Example/galleries", {
         "url": "145e98a8648c7695c150800ff8fd578ab26c28c1",
     })]
 
@@ -158,7 +158,7 @@ class ImagefapUserExtractor(Extractor):
         yield Message.Version, 1
         for gid, name in self.get_gallery_data():
             url = "http://www.imagefap.com/gallery/" + gid
-            data = {"gallery_id": util.safe_int(gid), "name": name}
+            data = {"gallery_id": util.safe_int(gid), "title": name}
             yield Message.Queue, url, data
 
     def get_gallery_data(self):

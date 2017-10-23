@@ -26,7 +26,7 @@ class ThreedeebooruTagExtractor(ThreedeebooruExtractor,
     """Extractor for images from behoimi.org based on search-tags"""
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post"
                r"(?:/(?:index)?)?\?tags=([^&]+)"]
-    test = [("http://behoimi.org/post?tags=himekawa_azuru dress", {
+    test = [("http://behoimi.org/post?tags=himekawa_azuru+dress", {
         "url": "ecb30c6aaaf8a6ff8f55255737a9840832a483c1",
         "content": "11cbda40c287e026c1ce4ca430810f761f2d0b2a",
     })]
