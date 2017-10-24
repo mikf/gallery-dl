@@ -15,6 +15,7 @@ import hmac
 import time
 import base64
 import random
+import shutil
 import string
 import _string
 import hashlib
@@ -319,7 +320,7 @@ class PathFormat():
         self.has_extension = False
         self.keywords = {}
         self.directory = self.realdirectory = ""
-        self.path = self.realpath = ""
+        self.path = self.realpath = self.partpath = ""
 
         bdir = extractor.config("base-directory", (".", "gallery-dl"))
         if not isinstance(bdir, str):
@@ -335,8 +336,8 @@ class PathFormat():
             self.exists = lambda: False
 
     def open(self, mode="wb"):
-        """Open file to 'realpath' and return a corresponding file object"""
-        return open(self.realpath, mode)
+        """Open file and return a corresponding file object"""
+        return open(self.partpath or self.realpath, mode)
 
     def exists(self):
         """Return True if 'path' is complete and refers to an existing path"""
@@ -386,6 +387,29 @@ class PathFormat():
         filename = sep + filename
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
+
+    def part_enable(self):
+        if self.has_extension:
+            self.partpath = self.realpath + ".part"
+        else:
+            self.set_extension("part", False)
+            self.partpath = self.realpath
+
+    def part_size(self):
+        if self.partpath and os.path.isfile(self.partpath):
+            try:
+                return os.path.getsize(self.partpath)
+            except OSError:
+                pass
+        return 0
+
+    def part_move(self):
+        try:
+            os.rename(self.partpath, self.realpath)
+            return
+        except OSError:
+            pass
+        shutil.copyfile(self.partpath, self.realpath)
 
     def _exists_abort(self):
         if self.has_extension and os.path.exists(self.realpath):

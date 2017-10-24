@@ -9,9 +9,11 @@
 """Downloader module for text: URLs"""
 
 from .common import DownloaderBase
+from .. import config
 
 
 class Downloader(DownloaderBase):
+    part = config.interpolate(("downloader", "text", "part"), True)
     mode = "t"
 
     def __init__(self, session, output):
