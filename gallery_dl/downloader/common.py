@@ -9,31 +9,41 @@
 """Common classes and constants used by downloader modules."""
 
 import os
-import os.path
-import logging
 import time
+import logging
 
 
 class DownloaderBase():
     """Base class for downloaders"""
     retries = 1
     mode = "b"
+    part = True
 
     def __init__(self, session, output):
         self.session = session
         self.out = output
         self.log = logging.getLogger("download")
+        self.downloading = False
 
     def download(self, url, pathfmt):
         """Download the resource at 'url' and write it to a file-like object"""
+        try:
+            self.download_impl(url, pathfmt)
+        finally:
+            # remove file from incomplete downloads
+            if self.downloading and not self.part:
+                try:
+                    os.remove(pathfmt.realpath)
+                except (OSError, AttributeError):
+                    pass
+
+    def download_impl(self, url, pathfmt):
+        """Actual implementaion of the download process"""
         tries = 0
         msg = ""
 
-        if not pathfmt.has_extension:
-            pathfmt.set_extension("part", False)
-            partpath = pathfmt.realpath
-        else:
-            partpath = pathfmt.realpath + ".part"
+        if self.part:
+            pathfmt.part_enable()
 
         while True:
             if tries:
@@ -45,12 +55,7 @@ class DownloaderBase():
             self.reset()
 
             # check for .part file
-            filesize = 0
-            if os.path.isfile(partpath):
-                try:
-                    filesize = os.path.getsize(partpath)
-                except OSError:
-                    pass
+            filesize = pathfmt.part_size()
 
             # connect to (remote) source
             try:
@@ -78,7 +83,8 @@ class DownloaderBase():
                     return True
 
             self.out.start(pathfmt.path)
-            with open(partpath, mode) as file:
+            self.downloading = True
+            with pathfmt.open(mode) as file:
                 # download content
                 try:
                     self.receive(file)
@@ -95,7 +101,9 @@ class DownloaderBase():
                     continue
             break
 
-        os.rename(partpath, pathfmt.realpath)
+        self.downloading = False
+        if self.part:
+            pathfmt.part_move()
         self.out.success(pathfmt.path, tries)
         return True
 

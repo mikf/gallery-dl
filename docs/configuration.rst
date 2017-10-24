@@ -92,6 +92,21 @@ Description Controls the progress indicator when *gallery-dl* is run with
 Downloader Options
 ==================
 
+downloader.part
+---------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Controls the use of ``.part`` files during file downloads.
+
+            * ``true``: Write downloaded data into ``.part`` files and rename
+              them upon download completion. This mode additionally supports
+              resuming incomplete downloads.
+            * ``false``: Do not use ``.part`` files and write data directly
+              into the actual output files.
+=========== =====
+
+
 downloader.http.retries
 -----------------------
 =========== =====

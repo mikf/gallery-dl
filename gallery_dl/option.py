@@ -146,6 +146,11 @@ def build_parser():
         help="Timeout for HTTP connections (defaut: 30s)",
     )
     downloader.add_argument(
+        "--no-part",
+        action=ConfigConstAction, nargs=0, dest="part", const=False,
+        help="Do not use .part files",
+    )
+    downloader.add_argument(
         "--abort-on-skip",
         action=ConfigConstAction, nargs=0, dest="skip", const="abort",
         help=("Abort extractor run if a file download would normally be "

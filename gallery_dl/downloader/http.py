@@ -13,10 +13,15 @@ from .common import DownloaderBase
 from .. import config, util
 
 
+def _conf(key, default=None):
+    return config.interpolate(("downloader", "http", key), default)
+
+
 class Downloader(DownloaderBase):
-    retries = config.interpolate(("downloader", "http", "retries",), 5)
-    timeout = config.interpolate(("downloader", "http", "timeout",), 30)
-    verify = config.interpolate(("downloader", "http", "verify",), True)
+    retries = _conf("retries", 5)
+    timeout = _conf("timeout", 30)
+    verify = _conf("verify", True)
+    part = _conf("part", True)
 
     def __init__(self, session, output):
         DownloaderBase.__init__(self, session, output)
