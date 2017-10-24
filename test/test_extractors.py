@@ -35,7 +35,7 @@ class TestExtractors(unittest.TestCase):
         else:
             content = False
 
-        tjob = job.TestJob(url, content=content)
+        tjob = job.TestJob(url, content=False)
         self.assertEqual(extr, tjob.extractor.__class__)
 
         if not result:
@@ -49,8 +49,8 @@ class TestExtractors(unittest.TestCase):
             self.assertEqual(result["url"], tjob.hash_url.hexdigest())
         if "keyword" in result:
             self.assertEqual(result["keyword"], tjob.hash_keyword.hexdigest())
-        if "content" in result:
-            self.assertEqual(result["content"], tjob.hash_content.hexdigest())
+        # if "content" in result:
+            # self.assertEqual(result["content"], tjob.hash_content.hexdigest())
         if "count" in result:
             self.assertEqual(len(tjob.urllist), int(result["count"]))
         if "pattern" in result:

@@ -6,27 +6,28 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Downloader module for text: urls"""
+"""Downloader module for text: URLs"""
 
-from .common import BasicDownloader
+from .common import DownloaderBase
 
 
-class Downloader(BasicDownloader):
+class Downloader(DownloaderBase):
+    mode = "t"
 
     def __init__(self, session, output):
-        BasicDownloader.__init__(self)
-        self.out = output
+        DownloaderBase.__init__(self, session, output)
+        self.text = ""
 
-    def download_impl(self, url, pathfmt):
-        if not pathfmt.has_extension:
-            pathfmt.set_extension("txt")
-            if pathfmt.exists():
-                self.out.skip(pathfmt.path)
-                return
+    def connect(self, url, offset):
+        self.text = url[offset + 5:]
+        return offset, len(url) - 5
 
-        self.out.start(pathfmt.path)
-        self.downloading = True
-        with pathfmt.open("w") as file:
-            file.write(url[5:])
-        self.downloading = False
-        self.out.success(pathfmt.path, 0)
+    def receive(self, file):
+        file.write(self.text)
+
+    def reset(self):
+        self.text = ""
+
+    @staticmethod
+    def get_extension():
+        return "txt"

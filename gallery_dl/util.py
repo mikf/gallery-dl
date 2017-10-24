@@ -369,9 +369,9 @@ class PathFormat():
         if self.has_extension:
             self.build_path()
 
-    def set_extension(self, extension):
+    def set_extension(self, extension, real=True):
         """Set the 'extension' keyword"""
-        self.has_extension = True
+        self.has_extension = real
         self.keywords["extension"] = extension
         self.build_path()
 
@@ -383,8 +383,9 @@ class PathFormat():
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
-        self.path = self.directory + sep + filename
-        self.realpath = self.realdirectory + sep + filename
+        filename = sep + filename
+        self.path = self.directory + filename
+        self.realpath = self.realdirectory + filename
 
     def _exists_abort(self):
         if self.has_extension and os.path.exists(self.realpath):
