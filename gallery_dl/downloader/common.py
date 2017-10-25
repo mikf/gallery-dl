@@ -16,7 +16,6 @@ import logging
 class DownloaderBase():
     """Base class for downloaders"""
     retries = 1
-    mode = "b"
     part = True
 
     def __init__(self, session, output):
@@ -66,13 +65,13 @@ class DownloaderBase():
 
             # check response
             if not offset:
-                mode = "w" + self.mode
+                mode = "wb"
                 if filesize:
                     self.log.info("Unable to resume partial download")
             elif offset == -1:
                 break  # early finish
             else:
-                mode = "a" + self.mode
+                mode = "ab"
                 self.log.info("Resuming download at byte %d", offset)
 
             # set missing filename extension

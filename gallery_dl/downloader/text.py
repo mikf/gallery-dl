@@ -14,21 +14,21 @@ from .. import config
 
 class Downloader(DownloaderBase):
     part = config.interpolate(("downloader", "text", "part"), True)
-    mode = "t"
 
     def __init__(self, session, output):
         DownloaderBase.__init__(self, session, output)
-        self.text = ""
+        self.content = b""
 
     def connect(self, url, offset):
-        self.text = url[offset + 5:]
-        return offset, len(url) - 5
+        data = url.encode()
+        self.content = data[offset + 5:]
+        return offset, len(data) - 5
 
     def receive(self, file):
-        file.write(self.text)
+        file.write(self.content)
 
     def reset(self):
-        self.text = ""
+        self.content = b""
 
     @staticmethod
     def get_extension():
