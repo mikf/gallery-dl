@@ -395,28 +395,37 @@ class PathFormat():
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
 
-    def part_enable(self):
+    def part_enable(self, part_directory=None):
+        """Enable .part file usage"""
         if self.has_extension:
             self.partpath = self.realpath + ".part"
         else:
             self.set_extension("part", False)
             self.partpath = self.realpath
+        if part_directory:
+            self.partpath = os.path.join(
+                part_directory,
+                os.path.basename(self.partpath),
+            )
 
     def part_size(self):
-        if self.partpath and os.path.isfile(self.partpath):
+        """Return size of .part file"""
+        if self.partpath:
             try:
-                return os.path.getsize(self.partpath)
+                return os.stat(self.partpath).st_size
             except OSError:
                 pass
         return 0
 
     def part_move(self):
+        """Rename .part file to its actual filename"""
         try:
             os.rename(self.partpath, self.realpath)
             return
         except OSError:
             pass
         shutil.copyfile(self.partpath, self.realpath)
+        os.unlink(self.partpath)
 
     def _exists_abort(self):
         if self.has_extension and os.path.exists(self.realpath):

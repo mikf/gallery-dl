@@ -17,6 +17,7 @@ class DownloaderBase():
     """Base class for downloaders"""
     retries = 1
     part = True
+    partdir = None
 
     def __init__(self, session, output):
         self.session = session
@@ -28,6 +29,9 @@ class DownloaderBase():
         """Download the resource at 'url' and write it to a file-like object"""
         try:
             self.download_impl(url, pathfmt)
+        except Exception:
+            print()
+            raise
         finally:
             # remove file from incomplete downloads
             if self.downloading and not self.part:
@@ -42,16 +46,16 @@ class DownloaderBase():
         msg = ""
 
         if self.part:
-            pathfmt.part_enable()
+            pathfmt.part_enable(self.partdir)
 
         while True:
+            self.reset()
             if tries:
                 self.out.error(pathfmt.path, msg, tries, self.retries)
                 if tries >= self.retries:
                     return False
                 time.sleep(1)
             tries += 1
-            self.reset()
 
             # check for .part file
             filesize = pathfmt.part_size()

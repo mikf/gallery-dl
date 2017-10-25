@@ -107,6 +107,15 @@ Description Controls the use of ``.part`` files during file downloads.
 =========== =====
 
 
+downloader.part-directory
+-------------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description Path to an existing directory to store ``.part`` files in.
+=========== =====
+
+
 downloader.http.retries
 -----------------------
 =========== =====

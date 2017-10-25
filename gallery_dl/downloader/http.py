@@ -22,6 +22,7 @@ class Downloader(DownloaderBase):
     timeout = _conf("timeout", 30)
     verify = _conf("verify", True)
     part = _conf("part", True)
+    partdir = util.expand_path(_conf("part-directory"))
 
     def __init__(self, session, output):
         DownloaderBase.__init__(self, session, output)
