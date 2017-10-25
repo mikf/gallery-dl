@@ -189,7 +189,8 @@ class HosturimageImageExtractor(ImagehostImageExtractor):
     https = True
 
     def get_info(self, page):
-        url, pos = text.extract(page, "<img class='centred' src='", "'")
+        pos = page.index("<img class='centred")
+        url = text.extract(page, " src='", "'", pos)[0]
         return url, url
 
 
