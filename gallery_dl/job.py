@@ -264,7 +264,7 @@ class TestJob(DownloadJob):
         def __exit__(self, *args):
             pass
 
-        def open(self):
+        def open(self, mode):
             self.size = 0
             return self
 
@@ -275,6 +275,9 @@ class TestJob(DownloadJob):
 
         def tell(self):
             return self.size
+
+        def part_size(self):
+            return 0
 
     def __init__(self, url, parent=None, content=False):
         DownloadJob.__init__(self, url, parent)
