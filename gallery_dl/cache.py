@@ -14,7 +14,7 @@ import time
 import tempfile
 import os.path
 import functools
-from . import config
+from . import config, util
 
 
 class CacheInvalidError(Exception):
@@ -111,7 +111,7 @@ class DatabaseCache(CacheModule):
         path = config.get(("cache", "file"), path_default)
         if path is None:
             raise RuntimeError()
-        path = os.path.expanduser(os.path.expandvars(path))
+        path = util.expand_path(path)
         self.db = sqlite3.connect(path, timeout=30, check_same_thread=False)
         self.db.execute(
             "CREATE TABLE IF NOT EXISTS data ("

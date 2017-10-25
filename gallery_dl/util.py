@@ -104,6 +104,13 @@ def safe_int(value, default=0):
         return default
 
 
+def expand_path(path):
+    """Expand environment variables and tildes (~)"""
+    if not path:
+        return path
+    return os.path.expandvars(os.path.expanduser(path))
+
+
 def code_to_language(code, default=None):
     """Map an ISO 639-1 language code to its actual name"""
     return CODES.get((code or "").lower(), default)
@@ -325,7 +332,7 @@ class PathFormat():
         bdir = extractor.config("base-directory", (".", "gallery-dl"))
         if not isinstance(bdir, str):
             bdir = os.path.join(*bdir)
-        self.basedirectory = os.path.expanduser(os.path.expandvars(bdir))
+        self.basedirectory = expand_path(bdir)
 
         skipmode = extractor.config("skip", True)
         if skipmode == "abort":
