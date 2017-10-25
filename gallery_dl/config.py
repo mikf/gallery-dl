@@ -55,7 +55,7 @@ def load(*files, format="json", strict=False):
 
     for conf in configfiles:
         try:
-            path = os.path.expanduser(os.path.expandvars(conf))
+            path = util.expand_path(conf)
             with open(path) as file:
                 confdict = parsefunc(file)
             if not _config:
