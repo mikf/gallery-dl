@@ -9,16 +9,10 @@
 """Downloader module for text: URLs"""
 
 from .common import DownloaderBase
-from .. import config, util
-
-
-def _conf(key, default=None):
-    return config.interpolate(("downloader", "text", key), default)
 
 
 class Downloader(DownloaderBase):
-    part = _conf("part", True)
-    partdir = util.expand_path(_conf("part-directory"))
+    scheme = "text"
 
     def __init__(self, session, output):
         DownloaderBase.__init__(self, session, output)
