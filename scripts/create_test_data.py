@@ -10,7 +10,7 @@
 """Create testdata for extractor tests"""
 
 import argparse
-from  gallery_dl import job, config, extractor
+from gallery_dl import job, config, extractor
 
 TESTDATA_FMT = """
     test = [("{}", {{
@@ -25,6 +25,7 @@ TESTDATA_EXCEPTION_FMT = """
         "exception": exception.{},
     }})]
 """
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -43,6 +44,7 @@ def main():
         urls = args.urls
 
     config.load()
+    config.set(("downloader", "part"), False)
     for url in urls:
         tjob = job.TestJob(url, content=args.content)
         try:
@@ -57,6 +59,7 @@ def main():
                     tjob.hash_content.hexdigest())
         print(tjob.extractor.__class__.__name__)
         print(fmt.format(url, *data))
+
 
 if __name__ == '__main__':
     main()

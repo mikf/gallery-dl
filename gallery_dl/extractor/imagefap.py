@@ -22,15 +22,16 @@ class ImagefapGalleryExtractor(Extractor):
     pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
                 r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")]
     test = [
-        ("http://www.imagefap.com/gallery/6318447", {
-            "url": "f63e6876df83a40e1a98dad70e46952dd9edb7a7",
-            "keyword": "275857d113bb007245de705ae7bd0dff7d677874",
-            "content": "38e50699db9518ae68648c45ecdd6be614efc324",
+        ("http://www.imagefap.com/pictures/7102714", {
+            "url": "ffb1d58924fc9d6a0650006a96395a04454b85cf",
+            "keyword": "b65c310d75269cb6dcc32c3fc1bdcf39bea45342",
+            "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
         ("http://www.imagefap.com/gallery/5486966", {
             "url": "eace9b33be99f87f3382c87bd915cf495a865d6e",
             "keyword": "b84da0543c2d1f848bf5e4c2950dd4f4543a1e0c",
         }),
+        ("http://www.imagefap.com/gallery.php?gid=7102714", None),
     ]
 
     def __init__(self, match):
@@ -86,10 +87,9 @@ class ImagefapImageExtractor(Extractor):
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{name}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"]
-    test = [("http://www.imagefap.com/photo/1616331218/", {
-        "url": "8a05c0ccdcf84e63c962803bc41d247628c549ea",
-        "keyword": "c5023841c72b88949786c231f472f51453103185",
-        "content": "964b8c62c9d5c2a039a2fccf1b1e10aaf7a18a96",
+    test = [("http://www.imagefap.com/photo/1369341772/", {
+        "url": "24cc4312e4a5084f39f1e35af5ba92e5f7c1ad3c",
+        "keyword": "26ae84575067b8231878ec1a2d1e14a0fbcea865",
     })]
 
     def __init__(self, match):
