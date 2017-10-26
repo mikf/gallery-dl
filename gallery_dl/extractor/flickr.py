@@ -172,7 +172,8 @@ class FlickrGroupExtractor(FlickrExtractor):
     directory_fmt = ["{category}", "{subcategory}s", "{group[groupname]}"]
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/groups/([^/]+)"]
     test = [("https://www.flickr.com/groups/bird_headshots/", {
-        "url": "1ac6b088abdc723ec17e951a1f77d8923620737a",
+        "pattern": (r"https?://farm\d+\.staticflickr\.com"
+                    r"/\d+/\d+_[0-9a-f]+(_[a-z])?\.[a-z]+"),
     })]
 
     def data(self):
