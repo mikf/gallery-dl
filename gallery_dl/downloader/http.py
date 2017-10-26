@@ -10,23 +10,18 @@
 
 import mimetypes
 from .common import DownloaderBase
-from .. import config, util
-
-
-def _conf(key, default=None):
-    return config.interpolate(("downloader", "http", key), default)
+from .. import util
 
 
 class Downloader(DownloaderBase):
-    retries = _conf("retries", 5)
-    timeout = _conf("timeout", 30)
-    verify = _conf("verify", True)
-    part = _conf("part", True)
-    partdir = util.expand_path(_conf("part-directory"))
+    scheme = "http"
 
     def __init__(self, session, output):
         DownloaderBase.__init__(self, session, output)
         self.response = None
+        self.retries = self.config("retries", 5)
+        self.timeout = self.config("timeout", 30)
+        self.verify = self.config("verify", True)
 
     def connect(self, url, offset):
         headers = {}

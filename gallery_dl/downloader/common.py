@@ -11,19 +11,29 @@
 import os
 import time
 import logging
+from .. import config, util
 
 
 class DownloaderBase():
     """Base class for downloaders"""
+    scheme = ""
     retries = 1
-    part = True
-    partdir = None
 
     def __init__(self, session, output):
         self.session = session
         self.out = output
         self.log = logging.getLogger("download")
         self.downloading = False
+        self.part = self.config("part", True)
+        self.partdir = self.config("part-directory")
+
+        if self.partdir:
+            self.partdir = util.expand_path(self.partdir)
+            os.makedirs(self.partdir, exist_ok=True)
+
+    def config(self, key, default=None):
+        """Interpolate config value for 'key'"""
+        return config.interpolate(("downloader", self.scheme, key), default)
 
     def download(self, url, pathfmt):
         """Download the resource at 'url' and write it to a file-like object"""

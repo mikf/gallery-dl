@@ -112,7 +112,11 @@ downloader.part-directory
 =========== =====
 Type        ``string``
 Default     ``null``
-Description Path to an existing directory to store ``.part`` files in.
+Description Alternate location for ``.part`` files.
+
+            Missing directories will be created as needed.
+            If this value is ``null``, ``.part`` files are going to be stored
+            alongside the actual output files.
 =========== =====
 
 
