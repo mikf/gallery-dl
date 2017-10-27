@@ -21,8 +21,7 @@ def read(fname):
 exec(read("gallery_dl/version.py"))
 
 DESCRIPTION = ("Command-line program to download image galleries and "
-               "collections from pixiv, exhentai, danbooru, gelbooru, nijie "
-               "and more")
+               "collections from pixiv, exhentai, danbooru and more")
 LONG_DESCRIPTION = read("README.rst")
 
 if "py2exe" in sys.argv:
@@ -44,7 +43,7 @@ if "py2exe" in sys.argv:
         "options": {"py2exe": {
             "bundle_files": 0,
             "compressed": 1,
-            "optimize": 2,
+            "optimize": 1,
             "dist_dir": ".",
             "packages": ["gallery_dl"],
             "dll_excludes": ["w9xpopen.exe"],
@@ -87,21 +86,18 @@ setup(
     ],
     keywords="image gallery downloader crawler scraper",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Intended Audience :: End Users/Desktop",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
-        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3 :: Only",
-        "Topic :: Internet",
         "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Multimedia",
         "Topic :: Multimedia :: Graphics",
     ],
     test_suite="test",

@@ -4,8 +4,9 @@ gallery-dl
 
 *gallery-dl* is a command-line program to download image-galleries and
 -collections from several image hosting sites such as pixiv.net, exhentai.org,
-gelbooru.com and several more (see `Supported Sites`_). It requires Python 3.3+
-to run and works on Unix-like systems as well as on Windows.
+danbooru.donmai.us and several more (see `Supported Sites`_).
+It requires Python 3.3+ to run and works on Unix-like systems as well as on
+Windows.
 
 
 |pypi| |build|
@@ -20,14 +21,14 @@ Installation via pip
 --------------------
 
 The stable releases of *gallery-dl* are distributed on PyPI_ and can be
-easily installed or upgraded to the latest version using pip_:
+easily installed or upgraded using pip_:
 
 .. code:: bash
 
     $ pip install --upgrade gallery-dl
 
-Installing the latest dev-version directly from GitHub can be done via
-pip as well:
+Installing the latest dev-version directly from GitHub can be done with
+pip_ as well:
 
 .. code:: bash
 
@@ -83,11 +84,11 @@ See also :code:`gallery-dl --help`.
 Examples
 --------
 
-Download images; in this case from gelbooru via tag search for 'bonocho':
+Download images; in this case from danbooru via tag search for 'bonocho':
 
 .. code:: bash
 
-    $ gallery-dl "http://gelbooru.com/index.php?page=post&s=list&tags=bonocho"
+    $ gallery-dl http://danbooru.donmai.us/posts?tags=bonocho
 
 
 Get the direct URL of an image from a site that requires authentication:
@@ -159,7 +160,7 @@ Username & Password
 Some extractors require you to provide valid login-credentials in the form of
 a username & password pair.
 This is necessary for ``pixiv``, ``nijie`` and ``seiga`` and optional
-(but strongly recommended) for ``exhentai`` and ``batoto``.
+(but strongly recommended) for ``exhentai``,  ``batoto`` and ``sankaku``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
