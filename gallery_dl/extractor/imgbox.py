@@ -13,9 +13,53 @@ from .. import text, exception
 import re
 
 
-class ImgboxGalleryExtractor(AsynchronousExtractor):
-    """Extractor for image galleries from imgbox.com"""
+class ImgboxExtractor(Extractor):
+    """Base class for imgbox extractors"""
     category = "imgbox"
+    url_base = "https://imgbox.com"
+
+    def items(self):
+        data = self.get_job_metadata()
+        yield Message.Version, 1
+        yield Message.Directory, data
+
+        for image_key in self.get_image_keys():
+            imgpage = self.request(self.url_base + "/" + image_key).text
+            imgdata = self.get_image_metadata(imgpage)
+            if imgdata["filename"]:
+                imgdata.update(data)
+                imgdata["image_key"] = image_key
+                text.nameext_from_url(imgdata["filename"], imgdata)
+                yield Message.Url, self.get_image_url(imgpage), imgdata
+
+    @staticmethod
+    def get_job_metadata():
+        """Collect metadata for extractor-job"""
+        return {}
+
+    @staticmethod
+    def get_image_keys():
+        """Return an iterable containing all image-keys"""
+        return []
+
+    @staticmethod
+    def get_image_metadata(page):
+        """Collect metadata for a downloadable file"""
+        return text.extract_all(page, (
+            ("num"      , '</a> &nbsp; ', ' of '),
+            (None       , 'class="image-container"', ''),
+            ("filename" , ' title="', '"'),
+        ))[0]
+
+    @staticmethod
+    def get_image_url(page):
+        """Extract download-url"""
+        pos = page.index(">Image</a>")
+        return text.extract(page, '<a href="', '"', pos)[0]
+
+
+class ImgboxGalleryExtractor(AsynchronousExtractor, ImgboxExtractor):
+    """Extractor for image galleries from imgbox.com"""
     subcategory = "gallery"
     directory_fmt = ["{category}", "{title} - {gallery_key}"]
     filename_fmt = "{num:>03}-{filename}"
@@ -23,70 +67,49 @@ class ImgboxGalleryExtractor(AsynchronousExtractor):
     test = [
         ("https://imgbox.com/g/JaX5V5HX7g", {
             "url": "6eafdeebaf0774238dddc9227e2ba315e40e9b7c",
-            "keyword": "abe510221e1dc8c804296be25adf1498fb93f892",
+            "keyword": "92499344257cf8c72695a8dab4ccc15ca7655c1e",
             "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
+        }),
+        ("https://imgbox.com/g/cUGEkRbdZZ", {
+            "url": "d839d47cbbbeb121f83c520072512f7e51f52107",
+            "keyword": "b352ca26009ba10d80b5e46067a78b4a51c6c2c9",
         }),
         ("https://imgbox.com/g/JaX5V5HX7h", {
             "exception": exception.NotFoundError,
         }),
     ]
-    url_base = "https://imgbox.com"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
-        self.key = match.group(1)
-        self.metadata = {}
+        self.gallery_key = match.group(1)
+        self.image_keys = []
 
-    def items(self):
-        page = self.request(self.url_base + "/g/" + self.key).text
+    def get_job_metadata(self):
+        page = self.request(self.url_base + "/g/" + self.gallery_key).text
         if "The specified gallery could not be found." in page:
             raise exception.NotFoundError("gallery")
-        self.metadata = self.get_job_metadata(page)
-        yield Message.Version, 1
-        yield Message.Directory, self.metadata
-        for match in re.finditer(r'<a href="([^"]+)"><img alt="', page):
-            imgpage = self.request(self.url_base + match.group(1)).text
-            data = self.get_file_metadata(imgpage)
-            if data["filename"]:
-                data = text.nameext_from_url(data["filename"], data)
-                yield Message.Url, self.get_file_url(imgpage), data
+        self.image_keys = re.findall(r'<a href="/([^"]+)"><img alt="', page)
 
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
         title = text.extract(page, "<h1>", "</h1>")[0]
         title, _, count = title.rpartition(" - ")
         return {
-            "gallery_key": self.key,
+            "gallery_key": self.gallery_key,
             "title": text.unescape(title),
             "count": count[:-7],
         }
 
-    def get_file_metadata(self, page):
-        """Collect metadata for a downloadable file"""
-        return text.extract_all(page, (
-            ("num"      , '</a> &nbsp; ', ' of '),
-            (None       , 'class="image-container"', ''),
-            ("image_key", 'alt="', '"'),
-            ("filename" , ' title="', '"'),
-        ), values=self.metadata.copy())[0]
-
-    @staticmethod
-    def get_file_url(page):
-        """Extract download-url"""
-        base = "https://i.imgbox.com/"
-        path = text.extract(page, base, '"')[0]
-        return base + path
+    def get_image_keys(self):
+        return self.image_keys
 
 
-class ImgboxImageExtractor(Extractor):
+class ImgboxImageExtractor(ImgboxExtractor):
     """Extractor for single images from imgbox.com"""
-    category = "imgbox"
     subcategory = "image"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"]
     test = [
         ("https://imgbox.com/qHhw7lpG", {
-            "url": "b9556dc307edf88e016fbced6d354702bc236070",
-            "keyword": "a5cdcdf6e784bb186ed65a0cd7978ae2d0e17a12",
+            "url": "af39eb0bca6fc5bd440addfba8b62868971e7b3c",
+            "keyword": "a7a65a05a49d9a0eae95d637019af55faad09c5e",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
         }),
         ("https://imgbox.com/qHhw7lpH", {
@@ -95,16 +118,15 @@ class ImgboxImageExtractor(Extractor):
     ]
 
     def __init__(self, match):
-        Extractor.__init__(self)
-        self.key = match.group(1)
+        ImgboxExtractor.__init__(self)
+        self.image_key = match.group(1)
 
-    def items(self):
-        page = self.request("https://imgbox.com/" + self.key).text
-        url , pos = text.extract(page, 'src="https://i.', '"')
-        if not url:
+    def get_image_keys(self):
+        return (self.image_key,)
+
+    @staticmethod
+    def get_image_metadata(page):
+        data = ImgboxExtractor.get_image_metadata(page)
+        if not data["filename"]:
             raise exception.NotFoundError("image")
-        filename, pos = text.extract(page, ' title="', '"', pos)
-        data = text.nameext_from_url(filename, {"image_key": self.key})
-        yield Message.Version, 1
-        yield Message.Directory, data
-        yield Message.Url, "https://i." + url, data
+        return data
