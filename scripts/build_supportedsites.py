@@ -56,8 +56,7 @@ CATEGORY_MAP = {
     "thebarchive"    : "The /b/ Archive",
     "worldthree"     : "World Three",
     "yeet"           : "YEET Archive",
-    "yomanga"        : "YoManga",
-    "yonkouprod"     : "Yonkou Productions",
+    "xvideos"        : "XVideos",
 }
 
 SUBCATEGORY_MAP = {

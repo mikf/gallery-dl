@@ -6,15 +6,26 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.xvideos.com"""
+"""Extract images from https://www.xvideos.com/"""
 
 from .common import Extractor, Message
 from .. import text, util, exception
+import json
 
 
-class XvideosGalleryExtractor(Extractor):
-    """Extractor for user profile galleries from xvideos.com"""
+class XvideosExtractor(Extractor):
+    """Base class for xvideos extractors"""
     category = "xvideos"
+
+    def get_page(self):
+        response = self.request(self.url, fatal=False)
+        if response.status_code in (403, 404):
+            raise exception.NotFoundError(self.subcategory)
+        return response.text
+
+
+class XvideosGalleryExtractor(XvideosExtractor):
+    """Extractor for user profile galleries from xvideos.com"""
     subcategory = "gallery"
     directory_fmt = ["{category}", "{user[name]}", "{title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
@@ -32,15 +43,13 @@ class XvideosGalleryExtractor(Extractor):
     ]
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        XvideosExtractor.__init__(self)
         self.user, self.gid = match.groups()
-        self.url = match.group(0)
+        self.url = "https://www.xvideos.com/profiles/{}/photos/{}".format(
+            self.user, self.gid)
 
     def items(self):
-        response = self.request(self.url, fatal=False)
-        if response.status_code in (403, 404):
-            raise exception.NotFoundError("gallery")
-        page = response.text
+        page = self.get_page()
         data = self.get_metadata(page)
         imgs = self.get_images(page)
         data["count"] = len(imgs)
@@ -78,3 +87,50 @@ class XvideosGalleryExtractor(Extractor):
         """Return a list of all image urls for this gallery"""
         return list(text.extract_iter(
             page, '<a class="embed-responsive-item" href="', '"'))
+
+
+class XvideosUserExtractor(XvideosExtractor):
+    """Extractor for user profiles from xvideos.com"""
+    subcategory = "user"
+    categorytransfer = True
+    pattern = [r"(?:https?://)?(?:www\.)?xvideos\.com"
+               r"/profiles/([^/?&#]+)/?(?:#.*)?$"]
+    test = [
+        ("https://www.xvideos.com/profiles/pervertedcouple", {
+            "url": "a413f3e60d6d3a2de79bd44fa3b7a9c03db4336e",
+            "keyword": "a796760d34732adc7ec52a8feb057515209a2ca6",
+        }),
+        ("https://www.xvideos.com/profiles/niwehrwhernvh", {
+            "exception": exception.NotFoundError,
+        }),
+        ("https://www.xvideos.com/profiles/pervertedcouple#_tabPhotos", None),
+    ]
+
+    def __init__(self, match):
+        XvideosExtractor.__init__(self)
+        self.user = match.group(1)
+        self.url = "https://www.xvideos.com/profiles/" + self.user
+
+    def items(self):
+        page = self.get_page()
+        data = json.loads(text.extract(
+            page, "xv.conf=", ";</script>")[0])["data"]
+
+        if not isinstance(data["galleries"], dict):
+            return
+        if "0" in data["galleries"]:
+            del data["galleries"]["0"]
+
+        galleries = [
+            {"gallery_id": util.safe_int(gid),
+             "title": text.unescape(gdata["title"]),
+             "count": gdata["nb_pics"]}
+            for gid, gdata in data["galleries"].items()
+        ]
+        galleries.sort(key=lambda x: x["gallery_id"])
+
+        yield Message.Version, 1
+        for gallery in galleries:
+            url = "https://www.xvideos.com/profiles/{}/photos/{}".format(
+                self.user, gallery["gallery_id"])
+            yield Message.Queue, url, gallery
