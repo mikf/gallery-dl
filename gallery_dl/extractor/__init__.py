@@ -83,6 +83,7 @@ modules = [
     "worldthree",
     "yandere",
     "yeet",
+    "xvideos",
     "imagehosts",
     "directlink",
     "recursive",
