@@ -92,9 +92,8 @@ class MangahereChapterExtractor(AsynchronousExtractor):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, '<title>', '</title>')
         chid , pos = text.extract(page, '.net/store/manga/', '/', pos)
-        _    , pos = text.extract(page, '<select class="wid60"', '', pos)
-        _    , pos = text.extract(page, '</select>', '', pos)
-        count, pos = text.extract(page, '>', '<', pos-30)
+        pages, pos = text.extract(page, ' class="wid60"', '</select>', pos)
+        count = re.findall(r">(\d+)<", pages)[-1]
         manga = re.match((r"(.+) \d+(\.\d+)? - Read .+ Chapter "
                           r"\d+(\.\d+)? Online"), manga).group(1)
         return {
