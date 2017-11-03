@@ -30,7 +30,7 @@ class TumblrUserExtractor(Extractor):
         Extractor.__init__(self)
         self.user = match.group(1)
         self.api_url = "https://{}.tumblr.com/api/read/json".format(self.user)
-        self.api_params = {"start": 0, "type": "photo"}
+        self.api_params = {"start": 0, "type": "photo", "num": 20}
 
     def items(self):
         images = self.get_image_data()
@@ -66,8 +66,8 @@ class TumblrUserExtractor(Extractor):
                 yield data["tumblelog"]
             for post in data["posts"]:
                 yield from self.get_images_from_post(post)
-            if len(data["posts"]) < 20:
-                break
+            if not data["posts"] or "id" in params:
+                return
             params["start"] += 20
 
     @staticmethod
