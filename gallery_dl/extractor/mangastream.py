@@ -21,14 +21,14 @@ class MangastreamChapterExtractor(AsynchronousExtractor):
     filename_fmt = "{manga}_c{chapter}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?(?:readms|mangastream)\.(?:com|net)/"
                 r"r(?:ead)?/([^/]*/([^/]+)/(\d+))")]
-    root = "https://readms.net/r/"
+    base_url = "https://mangastream.com/r/"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
         self.part, self.chapter, self.ch_id = match.groups()
 
     def items(self):
-        page = self.request(self.root + self.part).text
+        page = self.request(self.base_url + self.part).text
         data = self.get_job_metadata(page)
         next_url = None
         yield Message.Version, 1
@@ -38,7 +38,8 @@ class MangastreamChapterExtractor(AsynchronousExtractor):
                 page = self.request(next_url).text
             next_url, image_url = self.get_page_metadata(page)
             text.nameext_from_url(image_url, data)
-            image_url = urljoin(self.root, image_url)
+            next_url = urljoin(self.base_url, next_url)
+            image_url = urljoin(self.base_url, image_url)
             yield Message.Url, image_url, data.copy()
 
     def get_job_metadata(self, page):
