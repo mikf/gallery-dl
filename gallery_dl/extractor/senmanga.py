@@ -21,22 +21,22 @@ class SenmangaChapterExtractor(Extractor):
     pattern = [r"(?:https?://)?raw\.senmanga\.com/([^/]+/[^/]+)"]
     test = [
         ("http://raw.senmanga.com/Bokura-wa-Minna-Kawaisou/37A/1", {
-            "url": "32d88382fcad66859d089cd9a61249f375492ec5",
+            "url": "5f95140ff511d8497e2ec08fa7267c6bb231faec",
             "keyword": "705d941a150765edb33cd2707074bd703a93788c",
             "content": "a791dda85ac0d37e3b36d754560cbb65b8dab5b9",
         }),
         ("http://raw.senmanga.com/Love-Lab/2016-03/1", {
-            "url": "d4f37c7347e56a09f9679d63c1f24cd32621d0b8",
+            "url": "8347b9f00c14b864dd3c19a1f5ae52adb2ef00de",
             "keyword": "4e72e4ade57671ad0af9c8d81feeff4259d5bbec",
         }),
     ]
-    url_base = "http://raw.senmanga.com"
+    root = "https://raw.senmanga.com"
 
     def __init__(self, match):
         Extractor.__init__(self)
         part = match.group(1)
-        self.chapter_url = "{}/{}/".format(self.url_base, part)
-        self.img_url = "{}/viewer/{}/".format(self.url_base, part)
+        self.chapter_url = "{}/{}/".format(self.root, part)
+        self.img_url = "{}/viewer/{}/".format(self.root, part)
         self.session.headers["Referer"] = self.chapter_url
         self.session.headers["User-Agent"] = "Mozilla 5.0"
 

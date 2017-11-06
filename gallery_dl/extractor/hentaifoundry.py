@@ -29,7 +29,7 @@ class HentaifoundryUserExtractor(Extractor):
             "exception": exception.NotFoundError,
         }),
     ]
-    url_base = "https://www.hentai-foundry.com/pictures/user/"
+    base_url = "https://www.hentai-foundry.com/pictures/user/"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -50,18 +50,18 @@ class HentaifoundryUserExtractor(Extractor):
         needle = 'thumbTitle"><a href="/pictures/user/'
         for _ in range((count-1) // 25 + 1):
             pos = 0
-            url = self.url_base + self.artist + "/page/" + str(num)
+            url = self.base_url + self.artist + "/page/" + str(num)
             page = self.request(url).text
             for _ in range(25):
                 part, pos = text.extract(page, needle, '"', pos)
                 if not part:
                     return
-                yield self.get_image_metadata(self.url_base + part)
+                yield self.get_image_metadata(self.base_url + part)
             num += 1
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        url = self.url_base + self.artist + "?enterAgree=1"
+        url = self.base_url + self.artist + "?enterAgree=1"
         response = self.request(url, fatal=False)
         if response.status_code == 404:
             raise exception.NotFoundError("user")
@@ -73,15 +73,14 @@ class HentaifoundryUserExtractor(Extractor):
     def get_image_metadata(self, url):
         """Collect metadata for an image"""
         page = self.request(url).text
-        offset = len(self.url_base) + len(self.artist)
-        index = text.extract(url, '/', '/', offset)[0]
+        index = url.rsplit("/", 2)[1]
         title, pos = text.extract(
             page, 'Pictures</a> &raquo; <span>', '<')
-        url, pos = text.extract(
+        part, pos = text.extract(
             page, '//pictures.hentai-foundry.com', '"', pos)
         data = {"index": util.safe_int(index), "title": text.unescape(title)}
-        text.nameext_from_url(url, data)
-        return "https://pictures.hentai-foundry.com" + url, data
+        text.nameext_from_url(part, data)
+        return "https://pictures.hentai-foundry.com" + part, data
 
     def set_filters(self, token):
         """Set site-internal filters to show all images"""

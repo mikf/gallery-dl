@@ -15,13 +15,13 @@ from .. import text
 class ImgchiliExtractor(Extractor):
     """Base class for imgchili extractors"""
     category = "imgchili"
-    url_base = "https://imgchili.net/"
+    root = "https://imgchili.net"
 
     def __init__(self, match):
         Extractor.__init__(self)
         self.url = match.group(0)
         self.match = match
-        self.session.headers["Referer"] = self.url_base
+        self.session.headers["Referer"] = self.root
 
     def items(self):
         page = self.request(self.url, encoding="utf-8").text

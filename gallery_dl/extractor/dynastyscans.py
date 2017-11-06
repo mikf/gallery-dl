@@ -26,23 +26,23 @@ class DynastyscansChapterExtractor(Extractor):
     test = [
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {
-            "url": "ff79ea9956522a8dafd261c1fbe3c74aa8470dc5",
+            "url": "dce64e8c504118f1ab4135c00245ea12413896cb",
             "keyword": "fb2f470b995df5b301ccede31ed9829a010236db",
         }),
         (("http://dynasty-scans.com/chapters/"
           "new_game_the_spinoff_special_13"), {
-            "url": "2cd5e04bd16f842dc884c145a44cf0c64ec27a21",
+            "url": "dbe5bbb74da2edcfb1832895a484e2a40bc8b538",
             "keyword": "281bbe0fb74b812ced595619ca5876983490dc0e",
         }),
     ]
-    url_base = "https://dynasty-scans.com/"
+    root = "https://dynasty-scans.com"
 
     def __init__(self, match):
         Extractor.__init__(self)
         self.chaptername = match.group(1)
 
     def items(self):
-        page = self.request(self.url_base + "chapters/" + self.chaptername,
+        page = self.request(self.root + "/chapters/" + self.chaptername,
                             encoding="utf-8").text
         data = self.get_job_metadata(page)
         imgs = self.get_image_data(page)
@@ -50,7 +50,7 @@ class DynastyscansChapterExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, data
         for data["page"], img in enumerate(imgs, 1):
-            url = self.url_base + img["image"]
+            url = self.root + img["image"]
             text.nameext_from_url(url, data)
             data["name"] = img["name"]
             yield Message.Url, url, data
