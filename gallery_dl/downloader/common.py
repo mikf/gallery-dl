@@ -12,6 +12,7 @@ import os
 import time
 import logging
 from .. import config, util
+from requests.exceptions import RequestException
 
 
 class DownloaderBase():
@@ -101,9 +102,7 @@ class DownloaderBase():
                 # download content
                 try:
                     self.receive(file)
-                except OSError:
-                    raise
-                except Exception as exc:
+                except RequestException as exc:
                     msg = exc
                     continue
 
