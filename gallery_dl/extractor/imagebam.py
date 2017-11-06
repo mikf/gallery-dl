@@ -25,7 +25,7 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
         "keyword": "0ab7bef5cf995d9229dc900dc508311cefb32306",
         "content": "596e6bfa157f2c7169805d50075c2986549973a8",
     })]
-    url_base = "http://www.imagebam.com"
+    root = "http://www.imagebam.com"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
@@ -44,7 +44,7 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        url = self.url_base + "/gallery/" + self.gkey
+        url = self.root + "/gallery/" + self.gkey
         page = self.request(url, encoding="utf-8").text
         data, pos = text.extract_all(page, (
             (None       , "<img src='/img/icons/photos.png'", ""),
@@ -59,7 +59,7 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
         """Yield all image-urls and -ids for a gallery"""
         done = False
         while not done:
-            page = self.request(self.url_base + url).text
+            page = self.request(self.root + url).text
             pos = text.extract(
                 page, 'class="btn btn-default" title="Next">', ''
             )[1]
