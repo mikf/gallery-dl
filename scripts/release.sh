@@ -24,14 +24,19 @@ update() {
     cd "${ROOTDIR}"
     echo Updating version to ${NEWVERSION}
     sed -i "s#\"${PYVERSION}\"#\"${NEWVERSION}\"#" "gallery_dl/version.py"
-    sed -i "s#v${OLDVERSION}#v${NEWVERSION}#" "README.rst"
+    sed -i "s#v${OLDVERSION}#v${NEWVERSION}#" "${README}"
 }
 
 update-dev() {
     cd "${ROOTDIR}"
     IFS="." read MAJOR MINOR BUILD <<< "${NEWVERSION}"
     BUILD=$((BUILD+1))
+    # update version to -dev
     sed -i "s#\"${NEWVERSION}\"#\"${MAJOR}.${MINOR}.${BUILD}-dev\"#" "gallery_dl/version.py"
+    # add 'unreleased' line to changelog
+    sed -i "2i\\\n## Unreleased" "${CHANGELOG}"
+
+    git add "gallery_dl/version.py" "${CHANGELOG}"
 }
 
 build() {
@@ -59,7 +64,7 @@ build_windows() {
         exit 3
     fi
     if [ -e "dist/gallery-dl.exe" ]; then
-        mv -f "dist/gallery-dl.exe" "dist/gallery-v${OLDVERSION}-dl.exe"
+        mv -f "dist/gallery-dl.exe" "dist/gallery-dl-v${OLDVERSION}.exe"
     fi
     mv "gallery-dl.exe" "./dist/"
 }
@@ -72,10 +77,22 @@ sign() {
     gpg --detach-sign gallery-dl.exe
 }
 
+changelog() {
+    cd "${ROOTDIR}"
+    echo Updating "${CHANGELOG}"
+
+    # replace "#NN" with link to actual issue
+    # insert new version and date
+    sed -i \
+        -e "s*\([( ]\)#\([0-9]\+\)*\1[#\2](https://github.com/mikf/gallery-dl/issues/\2)*g" \
+        -e "s*^## [Uu]nreleased*## ${NEWVERSION} - $(date +%Y-%m-%d)*" \
+        "${CHANGELOG}"
+}
+
 git-upload() {
     cd "${ROOTDIR}"
     echo Pushing changes to github
-    git add "gallery_dl/version.py" "README.rst"
+    git add "gallery_dl/version.py" "${README}" "${CHANGELOG}"
     git commit -S -m "release version ${NEWVERSION}"
     git tag -s -m "version ${NEWVERSION}" "v${NEWVERSION}"
     git push
@@ -90,6 +107,8 @@ pypi-upload() {
 
 
 ROOTDIR="$(realpath "$(dirname "$0")/..")/"
+README="README.rst"
+CHANGELOG="CHANGELOG.md"
 
 LASTTAG="$(git describe --abbrev=0 --tags)"
 OLDVERSION="${LASTTAG#v}"
@@ -101,7 +120,7 @@ else
     NEWVERSION="${PYVERSION%-dev}"
 fi
 
-if [[ ! $NEWVERSION =~ [0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+if [[ ! $NEWVERSION =~ [0-9]+\.[0-9]+\.[0-9]+(-[a-z]+(\.[0-9]+)?)?$ ]]; then
     echo "invalid version: $NEWVERSION"
     exit 2
 fi
@@ -113,6 +132,7 @@ update
 build
 build_windows
 sign
+changelog
 git-upload
 pypi-upload
 update-dev
