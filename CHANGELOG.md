@@ -2,10 +2,10 @@
 
 ## Unreleased
 - Added support for:
-  - `xvideos` - https://www.xvideos.com/ (#45)
+  - `xvideos` - https://www.xvideos.com/ ([#45](https://github.com/mikf/gallery-dl/issues/45))
 - Fixed exception handling during file downloads which could lead to a premature exit
-- Fixed an issue with `tumblr` where not all images would be downloaded when using tags (#48)
-- Fixed extraction issues for `imgbox` (#47), `mangastream` (#49) and `mangahere`
+- Fixed an issue with `tumblr` where not all images would be downloaded when using tags ([#48](https://github.com/mikf/gallery-dl/issues/48))
+- Fixed extraction issues for `imgbox` ([#47](https://github.com/mikf/gallery-dl/issues/47)), `mangastream` ([#49](https://github.com/mikf/gallery-dl/issues/49)) and `mangahere`
 
 ## 1.0.0 - 2017-10-27
 - Added support for:
@@ -14,19 +14,19 @@
 - Added support for `pixiv` ranking lists
 - Added support for `booru` popular lists (`danbooru`, `e621`, `konachan`, `yandere`, `3dbooru`)
 - Added the `--cookies` command-line and [`cookies`](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractorcookies) config option to load additional cookies
-- Added the `--filter` and `--chapter-filter` command-line options to select individual images or manga-chapters by their metadata using simple Python expressions (#43)
+- Added the `--filter` and `--chapter-filter` command-line options to select individual images or manga-chapters by their metadata using simple Python expressions ([#43](https://github.com/mikf/gallery-dl/issues/43))
 - Added the [`verify`](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#downloaderhttpverify) config option to control certificate verification during file downloads
 - Added config options to overwrite internally used API credentials ([API Tokens & IDs](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#api-tokens-ids))
 - Added `-K` as a shortcut for `--list-keywords`
 - Changed the `--images` and `--chapters` command-line options to `--range` and `--chapter-range`
 - Changed keyword names for various modules to make them accessible by `--filter`. In general minus signs have been replaced with underscores (e.g. `gallery-id`  -> `gallery_id`).
 - Changed default filename formats for manga extractors to optionally use volume and title information
-- Improved the downloader modules to use [`.part` files](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#downloaderpart) and support resuming incomplete downloads (#29)
-- Improved `deviantart` by distinguishing between users and groups (#26), always using HTTPS, and always downloading full-sized original images
-- Improved `sankaku` by adding authentication support and fixing various other issues (#44)
-- Improved URL pattern for direct image links (#30)
-- Fixed an issue with `luscious` not getting original image URLs (#33)
-- Fixed various smaller issues for `batoto`, `hentai2read` (#38), `jaiminisbox`, `khinsider`, `kissmanga` (#28, #46), `mangahere`, `pawoo`, `twitter`
+- Improved the downloader modules to use [`.part` files](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#downloaderpart) and support resuming incomplete downloads ([#29](https://github.com/mikf/gallery-dl/issues/29))
+- Improved `deviantart` by distinguishing between users and groups ([#26](https://github.com/mikf/gallery-dl/issues/26)), always using HTTPS, and always downloading full-sized original images
+- Improved `sankaku` by adding authentication support and fixing various other issues ([#44](https://github.com/mikf/gallery-dl/issues/44))
+- Improved URL pattern for direct image links ([#30](https://github.com/mikf/gallery-dl/issues/30))
+- Fixed an issue with `luscious` not getting original image URLs ([#33](https://github.com/mikf/gallery-dl/issues/33))
+- Fixed various smaller issues for `batoto`, `hentai2read` ([#38](https://github.com/mikf/gallery-dl/issues/38)), `jaiminisbox`, `khinsider`, `kissmanga` ([#28](https://github.com/mikf/gallery-dl/issues/28), [#46](https://github.com/mikf/gallery-dl/issues/46)), `mangahere`, `pawoo`, `twitter`
 - Removed `kisscomic` and `yonkouprod` modules
 
 ## 0.9.1 - 2017-07-24
@@ -43,26 +43,26 @@
   - `thebarchive` - https://thebarchive.com/
   - `mangazuki` - https://mangazuki.co/
 - Improved `reddit` to allow submission filtering by ID and human-readable dates
-- Improved `deviantart` to support group galleries and gallery folders (#26)
+- Improved `deviantart` to support group galleries and gallery folders ([#26](https://github.com/mikf/gallery-dl/issues/26))
 - Changed `deviantart` to use better default path formats
 - Fixed extraction of larger `imgur` albums
 - Fixed some smaller issues for `pixiv`, `batoto` and `fallenangels`
 
 ## 0.9.0 - 2017-06-28
 - Added support for:
-  - `reddit` - https://www.reddit.com/ (#15)
-  - `flickr` - https://www.flickr.com/ (#16)
+  - `reddit` - https://www.reddit.com/ ([#15](https://github.com/mikf/gallery-dl/issues/15))
+  - `flickr` - https://www.flickr.com/ ([#16](https://github.com/mikf/gallery-dl/issues/16))
   - `gfycat` - https://gfycat.com/
 - Added support for direct image links
 - Added user authentication via [OAuth](https://github.com/mikf/gallery-dl#52oauth) for `reddit` and `flickr`
-- Added support for user authentication data from [`.netrc`](https://stackoverflow.com/tags/.netrc/info) files (#22)
-- Added a simple progress indicator for multiple URLs (#19)
+- Added support for user authentication data from [`.netrc`](https://stackoverflow.com/tags/.netrc/info) files ([#22](https://github.com/mikf/gallery-dl/issues/22))
+- Added a simple progress indicator for multiple URLs ([#19](https://github.com/mikf/gallery-dl/issues/19))
 - Added the `--write-unsupported` command-line option to write unsupported URLs to a file
-- Added documentation for all available config options ([configuration.rst](https://github.com/mikf/gallery-dl/blob/b7576876064b3049b2b2d6c11ada14592f2cd41b/docs/configuration.rst))
-- Improved `pixiv` to support tags for user downloads (#17)
-- Improved `pixiv` to support shortened and http://pixiv.me/... URLs (#23)
+- Added documentation for all available config options ([configuration.rst](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst))
+- Improved `pixiv` to support tags for user downloads ([#17](https://github.com/mikf/gallery-dl/issues/17))
+- Improved `pixiv` to support shortened and http://pixiv.me/... URLs ([#23](https://github.com/mikf/gallery-dl/issues/23))
 - Improved `imgur` to properly handle `.gifv` images and provide better metadata
-- Fixed an issue with `kissmanga` where metadata parsing for some series failed (#20)
+- Fixed an issue with `kissmanga` where metadata parsing for some series failed ([#20](https://github.com/mikf/gallery-dl/issues/20))
 - Fixed an issue with getting filename extensions from `Content-Type` response headers
 
 ## 0.8.4 - 2017-05-21
@@ -82,7 +82,7 @@
 - Updated the `exhentai` extractor to fall back to using the e-hentai version if no username is given
 - Updated `deviantart` to support sta.sh URLs
 - Fixed an issue with `kissmanga` which prevented image URLs from being decrypted properly (again)
-- Fixed an issue with `pixhost` where for an image inside an album it would always download the first image of that album (#13)
+- Fixed an issue with `pixhost` where for an image inside an album it would always download the first image of that album ([#13](https://github.com/mikf/gallery-dl/issues/13))
 - Removed the `mangashare` and `readcomics` modules
 
 ## 0.8.2 - 2017-04-10
@@ -103,11 +103,11 @@
 - Added logging support
 - Added the `-R/--retries` option to specify how often a download should be retried before giving up
 - Added the `--http-timeout` option to set a timeout for HTTP connections
-- Improved error handling/tolerance during HTTP file downloads (#10)
+- Improved error handling/tolerance during HTTP file downloads ([#10](https://github.com/mikf/gallery-dl/issues/10))
 - Improved option parsing and the help message from `-h/--help`
 - Changed the way configuration values are used by prioritizing top-level values
   - This allows for cmdline options like `-u/--username` to overwrite values set in configuration files
-- Fixed an issue with `imagefap.com` where incorrectly reported gallery sizes would cause the extractor to fail (#9)
+- Fixed an issue with `imagefap.com` where incorrectly reported gallery sizes would cause the extractor to fail ([#9](https://github.com/mikf/gallery-dl/issues/9))
 - Fixed an issue with `seiga.nicovideo.jp` where invalid characters in an API response caused the XML parser to fail
 - Fixed an issue with `seiga.nicovideo.jp` where the filename extension for the first image would be used for all others
 - Removed support for old configuration paths on Windows
@@ -178,7 +178,7 @@
 - Added base class for extractors of [FoOlSlide](https://foolcode.github.io/FoOlSlide/)-based sites
 - Changed default paths for configuration files on Windows
   - old paths are still supported, but that will change in future versions
-- Fixed aborting downloads if a single one failed (#5)
+- Fixed aborting downloads if a single one failed ([#5](https://github.com/mikf/gallery-dl/issues/5))
 - Fixed cloudflare-bypass cache containing outdated cookies
 - Fixed image URLs for hitomi and 8chan
 - Updated deviantart to always provide the highest quality image
@@ -192,7 +192,7 @@
   - twitter
   - rapidimg, picmaniac
 - Added support to find filename extensions by Content-Type response header
-- Fixed filename/path issues on Windows (#4):
+- Fixed filename/path issues on Windows ([#4](https://github.com/mikf/gallery-dl/issues/4)):
   - Enable path names with more than 260 characters
   - Remove trailing spaces in path segments
 - Updated Job class to automatically set category/subcategory keywords
