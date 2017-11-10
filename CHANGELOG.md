@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.1 - 2017-11-10
 - Added support for:
   - `xvideos` - https://www.xvideos.com/ ([#45](https://github.com/mikf/gallery-dl/issues/45))
 - Fixed exception handling during file downloads which could lead to a premature exit
