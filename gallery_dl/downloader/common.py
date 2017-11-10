@@ -11,7 +11,7 @@
 import os
 import time
 import logging
-from .. import config, util
+from .. import config, util, exception
 from requests.exceptions import RequestException
 
 
@@ -65,7 +65,7 @@ class DownloaderBase():
                 self.out.error(pathfmt.path, msg, tries, self.retries)
                 if tries >= self.retries:
                     return False
-                time.sleep(1)
+                time.sleep(tries)
             tries += 1
 
             # check for .part file
@@ -74,6 +74,11 @@ class DownloaderBase():
             # connect to (remote) source
             try:
                 offset, size = self.connect(url, filesize)
+            except exception.DownloadError as exc:
+                self.out.error(pathfmt.path, exc, 0, 0)
+                return False
+            except exception.DownloadComplete:
+                break
             except Exception as exc:
                 msg = exc
                 continue
@@ -83,8 +88,6 @@ class DownloaderBase():
                 mode = "wb"
                 if filesize:
                     self.log.info("Unable to resume partial download")
-            elif offset == -1:
-                break  # early finish
             else:
                 mode = "ab"
                 self.log.info("Resuming download at byte %d", offset)
@@ -124,8 +127,7 @@ class DownloaderBase():
 
         Returns a 2-tuple containing the actual offset and expected filesize.
         If the returned offset-value is greater than zero, all received data
-        will be appended to the existing .part file. If it is '-1', the
-        download will finish early and be considered successfull.
+        will be appended to the existing .part file.
         Return '0' as second tuple-field to indicate an unknown filesize.
         """
 

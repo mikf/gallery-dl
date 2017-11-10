@@ -89,9 +89,10 @@ class TerminalOutput(NullOutput):
         if tries <= 1 and path:
             print("\r", end="")
             safeprint(self.shorten(CHAR_ERROR + path))
+        if max_tries > 1:
+            error = "{} ({}/{})".format(error, tries, max_tries)
         print("\r[Error] ", end="")
-        safeprint(error, end="")
-        print(" (", tries, "/", max_tries, ")", sep="")
+        safeprint(error)
 
     def shorten(self, txt):
         """Reduce the length of 'txt' to the width of the terminal"""
@@ -119,8 +120,9 @@ class ColorOutput(TerminalOutput):
     def error(self, path, error, tries, max_tries):
         if tries <= 1 and path:
             print("\r\033[1;31m", self.shorten(path), sep="")
-        print("\r\033[0;31m[Error]\033[0m ", error,
-              " (", tries, "/", max_tries, ")", sep="")
+        if max_tries > 1:
+            error = "{} ({}/{})".format(error, tries, max_tries)
+        print("\r\033[0;31m[Error]\033[0m", error)
 
 
 if os.name == "nt":
