@@ -17,6 +17,8 @@ Exception
       |    +-- AuthorizationError
       |    +-- NotFoundError
       |    +-- HttpError
+      +-- DownloadError
+      +-- DownloadComplete
       +-- NoExtractorError
       +-- FormatError
       +-- FilterError
@@ -46,6 +48,14 @@ class NotFoundError(ExtractionError):
 
 class HttpError(ExtractionError):
     """HTTP request during extraction failed"""
+
+
+class DownloadError(GalleryDLException):
+    """Error during file download"""
+
+
+class DownloadComplete(GalleryDLException):
+    """Output file of attempted download is already complete"""
 
 
 class NoExtractorError(GalleryDLException):

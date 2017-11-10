@@ -10,7 +10,7 @@
 
 import mimetypes
 from .common import DownloaderBase
-from .. import util
+from .. import util, exception
 
 
 class Downloader(DownloaderBase):
@@ -33,14 +33,17 @@ class Downloader(DownloaderBase):
             timeout=self.timeout, verify=self.verify)
 
         code = self.response.status_code
-        if code == 200:
+        if code == 200:  # OK
             offset = 0
             size = self.response.headers.get("Content-Length")
-        elif code == 206:
+        elif code == 206:  # Partial Content
             size = self.response.headers["Content-Range"].rpartition("/")[2]
-        elif code == 416:
-            # file is already complete
-            return -1, 0
+        elif code == 416:  # Requested Range Not Satisfiable
+            raise exception.DownloadComplete()
+        elif 400 <= code < 500 and code != 429:  # Client Error
+            raise exception.DownloadError(
+                "{} Client Error: {} for url: {}".format(
+                    code, self.response.reason, url))
         else:
             self.response.raise_for_status()
 

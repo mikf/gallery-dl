@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Improved retry behavior for failed HTTP downloads
+
 ## 1.0.1 - 2017-11-10
 - Added support for:
   - `xvideos` - https://www.xvideos.com/ ([#45](https://github.com/mikf/gallery-dl/issues/45))
