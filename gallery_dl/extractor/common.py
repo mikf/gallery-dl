@@ -62,6 +62,11 @@ class Extractor():
                 if response.content or allow_empty:
                     return response
                 msg = "empty response body"
+            except requests.exceptions.HTTPError as exc:
+                msg = exc
+                code = response.status_code
+                if 400 <= code < 500 and code != 429:  # Client Error
+                    retries = 0
             except requests.exceptions.RequestException as exc:
                 msg = exc
             if not retries:
