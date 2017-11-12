@@ -9,7 +9,7 @@
 
 import sys
 import unittest
-from gallery_dl import extractor, job, config
+from gallery_dl import extractor, job, config, exception
 
 
 class TestExtractors(unittest.TestCase):
@@ -45,7 +45,16 @@ class TestExtractors(unittest.TestCase):
             self.assertRaises(result["exception"], tjob.run)
             return
 
-        tjob.run()
+        try:
+            tjob.run()
+        except exception.HttpError as exc:
+            try:
+                if 500 <= exc.args[0].response.status_code < 600:
+                    self.skipTest(exc)
+            except AttributeError as e:
+                pass
+            raise
+
         if "url" in result:
             self.assertEqual(result["url"], tjob.hash_url.hexdigest())
         if "keyword" in result:
@@ -73,7 +82,6 @@ skip = [
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
-    "nyafuu",
     "mangazuki",
 ]
 # enable selective testing for direct calls
