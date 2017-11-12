@@ -125,7 +125,14 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
             "url": "432d7958506ad913b0a9e42664a89e46a63e9296",
             "keyword": "96598b6f94d2b26d11c2780f8173cd6ab5fe9906",
         }),
-        ("http://bato.to/reader#459878c8fda07503", {
+        ("http://bato.to/reader#459878c8fda07502", {  # error 10030
+            "exception": exception.AuthorizationError,
+            "options": (("username", None),),
+        }),
+        ("https://bato.to/reader#528e7d7c4b1db6ff", {  # error 10031
+            "exception": exception.AuthorizationError,
+        }),
+        ("http://bato.to/reader#459878c8fda07503", {  # error 10020
             "exception": exception.NotFoundError,
         }),
     ]
@@ -149,7 +156,7 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
         response = self.request(self.reader_url, params=params, fatal=False)
         if response.status_code == 405:
             error = text.extract(response.text, "ERROR [", "]")[0]
-            if error == "10030":
+            if error in ("10030", "10031"):
                 raise exception.AuthorizationError()
             elif error == "10020":
                 raise exception.NotFoundError("chapter")
