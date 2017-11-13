@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
-from xml.etree import ElementTree
 
 
 class SeigaExtractor(Extractor):
@@ -74,11 +73,12 @@ class SeigaUserExtractor(SeigaExtractor):
                 r"user/illust/(\d+)")]
     test = [
         ("http://seiga.nicovideo.jp/user/illust/39537793", {
-            "keyword": "a716bf534b4191dc58ddbff51494b72a9cf58285",
+            "pattern": r"https://lohas\.nicoseiga\.jp/priv/[0-9a-f]+/\d+/\d+",
+            "count": 2,
         }),
         ("http://seiga.nicovideo.jp/user/illust/79433", {
             "url": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-            "keyword": "187b77728381d072466af7f7ebcc479a0830ce25",
+            "count": 0,
         }),
     ]
 
@@ -90,25 +90,27 @@ class SeigaUserExtractor(SeigaExtractor):
         return {"user_id": self.user_id}
 
     def get_images(self):
-        keymap = {0: "image_id", 2: "title", 3: "description",
-                  7: "summary", 8: "genre", 18: "date"}
-        url = "http://seiga.nicovideo.jp/api/user/data?id=" + self.user_id
-        response = self.request(url)
-        try:
-            root = ElementTree.fromstring(response.text)
-        except ElementTree.ParseError:
-            self.log.debug("xml parsing error; removing control characters")
-            xmldata = text.clean_xml(response.text)
-            root = ElementTree.fromstring(xmldata)
-        if root[0].text == "0":
-            return []
-        return [
-            {
-                key: image[index].text
-                for index, key in keymap.items()
-            }
-            for image in root[1]
-        ]
+        url = "http://seiga.nicovideo.jp/user/illust/" + self.user_id
+        params = {"target": "illust_all", "page": 1}
+
+        while True:
+            cnt = 0
+            page = self.request(url, params=params).text
+
+            for info in text.extract_iter(
+                    page, '<li class="list_item', '</a></li> '):
+                yield text.extract_all(info, (
+                    ("image_id", '/seiga/im', '"'),
+                    ("title"   , '<li class="title">', '</li>'),
+                    ("views"   , '</span>', '</li>'),
+                    ("comments", '</span>', '</li>'),
+                    ("clips"   , '</span>', '</li>'),
+                ))[0]
+                cnt += 1
+
+            if cnt < 40:
+                return
+            params["page"] += 1
 
 
 class SeigaImageExtractor(SeigaExtractor):
