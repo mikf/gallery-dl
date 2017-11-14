@@ -9,8 +9,9 @@
 """Extract images from http://seiga.nicovideo.jp"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
+import itertools
 
 
 class SeigaExtractor(Extractor):
@@ -18,28 +19,32 @@ class SeigaExtractor(Extractor):
     category = "seiga"
     cookiedomain = ".nicovideo.jp"
 
+    def __init__(self):
+        Extractor.__init__(self)
+        self.startimg = 0
+
     def items(self):
         self.login()
-        data = self.get_metadata()
+        images = iter(self.get_images())
+        data = next(images)
+
+        if self.startimg:
+            # consume elements up to 'startimg'
+            next(itertools.islice(images, self.startimg, self.startimg), None)
+
         yield Message.Version, 1
         yield Message.Directory, data
-        for image in self.get_images():
+        for image in images:
             data.update(image)
             data["extension"] = None
-            url = self.get_image_url(image["image_id"])
-            yield Message.Url, url, data
-
-    def get_metadata(self):
-        """Collect metadata for extractor-job"""
-        return {}
+            yield Message.Url, self.get_image_url(data["image_id"]), data
 
     def get_images(self):
-        """Return list of images"""
-        return []
+        """Return iterable containing metadata and images"""
 
     def get_image_url(self, image_id):
         """Get url for an image with id 'image_id'"""
-        url = "http://seiga.nicovideo.jp/image/source/" + image_id
+        url = "http://seiga.nicovideo.jp/image/source/{}".format(image_id)
         response = self.session.head(url)
         if response.status_code == 404:
             raise exception.NotFoundError("image")
@@ -67,45 +72,78 @@ class SeigaExtractor(Extractor):
 class SeigaUserExtractor(SeigaExtractor):
     """Extractor for images of a user from seiga.nicovideo.jp"""
     subcategory = "user"
-    directory_fmt = ["{category}", "{user_id}"]
-    filename_fmt = "{category}_{user_id}_{image_id}.{extension}"
+    directory_fmt = ["{category}", "{user[id]}"]
+    filename_fmt = "{category}_{user[id]}_{image_id}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/"
-                r"user/illust/(\d+)")]
+                r"user/illust/(\d+)(?:\?(?:[^&]+&)*sort=([^&#]+))?")]
     test = [
         ("http://seiga.nicovideo.jp/user/illust/39537793", {
             "pattern": r"https://lohas\.nicoseiga\.jp/priv/[0-9a-f]+/\d+/\d+",
             "count": 2,
         }),
         ("http://seiga.nicovideo.jp/user/illust/79433", {
-            "url": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-            "count": 0,
+            "exception": exception.NotFoundError,
         }),
+        (("http://seiga.nicovideo.jp/user/illust/39537793"
+          "?sort=image_view&target=illust_all"), None),
     ]
 
     def __init__(self, match):
         SeigaExtractor.__init__(self)
-        self.user_id = match.group(1)
+        self.user_id, self.order = match.groups()
+        self.startpage = 1
 
-    def get_metadata(self):
-        return {"user_id": self.user_id}
+    def skip(self, num):
+        pages, images = divmod(num, 40)
+        self.startpage += pages
+        self.startimg += images
+        return num
+
+    def get_metadata(self, page):
+        """Collect metadata from 'page'"""
+        data = text.extract_all(page, (
+            ("name" , '<img alt="', '"'),
+            ("msg"  , '<li class="user_message">', '</li>'),
+            (None   , '<span class="target_name">すべて</span>', ''),
+            ("count", '<span class="count ">', '</span>'),
+        ))[0]
+
+        if not data["name"] and "ユーザー情報が取得出来ませんでした" in page:
+            raise exception.NotFoundError("user")
+
+        return {
+            "user": {
+                "id": util.safe_int(self.user_id),
+                "name": data["name"],
+                "message": (data["msg"] or "").strip(),
+            },
+            "count": util.safe_int(data["count"]),
+        }
 
     def get_images(self):
         url = "http://seiga.nicovideo.jp/user/illust/" + self.user_id
-        params = {"target": "illust_all", "page": 1}
+        params = {"sort": self.order, "page": self.startpage,
+                  "target": "illust_all"}
 
         while True:
             cnt = 0
             page = self.request(url, params=params).text
 
+            if params["page"] == self.startpage:
+                yield self.get_metadata(page)
+
             for info in text.extract_iter(
                     page, '<li class="list_item', '</a></li> '):
-                yield text.extract_all(info, (
+                data = text.extract_all(info, (
                     ("image_id", '/seiga/im', '"'),
                     ("title"   , '<li class="title">', '</li>'),
                     ("views"   , '</span>', '</li>'),
                     ("comments", '</span>', '</li>'),
                     ("clips"   , '</span>', '</li>'),
                 ))[0]
+                for key in ("image_id", "views", "comments", "clips"):
+                    data[key] = util.safe_int(data[key])
+                yield data
                 cnt += 1
 
             if cnt < 40:
@@ -123,7 +161,7 @@ class SeigaImageExtractor(SeigaExtractor):
                 r"(?:priv|o)/[^/]+/\d+/(\d+)")]
     test = [
         ("http://seiga.nicovideo.jp/seiga/im5977527", {
-            "keyword": "6ff7564b35890e333ff7413cb633ddb58339912f",
+            "keyword": "f66ba5de33d4ce2cb57f23bb37e1e847e0771c10",
             "content": "d9202292012178374d57fb0126f6124387265297",
         }),
         ("http://seiga.nicovideo.jp/seiga/im123", {
@@ -135,5 +173,9 @@ class SeigaImageExtractor(SeigaExtractor):
         SeigaExtractor.__init__(self)
         self.image_id = match.group(1)
 
+    def skip(self, num):
+        self.startimg += num
+        return num
+
     def get_images(self):
-        return ({"image_id": self.image_id},)
+        return ({}, {"image_id": util.safe_int(self.image_id)})
