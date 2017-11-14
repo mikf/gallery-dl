@@ -10,6 +10,7 @@
 
 from .common import Extractor, MangaExtractor, Message
 from .. import text, util
+from urllib.parse import urljoin
 import json
 
 
@@ -35,7 +36,7 @@ class HbrowseExtractor(Extractor):
         return data
 
 
-class HbrowseMangaExtractor(MangaExtractor, HbrowseExtractor):
+class HbrowseMangaExtractor(HbrowseExtractor, MangaExtractor):
     """Extractor for manga from hbrowse.com"""
     pattern = [r"(?:https?://)?((?:www\.)?hbrowse\.com/\d+)/?$"]
     reverse = False
@@ -60,7 +61,7 @@ class HbrowseMangaExtractor(MangaExtractor, HbrowseExtractor):
             title, pos = text.extract(page, '>View ', '<', pos)
             data["chapter"] = util.safe_int(url.rpartition("/")[2][1:])
             data["title"] = title
-            results.append((url, data.copy()))
+            results.append((urljoin(self.root, url), data.copy()))
 
 
 class HbrowseChapterExtractor(HbrowseExtractor):
