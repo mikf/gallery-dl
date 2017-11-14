@@ -25,7 +25,7 @@ class PowermangaMangaExtractor(foolslide.FoolslideMangaExtractor):
     """Extractor for manga from powermanga.org"""
     category = "powermanga"
     pattern = foolslide.manga_pattern(r"read\.powermanga\.org")
-    test = [("http://read.powermanga.org/series/my_hero_academia/", {
-        "url": "3c7004eea7eefc8d365af3ec95ba98f8cc359553",
-        "keyword": "3c4899ce96ed3ba7871f34532befd2102f10b471",
+    test = [("https://read.powermanga.org/series/one_piece/", {
+        "url": "6ba226780a3c1c1f1cc5f4a4b96c18260f4ec0f3",
+        "keyword": "576109177b1bb59ab2f55450cc9ef4a31e28714c",
     })]
