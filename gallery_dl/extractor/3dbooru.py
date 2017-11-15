@@ -17,7 +17,6 @@ class ThreedeebooruExtractor(booru.JSONBooruExtractor):
     api_url = "http://behoimi.org/post/index.json"
     headers = {
         "Referer": "http://behoimi.org/post/show/",
-        "User-Agent": "Mozilla/5.0",
         "Accept-Encoding": "identity",
     }
 

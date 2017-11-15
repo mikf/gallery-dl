@@ -75,7 +75,6 @@ class FoolfuukaThreadExtractor(SharedConfigExtractor):
     def __init__(self, match):
         SharedConfigExtractor.__init__(self)
         self.board, self.thread = match.groups()
-        self.session.headers["User-Agent"] = "Mozilla 5.0"
         if self.referer:
             self.session.headers["Referer"] = self.root
 

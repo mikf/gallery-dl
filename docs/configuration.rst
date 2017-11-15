@@ -289,6 +289,19 @@ Description Source to read additional cookies from.
 =========== =====
 
 
+extractor.*.user-agent
+----------------------
+=========== =====
+Type        ``string``
+Default     ``"Mozilla/5.0 (X11; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0"``
+Description User-Agent header value to be used for HTTP requests.
+
+            Note that this option has no effect on `pixiv` and
+            `readcomiconline` extractors, as these need specific values to
+            function correctly.
+=========== =====
+
+
 Extractor-specific Options
 ==========================
 

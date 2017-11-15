@@ -37,10 +37,6 @@ class TwitterTweetExtractor(Extractor):
         self.path, self.user, self.tid = match.groups()
 
     def items(self):
-        self.session.headers["User-Agent"] = (
-            "Mozilla/5.0 (X11; Linux x86_64; rv:48.0) "
-            "Gecko/20100101 Firefox/48.0"
-        )
         page = self.request("https://twitter.com/" + self.path).text
         data = self.get_job_metadata()
         imgs = self.get_image_urls(page)

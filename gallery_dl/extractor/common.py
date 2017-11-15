@@ -34,6 +34,7 @@ class Extractor():
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
         self._set_cookies(self.config("cookies"))
+        self._set_headers()
 
     def __iter__(self):
         return self.items()
@@ -95,6 +96,13 @@ class Extractor():
                 self.log.warning("netrc: No authentication info")
 
         return username, password
+
+    def _set_headers(self):
+        """Set additional headers for the 'session' object"""
+        self.session.headers["Accept-Language"] = "en-US,en;q=0.5"
+        self.session.headers["User-Agent"] = self.config(
+            "user-agent", ("Mozilla/5.0 (X11; Linux x86_64; rv:54.0) "
+                           "Gecko/20100101 Firefox/54.0"))
 
     def _set_cookies(self, cookies):
         """Populate the cookiejar with 'cookies'"""

@@ -41,9 +41,6 @@ class SankakuTagExtractor(Extractor):
         self.wait_max = self.config("wait-max", 4)
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
-        self.session.headers["User-Agent"] = (
-            "Mozilla/5.0 Gecko/20100101 Firefox/40.0"
-        )
 
     def skip(self, num):
         pages = min(num // 20, 49)
