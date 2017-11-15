@@ -50,11 +50,7 @@ class ExhentaiGalleryExtractor(Extractor):
         self.wait_max = self.config("wait-max", 6)
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
-        self.session.headers.update({
-            "User-Agent": "Mozilla/5.0",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Referer": self.root + "/",
-        })
+        self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
         self.login()

@@ -38,7 +38,6 @@ class SenmangaChapterExtractor(Extractor):
         self.chapter_url = "{}/{}/".format(self.root, part)
         self.img_url = "{}/viewer/{}/".format(self.root, part)
         self.session.headers["Referer"] = self.chapter_url
-        self.session.headers["User-Agent"] = "Mozilla 5.0"
 
     def items(self):
         data = self.get_job_metadata()

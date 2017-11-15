@@ -20,6 +20,10 @@ class ReadcomiconlineExtractor(kissmanga.KissmangaExtractor):
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     root = "http://readcomiconline.to"
 
+    def __init__(self, match):
+        kissmanga.KissmangaExtractor.__init__(self, match)
+        self.session.headers["User-Agent"] = "Wget/1.19.2 (linux-gnu)"
+
 
 class ReadcomiconlineComicExtractor(ReadcomiconlineExtractor,
                                     kissmanga.KissmangaMangaExtractor):
