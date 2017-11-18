@@ -11,18 +11,19 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import memcache
+import re
 
 
 class TumblrExtractor(Extractor):
     """Base class for tumblr extractors"""
     category = "tumblr"
     directory_fmt = ["{category}", "{name}"]
-    filename_fmt = "{category}_{blog[name]}_{id}{offset}.{extension}"
+    filename_fmt = "{category}_{blog[name]}_{id}{offset:?o//}.{extension}"
 
     def __init__(self, match):
         Extractor.__init__(self)
         self.user = match.group(1)
-        self.api = TumblrAPI(self, "photo")
+        self.api = TumblrAPI(self)
 
     def items(self):
         blog = self.api.info(self.user)
@@ -30,23 +31,56 @@ class TumblrExtractor(Extractor):
         yield Message.Directory, blog
 
         for post in self.posts():
-            if "photos" not in post:
-                continue
-            photos = post["photos"]
-            del post["photos"]
-            del post["trail"]
-            for offset, photo in enumerate(photos, 1):
-                photo.update(photo["original_size"])
-                del photo["original_size"]
-                del photo["alt_sizes"]
-                post["extension"] = photo["url"].rpartition(".")[2]
-                post["offset"] = "o{}".format(offset)
-                post["photo"] = photo
-                post["blog"] = blog
-                yield Message.Url, photo["url"], post
+            post["blog"] = blog
+
+            if "trail" in post:
+                del post["trail"]
+
+            if "photos" in post:
+                photos = post["photos"]
+                del post["photos"]
+
+                for offset, photo in enumerate(photos, 1):
+                    photo.update(photo["original_size"])
+                    photo["url"] = self._original_url(photo["url"])
+                    del photo["original_size"]
+                    del photo["alt_sizes"]
+                    post["extension"] = photo["url"].rpartition(".")[2]
+                    post["offset"] = offset
+                    post["photo"] = photo
+                    yield Message.Url, photo["url"], post
+
+            if "audio_url" in post:  # type: "audio"
+                post["extension"] = None
+                post["offset"] = None
+                yield Message.Url, post["audio_url"], post
+
+            if "video_url" in post:  # type: "video"
+                post["extension"] = post["video_url"].rpartition(".")[2]
+                post["offset"] = None
+                yield Message.Url, post["video_url"], post
+
+            if "description" in post:
+                for url in re.findall(
+                        r' src="([^"]+)"', post["description"]):
+                    yield Message.Queue, url, post
+
+            if "permalink_url" in post:  # external video/audio
+                yield Message.Queue, post["permalink_url"], post
+
+            if "url" in post:  # type: "link"
+                yield Message.Queue, post["url"], post
 
     def posts(self):
         """Return an iterable containing all relevant posts"""
+
+    @staticmethod
+    def _original_url(url):
+        return re.sub(
+            (r"https?://\d+\.media\.tumblr\.com/([0-9a-f]+)"
+             r"/tumblr_([^/?&#.]+)_\d+\.([0-9a-z]+)"),
+            r"http://data.tumblr.com/\1/tumblr_\2_raw.\3", url
+        )
 
 
 class TumblrUserExtractor(TumblrExtractor):
@@ -54,8 +88,10 @@ class TumblrUserExtractor(TumblrExtractor):
     subcategory = "user"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com(?:/page/\d+)?/?$"]
     test = [("http://demo.tumblr.com/", {
-        "pattern": r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg",
-        "count": 1,
+        "pattern": (r"https?://(?:$|"
+                    r"\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280\.jpg|"
+                    r"w+\.tumblr\.com/audio_file/demo/\d+/tumblr_\w+)"),
+        "count": 3,
     })]
 
     def posts(self):
@@ -100,9 +136,9 @@ class TumblrAPI():
     """Minimal interface for the Tumblr API v2"""
     API_KEY = "O3hU2tMi5e4Qs5t3vezEi6L0qRORJ5y9oUpSGsrWu8iA3UCc3B"
 
-    def __init__(self, extractor, typ=None):
+    def __init__(self, extractor):
         self.api_key = extractor.config("api-key", TumblrAPI.API_KEY)
-        self.params = {"offset": 0, "limit": 50, "type": typ}
+        self.params = {"offset": 0, "limit": 50}
         self.extractor = extractor
 
     @memcache(keyarg=1)
