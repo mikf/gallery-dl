@@ -23,11 +23,11 @@ class SenmangaChapterExtractor(Extractor):
         ("http://raw.senmanga.com/Bokura-wa-Minna-Kawaisou/37A/1", {
             "url": "5f95140ff511d8497e2ec08fa7267c6bb231faec",
             "keyword": "705d941a150765edb33cd2707074bd703a93788c",
-            "content": "a791dda85ac0d37e3b36d754560cbb65b8dab5b9",
+            "content": "0e37b1995708ffc175f2e175d91a518e6948c379",
         }),
         ("http://raw.senmanga.com/Love-Lab/2016-03/1", {
             "url": "8347b9f00c14b864dd3c19a1f5ae52adb2ef00de",
-            "keyword": "4e72e4ade57671ad0af9c8d81feeff4259d5bbec",
+            "keyword": "0765e9d81b7430b3055b25a2627d6438f62de635",
         }),
     ]
     root = "https://raw.senmanga.com"
@@ -50,13 +50,14 @@ class SenmangaChapterExtractor(Extractor):
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         page = self.request(self.chapter_url).text
+        self.session.cookies.clear()
         title, pos = text.extract(page, '<title>', '</title>')
-        count, pos = text.extract(page, '</select> of ', ' ', pos)
-        manga, pos = text.extract(title, '| Raw | ', '  |  Chapter ')
-        chapter, pos = text.extract(title, '', ' |  Page ', pos)
+        count, pos = text.extract(page, '</select> of ', '\n', pos)
+        manga, _, chapter = title.partition(" - Chapter ")
+
         return {
-            "manga": text.unescape(manga.replace("-", " ")),
-            "chapter_string": chapter,
+            "manga": text.unescape(manga),
+            "chapter_string": chapter.partition(" - Page ")[0],
             "count": util.safe_int(count),
             "lang": "jp",
             "language": "Japanese",
