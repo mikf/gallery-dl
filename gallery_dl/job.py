@@ -335,13 +335,11 @@ class DataJob(Job):
         # collect data
         try:
             for msg in self.extractor:
-                copy = [
-                    part.copy() if hasattr(part, "copy") else part
-                    for part in msg
-                ]
-                self.data.append(copy)
+                self.dispatch(msg)
         except Exception as exc:
             self.data.append((exc.__class__.__name__, str(exc)))
+        except BaseException:
+            pass
 
         # dump to 'file'
         json.dump(
@@ -349,3 +347,12 @@ class DataJob(Job):
             sort_keys=True, indent=2, ensure_ascii=self.ensure_ascii
         )
         self.file.write("\n")
+
+    def handle_url(self, url, keywords):
+        self.data.append((Message.Url, url, keywords.copy()))
+
+    def handle_directory(self, keywords):
+        self.data.append((Message.Directory, keywords.copy()))
+
+    def handle_queue(self, url, keywords):
+        self.data.append((Message.Queue, url, keywords.copy()))
