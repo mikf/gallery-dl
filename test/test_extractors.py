@@ -83,8 +83,6 @@ skip = [
     "archivedmoe", "archiveofsins", "thebarchive",
     # temporary issues
     "mangazuki",
-    "hentaifoundry",  # invalid SSL cert
-    "desuarchive", "rbt",  # server migration
 ]
 # enable selective testing for direct calls
 if __name__ == '__main__' and len(sys.argv) > 1:
