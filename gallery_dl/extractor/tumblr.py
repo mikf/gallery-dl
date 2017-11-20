@@ -32,6 +32,7 @@ class TumblrExtractor(Extractor):
 
         for post in self.posts():
             post["blog"] = blog
+            post["offset"] = 0
 
             if "trail" in post:
                 del post["trail"]
@@ -40,30 +41,32 @@ class TumblrExtractor(Extractor):
                 photos = post["photos"]
                 del post["photos"]
 
-                for offset, photo in enumerate(photos, 1):
+                for photo in photos:
                     photo.update(photo["original_size"])
-                    photo["url"] = self._original_url(photo["url"])
+                    photo["url"] = self._original_image(photo["url"])
                     del photo["original_size"]
                     del photo["alt_sizes"]
                     post["extension"] = photo["url"].rpartition(".")[2]
-                    post["offset"] = offset
+                    post["offset"] += 1
                     post["photo"] = photo
                     yield Message.Url, photo["url"], post
 
             if "audio_url" in post:  # type: "audio"
                 post["extension"] = None
-                post["offset"] = None
+                post["offset"] += 1
                 yield Message.Url, post["audio_url"], post
 
             if "video_url" in post:  # type: "video"
-                post["extension"] = post["video_url"].rpartition(".")[2]
-                post["offset"] = None
-                yield Message.Url, post["video_url"], post
+                url = post["video_url"]
+                post["extension"] = url.rpartition(".")[2]
+                post["offset"] += 1
+                yield Message.Url, self._original_video(url), post
 
-            if "description" in post:
-                for url in re.findall(
-                        r' src="([^"]+)"', post["description"]):
-                    yield Message.Queue, url, post
+            if "description" in post:  # inline images
+                for url in re.findall(r' src="([^"]+)"', post["description"]):
+                    post["extension"] = url.rpartition(".")[2]
+                    post["offset"] += 1
+                    yield Message.Url, self._original_image(url), post
 
             if "permalink_url" in post:  # external video/audio
                 yield Message.Queue, post["permalink_url"], post
@@ -75,11 +78,19 @@ class TumblrExtractor(Extractor):
         """Return an iterable containing all relevant posts"""
 
     @staticmethod
-    def _original_url(url):
+    def _original_image(url):
         return re.sub(
-            (r"https?://\d+\.media\.tumblr\.com/([0-9a-f]+)"
-             r"/tumblr_([^/?&#.]+)_\d+\.([0-9a-z]+)"),
+            (r"https?://\d+\.media\.tumblr\.com"
+             r"/([0-9a-f]+)/tumblr_([^/?&#.]+)_\d+\.([0-9a-z]+)"),
             r"http://data.tumblr.com/\1/tumblr_\2_raw.\3", url
+        )
+
+    @staticmethod
+    def _original_video(url):
+        return re.sub(
+            (r"https?://vt\.media\.tumblr\.com"
+             r"/tumblr_([^_]+)_\d+\.([0-9a-z]+)"),
+            r"https://vt.media.tumblr.com/tumblr_\1.\2", url
         )
 
 
