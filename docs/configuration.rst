@@ -577,6 +577,40 @@ Description Minimum and maximum wait time in seconds between each image
 =========== =====
 
 
+extractor.tumblr.external
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Follow external URLs (e.g. from "Link" posts) and try to extract
+            images from them.
+=========== =====
+
+
+extractor.tumblr.inline
+-----------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Search posts for inline images.
+=========== =====
+
+
+extractor.tumblr.posts
+----------------------
+=========== =====
+Type        ``string``
+Default     ``"photo"``
+Description A comma-separated list of post types to extract images, etc. from.
+            For example: ``"text,link,photo"``.
+
+            Possible types are ``text``, ``quote``, ``link``, ``answer``,
+            ``video``, ``audio``, ``photo``, ``chat``.
+
+            You can use ``"all"`` instead of listing all types separately.
+=========== =====
+
+
 
 API Tokens & IDs
 ================
@@ -590,7 +624,7 @@ extractor.deviantart.client-id & .client-secret
 -----------------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and visit DeviantArt's `Applications & Keys`_ section
+How To      - login and visit DeviantArt's `Applications & Keys`_ section
             - click "Register your Application"
             - click "Save" (top right; default settings are fine)
             - copy ``client_id`` and ``client_secret`` of your new "Untitled"
@@ -602,7 +636,7 @@ extractor.flickr.api-key & .api-secret
 --------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and `Create an App`_ in Flickr's `App Garden`_
+How To      - login and `Create an App`_ in Flickr's `App Garden`_
             - click "APPLY FOR A NON-COMMERCIAL KEY"
             - fill out the form with a random name and description
               and click "SUBMIT"
@@ -615,7 +649,7 @@ extractor.pawoo.access-token
 ----------------------------
 =========== =====
 Type        ``string``
-How To
+How To
 =========== =====
 
 
@@ -623,7 +657,7 @@ extractor.pinterest.access-token
 --------------------------------
 =========== =====
 Type        ``string``
-How To
+How To
 =========== =====
 
 
@@ -631,7 +665,7 @@ extractor.reddit.client-id & .user-agent
 ----------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and visit the apps_ section of your account's preferences
+How To      - login and visit the apps_ section of your account's preferences
             - click the "are you a developer? create an app..." button
             - fill out the form, choose "installed app", preferably set
               "http://localhost:6414/" as "redirect uri" and finally click
@@ -641,6 +675,21 @@ How To      - login and visit the apps_ section of your account's preferences
             - use "``Python:<application name>:v1.0 (by /u/<username>)``" as
               user-agent and replace ``<application name>`` and ``<username>``
               accordingly (see Reddit's `API access rules`_)
+=========== =====
+
+
+extractor.tumblr.api-key
+------------------------
+=========== =====
+Type        ``string``
+How To      - login and visit Tumblr's Applications_ section
+            - click "Register application"
+            - fill out the form: use a random name and description, set
+              https://example.org/ as "Application Website" and "Default
+              callback URL"
+            - solve Google's "I'm not a robot" challenge and click "Register"
+            - copy your ``OAuth Consumer Key`` and put it in your configuration
+              file
 =========== =====
 
 
@@ -675,3 +724,4 @@ How To      - login and visit the apps_ section of your account's preferences
 .. _`App Garden`:          https://www.flickr.com/services/
 .. _apps:                  https://www.reddit.com/prefs/apps/
 .. _`API access rules`:    https://github.com/reddit/reddit/wiki/API
+.. _Applications:          https://www.tumblr.com/oauth/apps
