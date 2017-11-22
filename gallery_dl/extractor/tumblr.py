@@ -14,6 +14,26 @@ from ..cache import memcache
 import re
 
 
+def _original_image(url):
+    return re.sub(
+        (r"https?://\d+\.media\.tumblr\.com"
+         r"/([0-9a-f]+)/tumblr_([^/?&#.]+)_\d+\.([0-9a-z]+)"),
+        r"http://data.tumblr.com/\1/tumblr_\2_raw.\3", url
+    )
+
+
+def _original_video(url):
+    return re.sub(
+        (r"https?://vt\.media\.tumblr\.com"
+         r"/tumblr_([^_]+)_\d+\.([0-9a-z]+)"),
+        r"https://vt.media.tumblr.com/tumblr_\1.\2", url
+    )
+
+
+POST_TYPES = frozenset((
+    "text", "quote", "link", "answer", "video", "audio", "photo", "chat"))
+
+
 class TumblrExtractor(Extractor):
     """Base class for tumblr extractors"""
     category = "tumblr"
@@ -25,85 +45,94 @@ class TumblrExtractor(Extractor):
         self.user = match.group(1)
         self.api = TumblrAPI(self)
 
+        self.inline = self.config("inline", False)
+        self.external = self.config("external", False)
+
+        types = self.config("posts", ("photo",))
+        if types == "all":
+            self.types = POST_TYPES
+        elif types:
+            if isinstance(types, str):
+                types = types.split(",")
+            self.types = frozenset(types)
+        else:
+            self.types = frozenset()
+
     def items(self):
         blog = self.api.info(self.user)
         yield Message.Version, 1
         yield Message.Directory, blog
 
         for post in self.posts():
+            if post["type"] not in self.types:
+                continue
+
             post["blog"] = blog
             post["offset"] = 0
 
             if "trail" in post:
                 del post["trail"]
 
-            if "photos" in post:
+            if "photos" in post:  # type "photo" or "link"
                 photos = post["photos"]
                 del post["photos"]
 
                 for photo in photos:
+                    post["photo"] = photo
                     photo.update(photo["original_size"])
-                    photo["url"] = self._original_image(photo["url"])
                     del photo["original_size"]
                     del photo["alt_sizes"]
-                    post["extension"] = photo["url"].rpartition(".")[2]
-                    post["offset"] += 1
-                    post["photo"] = photo
-                    yield Message.Url, photo["url"], post
+                    yield self._prepare(photo["url"], post)
 
             if "audio_url" in post:  # type: "audio"
-                post["extension"] = None
-                post["offset"] += 1
-                yield Message.Url, post["audio_url"], post
+                yield self._prepare(
+                    post["audio_url"], post, None)
 
             if "video_url" in post:  # type: "video"
-                url = post["video_url"]
-                post["extension"] = url.rpartition(".")[2]
-                post["offset"] += 1
-                yield Message.Url, self._original_video(url), post
+                yield self._prepare(
+                    post["video_url"], post, _original_video)
 
-            if "description" in post:  # inline images
-                for url in re.findall(r' src="([^"]+)"', post["description"]):
-                    post["extension"] = url.rpartition(".")[2]
-                    post["offset"] += 1
-                    yield Message.Url, self._original_image(url), post
+            if self.inline:  # inline images
+                for key in ("body", "description"):
+                    if key in post:
+                        for url in re.findall('<img src="([^"]+)"', post[key]):
+                            yield self._prepare(url, post)
 
-            if "permalink_url" in post:  # external video/audio
-                yield Message.Queue, post["permalink_url"], post
-
-            if "url" in post:  # type: "link"
-                yield Message.Queue, post["url"], post
+            if self.external:  # external links
+                post["extension"] = None
+                for key in ("permalink_url", "url"):
+                    if key in post:
+                        yield Message.Queue, post[key], post
 
     def posts(self):
         """Return an iterable containing all relevant posts"""
 
     @staticmethod
-    def _original_image(url):
-        return re.sub(
-            (r"https?://\d+\.media\.tumblr\.com"
-             r"/([0-9a-f]+)/tumblr_([^/?&#.]+)_\d+\.([0-9a-z]+)"),
-            r"http://data.tumblr.com/\1/tumblr_\2_raw.\3", url
-        )
-
-    @staticmethod
-    def _original_video(url):
-        return re.sub(
-            (r"https?://vt\.media\.tumblr\.com"
-             r"/tumblr_([^_]+)_\d+\.([0-9a-z]+)"),
-            r"https://vt.media.tumblr.com/tumblr_\1.\2", url
-        )
+    def _prepare(url, post, transform=_original_image):
+        if transform:
+            url = transform(url)
+        post["offset"] += 1
+        return Message.Url, url, text.nameext_from_url(url, post)
 
 
 class TumblrUserExtractor(TumblrExtractor):
     """Extractor for all images from a tumblr-user"""
     subcategory = "user"
     pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com(?:/page/\d+)?/?$"]
-    test = [("http://demo.tumblr.com/", {
-        "pattern": (r"https?://(?:$|"
-                    r"\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280\.jpg|"
-                    r"w+\.tumblr\.com/audio_file/demo/\d+/tumblr_\w+)"),
-        "count": 3,
-    })]
+    test = [
+        ("http://demo.tumblr.com/", {
+            "pattern": (r"https?://\d+\.media\.tumblr\.com"
+                        r"/tumblr_[^/_]+_\d+\.jpg"),
+            "count": 1,
+        }),
+        ("http://demo.tumblr.com/", {
+            "pattern": (r"https?://(?:$|"
+                        r"\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280\.jpg|"
+                        r"w+\.tumblr\.com/audio_file/demo/\d+/tumblr_\w+)"),
+            "count": 3,
+            "options": (("posts", "all"), ("external", True), ("inline", True))
+        }),
+    ]
 
     def posts(self):
         return self.api.posts(self.user, {})
@@ -121,6 +150,7 @@ class TumblrPostExtractor(TumblrExtractor):
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
         self.post_id = match.group(2)
+        self.types = POST_TYPES
 
     def posts(self):
         return self.api.posts(self.user, {"id": self.post_id})
@@ -170,7 +200,7 @@ class TumblrAPI():
         response = self.extractor.request(
             url, params=params, fatal=False).json()
         if response["meta"]["status"] == 404:
-            raise exception.NotFoundError("user")
+            raise exception.NotFoundError("user or post")
         elif response["meta"]["status"] != 200:
             self.extractor.log.error(response)
             raise exception.StopExtraction()
