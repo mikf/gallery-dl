@@ -23,6 +23,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
               "album/horizon-riders-wii-"), {
         "pattern": ("https?://\d+\.\d+\.\d+\.\d+/ost/horizon-riders-wii-/"
                     "[^/]+/horizon-riders-wii-full-soundtrack\.mp3"),
+        "count": 1,
         "keyword": "d91cf3edee6713b536eaf3995743f0be7dc72f68",
     })]
 
@@ -58,13 +59,11 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
         pos = page.find("Download all songs at once:")
         if pos == -1:
             raise exception.NotFoundError("soundtrack")
-        num = 0
-        for url in text.extract_iter(
-                page, '<tr>\r\n\r\n\t \t<td><a href="', '"', pos):
+        page = text.extract(page, '<table align="center"', '</table>', pos)[0]
+        for num, url in enumerate(text.extract_iter(
+                page, '<td><a href="', '"'), 1):
             page = self.request(url, encoding="utf-8").text
             name, pos = text.extract(page, "Song name: <b>", "</b>")
             url , pos = text.extract(
-                page, '<p><a style="color: #21363f;" href="', '"', pos
-            )
-            num += 1
+                page, '<p><a style="color: #21363f;" href="', '"', pos)
             yield url, text.nameext_from_url(name, {"num": num})
