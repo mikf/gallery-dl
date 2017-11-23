@@ -55,8 +55,14 @@ class TumblrExtractor(Extractor):
             if isinstance(types, str):
                 types = types.split(",")
             self.types = frozenset(types)
+
+            invalid = self.types - POST_TYPES
+            if invalid:
+                self.log.warning('invalid post types: "%s"',
+                                 '", "'.join(sorted(invalid)))
         else:
             self.types = frozenset()
+            self.log.warning("no post types selected")
 
     def items(self):
         blog = self.api.info(self.user)
@@ -82,21 +88,19 @@ class TumblrExtractor(Extractor):
                     photo.update(photo["original_size"])
                     del photo["original_size"]
                     del photo["alt_sizes"]
-                    yield self._prepare(photo["url"], post)
+                    yield self._prepare(_original_image(photo["url"]), post)
 
             if "audio_url" in post:  # type: "audio"
-                yield self._prepare(
-                    post["audio_url"], post, None)
+                yield self._prepare(post["audio_url"], post)
 
             if "video_url" in post:  # type: "video"
-                yield self._prepare(
-                    post["video_url"], post, _original_video)
+                yield self._prepare(_original_video(post["video_url"]), post)
 
             if self.inline:  # inline images
                 for key in ("body", "description"):
                     if key in post:
                         for url in re.findall('<img src="([^"]+)"', post[key]):
-                            yield self._prepare(url, post)
+                            yield self._prepare(_original_image(url), post)
 
             if self.external:  # external links
                 post["extension"] = None
@@ -108,9 +112,7 @@ class TumblrExtractor(Extractor):
         """Return an iterable containing all relevant posts"""
 
     @staticmethod
-    def _prepare(url, post, transform=_original_image):
-        if transform:
-            url = transform(url)
+    def _prepare(url, post):
         post["offset"] += 1
         return Message.Url, url, text.nameext_from_url(url, post)
 
