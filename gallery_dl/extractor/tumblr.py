@@ -15,6 +15,8 @@ import re
 
 
 def _original_image(url):
+    if url.endswith(".gif") and "_inline_" in url:
+        return url
     return re.sub(
         (r"https?://\d+\.media\.tumblr\.com"
          r"/([0-9a-f]+)/tumblr_([^/?&#.]+)_\d+\.([0-9a-z]+)"),
@@ -45,24 +47,14 @@ class TumblrExtractor(Extractor):
         self.user = match.group(1)
         self.api = TumblrAPI(self)
 
+        self.types = self._setup_posttypes()
         self.inline = self.config("inline", False)
         self.external = self.config("external", False)
 
-        types = self.config("posts", ("photo",))
-        if types == "all":
-            self.types = POST_TYPES
-        elif types:
-            if isinstance(types, str):
-                types = types.split(",")
-            self.types = frozenset(types)
-
-            invalid = self.types - POST_TYPES
-            if invalid:
-                self.log.warning('invalid post types: "%s"',
-                                 '", "'.join(sorted(invalid)))
-        else:
-            self.types = frozenset()
-            self.log.warning("no post types selected")
+        if len(self.types) == 1:
+            self.api.params["type"] = next(iter(self.types))
+        elif not self.types:
+            self.log.warning("no valid post types selected")
 
     def items(self):
         blog = self.api.info(self.user)
@@ -111,6 +103,27 @@ class TumblrExtractor(Extractor):
     def posts(self):
         """Return an iterable containing all relevant posts"""
 
+    def _setup_posttypes(self):
+        types = self.config("posts", ("photo",))
+
+        if types == "all":
+            return POST_TYPES
+
+        elif not types:
+            return frozenset()
+
+        else:
+            if isinstance(types, str):
+                types = types.split(",")
+            types = frozenset(types)
+
+            invalid = types - POST_TYPES
+            if invalid:
+                types = types & POST_TYPES
+                self.log.warning('invalid post types: "%s"',
+                                 '", "'.join(sorted(invalid)))
+            return types
+
     @staticmethod
     def _prepare(url, post):
         post["offset"] += 1
@@ -152,10 +165,13 @@ class TumblrPostExtractor(TumblrExtractor):
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
         self.post_id = match.group(2)
-        self.types = POST_TYPES
 
     def posts(self):
         return self.api.posts(self.user, {"id": self.post_id})
+
+    @staticmethod
+    def _setup_posttypes():
+        return POST_TYPES
 
 
 class TumblrTagExtractor(TumblrExtractor):
