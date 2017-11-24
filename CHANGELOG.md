@@ -1,7 +1,11 @@
 # Changelog
 
 ## Unreleased
-- Improved retry behavior for failed HTTP downloads
+- Added an option to set a [custom user-agent string](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractoruser-agent)
+- Improved retry behavior for failed HTTP requests
+- Improved `seiga` by providing better metadata and getting more than the latest 200 images
+- Improved `tumblr` by adding support for [all post types](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractortumblrposts), scanning for [inline images](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractortumblrinline) and following [external links](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractortumblrexternal) ([#48](https://github.com/mikf/gallery-dl/issues/48))
+- Fixed extraction issues for `hbrowse`, `khinsider` and `senmanga`
 
 ## 1.0.1 - 2017-11-10
 - Added support for:
