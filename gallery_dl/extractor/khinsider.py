@@ -21,8 +21,8 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
                r"game-soundtracks/album/([^/?&#]+)"]
     test = [(("http://downloads.khinsider.com/game-soundtracks/"
               "album/horizon-riders-wii-"), {
-        "pattern": ("https?://\d+\.\d+\.\d+\.\d+/ost/horizon-riders-wii-/"
-                    "[^/]+/horizon-riders-wii-full-soundtrack\.mp3"),
+        "pattern": (r"https?://\d+\.\d+\.\d+\.\d+/ost/horizon-riders-wii/[^/]+"
+                    r"/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack\.mp3"),
         "count": 1,
         "keyword": "d91cf3edee6713b536eaf3995743f0be7dc72f68",
     })]
@@ -63,7 +63,6 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
         for num, url in enumerate(text.extract_iter(
                 page, '<td><a href="', '"'), 1):
             page = self.request(url, encoding="utf-8").text
-            name, pos = text.extract(page, "Song name: <b>", "</b>")
-            url , pos = text.extract(
-                page, '<p><a style="color: #21363f;" href="', '"', pos)
-            yield url, text.nameext_from_url(name, {"num": num})
+            url = text.extract(
+                page, '<p><a style="color: #21363f;" href="', '"')[0]
+            yield url, text.nameext_from_url(url, {"num": num})

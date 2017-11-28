@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.0.2 - 2017-11-24
 - Added an option to set a [custom user-agent string](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractoruser-agent)
 - Improved retry behavior for failed HTTP requests
