@@ -22,7 +22,7 @@ Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fireden              https://boards.fireden.net/         Threads
 Flickr               https://www.flickr.com/             |Images from Use-2|                                Optional (OAuth)
 Futaba Channel       https://www.2chan.net/              Threads
-Gelbooru             https://gelbooru.com/               Posts, Tag-Searches
+Gelbooru             https://gelbooru.com/               Pools, Posts, Tag-Searches
 Gfycat               https://gfycat.com/                 individual Images
 GoManga              https://gomanga.co/                 Chapters, Manga
 HBrowse              http://www.hbrowse.com/             Chapters, Manga
