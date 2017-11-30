@@ -61,10 +61,39 @@ class Downloader(DownloaderBase):
     def get_extension(self):
         mtype = self.response.headers.get("Content-Type", "image/jpeg")
         mtype = mtype.partition(";")[0]
+
+        if mtype in MIMETYPE_MAP:
+            return MIMETYPE_MAP[mtype]
+
         exts = mimetypes.guess_all_extensions(mtype, strict=False)
         if exts:
             exts.sort()
             return exts[-1][1:]
+
         self.log.warning(
             "No filename extension found for MIME type '%s'", mtype)
         return "txt"
+
+
+MIMETYPE_MAP = {
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/png": "png",
+    "image/gif": "gif",
+    "image/bmp": "bmp",
+    "image/webp": "webp",
+    "image/svg+xml": "svg",
+
+    "video/webm": "webm",
+    "video/ogg": "ogg",
+    "video/mp4": "mp4",
+
+    "audio/wav": "wav",
+    "audio/x-wav": "wav",
+    "audio/webm": "webm",
+    "audio/ogg": "ogg",
+    "audio/mpeg": "mp3",
+
+    "application/ogg": "ogg",
+    "application/octet-stream": "bin",
+}
