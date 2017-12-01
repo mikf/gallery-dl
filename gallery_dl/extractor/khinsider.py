@@ -44,6 +44,8 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
+        if "Download all songs at once:" not in page:
+            raise exception.NotFoundError("soundtrack")
         data = text.extract_all(page, (
             ("album", "Album name: <b>", "</b>"),
             ("count", "Number of Files: <b>", "</b>"),
@@ -56,10 +58,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
 
     def get_album_tracks(self, page):
         """Collect url and metadata for all tracks of a soundtrack"""
-        pos = page.find("Download all songs at once:")
-        if pos == -1:
-            raise exception.NotFoundError("soundtrack")
-        page = text.extract(page, '<table align="center"', '</table>', pos)[0]
+        page = text.extract(page, '<table class="songlist">', '</table>')[0]
         for num, url in enumerate(text.extract_iter(
                 page, '<td><a href="', '"'), 1):
             page = self.request(url, encoding="utf-8").text
