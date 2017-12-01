@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://kissmanga.com/"""
 
 from .common import Extractor, MangaExtractor, Message
-from .. import text, util, cloudflare, aes
+from .. import text, util, cloudflare, aes, exception
 from ..cache import cache
 import re
 import hashlib
@@ -36,7 +36,14 @@ class KissmangaExtractor(Extractor):
         self.url = match.group(0)
         self.session.headers["Referer"] = self.root
 
-    request = cloudflare.request_func
+    def request(self, url):
+        response = cloudflare.request_func(self, url)
+        if response.history and "/Message/AreYouHuman?" in response.url:
+            self.log.error("Requesting too many pages caused a redirect to %s."
+                           " Try visiting this URL in your browser and solving"
+                           " the CAPTCHA to continue.", response.url)
+            raise exception.StopExtraction()
+        return response
 
     @staticmethod
     def parse_chapter_string(data):
