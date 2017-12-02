@@ -189,6 +189,22 @@ class TestOther(unittest.TestCase):
         self.assertEqual(util.bdecode("1111011", "01"), 123)
         self.assertEqual(util.bdecode("AAAABAA", "BA"), 123)
 
+    def test_parse_bytes(self):
+        self.assertEqual(util.parse_bytes("50"), 50)
+        self.assertEqual(util.parse_bytes("50k"), 50 * 1024**1)
+        self.assertEqual(util.parse_bytes("50m"), 50 * 1024**2)
+        self.assertEqual(util.parse_bytes("50g"), 50 * 1024**3)
+        self.assertEqual(util.parse_bytes("50t"), 50 * 1024**4)
+        self.assertEqual(util.parse_bytes("50p"), 50 * 1024**5)
+
+        self.assertEqual(util.parse_bytes("123.456"), 123)
+        self.assertEqual(util.parse_bytes("123.567"), 124)
+        self.assertEqual(util.parse_bytes("0.5M"), round(0.5 * 1024**2))
+
+        self.assertEqual(util.parse_bytes("NaN"), 0)
+        self.assertEqual(util.parse_bytes("invalid"), 0)
+        self.assertEqual(util.parse_bytes(" 123 kb "), 0)
+
     def test_combine_dict(self):
         self.assertEqual(
             util.combine_dict({}, {}),

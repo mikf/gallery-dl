@@ -84,6 +84,22 @@ def bdecode(data, alphabet="0123456789"):
     return num
 
 
+def parse_bytes(value, suffixes="bkmgtp"):
+    """Convert a bytes-amount ("500k", "2.5M", ...) to int"""
+    last = value[-1].lower()
+
+    if last in suffixes:
+        mul = 1024 ** suffixes.index(last)
+        value = value[:-1]
+    else:
+        mul = 1
+
+    try:
+        return round(float(value) * mul)
+    except ValueError:
+        return 0
+
+
 def combine_dict(a, b):
     """Recursively combine the contents of b into a"""
     for key, value in b.items():
