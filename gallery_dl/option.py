@@ -228,14 +228,6 @@ def build_parser():
         help=("Same as '--filter' except for chapters "
               "and other delegated URLs"),
     )
-    selection.add_argument(
-        "--images", dest="depr_images",
-        help=argparse.SUPPRESS,
-    )
-    selection.add_argument(
-        "--chapters", dest="depr_chapters",
-        help=argparse.SUPPRESS,
-    )
 
     parser.add_argument(
         "urls",
