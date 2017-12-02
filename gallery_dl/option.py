@@ -136,6 +136,11 @@ def build_parser():
 
     downloader = parser.add_argument_group("Downloader Options")
     downloader.add_argument(
+        "-r", "--limit-rate",
+        metavar="RATE", action=ConfigAction, dest="rate",
+        help="Maximum download rate (e.g. 500k or 2.5M)",
+    )
+    downloader.add_argument(
         "-R", "--retries",
         metavar="RETRIES", action=ConfigAction, dest="retries", type=int,
         help="Number of retries (default: 5)",
