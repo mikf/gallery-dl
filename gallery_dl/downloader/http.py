@@ -8,6 +8,7 @@
 
 """Downloader module for http:// and https:// URLs"""
 
+import time
 import mimetypes
 from .common import DownloaderBase
 from .. import util, exception
@@ -22,6 +23,15 @@ class Downloader(DownloaderBase):
         self.retries = self.config("retries", 5)
         self.timeout = self.config("timeout", 30)
         self.verify = self.config("verify", True)
+        self.rate = self.config("rate")
+        self.chunk_size = 16384
+
+        if self.rate:
+            self.rate = util.parse_bytes(self.rate)
+            if not self.rate:
+                self.log.warning("Invalid rate limit specified")
+            elif self.rate < self.chunk_size:
+                self.chunk_size = self.rate
 
     def connect(self, url, offset):
         headers = {}
@@ -50,8 +60,20 @@ class Downloader(DownloaderBase):
         return offset, util.safe_int(size)
 
     def receive(self, file):
-        for data in self.response.iter_content(16384):
+        if self.rate:
+            total = 0            # total amount of bytes received
+            start = time.time()  # start time
+
+        for data in self.response.iter_content(self.chunk_size):
             file.write(data)
+
+            if self.rate:
+                total += len(data)
+                expected = total / self.rate  # expected elapsed time
+                delta = time.time() - start   # actual elapsed time since start
+                if delta < expected:
+                    # sleep if less time passed than expected
+                    time.sleep(expected - delta)
 
     def reset(self):
         if self.response:

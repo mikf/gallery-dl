@@ -120,6 +120,20 @@ Description Alternate location for ``.part`` files.
 =========== =====
 
 
+downloader.http.rate
+--------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Examples    ``"32000"``, ``"500k"``, ``"2.5M"``
+Description Maximum download rate in bytes per second.
+
+            Possible values are valid integer or floating-point numbers
+            optionally followed by one of ``k``, ``m``. ``g``, ``t`` or ``p``.
+            These suffixes are case-insensitive.
+=========== =====
+
+
 downloader.http.retries
 -----------------------
 =========== =====
