@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
-import itertools
 
 
 class SeigaExtractor(Extractor):
@@ -21,20 +20,16 @@ class SeigaExtractor(Extractor):
 
     def __init__(self):
         Extractor.__init__(self)
-        self.startimg = 0
+        self.start_image = 0
 
     def items(self):
         self.login()
         images = iter(self.get_images())
         data = next(images)
 
-        if self.startimg:
-            # consume elements up to 'startimg'
-            next(itertools.islice(images, self.startimg, self.startimg), None)
-
         yield Message.Version, 1
         yield Message.Directory, data
-        for image in images:
+        for image in util.advance(images, self.start_image):
             data.update(image)
             data["extension"] = None
             yield Message.Url, self.get_image_url(data["image_id"]), data
@@ -91,12 +86,12 @@ class SeigaUserExtractor(SeigaExtractor):
     def __init__(self, match):
         SeigaExtractor.__init__(self)
         self.user_id, self.order = match.groups()
-        self.startpage = 1
+        self.start_page = 1
 
     def skip(self, num):
         pages, images = divmod(num, 40)
-        self.startpage += pages
-        self.startimg += images
+        self.start_page += pages
+        self.start_image += images
         return num
 
     def get_metadata(self, page):
@@ -122,14 +117,14 @@ class SeigaUserExtractor(SeigaExtractor):
 
     def get_images(self):
         url = "http://seiga.nicovideo.jp/user/illust/" + self.user_id
-        params = {"sort": self.order, "page": self.startpage,
+        params = {"sort": self.order, "page": self.start_page,
                   "target": "illust_all"}
 
         while True:
             cnt = 0
             page = self.request(url, params=params).text
 
-            if params["page"] == self.startpage:
+            if params["page"] == self.start_page:
                 yield self.get_metadata(page)
 
             for info in text.extract_iter(
@@ -174,7 +169,7 @@ class SeigaImageExtractor(SeigaExtractor):
         self.image_id = match.group(1)
 
     def skip(self, num):
-        self.startimg += num
+        self.start_image += num
         return num
 
     def get_images(self):
