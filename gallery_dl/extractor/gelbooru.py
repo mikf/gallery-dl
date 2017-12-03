@@ -18,21 +18,29 @@ class GelbooruExtractor(SharedConfigExtractor):
     category = "gelbooru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
 
+    def __init__(self):
+        SharedConfigExtractor.__init__(self)
+        self.start_post = 0
+
     def items(self):
         yield Message.Version, 1
         yield Message.Directory, self.get_metadata()
 
-        for post_id in self.posts():
+        for post_id in util.advance(self.get_posts(), self.start_post):
             data = self.get_post_data(post_id)
             url = data["file_url"]
             yield Message.Url, url, text.nameext_from_url(url, data)
 
-    def posts(self):
-        """Return an iterable containing all relevant post ids"""
+    def skip(self, num):
+        self.start_post += num
+        return num
 
     def get_metadata(self):
         """Return general metadata"""
         return {}
+
+    def get_posts(self):
+        """Return an iterable containing all relevant post ids"""
 
     def get_post_data(self, post_id):
         """Extract metadata of a single post"""
@@ -53,6 +61,7 @@ class GelbooruExtractor(SharedConfigExtractor):
         ))[0]
         data["file_url"] = "http" + data["file_url"]
         data["md5"] = data["file_url"].rpartition("/")[2].partition(".")[0]
+        data["rating"] = RATING_MAP[data["rating"]]
         for key in ("id", "width", "height", "score"):
             data[key] = util.safe_int(data[key])
         return data
@@ -67,25 +76,34 @@ class GelbooruTagExtractor(GelbooruExtractor):
     test = [("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
         "count": 5,
     })]
+    per_page = 42
 
     def __init__(self, match):
         GelbooruExtractor.__init__(self)
         self.tags = text.unquote(match.group(1).replace("+", " "))
+        self.start_page = 0
+
+    def skip(self, num):
+        pages, posts = divmod(num, self.per_page)
+        self.start_page += pages
+        self.start_post += posts
+        return num
 
     def get_metadata(self):
         return {"tags": self.tags}
 
-    def posts(self):
+    def get_posts(self):
         url = "https://gelbooru.com/index.php?page=post&s=list"
-        params = {"tags": self.tags, "pid": 0}
+        # values for 'pid' must be multiples of 42
+        params = {"tags": self.tags, "pid": self.start_page * self.per_page}
 
         while True:
             page = self.request(url, params=params).text
             ids = list(text.extract_iter(page, '<a id="p', '"'))
             yield from ids
-            if len(ids) < 42:
+            if len(ids) < self.per_page:
                 return
-            params["pid"] += 42
+            params["pid"] += self.per_page
 
 
 class GelbooruPoolExtractor(GelbooruExtractor):
@@ -101,14 +119,22 @@ class GelbooruPoolExtractor(GelbooruExtractor):
     def __init__(self, match):
         GelbooruExtractor.__init__(self)
         self.pool_id = match.group(1)
+        self.posts = None
 
     def get_metadata(self):
-        return {"pool": self.pool_id}
-
-    def posts(self):
         page = self.request("https://gelbooru.com/index.php?page=pool&s=show"
                             "&id=" + self.pool_id).text
-        return text.extract_iter(page, 'id="p', '"')
+        name, pos = text.extract(page, "<h3>Now Viewing: ", "</h3>")
+        self.posts = list(text.extract_iter(page, 'id="p', '"', pos))
+
+        return {
+            "pool": util.safe_int(self.pool_id),
+            "pool_name": text.unescape(name),
+            "count": len(self.posts),
+        }
+
+    def get_posts(self):
+        return self.posts
 
 
 class GelbooruPostExtractor(GelbooruExtractor):
@@ -125,5 +151,12 @@ class GelbooruPostExtractor(GelbooruExtractor):
         GelbooruExtractor.__init__(self)
         self.post_id = match.group(1)
 
-    def posts(self):
+    def get_posts(self):
         return (self.post_id,)
+
+
+RATING_MAP = {
+    "Safe": "s",
+    "Questionable": "q",
+    "Explicit": "e",
+}
