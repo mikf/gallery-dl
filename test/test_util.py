@@ -205,6 +205,18 @@ class TestOther(unittest.TestCase):
         self.assertEqual(util.parse_bytes("invalid"), 0)
         self.assertEqual(util.parse_bytes(" 123 kb "), 0)
 
+    def test_advance(self):
+        items = range(5)
+
+        self.assertCountEqual(
+            util.advance(items, 0), items)
+        self.assertCountEqual(
+            util.advance(items, 3), range(3, 5))
+        self.assertCountEqual(
+            util.advance(items, 9), [])
+        self.assertCountEqual(
+            util.advance(util.advance(items, 1), 2), range(3, 5))
+
     def test_combine_dict(self):
         self.assertEqual(
             util.combine_dict({}, {}),

@@ -20,6 +20,7 @@ import string
 import _string
 import hashlib
 import datetime
+import itertools
 import urllib.parse
 from . import text, exception
 
@@ -98,6 +99,13 @@ def parse_bytes(value, suffixes="bkmgtp"):
         return round(float(value) * mul)
     except ValueError:
         return 0
+
+
+def advance(iterable, num):
+    """"Advance the iterable by 'num' steps"""
+    iterator = iter(iterable)
+    next(itertools.islice(iterator, num, num), None)
+    return iterator
 
 
 def combine_dict(a, b):
