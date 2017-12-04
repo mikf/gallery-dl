@@ -19,8 +19,8 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{album}"]
     pattern = [r"(?:https?://)?downloads\.khinsider\.com/"
                r"game-soundtracks/album/([^/?&#]+)"]
-    test = [(("http://downloads.khinsider.com/game-soundtracks/"
-              "album/horizon-riders-wii-"), {
+    test = [(("https://downloads.khinsider.com/game-soundtracks/"
+              "album/horizon-riders-wii"), {
         "pattern": (r"https?://\d+\.\d+\.\d+\.\d+/ost/horizon-riders-wii/[^/]+"
                     r"/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack\.mp3"),
         "count": 1,
@@ -60,7 +60,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
         """Collect url and metadata for all tracks of a soundtrack"""
         page = text.extract(page, '<table class="songlist">', '</table>')[0]
         for num, url in enumerate(text.extract_iter(
-                page, '<td><a href="', '"'), 1):
+                page, ' href="', '"'), 1):
             page = self.request(url, encoding="utf-8").text
             url = text.extract(
                 page, '<p><a style="color: #21363f;" href="', '"')[0]
