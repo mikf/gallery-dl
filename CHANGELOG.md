@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- Added the ``-r/--limit-rate`` command-line option to set a maximum download rate
+- Added the ``--sleep`` command-line option to specify the number of seconds to sleep before each download
+- Updated `gelbooru` to no longer use their now disabled API
+- Fixed extraction issues for `hentai2read` and `khinsider`
+- Removed the deprecated `--images` and `--chapters` options
+- Removed the ``mangazuki`` module
 
 ## 1.0.2 - 2017-11-24
 - Added an option to set a [custom user-agent string](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractoruser-agent)

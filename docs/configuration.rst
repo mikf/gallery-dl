@@ -270,6 +270,15 @@ Description Controls the behavior when downloading a file whose filename
 =========== =====
 
 
+extractor.*.sleep
+----------------
+=========== =====
+Type        ``float``
+Default     ``0``
+Description Number of seconds to sleep before each download.
+=========== =====
+
+
 extractor.*.username & .password
 --------------------------------
 =========== =====
