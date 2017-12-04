@@ -151,6 +151,11 @@ def build_parser():
         help="Timeout for HTTP connections (defaut: 30s)",
     )
     downloader.add_argument(
+        "--sleep",
+        metavar="SECONDS", action=ConfigAction, dest="sleep", type=float,
+        help="Number of seconds to sleep before each download",
+    )
+    downloader.add_argument(
         "--no-part",
         action=ConfigConstAction, nargs=0, dest="part", const=False,
         help="Do not use .part files",

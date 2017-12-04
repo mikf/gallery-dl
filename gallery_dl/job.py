@@ -7,6 +7,7 @@
 # published by the Free Software Foundation.
 
 import sys
+import time
 import json
 import hashlib
 from . import extractor, downloader, config, util, output, exception
@@ -137,6 +138,7 @@ class DownloadJob(Job):
     def __init__(self, url, parent=None):
         Job.__init__(self, url, parent)
         self.pathfmt = util.PathFormat(self.extractor)
+        self.sleep = self.extractor.config("sleep")
         self.downloaders = {}
         self.out = output.select()
 
@@ -146,6 +148,8 @@ class DownloadJob(Job):
         if self.pathfmt.exists():
             self.out.skip(self.pathfmt.path)
             return
+        if self.sleep:
+            time.sleep(self.sleep)
         dlinstance = self.get_downloader(url)
         dlinstance.download(url, self.pathfmt)
 
