@@ -58,9 +58,9 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
 
     def get_album_tracks(self, page):
         """Collect url and metadata for all tracks of a soundtrack"""
-        page = text.extract(page, '<table class="songlist">', '</table>')[0]
+        page = text.extract(page, '<table id="songlist">', '</table>')[0]
         for num, url in enumerate(text.extract_iter(
-                page, ' href="', '"'), 1):
+                page, '<td class="clickable-row"><a href="', '"'), 1):
             page = self.request(url, encoding="utf-8").text
             url = text.extract(
                 page, '<p><a style="color: #21363f;" href="', '"')[0]

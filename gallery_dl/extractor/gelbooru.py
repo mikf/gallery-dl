@@ -61,7 +61,7 @@ class GelbooruExtractor(SharedConfigExtractor):
         ))[0]
         data["file_url"] = "http" + data["file_url"]
         data["md5"] = data["file_url"].rpartition("/")[2].partition(".")[0]
-        data["rating"] = RATING_MAP[data["rating"]]
+        data["rating"] = (data["rating"] or "?")[0].lower()
         for key in ("id", "width", "height", "score"):
             data[key] = util.safe_int(data[key])
         return data
@@ -153,10 +153,3 @@ class GelbooruPostExtractor(GelbooruExtractor):
 
     def get_posts(self):
         return (self.post_id,)
-
-
-RATING_MAP = {
-    "Safe": "s",
-    "Questionable": "q",
-    "Explicit": "e",
-}

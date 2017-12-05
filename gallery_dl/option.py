@@ -148,7 +148,7 @@ def build_parser():
     downloader.add_argument(
         "--http-timeout",
         metavar="SECONDS", action=ConfigAction, dest="timeout", type=float,
-        help="Timeout for HTTP connections (defaut: 30s)",
+        help="Timeout for HTTP connections (defaut: 30.0)",
     )
     downloader.add_argument(
         "--sleep",
@@ -192,15 +192,17 @@ def build_parser():
     authentication.add_argument(
         "-u", "--username",
         metavar="USER", action=ConfigAction, dest="username",
+        help="A username to login with"
     )
     authentication.add_argument(
         "-p", "--password",
         metavar="PASS", action=ConfigAction, dest="password",
+        help="The password associated with the given username",
     )
     authentication.add_argument(
         "--netrc",
         action=ConfigConstAction, nargs=0, dest="netrc", const=True,
-        help="Use .netrc authentication data",
+        help="Enable .netrc authentication data",
     )
 
     selection = parser.add_argument_group("Selection Options")
@@ -223,8 +225,8 @@ def build_parser():
         metavar="EXPR", dest="image_filter",
         help=("Python expression controlling which images to download. Images "
               "for which the expression evaluates to False are ignored. "
-              "Available keys are the filename-specific ones listed by "
-              "'--list-keywords'. Example: --filter \"image_width >= 1000 and "
+              "Available keys are the filename-specific ones listed by '-K'. "
+              "Example: --filter \"image_width >= 1000 and "
               "rating in ('s', 'q')\""),
     )
     selection.add_argument(
