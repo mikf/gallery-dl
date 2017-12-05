@@ -24,7 +24,7 @@ class Job():
         if self.extractor is None:
             raise exception.NoExtractorError(url)
         self.extractor.log.debug(
-            "Using %s for %s", self.extractor.__class__.__name__, url)
+            "Using %s for '%s'", self.extractor.__class__.__name__, url)
 
         # url predicates
         predicates = [util.UniquePredicate()]
