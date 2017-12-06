@@ -50,8 +50,8 @@ class HttpError(ExtractionError):
     """HTTP request during extraction failed"""
 
 
-class DownloadError(GalleryDLException):
-    """Error during file download"""
+class DownloadRetry(GalleryDLException):
+    """Download attempt failed and should be retried"""
 
 
 class DownloadComplete(GalleryDLException):
