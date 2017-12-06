@@ -10,6 +10,7 @@
 
 import time
 import mimetypes
+from requests.exceptions import ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import util, exception
 
@@ -38,9 +39,12 @@ class Downloader(DownloaderBase):
         if offset:
             headers["Range"] = "bytes={}-".format(offset)
 
-        self.response = self.session.request(
-            "GET", url, stream=True, headers=headers, allow_redirects=True,
-            timeout=self.timeout, verify=self.verify)
+        try:
+            self.response = self.session.request(
+                "GET", url, stream=True, headers=headers, allow_redirects=True,
+                timeout=self.timeout, verify=self.verify)
+        except (ConnectionError, Timeout) as exc:
+            raise exception.DownloadRetry(exc)
 
         code = self.response.status_code
         if code == 200:  # OK
@@ -50,9 +54,9 @@ class Downloader(DownloaderBase):
             size = self.response.headers["Content-Range"].rpartition("/")[2]
         elif code == 416:  # Requested Range Not Satisfiable
             raise exception.DownloadComplete()
-        elif 400 <= code < 500 and code != 429:  # Client Error
-            raise exception.DownloadError(
-                "{} Client Error: {} for url: {}".format(
+        elif code == 429 or 500 <= code < 600:  # Server Error
+            raise exception.DownloadRetry(
+                "{} Server Error: {} for url: {}".format(
                     code, self.response.reason, url))
         else:
             self.response.raise_for_status()

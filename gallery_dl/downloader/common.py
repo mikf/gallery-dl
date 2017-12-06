@@ -74,14 +74,14 @@ class DownloaderBase():
             # connect to (remote) source
             try:
                 offset, size = self.connect(url, filesize)
-            except exception.DownloadError as exc:
-                self.out.error(pathfmt.path, exc, 0, 0)
-                return False
+            except exception.DownloadRetry as exc:
+                msg = exc
+                continue
             except exception.DownloadComplete:
                 break
             except Exception as exc:
-                msg = exc
-                continue
+                self.out.error(pathfmt.path, exc, 0, 0)
+                return False
 
             # check response
             if not offset:
