@@ -88,12 +88,17 @@ class SankakuTagExtractor(Extractor):
         """Collect metadata for a single image"""
         url = "https://chan.sankakucomplex.com/post/show/" + image_id
         page = self.request(url, retries=10).text
-        image_url, pos = text.extract(page, '<li>Original: <a href="', '"')
-        width    , pos = text.extract(page, '>', 'x', pos)
-        height   , pos = text.extract(page, '', ' ', pos)
-        data = text.nameext_from_url(image_url, {
+        file_url, pos = text.extract(page, '<li>Original: <a href="', '"')
+        if file_url:
+            width , pos = text.extract(page, '>', 'x', pos)
+            height, pos = text.extract(page, '', ' ', pos)
+        else:
+            width , pos = text.extract(page, '<object width=', ' ', pos)
+            height, pos = text.extract(page, 'height=', '>', pos)
+            file_url = text.extract(page, '<embed src="', '"', pos)[0]
+        data = text.nameext_from_url(file_url, {
             "id": util.safe_int(image_id),
-            "file_url": "https:" + text.unescape(image_url),
+            "file_url": "https:" + text.unescape(file_url),
             "width": util.safe_int(width),
             "height": util.safe_int(height),
         })
