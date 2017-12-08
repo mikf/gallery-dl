@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 - 2017-12-08
 - Added the ``-r/--limit-rate`` command-line option to set a maximum download rate
 - Added the ``--sleep`` command-line option to specify the number of seconds to sleep before each download
 - Updated `gelbooru` to no longer use their now disabled API
+- Fixed SWF extraction for `sankaku` ([#52](https://github.com/mikf/gallery-dl/issues/52))
 - Fixed extraction issues for `hentai2read` and `khinsider`
 - Removed the deprecated `--images` and `--chapters` options
 - Removed the ``mangazuki`` module
