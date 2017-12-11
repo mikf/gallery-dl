@@ -8,102 +8,86 @@
 
 """Extract images from https://chan.sankakucomplex.com/"""
 
-from .common import Extractor, Message
+from .common import SharedConfigExtractor, Message
 from .. import text, util, exception
 from ..cache import cache
 import time
 import random
 
 
-class SankakuTagExtractor(Extractor):
-    """Extractor for images from chan.sankakucomplex.com by search-tags"""
+class SankakuExtractor(SharedConfigExtractor):
+    """Base class for sankaku extractors"""
+    basecategory = "booru"
     category = "sankaku"
-    subcategory = "tag"
-    directory_fmt = ["{category}", "{tags}"]
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com"
-               r"/\?(?:[^&#]*&)*tags=([^&#]+)"]
-    test = [("https://chan.sankakucomplex.com/?tags=bonocho", {
-        "count": 5,
-        "pattern": (r"https://cs\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                    r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+"),
-    })]
     root = "https://chan.sankakucomplex.com"
     cookienames = ("login", "pass_hash")
     cookiedomain = "chan.sankakucomplex.com"
 
-    def __init__(self, match):
-        Extractor.__init__(self)
+    def __init__(self):
+        SharedConfigExtractor.__init__(self)
         self.logged_in = True
-        self.pagestart = 1
-        self.tags = text.unquote(match.group(1).replace("+", " "))
+        self.start_post = 0
         self.wait_min = self.config("wait-min", 2)
         self.wait_max = self.config("wait-max", 4)
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
 
-    def skip(self, num):
-        pages = min(num // 20, 49)
-        self.pagestart += pages
-        return pages * 20
-
     def items(self):
         self.login()
-        data = self.get_job_metadata()
         yield Message.Version, 1
-        yield Message.Directory, data
-        for image in self.get_images():
-            image.update(data)
-            yield Message.Url, image["file_url"], image
+        yield Message.Directory, self.get_metadata()
 
-    def get_job_metadata(self):
-        """Collect metadata for extractor-job"""
-        return {"tags": self.tags}
+        for post_id in util.advance(self.get_posts(), self.start_post):
+            self.wait()
+            data = self.get_post_data(post_id)
+            url = data["file_url"]
+            yield Message.Url, url, text.nameext_from_url(url, data)
 
-    def get_images(self):
-        """Yield all available images for the given tags"""
-        params = {
-            "tags": self.tags,
-            "page": self.pagestart,
-        }
-        while self.logged_in or params["page"] <= 25:
-            image = None
-            page = self.request(self.root, params=params, retries=10).text
-            pos = text.extract(page, '<div id=more-popular-posts-link>', '')[1]
-            for image_id in text.extract_iter(
-                    page, '<span class="thumb blacklisted" id=p', '>', pos):
-                self.wait()
-                image = self.get_image_metadata(image_id)
-                yield image
-            if not image:
-                return
-            params["page"] += 1
-            params["next"] = image["id"] - 1
-        self.log.warning(
-            "Unauthenticated users may only access the first 500 images / 25 "
-            "pages. (Use '--range 501-' to continue downloading from this "
-            "point onwards after setting up an account.)")
+    def skip(self, num):
+        self.start_post += num
+        return num
 
-    def get_image_metadata(self, image_id):
-        """Collect metadata for a single image"""
-        url = "https://chan.sankakucomplex.com/post/show/" + image_id
+    def get_metadata(self):
+        """Return general metadata"""
+        return {}
+
+    def get_posts(self):
+        """Return an iterable containing all relevant post ids"""
+
+    def get_post_data(self, post_id, extr=text.extract):
+        """Extract metadata of a single post"""
+        url = self.root + "/post/show/" + post_id
         page = self.request(url, retries=10).text
-        file_url, pos = text.extract(page, '<li>Original: <a href="', '"')
+
+        tags   , pos = extr(page, "<title>", " | Sankaku Channel</title>")
+        vavg   , pos = extr(page, "itemprop=ratingValue>", "<", pos)
+        vcnt   , pos = extr(page, "itemprop=reviewCount>", "<", pos)
+        _      , pos = extr(page, "Posted: <", "", pos)
+        created, pos = extr(page, ' title="', '"', pos)
+        rating = extr(page, "<li>Rating: ", "<", pos)[0]
+
+        file_url, pos = extr(page, '<li>Original: <a href="', '"', pos)
         if file_url:
-            width , pos = text.extract(page, '>', 'x', pos)
-            height, pos = text.extract(page, '', ' ', pos)
+            width , pos = extr(page, '>', 'x', pos)
+            height, pos = extr(page, '', ' ', pos)
         else:
-            width , pos = text.extract(page, '<object width=', ' ', pos)
-            height, pos = text.extract(page, 'height=', '>', pos)
-            file_url = text.extract(page, '<embed src="', '"', pos)[0]
-        data = text.nameext_from_url(file_url, {
-            "id": util.safe_int(image_id),
+            width , pos = extr(page, '<object width=', ' ', pos)
+            height, pos = extr(page, 'height=', '>', pos)
+            file_url = extr(page, '<embed src="', '"', pos)[0]
+
+        return {
+            "id": util.safe_int(post_id),
+            "md5": file_url.rpartition("/")[2].partition(".")[0],
+            "tags": tags,
+            "vote_average": float(vavg or 0),
+            "vote_count": util.safe_int(vcnt),
+            "created_at": created,
+            "rating": (rating or "?")[0].lower(),
             "file_url": "https:" + text.unescape(file_url),
             "width": util.safe_int(width),
             "height": util.safe_int(height),
-        })
-        data["md5"] = data["name"]
-        return data
+        }
 
     def wait(self):
         """Wait for a randomly chosen amount of seconds"""
@@ -138,3 +122,66 @@ class SankakuTagExtractor(Extractor):
             raise exception.AuthenticationError()
         cookies = response.history[0].cookies
         return {c: cookies[c] for c in self.cookienames}
+
+
+class SankakuTagExtractor(SankakuExtractor):
+    """Extractor for images from chan.sankakucomplex.com by search-tags"""
+    category = "sankaku"
+    subcategory = "tag"
+    directory_fmt = ["{category}", "{tags}"]
+    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com"
+               r"/\?(?:[^&#]*&)*tags=([^&#]+)"]
+    test = [
+        ("https://chan.sankakucomplex.com/?tags=bonocho", {
+            "count": 5,
+            "pattern": (r"https://cs\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
+                        r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+"),
+        }),
+        ("https://chan.sankakucomplex.com/?tags=bonocho+a+b+c+d", {
+            "options": (("username", None),),
+            "exception": exception.StopExtraction,
+        })
+    ]
+    per_page = 20
+
+    def __init__(self, match):
+        SankakuExtractor.__init__(self)
+        self.tags = text.unquote(match.group(1).replace("+", " "))
+        self.start_page = 1
+
+    def skip(self, num):
+        pages, posts = divmod(num, self.per_page)
+        if pages > 49:
+            self.log.info("Cannot skip more than 50 pages ahead.")
+            pages, posts = 49, self.per_page
+        self.start_page += pages
+        self.start_post += posts
+        return pages * self.per_page + posts
+
+    def get_metadata(self):
+        tags = self.tags.split()
+        if not self.logged_in and len(tags) > 4:
+            self.log.error("Unauthenticated users cannot use "
+                           "more than 4 tags at once.")
+            raise exception.StopExtraction()
+        return {"tags": " ".join(tags)}
+
+    def get_posts(self):
+        params = {"tags": self.tags, "page": self.start_page}
+
+        while self.logged_in or params["page"] <= 25:
+            page = self.request(self.root, params=params, retries=10).text
+            pos = page.find("<div id=more-popular-posts-link>") + 1
+
+            ids = list(text.extract_iter(page, '" id=p', '>', pos))
+            if not ids:
+                return
+            yield from ids
+
+            params["page"] += 1
+            params["next"] = int(ids[-1]) - 1
+
+        self.log.warning(
+            "Unauthenticated users may only access the first 500 images / 25 "
+            "pages. (Use '--range 501-' to continue downloading from this "
+            "point onwards after setting up an account.)")
