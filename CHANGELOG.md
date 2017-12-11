@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.1.0 - 2017-12-08
 - Added the ``-r/--limit-rate`` command-line option to set a maximum download rate
 - Added the ``--sleep`` command-line option to specify the number of seconds to sleep before each download
