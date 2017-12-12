@@ -126,7 +126,6 @@ class SankakuExtractor(SharedConfigExtractor):
 
 class SankakuTagExtractor(SankakuExtractor):
     """Extractor for images from chan.sankakucomplex.com by search-tags"""
-    category = "sankaku"
     subcategory = "tag"
     directory_fmt = ["{category}", "{tags}"]
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com"
@@ -185,3 +184,20 @@ class SankakuTagExtractor(SankakuExtractor):
             "Unauthenticated users may only access the first 500 images / 25 "
             "pages. (Use '--range 501-' to continue downloading from this "
             "point onwards after setting up an account.)")
+
+
+class SankakuPostExtractor(SankakuExtractor):
+    """Extractor for single images from chan.sankakucomplex.com"""
+    subcategory = "post"
+    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/post/show/(\d+)"]
+    test = [("https://chan.sankakucomplex.com/post/show/360451", {
+        "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
+        "count": 1,
+    })]
+
+    def __init__(self, match):
+        SankakuExtractor.__init__(self)
+        self.post_id = match.group(1)
+
+    def get_posts(self):
+        return (self.post_id,)
