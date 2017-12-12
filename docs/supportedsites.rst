@@ -62,7 +62,7 @@ RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://reddit.com/                 Submissions, Subreddits                            Optional (OAuth)
 Rule 34              https://rule34.xxx/                 Posts, Tag-Searches
 Safebooru            https://safebooru.org/              Posts, Tag-Searches
-Sankaku Channel      https://chan.sankakucomplex.com/    Tag-Searches                                       Optional
+Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
 Sea Otter Scans      https://reader.seaotterscans.com/   Chapters, Manga
 Sen Manga            http://raw.senmanga.com/            Chapters
 Sense-Scans          http://sensescans.com/              Chapters, Manga

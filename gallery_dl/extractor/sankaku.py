@@ -27,6 +27,7 @@ class SankakuExtractor(SharedConfigExtractor):
     def __init__(self):
         SharedConfigExtractor.__init__(self)
         self.logged_in = True
+        self.start_page = 1
         self.start_post = 0
         self.wait_min = self.config("wait-min", 2)
         self.wait_max = self.config("wait-max", 4)
@@ -146,7 +147,6 @@ class SankakuTagExtractor(SankakuExtractor):
     def __init__(self, match):
         SankakuExtractor.__init__(self)
         self.tags = text.unquote(match.group(1).replace("+", " "))
-        self.start_page = 1
 
     def skip(self, num):
         pages, posts = divmod(num, self.per_page)
@@ -184,6 +184,44 @@ class SankakuTagExtractor(SankakuExtractor):
             "Unauthenticated users may only access the first 500 images / 25 "
             "pages. (Use '--range 501-' to continue downloading from this "
             "point onwards after setting up an account.)")
+
+
+class SankakuPoolExtractor(SankakuExtractor):
+    """Extractor for image-pools  from chan.sankakucomplex.com"""
+    subcategory = "pool"
+    directory_fmt = ["{category}", "pool", "{pool}"]
+    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/pool/show/(\d+)"]
+    test = [("https://chan.sankakucomplex.com/pool/show/90", {
+        "count": 5,
+    })]
+    per_page = 24
+
+    def __init__(self, match):
+        SankakuExtractor.__init__(self)
+        self.pool_id = match.group(1)
+
+    def skip(self, num):
+        pages, posts = divmod(num, self.per_page)
+        self.start_page += pages
+        self.start_post += posts
+        return num
+
+    def get_metadata(self):
+        return {"pool": self.pool_id}
+
+    def get_posts(self):
+        url = self.root + "/pool/show/" + self.pool_id
+        params = {"page": self.start_page}
+
+        while True:
+            page = self.request(url, params=params, retries=10).text
+            ids = list(text.extract_iter(page, '" id=p', '>'))
+
+            yield from ids
+            if len(ids) < self.per_page:
+                return
+
+            params["page"] += 1
 
 
 class SankakuPostExtractor(SankakuExtractor):

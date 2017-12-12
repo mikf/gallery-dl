@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Added pool- and post-extractors for `sankaku`
 
 ## 1.1.0 - 2017-12-08
 - Added the ``-r/--limit-rate`` command-line option to set a maximum download rate

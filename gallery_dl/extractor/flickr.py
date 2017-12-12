@@ -112,7 +112,7 @@ class FlickrAlbumExtractor(FlickrExtractor):
     test = [(("https://www.flickr.com/photos/"
               "shona_s/albums/72157633471741607"), {
         "url": "baf4a3d1b15afcecf9638000a12c0eb3d5df9024",
-        "keyword": "40605c5b22feafcd029d1121f4dc8786b0aa7dcc",
+        "keyword": "3a99f962f30691dc1b2da46be56fe1b7768fe707",
     })]
 
     def __init__(self, match):
