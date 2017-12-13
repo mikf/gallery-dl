@@ -52,6 +52,7 @@ CATEGORY_MAP = {
     "seiga"          : "Niconico Seiga",
     "senmanga"       : "Sen Manga",
     "sensescans"     : "Sense-Scans",
+    "slideshare"     : "SlideShare",
     "spectrumnexus"  : "Spectrum Nexus",
     "thebarchive"    : "The /b/ Archive",
     "worldthree"     : "World Three",

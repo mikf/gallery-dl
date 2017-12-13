@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Added support for:
+  - `slideshare` - https://www.slideshare.net/ ([#54](https://github.com/mikf/gallery-dl/issues/54))
 - Added pool- and post-extractors for `sankaku`
 
 ## 1.1.0 - 2017-12-08
