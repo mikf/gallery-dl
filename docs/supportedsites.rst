@@ -66,6 +66,7 @@ Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag-Searc
 Sea Otter Scans      https://reader.seaotterscans.com/   Chapters, Manga
 Sen Manga            http://raw.senmanga.com/            Chapters
 Sense-Scans          http://sensescans.com/              Chapters, Manga
+SlideShare           https://www.slideshare.net/         Presentations
 Spectrum Nexus       |http://www.thes-0|                 Chapters, Manga
 The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Posts, Tag-Searches

@@ -9,7 +9,7 @@
 """Extract images from https://www.slideshare.net/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 
 
 class SlideshareExtractor(Extractor):
@@ -17,13 +17,20 @@ class SlideshareExtractor(Extractor):
     category = "slideshare"
     subcategory = "presentation"
     directory_fmt = ["{category}", "{user}"]
-    filename_fmt = "{presentation}-{num}.{extension}"
+    filename_fmt = "{presentation}-{num:>02}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?slideshare\.net/"
-               r"([^/]+)/([^/]+)"]
+               r"([^/?&#]+)/([^/?&#]+)"]
     test = [
-        ("https://www.slideshare.net/Slideshare/get-started-with-slide-share", {
+        (("https://www.slideshare.net/"
+          "Slideshare/get-started-with-slide-share"), {
             "url": "23685fb9b94b32c77a547d45dc3a82fe7579ea18",
             "content": "ee54e54898778e92696a7afec3ffabdbd98eb0cc",
+        }),
+
+        # long title
+        (("https://www.slideshare.net/pragmaticsolutions/warum-sie-nicht-ihren"
+          "-mitarbeitenden-ndern-sollten-sondern-ihr-managementsystem"), {
+            "url": "cf70ca99f57f61affab47ebf8583eb564b21e3a7",
         }),
     ]
 
@@ -32,7 +39,8 @@ class SlideshareExtractor(Extractor):
         self.user, self.presentation = match.groups()
 
     def items(self):
-        page = self.request("https://www.slideshare.net/" + self.user + "/" + self.presentation).text
+        page = self.request("https://www.slideshare.net/" + self.user +
+                            "/" + self.presentation).text
         data = self.get_job_metadata(page)
         imgs = self.get_image_urls(page)
         data["count"] = len(imgs)
@@ -43,17 +51,29 @@ class SlideshareExtractor(Extractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        metadata = {}
+        descr, pos = text.extract(
+            page, '<meta name="description" content="', '"')
+        title, pos = text.extract(
+            page, '<span class="j-title-breadcrumb">', '</span>', pos)
+        views, pos = text.extract(
+            page, '<span class="notranslate pippin-data">', 'views<', pos)
+        published, pos = text.extract(
+            page, '<time datetime="', '"', pos)
+        alt_descr, pos = text.extract(
+            page, 'id="slideshow-description-paragraph" class="notranslate">',
+            '</p>', pos)
 
-        text.extract_all(page, (
-            ('title', '<title>', '</title>'),
-            ('description', '<meta name="description" content="', '">'),
-        ), values=metadata)
+        if descr.endswith("…") and alt_descr:
+            descr = text.remove_html(alt_descr).strip()
 
-        metadata["presentation"] = self.presentation
-        metadata["user"] = self.user
-
-        return metadata
+        return {
+            "user": self.user,
+            "presentation": self.presentation,
+            "title": text.unescape(title.strip()),
+            "description": text.unescape(descr),
+            "views": util.safe_int(views.replace(",", "")),
+            "published": published,
+        }
 
     @staticmethod
     def get_image_urls(page):
