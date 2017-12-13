@@ -73,6 +73,7 @@ modules = [
     "seiga",
     "senmanga",
     "sensescans",
+    "slideshare",
     "spectrumnexus",
     "thebarchive",
     "tumblr",
