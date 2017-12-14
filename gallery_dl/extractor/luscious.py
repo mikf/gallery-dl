@@ -18,7 +18,7 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
     subcategory = "album"
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
-    pattern = [(r"(?:https?://)?(?:www\.)?luscious\.net/"
+    pattern = [(r"(?:https?://)?(?:members\.)?luscious\.net/"
                 r"(?:c/[^/]+/)?(?:pictures/album|albums)/([^/]+_(\d+))")]
     test = [
         (("https://luscious.net/c/hentai_manga/albums/"
@@ -39,7 +39,7 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         self.gpart, self.gid = match.groups()
 
     def items(self):
-        url = "https://luscious.net/albums/" + self.gpart + "/"
+        url = "https://members.luscious.net/albums/" + self.gpart + "/"
         page = self.request(url).text
         data = self.get_metadata(page)
         yield Message.Version, 1
@@ -74,7 +74,7 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         url = extr(page, '<a href="', '"', pos)[0]
         self._check_high_load(page, url)
         while url and not url.endswith("/more_like_this/"):
-            page = self.request("https://luscious.net" + url).text
+            page = self.request("https://members.luscious.net" + url).text
             imgid, pos = extr(url , '/id/', '/')
             url  , pos = extr(page, '<link rel="next" href="', '"')
             self._check_high_load(page, url)
