@@ -18,8 +18,8 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
     subcategory = "album"
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
-    pattern = [(r"(?:https?://)?(?:www\.)?luscious\.net/"
-                r"(?:c/[^/]+/)?(?:pictures/album|albums)/([^/]+_(\d+))")]
+    pattern = [(r"(?:https?://)?(?:www\.|members\.)?luscious\.net/"
+                r"(?:c/[^/?&#]+/)?(?:pictures/album|albums)/([^/?&#]+_(\d+))")]
     test = [
         (("https://luscious.net/c/hentai_manga/albums/"
           "okinami-no-koigokoro_277031/view/"), {
@@ -32,6 +32,8 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
             "keyword": "02624ff1097260e2a3c1b220afc92ea4c6b109b3",
         }),
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", None),
+        ("https://www.luscious.net/albums/okinami_277031/", None),
+        ("https://members.luscious.net/albums/okinami_277031/", None),
     ]
 
     def __init__(self, match):
