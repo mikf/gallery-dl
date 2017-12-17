@@ -13,7 +13,7 @@ Archived.Moe         https://archived.moe/               Threads
 Batoto               https://bato.to/                    Chapters, Manga                                    Optional
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches
 Desuarchive          https://desuarchive.org/            Threads
-DeviantArt           https://www.deviantart.com/         |Collections, De-1|
+DeviantArt           https://www.deviantart.com/         |Collections, De-1|                                Optional (OAuth)
 Doki Reader          https://kobato.hologfx.com/         Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches

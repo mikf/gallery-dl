@@ -271,7 +271,7 @@ Description Controls the behavior when downloading a file whose filename
 
 
 extractor.*.sleep
-----------------
+-----------------
 =========== =====
 Type        ``float``
 Default     ``0``
@@ -367,6 +367,19 @@ Description Request full-sized original images if available.
             Some of DeviantArt's images require an additional API call to get
             their actual original version, which is being hosted on
             Amazon Web Services (AWS) servers.
+=========== =====
+
+
+extractor.deviantart.refresh-token
+----------------------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description The ``refresh_token`` value you get from linking your
+            DeviantArt account to *gallery-dl*.
+
+            Using a ``refresh_token`` allows you to access private or otherwise
+            not publicly available deviations.
 =========== =====
 
 
@@ -576,10 +589,10 @@ extractor.reddit.refresh-token
 =========== =====
 Type        ``string``
 Default     ``null``
-Description The ``refresh_token`` value you get from linking your Reddit account
-            to *gallery-dl*.
+Description The ``refresh_token`` value you get from linking your
+            Reddit account to *gallery-dl*.
 
-            Using the ``refresh_token`` allows you to access private or otherwise
+            Using a ``refresh_token`` allows you to access private or otherwise
             not publicly available subreddits, given that your account is
             authorized to do so,
             but requests to the reddit API are going to be rate limited

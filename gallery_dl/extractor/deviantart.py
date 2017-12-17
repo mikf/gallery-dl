@@ -341,17 +341,23 @@ class DeviantartJournalExtractor(DeviantartExtractor):
 
 class DeviantartAPI():
     """Minimal interface for the deviantart API"""
-    def __init__(self, extractor, client_id="5388",
-                 client_secret="76b08c69cfb27f26d6161f9ab6d061a1"):
+    CLIENT_ID = "5388"
+    CLIENT_SECRET = "76b08c69cfb27f26d6161f9ab6d061a1"
+
+    def __init__(self, extractor):
         self.session = extractor.session
-        self.headers = {}
         self.log = extractor.log
-        self.client_id = extractor.config("client-id", client_id)
-        self.client_secret = extractor.config("client-secret", client_secret)
+        self.headers = {}
         self.delay = 0
+
         self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
+
+        self.refresh_token = extractor.config("refresh-token")
+        self.client_id = extractor.config("client-id", self.CLIENT_ID)
+        self.client_secret = extractor.config(
+            "client-secret", self.CLIENT_SECRET)
 
     def browse_user_journals(self, username, offset=0):
         """Yield all journal entries of a specific user"""
@@ -422,21 +428,22 @@ class DeviantartAPI():
 
     def authenticate(self):
         """Authenticate the application by requesting an access token"""
-        access_token = self._authenticate_impl(
-            self.client_id, self.client_secret
-        )
+        access_token = self._authenticate_impl(self.refresh_token)
         self.headers["Authorization"] = access_token
 
     @cache(maxage=3590, keyarg=1)
-    def _authenticate_impl(self, client_id, client_secret):
+    def _authenticate_impl(self, refresh_token):
         """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"
-        data = {
-            "grant_type": "client_credentials",
-            "client_id": client_id,
-            "client_secret": client_secret,
-        }
-        response = self.session.post(url, data=data)
+        if refresh_token:
+            self.log.info("Refreshing access token")
+            data = {"grant_type": "refresh_token",
+                    "refresh_token": refresh_token}
+        else:
+            self.log.info("Requesting public access token")
+            data = {"grant_type": "client_credentials"}
+        auth = (self.client_id, self.client_secret)
+        response = self.session.post(url, data=data, auth=auth)
         if response.status_code != 200:
             raise exception.AuthenticationError()
         return "Bearer " + response.json()["access_token"]
@@ -470,6 +477,7 @@ class DeviantartAPI():
         try:
             return response.json()
         except ValueError:
+            self.log.error("Failed to parse API response")
             return {}
 
     def _pagination(self, endpoint, params=None):

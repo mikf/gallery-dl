@@ -9,7 +9,7 @@
 """Utility classes to setup OAuth and link a users account to gallery-dl"""
 
 from .common import Extractor, Message
-from . import reddit, flickr
+from . import deviantart, flickr, reddit
 from .. import util
 import os
 import urllib.parse
@@ -20,7 +20,7 @@ class OAuthBase(Extractor):
     category = "oauth"
     redirect_uri = "http://localhost:6414/"
 
-    def __init__(self):
+    def __init__(self, match):
         Extractor.__init__(self)
         self.client = None
 
@@ -71,56 +71,87 @@ class OAuthBase(Extractor):
             print(url, end="\n\n", flush=True)
         return self.recv()
 
+    def _oauth2_authorization_code_grant(
+            self, client_id, client_secret, auth_url, token_url, scope):
+        """Perform an OAuth2 authorization code grant"""
 
-class OAuthReddit(OAuthBase):
-    subcategory = "reddit"
-    pattern = ["oauth:reddit$"]
-
-    def __init__(self, match):
-        OAuthBase.__init__(self)
-        self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
-        self.client_id = reddit.RedditAPI.CLIENT_ID
-        self.state = "gallery-dl:{}:{}".format(
+        state = "gallery-dl:{}:{}".format(
             self.subcategory, util.OAuthSession.nonce(8))
 
-    def items(self):
-        yield Message.Version, 1
-
-        url = "https://www.reddit.com/api/v1/authorize"
-        params = {
-            "client_id": self.client_id,
+        auth_params = {
+            "client_id": client_id,
             "response_type": "code",
-            "state": self.state,
+            "state": state,
             "redirect_uri": self.redirect_uri,
             "duration": "permanent",
-            "scope": "read",
+            "scope": scope,
         }
 
         # receive 'code'
-        params = self.open(url, params)
+        params = self.open(auth_url, auth_params)
 
-        if self.state != params.get("state"):
+        # check auth response
+        if state != params.get("state"):
             self.send("'state' mismatch: expected {}, got {}.".format(
-                      self.state, params.get("state")))
+                state, params.get("state")))
             return
         if "error" in params:
             self.send(params["error"])
             return
 
         # exchange 'code' for 'refresh_token'
-        url = "https://www.reddit.com/api/v1/access_token"
-        auth = (self.client_id, "")
         data = {
             "grant_type": "authorization_code",
             "code": params["code"],
             "redirect_uri": self.redirect_uri,
         }
-        data = self.session.post(url, auth=auth, data=data).json()
+        auth = (client_id, client_secret)
+        data = self.session.post(token_url, data=data, auth=auth).json()
 
+        # check token response
         if "error" in data:
             self.send(data["error"])
-        else:
-            self.send(REDDIT_MSG_TEMPLATE.format(token=data["refresh_token"]))
+            return
+
+        # display refresh token
+        self.send(OAUTH2_MSG_TEMPLATE.format(
+            category=self.subcategory,
+            token=data["refresh_token"]
+        ))
+
+
+class OAuthReddit(OAuthBase):
+    subcategory = "reddit"
+    pattern = ["oauth:reddit$"]
+
+    def items(self):
+        yield Message.Version, 1
+
+        self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
+        self._oauth2_authorization_code_grant(
+            reddit.RedditAPI.CLIENT_ID,
+            "",
+            "https://www.reddit.com/api/v1/authorize",
+            "https://www.reddit.com/api/v1/access_token",
+            "read",
+        )
+
+
+class OAuthDeviantart(OAuthBase):
+    subcategory = "deviantart"
+    pattern = ["oauth:deviantart$"]
+    redirect_uri = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
+
+    def items(self):
+        yield Message.Version, 1
+
+        self._oauth2_authorization_code_grant(
+            deviantart.DeviantartAPI.CLIENT_ID,
+            deviantart.DeviantartAPI.CLIENT_SECRET,
+            "https://www.deviantart.com/oauth2/authorize",
+            "https://www.deviantart.com/oauth2/token",
+            "browse",
+        )
 
 
 class OAuthFlickr(OAuthBase):
@@ -128,7 +159,7 @@ class OAuthFlickr(OAuthBase):
     pattern = ["oauth:flickr$"]
 
     def __init__(self, match):
-        OAuthBase.__init__(self)
+        OAuthBase.__init__(self, match)
         self.session = util.OAuthSession(
             self.session,
             flickr.FlickrAPI.API_KEY, flickr.FlickrAPI.API_SECRET
@@ -162,17 +193,18 @@ class OAuthFlickr(OAuthBase):
             token_secret=data["oauth_token_secret"][0]))
 
 
-REDDIT_MSG_TEMPLATE = """
+OAUTH2_MSG_TEMPLATE = """
 Your Refresh Token is
 
 {token}
 
-Put this value into your configuration file as 'extractor.reddit.refesh-token'.
+Put this value into your configuration file as
+'extractor.{category}.refesh-token'.
 
 Example:
 {{
     "extractor": {{
-        "reddit": {{
+        "{category}": {{
             "refresh-token": "{token}"
         }}
     }}

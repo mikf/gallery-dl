@@ -4,6 +4,7 @@
 - Added support for:
   - `slideshare` - https://www.slideshare.net/ ([#54](https://github.com/mikf/gallery-dl/issues/54))
 - Added pool- and post-extractors for `sankaku`
+- Added OAuth user authentication for `deviantart`
 - Improved `luscious` to support `members.luscious.net` URLs ([#55](https://github.com/mikf/gallery-dl/issues/55))
 - Fixed extraction issues for `nhentai` and `khinsider`
 
