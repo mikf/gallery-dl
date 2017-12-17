@@ -48,9 +48,12 @@ class NhentaiGalleryExtractor(Extractor):
         """Extract and return gallery-info"""
         page = self.request("https://nhentai.net/g/" + self.gid + "/1/").text
         media_url, pos = text.extract(
-            page, ".reader({\n\t\t\tmedia_url: '", "'")
+            page, "media_url: '", "'")
         json_data, pos = text.extract(
             page, "gallery: ", ",\n", pos)
+        if json_data.startswith("b'"):
+            json_data = json_data[2:-1].replace(r"\\u", r"\u")
+
         json_dict = json.loads(json_data)
         json_dict["media_url"] = media_url
         return json_dict
