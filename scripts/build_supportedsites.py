@@ -76,14 +76,15 @@ SUBCATEGORY_MAP = {
 }
 
 AUTH_MAP = {
-    "batoto"  : "Optional",
-    "exhentai": "Optional",
-    "flickr"  : "Optional (OAuth)",
-    "nijie"   : "Required",
-    "pixiv"   : "Required",
-    "reddit"  : "Optional (OAuth)",
-    "sankaku" : "Optional",
-    "seiga"   : "Required",
+    "batoto"    : "Optional",
+    "deviantart": "Optional (OAuth)",
+    "exhentai"  : "Optional",
+    "flickr"    : "Optional (OAuth)",
+    "nijie"     : "Required",
+    "pixiv"     : "Required",
+    "reddit"    : "Optional (OAuth)",
+    "sankaku"   : "Optional",
+    "seiga"     : "Required",
 }
 
 IGNORE_LIST = (
