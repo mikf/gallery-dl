@@ -4,6 +4,8 @@
 - Added support for:
   - `slideshare` - https://www.slideshare.net/ ([#54](https://github.com/mikf/gallery-dl/issues/54))
 - Added pool- and post-extractors for `sankaku`
+- Improved `luscious` to support `members.luscious.net` URLs ([#55](https://github.com/mikf/gallery-dl/issues/55))
+- Fixed extraction issues for `nhentai` and `khinsider`
 
 ## 1.1.0 - 2017-12-08
 - Added the ``-r/--limit-rate`` command-line option to set a maximum download rate
