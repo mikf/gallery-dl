@@ -438,15 +438,21 @@ class DeviantartAPI():
         if refresh_token:
             self.log.info("Refreshing access token")
             data = {"grant_type": "refresh_token",
-                    "refresh_token": refresh_token}
+                    "refresh_token": _refresh_token_cache(refresh_token)}
         else:
             self.log.info("Requesting public access token")
             data = {"grant_type": "client_credentials"}
+
         auth = (self.client_id, self.client_secret)
         response = self.session.post(url, data=data, auth=auth)
         if response.status_code != 200:
             raise exception.AuthenticationError()
-        return "Bearer " + response.json()["access_token"]
+
+        data = response.json()
+        if refresh_token:
+            _refresh_token_cache.invalidate(refresh_token)
+            _refresh_token_cache(refresh_token, data["refresh_token"])
+        return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, params=None, expect_error=False):
         """Call an API endpoint"""
@@ -496,6 +502,11 @@ class DeviantartAPI():
         result = []
         result.extend(self._pagination(endpoint, params))
         return result
+
+
+@cache(maxage=365*24*60*60, keyarg=0)
+def _refresh_token_cache(original_token, new_token=None):
+    return new_token or original_token
 
 
 SHADOW_TEMPLATE = """
