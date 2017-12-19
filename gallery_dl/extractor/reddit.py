@@ -45,7 +45,7 @@ class RedditExtractor(Extractor):
                     if match:
                         extra.append(match.group(1))
                     else:
-                        yield Message.Queue, url, {}
+                        yield Message.Queue, text.unescape(url), {}
 
                 if not extra or depth == self.max_depth:
                     return
