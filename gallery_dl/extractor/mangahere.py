@@ -17,18 +17,24 @@ import re
 class MangahereMangaExtractor(MangaExtractor):
     """Extractor for manga from mangahere.co"""
     category = "mangahere"
-    pattern = [r"(?:https?://)?((?:www\.)?mangahere\.co/manga/"
-               r"[^/]+)/?(?:#.*)?$"]
+    pattern = [r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
+               r"([^/]+)/?(?:#.*)?$"]
     test = [
-        ("http://www.mangahere.co/manga/aria/", {
-            "url": "77d96842292a6a341e8937816ed45cc09b538cf0",
+        ("http://www.mangahere.cc/manga/aria/", {
+            "url": "e8971b1605d9888d978ebb2895adb1c7c37d663c",
             "keyword": "951eef36a3775525a31ca78c9d9cea546f4cf2f5",
         }),
-        ("http://www.mangahere.co/manga/hiyokoi#50", {
-            "url": "f33cff8616dbc382a76034d9604e7671506ac02a",
+        ("http://www.mangahere.cc/manga/hiyokoi#50", {
+            "url": "6df27c0e105d9ee0b78a7aa77340d0891e6c7fc6",
             "keyword": "9542283639bd082fabf3a14b6695697d3ef15111",
-        })
+        }),
+        ("http://www.mangahere.co/manga/aria/", None),
+        ("http://m.mangahere.co/manga/aria/", None),
     ]
+
+    def __init__(self, match):
+        url = "http://www.mangahere.cc/manga/" + match.group(1) + "/"
+        MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):
         results = []
@@ -63,25 +69,33 @@ class MangahereChapterExtractor(AsynchronousExtractor):
         "{volume:?v/ />02}c{chapter:>03}{chapter_minor}"]
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
-    pattern = [(r"(?:https?://)?(?:www\.)?mangahere\.co/manga/"
+    pattern = [(r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
                 r"([^/]+(?:/v0*(\d+))?/c0*(\d+)(\.\d+)?)")]
-    test = [("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", {
-        "keyword": "0c263b83f803524baa8717d2b4d841617aa8d775",
-        "content": "dd8454469429c6c717cbc3cad228e76ef8c6e420",
-    })]
-    url_fmt = "http://www.mangahere.co/manga/{}/{}.html"
+    test = [
+        ("http://www.mangahere.cc/manga/dongguo_xiaojie/c003.2/", {
+            "keyword": "0c263b83f803524baa8717d2b4d841617aa8d775",
+            "content": "dd8454469429c6c717cbc3cad228e76ef8c6e420",
+        }),
+        ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", None),
+        ("http://m.mangahere.co/manga/dongguo_xiaojie/c003.2/", None),
+    ]
+    url_fmt = "http://www.mangahere.cc/manga/{}/{}.html"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
         self.part, self.volume, self.chapter, self.chminor = match.groups()
 
     def items(self):
-        page = self.request(self.url_fmt.format(self.part, 1)).text
+        # remove ".html" for the first chapter page to avoid redirects
+        url = self.url_fmt.format(self.part, "")[:-5]
+
+        page = self.request(url).text
         data = self.get_job_metadata(page)
         urls = zip(
             range(1, data["count"]+1),
             self.get_image_urls(page),
         )
+
         yield Message.Version, 1
         yield Message.Directory, data.copy()
         for data["page"], url in urls:
