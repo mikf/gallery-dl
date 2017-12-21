@@ -132,6 +132,8 @@ def expand_path(path):
     """Expand environment variables and tildes (~)"""
     if not path:
         return path
+    if not isinstance(path, str):
+        path = os.path.join(*path)
     return os.path.expandvars(os.path.expanduser(path))
 
 
@@ -353,10 +355,10 @@ class PathFormat():
         self.directory = self.realdirectory = ""
         self.path = self.realpath = self.partpath = ""
 
-        bdir = extractor.config("base-directory", (".", "gallery-dl"))
-        if not isinstance(bdir, str):
-            bdir = os.path.join(*bdir)
-        self.basedirectory = expand_path(bdir)
+        self.basedirectory = expand_path(
+            extractor.config("base-directory", (".", "gallery-dl")))
+        if os.altsep:
+            self.basedirectory = self.basedirectory.replace(os.altsep, os.sep)
 
         skipmode = extractor.config("skip", True)
         if skipmode == "abort":
@@ -407,7 +409,7 @@ class PathFormat():
         self.keywords["extension"] = extension
         self.build_path()
 
-    def build_path(self, sep=os.path.sep):
+    def build_path(self):
         """Use filename-keywords and directory to build a full path"""
         try:
             filename = text.clean_path(
@@ -415,7 +417,7 @@ class PathFormat():
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
-        filename = sep + filename
+        filename = os.sep + filename
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
 
