@@ -9,7 +9,8 @@
 """Extract images from https://gelbooru.com/"""
 
 from .common import SharedConfigExtractor, Message
-from .. import text, util
+from .. import text, util, exception
+import xml.etree.ElementTree as ET
 
 
 class GelbooruExtractor(SharedConfigExtractor):
@@ -17,19 +18,26 @@ class GelbooruExtractor(SharedConfigExtractor):
     basecategory = "booru"
     category = "gelbooru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
+    api_url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index"
 
     def __init__(self):
         SharedConfigExtractor.__init__(self)
         self.start_post = 0
+        self.use_api = self.config("api", True)
+        if self.use_api:
+            self.get_post_data = self.get_post_data_api
 
     def items(self):
         yield Message.Version, 1
         yield Message.Directory, self.get_metadata()
 
-        for post_id in util.advance(self.get_posts(), self.start_post):
-            data = self.get_post_data(post_id)
-            url = data["file_url"]
-            yield Message.Url, url, text.nameext_from_url(url, data)
+        for post in util.advance(self.get_posts(), self.start_post):
+            if isinstance(post, str):
+                post = self.get_post_data(post)
+            for key in ("id", "width", "height", "score", "change"):
+                post[key] = util.safe_int(post[key])
+            url = post["file_url"]
+            yield Message.Url, url, text.nameext_from_url(url, post)
 
     def skip(self, num):
         self.start_post += num
@@ -40,7 +48,7 @@ class GelbooruExtractor(SharedConfigExtractor):
         return {}
 
     def get_posts(self):
-        """Return an iterable containing all relevant post ids"""
+        """Return an iterable containing all relevant post objects"""
 
     def get_post_data(self, post_id):
         """Extract metadata of a single post"""
@@ -58,13 +66,19 @@ class GelbooruExtractor(SharedConfigExtractor):
             (None        , '<li>Score: ', ''),
             ("score"     , '>', '<'),
             ("file_url"  , '<li><a href="http', '"'),
+            ("change"    , ' id="lupdated" value="', '"'),
         ))[0]
-        data["file_url"] = "http" + data["file_url"]
+        data["file_url"] = "http" + data["file_url"].replace("m//", "m/", 1)
         data["md5"] = data["file_url"].rpartition("/")[2].partition(".")[0]
         data["rating"] = (data["rating"] or "?")[0].lower()
-        for key in ("id", "width", "height", "score"):
-            data[key] = util.safe_int(data[key])
+        data["tags"] = " ".join(
+            [tag.replace(" ", "_") for tag in data["tags"].split(", ")])
         return data
+
+    def get_post_data_api(self, post_id):
+        """Request metadata of a single post from Gelbooru's API"""
+        return ET.fromstring(
+            self.request(self.api_url + "&id=" + post_id).text)[0].attrib
 
 
 class GelbooruTagExtractor(GelbooruExtractor):
@@ -73,14 +87,20 @@ class GelbooruTagExtractor(GelbooruExtractor):
     directory_fmt = ["{category}", "{tags}"]
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=list&tags=([^&]+)"]
-    test = [("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
-        "count": 5,
-    })]
-    per_page = 42
+    test = [
+        ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
+            "count": 5,
+        }),
+        ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
+            "options": (("api", False),),
+            "count": 5,
+        }),
+    ]
 
     def __init__(self, match):
         GelbooruExtractor.__init__(self)
         self.tags = text.unquote(match.group(1).replace("+", " "))
+        self.per_page = 100 if self.use_api else 42
         self.start_page = 0
 
     def skip(self, num):
@@ -93,8 +113,26 @@ class GelbooruTagExtractor(GelbooruExtractor):
         return {"tags": self.tags}
 
     def get_posts(self):
+        if self.use_api:
+            return self._get_posts_api()
+        return self._get_posts_manual()
+
+    def _get_posts_api(self):
+        params = {
+            # 'pid' is page-id; first page has index 0
+            "tags": self.tags, "limit": self.per_page, "pid": self.start_page}
+        while True:
+            root = ET.fromstring(
+                self.request(self.api_url, params=params).text)
+            for item in root:
+                yield item.attrib
+            if len(root) < self.per_page:
+                return
+            params["pid"] += 1
+
+    def _get_posts_manual(self):
         url = "https://gelbooru.com/index.php?page=post&s=list"
-        # values for 'pid' must be multiples of 42
+        # 'pid' is post-id; values for 'pid' must be multiples of 42
         params = {"tags": self.tags, "pid": self.start_page * self.per_page}
 
         while True:
@@ -126,6 +164,9 @@ class GelbooruPoolExtractor(GelbooruExtractor):
                             "&id=" + self.pool_id).text
         name, pos = text.extract(page, "<h3>Now Viewing: ", "</h3>")
         self.posts = list(text.extract_iter(page, 'id="p', '"', pos))
+
+        if not name:
+            raise exception.NotFoundError("pool")
 
         return {
             "pool": util.safe_int(self.pool_id),
