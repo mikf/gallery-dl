@@ -441,6 +441,18 @@ Description Sets the maximum allowed size for downloaded images.
 =========== =====
 
 
+extractor.gelbooru.api
+----------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Enable use of Gelbooru's API.
+
+            Set this value to `false` if the API has been disabled to switch
+            to manual information extraction.
+=========== =====
+
+
 extractor.gfycat.format
 -----------------------
 =========== =====
