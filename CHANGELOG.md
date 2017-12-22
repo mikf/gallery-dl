@@ -1,11 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.1.1 - 2017-12-22
 - Added support for:
   - `slideshare` - https://www.slideshare.net/ ([#54](https://github.com/mikf/gallery-dl/issues/54))
 - Added pool- and post-extractors for `sankaku`
 - Added OAuth user authentication for `deviantart`
-- Improved `luscious` to support `members.luscious.net` URLs ([#55](https://github.com/mikf/gallery-dl/issues/55))
+- Updated `luscious` to support `members.luscious.net` URLs ([#55](https://github.com/mikf/gallery-dl/issues/55))
+- Updated `mangahere` to use their new domain name (mangahere.cc) and mobile URLs
+- Updated `gelbooru` to not be restricted to the first 20,000 images ([#56](https://github.com/mikf/gallery-dl/issues/56))
 - Fixed extraction issues for `nhentai` and `khinsider`
 
 ## 1.1.0 - 2017-12-08
