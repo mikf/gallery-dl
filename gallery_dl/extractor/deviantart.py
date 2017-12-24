@@ -301,7 +301,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     test = [(("https://pencilshadings.deviantart.com"
               "/favourites/70595441/3D-Favorites"), {
         "url": "36ea299132a6b0a0cd319318e9bf18ad32e9b8cc",
-        "keyword": "e32b1840f1e09d1671bdc0f8a7a72472a0df57a8",
+        "keyword": "703068ad65c4f2d6e34c5f58483e8a221cb55348",
         "options": (("original", False),),
     })]
 

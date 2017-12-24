@@ -20,7 +20,7 @@ class JaiminisboxChapterExtractor(foolslide.FoolslideChapterExtractor):
             "keyword": "d8919bc8f0351b44e938862214e654401962b5a5",
         }),
         ("https://jaiminisbox.com/reader/read/dr-stone/en/0/16/", {
-            "keyword": "faa77b1f6ff462cd5e01511ab55b8c2d6ec42c3e",
+            "keyword": "9b658599651f1ae87cab3e0e29dd21e8337a362c",
         }),
     ]
     method = "base64"

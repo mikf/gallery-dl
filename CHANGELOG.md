@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Fixed chapter information parsing for certain manga on `kissmanga` ([#58](https://github.com/mikf/gallery-dl/issues/58))
+
 ## 1.1.1 - 2017-12-22
 - Added support for:
   - `slideshare` - https://www.slideshare.net/ ([#54](https://github.com/mikf/gallery-dl/issues/54))
