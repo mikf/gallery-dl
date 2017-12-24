@@ -58,9 +58,11 @@ class KissmangaExtractor(Extractor):
         ), data["chapter_string"])
 
         if not match:
-            match = re.match(
-                r"[\w ]+?(?: -)? 0*()(\d+)()(?: *[:-]? *(.+))?",
-                data["chapter_string"])
+            match = re.match((
+                r".+?(?: -)? ()"
+                r"0*(\d+)(?:[Vv.]0*(\d+))?"
+                r"(?: *[:-]? *(.+))?"
+            ), data["chapter_string"])
 
         volume, chapter, minor, title = match.groups()
         data["volume"] = util.safe_int(volume)
