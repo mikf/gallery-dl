@@ -33,7 +33,7 @@ class Job():
             predicates.append(util.FilterPredicate(image["filter"]))
         if "range" in image:
             pred = util.RangePredicate(image["range"])
-            if pred.lower > 1:
+            if pred.lower > 1 and "filter" not in image:
                 pred.index += self.extractor.skip(pred.lower - 1)
             predicates.append(pred)
         self.pred_url = util.build_predicate(predicates)
