@@ -98,10 +98,15 @@ def main():
         if args.loglevel >= logging.ERROR:
             config.set(("output", "mode"), "null")
         elif args.loglevel <= logging.DEBUG:
-            import platform
+            import platform, requests
             log.debug("Version %s", __version__)
             log.debug("Python %s - %s",
                       platform.python_version(), platform.platform())
+            try:
+                log.debug("requests %s", requests.__version__)
+                log.debug("urllib3 %s", requests.packages.urllib3.__version__)
+            except AttributeError:
+                pass
 
         if args.list_modules:
             for module_name in extractor.modules:
