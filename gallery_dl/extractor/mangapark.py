@@ -38,9 +38,9 @@ class MangaparkExtractor(Extractor):
 class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
     """Extractor for manga from mangapark.me"""
     pattern = [r"(?:https?://)?(?:www\.)?(mangapark\.me/manga/[^/]+)/?$"]
-    test = [("http://mangapark.me/manga/mushishi", {
-        "url": "724a0e3de636bb6130973d9596c980c7e12d3535",
-        "keyword": "8299b696df873de47dc3bd043bb51edd8053216a",
+    test = [("http://mangapark.me/manga/aria", {
+        "url": "0c5a57e2b402c8cc9ceefba82619f6280346f984",
+        "keyword": "75a68497d1f305eaf9b9fec235bd1da6e499546f",
     })]
 
     def chapters(self, page):
