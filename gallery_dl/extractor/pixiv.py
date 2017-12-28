@@ -36,13 +36,6 @@ class PixivExtractor(Extractor):
         for work in self.works():
             work = self.prepare_work(work)
 
-            pos = work["extension"].rfind("?", -18)
-            if pos != -1:
-                timestamp = work["extension"][pos:]
-                work["extension"] = work["extension"][:pos]
-            else:
-                timestamp = ""
-
             if work["type"] == "ugoira":
                 if not self.load_ugoira:
                     continue
@@ -56,21 +49,10 @@ class PixivExtractor(Extractor):
                 yield Message.Url, work["url"], work
 
             else:
-                url = work["url"]
-                ext = work["extension"]
-                off = url.rfind(".")
-                if url[off-2] == "p":
-                    off -= 3
-                if work["id"] > 11319935 and "/img-original/" not in url:
-                    big = "_big"
-                else:
-                    big = ""
+                url, _, ext = work["url"].rpartition("_p0")
                 for i in range(work["page_count"]):
                     work["num"] = "_p{:02}".format(i)
-                    url = "{}{}_p{}.{}{}".format(
-                        url[:off], big, i, ext, timestamp
-                    )
-                    yield Message.Url, url, work
+                    yield Message.Url, "{}_p{}{}".format(url, i, ext), work
 
     def works(self):
         """Return all work-items for a pixiv-member"""
@@ -301,9 +283,9 @@ class PixivRankingExtractor(PixivExtractor):
                 self.date = None
 
         if self.content not in ("all", "illust", "manga", "ugoira"):
-                self.log.warning("unrecognized content value '%s' - "
-                                 "falling back to 'all'", self.content)
-                self.content = "all"
+            self.log.warning("unrecognized content value '%s' - "
+                             "falling back to 'all'", self.content)
+            self.content = "all"
 
     def works(self):
         yield from self._first["works"]
