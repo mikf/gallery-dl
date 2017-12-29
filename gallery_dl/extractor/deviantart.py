@@ -29,21 +29,19 @@ class DeviantartExtractor(Extractor):
         self.offset = 0
         self.flat = self.config("flat", True)
         self.original = self.config("original", True)
-
-        if match:
-            self.user = match.group(1)
-            self.group = not self.api.user_profile(self.user)
-            if self.group:
-                self.subcategory = "group-" + self.subcategory
-        else:
-            self.user = None
-            self.group = False
+        self.user = match.group(1) if match else None
+        self.group = False
 
     def skip(self, num):
         self.offset += num
         return num
 
     def items(self):
+        if self.user:
+            self.group = not self.api.user_profile(self.user)
+            if self.group:
+                self.subcategory = "group-" + self.subcategory
+
         yield Message.Version, 1
         for deviation in self.deviations():
             if isinstance(deviation, tuple):
