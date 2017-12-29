@@ -137,8 +137,8 @@ class DownloadJob(Job):
 
     def __init__(self, url, parent=None):
         Job.__init__(self, url, parent)
-        self.pathfmt = util.PathFormat(self.extractor)
-        self.sleep = self.extractor.config("sleep")
+        self.pathfmt = None
+        self.sleep = None
         self.downloaders = {}
         self.out = output.select()
 
@@ -155,6 +155,9 @@ class DownloadJob(Job):
 
     def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
+        if not self.pathfmt:
+            self.pathfmt = util.PathFormat(self.extractor)
+            self.sleep = self.extractor.config("sleep")
         self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url, keywords):
