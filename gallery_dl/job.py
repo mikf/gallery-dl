@@ -289,7 +289,8 @@ class TestJob(DownloadJob):
     def __init__(self, url, parent=None, content=False):
         DownloadJob.__init__(self, url, parent)
         self.content = content
-        self.urllist = []
+        self.list_url = []
+        self.list_keyword = []
         self.hash_url = hashlib.sha1()
         self.hash_keyword = hashlib.sha1()
         self.hash_content = hashlib.sha1()
@@ -306,7 +307,7 @@ class TestJob(DownloadJob):
         self.update_content(url)
 
     def handle_directory(self, keywords):
-        self.update_keyword(keywords)
+        self.update_keyword(keywords, False)
 
     def handle_queue(self, url, keywords):
         self.update_url(url)
@@ -314,14 +315,15 @@ class TestJob(DownloadJob):
 
     def update_url(self, url):
         """Update the URL hash"""
-        self.urllist.append(url)
+        self.list_url.append(url)
         self.hash_url.update(url.encode())
 
-    def update_keyword(self, kwdict):
+    def update_keyword(self, kwdict, to_list=True):
         """Update the keyword hash"""
+        if to_list:
+            self.list_keyword.append(kwdict.copy())
         self.hash_keyword.update(
-            json.dumps(kwdict, sort_keys=True).encode()
-        )
+            json.dumps(kwdict, sort_keys=True).encode())
 
     def update_content(self, url):
         """Update the content hash"""
