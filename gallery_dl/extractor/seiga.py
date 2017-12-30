@@ -74,7 +74,21 @@ class SeigaUserExtractor(SeigaExtractor):
     test = [
         ("http://seiga.nicovideo.jp/user/illust/39537793", {
             "pattern": r"https://lohas\.nicoseiga\.jp/priv/[0-9a-f]+/\d+/\d+",
-            "count": 2,
+            "count": 3,
+            "keyword": {
+                "user": {
+                    "id": 39537793,
+                    "message": str,
+                    "name": "Neko",
+                },
+                "clips": int,
+                "comments": int,
+                "count": int,
+                "extension": None,
+                "image_id": int,
+                "title": str,
+                "views": int,
+            },
         }),
         ("http://seiga.nicovideo.jp/user/illust/79433", {
             "exception": exception.NotFoundError,
