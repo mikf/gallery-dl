@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,44 +11,69 @@
 from . import booru
 
 
-class KonachanExtractor(booru.JSONBooruExtractor):
+class KonachanExtractor(booru.JsonParserMixin,
+                        booru.MoebooruPageMixin,
+                        booru.BooruExtractor):
     """Base class for konachan extractors"""
     category = "konachan"
-    api_url = "https://konachan.com/post.json"
+
+    def __init__(self, match):
+        super().__init__(match)
+        self.api_url = "https://konachan.{tld}/post.json".format(
+            tld=match.group("tld"))
 
 
-class KonachanTagExtractor(KonachanExtractor, booru.BooruTagExtractor):
+class KonachanTagExtractor(booru.TagMixin, KonachanExtractor):
     """Extractor for images from konachan.com based on search-tags"""
-    pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post\?tags=([^&]+)"]
-    test = [("http://konachan.com/post?tags=patata", {
-        "content": "838cfb815e31f48160855435655ddf7bfc4ecb8d",
-    })]
+    pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
+               r"/post\?(?:[^&#]*&)*tags=(?P<tags>[^&#]+)"]
+    test = [
+        ("http://konachan.com/post?tags=patata", {
+            "content": "838cfb815e31f48160855435655ddf7bfc4ecb8d",
+        }),
+        ("http://konachan.net/post?tags=patata", None),
+    ]
 
 
-class KonachanPoolExtractor(KonachanExtractor, booru.BooruPoolExtractor):
+class KonachanPoolExtractor(booru.PoolMixin, KonachanExtractor):
     """Extractor for image-pools from konachan.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/pool/show/(\d+)"]
-    test = [("http://konachan.com/pool/show/95", {
-        "content": "cf0546e38a93c2c510a478f8744e60687b7a8426",
-    })]
+    pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
+               r"/pool/show/(?P<pool>\d+)"]
+    test = [
+        ("http://konachan.com/pool/show/95", {
+            "content": "cf0546e38a93c2c510a478f8744e60687b7a8426",
+        }),
+        ("http://konachan.net/pool/show/95", None),
+    ]
 
 
-class KonachanPostExtractor(KonachanExtractor, booru.BooruPostExtractor):
+class KonachanPostExtractor(booru.PostMixin, KonachanExtractor):
     """Extractor for single images from konachan.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post/show/(\d+)"]
-    test = [("http://konachan.com/post/show/205189", {
-        "content": "674e75a753df82f5ad80803f575818b8e46e4b65",
-    })]
+    pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
+               r"/post/show/(?P<post>\d+)"]
+    test = [
+        ("http://konachan.com/post/show/205189", {
+            "content": "674e75a753df82f5ad80803f575818b8e46e4b65",
+        }),
+        ("http://konachan.com/post/show/205189", None),
+    ]
 
 
-class KonachanPopularExtractor(KonachanExtractor, booru.BooruPopularExtractor):
+class KonachanPopularExtractor(booru.MoebooruPopularMixin, KonachanExtractor):
     """Extractor for popular images from konachan.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?konachan\.com/post/popular_"
-               r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
-    test = [("https://konachan.com/post/popular_by_month?month=11&year=2010", {
-        "count": 20,
-    })]
+    pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
+               r"/post/popular_(?P<scale>by_(?:day|week|month)|recent)"
+               r"(?:\?(?P<query>[^#]*))?"]
+    test = [
+        ("https://konachan.com/post/popular_by_month?month=11&year=2010", {
+            "count": 20,
+        }),
+        ("https://konachan.com/post/popular_recent", None),
+        ("https://konachan.net/post/popular_recent", None),
+    ]
 
-    @property
-    def api_url(self):
-        return "https://konachan.com/post/popular_" + self.scale + ".json"
+    def __init__(self, match):
+        super().__init__(match)
+        self.api_url = (
+            "https://konachan.{tld}/post/popular_{scale}.json".format(
+                tld=match.group("tld"), scale=self.scale))

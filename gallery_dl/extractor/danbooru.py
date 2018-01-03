@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,16 +11,19 @@
 from . import booru
 
 
-class DanbooruExtractor(booru.JSONBooruExtractor):
+class DanbooruExtractor(booru.JsonParserMixin,
+                        booru.DanbooruPageMixin,
+                        booru.BooruExtractor):
     """Base class for danbooru extractors"""
     category = "danbooru"
     api_url = "https://danbooru.donmai.us/posts.json"
+    page_limit = 1000
 
 
-class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
+class DanbooruTagExtractor(booru.TagMixin, DanbooruExtractor):
     """Extractor for images from danbooru based on search-tags"""
     pattern = [r"(?:https?://)?(?:danbooru|hijiribe|sonohara)\.donmai\.us"
-               r"/posts\?(?:[^&#]*&)*tags=([^&#]+)"]
+               r"/posts\?(?:[^&#]*&)*tags=(?P<tags>[^&#]+)"]
     test = [
         ("https://danbooru.donmai.us/posts?tags=bonocho", {
             "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
@@ -30,28 +33,28 @@ class DanbooruTagExtractor(DanbooruExtractor, booru.BooruTagExtractor):
     ]
 
 
-class DanbooruPoolExtractor(DanbooruExtractor, booru.BooruPoolExtractor):
+class DanbooruPoolExtractor(booru.PoolMixin, DanbooruExtractor):
     """Extractor for image-pools from danbooru"""
     pattern = [r"(?:https?://)?(?:danbooru|hijiribe|sonohara)\.donmai\.us"
-               r"/pools/(\d+)"]
+               r"/pools/(?P<pool>\d+)"]
     test = [("https://danbooru.donmai.us/pools/7659", {
         "content": "b16bab12bea5f7ea9e0a836bf8045f280e113d99",
     })]
 
 
-class DanbooruPostExtractor(DanbooruExtractor, booru.BooruPostExtractor):
+class DanbooruPostExtractor(booru.PostMixin, DanbooruExtractor):
     """Extractor for single images from danbooru"""
     pattern = [r"(?:https?://)?(?:danbooru|hijiribe|sonohara)\.donmai\.us"
-               r"/posts/(\d+)"]
+               r"/posts/(?P<post>\d+)"]
     test = [("https://danbooru.donmai.us/posts/294929", {
         "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
     })]
 
 
-class DanbooruPopularExtractor(DanbooruExtractor, booru.BooruPopularExtractor):
+class DanbooruPopularExtractor(booru.PopularMixin, DanbooruExtractor):
     """Extractor for popular images from danbooru"""
     pattern = [r"(?:https?://)?(?:danbooru|hijiribe|sonohara)\.donmai\.us"
-               r"/explore/posts/popular()(?:\?([^#]*))?"]
+               r"/explore/posts/popular(?:\?(?P<query>[^#]*))?"]
     test = [
         ("https://danbooru.donmai.us/explore/posts/popular", None),
         (("https://danbooru.donmai.us/explore/posts/popular"
