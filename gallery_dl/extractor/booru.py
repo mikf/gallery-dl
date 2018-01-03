@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,8 +10,8 @@
 
 from .common import SharedConfigExtractor, Message
 from .. import text
-import xml.etree.ElementTree as ET
-import urllib.parse
+from urllib.parse import urljoin
+from xml.etree import ElementTree
 import datetime
 import operator
 
@@ -20,166 +20,158 @@ class BooruExtractor(SharedConfigExtractor):
     """Base class for all booru extractors"""
     basecategory = "booru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    headers = {}
-    pagestart = 1
-    pagekey = "page"
     api_url = ""
+    per_page = 50
+    page_start = 1
+    page_limit = None
+    sort = False
 
-    def __init__(self):
-        SharedConfigExtractor.__init__(self)
-        self.session.headers.update(self.headers)
-        self.params = {"limit": 50}
-        self.setup()
+    def __init__(self, match):
+        super().__init__()
+        self.params = {}
+
+    def skip(self, num):
+        pages = num // self.per_page
+        if self.page_limit and pages + self.page_start > self.page_limit:
+            pages = self.page_limit - self.page_start
+        self.page_start += pages
+        return pages * self.per_page
 
     def items(self):
         yield Message.Version, 1
-        yield Message.Directory, self.get_job_metadata()
-        for data in self.items_impl():
-            try:
-                url = self.get_file_url(data)
-                data = self.get_file_metadata(data)
-                yield Message.Url, url, data
-            except KeyError:
-                continue
+        yield Message.Directory, self.get_metadata()
 
-    def skip(self, num):
-        limit = self.params["limit"]
-        pages = num // limit
-        self.pagestart += pages
-        return pages * limit
+        self.reset_page()
+        while True:
+            images, count = self.parse_response(
+                self.request(self.api_url, params=self.params))
 
-    def items_impl(self):
-        pass
+            for data in images:
+                try:
+                    url = data["file_url"]
+                    if url.startswith("/"):
+                        url = urljoin(self.api_url, url)
+                    yield Message.Url, url, text.nameext_from_url(url, data)
+                except KeyError:
+                    continue
 
-    def setup(self):
-        pass
+            if count < self.per_page:
+                return
+            self.update_page(data)
 
-    def update_page(self, reset=False):
-        """Update the value of the 'page' parameter"""
-        # Override this method in derived classes if necessary.
-        # It is usually enough to just adjust the 'page' attribute
-        if reset is False:
-            self.params[self.pagekey] += 1
-        else:
-            self.params[self.pagekey] = self.pagestart
+    def reset_page(self):
+        """Initialize params to point to the first page"""
+        self.params["page"] = self.page_start
 
-    def get_job_metadata(self):
+    def update_page(self, data):
+        """Update params to point to the next page"""
+
+    def get_metadata(self):
         """Collect metadata for extractor-job"""
-        # Override this method in derived classes
-        return {}
-
-    def get_file_metadata(self, data):
-        """Collect metadata for a downloadable file"""
-        return text.nameext_from_url(self.get_file_url(data), data)
-
-    def get_file_url(self, data):
-        """Extract download-url from 'data'"""
-        url = data["file_url"]
-        if url.startswith("/"):
-            url = urllib.parse.urljoin(self.api_url, url)
-        return url
 
 
-class JSONBooruExtractor(BooruExtractor):
-    """Base class for JSON based API responses"""
+class JsonParserMixin():
+    """Class for JSON based API responses"""
     sort = False
 
-    def items_impl(self):
-        self.update_page(reset=True)
-        while True:
-            images = self.request(self.api_url, params=self.params).json()
-            if self.sort:
-                images.sort(key=operator.itemgetter("score", "id"),
-                            reverse=True)
-            yield from images
-            if len(images) < self.params["limit"]:
-                return
-            self.update_page()
+    def parse_response(self, response):
+        images = response.json()
+        if self.sort:
+            images.sort(key=operator.itemgetter("score", "id"),
+                        reverse=True)
+        return images, len(images)
 
 
-class XMLBooruExtractor(BooruExtractor):
-    """Base class for XML based API responses"""
-    def items_impl(self):
-        self.update_page(reset=True)
-        while True:
-            root = ET.fromstring(
-                self.request(self.api_url, params=self.params).text
-            )
-            for item in root:
-                yield item.attrib
-            if len(root) < self.params["limit"]:
-                return
-            self.update_page()
+class XmlParserMixin():
+    """Class for XML based API responses"""
+    def parse_response(self, response):
+        root = ElementTree.fromstring(response.text)
+        return map(lambda x: x.attrib, root), len(root)
 
 
-class BooruTagExtractor(BooruExtractor):
-    """Extractor for images based on search-tags"""
+class DanbooruPageMixin():
+    """Pagination for Danbooru v2"""
+    def update_page(self, data):
+        self.params["page"] = "b{}".format(data["id"])
+
+
+class MoebooruPageMixin():
+    """Pagination for Moebooru and Danbooru v1"""
+    def update_page(self, data):
+        print("update:", self.params)
+        if self.page_limit:
+            self.params["page"] = None
+            self.params["before_id"] = data["id"]
+        else:
+            self.params["page"] += 1
+
+
+class GelbooruPageMixin():
+    """Pagination for Gelbooru-like sites"""
+    def reset_page(self):
+        self.params["pid"] = self.page_start - 1
+
+    def update_page(self, data):
+        self.params["pid"] += 1
+
+
+class TagMixin():
+    """Extraction of images based on search-tags"""
     subcategory = "tag"
     directory_fmt = ["{category}", "{tags}"]
 
     def __init__(self, match):
-        BooruExtractor.__init__(self)
-        self.tags = text.unquote(match.group(1).replace("+", " "))
+        super().__init__(match)
+        self.tags = text.unquote(match.group("tags").replace("+", " "))
         self.params["tags"] = self.tags
+        self.params["limit"] = self.per_page
 
-    def get_job_metadata(self):
+    def get_metadata(self):
         return {"tags": self.tags}
 
 
-class BooruPoolExtractor(BooruExtractor):
-    """Extractor for image-pools"""
+class PoolMixin():
+    """Extraction of image-pools"""
     subcategory = "pool"
     directory_fmt = ["{category}", "pool", "{pool}"]
 
     def __init__(self, match):
-        BooruExtractor.__init__(self)
-        self.pool = match.group(1)
+        super().__init__(match)
+        self.pool = match.group("pool")
         self.params["tags"] = "pool:" + self.pool
+        self.params["limit"] = self.per_page
 
-    def get_job_metadata(self):
+    def get_metadata(self):
         return {"pool": self.pool}
 
 
-class BooruPostExtractor(BooruExtractor):
-    """Extractor for single images"""
+class PostMixin():
+    """Extraction of a single image-post"""
     subcategory = "post"
 
     def __init__(self, match):
-        BooruExtractor.__init__(self)
-        self.post = match.group(1)
+        super().__init__(match)
+        self.post = match.group("post")
         self.params["tags"] = "id:" + self.post
 
+    def get_metadata(self):
+        return {}
 
-class BooruPopularExtractor(BooruExtractor):
-    """Extractor for popular images"""
+
+class PopularMixin():
+    """Extraction and metadata handling for Danbooru v2"""
     subcategory = "popular"
     directory_fmt = ["{category}", "popular", "{scale}", "{date}"]
+    page_start = None
 
     def __init__(self, match):
-        BooruExtractor.__init__(self)
+        super().__init__(match)
         self.sort = True
-        self.scale = match.group(1)
-        self.params.update(text.parse_query(match.group(2)))
+        self.params.update(text.parse_query(match.group("query")))
 
-    def get_job_metadata(self, fmt="%Y-%m-%d"):
-        if "scale" in self.params:
-            scale = self.params["scale"]
-        elif self.scale:
-            scale = self.scale
-            if scale.startswith("by_"):
-                scale = scale[3:]
-        else:
-            scale = "day"
-
-        if "date" in self.params:
-            date = self.params["date"][:10]
-        elif "year" in self.params:
-            date = "{:>04}-{:>02}-{:>02}".format(
-                self.params["year"],
-                self.params.get("month", "01"),
-                self.params.get("day", "01"))
-        else:
-            date = datetime.datetime.utcnow().strftime(fmt)
+    def get_metadata(self, fmt="%Y-%m-%d"):
+        date = self.get_date() or datetime.datetime.utcnow().strftime(fmt)
+        scale = self.get_scale() or "day"
 
         if scale == "week":
             dt = datetime.datetime.strptime(date, fmt)
@@ -189,3 +181,33 @@ class BooruPopularExtractor(BooruExtractor):
             date = date[:-3]
 
         return {"date": date, "scale": scale}
+
+    def get_scale(self):
+        if "scale" in self.params:
+            return self.params["scale"]
+        return None
+
+    def get_date(self):
+        if "date" in self.params:
+            return self.params["date"][:10]
+        return None
+
+
+class MoebooruPopularMixin(PopularMixin):
+    """Extraction and metadata handling for Moebooru and Danbooru v1"""
+    def __init__(self, match):
+        super().__init__(match)
+        self.scale = match.group("scale")
+
+    def get_date(self):
+        if "year" in self.params:
+            return "{:>04}-{:>02}-{:>02}".format(
+                self.params["year"],
+                self.params.get("month", "01"),
+                self.params.get("day", "01"))
+        return None
+
+    def get_scale(self):
+        if self.scale and self.scale.startswith("by_"):
+            return self.scale[3:]
+        return self.scale

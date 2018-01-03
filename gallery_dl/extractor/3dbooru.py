@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,57 +11,65 @@
 from . import booru
 
 
-class ThreedeebooruExtractor(booru.JSONBooruExtractor):
+class ThreedeebooruExtractor(booru.JsonParserMixin,
+                             booru.MoebooruPageMixin,
+                             booru.BooruExtractor):
     """Base class for 3dbooru extractors"""
     category = "3dbooru"
     api_url = "http://behoimi.org/post/index.json"
-    headers = {
-        "Referer": "http://behoimi.org/post/show/",
-        "Accept-Encoding": "identity",
-    }
+    page_limit = 1000
+
+    def __init__(self, match):
+        super().__init__(match)
+        self.session.headers.update({
+            "Referer": "http://behoimi.org/post/show/",
+            "Accept-Encoding": "identity",
+        })
 
 
-class ThreedeebooruTagExtractor(ThreedeebooruExtractor,
-                                booru.BooruTagExtractor):
+class ThreedeebooruTagExtractor(booru.TagMixin,
+                                ThreedeebooruExtractor):
     """Extractor for images from behoimi.org based on search-tags"""
     pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post"
-               r"(?:/(?:index)?)?\?tags=([^&]+)"]
+               r"(?:/(?:index)?)?\?tags=(?P<tags>[^&#]+)"]
     test = [("http://behoimi.org/post?tags=himekawa_azuru+dress", {
         "url": "ecb30c6aaaf8a6ff8f55255737a9840832a483c1",
         "content": "11cbda40c287e026c1ce4ca430810f761f2d0b2a",
     })]
 
 
-class ThreedeebooruPoolExtractor(ThreedeebooruExtractor,
-                                 booru.BooruPoolExtractor):
+class ThreedeebooruPoolExtractor(booru.PoolMixin,
+                                 ThreedeebooruExtractor):
     """Extractor for image-pools from behoimi.org"""
-    pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/pool/show/(\d+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/pool/show/(?P<pool>\d+)"]
     test = [("http://behoimi.org/pool/show/27", {
         "url": "da75d2d1475449d5ef0c266cb612683b110a30f2",
         "content": "fd5b37c5c6c2de4b4d6f1facffdefa1e28176554",
     })]
 
 
-class ThreedeebooruPostExtractor(ThreedeebooruExtractor,
-                                 booru.BooruPostExtractor):
+class ThreedeebooruPostExtractor(booru.PostMixin,
+                                 ThreedeebooruExtractor):
     """Extractor for single images from behoimi.org"""
-    pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post/show/(\d+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post/show/(?P<post>\d+)"]
     test = [("http://behoimi.org/post/show/140852", {
         "url": "ce874ea26f01d6c94795f3cc3aaaaa9bc325f2f6",
         "content": "26549d55b82aa9a6c1686b96af8bfcfa50805cd4",
     })]
 
 
-class ThreedeebooruPopularExtractor(ThreedeebooruExtractor,
-                                    booru.BooruPopularExtractor):
+class ThreedeebooruPopularExtractor(booru.MoebooruPopularMixin,
+                                    ThreedeebooruExtractor):
     """Extractor for popular images from behoimi.org"""
-    pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org/post/popular_"
-               r"(by_(?:day|week|month)|recent)(?:\?([^#]*))?"]
+    pattern = [r"(?:https?://)?(?:www\.)?behoimi\.org"
+               r"/post/popular_(?P<scale>by_(?:day|week|month)|recent)"
+               r"(?:\?(?P<query>[^#]*))?"]
     test = [("http://behoimi.org/post/popular_by_month?month=2&year=2013", {
         "url": "a447e115fdab60c25ab71c4fdb1b9f509bc23f99",
         "count": 20,
     })]
 
-    @property
-    def api_url(self):
-        return "http://behoimi.org/post/popular_" + self.scale + ".json"
+    def __init__(self, match):
+        super().__init__(match)
+        self.api_url = "http://behoimi.org/post/popular_{scale}.json".format(
+            scale=self.scale)
