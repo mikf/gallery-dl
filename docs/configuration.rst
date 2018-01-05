@@ -644,6 +644,15 @@ Description Search posts for inline images.
 =========== =====
 
 
+extractor.tumblr.reblogs
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Extract images from reblogged posts.
+=========== =====
+
+
 extractor.tumblr.posts
 ----------------------
 =========== =====

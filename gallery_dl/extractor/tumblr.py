@@ -49,6 +49,7 @@ class TumblrExtractor(Extractor):
 
         self.types = self._setup_posttypes()
         self.inline = self.config("inline", False)
+        self.reblogs = self.config("reblogs", False)
         self.external = self.config("external", False)
 
         if len(self.types) == 1:
@@ -64,6 +65,11 @@ class TumblrExtractor(Extractor):
         for post in self.posts():
             if post["type"] not in self.types:
                 continue
+
+            reblog = "reblogged_from_id" in post
+            if reblog and not self.reblogs:
+                continue
+            post["reblogged"] = reblog
 
             post["blog"] = blog
             post["offset"] = 0
@@ -145,7 +151,8 @@ class TumblrUserExtractor(TumblrExtractor):
                         r"\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280\.jpg|"
                         r"w+\.tumblr\.com/audio_file/demo/\d+/tumblr_\w+)"),
             "count": 3,
-            "options": (("posts", "all"), ("external", True), ("inline", True))
+            "options": (("posts", "all"), ("external", True),
+                        ("inline", True), ("reblogs", True))
         }),
     ]
 
@@ -165,6 +172,7 @@ class TumblrPostExtractor(TumblrExtractor):
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
         self.post_id = match.group(2)
+        self.reblogs = True
 
     def posts(self):
         return self.api.posts(self.user, {"id": self.post_id})
@@ -197,7 +205,7 @@ class TumblrAPI():
 
     def __init__(self, extractor):
         self.api_key = extractor.config("api-key", TumblrAPI.API_KEY)
-        self.params = {"offset": 0, "limit": 50}
+        self.params = {"offset": 0, "limit": 50, "reblog_info": "true"}
         self.extractor = extractor
 
     @memcache(keyarg=1)
