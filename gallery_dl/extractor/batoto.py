@@ -63,24 +63,32 @@ class BatotoExtractor():
     def parse_chapter_string(data):
         """Parse 'chapter_string' value contained in 'data'"""
         data["chapter_string"] = text.unescape(data["chapter_string"])
-        pattern = r"(?:Vol\.(\d+) )?Ch\.(\d+)([^ :]*)(?::? (.+))"
+        pattern = r"(?:Vol\.(\d+) )?Ch\.([\d\w]+)([^ :]*)(?::? (.+))?"
         match = re.match(pattern, data["chapter_string"])
 
         volume, chapter, data["chapter_minor"], title = match.groups()
         data["volume"] = util.safe_int(volume)
-        data["chapter"] = util.safe_int(chapter)
-        data["title"] = title if title != "Read Online" else ""
+        data["chapter"] = util.safe_int(chapter, chapter)
+        data["title"] = title if title and title != "Read Online" else ""
         return data
 
 
 class BatotoMangaExtractor(BatotoExtractor, MangaExtractor):
     """Extractor for manga from bato.to"""
     pattern = [r"(?:https?://)?(?:www\.)?(bato\.to"
-               r"/comic/_/comics/[^/?&#]*-r\d+)"]
-    test = [("http://bato.to/comic/_/comics/aria-r2007", {
-        "url": "a38585b0339587666d772ee06f2a60abdbf42a97",
-        "keyword": "c33ea7b97e3714530384e2411fae62ae51aae50d",
-    })]
+               r"/comic/_(?:/comics)?/[^/?&#]*-r\d+)"]
+    test = [
+        ("http://bato.to/comic/_/comics/aria-r2007", {
+            "url": "a38585b0339587666d772ee06f2a60abdbf42a97",
+            "keyword": "c33ea7b97e3714530384e2411fae62ae51aae50d",
+        }),
+        #  non-numeric chapter ("Extra")
+        ("https://bato.to/comic/_/comics/cosplay-deka-r2563", {
+            "count": ">= 37",
+        }),
+        #  short URL
+        ("https://bato.to/comic/_/aria-r2007", None),
+    ]
 
     def chapters(self, page):
         pos = 0
