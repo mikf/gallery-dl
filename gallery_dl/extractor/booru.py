@@ -43,7 +43,7 @@ class BooruExtractor(SharedConfigExtractor):
 
         self.reset_page()
         while True:
-            images, count = self.parse_response(
+            images = self.parse_response(
                 self.request(self.api_url, params=self.params))
 
             for data in images:
@@ -55,7 +55,7 @@ class BooruExtractor(SharedConfigExtractor):
                 except KeyError:
                     continue
 
-            if count < self.per_page:
+            if len(images) < self.per_page:
                 return
             self.update_page(data)
 
@@ -66,27 +66,24 @@ class BooruExtractor(SharedConfigExtractor):
     def update_page(self, data):
         """Update params to point to the next page"""
 
-    def get_metadata(self):
-        """Collect metadata for extractor-job"""
-
-
-class JsonParserMixin():
-    """Class for JSON based API responses"""
-    sort = False
-
     def parse_response(self, response):
+        """Parse JSON API response"""
         images = response.json()
         if self.sort:
             images.sort(key=operator.itemgetter("score", "id"),
                         reverse=True)
-        return images, len(images)
+        return images
+
+    def get_metadata(self):
+        """Collect metadata for extractor-job"""
+        return {}
 
 
 class XmlParserMixin():
-    """Class for XML based API responses"""
+    """Mixin for XML based API responses"""
     def parse_response(self, response):
         root = ElementTree.fromstring(response.text)
-        return map(lambda x: x.attrib, root), len(root)
+        return [post.attrib for post in root]
 
 
 class DanbooruPageMixin():
@@ -98,7 +95,6 @@ class DanbooruPageMixin():
 class MoebooruPageMixin():
     """Pagination for Moebooru and Danbooru v1"""
     def update_page(self, data):
-        print("update:", self.params)
         if self.page_limit:
             self.params["page"] = None
             self.params["before_id"] = data["id"]
@@ -154,19 +150,16 @@ class PostMixin():
         self.post = match.group("post")
         self.params["tags"] = "id:" + self.post
 
-    def get_metadata(self):
-        return {}
-
 
 class PopularMixin():
     """Extraction and metadata handling for Danbooru v2"""
     subcategory = "popular"
     directory_fmt = ["{category}", "popular", "{scale}", "{date}"]
     page_start = None
+    sort = True
 
     def __init__(self, match):
         super().__init__(match)
-        self.sort = True
         self.params.update(text.parse_query(match.group("query")))
 
     def get_metadata(self, fmt="%Y-%m-%d"):

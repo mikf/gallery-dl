@@ -11,9 +11,7 @@
 from . import booru
 
 
-class YandereExtractor(booru.JsonParserMixin,
-                       booru.MoebooruPageMixin,
-                       booru.BooruExtractor):
+class YandereExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
     """Base class for yandere extractors"""
     category = "yandere"
     api_url = "https://yande.re/post.json"
