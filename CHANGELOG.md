@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased
-- Fixed chapter information parsing for certain manga on `kissmanga` ([#58](https://github.com/mikf/gallery-dl/issues/58))
+- Added an option to filter reblogs on `tumblr` ([#61](https://github.com/mikf/gallery-dl/issues/61))
+- Improved pagination for various …booru sites to work around page limits
+- Fixed chapter information parsing for certain manga on `kissmanga` ([#58](https://github.com/mikf/gallery-dl/issues/58)) and `batoto` ([#60](https://github.com/mikf/gallery-dl/issues/60))
 
 ## 1.1.1 - 2017-12-22
 - Added support for:
@@ -9,7 +11,7 @@
 - Added pool- and post-extractors for `sankaku`
 - Added OAuth user authentication for `deviantart`
 - Updated `luscious` to support `members.luscious.net` URLs ([#55](https://github.com/mikf/gallery-dl/issues/55))
-- Updated `mangahere` to use their new domain name (mangahere.cc) and mobile URLs
+- Updated `mangahere` to use their new domain name (mangahere.cc) and support mobile URLs
 - Updated `gelbooru` to not be restricted to the first 20,000 images ([#56](https://github.com/mikf/gallery-dl/issues/56))
 - Fixed extraction issues for `nhentai` and `khinsider`
 

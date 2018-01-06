@@ -49,7 +49,7 @@ class TumblrExtractor(Extractor):
 
         self.types = self._setup_posttypes()
         self.inline = self.config("inline", False)
-        self.reblogs = self.config("reblogs", False)
+        self.reblogs = self.config("reblogs", True)
         self.external = self.config("external", False)
 
         if len(self.types) == 1:

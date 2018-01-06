@@ -648,7 +648,7 @@ extractor.tumblr.reblogs
 ------------------------
 =========== =====
 Type        ``bool``
-Default     ``false``
+Default     ``true``
 Description Extract images from reblogged posts.
 =========== =====
 
