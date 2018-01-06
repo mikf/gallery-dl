@@ -11,9 +11,7 @@
 from . import booru
 
 
-class E621Extractor(booru.JsonParserMixin,
-                    booru.MoebooruPageMixin,
-                    booru.BooruExtractor):
+class E621Extractor(booru.MoebooruPageMixin, booru.BooruExtractor):
     """Base class for e621 extractors"""
     category = "e621"
     api_url = "https://e621.net/post/index.json"

@@ -11,9 +11,7 @@
 from . import booru
 
 
-class ThreedeebooruExtractor(booru.JsonParserMixin,
-                             booru.MoebooruPageMixin,
-                             booru.BooruExtractor):
+class ThreedeebooruExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
     """Base class for 3dbooru extractors"""
     category = "3dbooru"
     api_url = "http://behoimi.org/post/index.json"

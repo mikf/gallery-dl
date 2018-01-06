@@ -11,9 +11,7 @@
 from . import booru
 
 
-class KonachanExtractor(booru.JsonParserMixin,
-                        booru.MoebooruPageMixin,
-                        booru.BooruExtractor):
+class KonachanExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
     """Base class for konachan extractors"""
     category = "konachan"
 

@@ -17,9 +17,7 @@ BASE_PATTERN = (
     r"\.donmai\.us")
 
 
-class DanbooruExtractor(booru.JsonParserMixin,
-                        booru.DanbooruPageMixin,
-                        booru.BooruExtractor):
+class DanbooruExtractor(booru.DanbooruPageMixin, booru.BooruExtractor):
     """Base class for danbooru extractors"""
     category = "danbooru"
     page_limit = 1000
