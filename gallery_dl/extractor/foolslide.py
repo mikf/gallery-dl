@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,7 +16,7 @@ import json
 
 CHAPTER_RE = (
     r"/read/[^/]+"
-    r"/(?P<lang>[a-z]{2})"
+    r"/(?P<lang>[a-z-]+)"
     r"/(?P<volume>\d+)"
     r"/(?P<chapter>\d+)"
     r"(?:/(?P<chapter_minor>\d+))?)"
@@ -47,8 +47,9 @@ class FoolslideExtractor(SharedConfigExtractor):
     @staticmethod
     def parse_chapter_url(url, data):
         info = url.partition("/read/")[2].rstrip("/").split("/")
-        data["lang"] = info[1]
-        data["language"] = util.code_to_language(info[1])
+        lang = info[1].partition("-")[0]
+        data["lang"] = lang
+        data["language"] = util.code_to_language(lang)
         data["volume"] = util.safe_int(info[2])
         data["chapter"] = util.safe_int(info[3])
         data["chapter_minor"] = "." + info[4] if len(info) >= 5 else ""

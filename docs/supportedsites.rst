@@ -57,6 +57,7 @@ Pawoo                https://pawoo.net                   Images from Users, Imag
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links
 Pixiv                https://www.pixiv.net/              |Images from Use-3|                                Required
 PowerManga           https://powermanga.org/             Chapters, Manga
+Pure Mashiro         http://reader.puremashiro.moe/      Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://reddit.com/                 Submissions, Subreddits                            Optional (OAuth)
