@@ -44,6 +44,7 @@ CATEGORY_MAP = {
     "nijie"          : "nijie",
     "nyafuu"         : "Nyafuu Archive",
     "powermanga"     : "PowerManga",
+    "puremashiro"    : "Pure Mashiro",
     "readcomiconline": "Read Comic Online",
     "rbt"            : "RebeccaBlackTech",
     "rule34"         : "Rule 34",
