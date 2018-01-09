@@ -20,12 +20,14 @@ class SankakuExtractor(SharedConfigExtractor):
     basecategory = "booru"
     category = "sankaku"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    root = "https://chan.sankakucomplex.com"
     cookienames = ("login", "pass_hash")
-    cookiedomain = "chan.sankakucomplex.com"
+    subdomain = "chan"
 
     def __init__(self):
         SharedConfigExtractor.__init__(self)
+        self.cookiedomain = self.subdomain + ".sankakucomplex.com"
+        self.root = "https://" + self.cookiedomain
+
         self.logged_in = True
         self.start_page = 1
         self.start_post = 0
@@ -61,7 +63,7 @@ class SankakuExtractor(SharedConfigExtractor):
         url = self.root + "/post/show/" + post_id
         page = self.request(url, retries=10).text
 
-        tags   , pos = extr(page, "<title>", " | Sankaku Channel</title>")
+        tags   , pos = extr(page, "<title>", " | ")
         vavg   , pos = extr(page, "itemprop=ratingValue>", "<", pos)
         vcnt   , pos = extr(page, "itemprop=reviewCount>", "<", pos)
         _      , pos = extr(page, "Posted: <", "", pos)
@@ -100,7 +102,7 @@ class SankakuExtractor(SharedConfigExtractor):
             return
         username, password = self._get_auth_info()
         if username:
-            cookies = self._login_impl(username, password)
+            cookies = self._login_impl((username, self.subdomain), password)
             for key, value in cookies.items():
                 self.session.cookies.set(
                     key, value, domain=self.cookiedomain)
@@ -108,8 +110,9 @@ class SankakuExtractor(SharedConfigExtractor):
             self.logged_in = False
 
     @cache(maxage=90*24*60*60, keyarg=1)
-    def _login_impl(self, username, password):
+    def _login_impl(self, usertuple, password):
         """Actual login implementation"""
+        username = usertuple[0]
         self.log.info("Logging in as %s", username)
         params = {
             "url": "",

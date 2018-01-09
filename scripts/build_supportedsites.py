@@ -25,6 +25,7 @@ CATEGORY_MAP = {
     "hentaifoundry"  : "Hentai Foundry",
     "hentaihere"     : "HentaiHere",
     "hitomi"         : "Hitomi.la",
+    "idolcomplex"    : "Idol Complex",
     "imagebam"       : "ImageBam",
     "imagefap"       : "ImageFap",
     "imgbox"         : "imgbox",
@@ -77,15 +78,16 @@ SUBCATEGORY_MAP = {
 }
 
 AUTH_MAP = {
-    "batoto"    : "Optional",
-    "deviantart": "Optional (OAuth)",
-    "exhentai"  : "Optional",
-    "flickr"    : "Optional (OAuth)",
-    "nijie"     : "Required",
-    "pixiv"     : "Required",
-    "reddit"    : "Optional (OAuth)",
-    "sankaku"   : "Optional",
-    "seiga"     : "Required",
+    "batoto"     : "Optional",
+    "deviantart" : "Optional (OAuth)",
+    "exhentai"   : "Optional",
+    "flickr"     : "Optional (OAuth)",
+    "idolcomplex": "Optional",
+    "nijie"      : "Required",
+    "pixiv"      : "Required",
+    "reddit"     : "Optional (OAuth)",
+    "sankaku"    : "Optional",
+    "seiga"      : "Required",
 }
 
 IGNORE_LIST = (

@@ -18,7 +18,9 @@ SKIP = {
     "archivedmoe", "archiveofsins", "thebarchive",
 
     # temporary issues
-
+    "batoto",  # R.I.P.
+    "imgyt",  # server maintenance
+    "loveisover",
 }
 
 

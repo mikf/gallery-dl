@@ -30,6 +30,7 @@ Hentai Foundry       https://www.hentai-foundry.com/     Images from Users, indi
 Hentai2Read          https://hentai2read.com/            Chapters, Manga
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries
+Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
 ImageFap             http://imagefap.com/                Images from Users, Galleries, individual Images
 imgbox               https://imgbox.com/                 Galleries, individual Images
