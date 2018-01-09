@@ -9,7 +9,7 @@ It requires Python 3.3+ to run and works on Unix-like systems as well as on
 Windows.
 
 
-|pypi| |build|
+|pypi| |build| |gitter|
 
 .. section-numbering::
 
@@ -225,3 +225,6 @@ access to *gallery-dl*. Authorize it and you will he shown one or more
 
 .. |build| image:: https://travis-ci.org/mikf/gallery-dl.svg?branch=master
     :target: https://travis-ci.org/mikf/gallery-dl
+
+.. |gitter| image:: https://badges.gitter.im/gallery-dl/main.svg
+    :target: https://gitter.im/gallery-dl/main
