@@ -14,6 +14,7 @@ from . import sankaku
 class IdolcomplexExtractor(sankaku.SankakuExtractor):
     """Base class for idolcomplex extractors"""
     category = "idolcomplex"
+    cookiedomain = "idol.sankakucomplex.com"
     subdomain = "idol"
 
 
