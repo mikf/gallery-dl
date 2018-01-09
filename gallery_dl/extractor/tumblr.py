@@ -19,8 +19,8 @@ def _original_image(url):
         return url
     return re.sub(
         (r"https?://\d+\.media\.tumblr\.com"
-         r"/([0-9a-f]+)/tumblr_([^/?&#.]+)_\d+\.([0-9a-z]+)"),
-        r"http://data.tumblr.com/\1/tumblr_\2_raw.\3", url
+         r"/([0-9a-f]+/tumblr_[^/?&#.]+)_\d+\.([0-9a-z]+)"),
+        r"https://s3.amazonaws.com/data.tumblr.com/\1_raw.\2", url
     )
 
 
