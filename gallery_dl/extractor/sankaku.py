@@ -21,13 +21,12 @@ class SankakuExtractor(SharedConfigExtractor):
     category = "sankaku"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     cookienames = ("login", "pass_hash")
+    cookiedomain = "chan.sankakucomplex.com"
     subdomain = "chan"
 
     def __init__(self):
         SharedConfigExtractor.__init__(self)
-        self.cookiedomain = self.subdomain + ".sankakucomplex.com"
         self.root = "https://" + self.cookiedomain
-
         self.logged_in = True
         self.start_page = 1
         self.start_post = 0
