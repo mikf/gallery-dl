@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Added support for:
+  - `puremashiro` - http://reader.puremashiro.moe/ ([#66](https://github.com/mikf/gallery-dl/issues/66))
+  - `idolcomplex` - https://idol.sankakucomplex.com/
 - Added an option to filter reblogs on `tumblr` ([#61](https://github.com/mikf/gallery-dl/issues/61))
 - Improved pagination for various …booru sites to work around page limits
 - Fixed chapter information parsing for certain manga on `kissmanga` ([#58](https://github.com/mikf/gallery-dl/issues/58)) and `batoto` ([#60](https://github.com/mikf/gallery-dl/issues/60))

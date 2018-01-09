@@ -37,6 +37,7 @@ modules = [
     "hentaifoundry",
     "hentaihere",
     "hitomi",
+    "idolcomplex",
     "imagebam",
     "imagefap",
     "imgbox",
