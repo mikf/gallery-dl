@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann, Leonardo Taccari
+# Copyright 2016-2018 Mike Fährmann, Leonardo Taccari
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,11 +18,11 @@ class SlideshareExtractor(Extractor):
     subcategory = "presentation"
     directory_fmt = ["{category}", "{user}"]
     filename_fmt = "{presentation}-{num:>02}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.)?slideshare\.net/"
-               r"([^/?&#]+)/([^/?&#]+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?slideshare\.net"
+               r"/(?:mobile/)?([^/?&#]+)/([^/?&#]+)"]
     test = [
-        (("https://www.slideshare.net/"
-          "Slideshare/get-started-with-slide-share"), {
+        (("https://www.slideshare.net"
+          "/Slideshare/get-started-with-slide-share"), {
             "url": "23685fb9b94b32c77a547d45dc3a82fe7579ea18",
             "content": "ee54e54898778e92696a7afec3ffabdbd98eb0cc",
         }),
@@ -31,6 +31,12 @@ class SlideshareExtractor(Extractor):
         (("https://www.slideshare.net/pragmaticsolutions/warum-sie-nicht-ihren"
           "-mitarbeitenden-ndern-sollten-sondern-ihr-managementsystem"), {
             "url": "cf70ca99f57f61affab47ebf8583eb564b21e3a7",
+        }),
+
+        # mobile URL
+        (("https://www.slideshare.net"
+          "/mobile/uqudent/introduction-to-fixed-prosthodontics"), {
+            "url": "59993ad7b0cb93c73011547eedcd02c622649e9d",
         }),
     ]
 
