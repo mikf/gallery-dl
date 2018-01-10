@@ -21,6 +21,7 @@ SKIP = {
     "batoto",  # R.I.P.
     "imgyt",  # server maintenance
     "loveisover",
+    "mangapark",
 }
 
 
