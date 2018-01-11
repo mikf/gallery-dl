@@ -9,7 +9,7 @@
 """Extract manga chapters from https://bato.to/"""
 
 from .common import MangaExtractor, AsynchronousExtractor, Message
-from .. import text, util, exception
+from .. import text, util, cloudflare, exception
 from ..cache import cache
 import re
 
@@ -21,6 +21,8 @@ class BatotoExtractor():
     root = "https://bato.to"
     cookienames = ("member_id", "pass_hash")
     cookiedomain = ".bato.to"
+
+    request = cloudflare.request_func
 
     def login(self):
         """Login and set necessary cookies"""
@@ -53,8 +55,8 @@ class BatotoExtractor():
             "rememberMe": "1",
             "anonymous": "1",
         }
-        response = self.request(self.root + "/forums/index.php",
-                                method="POST", params=params, data=data)
+        response = self.session.post(self.root + "/forums/index.php",
+                                     params=params, data=data)
         if "Sign In - " in response.text:
             raise exception.AuthenticationError()
         return {c: response.cookies[c] for c in self.cookienames}
@@ -161,7 +163,7 @@ class BatotoChapterExtractor(BatotoExtractor, AsynchronousExtractor):
             "p": 1,
             "supress_webtoon": "t",
         }
-        response = self.request(self.reader_url, params=params, fatal=False)
+        response = self.request(self.reader_url, params=params)
         if response.status_code == 405:
             error = text.extract(response.text, "ERROR [", "]")[0]
             if error in ("10030", "10031"):
