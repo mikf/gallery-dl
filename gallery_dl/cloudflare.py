@@ -15,12 +15,12 @@ from . import text
 from .cache import cache
 
 
-def request_func(self, *args):
+def request_func(self, *args, **kwargs):
     cookies = _cookiecache(self.root)
     if cookies:
-        self.session.cookies = cookies
-    response = self.session.get(*args)
-    if response.status_code != 200:
+        self.session.cookies.update(cookies)
+    response = self.session.get(*args, **kwargs)
+    if response.status_code == 503:
         _cookiecache.invalidate(self.root)
         self.log.debug(response.text)
         self.log.info("Solving Cloudflare challenge")
