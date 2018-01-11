@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -486,21 +486,26 @@ class OAuthSession():
         params.update(self.params)
         params["oauth_nonce"] = self.nonce(16)
         params["oauth_timestamp"] = int(time.time())
-        params["oauth_signature"] = self.signature(url, params)
-        return self.session.get(url, params=params)
+        return self.session.get(url + self.sign(url, params))
 
-    def signature(self, url, params):
-        """Generate 'oauth_signature' value"""
-        query = urllib.parse.urlencode(sorted(params.items()))
+    def sign(self, url, params):
+        """Generate 'oauth_signature' value and return query string"""
+        query = urllib.parse.urlencode(
+            sorted(params.items()), quote_via=self.quote)
         message = self.concat("GET", url, query).encode()
         key = self.concat(self.consumer_secret, self.token_secret).encode()
         signature = hmac.new(key, message, hashlib.sha1).digest()
-        return base64.b64encode(signature).decode()
+        return "?{}&oauth_signature={}".format(
+            query, self.quote(base64.b64encode(signature).decode()))
 
     @staticmethod
     def concat(*args):
-        return "&".join(urllib.parse.quote(item, "") for item in args)
+        return "&".join(OAuthSession.quote(item) for item in args)
 
     @staticmethod
     def nonce(N, alphabet=string.ascii_letters):
         return "".join(random.choice(alphabet) for _ in range(N))
+
+    @staticmethod
+    def quote(value, _=None, encoding=None, errors=None):
+        return urllib.parse.quote(value, "~", encoding, errors)

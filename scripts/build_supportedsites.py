@@ -88,6 +88,7 @@ AUTH_MAP = {
     "reddit"     : "Optional (OAuth)",
     "sankaku"    : "Optional",
     "seiga"      : "Required",
+    "tumblr"     : "Optional (OAuth)",
 }
 
 IGNORE_LIST = (

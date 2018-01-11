@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extract images from https://www.tumblr.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import memcache
 import re
 
@@ -202,9 +202,20 @@ class TumblrTagExtractor(TumblrExtractor):
 class TumblrAPI():
     """Minimal interface for the Tumblr API v2"""
     API_KEY = "O3hU2tMi5e4Qs5t3vezEi6L0qRORJ5y9oUpSGsrWu8iA3UCc3B"
+    API_SECRET = "sFdsK3PDdP2QpYMRAoq0oDnw0sFS24XigXmdfnaeNZpJpqAn03"
 
     def __init__(self, extractor):
-        self.api_key = extractor.config("api-key", TumblrAPI.API_KEY)
+        self.api_key = extractor.config("api-key", self.API_KEY)
+        api_secret = extractor.config("api-secret", self.API_SECRET)
+        token = extractor.config("access-token")
+        token_secret = extractor.config("access-token-secret")
+        if token and token_secret:
+            self.session = util.OAuthSession(
+                extractor.session,
+                self.api_key, api_secret, token, token_secret)
+            self.api_key = None
+        else:
+            self.session = extractor.session
         self.params = {"offset": 0, "limit": 50, "reblog_info": "true"}
         self.extractor = extractor
 
@@ -219,12 +230,12 @@ class TumblrAPI():
         return self._pagination(blog, "posts", params)
 
     def _call(self, blog, endpoint, params):
-        params["api_key"] = self.api_key
+        if self.api_key:
+            params["api_key"] = self.api_key
         url = "https://api.tumblr.com/v2/blog/{}.tumblr.com/{}".format(
             blog, endpoint)
 
-        response = self.extractor.request(
-            url, params=params, fatal=False).json()
+        response = self.session.get(url, params=params).json()
         if response["meta"]["status"] == 404:
             raise exception.NotFoundError("user or post")
         elif response["meta"]["status"] != 200:
