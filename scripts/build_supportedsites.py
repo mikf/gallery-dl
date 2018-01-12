@@ -154,6 +154,7 @@ class RstTable():
 
 _subs = []
 
+
 def substitute(value, size):
     sub = "|{}-{}|".format(value[:15], len(_subs))
     _subs.append((value, sub))
@@ -180,7 +181,7 @@ def build_list():
     for extrlist in extractors:
         extrlist.sort(key=subcategory_key)
         for extr in extrlist:
-            extr.cat    = map_category(extr.category)
+            extr.cat = map_category(extr.category)
             extr.subcat = map_subcategory(extr.subcategory)
     extractors.sort(key=category_key)
 
@@ -206,7 +207,10 @@ def map_category(c):
 
 
 def map_subcategory(sc):
-    return SUBCATEGORY_MAP.get(sc, sc.capitalize() + "s")
+    if sc in SUBCATEGORY_MAP:
+        return SUBCATEGORY_MAP[sc]
+    sc = sc.capitalize()
+    return sc if sc.endswith("s") else sc + "s"
 
 
 def category_key(extrlist):
