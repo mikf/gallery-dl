@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.2 - 2018-01-12
 - Added support for:
   - `puremashiro` - http://reader.puremashiro.moe/ ([#66](https://github.com/mikf/gallery-dl/issues/66))
   - `idolcomplex` - https://idol.sankakucomplex.com/
