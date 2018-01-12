@@ -40,7 +40,7 @@ class TumblrExtractor(Extractor):
     """Base class for tumblr extractors"""
     category = "tumblr"
     directory_fmt = ["{category}", "{name}"]
-    filename_fmt = "{category}_{blog[name]}_{id}{offset:?o//}.{extension}"
+    filename_fmt = "{category}_{blog_name}_{id}o{offset}.{extension}"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -53,7 +53,7 @@ class TumblrExtractor(Extractor):
         self.external = self.config("external", False)
 
         if len(self.types) == 1:
-            self.api.params["type"] = next(iter(self.types))
+            self.api.posts_type = next(iter(self.types))
         elif not self.types:
             self.log.warning("no valid post types selected")
 
@@ -199,6 +199,19 @@ class TumblrTagExtractor(TumblrExtractor):
         return self.api.posts(self.user, {"tag": self.tag})
 
 
+class TumblrLikesExtractor(TumblrExtractor):
+    """Extractor for images from a tumblr-user by tag"""
+    subcategory = "likes"
+    directory_fmt = ["{category}", "{name}", "likes"]
+    pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/likes"]
+    test = [("http://mikf123.tumblr.com/likes", {
+        "count": 1,
+    })]
+
+    def posts(self):
+        return self.api.likes(self.user)
+
+
 class TumblrAPI():
     """Minimal interface for the Tumblr API v2"""
     API_KEY = "O3hU2tMi5e4Qs5t3vezEi6L0qRORJ5y9oUpSGsrWu8iA3UCc3B"
@@ -216,7 +229,7 @@ class TumblrAPI():
             self.api_key = None
         else:
             self.session = extractor.session
-        self.params = {"offset": 0, "limit": 50, "reblog_info": "true"}
+        self.posts_type = None
         self.extractor = extractor
 
     @memcache(keyarg=1)
@@ -226,8 +239,25 @@ class TumblrAPI():
 
     def posts(self, blog, params):
         """Retrieve published posts"""
-        params.update(self.params)
-        return self._pagination(blog, "posts", params)
+        params.update({"offset": 0, "limit": 50, "reblog_info": "true"})
+        if self.posts_type:
+            params["type"] = self.posts_type
+        while True:
+            data = self._call(blog, "posts", params)
+            yield from data["posts"]
+            params["offset"] += params["limit"]
+            if params["offset"] >= data["total_posts"]:
+                return
+
+    def likes(self, blog):
+        """Retrieve liked posts"""
+        params = {"limit": 50}
+        while True:
+            posts = self._call(blog, "likes", params)["liked_posts"]
+            if not posts:
+                return
+            yield from posts
+            params["before"] = posts[-1]["liked_timestamp"]
 
     def _call(self, blog, endpoint, params):
         if self.api_key:
@@ -236,18 +266,14 @@ class TumblrAPI():
             blog, endpoint)
 
         response = self.session.get(url, params=params).json()
-        if response["meta"]["status"] == 404:
+        status = response["meta"]["status"]
+
+        if status == 200:
+            return response["response"]
+        elif status == 403:
+            raise exception.AuthorizationError()
+        elif status == 404:
             raise exception.NotFoundError("user or post")
-        elif response["meta"]["status"] != 200:
+        else:
             self.extractor.log.error(response)
             raise exception.StopExtraction()
-
-        return response["response"]
-
-    def _pagination(self, blog, endpoint, params):
-        while True:
-            data = self._call(blog, endpoint, params)
-            yield from data["posts"]
-            params["offset"] += params["limit"]
-            if params["offset"] >= data["total_posts"]:
-                return
