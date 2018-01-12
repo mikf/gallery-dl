@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from http://mangapark.me/"""
+"""Extract manga-chapters and entire manga from https://mangapark.me/"""
 
 from .common import Extractor, MangaExtractor, Message
 from .. import text, util
+from urllib.parse import urljoin
 
 
 class MangaparkExtractor(Extractor):
     """Base class for mangapark extractors"""
     category = "mangapark"
-    root = "http://mangapark.me"
+    root = "https://mangapark.me"
 
     @staticmethod
     def parse_chapter_path(path, data):
@@ -38,9 +39,9 @@ class MangaparkExtractor(Extractor):
 class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
     """Extractor for manga from mangapark.me"""
     pattern = [r"(?:https?://)?(?:www\.)?(mangapark\.me/manga/[^/]+)/?$"]
-    test = [("http://mangapark.me/manga/aria", {
-        "url": "0c5a57e2b402c8cc9ceefba82619f6280346f984",
-        "keyword": "75a68497d1f305eaf9b9fec235bd1da6e499546f",
+    test = [("https://mangapark.me/manga/aria", {
+        "url": "4cb5606530b4eeacde7a4c9fd38296eb6ff46563",
+        "keyword": "e87ab8e7ad2571bbe587881e7fd422e8f582f818",
     })]
 
     def chapters(self, page):
@@ -78,16 +79,16 @@ class MangaparkChapterExtractor(MangaparkExtractor):
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me(/manga/[^/]+"
                 r"/s\d+(?:/v\d+)?/c\d+[^/]*(?:/e\d+)?)")]
     test = [
-        ("http://mangapark.me/manga/gosu/s2/c55", {
+        ("https://mangapark.me/manga/gosu/s2/c55", {
             "count": 50,
             "keyword": "72ac1714b492b021a1fe26d9271ed132d51a930e",
         }),
-        (("http://mangapark.me/manga/"
-          "ad-astra-per-aspera-hata-kenjirou/s1/c1.2"), {
+        (("https://mangapark.me/manga/"
+          "ad-astra-per-aspera-hata-kenjirou/s5/c1.2"), {
             "count": 40,
-            "keyword": "0ac6a028f6479b2ecfe7b2d014074a0aea027e90",
+            "keyword": "fb5082bb60e19cae0a194b89f69f333888a9325d",
         }),
-        ("http://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
+        ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
             "count": 15,
             "keyword": "dc9233cdd83d8659300f0a20ec3c493873f71741",
         }),
@@ -124,8 +125,7 @@ class MangaparkChapterExtractor(MangaparkExtractor):
         data["count"] = util.safe_int(data["count"])
         return data
 
-    @staticmethod
-    def get_images(page):
+    def get_images(self, page):
         """Collect image-urls, -widths and -heights"""
         pos = 0
         num = 0
@@ -136,7 +136,7 @@ class MangaparkChapterExtractor(MangaparkExtractor):
             num += 1
             width , pos = text.extract(page, ' width="', '"', pos)
             height, pos = text.extract(page, ' _heighth="', '"', pos)
-            yield url, {
+            yield urljoin(self.root, url), {
                 "page": num,
                 "width": width,
                 "height": height,
