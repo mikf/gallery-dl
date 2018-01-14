@@ -27,7 +27,7 @@ class Extractor():
     subcategory = ""
     categorytransfer = False
     directory_fmt = ["{category}"]
-    filename_fmt = "{filename}"
+    filename_fmt = "{name}.{extension}"
     cookiedomain = ""
 
     def __init__(self):
