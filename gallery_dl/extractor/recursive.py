@@ -28,7 +28,7 @@ class RecursiveExtractor(Extractor):
 
     def items(self):
         blist = self.config(
-            "blacklist", ("directlink",) + util.SPECIAL_EXTRACTORS)
+            "blacklist", {"directlink"} | util.SPECIAL_EXTRACTORS)
         page = self.request(self.url).text
         yield Message.Version, 1
         with extractor.blacklist(blist):

@@ -98,7 +98,7 @@ def find(url):
     """Find suitable extractor for the given url"""
     for pattern, klass in _list_patterns():
         match = pattern.match(url)
-        if match and klass.category not in _blacklist:
+        if match and klass not in _blacklist:
             return klass(match)
     return None
 
@@ -113,11 +113,15 @@ def extractors():
 
 class blacklist():
     """Context Manager to blacklist extractor modules"""
-    def __init__(self, categories):
-        self.categories = categories
+    def __init__(self, categories, extractors=None):
+        self.extractors = extractors or []
+        for _, klass in _list_patterns():
+            if klass.category in categories:
+                self.extractors.append(klass)
+        print(self.extractors)
 
     def __enter__(self):
-        _blacklist.extend(self.categories)
+        _blacklist.update(self.extractors)
 
     def __exit__(self, etype, value, traceback):
         _blacklist.clear()
@@ -127,7 +131,7 @@ class blacklist():
 # internals
 
 _cache = []
-_blacklist = []
+_blacklist = set()
 _module_iter = iter(modules)
 
 

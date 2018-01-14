@@ -183,7 +183,7 @@ CODES = {
     "zh": "Chinese",
 }
 
-SPECIAL_EXTRACTORS = ("oauth", "recursive", "test")
+SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
 
 
 def build_predicate(predicates):
