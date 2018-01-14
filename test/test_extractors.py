@@ -20,7 +20,7 @@ SKIP = {
     # temporary issues
     "batoto",  # R.I.P.
     "imgyt",  # server maintenance
-    "luscious",
+    "gelbooru",
 }
 
 
