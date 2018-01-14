@@ -32,7 +32,8 @@ class RedditExtractor(Extractor):
         depth = 0
 
         yield Message.Version, 1
-        with extractor.blacklist(("reddit",) + util.SPECIAL_EXTRACTORS):
+        with extractor.blacklist(
+                util.SPECIAL_EXTRACTORS, [RedditSubredditExtractor]):
             while True:
                 extra = []
                 for url in self._urls(submissions):
@@ -99,6 +100,35 @@ class RedditSubmissionExtractor(RedditExtractor):
 
     def submissions(self):
         return (self.api.submission(self.submission_id),)
+
+
+class RedditImageExtractor(Extractor):
+    """Extractor for reddit-hosted images"""
+    category = "reddit"
+    subcategory = "image"
+    pattern = [r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
+               r"/[^/?&#]+(?:\?[^#]*)?"]
+    test = [
+        ("https://i.redd.it/upjtjcx2npzz.jpg", {
+            "url": "0de614900feef103e580b632190458c0b62b641a",
+            "content": "cc9a68cf286708d5ce23c68e79cd9cf7826db6a3",
+        }),
+        (("https://i.reddituploads.com/0f44f1b1fca2461f957c713d9592617d"
+          "?fit=max&h=1536&w=1536&s=e96ce7846b3c8e1f921d2ce2671fb5e2"), {
+            "url": "f24f25efcedaddeec802e46c60d77ef975dc52a5",
+            "content": "d13c3b5f7e39b454fa21b33d7d6b0e0f07126849",
+        }),
+    ]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url = match.group(0)
+
+    def items(self):
+        data = text.nameext_from_url(self.url)
+        yield Message.Version, 1
+        yield Message.Directory, data
+        yield Message.Url, self.url, data
 
 
 class RedditAPI():
