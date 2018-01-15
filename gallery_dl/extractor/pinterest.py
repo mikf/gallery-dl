@@ -71,7 +71,6 @@ class PinterestBoardExtractor(PinterestExtractor):
         ("https://www.pinterest.com/g1952849/test-/", {
             "url": "705ee521630a5d613b0449d694a5345e684572a9",
             "keyword": "1650dd31c4dedd940cef399135e485400625ec0b",
-            "content": "30897fb5d5616765bb2c9c26cb84f54499424fb4",
         }),
         ("https://www.pinterest.com/g1952848/test/", {
             "exception": exception.NotFoundError,

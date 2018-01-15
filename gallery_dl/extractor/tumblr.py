@@ -35,6 +35,10 @@ def _original_video(url):
 POST_TYPES = frozenset((
     "text", "quote", "link", "answer", "video", "audio", "photo", "chat"))
 
+BASE_PATTERN = (
+    r"(?:tumblr:(?:https?://)?([^/]+)|"
+    r"(?:https?://)?([^.]+\.tumblr\.com))")
+
 
 class TumblrExtractor(Extractor):
     """Base class for tumblr extractors"""
@@ -44,7 +48,7 @@ class TumblrExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.user = match.group(1)
+        self.blog = match.group(1) or match.group(2)
         self.api = TumblrAPI(self)
 
         self.types = self._setup_posttypes()
@@ -58,7 +62,7 @@ class TumblrExtractor(Extractor):
             self.log.warning("no valid post types selected")
 
     def items(self):
-        blog = self.api.info(self.user)
+        blog = self.api.info(self.blog)
         yield Message.Version, 1
         yield Message.Directory, blog
 
@@ -139,7 +143,7 @@ class TumblrExtractor(Extractor):
 class TumblrUserExtractor(TumblrExtractor):
     """Extractor for all images from a tumblr-user"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com(?:/page/\d+)?/?$"]
+    pattern = [BASE_PATTERN + r"(?:/page/\d+)?/?$"]
     test = [
         ("http://demo.tumblr.com/", {
             "pattern": (r"https?://\d+\.media\.tumblr\.com"
@@ -154,16 +158,18 @@ class TumblrUserExtractor(TumblrExtractor):
             "options": (("posts", "all"), ("external", True),
                         ("inline", True), ("reblogs", True))
         }),
+        ("tumblr:http://www.b-authentique.com/", None),
+        ("tumblr:www.b-authentique.com", None),
     ]
 
     def posts(self):
-        return self.api.posts(self.user, {})
+        return self.api.posts(self.blog, {})
 
 
 class TumblrPostExtractor(TumblrExtractor):
     """Extractor for images from a single post on tumblr"""
     subcategory = "post"
-    pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/post/(\d+)"]
+    pattern = [BASE_PATTERN + r"/post/(\d+)"]
     test = [("http://demo.tumblr.com/post/459265350", {
         "pattern": r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg",
         "count": 1,
@@ -171,11 +177,11 @@ class TumblrPostExtractor(TumblrExtractor):
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        self.post_id = match.group(2)
+        self.post_id = match.group(3)
         self.reblogs = True
 
     def posts(self):
-        return self.api.posts(self.user, {"id": self.post_id})
+        return self.api.posts(self.blog, {"id": self.post_id})
 
     @staticmethod
     def _setup_posttypes():
@@ -185,7 +191,7 @@ class TumblrPostExtractor(TumblrExtractor):
 class TumblrTagExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user by tag"""
     subcategory = "tag"
-    pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/tagged/(.+)"]
+    pattern = [BASE_PATTERN + r"/tagged/([^/?&#]+)"]
     test = [("http://demo.tumblr.com/tagged/Times%20Square", {
         "pattern": r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg",
         "count": 1,
@@ -193,23 +199,23 @@ class TumblrTagExtractor(TumblrExtractor):
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        self.tag = text.unquote(match.group(2))
+        self.tag = text.unquote(match.group(3))
 
     def posts(self):
-        return self.api.posts(self.user, {"tag": self.tag})
+        return self.api.posts(self.blog, {"tag": self.tag})
 
 
 class TumblrLikesExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user by tag"""
     subcategory = "likes"
     directory_fmt = ["{category}", "{name}", "likes"]
-    pattern = [r"(?:https?://)?([^.]+)\.tumblr\.com/likes"]
+    pattern = [BASE_PATTERN + r"/likes"]
     test = [("http://mikf123.tumblr.com/likes", {
         "count": 1,
     })]
 
     def posts(self):
-        return self.api.likes(self.user)
+        return self.api.likes(self.blog)
 
 
 class TumblrAPI():
@@ -262,7 +268,7 @@ class TumblrAPI():
     def _call(self, blog, endpoint, params):
         if self.api_key:
             params["api_key"] = self.api_key
-        url = "https://api.tumblr.com/v2/blog/{}.tumblr.com/{}".format(
+        url = "https://api.tumblr.com/v2/blog/{}/{}".format(
             blog, endpoint)
 
         response = self.session.get(url, params=params).json()
