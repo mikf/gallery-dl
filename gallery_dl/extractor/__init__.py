@@ -60,6 +60,7 @@ modules = [
     "nhentai",
     "nijie",
     "nyafuu",
+    "paheal",
     "pawoo",
     "pinterest",
     "pixiv",

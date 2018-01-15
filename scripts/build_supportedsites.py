@@ -44,6 +44,7 @@ CATEGORY_MAP = {
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
     "nyafuu"         : "Nyafuu Archive",
+    "paheal"         : "rule #34",
     "powermanga"     : "PowerManga",
     "puremashiro"    : "Pure Mashiro",
     "readcomiconline": "Read Comic Online",

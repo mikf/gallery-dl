@@ -62,6 +62,7 @@ Pure Mashiro         http://reader.puremashiro.moe/      Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://reddit.com/                 individual Images, Submissions, Subreddits         Optional (OAuth)
+rule #34             http://rule34.paheal.net/           Posts, Tag-Searches
 Rule 34              https://rule34.xxx/                 Posts, Tag-Searches
 Safebooru            https://safebooru.org/              Posts, Tag-Searches
 Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
