@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from . import deviantart, flickr, reddit, tumblr
-from .. import text, util
+from .. import text, util, config
 import os
 import urllib.parse
 
@@ -23,6 +23,10 @@ class OAuthBase(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.client = None
+
+    def oauth_config(self, key, default=None):
+        return config.interpolate(
+            ("extractor", self.subcategory, key), default)
 
     def recv(self):
         """Open local HTTP server and recv callback parameters"""
@@ -66,7 +70,7 @@ class OAuthBase(Extractor):
         import webbrowser
         url += "?" + urllib.parse.urlencode(params)
         browser = self.config("browser", True)
-        if not browser or (browser and not webbrowser.open(url)):
+        if not browser or not webbrowser.open(url):
             print("Please open this URL in your browser:")
             print(url, end="\n\n", flush=True)
         return self.recv()
@@ -155,8 +159,10 @@ class OAuthDeviantart(OAuthBase):
         yield Message.Version, 1
 
         self._oauth2_authorization_code_grant(
-            deviantart.DeviantartAPI.CLIENT_ID,
-            deviantart.DeviantartAPI.CLIENT_SECRET,
+            self.oauth_config(
+                "client-id", deviantart.DeviantartAPI.CLIENT_ID),
+            self.oauth_config(
+                "client-secret", deviantart.DeviantartAPI.CLIENT_SECRET),
             "https://www.deviantart.com/oauth2/authorize",
             "https://www.deviantart.com/oauth2/token",
             "browse",
@@ -171,8 +177,8 @@ class OAuthFlickr(OAuthBase):
         OAuthBase.__init__(self, match)
         self.session = util.OAuthSession(
             self.session,
-            flickr.FlickrAPI.API_KEY,
-            flickr.FlickrAPI.API_SECRET,
+            self.oauth_config("api-key", flickr.FlickrAPI.API_KEY),
+            self.oauth_config("api-secret", flickr.FlickrAPI.API_SECRET),
         )
 
     def items(self):
@@ -194,7 +200,7 @@ class OAuthReddit(OAuthBase):
 
         self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
         self._oauth2_authorization_code_grant(
-            reddit.RedditAPI.CLIENT_ID,
+            self.oauth_config("client-id", reddit.RedditAPI.CLIENT_ID),
             "",
             "https://www.reddit.com/api/v1/authorize",
             "https://www.reddit.com/api/v1/access_token",
@@ -210,8 +216,8 @@ class OAuthTumblr(OAuthBase):
         OAuthBase.__init__(self, match)
         self.session = util.OAuthSession(
             self.session,
-            tumblr.TumblrAPI.API_KEY,
-            tumblr.TumblrAPI.API_SECRET,
+            self.oauth_config("api-key", tumblr.TumblrAPI.API_KEY),
+            self.oauth_config("api-secret", tumblr.TumblrAPI.API_SECRET),
         )
 
     def items(self):
