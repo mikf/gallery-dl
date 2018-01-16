@@ -135,12 +135,12 @@ class Job():
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
 
-    def __init__(self, url, parent=None):
+    def __init__(self, url, parent=None, output_object=output.select()):
         Job.__init__(self, url, parent)
         self.pathfmt = None
         self.sleep = None
         self.downloaders = {}
-        self.out = output.select()
+        self.out = output_object
 
     def handle_url(self, url, keywords):
         """Download the resource specified in 'url'"""

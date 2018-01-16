@@ -9,6 +9,8 @@
 
 import unittest
 import gallery_dl.util as util
+import gallery_dl.job as job
+import gallery_dl.output as output
 import gallery_dl.exception as exception
 import sys
 
@@ -244,6 +246,13 @@ class TestOther(unittest.TestCase):
         self.assertEqual(util.safe_int("zzz", "default"), "default")
         self.assertEqual(util.safe_int("", "default"), "default")
         self.assertEqual(util.safe_int(None, "default"), "default")
+
+
+class TestDownloadJob(unittest.TestCase):
+    def test_out_attribute(self):
+        test_url = 'https://imgur.com/gallery/JK12s'
+        dl_job = job.DownloadJob(test_url, output_object=output.NullOutput())
+        self.assertTrue(isinstance(dl_job.out, output.NullOutput))
 
 
 if __name__ == '__main__':
