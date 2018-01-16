@@ -119,7 +119,6 @@ class blacklist():
         for _, klass in _list_patterns():
             if klass.category in categories:
                 self.extractors.append(klass)
-        print(self.extractors)
 
     def __enter__(self):
         _blacklist.update(self.extractors)
