@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -296,6 +296,7 @@ class TestJob(DownloadJob):
         self.hash_content = hashlib.sha1()
         if content:
             self.fileobj = self.HashIO(self.hash_content)
+            self.get_downloader("http:")._check_extension = lambda a, b: None
 
     def run(self):
         for msg in self.extractor:
