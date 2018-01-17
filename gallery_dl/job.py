@@ -106,6 +106,12 @@ class Job():
             if self.pred_queue(url, kwds):
                 self.handle_queue(url, kwds)
 
+        elif msg[0] == Message.Urllist:
+            _, urls, kwds = msg
+            if self.pred_url(urls[0], kwds):
+                self.update_kwdict(kwds)
+                self.handle_urllist(urls, kwds)
+
         elif msg[0] == Message.Version:
             if msg[1] != 1:
                 raise "unsupported message-version ({}, {})".format(
@@ -115,6 +121,10 @@ class Job():
 
     def handle_url(self, url, keywords):
         """Handle Message.Url"""
+
+    def handle_urllist(self, urls, keywords):
+        """Handle Message.Urllist"""
+        self.handle_url(urls[0], keywords)
 
     def handle_directory(self, keywords):
         """Handle Message.Directory"""
@@ -144,14 +154,15 @@ class DownloadJob(Job):
 
     def handle_url(self, url, keywords):
         """Download the resource specified in 'url'"""
-        self.pathfmt.set_keywords(keywords)
-        if self.pathfmt.exists():
-            self.out.skip(self.pathfmt.path)
-            return
-        if self.sleep:
-            time.sleep(self.sleep)
-        dlinstance = self.get_downloader(url)
-        dlinstance.download(url, self.pathfmt)
+        if self._prepare_download(keywords):
+            self.get_downloader(url).download(url, self.pathfmt)
+
+    def handle_urllist(self, urls, keywords):
+        """Download the resource specified in 'url'"""
+        if self._prepare_download(keywords):
+            for url in urls:
+                if self.get_downloader(url).download(url, self.pathfmt):
+                    return
 
     def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
@@ -178,6 +189,15 @@ class DownloadJob(Job):
             instance = klass(self.extractor.session, self.out)
             self.downloaders[scheme] = instance
         return instance
+
+    def _prepare_download(self, keywords):
+        self.pathfmt.set_keywords(keywords)
+        if self.pathfmt.exists():
+            self.out.skip(self.pathfmt.path)
+            return False
+        if self.sleep:
+            time.sleep(self.sleep)
+        return True
 
 
 class KeywordJob(Job):
@@ -245,6 +265,13 @@ class UrlJob(Job):
     @staticmethod
     def handle_url(url, _):
         print(url)
+
+    @staticmethod
+    def handle_urllist(urls, _):
+        prefix = ""
+        for url in urls:
+            print(prefix, url, sep="")
+            prefix = "| "
 
     def handle_queue(self, url, _):
         try:
@@ -360,6 +387,9 @@ class DataJob(Job):
 
     def handle_url(self, url, keywords):
         self.data.append((Message.Url, url, keywords.copy()))
+
+    def handle_urllist(self, urls, keywords):
+        self.data.append((Message.Urllist, list(urls), keywords.copy()))
 
     def handle_directory(self, keywords):
         self.data.append((Message.Directory, keywords.copy()))
