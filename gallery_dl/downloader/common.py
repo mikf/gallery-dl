@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -85,11 +85,11 @@ class DownloaderBase():
 
             # check response
             if not offset:
-                mode = "wb"
+                mode = "w+b"
                 if filesize:
                     self.log.info("Unable to resume partial download")
             else:
-                mode = "ab"
+                mode = "r+b"
                 self.log.info("Resuming download at byte %d", offset)
 
             # set missing filename extension
@@ -102,6 +102,9 @@ class DownloaderBase():
             self.out.start(pathfmt.path)
             self.downloading = True
             with pathfmt.open(mode) as file:
+                if offset:
+                    file.seek(offset)
+
                 # download content
                 try:
                     self.receive(file)
@@ -114,9 +117,15 @@ class DownloaderBase():
                     msg = "filesize mismatch ({} < {})".format(
                         file.tell(), size)
                     continue
+
+                # check filename extension
+                adj_ext = self._check_extension(file, pathfmt)
+
             break
 
         self.downloading = False
+        if adj_ext:
+            pathfmt.adjust_extension(adj_ext)
         if self.part:
             pathfmt.part_move()
         self.out.success(pathfmt.path, tries)
@@ -139,3 +148,23 @@ class DownloaderBase():
 
     def get_extension(self):
         """Return a filename extension appropriate for the current request"""
+
+    @staticmethod
+    def _check_extension(file, pathfmt):
+        """Check filename extension against fileheader"""
+        extension = pathfmt.keywords["extension"]
+        if extension in FILETYPE_CHECK:
+            file.seek(0)
+            header = file.read(8)
+            if len(header) >= 8 and not FILETYPE_CHECK[extension](header):
+                for ext, check in FILETYPE_CHECK.items():
+                    if ext != extension and check(header):
+                        return ext
+        return None
+
+
+FILETYPE_CHECK = {
+    "jpg": lambda h: h[0:2] == b"\xff\xd8",
+    "png": lambda h: h[0:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a",
+    "gif": lambda h: h[0:4] == b"GIF8" and h[5] == 97,
+}

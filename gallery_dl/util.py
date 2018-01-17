@@ -409,6 +409,13 @@ class PathFormat():
         self.keywords["extension"] = extension
         self.build_path()
 
+    def adjust_extension(self, extension):
+        """Change filename extension of existing file"""
+        oldpath = self.realpath
+        self.set_extension(extension)
+        if not self.partpath:
+            os.replace(oldpath, self.realpath)
+
     def build_path(self):
         """Use filename-keywords and directory to build a full path"""
         try:
@@ -446,7 +453,7 @@ class PathFormat():
     def part_move(self):
         """Rename .part file to its actual filename"""
         try:
-            os.rename(self.partpath, self.realpath)
+            os.replace(self.partpath, self.realpath)
             return
         except OSError:
             pass
