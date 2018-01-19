@@ -39,7 +39,7 @@ class DownloaderBase():
     def download(self, url, pathfmt):
         """Download the resource at 'url' and write it to a file-like object"""
         try:
-            self.download_impl(url, pathfmt)
+            return self.download_impl(url, pathfmt)
         except Exception:
             print()
             raise

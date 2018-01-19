@@ -334,6 +334,9 @@ class TestJob(DownloadJob):
         self.update_keyword(keywords)
         self.update_content(url)
 
+    def handle_urllist(self, urls, keywords):
+        self.handle_url(urls[0], keywords)
+
     def handle_directory(self, keywords):
         self.update_keyword(keywords, False)
 
