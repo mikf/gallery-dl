@@ -15,12 +15,20 @@ import re
 
 
 def _original_image(url):
-    if url.endswith(".gif") and "_inline_" in url:
-        return url
-    return re.sub(
-        (r"https?://\d+\.media\.tumblr\.com"
-         r"/([0-9a-f]+/tumblr_[^/?&#.]+)_\d+\.([0-9a-z]+)"),
-        r"https://s3.amazonaws.com/data.tumblr.com/\1_raw.\2", url
+    match = re.match(
+        r"https?://\d+\.media\.tumblr\.com"
+        r"((/[0-9a-f]+)?/tumblr_[^/?&#.]+)_\d+\.([0-9a-z]+)",
+        url)
+
+    if not match:
+        return (url,)
+    root = "https://s3.amazonaws.com/data.tumblr.com"
+    path, key, ext = match.groups()
+
+    return (
+        "".join((root, path, "_raw." if key else "_1280.", ext)),
+        "".join((root, path, "_500.", ext)),
+        url,
     )
 
 
@@ -90,7 +98,7 @@ class TumblrExtractor(Extractor):
                     photo.update(photo["original_size"])
                     del photo["original_size"]
                     del photo["alt_sizes"]
-                    yield self._prepare(_original_image(photo["url"]), post)
+                    yield self._prepare_image(photo["url"], post)
 
             if "audio_url" in post:  # type: "audio"
                 yield self._prepare(post["audio_url"], post)
@@ -102,7 +110,7 @@ class TumblrExtractor(Extractor):
                 for key in ("body", "description"):
                     if key in post:
                         for url in re.findall('<img src="([^"]+)"', post[key]):
-                            yield self._prepare(_original_image(url), post)
+                            yield self._prepare_image(url, post)
 
             if self.external:  # external links
                 post["extension"] = None
@@ -139,6 +147,12 @@ class TumblrExtractor(Extractor):
         post["offset"] += 1
         return Message.Url, url, text.nameext_from_url(url, post)
 
+    @staticmethod
+    def _prepare_image(url, post):
+        post["offset"] += 1
+        urls = _original_image(url)
+        return Message.Urllist, urls, text.nameext_from_url(url, post)
+
 
 class TumblrUserExtractor(TumblrExtractor):
     """Extractor for all images from a tumblr-user"""
@@ -146,13 +160,13 @@ class TumblrUserExtractor(TumblrExtractor):
     pattern = [BASE_PATTERN + r"(?:/page/\d+)?/?$"]
     test = [
         ("http://demo.tumblr.com/", {
-            "pattern": (r"https?://\d+\.media\.tumblr\.com"
+            "pattern": (r"https://s3\.amazonaws\.com/data\.tumblr\.com"
                         r"/tumblr_[^/_]+_\d+\.jpg"),
             "count": 1,
         }),
         ("http://demo.tumblr.com/", {
             "pattern": (r"https?://(?:$|"
-                        r"\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280\.jpg|"
+                        r"s3\.amazonaws\.com/data\.tumblr\.com/.+_1280\.jpg|"
                         r"w+\.tumblr\.com/audio_file/demo/\d+/tumblr_\w+)"),
             "count": 3,
             "options": (("posts", "all"), ("external", True),
@@ -171,7 +185,8 @@ class TumblrPostExtractor(TumblrExtractor):
     subcategory = "post"
     pattern = [BASE_PATTERN + r"/post/(\d+)"]
     test = [("http://demo.tumblr.com/post/459265350", {
-        "pattern": r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg",
+        "pattern": (r"https://s3\.amazonaws\.com/data\.tumblr\.com"
+                    r"/tumblr_[^/_]+_1280.jpg"),
         "count": 1,
     })]
 
@@ -193,7 +208,8 @@ class TumblrTagExtractor(TumblrExtractor):
     subcategory = "tag"
     pattern = [BASE_PATTERN + r"/tagged/([^/?&#]+)"]
     test = [("http://demo.tumblr.com/tagged/Times%20Square", {
-        "pattern": r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg",
+        "pattern": (r"https://s3\.amazonaws\.com/data\.tumblr\.com"
+                    r"/tumblr_[^/_]+_1280.jpg"),
         "count": 1,
     })]
 
