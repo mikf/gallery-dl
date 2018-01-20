@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -40,10 +40,8 @@ class ImgurExtractor(Extractor):
     @staticmethod
     def _clean(data):
         try:
-            del data["views"]
             del data["adConfig"]
             del data["isAd"]
-            del data["date"]
         except KeyError:
             pass
         return data
@@ -59,16 +57,35 @@ class ImgurImageExtractor(ImgurExtractor):
     test = [
         ("https://imgur.com/21yMxCS", {
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
-            "keyword": "834b6714d6daf0f8df99f6261e9bb5f3ccbbcfdb",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
+            "keyword": {
+                "animated": False,
+                "datetime": "2016-11-10 14:24:35",
+                "description": str,
+                "ext": ".png",
+                "extension": "png",
+                "hash": "21yMxCS",
+                "height": "32",
+                "is_moderated": False,
+                "is_safe": False,
+                "is_viral": 0,
+                "looping": False,
+                "mimetype": "image/png",
+                "name": None,
+                "prefer_video": False,
+                "size": 182,
+                "source": "",
+                "title": "Test",
+                "video_host": None,
+                "video_source": None,
+                "width": "64",
+            },
         }),
         ("https://i.imgur.com/21yMxCS.png", {  # direct link
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
-            "keyword": "834b6714d6daf0f8df99f6261e9bb5f3ccbbcfdb",
         }),
         ("http://imgur.com/0gybAXR", {  # gifv/mp4 video
             "url": "a2220eb265a55b0c95e0d3d721ec7665460e3fd7",
-            "keyword": "94c3d9df06db5ffd1840be3b94c100ced19b4751",
             "content": "a3c080e43f58f55243ab830569ba02309d59abfc",
         }),
         ("https://imgur.com/zzzzzzz", {
@@ -95,11 +112,35 @@ class ImgurAlbumExtractor(ImgurExtractor):
     test = [
         ("https://imgur.com/a/TcBmP", {
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
-            "keyword": "4fb9d3089810ce5d230f2706b3b37edf529061bf",
+            "keyword": {
+                "album": {
+                    "album_cover": "693j2Kr",
+                    "album_description": None,
+                    "cover": "693j2Kr",
+                    "datetime": "2015-10-09 10:37:50",
+                    "description": None,
+                    "hash": "TcBmP",
+                    "id": "TcBmP",
+                    "is_album": True,
+                    "num_images": "19",
+                    "title": "138",
+                    "title_clean": "TcBmP",
+                    "views": str,
+                },
+                "animated": bool,
+                "datetime": str,
+                "extension": str,
+                "hash": str,
+                "height": int,
+                "num": int,
+                "prefer_video": bool,
+                "size": int,
+                "title": str,
+                "width": int,
+            },
         }),
         ("https://imgur.com/gallery/eD9CT", {  # large album
             "url": "4ee94de31ff26be416271bc0b1ea27b9349c9937",
-            "keyword": "577f15a6320b7717bd9fd04e7fde56f9519e3def",
         }),
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.NotFoundError,
