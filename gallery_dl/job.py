@@ -254,12 +254,12 @@ class KeywordJob(Job):
 
 class UrlJob(Job):
     """Print download urls"""
-    maxdepth = -1
+    maxdepth = 1
 
     def __init__(self, url, parent=None, depth=1):
         Job.__init__(self, url, parent)
         self.depth = depth
-        if depth == self.maxdepth:
+        if depth >= self.maxdepth:
             self.handle_queue = self.handle_url
 
     @staticmethod
