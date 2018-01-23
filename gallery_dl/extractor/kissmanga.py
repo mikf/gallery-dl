@@ -120,7 +120,7 @@ class KissmangaChapterExtractor(KissmangaExtractor):
             "keyword": "089158338b4cde43b2ff244814effeb13297de33",
         }),
         ("http://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
-            "url": "6abec8178f35fe7846586280ca9e38eacc32452c",
+            "count": 23,
             "keyword": "558da596e86ca544eb72cf303f3694bbf0b1f2f5",
         }),
         ("http://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608", None),
