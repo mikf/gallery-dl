@@ -112,7 +112,6 @@ Supported Sites
 * pixiv.net
 * seiga.nicovideo.jp
 * nijie.info
-* bato.to
 * mangastream.com
 * kissmanga.com
 * readcomiconline.to
@@ -160,7 +159,7 @@ Username & Password
 Some extractors require you to provide valid login-credentials in the form of
 a username & password pair.
 This is necessary for ``pixiv``, ``nijie`` and ``seiga`` and optional
-(but strongly recommended) for ``exhentai``,  ``batoto`` and ``sankaku``.
+(but strongly recommended) for ``exhentai`` and ``sankaku``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
