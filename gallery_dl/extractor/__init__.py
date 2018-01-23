@@ -18,7 +18,6 @@ modules = [
     "archivedmoe",
     "archiveofsins",
     "b4k",
-    "batoto",
     "danbooru",
     "desuarchive",
     "deviantart",

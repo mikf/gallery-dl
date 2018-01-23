@@ -10,7 +10,6 @@ Site                 URL                                 Capabilities           
 arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
-Batoto               https://bato.to/                    Chapters, Manga                                    Optional
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches
 Desuarchive          https://desuarchive.org/            Threads
 DeviantArt           https://www.deviantart.com/         |Collections, De-1|                                Optional (OAuth)
