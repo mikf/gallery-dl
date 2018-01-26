@@ -93,12 +93,6 @@ def build_parser():
         metavar="FILE", action=ConfigAction, dest="cookies",
         help="File to load additional cookies from",
     )
-    general.add_argument(
-        "--write-unsupported",
-        metavar="FILE", dest="unsupportedfile",
-        help=("Write URLs, which get emitted by other extractors but cannot "
-              "be handled, to FILE"),
-    )
 
     output = parser.add_argument_group("Output Options")
     output.add_argument(
@@ -132,6 +126,17 @@ def build_parser():
         "--list-extractors", dest="list_extractors", action="store_true",
         help=("Print a list of extractor classes "
               "with description, (sub)category and example URL"),
+    )
+    output.add_argument(
+        "--write-log",
+        metavar="FILE", dest="logfile", action=ConfigAction,
+        help=("Write logging output to FILE"),
+    )
+    output.add_argument(
+        "--write-unsupported",
+        metavar="FILE", dest="unsupportedfile",
+        help=("Write URLs, which get emitted by other extractors but cannot "
+              "be handled, to FILE"),
     )
 
     downloader = parser.add_argument_group("Downloader Options")

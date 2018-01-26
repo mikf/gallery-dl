@@ -72,6 +72,7 @@ Description Controls whether the output strings should be shortened to fit
             on one console line.
 =========== =====
 
+
 output.progress
 ---------------
 =========== =====
@@ -86,6 +87,15 @@ Description Controls the progress indicator when *gallery-dl* is run with
             * Any ``string``: Show the progress indicator using this
               as a custom `format string`_. Possible replacement keys are
               ``current``, ``total``  and ``url``.
+=========== =====
+
+
+output.logfile
+--------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description File to write logging output to.
 =========== =====
 
 

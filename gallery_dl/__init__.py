@@ -21,7 +21,7 @@ if sys.hexversion < 0x3030000:
     sys.exit(1)
 
 import logging
-from . import version, config, option, extractor, job, exception
+from . import version, config, option, extractor, job, util, exception
 
 __version__ = version.__version__
 log = logging.getLogger("gallery-dl")
@@ -107,6 +107,21 @@ def main():
                 log.debug("urllib3 %s", requests.packages.urllib3.__version__)
             except AttributeError:
                 pass
+
+        # logfile
+        logfile = config.interpolate(("output", "logfile"))
+        if logfile:
+            try:
+                handler = logging.FileHandler(util.expand_path(logfile))
+            except OSError as exc:
+                log.warning("logfile: %s", exc)
+            else:
+                formatter = logging.Formatter(
+                    "[%(asctime)s][%(name)s][%(levelname)s] %(message)s",
+                    "%Y-%m-%d %H:%M:%S")
+                handler.setFormatter(formatter)
+                handler.setLevel(logging.INFO)
+                logging.getLogger().addHandler(handler)
 
         if args.list_modules:
             for module_name in extractor.modules:
