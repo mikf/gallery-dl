@@ -53,6 +53,7 @@ class DownloaderBase():
 
     def download_impl(self, url, pathfmt):
         """Actual implementaion of the download process"""
+        adj_ext = None
         tries = 0
         msg = ""
 
@@ -62,7 +63,7 @@ class DownloaderBase():
         while True:
             self.reset()
             if tries:
-                self.out.error(pathfmt.path, msg, tries, self.retries)
+                self.log.error("%s (%d/%d)", msg, tries, self.retries)
                 if tries >= self.retries:
                     return False
                 time.sleep(tries)
@@ -80,7 +81,7 @@ class DownloaderBase():
             except exception.DownloadComplete:
                 break
             except Exception as exc:
-                self.out.error(pathfmt.path, exc, 0, 0)
+                self.log.error(exc)
                 return False
 
             # check response
