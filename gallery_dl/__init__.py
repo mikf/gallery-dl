@@ -27,17 +27,16 @@ __version__ = version.__version__
 log = logging.getLogger("gallery-dl")
 
 
-def initialize_logging():
+def initialize_logging(loglevel, formatter):
     # convert levelnames to lowercase
     for level in (10, 20, 30, 40, 50):
         name = logging.getLevelName(level)
         logging.addLevelName(level, name.lower())
     # setup basic logging to stderr
-    formatter = logging.Formatter("[%(name)s][%(levelname)s] %(message)s")
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     root = logging.getLogger()
-    root.setLevel(logging.INFO)
+    root.setLevel(loglevel)
     root.addHandler(handler)
 
 
@@ -78,10 +77,11 @@ def prepare_filter(filterexpr, target):
 
 def main():
     try:
-        initialize_logging()
         parser = option.build_parser()
         args = parser.parse_args()
-        logging.getLogger().setLevel(args.loglevel)
+
+        formatter = logging.Formatter("[%(name)s][%(levelname)s] %(message)s")
+        initialize_logging(args.loglevel, formatter)
 
         # configuration
         if args.load_config:
@@ -94,7 +94,19 @@ def main():
             config.set(key, value)
         config.set(("_",), {})
 
-        # logging
+        # logfile
+        logfile = config.interpolate(("output", "logfile"))
+        if logfile:
+            try:
+                path = util.expand_path(logfile)
+                handler = logging.FileHandler(path, "w")
+            except OSError as exc:
+                log.warning("logfile: %s", exc)
+            else:
+                handler.setFormatter(formatter)
+                logging.getLogger().addHandler(handler)
+
+        # loglevels
         if args.loglevel >= logging.ERROR:
             config.set(("output", "mode"), "null")
         elif args.loglevel <= logging.DEBUG:
@@ -107,21 +119,6 @@ def main():
                 log.debug("urllib3 %s", requests.packages.urllib3.__version__)
             except AttributeError:
                 pass
-
-        # logfile
-        logfile = config.interpolate(("output", "logfile"))
-        if logfile:
-            try:
-                handler = logging.FileHandler(util.expand_path(logfile))
-            except OSError as exc:
-                log.warning("logfile: %s", exc)
-            else:
-                formatter = logging.Formatter(
-                    "[%(asctime)s][%(name)s][%(levelname)s] %(message)s",
-                    "%Y-%m-%d %H:%M:%S")
-                handler.setFormatter(formatter)
-                handler.setLevel(logging.INFO)
-                logging.getLogger().addHandler(handler)
 
         if args.list_modules:
             for module_name in extractor.modules:
@@ -160,6 +157,7 @@ def main():
                         file = sys.stdin
                     else:
                         file = open(args.inputfile)
+
                     urls += sanatize_input(file)
                 except OSError as exc:
                     log.warning("input-file: %s", exc)
