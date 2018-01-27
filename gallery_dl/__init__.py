@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -28,6 +28,7 @@ log = logging.getLogger("gallery-dl")
 
 
 def initialize_logging(loglevel, formatter):
+    """Setup basic logging functionality before configfiles have been loaded"""
     # convert levelnames to lowercase
     for level in (10, 20, 30, 40, 50):
         name = logging.getLevelName(level)
@@ -41,6 +42,7 @@ def initialize_logging(loglevel, formatter):
 
 
 def progress(urls, pformat):
+    """Wrapper around urls to output a simple progress indicator"""
     if pformat is True:
         pformat = "[{current}/{total}] {url}"
     pinfo = {"total": len(urls)}
@@ -50,6 +52,7 @@ def progress(urls, pformat):
 
 
 def sanatize_input(file):
+    """Filter and strip strings from an input file"""
     for line in file:
         line = line.strip()
         if line:
@@ -110,13 +113,15 @@ def main():
         if args.loglevel >= logging.ERROR:
             config.set(("output", "mode"), "null")
         elif args.loglevel <= logging.DEBUG:
-            import platform, requests
+            import platform
+            import requests
             log.debug("Version %s", __version__)
             log.debug("Python %s - %s",
                       platform.python_version(), platform.platform())
             try:
-                log.debug("requests %s", requests.__version__)
-                log.debug("urllib3 %s", requests.packages.urllib3.__version__)
+                log.debug("requests %s - urllib3 %s",
+                          requests.__version__,
+                          requests.packages.urllib3.__version__)
             except AttributeError:
                 pass
 
@@ -157,14 +162,15 @@ def main():
                         file = sys.stdin
                     else:
                         file = open(args.inputfile)
-
                     urls += sanatize_input(file)
+                    file.close()
                 except OSError as exc:
                     log.warning("input-file: %s", exc)
 
             if args.unsupportedfile:
                 try:
-                    job.Job.ufile = open(args.unsupportedfile, "w")
+                    path = util.expand_path(args.unsupportedfile)
+                    job.Job.ufile = open(path, "w")
                 except OSError as exc:
                     log.warning("unsupported-URL file: %s", exc)
 
