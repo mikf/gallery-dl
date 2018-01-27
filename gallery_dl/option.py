@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,8 +12,6 @@ import argparse
 import logging
 import json
 from .version import __version__
-
-log = logging.getLogger("option")
 
 
 class ConfigAction(argparse.Action):
@@ -31,16 +29,13 @@ class ConfigConstAction(argparse.Action):
 class ParseAction(argparse.Action):
     """Parse <key>=<value> options and set them as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
+        key, _, value = values.partition("=")
         try:
-            key, _, value = values.partition("=")
-            try:
-                value = json.loads(value)
-            except ValueError:
-                pass
-            key = key.split(".")
-            namespace.options.append((key, value))
+            value = json.loads(value)
         except ValueError:
-            log.warning("Invalid '<key>=<value>' pair: %s", values)
+            pass
+        key = key.split(".")
+        namespace.options.append((key, value))
 
 
 class Formatter(argparse.HelpFormatter):
