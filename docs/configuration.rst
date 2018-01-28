@@ -99,6 +99,15 @@ Description File to write logging output to.
 =========== =====
 
 
+output.unsupportedfile
+----------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description File to write external URLs unsupported by *gallery-dl* to.
+=========== =====
+
+
 Downloader Options
 ==================
 
