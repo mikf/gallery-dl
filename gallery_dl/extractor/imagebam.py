@@ -21,8 +21,8 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([^/]+)"]
     test = [(("http://www.imagebam.com/"
               "gallery/adz2y0f9574bjpmonaismyrhtjgvey4o"), {
-        "url": "d7a4483b6d5ebba81950a349aad58ae034c60eda",
-        "keyword": "0ab7bef5cf995d9229dc900dc508311cefb32306",
+        "url": "fb01925129a1ff1941762eaa3a2783a66de6847f",
+        "keyword": "2541078f61ce50714715e21757176dd69126f804",
         "content": "596e6bfa157f2c7169805d50075c2986549973a8",
     })]
     root = "http://www.imagebam.com"
@@ -78,8 +78,8 @@ class ImagebamImageExtractor(Extractor):
     subcategory = "image"
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/image/([0-9a-f]{15})"]
     test = [("http://www.imagebam.com/image/94d56c502511890", {
-        "url": "94add9417c685d113a91bcdda4916e9538b5f8a9",
-        "keyword": "fd99b2f45b761d0b639af46740aacd976f5dfcc7",
+        "url": "b384893c35a01a09c58018db71ddc4cf2480be95",
+        "keyword": "1c7bc3f31ba248d65e085eb82d16f8e2156ec102",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
 

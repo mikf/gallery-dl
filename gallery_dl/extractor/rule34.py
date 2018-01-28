@@ -29,8 +29,9 @@ class Rule34TagExtractor(booru.TagMixin, Rule34Extractor):
     pattern = [(r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
                 r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")]
     test = [("http://rule34.xxx/index.php?page=post&s=list&tags=danraku", {
-        "url": "104094495973edfe7e764c8f2dd42017163322aa",
         "content": "a01768c6f86f32eb7ebbdeb87c30b0d9968d7f97",
+        "pattern": r"https?://b?img\.rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
+        "count": 2,
     })]
 
 
@@ -39,6 +40,5 @@ class Rule34PostExtractor(booru.PostMixin, Rule34Extractor):
     pattern = [(r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
                 r"\?page=post&s=view&id=(?P<post>\d+)")]
     test = [("http://rule34.xxx/index.php?page=post&s=view&id=1974854", {
-        "url": "3b1f9817785868d1cd94d5376d20478eed591965",
         "content": "fd2820df78fb937532da0a46f7af6cefc4dc94be",
     })]
