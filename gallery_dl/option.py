@@ -129,7 +129,7 @@ def build_parser():
     )
     output.add_argument(
         "--write-unsupported",
-        metavar="FILE", dest="unsupportedfile",
+        metavar="FILE", dest="unsupportedfile", action=ConfigAction,
         help=("Write URLs, which get emitted by other extractors but cannot "
               "be handled, to FILE"),
     )

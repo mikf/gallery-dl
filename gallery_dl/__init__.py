@@ -104,7 +104,7 @@ def main():
                 path = util.expand_path(logfile)
                 handler = logging.FileHandler(path, "w")
             except OSError as exc:
-                log.warning("logfile: %s", exc)
+                log.warning("log file: %s", exc)
             else:
                 handler.setFormatter(formatter)
                 logging.getLogger().addHandler(handler)
@@ -165,11 +165,12 @@ def main():
                     urls += sanatize_input(file)
                     file.close()
                 except OSError as exc:
-                    log.warning("input-file: %s", exc)
+                    log.warning("input file: %s", exc)
 
-            if args.unsupportedfile:
+            unsupportedfile = config.interpolate(("output", "unsupportedfile"))
+            if unsupportedfile:
                 try:
-                    path = util.expand_path(args.unsupportedfile)
+                    path = util.expand_path(unsupportedfile)
                     job.Job.ufile = open(path, "w")
                 except OSError as exc:
                     log.warning("unsupported-URL file: %s", exc)
