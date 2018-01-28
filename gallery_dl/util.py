@@ -352,6 +352,7 @@ class PathFormat():
 
         self.has_extension = False
         self.keywords = {}
+        self.filename = ""
         self.directory = self.realdirectory = ""
         self.path = self.realpath = self.partpath = ""
 
@@ -419,12 +420,12 @@ class PathFormat():
     def build_path(self):
         """Use filename-keywords and directory to build a full path"""
         try:
-            filename = text.clean_path(
+            self.filename = text.clean_path(
                 self.formatter.vformat(self.filename_fmt, self.keywords))
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
-        filename = os.sep + filename
+        filename = os.sep + self.filename
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
 
