@@ -155,14 +155,20 @@ class DownloadJob(Job):
     def handle_url(self, url, keywords):
         """Download the resource specified in 'url'"""
         if self._prepare_download(keywords):
-            self.get_downloader(url).download(url, self.pathfmt)
+            dlobj = self.get_downloader(url)
+            if not dlobj.download(url, self.pathfmt):
+                self._report_failure(dlobj)
 
     def handle_urllist(self, urls, keywords):
         """Download the resource specified in 'url'"""
         if self._prepare_download(keywords):
-            for url in urls:
-                if self.get_downloader(url).download(url, self.pathfmt):
+            for num, url in enumerate(urls):
+                dlobj = self.get_downloader(url)
+                if num:
+                    dlobj.log.info("Trying fallback URL #%d", num)
+                if dlobj.download(url, self.pathfmt):
                     return
+            self._report_failure(dlobj)
 
     def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
@@ -198,6 +204,9 @@ class DownloadJob(Job):
         if self.sleep:
             time.sleep(self.sleep)
         return True
+
+    def _report_failure(self, dlobj):
+        dlobj.log.error("Failed to download %s", self.pathfmt.filename)
 
 
 class KeywordJob(Job):
