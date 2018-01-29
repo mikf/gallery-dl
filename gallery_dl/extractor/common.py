@@ -28,6 +28,7 @@ class Extractor():
     categorytransfer = False
     directory_fmt = ["{category}"]
     filename_fmt = "{name}.{extension}"
+    archive_fmt = ""
     cookiedomain = ""
 
     def __init__(self):
