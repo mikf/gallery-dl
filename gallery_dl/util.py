@@ -19,6 +19,7 @@ import shutil
 import string
 import _string
 import hashlib
+import sqlite3
 import datetime
 import itertools
 import urllib.parse
@@ -517,3 +518,30 @@ class OAuthSession():
     @staticmethod
     def quote(value, _=None, encoding=None, errors=None):
         return urllib.parse.quote(value, "~", encoding, errors)
+
+
+class DownloadArchive():
+
+    def __init__(self, extractor, path):
+        con = sqlite3.connect(path)
+        con.isolation_level = None
+        self.cursor = con.cursor()
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+                            "(entry PRIMARY KEY) WITHOUT ROWID")
+        self.keygen = (
+            extractor.category +
+            (extractor.archive_fmt or extractor.filename_fmt)
+        ).format_map
+        self._key = None
+
+    def check(self, kwdict):
+        """Return True if item described by 'kwdict' exists in archive"""
+        self._key = self.keygen(kwdict)
+        self.cursor.execute(
+            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (self._key,))
+        return self.cursor.fetchone()
+
+    def add(self):
+        """Add last item used in 'check()' to archive"""
+        self.cursor.execute(
+            "INSERT OR IGNORE INTO archive VALUES (?)", (self._key,))
