@@ -63,7 +63,7 @@ class DownloaderBase():
         while True:
             self.reset()
             if tries:
-                self.log.error("%s (%d/%d)", msg, tries, self.retries)
+                self.log.warning("%s (%d/%d)", msg, tries, self.retries)
                 if tries >= self.retries:
                     return False
                 time.sleep(tries)
@@ -81,7 +81,7 @@ class DownloaderBase():
             except exception.DownloadComplete:
                 break
             except Exception as exc:
-                self.log.error(exc)
+                self.log.warning(exc)
                 return False
 
             # check response
