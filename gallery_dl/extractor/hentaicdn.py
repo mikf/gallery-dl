@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,6 +19,7 @@ class HentaicdnChapterExtractor(Extractor):
     directory_fmt = ["{category}", "{manga_id} {title}"]
     filename_fmt = ("{category}_{manga_id}_{chapter:>02}_"
                     "{num:>03}.{extension}")
+    archive_fmt = "{manga_id}_{chapter_id}_{num}"
     url = ""
 
     def items(self):

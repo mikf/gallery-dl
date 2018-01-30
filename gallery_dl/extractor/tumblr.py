@@ -17,7 +17,7 @@ import re
 def _original_image(url):
     match = re.match(
         r"https?://\d+\.media\.tumblr\.com"
-        r"((/[0-9a-f]+)?/tumblr_[^/?&#.]+)_\d+\.([0-9a-z]+)",
+        r"((/[0-9a-f]+)?/tumblr_[^/?&#.]+_)\d+(\.[0-9a-z]+)",
         url)
 
     if not match:
@@ -26,8 +26,8 @@ def _original_image(url):
     path, key, ext = match.groups()
 
     return (
-        "".join((root, path, "_raw." if key else "_1280.", ext)),
-        "".join((root, path, "_500.", ext)),
+        "".join((root, path, "raw" if key else "1280", ext)),
+        "".join((root, path, "500", ext)),
         url,
     )
 
@@ -53,6 +53,7 @@ class TumblrExtractor(Extractor):
     category = "tumblr"
     directory_fmt = ["{category}", "{name}"]
     filename_fmt = "{category}_{blog_name}_{id}o{offset}.{extension}"
+    archive_fmt = "{id}_{offset}"
 
     def __init__(self, match):
         Extractor.__init__(self)

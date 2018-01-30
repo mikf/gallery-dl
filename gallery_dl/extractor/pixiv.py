@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,6 +19,7 @@ class PixivExtractor(Extractor):
     category = "pixiv"
     directory_fmt = ["{category}", "{user[id]} {user[account]}"]
     filename_fmt = "{category}_{user[id]}_{id}{num}.{extension}"
+    archive_fmt = "{id}{num}"
     illust_url = "https://www.pixiv.net/member_illust.php?mode=medium"
 
     def __init__(self):

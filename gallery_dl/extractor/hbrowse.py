@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -70,6 +70,7 @@ class HbrowseChapterExtractor(HbrowseExtractor):
     directory_fmt = ["{category}", "{manga_id} {manga}", "c{chapter:>05}"]
     filename_fmt = ("{category}_{manga_id}_{chapter:>05}_"
                     "{num:>03}.{extension}")
+    archive_fmt = "{manga_id}_{chapter}_{num}"
     pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/c(\d+)"]
     test = [("http://www.hbrowse.com/10363/c00000", {
         "url": "634f4800858913f097bc3b62a8fedaf74b5254bd",

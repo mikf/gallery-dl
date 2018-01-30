@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,6 +22,8 @@ class DynastyscansChapterExtractor(Extractor):
         "{category}", "{manga}", "c{chapter:>03}{chapter_minor}{title:?: //}"]
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
+    archive_fmt = (
+        "{manga}_{chapter}{chapter_minor}_{page}")
     pattern = [r"(?:https?://)?(?:www\.)?dynasty-scans\.com/chapters/([^/]+)"]
     test = [
         (("http://dynasty-scans.com/chapters/"

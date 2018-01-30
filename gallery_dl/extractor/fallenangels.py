@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,12 +17,14 @@ class FallenangelsChapterExtractor(Extractor):
     """Extractor for manga-chapters from fascans.com"""
     category = "fallenangels"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}",
-                     "c{chapter:>03}{chapter_minor}{title:?: //}"]
+    directory_fmt = [
+        "{category}", "{manga}", "c{chapter:>03}{chapter_minor}{title:?: //}"]
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
-    pattern = [(r"(?:https?://)?(manga|truyen)\.fascans\.com/"
-                r"manga/([^/]+)/(\d+)(\.[^/?&#]+)?")]
+    archive_fmt = (
+        "{manga}_{chapter}{chapter_minor}_{page}")
+    pattern = [(r"(?:https?://)?(manga|truyen)\.fascans\.com"
+                r"/manga/([^/]+)/(\d+)(\.[^/?&#]+)?")]
     test = [
         ("https://manga.fascans.com/manga/chronos-ruler/20/1", {
             "url": "4604a7914566cc2da0ff789aa178e2d1c8c241e3",

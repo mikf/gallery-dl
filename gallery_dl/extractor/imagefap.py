@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,12 +13,17 @@ from .. import text, util
 import json
 
 
-class ImagefapGalleryExtractor(Extractor):
-    """Extractor for image galleries from imagefap.com"""
+class ImagefapExtractor(Extractor):
+    """Base class for imagefap extractors"""
     category = "imagefap"
-    subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{name}.{extension}"
+    archive_fmt = "{gallery_id}_{image_id}"
+
+
+class ImagefapGalleryExtractor(ImagefapExtractor):
+    """Extractor for image galleries from imagefap.com"""
+    subcategory = "gallery"
     pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
                 r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")]
     test = [
@@ -35,7 +40,7 @@ class ImagefapGalleryExtractor(Extractor):
     ]
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        ImagefapExtractor.__init__(self)
         self.gid = match.group(1)
         self.image_id = ""
 
@@ -80,12 +85,9 @@ class ImagefapGalleryExtractor(Extractor):
             params["idx"] += 24
 
 
-class ImagefapImageExtractor(Extractor):
+class ImagefapImageExtractor(ImagefapExtractor):
     """Extractor for single images from imagefap.com"""
-    category = "imagefap"
     subcategory = "image"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
-    filename_fmt = "{category}_{gallery_id}_{name}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"]
     test = [("http://www.imagefap.com/photo/1369341772/", {
         "url": "24cc4312e4a5084f39f1e35af5ba92e5f7c1ad3c",
@@ -93,7 +95,7 @@ class ImagefapImageExtractor(Extractor):
     })]
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        ImagefapExtractor.__init__(self)
         self.image_id = match.group(1)
 
     def items(self):
@@ -132,9 +134,8 @@ class ImagefapImageExtractor(Extractor):
         return json_dict
 
 
-class ImagefapUserExtractor(Extractor):
+class ImagefapUserExtractor(ImagefapExtractor):
     """Extractor for all galleries from a user at imagefap.com"""
-    category = "imagefap"
     subcategory = "user"
     categorytransfer = True
     pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
@@ -146,7 +147,7 @@ class ImagefapUserExtractor(Extractor):
     })]
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        ImagefapExtractor.__init__(self)
         try:
             self.user_id = int(match.group(1))
             self.user = None

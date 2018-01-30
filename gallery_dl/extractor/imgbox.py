@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,6 +16,7 @@ import re
 class ImgboxExtractor(Extractor):
     """Base class for imgbox extractors"""
     category = "imgbox"
+    archive_fmt = "{image_key}"
     root = "https://imgbox.com"
 
     def items(self):
@@ -62,7 +63,7 @@ class ImgboxGalleryExtractor(AsynchronousExtractor, ImgboxExtractor):
     """Extractor for image galleries from imgbox.com"""
     subcategory = "gallery"
     directory_fmt = ["{category}", "{title} - {gallery_key}"]
-    filename_fmt = "{num:>03}-{filename}"
+    filename_fmt = "{num:>03}-{name}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"]
     test = [
         ("https://imgbox.com/g/JaX5V5HX7g", {

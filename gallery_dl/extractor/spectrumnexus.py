@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -39,6 +39,7 @@ class SpectrumnexusChapterExtractor(AsynchronousExtractor):
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "{identifier}"]
     filename_fmt = "{manga} {identifier} {page:>03}.{extension}"
+    archive_fmt = "{manga}_{identifier}_{page}"
     pattern = [
         (r"(?:https?://)?(view\.thespectrum\.net/series/"
          r"[^\.]+\.html)\?ch=(Chapter\+(\d+)|Volume\+(\d+))"),

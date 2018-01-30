@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,6 +29,7 @@ class XvideosGalleryExtractor(XvideosExtractor):
     subcategory = "gallery"
     directory_fmt = ["{category}", "{user[name]}", "{title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
+    archive_fmt = "{gallery_id}_{num}"
     pattern = [r"(?:https?://)?(?:www\.)?xvideos\.com"
                r"/profiles/([^/?&#]+)/photos/(\d+)"]
     test = [

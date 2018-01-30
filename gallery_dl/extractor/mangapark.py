@@ -76,6 +76,8 @@ class MangaparkChapterExtractor(MangaparkExtractor):
         "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}"]
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
+    archive_fmt = (
+        "{manga}_{chapter}{chapter_minor}_{page}")
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me(/manga/[^/]+"
                 r"/s\d+(?:/v\d+)?/c\d+[^/]*(?:/e\d+)?)")]
     test = [

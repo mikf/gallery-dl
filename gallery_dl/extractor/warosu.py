@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,6 +18,7 @@ class WarosuThreadExtractor(Extractor):
     subcategory = "thread"
     directory_fmt = ["{category}", "{board}", "{thread} - {title}"]
     filename_fmt = "{tim}-{filename}{ext}"
+    archive_fmt = "{board}_{thread}_{tim}"
     pattern = [r"(?:https?://)?(?:www\.)?warosu\.org/([^/]+)/thread/(\d+)"]
     test = [
         ("https://warosu.org/jp/thread/16656025", {
