@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -62,6 +62,7 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{title:?: //}"]
     filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
+    archive_fmt = "{manga}_{chapter}_{page}"
     pattern = [
         (r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/?&#]+)/(\d+))"),
         (r"(?:https?://)?(?:www\.)?mangareader\.net"

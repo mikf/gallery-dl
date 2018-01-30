@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -106,6 +106,7 @@ class RedditImageExtractor(Extractor):
     """Extractor for reddit-hosted images"""
     category = "reddit"
     subcategory = "image"
+    archive_fmt = "{name}"
     pattern = [r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
                r"/[^/?&#]+(?:\?[^#]*)?"]
     test = [

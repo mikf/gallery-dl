@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,6 +18,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
     category = "khinsider"
     subcategory = "soundtrack"
     directory_fmt = ["{category}", "{album}"]
+    archive_fmt = "{album}_{name}"
     pattern = [r"(?:https?://)?downloads\.khinsider\.com/"
                r"game-soundtracks/album/([^/?&#]+)"]
     test = [(("https://downloads.khinsider.com/game-soundtracks/"

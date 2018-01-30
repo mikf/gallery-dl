@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,6 +22,7 @@ class ExhentaiGalleryExtractor(Extractor):
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery_id}"]
     filename_fmt = "{gallery_id}_{num:>04}_{image_token}_{name}.{extension}"
+    archive_fmt = "{gallery_id}_{num}"
     pattern = [r"(?:https?://)?(g\.e-|e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
     test = [
         ("https://exhentai.org/g/960460/4f0e369d82/", {

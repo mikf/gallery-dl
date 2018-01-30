@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,6 +22,8 @@ class MangafoxChapterExtractor(AsynchronousExtractor):
         "{volume:?v/ />02}c{chapter:>03}{chapter_minor}"]
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
+    archive_fmt = (
+        "{manga}_{chapter}{chapter_minor}_{page}")
     pattern = [(r"(?:https?://)?(?:www\.)?(mangafox\.me/manga/"
                 r"[^/]+/(v\d+/)?c\d+[^/]*)")]
     test = [(("http://mangafox.me/manga/kidou_keisatsu_patlabor/"

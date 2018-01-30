@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,6 +19,7 @@ class MangastreamChapterExtractor(AsynchronousExtractor):
     subcategory = "chapter"
     directory_fmt = ["{category}", "{manga}", "c{chapter}{title:?: //}"]
     filename_fmt = "{manga}_c{chapter}_{page:>03}.{extension}"
+    archive_fmt = "{chapter_id}_{page}"
     pattern = [(r"(?:https?://)?(?:www\.)?(?:readms|mangastream)\.(?:com|net)/"
                 r"r(?:ead)?/([^/]*/([^/]+)/(\d+))")]
     base_url = "https://mangastream.com/r/"

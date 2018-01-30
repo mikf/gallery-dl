@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,7 +17,8 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
     category = "imagebam"
     subcategory = "gallery"
     directory_fmt = ["{category}", "{title} - {gallery_key}"]
-    filename_fmt = "{num:>03}-{filename}"
+    filename_fmt = "{num:>03}-{name}.{extension}"
+    archive_fmt = "{image_id}"
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([^/]+)"]
     test = [(("http://www.imagebam.com/"
               "gallery/adz2y0f9574bjpmonaismyrhtjgvey4o"), {
@@ -76,6 +77,7 @@ class ImagebamImageExtractor(Extractor):
     """Extractor for single images from imagebam.com"""
     category = "imagebam"
     subcategory = "image"
+    archive_fmt = "{token}"
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/image/([0-9a-f]{15})"]
     test = [("http://www.imagebam.com/image/94d56c502511890", {
         "url": "b384893c35a01a09c58018db71ddc4cf2480be95",
