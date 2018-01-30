@@ -35,13 +35,14 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         ("https://www.luscious.net/albums/okinami_277031/", None),
         ("https://members.luscious.net/albums/okinami_277031/", None),
     ]
+    root = "https://luscious.net"
 
     def __init__(self, match):
         AsynchronousExtractor.__init__(self)
         self.gpart, self.gid = match.groups()
 
     def items(self):
-        url = "https://luscious.net/albums/" + self.gpart + "/"
+        url = "{}/albums/{}/".format(self.root, self.gpart)
         page = self.request(url).text
         data = self.get_metadata(page)
         yield Message.Version, 1
@@ -68,15 +69,22 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
             data["artist"] = None
         return data
 
-    def get_images(self, page):
+    def get_images(self, page, extr=text.extract):
         """Collect image-urls and -metadata"""
-        extr = text.extract
         num = 1
         pos = page.find('<div class="album_cover_item">')
         url = extr(page, '<a href="', '"', pos)[0]
         self._check_high_load(page, url)
         while url and not url.endswith("/more_like_this/"):
-            page = self.request("https://luscious.net" + url).text
+            page = self.request(self.root + url).text
+
+            if num == 1:
+                current = extr(page, '"pj_current_page" value="', '"')[0]
+                if current and current != "1":
+                    url = "{}/albums/{}/jump_to_page/1/".format(
+                        self.root, self.gid)
+                    page = self.request(url, method="POST").text
+
             imgid, pos = extr(url , '/id/', '/')
             url  , pos = extr(page, '<link rel="next" href="', '"')
             self._check_high_load(page, url)
