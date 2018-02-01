@@ -10,6 +10,7 @@ import sys
 import time
 import json
 import hashlib
+import logging
 from . import extractor, downloader, config, util, output, exception
 from .extractor.message import Message
 
@@ -147,34 +148,58 @@ class DownloadJob(Job):
 
     def __init__(self, url, parent=None):
         Job.__init__(self, url, parent)
+        self.log = logging.getLogger("download")
         self.pathfmt = None
+        self.archive = None
         self.sleep = None
         self.downloaders = {}
         self.out = output.select()
 
-    def handle_url(self, url, keywords):
+    def handle_url(self, url, keywords, fallback=None):
         """Download the resource specified in 'url'"""
-        if self._prepare_download(keywords):
-            dlobj = self.get_downloader(url)
-            if not dlobj.download(url, self.pathfmt):
-                self._report_failure(dlobj)
+        # prepare download
+        self.pathfmt.set_keywords(keywords)
+
+        if self.pathfmt.exists() or \
+                self.archive and self.archive.check(keywords):
+            self.out.skip(self.pathfmt.path)
+            return
+
+        if self.sleep:
+            time.sleep(self.sleep)
+
+        # download from URL
+        if not self.get_downloader(url).download(url, self.pathfmt):
+
+            # use fallback URLs if available
+            for num, url in enumerate(fallback or [], 1):
+                self.log.info("Trying fallback URL #%d", num)
+                if self.get_downloader(url).download(url, self.pathfmt):
+                    break
+            else:
+                # download failed
+                self.log.error(
+                    "Failed to download %s", self.pathfmt.filename)
+                return
+
+        # download successful
+        if self.archive:
+            self.archive.add()
 
     def handle_urllist(self, urls, keywords):
         """Download the resource specified in 'url'"""
-        if self._prepare_download(keywords):
-            for num, url in enumerate(urls):
-                dlobj = self.get_downloader(url)
-                if num:
-                    dlobj.log.info("Trying fallback URL #%d", num)
-                if dlobj.download(url, self.pathfmt):
-                    return
-            self._report_failure(dlobj)
+        fallback = iter(urls)
+        url = next(fallback)
+        self.handle_url(url, keywords, fallback)
 
     def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
         if not self.pathfmt:
             self.pathfmt = util.PathFormat(self.extractor)
             self.sleep = self.extractor.config("sleep")
+            archive = self.extractor.config("archive")
+            if archive:
+                self.archive = util.DownloadArchive(self.extractor, archive)
         self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url, keywords):
@@ -195,18 +220,6 @@ class DownloadJob(Job):
             instance = klass(self.extractor.session, self.out)
             self.downloaders[scheme] = instance
         return instance
-
-    def _prepare_download(self, keywords):
-        self.pathfmt.set_keywords(keywords)
-        if self.pathfmt.exists():
-            self.out.skip(self.pathfmt.path)
-            return False
-        if self.sleep:
-            time.sleep(self.sleep)
-        return True
-
-    def _report_failure(self, dlobj):
-        dlobj.log.error("Failed to download %s", self.pathfmt.filename)
 
 
 class KeywordJob(Job):
