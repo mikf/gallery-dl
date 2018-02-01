@@ -344,6 +344,20 @@ Description User-Agent header value to be used for HTTP requests.
 =========== =====
 
 
+extractor.*.archive
+-------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description File to store IDs of downloaded files in. Downloads of files
+            already recorded in this archive file will be skipped_.
+
+            The resulting archive file is not a plain text file but an SQLite3
+            database, as lookup operations are significantly faster when the
+            amount of stored IDs gets reasonably large.
+=========== =====
+
+
 Extractor-specific Options
 ==========================
 
@@ -779,6 +793,7 @@ How To      - login and visit Tumblr's Applications_ section
 .. |datetime.max| replace:: ``datetime.max``
 .. |strptime| replace:: strftime() and strptime() Behavior
 
+.. _skipped: `extractor.*.skip`_
 .. _`date-min and date-max`: `extractor.reddit.date-min & .date-max`_
 .. _date-format: extractor.reddit.date-format_
 

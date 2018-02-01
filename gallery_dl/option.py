@@ -207,6 +207,12 @@ def build_parser():
 
     selection = parser.add_argument_group("Selection Options")
     selection.add_argument(
+        "--download-archive",
+        metavar="FILE", dest="archive", action=ConfigAction,
+        help=("Record all downloaded files in the archive file and "
+              "skip downloading any file already in it.")
+    )
+    selection.add_argument(
         "--range",
         metavar="RANGE", dest="image_range",
         help=("Specify which images to download through a comma seperated list"
