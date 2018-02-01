@@ -26,6 +26,6 @@ class PowermangaMangaExtractor(foolslide.FoolslideMangaExtractor):
     category = "powermanga"
     pattern = foolslide.manga_pattern(r"read\.powermanga\.org")
     test = [("https://read.powermanga.org/series/one_piece/", {
-        "url": "6ba226780a3c1c1f1cc5f4a4b96c18260f4ec0f3",
-        "keyword": "576109177b1bb59ab2f55450cc9ef4a31e28714c",
+        "url": "3b2037a9ffe30ea0da4e710a40863f0693f21afe",
+        "keyword": "e2a924b0924cba711e78b3585ad24a97dec70006",
     })]
