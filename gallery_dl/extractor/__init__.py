@@ -103,6 +103,23 @@ def find(url):
     return None
 
 
+def add(klass):
+    """Add 'klass' to the list of available extractors"""
+    for pattern in klass:
+        _cache.append((re.compile(pattern), klass))
+
+
+def add_module(module):
+    """Add all extractors in 'module' to the list of available extractors"""
+    tuples = [
+        (re.compile(pattern), klass)
+        for klass in _get_classes(module)
+        for pattern in klass.pattern
+    ]
+    _cache.extend(tuples)
+    return tuples
+
+
 def extractors():
     """Yield all available extractor classes"""
     return sorted(
@@ -139,14 +156,9 @@ def _list_patterns():
     yield from _cache
 
     for module_name in _module_iter:
-        module = importlib.import_module("."+module_name, __package__)
-        tuples = [
-            (re.compile(pattern), klass)
-            for klass in _get_classes(module)
-            for pattern in klass.pattern
-        ]
-        _cache.extend(tuples)
-        yield from tuples
+        yield from add_module(
+            importlib.import_module("."+module_name, __package__)
+        )
 
 
 def _get_classes(module):

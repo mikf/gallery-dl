@@ -30,7 +30,7 @@ class Rule34TagExtractor(booru.TagMixin, Rule34Extractor):
                 r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")]
     test = [("http://rule34.xxx/index.php?page=post&s=list&tags=danraku", {
         "content": "a01768c6f86f32eb7ebbdeb87c30b0d9968d7f97",
-        "pattern": r"https?://b?img\.rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
+        "pattern": r"https?://(.?img\.)?rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
         "count": 2,
     })]
 
