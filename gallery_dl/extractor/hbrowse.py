@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,13 +8,13 @@
 
 """Extract images from http://www.hbrowse.com/"""
 
-from .common import Extractor, MangaExtractor, Message
+from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
 from urllib.parse import urljoin
 import json
 
 
-class HbrowseExtractor(Extractor):
+class HbrowseExtractor():
     """Base class for hbrowse extractors"""
     category = "hbrowse"
     root = "http://www.hbrowse.com"
@@ -64,41 +64,30 @@ class HbrowseMangaExtractor(HbrowseExtractor, MangaExtractor):
             results.append((urljoin(self.root, url), data.copy()))
 
 
-class HbrowseChapterExtractor(HbrowseExtractor):
+class HbrowseChapterExtractor(HbrowseExtractor, ChapterExtractor):
     """Extractor for manga-chapters from hbrowse.com"""
-    subcategory = "chapter"
     directory_fmt = ["{category}", "{manga_id} {manga}", "c{chapter:>05}"]
     filename_fmt = ("{category}_{manga_id}_{chapter:>05}_"
-                    "{num:>03}.{extension}")
+                    "{page:>03}.{extension}")
     pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/c(\d+)"]
     test = [("http://www.hbrowse.com/10363/c00000", {
         "url": "634f4800858913f097bc3b62a8fedaf74b5254bd",
-        "keyword": "730bd33de2a0a0fb4e0b6dcdafedcaeee1060047",
+        "keyword": "f37cafef404696312f5db6ccaaaf72737d309e2d",
         "content": "44578ebbe176c2c27434966aef22945787e2781e",
     })]
 
     def __init__(self, match):
-        HbrowseExtractor.__init__(self)
         self.gid, self.chapter = match.groups()
         self.path = "/{}/c{}/".format(self.gid, self.chapter)
+        ChapterExtractor.__init__(self, self.root + self.path)
 
-    def items(self):
-        page = self.request(self.root + self.path).text
-        data = self.get_job_metadata(page)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["num"], url in enumerate(self.get_image_urls(page), 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
-
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
+    def get_metadata(self, page):
         return self.parse_page(page, {
             "manga_id": util.safe_int(self.gid),
             "chapter": util.safe_int(self.chapter)
         })
 
-    def get_image_urls(self, page):
-        """Yield all image-urls for a 'chapter'"""
+    def get_images(self, page):
         base = self.root + "/data" + self.path
         json_data = text.extract(page, ';list = ', ',"zzz"')[0] + "]"
-        return [base + name for name in json.loads(json_data)]
+        return [(base + name, None) for name in json.loads(json_data)]

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,21 +8,16 @@
 
 """Extract manga-chapters from https://www.fascans.com/"""
 
-from .common import Extractor, MangaExtractor, Message
+from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
 import json
 
 
-class FallenangelsChapterExtractor(Extractor):
+class FallenangelsChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from fascans.com"""
     category = "fallenangels"
-    subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}",
-                     "c{chapter:>03}{chapter_minor}{title:?: //}"]
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
-    pattern = [(r"(?:https?://)?(manga|truyen)\.fascans\.com/"
-                r"manga/([^/]+)/(\d+)(\.[^/?&#]+)?")]
+    pattern = [(r"(?:https?://)?(manga|truyen)\.fascans\.com"
+                r"/manga/([^/]+)/(\d+)(\.[^/?&#]+)?")]
     test = [
         ("https://manga.fascans.com/manga/chronos-ruler/20/1", {
             "url": "4604a7914566cc2da0ff789aa178e2d1c8c241e3",
@@ -38,24 +33,12 @@ class FallenangelsChapterExtractor(Extractor):
     ]
 
     def __init__(self, match):
-        Extractor.__init__(self)
         self.version, self.manga, self.chapter, self.minor = match.groups()
-
-    def items(self):
         url = "https://{}.fascans.com/manga/{}/{}/1".format(
             self.version, self.manga, self.chapter)
-        page = self.request(url).text
-        data = self.get_metadata(page)
-        imgs = self.get_images(page)
-        data["count"] = len(imgs)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["page"], img in enumerate(imgs, 1):
-            url = img["page_image"]
-            yield Message.Url, url, text.nameext_from_url(url, data)
+        ChapterExtractor.__init__(self, url)
 
     def get_metadata(self, page):
-        """Collect metadata for extractor-job"""
         lang = "vi" if self.version == "truyen" else "en"
         data = {
             "chapter": self.chapter,
@@ -70,8 +53,12 @@ class FallenangelsChapterExtractor(Extractor):
 
     @staticmethod
     def get_images(page):
-        """Return a list of all images in this chapter"""
-        return json.loads(text.extract(page, "var pages = ", ";")[0])
+        return [
+            (img["page_image"], None)
+            for img in json.loads(
+                text.extract(page, "var pages = ", ";")[0]
+            )
+        ]
 
 
 class FallenangelsMangaExtractor(MangaExtractor):

@@ -8,12 +8,12 @@
 
 """Extract manga-chapters and entire manga from https://mangapark.me/"""
 
-from .common import Extractor, MangaExtractor, Message
+from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
 from urllib.parse import urljoin
 
 
-class MangaparkExtractor(Extractor):
+class MangaparkExtractor():
     """Base class for mangapark extractors"""
     category = "mangapark"
     root = "https://mangapark.me"
@@ -68,14 +68,8 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
             results.append((self.root + path, data.copy()))
 
 
-class MangaparkChapterExtractor(MangaparkExtractor):
+class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.me"""
-    subcategory = "chapter"
-    directory_fmt = [
-        "{category}", "{manga}",
-        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}"]
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me(/manga/[^/]+"
                 r"/s\d+(?:/v\d+)?/c\d+[^/]*(?:/e\d+)?)")]
     test = [
@@ -95,20 +89,11 @@ class MangaparkChapterExtractor(MangaparkExtractor):
     ]
 
     def __init__(self, match):
-        MangaparkExtractor.__init__(self)
         self.path = match.group(1)
+        url = self.root + self.path + "?zoom=2"
+        ChapterExtractor.__init__(self, url)
 
-    def items(self):
-        page = self.request(self.root + self.path + "?zoom=2").text
-        data = self.get_job_metadata(page)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for url, image in self.get_images(page):
-            data.update(image)
-            yield Message.Url, url, text.nameext_from_url(url, data)
-
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
+    def get_metadata(self, page):
         data = {"lang": "en", "language": "English"}
         self.parse_chapter_path(self.path, data)
         text.extract_all(page, (
@@ -126,7 +111,6 @@ class MangaparkChapterExtractor(MangaparkExtractor):
         return data
 
     def get_images(self, page):
-        """Collect image-urls, -widths and -heights"""
         pos = 0
         num = 0
         while True:

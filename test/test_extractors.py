@@ -20,7 +20,7 @@ SKIP = {
     # temporary issues
     "chronos",
     "coreimg",
-    "luscious",
+    "yeet",
 }
 
 

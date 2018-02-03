@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,7 +18,7 @@ import requests
 import threading
 import http.cookiejar
 from .message import Message
-from .. import config, exception
+from .. import config, text, exception
 
 
 class Extractor():
@@ -163,6 +163,47 @@ class AsynchronousExtractor(Extractor):
         put(None)
 
 
+class ChapterExtractor(Extractor):
+
+    subcategory = "chapter"
+    directory_fmt = [
+        "{category}", "{manga}",
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}"]
+    filename_fmt = (
+        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
+
+    def __init__(self, url):
+        Extractor.__init__(self)
+        self.url = url
+
+    def items(self):
+        page = self.request(self.url).text
+        data = self.get_metadata(page)
+        imgs = self.get_images(page)
+
+        if "count" in data:
+            images = zip(range(1, data["count"]+1), imgs)
+        else:
+            try:
+                data["count"] = len(imgs)
+            except TypeError:
+                pass
+            images = enumerate(imgs, 1)
+
+        yield Message.Version, 1
+        yield Message.Directory, data
+        for data["page"], (url, imgdata) in images:
+            if imgdata:
+                data.update(imgdata)
+            yield Message.Url, url, text.nameext_from_url(url, data)
+
+    def get_metadata(self, page):
+        """Return a dict with general metadata"""
+
+    def get_images(self, page):
+        """Return a list of all (image-url, metadata)-tuples"""
+
+
 class MangaExtractor(Extractor):
 
     subcategory = "manga"
@@ -176,7 +217,6 @@ class MangaExtractor(Extractor):
         self.url = url or self.scheme + "://" + match.group(1)
 
     def items(self):
-        self.login()
         page = self.request(self.url).text
 
         chapters = self.chapters(page)
@@ -187,12 +227,8 @@ class MangaExtractor(Extractor):
         for chapter, data in chapters:
             yield Message.Queue, chapter, data
 
-    def login(self):
-        """Login and set necessary cookies"""
-
     def chapters(self, page):
-        """Return a list of all (url, metadata)-tuples"""
-        return []
+        """Return a list of all (chapter-url, metadata)-tuples"""
 
 
 class SharedConfigExtractor(Extractor):
