@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,54 +8,36 @@
 
 """Extract manga-chapters from https://dynasty-scans.com/"""
 
-from .common import Extractor, Message
+from .common import ChapterExtractor
 from .. import text, util
 import re
 import json
 
 
-class DynastyscansChapterExtractor(Extractor):
+class DynastyscansChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from dynasty-scans.com"""
     category = "dynastyscans"
-    subcategory = "chapter"
-    directory_fmt = [
-        "{category}", "{manga}", "c{chapter:>03}{chapter_minor}{title:?: //}"]
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     pattern = [r"(?:https?://)?(?:www\.)?dynasty-scans\.com/chapters/([^/]+)"]
     test = [
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {
             "url": "dce64e8c504118f1ab4135c00245ea12413896cb",
-            "keyword": "fb2f470b995df5b301ccede31ed9829a010236db",
+            "keyword": "ec5c56bbd5c97aa521d00f2598bba4663fb8ab9f",
         }),
         (("http://dynasty-scans.com/chapters/"
           "new_game_the_spinoff_special_13"), {
             "url": "dbe5bbb74da2edcfb1832895a484e2a40bc8b538",
-            "keyword": "281bbe0fb74b812ced595619ca5876983490dc0e",
+            "keyword": "1208a102d9a1bb0b0c740a67996d9b26a9357b64",
         }),
     ]
     root = "https://dynasty-scans.com"
 
     def __init__(self, match):
-        Extractor.__init__(self)
         self.chaptername = match.group(1)
+        url = self.root + "/chapters/" + self.chaptername
+        ChapterExtractor.__init__(self, url)
 
-    def items(self):
-        page = self.request(self.root + "/chapters/" + self.chaptername,
-                            encoding="utf-8").text
-        data = self.get_job_metadata(page)
-        imgs = self.get_image_data(page)
-        data["count"] = len(imgs)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["page"], img in enumerate(imgs, 1):
-            url = self.root + img["image"]
-            text.nameext_from_url(url, data)
-            data["name"] = img["name"]
-            yield Message.Url, url, data
-
-    def get_job_metadata(self, page):
+    def get_metadata(self, page):
         """Collect metadata for extractor-job"""
         info  , pos = text.extract(page, "<h3 id='chapter-title'><b>", "</b>")
         author, pos = text.extract(page, " by ", "</a>", pos)
@@ -82,8 +64,10 @@ class DynastyscansChapterExtractor(Extractor):
             "language": "English",
         }
 
-    @staticmethod
-    def get_image_data(page):
+    def get_images(self, page):
         """Extract list of all image-urls for a manga chapter"""
         data = text.extract(page, "var pages = ", ";\n")[0]
-        return json.loads(data)
+        return [
+            (self.root + img["image"], None)
+            for img in json.loads(data)
+        ]
