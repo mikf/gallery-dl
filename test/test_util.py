@@ -175,6 +175,13 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{name}{title4:?//}", "Name")
         self._run_test("{name}{title4:? **/''/}", "Name")
 
+    def test_missing(self):
+        replacement = "None"
+        self._run_test("{missing}", replacement)
+        self._run_test("{missing.attr}", replacement)
+        self._run_test("{missing[key]}", replacement)
+        self._run_test("{missing?a/b/}", replacement)
+
     def _run_test(self, format_string, result):
         formatter = util.Formatter()
         output = formatter.vformat(format_string, self.kwdict)
