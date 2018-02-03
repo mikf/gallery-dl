@@ -331,6 +331,9 @@ class Formatter():
         """Return value called 'field_name' from 'kwargs'"""
         first, rest = _string.formatter_field_name_split(field_name)
 
+        if first not in kwargs:
+            return None
+
         obj = kwargs[first]
         for is_attr, i in rest:
             if is_attr:
