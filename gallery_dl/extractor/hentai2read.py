@@ -34,7 +34,7 @@ class Hentai2readMangaExtractor(MangaExtractor):
     def chapters(self, page):
         results = []
         manga, pos = text.extract(
-            page, '<span itemprop="itemreviewed">', '</span>')
+            page, '<span itemprop="name">', '</span>')
         mtype, pos = text.extract(
             page, '<small class="text-danger">[', ']</small>', pos)
         manga_id = util.safe_int(text.extract(page, 'data-mid="', '"', pos)[0])
