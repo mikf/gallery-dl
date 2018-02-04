@@ -78,6 +78,7 @@ modules = [
     "sensescans",
     "slideshare",
     "spectrumnexus",
+    "subapics",
     "thebarchive",
     "tumblr",
     "twitter",
