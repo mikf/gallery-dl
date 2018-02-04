@@ -40,6 +40,7 @@ Jaimini's Box        https://jaiminisbox.com/            Chapters, Manga
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
 KissManga            http://kissmanga.com/               Chapters, Manga
+Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag-Searches
 Love is Over Archive https://archive.loveisover.me/      Threads
 Luscious             https://luscious.net/               Albums
