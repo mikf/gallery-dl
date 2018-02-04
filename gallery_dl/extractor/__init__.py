@@ -47,6 +47,7 @@ modules = [
     "khinsider",
     "kireicake",
     "kissmanga",
+    "komikcast",
     "konachan",
     "loveisover",
     "luscious",
