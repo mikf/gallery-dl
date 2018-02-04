@@ -71,6 +71,7 @@ Sen Manga            http://raw.senmanga.com/            Chapters
 Sense-Scans          http://sensescans.com/              Chapters, Manga
 SlideShare           https://www.slideshare.net/         Presentations
 Spectrum Nexus       |http://www.thes-0|                 Chapters, Manga
+Subapics             https://subapics.com/               Chapters, Manga
 The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
 Twitter              https://twitter.com/                Tweets
