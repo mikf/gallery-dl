@@ -35,14 +35,13 @@ def parse_range(rangespec):
     ranges = []
 
     for group in rangespec.split(","):
-        parts = group.split("-", maxsplit=1)
+        first, sep, last = group.partition("-")
         try:
-            if len(parts) == 1:
-                beg = int(parts[0])
-                end = beg
+            if not sep:
+                beg = end = int(first)
             else:
-                beg = int(parts[0]) if parts[0].strip() else 1
-                end = int(parts[1]) if parts[1].strip() else sys.maxsize
+                beg = int(first) if first.strip() else 1
+                end = int(last) if last.strip() else sys.maxsize
             ranges.append((beg, end) if beg <= end else (end, beg))
         except ValueError:
             pass
