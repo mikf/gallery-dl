@@ -40,10 +40,11 @@ class HentaihereMangaExtractor(MangaExtractor):
             page, '<span class="mngType text-danger">[', ']</span>', pos)
 
         while True:
-            url, pos = text.extract(
-                page, '<li class="sub-chp clearfix">\n<a href="', '"', pos)
-            if not url:
+            marker, pos = text.extract(
+                page, '<li class="sub-chp clearfix">', '', pos)
+            if marker is None:
                 return results
+            url, pos = text.extract(page, '<a href="', '"', pos)
             chapter, pos = text.extract(page, 'title="Tagged: -">\n', '<', pos)
             chapter_id, pos = text.extract(page, '/C', '"', pos)
             chapter, _, title = text.unescape(chapter).strip().partition(" - ")
