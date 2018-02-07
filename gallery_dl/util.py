@@ -259,6 +259,16 @@ class ChainPredicate():
         return True
 
 
+class ExtendedUrl():
+    """URL with attached config dict"""
+    def __init__(self, url, confdict):
+        self.value = url
+        self.config = confdict
+
+    def __str__(self):
+        return self.value
+
+
 class Formatter():
     """Custom, trimmed-down version of string.Formatter
 

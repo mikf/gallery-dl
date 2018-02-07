@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -73,8 +73,8 @@ def load(*files, format="json", strict=False):
 
 
 def clear():
-    """Reset configuration to en empty state"""
-    globals()["_config"].clear()
+    """Reset configuration to an empty state"""
+    _config.clear()
 
 
 def get(keys, default=None, conf=_config):
@@ -124,3 +124,24 @@ def setdefault(keys, value, conf=_config):
             conf[k] = temp
             conf = temp
     return conf.setdefault(keys[-1], value)
+
+
+class apply():
+    """Context Manager to apply a dict to global config"""
+    _sentinel = object()
+
+    def __init__(self, config_dict):
+        self.original_values = {}
+        self.config_dict = config_dict
+        for key, value in config_dict.items():
+            self.original_values[key] = _config.get(key, self._sentinel)
+
+    def __enter__(self):
+        _config.update(self.config_dict)
+
+    def __exit__(self, etype, value, traceback):
+        for key, value in self.original_values.items():
+            if value is self._sentinel:
+                del _config[key]
+            else:
+                _config[key] = value

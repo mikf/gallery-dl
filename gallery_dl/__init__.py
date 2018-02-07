@@ -20,6 +20,7 @@ if sys.hexversion < 0x3030000:
     print("Python 3.3+ required", file=sys.stderr)
     sys.exit(1)
 
+import json
 import logging
 from . import version, config, option, extractor, job, util, exception
 
@@ -51,14 +52,6 @@ def progress(urls, pformat):
         yield pinfo["url"]
 
 
-def sanatize_input(file):
-    """Filter and strip strings from an input file"""
-    for line in file:
-        line = line.strip()
-        if line:
-            yield line
-
-
 def prepare_range(rangespec, target):
     if rangespec:
         range = util.optimize_range(util.parse_range(rangespec))
@@ -76,6 +69,56 @@ def prepare_filter(filterexpr, target):
             config.set(("_", target, "filter"), codeobj)
         except (SyntaxError, ValueError, TypeError) as exc:
             log.warning(exc)
+
+
+def parse_inputfile(file):
+    """Filter and strip strings from an input file
+
+    Lines starting with '#' and empty lines will be ignored.
+    Lines starting with '{' will be interpreted as JSON-object and
+      its values, while processing the next URL, are going to be
+      applied to the global config.
+    Everything else will be used as potential URL.
+
+    Example input file:
+
+    # this is a comment
+    {"base-directory": "/tmp/", "skip": false}
+    {"more": "multiple objects before an URL will be merged together"}
+    https://example.org/
+
+    # config is back to its initial values
+    https://example.com/index.htm
+    """
+    confdict = None
+
+    for line in file:
+        line = line.strip()
+
+        if not line or line[0] == "#":
+            # empty line or comment
+            continue
+
+        elif line[0] == "{":
+            # url-specfic config spec
+            try:
+                cfd = json.loads(line)
+            except ValueError as exc:
+                log.warning("input file: unable to parse config line: %s",exc)
+                continue
+
+            if confdict:
+                util.combine_dict(confdict, cfd)
+            else:
+                confdict = cfd
+
+        else:
+            # url
+            if confdict:
+                yield util.ExtendedUrl(line, confdict)
+            else:
+                yield line
+            confdict = None
 
 
 def main():
@@ -162,7 +205,7 @@ def main():
                         file = sys.stdin
                     else:
                         file = open(args.inputfile)
-                    urls += sanatize_input(file)
+                    urls += parse_inputfile(file)
                     file.close()
                 except OSError as exc:
                     log.warning("input file: %s", exc)
@@ -187,7 +230,11 @@ def main():
             for url in urls:
                 try:
                     log.debug("Starting %s for '%s'", jobtype.__name__, url)
-                    jobtype(url).run()
+                    if isinstance(url, util.ExtendedUrl):
+                        with config.apply(url.config):
+                            jobtype(url.value).run()
+                    else:
+                        jobtype(url).run()
                 except exception.NoExtractorError:
                     log.error("No suitable extractor found for '%s'", url)
 
