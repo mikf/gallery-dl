@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,29 +8,27 @@
 
 """Extract comic-issues and entire comics from http://readcomiconline.to/"""
 
-from . import kissmanga
-from .. import text
+from .common import ChapterExtractor, MangaExtractor
+from .. import text, cloudflare
 import re
 
 
-class ReadcomiconlineExtractor(kissmanga.KissmangaExtractor):
+class ReadcomiconlineBase():
     """Base class for readcomiconline extractors"""
     category = "readcomiconline"
     directory_fmt = ["{category}", "{comic}", "{issue:>03}"]
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     root = "http://readcomiconline.to"
+    useragent = "Wget/1.19.2 (linux-gnu)"
 
-    def __init__(self, match):
-        kissmanga.KissmangaExtractor.__init__(self, match)
-        self.session.headers["User-Agent"] = "Wget/1.19.2 (linux-gnu)"
+    request = cloudflare.request_func
 
 
-class ReadcomiconlineComicExtractor(ReadcomiconlineExtractor,
-                                    kissmanga.KissmangaMangaExtractor):
+class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
     """Extractor for comics from readcomiconline.to"""
     subcategory = "comic"
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to/"
-               r"Comic/[^/?&#]+/?$"]
+    pattern = [r"(?i)(?:https?://)?(?:www\.)?(readcomiconline\.to"
+               r"/Comic/[^/?&#]+/?)$"]
     test = [
         ("http://readcomiconline.to/Comic/W-i-t-c-h", {
             "url": "c5a530538a30b176916e30cbe223a93d83cb2691",
@@ -41,6 +39,10 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineExtractor,
             "keyword": "7d4877d1215650a768097a8626a2f0c6083119a4",
         }),
     ]
+
+    def __init__(self, match):
+        MangaExtractor.__init__(self, match)
+        self.session.headers["User-Agent"] = self.useragent
 
     def chapters(self, page):
         results = []
@@ -58,19 +60,21 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineExtractor,
         return results
 
 
-class ReadcomiconlineIssueExtractor(ReadcomiconlineExtractor,
-                                    kissmanga.KissmangaChapterExtractor):
+class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     """Extractor for comic-issues from readcomiconline.to"""
     subcategory = "issue"
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to/"
-               r"Comic/[^/?&#]+/[^/?&#]+\?id=\d+"]
+    pattern = [r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
+               r"/Comic/[^/?&#]+/[^/?&#]+\?id=\d+"]
     test = [("http://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
         "url": "a45c77f8fbde66091fe2346d6341f9cf3c6b1bc5",
         "keyword": "dee8a8a44659825afe1d69e1d809a48b03e98c68",
     })]
 
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
+    def __init__(self, match):
+        ChapterExtractor.__init__(self, match.group(0))
+        self.session.headers["User-Agent"] = self.useragent
+
+    def get_metadata(self, page):
         comic, pos = text.extract(page, "   - Read\r\n    ", "\r\n")
         iinfo, pos = text.extract(page, "    ", "\r\n", pos)
         match = re.match(r"(?:Issue )?#(\d+)|(.+)", iinfo)
@@ -82,6 +86,10 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineExtractor,
         }
 
     @staticmethod
-    def get_image_urls(page):
-        """Extract list of all image-urls for a manga chapter"""
-        return list(text.extract_iter(page, 'lstImages.push("', '"'))
+    def get_images(page):
+        return [
+            (url, None)
+            for url in text.extract_iter(
+                page, 'lstImages.push("', '"'
+            )
+        ]

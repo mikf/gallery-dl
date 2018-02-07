@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,42 +8,23 @@
 
 """Extract manga-chapters from https://mangastream.com/"""
 
-from .common import AsynchronousExtractor, Message
+from .common import ChapterExtractor
 from .. import text, util
 from urllib.parse import urljoin
 
 
-class MangastreamChapterExtractor(AsynchronousExtractor):
+class MangastreamChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from mangastream.com"""
     category = "mangastream"
-    subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter}{title:?: //}"]
-    filename_fmt = "{manga}_c{chapter}_{page:>03}.{extension}"
     pattern = [(r"(?:https?://)?(?:www\.)?(?:readms|mangastream)\.(?:com|net)/"
                 r"r(?:ead)?/([^/]*/([^/]+)/(\d+))")]
-    base_url = "https://mangastream.com/r/"
+    base_url = "https://readms.net/r/"
 
     def __init__(self, match):
-        AsynchronousExtractor.__init__(self)
         self.part, self.chapter, self.ch_id = match.groups()
+        ChapterExtractor.__init__(self, self.base_url + self.part)
 
-    def items(self):
-        page = self.request(self.base_url + self.part).text
-        data = self.get_job_metadata(page)
-        next_url = None
-        yield Message.Version, 1
-        yield Message.Directory, data.copy()
-        for data["page"] in range(1, data["count"]+1):
-            if next_url:
-                page = self.request(next_url).text
-            next_url, image_url = self.get_page_metadata(page)
-            text.nameext_from_url(image_url, data)
-            next_url = urljoin(self.base_url, next_url)
-            image_url = urljoin(self.base_url, image_url)
-            yield Message.Url, image_url, data.copy()
-
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
+    def get_metadata(self, page):
         manga, pos = text.extract(
             page, '<span class="hidden-xs hidden-sm">', "<")
         pos = page.find(self.part, pos)
@@ -59,9 +40,11 @@ class MangastreamChapterExtractor(AsynchronousExtractor):
             "language": "English",
         }
 
-    @staticmethod
-    def get_page_metadata(page):
-        """Collect next url, image-url and metadata for one manga-page"""
-        nurl, pos = text.extract(page, '<div class="page">\n<a href="', '"')
-        iurl, pos = text.extract(page, '<img id="manga-page" src="', '"', pos)
-        return nurl, iurl
+    def get_images(self, page):
+        while True:
+            next_url, pos = text.extract(
+                page, '<div class="page">\n<a href="', '"')
+            image_url, pos = text.extract(
+                page, '<img id="manga-page" src="', '"', pos)
+            yield urljoin(self.base_url, image_url), None
+            page = self.request(urljoin(self.base_url, next_url)).text

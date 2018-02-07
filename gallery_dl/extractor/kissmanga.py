@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extract manga-chapters and entire manga from http://kissmanga.com/"""
 
-from .common import Extractor, MangaExtractor, Message
+from .common import ChapterExtractor, MangaExtractor
 from .. import text, util, cloudflare, aes, exception
 from ..cache import cache
 import re
@@ -21,20 +21,10 @@ IV = [
 ]
 
 
-class KissmangaExtractor(Extractor):
+class KissmangaBase():
     """Base class for kissmanga extractors"""
     category = "kissmanga"
-    directory_fmt = [
-        "{category}", "{manga}",
-        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}"]
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     root = "http://kissmanga.com"
-
-    def __init__(self, match):
-        Extractor.__init__(self)
-        self.url = match.group(0)
-        self.session.headers["Referer"] = self.root
 
     def request(self, url):
         response = cloudflare.request_func(self, url)
@@ -72,10 +62,10 @@ class KissmangaExtractor(Extractor):
         return data
 
 
-class KissmangaMangaExtractor(KissmangaExtractor, MangaExtractor):
+class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
     """Extractor for manga from kissmanga.com"""
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com/"
-               r"Manga/[^/?&#]+/?$"]
+    pattern = [r"(?i)(?:https?://)?(?:www\.)?(kissmanga\.com"
+               r"/Manga/[^/?&#]+/?)$"]
     test = [
         ("http://kissmanga.com/Manga/Dropout", {
             "url": "992befdd64e178fe5af67de53f8b510860d968ca",
@@ -105,11 +95,10 @@ class KissmangaMangaExtractor(KissmangaExtractor, MangaExtractor):
         return results
 
 
-class KissmangaChapterExtractor(KissmangaExtractor):
+class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
     """Extractor for manga-chapters from kissmanga.com"""
-    subcategory = "chapter"
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com/"
-               r"Manga/[^/?&#]+/[^/?&#]+\?id=\d+"]
+    pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com"
+               r"/Manga/[^/?&#]+/[^/?&#]+\?id=\d+"]
     test = [
         ("http://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
             "url": "4136bcd1c6cecbca8cc2bc965d54f33ef0a97cc0",
@@ -126,18 +115,11 @@ class KissmangaChapterExtractor(KissmangaExtractor):
         ("http://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608", None),
     ]
 
-    def items(self):
-        page = self.request(self.url).text
-        data = self.get_job_metadata(page)
-        imgs = self.get_image_urls(page)
-        data["count"] = len(imgs)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["page"], url in enumerate(imgs, 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
+    def __init__(self, match):
+        ChapterExtractor.__init__(self, match.group(0))
+        self.session.headers["Referer"] = self.root
 
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
+    def get_metadata(self, page):
         title = text.extract(page, "<title>", "</title>")[0].strip()
         manga, cinfo = title.split("\n")[1:3]
         data = {
@@ -148,12 +130,11 @@ class KissmangaChapterExtractor(KissmangaExtractor):
         }
         return self.parse_chapter_string(data)
 
-    def get_image_urls(self, page):
-        """Extract list of all image-urls for a manga chapter"""
+    def get_images(self, page):
         try:
             key = self.build_aes_key(page)
             return [
-                aes.aes_cbc_decrypt_text(data, key, IV)
+                (aes.aes_cbc_decrypt_text(data, key, IV), None)
                 for data in text.extract_iter(
                     page, 'lstImages.push(wrapKA("', '"'
                 )
