@@ -168,9 +168,9 @@ class ChapterExtractor(Extractor):
     subcategory = "chapter"
     directory_fmt = [
         "{category}", "{manga}",
-        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}"]
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor:?//}{title:?: //}"]
     filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
+        "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
 
     def __init__(self, url):
         Extractor.__init__(self)
@@ -182,7 +182,10 @@ class ChapterExtractor(Extractor):
         imgs = self.get_images(page)
 
         if "count" in data:
-            images = zip(range(1, data["count"]+1), imgs)
+            images = zip(
+                range(1, data["count"]+1),
+                imgs
+            )
         else:
             try:
                 data["count"] = len(imgs)

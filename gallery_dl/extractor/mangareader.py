@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extract manga-chapters and entire manga from http://www.mangareader.net/"""
 
-from .common import AsynchronousExtractor, MangaExtractor, Message
+from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
 
 
@@ -57,11 +57,8 @@ class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
             results.append((self.root + url, data.copy()))
 
 
-class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
+class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
     """Extractor for manga-chapters from mangareader.net"""
-    subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "c{chapter:>03}{title:?: //}"]
-    filename_fmt = "{manga}_c{chapter:>03}_{page:>03}.{extension}"
     pattern = [
         (r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/?&#]+)/(\d+))"),
         (r"(?:https?://)?(?:www\.)?mangareader\.net"
@@ -70,26 +67,14 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
     test = [(("http://www.mangareader.net/"
               "karate-shoukoushi-kohinata-minoru/11"), {
         "url": "84ffaab4c027ef9022695c53163c3aeabd07ca58",
-        "keyword": "2038e6a780a0028eee0067985b55debb1d4a6aab",
+        "keyword": "2893cfcd1916859fb498f3345f1929f868fe667f",
     })]
 
     def __init__(self, match):
-        AsynchronousExtractor.__init__(self)
         self.part, self.url_title, self.chapter = match.groups()
+        ChapterExtractor.__init__(self, self.root + self.part)
 
-    def items(self):
-        page = self.request(self.root + self.part).text
-        data = self.get_job_metadata(page)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["page"] in range(1, data["count"]+1):
-            next_url, image_url, image_data = self.get_page_metadata(page)
-            image_data.update(data)
-            yield Message.Url, image_url, image_data
-            if next_url:
-                page = self.request(next_url).text
-
-    def get_job_metadata(self, chapter_page):
+    def get_metadata(self, chapter_page):
         """Collect metadata for extractor-job"""
         page = self.request(self.root + self.url_title).text
         data = self.parse_page(page, {
@@ -106,7 +91,16 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
         )
         return data
 
-    def get_page_metadata(self, page):
+    def get_images(self, page):
+        while True:
+            next_url, image_url, image_data = self.get_image_metadata(page)
+            yield image_url, image_data
+
+            if not next_url:
+                return
+            page = self.request(next_url).text
+
+    def get_image_metadata(self, page):
         """Collect next url, image-url and metadata for one manga-page"""
         extr = text.extract
         width = None
@@ -122,7 +116,7 @@ class MangareaderChapterExtractor(MangareaderBase, AsynchronousExtractor):
             width , pos = extr(page, '<img id="img" width="', '"', pos)
             height, pos = extr(page, ' height="', '"', pos)
         image, pos = extr(page, ' src="', '"', pos)
-        return self.root + url, image, text.nameext_from_url(image, {
+        return self.root + url, image, {
             "width": util.safe_int(width),
             "height": util.safe_int(height),
-        })
+        }

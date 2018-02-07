@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -35,5 +35,5 @@ class MangapandaChapterExtractor(MangapandaBase, MangareaderChapterExtractor):
     ]
     test = [("http://www.mangapanda.com/red-storm/2", {
         "url": "4bf4ddf6c50105ec8a37675495ab80c46608275d",
-        "keyword": "367d2694b49cc7cac82d68530d7d467a62453502",
+        "keyword": "32b5e84017c2bf5f122b339ecf40899e41f18cc9",
     })]

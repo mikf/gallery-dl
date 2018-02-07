@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extract manga-chapters and entire manga from http://www.mangahere.co/"""
 
-from .common import MangaExtractor, AsynchronousExtractor, Message
+from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
 from urllib.parse import urljoin
 import re
@@ -60,15 +60,9 @@ class MangahereMangaExtractor(MangaExtractor):
             }))
 
 
-class MangahereChapterExtractor(AsynchronousExtractor):
+class MangahereChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from mangahere.co"""
     category = "mangahere"
-    subcategory = "chapter"
-    directory_fmt = [
-        "{category}", "{manga}",
-        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}"]
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     pattern = [(r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
                 r"([^/]+(?:/v0*(\d+))?/c0*(\d+)(\.\d+)?)")]
     test = [
@@ -82,27 +76,12 @@ class MangahereChapterExtractor(AsynchronousExtractor):
     url_fmt = "http://www.mangahere.cc/manga/{}/{}.html"
 
     def __init__(self, match):
-        AsynchronousExtractor.__init__(self)
         self.part, self.volume, self.chapter, self.chminor = match.groups()
-
-    def items(self):
         # remove ".html" for the first chapter page to avoid redirects
         url = self.url_fmt.format(self.part, "")[:-5]
+        ChapterExtractor.__init__(self, url)
 
-        page = self.request(url).text
-        data = self.get_job_metadata(page)
-        urls = zip(
-            range(1, data["count"]+1),
-            self.get_image_urls(page),
-        )
-
-        yield Message.Version, 1
-        yield Message.Directory, data.copy()
-        for data["page"], url in urls:
-            text.nameext_from_url(url, data)
-            yield Message.Url, url, data.copy()
-
-    def get_job_metadata(self, page):
+    def get_metadata(self, page):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, '<title>', '</title>')
         chid , pos = text.extract(page, '.net/store/manga/', '/', pos)
@@ -122,15 +101,16 @@ class MangahereChapterExtractor(AsynchronousExtractor):
             "language": "English",
         }
 
-    def get_image_urls(self, page):
+    def get_images(self, page):
         """Yield all image-urls for this chapter"""
         pnum = 1
         while True:
             url, pos = text.extract(page, '<img src="', '"')
-            yield url
+            yield url, None
             _  , pos = text.extract(page, '<img src="', '"', pos)
             _  , pos = text.extract(page, '<img src="', '"', pos)
             url, pos = text.extract(page, '<img src="', '"', pos)
-            yield url
+            yield url, None
+
             pnum += 2
             page = self.request(self.url_fmt.format(self.part, pnum)).text
