@@ -100,7 +100,7 @@ def parse_inputfile(file):
             continue
 
         elif line[0] == "{":
-            # url-specfic config spec
+            # url-specific config spec
             try:
                 cfd = json.loads(line)
             except ValueError as exc:
