@@ -183,12 +183,15 @@ class TumblrUserExtractor(TumblrExtractor):
 class TumblrPostExtractor(TumblrExtractor):
     """Extractor for images from a single post on tumblr"""
     subcategory = "post"
-    pattern = [BASE_PATTERN + r"/post/(\d+)"]
-    test = [("http://demo.tumblr.com/post/459265350", {
-        "pattern": (r"https://s3\.amazonaws\.com/data\.tumblr\.com"
-                    r"/tumblr_[^/_]+_1280.jpg"),
-        "count": 1,
-    })]
+    pattern = [BASE_PATTERN + r"/(?:post|image)/(\d+)"]
+    test = [
+        ("http://demo.tumblr.com/post/459265350", {
+            "pattern": (r"https://s3\.amazonaws\.com/data\.tumblr\.com"
+                        r"/tumblr_[^/_]+_1280.jpg"),
+            "count": 1,
+        }),
+        ("http://demo.tumblr.com/image/459265350", None),
+    ]
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
