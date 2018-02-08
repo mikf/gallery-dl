@@ -52,6 +52,9 @@ class Job():
             self.extractor.category = parent.extractor.category
             self.extractor.subcategory = parent.extractor.subcategory
 
+        # user-supplied metadata
+        self.userkwds = self.extractor.config("keywords")
+
     def run(self):
         """Execute or run the job"""
         try:
@@ -133,9 +136,11 @@ class Job():
         """Handle Message.Queue"""
 
     def update_kwdict(self, kwdict):
-        """Add 'category' and 'subcategory' keywords"""
+        """Update 'kwdict' with additional metadata"""
         kwdict["category"] = self.extractor.category
         kwdict["subcategory"] = self.extractor.subcategory
+        if self.userkwds:
+            kwdict.update(self.userkwds)
 
     def _write_unsupported(self, url):
         if self.ufile:

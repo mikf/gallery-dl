@@ -344,6 +344,15 @@ Description User-Agent header value to be used for HTTP requests.
 =========== =====
 
 
+extractor.*.keywords
+--------------------
+=========== =====
+Type        ``object``
+Example    ``{"type": "Pixel Art", "type_id": 123}``
+Description Additional key-value pairs to be added to each metadata dictionary.
+=========== =====
+
+
 Extractor-specific Options
 ==========================
 
