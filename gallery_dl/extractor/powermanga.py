@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,6 +26,16 @@ class PowermangaMangaExtractor(foolslide.FoolslideMangaExtractor):
     category = "powermanga"
     pattern = foolslide.manga_pattern(r"read\.powermanga\.org")
     test = [("https://read.powermanga.org/series/one_piece/", {
-        "url": "e5e9a64c14ca51a170e14c4b711aaa88fdf7a7aa",
-        "keyword": "1245ab2a730f9129001a4589b1d8615a17dc4a7b",
+        "count": ">= 1",
+        "keyword": {
+            "chapter": int,
+            "chapter_minor": str,
+            "chapter_string": str,
+            "group": "PowerManga",
+            "lang": "en",
+            "language": "English",
+            "manga": "One Piece",
+            "title": str,
+            "volume": int,
+        },
     })]
