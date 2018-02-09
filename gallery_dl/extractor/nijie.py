@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -35,6 +35,8 @@ class NijieExtractor(AsynchronousExtractor):
         for image_id in images:
             for image_url, image_data in self.get_image_data(image_id):
                 image_data.update(data)
+                if not image_data["extension"]:
+                    image_data["extension"] = "jpg"
                 yield Message.Url, image_url, image_data
 
     def get_job_metadata(self):
@@ -138,7 +140,9 @@ class NijieImageExtractor(NijieExtractor):
         if 300 <= response.status_code < 400:
             raise exception.NotFoundError("image")
         self.page = response.text
-        self.artist_id = text.extract(self.page, "/nijie_picture/sp/", "_")[0]
+        self.artist_id = text.extract(
+            self.page, "/nijie_picture/sp/", "_")[0] or text.extract(
+            self.page, "/dojin_main/", "_")[0]
         return NijieExtractor.get_job_metadata(self)
 
     def get_image_ids(self):
