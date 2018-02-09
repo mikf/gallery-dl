@@ -38,10 +38,14 @@ class Hentai2readMangaExtractor(MangaExtractor):
             page, '<small class="text-danger">[', ']</small>', pos)
         manga_id = util.safe_int(text.extract(page, 'data-mid="', '"', pos)[0])
 
-        for url, chapter_id, chapter in re.findall(
-                r'<li>\s+<a href="([^"]+)"'
-                r'[^>]+data-cid="([^"]+)">'
-                r'\s+([^<]+)<', page):
+        while True:
+            chapter_id, pos = text.extract(page, ' data-cid="', '"', pos)
+            if not chapter_id:
+                return results
+            _  , pos = text.extract(page, ' href="', '"', pos)
+            url, pos = text.extract(page, ' href="', '"', pos)
+            chapter, pos = text.extract(page, '>', '<', pos)
+
             chapter, _, title = text.unescape(chapter).strip().partition(" - ")
             results.append((url, {
                 "manga_id": manga_id, "manga": manga, "type": mtype,
@@ -49,7 +53,6 @@ class Hentai2readMangaExtractor(MangaExtractor):
                 "chapter": util.safe_int(chapter),
                 "title": title, "lang": "en", "language": "English",
             }))
-        return results
 
 
 class Hentai2readChapterExtractor(ChapterExtractor):
