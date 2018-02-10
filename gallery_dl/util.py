@@ -510,8 +510,7 @@ class OAuthSession():
 
     def sign(self, url, params):
         """Generate 'oauth_signature' value and return query string"""
-        query = urllib.parse.urlencode(
-            sorted(params.items()), quote_via=self.quote)
+        query = self.urlencode(params)
         message = self.concat("GET", url, query).encode()
         key = self.concat(self.consumer_secret, self.token_secret).encode()
         signature = hmac.new(key, message, hashlib.sha1).digest()
@@ -529,3 +528,11 @@ class OAuthSession():
     @staticmethod
     def quote(value, _=None, encoding=None, errors=None):
         return urllib.parse.quote(value, "~", encoding, errors)
+
+    @staticmethod
+    def urlencode(params):
+        quote = OAuthSession.quote
+        return "&".join([
+            quote(str(key)) + "=" + quote(str(value))
+            for key, value in sorted(params.items())
+        ])
