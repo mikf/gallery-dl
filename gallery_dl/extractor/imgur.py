@@ -30,6 +30,7 @@ class ImgurExtractor(Extractor):
         return self._clean(json.loads(data))
 
     def _prepare(self, image):
+        image["ext"] = image["ext"].partition("?")[0]
         if image["ext"] == ".gif" and (
                 (self.mp4 and image["prefer_video"]) or self.mp4 == "always"):
             image["ext"] = ".mp4"
