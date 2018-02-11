@@ -526,13 +526,12 @@ class OAuthSession():
         return "".join(random.choice(alphabet) for _ in range(N))
 
     @staticmethod
-    def quote(value, _=None, encoding=None, errors=None):
-        return urllib.parse.quote(value, "~", encoding, errors)
+    def quote(value, quote=urllib.parse.quote):
+        return quote(value, "~")
 
     @staticmethod
     def urlencode(params):
-        quote = OAuthSession.quote
-        return "&".join([
-            quote(str(key)) + "=" + quote(str(value))
-            for key, value in sorted(params.items())
-        ])
+        return "&".join(
+            OAuthSession.quote(str(key)) + "=" + OAuthSession.quote(str(value))
+            for key, value in sorted(params.items()) if value
+        )
