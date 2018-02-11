@@ -75,6 +75,10 @@ class RedditSubredditExtractor(RedditExtractor):
     pattern = [r"(?:https?://)?(?:m\.|www\.)?reddit\.com/r/([^/?&#]+)"
                r"(/[a-z]+)?/?"
                r"(?:\?.*?(?:\bt=([a-z]+))?)?$"]
+    test = [
+        ("https://www.reddit.com/r/lavaporn/", None),
+        ("https://www.reddit.com/r/lavaporn/top/?sort=top&t=month", None),
+    ]
 
     def __init__(self, match):
         RedditExtractor.__init__(self)
@@ -93,6 +97,14 @@ class RedditSubmissionExtractor(RedditExtractor):
                 r"(?:m\.|www\.)?reddit\.com/r/[^/]+/comments|"
                 r"redd\.it"
                 r")/([a-z0-9]+)")]
+    test = [
+        ("https://www.reddit.com/r/lavaporn/comments/2a00np/", {
+            "pattern": r"https?://i\.imgur\.com/AaAUCgy\.jpg",
+            "count": 1,
+        }),
+        ("https://m.reddit.com/r/lavaporn/comments/2a00np/", None),
+        ("https://redd.it/2a00np/", None),
+    ]
 
     def __init__(self, match):
         RedditExtractor.__init__(self)
