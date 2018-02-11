@@ -18,6 +18,7 @@ class MangastreamChapterExtractor(ChapterExtractor):
     category = "mangastream"
     pattern = [(r"(?:https?://)?(?:www\.)?(?:readms|mangastream)\.(?:com|net)/"
                 r"r(?:ead)?/([^/]*/([^/]+)/(\d+))")]
+    test = [("https://readms.net/r/onepunch_man/087/4874/1", None)]
     base_url = "https://readms.net/r/"
 
     def __init__(self, match):

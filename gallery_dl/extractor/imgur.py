@@ -89,6 +89,9 @@ class ImgurImageExtractor(ImgurExtractor):
             "url": "a2220eb265a55b0c95e0d3d721ec7665460e3fd7",
             "content": "a3c080e43f58f55243ab830569ba02309d59abfc",
         }),
+        ("https://imgur.com/HjoXJAd", {  # url ends with '.jpg?1'
+            "url": "73f361b50753ab25da64160aa50bc5d139480d45",
+        }),
         ("https://imgur.com/zzzzzzz", {
             "exception": exception.NotFoundError,
         }),
