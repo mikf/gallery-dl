@@ -68,6 +68,10 @@ class TestExtractors(unittest.TestCase):
                 pass
             raise
 
+        # test archive-id uniqueness
+        self.assertEqual(len(set(tjob.list_archive)), len(tjob.list_archive))
+
+        # test extraction results
         if "url" in result:
             self.assertEqual(result["url"], tjob.hash_url.hexdigest())
 

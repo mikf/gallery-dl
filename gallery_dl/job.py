@@ -344,8 +344,10 @@ class TestJob(DownloadJob):
         self.content = content
         self.list_url = []
         self.list_keyword = []
+        self.list_archive = []
         self.hash_url = hashlib.sha1()
         self.hash_keyword = hashlib.sha1()
+        self.hash_archive = hashlib.sha1()
         self.hash_content = hashlib.sha1()
         if content:
             self.fileobj = self.HashIO(self.hash_content)
@@ -358,6 +360,7 @@ class TestJob(DownloadJob):
     def handle_url(self, url, keywords):
         self.update_url(url)
         self.update_keyword(keywords)
+        self.update_archive(keywords)
         self.update_content(url)
 
     def handle_urllist(self, urls, keywords):
@@ -381,6 +384,12 @@ class TestJob(DownloadJob):
             self.list_keyword.append(kwdict.copy())
         self.hash_keyword.update(
             json.dumps(kwdict, sort_keys=True).encode())
+
+    def update_archive(self, kwdict):
+        """Update the archive-id hash"""
+        archive_id = self.extractor.archive_fmt.format_map(kwdict)
+        self.list_archive.append(archive_id)
+        self.hash_archive.update(archive_id.encode())
 
     def update_content(self, url):
         """Update the content hash"""
