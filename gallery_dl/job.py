@@ -160,8 +160,7 @@ class DownloadJob(Job):
         # prepare download
         self.pathfmt.set_keywords(keywords)
 
-        if self.pathfmt.exists() or \
-                self.archive and self.archive.check(keywords):
+        if self.pathfmt.exists(self.archive):
             self.out.skip(self.pathfmt.path)
             return
 
@@ -172,7 +171,7 @@ class DownloadJob(Job):
         if not self.get_downloader(url).download(url, self.pathfmt):
 
             # use fallback URLs if available
-            for num, url in enumerate(fallback or [], 1):
+            for num, url in enumerate(fallback or (), 1):
                 self.log.info("Trying fallback URL #%d", num)
                 if self.get_downloader(url).download(url, self.pathfmt):
                     break
@@ -182,7 +181,7 @@ class DownloadJob(Job):
                     "Failed to download %s", self.pathfmt.filename)
                 return
 
-        # download successful
+        # download succeeded
         if self.archive:
             self.archive.add()
 
