@@ -362,22 +362,31 @@ class PathFormat():
         if os.altsep:
             self.basedirectory = self.basedirectory.replace(os.altsep, os.sep)
 
-        skipmode = extractor.config("skip", True)
-        if skipmode == "abort":
-            self.exists = self._exists_abort
-        elif skipmode == "exit":
-            self.exists = self._exists_exit
-        elif not skipmode:
-            self.exists = lambda: False
+        skip = extractor.config("skip", True)
+        if skip:
+            if skip == "abort":
+                self._skipexc = exception.StopExtraction
+            elif skip == "exit":
+                self._skipexc = exit
+            else:
+                self._skipexc = None
+        else:
+            self.exists = lambda x=None: False
 
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
         return open(self.partpath or self.realpath, mode)
 
-    def exists(self):
-        """Return True if 'path' is complete and refers to an existing path"""
-        if self.has_extension:
-            return os.path.exists(self.realpath)
+    def exists(self, archive=None):
+        if (self.has_extension and os.path.exists(self.realpath) or
+                archive and archive.check(self.keywords)):
+            if self._skipexc:
+                raise self._skipexc()
+            if not self.has_extension:
+                self.set_extension("")
+                if self.path[-1] == ".":
+                    self.path = self.path[:-1]
+            return True
         return False
 
     def set_directory(self, keywords):
@@ -461,16 +470,6 @@ class PathFormat():
             pass
         shutil.copyfile(self.partpath, self.realpath)
         os.unlink(self.partpath)
-
-    def _exists_abort(self):
-        if self.has_extension and os.path.exists(self.realpath):
-            raise exception.StopExtraction()
-        return False
-
-    def _exists_exit(self):
-        if self.has_extension and os.path.exists(self.realpath):
-            exit()
-        return False
 
     @staticmethod
     def adjust_path(path):
