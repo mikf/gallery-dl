@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,6 +18,7 @@ class HentaifoundryUserExtractor(Extractor):
     subcategory = "user"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
+    archive_fmt = "{index}"
     pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com/"
                r"(?:pictures/user/([^/]+)/?$|user/([^/]+)/profile)"]
     test = [

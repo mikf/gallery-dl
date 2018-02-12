@@ -16,6 +16,7 @@ from urllib.parse import urljoin
 class MangastreamChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from mangastream.com"""
     category = "mangastream"
+    archive_fmt = "{chapter_id}_{page}"
     pattern = [(r"(?:https?://)?(?:www\.)?(?:readms|mangastream)\.(?:com|net)/"
                 r"r(?:ead)?/([^/]*/([^/]+)/(\d+))")]
     test = [("https://readms.net/r/onepunch_man/087/4874/1", None)]

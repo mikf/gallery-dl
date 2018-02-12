@@ -18,6 +18,7 @@ class NijieExtractor(AsynchronousExtractor):
     category = "nijie"
     directory_fmt = ["{category}", "{artist_id}"]
     filename_fmt = "{category}_{artist_id}_{image_id}_p{index:>02}.{extension}"
+    archive_fmt = "{image_id}_{index}"
     cookiedomain = "nijie.info"
     popup_url = "https://nijie.info/view_popup.php?id="
 

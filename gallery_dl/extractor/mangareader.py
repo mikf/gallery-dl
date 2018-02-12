@@ -59,6 +59,7 @@ class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
 
 class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
     """Extractor for manga-chapters from mangareader.net"""
+    archive_fmt = "{manga}_{chapter}_{page}"
     pattern = [
         (r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/?&#]+)/(\d+))"),
         (r"(?:https?://)?(?:www\.)?mangareader\.net"

@@ -18,6 +18,7 @@ class ReadcomiconlineBase():
     category = "readcomiconline"
     directory_fmt = ["{category}", "{comic}", "{issue:>03}"]
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
+    archive_fmt = "{comic}_{issue}_{page}"
     root = "http://readcomiconline.to"
     useragent = "Wget/1.19.2 (linux-gnu)"
 

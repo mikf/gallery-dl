@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,6 +19,7 @@ class NhentaiGalleryExtractor(Extractor):
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
+    archive_fmt = "{gallery_id}_{num}"
     pattern = [r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)"]
     test = [("http://nhentai.net/g/147850/", {
         "url": "5179dbf0f96af44005a0ff705a0ad64ac26547d0",

@@ -18,6 +18,7 @@ class SlideshareExtractor(Extractor):
     subcategory = "presentation"
     directory_fmt = ["{category}", "{user}"]
     filename_fmt = "{presentation}-{num:>02}.{extension}"
+    archive_fmt = "{presentation}_{num}"
     pattern = [r"(?:https?://)?(?:www\.)?slideshare\.net"
                r"/(?:mobile/)?([^/?&#]+)/([^/?&#]+)"]
     test = [

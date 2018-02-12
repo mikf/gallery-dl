@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,6 +19,7 @@ class HitomiGalleryExtractor(Extractor):
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>03}_{name}.{extension}"
+    archive_fmt = "{gallery_id}_{num}"
     pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)\.html"]
     test = [("https://hitomi.la/galleries/867789.html", {
         "url": "e42a47dfadda93e4bf37e82b1dc9ad29edfa9130",

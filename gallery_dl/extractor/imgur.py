@@ -16,6 +16,7 @@ import json
 class ImgurExtractor(Extractor):
     """Base class for imgur extractors"""
     category = "imgur"
+    archive_fmt = "{hash}"
 
     def __init__(self, match):
         Extractor.__init__(self)

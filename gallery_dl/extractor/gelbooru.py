@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,6 +18,7 @@ class GelbooruExtractor(SharedConfigExtractor):
     basecategory = "booru"
     category = "gelbooru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
+    archive_fmt = "{id}"
     api_url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index"
 
     def __init__(self):
