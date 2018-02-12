@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,6 +17,7 @@ class PawooExtractor(Extractor):
     category = "pawoo"
     directory_fmt = ["{category}", "{account[username]}"]
     filename_fmt = "{category}_{id}_{media[id]}.{extension}"
+    archive_fmt = "{media[id]}"
 
     def __init__(self):
         Extractor.__init__(self)

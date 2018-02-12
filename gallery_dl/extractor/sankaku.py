@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,6 +20,7 @@ class SankakuExtractor(SharedConfigExtractor):
     basecategory = "booru"
     category = "sankaku"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
+    archive_fmt = "{id}"
     cookienames = ("login", "pass_hash")
     cookiedomain = "chan.sankakucomplex.com"
     subdomain = "chan"

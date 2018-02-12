@@ -38,7 +38,7 @@ class SpectrumnexusChapterExtractor(ChapterExtractor):
     category = "spectrumnexus"
     directory_fmt = ["{category}", "{manga}", "{chapter_string}"]
     filename_fmt = "{manga}_{chapter_string}_{page:>03}.{extension}"
-
+    archive_fmt = "{manga}_{chapter_string}_{page}"
     pattern = [r"(?:https?://)?view\.thespectrum\.net/series/"
                r"([^\.]+\.html)\?ch=(Chapter\+(\d+)|Volume\+(\d+))"]
     test = [(("http://view.thespectrum.net/series/"

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,6 +18,7 @@ class TwitterTweetExtractor(Extractor):
     subcategory = "tweet"
     directory_fmt = ["{category}", "{user}"]
     filename_fmt = "{tweet_id}_{num}.{extension}"
+    archive_fmt = "{tweet_id}_{num}"
     pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/"
                r"(([^/]+)/status/(\d+))"]
     test = [

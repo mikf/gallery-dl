@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,8 +20,9 @@ import re
 class DeviantartExtractor(Extractor):
     """Base class for deviantart extractors"""
     category = "deviantart"
-    filename_fmt = "{category}_{index}_{title}.{extension}"
     directory_fmt = ["{category}", "{author[username]!l}"]
+    filename_fmt = "{category}_{index}_{title}.{extension}"
+    archive_fmt = "{index}.{extension}"
 
     def __init__(self, match=None):
         Extractor.__init__(self)

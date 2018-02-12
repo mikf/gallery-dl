@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,8 @@ class ChanThreadExtractor(Extractor):
     category = "chan"
     subcategory = "thread"
     directory_fmt = ["{category}", "{board}", "{thread} - {title}"]
-    filename_fmt = "{tim}-{filename}{ext}"
+    filename_fmt = "{tim}-{filename}.{extension}"
+    archive_fmt = "{board}_{thread}_{tim}"
     api_url = ""
     file_url = ""
 
@@ -69,6 +70,7 @@ class FoolfuukaThreadExtractor(SharedConfigExtractor):
     directory_fmt = ["{category}", "{board[shortname]}",
                      "{thread_num}{title:? - //}"]
     filename_fmt = "{media[media]}"
+    archive_fmt = "{{board[shortname]}}_{num}_{timestamp}"
     root = ""
     referer = True
 

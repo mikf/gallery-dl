@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,6 +18,7 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
     subcategory = "album"
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
+    archive_fmt = "{gallery_id}_{image_id}"
     pattern = [(r"(?:https?://)?(?:www\.|members\.)?luscious\.net/"
                 r"(?:c/[^/?&#]+/)?(?:pictures/album|albums)/([^/?&#]+_(\d+))")]
     test = [

@@ -17,6 +17,7 @@ class PahealExtractor(SharedConfigExtractor):
     basecategory = "booru"
     category = "paheal"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
+    archive_fmt = "{id}"
     root = "http://rule34.paheal.net"
 
     def items(self):

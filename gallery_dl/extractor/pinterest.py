@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,6 +16,7 @@ class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
     category = "pinterest"
     filename_fmt = "{category}_{pin_id}.{extension}"
+    archive_fmt = "{pin_id}"
 
     def __init__(self):
         Extractor.__init__(self)

@@ -20,6 +20,7 @@ class BooruExtractor(SharedConfigExtractor):
     """Base class for all booru extractors"""
     basecategory = "booru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
+    archive_fmt = "{id}"
     api_url = ""
     per_page = 50
     page_start = 1
