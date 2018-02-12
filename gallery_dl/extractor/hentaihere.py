@@ -59,6 +59,7 @@ class HentaihereMangaExtractor(MangaExtractor):
 class HentaihereChapterExtractor(ChapterExtractor):
     """Extractor for a single manga chapter from hentaihere.com"""
     category = "hentaihere"
+    archive_fmt = "{chapter_id}_{page}"
     pattern = [r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/(\d+)"]
     test = [("https://hentaihere.com/m/S13812/1/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",

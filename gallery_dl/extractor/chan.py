@@ -70,7 +70,7 @@ class FoolfuukaThreadExtractor(SharedConfigExtractor):
     directory_fmt = ["{category}", "{board[shortname]}",
                      "{thread_num}{title:? - //}"]
     filename_fmt = "{media[media]}"
-    archive_fmt = "{{board[shortname]}}_{num}_{timestamp}"
+    archive_fmt = "{board[shortname]}_{num}_{timestamp}"
     root = ""
     referer = True
 

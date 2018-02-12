@@ -16,6 +16,7 @@ class DirectlinkExtractor(Extractor):
     """Extractor for direct links to images and other media files"""
     category = "directlink"
     filename_fmt = "{domain}/{path}"
+    archive_fmt = "{domain}/{path}"
     pattern = [r"https?://(?P<domain>[^/]+)/(?P<path>[^?&#]+\."
                r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus))"
                r"(?:\?(?P<query>[^/?#]*))?(?:#(?P<fragment>.*))?$"]

@@ -24,6 +24,7 @@ IV = [
 class KissmangaBase():
     """Base class for kissmanga extractors"""
     category = "kissmanga"
+    archive_fmt = "{chapter_id}_{page}"
     root = "http://kissmanga.com"
 
     def request(self, url):
@@ -69,7 +70,7 @@ class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
     test = [
         ("http://kissmanga.com/Manga/Dropout", {
             "url": "992befdd64e178fe5af67de53f8b510860d968ca",
-            "keyword": "1d23ea07296e004b33bee17fe2f5cd5177c58680",
+            "keyword": "32b09711c28b481845acc32e3bb6054cfc90224d",
         }),
         ("http://kissmanga.com/manga/feng-shen-ji", None),
     ]
@@ -87,8 +88,9 @@ class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
         for item in text.extract_iter(page, '<a href="', ' online">'):
             url, _, chapter = item.partition(needle)
             data = {
-                "manga": manga, "id": url.rpartition("=")[2],
-                "chapter_string": chapter, "lang": "en", "language": "English",
+                "manga": manga, "chapter_string": chapter,
+                "chapter_id": util.safe_int(url.rpartition("=")[2]),
+                "lang": "en", "language": "English",
             }
             self.parse_chapter_string(data)
             results.append((self.root + url, data))
@@ -98,25 +100,26 @@ class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
 class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
     """Extractor for manga-chapters from kissmanga.com"""
     pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com"
-               r"/Manga/[^/?&#]+/[^/?&#]+\?id=\d+"]
+               r"/Manga/[^/?&#]+/[^/?&#]+\?id=(\d+)"]
     test = [
         ("http://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
             "url": "4136bcd1c6cecbca8cc2bc965d54f33ef0a97cc0",
-            "keyword": "68384c1167858fb4aa475c4596f0a685c45fff36",
+            "keyword": "4a3a9341d453541de0dbfa24cd6b2e3ed39c0182",
         }),
         ("http://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
             "url": "de074848f6c1245204bb9214c12bcc3ecfd65019",
-            "keyword": "089158338b4cde43b2ff244814effeb13297de33",
+            "keyword": "ffc11b630da44fe67709ed0473756cf51b90a05c",
         }),
         ("http://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
             "count": 23,
-            "keyword": "558da596e86ca544eb72cf303f3694bbf0b1f2f5",
+            "keyword": "92669a75e48a8501f3fbfc22b8fd2d3188239212",
         }),
         ("http://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608", None),
     ]
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, match.group(0))
+        self.chapter_id = match.group(1)
         self.session.headers["Referer"] = self.root
 
     def get_metadata(self, page):
@@ -125,6 +128,7 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
         data = {
             "manga": manga.strip(),
             "chapter_string": cinfo.strip(),
+            "chapter_id": util.safe_int(self.chapter_id),
             "lang": "en",
             "language": "English",
         }
