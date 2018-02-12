@@ -16,7 +16,6 @@ import json
 class ImgurExtractor(Extractor):
     """Base class for imgur extractors"""
     category = "imgur"
-    archive_fmt = "{hash}"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -53,6 +52,7 @@ class ImgurImageExtractor(ImgurExtractor):
     """Extractor for individual images from imgur.com"""
     subcategory = "image"
     filename_fmt = "{category}_{hash}{title:?_//}.{extension}"
+    archive_fmt = "{hash}"
     pattern = [(r"(?:https?://)?(?:m\.|www\.)?imgur\.com/"
                 r"(?:gallery/)?((?!gallery)[^/?&#]{7})/?"),
                (r"(?:https?://)?i\.imgur\.com/([^/?&#.]{5,7})\.")]
@@ -112,6 +112,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
     subcategory = "album"
     directory_fmt = ["{category}", "{album[hash]}{album[title]:? - //}"]
     filename_fmt = "{category}_{album[hash]}_{num:>03}_{hash}.{extension}"
+    archive_fmt = "{album[hash]}_{hash}"
     pattern = [r"(?:https?://)?(?:m\.|www\.)?imgur\.com/"
                r"(?:a|gallery)/([^/?&#]{5})/?$"]
     test = [

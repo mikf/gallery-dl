@@ -58,6 +58,7 @@ class Hentai2readMangaExtractor(MangaExtractor):
 class Hentai2readChapterExtractor(ChapterExtractor):
     """Extractor for a single manga chapter from hentai2read.com"""
     category = "hentai2read"
+    archive_fmt = "{chapter_id}_{page}"
     pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/(\d+)"]
     test = [("http://hentai2read.com/amazon_elixir/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",

@@ -120,6 +120,7 @@ class HentaifoundryImageExtractor(Extractor):
     subcategory = "image"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
+    archive_fmt = "{index}"
     pattern = [(r"(?:https?://)?(?:www\.|pictures\.)?hentai-foundry\.com/"
                 r"(?:pictures/user/([^/]+)/(\d+)"
                 r"|[^/]/([^/]+)/(\d+))")]
