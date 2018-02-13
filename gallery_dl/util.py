@@ -390,6 +390,7 @@ class PathFormat():
         return open(self.partpath or self.realpath, mode)
 
     def exists(self, archive=None):
+        """Return True if the file exists on disk or in 'archive'"""
         if (self.has_extension and os.path.exists(self.realpath) or
                 archive and archive.check(self.keywords)):
             if self._skipexc:
@@ -539,23 +540,23 @@ class OAuthSession():
 
 class DownloadArchive():
 
-    def __init__(self, extractor, path):
+    def __init__(self, path, extractor):
         con = sqlite3.connect(path)
         con.isolation_level = None
         self.cursor = con.cursor()
         self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
                             "(entry PRIMARY KEY) WITHOUT ROWID")
         self.keygen = (extractor.category + extractor.archive_fmt).format_map
-        self._key = None
 
     def check(self, kwdict):
         """Return True if item described by 'kwdict' exists in archive"""
-        self._key = self.keygen(kwdict)
+        key = self.keygen(kwdict)
         self.cursor.execute(
-            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (self._key,))
+            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
         return self.cursor.fetchone()
 
-    def add(self):
-        """Add last item used in 'check()' to archive"""
+    def add(self, kwdict):
+        """Add item described by 'kwdict' to archive"""
+        key = self.keygen(kwdict)
         self.cursor.execute(
-            "INSERT OR IGNORE INTO archive VALUES (?)", (self._key,))
+            "INSERT OR IGNORE INTO archive VALUES (?)", (key,))
