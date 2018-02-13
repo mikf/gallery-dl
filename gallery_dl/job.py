@@ -188,7 +188,7 @@ class DownloadJob(Job):
 
         # download succeeded
         if self.archive:
-            self.archive.add()
+            self.archive.add(keywords)
 
     def handle_urllist(self, urls, keywords):
         """Download the resource specified in 'url'"""
@@ -203,7 +203,7 @@ class DownloadJob(Job):
             self.sleep = self.extractor.config("sleep")
             archive = self.extractor.config("archive")
             if archive:
-                self.archive = util.DownloadArchive(self.extractor, archive)
+                self.archive = util.DownloadArchive(archive, self.extractor)
         self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url, keywords):
