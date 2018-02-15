@@ -72,25 +72,34 @@ def prepare_filter(filterexpr, target):
 
 
 def parse_inputfile(file):
-    """Filter and strip strings from an input file
+    """Filter and process strings from an input file.
 
     Lines starting with '#' and empty lines will be ignored.
-    Lines starting with '{' will be interpreted as JSON-object and
-      its values, while processing the next URL, are going to be
-      applied to the global config.
+    Lines starting with '-' will be interpreted as a key-value pair separated
+      by an '='. where 'key' is a dot-separated option name and 'value' is a
+      JSON-parsable value for it. These config options will be applied while
+      processing the next URL.
+    Lines starting with '-G' are the same as above, except these options will
+      be valid for all following URLs, i.e. they are Global.
     Everything else will be used as potential URL.
 
     Example input file:
 
-    # this is a comment
-    {"base-directory": "/tmp/", "skip": false}
-    {"more": "multiple objects before an URL will be merged together"}
+    # settings global options
+    -G base-directory = "/tmp/"
+    -G skip = false
+
+    # setting local options for the next URL
+    -filename="spaces_are_optional.jpg"
+    -skip    = true
+
     https://example.org/
 
-    # config is back to its initial values
+    # next URL uses default filename and 'skip' is false.
     https://example.com/index.htm
     """
-    confdict = None
+    gconf = []
+    lconf = []
 
     for line in file:
         line = line.strip()
@@ -99,26 +108,36 @@ def parse_inputfile(file):
             # empty line or comment
             continue
 
-        elif line[0] == "{":
-            # url-specific config spec
-            try:
-                cfd = json.loads(line)
-            except ValueError as exc:
-                log.warning("input file: unable to parse config line: %s",exc)
+        elif line[0] == "-":
+            # config spec
+            if len(line) >= 2 and line[1] == "G":
+                conf = gconf
+                line = line[2:]
+            else:
+                conf = lconf
+                line = line[1:]
+
+            key, sep, value = line.partition("=")
+            if not sep:
+                log.warning("input file: invalid <key>=<value> pair: %s", line)
                 continue
 
-            if confdict:
-                util.combine_dict(confdict, cfd)
-            else:
-                confdict = cfd
+            try:
+                value = json.loads(value.strip())
+            except ValueError as exc:
+                log.warning("input file: unable to parse '%s': %s", value, exc)
+                continue
+
+            conf.append((key.strip().split("."), value))
 
         else:
             # url
-            if confdict:
-                yield util.ExtendedUrl(line, confdict)
+            if gconf or lconf:
+                yield util.ExtendedUrl(line, gconf, lconf)
+                gconf = []
+                lconf = []
             else:
                 yield line
-            confdict = None
 
 
 def main():
@@ -231,7 +250,9 @@ def main():
                 try:
                     log.debug("Starting %s for '%s'", jobtype.__name__, url)
                     if isinstance(url, util.ExtendedUrl):
-                        with config.apply(url.config):
+                        for key, value in url.gconfig:
+                            config.set(key, value)
+                        with config.apply(url.lconfig):
                             jobtype(url.value).run()
                     else:
                         jobtype(url).run()

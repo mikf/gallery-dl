@@ -261,10 +261,9 @@ class ChainPredicate():
 
 
 class ExtendedUrl():
-    """URL with attached config dict"""
-    def __init__(self, url, confdict):
-        self.value = url
-        self.config = confdict
+    """URL with attached config key-value pairs"""
+    def __init__(self, url, gconf, lconf):
+        self.value, self.gconfig, self.lconfig = url, gconf, lconf
 
     def __str__(self):
         return self.value

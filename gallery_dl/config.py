@@ -126,22 +126,32 @@ def setdefault(keys, value, conf=_config):
     return conf.setdefault(keys[-1], value)
 
 
+def unset(keys, conf=_config):
+    """Unset the value of property 'key'"""
+    try:
+        for k in keys[:-1]:
+            conf = conf[k]
+        del conf[keys[-1]]
+    except (KeyError, AttributeError):
+        pass
+
+
 class apply():
-    """Context Manager to apply a dict to global config"""
+    """Context Manager to temporarily apply a collection of key-value pairs"""
     _sentinel = object()
 
-    def __init__(self, config_dict):
-        self.original_values = {}
-        self.config_dict = config_dict
-        for key, value in config_dict.items():
-            self.original_values[key] = _config.get(key, self._sentinel)
+    def __init__(self, kvlist):
+        self.original = []
+        self.kvlist = kvlist
 
     def __enter__(self):
-        _config.update(self.config_dict)
+        for key, value in self.kvlist:
+            self.original.append((key, get(key, self._sentinel)))
+            set(key, value)
 
     def __exit__(self, etype, value, traceback):
-        for key, value in self.original_values.items():
+        for key, value in self.original:
             if value is self._sentinel:
-                del _config[key]
+                unset(key)
             else:
-                _config[key] = value
+                set(key, value)
