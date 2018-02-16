@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+- Added support for:
+  - `paheal` - https://rule34.paheal.net/ ([#69](https://github.com/mikf/gallery-dl/issues/69))
+  - `komikcast` - https://komikcast.com/ ([#70](https://github.com/mikf/gallery-dl/issues/70))
+  - `subapics` - http://subapics.com/ ([#70](https://github.com/mikf/gallery-dl/issues/70))
+- Added `--download-archive` to record downloaded files in an archive file
+- Added `--write-log` to write logging output to a file
+- Added a filetype check on download completion to fix incorrectly assigned filename extensions ([#63](https://github.com/mikf/gallery-dl/issues/63))
+- Added the `tumblr:...` pseudo URI scheme to support custom domains for Tumblr blogs ([#71](https://github.com/mikf/gallery-dl/issues/71))
+- Added fallback URLs for `tumblr` images ([#64](https://github.com/mikf/gallery-dl/issues/64))
+- Added support for `reddit`-hosted images ([#68](https://github.com/mikf/gallery-dl/issues/68))
+- Improved the input file format by allowing comments and per-URL options
+- Fixed OAuth 1.0 signature generation for Python 3.3 and 3.4 ([#75](https://github.com/mikf/gallery-dl/issues/75))
+- Fixed smaller issues for `luscious`, `hentai2read`, `hentaihere` and `imgur`
+- Removed the `batoto` module
+
 ## 1.1.2 - 2018-01-12
 - Added support for:
   - `puremashiro` - http://reader.puremashiro.moe/ ([#66](https://github.com/mikf/gallery-dl/issues/66))
