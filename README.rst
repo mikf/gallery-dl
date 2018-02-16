@@ -210,12 +210,12 @@ access to *gallery-dl*. Authorize it and you will he shown one or more
 .. _gallery-dl.conf:       https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
 .. _configuration.rst:     https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Complete List:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
-.. _standalone executable: https://github.com/mikf/gallery-dl/releases/download/v1.1.2/gallery-dl.exe
+.. _standalone executable: https://github.com/mikf/gallery-dl/releases/download/v1.2.0/gallery-dl.exe
 .. _Python:   https://www.python.org/downloads/
 .. _Requests: https://pypi.python.org/pypi/requests/
 .. _PyPI:     https://pypi.python.org/pypi
 .. _pip:      https://pip.pypa.io/en/stable/
-.. _stable:   https://github.com/mikf/gallery-dl/archive/v1.1.2.zip
+.. _stable:   https://github.com/mikf/gallery-dl/archive/v1.2.0.zip
 .. _dev:      https://github.com/mikf/gallery-dl/archive/master.zip
 .. _OAuth:    https://en.wikipedia.org/wiki/OAuth
 
