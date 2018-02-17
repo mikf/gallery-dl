@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Fixed extraction issues for `mangastream`
+
 ## 1.2.0 - 2018-02-16
 - Added support for:
   - `paheal` - https://rule34.paheal.net/ ([#69](https://github.com/mikf/gallery-dl/issues/69))

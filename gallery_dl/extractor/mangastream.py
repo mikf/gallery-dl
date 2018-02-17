@@ -44,9 +44,8 @@ class MangastreamChapterExtractor(ChapterExtractor):
 
     def get_images(self, page):
         while True:
-            next_url, pos = text.extract(
-                page, '<div class="page">\n<a href="', '"')
-            image_url, pos = text.extract(
-                page, '<img id="manga-page" src="', '"', pos)
+            pos = page.index(' class="page"')
+            next_url = text.extract(page, ' href="', '"', pos)[0]
+            image_url = text.extract(page, ' src="', '"', pos)[0]
             yield urljoin(self.base_url, image_url), None
             page = self.request(urljoin(self.base_url, next_url)).text
