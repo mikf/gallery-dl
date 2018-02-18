@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -36,9 +36,7 @@ def remove_html(text):
 def filename_from_url(url):
     """Extract the last part of an url to use as a filename"""
     try:
-        path = urllib.parse.urlparse(url).path
-        pos = path.rindex("/")
-        return path[pos+1:]
+        return urllib.parse.urlsplit(url).path.rpartition("/")[2]
     except ValueError:
         return url
 
