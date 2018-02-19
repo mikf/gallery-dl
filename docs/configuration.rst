@@ -331,6 +331,36 @@ Description Source to read additional cookies from.
 =========== =====
 
 
+extractor.*.proxy
+-----------------
+=========== =====
+Type        ``string`` or ``object``
+Default     ``null``
+Description Proxy (or proxies) to be used for remote connections.
+
+            * If this is a ``string``, it is the proxy URL for all
+              outgoing requests.
+            * If this is an ``object``, it is a scheme-to-proxy mapping to
+              specify different proxy URLs for each scheme.
+              It is also possible to set a proxy for a specific host by using
+              ``scheme://host`` as key.
+              See `Requests' proxy documentation`_ for more details.
+
+              Example:
+
+              .. code::
+
+                {
+                    "http": "http://10.10.1.10:3128",
+                    "https": "http://10.10.1.10:1080",
+                    "http://10.20.1.128": "http://10.10.1.10:5323"
+                }
+
+            Note that all proxy URLs should include a scheme,
+            otherwise ``http://`` is assumed.
+=========== =====
+
+
 extractor.*.user-agent
 ----------------------
 =========== =====
@@ -348,7 +378,7 @@ extractor.*.keywords
 --------------------
 =========== =====
 Type        ``object``
-Example    ``{"type": "Pixel Art", "type_id": 123}``
+Example     ``{"type": "Pixel Art", "type_id": 123}``
 Description Additional key-value pairs to be added to each metadata dictionary.
 =========== =====
 
@@ -811,6 +841,7 @@ How To      - login and visit Tumblr's Applications_ section
 .. _requests.request(): https://docs.python-requests.org/en/master/api/#requests.request
 .. _timeout:           https://docs.python-requests.org/en/latest/user/advanced/#timeouts
 .. _verify:            https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
+.. _`Requests' proxy documentation`: http://docs.python-requests.org/en/master/user/advanced/#proxies
 .. _format string:     https://docs.python.org/3/library/string.html#formatstrings
 .. _format strings:    https://docs.python.org/3/library/string.html#formatstrings
 .. _strptime:          https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior

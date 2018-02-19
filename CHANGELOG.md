@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased
-- Fixed extraction issues for `mangastream` and `pixiv`
+- Added `--proxy` to explicitly specify a proxy server ([#76](https://github.com/mikf/gallery-dl/issues/76))
+- Fixed ugoira extraction for `pixiv` ([#78](https://github.com/mikf/gallery-dl/issues/78))
+- Fixed miscellaneous extraction issues for `mangastream`
 
 ## 1.2.0 - 2018-02-16
 - Added support for:
