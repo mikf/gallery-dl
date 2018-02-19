@@ -34,8 +34,9 @@ class Extractor():
     def __init__(self):
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
-        self._set_cookies(self.config("cookies"))
         self._set_headers()
+        self._set_cookies()
+        self._set_proxies()
 
     def __iter__(self):
         return self.items()
@@ -105,8 +106,9 @@ class Extractor():
             "user-agent", ("Mozilla/5.0 (X11; Linux x86_64; rv:54.0) "
                            "Gecko/20100101 Firefox/54.0"))
 
-    def _set_cookies(self, cookies):
-        """Populate the cookiejar with 'cookies'"""
+    def _set_cookies(self):
+        """Populate the session's cookiejar"""
+        cookies = self.config("cookies")
         if cookies:
             if isinstance(cookies, dict):
                 setcookie = self.session.cookies.set
@@ -119,6 +121,20 @@ class Extractor():
                     self.session.cookies.update(cj)
                 except OSError as exc:
                     self.log.warning("cookies: %s", exc)
+
+    def _set_proxies(self):
+        """Update the session's proxy map"""
+        proxies = self.config("proxy")
+        if proxies:
+            if isinstance(proxies, str):
+                proxies = {"http": proxies, "https": proxies}
+            if isinstance(proxies, dict):
+                for scheme, proxy in proxies.items():
+                    if "://" not in proxy:
+                        proxies[scheme] = "http://" + proxy.lstrip("/")
+                self.session.proxies = proxies
+            else:
+                self.log.warning("invalid proxy specifier: %s", proxies)
 
     def _check_cookies(self, cookienames, domain=None):
         """Check if all 'cookienames' are in the session's cookiejar"""

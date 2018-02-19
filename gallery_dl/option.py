@@ -88,6 +88,11 @@ def build_parser():
         metavar="FILE", action=ConfigAction, dest="cookies",
         help="File to load additional cookies from",
     )
+    general.add_argument(
+        "--proxy",
+        metavar="URL", action=ConfigAction, dest="proxy",
+        help="Use the specified proxy",
+    )
 
     output = parser.add_argument_group("Output Options")
     output.add_argument(
