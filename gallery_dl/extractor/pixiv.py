@@ -71,12 +71,13 @@ class PixivExtractor(Extractor):
         """Parse ugoira data"""
         # get illust page
         page = self.request(
-            self.illust_url, params={"illust_id": data["id"]},
+            self.illust_url,
+            params={"illust_id": data["id"]},
+            headers={"User-Agent": "Mozilla/5.0"},
         ).text
 
         # parse page
-        meta = text.extract(page, ' data-meta="', '"')[0]
-        frames = text.extract(text.unescape(meta), ',"frames":[', ']')[0]
+        frames = text.extract(page, ',"frames":[', ']')[0]
 
         # build url
         url = re.sub(
