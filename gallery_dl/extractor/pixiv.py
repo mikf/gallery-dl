@@ -19,7 +19,7 @@ class PixivExtractor(Extractor):
     category = "pixiv"
     directory_fmt = ["{category}", "{user[id]} {user[account]}"]
     filename_fmt = "{category}_{user[id]}_{id}{num}.{extension}"
-    archive_fmt = "{id}{num}"
+    archive_fmt = "{id}{num}.{extension}"
     illust_url = "https://www.pixiv.net/member_illust.php?mode=medium"
 
     def __init__(self):
@@ -75,7 +75,8 @@ class PixivExtractor(Extractor):
         ).text
 
         # parse page
-        frames = text.extract(page, ',"frames":[', ']')[0]
+        meta = text.extract(page, ' data-meta="', '"')[0]
+        frames = text.extract(text.unescape(meta), ',"frames":[', ']')[0]
 
         # build url
         url = re.sub(
@@ -191,6 +192,13 @@ class PixivWorkExtractor(PixivExtractor):
         (("https://i.pximg.net/img-original/"
           "img/2017/04/25/07/33/29/62568267_p0.png"), {
             "url": "71b8bbd070d6b03a75ca4afb89f64d1445b2278d",
+        }),
+        # ugoira
+        (("https://www.pixiv.net/member_illust.php"
+          "?mode=medium&illust_id=66806629"), {
+            "pattern": (r"https?://i\.pximg\.net/img-zip-ugoira/.*/"
+                        r"66806629_ugoira1920x1080\.zip|text:.+"),
+            "count": 2,
         }),
         ("https://www.pixiv.net/i/966412", None),
         ("http://img.pixiv.net/img/soundcross/42626136.jpg", None),
