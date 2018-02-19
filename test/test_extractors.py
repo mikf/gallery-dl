@@ -21,6 +21,7 @@ SKIP = {
     "chronos",
     "coreimg",
     "hosturimage",
+    "imgtrex",
     "yeet",
 }
 
@@ -31,11 +32,13 @@ class TestExtractors(unittest.TestCase):
         name = "gallerydl"
         email = "gallerydl@openaliasbox.org"
         config.set(("cache", "file"), ":memory:")
+        config.set(("downloader", "part"), False)
         config.set(("extractor", "username"), name)
         config.set(("extractor", "password"), name)
         config.set(("extractor", "nijie", "username"), email)
         config.set(("extractor", "seiga", "username"), email)
-        config.set(("downloader", "part"), False)
+        config.set(("extractor", "tumblr", "api-key"),
+                   "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
 
     def tearDown(self):
         config.clear()
