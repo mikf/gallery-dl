@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-- Fixed extraction issues for `mangastream`
+- Fixed extraction issues for `mangastream` and `pixiv`
 
 ## 1.2.0 - 2018-02-16
 - Added support for:
