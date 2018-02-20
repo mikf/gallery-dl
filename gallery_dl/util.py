@@ -223,6 +223,8 @@ class UniquePredicate():
         self.urls = set()
 
     def __call__(self, url, kwds):
+        if url.startswith("text:"):
+            return True
         if url not in self.urls:
             self.urls.add(url)
             return True
