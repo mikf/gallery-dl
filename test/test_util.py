@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -76,14 +76,20 @@ class TestPredicate(unittest.TestCase):
 
     def test_unique_predicate(self):
         dummy = None
-
         pred = util.UniquePredicate()
+
+        # no duplicates
         self.assertTrue(pred("1", dummy))
         self.assertTrue(pred("2", dummy))
         self.assertFalse(pred("1", dummy))
         self.assertFalse(pred("2", dummy))
         self.assertTrue(pred("3", dummy))
         self.assertFalse(pred("3", dummy))
+
+        # duplicates for "text:"
+        self.assertTrue(pred("text:123", dummy))
+        self.assertTrue(pred("text:123", dummy))
+        self.assertTrue(pred("text:123", dummy))
 
     def test_build_predicate(self):
         pred = util.build_predicate([])
