@@ -303,6 +303,9 @@ class Formatter():
         "a": ascii,
     }
 
+    def __init__(self, default=None):
+        self.kwdefault = default
+
     def vformat(self, format_string, kwargs):
         """Apply 'kwargs' to the initial format_string and return its result"""
         result = []
@@ -337,13 +340,12 @@ class Formatter():
             return before[1:] + format(value, format_spec) + after
         return format(value, format_spec)
 
-    @staticmethod
-    def get_field(field_name, kwargs):
-        """Return value called 'field_name' from 'kwargs'"""
+    def get_field(self, field_name, kwargs):
+        """Return value with key 'field_name' from 'kwargs'"""
         first, rest = _string.formatter_field_name_split(field_name)
 
         if first not in kwargs:
-            return None
+            return self.kwdefault
 
         obj = kwargs[first]
         for is_attr, i in rest:
@@ -362,7 +364,7 @@ class PathFormat():
             "filename", extractor.filename_fmt)
         self.directory_fmt = extractor.config(
             "directory", extractor.directory_fmt)
-        self.formatter = Formatter()
+        self.formatter = Formatter(extractor.config("keywords-default"))
 
         self.has_extension = False
         self.keywords = {}
