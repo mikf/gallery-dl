@@ -383,6 +383,16 @@ Description Additional key-value pairs to be added to each metadata dictionary.
 =========== =====
 
 
+extractor.*.keywords-default
+----------------------------
+=========== =====
+Type        any
+Default     ``"None"``
+Description Default value used for missing or undefined keyword names in
+            format strings.
+=========== =====
+
+
 extractor.*.archive
 -------------------
 =========== =====

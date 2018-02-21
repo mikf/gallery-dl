@@ -186,10 +186,17 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{missing}", replacement)
         self._run_test("{missing.attr}", replacement)
         self._run_test("{missing[key]}", replacement)
-        self._run_test("{missing?a/b/}", replacement)
+        self._run_test("{missing:?a//}", "")
 
-    def _run_test(self, format_string, result):
-        formatter = util.Formatter()
+    def test_missing_custom_default(self):
+        replacement = default = "foobar"
+        self._run_test("{missing}"     , replacement, default)
+        self._run_test("{missing.attr}", replacement, default)
+        self._run_test("{missing[key]}", replacement, default)
+        self._run_test("{missing:?a//}", "a" + default, default)
+
+    def _run_test(self, format_string, result, default=None):
+        formatter = util.Formatter(default)
         output = formatter.vformat(format_string, self.kwdict)
         self.assertEqual(output, result, format_string)
 
