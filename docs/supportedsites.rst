@@ -44,7 +44,7 @@ Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag-Searches
 Love is Over Archive https://archive.loveisover.me/      Threads
 Luscious             https://luscious.net/               Albums
-Manga Fox            http://www.mangafox.me/             Chapters
+Manga Fox            http://fanfox.net/                  Chapters
 Manga Here           http://www.mangahere.co/            Chapters, Manga
 Manga Stream         https://mangastream.com/            Chapters
 Mangapanda           http://www.mangapanda.com/          Chapters, Manga
@@ -79,23 +79,15 @@ Warosu               https://warosu.org/                 Threads
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 XVideos              https://www.xvideos.com/            Images from Users, Galleries
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
-YEET Archive         https://archive.yeet.net/           Threads
 Acidimg              https://acidimg.cc/                 individual Images
-Chronos              http://chronos.to/                  individual Images
-Coreimg              http://coreimg.net/                 individual Images
 Fapat                http://fapat.me/                    individual Images
-Hosturimage          https://hosturimage.com/            individual Images
-Imageontime          http://imageontime.org/             individual Images
 Imagetwist           https://imagetwist.com/             individual Images
 Imagevenue           http://imagevenue.com/              individual Images
-Img4ever             https://img4ever.net/               individual Images
 Imgcandy             http://imgcandy.net/                individual Images
-Imgmaid              https://imgmaid.net/                individual Images
 Imgspice             https://imgspice.com/               individual Images
 Imgspot              http://imgspot.org/                 individual Images
 Imgtrex              http://imgtrex.com/                 individual Images
 Imgtrial             http://imgtrial.com/                individual Images
-Imgupload            https://imgupload.yt/               individual Images
 Imgyt                https://img.yt/                     individual Images
 Picmaniac            http://pic-maniac.com/              individual Images
 Pixhost              https://pixhost.org/                individual Images

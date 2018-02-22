@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache
+from ..cache import memcache
 from os.path import splitext
 from urllib.parse import urljoin
 
@@ -126,20 +126,10 @@ class AcidimgImageExtractor(ImgytImageExtractor):
     test = []
 
 
-class ChronosImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from chronos.to"""
-    category = "chronos"
-    pattern = [r"(?:https?://)?((?:www\.)?chronos\.to/([a-z0-9]{12}))"]
-    test = [
-        ("http://chronos.to/bdrmq7rw7v4y", {
-            "url": "7fcb3fe315c94283644d25ef47a644c2dc8da944",
-            "keyword": "04dbc71a1154728d01c931308184050d61c5da55",
-            "content": "0c8768055e4e20e7c7259608b67799171b691140",
-        }),
-        ("http://chronos.to/bdrmq7rw7v4z", {
-            "exception": exception.NotFoundError,
-        }),
-    ]
+class PicmaniacImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from pic-maniac.com"""
+    category = "picmaniac"
+    pattern = [r"(?:https?://)?((?:www\.)?pic-maniac\.com/([a-z0-9]{12}))"]
     https = False
     params = "complex"
 
@@ -149,77 +139,6 @@ class ChronosImageExtractor(ImagehostImageExtractor):
             raise exception.NotFoundError("image")
         filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, filename
-
-
-class CoreimgImageExtractor(ChronosImageExtractor):
-    """Extractor for single images from coreimg.net"""
-    category = "coreimg"
-    pattern = [r"(?:https?://)?((?:www\.)?coreimg\.net/([a-z0-9]{12}))"]
-    test = [("http://coreimg.net/ykcl5al8uzvg", {
-        "url": "2b32596a2ea66b7cc784e20f3749f75f20998d78",
-        "keyword": "8d71e5b820bc7177baee33ca529c91ae4521299f",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
-
-
-class ImgmaidImageExtractor(ChronosImageExtractor):
-    """Extractor for single images from imgmaid.net"""
-    category = "imgmaid"
-    pattern = [r"(?:https?://)?((?:www\.)?imgmaid\.net/([a-z0-9]{12}))"]
-    test = []
-    https = True
-
-
-class PicmaniacImageExtractor(ChronosImageExtractor):
-    """Extractor for single images from pic-maniac.com"""
-    category = "picmaniac"
-    pattern = [r"(?:https?://)?((?:www\.)?pic-maniac\.com/([a-z0-9]{12}))"]
-    test = []
-
-
-class HosturimageImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from hosturimage.com"""
-    category = "hosturimage"
-    pattern = [(r"(?:https?://)?((?:www\.)?hosturimage\.com/"
-                r"img-([a-z0-9]+)\.html)")]
-    test = [("https://hosturimage.com/img-581ca97112bf8.html", {
-        "url": "c672a3fd7fd48e5506d020aa19c4ac91ba078671",
-        "keyword": "c3c94340b8e395e07b5145cf17534b5871ec8593",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
-    https = True
-
-    def get_info(self, page):
-        pos = page.index("<img class='centred")
-        url = text.extract(page, " src='", "'", pos)[0]
-        return url, url
-
-
-class ImageontimeImageExtractor(HosturimageImageExtractor):
-    """Extractor for single images from imageontime.org"""
-    category = "imageontime"
-    pattern = [(r"(?:https?://)?((?:www\.)?imageontime\.org/"
-                r"img-([a-z0-9]+)\.html)")]
-    test = []
-    https = False
-
-
-class Img4everImageExtractor(HosturimageImageExtractor):
-    """Extractor for single images from img4ever.net"""
-    category = "img4ever"
-    pattern = [(r"(?:https?://)?((?:www\.)?img4ever\.net/"
-                r"img-([a-z0-9]+)\.html)")]
-    test = []
-    https = True
-
-
-class ImguploadImageExtractor(HosturimageImageExtractor):
-    """Extractor for single images from imgupload.yt"""
-    category = "imgupload"
-    pattern = [(r"(?:https?://)?((?:www\.)?imgupload\.yt/"
-                r"img-([a-z0-9]+)\.html)")]
-    test = []
-    https = True
 
 
 class ImgspotImageExtractor(ImagehostImageExtractor):
@@ -266,7 +185,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
     params = None
 
     @property
-    @cache(maxage=3*60*60)
+    @memcache(maxage=3*60*60)
     def cookies(self):
         return self.request(self.url).cookies
 
