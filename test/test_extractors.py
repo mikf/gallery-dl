@@ -18,11 +18,6 @@ SKIP = {
     "archivedmoe", "archiveofsins", "thebarchive",
 
     # temporary issues
-    "chronos",
-    "coreimg",
-    "hosturimage",
-    "imgtrex",
-    "yeet",
 }
 
 
