@@ -86,7 +86,6 @@ modules = [
     "whatisthisimnotgoodwithcomputers",
     "worldthree",
     "yandere",
-    "yeet",
     "xvideos",
     "imagehosts",
     "directlink",
