@@ -549,7 +549,9 @@ class DownloadArchive():
         self.cursor = con.cursor()
         self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
                             "(entry PRIMARY KEY) WITHOUT ROWID")
-        self.keygen = (extractor.category + extractor.archive_fmt).format_map
+        self.keygen = (extractor.category + extractor.config(
+            "archive-format", extractor.archive_fmt)
+        ).format_map
 
     def check(self, kwdict):
         """Return True if item described by 'kwdict' exists in archive"""

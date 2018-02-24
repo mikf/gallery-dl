@@ -402,8 +402,18 @@ Description File to store IDs of downloaded files in. Downloads of files
             already recorded in this archive file will be skipped_.
 
             The resulting archive file is not a plain text file but an SQLite3
-            database, as lookup operations are significantly faster when the
+            database, as either lookup operations are significantly faster or
+            memory requirements are significantly lower when the
             amount of stored IDs gets reasonably large.
+=========== =====
+
+
+extractor.*.archive-format
+--------------------------
+=========== =====
+Type        ``string``
+Example     ``"{id}_{offset}"``
+Description An alternative `format string`_ to build archive IDs with.
 =========== =====
 
 
