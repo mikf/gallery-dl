@@ -145,6 +145,7 @@ class TestFormatter(unittest.TestCase):
     kwdict = {
         "a": "hElLo wOrLd",
         "b": "äöü",
+        "u": "%27%3C%20/%20%3E%27",
         "name": "Name",
         "title1": "Title",
         "title2": "",
@@ -157,6 +158,8 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!u}", "HELLO WORLD")
         self._run_test("{a!c}", "Hello world")
         self._run_test("{a!C}", "Hello World")
+        self._run_test("{a!U}", self.kwdict["a"])
+        self._run_test("{u!U}", "'< / >'")
         self._run_test("{a!s}", self.kwdict["a"])
         self._run_test("{a!r}", "'" + self.kwdict["a"] + "'")
         self._run_test("{a!a}", "'" + self.kwdict["a"] + "'")

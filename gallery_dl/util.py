@@ -284,6 +284,7 @@ class Formatter():
     - "u": calls str.upper
     - "c": calls str.capitalize
     - "C": calls string.capwords
+    - "U": calls urllib.parse.unquote
     - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
 
     Extra Format Specifiers:
@@ -298,6 +299,7 @@ class Formatter():
         "u": str.upper,
         "c": str.capitalize,
         "C": string.capwords,
+        "U": urllib.parse.unquote,
         "s": str,
         "r": repr,
         "a": ascii,
