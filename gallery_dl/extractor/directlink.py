@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -33,8 +33,8 @@ class DirectlinkExtractor(Extractor):
         }),
         # percent-encoded characters
         ("https://example.org/%27%3C%23/%23%3E%27.jpg?key=%3C%26%3E", {
-            "url": "8e52f4587063be0db44b42738d6ff1ee837ce84a",
-            "keyword": "2f9e775c30bbee64bf48590b2f4007156ced18b9",
+            "url": "2627e8140727fdf743f86fe18f69f99a052c9718",
+            "keyword": "c658b8b6213e46be15a25e492df385ece5771bdf",
         }),
     ]
 
