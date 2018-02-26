@@ -22,12 +22,16 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor,
                               sankaku.SankakuTagExtractor):
     """Extractor for images from idol.sankakucomplex.com by search-tags"""
     pattern = [r"(?:https?://)?idol\.sankakucomplex\.com"
-               r"/\?(?:[^&#]*&)*tags=([^&#]+)"]
-    test = [("https://idol.sankakucomplex.com/?tags=lyumos+wreath", {
-        "count": ">= 6",
-        "pattern": (r"https://is\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                    r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+"),
-    })]
+               r"(?:/\?([^#]*))+"]
+    test = [
+        ("https://idol.sankakucomplex.com/?tags=lyumos+wreath", {
+            "count": ">= 6",
+            "pattern": (r"https://is\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
+                        r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+"),
+        }),
+        (("https://idol.sankakucomplex.com/"
+            "?tags=marie_rose&page=3&next=615855"), None),
+    ]
 
 
 class IdolcomplexPoolExtractor(IdolcomplexExtractor,
