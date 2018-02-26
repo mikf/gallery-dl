@@ -22,7 +22,9 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor,
                               sankaku.SankakuTagExtractor):
     """Extractor for images from idol.sankakucomplex.com by search-tags"""
     pattern = [r"(?:https?://)?idol\.sankakucomplex\.com"
-               r"/\?(?:[^&#]*&)*tags=([^&#]+)"]
+               r"/\?(?:[^&#]*&)*tags=([^&#]+)"
+               r"((?:[^&#]*&)*page=([^&#]+))*"
+               r"((?:[^&#]*&)*next=([^&#]+))*"]
     test = [("https://idol.sankakucomplex.com/?tags=lyumos+wreath", {
         "count": ">= 6",
         "pattern": (r"https://is\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
