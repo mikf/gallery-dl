@@ -133,7 +133,9 @@ class SankakuTagExtractor(SankakuExtractor):
     subcategory = "tag"
     directory_fmt = ["{category}", "{tags}"]
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com"
-               r"/\?(?:[^&#]*&)*tags=([^&#]+)"]
+               r"/\?(?:[^&#]*&)*tags=([^&#]+)"
+               r"((?:[^&#]*&)*page=([^&#]+))*"
+               r"((?:[^&#]*&)*next=([^&#]+))*"]
     test = [
         ("https://chan.sankakucomplex.com/?tags=bonocho", {
             "count": 5,
@@ -150,6 +152,8 @@ class SankakuTagExtractor(SankakuExtractor):
     def __init__(self, match):
         SankakuExtractor.__init__(self)
         self.tags = text.unquote(match.group(1).replace("+", " "))
+        self.start_page = 1 if match.group(3) is None else int(text.unquote(match.group(3)))
+        self.next = 0 if match.group(5) is None else int(text.unquote(match.group(5)))
 
     def skip(self, num):
         pages, posts = divmod(num, self.per_page)
@@ -170,6 +174,7 @@ class SankakuTagExtractor(SankakuExtractor):
 
     def get_posts(self):
         params = {"tags": self.tags, "page": self.start_page}
+        if self.next > 0 : params["next"] = self.next
 
         while self.logged_in or params["page"] <= 25:
             page = self.request(self.root, params=params, retries=10).text
