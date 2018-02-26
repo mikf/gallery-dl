@@ -133,7 +133,7 @@ class SankakuTagExtractor(SankakuExtractor):
     subcategory = "tag"
     directory_fmt = ["{category}", "{tags}"]
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com"
-               r"(?:/\?([^#]*))?"]
+               r"(?:/\?([^#]*))+"]
     test = [
         ("https://chan.sankakucomplex.com/?tags=bonocho", {
             "count": 5,
