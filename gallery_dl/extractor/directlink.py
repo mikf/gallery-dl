@@ -26,9 +26,15 @@ class DirectlinkExtractor(Extractor):
             "url": "32ee1045881e17ef3f13a9958595afa42421ec6c",
             "keyword": "2427b68c14006489df1776bb1bcd3bc24be25e10",
         }),
+        # more complex example
         ("https://example.org/path/file.webm?que=1&ry=2#fragment", {
             "url": "fd4aec8a32842343394e6078a06c3e6b647bf671",
             "keyword": "ed008f35fc18dddb2f448a18d160c949bb3b054c",
+        }),
+        # percent-encoded characters
+        ("https://example.org/%27%3C%23/%23%3E%27.jpg?key=%3C%26%3E", {
+            "url": "8e52f4587063be0db44b42738d6ff1ee837ce84a",
+            "keyword": "2f9e775c30bbee64bf48590b2f4007156ced18b9",
         }),
     ]
 
@@ -39,6 +45,10 @@ class DirectlinkExtractor(Extractor):
 
     def items(self):
         text.nameext_from_url(self.url, self.data)
+        for key, value in self.data.items():
+            if value:
+                self.data[key] = text.unquote(value)
+
         yield Message.Version, 1
         yield Message.Directory, self.data
         yield Message.Url, self.url, self.data
