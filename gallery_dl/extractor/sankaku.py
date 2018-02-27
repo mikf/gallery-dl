@@ -31,8 +31,8 @@ class SankakuExtractor(SharedConfigExtractor):
         self.logged_in = True
         self.start_page = 1
         self.start_post = 0
-        self.wait_min = self.config("wait-min", 2)
-        self.wait_max = self.config("wait-max", 4)
+        self.wait_min = self.config("wait-min", 2.5)
+        self.wait_max = self.config("wait-max", 5.0)
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
 
@@ -132,40 +132,57 @@ class SankakuTagExtractor(SankakuExtractor):
     """Extractor for images from chan.sankakucomplex.com by search-tags"""
     subcategory = "tag"
     directory_fmt = ["{category}", "{tags}"]
-    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com"
-               r"(?:/\?([^#]*))+"]
+    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/\?([^#]*)"]
     test = [
         ("https://chan.sankakucomplex.com/?tags=bonocho", {
             "count": 5,
             "pattern": (r"https://cs\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
                         r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+"),
         }),
+        # respect 'page' query parameter
+        ("https://chan.sankakucomplex.com/?tags=bonocho&page=2", {
+            "count": 0,
+        }),
+        # respect 'next' query parameter
+        ("https://chan.sankakucomplex.com/?tags=bonocho&next=182284", {
+            "count": 1,
+        }),
+        # error on five or more tags
         ("https://chan.sankakucomplex.com/?tags=bonocho+a+b+c+d", {
             "options": (("username", None),),
             "exception": exception.StopExtraction,
         }),
+        # match arbitrary query parameters
         (("https://chan.sankakucomplex.com/"
-            "?tags=marie_rose&page=98&next=3874906"), None),
+            "?tags=marie_rose&page=98&next=3874906&commit=Search"), None),
     ]
     per_page = 20
 
     def __init__(self, match):
         SankakuExtractor.__init__(self)
         query = text.parse_query(match.group(1))
-        self.tags = query.get("tags", "").replace("+", " ")
+        self.tags = text.unquote(query.get("tags", "").replace("+", " "))
         self.start_page = util.safe_int(query.get("page"), 1)
         self.next = util.safe_int(query.get("next"), 0)
 
     def skip(self, num):
-        pages, posts = divmod(num, self.per_page)
-        if pages > 49:
-            self.log.info("Cannot skip more than 50 pages ahead.")
-            pages, posts = 49, self.per_page
-        self.start_page += pages
-        self.start_post += posts
-        return pages * self.per_page + posts
+        if self.next:
+            self.start_post += num
+        else:
+            pages, posts = divmod(num, self.per_page)
+            self.start_page += pages
+            self.start_post += posts
+        return num
 
     def get_metadata(self):
+        if not self.next:
+            max_page = 50 if self.logged_in else 25
+            if self.start_page > max_page:
+                self.log.info("Traversing from page %d to page %d",
+                              max_page, self.start_page)
+                self.start_post += self.per_page * (self.start_page - max_page)
+                self.start_page = max_page
+
         tags = self.tags.split()
         if not self.logged_in and len(tags) > 4:
             self.log.error("Unauthenticated users cannot use "
@@ -174,11 +191,15 @@ class SankakuTagExtractor(SankakuExtractor):
         return {"tags": " ".join(tags)}
 
     def get_posts(self):
-        params = {"tags": self.tags, "page": self.start_page}
-        if self.next > 0:
-            params["next"] = self.next
+        params = {"tags": self.tags}
 
-        while self.logged_in or params["page"] <= 25:
+        if self.next:
+            params["next"] = self.next
+        else:
+            params["page"] = self.start_page
+
+        while True:
+            self.wait()
             page = self.request(self.root, params=params, retries=10).text
             pos = page.find("<div id=more-popular-posts-link>") + 1
 
@@ -187,13 +208,8 @@ class SankakuTagExtractor(SankakuExtractor):
                 return
             yield from ids
 
-            params["page"] += 1
-            params["next"] = int(ids[-1]) - 1
-
-        self.log.warning(
-            "Unauthenticated users may only access the first 500 images / 25 "
-            "pages. (Use '--range 501-' to continue downloading from this "
-            "point onwards after setting up an account.)")
+            params["page"] = 2
+            params["next"] = util.safe_int(ids[-1]) - 1
 
 
 class SankakuPoolExtractor(SankakuExtractor):
