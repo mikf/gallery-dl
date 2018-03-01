@@ -229,6 +229,7 @@ class TumblrLikesExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user by tag"""
     subcategory = "likes"
     directory_fmt = ["{category}", "{name}", "likes"]
+    archive_fmt = "f_{blog[name]}_{id}_{offset}"
     pattern = [BASE_PATTERN + r"/likes"]
     test = [("http://mikf123.tumblr.com/likes", {
         "count": 1,

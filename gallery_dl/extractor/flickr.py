@@ -16,7 +16,6 @@ class FlickrExtractor(Extractor):
     """Base class for flickr extractors"""
     category = "flickr"
     filename_fmt = "{category}_{id}.{extension}"
-    archive_fmt = "{id}"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -45,6 +44,7 @@ class FlickrExtractor(Extractor):
 class FlickrImageExtractor(FlickrExtractor):
     """Extractor for individual images from flickr.com"""
     subcategory = "image"
+    archive_fmt = "{id}"
     pattern = [r"(?:https?://)?(?:www\.|m\.)?flickr\.com/photos/[^/]+/(\d+)",
                r"(?:https?://)?[^.]+\.static\.?flickr\.com/(?:\d+/)+(\d+)_",
                r"(?:https?://)?flic\.kr/(p)/([A-Za-z1-9]+)"]
@@ -108,6 +108,7 @@ class FlickrAlbumExtractor(FlickrExtractor):
     subcategory = "album"
     directory_fmt = ["{category}", "{subcategory}s",
                      "{album[id]} - {album[title]}"]
+    archive_fmt = "a_{album[id]}_{id}"
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/"
                r"photos/([^/]+)/(?:album|set)s/(\d+)"]
     test = [(("https://www.flickr.com/photos/"
@@ -143,6 +144,7 @@ class FlickrGalleryExtractor(FlickrExtractor):
     subcategory = "gallery"
     directory_fmt = ["{category}", "galleries",
                      "{user[username]} {gallery[id]}"]
+    archive_fmt = "g_{gallery[id]}_{id}"
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/"
                r"photos/([^/]+)/galleries/(\d+)"]
     test = [(("https://www.flickr.com/photos/flickr/"
@@ -171,6 +173,7 @@ class FlickrGroupExtractor(FlickrExtractor):
     """Extractor for group pools from flickr.com"""
     subcategory = "group"
     directory_fmt = ["{category}", "{subcategory}s", "{group[groupname]}"]
+    archive_fmt = "G_{group[nsid]}_{id}"
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/groups/([^/]+)"]
     test = [("https://www.flickr.com/groups/bird_headshots/", {
         "pattern": (r"https?://farm\d+\.staticflickr\.com"
@@ -189,6 +192,7 @@ class FlickrUserExtractor(FlickrExtractor):
     """Extractor for the photostream of a flickr user"""
     subcategory = "user"
     directory_fmt = ["{category}", "{user[username]}"]
+    archive_fmt = "u_{user[nsid]}_{id}"
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/?$"]
     test = [("https://www.flickr.com/photos/shona_s/", {
         "url": "d125b536cd8c4229363276b6c84579c394eec3a2",
@@ -203,6 +207,7 @@ class FlickrFavoriteExtractor(FlickrExtractor):
     """Extractor for favorite photos of a flickr user"""
     subcategory = "favorite"
     directory_fmt = ["{category}", "{subcategory}s", "{user[username]}"]
+    archive_fmt = "f_{user[nsid]}_{id}"
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/favorites"]
     test = [("https://www.flickr.com/photos/shona_s/favorites", {
         "url": "5129b3f5bfa83cc25bdae3ce476036de1488dad2",
@@ -217,6 +222,7 @@ class FlickrSearchExtractor(FlickrExtractor):
     """Extractor for flickr photos based on search results"""
     subcategory = "search"
     directory_fmt = ["{category}", "{subcategory}", "{search[text]}"]
+    archive_fmt = "s_{search}_{id}"
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/search/?\?([^#]+)"]
     test = [
         (("https://flickr.com/search/?text=mountain"), None),

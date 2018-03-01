@@ -20,7 +20,6 @@ class SankakuExtractor(SharedConfigExtractor):
     basecategory = "booru"
     category = "sankaku"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    archive_fmt = "{id}"
     cookienames = ("login", "pass_hash")
     cookiedomain = "chan.sankakucomplex.com"
     subdomain = "chan"
@@ -38,14 +37,17 @@ class SankakuExtractor(SharedConfigExtractor):
 
     def items(self):
         self.login()
+        data = self.get_metadata()
+
         yield Message.Version, 1
-        yield Message.Directory, self.get_metadata()
+        yield Message.Directory, data
 
         for post_id in util.advance(self.get_posts(), self.start_post):
             self.wait()
-            data = self.get_post_data(post_id)
-            url = data["file_url"]
-            yield Message.Url, url, text.nameext_from_url(url, data)
+            post = self.get_post_data(post_id)
+            url = post["file_url"]
+            post.update(data)
+            yield Message.Url, url, text.nameext_from_url(url, post)
 
     def skip(self, num):
         self.start_post += num
@@ -131,7 +133,8 @@ class SankakuExtractor(SharedConfigExtractor):
 class SankakuTagExtractor(SankakuExtractor):
     """Extractor for images from chan.sankakucomplex.com by search-tags"""
     subcategory = "tag"
-    directory_fmt = ["{category}", "{tags}"]
+    directory_fmt = ["{category}", "{search_tags}"]
+    archive_fmt = "t_{search_tags}_{id}"
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/\?([^#]*)"]
     test = [
         ("https://chan.sankakucomplex.com/?tags=bonocho", {
@@ -188,7 +191,7 @@ class SankakuTagExtractor(SankakuExtractor):
             self.log.error("Unauthenticated users cannot use "
                            "more than 4 tags at once.")
             raise exception.StopExtraction()
-        return {"tags": " ".join(tags)}
+        return {"search_tags": " ".join(tags)}
 
     def get_posts(self):
         params = {"tags": self.tags}
@@ -216,6 +219,7 @@ class SankakuPoolExtractor(SankakuExtractor):
     """Extractor for image-pools  from chan.sankakucomplex.com"""
     subcategory = "pool"
     directory_fmt = ["{category}", "pool", "{pool}"]
+    archive_fmt = "p_{pool}_{id}"
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/pool/show/(\d+)"]
     test = [("https://chan.sankakucomplex.com/pool/show/90", {
         "count": 5,
@@ -253,6 +257,7 @@ class SankakuPoolExtractor(SankakuExtractor):
 class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single images from chan.sankakucomplex.com"""
     subcategory = "post"
+    archive_fmt = "{id}"
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/post/show/(\d+)"]
     test = [("https://chan.sankakucomplex.com/post/show/360451", {
         "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",

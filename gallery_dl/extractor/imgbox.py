@@ -16,7 +16,6 @@ import re
 class ImgboxExtractor(Extractor):
     """Base class for imgbox extractors"""
     category = "imgbox"
-    archive_fmt = "{image_key}"
     root = "https://imgbox.com"
 
     def items(self):
@@ -64,6 +63,7 @@ class ImgboxGalleryExtractor(AsynchronousExtractor, ImgboxExtractor):
     subcategory = "gallery"
     directory_fmt = ["{category}", "{title} - {gallery_key}"]
     filename_fmt = "{num:>03}-{name}.{extension}"
+    archive_fmt = "{gallery_key}_{image_key}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"]
     test = [
         ("https://imgbox.com/g/JaX5V5HX7g", {
@@ -106,6 +106,7 @@ class ImgboxGalleryExtractor(AsynchronousExtractor, ImgboxExtractor):
 class ImgboxImageExtractor(ImgboxExtractor):
     """Extractor for single images from imgbox.com"""
     subcategory = "image"
+    archive_fmt = "{image_key}"
     pattern = [r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"]
     test = [
         ("https://imgbox.com/qHhw7lpG", {
