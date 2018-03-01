@@ -111,6 +111,7 @@ class DownloaderBase():
                     self.receive(file)
                 except RequestException as exc:
                     msg = exc
+                    print()
                     continue
 
                 # check filesize
