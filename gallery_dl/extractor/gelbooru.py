@@ -18,7 +18,6 @@ class GelbooruExtractor(SharedConfigExtractor):
     basecategory = "booru"
     category = "gelbooru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    archive_fmt = "{id}"
     api_url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index"
 
     def __init__(self):
@@ -29,8 +28,10 @@ class GelbooruExtractor(SharedConfigExtractor):
             self.get_post_data = self.get_post_data_api
 
     def items(self):
+        data = self.get_metadata()
+
         yield Message.Version, 1
-        yield Message.Directory, self.get_metadata()
+        yield Message.Directory, data
 
         for post in util.advance(self.get_posts(), self.start_post):
             if isinstance(post, str):
@@ -38,6 +39,7 @@ class GelbooruExtractor(SharedConfigExtractor):
             for key in ("id", "width", "height", "score", "change"):
                 post[key] = util.safe_int(post[key])
             url = post["file_url"]
+            post.update(data)
             yield Message.Url, url, text.nameext_from_url(url, post)
 
     def skip(self, num):
@@ -85,7 +87,8 @@ class GelbooruExtractor(SharedConfigExtractor):
 class GelbooruTagExtractor(GelbooruExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
     subcategory = "tag"
-    directory_fmt = ["{category}", "{tags}"]
+    directory_fmt = ["{category}", "{search_tags}"]
+    archive_fmt = "t_{search_tags}_{id}"
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=list&tags=([^&]+)"]
     test = [
@@ -111,7 +114,7 @@ class GelbooruTagExtractor(GelbooruExtractor):
         return num
 
     def get_metadata(self):
-        return {"tags": self.tags}
+        return {"search_tags": self.tags}
 
     def get_posts(self):
         if self.use_api:
@@ -149,6 +152,7 @@ class GelbooruPoolExtractor(GelbooruExtractor):
     """Extractor for image-pools from gelbooru.com"""
     subcategory = "pool"
     directory_fmt = ["{category}", "pool", "{pool}"]
+    archive_fmt = "p_{pool}_{id}"
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=pool&s=show&id=(\d+)"]
     test = [("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
@@ -182,6 +186,7 @@ class GelbooruPoolExtractor(GelbooruExtractor):
 class GelbooruPostExtractor(GelbooruExtractor):
     """Extractor for single images from gelbooru.com"""
     subcategory = "post"
+    archive_fmt = "{id}"
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=view&id=(\d+)"]
     test = [("https://gelbooru.com/index.php?page=post&s=view&id=313638", {

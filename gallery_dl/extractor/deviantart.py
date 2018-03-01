@@ -22,7 +22,6 @@ class DeviantartExtractor(Extractor):
     category = "deviantart"
     directory_fmt = ["{category}", "{author[username]!l}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    archive_fmt = "{index}.{extension}"
 
     def __init__(self, match=None):
         Extractor.__init__(self)
@@ -166,6 +165,8 @@ class DeviantartExtractor(Extractor):
 class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
+    archive_fmt = "g_{username}_{index}.{extension}"
+
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"]
     test = [
@@ -192,6 +193,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     """Extractor for deviations inside an artist's gallery folder"""
     subcategory = "folder"
     directory_fmt = ["{category}", "{folder[owner]}", "{folder[title]}"]
+    archive_fmt = "F_{folder[index]}_{index}.{extension}"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/gallery/(\d+)/([^/?&#]+)"]
     test = [
@@ -225,6 +227,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
 class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
+    archive_fmt = "{index}.{extension}"
     pattern = [(r"(?:https?://)?([^.]+\.deviantart\.com/"
                 r"(?:art|journal)/[^/?&#]+-\d+)"),
                (r"(?:https?://)?(sta\.sh/[a-z0-9]+)")]
@@ -268,6 +271,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     """Extractor for an artist's favorites"""
     subcategory = "favorite"
     directory_fmt = ["{category}", "{username}", "Favourites"]
+    archive_fmt = "f_{username}_{index}.{extension}"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/favourites/?(?:\?catpath=/)?$"]
     test = [
@@ -295,12 +299,13 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     subcategory = "collection"
     directory_fmt = ["{category}", "{collection[owner]}",
                      "Favourites", "{collection[title]}"]
+    archive_fmt = "C_{collection[index]}_{index}.{extension}"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/favourites/(\d+)/([^/?&#]+)"]
     test = [(("https://pencilshadings.deviantart.com"
               "/favourites/70595441/3D-Favorites"), {
         "url": "742f92199d5bc6a89cda6ec6133d46c7a523824d",
-        "keyword": "9210c976b5274eff6ea1d2b8a4f891c9f35ce340",
+        "keyword": "5da3a16e85150d2a09e074b2b2ee916099b52737",
         "options": (("original", False),),
     })]
 
@@ -324,6 +329,7 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     """Extractor for an artist's journals"""
     subcategory = "journal"
     directory_fmt = ["{category}", "{username}", "Journal"]
+    archive_fmt = "j_{username}_{index}.{extension}"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
     test = [

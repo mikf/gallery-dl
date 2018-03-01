@@ -18,6 +18,7 @@ SKIP = {
     "archivedmoe", "archiveofsins", "thebarchive",
 
     # temporary issues
+    "powermanga",
 }
 
 

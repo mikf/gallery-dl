@@ -20,7 +20,6 @@ class BooruExtractor(SharedConfigExtractor):
     """Base class for all booru extractors"""
     basecategory = "booru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    archive_fmt = "{id}"
     api_url = ""
     per_page = 50
     page_start = 1
@@ -39,20 +38,23 @@ class BooruExtractor(SharedConfigExtractor):
         return pages * self.per_page
 
     def items(self):
+        data = self.get_metadata()
+
         yield Message.Version, 1
-        yield Message.Directory, self.get_metadata()
+        yield Message.Directory, data
 
         self.reset_page()
         while True:
             images = self.parse_response(
                 self.request(self.api_url, params=self.params))
 
-            for data in images:
+            for image in images:
                 try:
-                    url = data["file_url"]
+                    url = image["file_url"]
                     if url.startswith("/"):
                         url = urljoin(self.api_url, url)
-                    yield Message.Url, url, text.nameext_from_url(url, data)
+                    image.update(data)
+                    yield Message.Url, url, text.nameext_from_url(url, image)
                 except KeyError:
                     continue
 
@@ -115,7 +117,8 @@ class GelbooruPageMixin():
 class TagMixin():
     """Extraction of images based on search-tags"""
     subcategory = "tag"
-    directory_fmt = ["{category}", "{tags}"]
+    directory_fmt = ["{category}", "{search_tags}"]
+    archive_fmt = "t_{search_tags}_{id}"
 
     def __init__(self, match):
         super().__init__(match)
@@ -124,13 +127,14 @@ class TagMixin():
         self.params["limit"] = self.per_page
 
     def get_metadata(self):
-        return {"tags": self.tags}
+        return {"search_tags": self.tags}
 
 
 class PoolMixin():
     """Extraction of image-pools"""
     subcategory = "pool"
     directory_fmt = ["{category}", "pool", "{pool}"]
+    archive_fmt = "p_{pool}_{id}"
 
     def __init__(self, match):
         super().__init__(match)
@@ -145,6 +149,7 @@ class PoolMixin():
 class PostMixin():
     """Extraction of a single image-post"""
     subcategory = "post"
+    archive_fmt = "{id}"
 
     def __init__(self, match):
         super().__init__(match)
@@ -156,6 +161,7 @@ class PopularMixin():
     """Extraction and metadata handling for Danbooru v2"""
     subcategory = "popular"
     directory_fmt = ["{category}", "popular", "{scale}", "{date}"]
+    archive_fmt = "P_{scale[0]}_{date}_{id}"
     page_start = None
     sort = True
 

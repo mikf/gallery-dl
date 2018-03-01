@@ -15,7 +15,6 @@ from .. import text
 class ImgchiliExtractor(Extractor):
     """Base class for imgchili extractors"""
     category = "imgchili"
-    archive_fmt = "{image_id}"
     root = "https://imgchili.net"
 
     def __init__(self, match):
@@ -45,6 +44,7 @@ class ImgchiliExtractor(Extractor):
 class ImgchiliImageExtractor(ImgchiliExtractor):
     """Extractor for single images from imgchili.net"""
     subcategory = "image"
+    archive_fmt = "{image_id}"
     pattern = [r"(?:https?://)?(?:www\.)?imgchili\.net/show/\d+/(\d+)_[^/]+"]
     test = [(("http://imgchili.net/show/89427/"
               "89427136_test___quot;___gt;.png"), {
@@ -71,7 +71,8 @@ class ImgchiliImageExtractor(ImgchiliExtractor):
 class ImgchiliAlbumExtractor(ImgchiliExtractor):
     """Extractor for image-albums from imgchili.net"""
     subcategory = "album"
-    directory_fmt = ["{category}", "{title} - {key}"]
+    directory_fmt = ["{category}", "{title} - {album_id}"]
+    archive_fmt = "{album_id}_{image_id}"
     filename_fmt = "{num:>03} {filename}"
     pattern = [r"(?:https?://)?(?:www\.)?imgchili\.net/album/([^/]+)"]
     test = [("http://imgchili.net/album/7a3824c59f77c8d39b260f9168d4b49b", {
@@ -83,7 +84,7 @@ class ImgchiliAlbumExtractor(ImgchiliExtractor):
         title = text.extract(page, "<h1>", "</h1>")[0]
         return {
             "title": text.unescape(title),
-            "key": self.match.group(1),
+            "album_id": self.match.group(1),
         }
 
     def get_images(self, page):

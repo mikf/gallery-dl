@@ -18,7 +18,7 @@ class ImagebamGalleryExtractor(AsynchronousExtractor):
     subcategory = "gallery"
     directory_fmt = ["{category}", "{title} - {gallery_key}"]
     filename_fmt = "{num:>03}-{name}.{extension}"
-    archive_fmt = "{image_id}"
+    archive_fmt = "{gallery_key}_{image_id}"
     pattern = [r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([^/]+)"]
     test = [(("http://www.imagebam.com/"
               "gallery/adz2y0f9574bjpmonaismyrhtjgvey4o"), {
