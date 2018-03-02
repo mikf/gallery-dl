@@ -56,12 +56,13 @@ class PixivExtractor(Extractor):
                     yield Message.Url, "{}_p{}{}".format(url, i, ext), work
 
     def works(self):
-        """Return all work-items for a pixiv-member"""
+        """Return an iterable containing all relevant 'work'-objects"""
         return []
 
     def prepare_work(self, work):
         """Prepare a work-dictionary with additional keywords"""
         url = work["image_urls"]["large"]
+        del work["image_urls"]
         work["num"] = ""
         work["url"] = url
         work["extension"] = url.rpartition(".")[2]
@@ -224,6 +225,7 @@ class PixivFavoriteExtractor(PixivExtractor):
     """Extractor for all favorites/bookmarks of a pixiv-user"""
     subcategory = "favorite"
     directory_fmt = ["{category}", "bookmarks", "{user[id]} {user[account]}"]
+    archive_fmt = "f_{bookmark[id]}{num}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
                r"/bookmark\.php\?id=(\d+)"]
     test = [
@@ -241,6 +243,10 @@ class PixivFavoriteExtractor(PixivExtractor):
         return self.api.user_favorite_works(self.user_id)
 
     def prepare_work(self, work):
+        work["work"]["bookmark"] = {
+            key: work[key]
+            for key in ("id", "comment", "tags", "publicity")
+        }
         return PixivExtractor.prepare_work(self, work["work"])
 
 
@@ -263,6 +269,7 @@ class PixivBookmarkExtractor(PixivFavoriteExtractor):
 class PixivRankingExtractor(PixivExtractor):
     """Extractor for pixiv ranking pages"""
     subcategory = "ranking"
+    archive_fmt = "r_{ranking[mode]}_{ranking[date]}_{id}{num}.{extension}"
     directory_fmt = ["{category}", "rankings", "{mode}", "{date}"]
     pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
                r"/ranking\.php(?:\?([^#]*))?"]
@@ -275,6 +282,7 @@ class PixivRankingExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
+        self.ranking_info = None
         self._iter = None
         self._first = None
 
@@ -305,10 +313,15 @@ class PixivRankingExtractor(PixivExtractor):
     def get_metadata(self, user=None):
         self._iter = self.api.ranking(self.mode, self.content, self.date)
         self._first = next(self._iter)
-        return {k: self._first[k] for k in ("mode", "content", "date")}
+        self.ranking_info = {
+            key: self._first[key]
+            for key in ("mode", "content", "date")
+        }
+        return self.ranking_info.copy()
 
     def prepare_work(self, work):
         work["work"]["rank"] = work["rank"]
+        work["work"]["ranking"] = self.ranking_info
         return PixivExtractor.prepare_work(self, work["work"])
 
 
@@ -319,6 +332,7 @@ class PixivAPI():
     - https://github.com/upbit/pixivpy
     For in-depth information regarding the Pixiv Public-API, see
     - http://blog.imaou.com/opensource/2014/10/09/pixiv_api_for_ios_update.html
+    - https://gist.github.com/ZipFile/e14ff1a7e6d01456188a
     """
     def __init__(self, extractor):
         self.session = extractor.session
