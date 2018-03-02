@@ -77,7 +77,7 @@ class ImgchiliAlbumExtractor(ImgchiliExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?imgchili\.net/album/([^/]+)"]
     test = [("http://imgchili.net/album/7a3824c59f77c8d39b260f9168d4b49b", {
         "url": "995e32b62c36d48b02ef4c7a7a19463924391e2a",
-        "keyword": "ae0c56cfd1fe032e5bc22f1188767b2a923ae25e",
+        "keyword": "14e903b320702faae0f057af910f2fa04ef2ad66",
     })]
 
     def get_job_metadata(self, page):

@@ -108,7 +108,7 @@ class TumblrExtractor(Extractor):
                 yield self._prepare(_original_video(post["video_url"]), post)
 
             if self.inline:  # inline images
-                for key in ("body", "description"):
+                for key in ("body", "description", "source"):
                     if key in post:
                         for url in re.findall('<img src="([^"]+)"', post[key]):
                             yield self._prepare_image(url, post)
