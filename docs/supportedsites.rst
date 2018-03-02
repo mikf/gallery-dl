@@ -47,9 +47,9 @@ Luscious             https://luscious.net/               Albums
 Manga Fox            http://fanfox.net/                  Chapters
 Manga Here           http://www.mangahere.co/            Chapters, Manga
 Manga Stream         https://mangastream.com/            Chapters
-Mangapanda           http://www.mangapanda.com/          Chapters, Manga
+Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.me/               Chapters, Manga
-Mangareader          http://www.mangareader.net/         Chapters, Manga
+Mangareader          https://www.mangareader.net/        Chapters, Manga
 nhentai              https://nhentai.net/                Galleries
 Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
 nijie                https://nijie.info/                 Images from Users, individual Images               Required
