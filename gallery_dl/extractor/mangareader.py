@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from http://www.mangareader.net/"""
+"""Extract manga-chapters and entire manga from https://www.mangareader.net/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
@@ -15,7 +15,7 @@ from .. import text, util
 class MangareaderBase():
     """Base class for mangareader extractors"""
     category = "mangareader"
-    root = "http://www.mangareader.net"
+    root = "https://www.mangareader.net"
 
     @staticmethod
     def parse_page(page, data):
@@ -36,8 +36,8 @@ class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
     """Extractor for manga from mangareader.net"""
     pattern = [r"(?:https?://)?((?:www\.)?mangareader\.net/[^/?&#]+)/?$"]
     reverse = False
-    test = [("http://www.mangareader.net/mushishi", {
-        "url": "249042420b67a07b32e7f6be4c7410b6d810b808",
+    test = [("https://www.mangareader.net/mushishi", {
+        "url": "bc203b858b4ad76e5d77e39118a7be0350e357da",
         "keyword": "031b3ea085921c552de017ecbb9b906e462229c9",
     })]
 
@@ -65,9 +65,9 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
         (r"(?:https?://)?(?:www\.)?mangareader\.net"
          r"(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+)\.html)"),
     ]
-    test = [(("http://www.mangareader.net/"
+    test = [(("https://www.mangareader.net/"
               "karate-shoukoushi-kohinata-minoru/11"), {
-        "url": "84ffaab4c027ef9022695c53163c3aeabd07ca58",
+        "url": "061cc92a07edf17bb991ce0821fa4c77a147a860",
         "keyword": "2893cfcd1916859fb498f3345f1929f868fe667f",
     })]
 
