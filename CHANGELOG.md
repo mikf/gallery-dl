@@ -1,9 +1,17 @@
 # Changelog
 
-## Unreleased
+## 1.3.0 - 2018-03-02
 - Added `--proxy` to explicitly specify a proxy server ([#76](https://github.com/mikf/gallery-dl/issues/76))
-- Fixed ugoira extraction for `pixiv` ([#78](https://github.com/mikf/gallery-dl/issues/78))
-- Fixed miscellaneous extraction issues for `mangastream`
+- Added options to customize [archive ID formats](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractorarchive-format) and [undefined replacement fields](https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractorkeywords-default)
+- Changed various archive ID formats to improve their behavior for favorites / bookmarks / etc.
+  - Affected modules are `deviantart`, `flickr`, `tumblr`, `pixiv` and all …boorus
+- Improved `sankaku` and `idolcomplex` support by
+  - respecting `page` and `next` URL parameters ([#79](https://github.com/mikf/gallery-dl/issues/79))
+  - bypassing the page-limit for unauthenticated users
+- Improved `directlink` metadata by properly unquoting it
+- Fixed `pixiv` ugoira extraction ([#78](https://github.com/mikf/gallery-dl/issues/78))
+- Fixed miscellaneous extraction issues for `mangastream` and `tumblr`
+- Removed `yeet`, `chronos`, `coreimg`, `hosturimage`, `imageontime`, `img4ever`, `imgmaid`, `imgupload`
 
 ## 1.2.0 - 2018-02-16
 - Added support for:
