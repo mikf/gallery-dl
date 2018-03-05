@@ -47,6 +47,7 @@ Luscious             https://luscious.net/               Albums
 Manga Fox            http://fanfox.net/                  Chapters
 Manga Here           http://www.mangahere.co/            Chapters, Manga
 Manga Stream         https://mangastream.com/            Chapters
+Mangadex             https://mangadex.org/               Chapters, Manga
 Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.me/               Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga

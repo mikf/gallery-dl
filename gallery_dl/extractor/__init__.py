@@ -51,6 +51,7 @@ modules = [
     "konachan",
     "loveisover",
     "luscious",
+    "mangadex",
     "mangafox",
     "mangahere",
     "mangapanda",
