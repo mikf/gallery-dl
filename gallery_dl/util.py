@@ -155,6 +155,8 @@ def language_to_code(lang, default=None):
 
 CODES = {
     "ar": "Arabic",
+    "bg": "Bulgarian",
+    "ca": "Catalan",
     "cs": "Czech",
     "da": "Danish",
     "de": "German",
