@@ -9,7 +9,7 @@
 """Extract images from https://www.pinterest.com"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 
 
 class PinterestExtractor(Extractor):
@@ -27,10 +27,10 @@ class PinterestExtractor(Extractor):
         img = pin["image"]["original"]
         url = img["url"]
         data = {
-            "pin_id": pin["id"],
+            "pin_id": util.safe_int(pin["id"]),
             "note": pin["note"],
-            "width": img["width"],
-            "height": img["height"],
+            "width": util.safe_int(img["width"]),
+            "height": util.safe_int(img["height"]),
         }
         return url, text.nameext_from_url(url, data)
 
@@ -41,8 +41,8 @@ class PinterestPinExtractor(PinterestExtractor):
     pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.[^/]+/pin/([^/?#&]+)"]
     test = [
         ("https://www.pinterest.com/pin/858146903966145189/", {
-            "url": "7abf2be76bf03d452feacf6e000b040fc2706b80",
-            "keyword": "5aac8028244b865824c61667f6cadd51e8765853",
+            "url": "afb3c26719e3a530bb0e871c480882a801a4e8a5",
+            "keyword": "f651cb271247f306d1d30385d49c7b82da44c2b1",
             "content": "d3e24bc9f7af585e8c23b9136956bd45a4d9b947",
         }),
         ("https://www.pinterest.com/pin/858146903966145188/", {
@@ -70,8 +70,8 @@ class PinterestBoardExtractor(PinterestExtractor):
                r"(?!pin/)([^/?#&]+)/([^/?#&]+)"]
     test = [
         ("https://www.pinterest.com/g1952849/test-/", {
-            "url": "705ee521630a5d613b0449d694a5345e684572a9",
-            "keyword": "1650dd31c4dedd940cef399135e485400625ec0b",
+            "url": "85911dfca313f3f7f48c2aa0bc684f539d1d80a6",
+            "keyword": "c54cf5aa830994f2ed4871efa7154a5fdaa1c2ce",
         }),
         ("https://www.pinterest.com/g1952848/test/", {
             "exception": exception.NotFoundError,
@@ -99,7 +99,7 @@ class PinterestBoardExtractor(PinterestExtractor):
         """Get metadata from a board-object"""
         data = {
             "user": self.user,
-            "board_id": board["id"],
+            "board_id": util.safe_int(board["id"]),
             "board": board["name"],
             "count": board["counts"]["pins"],
         }
