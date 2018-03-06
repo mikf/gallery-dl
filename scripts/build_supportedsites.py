@@ -37,6 +37,7 @@ CATEGORY_MAP = {
     "kisscomic"      : "KissComic",
     "kissmanga"      : "KissManga",
     "loveisover"     : "Love is Over Archive",
+    "mangadex"       : "MangaDex",
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
     "mangapark"      : "MangaPark",
