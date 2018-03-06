@@ -266,9 +266,10 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
         "keyword": "a4527f14675e4512ef317ee0401940c711fbe012",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
+    https = True
     params = None
 
     def get_info(self, page):
-        needle = '<a href="http://www.turboimagehost.com"><img src="'
+        needle = '://www.turboimagehost.com"><img src="'
         url = text.extract(page, needle, '"')[0]
         return url, url
