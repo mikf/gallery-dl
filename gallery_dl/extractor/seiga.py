@@ -75,7 +75,7 @@ class SeigaUserExtractor(SeigaExtractor):
     test = [
         ("http://seiga.nicovideo.jp/user/illust/39537793", {
             "pattern": r"https://lohas\.nicoseiga\.jp/priv/[0-9a-f]+/\d+/\d+",
-            "count": 3,
+            "count": ">= 4",
             "keyword": {
                 "user": {
                     "id": 39537793,

@@ -53,7 +53,7 @@ class KonachanPostExtractor(booru.PostMixin, KonachanExtractor):
         ("http://konachan.com/post/show/205189", {
             "content": "674e75a753df82f5ad80803f575818b8e46e4b65",
         }),
-        ("http://konachan.com/post/show/205189", None),
+        ("http://konachan.net/post/show/205189", None),
     ]
 
 

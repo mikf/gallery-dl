@@ -18,9 +18,11 @@ SKIP = {
     "archivedmoe", "archiveofsins", "thebarchive",
 
     # temporary issues
+    "imgcandy",
     "imgchili",
+    "imgtrex",
     "powermanga",
-    "pinterest",
+    "puremashiro",
 }
 
 
