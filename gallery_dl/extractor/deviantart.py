@@ -193,17 +193,17 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     """Extractor for deviations inside an artist's gallery folder"""
     subcategory = "folder"
     directory_fmt = ["{category}", "{folder[owner]}", "{folder[title]}"]
-    archive_fmt = "F_{folder[index]}_{index}.{extension}"
+    archive_fmt = "F_{folder[uuid]}_{index}.{extension}"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/gallery/(\d+)/([^/?&#]+)"]
     test = [
         ("http://shimoda7.deviantart.com/gallery/722019/Miscellaneous", {
             "url": "12c331eeff84bd47350af5a199cecc187ae03832",
-            "keyword": "4e55acf35bd512d85b8e65d074c5f374ac369303",
+            "keyword": "efc16f7aff0d070e7eb6394f080b790b1613609d",
         }),
         ("http://majestic-da.deviantart.com/gallery/63419606/CHIBI-KAWAII", {
             "url": "2ea2a3df9591c26568b09291acb453fb87ce9920",
-            "keyword": "160b891599aa4ba1c799cd9e1696bcb1ddefeef4",
+            "keyword": "42ecdc1a4d7441628f4bcfbe4d2e683a3a4361e2",
             "options": (("original", False),),
         }),
     ]
@@ -217,6 +217,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
         folders = self.api.gallery_folders(self.user)
         folder = self._find_folder(folders, self.fname)
         self.folder["title"] = folder["name"]
+        self.folder["uuid"] = folder["folderid"]
         return self.api.gallery(self.user, folder["folderid"], self.offset)
 
     def prepare(self, deviation):
@@ -299,13 +300,13 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     subcategory = "collection"
     directory_fmt = ["{category}", "{collection[owner]}",
                      "Favourites", "{collection[title]}"]
-    archive_fmt = "C_{collection[index]}_{index}.{extension}"
+    archive_fmt = "C_{collection[uuid]}_{index}.{extension}"
     pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
                r"/favourites/(\d+)/([^/?&#]+)"]
     test = [(("https://pencilshadings.deviantart.com"
               "/favourites/70595441/3D-Favorites"), {
         "url": "742f92199d5bc6a89cda6ec6133d46c7a523824d",
-        "keyword": "5da3a16e85150d2a09e074b2b2ee916099b52737",
+        "keyword": "d258ca05424b3586c4feec940158bca00acdf511",
         "options": (("original", False),),
     })]
 
@@ -318,6 +319,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
         folders = self.api.collections_folders(self.user)
         folder = self._find_folder(folders, self.cname)
         self.collection["title"] = folder["name"]
+        self.collection["uuid"] = folder["folderid"]
         return self.api.collections(self.user, folder["folderid"], self.offset)
 
     def prepare(self, deviation):
