@@ -203,7 +203,8 @@ class DownloadJob(Job):
             self.sleep = self.extractor.config("sleep")
             archive = self.extractor.config("archive")
             if archive:
-                self.archive = util.DownloadArchive(archive, self.extractor)
+                path = util.expand_path(archive)
+                self.archive = util.DownloadArchive(path, self.extractor)
         self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url, keywords):
