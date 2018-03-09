@@ -70,7 +70,7 @@ class MangadexChapterExtractor(MangadexExtractor, ChapterExtractor):
             "chapter": util.safe_int(match.group(2)),
             "chapter_minor": match.group(3) or "",
             "chapter_id": util.safe_int(self.chapter_id),
-            "chapter_string": info.rstrip(" - MangaDex"),
+            "chapter_string": info.replace(" - MangaDex", ""),
             "group": text.unescape(group),
             "lang": util.language_to_code(language),
             "language": language,
