@@ -108,7 +108,7 @@ class PixivUserExtractor(PixivExtractor):
     pattern = [(r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
                 r"/member(?:_illust)?\.php\?id=(\d+)(?:.*&tag=([^&#]+))?"),
                (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-                r"/(?:u/|(?:mypage\.php)?#id=)(\d+)()")]
+                r"/(?:u(?:ser)?/|(?:mypage\.php)?#id=)(\d+)()")]
     test = [
         ("http://www.pixiv.net/member_illust.php?id=173530", {
             "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
@@ -121,6 +121,7 @@ class PixivUserExtractor(PixivExtractor):
             "exception": exception.NotFoundError,
         }),
         ("https://www.pixiv.net/u/173530", None),
+        ("https://www.pixiv.net/user/173530", None),
         ("https://www.pixiv.net/mypage.php#id=173530", None),
         ("https://www.pixiv.net/#id=173530", None),
         ("https://touch.pixiv.net/member_illust.php?id=173530", None),
