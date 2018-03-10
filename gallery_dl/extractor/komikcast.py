@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from https://komikcast.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text, util, cloudflare
 import re
 
 
@@ -18,6 +18,8 @@ class KomikcastBase():
     category = "komikcast"
     scheme = "https"
     root = "https://komikcast.com"
+
+    request = cloudflare.request_func
 
     @staticmethod
     def parse_chapter_string(chapter_string, data=None):
