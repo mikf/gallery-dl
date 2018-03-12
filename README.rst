@@ -130,11 +130,15 @@ Configuration
 =============
 
 Configuration files for *gallery-dl* use a JSON-based file format.
-For a (more or less) complete example, see gallery-dl.conf_.
-A list of all available configuration options and their
-descriptions can be found in configuration.rst_.
 
-*gallery-dl* searches for configuration files in the following paths:
+| For a (more or less) complete example with options set to their default values,
+  see gallery-dl.conf_.
+| For a configuration file example with more involved settings and options,
+  see gallery-dl-example.conf_.
+| A list of all available configuration options and their
+  descriptions can be found in configuration.rst_.
+
+*gallery-dl* searches for configuration files in the following places:
 
 +--------------------------------------------+------------------------------------------+
 | Linux                                      | Windows                                  |
@@ -144,7 +148,7 @@ descriptions can be found in configuration.rst_.
 |* ``${HOME}/.gallery-dl.conf``              |* ``%USERPROFILE%\gallery-dl.conf``       |
 +--------------------------------------------+------------------------------------------+
 
-(``%USERPROFILE%`` usually refers to the users home directory,
+(``%USERPROFILE%`` usually refers to the user's home directory,
 i.e. ``C:\Users\<username>\``)
 
 Values in later configuration files will override previous ones.
@@ -159,7 +163,7 @@ Username & Password
 Some extractors require you to provide valid login-credentials in the form of
 a username & password pair.
 This is necessary for ``pixiv``, ``nijie`` and ``seiga`` and optional
-(but strongly recommended) for ``exhentai`` and ``sankaku``.
+(but strongly recommended) for ``exhentai``,  ``sankaku`` and ``idolcomplex``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
@@ -207,10 +211,11 @@ access to *gallery-dl*. Authorize it and you will he shown one or more
 "tokens", which should be added to your configuration file.
 
 
-.. _gallery-dl.conf:       https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
-.. _configuration.rst:     https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
-.. _Complete List:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
-.. _standalone executable: https://github.com/mikf/gallery-dl/releases/download/v1.3.0/gallery-dl.exe
+.. _gallery-dl.conf:         https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
+.. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
+.. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
+.. _Complete List:           https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
+.. _standalone executable:   https://github.com/mikf/gallery-dl/releases/download/v1.3.0/gallery-dl.exe
 .. _Python:   https://www.python.org/downloads/
 .. _Requests: https://pypi.python.org/pypi/requests/
 .. _PyPI:     https://pypi.python.org/pypi
