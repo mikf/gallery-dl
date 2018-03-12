@@ -85,78 +85,11 @@ class ImgytImageExtractor(ImagehostImageExtractor):
         return url, filename
 
 
-class ImgcandyImageExtractor(ImgytImageExtractor):
-    """Extractor for single images from imgcandy.net"""
-    category = "imgcandy"
-    pattern = [(r"(?:https?://)?((?:www\.)?imgcandy\.net/img-([a-z0-9]+))"
-                r"(?:_.+)?\.html")]
-    test = [("http://imgcandy.net/img-57d02527efee8_test.png.html", {
-        "url": "bc3c9207b10dbfe8e65ccef5b9e3194a7427b4fa",
-        "keyword": "d3157ff8a33c56a8ec12931a3c098068e5a35cf5",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
-    https = False
-
-    def __init__(self, match):
-        ImgytImageExtractor.__init__(self, match)
-        self.url = "http://" + match.group(1) + ".html"
-
-
-class RapidimgImageExtractor(ImgytImageExtractor):
-    """Extractor for single images from rapidimg.net"""
-    category = "rapidimg"
-    pattern = [r"(?:https?://)?((?:www\.)?rapidimg\.net/"
-               r"img-([a-z0-9]+)\.html)"]
-    test = []
-    https = False
-
-
-class FapatImageExtractor(ImgytImageExtractor):
-    """Extractor for single images from fapat.me"""
-    category = "fapat"
-    pattern = [r"(?:https?://)?((?:www\.)?fapat\.me/img-([a-z0-9]+)\.html)"]
-    test = []
-    https = False
-
-
 class AcidimgImageExtractor(ImgytImageExtractor):
     """Extractor for single images from acidimg.cc"""
     category = "acidimg"
     pattern = [r"(?:https?://)?((?:www\.)?acidimg\.cc/img-([a-z0-9]+)\.html)"]
     test = []
-
-
-class PicmaniacImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from pic-maniac.com"""
-    category = "picmaniac"
-    pattern = [r"(?:https?://)?((?:www\.)?pic-maniac\.com/([a-z0-9]{12}))"]
-    https = False
-    params = "complex"
-
-    def get_info(self, page):
-        url, pos = text.extract(page, '<br><img src="', '"')
-        if not url:
-            raise exception.NotFoundError("image")
-        filename, pos = text.extract(page, ' alt="', '"', pos)
-        return url, filename
-
-
-class ImgspotImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from imgspot.org"""
-    category = "imgspot"
-    pattern = [r"(?:https?://)?((?:www\.)?imgspot\.org/img-([a-z0-9]+)\.html)"]
-    https = False
-
-    def get_info(self, page):
-        url = text.extract(page, "<img class='centred_resized' src='", "'")[0]
-        return url, url
-
-
-class ImgtrialImageExtractor(ImgspotImageExtractor):
-    """Extractor for single images from imgtrial.com"""
-    category = "imgtrial"
-    pattern = [r"(?:https?://)?((?:www\.)?imgtrial\.com"
-               r"/img-([a-z0-9]+)\.html)"]
 
 
 class ImagevenueImageExtractor(ImagehostImageExtractor):
@@ -208,24 +141,7 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         filename, pos = text.extract(page, '<td nowrap>', '</td>')
         url     , pos = text.extract(page, '<img src="https://img', '"', pos)
-        return "http://img" + url, text.unescape(filename)
-
-
-class ImgtrexImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from imgtrex.com"""
-    category = "imgtrex"
-    pattern = [r"(?:https?://)?((?:www\.)?imgtrex\.com/([^/]+))"]
-    test = [("http://imgtrex.com/im0ypxq0rke4/test-&<a>.png", {
-        "url": "c000618bddda42bd599a590b7972c7396d19d8fe",
-        "keyword": "58905795a9cd3f17d5ff024fc4d63645795ba23c",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
-    params = None
-
-    def get_info(self, page):
-        filename, pos = text.extract(page, '<title>ImgTrex: ', '</title>')
-        url     , pos = text.extract(page, '<br>\n<img src="', '"', pos)
-        return url, filename
+        return "https://img" + url, text.unescape(filename)
 
 
 class PixhostImageExtractor(ImagehostImageExtractor):
@@ -261,7 +177,7 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
     category = "turboimagehost"
     pattern = [(r"(?:https?://)?((?:www\.)?turboimagehost\.com/p/(\d+)"
                 r"/[^/]+\.html)")]
-    test = [("http://www.turboimagehost.com/p/29690902/test--.png.html", {
+    test = [("https://www.turboimagehost.com/p/29690902/test--.png.html", {
         "url": "ada27a4e04f9ffd5ab7cd787f4559d5b3744520b",
         "keyword": "a4527f14675e4512ef317ee0401940c711fbe012",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",

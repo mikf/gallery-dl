@@ -81,20 +81,13 @@ World Three          http://www.slide.world-three.org/   Chapters, Manga
 XVideos              https://www.xvideos.com/            Images from Users, Galleries
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
 Acidimg              https://acidimg.cc/                 individual Images
-Fapat                http://fapat.me/                    individual Images
 Imagetwist           https://imagetwist.com/             individual Images
 Imagevenue           http://imagevenue.com/              individual Images
-Imgcandy             http://imgcandy.net/                individual Images
 Imgspice             https://imgspice.com/               individual Images
-Imgspot              http://imgspot.org/                 individual Images
-Imgtrex              http://imgtrex.com/                 individual Images
-Imgtrial             http://imgtrial.com/                individual Images
 Imgyt                https://img.yt/                     individual Images
-Picmaniac            http://pic-maniac.com/              individual Images
 Pixhost              https://pixhost.org/                individual Images
 Postimg              https://postimg.org/                individual Images
-Rapidimg             http://rapidimg.net/                individual Images
-Turboimagehost       http://turboimagehost.com/          individual Images
+Turboimagehost       https://turboimagehost.com/         individual Images
 ==================== =================================== ================================================== ================
 
 .. |http://www.thes-0| replace:: http://www.thespectrum.net/manga_scans/
