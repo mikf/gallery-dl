@@ -40,7 +40,6 @@ modules = [
     "imagebam",
     "imagefap",
     "imgbox",
-    "imgchili",
     "imgth",
     "imgur",
     "jaiminisbox",
