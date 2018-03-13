@@ -33,7 +33,6 @@ Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searc
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
 ImageFap             http://imagefap.com/                Images from Users, Galleries, individual Images
 imgbox               https://imgbox.com/                 Galleries, individual Images
-imgChili             https://imgchili.net/               Albums, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
 Jaimini's Box        https://jaiminisbox.com/            Chapters, Manga
