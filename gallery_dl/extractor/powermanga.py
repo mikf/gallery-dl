@@ -15,9 +15,10 @@ class PowermangaChapterExtractor(foolslide.FoolslideChapterExtractor):
     """Extractor for manga-chapters from powermanga.org"""
     category = "powermanga"
     pattern = foolslide.chapter_pattern(r"read(?:er)?\.powermanga\.org")
-    test = [("https://read.powermanga.org/read/one_piece/en/0/803/page/1", {
-        "url": "e6179c1565068f99180620281f86bdd25be166b4",
-        "keyword": "224cab1f946d976ddbe4ef88fa1c02303699910b",
+    test = [(("https://read.powermanga.org"
+              "/read/one_piece_digital_colour_comics/en/0/75/"), {
+        "url": "854c5817f8f767e1bccd05fa9d58ffb5a4b09384",
+        "keyword": "9bf211d435060d1e38d3d13e4aaaa5a87381bfad",
     })]
 
 
@@ -25,7 +26,8 @@ class PowermangaMangaExtractor(foolslide.FoolslideMangaExtractor):
     """Extractor for manga from powermanga.org"""
     category = "powermanga"
     pattern = foolslide.manga_pattern(r"read\.powermanga\.org")
-    test = [("https://read.powermanga.org/series/one_piece/", {
+    test = [(("https://read.powermanga.org"
+              "/series/one_piece_digital_colour_comics/"), {
         "count": ">= 1",
         "keyword": {
             "chapter": int,
@@ -34,7 +36,7 @@ class PowermangaMangaExtractor(foolslide.FoolslideMangaExtractor):
             "group": "PowerManga",
             "lang": "en",
             "language": "English",
-            "manga": "One Piece",
+            "manga": "One Piece Digital Colour Comics",
             "title": str,
             "volume": int,
         },

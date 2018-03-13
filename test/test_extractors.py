@@ -7,22 +7,21 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
 import sys
 import unittest
 from gallery_dl import extractor, job, config, exception
 
 
-SKIP = {
-    # don't work on travis-ci
+# these don't work on travis-ci
+TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive",
+}
 
-    # temporary issues
-    "imgcandy",
-    "imgchili",
-    "imgtrex",
-    "powermanga",
-    "puremashiro",
+# temporary issues, etc.
+BROKEN = {
+    "puremashiro",  # online reader down
 }
 
 
@@ -134,20 +133,30 @@ def generate_tests():
     # enable selective testing for direct calls
     if __name__ == '__main__' and len(sys.argv) > 1:
         if sys.argv[1].lower() == "all":
-            extractors = extractor.extractors()
+            fltr = lambda c, bc: True  # noqa: E731
+        elif sys.argv[1].lower() == "broken":
+            fltr = lambda c, bc: c in BROKEN  # noqa: E731
         else:
-            extractors = [
-                extr for extr in extractor.extractors()
-                if extr.category in sys.argv or
-                hasattr(extr, "basecategory") and extr.basecategory in sys.argv
-            ]
+            argv = sys.argv[1:]
+            fltr = lambda c, bc: c in argv or bc in argv  # noqa: E731
         del sys.argv[1:]
     else:
-        extractors = [
-            extr for extr in extractor.extractors()
-            if extr.category not in SKIP
-        ]
+        skip = BROKEN.copy()
+        if "CI" in os.environ and "TRAVIS" in os.environ:
+            skip |= TRAVIS_SKIP
+        print("skipping:", ", ".join(skip))
+        fltr = lambda c, bc: c not in skip  # noqa: E731
 
+    # filter available extractor classes
+    extractors = [
+        extr for extr in extractor.extractors()
+        if fltr(
+            extr.category,
+            extr.basecategory if hasattr(extr, "basecategory") else None
+        )
+    ]
+
+    # add 'test_...' methods to TestExtractors
     for extr in extractors:
         if not hasattr(extr, "test") or not extr.test:
             continue
