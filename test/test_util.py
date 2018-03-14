@@ -11,6 +11,8 @@ import unittest
 import gallery_dl.util as util
 import gallery_dl.exception as exception
 import sys
+import random
+import string
 
 
 class TestRange(unittest.TestCase):
@@ -206,11 +208,24 @@ class TestFormatter(unittest.TestCase):
 
 class TestOther(unittest.TestCase):
 
+    def test_bencode(self):
+        self.assertEqual(util.bencode(0), "")
+        self.assertEqual(util.bencode(123), "123")
+        self.assertEqual(util.bencode(123, "01"), "1111011")
+        self.assertEqual(util.bencode(123, "BA"), "AAAABAA")
+
     def test_bdecode(self):
         self.assertEqual(util.bdecode(""), 0)
         self.assertEqual(util.bdecode("123"), 123)
         self.assertEqual(util.bdecode("1111011", "01"), 123)
         self.assertEqual(util.bdecode("AAAABAA", "BA"), 123)
+
+    def test_bencode_bdecode(self):
+        for _ in range(100):
+            value = random.randint(0, 1000000)
+            for alphabet in ("01", "0123456789", string.ascii_letters):
+                result = util.bdecode(util.bencode(value, alphabet), alphabet)
+                self.assertEqual(result, value)
 
     def test_parse_bytes(self):
         self.assertEqual(util.parse_bytes("50"), 50)

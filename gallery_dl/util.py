@@ -75,6 +75,16 @@ def optimize_range(ranges):
     return result
 
 
+def bencode(num, alphabet="0123456789"):
+    """Encode an integer into a base-N encoded string"""
+    data = ""
+    base = len(alphabet)
+    while num:
+        num, remainder = divmod(num, base)
+        data = alphabet[remainder] + data
+    return data
+
+
 def bdecode(data, alphabet="0123456789"):
     """Decode a base-N encoded string ( N = len(alphabet) )"""
     num = 0
