@@ -17,6 +17,7 @@ modules = [
     "8chan",
     "archivedmoe",
     "archiveofsins",
+    "artstation",
     "b4k",
     "danbooru",
     "desuarchive",

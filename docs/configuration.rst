@@ -420,6 +420,15 @@ Description An alternative `format string`_ to build archive IDs with.
 Extractor-specific Options
 ==========================
 
+extractor.artstation.external
+-----------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Try to follow external URLs of embedded players.
+=========== =====
+
+
 extractor.deviantart.flat
 -------------------------
 =========== =====
