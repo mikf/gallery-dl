@@ -464,29 +464,32 @@ class DeviantartAPI():
     def _call(self, endpoint, params=None, expect_error=False):
         """Call an API endpoint"""
         url = "https://www.deviantart.com/api/v1/oauth2/" + endpoint
-        tries = 1
         while True:
-            if self.delay:
-                time.sleep(self.delay)
+            if self.delay > 0:
+                time.sleep(2 ** (self.delay-1))
 
             self.authenticate()
             response = self.session.get(
                 url, headers=self.headers, params=params)
 
             if response.status_code == 200:
+                if self.delay > 2:
+                    self.delay -= 1
                 break
-            elif response.status_code == 429:
-                self.delay += 1
-                self.log.debug("rate limit (delay: %d)", self.delay)
+
             else:
-                if expect_error:
-                    return None
-                self.delay = 1
-                self.log.debug("http status code %d (%d/3)",
-                               response.status_code, tries)
-            tries += 1
-            if tries > 3:
-                raise Exception(response.text)
+                self.delay += 1
+
+                if response.status_code == 429:
+                    msg = "Rate limit reached"
+                else:
+                    if expect_error:
+                        return None
+                    msg = "API responded with {} {}".format(
+                        response.status_code, response.reason)
+                self.log.warning(
+                    "%s. Using %ds delay.", msg, 2 ** (self.delay-1))
+                self.log.debug(response.text)
         try:
             return response.json()
         except ValueError:
