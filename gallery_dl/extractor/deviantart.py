@@ -478,8 +478,6 @@ class DeviantartAPI():
                 break
 
             else:
-                self.delay += 1
-
                 if response.status_code == 429:
                     msg = "Rate limit reached"
                 else:
@@ -487,6 +485,7 @@ class DeviantartAPI():
                         return None
                     msg = "API responded with {} {}".format(
                         response.status_code, response.reason)
+                self.delay += 1
                 self.log.warning(
                     "%s. Using %ds delay.", msg, 2 ** (self.delay-1))
                 self.log.debug(response.text)
