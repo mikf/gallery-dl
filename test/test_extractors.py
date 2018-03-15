@@ -36,6 +36,9 @@ class TestExtractors(unittest.TestCase):
         config.set(("extractor", "password"), name)
         config.set(("extractor", "nijie", "username"), email)
         config.set(("extractor", "seiga", "username"), email)
+        config.set(("extractor", "deviantart", "client-id"), "7777")
+        config.set(("extractor", "deviantart", "client-secret"),
+                   "ff14994c744d9208e5caeec7aab4a026")
         config.set(("extractor", "tumblr", "api-key"),
                    "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
 

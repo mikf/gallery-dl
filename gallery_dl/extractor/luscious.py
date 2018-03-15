@@ -25,7 +25,7 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         (("https://luscious.net/c/hentai_manga/albums/"
           "okinami-no-koigokoro_277031/view/"), {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
-            "keyword": "76e099479b180420fd5cf820f00c52fe07fda884",
+            "keyword": "e746a3771f4e14bfff81215232a12417d6351ce6",
             "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
