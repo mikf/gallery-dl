@@ -1,8 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.3.1 - 2018-03-16
 - Added support for:
   - `mangadex` - https://mangadex.org/
+  - `artstation` - https://www.artstation.com/
+- Added CloudFlare DDoS protection bypass to `komikcast` extractors
+- Changed archive ID formats for `deviantart` folders and collections
+- Improved error handling for `deviantart` API calls
+- Removed `imgchili` and various smaller image hosts
 
 ## 1.3.0 - 2018-03-02
 - Added `--proxy` to explicitly specify a proxy server ([#76](https://github.com/mikf/gallery-dl/issues/76))
