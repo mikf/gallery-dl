@@ -4,190 +4,13 @@ Configuration
 Contents
 ========
 
-1) `General Options`_
-2) `Output Options`_
+1) `Extractor Options`_
+2) `Extractor-specific Options`_
 3) `Downloader Options`_
-4) `Extractor Options`_
-5) `Extractor-specific Options`_
+4) `Output Options`_
+5) `Miscellaneous Options`_
 6) `API Tokens & IDs`_
 
-General Options
-===============
-
-base-directory
---------------
-=========== =====
-Type        ``string``
-Default     ``"./gallery-dl/"``
-Description Directory path used as the base for all download destinations.
-=========== =====
-
-
-netrc
------
-=========== =====
-Type        ``bool``
-Default     ``false``
-Description Enable the use of |.netrc|_ authentication data.
-=========== =====
-
-
-cache.file
-----------
-=========== =====
-Type        ``string``
-Default     |tempfile.gettempdir()|_ + ``".gallery-dl.cache"``
-Description Path of the SQLite3 database used to cache login sessions,
-            cookies and API tokens.
-
-            Set this value to an invalid path or simply ``null`` to disable
-            this cache.
-=========== =====
-
-
-Output Options
-==============
-
-output.mode
------------
-=========== =====
-Type        ``string``
-Default     ``"auto"``
-Description Controls the output string format and status indicators.
-
-            * ``"null"``: No output
-            * ``"pipe"``: Suitable for piping to other processes or files
-            * ``"terminal"``: Suitable for the standard Windows console
-            * ``"color"``: Suitable for terminals that understand ANSI escape codes and colors
-            * ``"auto"``: Automatically choose the best suitable output mode
-=========== =====
-
-
-output.shorten
---------------
-=========== =====
-Type        ``bool``
-Default     ``true``
-Description Controls whether the output strings should be shortened to fit
-            on one console line.
-=========== =====
-
-
-output.progress
----------------
-=========== =====
-Type        ``bool`` or ``string``
-Default     ``true``
-Description Controls the progress indicator when *gallery-dl* is run with
-            multiple URLs as arguments.
-
-            * ``true``: Show the default progress indicator
-              (``"[{current}/{total}] {url}"``)
-            * ``false``: Do not show any progress indicator
-            * Any ``string``: Show the progress indicator using this
-              as a custom `format string`_. Possible replacement keys are
-              ``current``, ``total``  and ``url``.
-=========== =====
-
-
-output.logfile
---------------
-=========== =====
-Type        ``string``
-Default     ``null``
-Description File to write logging output to.
-=========== =====
-
-
-output.unsupportedfile
-----------------------
-=========== =====
-Type        ``string``
-Default     ``null``
-Description File to write external URLs unsupported by *gallery-dl* to.
-=========== =====
-
-
-Downloader Options
-==================
-
-downloader.part
----------------
-=========== =====
-Type        ``bool``
-Default     ``true``
-Description Controls the use of ``.part`` files during file downloads.
-
-            * ``true``: Write downloaded data into ``.part`` files and rename
-              them upon download completion. This mode additionally supports
-              resuming incomplete downloads.
-            * ``false``: Do not use ``.part`` files and write data directly
-              into the actual output files.
-=========== =====
-
-
-downloader.part-directory
--------------------------
-=========== =====
-Type        ``string``
-Default     ``null``
-Description Alternate location for ``.part`` files.
-
-            Missing directories will be created as needed.
-            If this value is ``null``, ``.part`` files are going to be stored
-            alongside the actual output files.
-=========== =====
-
-
-downloader.http.rate
---------------------
-=========== =====
-Type        ``string``
-Default     ``null``
-Examples    ``"32000"``, ``"500k"``, ``"2.5M"``
-Description Maximum download rate in bytes per second.
-
-            Possible values are valid integer or floating-point numbers
-            optionally followed by one of ``k``, ``m``. ``g``, ``t`` or ``p``.
-            These suffixes are case-insensitive.
-=========== =====
-
-
-downloader.http.retries
------------------------
-=========== =====
-Type        ``integer``
-Default     ``5``
-Description Number of times a failed download is retried before giving up.
-=========== =====
-
-
-downloader.http.timeout
------------------------
-=========== =====
-Type        ``float`` or ``null``
-Default     ``30``
-Description Amount of time (in seconds) to wait for a successful connection
-            and response from a remote server.
-
-            This value gets internally used as the |timeout|_ parameter for the
-            |requests.request()|_ method during downloads.
-=========== =====
-
-
-downloader.http.verify
-----------------------
-=========== =====
-Type        ``bool`` or ``string``
-Default     ``true``
-Description Controls whether to verify SSL/TLS certificates for HTTPS requests.
-
-            If this is a ``string``, it must be the path to a CA bundle to use
-            instead of the default certificates.
-
-            This value gets internally used as the |verify|_ parameter for the
-            |requests.request()|_ method during downloads.
-=========== =====
 
 
 Extractor Options
@@ -196,7 +19,7 @@ Extractor Options
 Each extractor is identified by its ``category`` and ``subcategory``.
 The ``category`` is the lowercase site name without any spaces or special
 characters, which is usually just the module name
-(``pixiv``, ``batoto``, ...).
+(``pixiv``, ``danbooru``, ...).
 The ``subcategory`` is a lowercase word describing the general functionality
 of that extractor (``user``, ``favorite``, ``manga``, ...).
 
@@ -269,8 +92,17 @@ Example     ``["{category}", "{manga}", "c{chapter} - {title}"]``
 Description A list of `format strings`_ for the resulting target directory.
 
             Each individual string in such a list represents a single path
-            segment, which will be joined together and prepended with the
+            segment, which will be joined together and appended to the
             base-directory_ to form the complete target directory path.
+=========== =====
+
+
+extractor.*.base-directory
+--------------------------
+=========== =====
+Type        ``string``
+Default     ``"./gallery-dl/"``
+Description Directory path used as the base for all download destinations.
 =========== =====
 
 
@@ -308,8 +140,8 @@ Description The username and password to use when attempting to log in to
 
             Specifying username and password is
             required for the ``pixiv``, ``nijie`` and ``seiga`` modules and
-            optional (but strongly recommended) for ``batoto``, ``exhentai``
-            and ``sankaku``.
+            optional (but strongly recommended) for ``exhentai``,
+            ``sankaku`` and ``idolcomplex``.
 
             These values can also be set via the ``-u/--username`` and
             ``-p/--password`` command-line options or by using a |.netrc|_ file.
@@ -415,6 +247,7 @@ Type        ``string``
 Example     ``"{id}_{offset}"``
 Description An alternative `format string`_ to build archive IDs with.
 =========== =====
+
 
 
 Extractor-specific Options
@@ -757,15 +590,188 @@ Description Extract images from reblogged posts.
 extractor.tumblr.posts
 ----------------------
 =========== =====
-Type        ``string``
+Type        ``string`` or ``list`` of ``strings``
 Default     ``"photo"``
-Description A comma-separated list of post types to extract images, etc. from.
-            For example: ``"text,link,photo"``.
+Example     ``"video,audio,link"`` or ``["video", "audio", "link"]``
+Description A (comma-separated) list of post types to extract images, etc. from.
 
             Possible types are ``text``, ``quote``, ``link``, ``answer``,
             ``video``, ``audio``, ``photo``, ``chat``.
 
             You can use ``"all"`` instead of listing all types separately.
+=========== =====
+
+
+
+Downloader Options
+==================
+
+downloader.part
+---------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Controls the use of ``.part`` files during file downloads.
+
+            * ``true``: Write downloaded data into ``.part`` files and rename
+              them upon download completion. This mode additionally supports
+              resuming incomplete downloads.
+            * ``false``: Do not use ``.part`` files and write data directly
+              into the actual output files.
+=========== =====
+
+
+downloader.part-directory
+-------------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description Alternate location for ``.part`` files.
+
+            Missing directories will be created as needed.
+            If this value is ``null``, ``.part`` files are going to be stored
+            alongside the actual output files.
+=========== =====
+
+
+downloader.http.rate
+--------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Examples    ``"32000"``, ``"500k"``, ``"2.5M"``
+Description Maximum download rate in bytes per second.
+
+            Possible values are valid integer or floating-point numbers
+            optionally followed by one of ``k``, ``m``. ``g``, ``t`` or ``p``.
+            These suffixes are case-insensitive.
+=========== =====
+
+
+downloader.http.retries
+-----------------------
+=========== =====
+Type        ``integer``
+Default     ``5``
+Description Number of times a failed download is retried before giving up.
+=========== =====
+
+
+downloader.http.timeout
+-----------------------
+=========== =====
+Type        ``float`` or ``null``
+Default     ``30``
+Description Amount of time (in seconds) to wait for a successful connection
+            and response from a remote server.
+
+            This value gets internally used as the |timeout|_ parameter for the
+            |requests.request()|_ method during downloads.
+=========== =====
+
+
+downloader.http.verify
+----------------------
+=========== =====
+Type        ``bool`` or ``string``
+Default     ``true``
+Description Controls whether to verify SSL/TLS certificates for HTTPS requests.
+
+            If this is a ``string``, it must be the path to a CA bundle to use
+            instead of the default certificates.
+
+            This value gets internally used as the |verify|_ parameter for the
+            |requests.request()|_ method during downloads.
+=========== =====
+
+
+
+Output Options
+==============
+
+output.mode
+-----------
+=========== =====
+Type        ``string``
+Default     ``"auto"``
+Description Controls the output string format and status indicators.
+
+            * ``"null"``: No output
+            * ``"pipe"``: Suitable for piping to other processes or files
+            * ``"terminal"``: Suitable for the standard Windows console
+            * ``"color"``: Suitable for terminals that understand ANSI escape codes and colors
+            * ``"auto"``: Automatically choose the best suitable output mode
+=========== =====
+
+
+output.shorten
+--------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Controls whether the output strings should be shortened to fit
+            on one console line.
+=========== =====
+
+
+output.progress
+---------------
+=========== =====
+Type        ``bool`` or ``string``
+Default     ``true``
+Description Controls the progress indicator when *gallery-dl* is run with
+            multiple URLs as arguments.
+
+            * ``true``: Show the default progress indicator
+              (``"[{current}/{total}] {url}"``)
+            * ``false``: Do not show any progress indicator
+            * Any ``string``: Show the progress indicator using this
+              as a custom `format string`_. Possible replacement keys are
+              ``current``, ``total``  and ``url``.
+=========== =====
+
+
+output.logfile
+--------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description File to write logging output to.
+=========== =====
+
+
+output.unsupportedfile
+----------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description File to write external URLs unsupported by *gallery-dl* to.
+=========== =====
+
+
+
+Miscellaneous Options
+=====================
+
+netrc
+-----
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Enable the use of |.netrc|_ authentication data.
+=========== =====
+
+
+cache.file
+----------
+=========== =====
+Type        ``string``
+Default     |tempfile.gettempdir()|_ + ``".gallery-dl.cache"``
+Description Path of the SQLite3 database used to cache login sessions,
+            cookies and API tokens across `gallery-dl` invocations.
+
+            Set this option to ``null`` or an invalid path to disable
+            this cache.
 =========== =====
 
 
@@ -851,6 +857,7 @@ How To      - login and visit Tumblr's Applications_ section
 =========== =====
 
 
+
 .. |.netrc| replace:: ``.netrc``
 .. |tempfile.gettempdir()| replace:: ``tempfile.gettempdir()``
 .. |requests.request()| replace:: ``requests.request()``
@@ -861,6 +868,7 @@ How To      - login and visit Tumblr's Applications_ section
 .. |datetime.max| replace:: ``datetime.max``
 .. |strptime| replace:: strftime() and strptime() Behavior
 
+.. _base-directory: `extractor.*.base-directory`_
 .. _skipped: `extractor.*.skip`_
 .. _`date-min and date-max`: `extractor.reddit.date-min & .date-max`_
 .. _date-format: extractor.reddit.date-format_
