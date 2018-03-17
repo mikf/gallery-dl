@@ -79,8 +79,11 @@ class ArtstationExtractor(Extractor):
             raise exception.NotFoundError("user")
         return response.json()
 
-    def _pagination(self, url):
-        params = {"page": 1}
+    def _pagination(self, url, params=None):
+        if not params:
+            params = {}
+        params["page"] = 1
+
         while True:
             projects = self.request(url, params=params).json()["data"]
             for project in projects:
@@ -112,7 +115,7 @@ class ArtstationUserExtractor(ArtstationExtractor):
     """Extractor for all projects of an artstation user"""
     subcategory = "user"
     pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects)([^/?&#]+)(?:/albums/all)?/?$",
+               r"/(?!artwork|projects|search)([^/?&#]+)(?:/albums/all)?/?$",
                r"(?:https?://)?((?!www)\w+)\.artstation\.com"
                r"(?:/(?:projects/?)?)?$"]
     test = [
@@ -138,7 +141,7 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
                      "{album[id]} - {album[title]}"]
     archive_fmt = "a_{album[id]}_{asset[id]}"
     pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects)([^/?&#]+)/albums/(\d+)",
+               r"/(?!artwork|projects|search)([^/?&#]+)/albums/(\d+)",
                r"(?:https?://)?((?!www)\w+)\.artstation\.com"
                r"/albums/(\d+)"]
     test = [
@@ -171,9 +174,9 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
         }
 
     def projects(self):
-        url = "{}/users/{}/projects.json?album_id={}".format(
-            self.root, self.user, self.album_id)
-        return self._pagination(url)
+        url = "{}/users/{}/projects.json".format(self.root, self.user)
+        params = {"album_id": self.album_id}
+        return self._pagination(url, params)
 
 
 class ArtstationLikesExtractor(ArtstationExtractor):
@@ -182,7 +185,7 @@ class ArtstationLikesExtractor(ArtstationExtractor):
     directory_fmt = ["{category}", "{userinfo[username]}", "Likes"]
     archive_fmt = "f_{userinfo[id]}_{asset[id]}"
     pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects)([^/?&#]+)/likes/?"]
+               r"/(?!artwork|projects|search)([^/?&#]+)/likes/?"]
     test = [
         ("https://www.artstation.com/dcchris/likes", {
             "count": ">= 3",
@@ -198,11 +201,46 @@ class ArtstationLikesExtractor(ArtstationExtractor):
         return self._pagination(url)
 
 
+class ArtstationSearchExtractor(ArtstationExtractor):
+    """Extractor for artstation search results"""
+    subcategory = "search"
+    directory_fmt = ["{category}", "Searches", "{search[searchterm]}"]
+    archive_fmt = "s_{search[searchterm]}_{asset[id]}"
+    pattern = [r"(?:https?://)?(?:\w+\.)?artstation\.com"
+               r"/search/?\?([^#]+)"]
+    test = [
+        ("https://www.artstation.com/search?sorting=recent&q=ancient", None),
+    ]
+
+    def __init__(self, match):
+        ArtstationExtractor.__init__(self)
+        query = text.parse_query(match.group(1))
+        self.searchterm = query.get("q", "")
+        self.order = query.get("sorting", "recent").lower()
+
+    def metadata(self):
+        return {"search": {
+            "searchterm": self.searchterm,
+            "order": self.order,
+        }}
+
+    def projects(self):
+        order = "likes_count" if self.order == "likes" else "published_at"
+        url = "{}/search/projects.json".format(self.root)
+        params = {
+            "direction": "desc",
+            "order": order,
+            "q": self.searchterm,
+            #  "show_pro_first": "true",
+        }
+        return self._pagination(url, params)
+
+
 class ArtstationImageExtractor(ArtstationExtractor):
     """Extractor for images from a single artstation project"""
     subcategory = "image"
     pattern = [r"(?:https?://)?(?:\w+\.)?artstation\.com"
-               r"/(?:artwork|projects)/(\w+)"]
+               r"/(?:artwork|projects|search)/(\w+)"]
     test = [
         ("https://www.artstation.com/artwork/LQVJr", {
             "pattern": r"https?://\w+\.artstation\.com/p/assets"
