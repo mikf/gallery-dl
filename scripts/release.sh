@@ -15,6 +15,7 @@ prompt() {
 cleanup() {
     cd "${ROOTDIR}"
     echo Removing old build directory
+
     if [ -d ./build ]; then
         rm -rf ./build
     fi
@@ -23,12 +24,14 @@ cleanup() {
 update() {
     cd "${ROOTDIR}"
     echo Updating version to ${NEWVERSION}
+
     sed -i "s#\"${PYVERSION}\"#\"${NEWVERSION}\"#" "gallery_dl/version.py"
     sed -i "s#v${OLDVERSION}#v${NEWVERSION}#" "${README}"
 }
 
 update-dev() {
     cd "${ROOTDIR}"
+
     IFS="." read MAJOR MINOR BUILD <<< "${NEWVERSION}"
     BUILD=$((BUILD+1))
     # update version to -dev
@@ -41,15 +44,16 @@ update-dev() {
 
 build() {
     cd "${ROOTDIR}"
-
-    # build wheel and source distributions
     echo Building bdist_wheel and sdist
+
     python setup.py bdist_wheel sdist
 }
 
-build_windows() {
-    # build windows exe in vm
+build-windows() {
+    cd "${ROOTDIR}"
     echo Building Windows executable
+
+    # build windows exe in vm
     ln -fs "${ROOTDIR}" /tmp/
     vmstart "Windows 7" &
     disown
@@ -72,6 +76,7 @@ build_windows() {
 sign() {
     cd "${ROOTDIR}/dist"
     echo Signing files
+
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}-py3-none-any.whl
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}.tar.gz
     gpg --detach-sign gallery-dl.exe
@@ -89,9 +94,21 @@ changelog() {
         "${CHANGELOG}"
 }
 
+supportedsites() {
+    cd "${ROOTDIR}"
+    echo Checking if "${SUPPORTEDSITES}" is up to date
+
+    ./scripts/build_supportedsites.py
+    if ! git diff --quiet "${SUPPORTEDSITES}"; then
+        echo "updated ${SUPPORTEDSITES} contains changes"
+        exit 4
+    fi
+}
+
 git-upload() {
     cd "${ROOTDIR}"
     echo Pushing changes to github
+
     git add "gallery_dl/version.py" "${README}" "${CHANGELOG}"
     git commit -S -m "release version ${NEWVERSION}"
     git tag -s -m "version ${NEWVERSION}" "v${NEWVERSION}"
@@ -102,6 +119,7 @@ git-upload() {
 pypi-upload() {
     cd "${ROOTDIR}/dist"
     echo Uploading to PyPI
+
     twine upload gallery_dl-${NEWVERSION}*
 }
 
@@ -109,6 +127,7 @@ pypi-upload() {
 ROOTDIR="$(realpath "$(dirname "$0")/..")/"
 README="README.rst"
 CHANGELOG="CHANGELOG.md"
+SUPPORTEDSITES="./docs/supportedsites.rst"
 
 LASTTAG="$(git describe --abbrev=0 --tags)"
 OLDVERSION="${LASTTAG#v}"
@@ -127,10 +146,11 @@ fi
 
 
 prompt
+supportedsites
 cleanup
 update
 build
-build_windows
+build-windows
 sign
 changelog
 git-upload
