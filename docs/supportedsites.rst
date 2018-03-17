@@ -10,17 +10,17 @@ Site                 URL                                 Capabilities           
 arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
-ArtStation           https://www.artstation.com/         Images from Users, individual Images, Likes
+ArtStation           https://www.artstation.com/         |Images from Use-1|
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches
 Desuarchive          https://desuarchive.org/            Threads
-DeviantArt           https://www.deviantart.com/         |Collections, De-1|                                Optional (OAuth)
+DeviantArt           https://www.deviantart.com/         |Collections, De-2|                                Optional (OAuth)
 Doki Reader          https://kobato.hologfx.com/         Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches
 ExHentai             https://exhentai.org/               Galleries                                          Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fireden              https://boards.fireden.net/         Threads
-Flickr               https://www.flickr.com/             |Images from Use-2|                                Optional (OAuth)
+Flickr               https://www.flickr.com/             |Images from Use-3|                                Optional (OAuth)
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag-Searches
 Gfycat               https://gfycat.com/                 individual Images
@@ -57,7 +57,7 @@ nijie                https://nijie.info/                 Images from Users, indi
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net                   Images from Users, Images from Statuses
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links
-Pixiv                https://www.pixiv.net/              |Images from Use-3|                                Required
+Pixiv                https://www.pixiv.net/              |Images from Use-4|                                Required
 PowerManga           https://powermanga.org/             Chapters, Manga
 Pure Mashiro         http://reader.puremashiro.moe/      Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
@@ -91,6 +91,7 @@ Turboimagehost       https://turboimagehost.com/         individual Images
 ==================== =================================== ================================================== ================
 
 .. |http://www.thes-0| replace:: http://www.thespectrum.net/manga_scans/
-.. |Collections, De-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals
-.. |Images from Use-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
-.. |Images from Use-3| replace:: Images from Users, Bookmarks, Favorites, pixiv.me Links, Rankings, Individual Images
+.. |Images from Use-1| replace:: Images from Users, Albums, individual Images, Likes
+.. |Collections, De-2| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals
+.. |Images from Use-3| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
+.. |Images from Use-4| replace:: Images from Users, Bookmarks, Favorites, pixiv.me Links, Rankings, Individual Images

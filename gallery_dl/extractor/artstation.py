@@ -17,8 +17,8 @@ import string
 class ArtstationExtractor(Extractor):
     """Base class for artstation extractors"""
     category = "artstation"
-    directory_fmt = ["{category}", "{username}"]
     filename_fmt = "{category}_{id}_{asset[id]}_{title}.{extension}"
+    directory_fmt = ["{category}", "{userinfo[username]}"]
     archive_fmt = "{asset[id]}"
     root = "https://www.artstation.com"
     per_page = 50
@@ -29,18 +29,15 @@ class ArtstationExtractor(Extractor):
         self.external = self.config("external", False)
 
     def items(self):
-        userinfo = None
+        data = self.metadata()
         yield Message.Version, 1
+        yield Message.Directory, data
 
         for project_id in self.projects():
             for asset in self.get_project_assets(project_id):
-                if not userinfo:
-                    userinfo = self.get_user_info(
-                        self.user or asset["user"]["username"])
-                    yield Message.Directory, userinfo
-
                 adict = asset["asset"]
-                asset["userinfo"] = userinfo
+                if data:
+                    asset.update(data)
 
                 if adict["has_image"]:
                     url = adict["image_url"]
@@ -50,6 +47,10 @@ class ArtstationExtractor(Extractor):
                 if adict["has_embedded_player"] and self.external:
                     url = text.extract(adict["player_embedded"], '"', '"')[0]
                     yield Message.Queue, url, asset
+
+    def metadata(self):
+        """Return general metadata"""
+        return {"userinfo": self.get_user_info(self.user)}
 
     def projects(self):
         """Return an iterable containing all relevant project IDs"""
@@ -111,7 +112,7 @@ class ArtstationUserExtractor(ArtstationExtractor):
     """Extractor for all projects of an artstation user"""
     subcategory = "user"
     pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects)([^/?&#]+)/?$",
+               r"/(?!artwork|projects)([^/?&#]+)(?:/albums/all)?/?$",
                r"(?:https?://)?((?!www)\w+)\.artstation\.com"
                r"(?:/(?:projects/?)?)?$"]
     test = [
@@ -120,6 +121,7 @@ class ArtstationUserExtractor(ArtstationExtractor):
                        r"/images/images/\d+/\d+/\d+/large/[^/]+",
             "count": ">= 6",
         }),
+        ("https://www.artstation.com/gaerikim/albums/all/", None),
         ("https://gaerikim.artstation.com/", None),
         ("https://gaerikim.artstation.com/projects/", None),
     ]
@@ -129,10 +131,55 @@ class ArtstationUserExtractor(ArtstationExtractor):
         return self._pagination(url)
 
 
+class ArtstationAlbumExtractor(ArtstationExtractor):
+    """Extractor for all projects of an artstation user"""
+    subcategory = "album"
+    directory_fmt = ["{category}", "{userinfo[username]}", "Albums",
+                     "{album[id]} - {album[title]}"]
+    archive_fmt = "a_{album[id]}_{asset[id]}"
+    pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
+               r"/(?!artwork|projects)([^/?&#]+)/albums/(\d+)",
+               r"(?:https?://)?((?!www)\w+)\.artstation\.com"
+               r"/albums/(\d+)"]
+    test = [
+        ("https://www.artstation.com/huimeiye/albums/770899", {
+            "count": 2,
+        }),
+        ("https://www.artstation.com/huimeiye/albums/770898", {
+            "exception": exception.NotFoundError,
+        }),
+        ("https://huimeiye.artstation.com/albums/770899", None),
+    ]
+
+    def __init__(self, match):
+        ArtstationExtractor.__init__(self, match)
+        self.album_id = util.safe_int(match.group(2))
+
+    def metadata(self):
+        userinfo = self.get_user_info(self.user)
+        album = None
+
+        for album in userinfo["albums_with_community_projects"]:
+            if album["id"] == self.album_id:
+                break
+        else:
+            raise exception.NotFoundError("album")
+
+        return {
+            "userinfo": userinfo,
+            "album": album
+        }
+
+    def projects(self):
+        url = "{}/users/{}/projects.json?album_id={}".format(
+            self.root, self.user, self.album_id)
+        return self._pagination(url)
+
+
 class ArtstationLikesExtractor(ArtstationExtractor):
     """Extractor for liked projects of an artstation user"""
     subcategory = "likes"
-    directory_fmt = ["{category}", "{username}", "Likes"]
+    directory_fmt = ["{category}", "{userinfo[username]}", "Likes"]
     archive_fmt = "f_{userinfo[id]}_{asset[id]}"
     pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
                r"/(?!artwork|projects)([^/?&#]+)/likes/?"]
@@ -175,6 +222,21 @@ class ArtstationImageExtractor(ArtstationExtractor):
     def __init__(self, match):
         ArtstationExtractor.__init__(self)
         self.project_id = match.group(1)
+        self.assets = None
+
+    def metadata(self):
+        self.assets = [
+            asset.copy()
+            for asset in ArtstationExtractor.get_project_assets(
+                self, self.project_id
+            )
+        ]
+
+        self.user = self.assets[0]["user"]["username"]
+        return ArtstationExtractor.metadata(self)
 
     def projects(self):
         return (self.project_id,)
+
+    def get_project_assets(self, project_id):
+        return self.assets
