@@ -12,6 +12,7 @@ CATEGORY_MAP = {
     "2chan"          : "Futaba Channel",
     "archivedmoe"    : "Archived.Moe",
     "archiveofsins"  : "Archive of Sins",
+    "artstation"     : "ArtStation",
     "b4k"            : "arch.b4k.co",
     "deviantart"     : "DeviantArt",
     "dokireader"     : "Doki Reader",
