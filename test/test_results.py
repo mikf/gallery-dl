@@ -21,11 +21,12 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "mangapark",
     "puremashiro",  # online reader down
 }
 
 
-class TestExtractors(unittest.TestCase):
+class TestExtractorResults(unittest.TestCase):
 
     def setUp(self):
         name = "gallerydl"
@@ -159,7 +160,7 @@ def generate_tests():
         )
     ]
 
-    # add 'test_...' methods to TestExtractors
+    # add 'test_...' methods
     for extr in extractors:
         if not hasattr(extr, "test") or not extr.test:
             continue
@@ -167,7 +168,7 @@ def generate_tests():
         for num, tcase in enumerate(extr.test, 1):
             test = _generate_test(extr, tcase)
             test.__name__ = name + str(num)
-            setattr(TestExtractors, test.__name__, test)
+            setattr(TestExtractorResults, test.__name__, test)
 
 
 generate_tests()
