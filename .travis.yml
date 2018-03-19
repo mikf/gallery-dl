@@ -9,7 +9,7 @@ env:
 matrix:
   include:
     - python: "3.6"
-    - env: GALLERYDL_TESTS=results
+      env: GALLERYDL_TESTS=results
 
 sudo: false
 git:
