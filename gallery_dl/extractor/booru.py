@@ -60,7 +60,7 @@ class BooruExtractor(SharedConfigExtractor):
 
             if len(images) < self.per_page:
                 return
-            self.update_page(data)
+            self.update_page(images[-1])
 
     def reset_page(self):
         """Initialize params to point to the first page"""
