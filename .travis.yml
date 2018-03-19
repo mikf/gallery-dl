@@ -1,14 +1,23 @@
-sudo: false
 language: python
 python:
-  - 3.3
-  - 3.4
-  - 3.5
-  - 3.6
-install:
-  - pip install -r requirements.txt
-script:
-  - if [[ $TRAVIS_PYTHON_VERSION != '3.6' ]]; then nosetests --ignore-files=test_extractors --verbose test; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.6' ]]; then nosetests --verbose test; fi
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+env:
+  - GALLERYDL_TESTS=core
+matrix:
+  include:
+    - python: "3.6"
+    - env: GALLERYDL_TESTS=results
+
+sudo: false
 git:
-  depth: 10
+  depth: 3
+branches:
+  only:
+  - master
+  - /^v\d+\.\d+\.\d+(-\S*)?$/
+
+script:
+  - ./scripts/run_tests.sh
