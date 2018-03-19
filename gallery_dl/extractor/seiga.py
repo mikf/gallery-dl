@@ -80,7 +80,7 @@ class SeigaUserExtractor(SeigaExtractor):
                 "user": {
                     "id": 39537793,
                     "message": str,
-                    "name": "Neko",
+                    "name": str,
                 },
                 "clips": int,
                 "comments": int,

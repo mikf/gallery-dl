@@ -37,6 +37,10 @@ class DanbooruTagExtractor(booru.TagMixin, DanbooruExtractor):
         ("https://danbooru.donmai.us/posts?tags=bonocho", {
             "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
         }),
+        # test page transitions
+        ("https://danbooru.donmai.us/posts?tags=canvas_%28cocktail_soft%29", {
+            "count": ">= 50",
+        }),
         ("https://hijiribe.donmai.us/posts?tags=bonocho", None),
         ("https://sonohara.donmai.us/posts?tags=bonocho", None),
         ("https://safebooru.donmai.us/posts?tags=bonocho", None),
@@ -53,7 +57,7 @@ class DanbooruPoolExtractor(booru.PoolMixin, DanbooruExtractor):
 
 class DanbooruPostExtractor(booru.PostMixin, DanbooruExtractor):
     """Extractor for single images from danbooru"""
-    pattern = [BASE_PATTERN + "/posts/(?P<post>\d+)"]
+    pattern = [BASE_PATTERN + r"/posts/(?P<post>\d+)"]
     test = [("https://danbooru.donmai.us/posts/294929", {
         "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
     })]
