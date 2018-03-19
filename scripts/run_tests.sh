@@ -1,9 +1,7 @@
 #!/bin/bash
 
-ROOTDIR="$(realpath "$(dirname "$0")/..")/"
-
 TESTS_CORE=(config cookies oauth text util)
-TESTS_RESULTS=(extractors)
+TESTS_RESULTS=(results)
 
 
 # select tests
@@ -21,4 +19,4 @@ TESTS=( ${TESTS[@]/%/.py}   )
 
 # run 'nosetests' with selected tests
 # (or all tests if ${TESTS} is empty)
-nosetests --verbose -w "${ROOTDIR}/test/" ${TESTS[@]}
+nosetests --verbose -w test ${TESTS[@]}
