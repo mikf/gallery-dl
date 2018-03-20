@@ -8,77 +8,75 @@
 
 """Extract images from https://hitomi.la/"""
 
-from .common import Extractor, Message
+from .common import ChapterExtractor
 from .. import text, util
 import string
 
 
-class HitomiGalleryExtractor(Extractor):
+class HitomiGalleryExtractor(ChapterExtractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
     subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery_id} {title}"]
-    filename_fmt = "{category}_{gallery_id}_{num:>03}_{name}.{extension}"
-    archive_fmt = "{gallery_id}_{num}"
-    pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)\.html"]
-    test = [("https://hitomi.la/galleries/867789.html", {
-        "url": "e42a47dfadda93e4bf37e82b1dc9ad29edfa9130",
-        "keyword": "c007cd41229d727b2ced3b364350561444738351",
-    })]
+    filename_fmt = "{category}_{gallery_id}_{page:>03}_{name}.{extension}"
+    archive_fmt = "{gallery_id}_{page}"
+    pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)"]
+    test = [
+        ("https://hitomi.la/galleries/867789.html", {
+            "url": "cb759868d090fe0e2655c3e29ebf146054322b6d",
+            "keyword": "b1e66ff971fc8cb80240a687f508f3b74053f799",
+        }),
+        ("https://hitomi.la/reader/867789.html", None),
+    ]
 
     def __init__(self, match):
-        Extractor.__init__(self)
-        self.gid = match.group(1)
+        self.gid = util.safe_int(match.group(1))
+        url = "https://hitomi.la/galleries/{}.html".format(self.gid)
+        ChapterExtractor.__init__(self, url)
 
-    def items(self):
-        url = "https://hitomi.la/galleries/" + self.gid + ".html"
-        page = self.request(url).text
-        data = self.get_job_metadata(page)
-        images = self.get_image_urls(page)
-        data["count"] = len(images)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["num"], url in enumerate(images, 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
+    def get_metadata(self, page, extr=text.extract):
+        pos = page.index('<h1><a href="/reader/')
+        title , pos = extr(page, '.html">', '<', pos)
+        artist, pos = extr(page, '<h2>', '</h2>', pos)
+        group , pos = extr(page, '<td>Group</td><td>', '</td>', pos)
+        gtype , pos = extr(page, '<td>Type</td><td>', '</td>', pos)
+        lang  , pos = extr(page, '<td>Language</td><td>', '</td>', pos)
+        series, pos = extr(page, '<td>Series</td><td>', '</td>', pos)
+        chars , pos = extr(page, '<td>Characters</td><td>', '</td>', pos)
+        tags  , pos = extr(page, '<td>Tags</td><td>', '</td>', pos)
+        date  , pos = extr(page, '<span class="date">', '</span>', pos)
+        lang = None if lang == "N/A" else text.remove_html(lang)
 
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
-        group = ""
-        gtype = ""
-        series = ""
-        _     , pos = text.extract(page, '<h1><a href="/reader/', '')
-        title , pos = text.extract(page, '.html">', "</a>", pos)
-        _     , pos = text.extract(page, '<li><a href="/artist/', '', pos)
-        artist, pos = text.extract(page, '.html">', '</a>', pos)
-        test  , pos = text.extract(page, '<li><a href="/group/', '', pos)
-        if test is not None:
-            group , pos = text.extract(page, '.html">', '</a>', pos)
-        test  , pos = text.extract(page, '<a href="/type/', '', pos)
-        if test is not None:
-            gtype , pos = text.extract(page, '.html">', '</a>', pos)
-        _     , pos = text.extract(page, '<tdLanguage</td>', '', pos)
-        lang  , pos = text.extract(page, '.html">', '</a>', pos)
-        test  , pos = text.extract(page, '<a href="/series/', '', pos)
-        if test is not None:
-            series, pos = text.extract(page, '.html">', '</a>', pos)
-        lang = lang.capitalize()
         return {
             "gallery_id": self.gid,
-            "title": " ".join(title.split()),
-            "artist": string.capwords(artist),
-            "group": string.capwords(group),
-            "type": gtype.strip().capitalize(),
+            "title": text.unescape(" ".join(title.split())),
+            "artist": self._prepare(artist),
+            "group": self._prepare(group),
+            "type": text.remove_html(gtype).capitalize(),
             "lang": util.language_to_code(lang),
             "language": lang,
-            "series": string.capwords(series),
+            "date": date,
+            "series": self._prepare(series),
+            "characters": self._prepare(chars),
+            "tags": self._prepare(tags),
         }
 
-    @staticmethod
-    def get_image_urls(page):
-        """Extract and return a list of all image-urls"""
+    def get_images(self, page):
+        subdomain = chr(97 + self.gid % 2) + "a"
+        base = "https://" + subdomain + ".hitomi.la/galleries/"
         return [
-            "https://la.hitomi.la/galleries/" + urlpart
+            (base + urlpart, None)
             for urlpart in text.extract_iter(
                 page, "'//tn.hitomi.la/smalltn/", ".jpg',"
             )
         ]
+
+    @staticmethod
+    def _prepare(value):
+        if not value or "<ul " not in value:
+            return ""
+        value = ", ".join(text.extract_iter(
+            value, '.html">', '<'))
+        return string.capwords(
+            text.unescape(value)
+        )
