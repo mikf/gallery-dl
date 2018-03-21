@@ -21,7 +21,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "mangapark",
+    "mangahere",  # invalid SSL cert
     "puremashiro",  # online reader down
 }
 
