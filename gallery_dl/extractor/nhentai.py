@@ -9,8 +9,6 @@
 """Extract images from https://nhentai.net/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
 
 
 class NhentaiGalleryExtractor(Extractor):
@@ -21,9 +19,9 @@ class NhentaiGalleryExtractor(Extractor):
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     archive_fmt = "{gallery_id}_{num}"
     pattern = [r"(?:https?://)?(?:www\.)?nhentai\.net/g/(\d+)"]
-    test = [("http://nhentai.net/g/147850/", {
+    test = [("https://nhentai.net/g/147850/", {
         "url": "5179dbf0f96af44005a0ff705a0ad64ac26547d0",
-        "keyword": "82751294e75fc203b019ffd94d8c1f94a5b86494",
+        "keyword": "2f94976e657f3043a89997e22f4de8e1b22d9175",
     })]
 
     def __init__(self, match):
@@ -33,8 +31,8 @@ class NhentaiGalleryExtractor(Extractor):
     def items(self):
         ginfo = self.get_gallery_info()
         data = self.get_job_metadata(ginfo)
-        urlfmt = "{}galleries/{}/{{}}.{{}}".format(
-            ginfo["media_url"], data["media_id"])
+        urlfmt = "https://i.nhentai.net/galleries/{}/{{}}.{{}}".format(
+            data["media_id"])
         extdict = {"j": "jpg", "p": "png", "g": "gif"}
         yield Message.Version, 1
         yield Message.Directory, data
@@ -47,24 +45,15 @@ class NhentaiGalleryExtractor(Extractor):
 
     def get_gallery_info(self):
         """Extract and return gallery-info"""
-        page = self.request("https://nhentai.net/g/" + self.gid + "/1/").text
-        media_url, pos = text.extract(
-            page, "media_url: '", "'")
-        json_data, pos = text.extract(
-            page, "gallery: ", ",\n", pos)
-        if json_data.startswith("b'"):
-            json_data = json_data[2:-1].replace(r"\\u", r"\u")
-
-        json_dict = json.loads(json_data)
-        json_dict["media_url"] = media_url
-        return json_dict
+        url = "https://nhentai.net/api/gallery/" + self.gid
+        return self.request(url).json()
 
     def get_job_metadata(self, ginfo):
         """Collect metadata for extractor-job"""
         title_en = ginfo["title"].get("english", "")
         title_ja = ginfo["title"].get("japanese", "")
         return {
-            "gallery_id": self.gid,
+            "gallery_id": ginfo["id"],
             "upload_date": ginfo["upload_date"],
             "media_id": ginfo["media_id"],
             "scanlator": ginfo["scanlator"],

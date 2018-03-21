@@ -80,11 +80,11 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
         (("https://mangapark.me/manga/"
           "ad-astra-per-aspera-hata-kenjirou/s5/c1.2"), {
             "count": 40,
-            "keyword": "fb5082bb60e19cae0a194b89f69f333888a9325d",
+            "keyword": "f7f7fb1ca8b26a59a47d8ec60c5eaaf69a43a3f6",
         }),
         ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
             "count": 15,
-            "keyword": "dc9233cdd83d8659300f0a20ec3c493873f71741",
+            "keyword": "8d5d1608d4182495ea43ad665e25b755b6468be2",
         }),
     ]
 
