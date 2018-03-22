@@ -434,6 +434,12 @@ class PathFormat():
             self.basedirectory,
             *segments
         )
+
+        # remove trailing path separator;
+        # occurs if the last argument to os.path.join() is an empty string
+        if self.directory[-1] == os.sep:
+            self.directory = self.directory[:-1]
+
         self.realdirectory = self.adjust_path(self.directory)
         os.makedirs(self.realdirectory, exist_ok=True)
 
