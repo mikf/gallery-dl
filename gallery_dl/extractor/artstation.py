@@ -21,7 +21,6 @@ class ArtstationExtractor(Extractor):
     directory_fmt = ["{category}", "{userinfo[username]}"]
     archive_fmt = "{asset[id]}"
     root = "https://www.artstation.com"
-    per_page = 50
 
     def __init__(self, match=None):
         Extractor.__init__(self)
@@ -33,8 +32,8 @@ class ArtstationExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, data
 
-        for project_id in self.projects():
-            for asset in self.get_project_assets(project_id):
+        for project in self.projects():
+            for asset in self.get_project_assets(project["hash_id"]):
                 adict = asset["asset"]
                 if data:
                     asset.update(data)
@@ -83,13 +82,16 @@ class ArtstationExtractor(Extractor):
         if not params:
             params = {}
         params["page"] = 1
+        total = 0
 
         while True:
-            projects = self.request(url, params=params).json()["data"]
-            for project in projects:
-                yield project["hash_id"]
-            if len(projects) < self.per_page:
+            data = self.request(url, params=params).json()
+            yield from data["data"]
+
+            total += len(data["data"])
+            if total >= data["total_count"]:
                 return
+
             params["page"] += 1
 
     @staticmethod
@@ -201,6 +203,62 @@ class ArtstationLikesExtractor(ArtstationExtractor):
         return self._pagination(url)
 
 
+class ArtstationChallengeExtractor(ArtstationExtractor):
+    """Extractor for submissions of artstation challenges"""
+    subcategory = "challenge"
+    filename_fmt = "{submission_id}_{asset_id}_{name}.{extension}"
+    directory_fmt = ["{category}", "Challenges",
+                     "{challenge[id]} - {challenge[title]}"]
+    archive_fmt = "c_{challenge[id]}_{asset_id}"
+    pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
+               r"/contests/[^/?&#]+/challenges/(\d+)"
+               r"/?(?:\?sorting=([a-z]+))?"]
+    test = [
+        (("https://www.artstation.com/contests/thu-2017/challenges/20"), None),
+        (("https://www.artstation.com/contests/beyond-human"
+          "/challenges/23?sorting=winners"), {
+            "count": 203,
+        }),
+    ]
+
+    def __init__(self, match):
+        ArtstationExtractor.__init__(self)
+        self.challenge_id = match.group(1)
+        self.sorting = match.group(2) or "popular"
+
+    def items(self):
+        challenge_url = "{}/contests/_/challenges/{}.json".format(
+            self.root, self.challenge_id)
+        submission_url = "{}/contests/_/challenges/{}/submissions.json".format(
+            self.root, self.challenge_id)
+        update_url = "{}/contests/submission_updates.json".format(
+            self.root)
+
+        challenge = self.request(challenge_url).json()
+        yield Message.Version, 1
+        yield Message.Directory, {"challenge": challenge}
+
+        params = {"sorting": self.sorting}
+        for submission in self._pagination(submission_url, params):
+
+            params = {"submission_id": submission["id"]}
+            for update in self._pagination(update_url, params=params):
+
+                del update["replies"]
+                update["challenge"] = challenge
+                for url in text.extract_iter(
+                        update["body_presentation_html"], ' href="', '"'):
+                    update["asset_id"] = self._id_from_url(url)
+                    text.nameext_from_url(url, update)
+                    yield Message.Url, self._no_cache(url), update
+
+    @staticmethod
+    def _id_from_url(url):
+        """Get an image's submission ID from its URL"""
+        parts = url.split("/")
+        return util.safe_int("".join(parts[7:10]))
+
+
 class ArtstationSearchExtractor(ArtstationExtractor):
     """Extractor for artstation search results"""
     subcategory = "search"
@@ -274,7 +332,7 @@ class ArtstationImageExtractor(ArtstationExtractor):
         return ArtstationExtractor.metadata(self)
 
     def projects(self):
-        return (self.project_id,)
+        return ({"hash_id": self.project_id},)
 
     def get_project_assets(self, project_id):
         return self.assets
