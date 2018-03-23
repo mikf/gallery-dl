@@ -91,7 +91,7 @@ Turboimagehost       https://turboimagehost.com/         individual Images
 ==================== =================================== ================================================== ================
 
 .. |http://www.thes-0| replace:: http://www.thespectrum.net/manga_scans/
-.. |Images from Use-1| replace:: Images from Users, Albums, individual Images, Likes
+.. |Images from Use-1| replace:: Images from Users, Albums, Contests, individual Images, Likes, Search Results
 .. |Collections, De-2| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals
 .. |Images from Use-3| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
 .. |Images from Use-4| replace:: Images from Users, Bookmarks, Favorites, pixiv.me Links, Rankings, Individual Images
