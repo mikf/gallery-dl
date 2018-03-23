@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.3.2 - 2018-03-23
+- Added extractors for `artstation` albums, challenges and search results
+- Improved URL and metadata extraction for `hitomi`and `nhentai`
+- Fixed page transitions for `danbooru` API results ([#82](https://github.com/mikf/gallery-dl/issues/82))
 
 ## 1.3.1 - 2018-03-16
 - Added support for:
