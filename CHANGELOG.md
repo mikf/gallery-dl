@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.3.2 - 2018-03-23
 - Added extractors for `artstation` albums, challenges and search results
 - Improved URL and metadata extraction for `hitomi`and `nhentai`
