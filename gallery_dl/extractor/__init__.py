@@ -107,7 +107,7 @@ def find(url):
 
 def add(klass):
     """Add 'klass' to the list of available extractors"""
-    for pattern in klass:
+    for pattern in klass.pattern:
         _cache.append((re.compile(pattern), klass))
 
 
