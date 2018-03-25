@@ -130,7 +130,7 @@ class MangadexMangaExtractor(MangadexExtractor, MangaExtractor):
         while True:
             before = len(results)
 
-            for info in text.extract_iter(page, "<tr id=", "</tr>"):
+            for info in text.extract_iter(page, '<tr id="chapter_', '</tr>'):
                 chid    , pos = extr(info, 'data-chapter-id="', '"')
                 chapter , pos = extr(info, 'data-chapter-num="', '"', pos)
                 volume  , pos = extr(info, 'data-volume-num="', '"', pos)
