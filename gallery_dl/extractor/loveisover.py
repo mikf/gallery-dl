@@ -18,5 +18,5 @@ class LoveisoverThreadExtractor(chan.FoolfuukaThreadExtractor):
     pattern = [r"(?:https?://)?(?:archive\.)?loveisover\.me"
                r"/([^/]+)/thread/(\d+)"]
     test = [("https://archive.loveisover.me/c/thread/2898043/", {
-        "url": "1340ba9d04d4e591d62e5ae5df3fd732f06a99fd",
+        "url": "f1531a84de4e25ed3ae768384f6be43a0f02db71",
     })]

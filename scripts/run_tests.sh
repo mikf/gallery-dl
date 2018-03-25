@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TESTS_CORE=(config cookies extractor oauth text util)
+TESTS_CORE=(config cookies downloader extractor oauth text util)
 TESTS_RESULTS=(results)
 
 
