@@ -16,13 +16,88 @@ import random
 import requests
 
 
-class ExhentaiGalleryExtractor(Extractor):
-    """Extractor for image galleries from exhentai.org"""
+class ExhentaiExtractor(Extractor):
     category = "exhentai"
-    subcategory = "gallery"
     directory_fmt = ["{category}", "{gallery_id}"]
     filename_fmt = "{gallery_id}_{num:>04}_{image_token}_{name}.{extension}"
     archive_fmt = "{gallery_id}_{num}"
+    cookiedomain = ".exhentai.org"
+    cookienames = ("ipb_member_id", "ipb_pass_hash")
+    root = "https://exhentai.org"
+
+    def __init__(self):
+        Extractor.__init__(self)
+        self.original = self.config("original", True)
+        self.wait_min = self.config("wait-min", 3)
+        self.wait_max = self.config("wait-max", 6)
+        if self.wait_max < self.wait_min:
+            self.wait_max = self.wait_min
+        self.session.headers["Referer"] = self.root + "/"
+
+    def request(self, *args, **kwargs):
+        response = Extractor.request(self, *args, **kwargs)
+        if self._is_sadpanda(response):
+            self.log.info("sadpanda.jpg")
+            raise exception.AuthorizationError()
+        return response
+
+    def wait(self, waittime=None):
+        """Wait for a randomly chosen amount of seconds"""
+        if not waittime:
+            waittime = random.uniform(self.wait_min, self.wait_max)
+        else:
+            waittime = random.uniform(waittime * 0.66, waittime * 1.33)
+        time.sleep(waittime)
+
+    def login(self):
+        """Login and set necessary cookies"""
+        if self._check_cookies(self.cookienames):
+            return
+        username, password = self._get_auth_info()
+        if not username:
+            self.log.info("no username given; using e-hentai.org")
+            self.root = "https://e-hentai.org"
+            self.original = False
+            return
+        cookies = self._login_impl(username, password)
+        for key, value in cookies.items():
+            self.session.cookies.set(
+                key, value, domain=self.cookiedomain)
+
+    @cache(maxage=90*24*60*60, keyarg=1)
+    def _login_impl(self, username, password):
+        """Actual login implementation"""
+        self.log.info("Logging in as %s", username)
+        url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
+        data = {
+            "CookieDate": "1",
+            "b": "d",
+            "bt": "1-1",
+            "UserName": username,
+            "PassWord": password,
+            "ipb_login_submit": "Login!",
+        }
+        headers = {
+            "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1"
+        }
+        response = self.request(url, method="POST", data=data, headers=headers)
+
+        if "You are now logged in as:" not in response.text:
+            raise exception.AuthenticationError()
+        return {c: response.cookies[c] for c in self.cookienames}
+
+    @staticmethod
+    def _is_sadpanda(response):
+        """Return True if the response object contains a sad panda"""
+        return (
+            response.headers.get("Content-Length") == "9615" and
+            "sadpanda.jpg" in response.headers.get("Content-Disposition", "")
+        )
+
+
+class ExhentaiGalleryExtractor(ExhentaiExtractor):
+    """Extractor for image galleries from exhentai.org"""
+    subcategory = "gallery"
     pattern = [r"(?:https?://)?(g\.e-|e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
     test = [
         ("https://exhentai.org/g/960460/4f0e369d82/", {
@@ -35,23 +110,16 @@ class ExhentaiGalleryExtractor(Extractor):
         ("http://exhentai.org/g/962698/7f02358e00/", {
             "exception": exception.AuthorizationError,
         }),
+        ("https://e-hentai.org/g/960460/4f0e369d82/", None),
+        ("https://g.e-hentai.org/g/960460/4f0e369d82/", None),
     ]
-    root = "https://exhentai.org"
-    cookienames = ("ipb_member_id", "ipb_pass_hash")
-    cookiedomain = ".exhentai.org"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        ExhentaiExtractor.__init__(self)
         self.key = {}
         self.count = 0
         self.version, self.gid, self.token = match.groups()
         self.gid = util.safe_int(self.gid)
-        self.original = self.config("original", True)
-        self.wait_min = self.config("wait-min", 3)
-        self.wait_max = self.config("wait-max", 6)
-        if self.wait_max < self.wait_min:
-            self.wait_max = self.wait_min
-        self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
         self.login()
@@ -62,9 +130,6 @@ class ExhentaiGalleryExtractor(Extractor):
         page = response.text
 
         if response.status_code == 404 and "Gallery Not Available" in page:
-            raise exception.AuthorizationError()
-        if self._is_sadpanda(response):
-            self.log.info("sadpanda.jpg")
             raise exception.AuthorizationError()
         if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
@@ -168,55 +233,49 @@ class ExhentaiGalleryExtractor(Extractor):
             })
             request["imgkey"] = nextkey
 
-    def wait(self, waittime=None):
-        """Wait for a randomly chosen amount of seconds"""
-        if not waittime:
-            waittime = random.uniform(self.wait_min, self.wait_max)
-        else:
-            waittime = random.uniform(waittime * 0.66, waittime * 1.33)
-        time.sleep(waittime)
 
-    def login(self):
-        """Login and set necessary cookies"""
-        if self._check_cookies(self.cookienames):
-            return
-        username, password = self._get_auth_info()
-        if not username:
-            self.log.info("no username given; using e-hentai.org")
-            self.root = "https://e-hentai.org"
-            self.original = False
-            return
-        cookies = self._login_impl(username, password)
-        for key, value in cookies.items():
-            self.session.cookies.set(
-                key, value, domain=self.cookiedomain)
+class ExhentaiSearchExtractor(ExhentaiExtractor):
+    """Extractor for exhentai search results"""
+    subcategory = "search"
+    pattern = [r"(?:https?://)?(?:g\.e-|e-|ex)hentai\.org/?\?(.*)$"]
+    test = [
+        ("https://exhentai.org/?f_search=touhou", None),
+        ("https://exhentai.org/?f_doujinshi=0&f_manga=0&f_artistcg=0"
+         "&f_gamecg=0&f_western=0&f_non-h=1&f_imageset=0&f_cosplay=0"
+         "&f_asianporn=0&f_misc=0&f_search=touhou&f_apply=Apply+Filter", None),
+    ]
 
-    @cache(maxage=90*24*60*60, keyarg=1)
-    def _login_impl(self, username, password):
-        """Actual login implementation"""
-        self.log.info("Logging in as %s", username)
-        url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
-        data = {
-            "CookieDate": "1",
-            "b": "d",
-            "bt": "1-1",
-            "UserName": username,
-            "PassWord": password,
-            "ipb_login_submit": "Login!",
-        }
-        headers = {
-            "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1"
-        }
-        response = self.request(url, method="POST", data=data, headers=headers)
+    def __init__(self, match):
+        ExhentaiExtractor.__init__(self)
+        self.params = text.parse_query(match.group(1))
+        self.params["page"] = util.safe_int(self.params.get("page"))
 
-        if "You are now logged in as:" not in response.text:
-            raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in self.cookienames}
+    def items(self):
+        self.login()
+        extr = text.extract
+        yield Message.Version, 1
 
-    @staticmethod
-    def _is_sadpanda(response):
-        """Return True if the response object contains a sad panda"""
-        return (
-            response.headers.get("Content-Length") == "9615" and
-            "sadpanda.jpg" in response.headers.get("Content-Disposition", "")
-        )
+        while True:
+            page = self.request(self.root, params=self.params).text
+
+            for info in text.extract_iter(page, '<tr class="gtr', '</tr>'):
+                gtype, pos = extr(info, ' alt="', '"')
+                date , pos = extr(info, 'nowrap">', '<', pos)
+                url  , pos = extr(info, ' class="it5"><a href="', '"', pos)
+                title, pos = extr(info, '>', '<', pos)
+                upl  , pos = extr(info, '<td class="itu">', '</td>', pos)
+                parts = url.rsplit("/", 3)
+
+                yield Message.Queue, url, {
+                    "type": gtype,
+                    "date": date,
+                    "gallery_id": util.safe_int(parts[1]),
+                    "gallery_token": parts[2],
+                    "title": text.unescape(title),
+                    "uploader": text.remove_html(upl),
+                }
+
+            if '<td class="ptdd">&gt;</td>' in page:
+                return
+            self.params["page"] += 1
+            self.wait()
