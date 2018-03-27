@@ -17,7 +17,7 @@ DeviantArt           https://www.deviantart.com/         |Collections, De-2|    
 Doki Reader          https://kobato.hologfx.com/         Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches
-ExHentai             https://exhentai.org/               Galleries                                          Optional
+ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fireden              https://boards.fireden.net/         Threads
 Flickr               https://www.flickr.com/             |Images from Use-3|                                Optional (OAuth)

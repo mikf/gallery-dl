@@ -17,6 +17,7 @@ import requests
 
 
 class ExhentaiExtractor(Extractor):
+    """Base class for exhentai extractors"""
     category = "exhentai"
     directory_fmt = ["{category}", "{gallery_id}"]
     filename_fmt = "{gallery_id}_{num:>04}_{image_token}_{name}.{extension}"
@@ -247,35 +248,80 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self)
-        self.params = text.parse_query(match.group(1))
+        self.params = text.parse_query(match.group(1) or "")
         self.params["page"] = util.safe_int(self.params.get("page"))
+        self.url = self.root
 
     def items(self):
         self.login()
-        extr = text.extract
+        self.init()
         yield Message.Version, 1
 
         while True:
-            page = self.request(self.root, params=self.params).text
+            page = self.request(self.url, params=self.params).text
 
-            for info in text.extract_iter(page, '<tr class="gtr', '</tr>'):
-                gtype, pos = extr(info, ' alt="', '"')
-                date , pos = extr(info, 'nowrap">', '<', pos)
-                url  , pos = extr(info, ' class="it5"><a href="', '"', pos)
-                title, pos = extr(info, '>', '<', pos)
-                upl  , pos = extr(info, '<td class="itu">', '</td>', pos)
-                parts = url.rsplit("/", 3)
+            for row in text.extract_iter(page, '<tr class="gtr', '</tr>'):
+                yield self._parse_row(row)
 
-                yield Message.Queue, url, {
-                    "type": gtype,
-                    "date": date,
-                    "gallery_id": util.safe_int(parts[1]),
-                    "gallery_token": parts[2],
-                    "title": text.unescape(title),
-                    "uploader": text.remove_html(upl),
-                }
-
-            if '<td class="ptdd">&gt;</td>' in page:
+            if 'class="ptdd">&gt;<' in page or ">No hits found</p>" in page:
                 return
             self.params["page"] += 1
             self.wait()
+
+    def init(self):
+        pass
+
+    def _parse_row(self, row, extr=text.extract):
+        """Parse information of a single result row"""
+        gtype, pos = extr(row, ' alt="', '"')
+        date , pos = extr(row, 'nowrap">', '<', pos)
+        url  , pos = extr(row, ' class="it5"><a href="', '"', pos)
+        title, pos = extr(row, '>', '<', pos)
+        key , last = self._parse_last(row, pos)
+        parts = url.rsplit("/", 3)
+
+        return Message.Queue, url, {
+            "type": gtype,
+            "date": date,
+            "gallery_id": util.safe_int(parts[1]),
+            "gallery_token": parts[2],
+            "title": text.unescape(title),
+            key: last,
+        }
+
+    def _parse_last(self, row, pos):
+        """Parse the last column of a result row
+
+        - Search results include an uploader name
+        - Favorite listings show the date the gallery was favorited
+        """
+        return "uploader", text.remove_html(
+            text.extract(row, '<td class="itu">', '</td>', pos)[0])
+
+
+class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
+    """Extractor for favorited exhentai galleries"""
+    subcategory = "favorite"
+    pattern = [r"(?:https?://)?(?:g\.e-|e-|ex)hentai\.org"
+               r"/favorites\.php(?:\?(.*))?"]
+    test = [
+        ("https://exhentai.org/favorites.php", None),
+        ("https://exhentai.org/favorites.php?favcat=1&f_search=henreader"
+         "&f_apply=Search+Favorites", None),
+    ]
+
+    def __init__(self, match):
+        ExhentaiSearchExtractor.__init__(self, match)
+        self.url = self.root + "/favorites.php"
+
+    def init(self):
+        # The first request to '/favorited.php' will return an empty list
+        # if the 's' cookie isn't set (maybe on some other conditions apply
+        # as well), so we make an "noop" request to get all the correct cookie
+        # values and to have a filled favorite list on the next request.
+        # TODO: proper cookie storage
+        self.request(self.url)
+        self.wait(1.5)
+
+    def _parse_last(self, row, pos):
+        return "date_favorited", text.extract(row, 'nowrap">', '<', pos)[0]
