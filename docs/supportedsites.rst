@@ -51,7 +51,7 @@ MangaDex             https://mangadex.org/               Chapters, Manga
 Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.me/               Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
-nhentai              https://nhentai.net/                Galleries
+nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
 nijie                https://nijie.info/                 Images from Users, individual Images               Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
