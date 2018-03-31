@@ -53,11 +53,11 @@ MangaPark            https://mangapark.me/               Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
-nijie                https://nijie.info/                 Images from Users, individual Images               Required
+nijie                https://nijie.info/                 |Images from Use-4|                                Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net                   Images from Users, Images from Statuses
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links
-Pixiv                https://www.pixiv.net/              |Images from Use-4|                                Required
+Pixiv                https://www.pixiv.net/              |Images from Use-5|                                Required
 PowerManga           https://powermanga.org/             Chapters, Manga
 Pure Mashiro         http://reader.puremashiro.moe/      Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
@@ -94,4 +94,5 @@ Turboimagehost       https://turboimagehost.com/         individual Images
 .. |Images from Use-1| replace:: Images from Users, Albums, Challenges, individual Images, Likes, Search Results
 .. |Collections, De-2| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals
 .. |Images from Use-3| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
-.. |Images from Use-4| replace:: Images from Users, Bookmarks, Favorites, pixiv.me Links, Rankings, Individual Images
+.. |Images from Use-4| replace:: Images from Users, Doujin, Favorites, individual Images
+.. |Images from Use-5| replace:: Images from Users, Bookmarks, Favorites, pixiv.me Links, Rankings, Individual Images

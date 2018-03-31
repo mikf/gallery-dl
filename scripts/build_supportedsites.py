@@ -66,6 +66,7 @@ CATEGORY_MAP = {
 }
 
 SUBCATEGORY_MAP = {
+    "doujin" : "Doujin",
     "gallery": "Galleries",
     "image"  : "individual Images",
     "issue"  : "Comic-Issues",
