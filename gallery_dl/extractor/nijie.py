@@ -153,6 +153,23 @@ class NijieDoujinExtractor(NijieExtractor):
         return self._pagination("members_dojin")
 
 
+class NijieFavoriteExtractor(NijieExtractor):
+    """Extractor for all favorites/bookmarks of a nijie-user"""
+    subcategory = "favorite"
+    directory_fmt = ["{category}", "bookmarks", "{user_id}"]
+    archive_fmt = "f_{user_id}_{image_id}_{index}"
+    pattern = [(r"(?:https?://)?(?:www\.)?nijie\.info"
+                r"/user_like_illust_view\.php\?id=(\d+)")]
+    test = [
+        ("https://nijie.info/user_like_illust_view.php?id=44", {
+            "count": ">= 16",
+        }),
+    ]
+
+    def get_image_ids(self):
+        return self._pagination("user_like_illust_view")
+
+
 class NijieImageExtractor(NijieExtractor):
     """Extractor for a work/image from nijie.info"""
     subcategory = "image"
