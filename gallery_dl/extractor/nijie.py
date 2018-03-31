@@ -22,10 +22,10 @@ class NijieExtractor(AsynchronousExtractor):
     cookiedomain = "nijie.info"
     popup_url = "https://nijie.info/view_popup.php?id="
 
-    def __init__(self):
+    def __init__(self, match=None):
         AsynchronousExtractor.__init__(self)
         self.session.headers["Referer"] = "https://nijie.info/"
-        self.artist_id = ""
+        self.artist_id = match.group(1) if match else None
 
     def items(self):
         self.login()
@@ -81,6 +81,19 @@ class NijieExtractor(AsynchronousExtractor):
             raise exception.AuthenticationError()
         return self.session.cookies
 
+    def _pagination(self, path):
+        url = "https://nijie.info/" + path
+        params = {"id": self.artist_id, "p": 1}
+        while True:
+            response = self.request(url, params=params, fatal=False)
+            if response.status_code == 404:
+                raise exception.NotFoundError("artist")
+            ids = list(text.extract_iter(response.text, ' illust_id="', '"'))
+            yield from ids
+            if len(ids) < 48:
+                return
+            params["p"] += 1
+
 
 class NijieUserExtractor(NijieExtractor):
     """Extractor for works of a nijie-user"""
@@ -97,22 +110,23 @@ class NijieUserExtractor(NijieExtractor):
         }),
     ]
 
-    def __init__(self, match):
-        NijieExtractor.__init__(self)
-        self.artist_id = match.group(1)
+    def get_image_ids(self):
+        return self._pagination("members_illust.php")
+
+
+class NijieDoujinExtractor(NijieExtractor):
+    """Extractor for doujin entries of a nijie-user"""
+    subcategory = "doujin"
+    pattern = [(r"(?:https?://)?(?:www\.)?nijie\.info/"
+                r"members_dojin\.php\?id=(\d+)")]
+    test = [
+        ("https://nijie.info/members_dojin.php?id=6782", {
+            "count": ">= 18",
+        })
+    ]
 
     def get_image_ids(self):
-        params = {"id": self.artist_id, "p": 1}
-        url = "https://nijie.info/members_illust.php"
-        while True:
-            response = self.request(url, params=params, fatal=False)
-            if response.status_code == 404:
-                raise exception.NotFoundError("artist")
-            ids = list(text.extract_iter(response.text, ' illust_id="', '"'))
-            yield from ids
-            if len(ids) < 48:
-                return
-            params["p"] += 1
+        return self._pagination("members_dojin.php")
 
 
 class NijieImageExtractor(NijieExtractor):
