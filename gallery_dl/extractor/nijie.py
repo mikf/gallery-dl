@@ -9,31 +9,33 @@
 """Extract images from https://nijie.info/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 
 
 class NijieExtractor(AsynchronousExtractor):
     """Base class for nijie extractors"""
     category = "nijie"
-    directory_fmt = ["{category}", "{artist_id}"]
+    directory_fmt = ["{category}", "{user_id}"]
     filename_fmt = "{category}_{artist_id}_{image_id}_p{index:>02}.{extension}"
     archive_fmt = "{image_id}_{index}"
     cookiedomain = "nijie.info"
+    root = "https://nijie.info"
     popup_url = "https://nijie.info/view_popup.php?id="
 
     def __init__(self, match=None):
         AsynchronousExtractor.__init__(self)
-        self.session.headers["Referer"] = "https://nijie.info/"
-        self.artist_id = match.group(1) if match else None
+        self.session.headers["Referer"] = self.root + "/"
+        self.user_id = match.group(1) if match else None
 
     def items(self):
         self.login()
         data = self.get_job_metadata()
-        images = self.get_image_ids()
+
         yield Message.Version, 1
         yield Message.Directory, data
-        for image_id in images:
+
+        for image_id in self.get_image_ids():
             for image_url, image_data in self.get_image_data(image_id):
                 image_data.update(data)
                 if not image_data["extension"]:
@@ -42,26 +44,36 @@ class NijieExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        return {"artist_id": self.artist_id}
+        return {"user_id": util.safe_int(self.user_id)}
 
     def get_image_ids(self):
-        """Collect all image-ids for a specific artist"""
-        return []
+        """Collect all relevant image-ids"""
 
     def get_image_data(self, image_id):
         """Get URL and metadata for images specified by 'image_id'"""
         page = self.request(self.popup_url + image_id).text
         return self.extract_image_data(page, image_id)
 
-    @staticmethod
-    def extract_image_data(page, image_id):
+    def extract_image_data(self, page, image_id):
         """Get URL and metadata for images from 'page'"""
-        images = list(text.extract_iter(page, '<img src="//pic', '"'))
+        title, pos = text.extract(
+            page, '<meta property="og:title" content="', '"')
+        description, pos = text.extract(
+            page, '<meta property="og:description" content="', '"', pos)
+        images = list(text.extract_iter(page, '<img src="//pic', '"', pos))
+
+        title = title.rpartition("|")[0].strip()
+        image_id = util.safe_int(image_id)
+        artist_id = util.safe_int(self._userid_from_popup(page))
+
         for index, url in enumerate(images):
             yield "https://pic" + url, text.nameext_from_url(url, {
-                "count": len(images),
                 "index": index,
+                "count": len(images),
+                "title": title,
+                "description": description,
                 "image_id": image_id,
+                "artist_id": artist_id,
             })
 
     def login(self):
@@ -75,43 +87,55 @@ class NijieExtractor(AsynchronousExtractor):
         """Actual login implementation"""
         self.log.info("Logging in as %s", username)
         data = {"email": username, "password": password}
-        page = self.request("https://nijie.info/login_int.php",
-                            method="POST", data=data).text
+        page = self.request(
+            self.root + "/login_int.php", method="POST", data=data).text
         if "//nijie.info/login.php" in page:
             raise exception.AuthenticationError()
         return self.session.cookies
 
     def _pagination(self, path):
-        url = "https://nijie.info/" + path
-        params = {"id": self.artist_id, "p": 1}
+        url = "{}/{}.php".format(self.root, path)
+        params = {"id": self.user_id, "p": 1}
+
         while True:
             response = self.request(url, params=params, fatal=False)
             if response.status_code == 404:
                 raise exception.NotFoundError("artist")
-            ids = list(text.extract_iter(response.text, ' illust_id="', '"'))
+
+            page = response.text
+            ids = list(text.extract_iter(page, ' illust_id="', '"'))
             yield from ids
-            if len(ids) < 48:
+
+            if '<a rel="next"' not in page:
                 return
             params["p"] += 1
+
+    @staticmethod
+    def _userid_from_popup(page):
+        return (
+            text.extract(page, "/nijie_picture/sp/", "_")[0] or
+            text.extract(page, "/dojin_main/", "_")[0]
+        )
 
 
 class NijieUserExtractor(NijieExtractor):
     """Extractor for works of a nijie-user"""
     subcategory = "user"
-    pattern = [(r"(?:https?://)?(?:www\.)?nijie\.info/"
-                r"members(?:_illust)?\.php\?id=(\d+)")]
+    pattern = [(r"(?:https?://)?(?:www\.)?nijie\.info"
+                r"/members(?:_illust)?\.php\?id=(\d+)")]
     test = [
         ("https://nijie.info/members_illust.php?id=44", {
             "url": "585d821df4716b1098660a0be426d01db4b65f2a",
-            "keyword": "804d3a9bb8205048ac0d1fe8eec39266b50f1e8e",
+            "keyword": "1eb3387196f1f30d6d74a41f4c77faaadd588e52",
         }),
         ("https://nijie.info/members_illust.php?id=43", {
             "exception": exception.NotFoundError,
         }),
+        ("https://nijie.info/members.php?id=44", None),
     ]
 
     def get_image_ids(self):
-        return self._pagination("members_illust.php")
+        return self._pagination("members_illust")
 
 
 class NijieDoujinExtractor(NijieExtractor):
@@ -122,26 +146,28 @@ class NijieDoujinExtractor(NijieExtractor):
     test = [
         ("https://nijie.info/members_dojin.php?id=6782", {
             "count": ">= 18",
-        })
+        }),
     ]
 
     def get_image_ids(self):
-        return self._pagination("members_dojin.php")
+        return self._pagination("members_dojin")
 
 
 class NijieImageExtractor(NijieExtractor):
     """Extractor for a work/image from nijie.info"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:www\.)?nijie\.info/view\.php\?id=(\d+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?nijie\.info"
+               r"/view(?:_popup)?\.php\?id=(\d+)"]
     test = [
         ("https://nijie.info/view.php?id=70720", {
             "url": "a10d4995645b5f260821e32c60a35f73546c2699",
-            "keyword": "4ecfd46460761b7a89fdba815eece10e917032c2",
+            "keyword": "0728fc3bbef1e192abfd59f88f07921d3d336804",
             "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
         }),
         ("https://nijie.info/view.php?id=70724", {
             "exception": exception.NotFoundError,
         }),
+        ("https://nijie.info/view_popup.php?id=70720", None),
     ]
 
     def __init__(self, match):
@@ -155,9 +181,7 @@ class NijieImageExtractor(NijieExtractor):
         if 300 <= response.status_code < 400:
             raise exception.NotFoundError("image")
         self.page = response.text
-        self.artist_id = text.extract(
-            self.page, "/nijie_picture/sp/", "_")[0] or text.extract(
-            self.page, "/dojin_main/", "_")[0]
+        self.user_id = self._userid_from_popup(self.page)
         return NijieExtractor.get_job_metadata(self)
 
     def get_image_ids(self):
