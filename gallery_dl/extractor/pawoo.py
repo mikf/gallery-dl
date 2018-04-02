@@ -55,7 +55,7 @@ class PawooExtractor(Extractor):
 class PawooUserExtractor(PawooExtractor):
     """Extractor for all images of an account/user on pawoo.net"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?pawoo\.net/(@[^/]+)/?$"]
+    pattern = [r"(?:https?://)?pawoo\.net/(@[^/]+)(?:/media)?/?$"]
     test = [
         ("https://pawoo.net/@kuroda", {
             "url": "a3f9e7555f2b024554c0e9b6cbcc7991af13cf99",
@@ -64,6 +64,7 @@ class PawooUserExtractor(PawooExtractor):
         ("https://pawoo.net/@zZzZz/", {
             "exception": exception.NotFoundError,
         }),
+        ("https://pawoo.net/@kuroda/media", None),
     ]
 
     def __init__(self, match):
