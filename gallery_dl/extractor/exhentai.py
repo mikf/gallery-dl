@@ -102,7 +102,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     pattern = [r"(?:https?://)?(g\.e-|e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
     test = [
         ("https://exhentai.org/g/960460/4f0e369d82/", {
-            "keyword": "173277161e28162dcc755d2e7a88e6cd750f2477",
+            "keyword": "15b755fd3e2c710d7fd7ff112a5cdbf4333201b2",
             "content": "493d759de534355c9f55f8e365565b62411de146",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -157,14 +157,15 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             ("title_jp"  , '<h1 id="gj">', '</h1>'),
             ("date"      , '>Posted:</td><td class="gdt2">', '</td>'),
             ("language"  , '>Language:</td><td class="gdt2">', ' '),
-            ("size"      , '>File Size:</td><td class="gdt2">', ' '),
-            ("size_units", '', '<'),
+            ("gallery_size", '>File Size:</td><td class="gdt2">', '<'),
             ("count"     , '>Length:</td><td class="gdt2">', ' '),
         ), values=data)
         data["lang"] = util.language_to_code(data["language"])
         data["title"] = text.unescape(data["title"])
         data["title_jp"] = text.unescape(data["title_jp"])
         data["count"] = util.safe_int(data["count"])
+        data["gallery_size"] = util.parse_bytes(
+            data["gallery_size"].rstrip("Bb"))
         return data
 
     def get_images(self, page):
@@ -182,6 +183,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             ("nextkey" , "'", "'"),
             ("url"     , '<img id="img" src="', '"'),
             ("origurl" , 'hentai.org/fullimg.php', '"'),
+            ("originfo", 'ownload original', '<'),
             ("startkey", 'var startkey="', '";'),
             ("showkey" , 'var showkey="', '";'),
         ))[0]
@@ -192,13 +194,14 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if self.original and data["origurl"]:
             part = text.unescape(data["origurl"])
             url = self.root + "/fullimg.php" + part
+            info = self._parse_original_info(data["originfo"])
         else:
             url = data["url"]
+            info = self._parse_image_info(url)
 
-        return url, text.nameext_from_url(data["url"], {
-            "num": 1,
-            "image_token": data["startkey"],
-        })
+        info["num"] = 1
+        info["image_token"] = data["startkey"]
+        return url, text.nameext_from_url(data["url"], info)
 
     def images_from_api(self):
         """Get image url and data from api calls"""
@@ -225,14 +228,36 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             if self.original and origurl:
                 url = text.unescape(origurl)
+                data = self._parse_original_info(
+                    text.extract(page["i7"], "ownload original", "<", pos)[0]
+                )
             else:
                 url = imgurl
+                data = self._parse_image_info(url)
 
-            yield url, text.nameext_from_url(imgurl, {
-                "num": request["page"],
-                "image_token": imgkey
-            })
+            data["num"] = request["page"]
+            data["image_token"] = imgkey
+            yield url, text.nameext_from_url(imgurl, data)
+
             request["imgkey"] = nextkey
+
+    @staticmethod
+    def _parse_image_info(url):
+        parts = url.split("/")[4].split("-")
+        return {
+            "width": util.safe_int(parts[2]),
+            "height": util.safe_int(parts[3]),
+            "size": util.safe_int(parts[1]),
+        }
+
+    @staticmethod
+    def _parse_original_info(info):
+        parts = info.lstrip().split(" ")
+        return {
+            "width": util.safe_int(parts[0]),
+            "height": util.safe_int(parts[2]),
+            "size": util.parse_bytes(parts[3] + parts[4][0]),
+        }
 
 
 class ExhentaiSearchExtractor(ExhentaiExtractor):
@@ -290,11 +315,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
         }
 
     def _parse_last(self, row, pos):
-        """Parse the last column of a result row
-
-        - Search results include an uploader name
-        - Favorite listings show the date the gallery was favorited
-        """
+        """Parse the last column of a result row"""
         return "uploader", text.remove_html(
             text.extract(row, '<td class="itu">', '</td>', pos)[0])
 
@@ -315,10 +336,10 @@ class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
         self.url = self.root + "/favorites.php"
 
     def init(self):
-        # The first request to '/favorited.php' will return an empty list
-        # if the 's' cookie isn't set (maybe on some other conditions apply
-        # as well), so we make an "noop" request to get all the correct cookie
-        # values and to have a filled favorite list on the next request.
+        # The first request to '/favorites.php' will return an empty list
+        # if the 's' cookie isn't set (maybe on some other conditions as well),
+        # so we make a "noop" request to get all the correct cookie values
+        # and to get a filled favorite list on the next one.
         # TODO: proper cookie storage
         self.request(self.url)
         self.wait(1.5)
