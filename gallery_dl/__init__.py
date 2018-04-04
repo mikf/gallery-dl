@@ -27,7 +27,6 @@ from . import version, config, option, extractor, job, util, exception
 __version__ = version.__version__
 log = logging.getLogger("gallery-dl")
 
-
 def initialize_logging(loglevel, formatter):
     """Setup basic logging functionality before configfiles have been loaded"""
     # convert levelnames to lowercase
@@ -40,6 +39,18 @@ def initialize_logging(loglevel, formatter):
     root = logging.getLogger()
     root.setLevel(loglevel)
     root.addHandler(handler)
+
+
+def replace_std_streams(errors="replace"):
+    """Replace standard streams and set their error handlers to 'errors'"""
+    for name in ("stdout", "stdin", "stderr"):
+        stream = getattr(sys, name)
+        setattr(sys, name, stream.__class__(
+            stream.buffer,
+            errors=errors,
+            newline=stream.newlines,
+            line_buffering=stream.line_buffering,
+        ))
 
 
 def progress(urls, pformat):
@@ -142,6 +153,9 @@ def parse_inputfile(file):
 
 def main():
     try:
+        if sys.stdout.encoding.lower() != "utf-8":
+            replace_std_streams()
+
         parser = option.build_parser()
         args = parser.parse_args()
 

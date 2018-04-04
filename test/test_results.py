@@ -21,6 +21,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "imgyt",        # "Name or service not known"
     "loveisover",   # "Name or service not known"
     "luscious",     # order changed, "Jump to Page" is gone
     "mangahere",    # invalid SSL cert
