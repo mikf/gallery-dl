@@ -71,13 +71,15 @@ class TumblrExtractor(Extractor):
             self.log.warning("no valid post types selected")
 
     def items(self):
-        blog = self.api.info(self.blog)
+        blog = None
         yield Message.Version, 1
-        yield Message.Directory, blog
 
         for post in self.posts():
             if post["type"] not in self.types:
                 continue
+            if not blog:
+                blog = self.api.info(self.blog)
+                yield Message.Directory, blog
 
             reblog = "reblogged_from_id" in post
             if reblog and not self.reblogs:
@@ -258,11 +260,14 @@ class TumblrAPI():
             self.session = extractor.session
         self.posts_type = None
         self.extractor = extractor
+        self._blogcache = {}
 
     @memcache(keyarg=1)
     def info(self, blog):
         """Return general information about a blog"""
-        return self._call(blog, "info", {})["blog"]
+        if blog not in self._blogcache:
+            self._blogcache[blog] = self._call(blog, "info", {})["blog"]
+        return self._blogcache[blog]
 
     def posts(self, blog, params):
         """Retrieve published posts"""
@@ -271,6 +276,7 @@ class TumblrAPI():
             params["type"] = self.posts_type
         while True:
             data = self._call(blog, "posts", params)
+            self._blogcache[blog] = data["blog"]
             yield from data["posts"]
             params["offset"] += params["limit"]
             if params["offset"] >= data["total_posts"]:
