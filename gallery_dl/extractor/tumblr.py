@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from ..cache import memcache
 import re
 
 
@@ -79,7 +78,7 @@ class TumblrExtractor(Extractor):
                 continue
             if not blog:
                 blog = self.api.info(self.blog)
-                yield Message.Directory, blog
+                yield Message.Directory, blog.copy()
 
             reblog = "reblogged_from_id" in post
             if reblog and not self.reblogs:
@@ -245,29 +244,33 @@ class TumblrAPI():
     """Minimal interface for the Tumblr API v2"""
     API_KEY = "O3hU2tMi5e4Qs5t3vezEi6L0qRORJ5y9oUpSGsrWu8iA3UCc3B"
     API_SECRET = "sFdsK3PDdP2QpYMRAoq0oDnw0sFS24XigXmdfnaeNZpJpqAn03"
+    BLOG_CACHE = {}
 
     def __init__(self, extractor):
-        self.api_key = extractor.config("api-key", self.API_KEY)
+        api_key = extractor.config("api-key", self.API_KEY)
         api_secret = extractor.config("api-secret", self.API_SECRET)
         token = extractor.config("access-token")
         token_secret = extractor.config("access-token-secret")
-        if token and token_secret:
+
+        if api_key and api_secret and token and token_secret:
             self.session = util.OAuthSession(
                 extractor.session,
-                self.api_key, api_secret, token, token_secret)
+                api_key, api_secret,
+                token, token_secret,
+            )
             self.api_key = None
         else:
             self.session = extractor.session
+            self.api_key = api_key
+
         self.posts_type = None
         self.extractor = extractor
-        self._blogcache = {}
 
-    @memcache(keyarg=1)
     def info(self, blog):
         """Return general information about a blog"""
-        if blog not in self._blogcache:
-            self._blogcache[blog] = self._call(blog, "info", {})["blog"]
-        return self._blogcache[blog]
+        if blog not in self.BLOG_CACHE:
+            self.BLOG_CACHE[blog] = self._call(blog, "info", {})["blog"]
+        return self.BLOG_CACHE[blog]
 
     def posts(self, blog, params):
         """Retrieve published posts"""
@@ -276,7 +279,7 @@ class TumblrAPI():
             params["type"] = self.posts_type
         while True:
             data = self._call(blog, "posts", params)
-            self._blogcache[blog] = data["blog"]
+            self.BLOG_CACHE[blog] = data["blog"]
             yield from data["posts"]
             params["offset"] += params["limit"]
             if params["offset"] >= data["total_posts"]:
