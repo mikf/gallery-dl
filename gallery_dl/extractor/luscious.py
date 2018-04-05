@@ -9,7 +9,7 @@
 """Extract images from https://luscious.net/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 
 class LusciousAlbumExtractor(AsynchronousExtractor):
@@ -25,12 +25,12 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         (("https://luscious.net/c/hentai_manga/albums/"
           "okinami-no-koigokoro_277031/view/"), {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
-            "keyword": "e746a3771f4e14bfff81215232a12417d6351ce6",
+            "keyword": "5ab53959f25a468455f79149461d26547669e50e",
             "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
-            "url": "01e2d7dd6eecea0152610f2446a6b1d60519c8bd",
-            "keyword": "02624ff1097260e2a3c1b220afc92ea4c6b109b3",
+            "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
+            "keyword": "2aeb3b5e439c2fbc27c65d0dc17edb9a0f679add",
         }),
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", None),
         ("https://www.luscious.net/albums/okinami_277031/", None),
@@ -73,9 +73,16 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
     def get_images(self, page, extr=text.extract):
         """Collect image-urls and -metadata"""
         num = 1
-        pos = page.find('<div class="album_cover_item">')
+
+        if 'class="read-more-btn"' in page:
+            url = "{}/pictures/album/x_{}/sorted/oldest/page/1/".format(
+                self.root, self.gid)
+            page = self.request(url).text
+            pos = page.find('<div id="picture_page_')
+        else:
+            pos = page.find('<div class="album_cover_item">')
         url = extr(page, '<a href="', '"', pos)[0]
-        self._check_high_load(page, url)
+
         while url and not url.endswith("/more_like_this/"):
             page = self.request(self.root + url).text
 
@@ -88,7 +95,6 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
 
             imgid, pos = extr(url , '/id/', '/')
             url  , pos = extr(page, '<link rel="next" href="', '"')
-            self._check_high_load(page, url)
             name , pos = extr(page, '<h1 id="picture_title">', '</h1>', pos)
             _    , pos = extr(page, '<ul class="image_option_icons">', '', pos)
             iurl , pos = extr(page, '<li><a href="', '"', pos+100)
@@ -100,8 +106,3 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
                 "image_id": imgid,
             }
             num += 1
-
-    def _check_high_load(self, page, url):
-        if not url and "<h1>High Load</h1>" in page:
-            self.log.error('"High Load!" - unable to continue')
-            raise exception.StopExtraction()
