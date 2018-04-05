@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -34,16 +34,6 @@ def select():
         raise Exception("invalid output mode: " + omode)
 
 
-def safeprint(txt, **kwargs):
-    """Handle unicode errors and replace invalid characters"""
-    try:
-        print(txt, **kwargs)
-    except UnicodeEncodeError:
-        enc = sys.stdout.encoding
-        txt = txt.encode(enc, errors="replace").decode(enc)
-        print(txt, **kwargs)
-
-
 class NullOutput():
 
     def start(self, path):
@@ -54,9 +44,6 @@ class NullOutput():
 
     def success(self, path, tries):
         """Print a message indicating the completion of a download"""
-
-    def error(self, path, error, tries, max_tries):
-        """Print a message indicating an error during download"""
 
 
 class PipeOutput(NullOutput):
@@ -76,23 +63,13 @@ class TerminalOutput(NullOutput):
             self.width = shutil.get_terminal_size().columns - OFFSET
 
     def start(self, path):
-        safeprint(self.shorten("  " + path), end="", flush=True)
+        print(self.shorten("  " + path), end="", flush=True)
 
     def skip(self, path):
-        safeprint(self.shorten(CHAR_SKIP + path))
+        print(self.shorten(CHAR_SKIP + path))
 
     def success(self, path, tries):
-        print("\r", end="")
-        safeprint(self.shorten(CHAR_SUCCESS + path))
-
-    def error(self, path, error, tries, max_tries):
-        if tries <= 1 and path:
-            print("\r", end="")
-            safeprint(self.shorten(CHAR_ERROR + path))
-        if max_tries > 1:
-            error = "{} ({}/{})".format(error, tries, max_tries)
-        print("\r[Error] ", end="")
-        safeprint(error)
+        print("\r", self.shorten(CHAR_SUCCESS + path), sep="")
 
     def shorten(self, txt):
         """Reduce the length of 'txt' to the width of the terminal"""
@@ -117,25 +94,16 @@ class ColorOutput(TerminalOutput):
     def success(self, path, tries):
         print("\r\033[1;32m", self.shorten(path), "\033[0m", sep="")
 
-    def error(self, path, error, tries, max_tries):
-        if tries <= 1 and path:
-            print("\r\033[1;31m", self.shorten(path), sep="")
-        if max_tries > 1:
-            error = "{} ({}/{})".format(error, tries, max_tries)
-        print("\r\033[0;31m[Error]\033[0m", error)
-
 
 if os.name == "nt":
     ANSI = os.environ.get("TERM") == "ANSI"
     OFFSET = 1
     CHAR_SKIP = "# "
-    CHAR_ERROR = "! "
     CHAR_SUCCESS = "* "
     CHAR_ELLIPSIES = "..."
 else:
     ANSI = True
     OFFSET = 0
     CHAR_SKIP = "# "
-    CHAR_ERROR = "✖ "
     CHAR_SUCCESS = "✔ "
     CHAR_ELLIPSIES = "…"
