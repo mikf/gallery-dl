@@ -61,11 +61,18 @@ def solve_jschl(url, page):
             value = evaluate_expression(expr[vlength+2:])
             solution = func(solution, value)
         elif expr.startswith("a.value"):
-            return solution + len(urllib.parse.urlsplit(url).netloc)
+            solution += len(urllib.parse.urlsplit(url).netloc)
+            if ".toFixed(" in expr:
+                solution = "{:.10f}".format(solution)
+            return solution
 
 
 def evaluate_expression(expr):
     """Evaluate a Javascript expression for the challenge"""
+    if "/" in expr:
+        num, _, denom = expr.partition("/")
+        return evaluate_expression(num) / evaluate_expression(denom)
+
     stack = []
     ranges = []
     value = ""
