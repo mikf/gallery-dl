@@ -23,7 +23,7 @@ TRAVIS_SKIP = {
 BROKEN = {
     "imgyt",        # "Name or service not known"
     "loveisover",   # "Name or service not known"
-    "mangahere",    # invalid SSL cert
+    "pinterest",    # access_token invalid ?
     "puremashiro",  # online reader down
 }
 
