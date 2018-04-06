@@ -135,6 +135,7 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
         return self.parse_chapter_string(data)
 
     def get_images(self, page):
+        self.session.headers["Referer"] = None
         try:
             key = self.build_aes_key(page)
             return [

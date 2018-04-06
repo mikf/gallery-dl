@@ -63,7 +63,7 @@ def solve_jschl(url, page):
         elif expr.startswith("a.value"):
             solution += len(urllib.parse.urlsplit(url).netloc)
             if ".toFixed(" in expr:
-                solution = "{:.10f}".format(solution)
+                solution = "{:.10f}".format(solution).rstrip("0")
             return solution
 
 

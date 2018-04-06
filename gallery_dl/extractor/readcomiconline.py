@@ -89,8 +89,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
             "language": "English",
         }
 
-    @staticmethod
-    def get_images(page):
+    def get_images(self, page):
+        self.session.headers["Referer"] = None
         return [
             (url, None)
             for url in text.extract_iter(

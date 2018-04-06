@@ -150,7 +150,7 @@ class FlickrGalleryExtractor(FlickrExtractor):
     test = [(("https://www.flickr.com/photos/flickr/"
               "galleries/72157681572514792/"), {
         "url": "1e0e300fa5fe8c49ba5dfa7ccca0cb0da8a04f93",
-        "keyword": "29addd2523493cb3a83ea16c8c1439cbd2f2da97",
+        "keyword": "ba1f0e4bf5ee4e10071bdc272c19f015985cf055",
     })]
 
     def __init__(self, match):

@@ -69,6 +69,7 @@ class MangahereChapterExtractor(ChapterExtractor):
         ("http://www.mangahere.cc/manga/dongguo_xiaojie/c003.2/", {
             "keyword": "0c263b83f803524baa8717d2b4d841617aa8d775",
             "content": "dd8454469429c6c717cbc3cad228e76ef8c6e420",
+            "options": (("verify", False),),
         }),
         ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", None),
         ("http://m.mangahere.co/manga/dongguo_xiaojie/c003.2/", None),
