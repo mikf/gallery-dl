@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## 1.3.3 - 2018-04-06
+- Added extractors for
+  - `nhentai` search results
+  - `exhentai` search results and favorites
+  - `nijie` doujins and favorites
+- Improved metadata extraction for `exhentai` and `nijie`
+- Improved `tumblr` extractors by avoiding unnecessary API calls
+- Fixed Cloudflare DDoS protection bypass
+- Fixed errors when trying to print unencodable characters
 
 ## 1.3.2 - 2018-03-23
 - Added extractors for `artstation` albums, challenges and search results
