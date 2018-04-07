@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.3.3 - 2018-04-06
 - Added extractors for
   - `nhentai` search results

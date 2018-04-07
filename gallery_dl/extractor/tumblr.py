@@ -146,14 +146,20 @@ class TumblrExtractor(Extractor):
 
     @staticmethod
     def _prepare(url, post):
+        text.nameext_from_url(url, post)
         post["offset"] += 1
-        return Message.Url, url, text.nameext_from_url(url, post)
+        post["hash"] = post["name"].partition("_")[2]
+        return Message.Url, url, post
 
     @staticmethod
     def _prepare_image(url, post):
+        text.nameext_from_url(url, post)
         post["offset"] += 1
-        urls = _original_image(url)
-        return Message.Urllist, urls, text.nameext_from_url(url, post)
+
+        parts = post["name"].split("_")
+        post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
+
+        return Message.Urllist, _original_image(url), post
 
 
 class TumblrUserExtractor(TumblrExtractor):

@@ -103,11 +103,11 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
                r"/Manga/[^/?&#]+/[^/?&#]+\?id=(\d+)"]
     test = [
         ("http://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
-            "url": "4136bcd1c6cecbca8cc2bc965d54f33ef0a97cc0",
+            "url": "46e63fd63e9e16f19bc1e6c7a45dc060815642fd",
             "keyword": "4a3a9341d453541de0dbfa24cd6b2e3ed39c0182",
         }),
         ("http://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
-            "url": "de074848f6c1245204bb9214c12bcc3ecfd65019",
+            "url": "c26be8bf9c2abacee2076979d021634092cf38f1",
             "keyword": "ffc11b630da44fe67709ed0473756cf51b90a05c",
         }),
         ("http://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
