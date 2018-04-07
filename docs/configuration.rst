@@ -587,6 +587,18 @@ Description Extract images from reblogged posts.
 =========== =====
 
 
+extractor.tumblr.sort
+---------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Sort photos of a Photoset according to their original upload order.
+
+            Otherwise these photos will be returned in the order the blog owner
+            arranged them in.
+=========== =====
+
+
 extractor.tumblr.posts
 ----------------------
 =========== =====
