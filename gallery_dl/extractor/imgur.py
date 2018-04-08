@@ -53,9 +53,9 @@ class ImgurImageExtractor(ImgurExtractor):
     subcategory = "image"
     filename_fmt = "{category}_{hash}{title:?_//}.{extension}"
     archive_fmt = "{hash}"
-    pattern = [(r"(?:https?://)?(?:m\.|www\.)?imgur\.com/"
-                r"(?:gallery/)?((?!gallery)[^/?&#]{7})/?"),
-               (r"(?:https?://)?i\.imgur\.com/([^/?&#.]{5,7})\.")]
+    pattern = [(r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
+                r"/(?!gallery)(\w{7}|\w{5})"),
+               (r"(?:https?://)?i\.imgur\.com/(\w{7}|\w{5})[sbtmlh]?\.")]
     test = [
         ("https://imgur.com/21yMxCS", {
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
@@ -83,9 +83,6 @@ class ImgurImageExtractor(ImgurExtractor):
                 "width": "64",
             },
         }),
-        ("https://i.imgur.com/21yMxCS.png", {  # direct link
-            "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
-        }),
         ("http://imgur.com/0gybAXR", {  # gifv/mp4 video
             "url": "a2220eb265a55b0c95e0d3d721ec7665460e3fd7",
             "content": "a3c080e43f58f55243ab830569ba02309d59abfc",
@@ -93,9 +90,16 @@ class ImgurImageExtractor(ImgurExtractor):
         ("https://imgur.com/HjoXJAd", {  # url ends with '.jpg?1'
             "url": "73f361b50753ab25da64160aa50bc5d139480d45",
         }),
-        ("https://imgur.com/zzzzzzz", {
+        ("https://imgur.com/zzzzzzz", {  # not found
             "exception": exception.NotFoundError,
         }),
+        ("https://www.imgur.com/21yMxCS", None),  # www
+        ("https://m.imgur.com/21yMxCS", None),  # mobile
+        ("https://imgur.com/zxaY6", None),  # 5 character key
+        ("https://i.imgur.com/21yMxCS.png", None),  # direct link
+        ("https://i.imgur.com/21yMxCSh.png", None),  # direct link thumbnail
+        ("https://i.imgur.com/zxaY6.gif", None),  # direct link (short)
+        ("https://i.imgur.com/zxaY6s.gif", None),  # direct link (short; thumb)
     ]
 
     def items(self):
@@ -113,8 +117,8 @@ class ImgurAlbumExtractor(ImgurExtractor):
     directory_fmt = ["{category}", "{album[hash]}{album[title]:? - //}"]
     filename_fmt = "{category}_{album[hash]}_{num:>03}_{hash}.{extension}"
     archive_fmt = "{album[hash]}_{hash}"
-    pattern = [r"(?:https?://)?(?:m\.|www\.)?imgur\.com/"
-               r"(?:a|gallery)/([^/?&#]{5})/?$"]
+    pattern = [r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
+               r"/(?:a|gallery)/(\w{5})"]
     test = [
         ("https://imgur.com/a/TcBmP", {
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
@@ -151,6 +155,8 @@ class ImgurAlbumExtractor(ImgurExtractor):
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.NotFoundError,
         }),
+        ("https://www.imgur.com/a/TcBmP", None),  # www
+        ("https://m.imgur.com/a/TcBmP", None),  # mobile
     ]
 
     def items(self):
