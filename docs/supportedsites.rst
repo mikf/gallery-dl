@@ -84,7 +84,7 @@ Acidimg              https://acidimg.cc/                 individual Images
 Imagetwist           https://imagetwist.com/             individual Images
 Imagevenue           http://imagevenue.com/              individual Images
 Imgspice             https://imgspice.com/               individual Images
-Imgyt                https://img.yt/                     individual Images
+Imxto                https://imx.to/                     individual Images
 Pixhost              https://pixhost.org/                individual Images
 Postimg              https://postimg.org/                individual Images
 Turboimagehost       https://turboimagehost.com/         individual Images
