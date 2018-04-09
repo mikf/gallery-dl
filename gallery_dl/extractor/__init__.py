@@ -49,7 +49,6 @@ modules = [
     "kissmanga",
     "komikcast",
     "konachan",
-    "loveisover",
     "luscious",
     "mangadex",
     "mangafox",
