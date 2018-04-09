@@ -21,7 +21,6 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "loveisover",   # "Name or service not known"
     "pinterest",    # access_token invalid ?
     "puremashiro",  # online reader down
 }
