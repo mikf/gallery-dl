@@ -23,6 +23,7 @@ class ImagehostImageExtractor(Extractor):
     method = "post"
     params = "simple"
     cookies = None
+    encoding = None
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -45,51 +46,91 @@ class ImagehostImageExtractor(Extractor):
             self.method = "get"
 
     def items(self):
-        page = self.request(self.url, method=self.method, data=self.params,
-                            cookies=self.cookies).text
+        page = self.request(
+            self.url,
+            method=self.method,
+            data=self.params,
+            cookies=self.cookies,
+            encoding=self.encoding,
+        ).text
+
         url, filename = self.get_info(page)
         data = text.nameext_from_url(filename, {"token": self.token})
         if self.https and url.startswith("http:"):
             url = "https:" + url[5:]
+
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
 
     def get_info(self, page):
         """Find image-url and string to get filename from"""
-        return "url", "filename"
 
 
-class ImgytImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from img.yt"""
-    category = "imgyt"
-    pattern = [r"(?:https?://)?((?:www\.)?img\.yt/img-([a-z0-9]+)\.html)"]
+class ImxtoImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imx.to"""
+    category = "imxto"
+    pattern = [r"(?:https?://)?(?:www\.)?(imx\.to/i/(\w+))",
+               r"(?:https?://)?(?:www\.)?((?:imx\.to|img\.yt)"
+               r"/img-([a-z0-9]+)\.html)"]
     test = [
-        ("https://img.yt/img-57a2050547b97.html", {
-            "url": "6801fac1ff8335bd27a1665ad27ad64cace2cd84",
-            "keyword": "7548cc9915f90f5d7ffbafa079085457ae34562c",
+        ("https://imx.to/i/1qdeva", {  # new-style URL
+            "url": "ab2173088a6cdef631d7a47dec4a5da1c6a00130",
+            "keyword": "7bb48a2327561ae04ea7a6d4e18e715379e2f497",
+            "content": "0c8768055e4e20e7c7259608b67799171b691140",
+        }),
+        ("https://imx.to/img-57a2050547b97.html", {  # old-style URL
+            "url": "a83fe6ef1909a318c4d49fcf2caf62f36c3f9204",
+            "keyword": "451ad3d4745489c2e663acb1281d89c36ada940a",
             "content": "54592f2635674c25677c6872db3709d343cdf92f",
         }),
-        ("https://img.yt/img-57a2050547b98.html", {
+        ("https://img.yt/img-57a2050547b97.html", {  # img.yt domain
+            "url": "a83fe6ef1909a318c4d49fcf2caf62f36c3f9204",
+        }),
+        ("https://imx.to/img-57a2050547b98.html", {
             "exception": exception.NotFoundError,
         }),
     ]
     https = True
+    encoding = "utf-8"
+
+    def __init__(self, match):
+        ImagehostImageExtractor.__init__(self, match)
+        if "/img-" in self.url:
+            self.url = self.url.replace("img.yt", "imx.to")
+            self.urlext = True
+        else:
+            self.urlext = False
+
+    def get_info(self, page):
+        url, pos = text.extract(
+            page, '<div style="text-align:center;"><a href="', '"')
+        if not url:
+            raise exception.NotFoundError("image")
+        filename, pos = text.extract(page, ' title="', '"', pos)
+        if self.urlext and filename:
+            filename += splitext(url)[1]
+        return url, filename or url
+
+
+class AcidimgImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from acidimg.cc"""
+    category = "acidimg"
+    pattern = [r"(?:https?://)?((?:www\.)?acidimg\.cc/img-([a-z0-9]+)\.html)"]
+    test = [("https://acidimg.cc/img-5acb6b9de4640.html", {
+        "url": "f132a630006e8d84f52d59555191ed82b3b64c04",
+        "keyword": "183098c59d9244650f666b6cb4df96d76d2aeae8",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })]
+    https = True
+    encoding = "utf-8"
 
     def get_info(self, page):
         url, pos = text.extract(page, "<img class='centred' src='", "'")
         if not url:
             raise exception.NotFoundError("image")
         filename, pos = text.extract(page, " alt='", "'", pos)
-        filename = (filename + splitext(url)[1]) if filename else url
-        return url, filename
-
-
-class AcidimgImageExtractor(ImgytImageExtractor):
-    """Extractor for single images from acidimg.cc"""
-    category = "acidimg"
-    pattern = [r"(?:https?://)?((?:www\.)?acidimg\.cc/img-([a-z0-9]+)\.html)"]
-    test = []
+        return url, (filename + splitext(url)[1]) if filename else url
 
 
 class ImagevenueImageExtractor(ImagehostImageExtractor):
