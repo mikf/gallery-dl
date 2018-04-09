@@ -63,7 +63,6 @@ class TumblrExtractor(Extractor):
         self.inline = self.config("inline", False)
         self.reblogs = self.config("reblogs", True)
         self.external = self.config("external", False)
-        self.sort_photos = self.config("sort", False)
 
         if len(self.types) == 1:
             self.api.posts_type = next(iter(self.types))
@@ -95,9 +94,6 @@ class TumblrExtractor(Extractor):
             if "photos" in post:  # type "photo" or "link"
                 photos = post["photos"]
                 del post["photos"]
-
-                if self.sort_photos and len(photos) > 1:
-                    photos.sort(key=self._get_tumblr_offset)
 
                 for photo in photos:
                     post["photo"] = photo
@@ -164,15 +160,6 @@ class TumblrExtractor(Extractor):
         post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
 
         return Message.Urllist, _original_image(url), post
-
-    @staticmethod
-    def _get_tumblr_offset(photo):
-        """Return the offset embedded in a photo's URL"""
-        return util.safe_int(
-            photo["original_size"]["url"]
-            .rpartition("_")[0]
-            .rpartition("o")[2]
-        )
 
 
 class TumblrUserExtractor(TumblrExtractor):
