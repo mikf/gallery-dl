@@ -79,7 +79,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
                 "height": util.safe_int(height),
             })
             for url, width, height in re.findall(
-                r"\s+src=[\"']([^\"']+)[\"']"
+                r"<img[^>]*? src=[\"']([^\"']+)[\"']"
                 r"(?:\s+data-original-width=[\"']([^\"']+)[\"'])?"
                 r"(?:\s+data-original-height=[\"']([^\"']+)[\"'])?",
                 readerarea
