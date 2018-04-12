@@ -255,6 +255,14 @@ class TestOther(unittest.TestCase):
         self.assertCountEqual(
             util.advance(util.advance(items, 1), 2), range(3, 5))
 
+    def test_raises(self):
+        self.assertRaises(Exception, util.raises(Exception()))
+
+        func = util.raises(ValueError(1))
+        self.assertRaises(Exception, func)
+        self.assertRaises(Exception, func)
+        self.assertRaises(Exception, func)
+
     def test_combine_dict(self):
         self.assertEqual(
             util.combine_dict({}, {}),

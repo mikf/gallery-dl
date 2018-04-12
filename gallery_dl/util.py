@@ -118,6 +118,13 @@ def advance(iterable, num):
     return iterator
 
 
+def raises(obj):
+    """Returns a function that raises 'obj' as exception"""
+    def wrap():
+        raise obj
+    return wrap
+
+
 def combine_dict(a, b):
     """Recursively combine the contents of b into a"""
     for key, value in b.items():
@@ -249,6 +256,7 @@ class FilterPredicate():
         "safe_int": safe_int,
         "urlsplit": urllib.parse.urlsplit,
         "datetime": datetime.datetime,
+        "abort": raises(exception.StopExtraction()),
         "re": re,
     }
 
@@ -258,6 +266,8 @@ class FilterPredicate():
     def __call__(self, url, kwds):
         try:
             return eval(self.codeobj, self.globalsdict, kwds)
+        except exception.GalleryDLException:
+            raise
         except Exception as exc:
             raise exception.FilterError(exc)
 
