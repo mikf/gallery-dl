@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 import re
+import time
 
 
 def _original_image(url):
@@ -270,7 +271,7 @@ class TumblrAPI():
             self.api_key = api_key
 
         self.posts_type = None
-        self.extractor = extractor
+        self.log = extractor.log
 
     def info(self, blog):
         """Return general information about a blog"""
@@ -307,15 +308,37 @@ class TumblrAPI():
         url = "https://api.tumblr.com/v2/blog/{}/{}".format(
             blog, endpoint)
 
-        response = self.session.get(url, params=params).json()
-        status = response["meta"]["status"]
+        response = self.session.get(url, params=params)
+        data = response.json()
+        status = data["meta"]["status"]
 
-        if status == 200:
-            return response["response"]
+        if 200 <= status < 400:
+            return data["response"]
         elif status == 403:
             raise exception.AuthorizationError()
         elif status == 404:
             raise exception.NotFoundError("user or post")
-        else:
-            self.extractor.log.error(response)
-            raise exception.StopExtraction()
+        elif status == 429:
+
+            # daily rate limit
+            if response.headers.get("x-ratelimit-perday-remaining") == "0":
+                self.log.error(
+                    "Daily API rate limit exceeded: aborting; "
+                    "%s seconds until rate limit reset",
+                    response.headers.get("x-ratelimit-perday-reset"),
+                )
+                raise exception.StopExtraction()
+
+            # hourly rate limit
+            reset = response.headers.get("x-ratelimit-perhour-reset")
+            if reset:
+                self.log.info(
+                    "Hourly API rate limit exceeded; "
+                    "waiting %s seconds for rate limit reset",
+                    reset,
+                )
+                time.sleep(int(reset) + 1)
+                return self._call(blog, endpoint, params)
+
+        self.log.error(data)
+        raise exception.StopExtraction()
