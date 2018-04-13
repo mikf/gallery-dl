@@ -130,7 +130,11 @@ def extract_iter(txt, begin, end, pos=0):
 
 def parse_query(qs):
     """Parse a query string into key-value pairs"""
-    return {key: vlist[0] for key, vlist in urllib.parse.parse_qs(qs).items()}
+    result = {}
+    for key, value in urllib.parse.parse_qsl(qs):
+        if key not in result:
+            result[key] = value
+    return result
 
 
 if os.name == "nt":

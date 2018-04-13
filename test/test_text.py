@@ -123,6 +123,37 @@ class TestText(unittest.TestCase):
         result = ["c", "b", "a", "d"]
         self.assertEqual(list(text.extract_iter(txt, "[", "]")), result)
 
+    def test_parse_query(self):
+        # standard stuff
+        self.assertEqual(
+            text.parse_query(""), {})
+        self.assertEqual(
+            text.parse_query("foo=1"), {"foo": "1"})
+        self.assertEqual(
+            text.parse_query("foo=1&bar=2"), {"foo": "1", "bar": "2"})
+
+        # missing value
+        self.assertEqual(
+            text.parse_query("bar"), {})
+        self.assertEqual(
+            text.parse_query("foo=1&bar"), {"foo": "1"})
+        self.assertEqual(
+            text.parse_query("foo=1&bar&baz=3"), {"foo": "1", "baz": "3"})
+
+        # keys with identical names
+        self.assertEqual(
+            text.parse_query("foo=1&foo=2"), {"foo": "1"})
+        self.assertEqual(
+            text.parse_query("foo=1&bar=2&foo=3&bar=4"),
+            {"foo": "1", "bar": "2"},
+        )
+
+        # non-string arguments
+        self.assertEqual(text.parse_query(()), {})
+        self.assertEqual(text.parse_query([]), {})
+        self.assertEqual(text.parse_query({}), {})
+        self.assertEqual(text.parse_query(None), {})
+
 
 if __name__ == '__main__':
     unittest.main()
