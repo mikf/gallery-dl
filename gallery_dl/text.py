@@ -15,14 +15,22 @@ import html
 import urllib.parse
 
 
-INVALID_XML_CHARS = (1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18,
-                     19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31)
+INVALID_XML_CHARS = (
+    "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07",
+    "\x08", "\x0b", "\x0c", "\x0e", "\x0f", "\x10", "\x11", "\x12",
+    "\x13", "\x14", "\x15", "\x16", "\x17", "\x18", "\x19", "\x1a",
+    "\x1b", "\x1c", "\x1d", "\x1e", "\x1f",
+)
 
 
 def clean_xml(xmldata, repl=""):
-    """Replace/Remove invalid control characters in XML data"""
+    """Replace/Remove invalid control characters in 'xmldata'"""
+    if not isinstance(xmldata, str):
+        try:
+            xmldata = "".join(xmldata)
+        except TypeError:
+            return ""
     for char in INVALID_XML_CHARS:
-        char = chr(char)
         if char in xmldata:
             xmldata = xmldata.replace(char, repl)
     return xmldata
