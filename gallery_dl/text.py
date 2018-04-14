@@ -36,17 +36,20 @@ def clean_xml(xmldata, repl=""):
     return xmldata
 
 
-def remove_html(text):
+def remove_html(txt):
     """Remove html-tags from a string"""
-    return " ".join(re.sub("<[^>]+?>", " ", text).split())
+    try:
+        return " ".join(re.sub("<[^>]+>", " ", txt).split())
+    except TypeError:
+        return ""
 
 
 def filename_from_url(url):
     """Extract the last part of an url to use as a filename"""
     try:
         return urllib.parse.urlsplit(url).path.rpartition("/")[2]
-    except ValueError:
-        return url
+    except (TypeError, AttributeError):
+        return ""
 
 
 def nameext_from_url(url, data=None):
@@ -64,7 +67,7 @@ def clean_path_windows(path):
     try:
         return re.sub(r'[<>:"\\/|?*]', "_", path)
     except TypeError:
-        return path
+        return ""
 
 
 def clean_path_posix(path):
@@ -72,7 +75,7 @@ def clean_path_posix(path):
     try:
         return path.replace("/", "_")
     except AttributeError:
-        return path
+        return ""
 
 
 def shorten_path(path, limit=255, encoding=sys.getfilesystemencoding()):
@@ -112,7 +115,7 @@ def extract(txt, begin, end, pos=0):
         first = txt.index(begin, pos) + len(begin)
         last = txt.index(end, first)
         return txt[first:last], last+len(end)
-    except ValueError:
+    except (ValueError, TypeError, AttributeError):
         return None, pos
 
 
@@ -139,9 +142,12 @@ def extract_iter(txt, begin, end, pos=0):
 def parse_query(qs):
     """Parse a query string into key-value pairs"""
     result = {}
-    for key, value in urllib.parse.parse_qsl(qs):
-        if key not in result:
-            result[key] = value
+    try:
+        for key, value in urllib.parse.parse_qsl(qs):
+            if key not in result:
+                result[key] = value
+    except AttributeError:
+        pass
     return result
 
 

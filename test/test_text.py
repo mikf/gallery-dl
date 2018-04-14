@@ -13,6 +13,9 @@ import sys
 from gallery_dl import text
 
 
+INVALID = ((), [], {}, None, 1, 2.3)
+
+
 class TestText(unittest.TestCase):
 
     def test_clean_xml(self, f=text.clean_xml):
@@ -35,59 +38,85 @@ class TestText(unittest.TestCase):
         self.assertEqual(f(value), "\t\n\r")
 
         # 'invalid' arguments
-        for value in ((), [], {}, None, 1, 2.3):
+        for value in INVALID:
             self.assertEqual(f(value), "")
 
-    def test_remove_html(self):
-        cases = (
-            "Hello World.",
-            " Hello  World. ",
-            "Hello<br/>World.",
-            "<div><span class='a'>Hello</span><strong>World.</strong></div>"
-        )
+    def test_remove_html(self, f=text.remove_html):
         result = "Hello World."
-        for case in cases:
-            self.assertEqual(text.remove_html(case), result)
 
-    def test_filename_from_url(self):
-        cases = (
-            "http://example.org/v2/filename.ext",
-            "http://example.org/v2/filename.ext?param=value#fragment",
-            "example.org/filename.ext",
-            "/filename.ext",
-            "filename.ext",
-        )
+        # standard usage
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("Hello World."), result)
+        self.assertEqual(f(" Hello  World.  "), result)
+        self.assertEqual(f("Hello<br/>World."), result)
+        self.assertEqual(
+            f("<div><b class='a'>Hello</b><i>World.</i></div>"), result)
+
+        # empty HTML
+        self.assertEqual(f("<div></div>"), "")
+        self.assertEqual(f(" <div>   </div> "), "")
+
+        # malformed HTML
+        self.assertEqual(f("<div</div>"), "")
+        self.assertEqual(f("<div<Hello World.</div>"), "")
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value), "")
+
+    def test_filename_from_url(self, f=text.filename_from_url):
         result = "filename.ext"
-        for case in cases:
-            self.assertEqual(text.filename_from_url(case), result)
 
-    def test_nameext_from_url(self):
-        cases = (
-            "http://example.org/v2/filename.ext",
-            "http://example.org/v2/filename.ext?param=value#fragment",
-            "example.org/filename.ext",
-            "/filename.ext",
-            "filename.ext",
-        )
-        result = {
-            "filename" : "filename.ext",
-            "name"     : "filename",
-            "extension": "ext",
-        }
-        for case in cases:
-            self.assertEqual(text.nameext_from_url(case), result)
+        # standard usage
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("filename.ext"), result)
+        self.assertEqual(f("/filename.ext"), result)
+        self.assertEqual(f("example.org/filename.ext"), result)
+        self.assertEqual(f("http://example.org/v2/filename.ext"), result)
+        self.assertEqual(
+            f("http://example.org/v2/filename.ext?param=value#frag"), result)
 
-    def test_clean_path(self):
-        cases = {
-            "Hello World." : ("Hello World.", "Hello World."),
-            "Hello/World/.": ("Hello_World_.", "Hello_World_."),
-            r'<Hello>:|"World\*?': (
-                '_Hello____World___', r'<Hello>:|"World\*?'
-            ),
-        }
-        for case, result in cases.items():
-            self.assertEqual(text.clean_path_windows(case), result[0])
-            self.assertEqual(text.clean_path_posix(case), result[1])
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value), "")
+
+    def test_nameext_from_url(self, f=text.nameext_from_url):
+        empty = {"filename": "", "name": "", "extension": ""}
+        result = {"filename": "filename.ext",
+                  "name": "filename", "extension": "ext"}
+
+        # standard usage
+        self.assertEqual(f(""), empty)
+        self.assertEqual(f("filename.ext"), result)
+        self.assertEqual(f("/filename.ext"), result)
+        self.assertEqual(f("example.org/filename.ext"), result)
+        self.assertEqual(f("http://example.org/v2/filename.ext"), result)
+        self.assertEqual(
+            f("http://example.org/v2/filename.ext?param=value#frag"), result)
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value), empty)
+
+    def test_clean_path_windows(self, f=text.clean_path_windows):
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("foo"), "foo")
+        self.assertEqual(f("foo/bar"), "foo_bar")
+        self.assertEqual(f("foo<>:\"\\/|?*bar"), "foo_________bar")
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value), "")
+
+    def test_clean_path_posix(self, f=text.clean_path_posix):
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("foo"), "foo")
+        self.assertEqual(f("foo/bar"), "foo_bar")
+        self.assertEqual(f("foo<>:\"\\/|?*bar"), "foo<>:\"\\_|?*bar")
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value), "")
 
     def test_shorten_path(self):
         cases = {
@@ -115,68 +144,104 @@ class TestText(unittest.TestCase):
             self.assertEqual(fname, result)
             self.assertTrue(len(fname.encode(enc)) <= 255)
 
-    def test_extract(self):
-        cases = {
-            ("<a><b>", "<", ">")   : ("a", 3),
-            ("<a><b>", "X", ">")   : (None, 0),
-            ("<a><b>", "<", "X")   : (None, 0),
-            ("<a><b>", "<", ">", 3): ("b", 6),
-            ("<a><b>", "X", ">", 3): (None, 3),
-            ("<a><b>", "<", "X", 3): (None, 3),
-        }
-        for case, result in cases.items():
-            self.assertEqual(text.extract(*case), result)
+    def test_extract(self, f=text.extract):
+        txt = "<a><b>"
+        self.assertEqual(f(txt, "<", ">"), ("a", 3))
+        self.assertEqual(f(txt, "X", ">"), (None, 0))
+        self.assertEqual(f(txt, "<", "X"), (None, 0))
 
-    def test_extract_all(self):
+        # 'pos' argument
+        for i in range(1, 4):
+            self.assertEqual(f(txt, "<", ">", i), ("b", 6))
+        for i in range(4, 10):
+            self.assertEqual(f(txt, "<", ">", i), (None, i))
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value   , "<"  , ">")  , (None, 0))
+            self.assertEqual(f(txt, value, ">")  , (None, 0))
+            self.assertEqual(f(txt, "<"  , value), (None, 0))
+
+    def test_extract_all(self, f=text.extract_all):
         txt = "[c][b][a]: xyz! [d][e"
-        result = ({
-            "A": "a",
-            "B": "b",
-            "X": "xyz",
-            "E": "xtra",
-        }, 15)
-        self.assertEqual(text.extract_all(txt, (
-            (None, "[", "]"),
-            ("B" , "[", "]"),
-            ("A" , "[", "]"),
-            ("X" , ": ", "!"),
-        ), values={"E": "xtra"}), result)
 
-    def test_extract_iter(self):
+        self.assertEqual(
+            f(txt, ()), ({}, 0))
+        self.assertEqual(
+            f(txt, (("C", "[", "]"), ("B", "[", "]"), ("A", "[", "]"))),
+            ({"A": "a", "B": "b", "C": "c"}, 9),
+        )
+
+        # 'None' as field name
+        self.assertEqual(
+            f(txt, ((None, "[", "]"), (None, "[", "]"), ("A", "[", "]"))),
+            ({"A": "a"}, 9),
+        )
+        self.assertEqual(
+            f(txt, ((None, "[", "]"), (None, "[", "]"), (None, "[", "]"))),
+            ({}, 9),
+        )
+
+        # failed matches
+        self.assertEqual(
+            f(txt, (("C", "[", "]"), ("X", "X", "X"), ("B", "[", "]"))),
+            ({"B": "b", "C": "c", "X": None}, 6),
+        )
+
+        # 'pos' argument
+        self.assertEqual(
+            f(txt, (("B", "[", "]"), ("A", "[", "]")), pos=1),
+            ({"A": "a", "B": "b"}, 9),
+        )
+
+        # 'values' argument
+        self.assertEqual(
+            f(txt, (("C", "[", "]"),), values={"A": "a", "B": "b"}),
+            ({"A": "a", "B": "b", "C": "c"}, 3),
+        )
+
+        vdict = {}
+        rdict, pos = f(txt, (), values=vdict)
+        self.assertIs(vdict, rdict)
+
+    def test_extract_iter(self, f=text.extract_iter):
         txt = "[c][b][a]: xyz! [d][e"
-        result = ["c", "b", "a", "d"]
-        self.assertEqual(list(text.extract_iter(txt, "[", "]")), result)
 
-    def test_parse_query(self):
-        # standard stuff
+        def g(*args):
+            return list(f(*args))
+
         self.assertEqual(
-            text.parse_query(""), {})
+            g("", "[", "]"), [])
         self.assertEqual(
-            text.parse_query("foo=1"), {"foo": "1"})
+            g("[a]", "[", "]"), ["a"])
         self.assertEqual(
-            text.parse_query("foo=1&bar=2"), {"foo": "1", "bar": "2"})
+            g(txt, "[", "]"), ["c", "b", "a", "d"])
+        self.assertEqual(
+            g(txt, "X", "X"), [])
+        self.assertEqual(
+            g(txt, "[", "]", 6), ["a", "d"])
+
+    def test_parse_query(self, f=text.parse_query):
+        # standard usage
+        self.assertEqual(f(""), {})
+        self.assertEqual(f("foo=1"), {"foo": "1"})
+        self.assertEqual(f("foo=1&bar=2"), {"foo": "1", "bar": "2"})
 
         # missing value
-        self.assertEqual(
-            text.parse_query("bar"), {})
-        self.assertEqual(
-            text.parse_query("foo=1&bar"), {"foo": "1"})
-        self.assertEqual(
-            text.parse_query("foo=1&bar&baz=3"), {"foo": "1", "baz": "3"})
+        self.assertEqual(f("bar"), {})
+        self.assertEqual(f("foo=1&bar"), {"foo": "1"})
+        self.assertEqual(f("foo=1&bar&baz=3"), {"foo": "1", "baz": "3"})
 
         # keys with identical names
+        self.assertEqual(f("foo=1&foo=2"), {"foo": "1"})
         self.assertEqual(
-            text.parse_query("foo=1&foo=2"), {"foo": "1"})
-        self.assertEqual(
-            text.parse_query("foo=1&bar=2&foo=3&bar=4"),
+            f("foo=1&bar=2&foo=3&bar=4"),
             {"foo": "1", "bar": "2"},
         )
 
-        # non-string arguments
-        self.assertEqual(text.parse_query(()), {})
-        self.assertEqual(text.parse_query([]), {})
-        self.assertEqual(text.parse_query({}), {})
-        self.assertEqual(text.parse_query(None), {})
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value), {})
 
 
 if __name__ == '__main__':
