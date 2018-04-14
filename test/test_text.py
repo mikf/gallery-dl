@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,34 @@
 
 import unittest
 import sys
-import gallery_dl.text as text
+
+from gallery_dl import text
 
 
 class TestText(unittest.TestCase):
+
+    def test_clean_xml(self, f=text.clean_xml):
+        # standard usage
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("foo"), "foo")
+        self.assertEqual(f("\tfoo\nbar\r"), "\tfoo\nbar\r")
+        self.assertEqual(f("<foo>\ab\ba\fr\v</foo>"), "<foo>bar</foo>")
+
+        # 'repl' argument
+        repl = "#"
+        self.assertEqual(f("", repl), "")
+        self.assertEqual(f("foo", repl), "foo")
+        self.assertEqual(f("\tfoo\nbar\r", repl), "\tfoo\nbar\r")
+        self.assertEqual(
+            f("<foo>\ab\ba\fr\v</foo>", repl), "<foo>#b#a#r#</foo>")
+
+        # removal of all illegal control characters
+        value = "".join(chr(x) for x in range(32))
+        self.assertEqual(f(value), "\t\n\r")
+
+        # 'invalid' arguments
+        for value in ((), [], {}, None, 1, 2.3):
+            self.assertEqual(f(value), "")
 
     def test_remove_html(self):
         cases = (
