@@ -52,8 +52,8 @@ class TumblrExtractor(Extractor):
     """Base class for tumblr extractors"""
     category = "tumblr"
     directory_fmt = ["{category}", "{name}"]
-    filename_fmt = "{category}_{blog_name}_{id}o{offset}.{extension}"
-    archive_fmt = "{id}_{offset}"
+    filename_fmt = "{category}_{blog_name}_{id}_{num:>02}.{extension}"
+    archive_fmt = "{id}_{num}"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -87,7 +87,7 @@ class TumblrExtractor(Extractor):
             post["reblogged"] = reblog
 
             post["blog"] = blog
-            post["offset"] = 0
+            post["num"] = 0
 
             if "trail" in post:
                 del post["trail"]
@@ -148,14 +148,14 @@ class TumblrExtractor(Extractor):
     @staticmethod
     def _prepare(url, post):
         text.nameext_from_url(url, post)
-        post["offset"] += 1
+        post["num"] += 1
         post["hash"] = post["name"].partition("_")[2]
         return Message.Url, url, post
 
     @staticmethod
     def _prepare_image(url, post):
         text.nameext_from_url(url, post)
-        post["offset"] += 1
+        post["num"] += 1
 
         parts = post["name"].split("_")
         post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
@@ -237,7 +237,7 @@ class TumblrLikesExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user by tag"""
     subcategory = "likes"
     directory_fmt = ["{category}", "{name}", "likes"]
-    archive_fmt = "f_{blog[name]}_{id}_{offset}"
+    archive_fmt = "f_{blog[name]}_{id}_{num}"
     pattern = [BASE_PATTERN + r"/likes"]
     test = [("http://mikf123.tumblr.com/likes", {
         "count": 1,
