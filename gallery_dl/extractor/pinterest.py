@@ -135,8 +135,8 @@ class PinterestPinitExtractor(PinterestExtractor):
 class PinterestAPI():
     """Minimal interface for the pinterest API"""
 
-    def __init__(self, extractor, access_token="AV2U9Oe6dyC2vfPugUnBvJ7Duxg9"
-                                               "FHCJPXPZIvRDXv9hvwBALwAAAAA"):
+    def __init__(self, extractor, access_token="AfyIXxi1MJ6et0NlIl_vBchHbex-"
+                                               "FSWylPyr2GJE2uu3W8A97QAAAAA"):
         access_token = extractor.config("access-token", access_token)
         self.session = extractor.session
         self.session.params["access_token"] = access_token
