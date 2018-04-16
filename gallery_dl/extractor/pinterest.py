@@ -134,6 +134,9 @@ class PinterestPinitExtractor(PinterestExtractor):
 
 class PinterestAPI():
     """Minimal interface for the pinterest API"""
+    CLIENT_ID = "4959725425749142746"
+    CLIENT_SECRET = ("2ea77dc64ca02974a728e46c5a9d2adf"
+                     "cdd42f4d4ffb40ad064072165ad4b10d")
 
     def __init__(self, extractor, access_token="AfyIXxi1MJ6et0NlIl_vBchHbex-"
                                                "FSWylPyr2GJE2uu3W8A97QAAAAA"):

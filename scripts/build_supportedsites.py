@@ -88,6 +88,7 @@ AUTH_MAP = {
     "flickr"     : "Optional (OAuth)",
     "idolcomplex": "Optional",
     "nijie"      : "Required",
+    "pinterest"  : "Optional (OAuth)",
     "pixiv"      : "Required",
     "reddit"     : "Optional (OAuth)",
     "sankaku"    : "Optional",

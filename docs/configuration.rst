@@ -788,7 +788,9 @@ extractor.deviantart.client-id & .client-secret
 -----------------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and visit DeviantArt's `Applications & Keys`_ section
+How To      - login and visit DeviantArt's
+              `Applications & Keys <https://www.deviantart.com/developers/apps>`__
+              section
             - click "Register your Application"
             - click "Save" (top right; default settings are fine)
             - copy ``client_id`` and ``client_secret`` of your new "Untitled"
@@ -800,7 +802,8 @@ extractor.flickr.api-key & .api-secret
 --------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and `Create an App`_ in Flickr's `App Garden`_
+How To      - login and `Create an App <https://www.flickr.com/services/apps/create/apply/>`__
+              in Flickr's `App Garden <https://www.flickr.com/services/>`__
             - click "APPLY FOR A NON-COMMERCIAL KEY"
             - fill out the form with a random name and description
               and click "SUBMIT"
@@ -817,11 +820,19 @@ How To
 =========== =====
 
 
-extractor.pinterest.access-token
---------------------------------
+extractor.pinterest.client-id & .secret
+---------------------------------------
 =========== =====
 Type        ``string``
-How To
+How To      - login and visit Pinterest's
+              `Apps <https://developers.pinterest.com/apps/>`__ section
+            - click "Create app"
+            - choose a random name and description and click "Create"
+            - scroll down and set a Site URL (e.g. https://example.org/)
+              and allow https://mikf.github.io/gallery-dl/oauth-redirect.html
+              as Redirect URI
+            - scroll back up again, copy the "App ID" and "App secret" values
+              and put them in your configuration file
 =========== =====
 
 
@@ -829,7 +840,8 @@ extractor.reddit.client-id & .user-agent
 ----------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and visit the apps_ section of your account's preferences
+How To      - login and visit the `apps <https://www.reddit.com/prefs/apps/>`__
+              section of your account's preferences
             - click the "are you a developer? create an app..." button
             - fill out the form, choose "installed app", preferably set
               "http://localhost:6414/" as "redirect uri" and finally click
@@ -838,7 +850,8 @@ How To      - login and visit the apps_ section of your account's preferences
               "installed app") and put it in your configuration file
             - use "``Python:<application name>:v1.0 (by /u/<username>)``" as
               user-agent and replace ``<application name>`` and ``<username>``
-              accordingly (see Reddit's `API access rules`_)
+              accordingly (see Reddit's
+              `API access rules <https://github.com/reddit/reddit/wiki/API>`__)
 =========== =====
 
 
@@ -846,7 +859,8 @@ extractor.tumblr.api-key
 ------------------------
 =========== =====
 Type        ``string``
-How To      - login and visit Tumblr's Applications_ section
+How To      - login and visit Tumblr's
+              `Applications <https://www.tumblr.com/oauth/apps>`__ section
             - click "Register application"
             - fill out the form: use a random name and description, set
               https://example.org/ as "Application Website" and "Default
@@ -886,10 +900,3 @@ How To      - login and visit Tumblr's Applications_ section
 .. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
 .. _datetime.max:      https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _Authentication:    https://github.com/mikf/gallery-dl#5authentication
-
-.. _`Applications & Keys`: https://www.deviantart.com/developers/apps
-.. _`Create an App`:       https://www.flickr.com/services/apps/create/apply/
-.. _`App Garden`:          https://www.flickr.com/services/
-.. _apps:                  https://www.reddit.com/prefs/apps/
-.. _`API access rules`:    https://github.com/reddit/reddit/wiki/API
-.. _Applications:          https://www.tumblr.com/oauth/apps
