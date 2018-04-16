@@ -46,7 +46,7 @@ class PinterestPinExtractor(PinterestExtractor):
             "content": "d3e24bc9f7af585e8c23b9136956bd45a4d9b947",
         }),
         ("https://www.pinterest.com/pin/858146903966145188/", {
-            "exception": exception.NotFoundError,
+            "exception": exception.StopExtraction,
         }),
     ]
 
@@ -140,6 +140,7 @@ class PinterestAPI():
         access_token = extractor.config("access-token", access_token)
         self.session = extractor.session
         self.session.params["access_token"] = access_token
+        self.log = extractor.log
 
     def pin(self, pin_id, fields="id,image,note"):
         """Query information about a pin"""
@@ -161,7 +162,7 @@ class PinterestAPI():
 
     def board_pins(self, user, board, fields="id,image,note"):
         """Yield all pins of a specific board"""
-        params = {"fields": fields}
+        params = {"fields": fields, "limit": 100}
         url = ("https://api.pinterest.com/v1/boards/{user}/{board}/pins/"
                .format(user=user, board=board))
         while True:
@@ -173,14 +174,16 @@ class PinterestAPI():
                 return
             params["cursor"] = cursor
 
-    @staticmethod
-    def _parse(response):
+    def _parse(self, response):
         """Parse an API response"""
         data = response.json()
-        if "data" not in data or data["data"] is None:
-            try:
-                msg = data["message"].partition(" ")[0].lower()
-            except KeyError:
-                msg = ""
+        if 200 <= response.status_code < 400 and data.get("data"):
+            return data
+
+        msg = data.get("message")
+        if response.status_code == 404:
+            msg = msg.partition(" ")[0].lower()
             raise exception.NotFoundError(msg)
-        return data
+        else:
+            self.log.error("API request failed: %s", msg or "")
+            raise exception.StopExtraction()
