@@ -9,7 +9,7 @@
 """Utility classes to setup OAuth and link a users account to gallery-dl"""
 
 from .common import Extractor, Message
-from . import deviantart, flickr, reddit, tumblr
+from . import deviantart, flickr, pinterest, reddit, tumblr
 from .. import text, util, config
 import os
 import urllib.parse
@@ -50,14 +50,7 @@ class OAuthBase(Extractor):
 
         data = self.client.recv(1024).decode()
         path = data.split(" ", 2)[1]
-        query = path.partition("?")[2]
-        return {
-            key: urllib.parse.unquote(value)
-            for key, _, value in [
-                part.partition("=")
-                for part in query.split("&")
-            ]
-        }
+        return text.parse_query(path.partition("?")[2])
 
     def send(self, msg):
         """Send 'msg' to the socket opened in 'recv()'"""
@@ -69,8 +62,7 @@ class OAuthBase(Extractor):
         """Open 'url' in browser amd return response parameters"""
         import webbrowser
         url += "?" + urllib.parse.urlencode(params)
-        browser = self.config("browser", True)
-        if not browser or not webbrowser.open(url):
+        if not self.config("browser", True) or not webbrowser.open(url):
             print("Please open this URL in your browser:")
             print(url, end="\n\n", flush=True)
         return self.recv()
@@ -80,7 +72,7 @@ class OAuthBase(Extractor):
         """Perform the OAuth 1.0a authorization flow"""
         del self.session.params["oauth_token"]
 
-        # Get a Request Token
+        # get a request token
         params = {"oauth_callback": self.redirect_uri}
         data = self.session.get(request_token_url, params=params).text
 
@@ -88,25 +80,29 @@ class OAuthBase(Extractor):
         self.session.params["oauth_token"] = token = data["oauth_token"]
         self.session.token_secret = data["oauth_token_secret"]
 
-        # Get the User's Authorization
+        # get the user's authorization
         params = {"oauth_token": token, "perms": "read"}
         data = self.open(authorize_url, params)
 
-        # Exchange the Request Token for an Access Token
+        # exchange the request token for an access token
         data = self.session.get(access_token_url, params=data).text
 
         data = text.parse_query(data)
         self.send(OAUTH1_MSG_TEMPLATE.format(
             category=self.subcategory,
             token=data["oauth_token"],
-            token_secret=data["oauth_token_secret"]))
+            token_secret=data["oauth_token_secret"],
+        ))
 
     def _oauth2_authorization_code_grant(
-            self, client_id, client_secret, auth_url, token_url, scope):
+            self, client_id, client_secret, auth_url, token_url,
+            scope="read", key="refresh_token", auth=True):
         """Perform an OAuth2 authorization code grant"""
 
-        state = "gallery-dl:{}:{}".format(
-            self.subcategory, util.OAuthSession.nonce(8))
+        state = "gallery-dl_{}_{}".format(
+            self.subcategory,
+            util.OAuthSession.nonce(8)
+        )
 
         auth_params = {
             "client_id": client_id,
@@ -117,25 +113,33 @@ class OAuthBase(Extractor):
             "scope": scope,
         }
 
-        # receive 'code'
+        # receive an authorization code
         params = self.open(auth_url, auth_params)
 
-        # check auth response
+        # check authorization response
         if state != params.get("state"):
             self.send("'state' mismatch: expected {}, got {}.".format(
-                state, params.get("state")))
+                state, params.get("state")
+            ))
             return
         if "error" in params:
             self.send(params["error"])
             return
 
-        # exchange 'code' for 'refresh_token'
+        # exchange the authorization code for a token
         data = {
             "grant_type": "authorization_code",
             "code": params["code"],
             "redirect_uri": self.redirect_uri,
         }
-        auth = (client_id, client_secret)
+
+        if auth:
+            auth = (client_id, client_secret)
+        else:
+            auth = None
+            data["client_id"] = client_id
+            data["client_secret"] = client_secret
+
         data = self.session.post(token_url, data=data, auth=auth).json()
 
         # check token response
@@ -143,10 +147,13 @@ class OAuthBase(Extractor):
             self.send(data["error"])
             return
 
-        # display refresh token
+        # display token
+        part = key.partition("_")[0]
         self.send(OAUTH2_MSG_TEMPLATE.format(
             category=self.subcategory,
-            token=data["refresh_token"]
+            key=part,
+            Key=part.capitalize(),
+            token=data[key],
         ))
 
 
@@ -165,7 +172,7 @@ class OAuthDeviantart(OAuthBase):
                 "client-secret", deviantart.DeviantartAPI.CLIENT_SECRET),
             "https://www.deviantart.com/oauth2/authorize",
             "https://www.deviantart.com/oauth2/token",
-            "browse",
+            scope="browse",
         )
 
 
@@ -191,6 +198,27 @@ class OAuthFlickr(OAuthBase):
         )
 
 
+class OAuthPinterest(OAuthBase):
+    subcategory = "pinterest"
+    pattern = ["oauth:pinterest$"]
+    redirect_uri = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
+
+    def items(self):
+        yield Message.Version, 1
+
+        self._oauth2_authorization_code_grant(
+            self.oauth_config(
+                "client-id", pinterest.PinterestAPI.CLIENT_ID),
+            self.oauth_config(
+                "client-secret", pinterest.PinterestAPI.CLIENT_SECRET),
+            "https://api.pinterest.com/oauth/",
+            "https://api.pinterest.com/v1/oauth/token",
+            scope="read_public",
+            key="access_token",
+            auth=False,
+        )
+
+
 class OAuthReddit(OAuthBase):
     subcategory = "reddit"
     pattern = ["oauth:reddit$"]
@@ -204,7 +232,7 @@ class OAuthReddit(OAuthBase):
             "",
             "https://www.reddit.com/api/v1/authorize",
             "https://www.reddit.com/api/v1/access_token",
-            "read",
+            scope="read",
         )
 
 
@@ -253,18 +281,18 @@ Example:
 
 
 OAUTH2_MSG_TEMPLATE = """
-Your Refresh Token is
+Your {Key} Token is
 
 {token}
 
 Put this value into your configuration file as
-'extractor.{category}.refesh-token'.
+'extractor.{category}.{key}-token'.
 
 Example:
 {{
     "extractor": {{
         "{category}": {{
-            "refresh-token": "{token}"
+            "{key}-token": "{token}"
         }}
     }}
 }}

@@ -194,7 +194,7 @@ OAuth
 -----
 
 *gallery-dl* supports user authentication via OAuth_ for
-``deviantart``, ``flickr``, ``reddit`` and ``tumblr``.
+``deviantart``, ``flickr``, ``pinterest``, ``reddit`` and ``tumblr``.
 This is entirely optional, but grants *gallery-dl* the ability
 to issue requests on your account's behalf and enables it to access resources
 which would otherwise be unavailable to a public user.
