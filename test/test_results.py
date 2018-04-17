@@ -21,7 +21,6 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "luscious",     # layout change
     "pinterest",    # access tokens have been set to 10 requests per hour
     "puremashiro",  # online reader down
 }
