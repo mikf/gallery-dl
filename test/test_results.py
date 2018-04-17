@@ -22,6 +22,7 @@ TRAVIS_SKIP = {
 # temporary issues, etc.
 BROKEN = {
     "luscious",     # layout change
+    "pinterest",    # access tokens have been set to 10 requests per hour
     "puremashiro",  # online reader down
 }
 
@@ -40,8 +41,6 @@ class TestExtractorResults(unittest.TestCase):
         config.set(("extractor", "deviantart", "client-id"), "7777")
         config.set(("extractor", "deviantart", "client-secret"),
                    "ff14994c744d9208e5caeec7aab4a026")
-        config.set(("extractor", "pinterest", "access-token"),
-                   "Ab1gUJFF5TFoWXRbX0p7_ue7jOHeFSX8iOrCIOZE24bOp0A6TQAAAAA")
         config.set(("extractor", "tumblr", "api-key"),
                    "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
 
