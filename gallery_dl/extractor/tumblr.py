@@ -234,7 +234,7 @@ class TumblrTagExtractor(TumblrExtractor):
 
 
 class TumblrLikesExtractor(TumblrExtractor):
-    """Extractor for images from a tumblr-user by tag"""
+    """Extractor for images from a tumblr-user's liked posts"""
     subcategory = "likes"
     directory_fmt = ["{category}", "{name}", "likes"]
     archive_fmt = "f_{blog[name]}_{id}_{offset}"
