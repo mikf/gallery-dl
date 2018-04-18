@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text, util
 
 
-class SlideshareExtractor(Extractor):
+class SlidesharePresentationExtractor(Extractor):
     """Extractor for images from a presentation on slideshare.net"""
     category = "slideshare"
     subcategory = "presentation"

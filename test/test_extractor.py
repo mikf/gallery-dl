@@ -144,6 +144,29 @@ class TestExtractor(unittest.TestCase):
                         "{} <-> {}".format(extr1, extr2),
                     )
 
+    def test_names(self):
+        """Ensure extractor classes are named CategorySubcategoryExtractor"""
+        mapping = {
+            "2chan"  : "futaba",
+            "3dbooru": "threedeebooru",
+            "4chan"  : "fourchan",
+            "4plebs" : "fourplebs",
+            "8chan"  : "infinitychan",
+            "b4k"    : "bfourk",
+            "oauth"  : None,
+            "rbt"    : "rebeccablacktech",
+            "whatisthisimnotgoodwithcomputers": "witingwc",
+        }
+
+        for extr in extractor.extractors():
+            category = mapping.get(extr.category, extr.category)
+            if category:
+                expected = "{}{}Extractor".format(
+                    category.capitalize(),
+                    extr.subcategory.capitalize(),
+                )
+                self.assertEqual(expected, extr.__name__)
+
 
 if __name__ == "__main__":
     unittest.main()
