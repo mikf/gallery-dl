@@ -133,6 +133,17 @@ class TestExtractor(unittest.TestCase):
                 msg = "'{}' isn't matched by any pattern".format(url)
                 self.fail(msg)
 
+    def test_docstrings(self):
+        """ensure docstring uniqueness"""
+        for extr1 in extractor.extractors():
+            for extr2 in extractor.extractors():
+                if extr1 != extr2 and extr1.__doc__ and extr2.__doc__:
+                    self.assertNotEqual(
+                        extr1.__doc__,
+                        extr2.__doc__,
+                        "{} <-> {}".format(extr1, extr2),
+                    )
+
 
 if __name__ == "__main__":
     unittest.main()
