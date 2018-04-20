@@ -95,22 +95,6 @@ def bdecode(data, alphabet="0123456789"):
     return num
 
 
-def parse_bytes(value, suffixes="bkmgtp"):
-    """Convert a bytes-amount ("500k", "2.5M", ...) to int"""
-    last = value[-1].lower()
-
-    if last in suffixes:
-        mul = 1024 ** suffixes.index(last)
-        value = value[:-1]
-    else:
-        mul = 1
-
-    try:
-        return round(float(value) * mul)
-    except ValueError:
-        return 0
-
-
 def advance(iterable, num):
     """"Advance the iterable by 'num' steps"""
     iterator = iter(iterable)
@@ -133,16 +117,6 @@ def combine_dict(a, b):
         else:
             a[key] = value
     return a
-
-
-def safe_int(value, default=0):
-    """Safely convert value to integer"""
-    if value is None or value == "":
-        return default
-    try:
-        return int(value)
-    except (ValueError, TypeError):
-        return default
 
 
 def expand_path(path):
@@ -253,7 +227,7 @@ class UniquePredicate():
 class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
     globalsdict = {
-        "safe_int": safe_int,
+        "parse_int": text.parse_int,
         "urlsplit": urllib.parse.urlsplit,
         "datetime": datetime.datetime,
         "abort": raises(exception.StopExtraction()),

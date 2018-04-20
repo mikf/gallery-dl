@@ -9,7 +9,7 @@
 """Extract hentai-manga from https://hentaihere.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 import re
 import json
 
@@ -32,7 +32,7 @@ class HentaihereMangaExtractor(MangaExtractor):
 
     def chapters(self, page):
         results = []
-        manga_id = util.safe_int(
+        manga_id = text.parse_int(
             self.url.rstrip("/").rpartition("/")[2][1:])
         manga, pos = text.extract(
             page, '<span itemprop="name">', '</span>')
@@ -50,8 +50,8 @@ class HentaihereMangaExtractor(MangaExtractor):
             chapter, _, title = text.unescape(chapter).strip().partition(" - ")
             results.append((url, {
                 "manga_id": manga_id, "manga": manga, "type": mtype,
-                "chapter_id": util.safe_int(chapter_id),
-                "chapter": util.safe_int(chapter),
+                "chapter_id": text.parse_int(chapter_id),
+                "chapter": text.parse_int(chapter),
                 "title": title, "lang": "en", "language": "English",
             }))
 
@@ -79,9 +79,9 @@ class HentaihereChapterExtractor(ChapterExtractor):
         match = re.match(pattern, title)
         return {
             "manga": match.group(1),
-            "manga_id": util.safe_int(self.manga_id),
-            "chapter": util.safe_int(self.chapter),
-            "chapter_id": util.safe_int(chapter_id),
+            "manga_id": text.parse_int(self.manga_id),
+            "chapter": text.parse_int(self.chapter),
+            "chapter_id": text.parse_int(chapter_id),
             "type": match.group(2),
             "title": match.group(3),
             "author": match.group(4),

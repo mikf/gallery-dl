@@ -9,7 +9,7 @@
 """Extract images from https://www.pinterest.com"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, exception
 
 
 class PinterestExtractor(Extractor):
@@ -27,10 +27,10 @@ class PinterestExtractor(Extractor):
         img = pin["image"]["original"]
         url = img["url"]
         data = {
-            "pin_id": util.safe_int(pin["id"]),
+            "pin_id": text.parse_int(pin["id"]),
             "note": pin["note"],
-            "width": util.safe_int(img["width"]),
-            "height": util.safe_int(img["height"]),
+            "width": text.parse_int(img["width"]),
+            "height": text.parse_int(img["height"]),
         }
         return url, text.nameext_from_url(url, data)
 
@@ -99,7 +99,7 @@ class PinterestBoardExtractor(PinterestExtractor):
         """Get metadata from a board-object"""
         data = {
             "user": self.user,
-            "board_id": util.safe_int(board["id"]),
+            "board_id": text.parse_int(board["id"]),
             "board": board["name"],
             "count": board["counts"]["pins"],
         }

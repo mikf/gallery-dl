@@ -27,7 +27,7 @@ class PahealExtractor(SharedConfigExtractor):
         for data in self.get_posts():
             url = data["file_url"]
             for key in ("id", "width", "height"):
-                data[key] = util.safe_int(data[key])
+                data[key] = text.parse_int(data[key])
             data["tags"] = text.unquote(data["tags"])
             yield Message.Url, url, text.nameext_from_url(url, data)
 

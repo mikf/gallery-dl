@@ -9,7 +9,7 @@
 """Extract hentai-manga from https://hentai2read.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 import re
 import json
 
@@ -36,7 +36,8 @@ class Hentai2readMangaExtractor(MangaExtractor):
             page, '<span itemprop="name">', '</span>')
         mtype, pos = text.extract(
             page, '<small class="text-danger">[', ']</small>', pos)
-        manga_id = util.safe_int(text.extract(page, 'data-mid="', '"', pos)[0])
+        manga_id = text.parse_int(text.extract(
+            page, 'data-mid="', '"', pos)[0])
 
         while True:
             chapter_id, pos = text.extract(page, ' data-cid="', '"', pos)
@@ -49,8 +50,8 @@ class Hentai2readMangaExtractor(MangaExtractor):
             chapter, _, title = text.unescape(chapter).strip().partition(" - ")
             results.append((url, {
                 "manga_id": manga_id, "manga": manga, "type": mtype,
-                "chapter_id": util.safe_int(chapter_id),
-                "chapter": util.safe_int(chapter),
+                "chapter_id": text.parse_int(chapter_id),
+                "chapter": text.parse_int(chapter),
                 "title": title, "lang": "en", "language": "English",
             }))
 
@@ -78,9 +79,9 @@ class Hentai2readChapterExtractor(ChapterExtractor):
                          r"(\d+): (.+) . Page 1 ", title)
         return {
             "manga": match.group(1),
-            "manga_id": util.safe_int(manga_id),
-            "chapter": util.safe_int(self.chapter),
-            "chapter_id": util.safe_int(chapter_id),
+            "manga_id": text.parse_int(manga_id),
+            "chapter": text.parse_int(self.chapter),
+            "chapter_id": text.parse_int(chapter_id),
             "type": match.group(2),
             "author": match.group(3),
             "title": match.group(5),

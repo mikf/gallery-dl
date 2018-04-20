@@ -13,6 +13,7 @@ from gallery_dl import text
 
 
 INVALID = ((), [], {}, None, 1, 2.3)
+INVALID_ALT = ((), [], {}, None, "")
 
 
 class TestText(unittest.TestCase):
@@ -193,6 +194,47 @@ class TestText(unittest.TestCase):
             g(txt, "X", "X"), [])
         self.assertEqual(
             g(txt, "[", "]", 6), ["a", "d"])
+
+    def test_parse_bytes(self, f=text.parse_bytes):
+        self.assertEqual(f("0"), 0)
+        self.assertEqual(f("50"), 50)
+        self.assertEqual(f("50k"), 50 * 1024**1)
+        self.assertEqual(f("50m"), 50 * 1024**2)
+        self.assertEqual(f("50g"), 50 * 1024**3)
+        self.assertEqual(f("50t"), 50 * 1024**4)
+        self.assertEqual(f("50p"), 50 * 1024**5)
+
+        # fractions
+        self.assertEqual(f("123.456"), 123)
+        self.assertEqual(f("123.567"), 124)
+        self.assertEqual(f("0.5M"), round(0.5 * 1024**2))
+
+        # invalid arguments
+        for value in INVALID_ALT:
+            self.assertEqual(f(value), 0)
+        self.assertEqual(f("NaN"), 0)
+        self.assertEqual(f("invalid"), 0)
+        self.assertEqual(f(" 123 kb "), 0)
+
+    def test_parse_int(self, f=text.parse_int):
+        self.assertEqual(f(0), 0)
+        self.assertEqual(f("0"), 0)
+        self.assertEqual(f(123), 123)
+        self.assertEqual(f("123"), 123)
+
+        # invalid arguments
+        for value in INVALID_ALT:
+            self.assertEqual(f(value), 0)
+        self.assertEqual(f("123.456"), 0)
+        self.assertEqual(f("zzz"), 0)
+        self.assertEqual(f([1, 2, 3]), 0)
+        self.assertEqual(f({1: 2, 3: 4}), 0)
+
+        # 'default' argument
+        default = "default"
+        for value in INVALID_ALT:
+            self.assertEqual(f(value, default), default)
+        self.assertEqual(f("zzz", default), default)
 
     def test_parse_query(self, f=text.parse_query):
         # standard usage

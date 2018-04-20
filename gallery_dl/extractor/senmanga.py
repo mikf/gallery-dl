@@ -9,7 +9,7 @@
 """Extract manga-chapters from from http://raw.senmanga.com/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 
 class SenmangaChapterExtractor(Extractor):
@@ -59,7 +59,7 @@ class SenmangaChapterExtractor(Extractor):
         return {
             "manga": text.unescape(manga),
             "chapter_string": chapter.partition(" - Page ")[0],
-            "count": util.safe_int(count),
+            "count": text.parse_int(count),
             "lang": "jp",
             "language": "Japanese",
         }

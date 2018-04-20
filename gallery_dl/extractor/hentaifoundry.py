@@ -9,7 +9,7 @@
 """Extract images from https://www.hentai-foundry.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, exception
 
 
 class HentaifoundryUserExtractor(Extractor):
@@ -69,7 +69,7 @@ class HentaifoundryUserExtractor(Extractor):
         page = response.text
         token, pos = text.extract(page, 'hidden" value="', '"')
         count, pos = text.extract(page, 'class="active" >Pictures (', ')', pos)
-        return {"artist": self.artist, "count": util.safe_int(count)}, token
+        return {"artist": self.artist, "count": text.parse_int(count)}, token
 
     def get_image_metadata(self, url):
         """Collect metadata for an image"""
@@ -79,7 +79,7 @@ class HentaifoundryUserExtractor(Extractor):
             page, 'Pictures</a> &raquo; <span>', '<')
         part, pos = text.extract(
             page, '//pictures.hentai-foundry.com', '"', pos)
-        data = {"index": util.safe_int(index), "title": text.unescape(title)}
+        data = {"index": text.parse_int(index), "title": text.unescape(title)}
         text.nameext_from_url(part, data)
         return "https://pictures.hentai-foundry.com" + part, data
 
@@ -161,7 +161,7 @@ class HentaifoundryImageExtractor(Extractor):
         url   , pos = extr(page, '//pictures.hentai-foundry.com', '"', pos)
         data = {
             "artist": artist,
-            "index": util.safe_int(self.index),
+            "index": text.parse_int(self.index),
             "title": text.unescape(title),
         }
         text.nameext_from_url(url, data)

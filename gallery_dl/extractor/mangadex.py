@@ -65,11 +65,11 @@ class MangadexChapterExtractor(MangadexExtractor, ChapterExtractor):
 
         return {
             "manga": match.group(5),
-            "manga_id": util.safe_int(manga_id),
-            "volume": util.safe_int(match.group(1)),
-            "chapter": util.safe_int(match.group(2)),
+            "manga_id": text.parse_int(manga_id),
+            "volume": text.parse_int(match.group(1)),
+            "chapter": text.parse_int(match.group(2)),
             "chapter_minor": match.group(3) or "",
-            "chapter_id": util.safe_int(self.chapter_id),
+            "chapter_id": text.parse_int(self.chapter_id),
             "chapter_string": info.replace(" - MangaDex", ""),
             "group": text.unescape(group),
             "lang": util.language_to_code(language),
@@ -124,7 +124,7 @@ class MangadexMangaExtractor(MangadexExtractor, MangaExtractor):
 
         manga = text.unescape(extr(
             page, '"og:title" content="', '"')[0].rpartition(" (")[0])
-        manga_id = util.safe_int(extr(
+        manga_id = text.parse_int(extr(
             page, '/images/manga/', '.')[0])
 
         while True:
@@ -145,15 +145,15 @@ class MangadexMangaExtractor(MangadexExtractor, MangaExtractor):
 
                 results.append((self.root + "/chapter/" + chid, {
                     "manga": manga,
-                    "manga_id": util.safe_int(manga_id),
+                    "manga_id": text.parse_int(manga_id),
                     "title": text.unescape(title),
-                    "volume": util.safe_int(volume),
-                    "chapter": util.safe_int(chapter),
+                    "volume": text.parse_int(volume),
+                    "chapter": text.parse_int(chapter),
                     "chapter_minor": sep + minor,
-                    "chapter_id": util.safe_int(chid),
+                    "chapter_id": text.parse_int(chid),
                     "group": text.unescape(text.remove_html(group)),
                     "contributor": text.remove_html(user),
-                    "views": util.safe_int(views),
+                    "views": text.parse_int(views),
                     "date": date,
                     "lang": util.language_to_code(language),
                     "language": language,

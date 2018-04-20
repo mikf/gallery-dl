@@ -9,7 +9,7 @@
 """Extract images from https://nhentai.net/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 
 class NHentaiExtractor(Extractor):
@@ -95,7 +95,7 @@ class NhentaiSearchExtractor(NHentaiExtractor):
     def _pagination(self, endpoint, params):
         """Pagination over API responses"""
         url = "{}/api/{}".format(self.root, endpoint)
-        params["page"] = util.safe_int(params.get("page"), 1)
+        params["page"] = text.parse_int(params.get("page"), 1)
 
         while True:
             data = self.request(url, params=params, fatal=False).json()
