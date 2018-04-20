@@ -50,8 +50,8 @@ class FoolslideExtractor(SharedConfigExtractor):
         lang = info[1].partition("-")[0]
         data["lang"] = lang
         data["language"] = util.code_to_language(lang)
-        data["volume"] = util.safe_int(info[2])
-        data["chapter"] = util.safe_int(info[3])
+        data["volume"] = text.parse_int(info[2])
+        data["chapter"] = text.parse_int(info[3])
         data["chapter_minor"] = "." + info[4] if len(info) >= 5 else ""
         return data
 
@@ -75,7 +75,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
         imgs = self.get_images(page)
 
         data["count"] = len(imgs)
-        data["chapter_id"] = util.safe_int(imgs[0]["chapter_id"])
+        data["chapter_id"] = text.parse_int(imgs[0]["chapter_id"])
 
         yield Message.Version, 1
         yield Message.Directory, data
@@ -88,7 +88,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
             except KeyError:
                 pass
             for key in ("height", "id", "size", "width"):
-                image[key] = util.safe_int(image[key])
+                image[key] = text.parse_int(image[key])
             data.update(image)
             text.nameext_from_url(data["filename"], data)
             yield Message.Url, url, data

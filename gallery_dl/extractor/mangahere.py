@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://www.mangahere.co/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 from urllib.parse import urljoin
 import re
 
@@ -53,8 +53,8 @@ class MangahereMangaExtractor(MangaExtractor):
             date, pos = text.extract(page, 'class="right">', '</span>', pos)
             results.append((urljoin("http:", url), {
                 "manga": manga, "title": title, "date": date,
-                "volume": util.safe_int(volume.rpartition(" ")[2]),
-                "chapter": util.safe_int(chapter),
+                "volume": text.parse_int(volume.rpartition(" ")[2]),
+                "chapter": text.parse_int(chapter),
                 "chapter_minor": dot + minor,
                 "lang": "en", "language": "English",
             }))
@@ -93,11 +93,11 @@ class MangahereChapterExtractor(ChapterExtractor):
         return {
             "manga": text.unescape(manga),
             # "title": TODO,
-            "volume": util.safe_int(self.volume),
-            "chapter": util.safe_int(self.chapter),
+            "volume": text.parse_int(self.volume),
+            "chapter": text.parse_int(self.chapter),
             "chapter_minor": self.chminor or "",
-            "chapter_id": util.safe_int(chid),
-            "count": util.safe_int(count),
+            "chapter_id": text.parse_int(chid),
+            "count": text.parse_int(count),
             "lang": "en",
             "language": "English",
         }

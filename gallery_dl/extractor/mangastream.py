@@ -9,7 +9,7 @@
 """Extract manga-chapters from https://mangastream.com/"""
 
 from .common import ChapterExtractor
-from .. import text, util
+from .. import text
 from urllib.parse import urljoin
 
 
@@ -35,9 +35,9 @@ class MangastreamChapterExtractor(ChapterExtractor):
         return {
             "manga": manga,
             "chapter": text.unquote(self.chapter),
-            "chapter_id": util.safe_int(self.ch_id),
+            "chapter_id": text.parse_int(self.ch_id),
             "title": title,
-            "count": util.safe_int(count, 1),
+            "count": text.parse_int(count, 1),
             "lang": "en",
             "language": "English",
         }

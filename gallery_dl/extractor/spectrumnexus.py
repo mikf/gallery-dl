@@ -9,7 +9,7 @@
 """Extract manga pages from http://www.thespectrum.net/manga_scans/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 
 
 class SpectrumnexusMangaExtractor(MangaExtractor):
@@ -55,15 +55,15 @@ class SpectrumnexusChapterExtractor(ChapterExtractor):
 
     def get_metadata(self, page):
         data = {
-            "chapter": util.safe_int(self.chapter),
+            "chapter": text.parse_int(self.chapter),
             "chapter_string": self.chapter_string.replace("+", " "),
-            "volume": util.safe_int(self.volume),
+            "volume": text.parse_int(self.volume),
         }
         data = text.extract_all(page, (
             ('manga', '<title>', ' &#183; SPECTRUM NEXUS </title>'),
             ('count', '<div class="viewerLabel"> of ', '<'),
         ), values=data)[0]
-        data["count"] = util.safe_int(data["count"])
+        data["count"] = text.parse_int(data["count"])
         return data
 
     def get_images(self, page):

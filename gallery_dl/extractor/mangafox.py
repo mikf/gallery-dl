@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://fanfox.net/"""
 
 from .common import ChapterExtractor
-from .. import text, util, exception
+from .. import text, exception
 import re
 
 
@@ -47,7 +47,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
         data["chapter_minor"] = match.group(4) or ""
         data["manga"] = data["manga"].rpartition(" ")[0]
         for key in ("sid", "cid", "count", "volume", "chapter"):
-            data[key] = util.safe_int(data[key])
+            data[key] = text.parse_int(data[key])
         return data
 
     def get_images(self, page):

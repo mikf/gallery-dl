@@ -9,7 +9,7 @@
 """Extract images from http://www.hbrowse.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 from urllib.parse import urljoin
 import json
 
@@ -30,7 +30,7 @@ class HbrowseExtractor():
         ), values=data)
 
         data["manga"] = text.unescape(data["manga"])
-        data["total"] = util.safe_int(data["total"])
+        data["total"] = text.parse_int(data["total"])
         data["artist"] = text.remove_html(data["artist"])
         data["origin"] = text.remove_html(data["origin"])
         return data
@@ -48,7 +48,7 @@ class HbrowseMangaExtractor(HbrowseExtractor, MangaExtractor):
     def chapters(self, page):
         results = []
         data = self.parse_page(page, {
-            "manga_id": util.safe_int(
+            "manga_id": text.parse_int(
                 self.url.rstrip("/").rpartition("/")[2])
         })
 
@@ -59,7 +59,7 @@ class HbrowseMangaExtractor(HbrowseExtractor, MangaExtractor):
             if not url:
                 return results
             title, pos = text.extract(page, '>View ', '<', pos)
-            data["chapter"] = util.safe_int(url.rpartition("/")[2][1:])
+            data["chapter"] = text.parse_int(url.rpartition("/")[2][1:])
             data["title"] = title
             results.append((urljoin(self.root, url), data.copy()))
 
@@ -84,8 +84,8 @@ class HbrowseChapterExtractor(HbrowseExtractor, ChapterExtractor):
 
     def get_metadata(self, page):
         return self.parse_page(page, {
-            "manga_id": util.safe_int(self.gid),
-            "chapter": util.safe_int(self.chapter)
+            "manga_id": text.parse_int(self.gid),
+            "chapter": text.parse_int(self.chapter)
         })
 
     def get_images(self, page):
