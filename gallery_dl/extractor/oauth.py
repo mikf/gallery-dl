@@ -9,7 +9,7 @@
 """Utility classes to setup OAuth and link a users account to gallery-dl"""
 
 from .common import Extractor, Message
-from . import deviantart, flickr, pinterest, reddit, tumblr
+from . import deviantart, flickr, reddit, tumblr
 from .. import text, util, config
 import os
 import urllib.parse
@@ -206,16 +206,18 @@ class OAuthPinterest(OAuthBase):
     def items(self):
         yield Message.Version, 1
 
+        client_id = self.oauth_config("client-id")
+        client_secret = self.oauth_config("client-secret")
+
+        if not client_id or not client_secret:
+            self.log.error("'client-id' and 'client-secret' required")
+            return
+
         self._oauth2_authorization_code_grant(
-            self.oauth_config(
-                "client-id", pinterest.PinterestAPI.CLIENT_ID),
-            self.oauth_config(
-                "client-secret", pinterest.PinterestAPI.CLIENT_SECRET),
+            client_id, client_secret,
             "https://api.pinterest.com/oauth/",
             "https://api.pinterest.com/v1/oauth/token",
-            scope="read_public",
-            key="access_token",
-            auth=False,
+            scope="read_public", key="access_token", auth=False,
         )
 
 
