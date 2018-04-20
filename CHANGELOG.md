@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.3.4 - 2018-04-20
+- Added support for custom OAuth2 credentials for `pinterest`
+- Improved rate limit handling for `tumblr` extractors
+- Improved `hentaifoundry` extractors
+- Improved `imgur` URL patterns
+- Fixed miscellaneous extraction issues for `luscious` and `komikcast`
+- Removed `loveisover` and `spectrumnexus`
 
 ## 1.3.3 - 2018-04-06
 - Added extractors for
