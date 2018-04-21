@@ -137,7 +137,7 @@ class ArtstationUserExtractor(ArtstationExtractor):
 
 
 class ArtstationAlbumExtractor(ArtstationExtractor):
-    """Extractor for all projects of an artstation user"""
+    """Extractor for all projects in an artstation album"""
     subcategory = "album"
     directory_fmt = ["{category}", "{userinfo[username]}", "Albums",
                      "{album[id]} - {album[title]}"]

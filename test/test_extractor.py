@@ -133,6 +133,40 @@ class TestExtractor(unittest.TestCase):
                 msg = "'{}' isn't matched by any pattern".format(url)
                 self.fail(msg)
 
+    def test_docstrings(self):
+        """ensure docstring uniqueness"""
+        for extr1 in extractor.extractors():
+            for extr2 in extractor.extractors():
+                if extr1 != extr2 and extr1.__doc__ and extr2.__doc__:
+                    self.assertNotEqual(
+                        extr1.__doc__,
+                        extr2.__doc__,
+                        "{} <-> {}".format(extr1, extr2),
+                    )
+
+    def test_names(self):
+        """Ensure extractor classes are named CategorySubcategoryExtractor"""
+        mapping = {
+            "2chan"  : "futaba",
+            "3dbooru": "threedeebooru",
+            "4chan"  : "fourchan",
+            "4plebs" : "fourplebs",
+            "8chan"  : "infinitychan",
+            "b4k"    : "bfourk",
+            "oauth"  : None,
+            "rbt"    : "rebeccablacktech",
+            "whatisthisimnotgoodwithcomputers": "witingwc",
+        }
+
+        for extr in extractor.extractors():
+            category = mapping.get(extr.category, extr.category)
+            if category:
+                expected = "{}{}Extractor".format(
+                    category.capitalize(),
+                    extr.subcategory.capitalize(),
+                )
+                self.assertEqual(expected, extr.__name__)
+
 
 if __name__ == "__main__":
     unittest.main()

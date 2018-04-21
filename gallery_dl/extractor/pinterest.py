@@ -46,6 +46,9 @@ class PinterestPinExtractor(PinterestExtractor):
             "content": "d3e24bc9f7af585e8c23b9136956bd45a4d9b947",
         }),
         ("https://www.pinterest.com/pin/858146903966145188/", {
+            "exception": exception.StopExtraction,
+        }),
+        ("https://www.pinterest.com/pin/85814690396614518/", {
             "exception": exception.NotFoundError,
         }),
     ]
@@ -135,52 +138,57 @@ class PinterestPinitExtractor(PinterestExtractor):
 class PinterestAPI():
     """Minimal interface for the pinterest API"""
 
-    def __init__(self, extractor, access_token="AV2U9Oe6dyC2vfPugUnBvJ7Duxg9"
-                                               "FHCJPXPZIvRDXv9hvwBALwAAAAA"):
-        access_token = extractor.config("access-token", access_token)
+    def __init__(self, extractor, access_token=None):
+        self.log = extractor.log
         self.session = extractor.session
-        self.session.params["access_token"] = access_token
+        self.access_token = (
+            access_token or
+            extractor.config("access-token") or
+            "AfyIXxi1MJ6et0NlIl_vBchHbex-FSWylPyr2GJE2uu3W8A97QAAAAA"
+        )
 
     def pin(self, pin_id, fields="id,image,note"):
         """Query information about a pin"""
+        endpoint = "pins/{}/".format(pin_id)
         params = {"fields": fields}
-        response = self.session.get(
-            "https://api.pinterest.com/v1/pins/{pin}/".format(pin=pin_id),
-            params=params
-        )
-        return self._parse(response)["data"]
+        return self._call(endpoint, params)["data"]
 
     def board(self, user, board, fields="id,name,counts"):
         """Query information about a board"""
+        endpoint = "boards/{}/{}/".format(user, board)
         params = {"fields": fields}
-        response = self.session.get(
-            "https://api.pinterest.com/v1/boards/{user}/{board}/"
-            .format(user=user, board=board), params=params
-        )
-        return self._parse(response)["data"]
+        return self._call(endpoint, params)["data"]
 
-    def board_pins(self, user, board, fields="id,image,note"):
+    def board_pins(self, user, board, fields="id,image,note", limit=100):
         """Yield all pins of a specific board"""
-        params = {"fields": fields}
-        url = ("https://api.pinterest.com/v1/boards/{user}/{board}/pins/"
-               .format(user=user, board=board))
+        endpoint = "boards/{}/{}/pins/".format(user, board)
+        params = {"fields": fields, "limit": limit}
+        return self._pagination(endpoint, params)
+
+    def _call(self, endpoint, params):
+        params["access_token"] = self.access_token
+        url = "https://api.pinterest.com/v1/" + endpoint
+
+        response = self.session.get(url, params=params)
+        status = response.status_code
+        data = response.json()
+
+        if 200 <= status < 400 and data.get("data"):
+            return data
+
+        msg = data.get("message", "")
+        if status == 404:
+            msg = msg.partition(" ")[0].lower()
+            raise exception.NotFoundError(msg)
+        self.log.error("API request failed: %s", msg or "")
+        raise exception.StopExtraction()
+
+    def _pagination(self, endpoint, params):
         while True:
-            response = self._parse(self.session.get(url, params=params))
+            response = self._call(endpoint, params)
             yield from response["data"]
 
             cursor = response["page"]["cursor"]
             if not cursor:
                 return
             params["cursor"] = cursor
-
-    @staticmethod
-    def _parse(response):
-        """Parse an API response"""
-        data = response.json()
-        if "data" not in data or data["data"] is None:
-            try:
-                msg = data["message"].partition(" ")[0].lower()
-            except KeyError:
-                msg = ""
-            raise exception.NotFoundError(msg)
-        return data
