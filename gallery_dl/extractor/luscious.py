@@ -74,7 +74,7 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         """Collect image-urls and -metadata"""
         num = 1
 
-        if 'class="read-more-btn"' in page:
+        if 'class="search_filter' in page:
             url = "{}/pictures/album/x_{}/sorted/oldest/page/1/".format(
                 self.root, self.gid)
             page = self.request(url).text

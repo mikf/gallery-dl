@@ -24,7 +24,7 @@ class HitomiGalleryExtractor(ChapterExtractor):
     test = [
         ("https://hitomi.la/galleries/867789.html", {
             "url": "cb759868d090fe0e2655c3e29ebf146054322b6d",
-            "keyword": "b1e66ff971fc8cb80240a687f508f3b74053f799",
+            "keyword": "85e453d01ee7f137669e75a764ccdc65ca092ad2",
         }),
         ("https://hitomi.la/reader/867789.html", None),
     ]
