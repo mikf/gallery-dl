@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.3.4 - 2018-04-20
 - Added support for custom OAuth2 credentials for `pinterest`
 - Improved rate limit handling for `tumblr` extractors
