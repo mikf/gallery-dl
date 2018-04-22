@@ -178,6 +178,9 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
             "url": "fa6ecb2c3aa78872f762d43f7809b7f0580debc1",
             "keyword": "b29746bac291d8c8e339f0256a2bd7bb3ebe1741",
         }),
+        ("http://shimoda8.deviantart.com/gallery/", {
+            "exception": exception.NotFoundError,
+        }),
         ("http://shimoda7.deviantart.com/gallery/?catpath=/", None),
     ]
 
@@ -306,7 +309,6 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     test = [(("https://pencilshadings.deviantart.com"
               "/favourites/70595441/3D-Favorites"), {
         "url": "742f92199d5bc6a89cda6ec6133d46c7a523824d",
-        "keyword": "d258ca05424b3586c4feec940158bca00acdf511",
         "options": (("original", False),),
     })]
 
@@ -355,7 +357,7 @@ class DeviantartAPI():
         self.session = extractor.session
         self.log = extractor.log
         self.headers = {}
-        self.delay = 0
+        self.delay = -1
 
         self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
@@ -465,35 +467,33 @@ class DeviantartAPI():
         """Call an API endpoint"""
         url = "https://www.deviantart.com/api/v1/oauth2/" + endpoint
         while True:
-            if self.delay > 0:
-                time.sleep(2 ** (self.delay-1))
+            if self.delay >= 0:
+                time.sleep(2 ** self.delay)
 
             self.authenticate()
             response = self.session.get(
                 url, headers=self.headers, params=params)
+            data = response.json()
+            status = response.status_code
 
-            if response.status_code == 200:
-                if self.delay > 2:
+            if 200 <= status < 400:
+                if self.delay > 1:
                     self.delay -= 1
-                break
+                return data
+            elif expect_error:
+                return None
+            elif data.get("error_description") == "User not found.":
+                raise exception.NotFoundError("user or group")
 
+            self.log.debug(response.text)
+            msg = "API responded with {} {}".format(
+                status, response.reason)
+            if 400 <= status < 500 and status != 429:
+                self.log.error(msg)
+                return data
             else:
-                if response.status_code == 429:
-                    msg = "Rate limit reached"
-                else:
-                    if expect_error:
-                        return None
-                    msg = "API responded with {} {}".format(
-                        response.status_code, response.reason)
                 self.delay += 1
-                self.log.warning(
-                    "%s. Using %ds delay.", msg, 2 ** (self.delay-1))
-                self.log.debug(response.text)
-        try:
-            return response.json()
-        except ValueError:
-            self.log.error("Failed to parse API response")
-            return {}
+                self.log.warning("%s. Using %ds delay.", msg, 2 ** self.delay)
 
     def _pagination(self, endpoint, params=None):
         while True:
