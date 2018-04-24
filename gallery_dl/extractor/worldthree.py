@@ -14,7 +14,7 @@ from . import foolslide
 class WorldthreeChapterExtractor(foolslide.FoolslideChapterExtractor):
     """Extractor for manga-chapters from slide.world-three.org"""
     category = "worldthree"
-    pattern = foolslide.chapter_pattern("(?:www\.)?slide\.world-three\.org")
+    pattern = foolslide.chapter_pattern(r"(?:www\.)?slide\.world-three\.org")
     test = [
         (("http://www.slide.world-three.org"
           "/read/black_bullet/en/2/7/page/1"), {
@@ -33,7 +33,7 @@ class WorldthreeChapterExtractor(foolslide.FoolslideChapterExtractor):
 class WorldthreeMangaExtractor(foolslide.FoolslideMangaExtractor):
     """Extractor for manga from slide.world-three.org"""
     category = "worldthree"
-    pattern = foolslide.manga_pattern("(?:www\.)?slide\.world-three\.org")
+    pattern = foolslide.manga_pattern(r"(?:www\.)?slide\.world-three\.org")
     test = [("http://www.slide.world-three.org/series/black_bullet/", {
         "url": "5743b93512d26e6b540d90a7a5d69208b6d4a738",
         "keyword": "3a24f1088b4d7f3b798a96163f21ca251293a120",
