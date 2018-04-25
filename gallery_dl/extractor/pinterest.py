@@ -81,15 +81,12 @@ class PinterestBoardExtractor(PinterestExtractor):
     def items(self):
         board = self.api.board(self.user, self.board)
         data = {"board": board, "count": board["pin_count"]}
-        num = data["count"]
         yield Message.Version, 1
         yield Message.Directory, data
         for pin in self.api.board_pins(board["id"]):
-            url, pdata = self.data_from_pin(pin)
-            data.update(pdata)
-            data["num"] = num
-            num -= 1
-            yield Message.Url, url, data
+            url, pin_data = self.data_from_pin(pin)
+            pin_data.update(data)
+            yield Message.Url, url, pin_data
 
 
 class PinterestPinitExtractor(PinterestExtractor):
@@ -157,11 +154,8 @@ class PinterestAPI():
         return self._pagination("BoardFeed", options)
 
     def _call(self, resource, options):
-        url = "{}/resource/{}Resource/get".format(self.BASE_URL, resource)
-        params = {
-            "source_url": "",
-            "data": json.dumps({"options": options}),
-        }
+        url = "{}/resource/{}Resource/get/".format(self.BASE_URL, resource)
+        params = {"data": json.dumps({"options": options}), "source_url": ""}
 
         response = self.session.get(url, params=params, headers=self.HEADERS)
         data = response.json()
@@ -179,10 +173,8 @@ class PinterestAPI():
         self.log.error("API request failed: %s", msg)
         raise exception.StopExtraction()
 
-    def _pagination(self, resource, options, bookmarks=None):
+    def _pagination(self, resource, options):
         while True:
-            if bookmarks:
-                options["bookmarks"] = bookmarks
             data = self._call(resource, options)
             yield from data["resource_response"]["data"]
 
@@ -190,5 +182,6 @@ class PinterestAPI():
                 bookmarks = data["resource"]["options"]["bookmarks"]
                 if not bookmarks or bookmarks[0] == "-end-":
                     return
+                options["bookmarks"] = bookmarks
             except KeyError:
                 return

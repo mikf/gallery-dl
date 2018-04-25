@@ -198,29 +198,6 @@ class OAuthFlickr(OAuthBase):
         )
 
 
-class OAuthPinterest(OAuthBase):
-    subcategory = "pinterest"
-    pattern = ["oauth:pinterest$"]
-    redirect_uri = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
-
-    def items(self):
-        yield Message.Version, 1
-
-        client_id = self.oauth_config("client-id")
-        client_secret = self.oauth_config("client-secret")
-
-        if not client_id or not client_secret:
-            self.log.error("'client-id' and 'client-secret' required")
-            return
-
-        self._oauth2_authorization_code_grant(
-            client_id, client_secret,
-            "https://api.pinterest.com/oauth/",
-            "https://api.pinterest.com/v1/oauth/token",
-            scope="read_public", key="access_token", auth=False,
-        )
-
-
 class OAuthReddit(OAuthBase):
     subcategory = "reddit"
     pattern = ["oauth:reddit$"]
