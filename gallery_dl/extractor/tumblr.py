@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
+from datetime import datetime, timedelta
 import re
 import time
 
@@ -322,10 +323,11 @@ class TumblrAPI():
 
             # daily rate limit
             if response.headers.get("x-ratelimit-perday-remaining") == "0":
+                reset = response.headers.get("x-ratelimit-perday-reset")
                 self.log.error(
                     "Daily API rate limit exceeded: aborting; "
-                    "%s seconds until rate limit reset",
-                    response.headers.get("x-ratelimit-perday-reset"),
+                    "rate limit will reset at %s",
+                    self._to_time(reset),
                 )
                 raise exception.StopExtraction()
 
@@ -334,11 +336,19 @@ class TumblrAPI():
             if reset:
                 self.log.info(
                     "Hourly API rate limit exceeded; "
-                    "waiting %s seconds for rate limit reset",
-                    reset,
+                    "waiting until %s for rate limit reset",
+                    self._to_time(reset),
                 )
                 time.sleep(int(reset) + 1)
                 return self._call(blog, endpoint, params)
 
         self.log.error(data)
         raise exception.StopExtraction()
+
+    @staticmethod
+    def _to_time(reset):
+        try:
+            reset_time = datetime.now() + timedelta(seconds=int(reset))
+        except (ValueError, TypeError):
+            return "?"
+        return reset_time.strftime("%H:%M:%S")
