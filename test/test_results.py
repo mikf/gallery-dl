@@ -16,7 +16,7 @@ from gallery_dl import extractor, job, config, exception
 # these don't work on travis-ci
 TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
-    "archivedmoe", "archiveofsins", "thebarchive",
+    "archivedmoe", "archiveofsins", "thebarchive", "sankaku", "idolcomplex",
 }
 
 # temporary issues, etc.

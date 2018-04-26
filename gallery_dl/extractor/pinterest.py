@@ -76,7 +76,8 @@ class PinterestBoardExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self)
-        self.user, self.board = match.groups()
+        self.user = text.unquote(match.group(1))
+        self.board = text.unquote(match.group(2))
 
     def items(self):
         board = self.api.board(self.user, self.board)
@@ -134,8 +135,7 @@ class PinterestAPI():
     }
 
     def __init__(self, extractor):
-        self.log = extractor.log
-        self.session = extractor.session
+        self.extractor = extractor
 
     def pin(self, pin_id):
         """Query information about a pin"""
@@ -157,20 +157,16 @@ class PinterestAPI():
         url = "{}/resource/{}Resource/get/".format(self.BASE_URL, resource)
         params = {"data": json.dumps({"options": options}), "source_url": ""}
 
-        response = self.session.get(url, params=params, headers=self.HEADERS)
+        response = self.extractor.request(
+            url, params=params, headers=self.HEADERS, fatal=False)
         data = response.json()
 
-        if 200 <= response.status_code < 400 and "resource_response" in data:
+        if 200 <= response.status_code < 400 and not response.history:
             return data
 
-        try:
-            msg = data["resource_response"]["error"]["message"]
-        except KeyError:
-            msg = ""
-        if response.status_code == 404:
-            msg = msg.partition(" ")[0].lower()
-            raise exception.NotFoundError(msg)
-        self.log.error("API request failed: %s", msg)
+        if response.status_code == 404 or response.history:
+            raise exception.NotFoundError(self.extractor.subcategory)
+        self.extractor.log.error("API request failed")
         raise exception.StopExtraction()
 
     def _pagination(self, resource, options):
