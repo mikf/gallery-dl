@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor
 from .. import text
-from urllib.parse import urljoin
 
 
 class MangastreamChapterExtractor(ChapterExtractor):
@@ -47,5 +46,5 @@ class MangastreamChapterExtractor(ChapterExtractor):
             pos = page.index(' class="page"')
             next_url = text.extract(page, ' href="', '"', pos)[0]
             image_url = text.extract(page, ' src="', '"', pos)[0]
-            yield urljoin(self.base_url, image_url), None
-            page = self.request(urljoin(self.base_url, next_url)).text
+            yield text.urljoin(self.base_url, image_url), None
+            page = self.request(text.urljoin(self.base_url, next_url)).text

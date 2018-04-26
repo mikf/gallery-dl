@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
-from urllib.parse import urljoin
 import json
 
 
@@ -61,7 +60,7 @@ class HbrowseMangaExtractor(HbrowseExtractor, MangaExtractor):
             title, pos = text.extract(page, '>View ', '<', pos)
             data["chapter"] = text.parse_int(url.rpartition("/")[2][1:])
             data["title"] = title
-            results.append((urljoin(self.root, url), data.copy()))
+            results.append((text.urljoin(self.root, url), data.copy()))
 
 
 class HbrowseChapterExtractor(HbrowseExtractor, ChapterExtractor):

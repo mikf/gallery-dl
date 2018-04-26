@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util, exception
-from urllib.parse import urljoin
 import json
 import re
 
@@ -84,7 +83,7 @@ class MangadexChapterExtractor(MangadexExtractor, ChapterExtractor):
         pagelist, pos = text.extract(page, "var page_array = [", "]", pos)
         server  , pos = text.extract(page, "var server = '", "'", pos)
 
-        base = urljoin(self.root, server + dataurl + "/")
+        base = text.urljoin(self.root, server + dataurl + "/")
 
         return [
             (base + page, None)

@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
-from urllib.parse import urljoin
 import re
 
 
@@ -51,7 +50,7 @@ class MangahereMangaExtractor(MangaExtractor):
             volume, pos = text.extract(page, 'span class="mr6">', '<', pos)
             title, pos = text.extract(page, '/span>', '<', pos)
             date, pos = text.extract(page, 'class="right">', '</span>', pos)
-            results.append((urljoin("http:", url), {
+            results.append((text.urljoin("http:", url), {
                 "manga": manga, "title": title, "date": date,
                 "volume": text.parse_int(volume.rpartition(" ")[2]),
                 "chapter": text.parse_int(chapter),
