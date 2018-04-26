@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from urllib.parse import urljoin
 
 
 class HentaifoundryExtractor(Extractor):
@@ -47,7 +46,7 @@ class HentaifoundryExtractor(Extractor):
 
     def get_image_metadata(self, url):
         """Collect metadata for an image"""
-        page = self.request(urljoin(self.root, url)).text
+        page = self.request(text.urljoin(self.root, url)).text
         index = url.rsplit("/", 2)[1]
         title, pos = text.extract(
             page, 'Pictures</a> &raquo; <span>', '<')

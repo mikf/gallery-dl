@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
-from urllib.parse import urljoin
 
 
 class MangaparkExtractor():
@@ -120,7 +119,7 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
             num += 1
             width , pos = text.extract(page, ' width="', '"', pos)
             height, pos = text.extract(page, ' _heighth="', '"', pos)
-            yield urljoin(self.root, url), {
+            yield text.urljoin(self.root, url), {
                 "page": num,
                 "width": width,
                 "height": height,

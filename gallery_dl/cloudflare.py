@@ -41,7 +41,7 @@ def solve_challenge(session, response):
     params["jschl_answer"] = solve_jschl(response.url, page)
 
     time.sleep(4)
-    url = urllib.parse.urljoin(response.url, "/cdn-cgi/l/chk_jschl")
+    url = text.urljoin(response.url, "/cdn-cgi/l/chk_jschl")
     return session.get(url, params=params)
 
 

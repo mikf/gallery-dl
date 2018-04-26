@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text, exception
 from ..cache import memcache
 from os.path import splitext
-from urllib.parse import urljoin
 
 
 class ImagehostImageExtractor(Extractor):
@@ -142,8 +141,7 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
 
     def get_info(self, page):
         url = text.extract(page, 'SRC="', '"')[0]
-        url = urljoin(self.url, url)
-        return url, url
+        return text.urljoin(self.url, url), url
 
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):
