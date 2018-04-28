@@ -64,7 +64,6 @@ modules = [
     "pinterest",
     "pixiv",
     "powermanga",
-    "puremashiro",
     "readcomiconline",
     "rebeccablacktech",
     "reddit",
