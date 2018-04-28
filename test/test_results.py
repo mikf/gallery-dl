@@ -21,7 +21,6 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "gomanga",      # server down
     "puremashiro",  # online reader down
 }
 
