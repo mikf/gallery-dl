@@ -31,7 +31,6 @@ modules = [
     "flickr",
     "gelbooru",
     "gfycat",
-    "gomanga",
     "hbrowse",
     "hentai2read",
     "hentaifoundry",

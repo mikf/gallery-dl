@@ -24,7 +24,6 @@ Flickr               https://www.flickr.com/             |Images from Use-2|    
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag-Searches
 Gfycat               https://gfycat.com/                 individual Images
-GoManga              https://gomanga.co/                 Chapters, Manga
 HBrowse              http://www.hbrowse.com/             Chapters, Manga
 Hentai Foundry       https://www.hentai-foundry.com/     Images from Users, individual Images
 Hentai2Read          https://hentai2read.com/            Chapters, Manga
