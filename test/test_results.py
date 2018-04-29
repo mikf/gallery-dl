@@ -143,9 +143,9 @@ def generate_tests():
             fltr = lambda c, bc: c in argv or bc in argv  # noqa: E731
         del sys.argv[1:]
     else:
-        skip = BROKEN.copy()
+        skip = set(BROKEN)
         if "CI" in os.environ and "TRAVIS" in os.environ:
-            skip |= TRAVIS_SKIP
+            skip |= set(TRAVIS_SKIP)
         print("skipping:", ", ".join(skip))
         fltr = lambda c, bc: c not in skip  # noqa: E731
 
