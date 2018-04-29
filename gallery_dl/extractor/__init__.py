@@ -75,6 +75,7 @@ modules = [
     "senmanga",
     "sensescans",
     "slideshare",
+    "smugmug",
     "subapics",
     "thebarchive",
     "tumblr",
