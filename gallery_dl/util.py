@@ -536,11 +536,11 @@ class OAuthSession():
         self.params["oauth_signature_method"] = "HMAC-SHA1"
         self.params["oauth_version"] = "1.0"
 
-    def get(self, url, params):
+    def get(self, url, params, **kwargs):
         params.update(self.params)
         params["oauth_nonce"] = self.nonce(16)
         params["oauth_timestamp"] = int(time.time())
-        return self.session.get(url + self.sign(url, params))
+        return self.session.get(url + self.sign(url, params), **kwargs)
 
     def sign(self, url, params):
         """Generate 'oauth_signature' value and return query string"""

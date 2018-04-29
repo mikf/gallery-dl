@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- Added support for:
+  - `smugmug` - https://www.smugmug.com/
+- Added title information for `mangadex` chapters
+- Improved the `pinterest` API implementation (#83)
+- Removed `gomanga` and `puremashiro`
 
 ## 1.3.4 - 2018-04-20
 - Added support for custom OAuth2 credentials for `pinterest`

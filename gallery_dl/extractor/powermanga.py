@@ -18,7 +18,7 @@ class PowermangaChapterExtractor(foolslide.FoolslideChapterExtractor):
     test = [(("https://read.powermanga.org"
               "/read/one_piece_digital_colour_comics/en/0/75/"), {
         "url": "854c5817f8f767e1bccd05fa9d58ffb5a4b09384",
-        "keyword": "9bf211d435060d1e38d3d13e4aaaa5a87381bfad",
+        "keyword": "9985bcb78491dff9c725958b06bba606be51b6d3",
     })]
 
 
