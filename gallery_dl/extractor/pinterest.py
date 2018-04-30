@@ -39,7 +39,9 @@ class PinterestPinExtractor(PinterestExtractor):
     test = [
         ("https://www.pinterest.com/pin/858146903966145189/", {
             "url": "afb3c26719e3a530bb0e871c480882a801a4e8a5",
-            "content": "d3e24bc9f7af585e8c23b9136956bd45a4d9b947",
+            # image version depends on CDN server used
+            #  "content": "d3e24bc9f7af585e8c23b9136956bd45a4d9b947",
+            #  "content": "4c435a66f6bb82bb681db2ecc888f76cf6c5f9ca",
         }),
         ("https://www.pinterest.com/pin/858146903966145188/", {
             "exception": exception.NotFoundError,

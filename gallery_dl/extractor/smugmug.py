@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from ..cache import memcache
 
 BASE_PATTERN = (
     r"(?:smugmug:(?:https?://)?([^/]+)|"
@@ -20,25 +19,16 @@ BASE_PATTERN = (
 class SmugmugExtractor(Extractor):
     """Base class for smugmug extractors"""
     category = "smugmug"
-    filename_fmt = "{category}_{Owner[Name]}_{Image[ImageKey]}.{extension}"
+    filename_fmt = "{category}_{Owner[NickName]}_{Image[ImageKey]}.{extension}"
 
     def __init__(self):
         Extractor.__init__(self)
         self.api = SmugmugAPI(self)
 
-    def update_image(self, image):
-        if "ArchivedUri" not in image:
-            largest = self.api.image_largest(image["ImageKey"])
-            for key in ("Url", "Width", "Height", "MD5", "Size"):
-                if key in largest:
-                    image[key] = largest[key]
-            return image["Url"], image
-        return image["ArchivedUri"], image
-
 
 class SmugmugAlbumExtractor(SmugmugExtractor):
     subcategory = "album"
-    directory_fmt = ["{category}", "{Owner[Name]}", "{Album[Name]}"]
+    directory_fmt = ["{category}", "{Owner[NickName]}", "{Album[Name]}"]
     archive_fmt = "a_{Album[AlbumKey]}_{Image[ImageKey]}"
     pattern = [r"smugmug:album:([^:]+)$"]
     test = [("smugmug:album:xgkb4C", {
@@ -51,33 +41,30 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
         self.album_id = match.group(1)
 
     def items(self):
-        album = self.api.album(self.album_id)
-        images = self.api.album_images(self.album_id)
-        username = album["Uris"]["User"]["Uri"].rpartition("/")[2]
-        owner = self.api.user(username)
+        album = self.api.album(self.album_id, "User")
+        owner = album["Uris"]["User"]
 
-        data = {
-            "Album": album,
-            "Owner": owner,
-        }
+        del album["Uris"]
+        del owner["Uris"]
+        data = {"Album": album, "Owner": owner}
 
         yield Message.Version, 1
         yield Message.Directory, data
 
-        for image in images:
-            url, image = self.update_image(image)
+        for image in self.api.album_images(self.album_id, "LargestImage"):
+            url = _apply_largest(image)
             data["Image"] = image
             yield Message.Url, url, text.nameext_from_url(url, data)
 
 
 class SmugmugImageExtractor(SmugmugExtractor):
     subcategory = "image"
-    directory_fmt = ["{category}", "{Owner[Name]}"]
+    directory_fmt = ["{category}", "{Owner[NickName]}"]
     archive_fmt = "{Image[ImageKey]}"
     pattern = [BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#]+)"]
     test = [("https://mikf.smugmug.com/Test/n-xnNH3s/i-L4CxBdg", {
         "url": "905bfdef52ce1a731a4eae17e9ac348511e17ae4",
-        "keyword": "d53df829d493ec3e31b8fe300872beb968812bfd",
+        "keyword": "490f2b977801e1f9c817be7aceea46d37418f08d",
         "content": "626fe50d25fe49beeda15e116938db36e163c01f",
     })]
 
@@ -86,18 +73,13 @@ class SmugmugImageExtractor(SmugmugExtractor):
         self.image_id = match.group(3)
 
     def items(self):
-        image = self.api.image(self.image_id)
-        username = image["Uris"]["ImageOwner"]["Uri"].rpartition("/")[2]
-        owner = self.api.user(username)
+        image = self.api.image(self.image_id, "LargestImage,ImageOwner")
+        owner = image["Uris"]["ImageOwner"]
 
-        url, image = self.update_image(image)
+        url = _apply_largest(image)
 
-        data = {
-            "Image": image,
-            "Owner": owner,
-        }
-        del image["Uris"]
         del owner["Uris"]
+        data = {"Image": image, "Owner": owner}
         text.nameext_from_url(url, data)
 
         yield Message.Version, 1
@@ -106,10 +88,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
 
 
 class SmugmugNodeExtractor(SmugmugExtractor):
-    """ """
     subcategory = "node"
-    directory_fmt = ["{category}"]
-    archive_fmt = "n_{Node[NodeID]}_{Image[ImageID]}"
     pattern = [BASE_PATTERN + r"(?:/[^/?&#]+)+/n-([^/?&#]+)$"]
     test = [("https://mikf.smugmug.com/Test/n-xnNH3s", {
         "pattern": "^smugmug:album:xgkb4C$",
@@ -124,9 +103,10 @@ class SmugmugNodeExtractor(SmugmugExtractor):
 
         data = self.api.node(self.node_id)
         if data["Type"] == "Album":
-            album_id = data["Uris"]["Album"]["Uri"].rpartition("/")[2]
-            yield Message.Queue, "smugmug:album:" + album_id, data
-        # ...
+            yield Message.Queue, "smugmug:album:" + _get(data, "Album"), data
+        #  if data["Type"] == "Folder":
+        #      for child in self.api.node_children(self.node_id):
+        #          yield Message.Queue, "smugmug:node:" + ...
 
 
 class SmugmugAPI():
@@ -154,61 +134,117 @@ class SmugmugAPI():
             self.session = extractor.session
             self.api_key = api_key
 
-    def album(self, album_id):
-        return self._call("album/" + album_id)["Album"]
+        self.log = extractor.log
 
-    def album_images(self, album_id):
-        return self._pagination("album/" + album_id + "!images")
+    def album(self, album_id, expands=None):
+        return self._expansion("album/" + album_id, expands)
 
-    def image(self, image_id):
-        return self._call("image/" + image_id)["Image"]
+    def image(self, image_id, expands=None):
+        return self._expansion("image/" + image_id, expands)
 
-    def image_largest(self, image_id):
-        endpoint = "image/" + image_id + "!largestimage"
-        return self._call(endpoint)["LargestImage"]
+    def node(self, node_id, expands=None):
+        return self._expansion("node/" + node_id, expands)
 
-    def image_sizes(self, image_id):
-        return self._call("image/" + image_id + "!sizedetails")
+    def user(self, username, expands=None):
+        return self._expansion("user/" + username, expands)
 
-    def node(self, node_id):
-        return self._call("node/" + node_id)["Node"]
+    def album_images(self, album_id, expands=None):
+        return self._pagination("album/" + album_id + "!images", expands)
 
-    @memcache(keyarg=1)
-    def user(self, username):
-        return self._call("user/" + username)["User"]
+    def node_children(self, node_id, expands=None):
+        return self._pagination("node/" + node_id + "!children", expands)
 
     def _call(self, endpoint, params=None):
         url = self.API_URL + endpoint
         params = params or {}
         if self.api_key:
             params["APIKey"] = self.api_key
+        params["_verbosity"] = "1"
 
         response = self.session.get(url, params=params, headers=self.HEADERS)
         data = response.json()
 
         if 200 <= data["Code"] < 400:
-            return data["Response"]
-
+            return data
         if data["Code"] == 404:
             raise exception.NotFoundError()
         if data["Code"] == 429:
             self.log.error("Rate limit reached")
-            raise exception.StopExtraction()
+        else:
+            self.log.error("API request failed")
+            self.log.debug(data)
+        raise exception.StopExtraction()
 
-    def _pagination(self, endpoint):
-        params = {
-            "start": 1,
-            "count": 100,
-        }
+    def _expansion(self, endpoint, expands):
+        if expands:
+            endpoint += "?_expand=" + expands
+        return _apply_expansions(self._call(endpoint), expands)
+
+    def _pagination(self, endpoint, expands=None):
+        if expands:
+            endpoint += "?_expand=" + expands
+        params = {"start": 1, "count": 100}
+
         while True:
-            response = self._call(endpoint, params)
+            data = self._call(endpoint, params)
+            yield from _apply_expansions_iter(data, expands)
 
-            obj = response[response["Locator"]]
-            if isinstance(obj, list):
-                yield from obj
-            else:
-                yield obj
-
-            if "NextPage" not in response["Pages"]:
+            if "NextPage" not in data["Response"]["Pages"]:
                 return
             params["start"] += params["count"]
+
+
+def _apply_largest(image, delete=True):
+    largest = image["Uris"]["LargestImage"]
+    if delete:
+        del image["Uris"]
+    for key in ("Url", "Width", "Height", "MD5", "Size", "Watermarked"):
+        if key in largest:
+            image[key] = largest[key]
+    return image["Url"]
+
+
+def _get(obj, key):
+    return obj["Uris"][key].rpartition("/")[2]
+
+
+def _apply_expansions(data, expands):
+    obj = _unwrap(data["Response"])
+
+    if "Expansions" in data:
+        expansions = data["Expansions"]
+        uris = obj["Uris"]
+
+        for name in expands.split(","):
+            uri = uris[name]
+            uris[name] = _unwrap(expansions[uri])
+
+    return obj
+
+
+def _apply_expansions_iter(data, expands):
+    objs = _unwrap_iter(data["Response"])
+
+    if "Expansions" in data:
+        expansions = data["Expansions"]
+        expands = expands.split(",")
+
+        for obj in objs:
+            uris = obj["Uris"]
+
+            for name in expands:
+                uri = uris[name]
+                uris[name] = _unwrap(expansions[uri])
+
+    return objs
+
+
+def _unwrap(response):
+    return response[response["Locator"]]
+
+
+def _unwrap_iter(response):
+    obj = _unwrap(response)
+    if isinstance(obj, list):
+        return obj
+    return (obj,)
