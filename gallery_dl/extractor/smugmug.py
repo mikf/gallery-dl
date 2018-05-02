@@ -12,8 +12,8 @@ from .common import Extractor, Message
 from .. import text, util, exception
 
 BASE_PATTERN = (
-    r"(?:smugmug:(?:https?://)?([^/]+)|"
-    r"(?:https?://)?([^.]+\.smugmug\.com))")
+    r"(?:smugmug:(?!album:)(?:https?://)?([^/]+)|"
+    r"(?:https?://)?([^.]+)\.smugmug\.com)")
 
 
 class SmugmugExtractor(Extractor):
@@ -24,6 +24,12 @@ class SmugmugExtractor(Extractor):
     def __init__(self):
         Extractor.__init__(self)
         self.api = SmugmugAPI(self)
+        self.domain = None
+        self.user = None
+
+    def _resolve_user(self):
+        if not self.user:
+            self.user = self.api.site_user(self.domain)["NickName"]
 
 
 class SmugmugAlbumExtractor(SmugmugExtractor):
@@ -64,7 +70,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
     pattern = [BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#]+)"]
     test = [("https://mikf.smugmug.com/Test/n-xnNH3s/i-L4CxBdg", {
         "url": "905bfdef52ce1a731a4eae17e9ac348511e17ae4",
-        "keyword": "490f2b977801e1f9c817be7aceea46d37418f08d",
+        "keyword": "3fd6db2ab3d12a6d3cfc49ee57adc91fdd295a6c",
         "content": "626fe50d25fe49beeda15e116938db36e163c01f",
     })]
 
@@ -87,31 +93,80 @@ class SmugmugImageExtractor(SmugmugExtractor):
         yield Message.Url, url, data
 
 
-class SmugmugNodeExtractor(SmugmugExtractor):
-    subcategory = "node"
-    pattern = [BASE_PATTERN + r"(?:/[^/?&#]+)+/n-([^/?&#]+)$"]
-    test = [("https://mikf.smugmug.com/Test/n-xnNH3s", {
-        "pattern": "^smugmug:album:xgkb4C$",
-    })]
+class SmugmugUserExtractor(SmugmugExtractor):
+    subcategory = "user"
+    pattern = [BASE_PATTERN + "(?:/browse)?/?$"]
+    test = [
+        ("https://mikf.smugmug.com/", {
+            "pattern": "smugmug:album:xgkb4C$",
+        }),
+        ("https://mikf.smugmug.com/browse", None),
+        ("smugmug:https://www.creativedogportraits.com/", {
+            "pattern": "smugmug:album:txWXzs$",
+        }),
+        ("smugmug:www.creativedogportraits.com/", None),
+        ("smugmug:www.creativedogportraits.com/browse", None),
+    ]
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self)
-        self.node_id = match.group(3)
+        self.domain = match.group(1)
+        self.user = match.group(2)
+
+    def items(self):
+        self._resolve_user()
+        yield Message.Version, 1
+        for album in self.api.user_albums(self.user):
+            uri = "smugmug:album:" + album["AlbumKey"]
+            yield Message.Queue, uri, album
+
+
+class SmugmugNodeExtractor(SmugmugExtractor):
+    subcategory = "node"
+    pattern = [BASE_PATTERN +
+               r"((?:/[^/?&#a-z][^/?&#]*)+)"
+               r"(?:/n-([^/?&#]+))?/?$"]
+    test = [
+        ("https://mikf.smugmug.com/Test/", {
+            "pattern": "smugmug:album:xgkb4C$",
+        }),
+        ("https://mikf.smugmug.com/Test/n-xnNH3s", {
+            "pattern": "smugmug:album:xgkb4C$",
+        }),
+        ("smugmug:https://www.creativedogportraits.com/PortfolioGallery/", {
+            "pattern": "smugmug:album:txWXzs$",
+        }),
+    ]
+
+    def __init__(self, match):
+        SmugmugExtractor.__init__(self)
+        self.domain, self.user, self.path, self.node_id = match.groups()
 
     def items(self):
         yield Message.Version, 1
 
-        data = self.api.node(self.node_id)
-        if data["Type"] == "Album":
-            yield Message.Queue, "smugmug:album:" + _get(data, "Album"), data
-        #  if data["Type"] == "Folder":
-        #      for child in self.api.node_children(self.node_id):
-        #          yield Message.Queue, "smugmug:node:" + ...
+        if self.node_id:
+            node = self.api.node(self.node_id)
+        else:
+            self._resolve_user()
+            data = self.api.user_urlpathlookup(self.user, self.path)
+            node = data["Uris"]["Node"]
+
+        nodes = (node,) if node["Type"] == "Album" else self.album_nodes(node)
+        for node in nodes:
+            yield Message.Queue, "smugmug:album:" + _get(node, "Album"), node
+
+    def album_nodes(self, root):
+        for node in self.api.node_children(root["NodeID"]):
+            if node["Type"] == "Album":
+                yield node
+            elif node["Type"] == "Folder":
+                yield from self.album_nodes(node)
 
 
 class SmugmugAPI():
     """Minimal interface for the smugmug API v2"""
-    API_URL = "https://api.smugmug.com/api/v2/"
+    API_DOMAIN = "api.smugmug.com"
     API_KEY = "DFqxg4jf7GrtsQ5PnbNB8899zKfnDrdK"
     API_SECRET = ("fknV35p9r9BwZC4XbTzvCXpcSJRdD83S"
                   "9nMFQm25ndGBzNPnwRDbRnnVBvqt4xTq")
@@ -154,8 +209,19 @@ class SmugmugAPI():
     def node_children(self, node_id, expands=None):
         return self._pagination("node/" + node_id + "!children", expands)
 
-    def _call(self, endpoint, params=None):
-        url = self.API_URL + endpoint
+    def user_albums(self, username, expands=None):
+        return self._pagination("user/" + username + "!albums", expands)
+
+    def site_user(self, domain):
+        return _unwrap(self._call("!siteuser", domain=domain)["Response"])
+
+    def user_urlpathlookup(self, username, path):
+        endpoint = "user/" + username + "!urlpathlookup"
+        params = {"urlpath": path}
+        return self._expansion(endpoint, "Node", params)
+
+    def _call(self, endpoint, params=None, domain=API_DOMAIN):
+        url = "https://{}/api/v2/{}".format(domain, endpoint)
         params = params or {}
         if self.api_key:
             params["APIKey"] = self.api_key
@@ -175,10 +241,10 @@ class SmugmugAPI():
             self.log.debug(data)
         raise exception.StopExtraction()
 
-    def _expansion(self, endpoint, expands):
+    def _expansion(self, endpoint, expands, params=None):
         if expands:
             endpoint += "?_expand=" + expands
-        return _apply_expansions(self._call(endpoint), expands)
+        return _apply_expansions(self._call(endpoint, params), expands)
 
     def _pagination(self, endpoint, expands=None):
         if expands:
@@ -240,7 +306,8 @@ def _apply_expansions_iter(data, expands):
 
 
 def _unwrap(response):
-    return response[response["Locator"]]
+    locator = response["Locator"]
+    return response[locator] if locator in response else []
 
 
 def _unwrap_iter(response):
