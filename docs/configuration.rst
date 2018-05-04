@@ -820,35 +820,6 @@ How To
 =========== =====
 
 
-extractor.pinterest.access-token
---------------------------------
-=========== =====
-Type        ``string``
-How To      - register a Pinterest application and use its client-id and
-              client-secret (see `extractor.pinterest.client-id & .secret`_)
-            - run `gallery-dl oauth:pinterest` and authenticate access with
-              (preferably) the same account that registered the application
-Notes       Access tokens currently only allow for 10 requests per hour.
-=========== =====
-
-
-extractor.pinterest.client-id & .secret
----------------------------------------
-=========== =====
-Type        ``string``
-How To      - login and visit Pinterest's
-              `Apps <https://developers.pinterest.com/apps/>`__ section
-            - agree to "Pinterest Developer Terms and the API Policy"
-              and click "Create app"
-            - choose a random name and description and click "Create"
-            - scroll down and set a Site URL (e.g. https://example.org/)
-              and allow https://mikf.github.io/gallery-dl/oauth-redirect.html
-              as Redirect URI
-            - scroll back up again, copy the "App ID" and "App secret" values
-              and put them in your configuration file
-=========== =====
-
-
 extractor.reddit.client-id & .user-agent
 ----------------------------------------
 =========== =====

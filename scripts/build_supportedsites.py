@@ -5,7 +5,7 @@ import os.path
 
 ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.realpath(ROOTDIR))
-import gallery_dl.extractor
+import gallery_dl.extractor  # noqa
 
 
 CATEGORY_MAP = {
@@ -20,7 +20,6 @@ CATEGORY_MAP = {
     "e621"           : "e621",
     "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
-    "gomanga"        : "GoManga",
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
     "hentaifoundry"  : "Hentai Foundry",
@@ -30,14 +29,11 @@ CATEGORY_MAP = {
     "imagebam"       : "ImageBam",
     "imagefap"       : "ImageFap",
     "imgbox"         : "imgbox",
-    "imgchili"       : "imgChili",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
     "jaiminisbox"    : "Jaimini's Box",
     "kireicake"      : "Kirei Cake",
-    "kisscomic"      : "KissComic",
     "kissmanga"      : "KissManga",
-    "loveisover"     : "Love is Over Archive",
     "mangadex"       : "MangaDex",
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
@@ -48,7 +44,6 @@ CATEGORY_MAP = {
     "nyafuu"         : "Nyafuu Archive",
     "paheal"         : "rule #34",
     "powermanga"     : "PowerManga",
-    "puremashiro"    : "Pure Mashiro",
     "readcomiconline": "Read Comic Online",
     "rbt"            : "RebeccaBlackTech",
     "rule34"         : "Rule 34",
@@ -58,10 +53,9 @@ CATEGORY_MAP = {
     "senmanga"       : "Sen Manga",
     "sensescans"     : "Sense-Scans",
     "slideshare"     : "SlideShare",
-    "spectrumnexus"  : "Spectrum Nexus",
+    "smugmug"        : "SmugMug",
     "thebarchive"    : "The /b/ Archive",
     "worldthree"     : "World Three",
-    "yeet"           : "YEET Archive",
     "xvideos"        : "XVideos",
 }
 
@@ -72,6 +66,7 @@ SUBCATEGORY_MAP = {
     "issue"  : "Comic-Issues",
     "manga"  : "Manga",
     "me"     : "pixiv.me Links",
+    "path"   : "Images from Users and Folders",
     "pinit"  : "pin.it Links",
     "popular": "Popular Images",
     "search" : "Search Results",

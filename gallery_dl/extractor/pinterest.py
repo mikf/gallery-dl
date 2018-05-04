@@ -10,13 +10,14 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+import json
 
 
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
     category = "pinterest"
-    filename_fmt = "{category}_{pin_id}.{extension}"
-    archive_fmt = "{pin_id}"
+    filename_fmt = "{category}_{id}.{extension}"
+    archive_fmt = "{id}"
 
     def __init__(self):
         Extractor.__init__(self)
@@ -24,15 +25,11 @@ class PinterestExtractor(Extractor):
 
     def data_from_pin(self, pin):
         """Get image url and metadata from a pin-object"""
-        img = pin["image"]["original"]
+        img = pin["images"]["orig"]
         url = img["url"]
-        data = {
-            "pin_id": text.parse_int(pin["id"]),
-            "note": pin["note"],
-            "width": text.parse_int(img["width"]),
-            "height": text.parse_int(img["height"]),
-        }
-        return url, text.nameext_from_url(url, data)
+        pin["width"] = img["width"]
+        pin["height"] = img["height"]
+        return url, text.nameext_from_url(url, pin)
 
 
 class PinterestPinExtractor(PinterestExtractor):
@@ -42,13 +39,11 @@ class PinterestPinExtractor(PinterestExtractor):
     test = [
         ("https://www.pinterest.com/pin/858146903966145189/", {
             "url": "afb3c26719e3a530bb0e871c480882a801a4e8a5",
-            "keyword": "f651cb271247f306d1d30385d49c7b82da44c2b1",
-            "content": "d3e24bc9f7af585e8c23b9136956bd45a4d9b947",
+            # image version depends on CDN server used
+            #  "content": "d3e24bc9f7af585e8c23b9136956bd45a4d9b947",
+            #  "content": "4c435a66f6bb82bb681db2ecc888f76cf6c5f9ca",
         }),
         ("https://www.pinterest.com/pin/858146903966145188/", {
-            "exception": exception.StopExtraction,
-        }),
-        ("https://www.pinterest.com/pin/85814690396614518/", {
             "exception": exception.NotFoundError,
         }),
     ]
@@ -68,13 +63,13 @@ class PinterestPinExtractor(PinterestExtractor):
 class PinterestBoardExtractor(PinterestExtractor):
     """Extractor for images from a board from pinterest.com"""
     subcategory = "board"
-    directory_fmt = ["{category}", "{user}", "{board}"]
+    directory_fmt = ["{category}", "{board[owner][username]}", "{board[name]}"]
+    archive_fmt = "{board[id]}_{id}"
     pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.[^/]+/"
                r"(?!pin/)([^/?#&]+)/([^/?#&]+)"]
     test = [
         ("https://www.pinterest.com/g1952849/test-/", {
             "url": "85911dfca313f3f7f48c2aa0bc684f539d1d80a6",
-            "keyword": "c54cf5aa830994f2ed4871efa7154a5fdaa1c2ce",
         }),
         ("https://www.pinterest.com/g1952848/test/", {
             "exception": exception.NotFoundError,
@@ -83,30 +78,18 @@ class PinterestBoardExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self)
-        self.user, self.board = match.groups()
+        self.user = text.unquote(match.group(1))
+        self.board = text.unquote(match.group(2))
 
     def items(self):
         board = self.api.board(self.user, self.board)
-        data = self.data_from_board(board)
-        num = data["count"]
+        data = {"board": board, "count": board["pin_count"]}
         yield Message.Version, 1
         yield Message.Directory, data
-        for pin in self.api.board_pins(self.user, self.board):
-            url, pdata = self.data_from_pin(pin)
-            data.update(pdata)
-            data["num"] = num
-            num -= 1
-            yield Message.Url, url, data
-
-    def data_from_board(self, board):
-        """Get metadata from a board-object"""
-        data = {
-            "user": self.user,
-            "board_id": text.parse_int(board["id"]),
-            "board": board["name"],
-            "count": board["counts"]["pins"],
-        }
-        return data
+        for pin in self.api.board_pins(board["id"]):
+            url, pin_data = self.data_from_pin(pin)
+            pin_data.update(data)
+            yield Message.Url, url, pin_data
 
 
 class PinterestPinitExtractor(PinterestExtractor):
@@ -136,59 +119,67 @@ class PinterestPinitExtractor(PinterestExtractor):
 
 
 class PinterestAPI():
-    """Minimal interface for the pinterest API"""
+    """Minimal interface for the Pinterest Web API
 
-    def __init__(self, extractor, access_token=None):
-        self.log = extractor.log
-        self.session = extractor.session
-        self.access_token = (
-            access_token or
-            extractor.config("access-token") or
-            "AfyIXxi1MJ6et0NlIl_vBchHbex-FSWylPyr2GJE2uu3W8A97QAAAAA"
-        )
+    For a better and more complete implementation in PHP, see
+    - https://github.com/seregazhuk/php-pinterest-bot
+    """
 
-    def pin(self, pin_id, fields="id,image,note"):
+    BASE_URL = "https://uk.pinterest.com"
+    HEADERS = {
+        "Accept"              : "application/json, text/javascript, "
+                                "*/*, q=0.01",
+        "Accept-Language"     : "en-US,en;q=0.5",
+        "X-Pinterest-AppState": "active",
+        "X-APP-VERSION"       : "cb1c7f9",
+        "X-Requested-With"    : "XMLHttpRequest",
+        "Origin"              : BASE_URL + "/",
+    }
+
+    def __init__(self, extractor):
+        self.extractor = extractor
+
+    def pin(self, pin_id):
         """Query information about a pin"""
-        endpoint = "pins/{}/".format(pin_id)
-        params = {"fields": fields}
-        return self._call(endpoint, params)["data"]
+        options = {"id": pin_id, "field_set_key": "detailed"}
+        return self._call("Pin", options)["resource_response"]["data"]
 
-    def board(self, user, board, fields="id,name,counts"):
+    def board(self, user, board):
         """Query information about a board"""
-        endpoint = "boards/{}/{}/".format(user, board)
-        params = {"fields": fields}
-        return self._call(endpoint, params)["data"]
+        options = {"slug": board, "username": user,
+                   "field_set_key": "detailed"}
+        return self._call("Board", options)["resource_response"]["data"]
 
-    def board_pins(self, user, board, fields="id,image,note", limit=100):
+    def board_pins(self, board_id):
         """Yield all pins of a specific board"""
-        endpoint = "boards/{}/{}/pins/".format(user, board)
-        params = {"fields": fields, "limit": limit}
-        return self._pagination(endpoint, params)
+        options = {"board_id": board_id}
+        return self._pagination("BoardFeed", options)
 
-    def _call(self, endpoint, params):
-        params["access_token"] = self.access_token
-        url = "https://api.pinterest.com/v1/" + endpoint
+    def _call(self, resource, options):
+        url = "{}/resource/{}Resource/get/".format(self.BASE_URL, resource)
+        params = {"data": json.dumps({"options": options}), "source_url": ""}
 
-        response = self.session.get(url, params=params)
-        status = response.status_code
+        response = self.extractor.request(
+            url, params=params, headers=self.HEADERS, fatal=False)
         data = response.json()
 
-        if 200 <= status < 400 and data.get("data"):
+        if 200 <= response.status_code < 400 and not response.history:
             return data
 
-        msg = data.get("message", "")
-        if status == 404:
-            msg = msg.partition(" ")[0].lower()
-            raise exception.NotFoundError(msg)
-        self.log.error("API request failed: %s", msg or "")
+        if response.status_code == 404 or response.history:
+            raise exception.NotFoundError(self.extractor.subcategory)
+        self.extractor.log.error("API request failed")
         raise exception.StopExtraction()
 
-    def _pagination(self, endpoint, params):
+    def _pagination(self, resource, options):
         while True:
-            response = self._call(endpoint, params)
-            yield from response["data"]
+            data = self._call(resource, options)
+            yield from data["resource_response"]["data"]
 
-            cursor = response["page"]["cursor"]
-            if not cursor:
+            try:
+                bookmarks = data["resource"]["options"]["bookmarks"]
+                if not bookmarks or bookmarks[0] == "-end-":
+                    return
+                options["bookmarks"] = bookmarks
+            except KeyError:
                 return
-            params["cursor"] = cursor
