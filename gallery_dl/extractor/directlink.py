@@ -21,10 +21,9 @@ class DirectlinkExtractor(Extractor):
                r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus))"
                r"(?:\?(?P<query>[^/?#]*))?(?:#(?P<fragment>.*))?$"]
     test = [
-        (("https://photos.smugmug.com/The-World/Hawaii/"
-          "i-SWz2K6n/2/X3/IMG_0311-X3.jpg"), {
-            "url": "32ee1045881e17ef3f13a9958595afa42421ec6c",
-            "keyword": "2427b68c14006489df1776bb1bcd3bc24be25e10",
+        (("https://en.wikipedia.org/static/images/project-logos/enwiki.png"), {
+            "url": "18c5d00077332e98e53be9fed2ee4be66154b88d",
+            "keyword": "66bce3a0a6872d8497e1984eb49d54a3ed0d3d5e",
         }),
         # more complex example
         ("https://example.org/path/file.webm?que=1&ry=2#fragment", {

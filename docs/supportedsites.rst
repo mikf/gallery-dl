@@ -24,7 +24,6 @@ Flickr               https://www.flickr.com/             |Images from Use-2|    
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag-Searches
 Gfycat               https://gfycat.com/                 individual Images
-GoManga              https://gomanga.co/                 Chapters, Manga
 HBrowse              http://www.hbrowse.com/             Chapters, Manga
 Hentai Foundry       https://www.hentai-foundry.com/     Images from Users, individual Images
 Hentai2Read          https://hentai2read.com/            Chapters, Manga
@@ -58,7 +57,6 @@ Pawoo                https://pawoo.net                   Images from Users, Imag
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links
 Pixiv                https://www.pixiv.net/              |Images from Use-4|                                Required
 PowerManga           https://powermanga.org/             Chapters, Manga
-Pure Mashiro         http://reader.puremashiro.moe/      Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://reddit.com/                 individual Images, Submissions, Subreddits         Optional (OAuth)
@@ -70,6 +68,7 @@ Sea Otter Scans      https://reader.seaotterscans.com/   Chapters, Manga
 Sen Manga            http://raw.senmanga.com/            Chapters
 Sense-Scans          http://sensescans.com/              Chapters, Manga
 SlideShare           https://www.slideshare.net/         Presentations
+SmugMug              https://www.smugmug.com/            |Albums, individ-5|
 Subapics             https://subapics.com/               Chapters, Manga
 The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
@@ -93,3 +92,4 @@ Turboimagehost       https://turboimagehost.com/         individual Images
 .. |Images from Use-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
 .. |Images from Use-3| replace:: Images from Users, Doujin, Favorites, individual Images
 .. |Images from Use-4| replace:: Images from Users, Bookmarks, Favorites, pixiv.me Links, Rankings, Individual Images
+.. |Albums, individ-5| replace:: Albums, individual Images, Images from Users and Folders

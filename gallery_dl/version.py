@@ -6,4 +6,4 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-__version__ = "1.3.5-dev"
+__version__ = "1.4.0-dev"

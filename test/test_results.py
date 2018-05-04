@@ -16,14 +16,11 @@ from gallery_dl import extractor, job, config, exception
 # these don't work on travis-ci
 TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
-    "archivedmoe", "archiveofsins", "thebarchive",
+    "archivedmoe", "archiveofsins", "thebarchive", "sankaku", "idolcomplex",
 }
 
 # temporary issues, etc.
 BROKEN = {
-    "gomanga",      # server down
-    "pinterest",    # access tokens have been set to 10 requests per hour
-    "puremashiro",  # online reader down
 }
 
 
@@ -146,9 +143,9 @@ def generate_tests():
             fltr = lambda c, bc: c in argv or bc in argv  # noqa: E731
         del sys.argv[1:]
     else:
-        skip = BROKEN.copy()
+        skip = set(BROKEN)
         if "CI" in os.environ and "TRAVIS" in os.environ:
-            skip |= TRAVIS_SKIP
+            skip |= set(TRAVIS_SKIP)
         print("skipping:", ", ".join(skip))
         fltr = lambda c, bc: c not in skip  # noqa: E731
 
