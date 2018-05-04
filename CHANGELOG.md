@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## 1.3.5 - 2018-05-04
 - Added support for:
   - `smugmug` - https://www.smugmug.com/
 - Added title information for `mangadex` chapters
-- Improved the `pinterest` API implementation (#83)
+- Improved the `pinterest` API implementation ([#83](https://github.com/mikf/gallery-dl/issues/83))
+- Improved error handling for `deviantart` and `tumblr`
 - Removed `gomanga` and `puremashiro`
 
 ## 1.3.4 - 2018-04-20

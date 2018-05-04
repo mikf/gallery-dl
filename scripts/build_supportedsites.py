@@ -66,6 +66,7 @@ SUBCATEGORY_MAP = {
     "issue"  : "Comic-Issues",
     "manga"  : "Manga",
     "me"     : "pixiv.me Links",
+    "path"   : "Images from Users and Folders",
     "pinit"  : "pin.it Links",
     "popular": "Popular Images",
     "search" : "Search Results",
