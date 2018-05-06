@@ -1,5 +1,8 @@
 # Changelog
 
+# Unreleased
+- Fixed extraction of `mangadex` manga with more than 100 chapters (#84)
+
 ## 1.3.5 - 2018-05-04
 - Added support for:
   - `smugmug` - https://www.smugmug.com/
