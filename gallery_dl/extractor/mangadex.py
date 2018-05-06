@@ -116,6 +116,9 @@ class MangadexMangaExtractor(MangadexExtractor, MangaExtractor):
                 "language": str,
             },
         }),
+        ("https://mangadex.org/manga/13318/dagashi-kashi/chapters/2/", {
+            "count": ">= 100",
+        }),
     ]
     scheme = "https"
     per_page = 100
@@ -166,4 +169,4 @@ class MangadexMangaExtractor(MangadexExtractor, MangaExtractor):
                 return results
 
             num += 1
-            page = self.request("{}/_/{}/".format(self.url, num)).text
+            page = self.request("{}/_/chapters/{}/".format(self.url, num)).text

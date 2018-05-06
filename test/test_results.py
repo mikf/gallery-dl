@@ -21,6 +21,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "pixiv",  # API requests sometimes fail
 }
 
 
