@@ -429,3 +429,101 @@ class PixivAPI():
             if pinfo["current"] == pinfo["pages"]:
                 return
             params["page"] = pinfo["next"]
+
+
+class PixivAppAPI():
+    """Minimal interface for the Pixiv App-API for mobile devices
+
+    For a more complete implementation, see
+    - https://github.com/upbit/pixivpy
+    """
+    CLIENT_ID = "MOBrBDS8blbauoSck0ZfDbtuzpyT"
+    CLIENT_SECRET = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj"
+
+    def __init__(self, extractor):
+        self.session = extractor.session
+        self.log = extractor.log
+        self.username, self.password = extractor._get_auth_info()
+        self.user_info = None
+
+        self.client_id = extractor.config(
+            "client-id", self.CLIENT_ID)
+        self.client_secret = extractor.config(
+            "client-secret", self.CLIENT_SECRET)
+
+        self.session.headers.update({
+            "App-OS": "ios",
+            "App-OS-Version": "10.3.1",
+            "App-Version": "6.7.1",
+            "User-Agent": "PixivIOSApp/6.7.1 (iOS 10.3.1; iPhone8,1)",
+        })
+
+    def illust_detail(self, illust_id):
+        params = {"illust_id": illust_id}
+        return self._call("v1/illust/detail", params)
+
+    def illust_ranking(self, mode="day", date=None):
+        params = {"mode": mode, "date": date}
+        return self._pagination("v1/illust/ranking", params)
+
+    def user_detail(self, user_id):
+        params = {"user_id": user_id}
+        return self._call("v1/user/detail", params)
+
+    def user_illusts(self, user_id, illust_type=None):
+        params = {"user_id": user_id, "type": illust_type}
+        return self._pagination("v1/user/illusts", params)
+
+    def ugoira_metadata(self, illust_id):
+        params = {"illust_id": illust_id}
+        return self._call("v1/ugoira/metadata", params)
+
+    def authenticate(self):
+        """Authenticate the application by requesting an access token"""
+        self.user_info, auth = self._authenticate_impl(
+            self.username, self.password)
+        self.session.headers["Authorization"] = auth
+
+    @cache(maxage=3590, keyarg=1)
+    def _authenticate_impl(self, username, password):
+        """Actual authenticate implementation"""
+        self.log.info("Logging in as %s", username)
+
+        url = "https://oauth.secure.pixiv.net/auth/token"
+        data = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "grant_type": "password",
+            "username": username,
+            "password": password,
+            "get_secure_url": 1,
+        }
+
+        response = self.session.post(url, data=data)
+        if response.status_code >= 400:
+            raise exception.AuthenticationError()
+
+        data = response.json()["response"]
+        return data["user"], "Bearer " + data["access_token"]
+
+    def _call(self, endpoint, params=None):
+        url = "https://app-api.pixiv.net/" + endpoint
+
+        self.authenticate()
+        response = self.session.get(url, params=params)
+
+        if 200 <= response.status_code < 400:
+            return response.json()
+        if response.status_code == 404:
+            raise exception.NotFoundError()
+        self.log.error("API request failed: %s", response.text)
+        raise exception.StopExtraction()
+
+    def _pagination(self, endpoint, params):
+        while True:
+            data = self._call(endpoint, params)
+            yield from data["illusts"]
+
+            if not data["next_url"]:
+                return
+            params["offset"] = data["next_url"].rpartition("=")[2]
