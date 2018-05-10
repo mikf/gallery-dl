@@ -164,7 +164,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         data["title"] = text.unescape(data["title"])
         data["title_jp"] = text.unescape(data["title_jp"])
         data["count"] = text.parse_int(data["count"])
-        data["gallery_size"] = util.parse_bytes(
+        data["gallery_size"] = text.parse_bytes(
             data["gallery_size"].rstrip("Bb"))
         return data
 
@@ -256,7 +256,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         return {
             "width": text.parse_int(parts[0]),
             "height": text.parse_int(parts[2]),
-            "size": util.parse_bytes(parts[3] + parts[4][0]),
+            "size": text.parse_bytes(parts[3] + parts[4][0]),
         }
 
 
