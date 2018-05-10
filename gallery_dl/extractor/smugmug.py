@@ -171,31 +171,13 @@ class SmugmugPathExtractor(SmugmugExtractor):
                 yield from self.album_nodes(node)
 
 
-class SmugmugAPI():
+class SmugmugAPI(oauth.OAuth1API):
     """Minimal interface for the smugmug API v2"""
     API_DOMAIN = "api.smugmug.com"
     API_KEY = "DFqxg4jf7GrtsQ5PnbNB8899zKfnDrdK"
     API_SECRET = ("fknV35p9r9BwZC4XbTzvCXpcSJRdD83S"
                   "9nMFQm25ndGBzNPnwRDbRnnVBvqt4xTq")
     HEADERS = {"Accept": "application/json"}
-
-    def __init__(self, extractor):
-        api_key = extractor.config("api-key", self.API_KEY)
-        api_secret = extractor.config("api-secret", self.API_SECRET)
-        token = extractor.config("access-token")
-        token_secret = extractor.config("access-token-secret")
-
-        if api_key and api_secret and token and token_secret:
-            self.session = oauth.OAuth1Session(
-                api_key, api_secret,
-                token, token_secret,
-            )
-            self.api_key = None
-        else:
-            self.session = extractor.session
-            self.api_key = api_key
-
-        self.log = extractor.log
 
     def album(self, album_id, expands=None):
         return self._expansion("album/" + album_id, expands)

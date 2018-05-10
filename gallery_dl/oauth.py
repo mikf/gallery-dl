@@ -22,8 +22,23 @@ import requests.auth
 from . import text
 
 
+def nonce(size, alphabet=string.ascii_letters):
+    """Generate a nonce value with 'size' characters"""
+    return "".join(random.choice(alphabet) for _ in range(size))
+
+
+def quote(value, quote=urllib.parse.quote):
+    """Quote 'value' according to the OAuth1.0 standard"""
+    return quote(value, "~")
+
+
+def concat(*args):
+    """Concatenate 'args' as expected by OAuth1.0"""
+    return "&".join(quote(item) for item in args)
+
+
 class OAuth1Session(requests.Session):
-    """Extension to requests.Session objects to support OAuth 1.0"""
+    """Extension to requests.Session to support OAuth 1.0"""
 
     def __init__(self, consumer_key, consumer_secret,
                  token=None, token_secret=None):
@@ -42,6 +57,7 @@ class OAuth1Session(requests.Session):
 
 class OAuth1Client(requests.auth.AuthBase):
     """OAuth1.0a authentication"""
+
     def __init__(self, consumer_key, consumer_secret,
                  token=None, token_secret=None):
 
@@ -86,16 +102,25 @@ class OAuth1Client(requests.auth.AuthBase):
         return quote(base64.b64encode(signature).decode())
 
 
-def concat(*args):
-    """Concatenate 'args'"""
-    return "&".join(quote(item) for item in args)
+class OAuth1API():
+    """Base class for OAuth1.0 based API interfaces"""
+    API_KEY = None
+    API_SECRET = None
 
+    def __init__(self, extractor):
+        self.log = extractor.log
 
-def nonce(size, alphabet=string.ascii_letters):
-    """Generate a nonce value with 'size' characters"""
-    return "".join(random.choice(alphabet) for _ in range(size))
+        api_key = extractor.config("api-key", self.API_KEY)
+        api_secret = extractor.config("api-secret", self.API_SECRET)
+        token = extractor.config("access-token")
+        token_secret = extractor.config("access-token-secret")
 
-
-def quote(value, quote=urllib.parse.quote):
-    """Quote 'value' according to the OAuth1.0 standard"""
-    return quote(value, "~")
+        if api_key and api_secret and token and token_secret:
+            self.log.debug("Using OAuth1.0 authentication")
+            self.session = OAuth1Session(
+                api_key, api_secret, token, token_secret)
+            self.api_key = None
+        else:
+            self.log.debug("Using api_key authentication")
+            self.session = extractor.session
+            self.api_key = api_key
