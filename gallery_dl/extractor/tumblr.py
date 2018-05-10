@@ -248,30 +248,15 @@ class TumblrLikesExtractor(TumblrExtractor):
         return self.api.likes(self.blog)
 
 
-class TumblrAPI():
+class TumblrAPI(oauth.OAuth1API):
     """Minimal interface for the Tumblr API v2"""
     API_KEY = "O3hU2tMi5e4Qs5t3vezEi6L0qRORJ5y9oUpSGsrWu8iA3UCc3B"
     API_SECRET = "sFdsK3PDdP2QpYMRAoq0oDnw0sFS24XigXmdfnaeNZpJpqAn03"
     BLOG_CACHE = {}
 
     def __init__(self, extractor):
-        api_key = extractor.config("api-key", self.API_KEY)
-        api_secret = extractor.config("api-secret", self.API_SECRET)
-        token = extractor.config("access-token")
-        token_secret = extractor.config("access-token-secret")
-
-        if api_key and api_secret and token and token_secret:
-            self.session = oauth.OAuth1Session(
-                api_key, api_secret,
-                token, token_secret,
-            )
-            self.api_key = None
-        else:
-            self.session = extractor.session
-            self.api_key = api_key
-
+        oauth.OAuth1API.__init__(self, extractor)
         self.posts_type = None
-        self.log = extractor.log
 
     def info(self, blog):
         """Return general information about a blog"""
