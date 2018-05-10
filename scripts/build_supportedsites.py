@@ -87,6 +87,7 @@ AUTH_MAP = {
     "reddit"     : "Optional (OAuth)",
     "sankaku"    : "Optional",
     "seiga"      : "Required",
+    "smugmug"    : "Optional (OAuth)",
     "tumblr"     : "Optional (OAuth)",
 }
 

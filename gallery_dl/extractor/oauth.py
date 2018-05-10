@@ -9,7 +9,7 @@
 """Utility classes to setup OAuth and link a users account to gallery-dl"""
 
 from .common import Extractor, Message
-from . import deviantart, flickr, reddit, tumblr
+from . import deviantart, flickr, reddit, smugmug, tumblr
 from .. import text, oauth, config
 import os
 import urllib.parse
@@ -209,6 +209,27 @@ class OAuthReddit(OAuthBase):
             "https://www.reddit.com/api/v1/authorize",
             "https://www.reddit.com/api/v1/access_token",
             scope="read",
+        )
+
+
+class OAuthSmugmug(OAuthBase):
+    subcategory = "smugmug"
+    pattern = ["oauth:smugmug$"]
+
+    def __init__(self, match):
+        OAuthBase.__init__(self, match)
+        self.session = oauth.OAuth1Session(
+            self.oauth_config("api-key", smugmug.SmugmugAPI.API_KEY),
+            self.oauth_config("api-secret", smugmug.SmugmugAPI.API_SECRET),
+        )
+
+    def items(self):
+        yield Message.Version, 1
+
+        self._oauth1_authorization_flow(
+            "https://api.smugmug.com/services/oauth/1.0a/getRequestToken",
+            "https://api.smugmug.com/services/oauth/1.0a/authorize",
+            "https://api.smugmug.com/services/oauth/1.0a/getAccessToken",
         )
 
 
