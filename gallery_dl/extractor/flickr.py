@@ -9,7 +9,7 @@
 """Extract images from https://www.flickr.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, oauth, util, exception
 
 
 class FlickrExtractor(Extractor):
@@ -264,17 +264,20 @@ class FlickrAPI():
     ]
 
     def __init__(self, extractor):
-        self.api_key = extractor.config("api-key", self.API_KEY)
-        self.api_secret = extractor.config("api-secret", self.API_SECRET)
+        api_key = extractor.config("api-key", self.API_KEY)
+        api_secret = extractor.config("api-secret", self.API_SECRET)
         token = extractor.config("access-token")
         token_secret = extractor.config("access-token-secret")
-        if token and token_secret:
-            self.session = util.OAuthSession(
-                extractor.session,
-                self.api_key, self.api_secret, token, token_secret)
+
+        if api_key and api_secret and token and token_secret:
+            self.session = oauth.OAuth1Session(
+                api_key, api_secret,
+                token, token_secret,
+            )
             self.api_key = None
         else:
             self.session = extractor.session
+            self.api_key = api_key
 
         self.maxsize = extractor.config("size-max")
         if isinstance(self.maxsize, str):

@@ -9,7 +9,7 @@
 """Extract images from https://www.smugmug.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, oauth, exception
 
 BASE_PATTERN = (
     r"(?:smugmug:(?!album:)(?:https?://)?([^/]+)|"
@@ -186,8 +186,7 @@ class SmugmugAPI():
         token_secret = extractor.config("access-token-secret")
 
         if api_key and api_secret and token and token_secret:
-            self.session = util.OAuthSession(
-                extractor.session,
+            self.session = oauth.OAuth1Session(
                 api_key, api_secret,
                 token, token_secret,
             )
