@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from . import deviantart, flickr, reddit, tumblr
-from .. import text, util, config
+from .. import text, oauth, config
 import os
 import urllib.parse
 
@@ -70,21 +70,19 @@ class OAuthBase(Extractor):
     def _oauth1_authorization_flow(
             self, request_token_url, authorize_url, access_token_url):
         """Perform the OAuth 1.0a authorization flow"""
-        del self.session.params["oauth_token"]
-
         # get a request token
         params = {"oauth_callback": self.redirect_uri}
         data = self.session.get(request_token_url, params=params).text
 
         data = text.parse_query(data)
-        self.session.params["oauth_token"] = token = data["oauth_token"]
-        self.session.token_secret = data["oauth_token_secret"]
+        self.session.auth.token_secret = data["oauth_token_secret"]
 
         # get the user's authorization
-        params = {"oauth_token": token, "perms": "read"}
+        params = {"oauth_token": data["oauth_token"], "perms": "read"}
         data = self.open(authorize_url, params)
 
         # exchange the request token for an access token
+        # self.session.token = data["oauth_token"]
         data = self.session.get(access_token_url, params=data).text
 
         data = text.parse_query(data)
@@ -101,7 +99,7 @@ class OAuthBase(Extractor):
 
         state = "gallery-dl_{}_{}".format(
             self.subcategory,
-            util.OAuthSession.nonce(8)
+            oauth.nonce(8),
         )
 
         auth_params = {
@@ -182,8 +180,7 @@ class OAuthFlickr(OAuthBase):
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
-        self.session = util.OAuthSession(
-            self.session,
+        self.session = oauth.OAuth1Session(
             self.oauth_config("api-key", flickr.FlickrAPI.API_KEY),
             self.oauth_config("api-secret", flickr.FlickrAPI.API_SECRET),
         )
@@ -221,8 +218,7 @@ class OAuthTumblr(OAuthBase):
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
-        self.session = util.OAuthSession(
-            self.session,
+        self.session = oauth.OAuth1Session(
             self.oauth_config("api-key", tumblr.TumblrAPI.API_KEY),
             self.oauth_config("api-secret", tumblr.TumblrAPI.API_SECRET),
         )

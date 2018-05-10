@@ -11,14 +11,9 @@
 import re
 import os
 import sys
-import hmac
-import time
-import base64
-import random
 import shutil
 import string
 import _string
-import hashlib
 import sqlite3
 import datetime
 import itertools
@@ -495,54 +490,6 @@ class PathFormat():
     def adjust_path(path):
         """Enable longer-than-260-character paths on windows"""
         return "\\\\?\\" + os.path.abspath(path) if os.name == "nt" else path
-
-
-class OAuthSession():
-    """Minimal wrapper for requests.session objects to support OAuth 1.0"""
-    def __init__(self, session, consumer_key, consumer_secret,
-                 token=None, token_secret=None):
-        self.session = session
-        self.consumer_secret = consumer_secret
-        self.token_secret = token_secret or ""
-        self.params = {}
-        self.params["oauth_consumer_key"] = consumer_key
-        self.params["oauth_token"] = token
-        self.params["oauth_signature_method"] = "HMAC-SHA1"
-        self.params["oauth_version"] = "1.0"
-
-    def get(self, url, params, **kwargs):
-        params.update(self.params)
-        params["oauth_nonce"] = self.nonce(16)
-        params["oauth_timestamp"] = int(time.time())
-        return self.session.get(url + self.sign(url, params), **kwargs)
-
-    def sign(self, url, params):
-        """Generate 'oauth_signature' value and return query string"""
-        query = self.urlencode(params)
-        message = self.concat("GET", url, query).encode()
-        key = self.concat(self.consumer_secret, self.token_secret).encode()
-        signature = hmac.new(key, message, hashlib.sha1).digest()
-        return "?{}&oauth_signature={}".format(
-            query, self.quote(base64.b64encode(signature).decode()))
-
-    @staticmethod
-    def concat(*args):
-        return "&".join(OAuthSession.quote(item) for item in args)
-
-    @staticmethod
-    def nonce(N, alphabet=string.ascii_letters):
-        return "".join(random.choice(alphabet) for _ in range(N))
-
-    @staticmethod
-    def quote(value, quote=urllib.parse.quote):
-        return quote(value, "~")
-
-    @staticmethod
-    def urlencode(params):
-        return "&".join(
-            OAuthSession.quote(str(key)) + "=" + OAuthSession.quote(str(value))
-            for key, value in sorted(params.items()) if value
-        )
 
 
 class DownloadArchive():
