@@ -21,6 +21,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "dokireader",  # SSL cert expired
     "pixiv",  # API requests sometimes fail
 }
 
