@@ -16,13 +16,13 @@ from gallery_dl import extractor, job, config, exception
 # these don't work on travis-ci
 TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
-    "archivedmoe", "archiveofsins", "thebarchive", "sankaku", "idolcomplex",
+    "archivedmoe", "archiveofsins", "thebarchive", "fireden",
+    "sankaku", "idolcomplex",
 }
 
 # temporary issues, etc.
 BROKEN = {
-    "dokireader",  # SSL cert expired
-    "pixiv",  # API requests sometimes fail
+    "pixiv",  # /users/<id>/favorite_works API endpoint is gone
 }
 
 
