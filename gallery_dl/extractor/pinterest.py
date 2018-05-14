@@ -72,7 +72,7 @@ class PinterestBoardExtractor(PinterestExtractor):
             "url": "85911dfca313f3f7f48c2aa0bc684f539d1d80a6",
         }),
         ("https://www.pinterest.com/g1952848/test/", {
-            "exception": exception.NotFoundError,
+            "exception": exception.GalleryDLException,
         }),
     ]
 
@@ -161,7 +161,11 @@ class PinterestAPI():
 
         response = self.extractor.request(
             url, params=params, headers=self.HEADERS, fatal=False)
-        data = response.json()
+
+        try:
+            data = response.json()
+        except ValueError:
+            data = {}
 
         if 200 <= response.status_code < 400 and not response.history:
             return data
@@ -169,6 +173,7 @@ class PinterestAPI():
         if response.status_code == 404 or response.history:
             raise exception.NotFoundError(self.extractor.subcategory)
         self.extractor.log.error("API request failed")
+        self.extractor.log.debug("%s", response.text)
         raise exception.StopExtraction()
 
     def _pagination(self, resource, options):

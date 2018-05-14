@@ -91,8 +91,8 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     """Extractor for manga from komikcast.com"""
     pattern = [r"(?:https?://)?(?:www\.)?(komikcast\.com/[^/?&#]+/?)$"]
     test = [("https://komikcast.com/tonari-no-kashiwagi-san/", {
-        "url": "ae862f22eb17fa97adf49222377ebe4412719771",
-        "keyword": "cd1ec571feacbc32e3b72c437d2e93e6b825be60",
+        "url": "c3c7a9233904d1c9e12dbb20911934af4b255ff8",
+        "keyword": "a4c7c24c87df41ff1d11da21e65df13d3a912691",
     })]
 
     def chapters(self, page):

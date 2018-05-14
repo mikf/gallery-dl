@@ -72,12 +72,15 @@ class RedditExtractor(Extractor):
 class RedditSubredditExtractor(RedditExtractor):
     """Extractor for images from subreddits on reddit.com"""
     subcategory = "subreddit"
-    pattern = [r"(?:https?://)?(?:m\.|www\.)?reddit\.com/r/([^/?&#]+)"
+    pattern = [r"(?:https?://)?(?:\w+\.)?reddit\.com/r/([^/?&#]+)"
                r"(/[a-z]+)?/?"
                r"(?:\?.*?(?:\bt=([a-z]+))?)?$"]
     test = [
         ("https://www.reddit.com/r/lavaporn/", None),
         ("https://www.reddit.com/r/lavaporn/top/?sort=top&t=month", None),
+        ("https://old.reddit.com/r/lavaporn/", None),
+        ("https://np.reddit.com/r/lavaporn/", None),
+        ("https://m.reddit.com/r/lavaporn/", None),
     ]
 
     def __init__(self, match):
@@ -94,7 +97,7 @@ class RedditSubmissionExtractor(RedditExtractor):
     """Extractor for images from a submission on reddit.com"""
     subcategory = "submission"
     pattern = [(r"(?:https?://)?(?:"
-                r"(?:m\.|www\.)?reddit\.com/r/[^/]+/comments|"
+                r"(?:\w+\.)?reddit\.com/r/[^/?&#]+/comments|"
                 r"redd\.it"
                 r")/([a-z0-9]+)")]
     test = [
@@ -102,6 +105,8 @@ class RedditSubmissionExtractor(RedditExtractor):
             "pattern": r"https?://i\.imgur\.com/AaAUCgy\.jpg",
             "count": 1,
         }),
+        ("https://old.reddit.com/r/lavaporn/comments/2a00np/", None),
+        ("https://np.reddit.com/r/lavaporn/comments/2a00np/", None),
         ("https://m.reddit.com/r/lavaporn/comments/2a00np/", None),
         ("https://redd.it/2a00np/", None),
     ]
