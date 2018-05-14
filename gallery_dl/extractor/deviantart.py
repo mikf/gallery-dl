@@ -167,7 +167,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     subcategory = "gallery"
     archive_fmt = "g_{username}_{index}.{extension}"
 
-    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
                r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"]
     test = [
         ("http://shimoda7.deviantart.com/gallery/", {
@@ -197,7 +197,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     subcategory = "folder"
     directory_fmt = ["{category}", "{folder[owner]}", "{folder[title]}"]
     archive_fmt = "F_{folder[uuid]}_{index}.{extension}"
-    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
                r"/gallery/(\d+)/([^/?&#]+)"]
     test = [
         ("http://shimoda7.deviantart.com/gallery/722019/Miscellaneous", {
@@ -232,8 +232,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
     archive_fmt = "{index}.{extension}"
-    pattern = [(r"(?:https?://)?([^.]+\.deviantart\.com/"
-                r"(?:art|journal)/[^/?&#]+-\d+)"),
+    pattern = [(r"(?:https?://)?(?!www\.)([\w-]+\.deviantart\.com"
+                r"/(?:art|journal)/[^/?&#]+-\d+)"),
                (r"(?:https?://)?(sta\.sh/[a-z0-9]+)")]
     test = [
         (("http://shimoda7.deviantart.com/art/"
@@ -276,7 +276,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     subcategory = "favorite"
     directory_fmt = ["{category}", "{username}", "Favourites"]
     archive_fmt = "f_{username}_{index}.{extension}"
-    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
                r"/favourites/?(?:\?catpath=/)?$"]
     test = [
         ("http://h3813067.deviantart.com/favourites/", {
@@ -304,7 +304,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     directory_fmt = ["{category}", "{collection[owner]}",
                      "Favourites", "{collection[title]}"]
     archive_fmt = "C_{collection[uuid]}_{index}.{extension}"
-    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
                r"/favourites/(\d+)/([^/?&#]+)"]
     test = [(("https://pencilshadings.deviantart.com"
               "/favourites/70595441/3D-Favorites"), {
@@ -334,7 +334,7 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     subcategory = "journal"
     directory_fmt = ["{category}", "{username}", "Journal"]
     archive_fmt = "j_{username}_{index}.{extension}"
-    pattern = [r"(?:https?://)?([^.]+)\.deviantart\.com"
+    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
                r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
     test = [
         ("https://angrywhitewanker.deviantart.com/journal/", {
@@ -346,6 +346,50 @@ class DeviantartJournalExtractor(DeviantartExtractor):
 
     def deviations(self):
         return self.api.browse_user_journals(self.user, self.offset)
+
+
+class DeviantartPopularExtractor(DeviantartExtractor):
+    """Extractor for popular deviations"""
+    subcategory = "popular"
+    directory_fmt = ["{category}", "Popular",
+                     "{popular[range]}", "{popular[search]}"]
+    archive_fmt = "P_{popular[range]}_{popular[search]}_{index}.{extension}"
+    pattern = [r"(?:https?://)?www\.deviantart\.com"
+               r"((?:/\w+)*)/(?:popular-([^/?&#]+))?/?(?:\?([^#]*))?"]
+    test = [
+        ("https://www.deviantart.com/popular-8-hours/?q=tree+house", {
+            "options": (("original", False),),
+        }),
+        ("https://www.deviantart.com/artisan/popular-all-time/?q=tree", None),
+        ("https://www.deviantart.com/?q=tree", None),
+        ("https://www.deviantart.com/", None),
+    ]
+
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self)
+        self.search_term = self.time_range = self.category_path = None
+
+        path, trange, query = match.groups()
+        if path:
+            self.category_path = path.lstrip("/")
+        if trange:
+            self.time_range = trange.replace("-", "").replace("hours", "hr")
+        if query:
+            self.search_term = text.parse_query(query).get("q")
+
+        self.popular = {
+            "search": self.search_term or "",
+            "range": trange or "24-hours",
+            "path": self.category_path,
+        }
+
+    def deviations(self):
+        return self.api.browse_popular(
+            self.search_term, self.time_range, self.category_path, self.offset)
+
+    def prepare(self, deviation):
+        DeviantartExtractor.prepare(self, deviation)
+        deviation["popular"] = self.popular
 
 
 class DeviantartAPI():
@@ -367,6 +411,15 @@ class DeviantartAPI():
         self.client_id = extractor.config("client-id", self.CLIENT_ID)
         self.client_secret = extractor.config(
             "client-secret", self.CLIENT_SECRET)
+
+    def browse_popular(self, query=None, timerange=None,
+                       category_path=None, offset=0):
+        """Yield popular deviations"""
+        endpoint = "browse/popular"
+        params = {"q": query, "offset": offset, "limit": 120,
+                  "timerange": timerange, "category_path": category_path,
+                  "mature_content": self.mature}
+        return self._pagination(endpoint, params)
 
     def browse_user_journals(self, username, offset=0):
         """Yield all journal entries of a specific user"""
