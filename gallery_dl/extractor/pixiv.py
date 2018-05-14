@@ -254,8 +254,7 @@ class PixivRankingExtractor(PixivExtractor):
     pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
                r"/ranking\.php(?:\?([^#]*))?"]
     test = [
-        (("https://www.pixiv.net/ranking.php"
-          "?mode=daily&date=20170818"), None),
+        ("https://www.pixiv.net/ranking.php?mode=daily&date=20170818", None),
         ("https://www.pixiv.net/ranking.php", None),
         ("https://touch.pixiv.net/ranking.php", None),
     ]
@@ -304,6 +303,65 @@ class PixivRankingExtractor(PixivExtractor):
 
     def get_metadata(self, user=None):
         return {"ranking": self.ranking_info}
+
+
+class PixivSearchExtractor(PixivExtractor):
+    """Extractor for pixiv search results"""
+    subcategory = "search"
+    archive_fmt = "s_{search[word]}_{id}{num}.{extension}"
+    directory_fmt = ["{category}", "search", "{search[word]}"]
+    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/search\.php\?([^#]+)"]
+    test = [
+        ("https://www.pixiv.net/search.php?s_mode=s_tag&word=Original", None),
+        ("https://touch.pixiv.net/search.php?word=Original", None),
+    ]
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self)
+
+        query = text.parse_query(match.group(1))
+
+        if "word" in query:
+            self.word = text.unescape(query["word"])
+        else:
+            self.log.error("missing search term")
+            self.word = None
+
+        sort = query.get("order", "date_d")
+        sort_map = {
+            "date": "date_asc",
+            "date_d": "date_desc",
+        }
+        if sort not in sort_map:
+            self.log.warning("invalid sort order '%s'", sort)
+            sort = "date_d"
+        self.sort = sort_map[sort]
+
+        target = query.get("s_mode", "s_tag")
+        target_map = {
+            "s_tag": "partial_match_for_tags",
+            "s_tag_full": "exact_match_for_tags",
+            "s_tc": "title_and_caption",
+        }
+        if target not in target_map:
+            self.log.warning("invalid search target '%s'", target)
+            target = "s_tag"
+        self.target = target_map[target]
+
+        self.search_info = {
+            "word": self.word,
+            "sort": self.sort,
+            "target": self.target,
+        }
+
+    def works(self):
+        if not self.word:
+            return ()
+        return self.api.search_illust(self.word, self.sort, self.target)
+
+    def get_metadata(self, user=None):
+        return {"search": self.search_info}
 
 
 class PixivAppAPI():
@@ -369,6 +427,11 @@ class PixivAppAPI():
     def illust_ranking(self, mode="day", date=None):
         params = {"mode": mode, "date": date}
         return self._pagination("v1/illust/ranking", params)
+
+    def search_illust(self, word, sort=None, target=None, duration=None):
+        params = {"word": word, "search_target": target,
+                  "sort": sort, "duration": duration}
+        return self._pagination("v1/search/illust", params)
 
     def user_bookmarks_illust(self, user_id, tag=None):
         params = {"user_id": user_id, "restrict": "public", "tag": tag}
