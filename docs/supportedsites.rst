@@ -88,8 +88,8 @@ Turboimagehost       https://turboimagehost.com/         individual Images
 ==================== =================================== ================================================== ================
 
 .. |Images from Use-0| replace:: Images from Users, Albums, Challenges, individual Images, Likes, Search Results
-.. |Collections, De-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals
+.. |Collections, De-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images
 .. |Images from Use-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
 .. |Images from Use-3| replace:: Images from Users, Doujin, Favorites, individual Images
-.. |Images from Use-4| replace:: Images from Users, Bookmarks, Favorites, pixiv.me Links, Rankings, Individual Images
+.. |Images from Use-4| replace:: Images from Users, Bookmarks, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
 .. |Albums, individ-5| replace:: Albums, individual Images, Images from Users and Folders
