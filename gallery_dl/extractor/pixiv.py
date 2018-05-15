@@ -112,17 +112,17 @@ class PixivUserExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
-        self.user_id, tag = match.groups()
-        if tag:
-            self.tag = text.unquote(tag).lower()
-            self.works = self._tagged_works
+        self.user_id, self.tag = match.groups()
 
     def works(self):
+        if self.tag:
+            return self._tagged_works()
         return self.api.user_illusts(self.user_id)
 
     def _tagged_works(self):
+        tag = text.unquote(self.tag).lower()
         for work in self.api.user_illusts(self.user_id):
-            if self.tag in [tag["name"].lower() for tag in work["tags"]]:
+            if tag in [tag["name"].lower() for tag in work["tags"]]:
                 yield work
 
 
@@ -259,8 +259,17 @@ class PixivRankingExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
+        self.query = match.group(1)
+        self.mode = self.date = None
 
-        modes = {
+    def works(self):
+        return self.api.illust_ranking(self.mode, self.date)
+
+    def get_metadata(self, user=None):
+        query = text.parse_query(self.query)
+
+        mode = query.get("mode", "daily").lower()
+        mode_map = {
             "daily": "day",
             "daily_r18": "day_r18",
             "weekly": "week",
@@ -274,14 +283,10 @@ class PixivRankingExtractor(PixivExtractor):
             "rookie": "week_rookie",
             "r18g": "week_r18g",
         }
-
-        query = text.parse_query(match.group(1))
-
-        mode = query.get("mode", "daily").lower()
-        if mode not in modes:
+        if mode not in mode_map:
             self.log.warning("invalid mode '%s'", mode)
             mode = "daily"
-        self.mode = modes[mode]
+        self.mode = mode_map[mode]
 
         date = query.get("date")
         if date:
@@ -294,13 +299,10 @@ class PixivRankingExtractor(PixivExtractor):
             date = (datetime.utcnow() - timedelta(days=1)).strftime("%Y-%m-%d")
         self.date = date
 
-        self.ranking_info = {"mode": mode, "date": self.date}
-
-    def works(self):
-        return self.api.illust_ranking(self.mode, self.date)
-
-    def get_metadata(self, user=None):
-        return {"ranking": self.ranking_info}
+        return {"ranking": {
+            "mode": mode,
+            "date": self.date,
+        }}
 
 
 class PixivSearchExtractor(PixivExtractor):
@@ -317,14 +319,20 @@ class PixivSearchExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
+        self.query = match.group(1)
+        self.word = self.sort = self.target = None
 
-        query = text.parse_query(match.group(1))
+    def works(self):
+        return self.api.search_illust(self.word, self.sort, self.target)
+
+    def get_metadata(self, user=None):
+        query = text.parse_query(self.query)
 
         if "word" in query:
             self.word = text.unescape(query["word"])
         else:
             self.log.error("missing search term")
-            self.word = None
+            raise exception.StopExtraction()
 
         sort = query.get("order", "date_d")
         sort_map = {
@@ -347,19 +355,11 @@ class PixivSearchExtractor(PixivExtractor):
             target = "s_tag"
         self.target = target_map[target]
 
-        self.search_info = {
+        return {"search": {
             "word": self.word,
             "sort": self.sort,
             "target": self.target,
-        }
-
-    def works(self):
-        if not self.word:
-            return ()
-        return self.api.search_illust(self.word, self.sort, self.target)
-
-    def get_metadata(self, user=None):
-        return {"search": self.search_info}
+        }}
 
 
 class PixivFollowExtractor(PixivExtractor):
@@ -374,7 +374,7 @@ class PixivFollowExtractor(PixivExtractor):
         ("https://touch.pixiv.net/bookmark_new_illust.php", None),
     ]
 
-    def __init__(self, match):
+    def __init__(self, _):
         PixivExtractor.__init__(self)
 
     def works(self):
