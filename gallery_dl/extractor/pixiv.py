@@ -240,9 +240,7 @@ class PixivBookmarkExtractor(PixivFavoriteExtractor):
 
     def get_metadata(self, user=None):
         self.api.login()
-        user = self.api.user_info
-        self.user_id = user["id"]
-        return PixivFavoriteExtractor.get_metadata(self, user)
+        return PixivFavoriteExtractor.get_metadata(self, self.api.user)
 
 
 class PixivRankingExtractor(PixivExtractor):
@@ -364,6 +362,29 @@ class PixivSearchExtractor(PixivExtractor):
         return {"search": self.search_info}
 
 
+class PixivFollowExtractor(PixivExtractor):
+    """Extractor for new illustrations from your followed artists"""
+    subcategory = "follow"
+    archive_fmt = "F_{user_follow[id]}_{id}{num}.{extension}"
+    directory_fmt = ["{category}", "following"]
+    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/bookmark_new_illust\.php"]
+    test = [
+        ("https://www.pixiv.net/bookmark_new_illust.php", None),
+        ("https://touch.pixiv.net/bookmark_new_illust.php", None),
+    ]
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self)
+
+    def works(self):
+        return self.api.illust_follow()
+
+    def get_metadata(self, user=None):
+        self.api.login()
+        return {"user_follow": self.api.user}
+
+
 class PixivAppAPI():
     """Minimal interface for the Pixiv App API for mobile devices
 
@@ -378,7 +399,7 @@ class PixivAppAPI():
         self.session = extractor.session
         self.log = extractor.log
         self.username, self.password = extractor._get_auth_info()
-        self.user_info = None
+        self.user = None
 
         self.client_id = extractor.config(
             "client-id", self.CLIENT_ID)
@@ -395,7 +416,7 @@ class PixivAppAPI():
 
     def login(self):
         """Login and gain an access token"""
-        self.user_info, auth = self._login_impl(
+        self.user, auth = self._login_impl(
             self.username, self.password)
         self.session.headers["Authorization"] = auth
 
@@ -423,6 +444,10 @@ class PixivAppAPI():
     def illust_detail(self, illust_id):
         params = {"illust_id": illust_id}
         return self._call("v1/illust/detail", params)["illust"]
+
+    def illust_follow(self, restrict="all"):
+        params = {"restrict": restrict}
+        return self._pagination("v2/illust/follow", params)
 
     def illust_ranking(self, mode="day", date=None):
         params = {"mode": mode, "date": date}
