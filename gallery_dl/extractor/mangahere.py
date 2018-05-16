@@ -10,17 +10,24 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
+from ..cache import memcache
 from urllib.parse import urljoin
 import re
 
 
-class MangahereMangaExtractor(MangaExtractor):
-    """Extractor for manga from mangahere.co"""
+class MangahereBase():
+    """Base class for mangahere extractors"""
     category = "mangahere"
+    root = "https://www.mangahere.cc"
+    url_fmt = root + "/manga/{}/{}.html"
+
+
+class MangahereMangaExtractor(MangahereBase, MangaExtractor):
+    """Extractor for manga from mangahere.cc"""
     pattern = [r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
                r"([^/]+)/?(?:#.*)?$"]
     test = [
-        ("http://www.mangahere.cc/manga/aria/", {
+        ("https://www.mangahere.cc/manga/aria/", {
             "url": "e8971b1605d9888d978ebb2895adb1c7c37d663c",
             "keyword": "951eef36a3775525a31ca78c9d9cea546f4cf2f5",
         }),
@@ -33,7 +40,7 @@ class MangahereMangaExtractor(MangaExtractor):
     ]
 
     def __init__(self, match):
-        url = "http://www.mangahere.cc/manga/" + match.group(1) + "/"
+        url = "{}/manga/{}/".format(self.root, match.group(1))
         MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):
@@ -60,24 +67,21 @@ class MangahereMangaExtractor(MangaExtractor):
             }))
 
 
-class MangahereChapterExtractor(ChapterExtractor):
-    """Extractor for manga-chapters from mangahere.co"""
-    category = "mangahere"
+class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
+    """Extractor for manga-chapters from mangahere.cc"""
     pattern = [(r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
-                r"([^/]+(?:/v0*(\d+))?/c0*(\d+)(\.\d+)?)")]
+                r"([^/]+(?:/v0*(\d+))?/c([^/?&#]+))")]
     test = [
-        ("http://www.mangahere.cc/manga/dongguo_xiaojie/c003.2/", {
-            "keyword": "0c263b83f803524baa8717d2b4d841617aa8d775",
-            "content": "dd8454469429c6c717cbc3cad228e76ef8c6e420",
-            "options": (("verify", False),),
+        ("https://www.mangahere.cc/manga/dongguo_xiaojie/c004.2/", {
+            "keyword": "0e1cee6dd377da02ad51aa810ba65db3e811aef9",
+            "content": "708d475f06893b88549cbd30df1e3f9428f2c884",
         }),
         ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", None),
         ("http://m.mangahere.co/manga/dongguo_xiaojie/c003.2/", None),
     ]
-    url_fmt = "http://www.mangahere.cc/manga/{}/{}.html"
 
     def __init__(self, match):
-        self.part, self.volume, self.chapter, self.chminor = match.groups()
+        self.part, self.volume, self.chapter = match.groups()
         # remove ".html" for the first chapter page to avoid redirects
         url = self.url_fmt.format(self.part, "")[:-5]
         ChapterExtractor.__init__(self, url)
@@ -85,18 +89,20 @@ class MangahereChapterExtractor(ChapterExtractor):
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""
         manga, pos = text.extract(page, '<title>', '</title>')
-        chid , pos = text.extract(page, '.net/store/manga/', '/', pos)
+        mid  , pos = text.extract(page, '.net/store/manga/', '/', pos)
         pages, pos = text.extract(page, ' class="wid60"', '</select>', pos)
         count = re.findall(r">(\d+)<", pages)[-1]
         manga = re.match((r"(.+) \d+(\.\d+)? - Read .+ Chapter "
                           r"\d+(\.\d+)? Online"), manga).group(1)
+        chapter, dot, minor = self.chapter.partition(".")
+
         return {
             "manga": text.unescape(manga),
-            # "title": TODO,
+            "manga_id": util.safe_int(mid),
+            "title": self._get_title_map(mid).get(self.chapter),
             "volume": util.safe_int(self.volume),
-            "chapter": util.safe_int(self.chapter),
-            "chapter_minor": self.chminor or "",
-            "chapter_id": util.safe_int(chid),
+            "chapter": util.safe_int(chapter),
+            "chapter_minor": dot + minor,
             "count": util.safe_int(count),
             "lang": "en",
             "language": "English",
@@ -115,3 +121,17 @@ class MangahereChapterExtractor(ChapterExtractor):
 
             pnum += 2
             page = self.request(self.url_fmt.format(self.part, pnum)).text
+
+    @memcache(keyarg=1)
+    def _get_title_map(self, manga_id):
+        url = "{}/get_chapters{}.js".format(self.root, manga_id)
+        page = self.request(url).text
+
+        chapters = {}
+        for info in text.extract_iter(page, '["', '"]'):
+            title, _, url = info.partition('","')
+            title = title.partition(": ")[2]
+            num = url.rpartition("c")[2].rstrip("/")
+            chapters[num] = text.unescape(title)
+
+        return chapters
