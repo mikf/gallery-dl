@@ -96,10 +96,12 @@ class PixivUserExtractor(PixivExtractor):
         ("http://www.pixiv.net/member_illust.php?id=173530", {
             "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
         }),
+        # illusts with specific tag
         (("https://www.pixiv.net/member_illust.php?id=173530"
           "&tag=%E6%89%8B%E3%81%B6%E3%82%8D"), {
             "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
         }),
+        # all sorts of query parameters
         (("https://www.pixiv.net/member_illust.php?id=3137110"
           "&tag=%E3%83%96%E3%82%A4%E3%82%BA&type=illust&p=2"), {
             "count": ">= 55",
@@ -226,39 +228,55 @@ class PixivFavoriteExtractor(PixivExtractor):
                      "{user_bookmark[id]} {user_bookmark[account]}"]
     archive_fmt = "f_{user_bookmark[id]}_{id}{num}.{extension}"
     pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/bookmark\.php\?id=(\d+)"]
+               r"/bookmark\.php(?:\?([^#]*))?"]
     test = [
         ("https://www.pixiv.net/bookmark.php?id=173530", {
             "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
         }),
+        # bookmarks with specific tag
+        (("https://www.pixiv.net/bookmark.php?id=3137110"
+          "&tag=%E3%81%AF%E3%82%93%E3%82%82%E3%82%93&p=1"), {
+            "count": 2,
+        }),
+        # own bookmarks
+        ("https://www.pixiv.net/bookmark.php", {
+            "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
+        }),
+        # touch URLs
         ("https://touch.pixiv.net/bookmark.php?id=173530", None),
+        ("https://touch.pixiv.net/bookmark.php", None),
     ]
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
-        self.user_id = match.group(1)
-        self.user = None
+        self.query = text.parse_query(match.group(1))
+        if "id" not in self.query:
+            self.subcategory = "bookmark"
 
     def works(self):
-        return self.api.user_bookmarks_illust(self.user_id)
+        tag = None
+        restrict = "public"
+        offset = 0
+
+        if "tag" in self.query:
+            tag = text.unquote(self.query["tag"])
+        if "rest" in self.query and self.query["rest"] == "hide":
+            restrict = "private"
+        if "p" in self.query:
+            offset = (text.parse_int(self.query["p"], 1) - 1) * 20
+
+        works = self.api.user_bookmarks_illust(self.user_id, tag, restrict)
+        return util.advance(works, offset)
 
     def get_metadata(self, user=None):
-        self.user = user or self.api.user_detail(self.user_id)
-        return {"user_bookmark": self.user}
+        if "id" in self.query:
+            user = self.api.user_detail(self.query["id"])
+        else:
+            self.api.login()
+            user = self.api.user
 
-
-class PixivBookmarkExtractor(PixivFavoriteExtractor):
-    """Extractor for all favorites/bookmarks of your own account"""
-    subcategory = "bookmark"
-    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/bookmark\.php()$"]
-    test = [
-        ("https://www.pixiv.net/bookmark.php", None),
-        ("https://touch.pixiv.net/bookmark.php", None),
-    ]
-
-    def get_metadata(self, user=None):
-        self.api.login()
-        return PixivFavoriteExtractor.get_metadata(self, self.api.user)
+        self.user_id = user["id"]
+        return {"user_bookmark": user}
 
 
 class PixivRankingExtractor(PixivExtractor):
@@ -476,8 +494,8 @@ class PixivAppAPI():
                   "sort": sort, "duration": duration}
         return self._pagination("v1/search/illust", params)
 
-    def user_bookmarks_illust(self, user_id, tag=None):
-        params = {"user_id": user_id, "restrict": "public", "tag": tag}
+    def user_bookmarks_illust(self, user_id, tag=None, restrict="public"):
+        params = {"user_id": user_id, "tag": tag, "restrict": restrict}
         return self._pagination("v1/user/bookmarks/illust", params)
 
     def user_detail(self, user_id):
@@ -512,4 +530,5 @@ class PixivAppAPI():
 
             if not data["next_url"]:
                 return
-            params["offset"] = data["next_url"].rpartition("=")[2]
+            query = data["next_url"].rpartition("?")[2]
+            params = text.parse_query(query)
