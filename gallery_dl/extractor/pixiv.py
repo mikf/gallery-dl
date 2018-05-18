@@ -9,7 +9,7 @@
 """Extract images and ugoira from https://www.pixiv.net/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 from datetime import datetime, timedelta
 
@@ -89,7 +89,7 @@ class PixivUserExtractor(PixivExtractor):
     """Extractor for works of a pixiv-user"""
     subcategory = "user"
     pattern = [(r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-                r"/member(?:_illust)?\.php\?id=(\d+)(?:.*&tag=([^&#]+))?"),
+                r"/member(?:_illust)?\.php\?id=(\d+)(?:&([^#]+))?"),
                (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
                 r"/(?:u(?:ser)?/|(?:mypage\.php)?#id=)(\d+)()")]
     test = [
@@ -99,6 +99,10 @@ class PixivUserExtractor(PixivExtractor):
         (("https://www.pixiv.net/member_illust.php?id=173530"
           "&tag=%E6%89%8B%E3%81%B6%E3%82%8D"), {
             "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
+        }),
+        (("https://www.pixiv.net/member_illust.php?id=3137110"
+          "&tag=%E3%83%96%E3%82%A4%E3%82%BA&type=illust&p=2"), {
+            "count": ">= 55",
         }),
         ("http://www.pixiv.net/member_illust.php?id=173531", {
             "exception": exception.NotFoundError,
@@ -112,18 +116,32 @@ class PixivUserExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
-        self.user_id, self.tag = match.groups()
+        self.user_id, self.query = match.groups()
 
     def works(self):
-        if self.tag:
-            return self._tagged_works()
-        return self.api.user_illusts(self.user_id)
+        works = self.api.user_illusts(self.user_id)
 
-    def _tagged_works(self):
-        tag = text.unquote(self.tag).lower()
-        for work in self.api.user_illusts(self.user_id):
-            if tag in [tag["name"].lower() for tag in work["tags"]]:
-                yield work
+        if self.query:
+            qdict = text.parse_query(self.query)
+            if "type" in qdict:
+                type_ = qdict["type"].lower()
+                works = filter(self._is_type(type_), works)
+            if "tag" in qdict:
+                tag = text.unquote(qdict["tag"]).lower()
+                works = filter(self._has_tag(tag), works)
+            if "p" in qdict:  # apply page-offset last
+                offset = (text.parse_int(qdict["p"], 1) - 1) * 20
+                works = util.advance(works, offset)
+
+        return works
+
+    @staticmethod
+    def _has_tag(tag):
+        return lambda work: tag in [t["name"].lower() for t in work["tags"]]
+
+    @staticmethod
+    def _is_type(type_):
+        return lambda work: work["type"] == type_
 
 
 class PixivMeExtractor(PixivExtractor):
@@ -466,8 +484,8 @@ class PixivAppAPI():
         params = {"user_id": user_id}
         return self._call("v1/user/detail", params)["user"]
 
-    def user_illusts(self, user_id, illust_type=None):
-        params = {"user_id": user_id, "type": illust_type}
+    def user_illusts(self, user_id):
+        params = {"user_id": user_id}
         return self._pagination("v1/user/illusts", params)
 
     def ugoira_metadata(self, illust_id):
