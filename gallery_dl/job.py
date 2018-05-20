@@ -11,7 +11,8 @@ import time
 import json
 import hashlib
 import logging
-from . import extractor, downloader, config, util, output, exception
+from . import extractor, downloader, postprocessor
+from . import config, util, output, exception
 from .extractor.message import Message
 
 
@@ -158,6 +159,7 @@ class DownloadJob(Job):
         self.archive = None
         self.sleep = None
         self.downloaders = {}
+        self.postprocessors = []
         self.out = output.select()
 
     def handle_url(self, url, keywords, fallback=None):
@@ -186,6 +188,10 @@ class DownloadJob(Job):
                     "Failed to download %s", self.pathfmt.filename)
                 return
 
+        # run post processors
+        for pp in self.postprocessors:
+            pp.run(self.pathfmt)
+
         # download succeeded
         if self.archive:
             self.archive.add(keywords)
@@ -201,10 +207,26 @@ class DownloadJob(Job):
         if not self.pathfmt:
             self.pathfmt = util.PathFormat(self.extractor)
             self.sleep = self.extractor.config("sleep")
+            postprocs = self.extractor.config("postprocessor")
             archive = self.extractor.config("archive")
+
+            if postprocs:
+                for pp_dict in postprocs:
+                    try:
+                        name = pp_dict["name"]
+                        pp_obj = postprocessor.find(name)(pp_dict)
+                    except KeyError as exc:
+                        postprocessor.log.warning("missing key %s", exc)
+                    except Exception as exc:
+                        postprocessor.log.warning(
+                            "%s %s", exc.__class__.__name__, exc)
+                    else:
+                        self.postprocessors.append(pp_obj)
+
             if archive:
                 path = util.expand_path(archive)
                 self.archive = util.DownloadArchive(path, self.extractor)
+
         self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url, keywords):
