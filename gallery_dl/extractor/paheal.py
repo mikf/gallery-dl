@@ -9,7 +9,7 @@
 """Extract images from http://rule34.paheal.net/"""
 
 from .common import SharedConfigExtractor, Message
-from .. import text, util
+from .. import text
 
 
 class PahealExtractor(SharedConfigExtractor):
@@ -27,7 +27,7 @@ class PahealExtractor(SharedConfigExtractor):
         for data in self.get_posts():
             url = data["file_url"]
             for key in ("id", "width", "height"):
-                data[key] = util.safe_int(data[key])
+                data[key] = text.parse_int(data[key])
             data["tags"] = text.unquote(data["tags"])
             yield Message.Url, url, text.nameext_from_url(url, data)
 
@@ -85,7 +85,7 @@ class PahealTagExtractor(PahealExtractor):
         return {
             "id": pid, "md5": md5, "tags": tags, "file_url": url,
             "width": width, "height": height,
-            "size": util.parse_bytes(size[:-1]),
+            "size": text.parse_bytes(size[:-1]),
         }
 
 

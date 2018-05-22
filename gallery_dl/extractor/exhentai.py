@@ -120,7 +120,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.key = {}
         self.count = 0
         self.version, self.gid, self.token = match.groups()
-        self.gid = util.safe_int(self.gid)
+        self.gid = text.parse_int(self.gid)
 
     def items(self):
         self.login()
@@ -163,8 +163,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         data["lang"] = util.language_to_code(data["language"])
         data["title"] = text.unescape(data["title"])
         data["title_jp"] = text.unescape(data["title_jp"])
-        data["count"] = util.safe_int(data["count"])
-        data["gallery_size"] = util.parse_bytes(
+        data["count"] = text.parse_int(data["count"])
+        data["gallery_size"] = text.parse_bytes(
             data["gallery_size"].rstrip("Bb"))
         return data
 
@@ -245,18 +245,18 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def _parse_image_info(url):
         parts = url.split("/")[4].split("-")
         return {
-            "width": util.safe_int(parts[2]),
-            "height": util.safe_int(parts[3]),
-            "size": util.safe_int(parts[1]),
+            "width": text.parse_int(parts[2]),
+            "height": text.parse_int(parts[3]),
+            "size": text.parse_int(parts[1]),
         }
 
     @staticmethod
     def _parse_original_info(info):
         parts = info.lstrip().split(" ")
         return {
-            "width": util.safe_int(parts[0]),
-            "height": util.safe_int(parts[2]),
-            "size": util.parse_bytes(parts[3] + parts[4][0]),
+            "width": text.parse_int(parts[0]),
+            "height": text.parse_int(parts[2]),
+            "size": text.parse_bytes(parts[3] + parts[4][0]),
         }
 
 
@@ -274,7 +274,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
     def __init__(self, match):
         ExhentaiExtractor.__init__(self)
         self.params = text.parse_query(match.group(1) or "")
-        self.params["page"] = util.safe_int(self.params.get("page"))
+        self.params["page"] = text.parse_int(self.params.get("page"))
         self.url = self.root
 
     def items(self):
@@ -308,7 +308,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
         return Message.Queue, url, {
             "type": gtype,
             "date": date,
-            "gallery_id": util.safe_int(parts[1]),
+            "gallery_id": text.parse_int(parts[1]),
             "gallery_token": parts[2],
             "title": text.unescape(title),
             key: last,

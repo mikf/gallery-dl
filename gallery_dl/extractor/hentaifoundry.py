@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from urllib.parse import urljoin
 
 
 class HentaifoundryExtractor(Extractor):
@@ -47,13 +46,13 @@ class HentaifoundryExtractor(Extractor):
 
     def get_image_metadata(self, url):
         """Collect metadata for an image"""
-        page = self.request(urljoin(self.root, url)).text
+        page = self.request(text.urljoin(self.root, url)).text
         index = url.rsplit("/", 2)[1]
         title, pos = text.extract(
             page, 'Pictures</a> &raquo; <span>', '<')
         part, pos = text.extract(
             page, '//pictures.hentai-foundry.com', '"', pos)
-        data = {"index": util.safe_int(index), "title": text.unescape(title)}
+        data = {"index": text.parse_int(index), "title": text.unescape(title)}
         text.nameext_from_url(part, data)
         return "https://pictures.hentai-foundry.com" + part, data
 
@@ -77,7 +76,7 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match.group(1) or match.group(3))
-        self.start_page = util.safe_int(match.group(2), 1)
+        self.start_page = text.parse_int(match.group(2), 1)
         self._skipped = (self.start_page - 1) * self.per_page
 
     def skip(self, num):
@@ -104,7 +103,7 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
 
         if response.status_code == 404:
             raise exception.NotFoundError("user")
-        count = util.safe_int(text.extract(
+        count = text.parse_int(text.extract(
             response.text, 'class="active" >Pictures (', ')')[0])
         if self._skipped >= count:
             raise exception.StopExtraction()
@@ -142,7 +141,7 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
             "filter_type": 0,
         }
         self.request("https://www.hentai-foundry.com/site/filters",
-                     method="post", data=formdata, allow_empty=True)
+                     method="post", data=formdata)
 
 
 class HentaifoundryImageExtractor(HentaifoundryExtractor):
@@ -171,4 +170,4 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
         return ("{}/{}?enterAgree=1".format(self.artist_url, self.index),)
 
     def get_job_metadata(self):
-        return {"artist": self.artist, "index": util.safe_int(self.index)}
+        return {"artist": self.artist, "index": text.parse_int(self.index)}

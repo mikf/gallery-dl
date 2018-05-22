@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from https://www.mangareader.net/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 
 
 class MangareaderBase():
@@ -53,7 +53,7 @@ class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
                 return results
             data["title"], pos = text.extract(page, '</a> : ', '</td>', pos)
             data["date"] , pos = text.extract(page, '<td>', '</td>', pos)
-            data["chapter"] = util.safe_int(url.rpartition("/")[2])
+            data["chapter"] = text.parse_int(url.rpartition("/")[2])
             results.append((self.root + url, data.copy()))
 
 
@@ -79,7 +79,7 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
         """Collect metadata for extractor-job"""
         page = self.request(self.root + self.url_title).text
         data = self.parse_page(page, {
-            "chapter": util.safe_int(self.chapter),
+            "chapter": text.parse_int(self.chapter),
             "lang": "en",
             "language": "English",
         })
@@ -87,7 +87,7 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
             ('title', ' ' + self.chapter + '</a> : ', '</td>'),
             ('date', '<td>', '</td>'),
         ), page.index('<div id="chapterlist">'), data)
-        data["count"] = util.safe_int(text.extract(
+        data["count"] = text.parse_int(text.extract(
             chapter_page, '</select> of ', '<')[0]
         )
         return data
@@ -118,6 +118,6 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
             height, pos = extr(page, ' height="', '"', pos)
         image, pos = extr(page, ' src="', '"', pos)
         return self.root + url, image, {
-            "width": util.safe_int(width),
-            "height": util.safe_int(height),
+            "width": text.parse_int(width),
+            "height": text.parse_int(height),
         }

@@ -9,7 +9,7 @@
 """Extract images from https://www.tumblr.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, oauth, exception
 from datetime import datetime, timedelta
 import re
 import time
@@ -53,8 +53,8 @@ class TumblrExtractor(Extractor):
     """Base class for tumblr extractors"""
     category = "tumblr"
     directory_fmt = ["{category}", "{name}"]
-    filename_fmt = "{category}_{blog_name}_{id}o{offset}.{extension}"
-    archive_fmt = "{id}_{offset}"
+    filename_fmt = "{category}_{blog_name}_{id}_{num:>02}.{extension}"
+    archive_fmt = "{id}_{num}"
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -88,7 +88,7 @@ class TumblrExtractor(Extractor):
             post["reblogged"] = reblog
 
             post["blog"] = blog
-            post["offset"] = 0
+            post["num"] = 0
 
             if "trail" in post:
                 del post["trail"]
@@ -149,14 +149,14 @@ class TumblrExtractor(Extractor):
     @staticmethod
     def _prepare(url, post):
         text.nameext_from_url(url, post)
-        post["offset"] += 1
+        post["num"] += 1
         post["hash"] = post["name"].partition("_")[2]
         return Message.Url, url, post
 
     @staticmethod
     def _prepare_image(url, post):
         text.nameext_from_url(url, post)
-        post["offset"] += 1
+        post["num"] += 1
 
         parts = post["name"].split("_")
         post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
@@ -238,7 +238,7 @@ class TumblrLikesExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user's liked posts"""
     subcategory = "likes"
     directory_fmt = ["{category}", "{name}", "likes"]
-    archive_fmt = "f_{blog[name]}_{id}_{offset}"
+    archive_fmt = "f_{blog[name]}_{id}_{num}"
     pattern = [BASE_PATTERN + r"/likes"]
     test = [("http://mikf123.tumblr.com/likes", {
         "count": 1,
@@ -248,31 +248,15 @@ class TumblrLikesExtractor(TumblrExtractor):
         return self.api.likes(self.blog)
 
 
-class TumblrAPI():
+class TumblrAPI(oauth.OAuth1API):
     """Minimal interface for the Tumblr API v2"""
     API_KEY = "O3hU2tMi5e4Qs5t3vezEi6L0qRORJ5y9oUpSGsrWu8iA3UCc3B"
     API_SECRET = "sFdsK3PDdP2QpYMRAoq0oDnw0sFS24XigXmdfnaeNZpJpqAn03"
     BLOG_CACHE = {}
 
     def __init__(self, extractor):
-        api_key = extractor.config("api-key", self.API_KEY)
-        api_secret = extractor.config("api-secret", self.API_SECRET)
-        token = extractor.config("access-token")
-        token_secret = extractor.config("access-token-secret")
-
-        if api_key and api_secret and token and token_secret:
-            self.session = util.OAuthSession(
-                extractor.session,
-                api_key, api_secret,
-                token, token_secret,
-            )
-            self.api_key = None
-        else:
-            self.session = extractor.session
-            self.api_key = api_key
-
+        oauth.OAuth1API.__init__(self, extractor)
         self.posts_type = None
-        self.log = extractor.log
 
     def info(self, blog):
         """Return general information about a blog"""

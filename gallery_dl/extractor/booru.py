@@ -10,7 +10,6 @@
 
 from .common import SharedConfigExtractor, Message
 from .. import text
-from urllib.parse import urljoin
 from xml.etree import ElementTree
 import datetime
 import operator
@@ -52,7 +51,7 @@ class BooruExtractor(SharedConfigExtractor):
                 try:
                     url = image["file_url"]
                     if url.startswith("/"):
-                        url = urljoin(self.api_url, url)
+                        url = text.urljoin(self.api_url, url)
                     image.update(data)
                     yield Message.Url, url, text.nameext_from_url(url, image)
                 except KeyError:

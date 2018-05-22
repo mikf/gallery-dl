@@ -52,34 +52,34 @@ class Extractor():
             ("extractor", self.category, self.subcategory, key), default)
 
     def request(self, url, method="GET", encoding=None, fatal=True, retries=3,
-                allow_empty=False, *args, **kwargs):
-        max_retries = retries
+                *args, **kwargs):
+        max_tries = retries
         while True:
             try:
-                response = None
                 response = self.session.request(method, url, *args, **kwargs)
-                if fatal:
-                    response.raise_for_status()
-                if encoding:
-                    response.encoding = encoding
-                if response.content or allow_empty:
-                    return response
-                msg = "empty response body"
-            except requests.exceptions.HTTPError as exc:
+            except (requests.ConnectionError, requests.Timeout) as exc:
                 msg = exc
-                code = response.status_code
-                if 400 <= code < 500 and code != 429:  # Client Error
-                    retries = 0
             except requests.exceptions.RequestException as exc:
-                msg = exc
-            if not retries:
-                raise exception.HttpError(msg)
-            if response and response.status_code == 429:  # Too Many Requests
-                waittime = float(response.headers.get("Retry-After", 10.0))
+                raise exception.HttpError(exc)
             else:
-                waittime = 1
+                if 200 <= response.status_code < 400 or not fatal:
+                    if encoding:
+                        response.encoding = encoding
+                    return response
+
+                msg = "{} HTTP Error: {} for url: {}".format(
+                    response.status_code, response.reason, url)
+                if response.status_code < 500 and response.status_code != 429:
+                    break
+
+            if not retries:
+                break
+            tries = max_tries - retries
             retries -= 1
-            time.sleep(waittime * (max_retries - retries))
+            self.log.debug("%s (%d/%d)", msg, tries, max_tries)
+            time.sleep(2 ** tries)
+
+        raise exception.HttpError(msg)
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""

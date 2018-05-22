@@ -10,7 +10,6 @@
 
 from .common import AsynchronousExtractor, Message
 from .. import text, exception
-from urllib.parse import urljoin
 
 
 class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
@@ -63,7 +62,8 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
         page = text.extract(page, '<table id="songlist">', '</table>')[0]
         for num, url in enumerate(text.extract_iter(
                 page, '<td class="clickable-row"><a href="', '"'), 1):
-            page = self.request(urljoin(self.root, url), encoding="utf-8").text
+            url = text.urljoin(self.root, url)
+            page = self.request(url, encoding="utf-8").text
             url = text.extract(
                 page, '<p><a style="color: #21363f;" href="', '"')[0]
             yield url, text.nameext_from_url(url, {"num": num})

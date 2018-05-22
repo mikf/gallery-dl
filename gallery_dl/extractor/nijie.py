@@ -9,7 +9,7 @@
 """Extract images from https://nijie.info/"""
 
 from .common import AsynchronousExtractor, Message
-from .. import text, util, exception
+from .. import text, exception
 from ..cache import cache
 
 
@@ -44,7 +44,7 @@ class NijieExtractor(AsynchronousExtractor):
 
     def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        return {"user_id": util.safe_int(self.user_id)}
+        return {"user_id": text.parse_int(self.user_id)}
 
     def get_image_ids(self):
         """Collect all relevant image-ids"""
@@ -63,8 +63,8 @@ class NijieExtractor(AsynchronousExtractor):
         images = list(text.extract_iter(page, '<img src="//pic', '"', pos))
 
         title = title.rpartition("|")[0].strip()
-        image_id = util.safe_int(image_id)
-        artist_id = util.safe_int(self._userid_from_popup(page))
+        image_id = text.parse_int(image_id)
+        artist_id = text.parse_int(self._userid_from_popup(page))
 
         for index, url in enumerate(images):
             yield "https://pic" + url, text.nameext_from_url(url, {
@@ -193,8 +193,8 @@ class NijieImageExtractor(NijieExtractor):
         self.page = ""
 
     def get_job_metadata(self):
-        response = self.request(self.popup_url + self.image_id,
-                                allow_redirects=False, allow_empty=True)
+        response = self.request(
+            self.popup_url + self.image_id, allow_redirects=False)
         if 300 <= response.status_code < 400:
             raise exception.NotFoundError("image")
         self.page = response.text

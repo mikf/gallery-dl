@@ -30,7 +30,7 @@ class HitomiGalleryExtractor(ChapterExtractor):
     ]
 
     def __init__(self, match):
-        self.gid = util.safe_int(match.group(1))
+        self.gid = text.parse_int(match.group(1))
         url = "https://hitomi.la/galleries/{}.html".format(self.gid)
         ChapterExtractor.__init__(self, url)
 

@@ -12,7 +12,7 @@ import time
 import mimetypes
 from requests.exceptions import ConnectionError, Timeout
 from .common import DownloaderBase
-from .. import util, exception
+from .. import text, exception
 
 
 class Downloader(DownloaderBase):
@@ -28,7 +28,7 @@ class Downloader(DownloaderBase):
         self.chunk_size = 16384
 
         if self.rate:
-            self.rate = util.parse_bytes(self.rate)
+            self.rate = text.parse_bytes(self.rate)
             if not self.rate:
                 self.log.warning("Invalid rate limit specified")
             elif self.rate < self.chunk_size:
@@ -61,7 +61,7 @@ class Downloader(DownloaderBase):
         else:
             self.response.raise_for_status()
 
-        return offset, util.safe_int(size)
+        return offset, text.parse_int(size)
 
     def receive(self, file):
         if self.rate:

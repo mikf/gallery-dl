@@ -9,9 +9,8 @@
 """Extract manga-chapters and entire manga from http://www.mangahere.co/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 from ..cache import memcache
-from urllib.parse import urljoin
 import re
 
 
@@ -58,10 +57,10 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
             volume, pos = text.extract(page, 'span class="mr6">', '<', pos)
             title, pos = text.extract(page, '/span>', '<', pos)
             date, pos = text.extract(page, 'class="right">', '</span>', pos)
-            results.append((urljoin("http:", url), {
+            results.append((text.urljoin("http:", url), {
                 "manga": manga, "title": title, "date": date,
-                "volume": util.safe_int(volume.rpartition(" ")[2]),
-                "chapter": util.safe_int(chapter),
+                "volume": text.parse_int(volume.rpartition(" ")[2]),
+                "chapter": text.parse_int(chapter),
                 "chapter_minor": dot + minor,
                 "lang": "en", "language": "English",
             }))
@@ -98,12 +97,12 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
 
         return {
             "manga": text.unescape(manga),
-            "manga_id": util.safe_int(mid),
+            "manga_id": text.parse_int(mid),
             "title": self._get_title_map(mid).get(self.chapter),
-            "volume": util.safe_int(self.volume),
-            "chapter": util.safe_int(chapter),
+            "volume": text.parse_int(self.volume),
+            "chapter": text.parse_int(chapter),
             "chapter_minor": dot + minor,
-            "count": util.safe_int(count),
+            "count": text.parse_int(count),
             "lang": "en",
             "language": "English",
         }

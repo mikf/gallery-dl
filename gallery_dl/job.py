@@ -17,7 +17,7 @@ from .extractor.message import Message
 
 class Job():
     """Base class for Job-types"""
-    ufile = None
+    ulog = None
 
     def __init__(self, url, parent=None):
         self.url = url
@@ -144,8 +144,8 @@ class Job():
             kwdict.update(self.userkwds)
 
     def _write_unsupported(self, url):
-        if self.ufile:
-            print(url, file=self.ufile, flush=True)
+        if self.ulog:
+            self.ulog.info(url)
 
 
 class DownloadJob(Job):

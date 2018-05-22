@@ -9,7 +9,7 @@
 """Extract images from https://www.xvideos.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, exception
 import json
 
 
@@ -57,7 +57,7 @@ class XvideosGalleryExtractor(XvideosExtractor):
         yield Message.Version, 1
         yield Message.Directory, data
         for url in imgs:
-            data["num"] = util.safe_int(url.rsplit("_", 2)[1])
+            data["num"] = text.parse_int(url.rsplit("_", 2)[1])
             data["extension"] = url.rpartition(".")[2]
             yield Message.Url, url, data
 
@@ -73,14 +73,14 @@ class XvideosGalleryExtractor(XvideosExtractor):
 
         return {
             "user": {
-                "id": util.safe_int(data["userid"]),
+                "id": text.parse_int(data["userid"]),
                 "name": self.user,
                 "display": data["display"],
                 "description": text.remove_html(data["descr"]).strip(),
             },
             "tags": text.unescape(data["tags"] or "").strip().split(", "),
             "title": text.unescape(data["title"]),
-            "gallery_id": util.safe_int(self.gid),
+            "gallery_id": text.parse_int(self.gid),
         }
 
     @staticmethod
@@ -123,7 +123,7 @@ class XvideosUserExtractor(XvideosExtractor):
             del data["galleries"]["0"]
 
         galleries = [
-            {"gallery_id": util.safe_int(gid),
+            {"gallery_id": text.parse_int(gid),
              "title": text.unescape(gdata["title"]),
              "count": gdata["nb_pics"]}
             for gid, gdata in data["galleries"].items()
