@@ -227,22 +227,6 @@ class TestOther(unittest.TestCase):
                 result = util.bdecode(util.bencode(value, alphabet), alphabet)
                 self.assertEqual(result, value)
 
-    def test_parse_bytes(self):
-        self.assertEqual(util.parse_bytes("50"), 50)
-        self.assertEqual(util.parse_bytes("50k"), 50 * 1024**1)
-        self.assertEqual(util.parse_bytes("50m"), 50 * 1024**2)
-        self.assertEqual(util.parse_bytes("50g"), 50 * 1024**3)
-        self.assertEqual(util.parse_bytes("50t"), 50 * 1024**4)
-        self.assertEqual(util.parse_bytes("50p"), 50 * 1024**5)
-
-        self.assertEqual(util.parse_bytes("123.456"), 123)
-        self.assertEqual(util.parse_bytes("123.567"), 124)
-        self.assertEqual(util.parse_bytes("0.5M"), round(0.5 * 1024**2))
-
-        self.assertEqual(util.parse_bytes("NaN"), 0)
-        self.assertEqual(util.parse_bytes("invalid"), 0)
-        self.assertEqual(util.parse_bytes(" 123 kb "), 0)
-
     def test_advance(self):
         items = range(5)
 
@@ -280,16 +264,6 @@ class TestOther(unittest.TestCase):
                 {1: {2: {3: {4: {"1": "a", "2": "b"}}}}},
                 {1: {2: {3: {4: {"1": "A", "3": "C"}}}}}),
             {1: {2: {3: {4: {"1": "A", "2": "b", "3": "C"}}}}})
-
-    def test_safe_int(self):
-        self.assertEqual(util.safe_int(123), 123)
-        self.assertEqual(util.safe_int("123"), 123)
-        self.assertEqual(util.safe_int("zzz"), 0)
-        self.assertEqual(util.safe_int(""), 0)
-        self.assertEqual(util.safe_int(None), 0)
-        self.assertEqual(util.safe_int("zzz", "default"), "default")
-        self.assertEqual(util.safe_int("", "default"), "default")
-        self.assertEqual(util.safe_int(None, "default"), "default")
 
 
 if __name__ == '__main__':

@@ -9,8 +9,7 @@
 """Extract manga-chapters and entire manga from https://mangapark.me/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
-from urllib.parse import urljoin
+from .. import text
 
 
 class MangaparkExtractor():
@@ -25,12 +24,12 @@ class MangaparkExtractor():
         for part in path.split("/")[3:]:
             key, value = part[0], part[1:]
             if key == "s":
-                data["version"] = util.safe_int(value)
+                data["version"] = text.parse_int(value)
             elif key == "v":
-                data["volume"] = util.safe_int(value)
+                data["volume"] = text.parse_int(value)
             elif key == "c":
                 chapter, dot, minor = value.partition(".")
-                data["chapter"] = util.safe_int(chapter)
+                data["chapter"] = text.parse_int(chapter)
                 data["chapter_minor"] = dot + minor
             elif key == "e":
                 data["chapter_minor"] = "v" + value
@@ -64,7 +63,7 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
             self.parse_chapter_path(path, data)
             data["title"] = title[3:].strip()
             data["date"] = date
-            data["count"] = util.safe_int(count)
+            data["count"] = text.parse_int(count)
             results.append((self.root + path, data.copy()))
 
 
@@ -107,7 +106,7 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
         data["manga"], _, data["type"] = data["manga"].rpartition(" ")
         data["manga"] = text.unescape(data["manga"])
         data["title"] = data["title"].partition(": ")[2]
-        data["count"] = util.safe_int(data["count"])
+        data["count"] = text.parse_int(data["count"])
         return data
 
     def get_images(self, page):
@@ -120,7 +119,7 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
             num += 1
             width , pos = text.extract(page, ' width="', '"', pos)
             height, pos = text.extract(page, ' _heighth="', '"', pos)
-            yield urljoin(self.root, url), {
+            yield text.urljoin(self.root, url), {
                 "page": num,
                 "width": width,
                 "height": height,

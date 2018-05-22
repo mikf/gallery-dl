@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from https://komikcast.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util, cloudflare
+from .. import text, cloudflare
 import re
 
 
@@ -39,7 +39,7 @@ class KomikcastBase():
             data["title"] = title.strip()
         else:
             data["title"] = ""
-        data["chapter"] = util.safe_int(chapter)
+        data["chapter"] = text.parse_int(chapter)
         data["lang"] = "id"
         data["language"] = "Indonesian"
 
@@ -75,8 +75,8 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
             page, '<div id="readerarea">', '<div class="navig">')[0]
         return [
             (url, {
-                "width": util.safe_int(width),
-                "height": util.safe_int(height),
+                "width": text.parse_int(width),
+                "height": text.parse_int(height),
             })
             for url, width, height in re.findall(
                 r"<img[^>]*? src=[\"']([^\"']+)[\"']"

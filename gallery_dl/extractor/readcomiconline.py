@@ -9,7 +9,7 @@
 """Extract comic-issues and entire comics from http://readcomiconline.to/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util, cloudflare
+from .. import text, cloudflare
 import re
 
 
@@ -56,7 +56,7 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
                 issue = issue[7:]
             results.append((self.root + url, {
                 "comic": comic, "issue": issue,
-                "issue_id": util.safe_int(url.rpartition("=")[2]),
+                "issue_id": text.parse_int(url.rpartition("=")[2]),
                 "lang": "en", "language": "English",
             }))
         return results
@@ -84,7 +84,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         return {
             "comic": comic,
             "issue": match.group(1) or match.group(2),
-            "issue_id": util.safe_int(self.issue_id),
+            "issue_id": text.parse_int(self.issue_id),
             "lang": "en",
             "language": "English",
         }

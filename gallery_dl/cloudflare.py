@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,6 +8,7 @@
 
 """Methods to access sites behind Cloudflare protection"""
 
+import re
 import time
 import operator
 import urllib.parse
@@ -30,6 +31,7 @@ def request_func(self, *args, **kwargs):
 
 
 def solve_challenge(session, response):
+
     session.headers["Referer"] = response.url
     page = response.text
     params = text.extract_all(page, (
@@ -37,58 +39,74 @@ def solve_challenge(session, response):
         ('pass'    , 'name="pass" value="', '"'),
     ))[0]
     params["jschl_answer"] = solve_jschl(response.url, page)
+
     time.sleep(4)
-    url = urllib.parse.urljoin(response.url, "/cdn-cgi/l/chk_jschl")
+    url = text.urljoin(response.url, "/cdn-cgi/l/chk_jschl")
     return session.get(url, params=params)
 
 
 def solve_jschl(url, page):
     """Solve challenge to get 'jschl_answer' value"""
+
+    # build variable name
+    # e.g. '...f, wqnVscP={"DERKbJk":+(...' --> wqnVscP.DERKbJk
     data, pos = text.extract_all(page, (
         ('var' , ',f, ', '='),
         ('key' , '"', '"'),
         ('expr', ':', '}'),
     ))
-    solution = evaluate_expression(data["expr"])
     variable = "{}.{}".format(data["var"], data["key"])
     vlength = len(variable)
+
+    # evaluate the initial expression
+    solution = evaluate_expression(data["expr"])
+
+    # iterator over all remaining expressions
+    # and combine their values in 'solution'
     expressions = text.extract(
-        page, "'challenge-form');", "f.submit();", pos
-    )[0]
+        page, "'challenge-form');", "f.submit();", pos)[0]
     for expr in expressions.split(";")[1:]:
+
         if expr.startswith(variable):
+            # select arithmetc function based on operator (+, -, *)
             func = operator_functions[expr[vlength]]
+            # evaluate the rest of the expression
             value = evaluate_expression(expr[vlength+2:])
+            # combine the expression value with our current solution
             solution = func(solution, value)
+
         elif expr.startswith("a.value"):
+            # add length of the hostname, i.e. add 11 for 'example.org'
             solution += len(urllib.parse.urlsplit(url).netloc)
+
             if ".toFixed(" in expr:
+                # trim the solution to 10 decimal places
+                # and strip trailing zeros
                 solution = "{:.10f}".format(solution).rstrip("0")
+
             return solution
 
 
-def evaluate_expression(expr):
+def evaluate_expression(expr, split_re=re.compile(r"\(+([^)]*)\)")):
     """Evaluate a Javascript expression for the challenge"""
+
     if "/" in expr:
+        # split the expression in numerator and denominator subexpressions,
+        # evaluate them separately,
+        # and return their fraction-result
         num, _, denom = expr.partition("/")
         return evaluate_expression(num) / evaluate_expression(denom)
 
-    stack = []
-    ranges = []
-    value = ""
-    for index, char in enumerate(expr):
-        if char == "(":
-            stack.append(index+1)
-        elif char == ")":
-            begin = stack.pop()
-            if stack:
-                ranges.append((begin, index))
-    for subexpr in [expr[begin:end] for begin, end in ranges] or (expr,):
-        num = 0
-        for part in subexpr.split("[]"):
-            num += expression_values[part]
-        value += str(num)
-    return int(value)
+    # iterate over all subexpressions,
+    # evaluate them,
+    # and accumulate their values in 'result'
+    result = ""
+    for subexpr in split_re.findall(expr):
+        result += str(sum(
+            expression_values[part]
+            for part in subexpr.split("[]")
+        ))
+    return int(result)
 
 
 operator_functions = {

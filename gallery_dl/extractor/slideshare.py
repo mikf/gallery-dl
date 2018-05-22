@@ -9,7 +9,7 @@
 """Extract images from https://www.slideshare.net/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 
 class SlidesharePresentationExtractor(Extractor):
@@ -78,7 +78,7 @@ class SlidesharePresentationExtractor(Extractor):
             "presentation": self.presentation,
             "title": text.unescape(title.strip()),
             "description": text.unescape(descr),
-            "views": util.safe_int(views.replace(",", "")),
+            "views": text.parse_int(views.replace(",", "")),
             "published": published,
         }
 

@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from http://kissmanga.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util, cloudflare, aes, exception
+from .. import text, cloudflare, aes, exception
 from ..cache import cache
 import re
 import hashlib
@@ -56,8 +56,8 @@ class KissmangaBase():
             ), data["chapter_string"])
 
         volume, chapter, minor, title = match.groups()
-        data["volume"] = util.safe_int(volume)
-        data["chapter"] = util.safe_int(chapter)
+        data["volume"] = text.parse_int(volume)
+        data["chapter"] = text.parse_int(chapter)
         data["chapter_minor"] = "." + minor if minor else ""
         data["title"] = title if title and title != "Read Online" else ""
         return data
@@ -89,7 +89,7 @@ class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
             url, _, chapter = item.partition(needle)
             data = {
                 "manga": manga, "chapter_string": chapter,
-                "chapter_id": util.safe_int(url.rpartition("=")[2]),
+                "chapter_id": text.parse_int(url.rpartition("=")[2]),
                 "lang": "en", "language": "English",
             }
             self.parse_chapter_string(data)
@@ -128,7 +128,7 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
         data = {
             "manga": manga.strip(),
             "chapter_string": cinfo.strip(),
-            "chapter_id": util.safe_int(self.chapter_id),
+            "chapter_id": text.parse_int(self.chapter_id),
             "lang": "en",
             "language": "English",
         }

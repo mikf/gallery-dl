@@ -9,7 +9,7 @@
 """Extract manga-chapters from https://dynasty-scans.com/"""
 
 from .common import ChapterExtractor
-from .. import text, util
+from .. import text
 import re
 import json
 
@@ -53,7 +53,7 @@ class DynastyscansChapterExtractor(ChapterExtractor):
 
         return {
             "manga": text.unescape(match.group(1)),
-            "chapter": util.safe_int(match.group(2)),
+            "chapter": text.parse_int(match.group(2)),
             "chapter_minor": match.group(3) or "",
             "title": text.unescape(match.group(4) or ""),
             "author": text.remove_html(author),

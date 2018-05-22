@@ -11,14 +11,9 @@
 import re
 import os
 import sys
-import hmac
-import time
-import base64
-import random
 import shutil
 import string
 import _string
-import hashlib
 import sqlite3
 import datetime
 import itertools
@@ -95,22 +90,6 @@ def bdecode(data, alphabet="0123456789"):
     return num
 
 
-def parse_bytes(value, suffixes="bkmgtp"):
-    """Convert a bytes-amount ("500k", "2.5M", ...) to int"""
-    last = value[-1].lower()
-
-    if last in suffixes:
-        mul = 1024 ** suffixes.index(last)
-        value = value[:-1]
-    else:
-        mul = 1
-
-    try:
-        return round(float(value) * mul)
-    except ValueError:
-        return 0
-
-
 def advance(iterable, num):
     """"Advance the iterable by 'num' steps"""
     iterator = iter(iterable)
@@ -133,16 +112,6 @@ def combine_dict(a, b):
         else:
             a[key] = value
     return a
-
-
-def safe_int(value, default=0):
-    """Safely convert value to integer"""
-    if value is None or value == "":
-        return default
-    try:
-        return int(value)
-    except (ValueError, TypeError):
-        return default
 
 
 def expand_path(path):
@@ -253,7 +222,7 @@ class UniquePredicate():
 class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
     globalsdict = {
-        "safe_int": safe_int,
+        "parse_int": text.parse_int,
         "urlsplit": urllib.parse.urlsplit,
         "datetime": datetime.datetime,
         "abort": raises(exception.StopExtraction()),
@@ -521,54 +490,6 @@ class PathFormat():
     def adjust_path(path):
         """Enable longer-than-260-character paths on windows"""
         return "\\\\?\\" + os.path.abspath(path) if os.name == "nt" else path
-
-
-class OAuthSession():
-    """Minimal wrapper for requests.session objects to support OAuth 1.0"""
-    def __init__(self, session, consumer_key, consumer_secret,
-                 token=None, token_secret=None):
-        self.session = session
-        self.consumer_secret = consumer_secret
-        self.token_secret = token_secret or ""
-        self.params = {}
-        self.params["oauth_consumer_key"] = consumer_key
-        self.params["oauth_token"] = token
-        self.params["oauth_signature_method"] = "HMAC-SHA1"
-        self.params["oauth_version"] = "1.0"
-
-    def get(self, url, params, **kwargs):
-        params.update(self.params)
-        params["oauth_nonce"] = self.nonce(16)
-        params["oauth_timestamp"] = int(time.time())
-        return self.session.get(url + self.sign(url, params), **kwargs)
-
-    def sign(self, url, params):
-        """Generate 'oauth_signature' value and return query string"""
-        query = self.urlencode(params)
-        message = self.concat("GET", url, query).encode()
-        key = self.concat(self.consumer_secret, self.token_secret).encode()
-        signature = hmac.new(key, message, hashlib.sha1).digest()
-        return "?{}&oauth_signature={}".format(
-            query, self.quote(base64.b64encode(signature).decode()))
-
-    @staticmethod
-    def concat(*args):
-        return "&".join(OAuthSession.quote(item) for item in args)
-
-    @staticmethod
-    def nonce(N, alphabet=string.ascii_letters):
-        return "".join(random.choice(alphabet) for _ in range(N))
-
-    @staticmethod
-    def quote(value, quote=urllib.parse.quote):
-        return quote(value, "~")
-
-    @staticmethod
-    def urlencode(params):
-        return "&".join(
-            OAuthSession.quote(str(key)) + "=" + OAuthSession.quote(str(value))
-            for key, value in sorted(params.items()) if value
-        )
 
 
 class DownloadArchive():

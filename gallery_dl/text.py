@@ -8,37 +8,47 @@
 
 """Collection of functions that work in strings/text"""
 
-import sys
 import re
-import os.path
 import html
+import os.path
 import urllib.parse
 
 
-INVALID_XML_CHARS = (1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18,
-                     19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31)
+INVALID_XML_CHARS = (
+    "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07",
+    "\x08", "\x0b", "\x0c", "\x0e", "\x0f", "\x10", "\x11", "\x12",
+    "\x13", "\x14", "\x15", "\x16", "\x17", "\x18", "\x19", "\x1a",
+    "\x1b", "\x1c", "\x1d", "\x1e", "\x1f",
+)
 
 
 def clean_xml(xmldata, repl=""):
-    """Replace/Remove invalid control characters in XML data"""
+    """Replace/Remove invalid control characters in 'xmldata'"""
+    if not isinstance(xmldata, str):
+        try:
+            xmldata = "".join(xmldata)
+        except TypeError:
+            return ""
     for char in INVALID_XML_CHARS:
-        char = chr(char)
         if char in xmldata:
             xmldata = xmldata.replace(char, repl)
     return xmldata
 
 
-def remove_html(text):
+def remove_html(txt):
     """Remove html-tags from a string"""
-    return " ".join(re.sub("<[^>]+?>", " ", text).split())
+    try:
+        return " ".join(re.sub("<[^>]+>", " ", txt).split())
+    except TypeError:
+        return ""
 
 
 def filename_from_url(url):
     """Extract the last part of an url to use as a filename"""
     try:
         return urllib.parse.urlsplit(url).path.rpartition("/")[2]
-    except ValueError:
-        return url
+    except (TypeError, AttributeError):
+        return ""
 
 
 def nameext_from_url(url, data=None):
@@ -56,7 +66,7 @@ def clean_path_windows(path):
     try:
         return re.sub(r'[<>:"\\/|?*]', "_", path)
     except TypeError:
-        return path
+        return ""
 
 
 def clean_path_posix(path):
@@ -64,20 +74,7 @@ def clean_path_posix(path):
     try:
         return path.replace("/", "_")
     except AttributeError:
-        return path
-
-
-def shorten_path(path, limit=255, encoding=sys.getfilesystemencoding()):
-    """Shorten a path segment to at most 'limit' bytes"""
-    return (path.encode(encoding)[:limit]).decode(encoding, "ignore")
-
-
-def shorten_filename(fname, limit=255, encoding=sys.getfilesystemencoding()):
-    """Shorten filename to at most 'limit' bytes while preserving extension"""
-    name, extension = os.path.splitext(fname)
-    bext = extension.encode(encoding)
-    bname = name.encode(encoding)[:limit-len(bext)]
-    return bname.decode(encoding, "ignore") + extension
+        return ""
 
 
 def extract(txt, begin, end, pos=0):
@@ -104,7 +101,7 @@ def extract(txt, begin, end, pos=0):
         first = txt.index(begin, pos) + len(begin)
         last = txt.index(end, first)
         return txt[first:last], last+len(end)
-    except ValueError:
+    except (ValueError, TypeError, AttributeError):
         return None, pos
 
 
@@ -128,12 +125,44 @@ def extract_iter(txt, begin, end, pos=0):
         yield value
 
 
+def parse_bytes(value, default=0, suffixes="bkmgtp"):
+    """Convert a bytes-amount ("500k", "2.5M", ...) to int"""
+    try:
+        last = value[-1].lower()
+    except (TypeError, KeyError, IndexError):
+        return default
+
+    if last in suffixes:
+        mul = 1024 ** suffixes.index(last)
+        value = value[:-1]
+    else:
+        mul = 1
+
+    try:
+        return round(float(value) * mul)
+    except ValueError:
+        return default
+
+
+def parse_int(value, default=0):
+    """Convert 'value' to int"""
+    if not value:
+        return default
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+
 def parse_query(qs):
     """Parse a query string into key-value pairs"""
     result = {}
-    for key, value in urllib.parse.parse_qsl(qs):
-        if key not in result:
-            result[key] = value
+    try:
+        for key, value in urllib.parse.parse_qsl(qs):
+            if key not in result:
+                result[key] = value
+    except AttributeError:
+        pass
     return result
 
 
@@ -142,6 +171,7 @@ if os.name == "nt":
 else:
     clean_path = clean_path_posix
 
+urljoin = urllib.parse.urljoin
 unquote = urllib.parse.unquote
 escape = html.escape
 

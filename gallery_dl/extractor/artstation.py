@@ -73,7 +73,7 @@ class ArtstationExtractor(Extractor):
     def get_user_info(self, username):
         """Return metadata for a specific user"""
         url = "{}/users/{}/quick.json".format(self.root, username.lower())
-        response = self.request(url, fatal=False, allow_empty=True)
+        response = self.request(url, fatal=False)
         if response.status_code == 404:
             raise exception.NotFoundError("user")
         return response.json()
@@ -158,7 +158,7 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
-        self.album_id = util.safe_int(match.group(2))
+        self.album_id = text.parse_int(match.group(2))
 
     def metadata(self):
         userinfo = self.get_user_info(self.user)
@@ -256,7 +256,7 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
     def _id_from_url(url):
         """Get an image's submission ID from its URL"""
         parts = url.split("/")
-        return util.safe_int("".join(parts[7:10]))
+        return text.parse_int("".join(parts[7:10]))
 
 
 class ArtstationSearchExtractor(ArtstationExtractor):

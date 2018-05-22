@@ -82,16 +82,16 @@ class SankakuExtractor(SharedConfigExtractor):
             file_url = extr(page, '<embed src="', '"', pos)[0]
 
         return {
-            "id": util.safe_int(post_id),
+            "id": text.parse_int(post_id),
             "md5": file_url.rpartition("/")[2].partition(".")[0],
             "tags": tags,
             "vote_average": float(vavg or 0),
-            "vote_count": util.safe_int(vcnt),
+            "vote_count": text.parse_int(vcnt),
             "created_at": created,
             "rating": (rating or "?")[0].lower(),
             "file_url": "https:" + text.unescape(file_url),
-            "width": util.safe_int(width),
-            "height": util.safe_int(height),
+            "width": text.parse_int(width),
+            "height": text.parse_int(height),
         }
 
     def wait(self):
@@ -165,8 +165,8 @@ class SankakuTagExtractor(SankakuExtractor):
         SankakuExtractor.__init__(self)
         query = text.parse_query(match.group(1))
         self.tags = text.unquote(query.get("tags", "").replace("+", " "))
-        self.start_page = util.safe_int(query.get("page"), 1)
-        self.next = util.safe_int(query.get("next"), 0)
+        self.start_page = text.parse_int(query.get("page"), 1)
+        self.next = text.parse_int(query.get("next"), 0)
 
     def skip(self, num):
         if self.next:
@@ -212,7 +212,7 @@ class SankakuTagExtractor(SankakuExtractor):
             yield from ids
 
             params["page"] = 2
-            params["next"] = util.safe_int(ids[-1]) - 1
+            params["next"] = text.parse_int(ids[-1]) - 1
 
 
 class SankakuPoolExtractor(SankakuExtractor):

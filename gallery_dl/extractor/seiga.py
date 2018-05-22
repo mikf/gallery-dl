@@ -123,11 +123,11 @@ class SeigaUserExtractor(SeigaExtractor):
 
         return {
             "user": {
-                "id": util.safe_int(self.user_id),
+                "id": text.parse_int(self.user_id),
                 "name": data["name"],
                 "message": (data["msg"] or "").strip(),
             },
-            "count": util.safe_int(data["count"]),
+            "count": text.parse_int(data["count"]),
         }
 
     def get_images(self):
@@ -152,7 +152,7 @@ class SeigaUserExtractor(SeigaExtractor):
                     ("clips"   , '</span>', '</li>'),
                 ))[0]
                 for key in ("image_id", "views", "comments", "clips"):
-                    data[key] = util.safe_int(data[key])
+                    data[key] = text.parse_int(data[key])
                 yield data
                 cnt += 1
 
@@ -188,4 +188,4 @@ class SeigaImageExtractor(SeigaExtractor):
         return num
 
     def get_images(self):
-        return ({}, {"image_id": util.safe_int(self.image_id)})
+        return ({}, {"image_id": text.parse_int(self.image_id)})

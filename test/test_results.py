@@ -22,7 +22,6 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "pixiv",  # /users/<id>/favorite_works API endpoint is gone
 }
 
 

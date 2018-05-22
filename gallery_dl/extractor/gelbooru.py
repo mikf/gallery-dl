@@ -37,7 +37,7 @@ class GelbooruExtractor(SharedConfigExtractor):
             if isinstance(post, str):
                 post = self.get_post_data(post)
             for key in ("id", "width", "height", "score", "change"):
-                post[key] = util.safe_int(post[key])
+                post[key] = text.parse_int(post[key])
             url = post["file_url"]
             post.update(data)
             yield Message.Url, url, text.nameext_from_url(url, post)
@@ -174,7 +174,7 @@ class GelbooruPoolExtractor(GelbooruExtractor):
             raise exception.NotFoundError("pool")
 
         return {
-            "pool": util.safe_int(self.pool_id),
+            "pool": text.parse_int(self.pool_id),
             "pool_name": text.unescape(name),
             "count": len(self.posts),
         }

@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util, exception
-from urllib.parse import urljoin
 import json
 import re
 
@@ -69,8 +68,8 @@ class MangadexChapterExtractor(MangadexExtractor, ChapterExtractor):
             "manga": data["manga_title"],
             "manga_id": data["manga_id"],
             "title": data["chapter_title"],
-            "volume": util.safe_int(match.group(1)),
-            "chapter": util.safe_int(match.group(2)),
+            "volume": text.parse_int(match.group(1)),
+            "chapter": text.parse_int(match.group(2)),
             "chapter_minor": match.group(3) or "",
             "chapter_id": data["chapter_id"],
             "chapter_string": info.replace(" - MangaDex", ""),
@@ -84,7 +83,7 @@ class MangadexChapterExtractor(MangadexExtractor, ChapterExtractor):
         pagelist, pos = text.extract(page, "var page_array = [", "]", pos)
         server  , pos = text.extract(page, "var server = '", "'", pos)
 
-        base = urljoin(self.root, server + dataurl + "/")
+        base = text.urljoin(self.root, server + dataurl + "/")
 
         return [
             (base + page, None)
@@ -130,7 +129,7 @@ class MangadexMangaExtractor(MangadexExtractor, MangaExtractor):
 
         manga = text.unescape(extr(
             page, '"og:title" content="', '"')[0].rpartition(" (")[0])
-        manga_id = util.safe_int(extr(
+        manga_id = text.parse_int(extr(
             page, '/images/manga/', '.')[0])
 
         while True:
@@ -151,15 +150,15 @@ class MangadexMangaExtractor(MangadexExtractor, MangaExtractor):
 
                 results.append((self.root + "/chapter/" + chid, {
                     "manga": manga,
-                    "manga_id": util.safe_int(manga_id),
+                    "manga_id": text.parse_int(manga_id),
                     "title": text.unescape(title),
-                    "volume": util.safe_int(volume),
-                    "chapter": util.safe_int(chapter),
+                    "volume": text.parse_int(volume),
+                    "chapter": text.parse_int(chapter),
                     "chapter_minor": sep + minor,
-                    "chapter_id": util.safe_int(chid),
+                    "chapter_id": text.parse_int(chid),
                     "group": text.unescape(text.remove_html(group)),
                     "contributor": text.remove_html(user),
-                    "views": util.safe_int(views),
+                    "views": text.parse_int(views),
                     "date": date,
                     "lang": util.language_to_code(language),
                     "language": language,
