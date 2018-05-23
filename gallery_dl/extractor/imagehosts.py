@@ -184,9 +184,9 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
 
 
 class PixhostImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from pixhost.org"""
+    """Extractor for single images from pixhost.to"""
     category = "pixhost"
-    pattern = [(r"(?:https?://)?((?:www\.)?pixhost\.org/show/"
+    pattern = [(r"(?:https?://)?((?:www\.)?pixhost\.(?:to|org)/show/"
                 r"\d+/(\d+)_[^/]+)")]
     https = True
     params = None
