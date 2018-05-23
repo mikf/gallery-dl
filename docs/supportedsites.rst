@@ -82,7 +82,7 @@ Imagetwist           https://imagetwist.com/             individual Images
 Imagevenue           http://imagevenue.com/              individual Images
 Imgspice             https://imgspice.com/               individual Images
 Imxto                https://imx.to/                     individual Images
-Pixhost              https://pixhost.org/                individual Images
+Pixhost              https://pixhost.to/                 individual Images
 Postimg              https://postimg.org/                individual Images
 Turboimagehost       https://turboimagehost.com/         individual Images
 ==================== =================================== ================================================== ================
@@ -91,5 +91,5 @@ Turboimagehost       https://turboimagehost.com/         individual Images
 .. |Collections, De-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images
 .. |Images from Use-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
 .. |Images from Use-3| replace:: Images from Users, Doujin, Favorites, individual Images
-.. |Images from Use-4| replace:: Images from Users, Bookmarks, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
+.. |Images from Use-4| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
 .. |Albums, individ-5| replace:: Albums, individual Images, Images from Users and Folders
