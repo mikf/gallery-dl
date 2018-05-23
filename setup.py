@@ -14,7 +14,8 @@ except ImportError:
 
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    import codecs
+    return codecs.open(os.path.join(os.path.dirname(__file__), fname), 'r', 'utf-8').read()
 
 
 # get version without importing the package
