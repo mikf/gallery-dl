@@ -26,13 +26,18 @@ class MangadexChapterExtractor(MangadexExtractor, ChapterExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?mangadex\.(?:org|com)/chapter/(\d+)"]
     test = [
         ("https://mangadex.org/chapter/122094", {
-            "keyword": "fe9f66f61ef3a31d9e5a0bd47c672f1b2433a682",
+            "keyword": "da1262219afe50dfe0098011366468fa507cc3c6",
             "content": "7ab3bef5caccb62b881f8e6e70359d3c7be8137f",
         }),
         # oneshot
         ("https://mangadex.org/chapter/138086", {
             "count": 64,
-            "keyword": "0e27e78e498debf905199ff9540cffe5c352ae21",
+            "keyword": "1f6fb237a96cdf05b436ae2a37a4436e717bbb30",
+        }),
+        # abnormal chapter string ("Vol. 1 Ch. 6 \ 5.1")
+        ("https://mangadex.org/chapter/255540", {
+            "count": 27,
+            "keyword": "fe5e3ece1bc6463350fde36f7e47e29d093fed84",
         }),
         # NotFoundError
         ("https://mangadex.org/chapter/1", {
@@ -43,53 +48,45 @@ class MangadexChapterExtractor(MangadexExtractor, ChapterExtractor):
     def __init__(self, match):
         url = self.root + "/chapter/" + match.group(1)
         ChapterExtractor.__init__(self, url)
+        self.data = None
 
     def get_metadata(self, page):
         if "title='Warning'" in page and " does not exist." in page:
             raise exception.NotFoundError("chapter")
 
-        info    , pos = text.extract(page, '="og:title" content="', '"')
-        _       , pos = text.extract(page, ' id="jump_group"', '', pos)
-        _       , pos = text.extract(page, ' selected ', '', pos)
-        language, ___ = text.extract(page, " title='", "'", pos-100)
-        group   , pos = text.extract(page, '>', '<', pos)
+        info, pos = text.extract(page, '="og:title" content="', ' (')
+        self.data = data = json.loads(
+            text.extract(page, 'data-type="chapter">', '<', pos)[0])
 
-        data = json.loads(
-            text.extract(page, 'data-type="chapter">', '<', pos)[0]
-        )
-
-        info = text.unescape(info)
-        match = re.match(
-            r"(?:(?:Vol\. (\d+) )?Ch\. (\d+)([^ ]*)|(.*)) "
-            r"\(([^)]+)\)",
-            info)
+        match = re.match(r"(?:[Vv]ol\. (\d+) )?[Cc]h\. ([^.]+)(\..+)?", info)
+        if match:
+            volume, chapter, minor = match.groups()
+            chapter = chapter.rpartition(" ")[2]
+        else:
+            volume = chapter = minor = ""
+        group = data["other_groups"][str(data["chapter_id"])]
 
         return {
             "manga": data["manga_title"],
             "manga_id": data["manga_id"],
             "title": data["chapter_title"],
-            "volume": text.parse_int(match.group(1)),
-            "chapter": text.parse_int(match.group(2)),
-            "chapter_minor": match.group(3) or "",
+            "volume": text.parse_int(volume),
+            "chapter": text.parse_int(chapter),
+            "chapter_minor": minor or "",
             "chapter_id": data["chapter_id"],
-            "chapter_string": info.replace(" - MangaDex", ""),
-            "group": text.unescape(group),
-            "lang": util.language_to_code(language),
-            "language": language,
+            "chapter_string": info,
+            "group": text.unescape(group["group_name"]),
+            "lang": util.language_to_code(group["lang_name"]),
+            "language": group["lang_name"],
         }
 
-    def get_images(self, page):
-        dataurl , pos = text.extract(page, "var dataurl = '", "'")
-        pagelist, pos = text.extract(page, "var page_array = [", "]", pos)
-        server  , pos = text.extract(page, "var server = '", "'", pos)
-
-        base = text.urljoin(self.root, server + dataurl + "/")
+    def get_images(self, _):
+        base = self.data["server"] + self.data["dataurl"] + "/"
+        base = text.urljoin(self.root, base)
 
         return [
             (base + page, None)
-            for page in json.loads(
-                "[" + pagelist.replace("'", '"').rstrip(",") + "]"
-            )
+            for page in self.data["page_array"]
         ]
 
 
@@ -147,6 +144,7 @@ class MangadexMangaExtractor(MangadexExtractor, MangaExtractor):
                 date    , pos = extr(info, ' datetime="', '"', pos)
 
                 chapter, sep, minor = chapter.partition(".")
+                chapter = chapter.rpartition(" ")[2]
 
                 results.append((self.root + "/chapter/" + chid, {
                     "manga": manga,
