@@ -57,9 +57,10 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
 
     path = opts.get("path")
     mode = opts.get("mode", "w")
+    encoding = opts.get("encoding", "utf-8")
     try:
         path = util.expand_path(path)
-        handler = logging.FileHandler(path, mode)
+        handler = logging.FileHandler(path, mode, encoding)
     except (OSError, ValueError) as exc:
         log.warning("%s: %s", key, exc)
         return None
