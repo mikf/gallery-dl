@@ -209,7 +209,7 @@ class DownloadJob(Job):
 
     def handle_queue(self, url, keywords):
         try:
-            DownloadJob(url, self).run()
+            self.__class__(url, self).run()
         except exception.NoExtractorError:
             self._write_unsupported(url)
 
@@ -225,6 +225,18 @@ class DownloadJob(Job):
             instance = klass(self.extractor.session, self.out)
             self.downloaders[scheme] = instance
         return instance
+
+
+class SimulationJob(DownloadJob):
+    """Simulate the extraction process without downloading anything"""
+
+    def handle_url(self, url, keywords, fallback=None):
+        self.pathfmt.set_keywords(keywords)
+        self.out.skip(self.pathfmt.path)
+        if self.sleep:
+            time.sleep(self.sleep)
+        if self.archive:
+            self.archive.add(keywords)
 
 
 class KeywordJob(Job):

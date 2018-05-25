@@ -114,6 +114,10 @@ def build_parser():
         help="Print JSON information",
     )
     output.add_argument(
+        "-s", "--simulate", dest="simulate", action="store_true",
+        help="Simulate data extraction; do not download anything",
+    )
+    output.add_argument(
         "-K", "--list-keywords", dest="list_keywords", action="store_true",
         help=("Print a list of available keywords and example values "
               "for the given URLs"),
