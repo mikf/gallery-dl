@@ -275,6 +275,8 @@ def main():
                 jobtype = job.KeywordJob
             elif args.list_data:
                 jobtype = job.DataJob
+            elif args.simulate:
+                jobtype = job.SimulationJob
             else:
                 jobtype = job.DownloadJob
 
