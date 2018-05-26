@@ -784,6 +784,7 @@ values embedded into *gallery-dl* itself, but if things unexpectedly break
 or you want to use your own personal client credentials, you can follow these
 instructions to get an alternative set of API tokens and IDs.
 
+
 extractor.deviantart.client-id & .client-secret
 -----------------------------------------------
 =========== =====
@@ -792,8 +793,10 @@ How To      - login and visit DeviantArt's
               `Applications & Keys <https://www.deviantart.com/developers/apps>`__
               section
             - click "Register your Application"
-            - click "Save" (top right; default settings are fine)
-            - copy ``client_id`` and ``client_secret`` of your new "Untitled"
+            - scroll to "OAuth2 Redirect URI Whitelist (Required)"
+              and enter "https://mikf.github.io/gallery-dl/oauth-redirect.html"
+            - click "Save" (top right)
+            - copy ``client_id`` and ``client_secret`` of your new
               application and put them in your configuration file
 =========== =====
 
@@ -839,8 +842,22 @@ How To      - login and visit the `apps <https://www.reddit.com/prefs/apps/>`__
 =========== =====
 
 
-extractor.tumblr.api-key
-------------------------
+extractor.smugmug.api-key & .api-secret
+---------------------------------------
+=========== =====
+Type        ``string``
+How To      - login and `Apply for an API Key <https://api.smugmug.com/api/developer/apply>`__
+            - use a random name and description,
+              set "Type" to "Application", "Platform" to "All",
+              and "Use" to "Non-Commercial"
+            - fill out the two checkboxes at the bottom and click "Apply"
+            - copy ``API Key`` and ``API Secret``
+              and put them in your configuration file
+=========== =====
+
+
+extractor.tumblr.api-key & .api-secret
+--------------------------------------
 =========== =====
 Type        ``string``
 How To      - login and visit Tumblr's
@@ -850,8 +867,9 @@ How To      - login and visit Tumblr's
               https://example.org/ as "Application Website" and "Default
               callback URL"
             - solve Google's "I'm not a robot" challenge and click "Register"
-            - copy your ``OAuth Consumer Key`` and put it in your configuration
-              file
+            - click "Show secret key" (below "OAuth Consumer Key")
+            - copy your ``OAuth Consumer Key`` and ``Secret Key``
+              and put them in your configuration file
 =========== =====
 
 
