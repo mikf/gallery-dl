@@ -52,6 +52,7 @@ CATEGORY_MAP = {
     "seiga"          : "Niconico Seiga",
     "senmanga"       : "Sen Manga",
     "sensescans"     : "Sense-Scans",
+    "simplyhentai"   : "Simply Hentai",
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
     "thebarchive"    : "The /b/ Archive",

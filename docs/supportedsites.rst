@@ -67,6 +67,7 @@ Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag-Searc
 Sea Otter Scans      https://reader.seaotterscans.com/   Chapters, Manga
 Sen Manga            http://raw.senmanga.com/            Chapters
 Sense-Scans          http://sensescans.com/              Chapters, Manga
+Simply Hentai        https://www.simply-hentai.com/      Galleries
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |Albums, individ-5|                                Optional (OAuth)
 Subapics             https://subapics.com/               Chapters, Manga

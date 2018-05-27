@@ -74,6 +74,7 @@ modules = [
     "seiga",
     "senmanga",
     "sensescans",
+    "simplyhentai",
     "slideshare",
     "smugmug",
     "subapics",
