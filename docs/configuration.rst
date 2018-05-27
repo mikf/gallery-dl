@@ -734,8 +734,8 @@ output.log
 ----------
 =========== =====
 Type        |Logging Configuration|_ or ``string``
-Default     ``null``
-Description Configuration for the standard logging to stderr.
+Default     ``"[{name}][{levelname}] {message}"``
+Description Configuration for standard logging output to stderr.
 
             If this is a simple ``string``, it specifies
             the format string for logging messages.
@@ -757,6 +757,8 @@ output.unsupportedfile
 Type        |Logging Configuration|_ or |Path|_
 Default     ``null``
 Description File to write external URLs unsupported by *gallery-dl* to.
+
+            The default format string here is ``"{message}"``.
 =========== =====
 
 
