@@ -43,6 +43,17 @@ def remove_html(txt):
         return ""
 
 
+def split_html(txt, sep=None):
+    """Split input string by html-tags"""
+    try:
+        return [
+            x for x in re.split("<[^>]+>", txt)
+            if x and not x.isspace()
+        ]
+    except TypeError:
+        return []
+
+
 def filename_from_url(url):
     """Extract the last part of an url to use as a filename"""
     try:
