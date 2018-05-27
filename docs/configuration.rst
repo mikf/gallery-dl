@@ -12,7 +12,6 @@ Contents
 6) `API Tokens & IDs`_
 
 
-
 Extractor Options
 =================
 
@@ -152,11 +151,11 @@ Description The username and password to use when attempting to log in to
 extractor.*.cookies
 -------------------
 =========== =====
-Type        ``string`` or ``object``
+Type        |Path|_ or ``object``
 Default     ``null``
 Description Source to read additional cookies from.
 
-            * If this is a ``string``, it specifies the path of a
+            * If this is a |Path|_, it specifies a
               Mozilla/Netscape format cookies.txt file.
             * If this is an ``object``, its key-value pairs, which should both
               be ``strings``, will be used as cookie-names and -values.
@@ -228,7 +227,7 @@ Description Default value used for missing or undefined keyword names in
 extractor.*.archive
 -------------------
 =========== =====
-Type        ``string``
+Type        |Path|_
 Default     ``null``
 Description File to store IDs of downloaded files in. Downloads of files
             already recorded in this archive file will be skipped_.
@@ -731,10 +730,22 @@ Description Controls the progress indicator when *gallery-dl* is run with
 =========== =====
 
 
+output.log
+----------
+=========== =====
+Type        |Logging Configuration|_ or ``string``
+Default     ``null``
+Description Configuration for the standard logging to stderr.
+
+            If this is a simple ``string``, it specifies
+            the format string for logging messages.
+=========== =====
+
+
 output.logfile
 --------------
 =========== =====
-Type        ``string``
+Type        |Logging Configuration|_ or |Path|_
 Default     ``null``
 Description File to write logging output to.
 =========== =====
@@ -743,7 +754,7 @@ Description File to write logging output to.
 output.unsupportedfile
 ----------------------
 =========== =====
-Type        ``string``
+Type        |Logging Configuration|_ or |Path|_
 Default     ``null``
 Description File to write external URLs unsupported by *gallery-dl* to.
 =========== =====
@@ -765,7 +776,7 @@ Description Enable the use of |.netrc|_ authentication data.
 cache.file
 ----------
 =========== =====
-Type        ``string``
+Type        |Path|_
 Default     |tempfile.gettempdir()|_ + ``".gallery-dl.cache"``
 Description Path of the SQLite3 database used to cache login sessions,
             cookies and API tokens across `gallery-dl` invocations.
@@ -874,6 +885,77 @@ How To      - login and visit Tumblr's
 
 
 
+Custom Types
+============
+
+
+Path
+----
+=========== =====
+Type        ``string`` or ``list`` of ``strings``
+Examples    * ``"file.ext"``
+            * ``"~/path/to/file.ext"``
+            * ``"$HOME/path/to/file.ext"``
+            * ``["$HOME", "path", "to", "file.ext"]``
+Description A |Path|_ is a ``string`` representing the location of a file.
+
+            Simple `tilde expansion <https://docs.python.org/3/library/os.path.html#os.path.expanduser>`__
+            and `environment variable expansion <https://docs.python.org/3/library/os.path.html#os.path.expandvars>`__
+            is supported.
+
+            In Windows environments, backslashes (``"\"``) can, in addition to
+            forward slashes (``"/"``), be used as path separators.
+            Because backslashes are JSON's escape character,
+            they themselves have to be escaped.
+            The path ``C:\path\to\file.ext`` has therefore to be written as
+            ``"C:\\path\\to\\file.ext"`` if you want to use backslashes.
+=========== =====
+
+
+Logging Configuration
+---------------------
+=========== =====
+Type        ``object``
+
+Examples    .. code::
+
+                {
+                    "format": "{asctime} {name}: {message}",
+                    "format-date": "%H:%M:%S",
+                    "path": "~/log.txt",
+                    "encoding": "ascii"
+                }
+
+Description Extended logging output configuration.
+
+            .. _`output format string`:
+
+            * format
+                * Format string for logging messages
+                  (see `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__)
+                * Default: ``"[{name}][{levelname}] {message}"``
+            * format-date
+                * Format string for {asctime} fields in logging messages
+                  (see `strftime() directives <https://docs.python.org/3/library/time.html#time.strftime>`__)
+                * Default: ``"%Y-%m-%d %H:%M:%S"``
+            * level
+                * Minimum logging message level
+                  (one of ``"debug"``, ``"info"``, ``"warning"``, ``"error"``, ``"exception"``)
+                * Default: ``"info"``
+            * path
+                * |Path|_ to the output file
+            * mode
+                * Mode in which the file is opened;
+                  use ``"w"`` to truncate or ``"a"`` to append
+                  (see `open() <https://docs.python.org/3/library/functions.html#open>`__)
+                * Default: ``"w"``
+            * encoding
+                * File encoding
+                * Default: ``"utf-8"``
+=========== =====
+
+
+
 .. |.netrc| replace:: ``.netrc``
 .. |tempfile.gettempdir()| replace:: ``tempfile.gettempdir()``
 .. |requests.request()| replace:: ``requests.request()``
@@ -882,6 +964,8 @@ How To      - login and visit Tumblr's
 .. |mature_content| replace:: ``mature_content``
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
 .. |datetime.max| replace:: ``datetime.max``
+.. |Path| replace:: ``Path``
+.. |Logging Configuration| replace:: ``Logging Configuration``
 .. |strptime| replace:: strftime() and strptime() Behavior
 
 .. _base-directory: `extractor.*.base-directory`_
