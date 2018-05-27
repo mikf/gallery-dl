@@ -64,6 +64,30 @@ class TestText(unittest.TestCase):
         for value in INVALID:
             self.assertEqual(f(value), "")
 
+    def test_split_html(self, f=text.split_html):
+        result = ["Hello", "World."]
+        empty = []
+
+        # standard usage
+        self.assertEqual(f(""), empty)
+        self.assertEqual(f("Hello World."), ["Hello World."])
+        self.assertEqual(f(" Hello  World.  "), [" Hello  World.  "])
+        self.assertEqual(f("Hello<br/>World."), result)
+        self.assertEqual(
+            f("<div><b class='a'>Hello</b><i>World.</i></div>"), result)
+
+        # empty HTML
+        self.assertEqual(f("<div></div>"), empty)
+        self.assertEqual(f(" <div>   </div> "), empty)
+
+        # malformed HTML
+        self.assertEqual(f("<div</div>"), empty)
+        self.assertEqual(f("<div<Hello World.</div>"), empty)
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value), empty)
+
     def test_filename_from_url(self, f=text.filename_from_url):
         result = "filename.ext"
 
