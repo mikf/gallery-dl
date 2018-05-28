@@ -52,7 +52,7 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
     opts = config.interpolate(("output", key))
     if not opts:
         return None
-    if isinstance(opts, str):
+    if not isinstance(opts, dict):
         opts = {"path": opts}
 
     path = opts.get("path")

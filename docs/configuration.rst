@@ -99,7 +99,7 @@ Description A list of `format strings`_ for the resulting target directory.
 extractor.*.base-directory
 --------------------------
 =========== =====
-Type        ``string``
+Type        |Path|_
 Default     ``"./gallery-dl/"``
 Description Directory path used as the base for all download destinations.
 =========== =====
@@ -295,7 +295,7 @@ extractor.deviantart.original
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description Request full-sized original images if available.
+Description Download full-sized original images if available.
 
             Some of DeviantArt's images require an additional API call to get
             their actual original version, which is being hosted on
@@ -321,8 +321,7 @@ extractor.exhentai.original
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description | Always download the original image or
-            | download the down-sampled version of larger images.
+Description Download full-sized original images if available.
 =========== =====
 
 
@@ -549,7 +548,7 @@ extractor.sankaku.wait-min & .wait-max
 --------------------------------------
 =========== =====
 Type        ``float``
-Default     ``2.0`` and ``4.0``
+Default     ``2.5`` and ``5.0``
 Description Minimum and maximum wait time in seconds between each image
 
             Sankaku Channel responds with ``429 Too Many Requests`` if it
@@ -623,7 +622,7 @@ Description Controls the use of ``.part`` files during file downloads.
 downloader.part-directory
 -------------------------
 =========== =====
-Type        ``string``
+Type        |Path|_
 Default     ``null``
 Description Alternate location for ``.part`` files.
 
@@ -733,7 +732,7 @@ Description Controls the progress indicator when *gallery-dl* is run with
 output.log
 ----------
 =========== =====
-Type        |Logging Configuration|_ or ``string``
+Type        ``string`` or |Logging Configuration|_
 Default     ``"[{name}][{levelname}] {message}"``
 Description Configuration for standard logging output to stderr.
 
@@ -745,7 +744,7 @@ Description Configuration for standard logging output to stderr.
 output.logfile
 --------------
 =========== =====
-Type        |Logging Configuration|_ or |Path|_
+Type        |Path|_ or |Logging Configuration|_
 Default     ``null``
 Description File to write logging output to.
 =========== =====
@@ -754,7 +753,7 @@ Description File to write logging output to.
 output.unsupportedfile
 ----------------------
 =========== =====
-Type        |Logging Configuration|_ or |Path|_
+Type        |Path|_ or |Logging Configuration|_
 Default     ``null``
 Description File to write external URLs unsupported by *gallery-dl* to.
 
@@ -899,7 +898,8 @@ Examples    * ``"file.ext"``
             * ``"~/path/to/file.ext"``
             * ``"$HOME/path/to/file.ext"``
             * ``["$HOME", "path", "to", "file.ext"]``
-Description A |Path|_ is a ``string`` representing the location of a file.
+Description A |Path|_ is a ``string`` representing the location of a file
+            or directory.
 
             Simple `tilde expansion <https://docs.python.org/3/library/os.path.html#os.path.expanduser>`__
             and `environment variable expansion <https://docs.python.org/3/library/os.path.html#os.path.expandvars>`__
@@ -919,7 +919,7 @@ Logging Configuration
 =========== =====
 Type        ``object``
 
-Examples    .. code::
+Example     .. code::
 
                 {
                     "format": "{asctime} {name}: {message}",
@@ -930,14 +930,12 @@ Examples    .. code::
 
 Description Extended logging output configuration.
 
-            .. _`output format string`:
-
             * format
                 * Format string for logging messages
                   (see `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__)
                 * Default: ``"[{name}][{levelname}] {message}"``
             * format-date
-                * Format string for {asctime} fields in logging messages
+                * Format string for ``{asctime}`` fields in logging messages
                   (see `strftime() directives <https://docs.python.org/3/library/time.html#time.strftime>`__)
                 * Default: ``"%Y-%m-%d %H:%M:%S"``
             * level
@@ -954,6 +952,9 @@ Description Extended logging output configuration.
             * encoding
                 * File encoding
                 * Default: ``"utf-8"``
+
+            Note: path, mode and encoding are only applied when configuring
+            logging output to a file.
 =========== =====
 
 
