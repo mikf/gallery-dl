@@ -74,7 +74,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
         readerarea = text.extract(
             page, '<div id="readerarea">', '<div class="navig">')[0]
         return [
-            (url, {
+            (text.unescape(url), {
                 "width": text.parse_int(width),
                 "height": text.parse_int(height),
             })
@@ -89,11 +89,15 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
 
 class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     """Extractor for manga from komikcast.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?(komikcast\.com/[^/?&#]+/?)$"]
-    test = [("https://komikcast.com/tonari-no-kashiwagi-san/", {
-        "url": "c3c7a9233904d1c9e12dbb20911934af4b255ff8",
-        "keyword": "a4c7c24c87df41ff1d11da21e65df13d3a912691",
-    })]
+    pattern = [r"(?:https?://)?(?:www\.)?(komikcast\.com"
+               r"/(?:komik/)?[^/?&#]+/?)$"]
+    test = [
+        ("https://komikcast.com/komik/090-eko-to-issho/", {
+            "url": "dc798d107697d1f2309b14ca24ca9dba30c6600f",
+            "keyword": "3db7e23e3c108031608fbbeb9334badecd967f95",
+        }),
+        ("https://komikcast.com/tonari-no-kashiwagi-san/", None),
+    ]
 
     def chapters(self, page):
         results = []
