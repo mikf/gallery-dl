@@ -40,13 +40,6 @@ class PawooExtractor(Extractor):
     @staticmethod
     def prepare(status):
         """Prepare a status object"""
-        for key in ("favourites_count", "reblogs_count", "reblog", "mentions",
-                    "favourited", "muted", "reblogged"):
-            del status[key]
-        account = status["account"]
-        for key in ("followers_count", "following_count", "statuses_count",
-                    "oauth_authentications"):
-            del account[key]
         attachments = status["media_attachments"]
         del status["media_attachments"]
         return attachments
@@ -55,11 +48,10 @@ class PawooExtractor(Extractor):
 class PawooUserExtractor(PawooExtractor):
     """Extractor for all images of an account/user on pawoo.net"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?pawoo\.net/(@[^/]+)(?:/media)?/?$"]
+    pattern = [r"(?:https?://)?pawoo\.net/@([^/?&#]+)(?:/media)?/?$"]
     test = [
         ("https://pawoo.net/@kuroda", {
             "url": "a3f9e7555f2b024554c0e9b6cbcc7991af13cf99",
-            "keyword": "e300caf8286fbebd00215b7c89b25617b6ef0b88",
         }),
         ("https://pawoo.net/@zZzZz/", {
             "exception": exception.NotFoundError,
@@ -72,9 +64,9 @@ class PawooUserExtractor(PawooExtractor):
         self.account_name = match.group(1)
 
     def statuses(self):
-        results = self.api.account_search(self.account_name, 1)
+        results = self.api.account_search("@" + self.account_name, 1)
         for account in results:
-            if account["username"] == self.account_name[1:]:
+            if account["username"] == self.account_name:
                 break
         else:
             raise exception.NotFoundError("account")
@@ -84,11 +76,10 @@ class PawooUserExtractor(PawooExtractor):
 class PawooStatusExtractor(PawooExtractor):
     """Extractor for images from a status on pawoo.net"""
     subcategory = "status"
-    pattern = [r"(?:https?://)?pawoo\.net/@[^/]+/(\d+)"]
+    pattern = [r"(?:https?://)?pawoo\.net/@[^/?&#]+/(\d+)"]
     test = [
         ("https://pawoo.net/@takehana_note/559043", {
             "url": "f95cc8c0274c4143e7e21dbdc693b90c65b596e3",
-            "keyword": "1495670fd098e6cc456c95897ae6af36534c2bad",
             "content": "3b148cf90174173355fe34179741ce476921b2fc",
         }),
         ("https://pawoo.net/@zZzZz/12346", {
