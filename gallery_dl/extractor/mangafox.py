@@ -55,7 +55,6 @@ class MangafoxChapterExtractor(ChapterExtractor):
         while True:
             url, pos = text.extract(page, '<img src="', '"')
             yield url, None
-            _  , pos = text.extract(page, '<img src="', '"', pos)
             url, pos = text.extract(page, '<img src="', '"', pos)
             yield url, None
 
