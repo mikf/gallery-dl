@@ -127,7 +127,8 @@ class PixivUserExtractor(PixivExtractor):
             qdict = text.parse_query(self.query)
             if "type" in qdict:
                 type_ = qdict["type"].lower()
-                works = filter(self._is_type(type_), works)
+                if type_ != "all":
+                    works = filter(self._is_type(type_), works)
             if "tag" in qdict:
                 tag = text.unquote(qdict["tag"]).lower()
                 works = filter(self._has_tag(tag), works)
