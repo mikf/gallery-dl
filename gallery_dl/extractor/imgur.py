@@ -118,7 +118,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
     filename_fmt = "{category}_{album[hash]}_{num:>03}_{hash}.{extension}"
     archive_fmt = "{album[hash]}_{hash}"
     pattern = [r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
-               r"/(?:a|gallery)/(\w{7}|\w{5})"]
+               r"/(?:a|gallery|t/unmuted)/(\w{7}|\w{5})"]
     test = [
         ("https://imgur.com/a/TcBmP", {
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
@@ -154,6 +154,9 @@ class ImgurAlbumExtractor(ImgurExtractor):
         }),
         ("https://imgur.com/a/RhJXhVT/all", {  # 7 character album hash
             "url": "695ef0c950023362a0163ee5041796300db76674",
+        }),
+        ("https://imgur.com/t/unmuted/FVyxO32", {  # unmuted URL
+            "url": "1df12d96438ad9018ace7665dc893419ce9ec867",
         }),
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.NotFoundError,
