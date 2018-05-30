@@ -20,7 +20,8 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
     filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
     archive_fmt = "{image_id}"
     pattern = [r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
-               r"(?:/(?!page|series|album|all-pages|image|gif)[^/?&#]+)+)"]
+               r"(?!/(?:album|gif|image|series)/)"
+               r"(?:/(?!(?:page|all-pages)/)[^/?&#]+)+)"]
     test = [
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
@@ -119,3 +120,62 @@ class SimplyhentaiImageExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
+
+
+class SimplyhentaiVideoExtractor(Extractor):
+    """Extractor for hentai videos from simply-hentai.com"""
+    category = "simplyhentai"
+    subcategory = "video"
+    directory_fmt = ["{category}", "{type}s"]
+    filename_fmt = "{title}{episode:?_//>02}.{extension}"
+    archive_fmt = "{title}_{episode}"
+    pattern = [r"(?:https?://)?(videos\.simply-hentai\.com/[^/?&#]+)"]
+    test = [
+        ("https://videos.simply-hentai.com/creamy-pie-episode-02", {
+            "pattern": r"https://www\.googleapis\.com/drive/v3/files"
+                       r"/0B1ecQ8ZVLm3JcHZzQzBnVy1ZUmc\?alt=media&key=[\w-]+",
+            "keyword": "315201bd4f3ce6bff57f4fbc631788c004d0eb7d",
+            "count": 1,
+        }),
+        (("https://videos.simply-hentai.com"
+          "/1715-tifa-in-hentai-gang-bang-3d-movie"), {
+            "url": "ad9a36ae06c601b6490e3c401834b4949d947eb0",
+            "keyword": "fef03513d5e1a9958d63e45a1d583e2f658b1168",
+        }),
+    ]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url = "https://" + match.group(1)
+
+    def items(self):
+        page = self.request(self.url).text
+
+        title, pos = text.extract(page, "<title>", "</title>")
+        tags , pos = text.extract(page, ">Tags</div>", "</div>", pos)
+        date , pos = text.extract(page, ">Upload Date</div>", "</div>", pos)
+        title = title.rpartition(" - ")[0]
+
+        if "<video" in page:
+            video_url = text.extract(page, '<source src="', '"', pos)[0]
+            episode = 0
+        else:
+            # video url from myhentai.tv embed
+            pos = page.index('<div class="video-frame-container">', pos)
+            embed_url = text.extract(page, 'src="', '"', pos)[0].replace(
+                "embedplayer.php?link=", "embed.php?name=")
+            embed_page = self.request(embed_url).text
+            video_url = text.extract(embed_page, '"file":"', '"')[0]
+            title, _, episode = title.rpartition(" Episode ")
+
+        data = text.nameext_from_url(video_url, {
+            "title": text.unescape(title),
+            "episode": text.parse_int(episode),
+            "tags": "".join(text.split_html(tags)),
+            "date": text.remove_html(date),
+            "type": "video",
+        })
+
+        yield Message.Version, 1
+        yield Message.Directory, data
+        yield Message.Url, video_url, data
