@@ -8,7 +8,7 @@
 
 """Extract hentai-manga from https://www.simply-hentai.com/"""
 
-from .common import ChapterExtractor
+from .common import Extractor, ChapterExtractor, Message
 from .. import text, util, exception
 
 
@@ -19,8 +19,8 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
     archive_fmt = "{image_id}"
-    pattern = [r"(?:https?://)?(?!videos)[^.]+\.simply-hentai\.com"
-               r"(?:/(?!page|series|album|all-pages)[^/?&#]+)+"]
+    pattern = [r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
+               r"(?:/(?!page|series|album|all-pages|image|gif)[^/?&#]+)+)"]
     test = [
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
@@ -37,8 +37,9 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
     ]
 
     def __init__(self, match):
-        ChapterExtractor.__init__(self, match.group(0))
-        self.session.headers["Referer"] = match.group(0)
+        url = "https://" + match.group(1)
+        ChapterExtractor.__init__(self, url)
+        self.session.headers["Referer"] = url
 
     def get_metadata(self, page):
         extr = text.extract
@@ -72,3 +73,49 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
             (urls["full"], {"image_id": text.parse_int(image_id)})
             for image_id, urls in sorted(images.items())
         ]
+
+
+class SimplyhentaiImageExtractor(Extractor):
+    """Extractor for individual images from simply-hentai.com"""
+    category = "simplyhentai"
+    subcategory = "image"
+    directory_fmt = ["{category}", "{type}s"]
+    filename_fmt = "{category}_{token}{title:?_//}.{extension}"
+    archive_fmt = "{token}"
+    pattern = [r"(?:https?://)?(?:www\.)?(simply-hentai\.com"
+               r"/(image|gif)/[^/?&#]+)"]
+    test = [
+        (("https://www.simply-hentai.com/image"
+          "/pheromomania-vol-1-kanzenban-isao-3949d8b3-400c-4b6"), {
+            "url": "0338eb137830ab6f81e5f410d3936ef785d063d9",
+            "keyword": "2f673a424cf06e946685660ff5ca5b0e7cf685cc",
+        }),
+        ("https://www.simply-hentai.com/gif/8915dfcf-0b6a-47c", {
+            "url": "11c060d7ec4dfd0bd105300b6e1fd454674a5af1",
+            "keyword": "fbfd5c418f3d9d7d0b0ba0cda0602240820da693",
+        }),
+    ]
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.url = "https://www." + match.group(1)
+        self.type = match.group(2)
+
+    def items(self):
+        page = self.request(self.url).text
+        url_search = 'data-src="' if self.type == "image" else '<source src="'
+
+        title, pos = text.extract(page, 'property="og:title" content="', '"')
+        url  , pos = text.extract(page, url_search, '"', pos)
+        tags , pos = text.extract(page, '<div class="tags">', '</div>', pos)
+
+        data = text.nameext_from_url(url, {
+            "title": text.unescape(title) if title else "",
+            "tags": ", ".join(text.split_html(tags)),
+            "type": self.type,
+        })
+        data["token"] = data["name"].rpartition("_")[2]
+
+        yield Message.Version, 1
+        yield Message.Directory, data
+        yield Message.Url, url, data
