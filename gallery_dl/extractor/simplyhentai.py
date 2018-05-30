@@ -20,8 +20,8 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
     filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
     archive_fmt = "{image_id}"
     pattern = [r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
-               r"(?!/(?:album|gif|image|series)/)"
-               r"(?:/(?!(?:page|all-pages)/)[^/?&#]+)+)"]
+               r"(?!/(?:album|gifs?|images?|series)(?:/|$))"
+               r"(?:/(?!(?:page|all-pages)(?:/|\.|$))[^/?&#]+)+)"]
     test = [
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
