@@ -34,11 +34,6 @@ class MangadexChapterExtractor(MangadexExtractor, ChapterExtractor):
             "count": 64,
             "keyword": "1f6fb237a96cdf05b436ae2a37a4436e717bbb30",
         }),
-        # abnormal chapter string ("Vol. 1 Ch. 6 \ 5.1")
-        ("https://mangadex.org/chapter/255540", {
-            "count": 27,
-            "keyword": "fe5e3ece1bc6463350fde36f7e47e29d093fed84",
-        }),
         # NotFoundError
         ("https://mangadex.org/chapter/1", {
             "exception": exception.NotFoundError,
