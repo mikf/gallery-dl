@@ -69,7 +69,8 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
         }
 
     def get_images(self, _):
-        images = self.request(self.url + "/all-pages.json").json()
+        headers = {"Accept": "application/json"}
+        images = self.request(self.url + "/all-pages", headers=headers).json()
         return [
             (urls["full"], {"image_id": text.parse_int(image_id)})
             for image_id, urls in sorted(images.items())
