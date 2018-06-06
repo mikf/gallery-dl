@@ -363,7 +363,7 @@ class PathFormat():
         self.keywords = {}
         self.filename = ""
         self.directory = self.realdirectory = ""
-        self.path = self.realpath = self.partpath = ""
+        self.path = self.realpath = self.temppath = ""
 
         self.basedirectory = expand_path(
             extractor.config("base-directory", (".", "gallery-dl")))
@@ -383,7 +383,7 @@ class PathFormat():
 
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
-        return open(self.partpath or self.realpath, mode)
+        return open(self.temppath, mode)
 
     def exists(self, archive=None):
         """Return True if the file exists on disk or in 'archive'"""
@@ -435,13 +435,6 @@ class PathFormat():
         self.keywords["extension"] = extension
         self.build_path()
 
-    def adjust_extension(self, extension):
-        """Change filename extension of existing file"""
-        oldpath = self.realpath
-        self.set_extension(extension)
-        if not self.partpath:
-            os.replace(oldpath, self.realpath)
-
     def build_path(self):
         """Use filename-keywords and directory to build a full path"""
         try:
@@ -453,38 +446,43 @@ class PathFormat():
         filename = os.sep + self.filename
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
+        if not self.temppath:
+            self.temppath = self.realpath
 
     def part_enable(self, part_directory=None):
         """Enable .part file usage"""
         if self.has_extension:
-            self.partpath = self.realpath + ".part"
+            self.temppath = self.realpath + ".part"
         else:
             self.set_extension("part", False)
-            self.partpath = self.realpath
+            self.temppath = self.realpath
         if part_directory:
-            self.partpath = os.path.join(
+            self.temppath = os.path.join(
                 part_directory,
-                os.path.basename(self.partpath),
+                os.path.basename(self.temppath),
             )
 
     def part_size(self):
         """Return size of .part file"""
-        if self.partpath:
-            try:
-                return os.stat(self.partpath).st_size
-            except OSError:
-                pass
+        try:
+            return os.stat(self.temppath).st_size
+        except OSError:
+            pass
         return 0
 
-    def part_move(self):
-        """Rename .part file to its actual filename"""
+    def finalize(self):
+        """Move tempfile to its target location"""
+        if self.temppath == self.realpath:
+            return
+
         try:
-            os.replace(self.partpath, self.realpath)
+            os.replace(self.temppath, self.realpath)
             return
         except OSError:
             pass
-        shutil.copyfile(self.partpath, self.realpath)
-        os.unlink(self.partpath)
+
+        shutil.copyfile(self.temppath, self.realpath)
+        os.unlink(self.temppath)
 
     @staticmethod
     def adjust_path(path):
