@@ -47,7 +47,7 @@ class DownloaderBase():
             # remove file from incomplete downloads
             if self.downloading and not self.part:
                 try:
-                    os.remove(pathfmt.realpath)
+                    os.remove(pathfmt.temppath)
                 except (OSError, AttributeError):
                     pass
 
@@ -127,10 +127,7 @@ class DownloaderBase():
 
         self.downloading = False
         if adj_ext:
-            pathfmt.adjust_extension(adj_ext)
-        if self.part:
-            pathfmt.part_move()
-        self.out.success(pathfmt.path, tries)
+            pathfmt.set_extension(adj_ext)
         return True
 
     def connect(self, url, offset):

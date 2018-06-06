@@ -193,6 +193,8 @@ class DownloadJob(Job):
             pp.run(self.pathfmt)
 
         # download succeeded
+        self.pathfmt.finalize()
+        self.out.success(self.pathfmt.path, 0)
         if self.archive:
             self.archive.add(keywords)
 
