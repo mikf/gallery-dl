@@ -16,14 +16,22 @@ class ExecPP(PostProcessor):
 
     def __init__(self, options):
         PostProcessor.__init__(self)
-        self.args = options["args"]
+        self.args = options["command"]
+        if options.get("async", False):
+            self._exec = subprocess.Popen
 
     def run(self, pathfmt):
-        args = [
+        self._exec([
             arg.format_map(pathfmt.keywords)
             for arg in self.args
-        ]
-        subprocess.Popen(args)
+        ])
+
+    def _exec(self, args):
+        retcode = subprocess.Popen(args).wait()
+        if retcode:
+            self.log.warning(
+                "executing '%s' returned non-zero exit status %d",
+                " ".join(args), retcode)
 
 
 __postprocessor__ = ExecPP

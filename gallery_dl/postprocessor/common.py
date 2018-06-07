@@ -8,8 +8,11 @@
 
 """Common classes and constants used by postprocessor modules."""
 
+from . import log
+
 
 class PostProcessor():
+    log = log
 
-    def run(self, asd):
+    def run(self, pathfmt):
         raise NotImplementedError()
