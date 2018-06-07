@@ -425,6 +425,7 @@ class PathFormat():
     def set_keywords(self, keywords):
         """Set filename keywords"""
         self.keywords = keywords
+        self.temppath = ""
         self.has_extension = bool(keywords.get("extension"))
         if self.has_extension:
             self.build_path()
@@ -455,7 +456,6 @@ class PathFormat():
             self.temppath = self.realpath + ".part"
         else:
             self.set_extension("part", False)
-            self.temppath = self.realpath
         if part_directory:
             self.temppath = os.path.join(
                 part_directory,

@@ -159,7 +159,7 @@ class DownloadJob(Job):
         self.archive = None
         self.sleep = None
         self.downloaders = {}
-        self.postprocessors = []
+        self.postprocessors = None
         self.out = output.select()
 
     def handle_url(self, url, keywords, fallback=None):
@@ -189,8 +189,9 @@ class DownloadJob(Job):
                 return
 
         # run post processors
-        for pp in self.postprocessors:
-            pp.run(self.pathfmt)
+        if self.postprocessors:
+            for pp in self.postprocessors:
+                pp.run(self.pathfmt)
 
         # download succeeded
         self.pathfmt.finalize()
@@ -209,26 +210,8 @@ class DownloadJob(Job):
         if not self.pathfmt:
             self.pathfmt = util.PathFormat(self.extractor)
             self.sleep = self.extractor.config("sleep")
-            postprocs = self.extractor.config("postprocessor")
-            archive = self.extractor.config("archive")
-
-            if postprocs:
-                for pp_dict in postprocs:
-                    try:
-                        name = pp_dict["name"]
-                        pp_obj = postprocessor.find(name)(pp_dict)
-                    except KeyError as exc:
-                        postprocessor.log.warning("missing key %s", exc)
-                    except Exception as exc:
-                        postprocessor.log.warning(
-                            "%s %s", exc.__class__.__name__, exc)
-                    else:
-                        self.postprocessors.append(pp_obj)
-
-            if archive:
-                path = util.expand_path(archive)
-                self.archive = util.DownloadArchive(path, self.extractor)
-
+            self._init_archive(self.extractor.config("archive"))
+            self._init_postprocessors(self.extractor.config("postprocessor"))
         self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url, keywords):
@@ -249,6 +232,36 @@ class DownloadJob(Job):
             instance = klass(self.extractor.session, self.out)
             self.downloaders[scheme] = instance
         return instance
+
+    def _init_archive(self, archive):
+        if archive:
+            path = util.expand_path(archive)
+            self.archive = util.DownloadArchive(path, self.extractor)
+
+    def _init_postprocessors(self, postprocessors):
+        if not postprocessors:
+            return
+
+        self.postprocessors = []
+        for pp_dict in postprocessors:
+            if "name" not in pp_dict:
+                postprocessor.log.warning("no 'name' specified")
+                continue
+
+            name = pp_dict["name"]
+            pp_cls = postprocessor.find(name)
+            if not pp_cls:
+                postprocessor.log.warning("'%s' not found", name)
+                continue
+
+            try:
+                pp_obj = pp_cls(pp_dict)
+            except Exception as exc:
+                postprocessor.log.error(
+                    "%s: initialization failed: %s %s",
+                    name, exc.__class__.__name__, exc)
+            else:
+                self.postprocessors.append(pp_obj)
 
 
 class KeywordJob(Job):
