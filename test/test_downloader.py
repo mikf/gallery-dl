@@ -54,9 +54,8 @@ class TestDownloaderBase(unittest.TestCase):
         pathfmt.set_keywords(kwdict)
 
         if content:
-            path = pathfmt.realpath + (".part" if part else "")
             mode = "w" + ("b" if isinstance(content, bytes) else "")
-            with open(path, mode) as file:
+            with pathfmt.open(mode) as file:
                 file.write(content)
 
         return pathfmt
@@ -65,20 +64,23 @@ class TestDownloaderBase(unittest.TestCase):
                   extension, expected_extension=None):
         pathfmt = self._prepare_destination(input, extension=extension)
         success = self.downloader.download(url, pathfmt)
-        path = pathfmt.realpath
 
         # test successful download
         self.assertTrue(success, "downloading '{}' failed".format(url))
 
         # test content
         mode = "r" + ("b" if isinstance(output, bytes) else "")
-        with open(path, mode) as file:
+        with pathfmt.open(mode) as file:
             content = file.read()
         self.assertEqual(content, output)
 
         # test filename extension
         self.assertEqual(
-            os.path.splitext(path)[1][1:],
+            pathfmt.keywords["extension"],
+            expected_extension,
+        )
+        self.assertEqual(
+            os.path.splitext(pathfmt.realpath)[1][1:],
             expected_extension,
         )
 
