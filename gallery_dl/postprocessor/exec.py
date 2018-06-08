@@ -14,7 +14,7 @@ import subprocess
 
 class ExecPP(PostProcessor):
 
-    def __init__(self, options):
+    def __init__(self, pathfmt, options):
         PostProcessor.__init__(self)
         self.args = options["command"]
         if options.get("async", False):

@@ -14,7 +14,7 @@ import os
 
 class ClassifyPP(PostProcessor):
 
-    DEFAULT_MAP = {
+    DEFAULT_MAPPING = {
         "Music" : ("mp3", "aac", "flac", "ogg", "wma", "m4a", "wav"),
         "Video" : ("flv", "ogv", "avi", "mp4", "mpg", "mpeg", "3gp", "mkv",
                    "webm", "vob", "wmv"),
@@ -22,9 +22,9 @@ class ClassifyPP(PostProcessor):
         "Archives" : ("zip", "rar", "7z", "tar", "gz", "bz2"),
     }
 
-    def __init__(self, options):
+    def __init__(self, pathfmt, options):
         PostProcessor.__init__(self)
-        mapping = options.get("mapping", self.DEFAULT_MAP)
+        mapping = options.get("mapping", self.DEFAULT_MAPPING)
 
         self.mapping = {
             ext: directory

@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Add files to ZIP archives"""
+"""Store files in ZIP archives"""
 
 from .common import PostProcessor
 import zipfile
@@ -21,19 +21,31 @@ class ZipPP(PostProcessor):
         "lzma": zipfile.ZIP_LZMA,
     }
 
-    def __init__(self, options):
+    def __init__(self, pathfmt, options):
         PostProcessor.__init__(self)
+        self.delete = not options.get("keep-files", False)
         self.ext = "." + options.get("extension", "zip")
-
         algorithm = options.get("compression", "store")
         if algorithm not in self.COMPRESSION_ALGORITHMS:
+            self.log.warning(
+                "unknown compression algorithm '%s'; falling back to 'store'",
+                algorithm)
             algorithm = "store"
-        self.compression = self.COMPRESSION_ALGORITHMS[algorithm]
+
+        path = pathfmt.realdirectory + self.ext
+        self.zfile = zipfile.ZipFile(
+            path, "a", self.COMPRESSION_ALGORITHMS[algorithm], True)
 
     def run(self, pathfmt):
-        archive = pathfmt.realdirectory + self.ext
-        with zipfile.ZipFile(archive, "a", self.compression, True) as zfile:
-            zfile.write(pathfmt.temppath, pathfmt.filename)
+        # 'NameToInfo' is not officially documented, but it's available
+        # for all supported Python versions and using it directly is a lot
+        # better than calling getinfo()
+        if pathfmt.filename not in self.zfile.NameToInfo:
+            self.zfile.write(pathfmt.temppath, pathfmt.filename)
+            pathfmt.delete = self.delete
+
+    def finalize(self):
+        self.zfile.close()
 
 
 __postprocessor__ = ZipPP

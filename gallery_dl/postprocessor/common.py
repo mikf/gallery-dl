@@ -12,7 +12,11 @@ from . import log
 
 
 class PostProcessor():
+    """Base class for postprocessors"""
     log = log
 
     def run(self, pathfmt):
-        raise NotImplementedError()
+        """Execute the postprocessor for a file"""
+
+    def finalize(self):
+        """Cleanup"""

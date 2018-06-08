@@ -93,6 +93,7 @@ class Job():
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
             log.debug("Traceback", exc_info=True)
+        self.handle_finalize()
 
     def dispatch(self, msg):
         """Call the appropriate message handler"""
@@ -136,6 +137,9 @@ class Job():
 
     def handle_queue(self, url, keywords):
         """Handle Message.Queue"""
+
+    def handle_finalize(self):
+        """Handle job finalization"""
 
     def update_kwdict(self, kwdict):
         """Update 'kwdict' with additional metadata"""
@@ -207,18 +211,51 @@ class DownloadJob(Job):
 
     def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
-        if not self.pathfmt:
-            self.pathfmt = util.PathFormat(self.extractor)
-            self.sleep = self.extractor.config("sleep")
-            self._init_archive(self.extractor.config("archive"))
-            self._init_postprocessors(self.extractor.config("postprocessor"))
+        if self.pathfmt:
+            self.pathfmt.set_directory(keywords)
+            return
+
+        # delayed initialization
+        self.pathfmt = util.PathFormat(self.extractor)
         self.pathfmt.set_directory(keywords)
+        self.sleep = self.extractor.config("sleep")
+
+        archive = self.extractor.config("archive")
+        if archive:
+            path = util.expand_path(archive)
+            self.archive = util.DownloadArchive(path, self.extractor)
+
+        postprocessors = self.extractor.config("postprocessors")
+        if postprocessors:
+            self.postprocessors = []
+            for pp_dict in postprocessors:
+                if "name" not in pp_dict:
+                    postprocessor.log.warning("no 'name' specified")
+                    continue
+                name = pp_dict["name"]
+                pp_cls = postprocessor.find(name)
+                if not pp_cls:
+                    postprocessor.log.warning("'%s' not found", name)
+                    continue
+                try:
+                    pp_obj = pp_cls(self.pathfmt, pp_dict)
+                except Exception as exc:
+                    postprocessor.log.error(
+                        "%s: initialization failed: %s %s",
+                        name, exc.__class__.__name__, exc)
+                else:
+                    self.postprocessors.append(pp_obj)
 
     def handle_queue(self, url, keywords):
         try:
             DownloadJob(url, self).run()
         except exception.NoExtractorError:
             self._write_unsupported(url)
+
+    def handle_finalize(self):
+        if self.postprocessors:
+            for pp in self.postprocessors:
+                pp.finalize()
 
     def get_downloader(self, url):
         """Return, and possibly construct, a downloader suitable for 'url'"""
@@ -232,36 +269,6 @@ class DownloadJob(Job):
             instance = klass(self.extractor.session, self.out)
             self.downloaders[scheme] = instance
         return instance
-
-    def _init_archive(self, archive):
-        if archive:
-            path = util.expand_path(archive)
-            self.archive = util.DownloadArchive(path, self.extractor)
-
-    def _init_postprocessors(self, postprocessors):
-        if not postprocessors:
-            return
-
-        self.postprocessors = []
-        for pp_dict in postprocessors:
-            if "name" not in pp_dict:
-                postprocessor.log.warning("no 'name' specified")
-                continue
-
-            name = pp_dict["name"]
-            pp_cls = postprocessor.find(name)
-            if not pp_cls:
-                postprocessor.log.warning("'%s' not found", name)
-                continue
-
-            try:
-                pp_obj = pp_cls(pp_dict)
-            except Exception as exc:
-                postprocessor.log.error(
-                    "%s: initialization failed: %s %s",
-                    name, exc.__class__.__name__, exc)
-            else:
-                self.postprocessors.append(pp_obj)
 
 
 class KeywordJob(Job):
