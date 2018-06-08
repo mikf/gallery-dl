@@ -11,7 +11,8 @@ import time
 import json
 import hashlib
 import logging
-from . import extractor, downloader, config, util, output, exception
+from . import extractor, downloader, postprocessor
+from . import config, util, output, exception
 from .extractor.message import Message
 
 
@@ -92,6 +93,7 @@ class Job():
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
             log.debug("Traceback", exc_info=True)
+        self.handle_finalize()
 
     def dispatch(self, msg):
         """Call the appropriate message handler"""
@@ -136,6 +138,9 @@ class Job():
     def handle_queue(self, url, keywords):
         """Handle Message.Queue"""
 
+    def handle_finalize(self):
+        """Handle job finalization"""
+
     def update_kwdict(self, kwdict):
         """Update 'kwdict' with additional metadata"""
         kwdict["category"] = self.extractor.category
@@ -158,6 +163,7 @@ class DownloadJob(Job):
         self.archive = None
         self.sleep = None
         self.downloaders = {}
+        self.postprocessors = None
         self.out = output.select()
 
     def handle_url(self, url, keywords, fallback=None):
@@ -186,7 +192,14 @@ class DownloadJob(Job):
                     "Failed to download %s", self.pathfmt.filename)
                 return
 
+        # run post processors
+        if self.postprocessors:
+            for pp in self.postprocessors:
+                pp.run(self.pathfmt)
+
         # download succeeded
+        self.pathfmt.finalize()
+        self.out.success(self.pathfmt.path, 0)
         if self.archive:
             self.archive.add(keywords)
 
@@ -198,20 +211,51 @@ class DownloadJob(Job):
 
     def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
-        if not self.pathfmt:
-            self.pathfmt = util.PathFormat(self.extractor)
-            self.sleep = self.extractor.config("sleep")
-            archive = self.extractor.config("archive")
-            if archive:
-                path = util.expand_path(archive)
-                self.archive = util.DownloadArchive(path, self.extractor)
+        if self.pathfmt:
+            self.pathfmt.set_directory(keywords)
+            return
+
+        # delayed initialization
+        self.pathfmt = util.PathFormat(self.extractor)
         self.pathfmt.set_directory(keywords)
+        self.sleep = self.extractor.config("sleep")
+
+        archive = self.extractor.config("archive")
+        if archive:
+            path = util.expand_path(archive)
+            self.archive = util.DownloadArchive(path, self.extractor)
+
+        postprocessors = self.extractor.config("postprocessors")
+        if postprocessors:
+            self.postprocessors = []
+            for pp_dict in postprocessors:
+                if "name" not in pp_dict:
+                    postprocessor.log.warning("no 'name' specified")
+                    continue
+                name = pp_dict["name"]
+                pp_cls = postprocessor.find(name)
+                if not pp_cls:
+                    postprocessor.log.warning("'%s' not found", name)
+                    continue
+                try:
+                    pp_obj = pp_cls(self.pathfmt, pp_dict)
+                except Exception as exc:
+                    postprocessor.log.error(
+                        "%s: initialization failed: %s %s",
+                        name, exc.__class__.__name__, exc)
+                else:
+                    self.postprocessors.append(pp_obj)
 
     def handle_queue(self, url, keywords):
         try:
             self.__class__(url, self).run()
         except exception.NoExtractorError:
             self._write_unsupported(url)
+
+    def handle_finalize(self):
+        if self.postprocessors:
+            for pp in self.postprocessors:
+                pp.finalize()
 
     def get_downloader(self, url):
         """Return, and possibly construct, a downloader suitable for 'url'"""
