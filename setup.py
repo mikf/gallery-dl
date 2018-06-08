@@ -83,6 +83,7 @@ setup(
         "gallery_dl",
         "gallery_dl.extractor",
         "gallery_dl.downloader",
+        "gallery_dl.postprocessor",
     ],
     keywords="image gallery downloader crawler scraper",
     classifiers=[

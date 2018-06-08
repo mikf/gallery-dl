@@ -1,7 +1,20 @@
 # Changelog
 
-# Unreleased
-- Fixed extraction of `mangadex` manga with more than 100 chapters (#84)
+## 1.4.0 - 2018-06-08
+- Added support for:
+  - `simplyhentai` - https://www.simply-hentai.com/ ([#89](https://github.com/mikf/gallery-dl/issues/89))
+- Added extractors for
+  - `pixiv` search results and followed users
+  - `deviantart` search results and popular listings
+- Added post-processors to perform actions on downloaded files
+- Added options to configure logging behavior
+- Added OAuth support for `smugmug`
+- Changed `pixiv` extractors to use the AppAPI
+  - this breaks `favorite` archive IDs and changes some metadata fields
+- Changed the default filename format for `tumblr` and renamed `offset` to `num`
+- Fixed a possible UnicodeDecodeError during installation ([#86](https://github.com/mikf/gallery-dl/issues/86))
+- Fixed extraction of `mangadex` manga with more than 100 chapters ([#84](https://github.com/mikf/gallery-dl/issues/84))
+- Fixed miscellaneous issues for `imgur`, `reddit`, `komikcast`, `mangafox` and `imagebam`
 
 ## 1.3.5 - 2018-05-04
 - Added support for:
