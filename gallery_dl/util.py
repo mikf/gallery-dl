@@ -359,6 +359,7 @@ class PathFormat():
             "directory", extractor.directory_fmt)
         self.formatter = Formatter(extractor.config("keywords-default"))
 
+        self.delete = False
         self.has_extension = False
         self.keywords = {}
         self.filename = ""
@@ -472,6 +473,10 @@ class PathFormat():
 
     def finalize(self):
         """Move tempfile to its target location"""
+        if self.delete:
+            os.unlink(self.temppath)
+            return
+
         if self.temppath == self.realpath:
             return
 
