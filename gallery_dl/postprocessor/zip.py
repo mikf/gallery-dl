@@ -10,6 +10,7 @@
 
 from .common import PostProcessor
 import zipfile
+import os
 
 
 class ZipPP(PostProcessor):
@@ -32,9 +33,10 @@ class ZipPP(PostProcessor):
                 algorithm)
             algorithm = "store"
 
-        path = pathfmt.realdirectory + self.ext
+        self.path = pathfmt.realdirectory
         self.zfile = zipfile.ZipFile(
-            path, "a", self.COMPRESSION_ALGORITHMS[algorithm], True)
+            self.path + self.ext, "a",
+            self.COMPRESSION_ALGORITHMS[algorithm], True)
 
     def run(self, pathfmt):
         # 'NameToInfo' is not officially documented, but it's available
@@ -46,6 +48,12 @@ class ZipPP(PostProcessor):
 
     def finalize(self):
         self.zfile.close()
+
+        if self.delete:
+            try:
+                os.rmdir(self.path)
+            except OSError:
+                pass
 
 
 __postprocessor__ = ZipPP
