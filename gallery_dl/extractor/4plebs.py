@@ -17,5 +17,5 @@ class FourplebsThreadExtractor(chan.FoolfuukaThreadExtractor):
     root = "https://archive.4plebs.org"
     pattern = [r"(?:https?://)?(?:archive\.)?4plebs\.org/([^/]+)/thread/(\d+)"]
     test = [("https://archive.4plebs.org/tg/thread/54059290", {
-        "url": "fd823f17b5001442b941fddcd9ec91bafedfbc79",
+        "url": "07452944164b602502b02b24521f8cee5c484d2a",
     })]

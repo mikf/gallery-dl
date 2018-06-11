@@ -62,9 +62,9 @@ class MangadexChapterExtractor(MangadexExtractor, ChapterExtractor):
         group = data["other_groups"][str(data["chapter_id"])]
 
         return {
-            "manga": data["manga_title"],
+            "manga": text.unescape(data["manga_title"]),
             "manga_id": data["manga_id"],
-            "title": data["chapter_title"],
+            "title": text.unescape(data["chapter_title"]),
             "volume": text.parse_int(volume),
             "chapter": text.parse_int(chapter),
             "chapter_minor": minor or "",

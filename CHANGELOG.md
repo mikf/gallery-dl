@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.4.0 - 2018-06-08
 - Added support for:
   - `simplyhentai` - https://www.simply-hentai.com/ ([#89](https://github.com/mikf/gallery-dl/issues/89))
