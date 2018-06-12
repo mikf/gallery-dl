@@ -9,6 +9,7 @@
 """Extract images and videos from https://www.4chan.org/"""
 
 from . import chan
+from .. import text
 
 
 class FourchanThreadExtractor(chan.ChanThreadExtractor):
@@ -22,3 +23,7 @@ class FourchanThreadExtractor(chan.ChanThreadExtractor):
     })]
     api_url = "https://a.4cdn.org/{board}/thread/{thread}.json"
     file_url = "https://i.4cdn.org/{board}/{tim}{ext}"
+
+    def update(self, post, data=None):
+        chan.ChanThreadExtractor.update(self, post, data)
+        post["filename"] = text.unescape(post["filename"])
