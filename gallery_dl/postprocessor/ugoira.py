@@ -18,6 +18,9 @@ class UgoiraPP(PostProcessor):
 
     def __init__(self, pathfmt, options):
         PostProcessor.__init__(self)
+        self.extension = options.get("extension") or "webm"
+        self.ffmpeg = options.get("ffmpeg-location") or "ffmpeg"
+        self.args = options.get("ffmpeg-args")
 
     def run(self, pathfmt):
         if pathfmt.keywords["extension"] != "txt":
@@ -30,8 +33,8 @@ class UgoiraPP(PostProcessor):
             for line in file:
                 name, _, duration = line.partition(" ")
                 framelist.append((name, int(duration.rstrip())))
-            # list the last frame twice to prevent it from only being
-            # displayed for a very short time
+            # add the last frame twice to prevent it from only being
+            # displayed for a very short amount of time
             framelist.append((name, int(duration.rstrip())))
 
         with tempfile.TemporaryDirectory() as tempdir:
@@ -49,8 +52,11 @@ class UgoiraPP(PostProcessor):
                     file.write("duration {}\n".format(duration / 1000))
 
             # invoke ffmpeg
-            pathfmt.set_extension("webm")
-            args = ["ffmpeg", "-i", ffconcat, pathfmt.realpath]
+            pathfmt.set_extension(self.extension)
+            args = [self.ffmpeg, "-i", ffconcat]
+            if self.args:
+                args += self.args
+            args.append(pathfmt.realpath)
             subprocess.Popen(args).wait()
 
         # mark framelist file for deletion
