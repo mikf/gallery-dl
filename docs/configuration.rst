@@ -8,8 +8,9 @@ Contents
 2) `Extractor-specific Options`_
 3) `Downloader Options`_
 4) `Output Options`_
-5) `Miscellaneous Options`_
-6) `API Tokens & IDs`_
+5) `Postprocessor Options`_
+6) `Miscellaneous Options`_
+7) `API Tokens & IDs`_
 
 
 Extractor Options
@@ -248,6 +249,22 @@ Description An alternative `format string`_ to build archive IDs with.
 =========== =====
 
 
+extractor.*.postprocessors
+--------------------------
+=========== =====
+Type        ``list`` of |Postprocessor Configuration|_ objects
+Example     .. code::
+
+                [
+                    {"name": "zip", "compression": "zip"},
+                    {"name": "exec",  "command": ["/home/asd/script", "{category}", "{image_id}"]}
+                ]
+
+Description A list of post-processors to be applied to each downloaded file
+            in the same order as they are specified.
+=========== =====
+
+
 
 Extractor-specific Options
 ==========================
@@ -452,7 +469,7 @@ extractor.reddit.comments
 -------------------------
 =========== =====
 Type        ``integer`` or ``string``
-Default     ``200``
+Default     ``500``
 Description The value of the ``limit`` parameter when loading
             a submission and its comments.
             This number (roughly) specifies the total amount of comments
@@ -461,8 +478,8 @@ Description The value of the ``limit`` parameter when loading
             Reddit's internal default and maximum values for this parameter
             appear to be 200 and 500 respectively.
 
-            The value `0` ignores all comments and significantly reduces to time
-            required when scanning a subreddit.
+            The value `0` ignores all comments and significantly reduces the
+            time required when scanning a subreddit.
 =========== =====
 
 
@@ -762,6 +779,126 @@ Description File to write external URLs unsupported by *gallery-dl* to.
 
 
 
+Postprocessor Options
+=====================
+
+
+classify
+--------
+
+Categorize files by filename extension
+
+classify.mapping
+----------------
+=========== =====
+Type        ``object``
+Default     .. code::
+
+                {
+                    "Pictures" : ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"],
+                    "Video"    : ["flv", "ogv", "avi", "mp4", "mpg", "mpeg", "3gp", "mkv", "webm", "vob", "wmv"],
+                    "Music"    : ["mp3", "aac", "flac", "ogg", "wma", "m4a", "wav"],
+                    "Archives" : ["zip", "rar", "7z", "tar", "gz", "bz2"]
+                }
+
+Description A mapping from directory names to filename extensions that should
+            be stored in them.
+
+            Files with an extension not listed will be ignored and stored
+            in their default location.
+=========== =====
+
+
+exec
+----
+
+Execute external commands.
+
+exec.async
+----------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Controls whether to wait for a subprocess to finish
+            or to let it run asynchronously.
+=========== =====
+
+exec.command
+------------
+=========== =====
+Type        ``list`` of ``strings``
+Example     ``["echo", "{user[account]}", "{id}"]``
+Description The command to run.
+
+            Each element of this list is treated as a `format string`_ using
+            the files' metadata.
+=========== =====
+
+
+ugoira
+------
+
+Convert Pixiv ugoira to webm.
+
+ugoira.extension
+----------------
+=========== =====
+Type        ``string``
+Default     ``"webm"``
+Description Filename extension for the resulting video files.
+=========== =====
+
+ugoira.ffmpeg-args
+------------------
+=========== =====
+Type        ``list`` of ``strings``
+Default     ``null``
+Example     ``["-c:v", "libvpx", "-b:v", "1M"]``
+Description Additional FFmpeg command-line arguments.
+=========== =====
+
+ugoira.ffmpeg-location
+----------------------
+=========== =====
+Type        |Path|_
+Default     ``"ffmpeg"``
+Description Location of the ``ffmpeg`` (or ``avconv``) executable to use.
+=========== =====
+
+
+zip
+---
+
+Store files in a ZIP archive.
+
+zip.compression
+---------------
+=========== =====
+Type        ``string``
+Default     ``"store"``
+Description Compression method to use when writing the archive.
+
+            Possible values are ``"store"``, ``"zip"``, ``"bzip2"``, ``"lzma"``.
+=========== =====
+
+zip.extension
+-------------
+=========== =====
+Type        ``string``
+Default     ``"zip"``
+Description Filename extension for the created ZIP archive.
+=========== =====
+
+zip.keep-files
+--------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Controls whether to keep the actual files or to delete them.
+=========== =====
+
+
+
 Miscellaneous Options
 =====================
 
@@ -958,6 +1095,26 @@ Description Extended logging output configuration.
 =========== =====
 
 
+Postprocessor Configuration
+---------------------------
+=========== =====
+Type        ``object``
+
+Example     .. code::
+
+                {
+                    "name": "zip",
+                    "compression": "store",
+                    "extension": "cbz"
+                }
+
+Description An object with the ``name`` of the post-processor to use
+            and its options.
+            See `Postprocessor Options`_ for a list of available
+            post-processors and their respective options.
+=========== =====
+
+
 
 .. |.netrc| replace:: ``.netrc``
 .. |tempfile.gettempdir()| replace:: ``tempfile.gettempdir()``
@@ -969,6 +1126,7 @@ Description Extended logging output configuration.
 .. |datetime.max| replace:: ``datetime.max``
 .. |Path| replace:: ``Path``
 .. |Logging Configuration| replace:: ``Logging Configuration``
+.. |Postprocessor Configuration| replace:: ``Postprocessor Configuration``
 .. |strptime| replace:: strftime() and strptime() Behavior
 
 .. _base-directory: `extractor.*.base-directory`_
