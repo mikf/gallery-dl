@@ -127,7 +127,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         yield Message.Version, 1
 
         url = "{}/g/{}/{}/".format(self.root, self.gid, self.token)
-        response = self.request(url, fatal=False)
+        response = self.request(url, expect=range(400, 500))
         page = response.text
 
         if response.status_code == 404 and "Gallery Not Available" in page:
@@ -327,7 +327,7 @@ class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
                r"/favorites\.php(?:\?(.*))?"]
     test = [
         ("https://exhentai.org/favorites.php", None),
-        ("https://exhentai.org/favorites.php?favcat=1&f_search=henreader"
+        ("https://exhentai.org/favorites.php?favcat=1&f_search=touhou"
          "&f_apply=Search+Favorites", None),
     ]
 

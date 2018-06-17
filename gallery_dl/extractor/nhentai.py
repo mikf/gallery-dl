@@ -98,7 +98,8 @@ class NhentaiSearchExtractor(NHentaiExtractor):
         params["page"] = text.parse_int(params.get("page"), 1)
 
         while True:
-            data = self.request(url, params=params, fatal=False).json()
+            data = self.request(
+                url, params=params, expect=range(400, 500)).json()
 
             if "error" in data:
                 self.log.error("API request failed: \"%s\"", data["error"])

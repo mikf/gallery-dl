@@ -99,7 +99,8 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
             num += 1
 
     def get_job_metadata(self):
-        response = self.request(self.artist_url + "?enterAgree=1", fatal=False)
+        url = self.artist_url + "?enterAgree=1"
+        response = self.request(url, expect=(404,))
 
         if response.status_code == 404:
             raise exception.NotFoundError("user")

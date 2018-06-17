@@ -17,9 +17,9 @@ class XvideosExtractor(Extractor):
     """Base class for xvideos extractors"""
     category = "xvideos"
 
-    def get_page(self):
-        response = self.request(self.url, fatal=False)
-        if response.status_code in (403, 404):
+    def get_page(self, codes=(403, 404)):
+        response = self.request(self.url, expect=codes)
+        if response.status_code in codes:
             raise exception.NotFoundError(self.subcategory)
         return response.text
 

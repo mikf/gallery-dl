@@ -160,7 +160,7 @@ class PinterestAPI():
         params = {"data": json.dumps({"options": options}), "source_url": ""}
 
         response = self.extractor.request(
-            url, params=params, headers=self.HEADERS, fatal=False)
+            url, params=params, headers=self.HEADERS, expect=range(400, 500))
 
         try:
             data = response.json()
