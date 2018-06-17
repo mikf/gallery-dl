@@ -51,7 +51,7 @@ class Extractor():
         return config.interpolate(
             ("extractor", self.category, self.subcategory, key), default)
 
-    def request(self, url, method="GET", encoding=None, fatal=True, retries=3,
+    def request(self, url, method="GET", encoding=None, expect=(), retries=3,
                 *args, **kwargs):
         max_tries = retries
         while True:
@@ -62,14 +62,15 @@ class Extractor():
             except requests.exceptions.RequestException as exc:
                 raise exception.HttpError(exc)
             else:
-                if 200 <= response.status_code < 400 or not fatal:
+                code = response.status_code
+                if 200 <= code < 400 or code in expect:
                     if encoding:
                         response.encoding = encoding
                     return response
 
                 msg = "{} HTTP Error: {} for url: {}".format(
-                    response.status_code, response.reason, url)
-                if response.status_code < 500 and response.status_code != 429:
+                    code, response.reason, url)
+                if code < 500 and code != 429:
                     break
 
             if not retries:

@@ -98,7 +98,7 @@ class NijieExtractor(AsynchronousExtractor):
         params = {"id": self.user_id, "p": 1}
 
         while True:
-            response = self.request(url, params=params, fatal=False)
+            response = self.request(url, params=params, expect=(404,))
             if response.status_code == 404:
                 raise exception.NotFoundError("artist")
 
