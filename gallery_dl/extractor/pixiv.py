@@ -53,15 +53,9 @@ class PixivExtractor(Extractor):
 
                 url = ugoira["zip_urls"]["medium"].replace(
                     "_ugoira600x600", "_ugoira1920x1080")
+                work["frames"] = ugoira["frames"]
                 work["extension"] = "zip"
                 yield Message.Url, url, work
-
-                framelist = "".join(
-                    "{file} {delay}\n".format_map(frame)
-                    for frame in ugoira["frames"]
-                )
-                work["extension"] = "txt"
-                yield Message.Url, "text:" + framelist, work
 
             elif work["page_count"] == 1:
                 url = meta_single_page["original_image_url"]

@@ -838,7 +838,7 @@ Description The command to run.
 ugoira
 ------
 
-Convert Pixiv ugoira to webm.
+Convert Pixiv Ugoira to WebM (requires `FFmpeg <https://www.ffmpeg.org/>`__).
 
 ugoira.extension
 ----------------
@@ -863,6 +863,14 @@ ugoira.ffmpeg-location
 Type        |Path|_
 Default     ``"ffmpeg"``
 Description Location of the ``ffmpeg`` (or ``avconv``) executable to use.
+=========== =====
+
+ugoira.keep-files
+-----------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Controls whether to keep the ZIP archives or to delete them.
 =========== =====
 
 
