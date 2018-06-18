@@ -9,6 +9,7 @@
 """Convert pixiv ugoira to webm"""
 
 from .common import PostProcessor
+from .. import util
 import subprocess
 import tempfile
 import zipfile
@@ -21,26 +22,25 @@ class UgoiraPP(PostProcessor):
         self.extension = options.get("extension") or "webm"
         self.ffmpeg = options.get("ffmpeg-location") or "ffmpeg"
         self.args = options.get("ffmpeg-args")
+        self.delete = not options.get("keep-files", False)
 
     def run(self, pathfmt):
-        if pathfmt.keywords["extension"] != "txt":
+        if (pathfmt.keywords["extension"] != "zip" or
+                "frames" not in pathfmt.keywords):
             return
 
-        framelist = []
-
-        # get frames and their durations
-        with pathfmt.open("r") as file:
-            for line in file:
-                name, _, duration = line.partition(" ")
-                framelist.append((name, int(duration.rstrip())))
-            # add the last frame twice to prevent it from only being
+        framelist = [
+            (frame["file"], frame["delay"] / 1000)
+            for frame in pathfmt.keywords["frames"]
+        ]
+        if self.extension != "gif":
+            # repeat the last frame to prevent it from only being
             # displayed for a very short amount of time
-            framelist.append((name, int(duration.rstrip())))
+            framelist.append(framelist[-1])
 
         with tempfile.TemporaryDirectory() as tempdir:
             # extract frames
-            pathfmt.set_extension("zip")
-            with zipfile.ZipFile(pathfmt.realpath) as zfile:
+            with zipfile.ZipFile(pathfmt.temppath) as zfile:
                 zfile.extractall(tempdir)
 
             # write ffconcat file
@@ -49,18 +49,20 @@ class UgoiraPP(PostProcessor):
                 file.write("ffconcat version 1.0\n")
                 for name, duration in framelist:
                     file.write("file '{}'\n".format(name))
-                    file.write("duration {}\n".format(duration / 1000))
+                    file.write("duration {}\n".format(duration))
 
             # invoke ffmpeg
             pathfmt.set_extension(self.extension)
-            args = [self.ffmpeg, "-i", ffconcat]
+            args = [util.expand_path(self.ffmpeg), "-i", ffconcat]
             if self.args:
                 args += self.args
             args.append(pathfmt.realpath)
             subprocess.Popen(args).wait()
 
-        # mark framelist file for deletion
-        pathfmt.delete = True
+        if self.delete:
+            pathfmt.delete = True
+        else:
+            pathfmt.set_extension("zip")
 
 
 __postprocessor__ = UgoiraPP
