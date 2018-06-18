@@ -251,6 +251,20 @@ def build_parser():
               "and other delegated URLs"),
     )
 
+    postprocessor = parser.add_argument_group("Post-processing Options")
+    postprocessor.add_argument(
+        "--zip",
+        action=ConfigConstAction, nargs=0,
+        dest="postprocessors", const=({"name": "zip"},),
+        help="Store downloaded files in a ZIP archive",
+    )
+    postprocessor.add_argument(
+        "--ugoira-conv",
+        action=ConfigConstAction, nargs=0,
+        dest="postprocessors", const=({"name": "ugoira"},),
+        help="Convert Pixiv Ugoira to WebM",
+    )
+
     parser.add_argument(
         "urls",
         nargs="*", metavar="URL",
