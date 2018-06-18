@@ -262,7 +262,7 @@ def build_parser():
         "--ugoira-conv",
         action=ConfigConstAction, nargs=0,
         dest="postprocessors", const=({"name": "ugoira"},),
-        help="Convert Pixiv Ugoira to WebM",
+        help="Convert Pixiv Ugoira to WebM (requires FFmpeg)",
     )
 
     parser.add_argument(
