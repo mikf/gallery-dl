@@ -189,9 +189,8 @@ class PixivWorkExtractor(PixivExtractor):
         # ugoira
         (("https://www.pixiv.net/member_illust.php"
           "?mode=medium&illust_id=66806629"), {
-            "pattern": (r"https?://i\.pximg\.net/img-zip-ugoira/.*/"
-                        r"66806629_ugoira1920x1080\.zip|text:.+"),
-            "count": 2,
+            "url": "7267695a985c4db8759bebcf8d21dbdd2d2317ef",
+            "keywords": {"frames": list},
         }),
         (("http://i1.pixiv.net/c/600x600/img-master/"
           "img/2008/06/13/00/29/13/966412_p0_master1200.jpg"), None),
