@@ -474,6 +474,7 @@ class PathFormat():
     def finalize(self):
         """Move tempfile to its target location"""
         if self.delete:
+            self.delete = False
             os.unlink(self.temppath)
             return
 
