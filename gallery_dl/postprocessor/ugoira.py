@@ -13,6 +13,7 @@ from .. import util
 import subprocess
 import tempfile
 import zipfile
+import os
 
 
 class UgoiraPP(PostProcessor):
@@ -20,9 +21,12 @@ class UgoiraPP(PostProcessor):
     def __init__(self, pathfmt, options):
         PostProcessor.__init__(self)
         self.extension = options.get("extension") or "webm"
-        self.ffmpeg = options.get("ffmpeg-location") or "ffmpeg"
         self.args = options.get("ffmpeg-args")
+        self.twopass = options.get("ffmpeg-twopass")
         self.delete = not options.get("keep-files", False)
+
+        ffmpeg = options.get("ffmpeg-location")
+        self.ffmpeg = util.expand_path(ffmpeg) if ffmpeg else "ffmpeg"
 
     def run(self, pathfmt):
         if (pathfmt.keywords["extension"] != "zip" or
@@ -53,11 +57,18 @@ class UgoiraPP(PostProcessor):
 
             # invoke ffmpeg
             pathfmt.set_extension(self.extension)
-            args = [util.expand_path(self.ffmpeg), "-i", ffconcat]
+            args = [self.ffmpeg, "-i", ffconcat]
             if self.args:
                 args += self.args
-            args.append(pathfmt.realpath)
-            subprocess.Popen(args).wait()
+            if self.twopass:
+                log = tempdir + "/ffmpeg2pass"
+                null = "NUL" if os.name == "nt" else "/dev/null"
+                args += ["-passlogfile", log, "-pass"]
+                subprocess.Popen(args + ["1", "-y", null]).wait()
+                subprocess.Popen(args + ["2", pathfmt.realpath]).wait()
+            else:
+                args.append(pathfmt.realpath)
+                subprocess.Popen(args).wait()
 
         if self.delete:
             pathfmt.delete = True

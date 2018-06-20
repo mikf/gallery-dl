@@ -865,6 +865,17 @@ Default     ``"ffmpeg"``
 Description Location of the ``ffmpeg`` (or ``avconv``) executable to use.
 =========== =====
 
+ugoira.ffmpeg-twopass
+---------------------
+=========== =====
+Type        ``bool``
+Default     ``False``
+Description Enable Two-Pass encoding.
+
+            It is recommended to explicitly set a container format with
+            ``-f <fmt>`` using `ugoira.ffmpeg-args`_ when using this option.
+=========== =====
+
 ugoira.keep-files
 -----------------
 =========== =====
