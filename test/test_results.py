@@ -22,7 +22,8 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "senmanga",
+    "desuarchive",
+    "rbt",
     "smugmug",
     "whatisthisimnotgoodwithcomputers",
 }
