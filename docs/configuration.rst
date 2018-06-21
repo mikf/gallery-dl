@@ -838,7 +838,7 @@ Description The command to run.
 ugoira
 ------
 
-Convert Pixiv Ugoira to WebM (requires `FFmpeg <https://www.ffmpeg.org/>`__).
+Convert Pixiv Ugoira to WebM using `FFmpeg <https://www.ffmpeg.org/>`__.
 
 ugoira.extension
 ----------------
@@ -853,7 +853,7 @@ ugoira.ffmpeg-args
 =========== =====
 Type        ``list`` of ``strings``
 Default     ``null``
-Example     ``["-c:v", "libvpx", "-b:v", "1M"]``
+Example     ``["-c:v", "libvpx-vp9", "-an", "-b:v", "2M"]``
 Description Additional FFmpeg command-line arguments.
 =========== =====
 
@@ -871,9 +871,6 @@ ugoira.ffmpeg-twopass
 Type        ``bool``
 Default     ``False``
 Description Enable Two-Pass encoding.
-
-            It is recommended to explicitly set a container format with
-            ``-f <fmt>`` using `ugoira.ffmpeg-args`_ when using this option.
 =========== =====
 
 ugoira.keep-files
@@ -881,7 +878,7 @@ ugoira.keep-files
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Controls whether to keep the ZIP archives or to delete them.
+Description Keep ZIP archives after conversion.
 =========== =====
 
 
@@ -913,7 +910,7 @@ zip.keep-files
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Controls whether to keep the actual files or to delete them.
+Description Keep the actual files after writing them to a ZIP archive.
 =========== =====
 
 

@@ -61,9 +61,10 @@ class UgoiraPP(PostProcessor):
             if self.args:
                 args += self.args
             if self.twopass:
-                log = tempdir + "/ffmpeg2pass"
+                if "-f" not in args:
+                    args += ["-f", self.extension]
                 null = "NUL" if os.name == "nt" else "/dev/null"
-                args += ["-passlogfile", log, "-pass"]
+                args += ["-passlogfile", tempdir + "/ffmpeg2pass", "-pass"]
                 subprocess.Popen(args + ["1", "-y", null]).wait()
                 subprocess.Popen(args + ["2", pathfmt.realpath]).wait()
             else:
