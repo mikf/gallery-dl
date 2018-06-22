@@ -24,7 +24,6 @@ TRAVIS_SKIP = {
 BROKEN = {
     "desuarchive",
     "rbt",
-    "smugmug",
     "whatisthisimnotgoodwithcomputers",
 }
 
