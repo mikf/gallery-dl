@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.4.1 - 2018-06-22
+- Added an `ugoira` post-processor to convert  `pixiv` animations to WebM
+- Added `--zip` and `--ugoira-conv` command-line options
+- Changed how ugoira frame information is handled
+  - instead of being written to a separate file, it is now made available as metadata field of the ZIP archive
+- Fixed manga and chapter titles for `mangadex`
+- Fixed file deletion by post-processors
 
 ## 1.4.0 - 2018-06-08
 - Added support for:
