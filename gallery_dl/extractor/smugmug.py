@@ -44,16 +44,11 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
     archive_fmt = "a_{Album[AlbumKey]}_{Image[ImageKey]}"
     pattern = [r"smugmug:album:([^:]+)$"]
     test = [
-        ("smugmug:album:MN6kHH", {
+        ("smugmug:album:SXvjbW", {
             "count": 0,
         }),
-        ("smugmug:album:6Ffcgk", {
-            "count": 1,
-            "pattern": ".*/i-L4CxBdg/0/33e0b290/X3/i-L4CxBdg-X3.jpg",
-        }),
-        ("smugmug:album:drn76C", {
-            "count": 2,
-            "content": "864f6953cb04121290407a579611bc5087d117ee",
+        ("smugmug:album:ddvxpg", {
+            "url": "8775c2cf05f001e895435faa89f22a03214568bf",
         }),
     ]
 
@@ -84,10 +79,10 @@ class SmugmugImageExtractor(SmugmugExtractor):
     directory_fmt = ["{category}", "{User[NickName]}"]
     archive_fmt = "{Image[ImageKey]}"
     pattern = [BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#]+)"]
-    test = [("https://mikf.smugmug.com/Test/n-xnNH3s/i-L4CxBdg", {
-        "url": "905bfdef52ce1a731a4eae17e9ac348511e17ae4",
-        "keyword": "df63d36cfaeb128fda86802942d9a4271d3feafc",
-        "content": "626fe50d25fe49beeda15e116938db36e163c01f",
+    test = [("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
+        "url": "ab0d7aa001a53ff3fd228622070b39005b6fc179",
+        "keyword": "4fcc02599d180321b22a7f7238102c48d5410c05",
+        "content": "64a8f69a1d824921eebbdf2420087937adfa45cd",
     })]
 
     def __init__(self, match):
@@ -113,15 +108,12 @@ class SmugmugPathExtractor(SmugmugExtractor):
     subcategory = "path"
     pattern = [BASE_PATTERN + r"((?:/[^/?&#a-mo-z][^/?&#]*)*)/?$"]
     test = [
-        ("https://mikf.smugmug.com/Test/", {
-            "pattern": "smugmug:album:xgkb4C$",
+        ("https://acapella.smugmug.com/Micro-Macro/Drops/", {
+            "pattern": "smugmug:album:ddvxpg$",
         }),
-        ("https://mikf.smugmug.com/Test/n-xnNH3s", {
-            "pattern": "smugmug:album:xgkb4C$",
-        }),
-        ("https://mikf.smugmug.com/", {
-            "count": 4,
-            "pattern": "smugmug:album:(xgkb4C|MN6kHH|6Ffcgk|drn76C)$",
+        ("https://acapella.smugmug.com/", {
+            "pattern": r"smugmug:album:\w+$",
+            "url": "8bd8b3f4f8bdd584bf5ddfd509ff3c98f8bc323b",
         }),
         ("smugmug:www.creativedogportraits.com/PortfolioGallery/", {
             "pattern": "smugmug:album:txWXzs$",
