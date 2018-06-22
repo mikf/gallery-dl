@@ -67,7 +67,7 @@ class XvideosGalleryExtractor(XvideosExtractor):
             ("userid" , '"id_user":', ','),
             ("display", '"display":"', '"'),
             ("title"  , '"title":"', '"'),
-            ("descr"  , '<small>', '</small>'),
+            ("descr"  , '<small class="mobile-hide">', '</small>'),
             ("tags"   , '<em>Tagged:</em>', '<'),
         ))[0]
 
@@ -76,7 +76,7 @@ class XvideosGalleryExtractor(XvideosExtractor):
                 "id": text.parse_int(data["userid"]),
                 "name": self.user,
                 "display": data["display"],
-                "description": text.remove_html(data["descr"]).strip(),
+                "description": data["descr"].strip(),
             },
             "tags": text.unescape(data["tags"] or "").strip().split(", "),
             "title": text.unescape(data["title"]),
