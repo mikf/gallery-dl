@@ -110,7 +110,7 @@ class PinterestPinitExtractor(PinterestExtractor):
         self.url = "https://" + match.group(1)
 
     def items(self):
-        response = self.session.head(self.url)
+        response = self.request(self.url, method="HEAD", allow_redirects=False)
         location = response.headers.get("Location")
         if not location or location in ("https://api.pinterest.com/None",
                                         "https://www.pinterest.com"):

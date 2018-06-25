@@ -159,7 +159,9 @@ class PixivMeExtractor(PixivExtractor):
         self.account = match.group(1)
 
     def items(self):
-        response = self.session.head("https://pixiv.me/" + self.account)
+        url = "https://pixiv.me/" + self.account
+        response = self.request(
+            url, method="HEAD", allow_redirects=False, expect=(404,))
         if response.status_code == 404:
             raise exception.NotFoundError("user")
         yield Message.Version, 1

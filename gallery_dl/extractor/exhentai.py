@@ -13,7 +13,6 @@ from .. import text, util, exception
 from ..cache import cache
 import time
 import random
-import requests
 
 
 class ExhentaiExtractor(Extractor):
@@ -214,13 +213,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "showkey": self.key["show"],
         }
         for request["page"] in range(2, self.count + 1):
-            while True:
-                try:
-                    self.wait()
-                    page = self.session.post(api_url, json=request).json()
-                    break
-                except requests.exceptions.ConnectionError:
-                    pass
+            self.wait()
+            page = self.request(api_url, method="POST", json=request).json()
             imgkey = nextkey
             nextkey, pos = text.extract(page["i3"], "'", "'")
             imgurl , pos = text.extract(page["i3"], 'id="img" src="', '"', pos)
