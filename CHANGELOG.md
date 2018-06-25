@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.4.1 - 2018-06-22
 - Added an `ugoira` post-processor to convert  `pixiv` animations to WebM
 - Added `--zip` and `--ugoira-conv` command-line options

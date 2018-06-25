@@ -41,7 +41,8 @@ class SeigaExtractor(Extractor):
     def get_image_url(self, image_id):
         """Get url for an image with id 'image_id'"""
         url = "http://seiga.nicovideo.jp/image/source/{}".format(image_id)
-        response = self.session.head(url)
+        response = self.request(
+            url, method="HEAD", allow_redirects=False, expect=(404,))
         if response.status_code == 404:
             raise exception.NotFoundError("image")
         return response.headers["Location"].replace("/o/", "/priv/", 1)
