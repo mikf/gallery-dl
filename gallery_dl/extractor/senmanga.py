@@ -28,7 +28,7 @@ class SenmangaChapterExtractor(Extractor):
         }),
         ("http://raw.senmanga.com/Love-Lab/2016-03/1", {
             "url": "8347b9f00c14b864dd3c19a1f5ae52adb2ef00de",
-            "keyword": "0765e9d81b7430b3055b25a2627d6438f62de635",
+            "keyword": "4e72e4ade57671ad0af9c8d81feeff4259d5bbec",
         }),
     ]
     root = "https://raw.senmanga.com"
@@ -57,7 +57,7 @@ class SenmangaChapterExtractor(Extractor):
         manga, _, chapter = title.partition(" - Chapter ")
 
         return {
-            "manga": text.unescape(manga),
+            "manga": text.unescape(manga).replace("-", " "),
             "chapter_string": chapter.partition(" - Page ")[0],
             "count": text.parse_int(count),
             "lang": "jp",
