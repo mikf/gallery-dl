@@ -97,7 +97,7 @@ class DownloaderBase():
             if not pathfmt.has_extension:
                 pathfmt.set_extension(self.get_extension())
                 if pathfmt.exists():
-                    self.out.skip(pathfmt.path)
+                    pathfmt.temppath = ""
                     return True
 
             self.out.start(pathfmt.path)

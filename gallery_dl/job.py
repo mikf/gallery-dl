@@ -192,6 +192,10 @@ class DownloadJob(Job):
                     "Failed to download %s", self.pathfmt.filename)
                 return
 
+        if not self.pathfmt.temppath:
+            self.out.skip(self.pathfmt.path)
+            return
+
         # run post processors
         if self.postprocessors:
             for pp in self.postprocessors:
