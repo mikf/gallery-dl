@@ -22,6 +22,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "imgth",  # "temporary offline"
     "whatisthisimnotgoodwithcomputers",
 }
 
