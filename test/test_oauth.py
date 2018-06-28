@@ -11,7 +11,7 @@ import unittest
 
 from gallery_dl import oauth, text
 
-TESTSERVER = "http://oauthbin.com"
+TESTSERVER = "http://term.ie/oauth/example"
 CONSUMER_KEY = "key"
 CONSUMER_SECRET = "secret"
 REQUEST_TOKEN = "requestkey"
@@ -65,7 +65,7 @@ class TestOAuthSession(unittest.TestCase):
 
     def test_request_token(self):
         response = self._oauth_request(
-            "/v1/request-token", {})
+            "/request_token.php", {})
         expected = "oauth_token=requestkey&oauth_token_secret=requestsecret"
         self.assertEqual(response, expected, msg=response)
 
@@ -75,7 +75,7 @@ class TestOAuthSession(unittest.TestCase):
 
     def test_access_token(self):
         response = self._oauth_request(
-            "/v1/access-token", {}, REQUEST_TOKEN, REQUEST_TOKEN_SECRET)
+            "/access_token.php", {}, REQUEST_TOKEN, REQUEST_TOKEN_SECRET)
         expected = "oauth_token=accesskey&oauth_token_secret=accesssecret"
         self.assertEqual(response, expected, msg=response)
 
@@ -86,7 +86,7 @@ class TestOAuthSession(unittest.TestCase):
     def test_authenticated_call(self):
         params = {"method": "foo", "a": "äöüß/?&#", "äöüß/?&#": "a"}
         response = self._oauth_request(
-            "/v1/echo", params, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+            "/echo_api.php", params, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
         self.assertEqual(text.parse_query(response), params)
 
