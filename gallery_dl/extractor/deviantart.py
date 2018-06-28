@@ -17,11 +17,19 @@ import time
 import re
 
 
+BASE_PATTERN = (
+    r"(?:https?://)?(?:"
+    r"(?:www\.)?deviantart\.com/([\w-]+)|"
+    r"(?!www\.)([\w-]+)\.deviantart\.com)"
+)
+
+
 class DeviantartExtractor(Extractor):
     """Base class for deviantart extractors"""
     category = "deviantart"
     directory_fmt = ["{category}", "{author[username]!l}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
+    root = "https://www.deviantart.com"
 
     def __init__(self, match=None):
         Extractor.__init__(self)
@@ -29,7 +37,7 @@ class DeviantartExtractor(Extractor):
         self.offset = 0
         self.flat = self.config("flat", True)
         self.original = self.config("original", True)
-        self.user = match.group(1) if match else None
+        self.user = match.group(1) or match.group(2) if match else None
         self.group = False
 
     def skip(self, num):
@@ -99,8 +107,7 @@ class DeviantartExtractor(Extractor):
             url = "https:" + url[5:]
         return Message.Url, url, deviation
 
-    @staticmethod
-    def commit_journal(deviation, journal):
+    def commit_journal(self, deviation, journal):
         title = text.escape(deviation["title"])
         url = deviation["url"]
         thumbs = deviation["thumbs"]
@@ -122,8 +129,8 @@ class DeviantartExtractor(Extractor):
             needle = '<div usr class="gr">'
             catlist = deviation["category_path"].split("/")
             categories = " / ".join(
-                ('<span class="crumb"><a href="https://www.deviantart.com/{}/"'
-                 '><span>{}</span></a></span>').format(cpath, cat.capitalize())
+                ('<span class="crumb"><a href="{}/{}/"><span>{}</span></a>'
+                 '</span>').format(self.root, cpath, cat.capitalize())
                 for cat, cpath in zip(
                     catlist,
                     itertools.accumulate(catlist, lambda t, c: t + "/" + c)
@@ -132,7 +139,7 @@ class DeviantartExtractor(Extractor):
             header = HEADER_TEMPLATE.format(
                 title=title,
                 url=url,
-                userurl=url[:url.find("/", 8)],
+                userurl="{}/{}/".format(self.root, deviation["username"]),
                 username=deviation["author"]["username"],
                 date=str(date),
                 categories=categories,
@@ -158,7 +165,7 @@ class DeviantartExtractor(Extractor):
         raise exception.NotFoundError("folder")
 
     def _folder_urls(self, folders, category):
-        url = "https://{}.deviantart.com/{}/0/".format(self.user, category)
+        url = "{}/{}/{}/0/".format(self.root, self.user, category)
         return [(url + folder["name"], folder) for folder in folders]
 
 
@@ -166,22 +173,23 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
     archive_fmt = "g_{username}_{index}.{extension}"
-
-    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
-               r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"]
+    pattern = [BASE_PATTERN + r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"]
     test = [
-        ("http://shimoda7.deviantart.com/gallery/", {
+        ("https://www.deviantart.com/shimoda7/gallery/", {
             "url": "2b80b212717da6971b92670de15a29f68429a067",
-            "keyword": "15897b5090af460c814cdd3e5702de10517fc4cc",
+            "keyword": "8a326ce18d6240ebf8019538f60a57688164dd35",
         }),
-        ("https://yakuzafc.deviantart.com/", {
-            "url": "fa6ecb2c3aa78872f762d43f7809b7f0580debc1",
+        ("https://www.deviantart.com/yakuzafc", {
+            "url": "243748f8665c22f4f1c4f98ea3a438c76ad5f7ea",
             "keyword": "b29746bac291d8c8e339f0256a2bd7bb3ebe1741",
         }),
-        ("http://shimoda8.deviantart.com/gallery/", {
+        ("https://www.deviantart.com/shimoda8/gallery/", {
             "exception": exception.NotFoundError,
         }),
-        ("http://shimoda7.deviantart.com/gallery/?catpath=/", None),
+        ("https://www.deviantart.com/shimoda7/gallery/?catpath=/", None),
+        ("https://shimoda7.deviantart.com/gallery/", None),
+        ("https://yakuzafc.deviantart.com/", None),
+        ("https://shimoda7.deviantart.com/gallery/?catpath=/", None),
     ]
 
     def deviations(self):
@@ -197,23 +205,27 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     subcategory = "folder"
     directory_fmt = ["{category}", "{folder[owner]}", "{folder[title]}"]
     archive_fmt = "F_{folder[uuid]}_{index}.{extension}"
-    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
-               r"/gallery/(\d+)/([^/?&#]+)"]
+    pattern = [BASE_PATTERN + r"/gallery/(\d+)/([^/?&#]+)"]
     test = [
-        ("http://shimoda7.deviantart.com/gallery/722019/Miscellaneous", {
+        ("https://www.deviantart.com/shimoda7/gallery/722019/Miscellaneous", {
             "url": "12c331eeff84bd47350af5a199cecc187ae03832",
-            "keyword": "efc16f7aff0d070e7eb6394f080b790b1613609d",
+            "keyword": "2c132d1996b2de87949164a6eab5d72b6c824609",
         }),
-        ("http://majestic-da.deviantart.com/gallery/63419606/CHIBI-KAWAII", {
+        (("https://www.deviantart.com/majestic-da"
+          "/gallery/63419606/CHIBI-KAWAII"), {
             "url": "2ea2a3df9591c26568b09291acb453fb87ce9920",
-            "keyword": "42ecdc1a4d7441628f4bcfbe4d2e683a3a4361e2",
+            "keyword": "adfe3d79c096dc52493a9fc5552f2e08e3fe02ca",
             "options": (("original", False),),
         }),
+        (("https://shimoda7.deviantart.com"
+          "/gallery/722019/Miscellaneous"), None),
+        (("https://majestic-da.deviantart.com"
+          "/gallery/63419606/CHIBI-KAWAII"), None),
     ]
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.user, fid, self.fname = match.groups()
+        _, _, fid, self.fname = match.groups()
         self.folder = {"owner": self.user, "index": fid}
 
     def deviations(self):
@@ -232,36 +244,42 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
     archive_fmt = "{index}.{extension}"
-    pattern = [(r"(?:https?://)?(?!www\.)([\w-]+\.deviantart\.com"
-                r"/(?:art|journal)/[^/?&#]+-\d+)"),
-               (r"(?:https?://)?(sta\.sh/[a-z0-9]+)")]
+    pattern = [BASE_PATTERN + r"/(?:art|journal)/[^/?&#]+-\d+",
+               r"(?:https?://)?(sta\.sh/[a-z0-9]+)"]
     test = [
-        (("http://shimoda7.deviantart.com/art/"
+        (("https://www.deviantart.com/shimoda7/art/"
           "For-the-sake-of-a-memory-10073852"), {
             "url": "eef0c01b3808c535ea673e7b3654ab5209b910b7",
-            "keyword": "344b558dead0da0031ba8d1dffff06f13bbb8561",
+            "keyword": "b7ed053c3fb54b93c90e5ff8ed9f7a11d47a9c74",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
-        ("https://zzz.deviantart.com/art/zzz-1234567890", {
+        ("https://www.deviantart.com/zzz/art/zzz-1234567890", {
             "exception": exception.NotFoundError,
         }),
-        ("http://sta.sh/01ijs78ebagf", {
+        ("https://sta.sh/01ijs78ebagf", {
             "url": "35c0cd0e51494a1e01bddf5414a0d1585cd9fb0e",
-            "keyword": "225008b7d218d2cd1ac5d5bad3d74e3cc171a1cb",
+            "keyword": "d0c01d39b05519e4812cd3c7ac8267363171c053",
         }),
-        ("http://sta.sh/abcdefghijkl", {
+        ("https://sta.sh/abcdefghijkl", {
             "exception": exception.NotFoundError,
         }),
-        (("https://myria-moon.deviantart.com/art/"
+        (("https://www.deviantart.com/myria-moon/art/"
           "Aime-Moi-part-en-vadrouille-261986576"), {
             "pattern": (r"https?://s3\.amazonaws\.com/origin-orig\."
                         r"deviantart\.net/a383/f/2013/135/e/7/[^.]+\.jpg\?"),
         }),
+        (("https://shimoda7.deviantart.com/art/"
+          "For-the-sake-of-a-memory-10073852"), None),
+        ("https://zzz.deviantart.com/art/zzz-1234567890", None),
+        (("https://myria-moon.deviantart.com/art/"
+          "Aime-Moi-part-en-vadrouille-261986576"), None),
     ]
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self)
-        self.url = "https://" + match.group(1)
+        self.url = match.group(0)
+        if not self.url.startswith("http"):
+            self.url = "https://" + self.url
 
     def deviations(self):
         response = self.request(self.url, expect=range(400, 500))
@@ -276,15 +294,16 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     subcategory = "favorite"
     directory_fmt = ["{category}", "{username}", "Favourites"]
     archive_fmt = "f_{username}_{index}.{extension}"
-    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
-               r"/favourites/?(?:\?catpath=/)?$"]
+    pattern = [BASE_PATTERN + r"/favourites/?(?:\?catpath=/)?$"]
     test = [
-        ("http://h3813067.deviantart.com/favourites/", {
+        ("https://www.deviantart.com/h3813067/favourites/", {
             "url": "eef0c01b3808c535ea673e7b3654ab5209b910b7",
-            "keyword": "4478a3fa7cf9c72947cd927e8b54dbec3db9d0b2",
+            "keyword": "2b2a6c3e36febaf039214d3c71b1e5a806d5e8bb",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
-        ("http://h3813067.deviantart.com/favourites/?catpath=/", None),
+        ("https://www.deviantart.com/h3813067/favourites/?catpath=/", None),
+        ("https://h3813067.deviantart.com/favourites/", None),
+        ("https://h3813067.deviantart.com/favourites/?catpath=/", None),
     ]
 
     def deviations(self):
@@ -304,17 +323,20 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     directory_fmt = ["{category}", "{collection[owner]}",
                      "Favourites", "{collection[title]}"]
     archive_fmt = "C_{collection[uuid]}_{index}.{extension}"
-    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
-               r"/favourites/(\d+)/([^/?&#]+)"]
-    test = [(("https://pencilshadings.deviantart.com"
-              "/favourites/70595441/3D-Favorites"), {
-        "url": "742f92199d5bc6a89cda6ec6133d46c7a523824d",
-        "options": (("original", False),),
-    })]
+    pattern = [BASE_PATTERN + r"/favourites/(\d+)/([^/?&#]+)"]
+    test = [
+        (("https://www.deviantart.com/pencilshadings"
+          "/favourites/70595441/3D-Favorites"), {
+            "url": "742f92199d5bc6a89cda6ec6133d46c7a523824d",
+            "options": (("original", False),),
+        }),
+        (("https://pencilshadings.deviantart.com"
+          "/favourites/70595441/3D-Favorites"), None),
+    ]
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.user, cid, self.cname = match.groups()
+        _, _, cid, self.cname = match.groups()
         self.collection = {"owner": self.user, "index": cid}
 
     def deviations(self):
@@ -334,14 +356,15 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     subcategory = "journal"
     directory_fmt = ["{category}", "{username}", "Journal"]
     archive_fmt = "j_{username}_{index}.{extension}"
-    pattern = [r"(?:https?://)?(?!www\.)([\w-]+)\.deviantart\.com"
-               r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
+    pattern = [BASE_PATTERN + r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
     test = [
-        ("https://angrywhitewanker.deviantart.com/journal/", {
-            "url": "2a7dba8f18e0d7cb791cd8c78e35376f98933f9e",
-            "keyword": "57a92f1ccdba4acfd4f264963fc41fc37aec4de3",
+        ("https://www.deviantart.com/angrywhitewanker/journal/", {
+            "url": "38db2a0d3a587a7e0f9dba7ff7d274610ebefe44",
+            "keyword": "8d11b458f389188cc1f00d09694ce4e00c43efcc",
         }),
-        ("http://shimoda7.deviantart.com/journal/?catpath=/", None),
+        ("https://www.deviantart.com/shimoda7/journal/?catpath=/", None),
+        ("https://angrywhitewanker.deviantart.com/journal/", None),
+        ("https://shimoda7.deviantart.com/journal/?catpath=/", None),
     ]
 
     def deviations(self):
@@ -355,14 +378,12 @@ class DeviantartPopularExtractor(DeviantartExtractor):
                      "{popular[range]}", "{popular[search]}"]
     archive_fmt = "P_{popular[range]}_{popular[search]}_{index}.{extension}"
     pattern = [r"(?:https?://)?www\.deviantart\.com"
-               r"((?:/\w+)*)/(?:popular-([^/?&#]+))?/?(?:\?([^#]*))?"]
+               r"((?:/\w+)*)/(?:popular-([^/?&#]+))/?(?:\?([^#]*))?"]
     test = [
         ("https://www.deviantart.com/popular-8-hours/?q=tree+house", {
             "options": (("original", False),),
         }),
         ("https://www.deviantart.com/artisan/popular-all-time/?q=tree", None),
-        ("https://www.deviantart.com/?q=tree", None),
-        ("https://www.deviantart.com/", None),
     ]
 
     def __init__(self, match):
