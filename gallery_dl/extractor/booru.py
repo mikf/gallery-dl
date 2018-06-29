@@ -53,6 +53,7 @@ class BooruExtractor(SharedConfigExtractor):
                     if url.startswith("/"):
                         url = text.urljoin(self.api_url, url)
                     image.update(data)
+                    self.prepare(image)
                     yield Message.Url, url, text.nameext_from_url(url, image)
                 except KeyError:
                     continue
@@ -79,6 +80,9 @@ class BooruExtractor(SharedConfigExtractor):
     def get_metadata(self):
         """Collect metadata for extractor-job"""
         return {}
+
+    def prepare(self, image):
+        """Prepare and modify an 'image' object"""
 
 
 class XmlParserMixin():
