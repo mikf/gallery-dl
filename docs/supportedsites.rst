@@ -31,7 +31,7 @@ HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
-ImageFap             http://imagefap.com/                Images from Users, Galleries, individual Images
+ImageFap             https://imagefap.com/               Images from Users, Galleries, individual Images
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
