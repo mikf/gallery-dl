@@ -23,6 +23,7 @@ TRAVIS_SKIP = {
 # temporary issues, etc.
 BROKEN = {
     "imgth",  # "temporary offline"
+    "mangahere",  # lots of 502 Bad Gateway responses
     "whatisthisimnotgoodwithcomputers",
 }
 

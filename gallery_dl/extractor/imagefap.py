@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://imagefap.com/"""
+"""Extract images from https://imagefap.com/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -19,6 +19,7 @@ class ImagefapExtractor(Extractor):
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{name}.{extension}"
     archive_fmt = "{gallery_id}_{image_id}"
+    root = "https://www.imagefap.com"
 
 
 class ImagefapGalleryExtractor(ImagefapExtractor):
@@ -27,16 +28,16 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
     pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
                 r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")]
     test = [
-        ("http://www.imagefap.com/pictures/7102714", {
-            "url": "ffb1d58924fc9d6a0650006a96395a04454b85cf",
+        ("https://www.imagefap.com/pictures/7102714", {
+            "url": "268995eac5d01ddecd0fe58cfa9828390dc85a84",
             "keyword": "b65c310d75269cb6dcc32c3fc1bdcf39bea45342",
             "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
-        ("http://www.imagefap.com/gallery/5486966", {
-            "url": "eace9b33be99f87f3382c87bd915cf495a865d6e",
+        ("https://www.imagefap.com/gallery/5486966", {
+            "url": "14906b4f0b8053d1d69bc730a325acb793cbc898",
             "keyword": "b84da0543c2d1f848bf5e4c2950dd4f4543a1e0c",
         }),
-        ("http://www.imagefap.com/gallery.php?gid=7102714", None),
+        ("https://www.imagefap.com/gallery.php?gid=7102714", None),
     ]
 
     def __init__(self, match):
@@ -45,7 +46,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
         self.image_id = ""
 
     def items(self):
-        url = "http://www.imagefap.com/pictures/" + self.gid + "/"
+        url = "{}/pictures/{}/".format(self.root, self.gid)
         page = self.request(url).text
         data = self.get_job_metadata(page)
         yield Message.Version, 1
@@ -69,7 +70,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
     def get_images(self):
         """Collect image-urls and -metadata"""
         num = 0
-        url = "http://www.imagefap.com/photo/" + self.image_id + "/"
+        url = "{}/photo/{}/".format(self.root, self.image_id)
         params = {"gid": self.gid, "idx": 0, "partial": "true"}
         while True:
             pos = 0
@@ -89,8 +90,8 @@ class ImagefapImageExtractor(ImagefapExtractor):
     """Extractor for single images from imagefap.com"""
     subcategory = "image"
     pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"]
-    test = [("http://www.imagefap.com/photo/1369341772/", {
-        "url": "24cc4312e4a5084f39f1e35af5ba92e5f7c1ad3c",
+    test = [("https://www.imagefap.com/photo/1369341772/", {
+        "url": "b31ee405b61ff0450020a1bf11c0581ca9adb471",
         "keyword": "26ae84575067b8231878ec1a2d1e14a0fbcea865",
     })]
 
@@ -121,14 +122,12 @@ class ImagefapImageExtractor(ImagefapExtractor):
 
     def load_json(self):
         """Load the JSON dictionary associated with the image"""
-        url = "http://www.imagefap.com/photo/" + self.image_id + "/"
+        url = "{}/photo/{}/".format(self.root, self.image_id)
         page = self.request(url).text
         section  , pos = text.extract(
-            page, '<meta name="description" content="', '"'
-        )
+            page, '<meta name="description" content="', '"')
         json_data, pos = text.extract(
-            page, '<script type="application/ld+json">', '</script>', pos
-        )
+            page, '<script type="application/ld+json">', '</script>', pos)
         json_dict = json.loads(json_data)
         json_dict["section"] = section
         return json_dict
@@ -142,8 +141,8 @@ class ImagefapUserExtractor(ImagefapExtractor):
                 r"profile(?:\.php\?user=|/)([^/]+)"),
                (r"(?:https?://)?(?:www\.)?imagefap\.com/"
                 r"usergallery\.php\?userid=(\d+)")]
-    test = [("http://www.imagefap.com/profile/Mr%20Bad%20Example/galleries", {
-        "url": "145e98a8648c7695c150800ff8fd578ab26c28c1",
+    test = [("https://www.imagefap.com/profile/Mr%20Bad%20Example/galleries", {
+        "url": "2d79fe2bd98d02d30378fe30e966d47f72bd4760",
     })]
 
     def __init__(self, match):
@@ -158,14 +157,14 @@ class ImagefapUserExtractor(ImagefapExtractor):
     def items(self):
         yield Message.Version, 1
         for gid, name in self.get_gallery_data():
-            url = "http://www.imagefap.com/gallery/" + gid
+            url = "{}/gallery/{}".format(self.root, gid)
             data = {"gallery_id": text.parse_int(gid), "title": name}
             yield Message.Queue, url, data
 
     def get_gallery_data(self):
         """Yield all gallery_ids of a specific user"""
         folders = self.get_gallery_folders()
-        url = "http://www.imagefap.com/ajax_usergallery_folder.php"
+        url = "{}/ajax_usergallery_folder.php".format(self.root)
         params = {"userid": self.user_id}
         for folder_id in folders:
             params["id"] = folder_id
@@ -182,10 +181,10 @@ class ImagefapUserExtractor(ImagefapExtractor):
     def get_gallery_folders(self):
         """Create a list of all folder_ids of a specific user"""
         if self.user:
-            url = "http://www.imagefap.com/profile/" + self.user + "/galleries"
+            url = "{}/profile/{}/galleries".format(self.root, self.user)
         else:
-            url = ("http://www.imagefap.com/usergallery.php?userid=" +
-                   str(self.user_id))
+            url = "{}/usergallery.php?userid={}".format(
+                self.root, self.user_id)
         page = self.request(url).text
         self.user_id, pos = text.extract(page, '?userid=', '"')
         folders, pos = text.extract(page, ' id="tgl_all" value="', '"', pos)
