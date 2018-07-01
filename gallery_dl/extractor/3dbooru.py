@@ -15,6 +15,7 @@ class ThreedeebooruExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
     """Base class for 3dbooru extractors"""
     category = "3dbooru"
     api_url = "http://behoimi.org/post/index.json"
+    post_url = "http://behoimi.org/post/show/{}"
     page_limit = 1000
 
     def __init__(self, match):
@@ -53,6 +54,13 @@ class ThreedeebooruPostExtractor(booru.PostMixin,
     test = [("http://behoimi.org/post/show/140852", {
         "url": "ce874ea26f01d6c94795f3cc3aaaaa9bc325f2f6",
         "content": "26549d55b82aa9a6c1686b96af8bfcfa50805cd4",
+        "options": (("tags", True),),
+        "keyword": {
+            "tags_character": "furude_rika",
+            "tags_copyright": "higurashi_no_naku_koro_ni",
+            "tags_model": "himekawa_azuru",
+            "tags_general": str,
+        },
     })]
 
 

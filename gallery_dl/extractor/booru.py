@@ -11,8 +11,10 @@
 from .common import SharedConfigExtractor, Message
 from .. import text
 from xml.etree import ElementTree
+import collections
 import datetime
 import operator
+import re
 
 
 class BooruExtractor(SharedConfigExtractor):
@@ -20,6 +22,7 @@ class BooruExtractor(SharedConfigExtractor):
     basecategory = "booru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     api_url = ""
+    post_url = ""
     per_page = 50
     page_start = 1
     page_limit = None
@@ -28,6 +31,10 @@ class BooruExtractor(SharedConfigExtractor):
     def __init__(self, match):
         super().__init__()
         self.params = {}
+        self.prepare = None
+
+        if self.post_url and self.config("tags", False):
+            self.prepare = self._extended_tags
 
     def skip(self, num):
         pages = num // self.per_page
@@ -50,17 +57,18 @@ class BooruExtractor(SharedConfigExtractor):
             for image in images:
                 try:
                     url = image["file_url"]
-                    if url.startswith("/"):
-                        url = text.urljoin(self.api_url, url)
-                    image.update(data)
-                    self.prepare(image)
-                    yield Message.Url, url, text.nameext_from_url(url, image)
                 except KeyError:
                     continue
+                if url.startswith("/"):
+                    url = text.urljoin(self.api_url, url)
+                image.update(data)
+                if self.prepare:
+                    self.prepare(image)
+                yield Message.Url, url, text.nameext_from_url(url, image)
 
             if len(images) < self.per_page:
                 return
-            self.update_page(images[-1])
+            self.update_page(image)
 
     def reset_page(self):
         """Initialize params to point to the first page"""
@@ -81,8 +89,19 @@ class BooruExtractor(SharedConfigExtractor):
         """Collect metadata for extractor-job"""
         return {}
 
-    def prepare(self, image):
-        """Prepare and modify an 'image' object"""
+    def _extended_tags(self, image):
+        """Rerieve extended tag information"""
+        url = self.post_url.format(image["id"])
+        page = self.request(url).text
+        tag_html = text.extract(page, '<ul id="tag-', '</ul>')[0]
+
+        tags = collections.defaultdict(list)
+        pattern = re.compile(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"']+)", re.S)
+        for tag_type, tag_name in pattern.findall(tag_html):
+            tags[tag_type].append(text.unquote(tag_name))
+
+        for key, value in tags.items():
+            image["tags_" + key] = " ".join(value)
 
 
 class XmlParserMixin():

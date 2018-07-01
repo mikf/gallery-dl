@@ -16,9 +16,10 @@ class KonachanExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
     category = "konachan"
 
     def __init__(self, match):
+        root = "https://konachan." + match.group("tld")
+        self.api_url = root + "/post.json"
+        self.post_url = root + "/post/show/{}"
         super().__init__(match)
-        self.api_url = "https://konachan.{tld}/post.json".format(
-            tld=match.group("tld"))
 
 
 class KonachanTagExtractor(booru.TagMixin, KonachanExtractor):
@@ -26,10 +27,10 @@ class KonachanTagExtractor(booru.TagMixin, KonachanExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
                r"/post\?(?:[^&#]*&)*tags=(?P<tags>[^&#]+)"]
     test = [
-        ("http://konachan.com/post?tags=patata", {
+        ("https://konachan.com/post?tags=patata", {
             "content": "838cfb815e31f48160855435655ddf7bfc4ecb8d",
         }),
-        ("http://konachan.net/post?tags=patata", None),
+        ("https://konachan.net/post?tags=patata", None),
     ]
 
 
@@ -38,10 +39,10 @@ class KonachanPoolExtractor(booru.PoolMixin, KonachanExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
                r"/pool/show/(?P<pool>\d+)"]
     test = [
-        ("http://konachan.com/pool/show/95", {
+        ("https://konachan.com/pool/show/95", {
             "content": "cf0546e38a93c2c510a478f8744e60687b7a8426",
         }),
-        ("http://konachan.net/pool/show/95", None),
+        ("https://konachan.net/pool/show/95", None),
     ]
 
 
@@ -50,10 +51,17 @@ class KonachanPostExtractor(booru.PostMixin, KonachanExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
                r"/post/show/(?P<post>\d+)"]
     test = [
-        ("http://konachan.com/post/show/205189", {
+        ("https://konachan.com/post/show/205189", {
             "content": "674e75a753df82f5ad80803f575818b8e46e4b65",
+            "options": (("tags", True),),
+            "keyword": {
+                "tags_artist": "patata",
+                "tags_character": "clownpiece",
+                "tags_copyright": "touhou",
+                "tags_general": str,
+            },
         }),
-        ("http://konachan.net/post/show/205189", None),
+        ("https://konachan.net/post/show/205189", None),
     ]
 
 
