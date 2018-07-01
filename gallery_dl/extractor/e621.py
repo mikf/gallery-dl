@@ -15,6 +15,7 @@ class E621Extractor(booru.MoebooruPageMixin, booru.BooruExtractor):
     """Base class for e621 extractors"""
     category = "e621"
     api_url = "https://e621.net/post/index.json"
+    post_url = "https://e621.net/post/show/{}"
     page_limit = 750
 
 
@@ -48,6 +49,12 @@ class E621PostExtractor(booru.PostMixin, E621Extractor):
     test = [("https://e621.net/post/show/535", {
         "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",
         "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
+        "options": (("tags", True),),
+        "keyword": {
+            "tags_artist": "anry",
+            "tags_general": str,
+            "tags_species": str,
+        },
     })]
 
 

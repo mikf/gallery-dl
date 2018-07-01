@@ -617,20 +617,23 @@ Description A (comma-separated) list of post types to extract images, etc. from.
 =========== =====
 
 
+extractor.3dbooru.tags
+----------------------
+extractor.e621.tags
+-------------------
+extractor.konachan.tags
+-----------------------
+extractor.rule34.tags
+---------------------
+extractor.safebooru.tags
+------------------------
 extractor.yandere.tags
 ----------------------
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Split tags into different categories
-            and provide the following additional metadata-entries:
-
-            - ``tags_artist``
-            - ``tags_character``
-            - ``tags_circle``
-            - ``tags_copyright``
-            - ``tags_faults``
-            - ``tags_general``
+Description Categorize tags by their respective types
+            and provide them as ``tags_<type>`` metadata fields.
 
             Note: This requires 1 additional HTTP request for each post.
 =========== =====
