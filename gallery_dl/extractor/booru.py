@@ -129,8 +129,10 @@ class MoebooruPageMixin():
 
 class GelbooruPageMixin():
     """Pagination for Gelbooru-like sites"""
+    page_start = 0
+
     def reset_page(self):
-        self.params["pid"] = self.page_start - 1
+        self.params["pid"] = self.page_start
 
     def update_page(self, data):
         self.params["pid"] += 1
