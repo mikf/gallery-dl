@@ -9,7 +9,7 @@
 """Base classes for extractors for danbooru and co"""
 
 from .common import SharedConfigExtractor, Message
-from .. import text
+from .. import text, exception
 from xml.etree import ElementTree
 import collections
 import datetime
@@ -167,7 +167,39 @@ class PoolMixin():
         self.params["limit"] = self.per_page
 
     def get_metadata(self):
-        return {"pool": self.pool}
+        return {"pool": text.parse_int(self.pool)}
+
+
+class GelbooruPoolMixin(PoolMixin):
+    """Image-pool extraction for Gelbooru-like sites"""
+    per_page = 1
+
+    def get_metadata(self):
+        page = self.request(self.pool_url.format(self.pool)).text
+        name, pos = text.extract(page, "<h3>Now Viewing: ", "</h3>")
+        if not name:
+            name, pos = text.extract(page, "<h4>Pool: ", "</h4>")
+        if not name:
+            raise exception.NotFoundError("pool")
+        self.posts = list(text.extract_iter(page, 'id="p', '"', pos))
+
+        return {
+            "pool": text.parse_int(self.pool),
+            "pool_name": text.unescape(name or ""),
+            "count": len(self.posts),
+        }
+
+    def reset_page(self):
+        self.index = self.page_start
+        self.update_page(None)
+
+    def update_page(self, data):
+        try:
+            post = self.posts[self.index]
+            self.index += 1
+        except IndexError:
+            post = "0"
+        self.params["tags"] = "id:" + post
 
 
 class PostMixin():

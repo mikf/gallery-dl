@@ -10,7 +10,7 @@
 
 from . import booru
 from .common import Message
-from .. import text, exception
+from .. import text, util
 
 
 class GelbooruExtractor(booru.XmlParserMixin,
@@ -20,6 +20,7 @@ class GelbooruExtractor(booru.XmlParserMixin,
     category = "gelbooru"
     api_url = "https://gelbooru.com/index.php"
     post_url = "https://gelbooru.com/index.php?page=post&s=view&id={}"
+    pool_url = "https://gelbooru.com/index.php?page=pool&s=show&id={}"
 
     def __init__(self, match):
         super().__init__(match)
@@ -102,31 +103,16 @@ class GelbooruTagExtractor(booru.TagMixin, GelbooruExtractor):
             params["pid"] += self.per_page
 
 
-class GelbooruPoolExtractor(GelbooruExtractor):
+class GelbooruPoolExtractor(booru.GelbooruPoolMixin, GelbooruExtractor):
     """Extractor for image-pools from gelbooru.com"""
     pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?page=pool&s=show&id=(\d+)"]
+               r"\?page=pool&s=show&id=(?P<pool>\d+)"]
     test = [("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
         "count": 6,
     })]
 
-    def get_metadata(self):
-        page = self.request("https://gelbooru.com/index.php?page=pool&s=show"
-                            "&id=" + self.pool_id).text
-        name, pos = text.extract(page, "<h3>Now Viewing: ", "</h3>")
-        self.posts = list(text.extract_iter(page, 'id="p', '"', pos))
-
-        if not name:
-            raise exception.NotFoundError("pool")
-
-        return {
-            "pool": text.parse_int(self.pool_id),
-            "pool_name": text.unescape(name),
-            "count": len(self.posts),
-        }
-
     def get_posts(self):
-        return self.posts
+        return util.advance(self.posts, self.page_start)
 
 
 class GelbooruPostExtractor(booru.PostMixin, GelbooruExtractor):
