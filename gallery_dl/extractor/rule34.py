@@ -18,6 +18,7 @@ class Rule34Extractor(booru.XmlParserMixin,
     category = "rule34"
     api_url = "https://rule34.xxx/index.php"
     post_url = "https://rule34.xxx/index.php?page=post&s=view&id={}"
+    pool_url = "https://rule34.xxx/index.php?page=pool&s=show&id={}"
     page_limit = 4000
 
     def __init__(self, match):
@@ -27,8 +28,8 @@ class Rule34Extractor(booru.XmlParserMixin,
 
 class Rule34TagExtractor(booru.TagMixin, Rule34Extractor):
     """Extractor for images from rule34.xxx based on search-tags"""
-    pattern = [(r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
-                r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")]
+    pattern = [r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
+               r"\?page=post&s=list&tags=(?P<tags>[^&#]+)"]
     test = [("https://rule34.xxx/index.php?page=post&s=list&tags=danraku", {
         "content": "a01768c6f86f32eb7ebbdeb87c30b0d9968d7f97",
         "pattern": r"https?://(.?img\.)?rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
@@ -36,10 +37,19 @@ class Rule34TagExtractor(booru.TagMixin, Rule34Extractor):
     })]
 
 
+class Rule34PoolExtractor(booru.GelbooruPoolMixin, Rule34Extractor):
+    """Extractor for image-pools from rule34.xxx"""
+    pattern = [r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
+               r"\?page=pool&s=show&id=(?P<pool>\d+)"]
+    test = [("https://rule34.xxx/index.php?page=pool&s=show&id=179", {
+        "count": 3,
+    })]
+
+
 class Rule34PostExtractor(booru.PostMixin, Rule34Extractor):
     """Extractor for single images from rule34.xxx"""
-    pattern = [(r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
-                r"\?page=post&s=view&id=(?P<post>\d+)")]
+    pattern = [r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
+               r"\?page=post&s=view&id=(?P<post>\d+)"]
     test = [("https://rule34.xxx/index.php?page=post&s=view&id=1974854", {
         "content": "fd2820df78fb937532da0a46f7af6cefc4dc94be",
         "options": (("tags", True),),
