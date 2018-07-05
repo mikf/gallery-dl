@@ -15,7 +15,7 @@ from .. import text
 class MangaparkExtractor():
     """Base class for mangapark extractors"""
     category = "mangapark"
-    root = "https://mangapark.me"
+    root_fmt = "https://mangapark.{}"
 
     @staticmethod
     def parse_chapter_path(path, data):
@@ -37,11 +37,20 @@ class MangaparkExtractor():
 
 class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
     """Extractor for manga from mangapark.me"""
-    pattern = [r"(?:https?://)?(?:www\.)?(mangapark\.me/manga/[^/]+)/?$"]
-    test = [("https://mangapark.me/manga/aria", {
-        "url": "4cb5606530b4eeacde7a4c9fd38296eb6ff46563",
-        "keyword": "e87ab8e7ad2571bbe587881e7fd422e8f582f818",
-    })]
+    pattern = [r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
+               r"(/manga/[^/?&#]+)/?$"]
+    test = [
+        ("https://mangapark.me/manga/aria", {
+            "url": "4cb5606530b4eeacde7a4c9fd38296eb6ff46563",
+            "keyword": "e87ab8e7ad2571bbe587881e7fd422e8f582f818",
+        }),
+        ("https://mangapark.net/manga/aria", None),
+        ("https://mangapark.com/manga/aria", None),
+    ]
+
+    def __init__(self, match):
+        self.root = self.root_fmt.format(match.group(1))
+        MangaExtractor.__init__(self, match, self.root + match.group(2))
 
     def chapters(self, page):
         results = []
@@ -69,8 +78,8 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
 
 class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.me"""
-    pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.me(/manga/[^/]+"
-                r"/s\d+(?:/v\d+)?/c\d+[^/]*(?:/e\d+)?)")]
+    pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
+                r"(/manga/[^/]+/s\d+(?:/v\d+)?/c\d+[^/]*(?:/e\d+)?)")]
     test = [
         ("https://mangapark.me/manga/gosu/s2/c55", {
             "count": 50,
@@ -85,10 +94,13 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
             "count": 15,
             "keyword": "8d5d1608d4182495ea43ad665e25b755b6468be2",
         }),
+        ("https://mangapark.net/manga/gosu/s2/c55", None),
+        ("https://mangapark.com/manga/gosu/s2/c55", None),
     ]
 
     def __init__(self, match):
-        self.path = match.group(1)
+        tld, self.path = match.groups()
+        self.root = self.root_fmt.format(tld)
         url = self.root + self.path + "?zoom=2"
         ChapterExtractor.__init__(self, url)
 
@@ -111,16 +123,13 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
 
     def get_images(self, page):
         pos = 0
-        num = 0
         while True:
             url, pos = text.extract(page, ' target="_blank" href="', '"', pos)
             if not url:
                 return
-            num += 1
             width , pos = text.extract(page, ' width="', '"', pos)
             height, pos = text.extract(page, ' _heighth="', '"', pos)
             yield text.urljoin(self.root, url), {
-                "page": num,
                 "width": width,
                 "height": height,
             }
