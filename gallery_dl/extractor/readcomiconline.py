@@ -68,7 +68,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     pattern = [r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
                r"/Comic/[^/?&#]+/[^/?&#]+\?id=(\d+)"]
     test = [("http://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
-        "url": "a45c77f8fbde66091fe2346d6341f9cf3c6b1bc5",
+        "url": "2bbab6ec4fbc05d269cca420a82a9b5acda28682",
         "keyword": "c6de1c9c8a307dc4be56783c4ac6f1338ffac6fc",
     })]
 

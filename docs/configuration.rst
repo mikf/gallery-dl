@@ -621,6 +621,8 @@ extractor.3dbooru.tags
 ----------------------
 extractor.e621.tags
 -------------------
+extractor.gelbooru.tags
+-----------------------
 extractor.konachan.tags
 -----------------------
 extractor.rule34.tags
