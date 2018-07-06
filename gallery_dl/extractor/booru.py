@@ -31,10 +31,7 @@ class BooruExtractor(SharedConfigExtractor):
     def __init__(self, match):
         super().__init__()
         self.params = {}
-        self.prepare = None
-
-        if self.post_url and self.config("tags", False):
-            self.prepare = self._extended_tags
+        self.extags = self.post_url and self.config("tags", False)
 
     def skip(self, num):
         pages = num // self.per_page
@@ -62,8 +59,8 @@ class BooruExtractor(SharedConfigExtractor):
                 if url.startswith("/"):
                     url = text.urljoin(self.api_url, url)
                 image.update(data)
-                if self.prepare:
-                    self.prepare(image)
+                if self.extags:
+                    self.extended_tags(image)
                 yield Message.Url, url, text.nameext_from_url(url, image)
 
             if len(images) < self.per_page:
@@ -89,17 +86,16 @@ class BooruExtractor(SharedConfigExtractor):
         """Collect metadata for extractor-job"""
         return {}
 
-    def _extended_tags(self, image):
+    def extended_tags(self, image, page=None):
         """Rerieve extended tag information"""
-        url = self.post_url.format(image["id"])
-        page = self.request(url).text
-        tag_html = text.extract(page, '<ul id="tag-', '</ul>')[0]
-
+        if not page:
+            url = self.post_url.format(image["id"])
+            page = self.request(url).text
         tags = collections.defaultdict(list)
+        tags_html = text.extract(page, '<ul id="tag-', '</ul>')[0]
         pattern = re.compile(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"']+)", re.S)
-        for tag_type, tag_name in pattern.findall(tag_html):
+        for tag_type, tag_name in pattern.findall(tags_html):
             tags[tag_type].append(text.unquote(tag_name))
-
         for key, value in tags.items():
             image["tags_" + key] = " ".join(value)
 
@@ -185,7 +181,7 @@ class GelbooruPoolMixin(PoolMixin):
 
         return {
             "pool": text.parse_int(self.pool),
-            "pool_name": text.unescape(name or ""),
+            "pool_name": text.unescape(name),
             "count": len(self.posts),
         }
 

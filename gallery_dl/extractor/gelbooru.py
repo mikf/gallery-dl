@@ -68,6 +68,8 @@ class GelbooruExtractor(booru.XmlParserMixin,
         data["rating"] = (data["rating"] or "?")[0].lower()
         data["tags"] = " ".join(
             [tag.replace(" ", "_") for tag in data["tags"].split(", ")])
+        if self.extags:
+            self.extended_tags(data, page)
         return data
 
 
