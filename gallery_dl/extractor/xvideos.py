@@ -36,7 +36,7 @@ class XvideosGalleryExtractor(XvideosExtractor):
         (("https://www.xvideos.com/profiles"
           "/pervertedcouple/photos/751031/random_stuff"), {
             "url": "4f0d992e5dc39def2c3ac8e099d17bf09e76e3c7",
-            "keyword": "750d462802d56eead0fe06c4f453419396d2f944",
+            "keyword": "8d637b372c6231cc4ada92dd5918db5fdbd06520",
         }),
         ("https://www.xvideos.com/profiles/pervertedcouple/photos/751032/", {
             "exception": exception.NotFoundError,

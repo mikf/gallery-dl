@@ -111,13 +111,9 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
         """Yield all image-urls for this chapter"""
         pnum = 1
         while True:
-            url, pos = text.extract(page, '<img src="', '"')
-            yield url, None
-            _  , pos = text.extract(page, '<img src="', '"', pos)
-            _  , pos = text.extract(page, '<img src="', '"', pos)
-            url, pos = text.extract(page, '<img src="', '"', pos)
-            yield url, None
-
+            for url in text.extract_iter(page, '<img src="', '"'):
+                if "/store/manga/" in url:
+                    yield url, None
             pnum += 2
             page = self.request(self.url_fmt.format(self.part, pnum)).text
 
