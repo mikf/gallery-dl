@@ -1,12 +1,15 @@
 # Changelog
 
+## Unreleased
+- Fixed chapter extraction on `mangahere`
+
 ## 1.4.2 - 2018-07-06
 - Added image-pool extractors for `safebooru` and `rule34`
 - Added option for extended tag information on `booru` sites ([#92](https://github.com/mikf/gallery-dl/issues/92))
 - Added support for DeviantArt's new URL format
 - Added support for `mangapark` mirrors
 - Changed `imagefap` extractors to use HTTPS
-- Fixed download-skips for files without known extension
+- Fixed crash when skipping downloads for files without known extension
 
 ## 1.4.1 - 2018-06-22
 - Added an `ugoira` post-processor to convert  `pixiv` animations to WebM
