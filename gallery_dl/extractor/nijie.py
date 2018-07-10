@@ -21,6 +21,7 @@ class NijieExtractor(AsynchronousExtractor):
     archive_fmt = "{image_id}_{index}"
     cookiedomain = "nijie.info"
     root = "https://nijie.info"
+    view_url = "https://nijie.info/view.php?id="
     popup_url = "https://nijie.info/view_popup.php?id="
 
     def __init__(self, match=None):
@@ -51,7 +52,7 @@ class NijieExtractor(AsynchronousExtractor):
 
     def get_image_data(self, image_id):
         """Get URL and metadata for images specified by 'image_id'"""
-        page = self.request(self.popup_url + image_id).text
+        page = self.request(self.view_url + image_id).text
         return self.extract_image_data(page, image_id)
 
     def extract_image_data(self, page, image_id):
@@ -60,14 +61,20 @@ class NijieExtractor(AsynchronousExtractor):
             page, '<meta property="og:title" content="', '"')
         description, pos = text.extract(
             page, '<meta property="og:description" content="', '"', pos)
-        images = list(text.extract_iter(page, '<img src="//pic', '"', pos))
+        artist_id, pos = text.extract(
+            page, '"sameAs": "https://nijie.info/members.php?id=', '"', pos)
+        images = list(text.extract_iter(
+            page, '<a href="./view_popup.php', '</a>', pos))
 
         title = title.rpartition("|")[0].strip()
         image_id = text.parse_int(image_id)
-        artist_id = text.parse_int(self._userid_from_popup(page))
+        artist_id = text.parse_int(artist_id)
 
-        for index, url in enumerate(images):
-            yield "https://pic" + url, text.nameext_from_url(url, {
+        for index, image in enumerate(images):
+            url = "https:" + text.extract(image, 'src="', '"')[0]
+            url = url.replace("/__rs_l120x120/", "/", 1)
+
+            yield url, text.nameext_from_url(url, {
                 "index": index,
                 "count": len(images),
                 "title": title,
@@ -109,13 +116,6 @@ class NijieExtractor(AsynchronousExtractor):
             if '<a rel="next"' not in page:
                 return
             params["p"] += 1
-
-    @staticmethod
-    def _userid_from_popup(page):
-        return (
-            text.extract(page, "/nijie_picture/sp/", "_")[0] or
-            text.extract(page, "/dojin_main/", "_")[0]
-        )
 
 
 class NijieUserExtractor(NijieExtractor):
@@ -193,12 +193,12 @@ class NijieImageExtractor(NijieExtractor):
         self.page = ""
 
     def get_job_metadata(self):
-        response = self.request(
-            self.popup_url + self.image_id, allow_redirects=False)
-        if 300 <= response.status_code < 400:
+        response = self.request(self.view_url + self.image_id, expect=(404,))
+        if response.status_code == 404:
             raise exception.NotFoundError("image")
         self.page = response.text
-        self.user_id = self._userid_from_popup(self.page)
+        self.user_id = text.extract(
+            self.page, '"sameAs": "https://nijie.info/members.php?id=', '"')[0]
         return NijieExtractor.get_job_metadata(self)
 
     def get_image_ids(self):
