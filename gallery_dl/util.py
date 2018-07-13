@@ -344,6 +344,10 @@ class Formatter():
         for is_attr, i in rest:
             if is_attr:
                 obj = getattr(obj, i)
+            elif ":" in i:
+                start, _, stop = i.partition(":")
+                start = int(start) if start else 0
+                return obj[start:int(stop)] if stop else obj[start:]
             else:
                 obj = obj[i]
 

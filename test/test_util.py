@@ -200,6 +200,16 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{missing[key]}", replacement, default)
         self._run_test("{missing:?a//}", "a" + default, default)
 
+    def test_slicing(self):
+        v = self.kwdict["a"]
+        self._run_test("{a[1:10]}"  , v[1:10])
+        self._run_test("{a[-10:-1]}", v[-10:-1])
+        self._run_test("{a[5:]}" , v[5:])
+        self._run_test("{a[50:]}", v[50:])
+        self._run_test("{a[:5]}" , v[:5])
+        self._run_test("{a[:50]}", v[:50])
+        self._run_test("{a[:]}"  , v)
+
     def _run_test(self, format_string, result, default=None):
         formatter = util.Formatter(default)
         output = formatter.vformat(format_string, self.kwdict)
