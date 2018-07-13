@@ -617,19 +617,7 @@ Description A (comma-separated) list of post types to extract images, etc. from.
 =========== =====
 
 
-extractor.3dbooru.tags
-----------------------
-extractor.e621.tags
--------------------
-extractor.gelbooru.tags
------------------------
-extractor.konachan.tags
------------------------
-extractor.rule34.tags
----------------------
-extractor.safebooru.tags
-------------------------
-extractor.yandere.tags
+extractor.[booru].tags
 ----------------------
 =========== =====
 Type        ``bool``
