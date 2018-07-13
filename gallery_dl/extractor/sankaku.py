@@ -11,8 +11,10 @@
 from .common import SharedConfigExtractor, Message
 from .. import text, util, exception
 from ..cache import cache
-import time
+import collections
 import random
+import time
+import re
 
 
 class SankakuExtractor(SharedConfigExtractor):
@@ -30,6 +32,7 @@ class SankakuExtractor(SharedConfigExtractor):
         self.logged_in = True
         self.start_page = 1
         self.start_post = 0
+        self.extags = self.config("tags", False)
         self.wait_min = self.config("wait-min", 2.5)
         self.wait_max = self.config("wait-max", 5.0)
         if self.wait_max < self.wait_min:
@@ -81,7 +84,7 @@ class SankakuExtractor(SharedConfigExtractor):
             height, pos = extr(page, 'height=', '>', pos)
             file_url = extr(page, '<embed src="', '"', pos)[0]
 
-        return {
+        data = {
             "id": text.parse_int(post_id),
             "md5": file_url.rpartition("/")[2].partition(".")[0],
             "tags": tags,
@@ -93,6 +96,17 @@ class SankakuExtractor(SharedConfigExtractor):
             "width": text.parse_int(width),
             "height": text.parse_int(height),
         }
+
+        if self.extags:
+            tags = collections.defaultdict(list)
+            tags_html = text.extract(page, '<ul id=tag-sidebar>', '</ul>')[0]
+            pattern = re.compile(r'tag-type-([^>]+)><a href="/\?tags=([^"]+)')
+            for tag_type, tag_name in pattern.findall(tags_html):
+                tags[tag_type].append(text.unquote(tag_name))
+            for key, value in tags.items():
+                data["tags_" + key] = " ".join(value)
+
+        return data
 
     def wait(self):
         """Wait for a randomly chosen amount of seconds"""
@@ -261,7 +275,15 @@ class SankakuPostExtractor(SankakuExtractor):
     pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/post/show/(\d+)"]
     test = [("https://chan.sankakucomplex.com/post/show/360451", {
         "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
-        "count": 1,
+        "options": (("tags", True),),
+        "keyword": {
+            "tags_artist": "bonocho",
+            "tags_copyright": "batman_(series) the_dark_knight",
+            "tags_medium": "sketch copyright_name",
+            "tags_studio": "dc_comics",
+            "tags_character": str,
+            "tags_general": str,
+        },
     })]
 
     def __init__(self, match):

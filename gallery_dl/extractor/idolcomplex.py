@@ -48,5 +48,12 @@ class IdolcomplexPostExtractor(IdolcomplexExtractor,
     pattern = [r"(?:https?://)?idol\.sankakucomplex\.com/post/show/(\d+)"]
     test = [("https://idol.sankakucomplex.com/post/show/694215", {
         "content": "694ec2491240787d75bf5d0c75d0082b53a85afd",
-        "count": 1,
+        "options": (("tags", True),),
+        "keyword": {
+            "tags_character": "shani_(the_witcher)",
+            "tags_copyright": "the_witcher",
+            "tags_idol": "lyumos",
+            "tags_medium": "3:2_aspect_ratio cosplay",
+            "tags_general": str,
+        },
     })]
