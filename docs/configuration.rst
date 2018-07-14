@@ -333,6 +333,18 @@ Description The ``refresh_token`` value you get from linking your
 =========== =====
 
 
+extractor.deviantart.wait-min
+-----------------------------
+=========== =====
+Type        ``int``
+Default     ``0``
+Description Minimum wait time in seconds before any API request.
+
+            Note: This value will internally be rounded up
+            to the next power of 2.
+=========== =====
+
+
 extractor.exhentai.original
 ---------------------------
 =========== =====
