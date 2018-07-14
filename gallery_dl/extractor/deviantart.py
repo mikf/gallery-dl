@@ -14,6 +14,7 @@ from ..cache import cache, memcache
 import itertools
 import datetime
 import time
+import math
 import re
 
 
@@ -422,7 +423,10 @@ class DeviantartAPI():
         self.session = extractor.session
         self.log = extractor.log
         self.headers = {}
-        self.delay = -1
+
+        delay = extractor.config("wait-min", 0)
+        self.delay = math.ceil(math.log2(delay)) if delay >= 1 else -1
+        self.delay_min = max(2, self.delay)
 
         self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
@@ -551,7 +555,7 @@ class DeviantartAPI():
             status = response.status_code
 
             if 200 <= status < 400:
-                if self.delay > 1:
+                if self.delay > self.delay_min:
                     self.delay -= 1
                 return data
             elif expect_error:
