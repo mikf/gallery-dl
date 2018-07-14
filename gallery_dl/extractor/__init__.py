@@ -82,7 +82,6 @@ modules = [
     "tumblr",
     "twitter",
     "warosu",
-    "whatisthisimnotgoodwithcomputers",
     "worldthree",
     "yandere",
     "xvideos",
