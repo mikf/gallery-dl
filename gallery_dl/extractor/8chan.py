@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,9 +16,9 @@ class InfinitychanThreadExtractor(chan.ChanThreadExtractor):
     category = "8chan"
     filename_fmt = "{time}-{filename}{ext}"
     pattern = [r"(?:https?://)?(?:www\.)?8ch\.net/([^/]+)/res/(\d+)"]
-    test = [("https://8ch.net/wh40k/res/1.html", {
-        "url": "9220c79950d3f9cdd2c0436e816aec6b8342fac1",
-        "keyword": "df5773339c5864c71b63fc26ca60ea7098b83cb1",
+    test = [("https://8ch.net/builders/res/3.html", {
+        "url": "5d85c0509f907f217aea379f862b41bf3d01f645",
+        "keyword": "c065d10c3552b2cb663579a8e88cf0777b1b770b",
     })]
     api_url = "https://8ch.net/{board}/res/{thread}.json"
     file_url = "https://media.8ch.net/{board}/src/{tim}{ext}"
