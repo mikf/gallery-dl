@@ -94,7 +94,6 @@ AUTH_MAP = {
 
 IGNORE_LIST = (
     "oauth",
-    "whatisthisimnotgoodwithcomputers",
 )
 
 
