@@ -294,6 +294,19 @@ Description Select the directory structure created by the Gallery- and
 =========== =====
 
 
+extractor.deviantart.journals
+-----------------------------
+=========== =====
+Type        ``string``
+Default     ``"html"``
+Description Selects the output format of journal entries.
+
+            - ``"html"``: HTML with (roughly) the same layout as on DeviantArt.
+            - ``"text"``: Plain text with image references and HTML tags removed.
+            - ``"none"``: Don't download journals.
+=========== =====
+
+
 extractor.deviantart.mature
 ---------------------------
 =========== =====
@@ -338,7 +351,7 @@ extractor.deviantart.wait-min
 =========== =====
 Type        ``int``
 Default     ``0``
-Description Minimum wait time in seconds before any API request.
+Description Minimum wait time in seconds before API requests.
 
             Note: This value will internally be rounded up
             to the next power of 2.

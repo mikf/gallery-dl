@@ -21,7 +21,7 @@ import re
 BASE_PATTERN = (
     r"(?:https?://)?(?:"
     r"(?:www\.)?deviantart\.com/([\w-]+)|"
-    r"(?!www\.)([\w-]+)\.deviantart\.com)"
+    r"([\w-]+)\.deviantart\.com)"
 )
 
 
@@ -40,6 +40,11 @@ class DeviantartExtractor(Extractor):
         self.original = self.config("original", True)
         self.user = match.group(1) or match.group(2) if match else None
         self.group = False
+
+        self.commit_journal = {
+            "html": self._commit_journal_html,
+            "text": self._commit_journal_text,
+        }.get(self.config("journals", "html"))
 
     def skip(self, num):
         self.offset += num
@@ -77,7 +82,7 @@ class DeviantartExtractor(Extractor):
             if "flash" in deviation:
                 yield self.commit(deviation, deviation["flash"])
 
-            if "excerpt" in deviation:
+            if "excerpt" in deviation and self.commit_journal:
                 journal = self.api.deviation_content(deviation["deviationid"])
                 yield self.commit_journal(deviation, journal)
 
@@ -94,7 +99,6 @@ class DeviantartExtractor(Extractor):
             deviation["index"] = deviation["url"].rpartition("-")[2]
         except KeyError:
             deviation["index"] = 0
-
         if self.user:
             deviation["username"] = self.user
         deviation["da_category"] = deviation["category"]
@@ -108,7 +112,7 @@ class DeviantartExtractor(Extractor):
             url = "https:" + url[5:]
         return Message.Url, url, deviation
 
-    def commit_journal(self, deviation, journal):
+    def _commit_journal_html(self, deviation, journal):
         title = text.escape(deviation["title"])
         url = deviation["url"]
         thumbs = deviation["thumbs"]
@@ -142,11 +146,11 @@ class DeviantartExtractor(Extractor):
                 url=url,
                 userurl="{}/{}/".format(self.root, deviation["username"]),
                 username=deviation["author"]["username"],
-                date=str(date),
+                date=date,
                 categories=categories,
             )
 
-        html = JOURNAL_TEMPLATE.format(
+        html = JOURNAL_TEMPLATE_HTML.format(
             title=title,
             html=html.replace(needle, header, 1),
             shadow=shadow,
@@ -156,6 +160,23 @@ class DeviantartExtractor(Extractor):
 
         deviation["extension"] = "htm"
         return Message.Url, html, deviation
+
+    @staticmethod
+    def _commit_journal_text(deviation, journal):
+        date = datetime.datetime.utcfromtimestamp(deviation["published_time"])
+        content = "\n".join(
+            text.unescape(text.remove_html(txt))
+            for txt in journal["html"].rpartition("<script")[0].split("<br />")
+        )
+        txt = JOURNAL_TEMPLATE_TEXT.format(
+            title=deviation["title"],
+            username=deviation["author"]["username"],
+            date=date,
+            content=content,
+        )
+
+        deviation["extension"] = "txt"
+        return Message.Url, txt, deviation
 
     @staticmethod
     def _find_folder(folders, name):
@@ -246,12 +267,12 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     subcategory = "deviation"
     archive_fmt = "{index}.{extension}"
     pattern = [BASE_PATTERN + r"/(?:art|journal)/[^/?&#]+-\d+",
-               r"(?:https?://)?(sta\.sh/[a-z0-9]+)"]
+               r"(?:https?://)?sta\.sh/()()[a-z0-9]+"]
     test = [
         (("https://www.deviantart.com/shimoda7/art/"
           "For-the-sake-of-a-memory-10073852"), {
             "url": "eef0c01b3808c535ea673e7b3654ab5209b910b7",
-            "keyword": "b7ed053c3fb54b93c90e5ff8ed9f7a11d47a9c74",
+            "keyword": "925217229da46aeb8ce282675dc8639fa20a892c",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://www.deviantart.com/zzz/art/zzz-1234567890", {
@@ -277,7 +298,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     ]
 
     def __init__(self, match):
-        DeviantartExtractor.__init__(self)
+        DeviantartExtractor.__init__(self, match)
         self.url = match.group(0)
         if not self.url.startswith("http"):
             self.url = "https://" + self.url
@@ -310,10 +331,10 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     def deviations(self):
         folders = self.api.collections_folders(self.user)
         if self.flat:
-            return itertools.chain.from_iterable([
+            return itertools.chain.from_iterable(
                 self.api.collections(self.user, folder["folderid"])
                 for folder in folders
-            ])
+            )
         else:
             return self._folder_urls(folders, "favourites")
 
@@ -362,6 +383,14 @@ class DeviantartJournalExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/angrywhitewanker/journal/", {
             "url": "38db2a0d3a587a7e0f9dba7ff7d274610ebefe44",
             "keyword": "8d11b458f389188cc1f00d09694ce4e00c43efcc",
+        }),
+        ("https://www.deviantart.com/angrywhitewanker/journal/", {
+            "url": "b2a8e74d275664b1a4acee0fca0a6fd33298571e",
+            "options": (("journals", "text"),),
+        }),
+        ("https://www.deviantart.com/angrywhitewanker/journal/", {
+            "count": 0,
+            "options": (("journals", "none"),),
         }),
         ("https://www.deviantart.com/shimoda7/journal/?catpath=/", None),
         ("https://angrywhitewanker.deviantart.com/journal/", None),
@@ -629,7 +658,7 @@ HEADER_CUSTOM_TEMPLATE = """<div class='boxtop journaltop'>
 Journal Entry: <span>{date}</span>
 """
 
-JOURNAL_TEMPLATE = """text:<!DOCTYPE html>
+JOURNAL_TEMPLATE_HTML = """text:<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -675,4 +704,10 @@ roses/cssmin/desktop.css?1491362542749" >
     </div>
 </body>
 </html>
+"""
+
+JOURNAL_TEMPLATE_TEXT = """text:{title}
+by {username}, {date}
+
+{content}
 """

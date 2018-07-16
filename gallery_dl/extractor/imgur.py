@@ -155,8 +155,8 @@ class ImgurAlbumExtractor(ImgurExtractor):
         ("https://imgur.com/a/RhJXhVT/all", {  # 7 character album hash
             "url": "695ef0c950023362a0163ee5041796300db76674",
         }),
-        ("https://imgur.com/t/unmuted/FVyxO32", {  # unmuted URL
-            "url": "1df12d96438ad9018ace7665dc893419ce9ec867",
+        ("https://imgur.com/t/unmuted/YMqBcua", {  # unmuted URL
+            "url": "86b4747f8147cec7602f0214e267309af73a8655",
         }),
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.NotFoundError,
