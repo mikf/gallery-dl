@@ -9,7 +9,7 @@
 from __future__ import unicode_literals, print_function
 
 __author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2017 Mike Fährmann"
+__copyright__ = "Copyright 2014-2018 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
@@ -17,7 +17,7 @@ __email__ = "mike_faehrmann@web.de"
 import sys
 
 if sys.hexversion < 0x3030000:
-    print("Python 3.3+ required", file=sys.stderr)
+    print("Python 3.4+ required", file=sys.stderr)
     sys.exit(1)
 
 import json
