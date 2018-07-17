@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://rule34.paheal.net/"""
+"""Extract images from https://rule34.paheal.net/"""
 
 from .common import SharedConfigExtractor, Message
 from .. import text
@@ -18,7 +18,7 @@ class PahealExtractor(SharedConfigExtractor):
     category = "paheal"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     archive_fmt = "{id}"
-    root = "http://rule34.paheal.net"
+    root = "https://rule34.paheal.net"
 
     def items(self):
         yield Message.Version, 1
@@ -46,8 +46,8 @@ class PahealTagExtractor(PahealExtractor):
     pattern = [r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/list/([^/?&#]+)"]
     test = [("https://rule34.paheal.net/post/list/k-on/1", {
-        "url": "c33de1a1470ab29e24ba7a39f53dbf77984be383",
-        "keyword": "dcba36cfeedf53387aa9656675307fb9141901f1",
+        "url": "d5b6954b978387c6dea69afcdcf24596da55e633",
+        "keyword": "c0536722f251150783717ba471f16af6b957632e",
     })]
     per_page = 70
 
@@ -94,9 +94,9 @@ class PahealPostExtractor(PahealExtractor):
     subcategory = "post"
     pattern = [r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/view/(\d+)"]
-    test = [("http://rule34.paheal.net/post/view/481609", {
-        "url": "2d6c0e28dc2ba3fdd75c807aab297bb973588858",
-        "keyword": "da03f47df6878b519717a0ffcfd24e1ec7890987",
+    test = [("https://rule34.paheal.net/post/view/481609", {
+        "url": "3aa2189c8d1fa952a4d3420def93fd2bd54d6741",
+        "keyword": "d7a0bd6d8b0a5bd8300857044ed2d53d481d37cf",
         "content": "7b924bcf150b352ac75c9d281d061e174c851a11",
     })]
 
