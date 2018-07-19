@@ -9,6 +9,7 @@
 
 import os
 import sys
+import re
 import unittest
 from gallery_dl import extractor, job, config, exception
 
@@ -67,11 +68,8 @@ class TestExtractorResults(unittest.TestCase):
         try:
             tjob.run()
         except exception.HttpError as exc:
-            try:
-                if 500 <= exc.args[0].response.status_code < 600:
-                    self.skipTest(exc)
-            except AttributeError:
-                pass
+            if re.match(r"5\d\d HTTP Error:", str(exc)):
+                self.skipTest(exc)
             raise
 
         # test archive-id uniqueness
