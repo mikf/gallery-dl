@@ -39,6 +39,7 @@ CATEGORY_MAP = {
     "mangahere"      : "Manga Here",
     "mangapark"      : "MangaPark",
     "mangastream"    : "Manga Stream",
+    "myportfolio"    : "Adobe Portfolio",
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
     "nyafuu"         : "Nyafuu Archive",
