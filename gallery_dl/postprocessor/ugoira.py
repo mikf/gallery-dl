@@ -10,6 +10,7 @@
 
 from .common import PostProcessor
 from .. import util
+import collections
 import subprocess
 import tempfile
 import zipfile
@@ -28,19 +29,17 @@ class UgoiraPP(PostProcessor):
         ffmpeg = options.get("ffmpeg-location")
         self.ffmpeg = util.expand_path(ffmpeg) if ffmpeg else "ffmpeg"
 
+        rate = options.get("framerate", "auto")
+        if rate != "auto":
+            self.calculate_framerate = lambda _: (None, rate)
+
     def run(self, pathfmt):
         if (pathfmt.keywords["extension"] != "zip" or
                 "frames" not in pathfmt.keywords):
             return
 
-        framelist = [
-            (frame["file"], frame["delay"] / 1000)
-            for frame in pathfmt.keywords["frames"]
-        ]
-        if self.extension != "gif":
-            # repeat the last frame to prevent it from only being
-            # displayed for a very short amount of time
-            framelist.append(framelist[-1])
+        framelist = pathfmt.keywords["frames"]
+        rate_in, rate_out = self.calculate_framerate(framelist)
 
         with tempfile.TemporaryDirectory() as tempdir:
             # extract frames
@@ -51,15 +50,27 @@ class UgoiraPP(PostProcessor):
             ffconcat = tempdir + "/ffconcat.txt"
             with open(ffconcat, "w") as file:
                 file.write("ffconcat version 1.0\n")
-                for name, duration in framelist:
-                    file.write("file '{}'\n".format(name))
-                    file.write("duration {}\n".format(duration))
+                for frame in framelist:
+                    file.write("file '{}'\n".format(frame["file"]))
+                    file.write("duration {}\n".format(frame["delay"] / 1000))
+                if self.extension != "gif":
+                    # repeat the last frame to prevent it from only being
+                    # displayed for a very short amount of time
+                    file.write("file '{}'\n".format(framelist[-1]["file"]))
+
+            # collect command-line arguments
+            args = [self.ffmpeg]
+            if rate_in:
+                args += ["-r", str(rate_in)]
+            args += ["-i", ffconcat]
+            if rate_out:
+                args += ["-r", str(rate_out)]
+            if self.args:
+                args += self.args
+            self.log.debug("ffmpeg args: %s", args)
 
             # invoke ffmpeg
             pathfmt.set_extension(self.extension)
-            args = [self.ffmpeg, "-i", ffconcat]
-            if self.args:
-                args += self.args
             if self.twopass:
                 if "-f" not in args:
                     args += ["-f", self.extension]
@@ -75,6 +86,12 @@ class UgoiraPP(PostProcessor):
             pathfmt.delete = True
         else:
             pathfmt.set_extension("zip")
+
+    @staticmethod
+    def calculate_framerate(framelist):
+        counter = collections.Counter(frame["delay"] for frame in framelist)
+        fps = "1000/{}".format(min(counter))
+        return (fps, None) if len(counter) == 1 else (None, fps)
 
 
 __postprocessor__ = UgoiraPP

@@ -910,6 +910,19 @@ Default     ``False``
 Description Enable Two-Pass encoding.
 =========== =====
 
+ugoira.framerate
+----------------
+=========== =====
+Type        ``string``
+Default     ``"auto"``
+Description Controls the frame rate argument (``-r``) for FFmpeg
+
+            - ``"auto"``: Automatically assign a fitting frame rate
+              based on delays between frames.
+            - any other ``string``:  Use this value as argument for ``-r``.
+            - ``null`` or an empty ``string``: Don't set an explicit frame rate.
+=========== =====
+
 ugoira.keep-files
 -----------------
 =========== =====
