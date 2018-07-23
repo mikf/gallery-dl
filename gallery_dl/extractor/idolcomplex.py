@@ -53,7 +53,7 @@ class IdolcomplexPostExtractor(IdolcomplexExtractor,
             "tags_character": "shani_(the_witcher)",
             "tags_copyright": "the_witcher",
             "tags_idol": "lyumos",
-            "tags_medium": "3:2_aspect_ratio cosplay",
+            "tags_medium": "3:2_aspect_ratio",
             "tags_general": str,
         },
     })]

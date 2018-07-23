@@ -542,9 +542,9 @@ class DeviantartAPI():
         endpoint = "user/profile/" + username
         return self._call(endpoint, expect_error=True)
 
-    def authenticate(self):
+    def authenticate(self, refresh_token):
         """Authenticate the application by requesting an access token"""
-        access_token = self._authenticate_impl(self.refresh_token)
+        access_token = self._authenticate_impl(refresh_token)
         self.headers["Authorization"] = access_token
 
     @cache(maxage=3590, keyarg=1)
@@ -570,14 +570,14 @@ class DeviantartAPI():
             _refresh_token_cache(refresh_token, data["refresh_token"])
         return "Bearer " + data["access_token"]
 
-    def _call(self, endpoint, params=None, expect_error=False):
+    def _call(self, endpoint, params=None, expect_error=False, public=True):
         """Call an API endpoint"""
         url = "https://www.deviantart.com/api/v1/oauth2/" + endpoint
         while True:
             if self.delay >= 0:
                 time.sleep(2 ** self.delay)
 
-            self.authenticate()
+            self.authenticate(None if public else self.refresh_token)
             response = self.session.get(
                 url, headers=self.headers, params=params)
             data = response.json()
@@ -604,7 +604,7 @@ class DeviantartAPI():
 
     def _pagination(self, endpoint, params=None):
         while True:
-            data = self._call(endpoint, params)
+            data = self._call(endpoint, params, public=False)
             if "results" in data:
                 yield from data["results"]
                 if not data["has_more"]:
