@@ -461,6 +461,7 @@ class DeviantartAPI():
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
 
+        self.try_public = extractor.config("try-public", False)
         self.refresh_token = extractor.config("refresh-token")
         self.client_id = extractor.config("client-id", self.CLIENT_ID)
         self.client_secret = extractor.config(
@@ -552,7 +553,7 @@ class DeviantartAPI():
         """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"
         if refresh_token:
-            self.log.info("Refreshing access token")
+            self.log.info("Refreshing private access token")
             data = {"grant_type": "refresh_token",
                     "refresh_token": _refresh_token_cache(refresh_token)}
         else:
@@ -603,16 +604,21 @@ class DeviantartAPI():
                 self.log.warning("%s. Using %ds delay.", msg, 2 ** self.delay)
 
     def _pagination(self, endpoint, params=None):
+        public = self.try_public
         while True:
-            data = self._call(endpoint, params, public=False)
-            if "results" in data:
-                yield from data["results"]
-                if not data["has_more"]:
-                    return
-                params["offset"] = data["next_offset"]
-            else:
+            data = self._call(endpoint, params, public=public)
+            if "results" not in data:
                 self.log.error("Unexpected API response: %s", data)
                 return
+            if (public and len(data["results"]) < params["limit"] and
+                    self.refresh_token and data["has_more"]):
+                self.log.info("Switching to private access token")
+                public = False
+                continue
+            yield from data["results"]
+            if not data["has_more"]:
+                return
+            params["offset"] = data["next_offset"]
 
     def _pagination_list(self, endpoint, params=None):
         result = []
