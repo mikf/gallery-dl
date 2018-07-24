@@ -346,6 +346,23 @@ Description The ``refresh_token`` value you get from linking your
 =========== =====
 
 
+extractor.deviantart.try-public
+-------------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Try accessing a user's deviations with a public access token first
+            and only switch to a private access token if deviations are
+            detected as missing (i.e. they are only visible to logged in users).
+
+            This option only has an effect when using a `refresh token`__
+            and tries to minimize the amount of API calls with private access
+            tokens, as they have a much lower rate limit than public ones.
+
+            __ extractor.deviantart.refresh-token_
+=========== =====
+
+
 extractor.deviantart.wait-min
 -----------------------------
 =========== =====
