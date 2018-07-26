@@ -18,7 +18,7 @@ from gallery_dl import extractor, job, config, exception
 TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive", "fireden",
-    "sankaku", "idolcomplex", "mangahere",
+    "sankaku", "idolcomplex", "mangahere", "turboimagehost",
 }
 
 # temporary issues, etc.
