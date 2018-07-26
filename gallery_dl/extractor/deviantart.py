@@ -461,7 +461,6 @@ class DeviantartAPI():
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
 
-        self.prefer_public = extractor.config("prefer-public", False)
         self.refresh_token = extractor.config("refresh-token")
         self.client_id = extractor.config("client-id", self.CLIENT_ID)
         self.client_secret = extractor.config(
@@ -604,7 +603,7 @@ class DeviantartAPI():
                 self.log.warning("%s. Using %ds delay.", msg, 2 ** self.delay)
 
     def _pagination(self, endpoint, params):
-        public = self.prefer_public
+        public = True
         while True:
             data = self._call(endpoint, params, public=public)
             if "results" not in data:
@@ -612,13 +611,12 @@ class DeviantartAPI():
                 return
             if (public and self.refresh_token and
                     len(data["results"]) < params["limit"]):
-                self.log.debug("Repeating API call with private access token")
+                self.log.debug("Switching to private access token")
                 public = False
                 continue
             yield from data["results"]
             if not data["has_more"]:
                 return
-            public = self.prefer_public
             params["offset"] = data["next_offset"]
 
     def _pagination_list(self, endpoint, params):

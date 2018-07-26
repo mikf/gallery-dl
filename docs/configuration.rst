@@ -333,23 +333,6 @@ Description Download full-sized original images if available.
 =========== =====
 
 
-extractor.deviantart.prefer-public
-----------------------------------
-=========== =====
-Type        ``bool``
-Default     ``false``
-Description Call API endpoints with a public access token first
-            and only switch to a private access token if deviations are missing
-            (i.e. they are only visible to logged in users).
-
-            This option only has an effect when using a `refresh token`__
-            and tries to minimize the amount of API calls with private access
-            tokens, as they have a much lower rate limit than public ones.
-
-            __ extractor.deviantart.refresh-token_
-=========== =====
-
-
 extractor.deviantart.refresh-token
 ----------------------------------
 =========== =====
