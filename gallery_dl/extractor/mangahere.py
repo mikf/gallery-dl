@@ -17,7 +17,7 @@ import re
 class MangahereBase():
     """Base class for mangahere extractors"""
     category = "mangahere"
-    root = "https://www.mangahere.cc"
+    root = "http://www.mangahere.cc"
     url_fmt = root + "/manga/{}/{}.html"
 
 
