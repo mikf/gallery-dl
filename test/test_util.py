@@ -210,6 +210,14 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a[:50]}", v[:50])
         self._run_test("{a[:]}"  , v)
 
+    def test_maxlen(self):
+        v = self.kwdict["a"]
+        self._run_test("{a:L5/foo/}" , "foo")
+        self._run_test("{a:L50/foo/}", v)
+        self._run_test("{a:L50/foo/>50}", " " * 39 + v)
+        self._run_test("{a:L50/foo/>51}", "foo")
+        self._run_test("{a:Lab/foo/}", "foo")
+
     def _run_test(self, format_string, result, default=None):
         formatter = util.Formatter(default)
         output = formatter.vformat(format_string, self.kwdict)

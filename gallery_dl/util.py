@@ -284,6 +284,12 @@ class Formatter():
         Otherwise the whole replacement field becomes an empty string.
         Example: {f:?-+/+-/} -> "-+Example+-" (if "f" contains "Example")
                              -> ""            (if "f" is None, 0, "")
+
+    - "L<maxlen>/<replacement>/":
+        Replaces the output with <replacement> if its length (in characters)
+        exceeds <maxlen>. Otherwise everything is left as is.
+        Example: {f:L5/too long/} -> "foo"      (if "f" is "foo")
+                                  -> "too long" (if "f" is "foobar")
     """
     conversions = {
         "l": str.lower,
@@ -331,6 +337,11 @@ class Formatter():
                 return ""
             before, after, format_spec = format_spec.split("/", 2)
             return before[1:] + format(value, format_spec) + after
+        if format_spec[0] == "L":
+            maxlen, replacement, format_spec = format_spec.split("/", 2)
+            maxlen = text.parse_int(maxlen[1:])
+            value = format(value, format_spec)
+            return value if len(value) <= maxlen else replacement
         return format(value, format_spec)
 
     def get_field(self, field_name, kwargs):
