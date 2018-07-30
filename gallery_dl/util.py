@@ -391,7 +391,7 @@ class PathFormat():
             if skip == "abort":
                 self._skipexc = exception.StopExtraction
             elif skip == "exit":
-                self._skipexc = exit
+                self._skipexc = sys.exit
             else:
                 self._skipexc = None
         else:
@@ -403,8 +403,8 @@ class PathFormat():
 
     def exists(self, archive=None):
         """Return True if the file exists on disk or in 'archive'"""
-        if (self.has_extension and os.path.exists(self.realpath) or
-                archive and archive.check(self.keywords)):
+        if (archive and archive.check(self.keywords) or
+                self.has_extension and os.path.exists(self.realpath)):
             if self._skipexc:
                 raise self._skipexc()
             if not self.has_extension:
