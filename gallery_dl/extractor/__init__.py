@@ -19,6 +19,7 @@ modules = [
     "archiveofsins",
     "artstation",
     "b4k",
+    "behance",
     "danbooru",
     "desuarchive",
     "deviantart",
