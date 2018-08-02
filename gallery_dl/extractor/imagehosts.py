@@ -216,9 +216,9 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
     category = "turboimagehost"
     pattern = [(r"(?:https?://)?((?:www\.)?turboimagehost\.com/p/(\d+)"
                 r"/[^/]+\.html)")]
-    test = [("https://www.turboimagehost.com/p/29690902/test--.png.html", {
-        "url": "ada27a4e04f9ffd5ab7cd787f4559d5b3744520b",
-        "keyword": "a4527f14675e4512ef317ee0401940c711fbe012",
+    test = [("https://www.turboimagehost.com/p/39078423/test--.png.html", {
+        "url": "b94de43612318771ced924cb5085976f13b3b90e",
+        "keyword": "c1391465dc7b590b0eb8ea2a8cd235733c6fce2b",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })]
     https = True

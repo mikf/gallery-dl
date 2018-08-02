@@ -24,8 +24,9 @@ class BehanceGalleryExtractor(Extractor):
     test = [
         ("https://www.behance.net/gallery/17386197", {
             "count": 2,
+            "url": "8c692c208b74fed789288eda9230715be8d02057",
             "keyword": {
-                "title": str,
+                "title": 're:"Hi". A short story about the important things ',
                 "user": "Place Studio, Julio César Velazquez",
                 "fields": ["Animation", "Character Design", "Directing"],
                 "date": 1401810111,
@@ -33,6 +34,11 @@ class BehanceGalleryExtractor(Extractor):
                 "votes": int,
                 "comments": int,
             },
+        }),
+        ("https://www.behance.net/gallery/13706563/Fundacja-ING-Dzieciom", {
+            "count": 7,
+            "url": "3b78be2a5652524529962cf2dc81b383129c1363",
+            "keyword": {"user": "UVMW Studio"},
         }),
     ]
 
