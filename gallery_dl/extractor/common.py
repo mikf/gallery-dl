@@ -37,6 +37,10 @@ class Extractor():
         self._set_headers()
         self._set_cookies()
         self._set_proxies()
+        self._retries = config.interpolate(
+            ("downloader", "http", "retries"), 5)
+        self._timeout = config.interpolate(
+            ("downloader", "http", "timeout"), 30)
 
     def __iter__(self):
         return self.items()
@@ -51,12 +55,14 @@ class Extractor():
         return config.interpolate(
             ("extractor", self.category, self.subcategory, key), default)
 
-    def request(self, url, method="GET", encoding=None, expect=(), retries=3,
-                *args, **kwargs):
-        max_tries = retries
+    def request(self, url, method="GET", *,
+                encoding=None, expect=(), retries=None, **kwargs):
+        tries = 0
+        retries = retries or self._retries
+        kwargs.setdefault("timeout", self._timeout)
         while True:
             try:
-                response = self.session.request(method, url, *args, **kwargs)
+                response = self.session.request(method, url, **kwargs)
             except (requests.ConnectionError, requests.Timeout) as exc:
                 msg = exc
             except requests.exceptions.RequestException as exc:
@@ -73,12 +79,11 @@ class Extractor():
                 if code < 500 and code != 429:
                     break
 
-            if not retries:
+            if tries >= retries:
                 break
-            tries = max_tries - retries
-            retries -= 1
-            self.log.debug("%s (%d/%d)", msg, tries, max_tries)
+            self.log.debug("%s (%d/%d)", msg, tries + 1, retries)
             time.sleep(2 ** tries)
+            tries += 1
 
         raise exception.HttpError(msg)
 
