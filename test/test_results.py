@@ -117,7 +117,7 @@ class TestExtractorResults(unittest.TestCase):
                 continue
             elif isinstance(test, type):
                 self.assertIsInstance(value, test)
-            elif isinstance(test, str) and value.startswith("re:"):
+            elif isinstance(test, str) and test.startswith("re:"):
                 self.assertRegex(value, test[3:])
             else:
                 self.assertEqual(value, test)
