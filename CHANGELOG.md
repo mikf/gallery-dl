@@ -1,7 +1,18 @@
 # Changelog
 
-## Unreleased
+## 1.5.0 - 2018-08-03
+- Added support for:
+  - `behance` - https://www.behance.net/
+  - `myportfolio` - https://www.myportfolio.com/ ([#95](https://github.com/mikf/gallery-dl/issues/95))
+- Added custom format string options to handle long strings ([#92](https://github.com/mikf/gallery-dl/issues/92), [#94](https://github.com/mikf/gallery-dl/issues/94))
+  - Slicing: `"{field[10:40]}"`
+  - Replacement: `"{field:L40/too long/}"`
+- Improved frame rate handling for ugoira conversions
+- Improved private access token usage on `deviantart`
+- Fixed metadata extraction for some images on `nijie`
 - Fixed chapter extraction on `mangahere`
+- Removed `whatisthisimnotgoodwithcomputers`
+- Removed support for Python 3.3
 
 ## 1.4.2 - 2018-07-06
 - Added image-pool extractors for `safebooru` and `rule34`
