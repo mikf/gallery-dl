@@ -33,8 +33,8 @@ class SankakuExtractor(SharedConfigExtractor):
         self.start_page = 1
         self.start_post = 0
         self.extags = self.config("tags", False)
-        self.wait_min = self.config("wait-min", 2.5)
-        self.wait_max = self.config("wait-max", 5.0)
+        self.wait_min = self.config("wait-min", 3.0)
+        self.wait_max = self.config("wait-max", 6.0)
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
 
