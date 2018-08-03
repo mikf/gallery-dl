@@ -590,7 +590,7 @@ extractor.sankaku.wait-min & .wait-max
 --------------------------------------
 =========== =====
 Type        ``float``
-Default     ``2.5`` and ``5.0``
+Default     ``3.0`` and ``6.0``
 Description Minimum and maximum wait time in seconds between each image
 
             Sankaku Channel responds with ``429 Too Many Requests`` if it
