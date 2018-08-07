@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.5.0 - 2018-08-03
 - Added support for:
   - `behance` - https://www.behance.net/
