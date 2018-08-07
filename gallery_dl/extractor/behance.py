@@ -82,7 +82,7 @@ class BehanceGalleryExtractor(Extractor):
             "gallery_id": text.parse_int(self.gallery_id),
             "title": text.unescape(title),
             "user": ", ".join(users),
-            "fields": text.split_html(fields),
+            "fields": [f for f in text.split_html(fields) if f != ", "],
             "date": text.parse_int(date),
             "views": text.parse_int(stats[0]),
             "votes": text.parse_int(stats[1]),
