@@ -67,7 +67,7 @@ class BehanceGalleryExtractor(Extractor):
         users, pos = text.extract(
             page, 'class="project-owner-info ', 'class="project-owner-actions')
         title, pos = text.extract(
-            page, '<div class="project-title">', '</div>', pos)
+            page, 'project-title">', '</div>', pos)
         fields, pos = text.extract(
             page, '<ul id="project-fields-list">', '</ul>', pos)
         stats, pos = text.extract(
@@ -80,7 +80,7 @@ class BehanceGalleryExtractor(Extractor):
 
         return {
             "gallery_id": text.parse_int(self.gallery_id),
-            "title": text.unescape(title),
+            "title": text.unescape(title or ""),
             "user": ", ".join(users),
             "fields": [f for f in text.split_html(fields) if f != ", "],
             "date": text.parse_int(date),

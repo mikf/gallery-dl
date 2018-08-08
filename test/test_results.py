@@ -24,6 +24,7 @@ TRAVIS_SKIP = {
 # temporary issues, etc.
 BROKEN = {
     "imagefap",
+    "mangadex",
     "subapics",
 }
 
