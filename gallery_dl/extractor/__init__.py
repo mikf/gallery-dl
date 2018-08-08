@@ -63,6 +63,7 @@ modules = [
     "nyafuu",
     "paheal",
     "pawoo",
+    "piczel",
     "pinterest",
     "pixiv",
     "powermanga",
