@@ -56,6 +56,7 @@ Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, indi
 nijie                https://nijie.info/                 |Images from Use-3|                                Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net                   Images from Users, Images from Statuses
+Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links
 Pixiv                https://www.pixiv.net/              |Images from Use-4|                                Required
 PowerManga           https://powermanga.org/             Chapters, Manga
