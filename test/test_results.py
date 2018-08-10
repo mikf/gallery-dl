@@ -36,6 +36,7 @@ class TestExtractorResults(unittest.TestCase):
         email = "gallerydl@openaliasbox.org"
         config.set(("cache", "file"), ":memory:")
         config.set(("downloader", "part"), False)
+        config.set(("downloader", "timeout"), 60)
         config.set(("extractor", "username"), name)
         config.set(("extractor", "password"), name)
         config.set(("extractor", "nijie", "username"), email)
