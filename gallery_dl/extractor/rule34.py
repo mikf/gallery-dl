@@ -57,6 +57,6 @@ class Rule34PostExtractor(booru.PostMixin, Rule34Extractor):
             "tags_artist": "danraku",
             "tags_character": "io_(pso2)",
             "tags_copyright": "phantasy_star phantasy_star_online_2",
-            "tags_general": "absurdres blue_hair female highres",
+            "tags_general": str,
         },
     })]

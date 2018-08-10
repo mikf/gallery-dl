@@ -3,7 +3,7 @@
 ## Unreleased
 - Added support for:
   - `piczel` - https://piczel.tv/
-- Fixed metadata extraction for `behance`
+- Fixed extraction issues for `mangadex` and `behance`
 
 ## 1.5.0 - 2018-08-03
 - Added support for:
