@@ -23,8 +23,8 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "imagefap",
-    "mangadex",
+    "imagefap",  # gallery flagged and unavailable
+    "rbt",       # cert expired
     "subapics",
 }
 
