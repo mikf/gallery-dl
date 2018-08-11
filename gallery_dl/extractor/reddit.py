@@ -216,7 +216,7 @@ class RedditAPI():
         """Actual authenticate implementation"""
         url = "https://www.reddit.com/api/v1/access_token"
         if refresh_token:
-            self.log.info("Refreshing access token")
+            self.log.info("Refreshing private access token")
             data = {"grant_type": "refresh_token",
                     "refresh_token": refresh_token}
         else:
@@ -226,7 +226,8 @@ class RedditAPI():
                     "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
         response = self.session.post(url, data=data, auth=(self.client_id, ""))
         if response.status_code != 200:
-            raise exception.AuthenticationError()
+            raise exception.AuthenticationError('"{} ({})"'.format(
+                response.json().get("message"), response.status_code))
         return "Bearer " + response.json()["access_token"]
 
     def _call(self, endpoint, params):

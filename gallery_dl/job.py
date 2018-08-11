@@ -63,9 +63,9 @@ class Job():
             log = self.extractor.log
             for msg in self.extractor:
                 self.dispatch(msg)
-        except exception.AuthenticationError:
-            log.error("Authentication failed. Please provide a valid "
-                      "username/password pair.")
+        except exception.AuthenticationError as exc:
+            msg = str(exc) or "Please provide a valid username/password pair."
+            log.error("Authentication failed: %s", msg)
         except exception.AuthorizationError:
             log.error("You do not have permission to access the resource "
                       "at '%s'", self.url)

@@ -561,10 +561,11 @@ class DeviantartAPI():
 
         auth = (self.client_id, self.client_secret)
         response = self.session.post(url, data=data, auth=auth)
-        if response.status_code != 200:
-            raise exception.AuthenticationError()
-
         data = response.json()
+
+        if response.status_code != 200:
+            raise exception.AuthenticationError('"{} ({})"'.format(
+                data.get("error_description"), data.get("error")))
         if refresh_token:
             _refresh_token_cache.invalidate(refresh_token)
             _refresh_token_cache(refresh_token, data["refresh_token"])
