@@ -30,7 +30,7 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
-            "keyword": "2aeb3b5e439c2fbc27c65d0dc17edb9a0f679add",
+            "keyword": "cb67fe7be9d02ef0df2204a621651e8a900887cf",
         }),
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", None),
         ("https://www.luscious.net/albums/okinami_277031/", None),
