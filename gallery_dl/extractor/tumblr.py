@@ -15,24 +15,6 @@ import re
 import time
 
 
-def _original_image(url):
-    match = re.match(
-        r"https?://\d+\.media\.tumblr\.com"
-        r"((/[0-9a-f]+)?/tumblr_[^/?&#.]+_)\d+(\.[0-9a-z]+)",
-        url)
-
-    if not match:
-        return (url,)
-    root = "https://s3.amazonaws.com/data.tumblr.com"
-    path, key, ext = match.groups()
-
-    return (
-        "".join((root, path, "raw" if key else "1280", ext)),
-        "".join((root, path, "500", ext)),
-        url,
-    )
-
-
 def _original_video(url):
     return re.sub(
         (r"https?://vt\.media\.tumblr\.com"
@@ -161,7 +143,7 @@ class TumblrExtractor(Extractor):
         parts = post["name"].split("_")
         post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
 
-        return Message.Urllist, _original_image(url), post
+        return Message.Url, url, post
 
 
 class TumblrUserExtractor(TumblrExtractor):
@@ -170,13 +152,13 @@ class TumblrUserExtractor(TumblrExtractor):
     pattern = [BASE_PATTERN + r"(?:/page/\d+)?/?$"]
     test = [
         ("http://demo.tumblr.com/", {
-            "pattern": (r"https://s3\.amazonaws\.com/data\.tumblr\.com"
+            "pattern": (r"https://\d+\.media\.tumblr\.com"
                         r"/tumblr_[^/_]+_\d+\.jpg"),
             "count": 1,
         }),
         ("http://demo.tumblr.com/", {
             "pattern": (r"https?://(?:$|"
-                        r"s3\.amazonaws\.com/data\.tumblr\.com/.+_1280\.jpg|"
+                        r"\d+\.media\.tumblr\.com/.+_1280\.jpg|"
                         r"w+\.tumblr\.com/audio_file/demo/\d+/tumblr_\w+)"),
             "count": 3,
             "options": (("posts", "all"), ("external", True),
@@ -196,7 +178,7 @@ class TumblrPostExtractor(TumblrExtractor):
     pattern = [BASE_PATTERN + r"/(?:post|image)/(\d+)"]
     test = [
         ("http://demo.tumblr.com/post/459265350", {
-            "pattern": (r"https://s3\.amazonaws\.com/data\.tumblr\.com"
+            "pattern": (r"https://\d+\.media\.tumblr\.com"
                         r"/tumblr_[^/_]+_1280.jpg"),
             "count": 1,
         }),
@@ -221,8 +203,7 @@ class TumblrTagExtractor(TumblrExtractor):
     subcategory = "tag"
     pattern = [BASE_PATTERN + r"/tagged/([^/?&#]+)"]
     test = [("http://demo.tumblr.com/tagged/Times%20Square", {
-        "pattern": (r"https://s3\.amazonaws\.com/data\.tumblr\.com"
-                    r"/tumblr_[^/_]+_1280.jpg"),
+        "pattern": (r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg"),
         "count": 1,
     })]
 
