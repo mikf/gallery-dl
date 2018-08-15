@@ -13,6 +13,9 @@ from .. import text, exception
 import json
 
 
+BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.\w+"
+
+
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
     category = "pinterest"
@@ -22,6 +25,16 @@ class PinterestExtractor(Extractor):
     def __init__(self):
         Extractor.__init__(self)
         self.api = PinterestAPI(self)
+
+    def items(self):
+        data = self.metadata()
+        yield Message.Version, 1
+        yield Message.Directory, data
+
+        for pin in self.pins():
+            url, pin_data = self.data_from_pin(pin)
+            pin_data.update(data)
+            yield Message.Url, url, pin_data
 
     def data_from_pin(self, pin):
         """Get image url and metadata from a pin-object"""
@@ -35,7 +48,7 @@ class PinterestExtractor(Extractor):
 class PinterestPinExtractor(PinterestExtractor):
     """Extractor for images from a single pin from pinterest.com"""
     subcategory = "pin"
-    pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.[^/]+/pin/([^/?#&]+)"]
+    pattern = [BASE_PATTERN + r"/pin/([^/?#&]+)/?$"]
     test = [
         ("https://www.pinterest.com/pin/858146903966145189/", {
             "url": "afb3c26719e3a530bb0e871c480882a801a4e8a5",
@@ -51,13 +64,14 @@ class PinterestPinExtractor(PinterestExtractor):
     def __init__(self, match):
         PinterestExtractor.__init__(self)
         self.pin_id = match.group(1)
+        self.pin = None
 
-    def items(self):
-        pin = self.api.pin(self.pin_id)
-        url, data = self.data_from_pin(pin)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        yield Message.Url, url, data
+    def metadata(self):
+        self.pin = self.api.pin(self.pin_id)
+        return self.data_from_pin(self.pin)[1]
+
+    def pins(self):
+        return (self.pin,)
 
 
 class PinterestBoardExtractor(PinterestExtractor):
@@ -65,8 +79,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     subcategory = "board"
     directory_fmt = ["{category}", "{board[owner][username]}", "{board[name]}"]
     archive_fmt = "{board[id]}_{id}"
-    pattern = [r"(?:https?://)?(?:[^./]+\.)?pinterest\.[^/]+/"
-               r"(?!pin/)([^/?#&]+)/([^/?#&]+)"]
+    pattern = [BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/?$"]
     test = [
         ("https://www.pinterest.com/g1952849/test-/", {
             "url": "85911dfca313f3f7f48c2aa0bc684f539d1d80a6",
@@ -80,16 +93,52 @@ class PinterestBoardExtractor(PinterestExtractor):
         PinterestExtractor.__init__(self)
         self.user = text.unquote(match.group(1))
         self.board = text.unquote(match.group(2))
+        self.board_id = 0
 
-    def items(self):
+    def metadata(self):
         board = self.api.board(self.user, self.board)
-        data = {"board": board, "count": board["pin_count"]}
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for pin in self.api.board_pins(board["id"]):
-            url, pin_data = self.data_from_pin(pin)
-            pin_data.update(data)
-            yield Message.Url, url, pin_data
+        self.board_id = board["id"]
+        return {"board": board}
+
+    def pins(self):
+        return self.api.board_pins(self.board_id)
+
+
+class PinterestRelatedPinExtractor(PinterestPinExtractor):
+    """Extractor for related pins of another pin from pinterest.com"""
+    subcategory = "related-pin"
+    directory_fmt = ["{category}", "related {original_pin[id]}"]
+    pattern = [BASE_PATTERN + r"/pin/([^/?#&]+)/?#related$"]
+    test = [
+        ("https://www.pinterest.com/pin/858146903966145189/#related", {
+            "range": (1, 50),
+            "count": 50,
+        }),
+    ]
+
+    def metadata(self):
+        pin = self.api.pin(self.pin_id)
+        return {"original_pin": self.data_from_pin(pin)[1]}
+
+    def pins(self):
+        return self.api.pin_related(self.pin_id)
+
+
+class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
+    """Extractor for related pins of a board from pinterest.com"""
+    subcategory = "related-board"
+    directory_fmt = ["{category}", "{board[owner][username]}",
+                     "{board[name]}", "related"]
+    pattern = [BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/?#related$"]
+    test = [
+        ("https://www.pinterest.com/g1952849/test-/#related", {
+            "range": (1, 50),
+            "count": 50,
+        }),
+    ]
+
+    def pins(self):
+        return self.api.board_related(self.board_id)
 
 
 class PinterestPinitExtractor(PinterestExtractor):
@@ -145,6 +194,11 @@ class PinterestAPI():
         options = {"id": pin_id, "field_set_key": "detailed"}
         return self._call("Pin", options)["resource_response"]["data"]
 
+    def pin_related(self, pin_id):
+        """Yield related pins of another pin"""
+        options = {"pin": pin_id, "add_vase": True, "pins_only": True}
+        return self._pagination("RelatedPinFeed", options)
+
     def board(self, user, board):
         """Query information about a board"""
         options = {"slug": board, "username": user,
@@ -155,6 +209,11 @@ class PinterestAPI():
         """Yield all pins of a specific board"""
         options = {"board_id": board_id}
         return self._pagination("BoardFeed", options)
+
+    def board_related(self, board_id):
+        """Yield related pins of a specific board"""
+        options = {"board_id": board_id, "add_vase": True}
+        return self._pagination("BoardRelatedPixieFeed", options)
 
     def _call(self, resource, options):
         url = "{}/resource/{}Resource/get/".format(self.BASE_URL, resource)
@@ -172,7 +231,8 @@ class PinterestAPI():
             return data
 
         if response.status_code == 404 or response.history:
-            raise exception.NotFoundError(self.extractor.subcategory)
+            resource = self.extractor.subcategory.rpartition("-")[2]
+            raise exception.NotFoundError(resource)
         self.extractor.log.error("API request failed")
         self.extractor.log.debug("%s", response.text)
         raise exception.StopExtraction()
