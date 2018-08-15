@@ -14,7 +14,7 @@ import unittest
 from gallery_dl import extractor, job, config, exception
 
 
-# these don't work on travis-ci
+# these don't work on Travis CI
 TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive", "fireden",
@@ -23,8 +23,9 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "imagefap",  # gallery flagged and unavailable
-    "rbt",       # cert expired
+    "desuarchive",  # down
+    "imagefap",     # gallery flagged and unavailable
+    "rbt",          # down
     "subapics",
 }
 
@@ -55,6 +56,8 @@ class TestExtractorResults(unittest.TestCase):
             if "options" in result:
                 for key, value in result["options"]:
                     config.set(key.split("."), value)
+            if "range" in result:
+                config.set(("_", "image", "range"), (result["range"],))
             content = "content" in result
         else:
             content = False
@@ -67,9 +70,10 @@ class TestExtractorResults(unittest.TestCase):
         if "exception" in result:
             self.assertRaises(result["exception"], tjob.run)
             return
-
         try:
             tjob.run()
+        except exception.StopExtraction:
+            pass
         except exception.HttpError as exc:
             if re.match(r"5\d\d HTTP Error:", str(exc)):
                 self.skipTest(exc)
