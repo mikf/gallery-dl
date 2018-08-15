@@ -82,8 +82,9 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
                 r"<img[^>]*? src=[\"']([^\"']+)[\"']"
                 r"(?:\s+data-original-width=[\"']([^\"']+)[\"'])?"
                 r"(?:\s+data-original-height=[\"']([^\"']+)[\"'])?",
-                readerarea[readerarea.rfind("</script>") + 1:]
+                readerarea
             )
+            if "/Banner-" not in url
         ]
 
 
