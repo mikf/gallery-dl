@@ -76,6 +76,8 @@ SUBCATEGORY_MAP = {
     "tag"    : "Tag-Searches",
     "user"   : "Images from Users",
     "work"   : "Individual Images",
+    "related-pin"  : "related Pins",
+    "related-board": "",
 }
 
 AUTH_MAP = {
@@ -238,7 +240,7 @@ columns = [
         for extrlist in extractors
     ], 35),
     RstColumn("Capabilities", [
-        ", ".join(extr.subcat for extr in extrlist)
+        ", ".join(extr.subcat for extr in extrlist if extr.subcat)
         for extrlist in extractors
     ], 50),
     RstColumn("Authentication", [

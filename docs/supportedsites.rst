@@ -57,7 +57,7 @@ nijie                https://nijie.info/                 |Images from Use-3|    
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net                   Images from Users, Images from Statuses
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
-Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links
+Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links, related Pins
 Pixiv                https://www.pixiv.net/              |Images from Use-4|                                Required
 PowerManga           https://powermanga.org/             Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
