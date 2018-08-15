@@ -9,6 +9,7 @@
 
 import sys
 import unittest
+import string
 
 import gallery_dl.extractor as extractor
 from gallery_dl.extractor.common import Extractor, Message
@@ -118,7 +119,6 @@ class TestExtractor(unittest.TestCase):
 
                 match = pattern.match(url)
                 if match:
-                    self.assertEqual(extr1, extr2)
                     matches.append(match)
 
             # fail if more or less than 1 match happened
@@ -146,6 +146,11 @@ class TestExtractor(unittest.TestCase):
 
     def test_names(self):
         """Ensure extractor classes are named CategorySubcategoryExtractor"""
+        def capitalize(c):
+            if "-" in c:
+                return string.capwords(c.replace("-", " ")).replace(" ", "")
+            return c.capitalize()
+
         mapping = {
             "2chan"  : "futaba",
             "3dbooru": "threedeebooru",
@@ -155,15 +160,14 @@ class TestExtractor(unittest.TestCase):
             "b4k"    : "bfourk",
             "oauth"  : None,
             "rbt"    : "rebeccablacktech",
-            "whatisthisimnotgoodwithcomputers": "witingwc",
         }
 
         for extr in extractor.extractors():
             category = mapping.get(extr.category, extr.category)
             if category:
                 expected = "{}{}Extractor".format(
-                    category.capitalize(),
-                    extr.subcategory.capitalize(),
+                    capitalize(category),
+                    capitalize(extr.subcategory),
                 )
                 self.assertEqual(expected, extr.__name__)
 
