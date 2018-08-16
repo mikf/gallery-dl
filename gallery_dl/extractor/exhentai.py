@@ -58,6 +58,7 @@ class ExhentaiExtractor(Extractor):
             self.log.info("no username given; using e-hentai.org")
             self.root = "https://e-hentai.org"
             self.original = False
+            self.session.cookies["nw"] = "1"
             return
         cookies = self._login_impl(username, password)
         for key, value in cookies.items():
