@@ -36,7 +36,14 @@ class PinterestExtractor(Extractor):
             pin_data.update(data)
             yield Message.Url, url, pin_data
 
-    def data_from_pin(self, pin):
+    def metadata(self):
+        """Return general metadata"""
+
+    def pins(self):
+        """Return all relevant pin-objects"""
+
+    @staticmethod
+    def data_from_pin(pin):
         """Get image url and metadata from a pin-object"""
         img = pin["images"]["orig"]
         url = img["url"]
@@ -48,7 +55,7 @@ class PinterestExtractor(Extractor):
 class PinterestPinExtractor(PinterestExtractor):
     """Extractor for images from a single pin from pinterest.com"""
     subcategory = "pin"
-    pattern = [BASE_PATTERN + r"/pin/([^/?#&]+)/?$"]
+    pattern = [BASE_PATTERN + r"/pin/([^/?#&]+)(?!.*#related$)"]
     test = [
         ("https://www.pinterest.com/pin/858146903966145189/", {
             "url": "afb3c26719e3a530bb0e871c480882a801a4e8a5",
@@ -79,7 +86,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     subcategory = "board"
     directory_fmt = ["{category}", "{board[owner][username]}", "{board[name]}"]
     archive_fmt = "{board[id]}_{id}"
-    pattern = [BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/?$"]
+    pattern = [BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)(?!.*#related$)"]
     test = [
         ("https://www.pinterest.com/g1952849/test-/", {
             "url": "85911dfca313f3f7f48c2aa0bc684f539d1d80a6",
@@ -108,7 +115,7 @@ class PinterestRelatedPinExtractor(PinterestPinExtractor):
     """Extractor for related pins of another pin from pinterest.com"""
     subcategory = "related-pin"
     directory_fmt = ["{category}", "related {original_pin[id]}"]
-    pattern = [BASE_PATTERN + r"/pin/([^/?#&]+)/?#related$"]
+    pattern = [BASE_PATTERN + r"/pin/([^/?#&]+).*#related$"]
     test = [
         ("https://www.pinterest.com/pin/858146903966145189/#related", {
             "range": (1, 50),
@@ -129,7 +136,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     subcategory = "related-board"
     directory_fmt = ["{category}", "{board[owner][username]}",
                      "{board[name]}", "related"]
-    pattern = [BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/?#related$"]
+    pattern = [BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+).*#related$"]
     test = [
         ("https://www.pinterest.com/g1952849/test-/#related", {
             "range": (1, 50),
@@ -244,7 +251,8 @@ class PinterestAPI():
 
             try:
                 bookmarks = data["resource"]["options"]["bookmarks"]
-                if not bookmarks or bookmarks[0] == "-end-":
+                if (not bookmarks or bookmarks[0] == "-end-" or
+                        bookmarks[0].startswith("Y2JOb25lO")):
                     return
                 options["bookmarks"] = bookmarks
             except KeyError:
