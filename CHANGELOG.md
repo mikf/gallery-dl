@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.5.1 - 2018-08-17
 - Added support for:
   - `piczel` - https://piczel.tv/

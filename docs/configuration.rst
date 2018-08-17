@@ -642,6 +642,15 @@ Description A (comma-separated) list of post types to extract images, etc. from.
 =========== =====
 
 
+extractor.twitter.retweets
+--------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Extract images from retweets.
+=========== =====
+
+
 extractor.[booru].tags
 ----------------------
 =========== =====

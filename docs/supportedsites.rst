@@ -76,7 +76,7 @@ SmugMug              https://www.smugmug.com/            |Albums, individ-5|    
 Subapics             https://subapics.com/               Chapters, Manga
 The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
-Twitter              https://twitter.com/                Tweets
+Twitter              https://twitter.com/                Images from Users, Tweets
 Warosu               https://warosu.org/                 Threads
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 XVideos              https://www.xvideos.com/            Images from Users, Galleries

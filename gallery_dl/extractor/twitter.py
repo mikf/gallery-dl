@@ -12,52 +12,121 @@ from .common import Extractor, Message
 from .. import text
 
 
-class TwitterTweetExtractor(Extractor):
-    """Extractor for images from tweets on twitter.com"""
+class TwitterExtractor(Extractor):
+    """Base class for twitter extractors"""
     category = "twitter"
-    subcategory = "tweet"
     directory_fmt = ["{category}", "{user}"]
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{num}"
-    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/"
-               r"(([^/]+)/status/(\d+))"]
+    root = "https://twitter.com"
+
+    def __init__(self):
+        Extractor.__init__(self)
+        self.user = None
+        self.retweets = self.config("retweets", True)
+
+    def items(self):
+        yield Message.Version, 1
+        yield Message.Directory, self.metadata()
+
+        for tweet in self.tweets():
+            data = self._data_from_tweet(tweet)
+            if not self.retweets and data["retweet_id"]:
+                continue
+
+            images = text.extract_iter(
+                tweet, 'data-image-url="', '"')
+            for data["num"], url in enumerate(images, 1):
+                text.nameext_from_url(url, data)
+                yield Message.Url, url + ":orig", data
+
+    def metadata(self):
+        """Return general metadata"""
+
+    def tweets(self):
+        """Yield HTML content of all relevant tweets"""
+
+    @staticmethod
+    def _data_from_tweet(tweet):
+        data = text.extract_all(tweet, (
+            ("tweet_id"  , 'data-tweet-id="'   , '"'),
+            ("retweet_id", 'data-retweet-id="' , '"'),
+            ("retweeter" , 'data-retweeter="'  , '"'),
+            ("user"      , 'data-screen-name="', '"'),
+            ("username"  , 'data-name="'       , '"'),
+            ("userid"    , 'data-user-id="'    , '"'),
+        ))[0]
+        for key in ("tweet_id", "retweet_id", "userid"):
+            data[key] = text.parse_int(data[key])
+        data["retweeter"] = data["retweeter"] or ""
+        return data
+
+
+class TwitterUserExtractor(TwitterExtractor):
+    """Extractor for all tweeted images of a user"""
+    subcategory = "user"
+    archive_fmt = "{tweet_id}_{num}"
+    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
+               r"/([^/?&#]+)/?$"]
+    test = [("https://twitter.com/PicturesEarth", {
+        "range": (1, 40),
+        "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
+        "keyword": "611066e488c233e0b1bd2ab45d5f7fca1335f691",
+    })]
+
+    def __init__(self, match):
+        TwitterExtractor.__init__(self)
+        self.user = match.group(1)
+
+    def metadata(self):
+        return {"user": self.user}
+
+    def tweets(self):
+        url = "{}/i/profiles/show/{}/timeline/tweets".format(
+            self.root, self.user)
+        params = {}
+        tweet = None
+
+        while True:
+            data = self.request(url, params=params).json()
+            html = data["items_html"]
+
+            for tweet in text.extract_iter(
+                    html, '<div class="tweet ', '\n</li>'):
+                yield tweet
+
+            if not tweet or not data["has_more_items"]:
+                return
+            params["max_position"] = text.extract(
+                tweet, 'data-tweet-id="', '"')[0]
+
+
+class TwitterTweetExtractor(TwitterExtractor):
+    """Extractor for images from tweets on twitter.com"""
+    subcategory = "tweet"
+    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
+               r"/([^/?&#]+)/status/(\d+)"]
     test = [
         ("https://twitter.com/PicturesEarth/status/672897688871018500", {
             "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
-            "keyword": "7a6eac2bc88bbf16d0671ebb38e31f708d940ee8",
+            "keyword": "6ea5cdc97e4e8b2b133f7dfb2048b85a608ef041",
             "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
         }),
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "334cd0c1f85c3e66923b44740f17407ce444931e",
+            "keyword": "9d0960bc4e1b7407319f8826a43bccf2df60abcf",
         }),
     ]
 
     def __init__(self, match):
-        Extractor.__init__(self)
-        self.path, self.user, self.tid = match.groups()
+        TwitterExtractor.__init__(self)
+        self.user, self.tweet_id = match.groups()
 
-    def items(self):
-        page = self.request("https://twitter.com/" + self.path).text
-        data = self.get_job_metadata()
-        imgs = self.get_image_urls(page)
-        data["count"] = len(imgs)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["num"], url in enumerate(imgs, 1):
-            yield Message.Url, url + ":orig", text.nameext_from_url(url, data)
+    def metadata(self):
+        return {"user": self.user, "tweet_id": self.tweet_id}
 
-    def get_job_metadata(self):
-        """Collect metadata for extractor-job"""
-        return {
-            "user": self.user,
-            "tweet_id": self.tid,
-        }
-
-    @staticmethod
-    def get_image_urls(page):
-        """Extract and return a list of all image-urls"""
-        tweet = text.extract(
-            page, '<div class="follow-bar">', '<ul class="stats" ')[0]
-        return list(text.extract_iter(
-            tweet, '<img data-aria-label-part src="', '"'))
+    def tweets(self):
+        url = "{}/{}/status/{}".format(self.root, self.user, self.tweet_id)
+        page = self.request(url).text
+        return (text.extract(
+            page, '<div class="tweet ', '<ul class="stats')[0],)
