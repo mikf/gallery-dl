@@ -1,9 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.5.1 - 2018-08-17
 - Added support for:
   - `piczel` - https://piczel.tv/
-- Fixed extraction issues for `mangadex` and `behance`
+- Added support for related pins on `pinterest`
+- Fixed accessing "offensive" galleries on `exhentai` ([#97](https://github.com/mikf/gallery-dl/issues/97))
+- Fixed extraction issues for `mangadex`, `komikcast` and `behance`
+- Removed original-image functionality from `tumblr`, since "raw" images are no longer accessible
 
 ## 1.5.0 - 2018-08-03
 - Added support for:
