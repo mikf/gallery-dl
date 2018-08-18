@@ -17,25 +17,28 @@ class TwitterExtractor(Extractor):
     category = "twitter"
     directory_fmt = ["{category}", "{user}"]
     filename_fmt = "{tweet_id}_{num}.{extension}"
-    archive_fmt = "{tweet_id}_{num}"
+    archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     root = "https://twitter.com"
 
     def __init__(self):
         Extractor.__init__(self)
         self.user = None
-        self.retweets = self.config("retweets", True)
+        self.retweets = True
 
     def items(self):
         yield Message.Version, 1
         yield Message.Directory, self.metadata()
 
         for tweet in self.tweets():
+            images = list(text.extract_iter(
+                tweet, 'data-image-url="', '"'))
+            if not images:
+                continue
+
             data = self._data_from_tweet(tweet)
             if not self.retweets and data["retweet_id"]:
                 continue
 
-            images = text.extract_iter(
-                tweet, 'data-image-url="', '"')
             for data["num"], url in enumerate(images, 1):
                 text.nameext_from_url(url, data)
                 yield Message.Url, url + ":orig", data
@@ -54,29 +57,29 @@ class TwitterExtractor(Extractor):
             ("retweeter" , 'data-retweeter="'  , '"'),
             ("user"      , 'data-screen-name="', '"'),
             ("username"  , 'data-name="'       , '"'),
-            ("userid"    , 'data-user-id="'    , '"'),
+            ("user_id"   , 'data-user-id="'    , '"'),
         ))[0]
-        for key in ("tweet_id", "retweet_id", "userid"):
+        for key in ("tweet_id", "retweet_id", "user_id"):
             data[key] = text.parse_int(data[key])
         data["retweeter"] = data["retweeter"] or ""
         return data
 
 
-class TwitterUserExtractor(TwitterExtractor):
-    """Extractor for all tweeted images of a user"""
-    subcategory = "user"
-    archive_fmt = "{tweet_id}_{num}"
+class TwitterTimelineExtractor(TwitterExtractor):
+    """Extractor for all tweeted images from a user's timeline"""
+    subcategory = "timeline"
     pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
                r"/([^/?&#]+)/?$"]
     test = [("https://twitter.com/PicturesEarth", {
         "range": (1, 40),
         "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
-        "keyword": "611066e488c233e0b1bd2ab45d5f7fca1335f691",
+        "keyword": "cbae53b6f4ba133078bb13c95dbd3cbb4fa40b9f",
     })]
 
     def __init__(self, match):
         TwitterExtractor.__init__(self)
         self.user = match.group(1)
+        self.retweets = self.config("retweets", True)
 
     def metadata(self):
         return {"user": self.user}
@@ -84,37 +87,45 @@ class TwitterUserExtractor(TwitterExtractor):
     def tweets(self):
         url = "{}/i/profiles/show/{}/timeline/tweets".format(
             self.root, self.user)
-        params = {}
-        tweet = None
+        params = {
+            "include_available_features": "1",
+            "include_entities": "1",
+            "reset_error_state": "false",
+            "lang": "en",
+        }
+        headers = {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-Twitter-Active-User": "yes",
+            "Referer": "{}/{}".format(self.root, self.user)
+        }
 
         while True:
-            data = self.request(url, params=params).json()
-            html = data["items_html"]
+            data = self.request(url, params=params, headers=headers).json()
 
             for tweet in text.extract_iter(
-                    html, '<div class="tweet ', '\n</li>'):
+                    data["items_html"], '<div class="tweet ', '\n</li>'):
                 yield tweet
 
-            if not tweet or not data["has_more_items"]:
+            if not data["has_more_items"]:
                 return
             params["max_position"] = text.extract(
                 tweet, 'data-tweet-id="', '"')[0]
 
 
 class TwitterTweetExtractor(TwitterExtractor):
-    """Extractor for images from tweets on twitter.com"""
+    """Extractor for images from individual tweets"""
     subcategory = "tweet"
     pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
                r"/([^/?&#]+)/status/(\d+)"]
     test = [
         ("https://twitter.com/PicturesEarth/status/672897688871018500", {
             "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
-            "keyword": "6ea5cdc97e4e8b2b133f7dfb2048b85a608ef041",
+            "keyword": "46c8e739a892000848a8a2184da91346c9cbe4bf",
             "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
         }),
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "9d0960bc4e1b7407319f8826a43bccf2df60abcf",
+            "keyword": "7729cd3ff16a5647b0b5ffdec9d428c91eedafbe",
         }),
     ]
 
