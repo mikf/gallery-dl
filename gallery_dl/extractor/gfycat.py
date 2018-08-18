@@ -15,39 +15,54 @@ from .. import exception
 class GfycatExtractor(Extractor):
     """Base class for gfycat extractors"""
     category = "gfycat"
+    filename_fmt = "{category}_{gfyName}.{extension}"
     archive_fmt = "{gfyName}"
+    root = "https://gfycat.com"
 
-    def __init__(self, match):
+    def __init__(self):
         Extractor.__init__(self)
-        self.item_id = match.group(1)
         self.formats = (self.config("format", "mp4"), "mp4", "webm", "gif")
 
-    def _select_format(self, gfycat):
+    def _select_format(self, gfyitem):
         for fmt in self.formats:
             key = fmt + "Url"
-            if key in gfycat:
-                url = gfycat[key]
-                gfycat["extension"] = url.rpartition(".")[2]
+            if key in gfyitem:
+                url = gfyitem[key]
+                gfyitem["extension"] = url.rpartition(".")[2]
                 return url
+        return ""
 
-    @staticmethod
-    def _clean(image):
-        for key in ("dislikes", "likes", "views", "viewsNewEpoch"):
-            del image[key]
-        return image
+    def _get_info(self, gfycat_id):
+        url = "{}/cajax/get/{}".format(self.root, gfycat_id)
+        data = self.request(url).json()
+        if "error" in data:
+            raise exception.NotFoundError("animation")
+        return data["gfyItem"]
 
 
 class GfycatImageExtractor(GfycatExtractor):
     """Extractor for individual images from gfycat.com"""
     subcategory = "image"
-    filename_fmt = "{category}_{gfyName}.{extension}"
-    pattern = [r"(?:https?://)?(?:[a-z]+\.)?gfycat\.com/"
-               r"(?:(?:gifs/)?detail/|ifr/)?([A-Za-z]+)"]
+    pattern = [r"(?:https?://)?(?:\w+\.)?gfycat\.com"
+               r"/(?:(?:gifs/)?detail/|ifr/)?([A-Za-z]+)"]
     test = [
         ("https://gfycat.com/GrayGenerousCowrie", {
             "url": "e0b5e1d7223108249b15c3c7898dd358dbfae045",
-            "keyword": "f92a5792df3ae61817627768897f1d0dd134c2e4",
             "content": "3157cd8b3799205c5a0df98a7ee31aa85bf6491e",
+            "keyword": {
+                "gfyId": "graygenerouscowrie",
+                "gfyName": "GrayGenerousCowrie",
+                "gfyNumber": "755075459",
+                "title": "Bottom's up",
+                "userName": "jackson3oh3",
+                "createDate": "1495884169",
+                "md5": "a4796e05b0db9ba9ce5140145cd318aa",
+                "width": "400",
+                "height": "224",
+                "frameRate": "23",
+                "numFrames": "158",
+                "views": int,
+            },
         }),
         (("https://thumbs.gfycat.com/SillyLameIsabellinewheatear"
           "-size_restricted.gif"), {
@@ -56,17 +71,16 @@ class GfycatImageExtractor(GfycatExtractor):
         ("https://gfycat.com/detail/UnequaledHastyAnkole?tagname=aww", {
             "url": "e24c9f69897fd223343782425a429c5cab6a768e",
         }),
+        ("https://gfycat.com/gifs/detail/UnequaledHastyAnkole", None),
+        ("https://gfycat.com/ifr/UnequaledHastyAnkole", None),
     ]
 
-    def items(self):
-        gfycat = self._clean(self._get_info(self.item_id))
-        yield Message.Version, 1
-        yield Message.Directory, gfycat
-        yield Message.Url, self._select_format(gfycat), gfycat
+    def __init__(self, match):
+        GfycatExtractor.__init__(self)
+        self.gfycat_id = match.group(1)
 
-    def _get_info(self, gfycat_id):
-        url = "https://gfycat.com/cajax/get/" + gfycat_id
-        data = self.request(url).json()
-        if "error" in data:
-            raise exception.NotFoundError("animation")
-        return data["gfyItem"]
+    def items(self):
+        gfyitem = self._get_info(self.gfycat_id)
+        yield Message.Version, 1
+        yield Message.Directory, gfyitem
+        yield Message.Url, self._select_format(gfyitem), gfyitem
