@@ -20,10 +20,10 @@ class TwitterExtractor(Extractor):
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     root = "https://twitter.com"
 
-    def __init__(self):
+    def __init__(self, match):
         Extractor.__init__(self)
-        self.user = None
-        self.retweets = True
+        self.user = match.group(1)
+        self.retweets = self.config("retweets", True)
 
     def items(self):
         yield Message.Version, 1
@@ -45,9 +45,11 @@ class TwitterExtractor(Extractor):
 
     def metadata(self):
         """Return general metadata"""
+        return {"user": self.user}
 
     def tweets(self):
         """Yield HTML content of all relevant tweets"""
+        return ()
 
     @staticmethod
     def _data_from_tweet(tweet):
@@ -64,29 +66,7 @@ class TwitterExtractor(Extractor):
         data["retweeter"] = data["retweeter"] or ""
         return data
 
-
-class TwitterTimelineExtractor(TwitterExtractor):
-    """Extractor for all tweeted images from a user's timeline"""
-    subcategory = "timeline"
-    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/([^/?&#]+)/?$"]
-    test = [("https://twitter.com/PicturesEarth", {
-        "range": (1, 40),
-        "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
-        "keyword": "cbae53b6f4ba133078bb13c95dbd3cbb4fa40b9f",
-    })]
-
-    def __init__(self, match):
-        TwitterExtractor.__init__(self)
-        self.user = match.group(1)
-        self.retweets = self.config("retweets", True)
-
-    def metadata(self):
-        return {"user": self.user}
-
-    def tweets(self):
-        url = "{}/i/profiles/show/{}/timeline/tweets".format(
-            self.root, self.user)
+    def _tweets_from_api(self, url):
         params = {
             "include_available_features": "1",
             "include_entities": "1",
@@ -112,6 +92,39 @@ class TwitterTimelineExtractor(TwitterExtractor):
                 tweet, 'data-tweet-id="', '"')[0]
 
 
+class TwitterTimelineExtractor(TwitterExtractor):
+    """Extractor for all images from a user's timeline"""
+    subcategory = "timeline"
+    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
+               r"/([^/?&#]+)/?$"]
+    test = [("https://twitter.com/PicturesEarth", {
+        "range": (1, 40),
+        "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
+        "keyword": "cbae53b6f4ba133078bb13c95dbd3cbb4fa40b9f",
+    })]
+
+    def tweets(self):
+        url = "{}/i/profiles/show/{}/timeline/tweets".format(
+            self.root, self.user)
+        return self._tweets_from_api(url)
+
+
+class TwitterMediaExtractor(TwitterExtractor):
+    """Extractor for all images from a user's Media Tweets"""
+    subcategory = "media"
+    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
+               r"/([^/?&#]+)/media(?!\w)"]
+    test = [("https://twitter.com/PicturesEarth/media", {
+        "range": (1, 40),
+        "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
+    })]
+
+    def tweets(self):
+        url = "{}/i/profiles/show/{}/media_timeline".format(
+            self.root, self.user)
+        return self._tweets_from_api(url)
+
+
 class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for images from individual tweets"""
     subcategory = "tweet"
@@ -130,8 +143,8 @@ class TwitterTweetExtractor(TwitterExtractor):
     ]
 
     def __init__(self, match):
-        TwitterExtractor.__init__(self)
-        self.user, self.tweet_id = match.groups()
+        TwitterExtractor.__init__(self, match)
+        self.tweet_id = match.group(2)
 
     def metadata(self):
         return {"user": self.user, "tweet_id": self.tweet_id}

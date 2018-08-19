@@ -81,7 +81,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
     pattern = [BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#]+)"]
     test = [("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
         "url": "ab0d7aa001a53ff3fd228622070b39005b6fc179",
-        "keyword": "4fcc02599d180321b22a7f7238102c48d5410c05",
+        "keyword": "a116167929c22338e6067b81c5d3bee641df3af3",
         "content": "64a8f69a1d824921eebbdf2420087937adfa45cd",
     })]
 
