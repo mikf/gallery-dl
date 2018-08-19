@@ -35,10 +35,10 @@ class BehanceGalleryExtractor(Extractor):
                 "comments": int,
             },
         }),
-        ("https://www.behance.net/gallery/13706563/Fundacja-ING-Dzieciom", {
-            "count": 7,
-            "url": "3b78be2a5652524529962cf2dc81b383129c1363",
-            "keyword": {"user": "UVMW Studio"},
+        ("https://www.behance.net/gallery/21324767/Nevada-City", {
+            "count": 6,
+            "url": "2b2a689d57f113617088eeab4dc81b884bf24410",
+            "keyword": {"user": "Alex Strohl"},
         }),
     ]
 
