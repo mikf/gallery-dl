@@ -142,7 +142,7 @@ class ImagefapUserExtractor(ImagefapExtractor):
                (r"(?:https?://)?(?:www\.)?imagefap\.com/"
                 r"usergallery\.php\?userid=(\d+)")]
     test = [("https://www.imagefap.com/profile/Mr%20Bad%20Example/galleries", {
-        "url": "2d79fe2bd98d02d30378fe30e966d47f72bd4760",
+        "url": "4c400a10d496701734d3bd7414ce2f45e6543c65",
     })]
 
     def __init__(self, match):

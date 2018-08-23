@@ -23,11 +23,6 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "desuarchive",  # down
-    "gfycat",
-    "imagefap",     # gallery flagged and unavailable
-    "rbt",          # down
-    "subapics",
 }
 
 
