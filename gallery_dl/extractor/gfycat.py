@@ -48,7 +48,7 @@ class GfycatImageExtractor(GfycatExtractor):
     test = [
         ("https://gfycat.com/GrayGenerousCowrie", {
             "url": "e0b5e1d7223108249b15c3c7898dd358dbfae045",
-            "content": "3157cd8b3799205c5a0df98a7ee31aa85bf6491e",
+            "content": "5786028e04b155baa20b87c5f4f77453cd5edc37",
             "keyword": {
                 "gfyId": "graygenerouscowrie",
                 "gfyName": "GrayGenerousCowrie",
