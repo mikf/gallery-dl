@@ -16,6 +16,7 @@ import string
 import _string
 import sqlite3
 import datetime
+import operator
 import itertools
 import urllib.parse
 from . import text, exception
@@ -263,7 +264,7 @@ class ExtendedUrl():
 
 
 class Formatter():
-    """Custom, trimmed-down version of string.Formatter
+    """Custom, extended version of string.Formatter
 
     This string formatter implementation is a mostly performance-optimized
     variant of the original string.Formatter class. Unnecessary features have
@@ -302,67 +303,112 @@ class Formatter():
         "a": ascii,
     }
 
-    def __init__(self, default=None):
-        self.kwdefault = default
-
-    def vformat(self, format_string, kwargs):
-        """Apply 'kwargs' to the initial format_string and return its result"""
-        result = []
-        append = result.append
+    def __init__(self, format_string, default=None):
+        self.default = default
+        self.result = []
+        self.fields = []
 
         for literal_text, field_name, format_spec, conversion in \
                 _string.formatter_parser(format_string):
-
             if literal_text:
-                append(literal_text)
-
+                self.result.append(literal_text)
             if field_name:
-                obj = self.get_field(field_name, kwargs)
-                if conversion:
-                    obj = self.conversions[conversion](obj)
-                if format_spec:
-                    format_spec = format_spec.format_map(kwargs)
-                    obj = self.format_field(obj, format_spec)
-                else:
-                    obj = str(obj)
-                append(obj)
+                self.fields.append((
+                    len(self.result),
+                    self._field_access(field_name, format_spec, conversion)
+                ))
+                self.result.append("")
 
-        return "".join(result)
+    def format_map(self, kwargs):
+        """Apply 'kwargs' to the initial format_string and return its result"""
+        for index, func in self.fields:
+            self.result[index] = func(kwargs)
+        return "".join(self.result)
 
-    @staticmethod
-    def format_field(value, format_spec):
-        """Format 'value' according to 'format_spec'"""
-        if format_spec[0] == "?":
-            if not value:
-                return ""
-            before, after, format_spec = format_spec.split("/", 2)
-            return before[1:] + format(value, format_spec) + after
-        if format_spec[0] == "L":
-            maxlen, replacement, format_spec = format_spec.split("/", 2)
-            maxlen = text.parse_int(maxlen[1:])
-            value = format(value, format_spec)
-            return value if len(value) <= maxlen else replacement
-        return format(value, format_spec)
-
-    def get_field(self, field_name, kwargs):
-        """Return value with key 'field_name' from 'kwargs'"""
+    def _field_access(self, field_name, format_spec, conversion):
         first, rest = _string.formatter_field_name_split(field_name)
 
-        if first not in kwargs:
-            return self.kwdefault
-
-        obj = kwargs[first]
-        for is_attr, i in rest:
+        funcs = []
+        for is_attr, key in rest:
             if is_attr:
-                obj = getattr(obj, i)
-            elif ":" in i:
-                start, _, stop = i.partition(":")
-                start = int(start) if start else 0
-                return obj[start:int(stop)] if stop else obj[start:]
+                func = operator.attrgetter
+            elif ":" in key:
+                func = self._slicegetter
             else:
-                obj = obj[i]
+                func = operator.itemgetter
+            funcs.append(func(key))
 
-        return obj
+        if conversion:
+            funcs.append(self.conversions[conversion])
+
+        if format_spec:
+            if format_spec[0] == "?":
+                func = self._format_optional
+            elif format_spec[0] == "L":
+                func = self._format_maxlen
+            else:
+                func = self._format_default
+            fmt = func(format_spec)
+        else:
+            fmt = str
+
+        if funcs:
+            return self._apply(first, funcs, fmt)
+        return self._apply_simple(first, fmt)
+
+    def _apply_simple(self, key, fmt):
+        def wrap(obj):
+            if key in obj:
+                obj = obj[key]
+            else:
+                obj = self.default
+            return fmt(obj)
+        return wrap
+
+    def _apply(self, key, funcs, fmt):
+        def wrap(obj):
+            if key in obj:
+                obj = obj[key]
+                for func in funcs:
+                    obj = func(obj)
+            else:
+                obj = self.default
+            return fmt(obj)
+        return wrap
+
+    @staticmethod
+    def _slicegetter(key):
+        start, _, stop = key.partition(":")
+        stop, _, step = stop.partition(":")
+        start = int(start) if start else None
+        stop = int(stop) if stop else None
+        step = int(step) if step else None
+        return operator.itemgetter(slice(start, stop, step))
+
+    @staticmethod
+    def _format_optional(format_spec):
+        def wrap(obj):
+            if not obj:
+                return ""
+            return before + format(obj, format_spec) + after
+        before, after, format_spec = format_spec.split("/", 2)
+        before = before[1:]
+        return wrap
+
+    @staticmethod
+    def _format_maxlen(format_spec):
+        def wrap(obj):
+            obj = format(obj, format_spec)
+            return obj if len(obj) <= maxlen else replacement
+        maxlen, replacement, format_spec = format_spec.split("/", 2)
+        maxlen = text.parse_int(maxlen[1:])
+        return wrap
+
+    @staticmethod
+    def _format_default(format_spec):
+        def wrap(obj):
+            return format(obj, format_spec)
+        return wrap
 
 
 class PathFormat():
@@ -372,7 +418,12 @@ class PathFormat():
             "filename", extractor.filename_fmt)
         self.directory_fmt = extractor.config(
             "directory", extractor.directory_fmt)
-        self.formatter = Formatter(extractor.config("keywords-default"))
+        self.kwdefault = extractor.config("keywords-default")
+
+        try:
+            self.formatter = Formatter(self.filename_fmt, self.kwdefault)
+        except Exception as exc:
+            raise exception.FormatError(exc, "filename")
 
         self.delete = False
         self.has_extension = False
@@ -419,7 +470,8 @@ class PathFormat():
         try:
             segments = [
                 text.clean_path(
-                    self.formatter.vformat(segment, keywords).strip())
+                    Formatter(segment, self.kwdefault)
+                    .format_map(keywords).strip())
                 for segment in self.directory_fmt
             ]
         except Exception as exc:
@@ -456,7 +508,7 @@ class PathFormat():
         """Use filename-keywords and directory to build a full path"""
         try:
             self.filename = text.clean_path(
-                self.formatter.vformat(self.filename_fmt, self.keywords))
+                self.formatter.format_map(self.keywords))
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 

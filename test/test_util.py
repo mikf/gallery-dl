@@ -209,6 +209,13 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a[:5]}" , v[:5])
         self._run_test("{a[:50]}", v[:50])
         self._run_test("{a[:]}"  , v)
+        self._run_test("{a[1:10:2]}"  , v[1:10:2])
+        self._run_test("{a[-10:-1:2]}", v[-10:-1:2])
+        self._run_test("{a[5::2]}" , v[5::2])
+        self._run_test("{a[50::2]}", v[50::2])
+        self._run_test("{a[:5:2]}" , v[:5:2])
+        self._run_test("{a[:50:2]}", v[:50:2])
+        self._run_test("{a[::]}"   , v)
 
     def test_maxlen(self):
         v = self.kwdict["a"]
@@ -219,8 +226,8 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:Lab/foo/}", "foo")
 
     def _run_test(self, format_string, result, default=None):
-        formatter = util.Formatter(default)
-        output = formatter.vformat(format_string, self.kwdict)
+        formatter = util.Formatter(format_string, default)
+        output = formatter.format_map(self.kwdict)
         self.assertEqual(output, result, format_string)
 
 
