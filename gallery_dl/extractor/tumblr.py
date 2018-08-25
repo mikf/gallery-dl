@@ -15,6 +15,14 @@ import re
 import time
 
 
+def _original_inline_image(url):
+    return re.sub(
+        (r"https?://(\d+\.media\.tumblr\.com(?:/[0-9a-f]+)?"
+         r"/tumblr(?:_inline)?_[^_]+)_\d+\.([0-9a-z]+)"),
+        r"https://\1_1280.\2", url
+    )
+
+
 def _original_video(url):
     return re.sub(
         (r"https?://vt\.media\.tumblr\.com"
@@ -96,6 +104,7 @@ class TumblrExtractor(Extractor):
                 for key in ("body", "description", "source"):
                     if key in post:
                         for url in re.findall('<img src="([^"]+)"', post[key]):
+                            url = _original_inline_image(url)
                             yield self._prepare_image(url, post)
 
             if self.external:  # external links
