@@ -101,6 +101,8 @@ class MangadexChapterExtractor(MangadexExtractor):
     def get_images(self):
         """Return a list of all image URLs"""
         base = self.data["server"] + self.data["hash"] + "/"
+        if base.startswith("/"):
+            base = text.urljoin(self.root, base)
         return [base + page for page in self.data["page_array"]]
 
 
