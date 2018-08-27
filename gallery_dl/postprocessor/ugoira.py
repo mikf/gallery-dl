@@ -34,11 +34,16 @@ class UgoiraPP(PostProcessor):
             self.calculate_framerate = lambda _: (None, rate)
 
     def run(self, pathfmt):
-        if (pathfmt.keywords["extension"] != "zip" or
-                "frames" not in pathfmt.keywords):
+        if pathfmt.keywords["extension"] != "zip":
             return
 
-        framelist = pathfmt.keywords["frames"]
+        if "frames" in pathfmt.keywords:
+            framelist = pathfmt.keywords["frames"]
+        elif "pixiv_ugoira_frame_data" in pathfmt.keywords:
+            framelist = pathfmt.keywords["pixiv_ugoira_frame_data"]["data"]
+        else:
+            return
+
         rate_in, rate_out = self.calculate_framerate(framelist)
 
         with tempfile.TemporaryDirectory() as tempdir:
