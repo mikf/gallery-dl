@@ -23,7 +23,8 @@ class UgoiraPP(PostProcessor):
         PostProcessor.__init__(self)
         self.extension = options.get("extension") or "webm"
         self.args = options.get("ffmpeg-args")
-        self.twopass = options.get("ffmpeg-twopass")
+        self.twopass = options.get("ffmpeg-twopass", False)
+        self.output = options.get("ffmpeg-output", True)
         self.delete = not options.get("keep-files", False)
 
         ffmpeg = options.get("ffmpeg-location")
@@ -79,18 +80,21 @@ class UgoiraPP(PostProcessor):
             if self.twopass:
                 if "-f" not in args:
                     args += ["-f", self.extension]
-                null = "NUL" if os.name == "nt" else "/dev/null"
                 args += ["-passlogfile", tempdir + "/ffmpeg2pass", "-pass"]
-                subprocess.Popen(args + ["1", "-y", null]).wait()
-                subprocess.Popen(args + ["2", pathfmt.realpath]).wait()
+                self._exec(args + ["1", "-y", os.devnull])
+                self._exec(args + ["2", pathfmt.realpath])
             else:
                 args.append(pathfmt.realpath)
-                subprocess.Popen(args).wait()
+                self._exec(args)
 
         if self.delete:
             pathfmt.delete = True
         else:
             pathfmt.set_extension("zip")
+
+    def _exec(self, args):
+        out = None if self.output else subprocess.DEVNULL
+        return subprocess.Popen(args, stdout=out, stderr=out).wait()
 
     @staticmethod
     def calculate_framerate(framelist):

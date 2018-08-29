@@ -911,11 +911,20 @@ Default     ``"ffmpeg"``
 Description Location of the ``ffmpeg`` (or ``avconv``) executable to use.
 =========== =====
 
+
+ugoira.ffmpeg-output
+--------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Show FFmpeg output.
+=========== =====
+
 ugoira.ffmpeg-twopass
 ---------------------
 =========== =====
 Type        ``bool``
-Default     ``False``
+Default     ``false``
 Description Enable Two-Pass encoding.
 =========== =====
 
