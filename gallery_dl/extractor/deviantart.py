@@ -141,11 +141,13 @@ class DeviantartExtractor(Extractor):
                     itertools.accumulate(catlist, lambda t, c: t + "/" + c)
                 )
             )
+            username = deviation["author"]["username"]
+            urlname = deviation.get("username") or username.lower()
             header = HEADER_TEMPLATE.format(
                 title=title,
                 url=url,
-                userurl="{}/{}/".format(self.root, deviation["username"]),
-                username=deviation["author"]["username"],
+                userurl="{}/{}/".format(self.root, urlname),
+                username=username,
                 date=date,
                 categories=categories,
             )
@@ -410,7 +412,7 @@ class DeviantartPopularExtractor(DeviantartExtractor):
     pattern = [r"(?:https?://)?www\.deviantart\.com"
                r"((?:/\w+)*)/(?:popular-([^/?&#]+))/?(?:\?([^#]*))?"]
     test = [
-        ("https://www.deviantart.com/popular-8-hours/?q=tree+house", {
+        ("https://www.deviantart.com/popular-24-hours/?q=tree+house", {
             "options": (("original", False),),
         }),
         ("https://www.deviantart.com/artisan/popular-all-time/?q=tree", None),
