@@ -110,7 +110,8 @@ class MangadexMangaExtractor(MangadexExtractor):
     """Extractor for manga from mangadex.org"""
     subcategory = "manga"
     categorytransfer = True
-    pattern = [r"(?:https?://)?(?:www\.)?mangadex\.(?:org|com)/manga/(\d+)"]
+    pattern = [r"(?:https?://)?(?:www\.)?mangadex\.(?:org|com)"
+               r"/(?:title|manga)/(\d+)"]
     test = [
         ("https://mangadex.org/manga/2946/souten-no-koumori", {
             "count": ">= 1",
@@ -131,6 +132,7 @@ class MangadexMangaExtractor(MangadexExtractor):
         ("https://mangadex.org/manga/13318/dagashi-kashi/chapters/2/", {
             "count": ">= 100",
         }),
+        ("https://mangadex.org/title/2946/souten-no-koumori", None),
     ]
 
     def __init__(self, match):
