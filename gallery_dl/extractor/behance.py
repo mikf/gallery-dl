@@ -12,14 +12,18 @@ from .common import Extractor, Message
 from .. import text
 
 
-class BehanceGalleryExtractor(Extractor):
-    """Extractor for image galleries from www.behance.net"""
+class BehanceExtractor(Extractor):
+    """Base class for behance extractors"""
     category = "behance"
+    root = "https://www.behance.net"
+
+
+class BehanceGalleryExtractor(BehanceExtractor):
+    """Extractor for image galleries from www.behance.net"""
     subcategory = "gallery"
     directory_fmt = ["{category}", "{user}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>02}.{extension}"
     archive_fmt = "{gallery_id}_{num}"
-    root = "https://www.behance.net"
     pattern = [r"(?:https?://)?(?:www\.)?behance\.net/gallery/(\d+)"]
     test = [
         ("https://www.behance.net/gallery/17386197", {
@@ -43,7 +47,7 @@ class BehanceGalleryExtractor(Extractor):
     ]
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        BehanceExtractor.__init__(self)
         self.gallery_id = match.group(1)
 
     def items(self):
@@ -115,3 +119,34 @@ class BehanceGalleryExtractor(Extractor):
 
         user = text.extract(users, ' class="profile-list-name"', '</a>')[0]
         return (user.rpartition(">")[2],)
+
+
+class BehanceUserExtractor(BehanceExtractor):
+    """Extractor for a user's galleries from www.behance.net"""
+    subcategory = "user"
+    pattern = [r"(?:https?://)?(?:www\.)?behance\.net"
+               r"/(?!gallery/)([^/?&#]+)/?$"]
+    test = [("https://www.behance.net/alexstrohl", {
+        "count": ">= 8",
+        "pattern": BehanceGalleryExtractor.pattern[0],
+    })]
+
+    def __init__(self, match):
+        BehanceExtractor.__init__(self)
+        self.user = match.group(1)
+
+    def items(self):
+        url = "{}/{}".format(self.root, self.user)
+        headers = {"X-Requested-With": "XMLHttpRequest"}
+        params = {"offset": None}
+
+        yield Message.Version, 1
+        while True:
+            data = self.request(url, headers=headers, params=params).json()
+
+            for gallery in data["section_content"]:
+                yield Message.Queue, gallery["url"], gallery
+
+            if "offset" not in data:
+                return
+            params["offset"] = data["offset"]
