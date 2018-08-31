@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.5.2 - 2018-08-31
+- Added support for `twitter` timelines
+- Added option to suppress FFmpeg output during ugoira conversions
+- Improved filename formatter performance
+- Improved inline image quality on `tumblr`
+- Fixed image URLs for newly released `mangadex` chapters
+- Fixed a smaller issue with `deviantart` journals
+- Replaced `subapics` with `ngomik`
 
 ## 1.5.1 - 2018-08-17
 - Added support for:
