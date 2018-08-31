@@ -68,7 +68,7 @@ SUBCATEGORY_MAP = {
     "issue"  : "Comic-Issues",
     "manga"  : "Manga",
     "me"     : "pixiv.me Links",
-    "media"  : "Media Tweets",
+    "media"  : "Media Timelines",
     "path"   : "Images from Users and Folders",
     "pinit"  : "pin.it Links",
     "popular": "Popular Images",
@@ -227,8 +227,6 @@ def category_key(extrlist):
 def subcategory_key(cls):
     if cls.subcategory in ("user", "issue"):
         return "A"
-    if cls.subcategory in ("media",):
-        return "z"
     return cls.subcategory
 
 

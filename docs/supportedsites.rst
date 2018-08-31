@@ -12,7 +12,7 @@ arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |Images from Use-0|
-Behance              https://www.behance.net/            Galleries
+Behance              https://www.behance.net/            Images from Users, Galleries
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches
 Desuarchive          https://desuarchive.org/            Threads
 DeviantArt           https://www.deviantart.com/         |Collections, De-1|                                Optional (OAuth)
@@ -76,7 +76,7 @@ SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |Albums, individ-5|                                Optional (OAuth)
 The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
-Twitter              https://twitter.com/                Timelines, Tweets, Media Tweets
+Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets
 Warosu               https://warosu.org/                 Threads
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 XVideos              https://www.xvideos.com/            Images from Users, Galleries
