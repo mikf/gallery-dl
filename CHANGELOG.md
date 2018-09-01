@@ -1,10 +1,13 @@
 # Changelog
 
+## Unreleased
+- Fixed extraction of `smugmug` albums with no explicit owner ([#100](https://github.com/mikf/gallery-dl/issues/100))
+
 ## 1.5.2 - 2018-08-31
-- Added support for `twitter` timelines
+- Added support for `twitter` timelines ([#96](https://github.com/mikf/gallery-dl/issues/96))
 - Added option to suppress FFmpeg output during ugoira conversions
 - Improved filename formatter performance
-- Improved inline image quality on `tumblr`
+- Improved inline image quality on `tumblr` ([#98](https://github.com/mikf/gallery-dl/issues/98))
 - Fixed image URLs for newly released `mangadex` chapters
 - Fixed a smaller issue with `deviantart` journals
 - Replaced `subapics` with `ngomik`
