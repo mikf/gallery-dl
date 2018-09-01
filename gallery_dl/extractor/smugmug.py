@@ -19,8 +19,19 @@ BASE_PATTERN = (
 class SmugmugExtractor(Extractor):
     """Base class for smugmug extractors"""
     category = "smugmug"
-    filename_fmt = ("{category}_{User[NickName]}_"
+    filename_fmt = ("{category}_{User[NickName]:?/_/}"
                     "{Image[UploadKey]}_{Image[ImageKey]}.{extension}")
+    empty_user = {
+        "Uri": "",
+        "ResponseLevel": "Public",
+        "Name": "",
+        "NickName": "",
+        "QuickShare": False,
+        "RefTag": "",
+        "ViewPassHint": "",
+        "WebUri": "",
+        "Uris": None,
+    }
 
     def __init__(self):
         Extractor.__init__(self)
@@ -44,11 +55,16 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
     archive_fmt = "a_{Album[AlbumKey]}_{Image[ImageKey]}"
     pattern = [r"smugmug:album:([^:]+)$"]
     test = [
+        ("smugmug:album:ddvxpg", {
+            "url": "8775c2cf05f001e895435faa89f22a03214568bf",
+        }),
+        # empty
         ("smugmug:album:SXvjbW", {
             "count": 0,
         }),
-        ("smugmug:album:ddvxpg", {
-            "url": "8775c2cf05f001e895435faa89f22a03214568bf",
+        # no "User"
+        ("smugmug:album:6VRT8G", {
+            "url": "3d3f161a77e2e11a04b6778cc62238128c1f1113",
         }),
     ]
 
@@ -58,7 +74,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
 
     def items(self):
         album = self.api.album(self.album_id, "User")
-        user = album["Uris"]["User"]
+        user = album["Uris"].get("User") or self.empty_user.copy()
 
         del user["Uris"]
         del album["Uris"]
@@ -79,11 +95,18 @@ class SmugmugImageExtractor(SmugmugExtractor):
     directory_fmt = ["{category}", "{User[NickName]}"]
     archive_fmt = "{Image[ImageKey]}"
     pattern = [BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#]+)"]
-    test = [("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
-        "url": "ab0d7aa001a53ff3fd228622070b39005b6fc179",
-        "keyword": "a116167929c22338e6067b81c5d3bee641df3af3",
-        "content": "64a8f69a1d824921eebbdf2420087937adfa45cd",
-    })]
+    test = [
+        ("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
+            "url": "ab0d7aa001a53ff3fd228622070b39005b6fc179",
+            "keyword": "a116167929c22338e6067b81c5d3bee641df3af3",
+            "content": "64a8f69a1d824921eebbdf2420087937adfa45cd",
+        }),
+        # no "ImageOwner"
+        ("https://www.smugmug.com/gallery/n-GLCjnD/i-JD62fQk", {
+            "url": "721023fd2cba1a88404b54039d9eebb5756d1e68",
+            "keyword": "1189f48e6b2592f6b90f8bd875238e93aba780e7",
+        }),
+    ]
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self)
@@ -91,7 +114,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
 
     def items(self):
         image = self.api.image(self.image_id, "LargestImage,ImageOwner")
-        user = image["Uris"]["ImageOwner"]
+        user = image["Uris"].get("ImageOwner") or self.empty_user.copy()
         url = self._apply_largest(image)
 
         del user["Uris"]
@@ -106,7 +129,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
 class SmugmugPathExtractor(SmugmugExtractor):
     """Extractor for smugmug albums from URL paths and users"""
     subcategory = "path"
-    pattern = [BASE_PATTERN + r"((?:/[^/?&#a-mo-z][^/?&#]*)*)/?$"]
+    pattern = [BASE_PATTERN + r"((?:/[^/?&#a-fh-mo-z][^/?&#]*)*)/?$"]
     test = [
         ("https://acapella.smugmug.com/Micro-Macro/Drops/", {
             "pattern": "smugmug:album:ddvxpg$",
@@ -115,6 +138,11 @@ class SmugmugPathExtractor(SmugmugExtractor):
             "pattern": r"smugmug:album:\w+$",
             "url": "8bd8b3f4f8bdd584bf5ddfd509ff3c98f8bc323b",
         }),
+        # gallery node without owner
+        ("https://www.smugmug.com/gallery/n-GLCjnD/", {
+            "pattern": "smugmug:album:6VRT8G$",
+        }),
+        # custom domain
         ("smugmug:www.creativedogportraits.com/PortfolioGallery/", {
             "pattern": "smugmug:album:txWXzs$",
         }),
@@ -135,8 +163,11 @@ class SmugmugPathExtractor(SmugmugExtractor):
             self.user = self.api.site_user(self.domain)["NickName"]
 
         if self.path:
-            data = self.api.user_urlpathlookup(self.user, self.path)
-            node = data["Uris"]["Node"]
+            if self.path.startswith("/gallery/n-"):
+                node = self.api.node(self.path[11:])
+            else:
+                data = self.api.user_urlpathlookup(self.user, self.path)
+                node = data["Uris"]["Node"]
 
             if node["Type"] == "Album":
                 nodes = (node,)
@@ -265,7 +296,8 @@ class SmugmugAPI(oauth.OAuth1API):
                 uris = obj["Uris"]
 
                 for name in expands:
-                    uri = uris[name]
-                    uris[name] = unwrap(expansions[uri])
+                    if name in uris:
+                        uri = uris[name]
+                        uris[name] = unwrap(expansions[uri])
 
         return objs
