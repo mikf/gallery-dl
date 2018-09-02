@@ -23,7 +23,6 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "simplyhentai",
 }
 
 
@@ -104,6 +103,7 @@ class TestExtractorResults(unittest.TestCase):
                 self.assertEqual(len(tjob.list_url), count)
 
         if "pattern" in result:
+            self.assertGreater(len(tjob.list_url), 0)
             for url in tjob.list_url:
                 self.assertRegex(url, result["pattern"])
 
