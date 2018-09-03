@@ -233,13 +233,15 @@ class DownloadJob(Job):
         if postprocessors:
             self.postprocessors = []
             for pp_dict in postprocessors:
-                if "name" not in pp_dict:
-                    postprocessor.log.warning("no 'name' specified")
+                whitelist = pp_dict.get("whitelist")
+                blacklist = pp_dict.get("blacklist")
+                if (whitelist and self.extractor.category not in whitelist or
+                        blacklist and self.extractor.category in blacklist):
                     continue
-                name = pp_dict["name"]
+                name = pp_dict.get("name")
                 pp_cls = postprocessor.find(name)
                 if not pp_cls:
-                    postprocessor.log.warning("'%s' not found", name)
+                    postprocessor.log.warning("module '%s' not found", name)
                     continue
                 try:
                     pp_obj = pp_cls(self.pathfmt, pp_dict)
@@ -249,6 +251,8 @@ class DownloadJob(Job):
                         name, exc.__class__.__name__, exc)
                 else:
                     self.postprocessors.append(pp_obj)
+            self.extractor.log.debug(
+                "Active postprocessor modules: %s", self.postprocessors)
 
     def handle_queue(self, url, keywords):
         try:
