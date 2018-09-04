@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
+
+"""Downloader modules"""
 
 import importlib
 
@@ -14,13 +16,15 @@ def find(scheme):
     try:
         return _cache[scheme]
     except KeyError:
+        klass = None
         try:
-            module = importlib.import_module("."+scheme, __package__)
-            klass = getattr(module, "Downloader")
-            _cache[scheme] = klass
-            return klass
-        except ImportError:
-            return None
+            if "." not in scheme:  # prevent relative imports
+                module = importlib.import_module("." + scheme, __package__)
+                klass = module.Downloader
+        except (ImportError, AttributeError, TypeError):
+            pass
+        _cache[scheme] = klass
+        return klass
 
 
 # --------------------------------------------------------------------

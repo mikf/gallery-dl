@@ -6,6 +6,8 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+"""Post-processing modules"""
+
 import importlib
 import logging
 
@@ -17,13 +19,15 @@ def find(name):
     try:
         return _cache[name]
     except KeyError:
+        klass = None
         try:
-            module = importlib.import_module("."+name, __package__)
-            cls = module.__postprocessor__
-            _cache[name] = cls
-            return cls
-        except (ImportError, AttributeError):
-            return None
+            if "." not in name:  # prevent relative imports
+                module = importlib.import_module("." + name, __package__)
+                klass = module.__postprocessor__
+        except (ImportError, AttributeError, TypeError):
+            pass
+        _cache[name] = klass
+        return klass
 
 
 # --------------------------------------------------------------------
