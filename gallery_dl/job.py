@@ -267,15 +267,16 @@ class DownloadJob(Job):
 
     def get_downloader(self, url):
         """Return, and possibly construct, a downloader suitable for 'url'"""
-        pos = url.find(":")
-        scheme = url[:pos] if pos != -1 else "http"
+        scheme = url.partition(":")[0]
         if scheme == "https":
             scheme = "http"
-        instance = self.downloaders.get(scheme)
-        if instance is None:
-            klass = downloader.find(scheme)
-            instance = klass(self.extractor.session, self.out)
-            self.downloaders[scheme] = instance
+        try:
+            return self.downloaders[scheme]
+        except KeyError:
+            pass
+        klass = downloader.find(scheme)
+        instance = klass(self.extractor.session, self.out)
+        self.downloaders[scheme] = instance
         return instance
 
 
