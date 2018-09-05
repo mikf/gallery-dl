@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,7 +18,8 @@ Exception
       |    +-- NotFoundError
       |    +-- HttpError
       +-- DownloadError
-      +-- DownloadComplete
+      |    +-- DownloadComplete
+      |    +-- DownloadRetry
       +-- NoExtractorError
       +-- FormatError
       +-- FilterError
@@ -50,11 +51,15 @@ class HttpError(ExtractionError):
     """HTTP request during extraction failed"""
 
 
-class DownloadRetry(GalleryDLException):
+class DownloadError(GalleryDLException):
+    """Base class for exceptions during file downloads"""
+
+
+class DownloadRetry(DownloadError):
     """Download attempt failed and should be retried"""
 
 
-class DownloadComplete(GalleryDLException):
+class DownloadComplete(DownloadError):
     """Output file of attempted download is already complete"""
 
 
