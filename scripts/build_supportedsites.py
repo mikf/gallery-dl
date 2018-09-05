@@ -22,6 +22,7 @@ CATEGORY_MAP = {
     "fallenangels"   : "Fallen Angels Scans",
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
+    "hentaicafe"     : "Hentai Cafe",
     "hentaifoundry"  : "Hentai Foundry",
     "hentaihere"     : "HentaiHere",
     "hitomi"         : "Hitomi.la",
