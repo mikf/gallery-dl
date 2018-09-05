@@ -27,6 +27,7 @@ Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag-Searches
 Gfycat               https://gfycat.com/                 individual Images
 HBrowse              http://www.hbrowse.com/             Chapters, Manga
+Hentai Cafe          https://hentai.cafe/                Chapters, Manga
 Hentai Foundry       https://www.hentai-foundry.com/     Images from Users, individual Images
 Hentai2Read          https://hentai2read.com/            Chapters, Manga
 HentaiHere           https://hentaihere.com/             Chapters, Manga
