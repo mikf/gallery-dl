@@ -100,12 +100,16 @@ class TumblrExtractor(Extractor):
             if "video_url" in post:  # type: "video"
                 yield self._prepare(_original_video(post["video_url"]), post)
 
-            if self.inline:  # inline images
+            if self.inline:  # inline media
                 for key in ("body", "description", "source"):
-                    if key in post:
-                        for url in re.findall('<img src="([^"]+)"', post[key]):
-                            url = _original_inline_image(url)
-                            yield self._prepare_image(url, post)
+                    if key not in post:
+                        continue
+                    for url in re.findall('<img src="([^"]+)"', post[key]):
+                        url = _original_inline_image(url)
+                        yield self._prepare_image(url, post)
+                    for url in re.findall('<source src="([^"]+)"', post[key]):
+                        url = _original_video(url)
+                        yield self._prepare(url, post)
 
             if self.external:  # external links
                 post["extension"] = None
