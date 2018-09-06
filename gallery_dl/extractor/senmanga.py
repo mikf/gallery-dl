@@ -28,7 +28,7 @@ class SenmangaChapterExtractor(Extractor):
         }),
         ("http://raw.senmanga.com/Love-Lab/2016-03/1", {
             "url": "8347b9f00c14b864dd3c19a1f5ae52adb2ef00de",
-            "keyword": "4e72e4ade57671ad0af9c8d81feeff4259d5bbec",
+            "keyword": "8a8ab2529ba2edfc83a6b3a8bede1d6c580db7b4",
         }),
     ]
     root = "https://raw.senmanga.com"
