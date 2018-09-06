@@ -162,7 +162,7 @@ class TumblrExtractor(Extractor):
 class TumblrUserExtractor(TumblrExtractor):
     """Extractor for all images from a tumblr-user"""
     subcategory = "user"
-    pattern = [BASE_PATTERN + r"(?:/page/\d+)?/?$"]
+    pattern = [BASE_PATTERN + r"(?:/page/\d+|/archive)?/?$"]
     test = [
         ("http://demo.tumblr.com/", {
             "pattern": (r"https://\d+\.media\.tumblr\.com"
@@ -177,6 +177,8 @@ class TumblrUserExtractor(TumblrExtractor):
             "options": (("posts", "all"), ("external", True),
                         ("inline", True), ("reblogs", True))
         }),
+        ("https://demo.tumblr.com/page/2", None),
+        ("https://demo.tumblr.com/archive", None),
         ("tumblr:http://www.b-authentique.com/", None),
         ("tumblr:www.b-authentique.com", None),
     ]
