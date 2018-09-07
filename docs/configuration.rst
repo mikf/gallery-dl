@@ -614,16 +614,20 @@ extractor.tumblr.inline
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Search posts for inline images.
+Description Search posts for inline images and videos.
 =========== =====
 
 
 extractor.tumblr.reblogs
 ------------------------
 =========== =====
-Type        ``bool``
+Type        ``bool`` or ``string``
 Default     ``true``
-Description Extract images from reblogged posts.
+Description * ``true``: Extract media from reblogged posts
+            * ``false``: Skip reblogged posts
+            * ``"deleted"``: Skip reblogged posts, but download from them
+              anyway if the parent post has been deleted
+              (requires 1 additional API request per reblogged post)
 =========== =====
 
 
