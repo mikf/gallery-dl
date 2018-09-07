@@ -304,7 +304,7 @@ class RedditAPI():
 
     def _parse_id(self, key, default):
         sid = self.extractor.config(key)
-        return self._decode(sid.rpartition("_")[2]) if sid else default
+        return self._decode(sid.rpartition("_")[2].lower()) if sid else default
 
     @staticmethod
     def _decode(sid):
