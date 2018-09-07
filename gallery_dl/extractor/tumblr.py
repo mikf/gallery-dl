@@ -73,7 +73,7 @@ class TumblrExtractor(Extractor):
                 yield Message.Directory, blog.copy()
 
             reblog = "reblogged_from_id" in post
-            if reblog and not self.reblogs:
+            if reblog and self._skip_reblog(post):
                 continue
             post["reblogged"] = reblog
 
@@ -157,6 +157,19 @@ class TumblrExtractor(Extractor):
         post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
 
         return Message.Url, url, post
+
+    def _skip_reblog(self, post):
+        if self.reblogs != "deleted":
+            return not self.reblogs
+        match = re.match(
+            TumblrPostExtractor.pattern[0], post["reblogged_root_url"])
+        if match:
+            blog = match.group(1) or match.group(2)
+            try:
+                next(self.api.posts(blog, {"id": match.group(3)}))
+            except exception.NotFoundError:
+                return False
+        return True
 
 
 class TumblrUserExtractor(TumblrExtractor):
