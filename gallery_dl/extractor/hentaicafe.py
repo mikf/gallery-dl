@@ -16,6 +16,7 @@ import re
 class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
     """Extractor for manga-chapters from hentai.cafe"""
     category = "hentaicafe"
+    directory_fmt = ["{category}", "{manga}"]
     pattern = foolslide.chapter_pattern(r"(?:www\.)?hentai\.cafe/manga")
     test = [("https://hentai.cafe/manga/read/saitom-box/en/0/1/", {
         "url": "8c6a8c56875ba3ed7ab0a74a64f9960077767fc2",
