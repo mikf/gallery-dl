@@ -25,9 +25,9 @@ def _original_inline_image(url):
 
 def _original_video(url):
     return re.sub(
-        (r"https?://vt\.media\.tumblr\.com"
-         r"/tumblr_([^_]+)_\d+\.([0-9a-z]+)"),
-        r"https://vt.media.tumblr.com/tumblr_\1.\2", url
+        (r"https?://(vt+(?:\.media)?\.tumblr\.com"
+         r"/tumblr_[^_]+)_\d+\.([0-9a-z]+)"),
+        r"https://\1.\2", url
     )
 
 
