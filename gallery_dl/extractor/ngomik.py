@@ -44,7 +44,7 @@ class NgomikChapterExtractor(ChapterExtractor):
     @staticmethod
     def get_images(page):
         readerarea = text.extract(
-            page, '<div class="page-break">', '<div class="select-view">')[0]
+            page, '<div class="page-break', '<div class="select-view')[0]
         return [
             (url, None)
             for url in text.extract_iter(
