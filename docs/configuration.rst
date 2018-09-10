@@ -625,9 +625,8 @@ Type        ``bool`` or ``string``
 Default     ``true``
 Description * ``true``: Extract media from reblogged posts
             * ``false``: Skip reblogged posts
-            * ``"deleted"``: Skip reblogged posts, but download from them
-              anyway if the parent post has been deleted
-              (requires 1 additional API request per reblogged post)
+            * ``"same-blog"``: Skip reblogged posts unless the original post
+            is from the same blog
 =========== =====
 
 

@@ -61,6 +61,9 @@ class TumblrExtractor(Extractor):
         elif not self.types:
             self.log.warning("no valid post types selected")
 
+        if self.reblogs == "same-blog":
+            self._skip_reblog = self._skip_reblog_same_blog
+
     def items(self):
         blog = None
         yield Message.Version, 1
@@ -70,6 +73,7 @@ class TumblrExtractor(Extractor):
                 continue
             if not blog:
                 blog = self.api.info(self.blog)
+                blog["uuid"] = self.blog
                 yield Message.Directory, blog.copy()
 
             reblog = "reblogged_from_id" in post
@@ -158,18 +162,11 @@ class TumblrExtractor(Extractor):
 
         return Message.Url, url, post
 
-    def _skip_reblog(self, post):
-        if self.reblogs != "deleted":
-            return not self.reblogs
-        match = re.match(
-            TumblrPostExtractor.pattern[0], post["reblogged_root_url"])
-        if match:
-            blog = match.group(1) or match.group(2)
-            try:
-                next(self.api.posts(blog, {"id": match.group(3)}))
-            except exception.NotFoundError:
-                return False
-        return True
+    def _skip_reblog(self, _):
+        return not self.reblogs
+
+    def _skip_reblog_same_blog(self, post):
+        return self.blog != post["reblogged_root_uuid"]
 
 
 class TumblrUserExtractor(TumblrExtractor):
