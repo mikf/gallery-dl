@@ -20,6 +20,7 @@ modules = [
     "artstation",
     "b4k",
     "behance",
+    "bobx",
     "danbooru",
     "desuarchive",
     "deviantart",

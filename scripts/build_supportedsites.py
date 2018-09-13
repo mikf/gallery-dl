@@ -14,6 +14,7 @@ CATEGORY_MAP = {
     "archiveofsins"  : "Archive of Sins",
     "artstation"     : "ArtStation",
     "b4k"            : "arch.b4k.co",
+    "bobx"           : "BobX",
     "deviantart"     : "DeviantArt",
     "dokireader"     : "Doki Reader",
     "dynastyscans"   : "Dynasty Reader",
