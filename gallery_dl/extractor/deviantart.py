@@ -102,6 +102,8 @@ class DeviantartExtractor(Extractor):
         if self.user:
             deviation["username"] = self.user
         deviation["da_category"] = deviation["category"]
+        deviation["published_time"] = text.parse_int(
+            deviation["published_time"])
 
     @staticmethod
     def commit(deviation, target):
