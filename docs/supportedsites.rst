@@ -13,7 +13,7 @@ Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |Images from Use-0|
 Behance              https://www.behance.net/            Images from Users, Galleries
-BobX                 http://www.bobx.com/dark/           Galleries, Models
+BobX                 http://www.bobx.com/dark/           Galleries, Idols
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches
 Desuarchive          https://desuarchive.org/            Threads
 DeviantArt           https://www.deviantart.com/         |Collections, De-1|                                Optional (OAuth)

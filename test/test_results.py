@@ -23,6 +23,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "luscious",  # 504 Gateway Time-out
 }
 
 

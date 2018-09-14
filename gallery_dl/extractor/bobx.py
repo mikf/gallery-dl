@@ -89,9 +89,9 @@ class BobxGalleryExtractor(BobxExtractor):
         return text.extract_iter(page, '<img src="/thumbnail', '"')
 
 
-class BobxModelExtractor(BobxExtractor):
-    """Extractor for a model's image galleries on bobx.com"""
-    subcategory = "model"
+class BobxIdolExtractor(BobxExtractor):
+    """Extractor for an idol's image galleries on bobx.com"""
+    subcategory = "idol"
     pattern = [r"(?:https?://)?(?:www\.)?bobx\.com/([^/]+/[^/?&#]+)/?$"]
     test = [("http://www.bobx.com/idol/nashiko-momotsuki/", {
         "url": "4294c30465ba17c2ed755aa01762c2cb01edc70f",
