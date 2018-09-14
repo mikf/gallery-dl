@@ -1,7 +1,15 @@
 # Changelog
 
-## Unreleased
-- Fixed extraction of `smugmug` albums with no explicit owner ([#100](https://github.com/mikf/gallery-dl/issues/100))
+## 1.5.3 - 2018-09-14
+- Added support for:
+  - `hentaicafe` - https://hentai.cafe/ ([#101](https://github.com/mikf/gallery-dl/issues/101))
+  - `bobx` - http://www.bobx.com/dark/
+- Added black-/whitelist options for post-processor modules
+- Added support for `tumblr` inline videos ([#102](https://github.com/mikf/gallery-dl/issues/102))
+- Fixed extraction of `smugmug` albums without owner ([#100](https://github.com/mikf/gallery-dl/issues/100))
+- Fixed issues when using default config values with `reddit` extractors ([#104](https://github.com/mikf/gallery-dl/issues/104))
+- Fixed pagination for user favorites on `sankaku` ([#106](https://github.com/mikf/gallery-dl/issues/106))
+- Fixed a crash when processing `deviantart` journals ([#108](https://github.com/mikf/gallery-dl/issues/108))
 
 ## 1.5.2 - 2018-08-31
 - Added support for `twitter` timelines ([#96](https://github.com/mikf/gallery-dl/issues/96))
