@@ -130,14 +130,14 @@ class SankakuExtractor(SharedConfigExtractor):
         """Actual login implementation"""
         username = usertuple[0]
         self.log.info("Logging in as %s", username)
-        params = {
+        data = {
             "url": "",
             "user[name]": username,
             "user[password]": password,
             "commit": "Login",
         }
         response = self.request(self.root + "/user/authenticate",
-                                method="POST", params=params)
+                                method="POST", data=data)
         if not response.history or response.url != self.root + "/user/home":
             raise exception.AuthenticationError()
         cookies = response.history[0].cookies
