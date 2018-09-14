@@ -225,8 +225,12 @@ class SankakuTagExtractor(SankakuExtractor):
                 return
             yield from ids
 
+            next_url = text.extract(page, 'next-page-url="/?', '"', pos)[0]
+            if next_url:
+                params["next"] = text.parse_query(next_url)["next"]
+            else:
+                params["next"] = text.parse_int(ids[-1]) - 1
             params["page"] = 2
-            params["next"] = text.parse_int(ids[-1]) - 1
 
 
 class SankakuPoolExtractor(SankakuExtractor):
