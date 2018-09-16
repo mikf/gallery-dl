@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.5.3 - 2018-09-14
 - Added support for:
   - `hentaicafe` - https://hentai.cafe/ ([#101](https://github.com/mikf/gallery-dl/issues/101))
