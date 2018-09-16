@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2017 Mike Fährmann
+# Copyright 2015-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,9 +8,10 @@
 
 """Recursive extractor"""
 
-import re
 from .common import Extractor, Message
-from .. import extractor, adapter, util
+from .. import extractor, util
+import requests
+import re
 
 
 class RecursiveExtractor(Extractor):
@@ -23,7 +24,7 @@ class RecursiveExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.session.mount("file://", adapter.FileAdapter())
+        self.session.mount("file://", FileAdapter())
         self.url = match.group(1)
 
     def items(self):
@@ -34,3 +35,23 @@ class RecursiveExtractor(Extractor):
         with extractor.blacklist(blist):
             for match in re.finditer(r"https?://[^\s\"']+", page):
                 yield Message.Queue, match.group(0), {}
+
+
+class FileAdapter(requests.adapters.BaseAdapter):
+    """Requests adapter for local files"""
+
+    def send(self, request, **kwargs):
+        response = requests.Response()
+        try:
+            response.raw = open(request.url[7:], "rb")
+        except OSError:
+            import io
+            response.raw = io.BytesIO()
+            response.status_code = requests.codes.bad_request
+        else:
+            response.raw.release_conn = response.raw.close
+            response.status_code = requests.codes.ok
+        return response
+
+    def close(self):
+        pass
