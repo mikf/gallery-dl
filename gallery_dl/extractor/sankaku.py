@@ -130,14 +130,15 @@ class SankakuExtractor(SharedConfigExtractor):
         """Actual login implementation"""
         username = usertuple[0]
         self.log.info("Logging in as %s", username)
+        url = self.root + "/user/authenticate"
         data = {
             "url": "",
             "user[name]": username,
             "user[password]": password,
             "commit": "Login",
         }
-        response = self.request(self.root + "/user/authenticate",
-                                method="POST", data=data)
+        response = self.request(url, method="POST", data=data)
+
         if not response.history or response.url != self.root + "/user/home":
             raise exception.AuthenticationError()
         cookies = response.history[0].cookies
@@ -225,12 +226,10 @@ class SankakuTagExtractor(SankakuExtractor):
                 return
             yield from ids
 
-            next_url = text.extract(page, 'next-page-url="/?', '"', pos)[0]
-            if next_url:
-                params["next"] = text.parse_query(next_url)["next"]
-            else:
-                params["next"] = text.parse_int(ids[-1]) - 1
-            params["page"] = 2
+            next_qs = text.extract(page, 'next-page-url="/?', '"', pos)[0]
+            next_id = text.parse_query(next_qs).get("next")
+            params["next"] = next_id or (text.parse_int(ids[-1]) - 1)
+            params["page"] = "2"
 
 
 class SankakuPoolExtractor(SankakuExtractor):
