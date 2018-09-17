@@ -368,8 +368,15 @@ class FlickrAPI(oauth.OAuth1API):
         if self.api_key:
             params["api_key"] = self.api_key
         data = self.session.get(self.API_URL, params=params).json()
-        if "code" in data and data["code"] == 1:
-            raise exception.NotFoundError(self.subcategory)
+        if "code" in data:
+            if data["code"] == 1:
+                raise exception.NotFoundError(self.subcategory)
+            elif data["code"] == 98:
+                raise exception.AuthenticationError(data.get("message"))
+            elif data["code"] == 99:
+                raise exception.AuthorizationError()
+            self.log.error("API call failed: %s", data.get("message"))
+            raise exception.StopExtraction()
         return data
 
     def _pagination(self, method, params):
