@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Added support for:
+  - `wallhaven` - https://alpha.wallhaven.cc/
 
 ## 1.5.3 - 2018-09-14
 - Added support for:
