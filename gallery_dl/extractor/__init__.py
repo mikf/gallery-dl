@@ -86,6 +86,7 @@ modules = [
     "thebarchive",
     "tumblr",
     "twitter",
+    "wallhaven",
     "warosu",
     "worldthree",
     "yandere",

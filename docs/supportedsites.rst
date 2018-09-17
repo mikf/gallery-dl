@@ -79,6 +79,7 @@ SmugMug              https://www.smugmug.com/            |Albums, individ-5|    
 The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
 Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets
+Wallhaven            https://alpha.wallhaven.cc/         individual Images, Search Results
 Warosu               https://warosu.org/                 Threads
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 XVideos              https://www.xvideos.com/            Images from Users, Galleries
