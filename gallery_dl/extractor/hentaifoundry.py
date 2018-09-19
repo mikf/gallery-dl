@@ -145,6 +145,32 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
                      method="post", data=formdata)
 
 
+class HentaifoundryScrapsExtractor(HentaifoundryUserExtractor):
+    """ """
+    subcategory = "scraps"
+    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/pictures/user/([^/]+)/scraps(?:/(?:page/(\d+))?)?$"]
+    test = []
+
+    def __init__(self, match):
+        HentaifoundryUserExtractor.__init__(self, match)
+        self.artist_url += "/scraps"
+
+    def get_job_metadata(self):
+        url = self.artist_url + "?enterAgree=1"
+        response = self.request(url, expect=(404,))
+
+        if response.status_code == 404:
+            raise exception.NotFoundError("user")
+        count = text.parse_int(text.extract(
+            response.text, 'class="active" >Scraps (', ')')[0])
+        if self._skipped >= count:
+            raise exception.StopExtraction()
+
+        self.set_filters()
+        return {"artist": self.artist, "count": count}
+
+
 class HentaifoundryImageExtractor(HentaifoundryExtractor):
     """Extractor for a single image from hentaifoundry.com"""
     subcategory = "image"
