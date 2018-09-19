@@ -96,6 +96,7 @@ AUTH_MAP = {
     "seiga"      : "Required",
     "smugmug"    : "Optional (OAuth)",
     "tumblr"     : "Optional (OAuth)",
+    "wallhaven"  : "Optional",
 }
 
 IGNORE_LIST = (

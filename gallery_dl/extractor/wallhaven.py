@@ -9,7 +9,8 @@
 """Extract images from https://alpha.wallhaven.cc/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 
 
 class WallhavenExtractor(Extractor):
@@ -17,6 +18,35 @@ class WallhavenExtractor(Extractor):
     category = "wallhaven"
     filename_fmt = "{category}_{id}_{width}x{height}.{extension}"
     root = "https://alpha.wallhaven.cc"
+
+    def login(self):
+        """Login and set necessary cookies"""
+        username, password = self._get_auth_info()
+        if username:
+            cookie = self._login_impl(username, password)
+            self.session.cookies.set_cookie(cookie)
+
+    @cache(maxage=365*24*60*60, keyarg=1)
+    def _login_impl(self, username, password):
+        """Actual login implementation"""
+        self.log.info("Logging in as %s", username)
+
+        url = "{}/auth/login".format(self.root)
+        page = self.request(url).text
+        pos = page.index('name="_token"')
+
+        data = {
+            "username": username,
+            "password": password,
+            "_token": text.extract(page, 'value="', '"', pos)[0]
+        }
+        response = self.request(
+            url, method="POST", data=data, allow_redirects=False)
+
+        for cookie in response.cookies:
+            if cookie.name.startswith("remember_"):
+                return cookie
+        raise exception.AuthenticationError()
 
     def get_wallpaper_data(self, wallpaper_id):
         """Extract url and metadata for a wallpaper"""
@@ -61,9 +91,10 @@ class WallhavenSearchExtractor(WallhavenExtractor):
     archive_fmt = "s_{search[q]}_{id}"
     pattern = [r"(?:https?://)?alpha\.wallhaven\.cc/search\?([^/?#]+)"]
     test = [
-        ("https://alpha.wallhaven.cc/search?q=id%3A87", {
-            "url": "0a8ba15e6eb94178a8720811c4bdcca0e20d537a",
-            "keyword": "7e5840cff08ca53cab1963002c4c1c5868f16020",
+        ("https://alpha.wallhaven.cc/search?q=touhou", None),
+        (("https://alpha.wallhaven.cc/search?q=id%3A87"
+          "&categories=111&purity=100&sorting=relevance&order=desc&page=3"), {
+            "url": "1b9b6d97b9670e32ef5dd6942a095549ab543d91",
             "range": (1, 3),
         }),
     ]
@@ -74,6 +105,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         self.params = text.parse_query(match.group(1))
 
     def items(self):
+        self.login()
         yield Message.Version, 1
         yield Message.Directory, {"search": self.params}
 
@@ -127,6 +159,10 @@ class WallhavenImageExtractor(WallhavenExtractor):
                 "favorites": int,
             },
         }),
+        # NSFW
+        ("https://alpha.wallhaven.cc/wallpaper/8536", {
+            "url": "8431c6f1eec3a6f113980eeec9dfcb707de7ddcf",
+        }),
         ("https://whvn.cc/8114", None),
     ]
 
@@ -135,6 +171,7 @@ class WallhavenImageExtractor(WallhavenExtractor):
         self.wallpaper_id = match.group(1)
 
     def items(self):
+        self.login()
         url, data = self.get_wallpaper_data(self.wallpaper_id)
         yield Message.Version, 1
         yield Message.Directory, data
