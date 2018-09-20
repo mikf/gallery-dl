@@ -13,6 +13,7 @@ from .. import text, util, exception
 
 
 class HentaifoundryExtractor(Extractor):
+    """Base class for hentaifoundry extractors"""
     category = "hentaifoundry"
     directory_fmt = ["{category}", "{artist}"]
     filename_fmt = "{category}_{index}_{title}.{extension}"
@@ -20,10 +21,12 @@ class HentaifoundryExtractor(Extractor):
     root = "https://www.hentai-foundry.com"
     per_page = 25
 
-    def __init__(self, artist):
+    def __init__(self, artist, needle=""):
         Extractor.__init__(self)
         self.artist = artist
-        self.artist_url = "{}/pictures/user/{}".format(self.root, self.artist)
+        self.needle = needle
+        self.artist_url = "{}/pictures/user/{}".format(self.root, artist)
+        self.start_page = 1
         self.start_post = 0
 
     def items(self):
@@ -31,92 +34,55 @@ class HentaifoundryExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, data
 
+        self.set_filters()
         for page_url in util.advance(self.get_image_pages(), self.start_post):
             url, image = self.get_image_metadata(page_url)
             image.update(data)
-            if not image["extension"]:
-                image["extension"] = "jpg"
             yield Message.Url, url, image
-
-    def get_image_pages(self):
-        """Yield urls all image pages of one artist"""
-
-    def get_job_metadata(self):
-        """Collect metadata for extractor-job"""
-
-    def get_image_metadata(self, url):
-        """Collect metadata for an image"""
-        page = self.request(text.urljoin(self.root, url)).text
-        index = url.rsplit("/", 2)[1]
-        title, pos = text.extract(
-            page, 'Pictures</a> &raquo; <span>', '<')
-        part, pos = text.extract(
-            page, '//pictures.hentai-foundry.com', '"', pos)
-        data = {"index": text.parse_int(index), "title": text.unescape(title)}
-        text.nameext_from_url(part, data)
-        return "https://pictures.hentai-foundry.com" + part, data
-
-
-class HentaifoundryUserExtractor(HentaifoundryExtractor):
-    """Extractor for all images of a hentai-foundry-user"""
-    subcategory = "user"
-    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com/"
-               r"(?:pictures/user/([^/]+)(?:/(?:page/(\d+))?)?$"
-               r"|user/([^/]+)/profile)"]
-    test = [
-        ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
-            "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
-            "keyword": "f8fecc8aa89978ecf402ec221243978fe791bd54",
-        }),
-        ("http://www.hentai-foundry.com/user/asdq/profile", {
-            "exception": exception.NotFoundError,
-        }),
-        ("https://www.hentai-foundry.com/pictures/user/Tenpura/page/3", None),
-    ]
-
-    def __init__(self, match):
-        HentaifoundryExtractor.__init__(self, match.group(1) or match.group(3))
-        self.start_page = text.parse_int(match.group(2), 1)
-        self._skipped = (self.start_page - 1) * self.per_page
 
     def skip(self, num):
         pages, posts = divmod(num, self.per_page)
         self.start_page += pages
         self.start_post += posts
-        self._skipped += num
         return num
 
-    def get_image_pages(self):
-        num = self.start_page
-
-        while True:
-            url = "{}/page/{}".format(self.artist_url, num)
-            page = self.request(url).text
-            yield from text.extract_iter(page, 'thumbTitle"><a href="', '"')
-
-            if 'class="pager"' not in page or 'class="last hidden"' in page:
-                return
-            num += 1
-
     def get_job_metadata(self):
-        url = self.artist_url + "?enterAgree=1"
-        response = self.request(url, expect=(404,))
-
-        if response.status_code == 404:
-            raise exception.NotFoundError("user")
-        count = text.parse_int(text.extract(
-            response.text, 'class="active" >Pictures (', ')')[0])
-        if self._skipped >= count:
-            raise exception.StopExtraction()
-
-        self.set_filters()
+        """Collect metadata for extractor-job"""
+        page = self.request(self.artist_url + "?enterAgree=1").text
+        needle = ' >{} ('.format(self.needle)
+        count = text.parse_int(text.extract(page, needle, ')')[0])
         return {"artist": self.artist, "count": count}
+
+    def get_image_pages(self):
+        """Yield urls all image pages of one artist"""
+
+    def get_image_metadata(self, url):
+        """Collect metadata for an image"""
+        page = self.request(text.urljoin(self.root, url)).text
+        index = url.rsplit("/", 2)[1]
+        title , pos = text.extract(page, '<title>', '</title>')
+        width , pos = text.extract(page, 'width="', '"', pos)
+        height, pos = text.extract(page, 'height="', '"', pos)
+        url   , pos = text.extract(page, 'src="', '"', pos)
+
+        title, _, artist = title.rpartition(" - ")[0].rpartition(" by ")
+
+        data = text.nameext_from_url(url, {
+            "title": text.unescape(title),
+            "artist": text.unescape(artist),
+            "index": text.parse_int(index),
+            "width": text.parse_int(width),
+            "height": text.parse_int(height),
+        })
+        if not data["extension"]:
+            data["extension"] = "jpg"
+        return text.urljoin(self.root, url), data
 
     def set_filters(self):
         """Set site-internal filters to show all images"""
         token = text.extract(
             self.session.cookies["YII_CSRF_TOKEN"], "%22", "%22")[0]
-        formdata = {
+        data = {
             "YII_CSRF_TOKEN": token,
             "rating_nudity": 3,
             "rating_violence": 3,
@@ -141,60 +107,97 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
             "filter_order": "date_new",
             "filter_type": 0,
         }
-        self.request("https://www.hentai-foundry.com/site/filters",
-                     method="post", data=formdata)
+        url = self.root + "/site/filters"
+        self.request(url, method="POST", data=data)
+
+    def _pagination(self, url):
+        num = self.start_page
+
+        while True:
+            page = self.request("{}/page/{}".format(url, num)).text
+            yield from text.extract_iter(page, 'thumbTitle"><a href="', '"')
+
+            if 'class="pager"' not in page or 'class="last hidden"' in page:
+                return
+            num += 1
 
 
-class HentaifoundryScrapsExtractor(HentaifoundryUserExtractor):
-    """ """
-    subcategory = "scraps"
+class HentaifoundryUserExtractor(HentaifoundryExtractor):
+    """Extractor for all images of a hentai-foundry-user"""
+    subcategory = "user"
     pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
-               r"/pictures/user/([^/]+)/scraps(?:/(?:page/(\d+))?)?$"]
-    test = []
+               r"/(?:pictures/user/([^/]+)(?:/(?:page/(\d+))?)?$"
+               r"|user/([^/]+)/profile)"]
+    test = [
+        ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
+            "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
+            "keyword": "98dc5e3856a38243ad4be3e428dc6a069243bc13",
+        }),
+        ("https://www.hentai-foundry.com/pictures/user/Tenpura/page/3", None),
+        ("https://www.hentai-foundry.com/user/Tenpura/profile", None),
+    ]
 
     def __init__(self, match):
-        HentaifoundryUserExtractor.__init__(self, match)
-        self.artist_url += "/scraps"
+        HentaifoundryExtractor.__init__(
+            self, match.group(1) or match.group(3), "Pictures")
+        self.start_page = text.parse_int(match.group(2), 1)
 
-    def get_job_metadata(self):
-        url = self.artist_url + "?enterAgree=1"
-        response = self.request(url, expect=(404,))
+    def get_image_pages(self):
+        return self._pagination(self.artist_url)
 
-        if response.status_code == 404:
-            raise exception.NotFoundError("user")
-        count = text.parse_int(text.extract(
-            response.text, 'class="active" >Scraps (', ')')[0])
-        if self._skipped >= count:
-            raise exception.StopExtraction()
 
-        self.set_filters()
-        return {"artist": self.artist, "count": count}
+class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
+    """Extractor for scrap images of a hentai-foundry-user"""
+    subcategory = "scraps"
+    directory_fmt = ["{category}", "{artist}", "Scraps"]
+    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/pictures/user/([^/]+)/scraps(?:/(?:page/(\d+))?)?$"]
+    test = [
+        ("https://www.hentai-foundry.com/pictures/user/Evulchibi/scraps", {
+            "url": "00a11e30b73ff2b00a1fba0014f08d49da0a68ec",
+            "keyword": "e294a72ab7be53a716eab92d8c97f82d6e76693c",
+        }),
+        (("https://www.hentai-foundry.com"
+          "/pictures/user/Evulchibi/scraps/page/3"), None),
+    ]
+
+    def __init__(self, match):
+        HentaifoundryExtractor.__init__(self, match.group(1), "Scraps")
+        self.start_page = text.parse_int(match.group(2), 1)
+
+    def get_image_pages(self):
+        return self._pagination(self.artist_url + "/scraps")
 
 
 class HentaifoundryImageExtractor(HentaifoundryExtractor):
     """Extractor for a single image from hentaifoundry.com"""
     subcategory = "image"
-    pattern = [(r"(?:https?://)?(?:www\.|pictures\.)?hentai-foundry\.com/"
-                r"(?:pictures/user/([^/]+)/(\d+)"
-                r"|[^/]/([^/]+)/(\d+))")]
+    pattern = [r"(?:https?://)?(?:www\.|pictures\.)?hentai-foundry\.com"
+               r"/(?:pictures/user|[^/])/([^/]+)/(\d+)"]
     test = [
-        (("http://www.hentai-foundry.com"
+        (("https://www.hentai-foundry.com"
           "/pictures/user/Tenpura/407501/shimakaze"), {
             "url": "fbf2fd74906738094e2575d2728e8dc3de18a8a3",
-            "keyword": "2956321893e9187edde4aeac6bed889449692e6a",
+            "keyword": "e6ae60151ae3c17a22b3d61574ff5a883e577573",
             "content": "91bf01497c39254b6dfb234a18e8f01629c77fd1",
         }),
-        ("http://www.hentai-foundry.com/pictures/user/Tenpura/340853/", {
+        ("https://www.hentai-foundry.com/pictures/user/Tenpura/340853/", {
             "exception": exception.HttpError,
         }),
+        (("https://pictures.hentai-foundry.com"
+          "/t/Tenpura/407501/Tenpura-407501-shimakaze.png"), None),
     ]
 
     def __init__(self, match):
-        HentaifoundryExtractor.__init__(self, match.group(1) or match.group(3))
-        self.index = match.group(2) or match.group(4)
+        HentaifoundryExtractor.__init__(self, match.group(1))
+        self.index = match.group(2)
 
-    def get_image_pages(self):
-        return ("{}/{}?enterAgree=1".format(self.artist_url, self.index),)
+    def items(self):
+        url, data = self.get_image_metadata(
+            "{}/{}/?enterAgree=1".format(self.artist_url, self.index))
+        yield Message.Version, 1
+        yield Message.Directory, data
+        yield Message.Url, url, data
 
-    def get_job_metadata(self):
-        return {"artist": self.artist, "index": text.parse_int(self.index)}
+    def skip(self, _):
+        return 0
