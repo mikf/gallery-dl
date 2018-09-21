@@ -215,13 +215,38 @@ class DownloadJob(Job):
 
     def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
-        if self.pathfmt:
-            self.pathfmt.set_directory(keywords)
-            return
-
-        # delayed initialization
-        self.pathfmt = util.PathFormat(self.extractor)
+        if not self.pathfmt:
+            self.initialize()
         self.pathfmt.set_directory(keywords)
+
+    def handle_queue(self, url, keywords):
+        try:
+            self.__class__(url, self).run()
+        except exception.NoExtractorError:
+            self._write_unsupported(url)
+
+    def handle_finalize(self):
+        if self.postprocessors:
+            for pp in self.postprocessors:
+                pp.finalize()
+
+    def get_downloader(self, url):
+        """Return, and possibly construct, a downloader suitable for 'url'"""
+        scheme = url.partition(":")[0]
+        if scheme == "https":
+            scheme = "http"
+        try:
+            return self.downloaders[scheme]
+        except KeyError:
+            pass
+        klass = downloader.find(scheme)
+        instance = klass(self.extractor.session, self.out)
+        self.downloaders[scheme] = instance
+        return instance
+
+    def initialize(self):
+        """Delayed initialization of PathFormat, etc."""
+        self.pathfmt = util.PathFormat(self.extractor)
         self.sleep = self.extractor.config("sleep")
 
         archive = self.extractor.config("archive")
@@ -254,31 +279,6 @@ class DownloadJob(Job):
             self.extractor.log.debug(
                 "Active postprocessor modules: %s", self.postprocessors)
 
-    def handle_queue(self, url, keywords):
-        try:
-            self.__class__(url, self).run()
-        except exception.NoExtractorError:
-            self._write_unsupported(url)
-
-    def handle_finalize(self):
-        if self.postprocessors:
-            for pp in self.postprocessors:
-                pp.finalize()
-
-    def get_downloader(self, url):
-        """Return, and possibly construct, a downloader suitable for 'url'"""
-        scheme = url.partition(":")[0]
-        if scheme == "https":
-            scheme = "http"
-        try:
-            return self.downloaders[scheme]
-        except KeyError:
-            pass
-        klass = downloader.find(scheme)
-        instance = klass(self.extractor.session, self.out)
-        self.downloaders[scheme] = instance
-        return instance
-
 
 class SimulationJob(DownloadJob):
     """Simulate the extraction process without downloading anything"""
@@ -290,6 +290,10 @@ class SimulationJob(DownloadJob):
             time.sleep(self.sleep)
         if self.archive:
             self.archive.add(keywords)
+
+    def handle_directory(self, keywords):
+        if not self.pathfmt:
+            self.initialize()
 
 
 class KeywordJob(Job):
