@@ -34,6 +34,10 @@ class UgoiraPP(PostProcessor):
         if rate != "auto":
             self.calculate_framerate = lambda _: (None, rate)
 
+        self.prevent_odd = (
+            options.get("libx264-prevent-odd", True) and
+            self.extension.lower() in ("mp4", "mkv"))
+
     def run(self, pathfmt):
         if pathfmt.keywords["extension"] != "zip":
             return
@@ -71,6 +75,8 @@ class UgoiraPP(PostProcessor):
             args += ["-i", ffconcat]
             if rate_out:
                 args += ["-r", str(rate_out)]
+            if self.prevent_odd:
+                args += ["-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)"]
             if self.args:
                 args += self.args
             self.log.debug("ffmpeg args: %s", args)

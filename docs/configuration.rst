@@ -77,7 +77,7 @@ Description A `format string`_ to build the resulting filename
                 subcategory
                   image
 
-            Note that even if the value of the ``extension`` key is missing or
+            Note: Even if the value of the ``extension`` key is missing or
             ``None``, it will filled in later when the file download is
             starting. This key is therefore always available to provide
             a valid filename extension.
@@ -188,7 +188,7 @@ Description Proxy (or proxies) to be used for remote connections.
                     "http://10.20.1.128": "http://10.10.1.10:5323"
                 }
 
-            Note that all proxy URLs should include a scheme,
+            Note: All proxy URLs should include a scheme,
             otherwise ``http://`` is assumed.
 =========== =====
 
@@ -200,7 +200,7 @@ Type        ``string``
 Default     ``"Mozilla/5.0 (X11; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0"``
 Description User-Agent header value to be used for HTTP requests.
 
-            Note that this option has no effect on `pixiv` and
+            Note: This option has no effect on `pixiv` and
             `readcomiconline` extractors, as these need specific values to
             function correctly.
 =========== =====
@@ -626,7 +626,7 @@ Default     ``true``
 Description * ``true``: Extract media from reblogged posts
             * ``false``: Skip reblogged posts
             * ``"same-blog"``: Skip reblogged posts unless the original post
-            is from the same blog
+              is from the same blog
 =========== =====
 
 
@@ -951,6 +951,26 @@ Type        ``bool``
 Default     ``false``
 Description Keep ZIP archives after conversion.
 =========== =====
+
+ugoira.libx264-prevent-odd
+--------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Prevent ``"width/height not divisible by 2"`` errors
+            when presumably using a ``libx264`` encoder
+            by applying a simple cropping filter. See this `Stack Overflow
+            thread <https://stackoverflow.com/questions/20847674>`__
+            for more information.
+
+            If the `filename extension`__ is set to ``mp4`` or ``mkv``,
+            this option effectively adds
+            ``["-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)"]``
+            to the list of FFmpeg command-line arguments
+            to reduce an odd width/height by 1 pixel and make them even.
+=========== =====
+
+__ ugoira.extension_
 
 
 zip
