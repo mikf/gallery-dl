@@ -89,7 +89,8 @@ class MyportfolioUserExtractor(Extractor):
     pattern = [BASE_PATTERN + r"/?$"]
     test = [
         ("https://hannahcosgrove.myportfolio.com/", {
-            "url": "846814f50114e586adfe1fe809fe0da004f22b46",
+            "pattern": r"https://hannahcosgrove\.myportfolio\.com/[^/?&#+]+$",
+            "count": ">= 23",
         }),
         ("myportfolio:https://tooco.com.ar/", {
             "count": ">= 40",

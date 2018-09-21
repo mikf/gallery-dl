@@ -237,16 +237,13 @@ class DeviantartFolderExtractor(DeviantartExtractor):
             "url": "12c331eeff84bd47350af5a199cecc187ae03832",
             "keyword": "2c132d1996b2de87949164a6eab5d72b6c824609",
         }),
-        (("https://www.deviantart.com/majestic-da"
-          "/gallery/63419606/CHIBI-KAWAII"), {
-            "url": "2ea2a3df9591c26568b09291acb453fb87ce9920",
-            "keyword": "adfe3d79c096dc52493a9fc5552f2e08e3fe02ca",
+        ("https://www.deviantart.com/yakuzafc/gallery/37412168/Crafts", {
+            "url": "b6bdaca6bfcedf1c0418c5b5dd19aa1d7fd234db",
+            "keyword": "91624217b8a440e6cd7cc412c475e69b956e0a08",
             "options": (("original", False),),
         }),
-        (("https://shimoda7.deviantart.com"
-          "/gallery/722019/Miscellaneous"), None),
-        (("https://majestic-da.deviantart.com"
-          "/gallery/63419606/CHIBI-KAWAII"), None),
+        ("https://shimoda7.deviantart.com/gallery/722019/Miscellaneous", None),
+        ("https://yakuzafc.deviantart.com/gallery/37412168/Crafts", None),
     ]
 
     def __init__(self, match):
