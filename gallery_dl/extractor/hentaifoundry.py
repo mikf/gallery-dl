@@ -189,6 +189,39 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
         self.url = "{}/user/{}/faves/pictures".format(self.root, self.user)
 
 
+class HentaifoundryRecentExtractor(HentaifoundryExtractor):
+    """Extractor for 'Recent Pictures' on hentaifoundry.com"""
+    subcategory = "recent"
+    directory_fmt = ["{category}", "Recent Pictures", "{date}"]
+    archive_fmt = "r_{index}"
+    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/pictures/recent/(\d+-\d+-\d+)(?:/page/(\d+))?"]
+    test = [("http://www.hentai-foundry.com/pictures/recent/2018-09-20", None)]
+
+    def __init__(self, match):
+        HentaifoundryExtractor.__init__(self, "", match.group(2))
+        self.date = match.group(1)
+        self.url = "{}/pictures/recent/{}".format(self.root, self.date)
+
+    def get_job_metadata(self):
+        self.request(self.root + "/?enterAgree=1")
+        return {"date": self.date}
+
+
+class HentaifoundryPopularExtractor(HentaifoundryExtractor):
+    """Extractor for popular images on hentaifoundry.com"""
+    subcategory = "popular"
+    directory_fmt = ["{category}", "Popular Pictures"]
+    archive_fmt = "p_{index}"
+    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/pictures/popular(?:/page/(\d+))?"]
+    test = [("http://www.hentai-foundry.com/pictures/popular", None)]
+
+    def __init__(self, match):
+        HentaifoundryExtractor.__init__(self, "", match.group(1))
+        self.url = self.root + "/pictures/popular"
+
+
 class HentaifoundryImageExtractor(HentaifoundryExtractor):
     """Extractor for a single image from hentaifoundry.com"""
     subcategory = "image"
