@@ -74,6 +74,7 @@ SUBCATEGORY_MAP = {
     "path"   : "Images from Users and Folders",
     "pinit"  : "pin.it Links",
     "popular": "Popular Images",
+    "recent" : "Recent Images",
     "search" : "Search Results",
     "status" : "Images from Statuses",
     "tag"    : "Tag-Searches",
