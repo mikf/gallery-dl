@@ -168,6 +168,27 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
         return {"user": self.user, "count": text.parse_int(count)}
 
 
+class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
+    """Extractor for favorite images of a hentai-foundry-user"""
+    subcategory = "favorite"
+    directory_fmt = ["{category}", "{user}", "Favorites"]
+    archive_fmt = "f_{user}_{index}"
+    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/user/([^/]+)/faves/pictures(?:/page/(\d+))?"]
+    test = [
+        ("https://www.hentai-foundry.com/user/Tenpura/faves/pictures", {
+            "url": "56f9ae2e89fe855e9fe1da9b81e5ec6212b0320b",
+            "keyword": "0ab79552ae2fbfcf501ebbebcf19c2dfc9b5eb4e",
+        }),
+        ("https://www.hentai-foundry.com"
+         "/user/Tenpura/faves/pictures/page/3", None),
+    ]
+
+    def __init__(self, match):
+        HentaifoundryExtractor.__init__(self, match.group(1), match.group(2))
+        self.url = "{}/user/{}/faves/pictures".format(self.root, self.user)
+
+
 class HentaifoundryImageExtractor(HentaifoundryExtractor):
     """Extractor for a single image from hentaifoundry.com"""
     subcategory = "image"

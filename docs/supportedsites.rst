@@ -29,7 +29,7 @@ Gelbooru             https://gelbooru.com/               Pools, Posts, Tag-Searc
 Gfycat               https://gfycat.com/                 individual Images
 HBrowse              http://www.hbrowse.com/             Chapters, Manga
 Hentai Cafe          https://hentai.cafe/                Chapters, Manga
-Hentai Foundry       https://www.hentai-foundry.com/     Images from Users, individual Images, Scraps
+Hentai Foundry       https://www.hentai-foundry.com/     |Images from Use-3|
 Hentai2Read          https://hentai2read.com/            Chapters, Manga
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries
@@ -56,12 +56,12 @@ Mangareader          https://www.mangareader.net/        Chapters, Manga
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
-nijie                https://nijie.info/                 |Images from Use-3|                                Required
+nijie                https://nijie.info/                 |Images from Use-4|                                Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net                   Images from Users, Images from Statuses
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links, related Pins
-Pixiv                https://www.pixiv.net/              |Images from Use-4|                                Required
+Pixiv                https://www.pixiv.net/              |Images from Use-5|                                Required
 PowerManga           https://powermanga.org/             Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
@@ -75,7 +75,7 @@ Sen Manga            http://raw.senmanga.com/            Chapters
 Sense-Scans          http://sensescans.com/              Chapters, Manga
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
 SlideShare           https://www.slideshare.net/         Presentations
-SmugMug              https://www.smugmug.com/            |Albums, individ-5|                                Optional (OAuth)
+SmugMug              https://www.smugmug.com/            |Albums, individ-6|                                Optional (OAuth)
 The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
 Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets
@@ -97,6 +97,7 @@ Turboimagehost       https://turboimagehost.com/         individual Images
 .. |Images from Use-0| replace:: Images from Users, Albums, Challenges, individual Images, Likes, Search Results
 .. |Collections, De-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images
 .. |Images from Use-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
-.. |Images from Use-3| replace:: Images from Users, Doujin, Favorites, individual Images
-.. |Images from Use-4| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
-.. |Albums, individ-5| replace:: Albums, individual Images, Images from Users and Folders
+.. |Images from Use-3| replace:: Images from Users, Favorites, individual Images, Scraps
+.. |Images from Use-4| replace:: Images from Users, Doujin, Favorites, individual Images
+.. |Images from Use-5| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
+.. |Albums, individ-6| replace:: Albums, individual Images, Images from Users and Folders
