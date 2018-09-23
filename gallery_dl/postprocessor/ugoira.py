@@ -22,7 +22,7 @@ class UgoiraPP(PostProcessor):
     def __init__(self, pathfmt, options):
         PostProcessor.__init__(self)
         self.extension = options.get("extension") or "webm"
-        self.args = options.get("ffmpeg-args")
+        self.args = options.get("ffmpeg-args") or ()
         self.twopass = options.get("ffmpeg-twopass", False)
         self.output = options.get("ffmpeg-output", True)
         self.delete = not options.get("keep-files", False)
@@ -34,9 +34,20 @@ class UgoiraPP(PostProcessor):
         if rate != "auto":
             self.calculate_framerate = lambda _: (None, rate)
 
-        self.prevent_odd = (
-            options.get("libx264-prevent-odd", True) and
-            self.extension.lower() in ("mp4", "mkv"))
+        if options.get("libx264-prevent-odd", True):
+            # get last video-codec argument
+            vcodec = None
+            for index, arg in enumerate(self.args):
+                arg, _, stream = arg.partition(":")
+                if arg == "-vcodec" or arg in ("-c", "-codec") and (
+                        not stream or stream.partition(":")[0] in ("v", "V")):
+                    vcodec = self.args[index + 1]
+            # use filter if libx264/5 is explicitly or implicitly used
+            self.prevent_odd = (
+                vcodec in ("libx264", "libx265") or
+                not vcodec and self.extension.lower() in ("mp4", "mkv"))
+        else:
+            self.prevent_odd = False
 
     def run(self, pathfmt):
         if pathfmt.keywords["extension"] != "zip":
