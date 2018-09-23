@@ -958,14 +958,13 @@ ugoira.libx264-prevent-odd
 Type        ``bool``
 Default     ``true``
 Description Prevent ``"width/height not divisible by 2"`` errors
-            when presumably using a ``libx264`` encoder
+            when using ``libx264`` or ``libx265`` encoders
             by applying a simple cropping filter. See this `Stack Overflow
             thread <https://stackoverflow.com/questions/20847674>`__
             for more information.
 
-            If the `filename extension`__ is set to ``mp4`` or ``mkv``,
-            this option effectively adds
-            ``["-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)"]``
+            This option, when ``libx264/5`` is used, automatically
+            adds ``["-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)"]``
             to the list of FFmpeg command-line arguments
             to reduce an odd width/height by 1 pixel and make them even.
 =========== =====
