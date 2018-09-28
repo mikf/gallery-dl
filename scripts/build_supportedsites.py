@@ -106,16 +106,19 @@ IGNORE_LIST = (
 
 
 class RstColumn():
+    _substitutions = []
 
     def __init__(self, title, data, size=None):
-        self.title = title
         self.data = self._transform(data)
+        self._subs = []
+        self._substitutions.append(self._subs)
+
         if not size:
             self.size = max(len(value) for value in data + [title])
         else:
             self.size = size
 
-        self.title = self._pad(self.title)
+        self.title = self._pad(title)
         for i, value in enumerate(self.data):
             self.data[i] = self._pad(value)
 
@@ -138,7 +141,12 @@ class RstColumn():
         if len(s) <= self.size:
             return s + " " * (self.size - len(s))
         else:
-            return substitute(s, self.size)
+            return self._substitute(s)
+
+    def _substitute(self, value):
+        sub = "|{}-{}|".format(self.title.strip(), len(self._subs))
+        self._subs.append((sub, value))
+        return sub + " " * (self.size - len(sub))
 
 
 class RstTable():
@@ -158,15 +166,6 @@ class RstTable():
 
     def _format_row(self, row):
         return " ".join(col[row] for col in self.columns)
-
-
-_subs = []
-
-
-def substitute(value, size):
-    sub = "|{}-{}|".format(value[:15], len(_subs))
-    _subs.append((value, sub))
-    return sub + " " * (size - len(sub))
 
 
 def build_list():
@@ -261,5 +260,6 @@ with open(os.path.join(ROOTDIR, "docs", outfile), "w") as file:
     for line in RstTable(columns):
         file.write(line.rstrip() + "\n")
     file.write("\n")
-    for val, sub in _subs:
-        file.write(".. {} replace:: {}\n".format(sub, val))
+    for subs in RstColumn._substitutions:
+        for sub, val in subs:
+            file.write(".. {} replace:: {}\n".format(sub, val))

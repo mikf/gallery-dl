@@ -11,25 +11,25 @@ Adobe Portfolio      https://www.myportfolio.com/        Images from Users, Gall
 arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
-ArtStation           https://www.artstation.com/         |Images from Use-0|
+ArtStation           https://www.artstation.com/         |Capabilities-0|
 Behance              https://www.behance.net/            Images from Users, Galleries
 BobX                 http://www.bobx.com/dark/           Galleries, Idols
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches
 Desuarchive          https://desuarchive.org/            Threads
-DeviantArt           https://www.deviantart.com/         |Collections, De-1|                                Optional (OAuth)
+DeviantArt           https://www.deviantart.com/         |Capabilities-1|                                   Optional (OAuth)
 Doki Reader          https://kobato.hologfx.com/         Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fireden              https://boards.fireden.net/         Threads
-Flickr               https://www.flickr.com/             |Images from Use-2|                                Optional (OAuth)
+Flickr               https://www.flickr.com/             |Capabilities-2|                                   Optional (OAuth)
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag-Searches
 Gfycat               https://gfycat.com/                 individual Images
 HBrowse              http://www.hbrowse.com/             Chapters, Manga
 Hentai Cafe          https://hentai.cafe/                Chapters, Manga
-Hentai Foundry       https://www.hentai-foundry.com/     |Images from Use-3|
+Hentai Foundry       https://www.hentai-foundry.com/     |Capabilities-3|
 Hentai2Read          https://hentai2read.com/            Chapters, Manga
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries
@@ -56,12 +56,12 @@ Mangareader          https://www.mangareader.net/        Chapters, Manga
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
-nijie                https://nijie.info/                 |Images from Use-4|                                Required
+nijie                https://nijie.info/                 |Capabilities-4|                                   Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net                   Images from Users, Images from Statuses
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links, related Pins
-Pixiv                https://www.pixiv.net/              |Images from Use-5|                                Required
+Pixiv                https://www.pixiv.net/              |Capabilities-5|                                   Required
 PowerManga           https://powermanga.org/             Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
@@ -75,7 +75,7 @@ Sen Manga            http://raw.senmanga.com/            Chapters
 Sense-Scans          http://sensescans.com/              Chapters, Manga
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
 SlideShare           https://www.slideshare.net/         Presentations
-SmugMug              https://www.smugmug.com/            |Albums, individ-6|                                Optional (OAuth)
+SmugMug              https://www.smugmug.com/            |Capabilities-6|                                   Optional (OAuth)
 The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
 Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets
@@ -94,10 +94,10 @@ Postimg              https://postimg.org/                individual Images
 Turboimagehost       https://turboimagehost.com/         individual Images
 ==================== =================================== ================================================== ================
 
-.. |Images from Use-0| replace:: Images from Users, Albums, Challenges, individual Images, Likes, Search Results
-.. |Collections, De-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images
-.. |Images from Use-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
-.. |Images from Use-3| replace:: Images from Users, Favorites, individual Images, Popular Images, Recent Images, Scraps
-.. |Images from Use-4| replace:: Images from Users, Doujin, Favorites, individual Images
-.. |Images from Use-5| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
-.. |Albums, individ-6| replace:: Albums, individual Images, Images from Users and Folders
+.. |Capabilities-0| replace:: Images from Users, Albums, Challenges, individual Images, Likes, Search Results
+.. |Capabilities-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images
+.. |Capabilities-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
+.. |Capabilities-3| replace:: Images from Users, Favorites, individual Images, Popular Images, Recent Images, Scraps
+.. |Capabilities-4| replace:: Images from Users, Doujin, Favorites, individual Images
+.. |Capabilities-5| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
+.. |Capabilities-6| replace:: Albums, individual Images, Images from Users and Folders
