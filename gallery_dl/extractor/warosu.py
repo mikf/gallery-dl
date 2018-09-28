@@ -17,27 +17,28 @@ class WarosuThreadExtractor(Extractor):
     category = "warosu"
     subcategory = "thread"
     directory_fmt = ["{category}", "{board}", "{thread} - {title}"]
-    filename_fmt = "{tim}-{filename}{ext}"
+    filename_fmt = "{tim}-{filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     pattern = [r"(?:https?://)?(?:www\.)?warosu\.org/([^/]+)/thread/(\d+)"]
     test = [
         ("https://warosu.org/jp/thread/16656025", {
             "url": "889d57246ed67e491e5b8f7f124e50ea7991e770",
-            "keyword": "65607b4630d87767465a5985c81cfa594913c073",
+            "keyword": "c00ea4c5460c5986994f17bb8416826d42ca57c0",
         }),
         ("https://warosu.org/jp/thread/16658073", {
             "url": "4500cf3184b067424fd9883249bd543c905fbecd",
-            "keyword": "d88ea2280201a7b04256c852733faff7272d7d11",
+            "keyword": "7534edf4ec51891dbf44d775b73fbbefd52eec71",
             "content": "d48df0a701e6599312bfff8674f4aa5d4fb8db1c",
         }),
     ]
+    root = "https://warosu.org"
 
     def __init__(self, match):
         Extractor.__init__(self)
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "https://warosu.org/" + self.board + "/thread/" + self.thread
+        url = "{}/{}/thread/{}".format(self.root, self.board, self.thread)
         page = self.request(url).text
         data = self.get_metadata(page)
         posts = self.posts(page)
@@ -48,11 +49,12 @@ class WarosuThreadExtractor(Extractor):
 
         yield Message.Version, 1
         yield Message.Directory, data
-        for post in self.posts(page):
-            if "image" not in post:
-                continue
-            post.update(data)
-            yield Message.Url, post["image"], post
+        for post in posts:
+            if "image" in post:
+                for key in ("w", "h", "no", "time", "tim"):
+                    post[key] = text.parse_int(post[key])
+                post.update(data)
+                yield Message.Url, post["image"], post
 
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""
@@ -102,5 +104,5 @@ class WarosuThreadExtractor(Extractor):
             ("filename", '', '<'),
             ("image"   , '<br />\n<a href="', '"'),
         ), 0, data)
-        data["filename"] = data["filename"].rpartition(".")[0]
+        data["filename"] = text.unquote(data["filename"].rpartition(".")[0])
         data["image"] = "https:" + data["image"]
