@@ -91,6 +91,7 @@ modules = [
     "worldthree",
     "yandere",
     "xvideos",
+    "yuki",
     "imagehosts",
     "directlink",
     "recursive",
