@@ -61,6 +61,7 @@ CATEGORY_MAP = {
     "thebarchive"    : "The /b/ Archive",
     "worldthree"     : "World Three",
     "xvideos"        : "XVideos",
+    "yuki"           : "yuki.la 4chan archive",
 }
 
 SUBCATEGORY_MAP = {
