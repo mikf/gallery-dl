@@ -16,7 +16,7 @@ class YukiThreadExtractor(Extractor):
     """Extractor for images from threads on yuki.la"""
     category = "yuki"
     subcategory = "thread"
-    directory_fmt = ["{category}", "{board}", "{thread} - {title}"]
+    directory_fmt = ["{category}", "{board}", "{thread}{title:? - //}"]
     filename_fmt = "{time}-{filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     pattern = [r"(?:https?://)?yuki\.la/([^/?&#]+)/(\d+)"]
@@ -29,6 +29,16 @@ class YukiThreadExtractor(Extractor):
         ("https://yuki.la/a/159767162", {
             "url": "cd94d0eb646d279c3b7efb9b7898888e5d44fa93",
             "keyword": "7a4ff90e423c74bd3126fb65d13015decec2fa45",
+        }),
+        # old thread - missing board name in title and multi-line HTML
+        ("https://yuki.la/gif/6877752", {
+            "url": "3dbb2f8453490d002416c5fc2fe95b56c129faf9",
+            "keyword": "563ef4ae80134d845dddaed7ebe56f5fc41056be",
+        }),
+        # even older thread - no thread title
+        ("https://yuki.la/a/9357051", {
+            "url": "010560bf254bd485e48366c3531728bda4b22583",
+            "keyword": "7b736c41e307dcfcb84ef495f29299a6ddd06d67",
         }),
     ]
     root = "https://yuki.la"
@@ -54,19 +64,26 @@ class YukiThreadExtractor(Extractor):
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""
         title = text.extract(page, "<title>", "</title>")[0]
-        title, boardname, _ = title.rsplit(" - ", 2)
+        try:
+            title, boardname, _ = title.rsplit(" - ", 2)
+        except ValueError:
+            title = boardname = ""
+        else:
+            title = title.partition(" - ")[2]
+            if not title:
+                title, boardname = boardname, ""
         return {
             "board": self.board,
             "board_name": boardname,
             "thread": text.parse_int(self.thread),
-            "title": text.unescape(title.partition(" - ")[2]),
+            "title": text.unescape(title),
         }
 
     def posts(self, page):
         """Build a list of all post-objects"""
         return [
             self.parse(post) for post in text.extract_iter(
-                page, '<div class="postContainer', '</div></div>')
+                page, '<div class="postContainer', '</blockquote>')
         ]
 
     def parse(self, post):
@@ -81,15 +98,14 @@ class YukiThreadExtractor(Extractor):
 
     @staticmethod
     def _extract_post(post):
-        data = text.extract_all(post, (
+        data, pos = text.extract_all(post, (
             ("no"  , 'id="pc', '"'),
             ("name", '<span class="name">', '</span>'),
             ("time", 'data-utc="', '"'),
             ("now" , '>', ' <'),
-            ("com" , '<blockquote ', '</blockquote>'),
-        ))[0]
+        ))
         data["com"] = text.unescape(text.remove_html(
-            data["com"].partition(">")[2]))
+            post[post.index("<blockquote ", pos):].partition(">")[2]))
         return data
 
     @staticmethod
