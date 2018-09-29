@@ -66,13 +66,13 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
         ChapterExtractor.__init__(self, self.root + match.group(1))
 
     def get_metadata(self, page):
-        info = text.extract(page, '<b>', "</b>")[0]
+        info = text.extract(page, '<title>', " - Komikcast</title>")[0]
         return self.parse_chapter_string(info)
 
     @staticmethod
     def get_images(page):
         readerarea = text.extract(
-            page, '<div id="readerarea">', '<div class="navig">')[0]
+            page, '<div class="lexot">', '</center>')[0]
         return [
             (text.unescape(url), {
                 "width": text.parse_int(width),
@@ -104,9 +104,11 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
         results = []
         data = self.get_metadata(page)
 
+        page = text.extract(
+            page, "<span>Chapter List</span>", "<span>Download</span>")[0]
         for item in text.extract_iter(
-                page, '<span class="leftoff"><a href="', '</a>'):
-            url, _, chapter_string = item.rpartition('">Chapter ')
+                page, ' href="', '" rel="'):
+            url, _, chapter_string = item.rpartition('" title="')
             self.parse_chapter_string(chapter_string, data)
             results.append((url, data.copy()))
         return results
@@ -115,9 +117,9 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     def get_metadata(page):
         """Return a dict with general metadata"""
         manga , pos = text.extract(page, "<title>", "</title>")
-        author, pos = text.extract(page, "<th>Author</th><td>", "</td>", pos)
-        genres, pos = text.extract(page, "<th>Genres </th><td>", "</td>", pos)
-        mtype , pos = text.extract(page, "<th>Type </th><td>", "</td>", pos)
+        author, pos = text.extract(page, "<b>Author</b>: ", "</span>", pos)
+        genres, pos = text.extract(page, "<b>Genres </b>: ", "</span>", pos)
+        mtype , pos = text.extract(page, "<b>Type </b>: ", "</span>", pos)
 
         return {
             "manga": text.unescape(manga.rpartition(" - ")[0]),
