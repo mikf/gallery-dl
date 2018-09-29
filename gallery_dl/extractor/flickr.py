@@ -114,7 +114,7 @@ class FlickrAlbumExtractor(FlickrExtractor):
     test = [(("https://www.flickr.com/photos/"
               "shona_s/albums/72157633471741607"), {
         "url": "baf4a3d1b15afcecf9638000a12c0eb3d5df9024",
-        "keyword": "3a99f962f30691dc1b2da46be56fe1b7768fe707",
+        "keyword": "b579f19134ab8217f05979e52adf7712898492c7",
     })]
 
     def __init__(self, match):
@@ -122,21 +122,13 @@ class FlickrAlbumExtractor(FlickrExtractor):
         self.album_id = match.group(2)
 
     def data(self):
-        self._generator = self.api.photosets_getPhotos(self.album_id)
-        self._first = next(self._generator)
-        photoset = self._first.copy()
-        del photoset["photo"]
-        return {"album": photoset}
+        data = FlickrExtractor.data(self)
+        data["album"] = self.api.photosets_getInfo(
+            self.album_id, self.user["nsid"])
+        return data
 
     def photos(self):
-        for photo in self._photos():
-            self.api._extract_format(photo)
-            yield photo
-
-    def _photos(self):
-        yield from self._first["photo"]
-        for photoset in self._generator:
-            yield from photoset["photo"]
+        return self.api.photosets_getPhotos(self.album_id)
 
 
 class FlickrGalleryExtractor(FlickrExtractor):
@@ -293,11 +285,7 @@ class FlickrAPI(oauth.OAuth1API):
         """Gets information about a gallery."""
         params = {"gallery_id": gallery_id}
         gallery = self._call("galleries.getInfo", params)["gallery"]
-        del gallery["count_views"]
-        del gallery["count_comments"]
-        gallery["title"] = gallery["title"]["_content"]
-        gallery["description"] = gallery["description"]["_content"]
-        return gallery
+        return self._clean_info(gallery)
 
     def galleries_getPhotos(self, gallery_id):
         """Return the list of photos for a gallery."""
@@ -340,10 +328,16 @@ class FlickrAPI(oauth.OAuth1API):
         """Return a list of photos matching some criteria."""
         return self._listing("photos.search", params.copy())
 
+    def photosets_getInfo(self, photoset_id, user_id):
+        """Gets information about a photoset."""
+        params = {"photoset_id": photoset_id, "user_id": user_id}
+        photoset = self._call("photosets.getInfo", params)["photoset"]
+        return self._clean_info(photoset)
+
     def photosets_getPhotos(self, photoset_id):
         """Get the list of photos in a set."""
         params = {"photoset_id": photoset_id}
-        return self._pagination("photosets.getPhotos", params)
+        return self._listing("photosets.getPhotos", params)
 
     def urls_lookupGroup(self, groupname):
         """Returns a group NSID, given the url to a group's page."""
@@ -433,3 +427,11 @@ class FlickrAPI(oauth.OAuth1API):
         else:
             # extra API call to get photo url and size
             photo["photo"] = self.photos_getSizes(photo["id"])[-1]
+
+    @staticmethod
+    def _clean_info(info):
+        del info["count_views"]
+        del info["count_comments"]
+        info["title"] = info["title"]["_content"]
+        info["description"] = info["description"]["_content"]
+        return info
