@@ -9,7 +9,7 @@
 """Extract images from https://twitter.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, extractor
 
 
 class TwitterExtractor(Extractor):
@@ -24,24 +24,31 @@ class TwitterExtractor(Extractor):
         Extractor.__init__(self)
         self.user = match.group(1)
         self.retweets = self.config("retweets", True)
+        self.videos = self.config("videos", False)
+
+        if self.videos:
+            self._blacklist = extractor.blacklist(("twitter",))
 
     def items(self):
         yield Message.Version, 1
         yield Message.Directory, self.metadata()
 
         for tweet in self.tweets():
-            images = list(text.extract_iter(
-                tweet, 'data-image-url="', '"'))
-            if not images:
-                continue
-
             data = self._data_from_tweet(tweet)
             if not self.retweets and data["retweet_id"]:
                 continue
 
+            images = text.extract_iter(
+                tweet, 'data-image-url="', '"')
             for data["num"], url in enumerate(images, 1):
                 text.nameext_from_url(url, data)
                 yield Message.Url, url + ":orig", data
+
+            if self.videos and "-videoContainer" in tweet:
+                url = "{}/{}/status/{}".format(
+                    self.root, data["user"], data["tweet_id"])
+                with self._blacklist:
+                    yield Message.Queue, url, data
 
     def metadata(self):
         """Return general metadata"""
@@ -49,7 +56,6 @@ class TwitterExtractor(Extractor):
 
     def tweets(self):
         """Yield HTML content of all relevant tweets"""
-        return ()
 
     @staticmethod
     def _data_from_tweet(tweet):

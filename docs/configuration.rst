@@ -654,6 +654,15 @@ Description Extract images from retweets.
 =========== =====
 
 
+extractor.twitter.videos
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Output video tweets as unsupported URLs.
+=========== =====
+
+
 extractor.[booru].tags
 ----------------------
 =========== =====
