@@ -94,7 +94,7 @@ class BobxIdolExtractor(BobxExtractor):
     subcategory = "idol"
     pattern = [r"(?:https?://)?(?:www\.)?bobx\.com/([^/]+/[^/?&#]+)/?$"]
     test = [("http://www.bobx.com/idol/nashiko-momotsuki/", {
-        "url": "4294c30465ba17c2ed755aa01762c2cb01edc70f",
+        "url": "5e4b57f39dc1b59e80ffa29ca51b6469f13f564d",
     })]
 
     def __init__(self, match):
