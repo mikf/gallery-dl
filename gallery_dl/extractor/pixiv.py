@@ -9,7 +9,7 @@
 """Extract images and ugoira from https://www.pixiv.net/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, exception
 from ..cache import cache
 from datetime import datetime, timedelta
 
@@ -95,11 +95,6 @@ class PixivUserExtractor(PixivExtractor):
           "&tag=%E6%89%8B%E3%81%B6%E3%82%8D"), {
             "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
         }),
-        # all sorts of query parameters
-        (("https://www.pixiv.net/member_illust.php?id=3137110"
-          "&tag=%E3%83%96%E3%82%A4%E3%82%BA&type=illust&p=2"), {
-            "count": ">= 55",
-        }),
         ("http://www.pixiv.net/member_illust.php?id=173531", {
             "exception": exception.NotFoundError,
         }),
@@ -112,33 +107,20 @@ class PixivUserExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
-        self.user_id, self.query = match.groups()
+        self.user_id = match.group(1)
+        self.query = text.parse_query(match.group(2))
 
     def works(self):
         works = self.api.user_illusts(self.user_id)
 
-        if self.query:
-            qdict = text.parse_query(self.query)
-            if "type" in qdict:
-                type_ = qdict["type"].lower()
-                if type_ != "all":
-                    works = filter(self._is_type(type_), works)
-            if "tag" in qdict:
-                tag = text.unquote(qdict["tag"]).lower()
-                works = filter(self._has_tag(tag), works)
-            if "p" in qdict:  # apply page-offset last
-                offset = (text.parse_int(qdict["p"], 1) - 1) * 20
-                works = util.advance(works, offset)
+        if "tag" in self.query:
+            tag = text.unquote(self.query["tag"]).lower()
+            works = (
+                work for work in works
+                if tag in [t["name"].lower() for t in work["tags"]]
+            )
 
         return works
-
-    @staticmethod
-    def _has_tag(tag):
-        return lambda work: tag in [t["name"].lower() for t in work["tags"]]
-
-    @staticmethod
-    def _is_type(type_):
-        return lambda work: work["type"] == type_
 
 
 class PixivMeExtractor(PixivExtractor):
@@ -252,17 +234,13 @@ class PixivFavoriteExtractor(PixivExtractor):
     def works(self):
         tag = None
         restrict = "public"
-        offset = 0
 
         if "tag" in self.query:
             tag = text.unquote(self.query["tag"])
         if "rest" in self.query and self.query["rest"] == "hide":
             restrict = "private"
-        if "p" in self.query:
-            offset = (text.parse_int(self.query["p"], 1) - 1) * 20
 
-        works = self.api.user_bookmarks_illust(self.user_id, tag, restrict)
-        return util.advance(works, offset)
+        return self.api.user_bookmarks_illust(self.user_id, tag, restrict)
 
     def get_metadata(self, user=None):
         if "id" in self.query:
