@@ -179,17 +179,17 @@ class DownloadJob(Job):
             time.sleep(self.sleep)
 
         # download from URL
-        if not self.get_downloader(url).download(url, self.pathfmt):
+        if not self.download(url):
 
             # use fallback URLs if available
             for num, url in enumerate(fallback or (), 1):
                 self.log.info("Trying fallback URL #%d", num)
-                if self.get_downloader(url).download(url, self.pathfmt):
+                if self.download(url):
                     break
             else:
                 # download failed
                 self.log.error(
-                    "Failed to download %s", self.pathfmt.filename)
+                    "Failed to download %s", self.pathfmt.filename or url)
                 return
 
         if not self.pathfmt.temppath:
@@ -230,17 +230,29 @@ class DownloadJob(Job):
             for pp in self.postprocessors:
                 pp.finalize()
 
-    def get_downloader(self, url):
-        """Return, and possibly construct, a downloader suitable for 'url'"""
+    def download(self, url):
+        """Download 'url'"""
         scheme = url.partition(":")[0]
+        downloader = self.get_downloader(scheme)
+        if downloader:
+            return downloader.download(url, self.pathfmt)
+        return False
+
+    def get_downloader(self, scheme):
+        """Return a downloader suitable for 'scheme'"""
         if scheme == "https":
             scheme = "http"
         try:
             return self.downloaders[scheme]
         except KeyError:
             pass
+
         klass = downloader.find(scheme)
-        instance = klass(self.extractor.session, self.out)
+        if klass:
+            instance = klass(self.extractor.session, self.out)
+        else:
+            instance = None
+            self.log.error("'%s:' URLs are not supported", scheme)
         self.downloaders[scheme] = instance
         return instance
 

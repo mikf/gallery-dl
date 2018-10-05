@@ -9,7 +9,7 @@
 """Extract images from https://twitter.com/"""
 
 from .common import Extractor, Message
-from .. import text, extractor
+from .. import text
 
 
 class TwitterExtractor(Extractor):
@@ -25,9 +25,6 @@ class TwitterExtractor(Extractor):
         self.user = match.group(1)
         self.retweets = self.config("retweets", True)
         self.videos = self.config("videos", False)
-
-        if self.videos:
-            self._blacklist = extractor.blacklist(("twitter",))
 
     def items(self):
         yield Message.Version, 1
@@ -45,10 +42,10 @@ class TwitterExtractor(Extractor):
                 yield Message.Url, url + ":orig", data
 
             if self.videos and "-videoContainer" in tweet:
-                url = "{}/{}/status/{}".format(
+                data["num"] = 1
+                url = "ytdl:{}/{}/status/{}".format(
                     self.root, data["user"], data["tweet_id"])
-                with self._blacklist:
-                    yield Message.Queue, url, data
+                yield Message.Url, url, data
 
     def metadata(self):
         """Return general metadata"""
