@@ -433,7 +433,7 @@ class TestJob(DownloadJob):
         self.hash_content = hashlib.sha1()
         if content:
             self.fileobj = self.HashIO(self.hash_content)
-            self.get_downloader("http:")._check_extension = lambda a, b: None
+            self.get_downloader("http")._check_extension = lambda a, b: None
 
     def run(self):
         for msg in self.extractor:
@@ -476,7 +476,8 @@ class TestJob(DownloadJob):
     def update_content(self, url):
         """Update the content hash"""
         if self.content:
-            self.get_downloader(url).download(url, self.fileobj)
+            scheme = url.partition(":")[0]
+            self.get_downloader(scheme).download(url, self.fileobj)
 
 
 class DataJob(Job):
