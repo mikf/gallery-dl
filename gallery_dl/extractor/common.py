@@ -41,6 +41,8 @@ class Extractor():
             ("downloader", "http", "retries"), 5)
         self._timeout = config.interpolate(
             ("downloader", "http", "timeout"), 30)
+        self._verify = config.interpolate(
+            ("downloader", "http", "verify"), True)
 
     def __iter__(self):
         return self.items()
@@ -60,6 +62,7 @@ class Extractor():
         tries = 0
         retries = retries or self._retries
         kwargs.setdefault("timeout", self._timeout)
+        kwargs.setdefault("verify", self._verify)
         while True:
             try:
                 response = self.session.request(method, url, **kwargs)
