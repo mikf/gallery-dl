@@ -15,8 +15,6 @@ import unittest
 import threading
 import http.server
 
-import requests
-
 import gallery_dl.downloader as downloader
 import gallery_dl.extractor as extractor
 import gallery_dl.config as config
@@ -29,6 +27,7 @@ class TestDownloaderBase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.extractor = extractor.find("test:")
         cls.dir = tempfile.TemporaryDirectory()
         cls.fnum = 0
         config.set(("base-directory",), cls.dir.name)
@@ -49,7 +48,7 @@ class TestDownloaderBase(unittest.TestCase):
             "name": name,
             "extension": extension,
         }
-        pathfmt = PathFormat(extractor.find("test:"))
+        pathfmt = PathFormat(cls.extractor)
         pathfmt.set_directory(kwdict)
         pathfmt.set_keywords(kwdict)
 
@@ -90,8 +89,7 @@ class TestHTTPDownloader(TestDownloaderBase):
     @classmethod
     def setUpClass(cls):
         TestDownloaderBase.setUpClass()
-        cls.downloader = downloader.find("http")(
-            requests.session(), NullOutput())
+        cls.downloader = downloader.find("http")(cls.extractor, NullOutput())
 
         port = 8088
         cls.address = "http://127.0.0.1:{}".format(port)
@@ -128,7 +126,7 @@ class TestTextDownloader(TestDownloaderBase):
     @classmethod
     def setUpClass(cls):
         TestDownloaderBase.setUpClass()
-        cls.downloader = downloader.find("text")(None, NullOutput())
+        cls.downloader = downloader.find("text")(cls.extractor, NullOutput())
 
     def test_text_download(self):
         self._run_test("text:foobar", None, "foobar", "txt", "txt")
@@ -146,8 +144,8 @@ class TestTextDownloader(TestDownloaderBase):
 class FakeDownloader(DownloaderBase):
     scheme = "fake"
 
-    def __init__(self, session, output):
-        DownloaderBase.__init__(self, session, output)
+    def __init__(self, extractor, output):
+        DownloaderBase.__init__(self, extractor, output)
 
     def connect(self, url, offset):
         pass

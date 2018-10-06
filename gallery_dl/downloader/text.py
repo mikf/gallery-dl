@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,8 +14,8 @@ from .common import DownloaderBase
 class Downloader(DownloaderBase):
     scheme = "text"
 
-    def __init__(self, session, output):
-        DownloaderBase.__init__(self, session, output)
+    def __init__(self, extractor, output):
+        DownloaderBase.__init__(self, extractor, output)
         self.content = b""
 
     def connect(self, url, offset):

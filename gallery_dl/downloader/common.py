@@ -20,8 +20,8 @@ class DownloaderBase():
     scheme = ""
     retries = 1
 
-    def __init__(self, session, output):
-        self.session = session
+    def __init__(self, extractor, output):
+        self.session = extractor.session
         self.out = output
         self.log = logging.getLogger("download")
         self.downloading = False

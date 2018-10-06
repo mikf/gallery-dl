@@ -249,7 +249,7 @@ class DownloadJob(Job):
 
         klass = downloader.find(scheme)
         if klass:
-            instance = klass(self.extractor.session, self.out)
+            instance = klass(self.extractor, self.out)
         else:
             instance = None
             self.log.error("'%s:' URLs are not supported", scheme)

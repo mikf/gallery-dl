@@ -37,12 +37,9 @@ class Extractor():
         self._set_headers()
         self._set_cookies()
         self._set_proxies()
-        self._retries = config.interpolate(
-            ("downloader", "http", "retries"), 5)
-        self._timeout = config.interpolate(
-            ("downloader", "http", "timeout"), 30)
-        self._verify = config.interpolate(
-            ("downloader", "http", "verify"), True)
+        self._retries = self.config("retries", 5)
+        self._timeout = self.config("timeout", 30)
+        self._verify = self.config("verify", True)
 
     def __iter__(self):
         return self.items()

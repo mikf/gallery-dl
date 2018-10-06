@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2017 Mike Fährmann
+# Copyright 2014-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,12 +18,12 @@ from .. import text, exception
 class Downloader(DownloaderBase):
     scheme = "http"
 
-    def __init__(self, session, output):
-        DownloaderBase.__init__(self, session, output)
+    def __init__(self, extractor, output):
+        DownloaderBase.__init__(self, extractor, output)
         self.response = None
-        self.retries = self.config("retries", 5)
-        self.timeout = self.config("timeout", 30)
-        self.verify = self.config("verify", True)
+        self.retries = self.config("retries", extractor._retries)
+        self.timeout = self.config("timeout", extractor._timeout)
+        self.verify = self.config("verify", extractor._verify)
         self.rate = self.config("rate")
         self.chunk_size = 16384
 
