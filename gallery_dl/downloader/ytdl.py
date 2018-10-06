@@ -17,8 +17,8 @@ import os
 class Downloader(DownloaderBase):
     scheme = "ytdl"
 
-    def __init__(self, session, output):
-        DownloaderBase.__init__(self, session, output)
+    def __init__(self, extractor, output):
+        DownloaderBase.__init__(self, extractor, output)
         self.ytdl = YoutubeDL({
             "logger": logging.getLogger("ytdl"),
         })
