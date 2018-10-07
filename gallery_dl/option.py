@@ -134,7 +134,7 @@ def build_parser():
     output.add_argument(
         "--write-log",
         metavar="FILE", dest="logfile", action=ConfigAction,
-        help=("Write logging output to FILE"),
+        help="Write logging output to FILE",
     )
     output.add_argument(
         "--write-unsupported",
@@ -183,18 +183,18 @@ def build_parser():
         help="Additional configuration files",
     )
     configuration.add_argument(
-        "--config-yaml",
-        metavar="CFG", dest="yamlfiles", action="append",
-        help="Additional configuration files (YAML format)",
+        "-o", "--option",
+        metavar="OPT", action=ParseAction, dest="options", default=[],
+        help="Additional '<key>=<value>' option values",
     )
     configuration.add_argument(
         "--ignore-config", dest="load_config", action="store_false",
         help="Do not read the default configuration files",
     )
     configuration.add_argument(
-        "-o", "--option",
-        metavar="OPT", action=ParseAction, dest="options", default=[],
-        help="Additional '<key>=<value>' option values",
+        "--config-yaml",
+        metavar="CFG", dest="yamlfiles", action="append",
+        help=argparse.SUPPRESS,
     )
 
     authentication = parser.add_argument_group("Authentication Options")
@@ -223,31 +223,30 @@ def build_parser():
     )
     selection.add_argument(
         "--range",
-        metavar="RANGE", dest="image_range",
-        help=("Specify which images to download through a comma seperated list"
-              " of indices or index-ranges; "
-              "for example '--range -2,4,6-8,10-' will download images with "
+        metavar="RANGE", dest="image-range", action=ConfigAction,
+        help=("Index-range specifying which images to download. "
+              "For example '--range -2,4,6-8,10-' will download images with "
               "index 1, 2, 4, 6, 7, 8 and 10 up to the last one"),
     )
     selection.add_argument(
         "--chapter-range",
-        metavar="RANGE", dest="chapter_range",
-        help=("Same as '--range' except for chapters "
+        metavar="RANGE", dest="chapter-range", action=ConfigAction,
+        help=("Like '--range', but applies to manga-chapters "
               "and other delegated URLs"),
     )
     selection.add_argument(
         "--filter",
-        metavar="EXPR", dest="image_filter",
-        help=("Python expression controlling which images to download. Images "
-              "for which the expression evaluates to False are ignored. "
+        metavar="EXPR", dest="image-filter", action=ConfigAction,
+        help=("Python expression controlling which images to download. "
+              "Files for which the expression evaluates to False are ignored. "
               "Available keys are the filename-specific ones listed by '-K'. "
               "Example: --filter \"image_width >= 1000 and "
               "rating in ('s', 'q')\""),
     )
     selection.add_argument(
         "--chapter-filter",
-        metavar="EXPR", dest="chapter_filter",
-        help=("Same as '--filter' except for chapters "
+        metavar="EXPR", dest="chapter-filter", action=ConfigAction,
+        help=("Like '--filter', but applies to manga-chapters "
               "and other delegated URLs"),
     )
 
