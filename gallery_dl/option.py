@@ -170,6 +170,11 @@ def build_parser():
         help="Do not use .part files",
     )
     downloader.add_argument(
+        "--no-check-certificate",
+        action=ConfigConstAction, nargs=0, dest="verify", const=False,
+        help="Disable HTTPS certificate validation",
+    )
+    downloader.add_argument(
         "--abort-on-skip",
         action=ConfigConstAction, nargs=0, dest="skip", const="abort",
         help=("Abort extractor run if a file download would normally be "
