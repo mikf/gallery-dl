@@ -29,25 +29,12 @@ class Job():
             "Using %s for '%s'", self.extractor.__class__.__name__, url)
 
         # url predicates
-        predicates = [util.UniquePredicate()]
-        image = config.get(("_", "image"), {})
-        if "filter" in image:
-            predicates.append(util.FilterPredicate(image["filter"]))
-        if "range" in image:
-            pred = util.RangePredicate(image["range"])
-            if pred.lower > 1 and "filter" not in image:
-                pred.index += self.extractor.skip(pred.lower - 1)
-            predicates.append(pred)
-        self.pred_url = util.build_predicate(predicates)
+        self.pred_url = self._prepare_predicates(
+            "image", [util.UniquePredicate()], True)
 
         # queue predicates
-        predicates = []
-        chapter = config.get(("_", "chapter"), {})
-        if "filter" in chapter:
-            predicates.append(util.FilterPredicate(chapter["filter"]))
-        if "range" in chapter:
-            predicates.append(util.RangePredicate(chapter["range"]))
-        self.pred_queue = util.build_predicate(predicates)
+        self.pred_queue = self._prepare_predicates(
+            "chapter", [], False)
 
         # category transfer
         if parent and parent.extractor.categorytransfer:
@@ -147,6 +134,30 @@ class Job():
         kwdict["subcategory"] = self.extractor.subcategory
         if self.userkwds:
             kwdict.update(self.userkwds)
+
+    def _prepare_predicates(self, target, predicates, skip=True):
+        pfilter = self.extractor.config(target + "-filter")
+        if pfilter:
+            try:
+                pred = util.FilterPredicate(pfilter, target)
+            except (SyntaxError, ValueError, TypeError) as exc:
+                self.extractor.log.warning(exc)
+            else:
+                predicates.append(pred)
+
+        prange = self.extractor.config(target + "-range")
+        if prange:
+            try:
+                pred = util.RangePredicate(prange)
+            except ValueError as exc:
+                self.extractor.log.warning(
+                    "invalid %s range: %s", target, exc)
+            else:
+                if skip and pred.lower > 1 and not pfilter:
+                    pred.index += self.extractor.skip(pred.lower - 1)
+                predicates.append(pred)
+
+        return util.build_predicate(predicates)
 
     def _write_unsupported(self, url):
         if self.ulog:

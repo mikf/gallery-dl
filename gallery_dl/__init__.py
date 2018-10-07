@@ -116,25 +116,6 @@ def progress(urls, pformat):
         yield pinfo["url"]
 
 
-def prepare_range(rangespec, target):
-    if rangespec:
-        range = util.optimize_range(util.parse_range(rangespec))
-        if range:
-            config.set(("_", target, "range"), range)
-        else:
-            log.warning("invalid/empty %s range", target)
-
-
-def prepare_filter(filterexpr, target):
-    if filterexpr:
-        try:
-            name = "<{} filter>".format(target)
-            codeobj = compile(filterexpr, name, "eval")
-            config.set(("_", target, "filter"), codeobj)
-        except (SyntaxError, ValueError, TypeError) as exc:
-            log.warning(exc)
-
-
 def parse_inputfile(file):
     """Filter and process strings from an input file.
 
@@ -316,11 +297,6 @@ def main():
                 ulog.addHandler(handler)
                 ulog.propagate = False
                 job.Job.ulog = ulog
-
-            prepare_range(args.image_range, "image")
-            prepare_range(args.chapter_range, "chapter")
-            prepare_filter(args.image_filter, "image")
-            prepare_filter(args.chapter_filter, "chapter")
 
             pformat = config.get(("output", "progress"), True)
             if pformat and len(urls) > 1 and args.loglevel < logging.ERROR:

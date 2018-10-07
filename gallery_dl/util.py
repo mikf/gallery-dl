@@ -22,55 +22,6 @@ import urllib.parse
 from . import text, exception
 
 
-def parse_range(rangespec):
-    """Parse an integer range string and return the resulting ranges
-
-    Examples
-        parse_range("-2,4,6-8,10-")      -> [(1,2), (4,4), (6,8), (10,INTMAX)]
-        parse_range(" - 3 , 4-  4, 2-6") -> [(1,3), (4,4), (2,6)]
-    """
-    ranges = []
-
-    for group in rangespec.split(","):
-        first, sep, last = group.partition("-")
-        try:
-            if not sep:
-                beg = end = int(first)
-            else:
-                beg = int(first) if first.strip() else 1
-                end = int(last) if last.strip() else sys.maxsize
-            ranges.append((beg, end) if beg <= end else (end, beg))
-        except ValueError:
-            pass
-
-    return ranges
-
-
-def optimize_range(ranges):
-    """Simplify/Combine a parsed list of ranges
-
-    Examples
-        optimize_range([(2,4), (4,6), (5,8)])         -> [(2,8)]
-        optimize_range([(1,1), (2,2), (3,6), (8,9))]) -> [(1,6), (8,9)]
-    """
-    if len(ranges) <= 1:
-        return ranges
-
-    ranges.sort()
-    riter = iter(ranges)
-    result = []
-
-    beg, end = next(riter)
-    for lower, upper in riter:
-        if lower > end+1:
-            result.append((beg, end))
-            beg, end = lower, upper
-        elif upper > end:
-            end = upper
-    result.append((beg, end))
-    return result
-
-
 def bencode(num, alphabet="0123456789"):
     """Encode an integer into a base-N encoded string"""
     data = ""
@@ -186,9 +137,10 @@ def build_predicate(predicates):
 
 class RangePredicate():
     """Predicate; True if the current index is in the given range"""
-    def __init__(self, ranges):
-        self.ranges = ranges
+    def __init__(self, rangespec):
+        self.ranges = self.optimize_range(self.parse_range(rangespec))
         self.index = 0
+
         if self.ranges:
             self.lower, self.upper = self.ranges[0][0], self.ranges[-1][1]
         else:
@@ -204,6 +156,54 @@ class RangePredicate():
             if lower <= self.index <= upper:
                 return True
         return False
+
+    @staticmethod
+    def parse_range(rangespec):
+        """Parse an integer range string and return the resulting ranges
+
+        Examples:
+            parse_range("-2,4,6-8,10-") -> [(1,2), (4,4), (6,8), (10,INTMAX)]
+            parse_range(" - 3 , 4-  4, 2-6") -> [(1,3), (4,4), (2,6)]
+        """
+        ranges = []
+
+        for group in rangespec.split(","):
+            if not group:
+                continue
+            first, sep, last = group.partition("-")
+            if not sep:
+                beg = end = int(first)
+            else:
+                beg = int(first) if first.strip() else 1
+                end = int(last) if last.strip() else sys.maxsize
+            ranges.append((beg, end) if beg <= end else (end, beg))
+
+        return ranges
+
+    @staticmethod
+    def optimize_range(ranges):
+        """Simplify/Combine a parsed list of ranges
+
+        Examples:
+            optimize_range([(2,4), (4,6), (5,8)]) -> [(2,8)]
+            optimize_range([(1,1), (2,2), (3,6), (8,9))]) -> [(1,6), (8,9)]
+        """
+        if len(ranges) <= 1:
+            return ranges
+
+        ranges.sort()
+        riter = iter(ranges)
+        result = []
+
+        beg, end = next(riter)
+        for lower, upper in riter:
+            if lower > end+1:
+                result.append((beg, end))
+                beg, end = lower, upper
+            elif upper > end:
+                end = upper
+        result.append((beg, end))
+        return result
 
 
 class UniquePredicate():
@@ -230,8 +230,9 @@ class FilterPredicate():
         "re": re,
     }
 
-    def __init__(self, codeobj):
-        self.codeobj = codeobj
+    def __init__(self, filterexpr, target="image"):
+        name = "<{} filter>".format(target)
+        self.codeobj = compile(filterexpr, name, "eval")
 
     def __call__(self, url, kwds):
         try:
