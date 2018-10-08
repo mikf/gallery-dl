@@ -257,13 +257,97 @@ Example     .. code::
 
                 [
                     {"name": "zip", "compression": "zip"},
-                    {"name": "exec",  "command": ["/home/asd/script", "{category}", "{image_id}"]}
+                    {"name": "exec",  "command": ["/home/foobar/script", "{category}", "{image_id}"]}
                 ]
 
 Description A list of post-processors to be applied to each downloaded file
             in the same order as they are specified.
 =========== =====
 
+
+extractor.*.retries
+-------------------
+=========== =====
+Type        ``integer``
+Default     ``5``
+Description Number of times a failed HTTP request is retried before giving up.
+=========== =====
+
+
+extractor.*.timeout
+-------------------
+=========== =====
+Type        ``float`` or ``null``
+Default     ``30``
+Description Amount of time (in seconds) to wait for a successful connection
+            and response from a remote server.
+
+            This value gets internally used as the |timeout|_ parameter for the
+            |requests.request()|_ method.
+=========== =====
+
+
+extractor.*.verify
+------------------
+=========== =====
+Type        ``bool`` or ``string``
+Default     ``true``
+Description Controls whether to verify SSL/TLS certificates for HTTPS requests.
+
+            If this is a ``string``, it must be the path to a CA bundle to use
+            instead of the default certificates.
+
+            This value gets internally used as the |verify|_ parameter for the
+            |requests.request()|_ method.
+=========== =====
+
+
+extractor.*.image-range
+-----------------------
+=========== =====
+Type        ``string``
+Example     | ``"10-20"``,
+            | ``"-5, 10, 30-50, 100-"``
+Description Index-range(s) specifying which images to download.
+
+            Note: The index of the first image is ``1``.
+=========== =====
+
+
+extractor.*.chapter-range
+-------------------------
+=========== =====
+Type        ``string``
+Description Like `image-range`__, but applies to delegated URLs
+            like manga-chapters, etc.
+=========== =====
+
+__ `extractor.*.image-range`_
+
+
+extractor.*.image-filter
+------------------------
+=========== =====
+Type        ``string``
+Example     | ``"width >= 1200 and width/height > 1.2"``,
+            | ``"re.search(r'foo(bar)+', description)"``
+Description | Python expression controlling which images to download.
+            | Files for which the expression evaluates to ``False``
+              are ignored.
+            | Available keys are the filename-specific ones listed
+              by ``-K`` or ``-j``.
+=========== =====
+
+
+extractor.*.chapter-filter
+--------------------------
+=========== =====
+Type        ``string``
+Description Like `image-filter`__, but applies to delegated URLs
+            like manga-chapters, etc.
+=========== =====
+
+__ `extractor.*.image-filter`_
 
 
 Extractor-specific Options
@@ -659,7 +743,7 @@ extractor.twitter.videos
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Output video tweets as unsupported URLs.
+Description Use `youtube-dl`_ to download from video tweets.
 =========== =====
 
 
@@ -725,8 +809,8 @@ downloader.http.retries
 -----------------------
 =========== =====
 Type        ``integer``
-Default     ``5``
-Description Number of times a failed download is retried before giving up.
+Default     `extractor.*.retries`_
+Description Number of retries during file downloads.
 =========== =====
 
 
@@ -734,12 +818,8 @@ downloader.http.timeout
 -----------------------
 =========== =====
 Type        ``float`` or ``null``
-Default     ``30``
-Description Amount of time (in seconds) to wait for a successful connection
-            and response from a remote server.
-
-            This value gets internally used as the |timeout|_ parameter for the
-            |requests.request()|_ method during downloads.
+Default     `extractor.*.timeout`_
+Description Connection timeout during file downloads.
 =========== =====
 
 
@@ -747,14 +827,8 @@ downloader.http.verify
 ----------------------
 =========== =====
 Type        ``bool`` or ``string``
-Default     ``true``
-Description Controls whether to verify SSL/TLS certificates for HTTPS requests.
-
-            If this is a ``string``, it must be the path to a CA bundle to use
-            instead of the default certificates.
-
-            This value gets internally used as the |verify|_ parameter for the
-            |requests.request()|_ method during downloads.
+Default     `extractor.*.verify`_
+Description Certificate validation during file downloads.
 =========== =====
 
 
@@ -833,6 +907,16 @@ Default     ``null``
 Description File to write external URLs unsupported by *gallery-dl* to.
 
             The default format string here is ``"{message}"``.
+=========== =====
+
+
+output.num-to-str
+-----------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Convert numeric values (``integer`` or ``float``) to ``string``
+            before outputting them as JSON.
 =========== =====
 
 
@@ -977,8 +1061,6 @@ Description Prevent ``"width/height not divisible by 2"`` errors
             to the list of FFmpeg command-line arguments
             to reduce an odd width/height by 1 pixel and make them even.
 =========== =====
-
-__ ugoira.extension_
 
 
 zip
@@ -1220,13 +1302,18 @@ Example     .. code::
                 {
                     "name": "zip",
                     "compression": "store",
-                    "extension": "cbz"
+                    "extension": "cbz",
+                    "whitelist": ["mangadex", "exhentai", "nhentai"]
                 }
 
-Description An object with the ``name`` of the post-processor to use
-            and its options.
-            See `Postprocessor Options`_ for a list of available
+Description An object with the ``name`` of a post-processor and its options.
+
+            See `Postprocessor Options`_ for a list of all available
             post-processors and their respective options.
+
+            You can also set a ``whitelist`` or ``blacklist`` to
+            only enable or disable a post-processor for the specified
+            extractor categories.
 =========== =====
 
 
@@ -1262,3 +1349,4 @@ Description An object with the ``name`` of the post-processor to use
 .. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
 .. _datetime.max:      https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _Authentication:    https://github.com/mikf/gallery-dl#5authentication
+.. _youtube-dl:        https://github.com/rg3/youtube-dl
