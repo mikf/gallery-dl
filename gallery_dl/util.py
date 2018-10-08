@@ -57,13 +57,27 @@ def raises(obj):
 
 
 def combine_dict(a, b):
-    """Recursively combine the contents of b into a"""
+    """Recursively combine the contents of 'b' into 'a'"""
     for key, value in b.items():
         if key in a and isinstance(value, dict) and isinstance(a[key], dict):
             combine_dict(a[key], value)
         else:
             a[key] = value
     return a
+
+
+def transform_dict(a, func):
+    """Recursively apply 'func' to all values in 'a'"""
+    for key, value in a.items():
+        if isinstance(value, dict):
+            transform_dict(value, func)
+        else:
+            a[key] = func(value)
+
+
+def number_to_string(value):
+    """Convert numbers (int, float) to string; Return everything else as is."""
+    return str(value) if isinstance(value, (int, float)) else value
 
 
 def expand_path(path):
