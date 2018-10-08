@@ -118,7 +118,7 @@ class PinterestRelatedPinExtractor(PinterestPinExtractor):
     pattern = [BASE_PATTERN + r"/pin/([^/?#&]+).*#related$"]
     test = [
         ("https://www.pinterest.com/pin/858146903966145189/#related", {
-            "range": (1, 50),
+            "range": "1-50",
             "count": 50,
         }),
     ]
@@ -139,7 +139,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     pattern = [BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+).*#related$"]
     test = [
         ("https://www.pinterest.com/g1952849/test-/#related", {
-            "range": (1, 50),
+            "range": "1-50",
             "count": 50,
         }),
     ]

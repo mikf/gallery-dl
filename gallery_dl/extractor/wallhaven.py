@@ -95,7 +95,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         (("https://alpha.wallhaven.cc/search?q=id%3A87"
           "&categories=111&purity=100&sorting=relevance&order=desc&page=3"), {
             "url": "1b9b6d97b9670e32ef5dd6942a095549ab543d91",
-            "range": (1, 3),
+            "range": "1-3",
         }),
     ]
     per_page = 24

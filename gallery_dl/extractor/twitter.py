@@ -101,7 +101,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
                r"/([^/?&#]+)/?$"]
     test = [("https://twitter.com/PicturesEarth", {
-        "range": (1, 40),
+        "range": "1-40",
         "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
         "keyword": "cbae53b6f4ba133078bb13c95dbd3cbb4fa40b9f",
     })]
@@ -118,7 +118,7 @@ class TwitterMediaExtractor(TwitterExtractor):
     pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
                r"/([^/?&#]+)/media(?!\w)"]
     test = [("https://twitter.com/PicturesEarth/media", {
-        "range": (1, 40),
+        "range": "1-40",
         "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
     })]
 
