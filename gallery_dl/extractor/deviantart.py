@@ -238,8 +238,8 @@ class DeviantartFolderExtractor(DeviantartExtractor):
             "keyword": "2c132d1996b2de87949164a6eab5d72b6c824609",
         }),
         ("https://www.deviantart.com/yakuzafc/gallery/37412168/Crafts", {
-            "url": "b6bdaca6bfcedf1c0418c5b5dd19aa1d7fd234db",
-            "keyword": "91624217b8a440e6cd7cc412c475e69b956e0a08",
+            "url": "f7d1f3cde2cdb56ffd02ef5eee0c1d0dcf2e08f1",
+            "keyword": "e7f670d3b021d051dd150eb485df7add5f7d6a02",
             "options": (("original", False),),
         }),
         ("https://shimoda7.deviantart.com/gallery/722019/Miscellaneous", None),

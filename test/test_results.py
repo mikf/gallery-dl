@@ -23,7 +23,6 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "gelbooru",       # no API results
 }
 
 
@@ -54,7 +53,7 @@ class TestExtractorResults(unittest.TestCase):
                 for key, value in result["options"]:
                     config.set(key.split("."), value)
             if "range" in result:
-                config.set(("_", "image", "range"), (result["range"],))
+                config.set(("image-range",), result["range"])
             content = "content" in result
         else:
             content = False
