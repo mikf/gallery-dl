@@ -498,7 +498,6 @@ class DataJob(Job):
         Job.__init__(self, url, parent)
         self.file = file
         self.data = []
-        self.ensure_ascii = config.get(("output", "ascii"), True)
 
     def run(self):
         # collect data
@@ -510,10 +509,15 @@ class DataJob(Job):
         except BaseException:
             pass
 
+        if config.get(("output", "num-to-str"), False):
+            for msg in self.data:
+                util.transform_dict(msg[-1], util.number_to_string)
+
         # dump to 'file'
         json.dump(
             self.data, self.file,
-            sort_keys=True, indent=2, ensure_ascii=self.ensure_ascii
+            sort_keys=True, indent=2,
+            ensure_ascii=config.get(("output", "ascii"), True),
         )
         self.file.write("\n")
 
@@ -528,3 +532,6 @@ class DataJob(Job):
 
     def handle_queue(self, url, keywords):
         self.data.append((Message.Queue, url, keywords.copy()))
+
+    def handle_finalize(self):
+        self.file.close()
