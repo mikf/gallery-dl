@@ -124,6 +124,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
 class BehanceUserExtractor(BehanceExtractor):
     """Extractor for a user's galleries from www.behance.net"""
     subcategory = "user"
+    categorytransfer = True
     pattern = [r"(?:https?://)?(?:www\.)?behance\.net"
                r"/(?!gallery/)([^/?&#]+)/?$"]
     test = [("https://www.behance.net/alexstrohl", {
