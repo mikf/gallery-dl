@@ -407,13 +407,13 @@ Description Enable mature content.
 extractor.deviantart.original
 -----------------------------
 =========== =====
-Type        ``bool``
+Type        ``bool`` or ``string``
 Default     ``true``
-Description Download full-sized original images if available.
+Description Download original files if available.
 
-            Some of DeviantArt's images require an additional API call to get
-            their actual original version, which is being hosted on
-            Amazon Web Services (AWS) servers.
+            Setting this option to ``"images"`` only downloads original
+            files if they are images and falls back to preview versions for
+            everything else (archives, etc.).
 =========== =====
 
 

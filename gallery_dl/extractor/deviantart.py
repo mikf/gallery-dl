@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache, memcache
 import itertools
+import mimetypes
 import datetime
 import time
 import math
@@ -70,8 +71,7 @@ class DeviantartExtractor(Extractor):
                 content = deviation["content"]
                 if (self.original and deviation["is_downloadable"] and
                         content["filesize"] != deviation["download_filesize"]):
-                    content.update(
-                        self.api.deviation_download(deviation["deviationid"]))
+                    self._update_content(deviation, content)
                 yield self.commit(deviation, content)
 
             if "videos" in deviation:
@@ -193,6 +193,15 @@ class DeviantartExtractor(Extractor):
     def _folder_urls(self, folders, category):
         url = "{}/{}/{}/0/".format(self.root, self.user, category)
         return [(url + folder["name"], folder) for folder in folders]
+
+    def _update_content(self, deviation, content):
+        data = self.api.deviation_download(deviation["deviationid"])
+        if self.original == "images":
+            url = data["src"].partition("?")[0]
+            mtype = mimetypes.guess_type(url, False)[0]
+            if not mtype or not mtype.startswith("image/"):
+                return
+        content.update(data)
 
 
 class DeviantartGalleryExtractor(DeviantartExtractor):
