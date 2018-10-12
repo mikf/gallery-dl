@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2018 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -187,11 +187,13 @@ class CacheDecorator():
         return functools.partial(self.__call__, obj)
 
     def invalidate(self, key=None):
-        if key is None:
-            key = self.key
-        else:
-            key = "%s-%s" % (self.key, key)
+        key = "%s-%s" % (self.key, key) if key else self.key
         del self.cache[key]
+
+    def update(self, key, result):
+        key = "%s-%s" % (self.key, key) if key else self.key
+        expires = int(time.time() + self.maxage)
+        self.cache[key] = result, expires
 
 
 def build_cache_decorator(*modules):
