@@ -577,8 +577,7 @@ class DeviantartAPI():
             raise exception.AuthenticationError('"{} ({})"'.format(
                 data.get("error_description"), data.get("error")))
         if refresh_token:
-            _refresh_token_cache.invalidate(refresh_token)
-            _refresh_token_cache(refresh_token, data["refresh_token"])
+            _refresh_token_cache.update(refresh_token, data["refresh_token"])
         return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, params=None, expect_error=False, public=True):
