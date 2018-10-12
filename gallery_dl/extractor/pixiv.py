@@ -432,23 +432,31 @@ class PixivAppAPI():
 
     @cache(maxage=3590, keyarg=1)
     def _login_impl(self, username, password):
-        self.log.info("Logging in as %s", username)
-
         url = "https://oauth.secure.pixiv.net/auth/token"
         data = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
-            "grant_type": "password",
-            "username": username,
-            "password": password,
             "get_secure_url": 1,
         }
+        refresh_token = _refresh_token_cache(username)
+
+        if refresh_token:
+            self.log.info("Refreshing access token")
+            data["grant_type"] = "refresh_token"
+            data["refresh_token"] = refresh_token
+        else:
+            self.log.info("Logging in as %s", username)
+            data["grant_type"] = "password"
+            data["username"] = username
+            data["password"] = password
 
         response = self.session.post(url, data=data)
         if response.status_code >= 400:
             raise exception.AuthenticationError()
 
         data = response.json()["response"]
+        if not refresh_token:
+            _refresh_token_cache.update(username, data["refresh_token"])
         return data["user"], "Bearer " + data["access_token"]
 
     def illust_detail(self, illust_id):
@@ -506,3 +514,8 @@ class PixivAppAPI():
                 return
             query = data["next_url"].rpartition("?")[2]
             params = text.parse_query(query)
+
+
+@cache(maxage=365*24*60*60, keyarg=0)
+def _refresh_token_cache(username):
+    return None
