@@ -111,13 +111,19 @@ extractor.*.skip
 =========== =====
 Type        ``bool`` or ``string``
 Default     ``true``
-Description Controls the behavior when downloading a file whose filename
+Description Controls the behavior when downloading files whose filename
             already exists.
 
-            * ``true``: Skip the download
-            * ``false``: Overwrite the already existing file
+            * ``true``: Skip downloads
+            * ``false``: Overwrite already existing files
+
             * ``"abort"``: Abort the current extractor run
+            * ``"abort:N"``: Skip downloads and abort extractor run
+              after ``N`` consecutive skips
+
             * ``"exit"``: Exit the program altogether
+            * ``"exit:N"``: Skip downloads and exit the program
+              after ``N`` consecutive skips
 =========== =====
 
 

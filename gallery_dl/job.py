@@ -12,7 +12,7 @@ import json
 import hashlib
 import logging
 from . import extractor, downloader, postprocessor
-from . import config, util, output, exception
+from . import config, text, util, output, exception
 from .extractor.message import Message
 
 
@@ -183,7 +183,7 @@ class DownloadJob(Job):
         self.pathfmt.set_keywords(keywords)
 
         if self.pathfmt.exists(self.archive):
-            self.out.skip(self.pathfmt.path)
+            self.handle_skip()
             return
 
         if self.sleep:
@@ -204,7 +204,7 @@ class DownloadJob(Job):
                 return
 
         if not self.pathfmt.temppath:
-            self.out.skip(self.pathfmt.path)
+            self.handle_skip()
             return
 
         # run post processors
@@ -217,6 +217,7 @@ class DownloadJob(Job):
         self.out.success(self.pathfmt.path, 0)
         if self.archive:
             self.archive.add(keywords)
+        self._skipcnt = 0
 
     def handle_urllist(self, urls, keywords):
         """Download the resource specified in 'url'"""
@@ -240,6 +241,13 @@ class DownloadJob(Job):
         if self.postprocessors:
             for pp in self.postprocessors:
                 pp.finalize()
+
+    def handle_skip(self):
+        self.out.skip(self.pathfmt.path)
+        if self._skipexc:
+            self._skipcnt += 1
+            if self._skipcnt >= self._skipmax:
+                raise self._skipexc()
 
     def download(self, url):
         """Download 'url'"""
@@ -271,6 +279,20 @@ class DownloadJob(Job):
         """Delayed initialization of PathFormat, etc."""
         self.pathfmt = util.PathFormat(self.extractor)
         self.sleep = self.extractor.config("sleep")
+
+        skip = self.extractor.config("skip", True)
+        if skip:
+            self._skipexc = None
+            if isinstance(skip, str):
+                skip, _, smax = skip.partition(":")
+                if skip == "abort":
+                    self._skipexc = exception.StopExtraction
+                elif skip == "exit":
+                    self._skipexc = sys.exit
+                self._skipcnt = 0
+                self._skipmax = text.parse_int(smax)
+        else:
+            self.pathfmt.exists = lambda x=None: False
 
         archive = self.extractor.config("archive")
         if archive:
