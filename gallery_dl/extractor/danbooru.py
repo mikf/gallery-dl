@@ -70,7 +70,7 @@ class DanbooruPopularExtractor(booru.PopularMixin, DanbooruExtractor):
         ("https://danbooru.donmai.us/explore/posts/popular", None),
         (("https://danbooru.donmai.us/explore/posts/popular"
           "?date=2013-06-06+03%3A34%3A22+-0400&scale=week"), {
-            "count": ">= 19",
+            "count": ">= 1",
         }),
     ]
 
