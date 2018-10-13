@@ -452,17 +452,6 @@ class PathFormat():
         if os.altsep:
             self.basedirectory = self.basedirectory.replace(os.altsep, os.sep)
 
-        skip = extractor.config("skip", True)
-        if skip:
-            if skip == "abort":
-                self._skipexc = exception.StopExtraction
-            elif skip == "exit":
-                self._skipexc = sys.exit
-            else:
-                self._skipexc = None
-        else:
-            self.exists = lambda x=None: False
-
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
         return open(self.temppath, mode)
@@ -471,9 +460,8 @@ class PathFormat():
         """Return True if the file exists on disk or in 'archive'"""
         if (archive and archive.check(self.keywords) or
                 self.has_extension and os.path.exists(self.realpath)):
-            if self._skipexc:
-                raise self._skipexc()
             if not self.has_extension:
+                # adjust display name
                 self.set_extension("")
                 if self.path[-1] == ".":
                     self.path = self.path[:-1]
