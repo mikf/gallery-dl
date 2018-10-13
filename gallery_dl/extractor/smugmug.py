@@ -136,7 +136,7 @@ class SmugmugPathExtractor(SmugmugExtractor):
         }),
         ("https://acapella.smugmug.com/", {
             "pattern": r"smugmug:album:\w+$",
-            "url": "8bd8b3f4f8bdd584bf5ddfd509ff3c98f8bc323b",
+            "url": "797eb1cbbf5ad8ecac8ee4eedc6466ed77a65d68",
         }),
         # gallery node without owner
         ("https://www.smugmug.com/gallery/n-GLCjnD/", {
