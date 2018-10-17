@@ -9,7 +9,7 @@
 """Extract images from http://www.imagebam.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 
 
 class ImagebamExtractor(Extractor):
@@ -41,8 +41,7 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
             "content": "596e6bfa157f2c7169805d50075c2986549973a8",
         }),
         ("http://www.imagebam.com/gallery/gsl8teckymt4vbvx1stjkyk37j70va2c", {
-            "url": "7d54178cecddfd46025cc9759f5b675fbb8f65af",
-            "keyword": "7d7db9664061132be50aa0d98e9602e98eb581ce",
+            "exception": exception.NotFoundError,
         }),
     ]
 
@@ -52,8 +51,10 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
 
     def items(self):
         url = "{}/gallery/{}".format(self.root, self.gallery_key)
-        page = text.extract(
-            self.request(url).text, "<fieldset>", "</fieldset>")[0]
+        page = self.request(url).text
+        if ">Error<" in page:
+            raise exception.NotFoundError("gallery")
+        page = text.extract(page, "<fieldset>", "</fieldset>")[0]
 
         data = self.get_metadata(page)
         imgs = self.get_image_pages(page)
