@@ -524,7 +524,7 @@ class PathFormat():
     def part_enable(self, part_directory=None):
         """Enable .part file usage"""
         if self.has_extension:
-            self.temppath = self.realpath + ".part"
+            self.temppath += ".part"
         else:
             self.set_extension("part", False)
         if part_directory:

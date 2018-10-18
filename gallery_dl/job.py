@@ -182,6 +182,10 @@ class DownloadJob(Job):
         # prepare download
         self.pathfmt.set_keywords(keywords)
 
+        if self.postprocessors:
+            for pp in self.postprocessors:
+                pp.prepare(self.pathfmt)
+
         if self.pathfmt.exists(self.archive):
             self.handle_skip()
             return

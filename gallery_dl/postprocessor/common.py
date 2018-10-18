@@ -15,6 +15,9 @@ class PostProcessor():
     """Base class for postprocessors"""
     log = log
 
+    def prepare(self, pathfmt):
+        """ """
+
     def run(self, pathfmt):
         """Execute the postprocessor for a file"""
 

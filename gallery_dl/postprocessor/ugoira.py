@@ -49,18 +49,27 @@ class UgoiraPP(PostProcessor):
         else:
             self.prevent_odd = False
 
-    def run(self, pathfmt):
+    def prepare(self, pathfmt):
+        self._frames = None
+
         if pathfmt.keywords["extension"] != "zip":
             return
 
         if "frames" in pathfmt.keywords:
-            framelist = pathfmt.keywords["frames"]
+            self._frames = pathfmt.keywords["frames"]
         elif "pixiv_ugoira_frame_data" in pathfmt.keywords:
-            framelist = pathfmt.keywords["pixiv_ugoira_frame_data"]["data"]
+            self._frames = pathfmt.keywords["pixiv_ugoira_frame_data"]["data"]
         else:
             return
 
-        rate_in, rate_out = self.calculate_framerate(framelist)
+        if self.delete:
+            pathfmt.set_extension(self.extension)
+
+    def run(self, pathfmt):
+        if not self._frames:
+            return
+
+        rate_in, rate_out = self.calculate_framerate(self._frames)
 
         with tempfile.TemporaryDirectory() as tempdir:
             # extract frames
@@ -71,13 +80,13 @@ class UgoiraPP(PostProcessor):
             ffconcat = tempdir + "/ffconcat.txt"
             with open(ffconcat, "w") as file:
                 file.write("ffconcat version 1.0\n")
-                for frame in framelist:
+                for frame in self._frames:
                     file.write("file '{}'\n".format(frame["file"]))
                     file.write("duration {}\n".format(frame["delay"] / 1000))
                 if self.extension != "gif":
                     # repeat the last frame to prevent it from only being
                     # displayed for a very short amount of time
-                    file.write("file '{}'\n".format(framelist[-1]["file"]))
+                    file.write("file '{}'\n".format(self._frames[-1]["file"]))
 
             # collect command-line arguments
             args = [self.ffmpeg]
