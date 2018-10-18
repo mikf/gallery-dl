@@ -32,13 +32,18 @@ class ClassifyPP(PostProcessor):
             for ext in exts
         }
 
-    def run(self, pathfmt):
+    def prepare(self, pathfmt):
         ext = pathfmt.keywords["extension"]
 
         if ext in self.mapping:
-            path = pathfmt.realdirectory + os.sep + self.mapping[ext]
-            pathfmt.realpath = path + os.sep + pathfmt.filename
-            os.makedirs(path, exist_ok=True)
+            self._dir = pathfmt.realdirectory + os.sep + self.mapping[ext]
+            pathfmt.realpath = self._dir + os.sep + pathfmt.filename
+        else:
+            self._dir = None
+
+    def run(self, pathfmt):
+        if self._dir:
+            os.makedirs(self._dir, exist_ok=True)
 
 
 __postprocessor__ = ClassifyPP
