@@ -72,7 +72,7 @@ class TestExtractorResults(unittest.TestCase):
         except exception.StopExtraction:
             pass
         except exception.HttpError as exc:
-            if re.match(r"5\d\d HTTP Error:", str(exc)):
+            if re.match(r"5\d\d: ", str(exc)):
                 self.skipTest(exc)
             raise
 

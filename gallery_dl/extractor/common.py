@@ -74,7 +74,7 @@ class Extractor():
                         response.encoding = encoding
                     return response
 
-                msg = "{} HTTP Error: {} for url: {}".format(
+                msg = "{}: {} for url: {}".format(
                     code, response.reason, url)
                 if code < 500 and code != 429:
                     break
