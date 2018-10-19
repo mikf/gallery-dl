@@ -797,8 +797,8 @@ Description Alternate location for ``.part`` files.
 =========== =====
 
 
-downloader.http.rate
---------------------
+downloader.rate
+---------------
 =========== =====
 Type        ``string``
 Default     ``null``
@@ -811,8 +811,8 @@ Description Maximum download rate in bytes per second.
 =========== =====
 
 
-downloader.http.retries
------------------------
+downloader.retries
+------------------
 =========== =====
 Type        ``integer``
 Default     `extractor.*.retries`_
@@ -820,8 +820,8 @@ Description Number of retries during file downloads.
 =========== =====
 
 
-downloader.http.timeout
------------------------
+downloader.timeout
+------------------
 =========== =====
 Type        ``float`` or ``null``
 Default     `extractor.*.timeout`_
@@ -829,12 +829,43 @@ Description Connection timeout during file downloads.
 =========== =====
 
 
-downloader.http.verify
-----------------------
+downloader.verify
+-----------------
 =========== =====
 Type        ``bool`` or ``string``
 Default     `extractor.*.verify`_
 Description Certificate validation during file downloads.
+=========== =====
+
+
+downloader.ytdl.logging
+-----------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description | Route youtube-dl's output through gallery-dl's logging system.
+            | Otherwise youtube-dl will write its output directly to stdout/stderr.
+
+            Note: Set ``quiet`` and ``no_warnings`` in
+            `downloader.ytdl.raw-options`_ to ``true`` to suppress all output.
+=========== =====
+
+
+downloader.ytdl.raw-options
+---------------------------
+=========== =====
+Type        ``object``
+Example     .. code::
+
+                {
+                    "quiet": true,
+                    "writesubtitles": true,
+                    "merge_output_format": "mkv"
+                }
+
+Description | Additional options passed directly to the ``YoutubeDL`` constructor.
+            | All available options can be found in `youtube-dl's docstrings
+              <https://github.com/rg3/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
 =========== =====
 
 

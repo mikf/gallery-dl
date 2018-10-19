@@ -23,7 +23,7 @@ class DownloaderBase():
     def __init__(self, extractor, output):
         self.session = extractor.session
         self.out = output
-        self.log = logging.getLogger("download")
+        self.log = logging.getLogger("downloader." + self.scheme)
         self.downloading = False
         self.part = self.config("part", True)
         self.partdir = self.config("part-directory")

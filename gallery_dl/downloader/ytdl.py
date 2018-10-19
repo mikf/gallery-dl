@@ -8,9 +8,9 @@
 
 """Downloader module for URLs requiring youtube-dl support"""
 
-from .common import DownloaderBase
 from youtube_dl import YoutubeDL
-import logging
+from .common import DownloaderBase
+from .. import text
 import os
 
 
@@ -19,9 +19,21 @@ class Downloader(DownloaderBase):
 
     def __init__(self, extractor, output):
         DownloaderBase.__init__(self, extractor, output)
-        self.ytdl = YoutubeDL({
-            "logger": logging.getLogger("ytdl"),
-        })
+
+        options = {
+            "format": self.config("format") or None,
+            "ratelimit": text.parse_bytes(self.config("rate"), None),
+            "retries": self.config("retries", extractor._retries),
+            "socket_timeout": self.config("timeout", extractor._timeout),
+            "nocheckcertificate": not self.config("verify", extractor._verify),
+            "nopart": not self.part,
+        }
+        options.update(self.config("raw-options") or {})
+
+        if self.config("logging", True):
+            options["logger"] = self.log
+
+        self.ytdl = YoutubeDL(options)
 
     def download(self, url, pathfmt):
         try:
@@ -38,15 +50,16 @@ class Downloader(DownloaderBase):
         if pathfmt.exists():
             pathfmt.temppath = ""
             return True
-        if self.partdir:
+        if self.part and self.partdir:
             pathfmt.temppath = os.path.join(
                 self.partdir, pathfmt.filename)
-        self.ytdl.params["outtmpl"] = pathfmt.temppath.replace("%", "%$")
+        self.ytdl.params["outtmpl"] = pathfmt.temppath.replace("%", "%%")
 
         self.out.start(pathfmt.path)
         try:
             self.ytdl.process_info(info_dict)
         except Exception:
+            self.log.debug("Traceback", exc_info=True)
             return False
         return True
 
