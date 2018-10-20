@@ -30,12 +30,12 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
     test = [
         ("https://www.imagefap.com/pictures/7102714", {
             "url": "268995eac5d01ddecd0fe58cfa9828390dc85a84",
-            "keyword": "b65c310d75269cb6dcc32c3fc1bdcf39bea45342",
+            "keyword": "3b90205f434bd1e0461bdbd5d2d9c34056b50fe6",
             "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
         ("https://www.imagefap.com/gallery/5486966", {
             "url": "14906b4f0b8053d1d69bc730a325acb793cbc898",
-            "keyword": "b84da0543c2d1f848bf5e4c2950dd4f4543a1e0c",
+            "keyword": "66ccb98b69cb52f89540224260641002f41f6ece",
         }),
         ("https://www.imagefap.com/gallery.php?gid=7102714", None),
     ]
@@ -57,15 +57,20 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        data, pos = text.extract_all(page, (
-            ("section" , '<meta name="description" content="', '"'),
-            ("title"   , '<title>Porn pics of ', ' (Page 1)</title>'),
-            ("uploader", '>Uploaded by ', '</font>'),
-            ("count"   , ' 1 of ', ' pics"'),
-        ), values={"gallery_id": self.gid})
+        descr, pos = text.extract(
+            page, '<meta name="description" content="Browse ', '"')
+        count, pos = text.extract(page, ' 1 of ', ' pics"', pos)
         self.image_id = text.extract(page, 'id="img_ed_', '"', pos)[0]
-        data["title"] = text.unescape(data["title"])
-        return data
+
+        title, _, descr = descr.partition(" porn picture gallery by ")
+        uploader, _, tags = descr.partition(" to see hottest ")
+        return {
+            "gallery_id": text.parse_int(self.gid),
+            "title": text.unescape(title),
+            "uploader": uploader,
+            "tags": tags[:-11].split(", "),
+            "count": text.parse_int(count),
+        }
 
     def get_images(self):
         """Collect image-urls and -metadata"""
@@ -81,7 +86,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
                     return
                 num += 1
                 _, imgid, name = imgurl.rsplit("/", 2)
-                data = {"image_id": imgid, "num": num}
+                data = {"image_id": text.parse_int(imgid), "num": num}
                 yield imgurl, text.nameext_from_url(name, data)
             params["idx"] += 24
 
@@ -92,7 +97,7 @@ class ImagefapImageExtractor(ImagefapExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"]
     test = [("https://www.imagefap.com/photo/1369341772/", {
         "url": "b31ee405b61ff0450020a1bf11c0581ca9adb471",
-        "keyword": "26ae84575067b8231878ec1a2d1e14a0fbcea865",
+        "keyword": "b49940c04ed30bfc1c28ec39eb08b3be5753ce8a",
     })]
 
     def __init__(self, match):
@@ -100,37 +105,28 @@ class ImagefapImageExtractor(ImagefapExtractor):
         self.image_id = match.group(1)
 
     def items(self):
-        info = self.load_json()
-        data = self.get_job_metadata(info)
+        data = self.get_job_metadata()
         yield Message.Version, 1
         yield Message.Directory, data
-        yield Message.Url, info["contentUrl"], data
+        yield Message.Url, data["url"], data
 
-    def get_job_metadata(self, info):
+    def get_job_metadata(self):
         """Collect metadata for extractor-job"""
-        parts = info["contentUrl"].rsplit("/", 3)
-        return text.nameext_from_url(parts[3], {
-            "title": text.unescape(info["name"]),
-            "section": info["section"],
-            "uploader": info["author"],
-            "date": info["datePublished"],
-            "width": info["width"],
-            "height": info["height"],
-            "gallery_id": parts[1],
-            "image_id": parts[2],
-        })
-
-    def load_json(self):
-        """Load the JSON dictionary associated with the image"""
         url = "{}/photo/{}/".format(self.root, self.image_id)
         page = self.request(url).text
-        section  , pos = text.extract(
-            page, '<meta name="description" content="', '"')
-        json_data, pos = text.extract(
-            page, '<script type="application/ld+json">', '</script>', pos)
-        json_dict = json.loads(json_data)
-        json_dict["section"] = section
-        return json_dict
+        info = json.loads(text.extract(
+            page, '<script type="application/ld+json">', '</script>')[0])
+        parts = info["contentUrl"].rsplit("/", 3)
+        return text.nameext_from_url(parts[3], {
+            "url": info["contentUrl"],
+            "title": text.unescape(info["name"]),
+            "uploader": info["author"],
+            "date": info["datePublished"],
+            "width": text.parse_int(info["width"]),
+            "height": text.parse_int(info["height"]),
+            "gallery_id": text.parse_int(parts[1]),
+            "image_id": text.parse_int(parts[2]),
+        })
 
 
 class ImagefapUserExtractor(ImagefapExtractor):
