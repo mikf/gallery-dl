@@ -92,7 +92,7 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
         }),
         ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
             "count": 15,
-            "keyword": "8d5d1608d4182495ea43ad665e25b755b6468be2",
+            "keyword": "e6ef5192c8484d598bc834add4a56ee067e23b73",
         }),
         ("https://mangapark.net/manga/gosu/s2/c55", None),
         ("https://mangapark.com/manga/gosu/s2/c55", None),

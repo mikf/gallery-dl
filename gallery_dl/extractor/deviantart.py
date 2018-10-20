@@ -359,7 +359,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     test = [
         (("https://www.deviantart.com/pencilshadings"
           "/favourites/70595441/3D-Favorites"), {
-            "url": "742f92199d5bc6a89cda6ec6133d46c7a523824d",
+            "url": "6d9099b0a939c4fcffbf2902f4011ec0af64f97a",
             "options": (("original", False),),
         }),
         (("https://pencilshadings.deviantart.com"
