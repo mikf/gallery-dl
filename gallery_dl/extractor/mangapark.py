@@ -83,7 +83,7 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
     test = [
         ("https://mangapark.me/manga/gosu/s2/c55", {
             "count": 50,
-            "keyword": "72ac1714b492b021a1fe26d9271ed132d51a930e",
+            "keyword": "5454f37e6ca4113c5639c9bdad5185ccdce4bb10",
         }),
         (("https://mangapark.me/manga/"
           "ad-astra-per-aspera-hata-kenjirou/s5/c1.2"), {
