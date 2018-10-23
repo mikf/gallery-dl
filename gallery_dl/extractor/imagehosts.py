@@ -225,6 +225,5 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
     params = None
 
     def get_info(self, page):
-        needle = '://www.turboimagehost.com"><img src="'
-        url = text.extract(page, needle, '"')[0]
+        url = text.extract(page, 'src="', '"', page.index("<img "))[0]
         return url, url
