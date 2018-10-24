@@ -16,9 +16,8 @@ __email__ = "mike_faehrmann@web.de"
 
 import sys
 
-if sys.hexversion < 0x3030000:
-    print("Python 3.4+ required", file=sys.stderr)
-    sys.exit(1)
+if sys.hexversion < 0x3040000:
+    sys.exit("Python 3.4+ required")
 
 import json
 import logging
