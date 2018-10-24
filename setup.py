@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals, print_function
+
 import sys
 import os.path
 
+if sys.hexversion < 0x3040000:
+    sys.exit("Python 3.4+ required")
 
 try:
     from setuptools import setup
@@ -14,7 +18,9 @@ except ImportError:
 
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname), encoding='utf-8').read()
+    path = os.path.join(os.path.dirname(__file__), fname)
+    with open(path, encoding="utf-8") as file:
+        return file.read()
 
 
 # get version without importing the package
@@ -28,8 +34,7 @@ if "py2exe" in sys.argv:
     try:
         import py2exe
     except ImportError:
-        print("Error importing 'py2exe'", file=sys.stderr)
-        exit(1)
+        sys.exit("Error importing 'py2exe'")
     params = {
         "console": [{
             "script": "./gallery_dl/__main__.py",
@@ -93,12 +98,15 @@ setup(
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
+        "Operating System :: MacOS",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Multimedia :: Graphics",
+        "Topic :: Utilities",
     ],
     test_suite="test",
     **params
