@@ -58,7 +58,7 @@ class FutabaThreadExtractor(Extractor):
     def posts(self, page):
         """Build a list of all post-objects"""
         page = text.extract(
-            page, '<div class="thre">', '<div style="clear:left"></div>')[0]
+            page, '<div class="thre"', '<div style="clear:left"></div>')[0]
         return [
             self.parse(post)
             for post in page.split('<table border=0>')
