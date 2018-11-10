@@ -69,8 +69,7 @@ class DeviantartExtractor(Extractor):
 
             if "content" in deviation:
                 content = deviation["content"]
-                if (self.original and deviation["is_downloadable"] and
-                        content["filesize"] != deviation["download_filesize"]):
+                if self.original and deviation["is_downloadable"]:
                     self._update_content(deviation, content)
                 yield self.commit(deviation, content)
 
