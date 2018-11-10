@@ -283,7 +283,7 @@ def main():
                     if args.inputfile == "-":
                         file = sys.stdin
                     else:
-                        file = open(args.inputfile)
+                        file = open(args.inputfile, encoding="utf-8")
                     urls += parse_inputfile(file)
                     file.close()
                 except OSError as exc:
