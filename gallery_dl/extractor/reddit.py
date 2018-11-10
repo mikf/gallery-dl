@@ -134,7 +134,7 @@ class RedditImageExtractor(Extractor):
         (("https://i.reddituploads.com/0f44f1b1fca2461f957c713d9592617d"
           "?fit=max&h=1536&w=1536&s=e96ce7846b3c8e1f921d2ce2671fb5e2"), {
             "url": "f24f25efcedaddeec802e46c60d77ef975dc52a5",
-            "content": "d13c3b5f7e39b454fa21b33d7d6b0e0f07126849",
+            "content": "541dbcc3ad77aa01ee21ca49843c5e382371fae7",
         }),
     ]
 

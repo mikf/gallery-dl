@@ -23,6 +23,9 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "deviantart",
+    "dokireader",
+    "imagefap",
     "seaotterscans",
 }
 
