@@ -109,8 +109,8 @@ class Extractor():
         """Set additional headers for the 'session' object"""
         self.session.headers["Accept-Language"] = "en-US,en;q=0.5"
         self.session.headers["User-Agent"] = self.config(
-            "user-agent", ("Mozilla/5.0 (X11; Linux x86_64; rv:54.0) "
-                           "Gecko/20100101 Firefox/54.0"))
+            "user-agent", ("Mozilla/5.0 (X11; Linux x86_64; rv:62.0) "
+                           "Gecko/20100101 Firefox/62.0"))
 
     def _set_cookies(self):
         """Populate the session's cookiejar"""
