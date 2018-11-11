@@ -203,7 +203,7 @@ extractor.*.user-agent
 ----------------------
 =========== =====
 Type        ``string``
-Default     ``"Mozilla/5.0 (X11; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0"``
+Default     ``"Mozilla/5.0 (X11; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0"``
 Description User-Agent header value to be used for HTTP requests.
 
             Note: This option has no effect on `pixiv` and
