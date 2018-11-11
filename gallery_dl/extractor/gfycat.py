@@ -44,7 +44,7 @@ class GfycatImageExtractor(GfycatExtractor):
     """Extractor for individual images from gfycat.com"""
     subcategory = "image"
     pattern = [r"(?:https?://)?(?:\w+\.)?gfycat\.com"
-               r"/(?:(?:gifs/)?detail/|ifr/)?([A-Za-z]+)"]
+               r"/(?:\w+/|gifs/detail/)?([A-Za-z]+)"]
     test = [
         ("https://gfycat.com/GrayGenerousCowrie", {
             "url": "e0b5e1d7223108249b15c3c7898dd358dbfae045",
@@ -73,6 +73,7 @@ class GfycatImageExtractor(GfycatExtractor):
         }),
         ("https://gfycat.com/gifs/detail/UnequaledHastyAnkole", None),
         ("https://gfycat.com/ifr/UnequaledHastyAnkole", None),
+        ("https://gfycat.com/ru/UnequaledHastyAnkole", None),
     ]
 
     def __init__(self, match):
