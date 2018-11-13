@@ -259,6 +259,7 @@ class DownloadJob(Job):
         downloader = self.get_downloader(scheme)
         if downloader:
             return downloader.download(url, self.pathfmt)
+        self._write_unsupported(url)
         return False
 
     def get_downloader(self, scheme):
@@ -271,7 +272,7 @@ class DownloadJob(Job):
             pass
 
         klass = downloader.find(scheme)
-        if klass:
+        if klass and config.get(("downloader", scheme, "enable"), True):
             instance = klass(self.extractor, self.out)
         else:
             instance = None
