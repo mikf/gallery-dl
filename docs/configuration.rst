@@ -838,6 +838,15 @@ Description Certificate validation during file downloads.
 =========== =====
 
 
+downloader.*.enable
+-------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Enable/Disable this downloader module.
+=========== =====
+
+
 downloader.ytdl.logging
 -----------------------
 =========== =====
