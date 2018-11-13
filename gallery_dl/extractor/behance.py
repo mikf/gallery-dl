@@ -26,9 +26,9 @@ class BehanceGalleryExtractor(BehanceExtractor):
     archive_fmt = "{gallery_id}_{num}"
     pattern = [r"(?:https?://)?(?:www\.)?behance\.net/gallery/(\d+)"]
     test = [
-        ("https://www.behance.net/gallery/17386197", {
+        ("https://www.behance.net/gallery/17386197/A-Short-Story", {
             "count": 2,
-            "url": "8c692c208b74fed789288eda9230715be8d02057",
+            "url": "ebe032f78e8af98f9873f85eb77a1e49a3f8e648",
             "keyword": {
                 "title": 're:"Hi". A short story about the important things ',
                 "user": "Place Studio, Julio César Velazquez",
@@ -60,11 +60,8 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
         yield Message.Version, 1
         yield Message.Directory, data
-        for data["num"], (url, external) in enumerate(imgs, 1):
-            if external:
-                yield Message.Queue, url, data
-            else:
-                yield Message.Url, url, text.nameext_from_url(url, data)
+        for data["num"], url in enumerate(imgs, 1):
+            yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""
@@ -101,10 +98,10 @@ class BehanceGalleryExtractor(BehanceExtractor):
             srcset = text.extract(p, 'srcset="', '"')[0]
             if srcset:
                 url = srcset.rstrip(",").rpartition(",")[2].partition(" ")[0]
-                results.append((url, False))
+                results.append(url)
             elif "<iframe " in p:
                 url = text.extract(p, ' src="', '"')[0]
-                results.append((text.unescape(url), True))
+                results.append("ytdl:" + text.unescape(url))
         return results
 
     @staticmethod
