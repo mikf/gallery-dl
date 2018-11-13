@@ -34,18 +34,20 @@ class ArtstationExtractor(Extractor):
 
         for project in self.projects():
             for asset in self.get_project_assets(project["hash_id"]):
+                asset.update(data)
                 adict = asset["asset"]
-                if data:
-                    asset.update(data)
+
+                if adict["has_embedded_player"] and self.external:
+                    player = adict["player_embedded"]
+                    url = text.extract(player, 'src="', '"')[0]
+                    if not url.startswith(self.root):
+                        yield Message.Url, "ytdl:" + url, asset
+                        continue
 
                 if adict["has_image"]:
                     url = adict["image_url"]
                     text.nameext_from_url(url, asset)
                     yield Message.Url, self._no_cache(url), asset
-
-                if adict["has_embedded_player"] and self.external:
-                    url = text.extract(adict["player_embedded"], '"', '"')[0]
-                    yield Message.Queue, url, asset
 
     def metadata(self):
         """Return general metadata"""
@@ -310,6 +312,12 @@ class ArtstationImageExtractor(ArtstationExtractor):
         # multiple images per project
         ("https://www.artstation.com/artwork/Db3dy", {
             "count": 4,
+        }),
+        # embedded youtube video
+        ("https://www.artstation.com/artwork/g4WPK", {
+            "range": "2",
+            "options": (("external", True),),
+            "pattern": "ytdl:https://www.youtube.com/embed/JNFfJtwwrU0",
         }),
         # different URL pattern
         ("https://sungchoi.artstation.com/projects/LQVJr", None),
