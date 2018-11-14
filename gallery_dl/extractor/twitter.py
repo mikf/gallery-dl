@@ -84,6 +84,8 @@ class TwitterExtractor(Extractor):
 
         while True:
             data = self.request(url, params=params, headers=headers).json()
+            if "inner" in data:
+                data = data["inner"]
 
             for tweet in text.extract_iter(
                     data["items_html"], '<div class="tweet ', '\n</li>'):
