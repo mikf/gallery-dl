@@ -32,9 +32,10 @@ class PinterestExtractor(Extractor):
         yield Message.Directory, data
 
         for pin in self.pins():
-            url, pin_data = self.data_from_pin(pin)
-            pin_data.update(data)
-            yield Message.Url, url, pin_data
+            if "images" in pin:
+                url, pin_data = self.data_from_pin(pin)
+                pin_data.update(data)
+                yield Message.Url, url, pin_data
 
     def metadata(self):
         """Return general metadata"""
