@@ -133,13 +133,19 @@ class ImagefapUserExtractor(ImagefapExtractor):
     """Extractor for all galleries from a user at imagefap.com"""
     subcategory = "user"
     categorytransfer = True
-    pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
-                r"profile(?:\.php\?user=|/)([^/]+)"),
-               (r"(?:https?://)?(?:www\.)?imagefap\.com/"
-                r"usergallery\.php\?userid=(\d+)")]
-    test = [("https://www.imagefap.com/profile/Mr%20Bad%20Example/galleries", {
-        "url": "4c400a10d496701734d3bd7414ce2f45e6543c65",
-    })]
+    pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com"
+                r"/profile(?:\.php\?user=|/)([^/?&#]+)"),
+               (r"(?:https?://)?(?:www\.)?imagefap\.com"
+                r"/usergallery\.php\?userid=(\d+)")]
+    test = [
+        ("https://www.imagefap.com/profile/LucyRae/galleries", {
+            "url": "d941aa906f56a75972a7a5283030eb9a8d27a4fd",
+        }),
+        ("https://www.imagefap.com/usergallery.php?userid=1862791", {
+            "url": "d941aa906f56a75972a7a5283030eb9a8d27a4fd",
+        }),
+        ("https://www.imagefap.com/profile.php?user=LucyRae", None),
+    ]
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self)
