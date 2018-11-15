@@ -521,18 +521,23 @@ class TestJob(DownloadJob):
 class DataJob(Job):
     """Collect extractor results and dump them"""
 
-    def __init__(self, url, parent=None, file=sys.stdout):
+    def __init__(self, url, parent=None, file=sys.stdout, ensure_ascii=True):
         Job.__init__(self, url, parent)
         self.file = file
         self.data = []
+        self.ascii = config.get(("output", "ascii"), ensure_ascii)
 
     def run(self):
         # collect data
         try:
             for msg in self.extractor:
                 self.dispatch(msg)
+        except exception.StopExtraction:
+            pass
         except Exception as exc:
             self.data.append((exc.__class__.__name__, str(exc)))
+        except KeyboardInterrupt:
+            raise
         except BaseException:
             pass
 
@@ -543,8 +548,7 @@ class DataJob(Job):
         # dump to 'file'
         json.dump(
             self.data, self.file,
-            sort_keys=True, indent=2,
-            ensure_ascii=config.get(("output", "ascii"), True),
+            sort_keys=True, indent=2, ensure_ascii=self.ascii,
         )
         self.file.write("\n")
 
