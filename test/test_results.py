@@ -28,23 +28,29 @@ BROKEN = {
 }
 
 
+def setup_test_config():
+    name = "gallerydl"
+    email = "gallerydl@openaliasbox.org"
+
+    config.clear()
+    config.set(("cache", "file"), ":memory:")
+    config.set(("downloader", "part"), False)
+    config.set(("extractor", "timeout"), 60)
+    config.set(("extractor", "username"), name)
+    config.set(("extractor", "password"), name)
+    config.set(("extractor", "nijie", "username"), email)
+    config.set(("extractor", "seiga", "username"), email)
+    config.set(("extractor", "deviantart", "client-id"), "7777")
+    config.set(("extractor", "deviantart", "client-secret"),
+               "ff14994c744d9208e5caeec7aab4a026")
+    config.set(("extractor", "tumblr", "api-key"),
+               "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
+
+
 class TestExtractorResults(unittest.TestCase):
 
     def setUp(self):
-        name = "gallerydl"
-        email = "gallerydl@openaliasbox.org"
-        config.set(("cache", "file"), ":memory:")
-        config.set(("downloader", "part"), False)
-        config.set(("downloader", "timeout"), 60)
-        config.set(("extractor", "username"), name)
-        config.set(("extractor", "password"), name)
-        config.set(("extractor", "nijie", "username"), email)
-        config.set(("extractor", "seiga", "username"), email)
-        config.set(("extractor", "deviantart", "client-id"), "7777")
-        config.set(("extractor", "deviantart", "client-secret"),
-                   "ff14994c744d9208e5caeec7aab4a026")
-        config.set(("extractor", "tumblr", "api-key"),
-                   "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
+        setup_test_config()
 
     def tearDown(self):
         config.clear()
