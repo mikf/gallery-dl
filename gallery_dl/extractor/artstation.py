@@ -191,8 +191,10 @@ class ArtstationLikesExtractor(ArtstationExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
                r"/(?!artwork|projects|search)([^/?&#]+)/likes/?"]
     test = [
-        ("https://www.artstation.com/dcchris/likes", {
-            "count": ">= 3",
+        ("https://www.artstation.com/mikf/likes", {
+            "pattern": r"https://\w+\.artstation\.com/p/assets"
+                       r"/images/images/\d+/\d+/\d+/large/[^/]+",
+            "count": 6,
         }),
         # no likes
         ("https://www.artstation.com/sungchoi/likes", {
@@ -219,7 +221,8 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
         (("https://www.artstation.com/contests/thu-2017/challenges/20"), None),
         (("https://www.artstation.com/contests/beyond-human"
           "/challenges/23?sorting=winners"), {
-            "count": 203,
+            "range": "1-30",
+            "count": 30,
         }),
     ]
 

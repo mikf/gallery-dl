@@ -25,8 +25,6 @@ TRAVIS_SKIP = {
 BROKEN = {
     "deviantart",
     "dokireader",
-    "imagefap",
-    "seaotterscans",
 }
 
 

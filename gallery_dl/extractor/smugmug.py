@@ -56,7 +56,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
     pattern = [r"smugmug:album:([^:]+)$"]
     test = [
         ("smugmug:album:ddvxpg", {
-            "url": "8775c2cf05f001e895435faa89f22a03214568bf",
+            "url": "0429e9bf50ee600674e448934e3882ca1761ae7b",
         }),
         # empty
         ("smugmug:album:SXvjbW", {
@@ -64,7 +64,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
         }),
         # no "User"
         ("smugmug:album:6VRT8G", {
-            "url": "3d3f161a77e2e11a04b6778cc62238128c1f1113",
+            "url": "c4a0f4c4bfd514b93cbdeb02b3345bf7ef6604df",
         }),
     ]
 
@@ -97,14 +97,14 @@ class SmugmugImageExtractor(SmugmugExtractor):
     pattern = [BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#]+)"]
     test = [
         ("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
-            "url": "ab0d7aa001a53ff3fd228622070b39005b6fc179",
-            "keyword": "a116167929c22338e6067b81c5d3bee641df3af3",
+            "url": "78f0bf3516b6d670b7319216bdeccb35942ca4cf",
+            "keyword": "8ebb25fb493d3cd5cfcb8f3a4601fa721afe1d83",
             "content": "64a8f69a1d824921eebbdf2420087937adfa45cd",
         }),
         # no "ImageOwner"
         ("https://www.smugmug.com/gallery/n-GLCjnD/i-JD62fQk", {
-            "url": "721023fd2cba1a88404b54039d9eebb5756d1e68",
-            "keyword": "1189f48e6b2592f6b90f8bd875238e93aba780e7",
+            "url": "d4047637947b35e4ef49e3c7cb70303cc224a3a0",
+            "keyword": "96fc43bc3081f6356c929be43ab5971009975063",
         }),
     ]
 
