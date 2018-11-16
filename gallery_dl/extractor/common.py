@@ -60,6 +60,7 @@ class Extractor():
         retries = retries or self._retries
         kwargs.setdefault("timeout", self._timeout)
         kwargs.setdefault("verify", self._verify)
+
         while True:
             try:
                 response = self.session.request(method, url, **kwargs)
@@ -74,14 +75,13 @@ class Extractor():
                         response.encoding = encoding
                     return response
 
-                msg = "{}: {} for url: {}".format(
-                    code, response.reason, url)
+                msg = "{}: {} for url: {}".format(code, response.reason, url)
                 if code < 500 and code != 429:
                     break
 
+            self.log.debug("%s (%d/%d)", msg, tries + 1, retries)
             if tries >= retries:
                 break
-            self.log.debug("%s (%d/%d)", msg, tries + 1, retries)
             time.sleep(2 ** tries)
             tries += 1
 
@@ -94,7 +94,7 @@ class Extractor():
 
         if username:
             password = self.config("password")
-        elif config.get(("netrc",), False):
+        elif self.config("netrc", False):
             try:
                 info = netrc.netrc().authenticators(self.category)
                 username, _, password = info

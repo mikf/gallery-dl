@@ -13,8 +13,10 @@ Contents
 7) `API Tokens & IDs`_
 
 
+
 Extractor Options
 =================
+
 
 Each extractor is identified by its ``category`` and ``subcategory``.
 The ``category`` is the lowercase site name without any spaces or special
@@ -152,6 +154,15 @@ Description The username and password to use when attempting to log in to
             These values can also be set via the ``-u/--username`` and
             ``-p/--password`` command-line options or by using a |.netrc|_ file.
             (see Authentication_)
+=========== =====
+
+
+extractor.*.netrc
+-----------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Enable the use of |.netrc|_ authentication data.
 =========== =====
 
 
@@ -356,8 +367,10 @@ Description Like `image-filter`__, but applies to delegated URLs
 __ `extractor.*.image-filter`_
 
 
+
 Extractor-specific Options
 ==========================
+
 
 extractor.artstation.external
 -----------------------------
@@ -769,8 +782,18 @@ Description Categorize tags by their respective types
 Downloader Options
 ==================
 
-downloader.part
----------------
+
+downloader.*.enabled
+--------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Enable/Disable this downloader module.
+=========== =====
+
+
+downloader.*.part
+-----------------
 =========== =====
 Type        ``bool``
 Default     ``true``
@@ -784,8 +807,8 @@ Description Controls the use of ``.part`` files during file downloads.
 =========== =====
 
 
-downloader.part-directory
--------------------------
+downloader.*.part-directory
+---------------------------
 =========== =====
 Type        |Path|_
 Default     ``null``
@@ -797,8 +820,8 @@ Description Alternate location for ``.part`` files.
 =========== =====
 
 
-downloader.rate
----------------
+downloader.*.rate
+-----------------
 =========== =====
 Type        ``string``
 Default     ``null``
@@ -811,8 +834,8 @@ Description Maximum download rate in bytes per second.
 =========== =====
 
 
-downloader.retries
-------------------
+downloader.*.retries
+--------------------
 =========== =====
 Type        ``integer``
 Default     `extractor.*.retries`_
@@ -820,8 +843,8 @@ Description Number of retries during file downloads.
 =========== =====
 
 
-downloader.timeout
-------------------
+downloader.*.timeout
+--------------------
 =========== =====
 Type        ``float`` or ``null``
 Default     `extractor.*.timeout`_
@@ -829,8 +852,8 @@ Description Connection timeout during file downloads.
 =========== =====
 
 
-downloader.verify
------------------
+downloader.*.verify
+-------------------
 =========== =====
 Type        ``bool`` or ``string``
 Default     `extractor.*.verify`_
@@ -838,12 +861,14 @@ Description Certificate validation during file downloads.
 =========== =====
 
 
-downloader.*.enable
--------------------
+downloader.ytdl.format
+----------------------
 =========== =====
-Type        ``bool``
-Default     ``true``
-Description Enable/Disable this downloader module.
+Type        ``string``
+Default     youtube-dl's default, currently ``"bestvideo+bestaudio/best"``
+Description Video `format selection
+            <https://github.com/rg3/youtube-dl#format-selection>`__
+            directly passed to youtube-dl.
 =========== =====
 
 
@@ -881,6 +906,7 @@ Description | Additional options passed directly to the ``YoutubeDL`` constructo
 
 Output Options
 ==============
+
 
 output.mode
 -----------
@@ -1053,7 +1079,6 @@ Default     ``"ffmpeg"``
 Description Location of the ``ffmpeg`` (or ``avconv``) executable to use.
 =========== =====
 
-
 ugoira.ffmpeg-output
 --------------------
 =========== =====
@@ -1145,14 +1170,6 @@ Description Keep the actual files after writing them to a ZIP archive.
 Miscellaneous Options
 =====================
 
-netrc
------
-=========== =====
-Type        ``bool``
-Default     ``false``
-Description Enable the use of |.netrc|_ authentication data.
-=========== =====
-
 
 cache.file
 ----------
@@ -1170,6 +1187,7 @@ Description Path of the SQLite3 database used to cache login sessions,
 
 API Tokens & IDs
 ================
+
 
 All configuration keys listed in this section have fully functional default
 values embedded into *gallery-dl* itself, but if things unexpectedly break

@@ -272,11 +272,11 @@ class DownloadJob(Job):
             pass
 
         klass = downloader.find(scheme)
-        if klass and config.get(("downloader", scheme, "enable"), True):
+        if klass and config.get(("downloader", scheme, "enabled"), True):
             instance = klass(self.extractor, self.out)
         else:
             instance = None
-            self.log.error("'%s:' URLs are not supported", scheme)
+            self.log.error("'%s:' URLs are not supported/enabled", scheme)
         self.downloaders[scheme] = instance
         return instance
 
