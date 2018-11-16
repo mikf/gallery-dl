@@ -20,7 +20,7 @@ def find(scheme):
         try:
             if "." not in scheme:  # prevent relative imports
                 module = importlib.import_module("." + scheme, __package__)
-                klass = module.Downloader
+                klass = module.__downloader__
         except (ImportError, AttributeError, TypeError):
             pass
         _cache[scheme] = klass

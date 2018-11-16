@@ -14,7 +14,7 @@ from .. import text
 import os
 
 
-class Downloader(DownloaderBase):
+class YoutubeDLDownloader(DownloaderBase):
     scheme = "ytdl"
 
     def __init__(self, extractor, output):
@@ -70,3 +70,6 @@ class Downloader(DownloaderBase):
         for entry in info_dict["entries"]:
             self.ytdl.process_info(entry)
         return True
+
+
+__downloader__ = YoutubeDLDownloader

@@ -15,7 +15,7 @@ from .common import DownloaderBase
 from .. import text, exception
 
 
-class Downloader(DownloaderBase):
+class HttpDownloader(DownloaderBase):
     scheme = "http"
 
     def __init__(self, extractor, output):
@@ -123,3 +123,6 @@ MIMETYPE_MAP = {
     "application/ogg": "ogg",
     "application/octet-stream": "bin",
 }
+
+
+__downloader__ = HttpDownloader
