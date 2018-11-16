@@ -11,7 +11,7 @@
 from .common import DownloaderBase
 
 
-class Downloader(DownloaderBase):
+class TextDownloader(DownloaderBase):
     scheme = "text"
 
     def __init__(self, extractor, output):
@@ -32,3 +32,6 @@ class Downloader(DownloaderBase):
     @staticmethod
     def get_extension():
         return "txt"
+
+
+__downloader__ = TextDownloader
