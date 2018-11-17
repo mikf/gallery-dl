@@ -3,22 +3,32 @@ gallery-dl
 ==========
 
 *gallery-dl* is a command-line program to download image-galleries and
--collections from several image hosting sites such as pixiv.net, exhentai.org,
-danbooru.donmai.us and several more (see `Supported Sites`_).
-It requires Python 3.4+ to run and works on Unix-like systems as well as on
-Windows.
+-collections from several image hosting sites (see `Supported Sites`_).
+It is a cross-platform tool with many configuration options
+and powerful filenaming capabilities.
 
 
 |pypi| |build| |gitter|
 
-.. section-numbering::
+
+Dependencies
+============
+
+- Python_ 3.4+
+- Requests_
+
+Optional
+--------
+
+- FFmpeg_: Pixiv Ugoira to WebM conversion
+- youtube-dl_: Video downloads
 
 
 Installation
 ============
 
-Installation via pip
---------------------
+Pip
+---
 
 The stable releases of *gallery-dl* are distributed on PyPI_ and can be
 easily installed or upgraded using pip_:
@@ -34,16 +44,18 @@ pip_ as well:
 
     $ pip install --upgrade https://github.com/mikf/gallery-dl/archive/master.zip
 
+Be sure the Python interpreter used for pip_ is version 3.4 or higher.
+You might have to use :code:`pip3` or :code:`python3 -m pip`
+depending on your system's defaults.
 
-Manual installation via Python
-------------------------------
 
-You can also install *gallery-dl* manually:
+Manual
+------
 
 Get the code by either
 
 * Downloading a stable_ or dev_ archive and unpacking it
-* Or via :code:`git clone`
+* Or via :code:`git clone https://github.com/mikf/gallery-dl.git`
 
 Navigate into the respective directory and run the :code:`setup.py` file.
 
@@ -62,10 +74,10 @@ Standalone executable (Windows only)
 ------------------------------------
 
 Windows users can download a `standalone executable`_, which comes with a
-Python interpreter and all required packages included.
+Python 3.4 interpreter and all required packages included.
 
-Put this file in your PATH or use it from the current directory and you are
-good to go,
+Put this file in your `PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__
+or use it from the current directory and you are good to go,
 
 
 Usage
@@ -106,26 +118,6 @@ Get the direct URL of an image from a site that requires authentication:
     $ gallery-dl r:https://pastebin.com/raw/FLwrCYsT
 
 
-Supported Sites
-===============
-
-* pixiv.net
-* seiga.nicovideo.jp
-* nijie.info
-* mangastream.com
-* kissmanga.com
-* readcomiconline.to
-* danbooru.donmai.us
-* gelbooru.com
-* exhentai.org
-* nhentai.net
-* luscious.net
-* hentai-foundry.com
-* deviantart.com
-* tumblr.com
-* `Complete List`_
-
-
 Configuration
 =============
 
@@ -163,7 +155,8 @@ Username & Password
 Some extractors require you to provide valid login-credentials in the form of
 a username & password pair.
 This is necessary for ``pixiv``, ``nijie`` and ``seiga`` and optional
-(but strongly recommended) for ``exhentai``,  ``sankaku`` and ``idolcomplex``.
+(but strongly recommended) for ``exhentai``,  ``sankaku``, ``idolcomplex``
+and ``wallhaven``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
@@ -214,18 +207,21 @@ access to *gallery-dl*. Authorize it and you will he shown one or more
 .. _gallery-dl.conf:         https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
-.. _Complete List:           https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
+.. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
 .. _standalone executable:   https://github.com/mikf/gallery-dl/releases/download/v1.5.3/gallery-dl.exe
-.. _Python:   https://www.python.org/downloads/
-.. _Requests: https://pypi.python.org/pypi/requests/
-.. _PyPI:     https://pypi.python.org/pypi
-.. _pip:      https://pip.pypa.io/en/stable/
-.. _stable:   https://github.com/mikf/gallery-dl/archive/v1.5.3.zip
-.. _dev:      https://github.com/mikf/gallery-dl/archive/master.zip
-.. _OAuth:    https://en.wikipedia.org/wiki/OAuth
+.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.5.3.zip
+.. _dev:                     https://github.com/mikf/gallery-dl/archive/master.zip
+
+.. _Python:     https://www.python.org/downloads/
+.. _PyPI:       https://pypi.org/
+.. _pip:        https://pip.pypa.io/en/stable/
+.. _Requests:   http://docs.python-requests.org/en/master/
+.. _FFmpeg:     https://www.ffmpeg.org/
+.. _youtube-dl: https://rg3.github.io/youtube-dl/
+.. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
-    :target: https://pypi.python.org/pypi/gallery-dl
+    :target: https://pypi.org/project/gallery-dl/
 
 .. |build| image:: https://travis-ci.org/mikf/gallery-dl.svg?branch=master
     :target: https://travis-ci.org/mikf/gallery-dl
