@@ -26,8 +26,8 @@ def read(fname):
 # get version without importing the package
 exec(read("gallery_dl/version.py"))
 
-DESCRIPTION = ("Command-line program to download image galleries and "
-               "collections from pixiv, exhentai, danbooru and more")
+DESCRIPTION = ("Command-line program to download image-galleries and "
+               "-collections from several image hosting sites")
 LONG_DESCRIPTION = read("README.rst")
 
 if "py2exe" in sys.argv:
