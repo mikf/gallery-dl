@@ -1,8 +1,22 @@
 # Changelog
 
 ## Unreleased
+
+## 1.6.0 - 2018-11-17
 - Added support for:
   - `wallhaven` - https://alpha.wallhaven.cc/
+  - `yuki` - https://yuki.la/
+- Added youtube-dl integration and video downloads for `twitter` ([#99](https://github.com/mikf/gallery-dl/issues/99)), `behance`, `artstation`
+- Added per-extractor options for network connections (`retries`, `timeout`, `verify`)
+- Added a `--no-check-certificate` command-line option
+- Added ability to specify the number of skipped downloads before aborting/exiting ([#115](https://github.com/mikf/gallery-dl/issues/115))
+- Added extractors for scraps, favorites, popular and recent images on `hentaifoundry` ([#110](https://github.com/mikf/gallery-dl/issues/110))
+- Improved login procedure for `pixiv`  to avoid unwanted emails on each new login
+- Improved album metadata and error handling for `flickr` ([#109](https://github.com/mikf/gallery-dl/issues/109))
+- Updated default User-Agent string to Firefox 62 ([#122](https://github.com/mikf/gallery-dl/issues/122))
+- Fixed `twitter` API response handling when logged in ([#123](https://github.com/mikf/gallery-dl/issues/123))
+- Fixed issue when converting Ugoira using H.264
+- Fixed miscellaneous issues for `2chan`, `deviantart`, `fallenangels`, `flickr`, `imagefap`, `pinterest`, `turboimagehost`, `warosu`, `yuki` ([#112](https://github.com/mikf/gallery-dl/issues/112))
 
 ## 1.5.3 - 2018-09-14
 - Added support for:
