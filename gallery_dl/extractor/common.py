@@ -64,9 +64,12 @@ class Extractor():
         while True:
             try:
                 response = self.session.request(method, url, **kwargs)
-            except (requests.ConnectionError, requests.Timeout) as exc:
+            except (requests.exceptions.ConnectionError,
+                    requests.exceptions.Timeout,
+                    requests.exceptions.ChunkedEncodingError,
+                    requests.exceptions.ContentDecodingError) as exc:
                 msg = exc
-            except requests.exceptions.RequestException as exc:
+            except (requests.exceptions.RequestException) as exc:
                 raise exception.HttpError(exc)
             else:
                 code = response.status_code
@@ -79,11 +82,11 @@ class Extractor():
                 if code < 500 and code != 429:
                     break
 
-            self.log.debug("%s (%d/%d)", msg, tries + 1, retries)
+            tries += 1
+            self.log.debug("%s (%d/%d)", msg, tries, retries)
             if tries >= retries:
                 break
             time.sleep(2 ** tries)
-            tries += 1
 
         raise exception.HttpError(msg)
 
