@@ -86,8 +86,8 @@ class HentaifoundryExtractor(Extractor):
 
     def set_filters(self):
         """Set site-internal filters to show all images"""
-        token = text.extract(
-            self.session.cookies["YII_CSRF_TOKEN"], "%22", "%22")[0]
+        token = text.unquote(text.extract(
+            self.session.cookies["YII_CSRF_TOKEN"], "%22", "%22")[0])
         data = {
             "YII_CSRF_TOKEN": token,
             "rating_nudity": 3,
