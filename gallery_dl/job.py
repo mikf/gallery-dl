@@ -60,7 +60,10 @@ class Job():
             res = str(exc) or "resource (gallery/image/user)"
             log.error("The %s at '%s' does not exist", res, self.url)
         except exception.HttpError as exc:
-            log.error("HTTP request failed:  %s", exc)
+            err = exc.args[0]
+            if isinstance(err, Exception):
+                err = "{}: {}".format(err.__class__.__name__, err)
+            log.error("HTTP request failed:  %s", err)
         except exception.FormatError as exc:
             err, obj = exc.args
             log.error("Applying %s format string failed:  %s: %s",
