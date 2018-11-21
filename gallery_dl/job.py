@@ -235,8 +235,9 @@ class DownloadJob(Job):
     def handle_directory(self, keywords):
         """Set and create the target directory for downloads"""
         if not self.pathfmt:
-            self.initialize()
-        self.pathfmt.set_directory(keywords)
+            self.initialize(keywords)
+        else:
+            self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url, keywords):
         try:
@@ -283,9 +284,11 @@ class DownloadJob(Job):
         self.downloaders[scheme] = instance
         return instance
 
-    def initialize(self):
+    def initialize(self, keywords=None):
         """Delayed initialization of PathFormat, etc."""
         self.pathfmt = util.PathFormat(self.extractor)
+        if keywords:
+            self.pathfmt.set_directory(keywords)
         self.sleep = self.extractor.config("sleep")
 
         skip = self.extractor.config("skip", True)
