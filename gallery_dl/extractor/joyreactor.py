@@ -6,11 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for http://joyreactor.com/"""
+"""Extractors for http://joyreactor.cc/"""
 
 from .common import Extractor, Message
 from .. import text
 import json
+
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?(joyreactor\.c(?:c|om))"
 
 
 class JoyreactorExtractor(Extractor):
@@ -23,7 +26,7 @@ class JoyreactorExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self)
         self.url = match.group(0)
-        self.root = "http://joyreactor." + match.group(1)
+        self.root = "http://" + match.group(1)
         self.session.headers["Referer"] = self.root
 
     def items(self):
@@ -112,11 +115,11 @@ class JoyreactorExtractor(Extractor):
 
 
 class JoyreactorTagExtractor(JoyreactorExtractor):
-    """Extractor for tag searches on joyreactor.com"""
+    """Extractor for tag searches on joyreactor.cc"""
     subcategory = "tag"
     directory_fmt = ["{category}", "{search_tags}"]
     archive_fmt = "{search_tags}_{post_id}_{num}"
-    pattern = [r"(?:https?://)?(?:www\.)?joyreactor\.(com|cc)/tag/([^/?&#]+)"]
+    pattern = [BASE_PATTERN + r"/tag/([^/?&#]+)"]
     test = [
         ("http://joyreactor.com/tag/Cirno", {
             "url": "a81382a3146da50b647c475f87427a6ca1d737df",
@@ -137,10 +140,10 @@ class JoyreactorTagExtractor(JoyreactorExtractor):
 
 
 class JoyreactorUserExtractor(JoyreactorExtractor):
-    """Extractor for all posts of a user on joyreactor.com"""
+    """Extractor for all posts of a user on joyreactor.cc"""
     subcategory = "user"
     directory_fmt = ["{category}", "user", "{user}"]
-    pattern = [r"(?:https?://)?(?:www\.)?joyreactor\.(com|cc)/user/([^/?&#]+)"]
+    pattern = [BASE_PATTERN + r"/user/([^/?&#]+)"]
     test = [
         ("http://joyreactor.com/user/Tacoman123", {
             "url": "0444158f17c22f08515ad4e7abf69ad2f3a63b35",
@@ -161,9 +164,9 @@ class JoyreactorUserExtractor(JoyreactorExtractor):
 
 
 class JoyreactorPostExtractor(JoyreactorExtractor):
-    """Extractor for single posts on joyreactor.com"""
+    """Extractor for single posts on joyreactor.cc"""
     subcategory = "post"
-    pattern = [r"(?:https?://)?(?:www\.)?joyreactor\.(com|cc)/post/(\d+)"]
+    pattern = [BASE_PATTERN + r"/post/(\d+)"]
     test = [
         ("http://joyreactor.com/post/3721876", {  # single image
             "url": "904779f6571436f3d5adbce30c2c272f6401e14a",
