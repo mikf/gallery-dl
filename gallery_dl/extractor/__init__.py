@@ -70,6 +70,7 @@ modules = [
     "piczel",
     "pinterest",
     "pixiv",
+    "pornreactor",
     "powermanga",
     "readcomiconline",
     "rebeccablacktech",
