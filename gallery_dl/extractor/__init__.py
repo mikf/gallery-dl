@@ -46,6 +46,7 @@ modules = [
     "imgth",
     "imgur",
     "jaiminisbox",
+    "joyreactor",
     "khinsider",
     "kireicake",
     "kissmanga",
