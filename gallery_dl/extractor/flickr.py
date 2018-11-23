@@ -110,16 +110,37 @@ class FlickrAlbumExtractor(FlickrExtractor):
                      "{album[id]} - {album[title]}"]
     archive_fmt = "a_{album[id]}_{id}"
     pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/"
-               r"photos/([^/]+)/(?:album|set)s/(\d+)"]
-    test = [(("https://www.flickr.com/photos/"
-              "shona_s/albums/72157633471741607"), {
-        "url": "baf4a3d1b15afcecf9638000a12c0eb3d5df9024",
-        "keyword": "b579f19134ab8217f05979e52adf7712898492c7",
-    })]
+               r"photos/([^/]+)/(?:album|set)s(?:/(\d+))?"]
+    test = [
+        (("https://www.flickr.com/photos/shona_s/albums/72157633471741607"), {
+            "url": "baf4a3d1b15afcecf9638000a12c0eb3d5df9024",
+            "keyword": "b579f19134ab8217f05979e52adf7712898492c7",
+        }),
+        ("https://www.flickr.com/photos/shona_s/albums", {
+            "url": "657d541470482e0d69deec33ab97a6d7d4af6fe4",
+            "keyword": "736a41a7d702f7fe00edc957ae201d84f745e654",
+        }),
+    ]
 
     def __init__(self, match):
         FlickrExtractor.__init__(self, match)
         self.album_id = match.group(2)
+
+    def items(self):
+        if self.album_id:
+            return FlickrExtractor.items(self)
+        return self._album_items()
+
+    def _album_items(self):
+        yield Message.Version, 1
+        data = FlickrExtractor.data(self)
+
+        for albums in self.api.photosets_getList(self.user["nsid"]):
+            for album in albums["photoset"]:
+                self.api._clean_info(album).update(data)
+                url = "https://www.flickr.com/photos/{}/albums/{}".format(
+                    self.user["path_alias"], album["id"])
+                yield Message.Queue, url, album
 
     def data(self):
         data = FlickrExtractor.data(self)
@@ -141,8 +162,8 @@ class FlickrGalleryExtractor(FlickrExtractor):
                r"photos/([^/]+)/galleries/(\d+)"]
     test = [(("https://www.flickr.com/photos/flickr/"
               "galleries/72157681572514792/"), {
-        "url": "1e0e300fa5fe8c49ba5dfa7ccca0cb0da8a04f93",
-        "keyword": "ba1f0e4bf5ee4e10071bdc272c19f015985cf055",
+        "url": "1d012592bc7ce3a24b2b025b1176a31e947122f6",
+        "keyword": "30cdec50e125f1cdf2425eab6052590535323c2d",
     })]
 
     def __init__(self, match):
@@ -333,6 +354,11 @@ class FlickrAPI(oauth.OAuth1API):
         params = {"photoset_id": photoset_id, "user_id": user_id}
         photoset = self._call("photosets.getInfo", params)["photoset"]
         return self._clean_info(photoset)
+
+    def photosets_getList(self, user_id):
+        """Returns the photosets belonging to the specified user."""
+        params = {"user_id": user_id}
+        return self._pagination("photosets.getList", params)
 
     def photosets_getPhotos(self, photoset_id):
         """Get the list of photos in a set."""
