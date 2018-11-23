@@ -63,8 +63,15 @@ class JoyreactorExtractor(Extractor):
     def _parse_post(post):
         post, _, script = post.partition('<script type="application/ld+json">')
         images = text.extract_iter(post, '<div class="image">', '</div>')
-        script = script[:script.index("</")].strip().replace("\\", "\\\\")
-        data = json.loads(script)
+        script = script[:script.index("</")].strip()
+
+        try:
+            data = json.loads(script)
+        except ValueError:
+            data = json.loads(script
+                              .replace("\\", "\\\\")
+                              .replace("\n", "")
+                              .replace("\r", ""))
 
         num = 0
         date = data["datePublished"]
