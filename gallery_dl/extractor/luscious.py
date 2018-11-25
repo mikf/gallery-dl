@@ -8,7 +8,7 @@
 
 """Extract images from https://luscious.net/"""
 
-from .common import AsynchronousExtractor, Message
+from .common import Extractor, AsynchronousExtractor, Message
 from .. import text, util
 
 
@@ -19,11 +19,10 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     archive_fmt = "{gallery_id}_{image_id}"
-    pattern = [(r"(?:https?://)?(?:www\.|members\.)?luscious\.net/"
-                r"(?:c/[^/?&#]+/)?(?:pictures/album|albums)/([^/?&#]+_(\d+))")]
+    pattern = [(r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
+                r"/(?:albums|pictures/c/[^/?&#]+/album)/([^/?&#]+_(\d+))")]
     test = [
-        (("https://luscious.net/c/hentai_manga/albums/"
-          "okinami-no-koigokoro_277031/view/"), {
+        ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
             "keyword": "5ab53959f25a468455f79149461d26547669e50e",
             "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
@@ -32,9 +31,10 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
             "keyword": "3de82f61ad4afd0f546ab5ae5bf9c5388cc9c3db",
         }),
-        ("https://luscious.net/albums/okinami-no-koigokoro_277031/", None),
         ("https://www.luscious.net/albums/okinami_277031/", None),
         ("https://members.luscious.net/albums/okinami_277031/", None),
+        ("https://luscious.net/pictures/c/video_game_manga/album"
+         "/okinami-no-koigokoro_277031/sorted/position/id/16528978/@_1", None),
     ]
     root = "https://luscious.net"
 
@@ -106,3 +106,62 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
                 "image_id": imgid,
             }
             num += 1
+
+
+class LusciousSearchExtractor(Extractor):
+    """Extractor for album searches on luscious.net"""
+    category = "luscious"
+    subcategory = "search"
+    pattern = [(r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
+                r"/((?:albums|c)(?:/(?![^/?&#]+_\d+)[^/?&#]+)+)")]
+    test = [
+        ("https://luscious.net/c/hentai/", None),
+        ("https://luscious.net/albums/t2/2/c/hentai/sorted/updated"
+         "/tagged/+full_color/page/2/", {
+             "pattern": r"https://luscious.net/albums/[^_]+_\d+/",
+             "range": "20-40",
+             "count": 21,
+         }),
+    ]
+    root = "https://luscious.net"
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.path = match.group(1).partition("/page/")[0]
+        if not self.path.startswith("albums/"):
+            self.path = "albums/" + self.path
+
+    def items(self):
+        yield Message.Version, 1
+        for album in self.albums():
+            url, data = self.parse_album(album)
+            yield Message.Queue, url, data
+
+    def albums(self, pnum=1):
+        while True:
+            url = "{}/{}/page/{}/.json/".format(self.root, self.path, pnum)
+            data = self.request(url).json()
+
+            yield from text.extract_iter(
+                data["html"], "<figcaption>", "</figcaption>")
+
+            if data["paginator_complete"]:
+                return
+            pnum += 1
+
+    def parse_album(self, album):
+        url  , pos = text.extract(album, 'href="', '"')
+        title, pos = text.extract(album, ">", "<", pos)
+        count, pos = text.extract(album, "# of pictures:", "<", pos)
+        date , pos = text.extract(album, "Updated:&nbsp;", "<", pos)
+        desc , pos = text.extract(album, "class='desc'>", "<", pos)
+        tags , pos = text.extract(album, "<ol ", "</ol>", pos)
+
+        return text.urljoin(self.root, url), {
+            "title": text.unescape(title or ""),
+            "description": text.unescape(desc or ""),
+            "gallery_id": url.rpartition("_")[2].rstrip("/"),
+            "count": text.parse_int(count),
+            "date": date,
+            "tags": text.remove_html(tags.partition(">")[2]),
+        }
