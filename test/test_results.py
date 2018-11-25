@@ -62,6 +62,7 @@ class TestExtractorResults(unittest.TestCase):
                     config.set(key.split("."), value)
             if "range" in result:
                 config.set(("image-range",), result["range"])
+                config.set(("chapter-range",), result["range"])
             content = "content" in result
         else:
             content = False
