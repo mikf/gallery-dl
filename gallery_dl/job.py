@@ -542,8 +542,6 @@ class DataJob(Job):
             pass
         except Exception as exc:
             self.data.append((exc.__class__.__name__, str(exc)))
-        except KeyboardInterrupt:
-            raise
         except BaseException:
             pass
 
