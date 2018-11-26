@@ -9,15 +9,14 @@
 """Extract manga-chapters and entire manga from http://fanfox.net/"""
 
 from .common import ChapterExtractor
-from .. import text, exception
-import re
+from .. import text
 
 
 class MangafoxChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from fanfox.net"""
     category = "mangafox"
-    pattern = [(r"(?:https?://)?(?:www\.)?(?:mangafox\.me|fanfox\.net)"
-                r"(/manga/[^/]+/(?:v\d+/)?c\d+[^/?&#]*)")]
+    pattern = [(r"(?:https?://)?(?:www\.|m\.)?(?:mangafox\.me|fanfox\.net)"
+                r"(/manga/[^/]+/((?:v(\d+)/)?c(\d+)([^/?&#]*)))")]
     test = [
         ("http://fanfox.net/manga/kidou_keisatsu_patlabor/v05/c006.2/1.html", {
             "keyword": "36b570e9ef11b4748407324fe08bebbe4856e6fd",
@@ -25,37 +24,37 @@ class MangafoxChapterExtractor(ChapterExtractor):
         }),
         ("http://mangafox.me/manga/kidou_keisatsu_patlabor/v05/c006.2/", None),
     ]
-    root = "http://fanfox.net"
+    root = "http://m.fanfox.net"
 
     def __init__(self, match):
-        self.urlbase = self.root + match.group(1)
+        base, self.cstr, self.volume, self.chapter, self.minor = match.groups()
+        self.urlbase = self.root + base
         ChapterExtractor.__init__(self, self.urlbase + "/1.html")
 
     def get_metadata(self, page):
-        if "Sorry, its licensed, and not available." in page:
-            raise exception.AuthorizationError()
-        data = text.extract_all(page, (
-            ("manga"         , " - Read ", " Manga Scans "),
-            ("sid"           , "var sid=", ";"),
-            ("cid"           , "var cid=", ";"),
-            ("count"         , "var total_pages=", ";"),
-            ("chapter_string", 'var current_chapter="', '"'),
-        ))[0]
-        match = re.match(r"(v0*(\d+)/)?c0*(\d+)(.*)", data["chapter_string"])
-        data["volume"] = match.group(2)
-        data["chapter"] = match.group(3)
-        data["chapter_minor"] = match.group(4) or ""
-        data["manga"] = data["manga"].rpartition(" ")[0]
-        for key in ("sid", "cid", "count", "volume", "chapter"):
-            data[key] = text.parse_int(data[key])
-        return data
+        manga, pos = text.extract(page, "<title>", "</title>")
+        count, pos = text.extract(
+            page, ">", "<", page.find("</select>", pos) - 20)
+        sid  , pos = text.extract(page, "var series_id =", ";", pos)
+        cid  , pos = text.extract(page, "var chapter_id =", ";", pos)
+
+        return {
+            "manga": text.unescape(manga),
+            "volume": text.parse_int(self.volume),
+            "chapter": text.parse_int(self.chapter),
+            "chapter_minor": self.minor or "",
+            "chapter_string": self.cstr,
+            "count": text.parse_int(count),
+            "sid": text.parse_int(sid),
+            "cid": text.parse_int(cid),
+        }
 
     def get_images(self, page):
         pnum = 1
         while True:
             url, pos = text.extract(page, '<img src="', '"')
             yield url, None
-            url, pos = text.extract(page, '<img src="', '"', pos)
+            url, pos = text.extract(page, ' src="', '"', pos)
             yield url, None
 
             pnum += 2
