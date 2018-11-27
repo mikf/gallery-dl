@@ -61,6 +61,7 @@ modules = [
     "mangareader",
     "mangastream",
     "myportfolio",
+    "newgrounds",
     "ngomik",
     "nhentai",
     "nijie",
