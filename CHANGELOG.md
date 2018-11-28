@@ -1,13 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.6.1 - 2018-11-28
 - Added support for:
-  - `joyreactor` - http://joyreactor.cc/ (#114)
-  - `pornreactor` - http://pornreactor.cc/ (#114)
-  - `newgrounds` - https://www.newgrounds.com/ (#119)
-- Added extractor for search results on `luscious` (#127)
-- Fixed filenames of ZIP archives (#126)
-- Fixed extraction issues for `gfycat`, `hentaifoundry` (#125), `mangafox`
+  - `joyreactor` - http://joyreactor.cc/ ([#114](https://github.com/mikf/gallery-dl/issues/114))
+  - `pornreactor` - http://pornreactor.cc/ ([#114](https://github.com/mikf/gallery-dl/issues/114))
+  - `newgrounds` - https://www.newgrounds.com/ ([#119](https://github.com/mikf/gallery-dl/issues/119))
+- Added extractor for search results on `luscious` ([#127](https://github.com/mikf/gallery-dl/issues/127))
+- Fixed filenames of ZIP archives ([#126](https://github.com/mikf/gallery-dl/issues/126))
+- Fixed extraction issues for `gfycat`, `hentaifoundry` ([#125](https://github.com/mikf/gallery-dl/issues/125)), `mangafox`
 
 ## 1.6.0 - 2018-11-17
 - Added support for:
