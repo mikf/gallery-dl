@@ -126,8 +126,7 @@ class JoyreactorTagExtractor(JoyreactorExtractor):
             "keyword": "dcd3b101cae0a93fbb91281235de1410faf88455",
         }),
         ("http://joyreactor.cc/tag/Advent+Cirno", {
-            "url": "31a43d7412ffafe8a35a6c0193e56a526725ac60",
-            "keyword": "a133eeda24352d06cce6fb4730a350c1354b3a22",
+            "count": ">= 17",
         }),
     ]
 
@@ -149,10 +148,7 @@ class JoyreactorUserExtractor(JoyreactorExtractor):
             "url": "0444158f17c22f08515ad4e7abf69ad2f3a63b35",
             "keyword": "1571a81fa5b8bab81528c93065d2460a72e77102",
         }),
-        ("http://joyreactor.cc/user/hemantic", {
-            "url": "d0124bf9695ae963a4db53a9d7c6c1a15ee29216",
-            "keyword": "eab8e046e847989a9218ca9fcd87e56a4064180d",
-        }),
+        ("http://joyreactor.cc/user/hemantic", None),
     ]
 
     def __init__(self, match):
