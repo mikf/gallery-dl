@@ -40,12 +40,13 @@ imgbox               https://imgbox.com/                 Galleries, individual I
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
 Jaimini's Box        https://jaiminisbox.com/            Chapters, Manga
+Joyreactor           http://joyreactor.cc/               Images from Users, Posts, Tag-Searches
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
 KissManga            http://kissmanga.com/               Chapters, Manga
 Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag-Searches
-Luscious             https://luscious.net/               Albums
+Luscious             https://luscious.net/               Albums, Search Results
 Manga Fox            http://fanfox.net/                  Chapters
 Manga Here           http://www.mangahere.co/            Chapters, Manga
 Manga Stream         https://mangastream.com/            Chapters
@@ -53,6 +54,7 @@ MangaDex             https://mangadex.org/               Chapters, Manga
 Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.me/               Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
+Newgrounds           https://www.newgrounds.com/         Images from Users, individual Images, Videos
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
@@ -62,6 +64,7 @@ Pawoo                https://pawoo.net                   Images from Users, Imag
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links, related Pins
 Pixiv                https://www.pixiv.net/              |Capabilities-5|                                   Required
+Pornreactor          http://pornreactor.cc/              Images from Users, Posts, Tag-Searches
 PowerManga           https://powermanga.org/             Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads

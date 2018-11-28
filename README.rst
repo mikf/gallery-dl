@@ -49,8 +49,8 @@ You might have to use :code:`pip3` or :code:`python3 -m pip`
 depending on your system's defaults.
 
 
-Manual
-------
+From Source
+-----------
 
 Get the code by either
 
@@ -70,7 +70,7 @@ Navigate into the respective directory and run the :code:`setup.py` file.
     $ python setup.py install
 
 
-Standalone executable (Windows only)
+Standalone Executable (Windows only)
 ------------------------------------
 
 Windows users can download a `standalone executable`_, which comes with a

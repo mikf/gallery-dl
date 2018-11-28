@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- Added support for:
+  - `joyreactor` - http://joyreactor.cc/ (#114)
+  - `pornreactor` - http://pornreactor.cc/ (#114)
+  - `newgrounds` - https://www.newgrounds.com/ (#119)
+- Added extractor for search results on `luscious` (#127)
+- Fixed filenames of ZIP archives (#126)
+- Fixed extraction issues for `gfycat`, `hentaifoundry` (#125), `mangafox`
 
 ## 1.6.0 - 2018-11-17
 - Added support for:
