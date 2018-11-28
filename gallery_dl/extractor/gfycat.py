@@ -9,7 +9,8 @@
 """Extract images from https://gfycat.com/"""
 
 from .common import Extractor, Message
-from .. import exception
+from .. import text
+import json
 
 
 class GfycatExtractor(Extractor):
@@ -33,18 +34,17 @@ class GfycatExtractor(Extractor):
         return ""
 
     def _get_info(self, gfycat_id):
-        url = "{}/cajax/get/{}".format(self.root, gfycat_id)
-        data = self.request(url).json()
-        if "error" in data:
-            raise exception.NotFoundError("animation")
-        return data["gfyItem"]
+        url = "{}/ifr/{}".format(self.root, gfycat_id)
+        page = self.request(url).text
+        data = json.loads(text.extract(page, '___INITIAL_STATE__=', ';')[0])
+        return data["cache"]["gifs"][gfycat_id.lower()]
 
 
 class GfycatImageExtractor(GfycatExtractor):
     """Extractor for individual images from gfycat.com"""
     subcategory = "image"
     pattern = [r"(?:https?://)?(?:\w+\.)?gfycat\.com"
-               r"/(?:\w+/|gifs/detail/)?([A-Za-z]+)"]
+               r"/(?:gifs/detail/|\w+/)?([A-Za-z]+)"]
     test = [
         ("https://gfycat.com/GrayGenerousCowrie", {
             "url": "e0b5e1d7223108249b15c3c7898dd358dbfae045",
@@ -55,12 +55,12 @@ class GfycatImageExtractor(GfycatExtractor):
                 "gfyNumber": "755075459",
                 "title": "Bottom's up",
                 "userName": "jackson3oh3",
-                "createDate": "1495884169",
+                "createDate": 1495884169,
                 "md5": "a4796e05b0db9ba9ce5140145cd318aa",
-                "width": "400",
-                "height": "224",
-                "frameRate": "23",
-                "numFrames": "158",
+                "width": 400,
+                "height": 224,
+                "frameRate": 23,
+                "numFrames": 158,
                 "views": int,
             },
         }),
