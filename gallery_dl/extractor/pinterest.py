@@ -90,7 +90,8 @@ class PinterestBoardExtractor(PinterestExtractor):
     pattern = [BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)(?!.*#related$)"]
     test = [
         ("https://www.pinterest.com/g1952849/test-/", {
-            "url": "85911dfca313f3f7f48c2aa0bc684f539d1d80a6",
+            "pattern": r"https://i\.pinimg\.com/originals/",
+            "count": 2,
         }),
         ("https://www.pinterest.com/g1952848/test/", {
             "exception": exception.GalleryDLException,
@@ -152,7 +153,8 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
 class PinterestPinitExtractor(PinterestExtractor):
     """Extractor for images from a pin.it URL"""
     subcategory = "pinit"
-    pattern = [r"(?:https?://)?(pin\.it/[^/?#&]+)"]
+    pattern = [r"(?:https?://)?pin\.it/([^/?#&]+)"]
+
     test = [
         ("https://pin.it/Hvt8hgT", {
             "url": "8daad8558382c68f0868bdbd17d05205184632fa",
@@ -164,10 +166,12 @@ class PinterestPinitExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self)
-        self.url = "https://" + match.group(1)
+        self.shortened_id = match.group(1)
 
     def items(self):
-        response = self.request(self.url, method="HEAD", allow_redirects=False)
+        url = "https://api.pinterest.com/url_shortener/{}/redirect".format(
+            self.shortened_id)
+        response = self.request(url, method="HEAD", allow_redirects=False)
         location = response.headers.get("Location")
         if not location or location in ("https://api.pinterest.com/None",
                                         "https://pin.it/None",
