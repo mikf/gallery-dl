@@ -158,7 +158,10 @@ class TumblrExtractor(Extractor):
         post["num"] += 1
 
         parts = post["name"].split("_")
-        post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
+        try:
+            post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
+        except IndexError:
+            post["hash"] = ""
 
         return Message.Url, url, post
 
