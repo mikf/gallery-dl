@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.6.1 - 2018-11-28
 - Added support for:
   - `joyreactor` - http://joyreactor.cc/ ([#114](https://github.com/mikf/gallery-dl/issues/114))
