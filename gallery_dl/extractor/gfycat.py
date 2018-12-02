@@ -9,8 +9,6 @@
 """Extract images from https://gfycat.com/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
 
 
 class GfycatExtractor(Extractor):
@@ -34,10 +32,8 @@ class GfycatExtractor(Extractor):
         return ""
 
     def _get_info(self, gfycat_id):
-        url = "{}/ifr/{}".format(self.root, gfycat_id)
-        page = self.request(url).text
-        data = json.loads(text.extract(page, '___INITIAL_STATE__=', ';')[0])
-        return data["cache"]["gifs"][gfycat_id.lower()]
+        url = "https://api.gfycat.com/v1/gfycats/" + gfycat_id
+        return self.request(url).json()["gfyItem"]
 
 
 class GfycatImageExtractor(GfycatExtractor):
