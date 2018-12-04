@@ -75,14 +75,16 @@ class Job():
         except exception.StopExtraction:
             pass
         except OSError as exc:
-            log.error("Unable to download data: %s", exc)
+            log.error("Unable to download data:  %s: %s",
+                      exc.__class__.__name__, exc)
+            log.debug("", exc_info=True)
         except Exception as exc:
             log.error(("An unexpected error occurred: %s - %s. "
                        "Please run gallery-dl again with the --verbose flag, "
                        "copy its output and report this issue on "
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
-            log.debug("Traceback", exc_info=True)
+            log.debug("", exc_info=True)
         self.handle_finalize()
 
     def dispatch(self, msg):
