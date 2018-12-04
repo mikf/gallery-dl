@@ -303,7 +303,7 @@ class TumblrAPI(oauth.OAuth1API):
         url = "https://api.tumblr.com/v2/blog/{}/{}".format(
             blog, endpoint)
 
-        response = self.session.get(url, params=params)
+        response = self.request(url, params=params)
         data = response.json()
         status = data["meta"]["status"]
 

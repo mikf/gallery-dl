@@ -109,6 +109,7 @@ class OAuth1API():
 
     def __init__(self, extractor):
         self.log = extractor.log
+        self.extractor = extractor
 
         api_key = extractor.config("api-key", self.API_KEY)
         api_secret = extractor.config("api-secret", self.API_SECRET)
@@ -124,3 +125,8 @@ class OAuth1API():
             self.log.debug("Using api_key authentication")
             self.session = extractor.session
             self.api_key = api_key
+
+    def request(self, url, method="GET", *, expect=range(400, 500), **kwargs):
+        kwargs["expect"] = expect
+        kwargs["session"] = self.session
+        return self.extractor.request(url, method, **kwargs)

@@ -54,16 +54,17 @@ class Extractor():
         return config.interpolate(
             ("extractor", self.category, self.subcategory, key), default)
 
-    def request(self, url, method="GET", *,
+    def request(self, url, method="GET", *, session=None,
                 encoding=None, expect=(), retries=None, **kwargs):
         tries = 0
         retries = retries or self._retries
+        session = session or self.session
         kwargs.setdefault("timeout", self._timeout)
         kwargs.setdefault("verify", self._verify)
 
         while True:
             try:
-                response = self.session.request(method, url, **kwargs)
+                response = session.request(method, url, **kwargs)
             except (requests.exceptions.ConnectionError,
                     requests.exceptions.Timeout,
                     requests.exceptions.ChunkedEncodingError,
