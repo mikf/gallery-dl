@@ -161,7 +161,8 @@ class TumblrExtractor(Extractor):
         try:
             post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
         except IndexError:
-            post["hash"] = ""
+            # filename doesn't follow the usual pattern (#129)
+            post["hash"] = post["name"]
 
         return Message.Url, url, post
 
