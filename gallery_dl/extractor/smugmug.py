@@ -238,7 +238,7 @@ class SmugmugAPI(oauth.OAuth1API):
             params["APIKey"] = self.api_key
         params["_verbosity"] = "1"
 
-        response = self.session.get(url, params=params, headers=self.HEADERS)
+        response = self.request(url, params=params, headers=self.HEADERS)
         data = response.json()
 
         if 200 <= data["Code"] < 400:

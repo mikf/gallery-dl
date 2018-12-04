@@ -295,7 +295,6 @@ class FlickrAPI(oauth.OAuth1API):
         else:
             self.formats = self.FORMATS
         self.formats = self.formats[:4]
-        self.subcategory = extractor.subcategory
 
     def favorites_getList(self, user_id):
         """Returns a list of the user's favorite photos."""
@@ -387,10 +386,10 @@ class FlickrAPI(oauth.OAuth1API):
         params["nojsoncallback"] = "1"
         if self.api_key:
             params["api_key"] = self.api_key
-        data = self.session.get(self.API_URL, params=params).json()
+        data = self.request(self.API_URL, params=params).json()
         if "code" in data:
             if data["code"] == 1:
-                raise exception.NotFoundError(self.subcategory)
+                raise exception.NotFoundError(self.extractor.subcategory)
             elif data["code"] == 98:
                 raise exception.AuthenticationError(data.get("message"))
             elif data["code"] == 99:
