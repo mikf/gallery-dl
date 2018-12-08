@@ -118,17 +118,45 @@ class InstagramPostpageExtractor(InstagramExtractor):
     test = [
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
-            "url": "6cfef075fb6431b799d9e6e5b13cdf9986d216cc",
+            "keyword": {
+                "comments": int,
+                "height": int,
+                "likes": int,
+                "media_id": "1922949326347663701",
+                "shortcode": "BqvsDleB3lV",
+                "typename": "GraphImage",
+                "username": "instagram",
+                "width": int,
+            }
         }),
 
         # GraphSidecar
         ("https://www.instagram.com/p/BoHk1haB5tM/", {
-            "url": "df18e853dd1135317b7cd503e8e5d3e0b17c46d4",
+            "keyword": {
+                "comments": int,
+                "height": int,
+                "likes": int,
+                "media_id": "1875629777499953996",
+                "shortcode": "BoHk1haB5tM",
+                "typename": "GraphSidecar",
+                "username": "instagram",
+                "width": int,
+            }
         }),
 
         # GraphVideo
         ("https://www.instagram.com/p/Bqxp0VSBgJg/", {
             "url": "8f38c1cf460c9804842f7306c487410f33f82e7e",
+            "keyword": {
+                "comments": int,
+                "height": int,
+                "likes": int,
+                "media_id": "1923502432034620000",
+                "shortcode": "Bqxp0VSBgJg",
+                "typename": "GraphVideo",
+                "username": "instagram",
+                "width": int,
+            }
         }),
     ]
 
