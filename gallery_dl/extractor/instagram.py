@@ -176,6 +176,7 @@ class InstagramProfilepageExtractor(InstagramExtractor):
     test = [
         ("https://www.instagram.com/instagram/", {
             "range": "1-12",
+            "count": ">= 12",
         }),
     ]
 
