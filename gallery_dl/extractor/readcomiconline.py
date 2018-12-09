@@ -19,7 +19,7 @@ class ReadcomiconlineBase():
     directory_fmt = ["{category}", "{comic}", "{issue:>03}"]
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     archive_fmt = "{issue_id}_{page}"
-    root = "http://readcomiconline.to"
+    root = "https://readcomiconline.to"
     useragent = "Wget/1.19.2 (linux-gnu)"
 
     request = cloudflare.request_func
@@ -28,21 +28,22 @@ class ReadcomiconlineBase():
 class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
     """Extractor for comics from readcomiconline.to"""
     subcategory = "comic"
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?(readcomiconline\.to"
-               r"/Comic/[^/?&#]+/?)$"]
+    pattern = [r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
+               r"(/Comic/[^/?&#]+/?)$"]
     test = [
-        ("http://readcomiconline.to/Comic/W-i-t-c-h", {
-            "url": "c5a530538a30b176916e30cbe223a93d83cb2691",
+        ("https://readcomiconline.to/Comic/W-i-t-c-h", {
+            "url": "e231bc2a293edb465133c37a8e36a7e7d94cab14",
             "keyword": "3986248e4458fa44a201ec073c3684917f48ee0c",
         }),
-        ("http://readcomiconline.to/Comic/Bazooka-Jules", {
-            "url": "e517dca61dff489f18ca781084f59a9eeb60a6b6",
+        ("https://readcomiconline.to/Comic/Bazooka-Jules", {
+            "url": "711674cb78ed10bd2557315f7a67552d01b33985",
             "keyword": "f5ba5246cd787bb750924d9690cb1549199bd516",
         }),
     ]
+    scheme = "https"
 
     def __init__(self, match):
-        MangaExtractor.__init__(self, match)
+        MangaExtractor.__init__(self, match, self.root + match.group(1))
         self.session.headers["User-Agent"] = self.useragent
 
     def chapters(self, page):
@@ -66,15 +67,15 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     """Extractor for comic-issues from readcomiconline.to"""
     subcategory = "issue"
     pattern = [r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
-               r"/Comic/[^/?&#]+/[^/?&#]+\?id=(\d+)"]
-    test = [("http://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
+               r"(/Comic/[^/?&#]+/[^/?&#]+\?id=(\d+))"]
+    test = [("https://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
         "url": "2bbab6ec4fbc05d269cca420a82a9b5acda28682",
         "keyword": "c6de1c9c8a307dc4be56783c4ac6f1338ffac6fc",
     })]
 
     def __init__(self, match):
-        ChapterExtractor.__init__(self, match.group(0))
-        self.issue_id = match.group(1)
+        ChapterExtractor.__init__(self, self.root + match.group(1))
+        self.issue_id = match.group(2)
         self.session.headers["User-Agent"] = self.useragent
 
     def get_metadata(self, page):

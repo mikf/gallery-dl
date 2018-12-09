@@ -90,7 +90,7 @@ class PiczelImageExtractor(PiczelExtractor):
     subcategory = "image"
     pattern = [r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/image/(\d+)"]
     test = [("https://piczel.tv/gallery/image/7807", {
-        "url": "c8caccac9fa798dc4fd4b920890e4d8b42cb44e5",
+        "url": "9b9e416b6ab7e58676fab84453d5028f306ece34",
         "content": "df9a053a24234474a19bce2b7e27e0dec23bff87",
         "keyword": {
             "created_at": "2018-07-22T05:13:58.000Z",
