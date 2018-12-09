@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from Instagram"""
+"""Extract images from https://www.instagram.com/"""
 
 import hashlib
 import json
@@ -21,9 +21,6 @@ class InstagramExtractor(Extractor):
     filename_fmt = "{media_id}.{extension}"
     archive_fmt = "{media_id}"
     root = "https://www.instagram.com"
-
-    def __init__(self, match):
-        Extractor.__init__(self)
 
     def items(self):
         yield Message.Version, 1
@@ -57,10 +54,10 @@ class InstagramExtractor(Extractor):
             'shortcode': media['shortcode'],
             'typename': media['__typename'],
             'display_url': media['display_url'],
-            'height': int(media['dimensions']['height']),
-            'width': int(media['dimensions']['width']),
-            'comments': int(media['edge_media_to_comment']['count']),
-            'likes': int(media['edge_media_preview_like']['count']),
+            'height': text.parse_int(media['dimensions']['height']),
+            'width': text.parse_int(media['dimensions']['width']),
+            'comments': text.parse_int(media['edge_media_to_comment']['count']),
+            'likes': text.parse_int(media['edge_media_preview_like']['count']),
             'owner_id': media['owner']['id'],
             'username': media['owner']['username'],
             'fullname': media['owner']['full_name'],
@@ -108,16 +105,20 @@ class InstagramExtractor(Extractor):
                 '66eb9403e44cc12e5b5ecda48b667d41',
                 variables,
             )
-            shared_data = json.loads(self.request(url, headers=headers).text)
+            shared_data = self.request(url, headers=headers).json()
 
 
-class InstagramPostpageExtractor(InstagramExtractor):
+class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
-    subcategory = "postpage"
+    subcategory = "image"
     pattern = [r"(?:https?://)?(?:www\.)?instagram\.com/p/([^/]+)/?"]
     test = [
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
+            "pattern": r"https://[^/.]+\.cdninstagram\.com/vp"
+                       r"/5043db33a998e32fb5713411be1d466e"
+                       r"/5C8DAF92/t51.2885-15/e35"
+                       r"/44877605_725955034447492_3123079845831750529_n.jpg",
             "keyword": {
                 "comments": int,
                 "height": int,
@@ -132,6 +133,10 @@ class InstagramPostpageExtractor(InstagramExtractor):
 
         # GraphSidecar
         ("https://www.instagram.com/p/BoHk1haB5tM/", {
+            "pattern": r"https://[^/.]+\.cdninstagram\.com/vp"
+                       "/fd70fa8d5775ce1c297a95d3800f4b7c"
+                       "/5C935FCB/t51.2885-15/e35"
+                       "/40758827_2138611023072230_4073975203662780931_n.jpg",
             "keyword": {
                 "comments": int,
                 "height": int,
@@ -161,18 +166,18 @@ class InstagramPostpageExtractor(InstagramExtractor):
     ]
 
     def __init__(self, match):
-        InstagramExtractor.__init__(self, match)
+        InstagramExtractor.__init__(self)
         self.shortcode = match.group(1)
 
     def instagrams(self):
         url = '{}/p/{}/'.format(self.root, self.shortcode)
-        return [self._extract_postpage(url)]
+        return (self._extract_postpage(url),)
 
 
-class InstagramProfilepageExtractor(InstagramExtractor):
+class InstagramUserExtractor(InstagramExtractor):
     """Extractor for ProfilePage"""
-    subcategory = "profilepage"
-    pattern = [r"(?:https?://)?(?:www\.)?instagram\.com/([^/]+)/?$"]
+    subcategory = "user"
+    pattern = [r"(?:https?://)?(?:www\.)?instagram\.com/(?!p/)([^/?&#]+)"]
     test = [
         ("https://www.instagram.com/instagram/", {
             "range": "1-12",
@@ -181,7 +186,7 @@ class InstagramProfilepageExtractor(InstagramExtractor):
     ]
 
     def __init__(self, match):
-        InstagramExtractor.__init__(self, match)
+        InstagramExtractor.__init__(self)
         self.username = match.group(1)
 
     def instagrams(self):
