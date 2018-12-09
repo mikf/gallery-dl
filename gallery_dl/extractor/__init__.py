@@ -45,6 +45,7 @@ modules = [
     "imgbox",
     "imgth",
     "imgur",
+    "instagram",
     "jaiminisbox",
     "joyreactor",
     "khinsider",
