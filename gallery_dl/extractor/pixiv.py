@@ -29,9 +29,7 @@ class PixivExtractor(Extractor):
 
     def items(self):
         metadata = self.get_metadata()
-
         yield Message.Version, 1
-        yield Message.Directory, metadata
 
         for work in self.works():
             if not work["user"]["id"]:
@@ -45,6 +43,8 @@ class PixivExtractor(Extractor):
             work["num"] = ""
             work["tags"] = [tag["name"] for tag in work["tags"]]
             work.update(metadata)
+
+            yield Message.Directory, work
 
             if work["type"] == "ugoira":
                 if not self.load_ugoira:
