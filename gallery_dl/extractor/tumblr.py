@@ -107,7 +107,7 @@ class TumblrExtractor(Extractor):
             if self.inline and "reblog" in post:  # inline media
                 # only "chat" posts are missing a "reblog" key in their
                 # API response, but they can't contain images/videos anyway
-                body = post["reblog"]["comment"]
+                body = post["reblog"]["comment"] + post["reblog"]["tree_html"]
                 for url in re.findall('<img src="([^"]+)"', body):
                     url = _original_inline_image(url)
                     yield self._prepare_image(url, post)
