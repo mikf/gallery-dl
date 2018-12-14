@@ -55,7 +55,11 @@ class KissmangaBase():
                 r"(?: *[:-]? *(.+))?"
             ), data["chapter_string"])
 
-        volume, chapter, minor, title = match.groups()
+        if match:
+            volume, chapter, minor, title = match.groups()
+        else:
+            volume, chapter, minor, title = 0, 0, "", data["chapter_string"]
+
         data["volume"] = text.parse_int(volume)
         data["chapter"] = text.parse_int(chapter)
         data["chapter_minor"] = "." + minor if minor else ""
@@ -113,6 +117,10 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
         ("http://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
             "count": 23,
             "keyword": "d47c94f4c57f4ab690a34b60fefac7b294468856",
+        }),
+        ("https://kissmanga.com/Manga/Houseki-no-Kuni/Oneshot?id=404189", {
+            "count": 49,
+            "keyword": "7835a19c9fc54ec4f2b345e8be3e865cfa57da5c",
         }),
         ("http://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608", None),
     ]
