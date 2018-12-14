@@ -46,8 +46,8 @@ class PahealTagExtractor(PahealExtractor):
     pattern = [r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/list/([^/?&#]+)"]
     test = [("https://rule34.paheal.net/post/list/k-on/1", {
-        "url": "d5b6954b978387c6dea69afcdcf24596da55e633",
-        "keyword": "c0536722f251150783717ba471f16af6b957632e",
+        "url": "0f5a777cea524635760de32dd85a3de5ac5f3f43",
+        "keyword": "fddaa6329bae5b99e8a666eeeb1cb7721d21bf6d",
     })]
     per_page = 70
 
