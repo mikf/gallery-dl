@@ -41,7 +41,7 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
                r"(/manga/[^/?&#]+)/?$"]
     test = [
         ("https://mangapark.me/manga/aria", {
-            "url": "4cb5606530b4eeacde7a4c9fd38296eb6ff46563",
+            "url": "a3437cd6802530f386d4cd3395312a38046eb4e9",
             "keyword": "e87ab8e7ad2571bbe587881e7fd422e8f582f818",
         }),
         ("https://mangapark.net/manga/aria", None),
@@ -92,7 +92,7 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
         }),
         ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
             "count": 15,
-            "keyword": "e6ef5192c8484d598bc834add4a56ee067e23b73",
+            "keyword": "8d5d1608d4182495ea43ad665e25b755b6468be2",
         }),
         ("https://mangapark.net/manga/gosu/s2/c55", None),
         ("https://mangapark.com/manga/gosu/s2/c55", None),
