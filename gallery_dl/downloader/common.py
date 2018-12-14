@@ -13,6 +13,7 @@ import time
 import logging
 from .. import config, util, exception
 from requests.exceptions import RequestException
+from ssl import SSLError
 
 
 class DownloaderBase():
@@ -109,7 +110,7 @@ class DownloaderBase():
                 # download content
                 try:
                     self.receive(file)
-                except RequestException as exc:
+                except (RequestException, SSLError) as exc:
                     msg = exc
                     print()
                     continue
