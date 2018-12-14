@@ -26,6 +26,10 @@ class HitomiGalleryExtractor(ChapterExtractor):
             "url": "cb759868d090fe0e2655c3e29ebf146054322b6d",
             "keyword": "85e453d01ee7f137669e75a764ccdc65ca092ad2",
         }),
+        ("https://hitomi.la/galleries/1036181.html", {
+            # "aa" subdomain for gallery-id ending in 1 (#142)
+            "pattern": r"https://aa\.hitomi\.la/",
+        }),
         ("https://hitomi.la/reader/867789.html", None),
     ]
 
@@ -62,8 +66,12 @@ class HitomiGalleryExtractor(ChapterExtractor):
         }
 
     def get_images(self, page):
-        subdomain = chr(97 + self.gid % 2) + "a"
+        # see https://ltn.hitomi.la/common.js
+        frontends = 2
+        offset = self.gid % frontends if self.gid % 10 != 1 else 0
+        subdomain = chr(97 + offset) + "a"
         base = "https://" + subdomain + ".hitomi.la/galleries/"
+
         return [
             (base + urlpart, None)
             for urlpart in text.extract_iter(
