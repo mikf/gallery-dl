@@ -27,14 +27,14 @@ class SensescansChapterExtractor(SensescansExtractor,
                 r"(?:/reader)?(" + foolslide.CHAPTER_RE)]
     test = [
         (("http://reader.sensescans.com/read/"
-          "magi__labyrinth_of_magic/en/33/319/page/1"), {
-              "url": "cc192cbeed36127d374926c50c3a4bd06092b760",
-              "keyword": "fcc1ff4a902f222364df9c39db2f8e7dcbcd53da",
+          "magi__labyrinth_of_magic/en/37/369/"), {
+              "url": "a399ef037cdfbc25b09d435cc2ea1e3e454a6812",
+              "keyword": "43ba75615d3e77d507808b0f3a8fd7fc72232a60",
         }),
         (("http://sensescans.com/reader/read/"
-          "magi__labyrinth_of_magic/en/33/319/page/1"), {
-              "url": "cc192cbeed36127d374926c50c3a4bd06092b760",
-              "keyword": "fcc1ff4a902f222364df9c39db2f8e7dcbcd53da",
+          "magi__labyrinth_of_magic/en/37/369/"), {
+              "url": "a399ef037cdfbc25b09d435cc2ea1e3e454a6812",
+              "keyword": "43ba75615d3e77d507808b0f3a8fd7fc72232a60",
         }),
     ]
 
