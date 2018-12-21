@@ -21,16 +21,18 @@ class MangaparkExtractor():
     def parse_chapter_path(path, data):
         """Get volume/chapter information from url-path of a chapter"""
         data["volume"], data["chapter_minor"] = 0, ""
-        for part in path.split("/")[3:]:
+        for part in path.split("/")[1:]:
             key, value = part[0], part[1:]
-            if key == "s":
-                data["version"] = text.parse_int(value)
-            elif key == "v":
-                data["volume"] = text.parse_int(value)
-            elif key == "c":
+            if key == "c":
                 chapter, dot, minor = value.partition(".")
                 data["chapter"] = text.parse_int(chapter)
                 data["chapter_minor"] = dot + minor
+            elif key == "i":
+                data["chapter_id"] = text.parse_int(value)
+            elif key == "v":
+                data["volume"] = text.parse_int(value)
+            elif key == "s":
+                data["stream"] = text.parse_int(value)
             elif key == "e":
                 data["chapter_minor"] = "v" + value
 
@@ -41,8 +43,8 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
                r"(/manga/[^/?&#]+)/?$"]
     test = [
         ("https://mangapark.me/manga/aria", {
-            "url": "a3437cd6802530f386d4cd3395312a38046eb4e9",
-            "keyword": "e87ab8e7ad2571bbe587881e7fd422e8f582f818",
+            "url": "aae6bf44e4360a1b0f5aa5fd74339cac6d616d20",
+            "keyword": "b7440cc4cd68d0262703da1ceadaecd34bdaacb0",
         }),
         ("https://mangapark.net/manga/aria", None),
         ("https://mangapark.com/manga/aria", None),
@@ -58,67 +60,74 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
         data["manga"] = text.unescape(
             text.extract(page, '<title>', ' Manga - Read ')[0])
 
-        pos = page.index('<div id="list" class="book-list">')
-        while True:
-            test, pos = text.extract(page, '<a class="ch sts sts_', '', pos)
-            if test is None:
-                return results
+        for stream in page.split('<div id="stream_')[1:]:
+            data["stream"] = text.parse_int(text.extract(stream, '', '"')[0])
 
-            path , pos = text.extract(page, 'href="', '"', pos)
-            title, pos = text.extract(page, '</a>', '</span>', pos)
-            date , pos = text.extract(page, '<i>', '</i>', pos)
-            count, pos = text.extract(page, '\tof ', ' ', pos)
+            pos = 0
+            while True:
+                test, pos = text.extract(
+                    stream, '<a class="ml-1 visited ch', '', pos)
+                if test is None:
+                    break
 
-            self.parse_chapter_path(path, data)
-            data["title"] = title[3:].strip()
-            data["date"] = date
-            data["count"] = text.parse_int(count)
-            results.append((self.root + path, data.copy()))
+                path , pos = text.extract(stream, 'href="', '"', pos)
+                title, pos = text.extract(stream, '</a>', '</div>', pos)
+                count, pos = text.extract(stream, ' of ', ' ', pos)
+
+                self.parse_chapter_path(path[8:], data)
+                data["title"] = title.strip()[2:]
+                data["count"] = text.parse_int(count)
+                results.append((self.root + path, data.copy()))
+
+        return results
 
 
 class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.me"""
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
-                r"(/manga/[^/]+/s\d+(?:/v\d+)?/c\d+[^/]*(?:/e\d+)?)")]
+                r"/manga/([^?&#]+/i\d+)")]
     test = [
-        ("https://mangapark.me/manga/gosu/s2/c55", {
+        ("https://mangapark.me/manga/gosu/i811615/c55/1", {
             "count": 50,
-            "keyword": "72ac1714b492b021a1fe26d9271ed132d51a930e",
+            "keyword": "388604e02c4c22cd41bd676efa1b6e8710ed2320",
         }),
-        (("https://mangapark.me/manga/"
-          "ad-astra-per-aspera-hata-kenjirou/s5/c1.2"), {
+        (("https://mangapark.me/manga"
+          "/ad-astra-per-aspera-hata-kenjirou/i662054/c001.2/1"), {
             "count": 40,
-            "keyword": "f7f7fb1ca8b26a59a47d8ec60c5eaaf69a43a3f6",
+            "keyword": "3f286631279e2017ce87c1b8db05d7b3f15e2971",
         }),
-        ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/s2/c70/e2/1", {
+        ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/i655476/c70/1", {
             "count": 15,
-            "keyword": "8d5d1608d4182495ea43ad665e25b755b6468be2",
+            "keyword": "3abb13e6d1ea7f8808b0ec415270b3afac97f98b",
         }),
-        ("https://mangapark.net/manga/gosu/s2/c55", None),
-        ("https://mangapark.com/manga/gosu/s2/c55", None),
+        ("https://mangapark.net/manga/gosu/i811615/c55/1", None),
+        ("https://mangapark.com/manga/gosu/i811615/c55/1", None),
     ]
 
     def __init__(self, match):
         tld, self.path = match.groups()
         self.root = self.root_fmt.format(tld)
-        url = self.root + self.path + "?zoom=2"
+        url = "{}/manga/{}?zoom=2".format(self.root, self.path)
         ChapterExtractor.__init__(self, url)
 
     def get_metadata(self, page):
-        data = {"lang": "en", "language": "English"}
-        self.parse_chapter_path(self.path, data)
-        text.extract_all(page, (
+        data = text.extract_all(page, (
             ("manga_id"  , "var _manga_id = '", "'"),
             ("chapter_id", "var _book_id = '", "'"),
+            ("stream"    , "var _stream = '", "'"),
+            ("path"      , "var _book_link = '", "'"),
             ("manga"     , "<h2>", "</h2>"),
             ("title"     , "</a>", "<"),
-            (None        , 'target="_blank" href="', ''),
             ("count"     , 'page 1">1 / ', '<'),
-        ), values=data)
+        ), values={"lang": "en", "language": "English"})[0]
+        self.parse_chapter_path(data["path"], data)
+
         data["manga"], _, data["type"] = data["manga"].rpartition(" ")
         data["manga"] = text.unescape(data["manga"])
         data["title"] = data["title"].partition(": ")[2]
-        data["count"] = text.parse_int(data["count"])
+        for key in ("manga_id", "chapter_id", "stream", "count"):
+            data[key] = text.parse_int(data[key])
+
         return data
 
     def get_images(self, page):
@@ -130,6 +139,6 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
             width , pos = text.extract(page, ' width="', '"', pos)
             height, pos = text.extract(page, ' _heighth="', '"', pos)
             yield text.urljoin(self.root, url), {
-                "width": width,
-                "height": height,
+                "width": text.parse_int(width),
+                "height": text.parse_int(height),
             }
