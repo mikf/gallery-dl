@@ -99,6 +99,9 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
             _    , pos = extr(page, '<ul class="image_option_icons">', '', pos)
             iurl , pos = extr(page, '<li><a href="', '"', pos+100)
 
+            if iurl[0] == "/":
+                iurl = text.urljoin(self.root, iurl)
+
             yield iurl, {
                 "num": num,
                 "name": name,
