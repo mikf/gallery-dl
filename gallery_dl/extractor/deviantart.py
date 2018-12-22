@@ -458,7 +458,7 @@ class DeviantartAPI():
     CLIENT_SECRET = "76b08c69cfb27f26d6161f9ab6d061a1"
 
     def __init__(self, extractor):
-        self.session = extractor.session
+        self.extractor = extractor
         self.log = extractor.log
         self.headers = {}
 
@@ -553,8 +553,7 @@ class DeviantartAPI():
 
     def authenticate(self, refresh_token):
         """Authenticate the application by requesting an access token"""
-        access_token = self._authenticate_impl(refresh_token)
-        self.headers["Authorization"] = access_token
+        self.headers["Authorization"] = self._authenticate_impl(refresh_token)
 
     @cache(maxage=3590, keyarg=1)
     def _authenticate_impl(self, refresh_token):
@@ -569,7 +568,8 @@ class DeviantartAPI():
             data = {"grant_type": "client_credentials"}
 
         auth = (self.client_id, self.client_secret)
-        response = self.session.post(url, data=data, auth=auth)
+        response = self.extractor.request(
+            url, method="POST", data=data, auth=auth)
         data = response.json()
 
         if response.status_code != 200:
@@ -587,8 +587,12 @@ class DeviantartAPI():
                 time.sleep(2 ** self.delay)
 
             self.authenticate(None if public else self.refresh_token)
-            response = self.session.get(
-                url, headers=self.headers, params=params)
+            response = self.extractor.request(
+                url,
+                params=params,
+                headers=self.headers,
+                expect=range(400, 500),
+            )
             data = response.json()
             status = response.status_code
 
@@ -604,12 +608,12 @@ class DeviantartAPI():
             self.log.debug(response.text)
             msg = "API responded with {} {}".format(
                 status, response.reason)
-            if 400 <= status < 500 and status != 429:
-                self.log.error(msg)
-                return data
-            else:
+            if status == 429:
                 self.delay += 1
                 self.log.warning("%s. Using %ds delay.", msg, 2 ** self.delay)
+            else:
+                self.log.error(msg)
+                return data
 
     def _pagination(self, endpoint, params):
         public = True
