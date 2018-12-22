@@ -382,11 +382,11 @@ class Formatter():
 
     def _apply(self, key, funcs, fmt):
         def wrap(obj):
-            if key in obj:
+            try:
                 obj = obj[key]
                 for func in funcs:
                     obj = func(obj)
-            else:
+            except Exception:
                 obj = self.default
             return fmt(obj)
         return wrap
