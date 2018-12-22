@@ -406,7 +406,7 @@ class PixivAppAPI():
     CLIENT_SECRET = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj"
 
     def __init__(self, extractor):
-        self.session = extractor.session
+        self.extractor = extractor
         self.log = extractor.log
         self.username, self.password = extractor._get_auth_info()
         self.user = None
@@ -416,7 +416,7 @@ class PixivAppAPI():
         self.client_secret = extractor.config(
             "client-secret", self.CLIENT_SECRET)
 
-        self.session.headers.update({
+        extractor.session.headers.update({
             "App-OS": "ios",
             "App-OS-Version": "10.3.1",
             "App-Version": "6.7.1",
@@ -426,9 +426,8 @@ class PixivAppAPI():
 
     def login(self):
         """Login and gain an access token"""
-        self.user, auth = self._login_impl(
-            self.username, self.password)
-        self.session.headers["Authorization"] = auth
+        self.user, auth = self._login_impl(self.username, self.password)
+        self.extractor.session.headers["Authorization"] = auth
 
     @cache(maxage=3590, keyarg=1)
     def _login_impl(self, username, password):
@@ -450,7 +449,8 @@ class PixivAppAPI():
             data["username"] = username
             data["password"] = password
 
-        response = self.session.post(url, data=data)
+        response = self.extractor.request(
+            url, method="POST", data=data, expect=(400,))
         if response.status_code >= 400:
             raise exception.AuthenticationError()
 
@@ -496,7 +496,8 @@ class PixivAppAPI():
         url = "https://app-api.pixiv.net/" + endpoint
 
         self.login()
-        response = self.session.get(url, params=params)
+        response = self.extractor.request(
+            url, params=params, expect=range(400, 500))
 
         if 200 <= response.status_code < 400:
             return response.json()

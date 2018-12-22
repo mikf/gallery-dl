@@ -105,17 +105,16 @@ class MastodonAPI():
     def __init__(self, extractor, root="https://pawoo.net",
                  access_token=("286462927198d0cf3e24683e91c8259a"
                                "ac4367233064e0570ca18df2ac65b226")):
-        access_token = extractor.config("access-token", access_token)
-        self.session = extractor.session
-        self.session.headers["Authorization"] = "Bearer " + access_token
         self.root = root
+        self.extractor = extractor
+        extractor.session.headers["Authorization"] = "Bearer {}".format(
+            extractor.config("access-token", access_token))
 
     def account_search(self, query, limit=40):
         """Search for content"""
-        response = self.session.get(
-            self.root + "/api/v1/accounts/search",
-            params={"q": query, "limit": limit},
-        )
+        url = "{}/api/v1/accounts/search".format(self.root)
+        params = {"q": query, "limit": limit}
+        response = self.extractor.request(url, params=params)
         return self._parse(response)
 
     def account_statuses(self, account_id):
@@ -123,15 +122,14 @@ class MastodonAPI():
         url = "{}/api/v1/accounts/{}/statuses?only_media=1".format(
             self.root, account_id)
         while url:
-            response = self.session.get(url)
+            response = self.extractor.request(url)
             yield from self._parse(response)
             url = response.links.get("next", {}).get("url")
 
     def status(self, status_id):
         """Fetch a Status"""
-        response = self.session.get(
-            self.root + "/api/v1/statuses/" + status_id
-        )
+        url = "{}/api/v1/statuses/{}".format(self.root, status_id)
+        response = self.extractor.request(url, expect=(404,))
         return self._parse(response)
 
     @staticmethod

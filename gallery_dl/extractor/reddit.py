@@ -160,7 +160,6 @@ class RedditAPI():
         self.morecomments = extractor.config("morecomments", False)
         self.refresh_token = extractor.config("refresh-token")
         self.log = extractor.log
-        self.session = extractor.session
 
         client_id = extractor.config("client-id", self.CLIENT_ID)
         user_agent = extractor.config("user-agent", self.USER_AGENT)
@@ -172,7 +171,7 @@ class RedditAPI():
                 "override either both or none of them.")
         else:
             self.client_id = client_id
-            self.session.headers["User-Agent"] = user_agent
+            extractor.session.headers["User-Agent"] = user_agent
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
@@ -209,7 +208,7 @@ class RedditAPI():
     def authenticate(self):
         """Authenticate the application by requesting an access token"""
         access_token = self._authenticate_impl(self.refresh_token)
-        self.session.headers["Authorization"] = access_token
+        self.extractor.session.headers["Authorization"] = access_token
 
     @cache(maxage=3590, keyarg=1)
     def _authenticate_impl(self, refresh_token=None):
@@ -224,7 +223,8 @@ class RedditAPI():
             data = {"grant_type": ("https://oauth.reddit.com/"
                                    "grants/installed_client"),
                     "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
-        response = self.session.post(url, data=data, auth=(self.client_id, ""))
+        response = self.extractor.request(
+            url, method="POST", data=data, auth=(self.client_id, ""))
         if response.status_code != 200:
             raise exception.AuthenticationError('"{} ({})"'.format(
                 response.json().get("message"), response.status_code))
@@ -234,7 +234,8 @@ class RedditAPI():
         url = "https://oauth.reddit.com" + endpoint
         params["raw_json"] = 1
         self.authenticate()
-        response = self.session.get(url, params=params)
+        response = self.extractor.request(
+            url, params=params, expect=range(400, 500))
         remaining = response.headers.get("x-ratelimit-remaining")
         if remaining and float(remaining) < 2:
             wait = int(response.headers["x-ratelimit-reset"])
