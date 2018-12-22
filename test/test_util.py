@@ -188,10 +188,16 @@ class TestFormatter(unittest.TestCase):
 
     def test_missing(self):
         replacement = "None"
+
         self._run_test("{missing}", replacement)
         self._run_test("{missing.attr}", replacement)
         self._run_test("{missing[key]}", replacement)
         self._run_test("{missing:?a//}", "")
+
+        self._run_test("{name[missing]}", replacement)
+        self._run_test("{name[missing].attr}", replacement)
+        self._run_test("{name[missing][key]}", replacement)
+        self._run_test("{name[missing]:?a//}", "")
 
     def test_missing_custom_default(self):
         replacement = default = "foobar"
