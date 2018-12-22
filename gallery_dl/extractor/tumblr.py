@@ -9,7 +9,7 @@
 """Extract images from https://www.tumblr.com/"""
 
 from .common import Extractor, Message
-from .. import text, oauth, exception
+from .. import text, oauth, extractor, exception
 from datetime import datetime, timedelta
 import re
 import time
@@ -117,9 +117,10 @@ class TumblrExtractor(Extractor):
 
             if self.external:  # external links
                 post["extension"] = None
-                for key in ("permalink_url", "url"):
-                    if key in post:
-                        yield Message.Queue, post[key], post
+                with extractor.blacklist(("tumblr",)):
+                    for key in ("permalink_url", "url"):
+                        if key in post:
+                            yield Message.Queue, post[key], post
 
     def posts(self):
         """Return an iterable containing all relevant posts"""
