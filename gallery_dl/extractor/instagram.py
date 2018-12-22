@@ -115,8 +115,8 @@ class InstagramImageExtractor(InstagramExtractor):
     test = [
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
-            "pattern": r"https://[^/.]+\.cdninstagram\.com/vp/[0-9a-f]+"
-                       r"/5C8DAF92/t51.2885-15/e35"
+            "pattern": r"https://[^/]+\.(cdninstagram\.com|fbcdn\.net)"
+                       r"/vp/[0-9a-f]+/[0-9A-F]+/t51.2885-15/e35"
                        r"/44877605_725955034447492_3123079845831750529_n.jpg",
             "keyword": {
                 "comments": int,
@@ -132,9 +132,9 @@ class InstagramImageExtractor(InstagramExtractor):
 
         # GraphSidecar
         ("https://www.instagram.com/p/BoHk1haB5tM/", {
-            "pattern": r"https://[^/.]+\.cdninstagram\.com/vp/[0-9a-f]+"
-                       "/5C935FCB/t51.2885-15/e35"
-                       "/40758827_2138611023072230_4073975203662780931_n.jpg",
+            "pattern": r"https://[^/]+\.(cdninstagram\.com|fbcdn\.net)"
+                       r"/vp/[0-9a-f]+/[0-9A-F]+/t51.2885-15/e35"
+                       r"/40758827_2138611023072230_4073975203662780931_n.jpg",
             "keyword": {
                 "comments": int,
                 "height": int,
