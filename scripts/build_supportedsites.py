@@ -77,6 +77,7 @@ SUBCATEGORY_MAP = {
     "popular": "Popular Images",
     "recent" : "Recent Images",
     "search" : "Search Results",
+    "stash"  : "Sta.sh",
     "status" : "Images from Statuses",
     "tag"    : "Tag-Searches",
     "user"   : "Images from Users",

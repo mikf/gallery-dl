@@ -39,6 +39,7 @@ ImageFap             https://imagefap.com/               Images from Users, Gall
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
+Instagram            https://www.instagram.com/          Images from Users, individual Images
 Jaimini's Box        https://jaiminisbox.com/            Chapters, Manga
 Joyreactor           http://joyreactor.cc/               Images from Users, Posts, Tag-Searches
 Khinsider            https://downloads.khinsider.com/    Soundtracks
@@ -100,7 +101,7 @@ Turboimagehost       https://turboimagehost.com/         individual Images
 
 .. |Site-0| replace:: yuki.la 4chan archive
 .. |Capabilities-0| replace:: Images from Users, Albums, Challenges, individual Images, Likes, Search Results
-.. |Capabilities-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images
+.. |Capabilities-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Sta.sh
 .. |Capabilities-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
 .. |Capabilities-3| replace:: Images from Users, Favorites, individual Images, Popular Images, Recent Images, Scraps
 .. |Capabilities-4| replace:: Images from Users, Doujin, Favorites, individual Images
