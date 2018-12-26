@@ -702,6 +702,15 @@ Description Minimum and maximum wait time in seconds between each image
 =========== =====
 
 
+extractor.tumblr.avatar
+-----------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Download blog avatars.
+=========== =====
+
+
 extractor.tumblr.external
 -------------------------
 =========== =====
