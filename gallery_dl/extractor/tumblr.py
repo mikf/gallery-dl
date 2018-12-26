@@ -52,6 +52,7 @@ class TumblrExtractor(Extractor):
         self.api = TumblrAPI(self)
 
         self.types = self._setup_posttypes()
+        self.avatar = self.config("avatar", False)
         self.inline = self.config("inline", False)
         self.reblogs = self.config("reblogs", True)
         self.external = self.config("external", False)
@@ -75,6 +76,10 @@ class TumblrExtractor(Extractor):
                 blog = self.api.info(self.blog)
                 blog["uuid"] = self.blog
                 yield Message.Directory, blog.copy()
+
+                if self.avatar:
+                    url = self.api.avatar(self.blog)
+                    yield self._prepare_avatar(url, post.copy(), blog)
 
             reblog = "reblogged_from_id" in post
             if reblog and self._skip_reblog(post):
@@ -165,6 +170,15 @@ class TumblrExtractor(Extractor):
             # filename doesn't follow the usual pattern (#129)
             post["hash"] = post["name"]
 
+        return Message.Url, url, post
+
+    @staticmethod
+    def _prepare_avatar(url, post, blog):
+        text.nameext_from_url(url, post)
+        post["num"] = 1
+        post["blog"] = blog
+        post["reblogged"] = False
+        post["type"] = post["id"] = post["hash"] = "avatar"
         return Message.Url, url, post
 
     def _skip_reblog(self, _):
@@ -275,6 +289,12 @@ class TumblrAPI(oauth.OAuth1API):
             self.BLOG_CACHE[blog] = self._call(blog, "info", {})["blog"]
         return self.BLOG_CACHE[blog]
 
+    def avatar(self, blog, size="512"):
+        """Retrieve a blog avatar"""
+        params = {"size": size}
+        data = self._call(blog, "avatar", params, allow_redirects=False)
+        return data["avatar_url"]
+
     def posts(self, blog, params):
         """Retrieve published posts"""
         params.update({"offset": 0, "limit": 50, "reblog_info": "true"})
@@ -298,13 +318,13 @@ class TumblrAPI(oauth.OAuth1API):
             yield from posts
             params["before"] = posts[-1]["liked_timestamp"]
 
-    def _call(self, blog, endpoint, params):
+    def _call(self, blog, endpoint, params, **kwargs):
         if self.api_key:
             params["api_key"] = self.api_key
         url = "https://api.tumblr.com/v2/blog/{}/{}".format(
             blog, endpoint)
 
-        response = self.request(url, params=params)
+        response = self.request(url, params=params, **kwargs)
         data = response.json()
         status = data["meta"]["status"]
 
