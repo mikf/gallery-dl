@@ -725,7 +725,7 @@ extractor.tumblr.inline
 -----------------------
 =========== =====
 Type        ``bool``
-Default     ``false``
+Default     ``true``
 Description Search posts for inline images and videos.
 =========== =====
 
@@ -746,7 +746,7 @@ extractor.tumblr.posts
 ----------------------
 =========== =====
 Type        ``string`` or ``list`` of ``strings``
-Default     ``"photo"``
+Default     ``"all"``
 Example     ``"video,audio,link"`` or ``["video", "audio", "link"]``
 Description A (comma-separated) list of post types to extract images, etc. from.
 

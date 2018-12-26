@@ -53,7 +53,7 @@ class TumblrExtractor(Extractor):
 
         self.types = self._setup_posttypes()
         self.avatar = self.config("avatar", False)
-        self.inline = self.config("inline", False)
+        self.inline = self.config("inline", True)
         self.reblogs = self.config("reblogs", True)
         self.external = self.config("external", False)
 
@@ -131,7 +131,7 @@ class TumblrExtractor(Extractor):
         """Return an iterable containing all relevant posts"""
 
     def _setup_posttypes(self):
-        types = self.config("posts", ("photo",))
+        types = self.config("posts", "all")
 
         if types == "all":
             return POST_TYPES
