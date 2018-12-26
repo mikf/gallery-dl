@@ -275,8 +275,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
     archive_fmt = "{index}.{extension}"
-    pattern = [BASE_PATTERN + r"/(?:art|journal)/[^/?&#]+-\d+",
-               r"(?:https?://)?sta\.sh/()()[a-z0-9]+"]
+    pattern = [BASE_PATTERN + r"/(?:art|journal)/[^/?&#]+-\d+"]
     test = [
         (("https://www.deviantart.com/shimoda7/art/"
           "For-the-sake-of-a-memory-10073852"), {
@@ -285,13 +284,6 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://www.deviantart.com/zzz/art/zzz-1234567890", {
-            "exception": exception.NotFoundError,
-        }),
-        ("https://sta.sh/01ijs78ebagf", {
-            "url": "35c0cd0e51494a1e01bddf5414a0d1585cd9fb0e",
-            "keyword": "d0c01d39b05519e4812cd3c7ac8267363171c053",
-        }),
-        ("https://sta.sh/abcdefghijkl", {
             "exception": exception.NotFoundError,
         }),
         (("https://www.deviantart.com/myria-moon/art/"
@@ -318,6 +310,38 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         if response.status_code >= 400 or not deviation_id:
             raise exception.NotFoundError("image")
         return (self.api.deviation(deviation_id),)
+
+
+class DeviantartStashExtractor(DeviantartDeviationExtractor):
+    """Extractor for sta.sh-ed deviations"""
+    subcategory = "stash"
+    archive_fmt = "{index}.{extension}"
+    pattern = [r"(?:https?://)?sta\.sh/()()[a-z0-9]+"]
+    test = [
+        ("https://sta.sh/022c83odnaxc", {
+            "pattern": r"https://s3.amazonaws.com/origin-orig.deviantart.net",
+            "count": 1,
+        }),
+        ("https://sta.sh/21jf51j7pzl2", {
+            "pattern": pattern[0],
+            "count": 4,
+        }),
+        ("https://sta.sh/abcdefghijkl", {
+            "exception": exception.HttpError,
+        }),
+    ]
+
+    def deviations(self):
+        page = self.request(self.url).text
+        deviation_id = text.extract(page, '//deviation/', '"')[0]
+
+        if deviation_id:
+            yield self.api.deviation(deviation_id)
+        else:
+            page = text.extract(
+                page, '<div id="stash-body"', '<div class="footer"')[0]
+            for url in text.extract_iter(page, '<a href="', '"'):
+                yield url, {}
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
