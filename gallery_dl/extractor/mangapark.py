@@ -63,19 +63,13 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
         for stream in page.split('<div id="stream_')[1:]:
             data["stream"] = text.parse_int(text.extract(stream, '', '"')[0])
 
-            pos = 0
-            while True:
-                test, pos = text.extract(
-                    stream, '<a class="ml-1 visited ch', '', pos)
-                if test is None:
-                    break
-
-                path , pos = text.extract(stream, 'href="', '"', pos)
-                title, pos = text.extract(stream, '</a>', '</div>', pos)
-                count, pos = text.extract(stream, ' of ', ' ', pos)
+            for chapter in text.extract_iter(stream, '<li ', '</li>'):
+                path , pos = text.extract(chapter, 'href="', '"')
+                title, pos = text.extract(chapter, '>: </span>', '<', pos)
+                count, pos = text.extract(chapter, '  of ', ' ', pos)
 
                 self.parse_chapter_path(path[8:], data)
-                data["title"] = title.strip()[2:]
+                data["title"] = title.strip() if title else ""
                 data["count"] = text.parse_int(count)
                 results.append((self.root + path, data.copy()))
 
