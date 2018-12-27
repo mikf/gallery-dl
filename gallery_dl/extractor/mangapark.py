@@ -9,7 +9,7 @@
 """Extract manga-chapters and entire manga from https://mangapark.me/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
+from .. import text, exception
 
 
 class MangaparkExtractor():
@@ -91,8 +91,7 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
             "keyword": "3f286631279e2017ce87c1b8db05d7b3f15e2971",
         }),
         ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/i655476/c70/1", {
-            "count": 15,
-            "keyword": "3abb13e6d1ea7f8808b0ec415270b3afac97f98b",
+            "exception": exception.NotFoundError,
         }),
         ("https://mangapark.net/manga/gosu/i811615/c55/1", None),
         ("https://mangapark.com/manga/gosu/i811615/c55/1", None),
@@ -114,6 +113,9 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
             ("title"     , "</a>", "<"),
             ("count"     , 'page 1">1 / ', '<'),
         ), values={"lang": "en", "language": "English"})[0]
+
+        if not data["path"]:
+            raise exception.NotFoundError("chapter")
         self.parse_chapter_path(data["path"], data)
 
         data["manga"], _, data["type"] = data["manga"].rpartition(" ")
