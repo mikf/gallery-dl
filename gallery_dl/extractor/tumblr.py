@@ -194,17 +194,17 @@ class TumblrUserExtractor(TumblrExtractor):
     pattern = [BASE_PATTERN + r"(?:/page/\d+|/archive)?/?$"]
     test = [
         ("http://demo.tumblr.com/", {
-            "pattern": (r"https://\d+\.media\.tumblr\.com"
-                        r"/tumblr_[^/_]+_\d+\.jpg"),
+            "pattern": r"https://\d+\.media\.tumblr\.com"
+                       r"/tumblr_[^/_]+_\d+\.jpg",
             "count": 1,
+            "options": (("posts", "photo"),),
         }),
         ("http://demo.tumblr.com/", {
             "pattern": (r"https?://(?:$|"
                         r"\d+\.media\.tumblr\.com/.+_1280\.jpg|"
                         r"w+\.tumblr\.com/audio_file/demo/\d+/tumblr_\w+)"),
             "count": 3,
-            "options": (("posts", "all"), ("external", True),
-                        ("inline", True), ("reblogs", True))
+            "options": (("posts", "all"), ("external", True))
         }),
         ("https://demo.tumblr.com/page/2", None),
         ("https://demo.tumblr.com/archive", None),
@@ -225,6 +225,30 @@ class TumblrPostExtractor(TumblrExtractor):
             "pattern": (r"https://\d+\.media\.tumblr\.com"
                         r"/tumblr_[^/_]+_1280.jpg"),
             "count": 1,
+        }),
+        ("https://mikf123.tumblr.com/post/167770226574/text-post", {
+            "count": 2,
+        }),
+        ("https://mikf123.tumblr.com/post/181022561719/quote-post", {
+            "count": 1,
+        }),
+        ("https://mikf123.tumblr.com/post/167623351559/link-post", {
+            "count": 2,
+        }),
+        ("https://muyanna.tumblr.com/post/180692431632/answer-post", {
+            "count": 1,
+        }),
+        ("https://mikf123.tumblr.com/post/167633596145/video-post", {
+            "count": 2,
+        }),
+        ("https://mikf123.tumblr.com/post/167770026604/audio-post", {
+            "count": 2,
+        }),
+        ("https://mikf123.tumblr.com/post/172687798174/photo-post", {
+            "count": 4,
+        }),
+        ("https://mikf123.tumblr.com/post/181022380064/chat-post", {
+            "count": 0,
         }),
         ("http://demo.tumblr.com/image/459265350", None),
     ]
