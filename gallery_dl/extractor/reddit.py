@@ -36,7 +36,7 @@ class RedditExtractor(Extractor):
                 util.SPECIAL_EXTRACTORS, [RedditSubredditExtractor]):
             while True:
                 extra = []
-                for url in self._urls(submissions):
+                for url, data in self._urls(submissions):
                     if url[0] == "#":
                         continue
                     if url[0] == "/":
@@ -46,7 +46,7 @@ class RedditExtractor(Extractor):
                     if match:
                         extra.append(match.group(1))
                     else:
-                        yield Message.Queue, text.unescape(url), {}
+                        yield Message.Queue, text.unescape(url), data
 
                 if not extra or depth == self.max_depth:
                     return
@@ -62,11 +62,18 @@ class RedditExtractor(Extractor):
     def _urls(self, submissions):
         for submission, comments in submissions:
             self._visited.add(submission["id"])
+
             if not submission["is_self"]:
-                yield submission["url"]
-            strings = [submission["selftext_html"] or ""]
-            strings += [c["body_html"] or "" for c in comments]
-            yield from text.extract_iter("".join(strings), ' href="', '"')
+                yield submission["url"], submission
+
+            for url in text.extract_iter(
+                    submission["selftext_html"] or "", ' href="', '"'):
+                yield url, submission
+
+            for comment in comments:
+                for url in text.extract_iter(
+                        comment["body_html"] or "", ' href="', '"'):
+                    yield url, comment
 
 
 class RedditSubredditExtractor(RedditExtractor):
@@ -103,7 +110,6 @@ class RedditSubmissionExtractor(RedditExtractor):
     test = [
         ("https://www.reddit.com/r/lavaporn/comments/2a00np/", {
             "pattern": r"https?://i\.imgur\.com/AaAUCgy\.jpg",
-            "count": 1,
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/", None),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/", None),
