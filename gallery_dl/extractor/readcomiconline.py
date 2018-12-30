@@ -20,7 +20,6 @@ class ReadcomiconlineBase():
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     archive_fmt = "{issue_id}_{page}"
     root = "https://readcomiconline.to"
-    useragent = "Wget/1.19.2 (linux-gnu)"
 
     request = cloudflare.request_func
 
@@ -40,19 +39,22 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
             "keyword": "f5ba5246cd787bb750924d9690cb1549199bd516",
         }),
     ]
-    scheme = "https"
 
     def __init__(self, match):
         MangaExtractor.__init__(self, match, self.root + match.group(1))
-        self.session.headers["User-Agent"] = self.useragent
 
     def chapters(self, page):
         results = []
-        comic, pos = text.extract(page, '<div class="heading"><h3>', '<')
-        page , pos = text.extract(page, '<ul class="list">', '</ul>', pos)
+        comic, pos = text.extract(page, ' class="barTitle">', '<')
+        page , pos = text.extract(page, ' class="listing">', '</table>', pos)
 
-        for item in text.extract_iter(page, '<a href="', '</span>'):
-            url, _, issue = item.partition('"><span>')
+        comic = comic.rpartition("information")[0].strip()
+        needle = ' title="Read {} '.format(comic)
+        comic = text.unescape(comic)
+
+        for item in text.extract_iter(page, ' href="', ' comic online '):
+            url, _, issue = item.partition(needle)
+            url = url.rpartition('"')[0]
             if issue.startswith('Issue #'):
                 issue = issue[7:]
             results.append((self.root + url, {
@@ -76,7 +78,6 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     def __init__(self, match):
         ChapterExtractor.__init__(self, self.root + match.group(1))
         self.issue_id = match.group(2)
-        self.session.headers["User-Agent"] = self.useragent
 
     def get_metadata(self, page):
         comic, pos = text.extract(page, "   - Read\r\n    ", "\r\n")
