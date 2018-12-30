@@ -91,7 +91,8 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
             "keyword": "3f286631279e2017ce87c1b8db05d7b3f15e2971",
         }),
         ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/i655476/c70/1", {
-            "exception": exception.NotFoundError,
+            "count": 15,
+            "keyword": "3abb13e6d1ea7f8808b0ec415270b3afac97f98b",
         }),
         ("https://mangapark.net/manga/gosu/i811615/c55/1", None),
         ("https://mangapark.com/manga/gosu/i811615/c55/1", None),
