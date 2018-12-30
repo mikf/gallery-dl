@@ -25,7 +25,7 @@ class KissmangaBase():
     """Base class for kissmanga extractors"""
     category = "kissmanga"
     archive_fmt = "{chapter_id}_{page}"
-    root = "http://kissmanga.com"
+    root = "https://kissmanga.com"
 
     def request(self, url):
         response = cloudflare.request_func(self, url)
@@ -69,22 +69,23 @@ class KissmangaBase():
 
 class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
     """Extractor for manga from kissmanga.com"""
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?(kissmanga\.com"
-               r"/Manga/[^/?&#]+/?)$"]
+    pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com"
+               r"(/Manga/[^/?&#]+/?)$"]
     test = [
-        ("http://kissmanga.com/Manga/Dropout", {
-            "url": "992befdd64e178fe5af67de53f8b510860d968ca",
+        ("https://kissmanga.com/Manga/Dropout", {
+            "url": "9e3a6f715b229aa3fafa42a1d5da5d65614cb532",
             "keyword": "32b09711c28b481845acc32e3bb6054cfc90224d",
         }),
-        ("http://kissmanga.com/manga/feng-shen-ji", None),
+        ("https://kissmanga.com/manga/feng-shen-ji", None),
     ]
+
+    def __init__(self, match):
+        MangaExtractor.__init__(self, match, self.root + match.group(1))
 
     def chapters(self, page):
         results = []
-        manga, pos = text.extract(
-            page, '<div class="barTitle">', '\ninformation')
-        page, pos = text.extract(
-            page, '<table class="listing">', '</table>', pos)
+        manga, pos = text.extract(page, ' class="barTitle">', '\ninformation')
+        page , pos = text.extract(page, ' class="listing">', '</table>', pos)
         manga = manga.strip()
         needle = '" title="Read ' + manga + ' '
         manga = text.unescape(manga)
@@ -104,17 +105,17 @@ class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
 class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
     """Extractor for manga-chapters from kissmanga.com"""
     pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com"
-               r"/Manga/[^/?&#]+/[^/?&#]+\?id=(\d+)"]
+               r"(/Manga/[^/?&#]+/[^/?&#]+\?id=(\d+))"]
     test = [
-        ("http://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
+        ("https://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
             "url": "46e63fd63e9e16f19bc1e6c7a45dc060815642fd",
             "keyword": "4a3a9341d453541de0dbfa24cd6b2e3ed39c0182",
         }),
-        ("http://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
+        ("https://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
             "url": "c26be8bf9c2abacee2076979d021634092cf38f1",
             "keyword": "ffc11b630da44fe67709ed0473756cf51b90a05c",
         }),
-        ("http://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
+        ("https://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
             "count": 23,
             "keyword": "d47c94f4c57f4ab690a34b60fefac7b294468856",
         }),
@@ -122,12 +123,12 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
             "count": 49,
             "keyword": "7835a19c9fc54ec4f2b345e8be3e865cfa57da5c",
         }),
-        ("http://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608", None),
+        ("https://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608", None),
     ]
 
     def __init__(self, match):
-        ChapterExtractor.__init__(self, match.group(0))
-        self.chapter_id = match.group(1)
+        ChapterExtractor.__init__(self, self.root + match.group(1))
+        self.chapter_id = match.group(2)
         self.session.headers["Referer"] = self.root
 
     def get_metadata(self, page):
@@ -153,7 +154,7 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
                 )
             ]
         except UnicodeDecodeError:
-            self.log.error("Failed to decrypt image URls")
+            self.log.error("Failed to decrypt image URLs")
         except (ValueError, IndexError):
             self.log.error("Failed to get AES key")
         return []
