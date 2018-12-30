@@ -23,7 +23,6 @@ def request_func(self, *args, **kwargs):
     response = self.session.get(*args, **kwargs)
     if response.status_code == 503:
         _cookiecache.invalidate(self.root)
-        self.log.debug(response.text)
         self.log.info("Solving Cloudflare challenge")
         response = solve_challenge(self.session, response)
         _cookiecache(self.root, self.session.cookies)
