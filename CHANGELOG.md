@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased
+## 1.6.2 - 2019-01-01
+- Added support for:
+  - `instagram` - https://www.instagram.com ([#134](https://github.com/mikf/gallery-dl/issues/134))
+- Added support for multiple items on sta.sh pages ([#113](https://github.com/mikf/gallery-dl/issues/113))
+- Added option to download `tumblr` avatars ([#137](https://github.com/mikf/gallery-dl/issues/137))
+- Changed defaults for visited post types and inline media on `tumblr`
+- Improved inline extraction of `tumblr` posts ([#133](https://github.com/mikf/gallery-dl/issues/133), [#137](https://github.com/mikf/gallery-dl/issues/137))
+- Improved error handling and retry behavior of all API calls
+- Improved handling of missing fields in format strings ([#136](https://github.com/mikf/gallery-dl/issues/136))
+- Fixed hash extraction for unusual `tumblr` URLs ([#129](https://github.com/mikf/gallery-dl/issues/129))
+- Fixed image subdomains for `hitomi` galleries ([#142](https://github.com/mikf/gallery-dl/issues/142))
+- Fixed and improved miscellaneous issues for `kissmanga` ([#20](https://github.com/mikf/gallery-dl/issues/20)), `luscious`, `mangapark`, `readcomiconline`
 
 ## 1.6.1 - 2018-11-28
 - Added support for:
