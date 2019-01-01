@@ -91,9 +91,6 @@ class DeviantartExtractor(Extractor):
 
     def prepare(self, deviation):
         """Adjust the contents of a Deviation-object"""
-        for key in ("stats", "preview", "is_favourited", "allows_comments"):
-            if key in deviation:
-                del deviation[key]
         try:
             deviation["index"] = deviation["url"].rpartition("-")[2]
         except KeyError:
@@ -109,8 +106,6 @@ class DeviantartExtractor(Extractor):
         url = target["src"]
         deviation["target"] = text.nameext_from_url(url, target.copy())
         deviation["extension"] = deviation["target"]["extension"]
-        if url.startswith("http:"):
-            url = "https:" + url[5:]
         return Message.Url, url, deviation
 
     def _commit_journal_html(self, deviation, journal):
@@ -210,12 +205,55 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     pattern = [BASE_PATTERN + r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"]
     test = [
         ("https://www.deviantart.com/shimoda7/gallery/", {
-            "url": "2b80b212717da6971b92670de15a29f68429a067",
-            "keyword": "8a326ce18d6240ebf8019538f60a57688164dd35",
+            "pattern": r"https://(s3.amazonaws.com/origin-(img|orig)"
+                       r".deviantart.net/|images-wixmp-\w+.wixmp.com/)",
+            "count": ">= 30",
+            "keyword": {
+                "allows_comments": bool,
+                "author": {
+                    "type": "regular",
+                    "usericon": str,
+                    "userid": "9AE51FC7-0278-806C-3FFF-F4961ABF9E2B",
+                    "username": "shimoda7",
+                },
+                "category_path": str,
+                "content": {
+                    "filesize": int,
+                    "height": int,
+                    "src": str,
+                    "transparency": bool,
+                    "width": int,
+                },
+                "da_category": str,
+                "deviationid": str,
+                "?download_filesize": int,
+                "extension": str,
+                "index": str,
+                "is_deleted": bool,
+                "is_downloadable": bool,
+                "is_favourited": bool,
+                "is_mature": bool,
+                "preview": {
+                    "height": int,
+                    "src": str,
+                    "transparency": bool,
+                    "width": int,
+                },
+                "published_time": int,
+                "stats": {
+                    "comments": int,
+                    "favourites": int,
+                },
+                "target": dict,
+                "thumbs": list,
+                "title": str,
+                "url": r"re:https://www.deviantart.com/shimoda7/art/[^/]+-\d+",
+                "username": "shimoda7",
+            },
         }),
         ("https://www.deviantart.com/yakuzafc", {
-            "url": "243748f8665c22f4f1c4f98ea3a438c76ad5f7ea",
-            "keyword": "b29746bac291d8c8e339f0256a2bd7bb3ebe1741",
+            "pattern": r"https://www.deviantart.com/yakuzafc/gallery/0/",
+            "count": ">= 15",
         }),
         ("https://www.deviantart.com/shimoda8/gallery/", {
             "exception": exception.NotFoundError,
@@ -242,12 +280,11 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     pattern = [BASE_PATTERN + r"/gallery/(\d+)/([^/?&#]+)"]
     test = [
         ("https://www.deviantart.com/shimoda7/gallery/722019/Miscellaneous", {
-            "url": "12c331eeff84bd47350af5a199cecc187ae03832",
-            "keyword": "2c132d1996b2de87949164a6eab5d72b6c824609",
+            "count": 5,
+            "options": (("original", False),),
         }),
         ("https://www.deviantart.com/yakuzafc/gallery/37412168/Crafts", {
-            "url": "f7d1f3cde2cdb56ffd02ef5eee0c1d0dcf2e08f1",
-            "keyword": "e7f670d3b021d051dd150eb485df7add5f7d6a02",
+            "count": ">= 4",
             "options": (("original", False),),
         }),
         ("https://shimoda7.deviantart.com/gallery/722019/Miscellaneous", None),
@@ -279,8 +316,6 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     test = [
         (("https://www.deviantart.com/shimoda7/art/"
           "For-the-sake-of-a-memory-10073852"), {
-            "url": "eef0c01b3808c535ea673e7b3654ab5209b910b7",
-            "keyword": "925217229da46aeb8ce282675dc8639fa20a892c",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://www.deviantart.com/zzz/art/zzz-1234567890", {
@@ -352,8 +387,6 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     pattern = [BASE_PATTERN + r"/favourites/?(?:\?catpath=/)?$"]
     test = [
         ("https://www.deviantart.com/h3813067/favourites/", {
-            "url": "eef0c01b3808c535ea673e7b3654ab5209b910b7",
-            "keyword": "2b2a6c3e36febaf039214d3c71b1e5a806d5e8bb",
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://www.deviantart.com/h3813067/favourites/?catpath=/", None),
@@ -382,7 +415,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     test = [
         (("https://www.deviantart.com/pencilshadings"
           "/favourites/70595441/3D-Favorites"), {
-            "url": "6d9099b0a939c4fcffbf2902f4011ec0af64f97a",
+            "count": ">= 20",
             "options": (("original", False),),
         }),
         (("https://pencilshadings.deviantart.com"
@@ -415,7 +448,6 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     test = [
         ("https://www.deviantart.com/angrywhitewanker/journal/", {
             "url": "38db2a0d3a587a7e0f9dba7ff7d274610ebefe44",
-            "keyword": "8d11b458f389188cc1f00d09694ce4e00c43efcc",
         }),
         ("https://www.deviantart.com/angrywhitewanker/journal/", {
             "url": "b2a8e74d275664b1a4acee0fca0a6fd33298571e",

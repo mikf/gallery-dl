@@ -18,12 +18,11 @@ from gallery_dl import extractor, job, config, exception
 TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
     "archivedmoe", "archiveofsins", "thebarchive", "fireden",
-    "sankaku", "idolcomplex", "mangahere",
+    "sankaku", "idolcomplex", "mangahere", "readcomiconline",
 }
 
 # temporary issues, etc.
 BROKEN = {
-    "deviantart",
 }
 
 
@@ -125,14 +124,13 @@ class TestExtractorResults(unittest.TestCase):
             value = kwdict[key]
 
             if isinstance(test, dict):
-                self._test_kwdict(kwdict[key], test)
-                continue
+                self._test_kwdict(value, test)
             elif isinstance(test, type):
-                self.assertIsInstance(value, test)
+                self.assertIsInstance(value, test, msg=key)
             elif isinstance(test, str) and test.startswith("re:"):
-                self.assertRegex(value, test[3:])
+                self.assertRegex(value, test[3:], msg=key)
             else:
-                self.assertEqual(value, test)
+                self.assertEqual(value, test, msg=key)
 
 
 def generate_tests():
