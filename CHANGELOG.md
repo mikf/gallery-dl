@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.6.2 - 2019-01-01
 - Added support for:
   - `instagram` - https://www.instagram.com ([#134](https://github.com/mikf/gallery-dl/issues/134))
