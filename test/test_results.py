@@ -38,11 +38,19 @@ def setup_test_config():
     config.set(("extractor", "password"), name)
     config.set(("extractor", "nijie", "username"), email)
     config.set(("extractor", "seiga", "username"), email)
+
     config.set(("extractor", "deviantart", "client-id"), "7777")
     config.set(("extractor", "deviantart", "client-secret"),
                "ff14994c744d9208e5caeec7aab4a026")
+
     config.set(("extractor", "tumblr", "api-key"),
                "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
+    config.set(("extractor", "tumblr", "api-secret"),
+               "6wxAK2HwrXdedn7VIoZWxGqVhZ8JdYKDLjiQjL46MLqGuEtyVj")
+    config.set(("extractor", "tumblr", "access-token"),
+               "N613fPV6tOZQnyn0ERTuoEZn0mEqG8m2K8M3ClSJdEHZJuqFdG")
+    config.set(("extractor", "tumblr", "access-token-secret"),
+               "sgOA7ZTT4FBXdOGGVV331sSp0jHYp4yMDRslbhaQf7CaS71i4O")
 
 
 class TestExtractorResults(unittest.TestCase):

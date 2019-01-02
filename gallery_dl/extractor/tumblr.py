@@ -206,6 +206,18 @@ class TumblrUserExtractor(TumblrExtractor):
             "count": 3,
             "options": (("posts", "all"), ("external", True))
         }),
+        ("https://mikf123-hidden.tumblr.com/", {  # dashbord-only
+            "count": 2,
+            "keyword": {"tags": ["test", "hidden"]},
+        }),
+        ("https://mikf123-private.tumblr.com/", {  # password protected
+            "count": 2,
+            "keyword": {"tags": ["test", "private"]},
+        }),
+        ("https://mikf123-private-hidden.tumblr.com/", {  # both
+            "count": 2,
+            "keyword": {"tags": ["test", "private", "hidden"]},
+        }),
         ("https://demo.tumblr.com/page/2", None),
         ("https://demo.tumblr.com/archive", None),
         ("tumblr:http://www.b-authentique.com/", None),
