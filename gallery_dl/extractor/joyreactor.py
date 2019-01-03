@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -136,6 +136,22 @@ class JoyreactorTagExtractor(JoyreactorExtractor):
 
     def metadata(self):
         return {"search_tags": text.unescape(self.tag).replace("+", " ")}
+
+
+class JoyreactorSearchExtractor(JoyreactorTagExtractor):
+    """Extractor for search results on joyreactor.cc"""
+    subcategory = "search"
+    directory_fmt = ["{category}", "search", "{search_tags}"]
+    archive_fmt = "s_{search_tags}_{post_id}_{num}"
+    pattern = [BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"]
+    test = [
+        ("http://joyreactor.com/search?q=Cirno+Gifs", {
+            "count": ">= 0",
+        }),
+        ("http://joyreactor.cc/search/Cirno+Gifs", {
+            "count": ">= 0",
+        }),
+    ]
 
 
 class JoyreactorUserExtractor(JoyreactorExtractor):

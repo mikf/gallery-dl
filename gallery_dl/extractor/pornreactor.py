@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .joyreactor import (
     JoyreactorTagExtractor,
+    JoyreactorSearchExtractor,
     JoyreactorUserExtractor,
     JoyreactorPostExtractor,
 )
@@ -27,6 +28,19 @@ class PornreactorTagExtractor(JoyreactorTagExtractor):
             "count": ">= 120",
         }),
         ("http://fapreactor.com/tag/RiceGnat", None),
+    ]
+
+
+class PornreactorSearchExtractor(JoyreactorSearchExtractor):
+    """Extractor for search results on pornreactor.cc"""
+    category = "pornreactor"
+    pattern = [BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"]
+    test = [
+        ("http://pornreactor.cc/search?q=ecchi+hentai", {
+            "range": "1-25",
+            "count": ">= 20",
+        }),
+        ("http://fapreactor.com/search/ecchi+hentai", None),
     ]
 
 

@@ -41,7 +41,7 @@ imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
 Instagram            https://www.instagram.com/          Images from Users, individual Images
 Jaimini's Box        https://jaiminisbox.com/            Chapters, Manga
-Joyreactor           http://joyreactor.cc/               Images from Users, Posts, Tag-Searches
+Joyreactor           http://joyreactor.cc/               |Capabilities-4|
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
 KissManga            http://kissmanga.com/               Chapters, Manga
@@ -59,13 +59,13 @@ Newgrounds           https://www.newgrounds.com/         Images from Users, indi
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
-nijie                https://nijie.info/                 |Capabilities-4|                                   Required
+nijie                https://nijie.info/                 |Capabilities-5|                                   Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net                   Images from Users, Images from Statuses
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links, related Pins
-Pixiv                https://www.pixiv.net/              |Capabilities-5|                                   Required
-Pornreactor          http://pornreactor.cc/              Images from Users, Posts, Tag-Searches
+Pixiv                https://www.pixiv.net/              |Capabilities-6|                                   Required
+Pornreactor          http://pornreactor.cc/              |Capabilities-7|
 PowerManga           https://powermanga.org/             Chapters, Manga
 Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
@@ -79,7 +79,7 @@ Sen Manga            http://raw.senmanga.com/            Chapters
 Sense-Scans          http://sensescans.com/              Chapters, Manga
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
 SlideShare           https://www.slideshare.net/         Presentations
-SmugMug              https://www.smugmug.com/            |Capabilities-6|                                   Optional (OAuth)
+SmugMug              https://www.smugmug.com/            |Capabilities-8|                                   Optional (OAuth)
 The /b/ Archive      https://thebarchive.com/            Threads
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
 Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets
@@ -104,6 +104,8 @@ Turboimagehost       https://turboimagehost.com/         individual Images
 .. |Capabilities-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Sta.sh
 .. |Capabilities-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
 .. |Capabilities-3| replace:: Images from Users, Favorites, individual Images, Popular Images, Recent Images, Scraps
-.. |Capabilities-4| replace:: Images from Users, Doujin, Favorites, individual Images
-.. |Capabilities-5| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
-.. |Capabilities-6| replace:: Albums, individual Images, Images from Users and Folders
+.. |Capabilities-4| replace:: Images from Users, Posts, Search Results, Tag-Searches
+.. |Capabilities-5| replace:: Images from Users, Doujin, Favorites, individual Images
+.. |Capabilities-6| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
+.. |Capabilities-7| replace:: Images from Users, Posts, Search Results, Tag-Searches
+.. |Capabilities-8| replace:: Albums, individual Images, Images from Users and Folders
