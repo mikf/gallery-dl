@@ -54,13 +54,12 @@ class JoyreactorExtractor(Extractor):
             yield from text.extract_iter(
                 page, '<div class="uhead">', '<div class="ufoot">')
 
-            pos = page.find("<span class='current'>")
-            if pos == -1 or page[pos+21:pos+24] == ">1<":
+            try:
+                pos = page.index("class='next'")
+                pos = page.rindex("class='current'", 0, pos)
+                url = self.root + text.extract(page, "href='", "'", pos)[0]
+            except (ValueError, TypeError):
                 return
-            path = text.extract(page, "href='", "'", pos)[0]
-            if not path:
-                return
-            url = self.root + path
 
     def _parse_post(self, post):
         post, _, script = post.partition('<script type="application/ld+json">')
@@ -75,7 +74,7 @@ class JoyreactorExtractor(Extractor):
                 script = script.translate(mapping).replace("\\", "\\\\")
                 data = json.loads(script)
             except ValueError as exc:
-                self.log.warning("Unable to parse post: %s", exc)
+                self.log.warning("Unable to parse JSON data: %s", exc)
                 return
 
         num = 0
@@ -148,10 +147,11 @@ class JoyreactorSearchExtractor(JoyreactorTagExtractor):
     pattern = [BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"]
     test = [
         ("http://joyreactor.com/search?q=Cirno+Gifs", {
-            "count": ">= 0",
+            "count": 0,  # no search results on joyreactor.com
         }),
         ("http://joyreactor.cc/search/Cirno+Gifs", {
-            "count": ">= 0",
+            "range": "1-25",
+            "count": ">= 20",
         }),
     ]
 
