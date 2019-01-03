@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -114,7 +114,7 @@ class MangadexMangaExtractor(MangadexExtractor):
                r"/(?:title|manga)/(\d+)"]
     test = [
         ("https://mangadex.org/manga/2946/souten-no-koumori", {
-            "count": ">= 1",
+            "pattern": r"https://mangadex.org/chapter/\d+",
             "keywords": {
                 "manga": "Souten no Koumori",
                 "manga_id": 2946,
@@ -132,6 +132,9 @@ class MangadexMangaExtractor(MangadexExtractor):
         ("https://mangadex.org/manga/13318/dagashi-kashi/chapters/2/", {
             "count": ">= 100",
         }),
+        ("https://mangadex.org/title/13004/yorumori-no-kuni-no-sora-ni", {
+            "count": 0,
+        }),
         ("https://mangadex.org/title/2946/souten-no-koumori", None),
     ]
 
@@ -148,6 +151,8 @@ class MangadexMangaExtractor(MangadexExtractor):
     def chapters(self):
         """Return a sorted list of chapter-metadata dicts"""
         data = self.manga_data(self.manga_id)
+        if "chapter" not in data:
+            return ()
         manga = data["manga"]
 
         results = []
