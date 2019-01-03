@@ -62,8 +62,7 @@ class JoyreactorExtractor(Extractor):
                 return
             url = self.root + path
 
-    @staticmethod
-    def _parse_post(post):
+    def _parse_post(self, post):
         post, _, script = post.partition('<script type="application/ld+json">')
         images = text.extract_iter(post, '<div class="image">', '</div>')
         script = script[:script.index("</")].strip()
@@ -71,10 +70,13 @@ class JoyreactorExtractor(Extractor):
         try:
             data = json.loads(script)
         except ValueError:
-            data = json.loads(script
-                              .replace("\\", "\\\\")
-                              .replace("\n", "")
-                              .replace("\r", ""))
+            try:
+                mapping = dict.fromkeys(range(32))
+                script = script.translate(mapping).replace("\\", "\\\\")
+                data = json.loads(script)
+            except ValueError as exc:
+                self.log.warning("Unable to parse post: %s", exc)
+                return
 
         num = 0
         date = data["datePublished"]
