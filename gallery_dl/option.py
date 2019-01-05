@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -267,6 +267,12 @@ def build_parser():
         action=ConfigConstAction, nargs=0,
         dest="postprocessors", const=({"name": "ugoira"},),
         help="Convert Pixiv Ugoira to WebM (requires FFmpeg)",
+    )
+    postprocessor.add_argument(
+        "--write-metadata",
+        action=ConfigConstAction, nargs=0,
+        dest="postprocessors", const=({"name": "metadata"},),
+        help="Write metadata to separate JSON files",
     )
 
     parser.add_argument(
