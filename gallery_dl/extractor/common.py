@@ -248,6 +248,9 @@ class MangaExtractor(Extractor):
         Extractor.__init__(self)
         self.url = url or self.scheme + "://" + match.group(1)
 
+        if self.config("chapter-reverse", False):
+            self.reverse = not self.reverse
+
     def items(self):
         page = self.request(self.url).text
 
