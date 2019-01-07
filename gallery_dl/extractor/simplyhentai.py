@@ -25,8 +25,8 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
     test = [
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
-            "url": "35f3843d0ea83e6a618df7afaebd2b03f3628db9",
-            "keyword": "1e22ccbe66412eab844f135ad9cd3424b8b064e8",
+            "url": "258289249990502c3138719cb89e995a60861e49",
+            "keyword": "3873c6078ce116e798fac8b7a955e3b3a4f526a6",
         }),
         ("https://www.simply-hentai.com/notfound", {
             "exception": exception.GalleryDLException,
