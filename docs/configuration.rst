@@ -797,6 +797,18 @@ Description Categorize tags by their respective types
 =========== =====
 
 
+extractor.[manga-extractor].chapter-reverse
+-------------------------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Reverse the order of chapter URLs extracted from manga pages.
+
+            * `true`: Start with the latest chapter
+            * `false`: Start with the first chapter
+=========== =====
+
+
 
 Downloader Options
 ==================
