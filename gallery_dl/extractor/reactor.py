@@ -11,6 +11,8 @@
 from .common import SharedConfigExtractor, Message
 from .. import text
 import urllib.parse
+import random
+import time
 import json
 
 
@@ -29,6 +31,11 @@ class ReactorExtractor(SharedConfigExtractor):
         self.url = match.group(0)
         self.root = "http://" + match.group(1)
         self.session.headers["Referer"] = self.root
+
+        self.wait_min = self.config("wait-min", 3)
+        self.wait_max = self.config("wait-max", 6)
+        if self.wait_max < self.wait_min:
+            self.wait_max = self.wait_min
 
         if not self.category:
             # set category based on domain name
@@ -55,6 +62,7 @@ class ReactorExtractor(SharedConfigExtractor):
 
     def _pagination(self, url):
         while True:
+            time.sleep(random.uniform(self.wait_min, self.wait_max))
             page = self.request(url).text
 
             yield from text.extract_iter(

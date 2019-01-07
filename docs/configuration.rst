@@ -583,6 +583,16 @@ Description Download Pixiv's Ugoira animations or ignore them.
 =========== =====
 
 
+extractor.reactor.wait-min & .wait-max
+--------------------------------------
+=========== =====
+Type        ``float``
+Default     ``3.0`` and ``6.0``
+Description Minimum and maximum wait time in seconds between HTTP requests
+            during the extraction process.
+=========== =====
+
+
 extractor.recursive.blacklist
 -----------------------------
 =========== =====
