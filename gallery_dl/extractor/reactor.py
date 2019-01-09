@@ -202,12 +202,12 @@ class JoyreactorTagExtractor(ReactorTagExtractor):
     category = "joyreactor"
     pattern = [JR_BASE_PATTERN + r"/tag/([^/?&#]+)"]
     test = [
+        ("http://joyreactor.cc/tag/Advent+Cirno", {
+            "count": ">= 17",
+        }),
         ("http://joyreactor.com/tag/Cirno", {
             "url": "a81382a3146da50b647c475f87427a6ca1d737df",
             "keyword": "dcd3b101cae0a93fbb91281235de1410faf88455",
-        }),
-        ("http://joyreactor.cc/tag/Advent+Cirno", {
-            "count": ">= 17",
         }),
     ]
 
@@ -217,12 +217,12 @@ class JoyreactorSearchExtractor(ReactorSearchExtractor):
     category = "joyreactor"
     pattern = [JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"]
     test = [
-        ("http://joyreactor.com/search?q=Cirno+Gifs", {
-            "count": 0,  # no search results on joyreactor.com
-        }),
         ("http://joyreactor.cc/search/Cirno+Gifs", {
             "range": "1-25",
             "count": ">= 20",
+        }),
+        ("http://joyreactor.com/search?q=Cirno+Gifs", {
+            "count": 0,  # no search results on joyreactor.com
         }),
     ]
 
@@ -232,11 +232,11 @@ class JoyreactorUserExtractor(ReactorUserExtractor):
     category = "joyreactor"
     pattern = [JR_BASE_PATTERN + r"/user/([^/?&#]+)"]
     test = [
+        ("http://joyreactor.cc/user/hemantic", None),
         ("http://joyreactor.com/user/Tacoman123", {
             "url": "0444158f17c22f08515ad4e7abf69ad2f3a63b35",
             "keyword": "1571a81fa5b8bab81528c93065d2460a72e77102",
         }),
-        ("http://joyreactor.cc/user/hemantic", None),
     ]
 
 

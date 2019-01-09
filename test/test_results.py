@@ -23,6 +23,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "pinterest",
 }
 
 
@@ -38,6 +39,7 @@ def setup_test_config():
     config.set(("extractor", "password"), name)
     config.set(("extractor", "nijie", "username"), email)
     config.set(("extractor", "seiga", "username"), email)
+    config.set(("extractor", "danbooru", "username"), None)
 
     config.set(("extractor", "deviantart", "client-id"), "7777")
     config.set(("extractor", "deviantart", "client-secret"),

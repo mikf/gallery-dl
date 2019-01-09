@@ -87,7 +87,7 @@ SUBCATEGORY_MAP = {
 }
 
 AUTH_MAP = {
-    "batoto"     : "Optional",
+    "danbooru"   : "Optional",
     "deviantart" : "Optional (OAuth)",
     "exhentai"   : "Optional",
     "flickr"     : "Optional (OAuth)",
@@ -176,7 +176,7 @@ def build_list():
     last = None
 
     for extr in gallery_dl.extractor.extractors():
-        if extr.category in IGNORE_LIST:
+        if not extr.category or extr.category in IGNORE_LIST:
             continue
         if extr.category == last or not last:
             classes.append(extr)
@@ -200,9 +200,15 @@ def build_list():
 def get_domain(classes):
     try:
         cls = classes[0]
+
         url = sys.modules[cls.__module__].__doc__.split()[-1]
         if url.startswith("http"):
             return url
+
+        if hasattr(cls, "test") and cls.test:
+            url = cls.test[0][0]
+            return url[:url.find("/", 8)+1]
+
         scheme = "https" if hasattr(cls, "https") and cls.https else "http"
         host = cls.__doc__.split()[-1]
         return scheme + "://" + host + "/"
