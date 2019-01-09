@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -148,7 +148,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
     category = "imagetwist"
     pattern = [r"(?:https?://)?((?:www\.)?imagetwist\.com/([a-z0-9]{12}))"]
-    test = [("http://imagetwist.com/4e46hv31tu0q/test.jpg", {
+    test = [("https://imagetwist.com/4e46hv31tu0q/test.jpg", {
         "url": "c999dc1a5dec0525ac9eb8c092f173dfe6dba0b0",
         "keyword": "30dd34dcb06b5b51c6cfff199c610b24edb7b9bc",
         "content": "96b1fd099b06faad5879fce23a7e4eb8290d8810",

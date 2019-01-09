@@ -14,7 +14,7 @@ Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |Capabilities-0|
 Behance              https://www.behance.net/            Images from Users, Galleries
 BobX                 http://www.bobx.com/dark/           Galleries, Idols
-Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches
+Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches         Optional
 Desuarchive          https://desuarchive.org/            Threads
 DeviantArt           https://www.deviantart.com/         |Capabilities-1|                                   Optional (OAuth)
 Doki Reader          https://kobato.hologfx.com/         Chapters, Manga
@@ -96,7 +96,7 @@ Imgspice             https://imgspice.com/               individual Images
 Imxto                https://imx.to/                     individual Images
 Pixhost              https://pixhost.to/                 individual Images
 Postimg              https://postimg.org/                individual Images
-Turboimagehost       https://turboimagehost.com/         individual Images
+Turboimagehost       https://www.turboimagehost.com/     individual Images
 ==================== =================================== ================================================== ================
 
 .. |Site-0| replace:: yuki.la 4chan archive
