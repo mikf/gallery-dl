@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,7 +16,7 @@ from gallery_dl import extractor, job, config, exception
 
 # these don't work on Travis CI
 TRAVIS_SKIP = {
-    "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie",
+    "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie", "bobx",
     "archivedmoe", "archiveofsins", "thebarchive", "fireden",
     "sankaku", "idolcomplex", "mangahere", "readcomiconline",
 }
