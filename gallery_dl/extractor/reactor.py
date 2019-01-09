@@ -63,7 +63,18 @@ class ReactorExtractor(SharedConfigExtractor):
     def _pagination(self, url):
         while True:
             time.sleep(random.uniform(self.wait_min, self.wait_max))
-            page = self.request(url).text
+
+            response = self.request(url)
+            if response.history:
+                # sometimes there is a redirect from
+                # the last page of a listing (.../tag/<tag>/1)
+                # to the first page (.../tag/<tag>)
+                # which could cause an endless loop
+                cnt_old = response.history[0].url.count("/")
+                cnt_new = response.url.count("/")
+                if cnt_old == 5 and cnt_new == 4:
+                    return
+            page = response.text
 
             yield from text.extract_iter(
                 page, '<div class="uhead">', '<div class="ufoot">')
