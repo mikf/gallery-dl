@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2018 Mike Fährmann
+# Copyright 2014-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -28,6 +28,11 @@ class DanbooruExtractor(booru.DanbooruPageMixin, booru.BooruExtractor):
         self.scheme = "https" if self.subdomain == "danbooru" else "http"
         self.api_url = "{scheme}://{subdomain}.donmai.us/posts.json".format(
             scheme=self.scheme, subdomain=self.subdomain)
+
+        username, api_key = self._get_auth_info()
+        if username:
+            self.log.debug("Using HTTP Basic Auth for user '%s'", username)
+            self.session.auth = (username, api_key)
 
 
 class DanbooruTagExtractor(booru.TagMixin, DanbooruExtractor):
