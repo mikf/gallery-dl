@@ -203,7 +203,6 @@ def main():
             config.load(*args.yamlfiles, format="yaml", strict=True)
         for key, value in args.options:
             config.set(key, value)
-        config.set(("_",), {})
 
         # stream logging handler
         configure_logging_handler("log", logging.getLogger().handlers[0])
