@@ -41,6 +41,7 @@ class ArtstationExtractor(Extractor):
                     player = adict["player_embedded"]
                     url = text.extract(player, 'src="', '"')[0]
                     if not url.startswith(self.root):
+                        text.nameext_from_url(url, asset)
                         yield Message.Url, "ytdl:" + url, asset
                         continue
 
@@ -68,9 +69,13 @@ class ArtstationExtractor(Extractor):
         assets = data["assets"]
         del data["assets"]
 
-        for asset in assets:
-            data["asset"] = asset
+        if len(assets) == 1:
+            data["asset"] = assets[0]
             yield data
+        else:
+            for asset in assets:
+                data["asset"] = asset
+                yield data.copy()
 
     def get_user_info(self, username):
         """Return metadata for a specific user"""
@@ -332,13 +337,8 @@ class ArtstationImageExtractor(ArtstationExtractor):
         self.assets = None
 
     def metadata(self):
-        self.assets = [
-            asset.copy()
-            for asset in ArtstationExtractor.get_project_assets(
-                self, self.project_id
-            )
-        ]
-
+        self.assets = list(ArtstationExtractor.get_project_assets(
+            self, self.project_id))
         self.user = self.assets[0]["user"]["username"]
         return ArtstationExtractor.metadata(self)
 
