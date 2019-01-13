@@ -258,6 +258,9 @@ def main():
                 if hasattr(extr, "test") and extr.test:
                     print("Example :", extr.test[0][0])
                 print()
+        elif args.start_server:
+            from . import server
+            server.run()
         else:
             if not args.urls and not args.inputfile:
                 parser.error(
