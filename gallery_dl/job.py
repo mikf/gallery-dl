@@ -330,7 +330,7 @@ class DownloadJob(Job):
                     pp_obj = pp_cls(self.pathfmt, pp_dict)
                 except Exception as exc:
                     postprocessor.log.error(
-                        "%s: initialization failed: %s %s",
+                        "'%s' initialization failed:  %s: %s",
                         name, exc.__class__.__name__, exc)
                 else:
                     self.postprocessors.append(pp_obj)
