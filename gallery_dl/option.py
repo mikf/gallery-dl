@@ -93,6 +93,11 @@ def build_parser():
         metavar="URL", action=ConfigAction, dest="proxy",
         help="Use the specified proxy",
     )
+    general.add_argument(
+        "--server",
+        dest="start_server", action="store_true",
+        help="Start server",
+    )
 
     output = parser.add_argument_group("Output Options")
     output.add_argument(
