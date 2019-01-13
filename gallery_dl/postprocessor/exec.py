@@ -16,7 +16,13 @@ class ExecPP(PostProcessor):
 
     def __init__(self, pathfmt, options):
         PostProcessor.__init__(self)
-        self.args = options["command"]
+
+        try:
+            self.args = options["command"]
+            self.args[0]  # test if 'args' is subscriptable
+        except (KeyError, IndexError, TypeError):
+            raise TypeError("option 'command' must be a non-empty list")
+
         if options.get("async", False):
             self._exec = subprocess.Popen
 
