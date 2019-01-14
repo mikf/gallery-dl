@@ -104,7 +104,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
         # no "ImageOwner"
         ("https://www.smugmug.com/gallery/n-GLCjnD/i-JD62fQk", {
             "url": "d4047637947b35e4ef49e3c7cb70303cc224a3a0",
-            "keyword": "96fc43bc3081f6356c929be43ab5971009975063",
+            "keyword": "0a1b12efd789c42d9b061f01b2a1fcfd6af32003",
         }),
     ]
 
