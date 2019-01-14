@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import json
 
 
 class NHentaiExtractor(Extractor):
@@ -68,45 +69,41 @@ class NhentaiGalleryExtractor(NHentaiExtractor):
 
     def get_gallery_info(self, gallery_id):
         """Extract and return info about a gallery by ID"""
-        url = "{}/api/gallery/{}".format(self.root, gallery_id)
-        return self.request(url).json()
+        url = "{}/g/{}".format(self.root, gallery_id)
+        page = self.request(url).text
+        return json.loads(text.extract(page, "N.gallery(", ");")[0])
 
 
 class NhentaiSearchExtractor(NHentaiExtractor):
     """Extractor for nhentai search results"""
     category = "nhentai"
     subcategory = "search"
-    pattern = [r"(?:https?://)?nhentai\.net/search/?\?(.*)"]
+    pattern = [r"(?:https?://)?nhentai\.net/search/?\?([^#]+)"]
+    test = [("https://nhentai.net/search/?q=touhou", {
+        "pattern": NhentaiGalleryExtractor.pattern[0],
+        "count": 30,
+        "range": "1-30",
+    })]
 
     def __init__(self, match):
         NHentaiExtractor.__init__(self)
         self.params = text.parse_query(match.group(1))
 
-        if "q" in self.params:
-            self.params["query"] = self.params["q"]
-            del self.params["q"]
-
     def items(self):
         yield Message.Version, 1
-        for ginfo in self._pagination("galleries/search", self.params):
-            url = "{}/g/{}/".format(self.root, ginfo["id"])
-            yield Message.Queue, url, self.transform_to_metadata(ginfo)
+        for gid in self._pagination(self.params):
+            url = "{}/g/{}/".format(self.root, gid)
+            yield Message.Queue, url, {}
 
-    def _pagination(self, endpoint, params):
-        """Pagination over API responses"""
-        url = "{}/api/{}".format(self.root, endpoint)
+    def _pagination(self, params):
+        url = "{}/search/".format(self.root)
         params["page"] = text.parse_int(params.get("page"), 1)
 
         while True:
-            data = self.request(
-                url, params=params, expect=range(400, 500)).json()
+            page = self.request(url, params=params).text
 
-            if "error" in data:
-                self.log.error("API request failed: \"%s\"", data["error"])
-                return
+            yield from text.extract_iter(page, 'href="/g/', '/')
 
-            yield from data["result"]
-
-            if params["page"] >= data["num_pages"]:
+            if 'class="next"' not in page:
                 return
             params["page"] += 1
