@@ -44,6 +44,31 @@ class NewgroundsExtractor(Extractor):
 
     def parse_page_data(self, page_url):
         """Collect url and metadata from an image page"""
+        page = self.request(page_url).text
+
+        full, pos = text.extract(page, '"full_image_text":', '});')
+        desc, pos = text.extract(page, '"og:description" content="', '"', pos)
+        rate, pos = text.extract(page, 'class="rated-', '"', pos)
+        tags, pos = text.extract(page, '<dd class="tags momag">', '</dd>', pos)
+
+        full = json.loads(full)
+        url   , pos = text.extract(full, 'src="', '"')
+        title , pos = text.extract(full, 'alt="', '"', pos)
+        width , pos = text.extract(full, 'width="', '"', pos)
+        height, pos = text.extract(full, 'height="', '"', pos)
+
+        tags = text.split_html(tags)
+        tags.sort()
+
+        return url, {
+            "title": text.unescape(title),
+            "description": text.unescape(desc),
+            "width": text.parse_int(width),
+            "height": text.parse_int(height),
+            "index": text.parse_int(url.rpartition("/")[2].partition("_")[0]),
+            "tags": tags,
+            "rating": rate,
+        }
 
     def _pagination(self, url):
         headers = {
@@ -72,53 +97,28 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
     test = [
         ("https://blitzwuff.newgrounds.com/art", {
             "url": "24b19c4a135a09889fac7b46a74e427e4308d02b",
-            "keyword": "7cbadd5426b8cba270995fffca2e52571d1f9c8d",
+            "keyword": "68c235e5c4ce94f2f9e001d84fe801441e5500f1",
         }),
-        ("https://derpixon.newgrounds.com/art", None),
-        ("https://derpixon.newgrounds.com/", None),
+        ("https://blitzwuff.newgrounds.com/", None),
     ]
 
     def get_page_urls(self):
         return self._pagination(self.root + "/art/page/1")
 
-    def parse_page_data(self, page_url):
-        page = self.request(page_url).text
 
-        full, pos = text.extract(page, '"full_image_text":', '});')
-        desc, pos = text.extract(page, '"og:description" content="', '"', pos)
-        rate, pos = text.extract(page, 'class="rated-', '"', pos)
-        tags, pos = text.extract(page, '<dd class="tags momag">', '</dd>', pos)
-
-        full = json.loads(full)
-        url   , pos = text.extract(full, 'src="', '"')
-        title , pos = text.extract(full, 'alt="', '"', pos)
-        width , pos = text.extract(full, 'width="', '"', pos)
-        height, pos = text.extract(full, 'height="', '"', pos)
-
-        return url, {
-            "title": title,
-            "description": text.unescape(desc),
-            "width": text.parse_int(width),
-            "height": text.parse_int(height),
-            "index": text.parse_int(url.rpartition("/")[2].partition("_")[0]),
-            "tags": text.split_html(tags),
-            "rating": rate,
-        }
-
-
-class NewgroundsImageExtractor(NewgroundsUserExtractor):
+class NewgroundsImageExtractor(NewgroundsExtractor):
     """Extractor for a single image from newgrounds.com"""
     subcategory = "image"
     pattern = [r"(?:https?://)?(?:www\.)?newgrounds\.com"
                r"/art/view/([^/?&#]+)/[^/?&#]+"]
     test = [("https://www.newgrounds.com/art/view/blitzwuff/ffx", {
         "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
-        "keyword": "8f36f33e400016c25dc1be6476a4c1b34881ac86",
+        "keyword": "5738e2bf19137898204f36c5ae573826672b612c",
         "content": "cb067d6593598710292cdd340d350d14a26fe075",
     })]
 
     def __init__(self, match):
-        NewgroundsUserExtractor.__init__(self, match)
+        NewgroundsExtractor.__init__(self, match)
         self.page_url = match.group(0)
 
     def get_page_urls(self):
