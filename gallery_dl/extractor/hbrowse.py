@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extract images from http://www.hbrowse.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
+from .. import text, exception
 import json
 
 
@@ -18,8 +18,7 @@ class HbrowseExtractor():
     category = "hbrowse"
     root = "http://www.hbrowse.com"
 
-    @staticmethod
-    def parse_page(page, data):
+    def parse_page(self, page, data):
         """Parse metadata on 'page' and add it to 'data'"""
         text.extract_all(page, (
             ('manga' , '<td class="listLong">', '</td>'),
@@ -27,6 +26,11 @@ class HbrowseExtractor():
             ('total' , '<td class="listLong">', ' '),
             ('origin', '<td class="listLong">', '</td>'),
         ), values=data)
+
+        if not data["manga"] and "<b>Warning</b>" in page:
+            msg = page.rpartition(">")[2].strip()
+            self.log.error("Site is not accessible: '%s'", msg)
+            raise exception.StopExtraction()
 
         data["manga"] = text.unescape(data["manga"])
         data["total"] = text.parse_int(data["total"])
