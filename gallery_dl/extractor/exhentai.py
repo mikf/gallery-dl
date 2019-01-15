@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2018 Mike Fährmann
+# Copyright 2014-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,6 +13,9 @@ from .. import text, util, exception
 from ..cache import cache
 import time
 import random
+
+
+BASE_PATTERN = r"(?:https?://)?(e[x-]|g\.e-)hentai\.org"
 
 
 class ExhentaiExtractor(Extractor):
@@ -99,10 +102,10 @@ class ExhentaiExtractor(Extractor):
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
     """Extractor for image galleries from exhentai.org"""
     subcategory = "gallery"
-    pattern = [r"(?:https?://)?(g\.e-|e-|ex)hentai\.org/g/(\d+)/([\da-f]{10})"]
+    pattern = [BASE_PATTERN + r"/g/(\d+)/([\da-f]{10})"]
     test = [
         ("https://exhentai.org/g/960460/4f0e369d82/", {
-            "keyword": "15b755fd3e2c710d7fd7ff112a5cdbf4333201b2",
+            "keyword": "900b8dccd23c41a76e915a8df70ae77c4e0f52c7",
             "content": "493d759de534355c9f55f8e365565b62411de146",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -152,7 +155,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "gallery_id"   : self.gid,
             "gallery_token": self.token,
         }
-        text.extract_all(page, (
+        data, pos = text.extract_all(page, (
             ("title"     , '<h1 id="gn">', '</h1>'),
             ("title_jp"  , '<h1 id="gj">', '</h1>'),
             ("date"      , '>Posted:</td><td class="gdt2">', '</td>'),
@@ -160,12 +163,17 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             ("gallery_size", '>File Size:</td><td class="gdt2">', '<'),
             ("count"     , '>Length:</td><td class="gdt2">', ' '),
         ), values=data)
+
         data["lang"] = util.language_to_code(data["language"])
         data["title"] = text.unescape(data["title"])
         data["title_jp"] = text.unescape(data["title_jp"])
         data["count"] = text.parse_int(data["count"])
         data["gallery_size"] = text.parse_bytes(
             data["gallery_size"].rstrip("Bb"))
+        data["tags"] = [
+            text.unquote(tag)
+            for tag in text.extract_iter(page, 'hentai.org/tag/', '"', pos)
+        ]
         return data
 
     def get_images(self, page):
@@ -258,12 +266,16 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 class ExhentaiSearchExtractor(ExhentaiExtractor):
     """Extractor for exhentai search results"""
     subcategory = "search"
-    pattern = [r"(?:https?://)?(?:g\.e-|e-|ex)hentai\.org/?\?(.*)$"]
+    pattern = [BASE_PATTERN + r"/?\?(.*)$"]
     test = [
         ("https://exhentai.org/?f_search=touhou", None),
-        ("https://exhentai.org/?f_doujinshi=0&f_manga=0&f_artistcg=0"
-         "&f_gamecg=0&f_western=0&f_non-h=1&f_imageset=0&f_cosplay=0"
-         "&f_asianporn=0&f_misc=0&f_search=touhou&f_apply=Apply+Filter", None),
+        (("https://exhentai.org/?f_doujinshi=0&f_manga=0&f_artistcg=0"
+          "&f_gamecg=0&f_western=0&f_non-h=1&f_imageset=0&f_cosplay=0"
+          "&f_asianporn=0&f_misc=0&f_search=touhou&f_apply=Apply+Filter"), {
+            "pattern": ExhentaiGalleryExtractor.pattern[0],
+            "range": "1-30",
+            "count": 30,
+        }),
     ]
 
     def __init__(self, match):
@@ -318,8 +330,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
     """Extractor for favorited exhentai galleries"""
     subcategory = "favorite"
-    pattern = [r"(?:https?://)?(?:g\.e-|e-|ex)hentai\.org"
-               r"/favorites\.php(?:\?(.*))?"]
+    pattern = [BASE_PATTERN + r"/favorites\.php(?:\?(.*))?"]
     test = [
         ("https://exhentai.org/favorites.php", None),
         ("https://exhentai.org/favorites.php?favcat=1&f_search=touhou"
