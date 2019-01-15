@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://www.hbrowse.com/"""
+"""Extract images from https://www.hbrowse.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, exception
@@ -16,7 +16,7 @@ import json
 class HbrowseExtractor():
     """Base class for hbrowse extractors"""
     category = "hbrowse"
-    root = "http://www.hbrowse.com"
+    root = "https://www.hbrowse.com"
 
     def parse_page(self, page, data):
         """Parse metadata on 'page' and add it to 'data'"""
@@ -43,8 +43,8 @@ class HbrowseMangaExtractor(HbrowseExtractor, MangaExtractor):
     """Extractor for manga from hbrowse.com"""
     pattern = [r"(?:https?://)?((?:www\.)?hbrowse\.com/\d+)/?$"]
     reverse = False
-    test = [("http://www.hbrowse.com/10363", {
-        "url": "4d9def5df21c23f8c3d36de2076c189c02ea43bd",
+    test = [("https://www.hbrowse.com/10363", {
+        "url": "b89682bfb86c11d2af0dc47463804ec3ac4aadd6",
         "keyword": "aa0c6ba9ba180f18861aa5d608ff7f1966e666f8",
     })]
 
@@ -74,8 +74,8 @@ class HbrowseChapterExtractor(HbrowseExtractor, ChapterExtractor):
                     "{page:>03}.{extension}")
     archive_fmt = "{manga_id}_{chapter}_{page}"
     pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/c(\d+)"]
-    test = [("http://www.hbrowse.com/10363/c00000", {
-        "url": "634f4800858913f097bc3b62a8fedaf74b5254bd",
+    test = [("https://www.hbrowse.com/10363/c00000", {
+        "url": "6feefbc9f4b98e20d8425ddffa9dd111791dc3e6",
         "keyword": "f37cafef404696312f5db6ccaaaf72737d309e2d",
         "content": "44578ebbe176c2c27434966aef22945787e2781e",
     })]
