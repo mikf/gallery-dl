@@ -20,7 +20,7 @@ class HbrowseExtractor():
 
     def parse_page(self, page, data):
         """Parse metadata on 'page' and add it to 'data'"""
-        text.extract_all(page, (
+        data, pos = text.extract_all(page, (
             ('manga' , '<td class="listLong">', '</td>'),
             ('artist', '<td class="listLong">', '</td>'),
             ('total' , '<td class="listLong">', ' '),
@@ -32,10 +32,13 @@ class HbrowseExtractor():
             self.log.error("Site is not accessible: '%s'", msg)
             raise exception.StopExtraction()
 
+        tags = text.extract(page, 'class="listTable"', '</table>', pos)[0]
+
         data["manga"] = text.unescape(data["manga"])
         data["total"] = text.parse_int(data["total"])
         data["artist"] = text.remove_html(data["artist"])
         data["origin"] = text.remove_html(data["origin"])
+        data["tags"] = list(text.extract_iter(tags, 'href="/browse/', '"'))
         return data
 
 
@@ -45,7 +48,7 @@ class HbrowseMangaExtractor(HbrowseExtractor, MangaExtractor):
     reverse = False
     test = [("https://www.hbrowse.com/10363", {
         "url": "b89682bfb86c11d2af0dc47463804ec3ac4aadd6",
-        "keyword": "aa0c6ba9ba180f18861aa5d608ff7f1966e666f8",
+        "keyword": "4b15fda1858a69de1fbf5afddfe47dd893397312",
     })]
 
     def chapters(self, page):
@@ -76,7 +79,7 @@ class HbrowseChapterExtractor(HbrowseExtractor, ChapterExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/c(\d+)"]
     test = [("https://www.hbrowse.com/10363/c00000", {
         "url": "6feefbc9f4b98e20d8425ddffa9dd111791dc3e6",
-        "keyword": "f37cafef404696312f5db6ccaaaf72737d309e2d",
+        "keyword": "95ec73a58aeac57f4dd20f0fa0c2812b045a30e8",
         "content": "44578ebbe176c2c27434966aef22945787e2781e",
     })]
 
