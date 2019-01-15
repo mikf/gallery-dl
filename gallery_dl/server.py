@@ -6,20 +6,33 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from . import extractor, config, text
+import socketserver
+import http.server
 import json
 
 
-class RequestHandler(BaseHTTPRequestHandler):
+FAVICON = (b"GIF87a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\xff\xff\xff,"
+           b"\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;")
+
+
+class HttpServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    daemon_threads = True
+
+
+class RequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Handle GET requests"""
         path, _, query = self.path.partition("?")
         args = text.parse_query(query)
 
-        if path == "/api/json":
+        if path == "/api/json" or path.startswith("/api/json/"):
             self._send_json(self.api_json(args))
+
+        elif path == "/favicon.ico":
+            self._send_data(FAVICON, "image/gif", 200)
+
         else:
             self._send_json({"error": "Not Found"}, 404)
 
@@ -45,18 +58,23 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         return url, data, None
 
+    def _send_data(self, data, mime, status=200):
+        self.send_response(status)
+        self.send_header("Content-Type", mime)
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
     def _send_json(self, data, status=200):
         """Send 'data' as JSON response"""
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        self.wfile.write(json.dumps(data, separators=(',', ':')).encode())
+        data = json.dumps(data, separators=(',', ':')).encode()
+        self._send_data(data, "application/json", status)
 
 
 def run():
     bind = config.get(("server", "bind"), "127.0.0.1")
     port = config.get(("server", "port"), 6412)
-    httpd = HTTPServer((bind, port), RequestHandler)
+    httpd = HttpServer((bind, port), RequestHandler)
 
     try:
         httpd.serve_forever()
