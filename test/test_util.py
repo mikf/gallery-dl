@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -147,6 +147,7 @@ class TestFormatter(unittest.TestCase):
     kwdict = {
         "a": "hElLo wOrLd",
         "b": "äöü",
+        "l": ["a", "b", "c"],
         "u": "%27%3C%20/%20%3E%27",
         "name": "Name",
         "title1": "Title",
@@ -230,6 +231,18 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:L50/foo/>50}", " " * 39 + v)
         self._run_test("{a:L50/foo/>51}", "foo")
         self._run_test("{a:Lab/foo/}", "foo")
+
+    def test_join(self):
+        self._run_test("{l:J}"       , "abc")
+        self._run_test("{l:J,}"      , "a,b,c")
+        self._run_test("{l:J,/}"     , "a,b,c")
+        self._run_test("{l:J,/>20}"  , "               a,b,c")
+        self._run_test("{l:J - }"    , "a - b - c")
+        self._run_test("{l:J - /}"   , "a - b - c")
+        self._run_test("{l:J - />20}", "           a - b - c")
+
+        self._run_test("{a:J/}"      , self.kwdict["a"])
+        self._run_test("{a:J, /}"    , ", ".join(self.kwdict["a"]))
 
     def _run_test(self, format_string, result, default=None):
         formatter = util.Formatter(format_string, default)

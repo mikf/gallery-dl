@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -306,6 +306,10 @@ class Formatter():
         exceeds <maxlen>. Otherwise everything is left as is.
         Example: {f:L5/too long/} -> "foo"      (if "f" is "foo")
                                   -> "too long" (if "f" is "foobar")
+
+    - "J<separator>/":
+        Joins elements of a list (or string) using <separator>
+        Example: {f:J - /} -> "a - b - c" (if "f" is ["a", "b", "c"])
     """
     conversions = {
         "l": str.lower,
@@ -361,6 +365,8 @@ class Formatter():
                 func = self._format_optional
             elif format_spec[0] == "L":
                 func = self._format_maxlen
+            elif format_spec[0] == "J":
+                func = self._format_join
             else:
                 func = self._format_default
             fmt = func(format_spec)
@@ -417,6 +423,15 @@ class Formatter():
             return obj if len(obj) <= maxlen else replacement
         maxlen, replacement, format_spec = format_spec.split("/", 2)
         maxlen = text.parse_int(maxlen[1:])
+        return wrap
+
+    @staticmethod
+    def _format_join(format_spec):
+        def wrap(obj):
+            obj = separator.join(obj)
+            return format(obj, format_spec)
+        separator, _, format_spec = format_spec.partition("/")
+        separator = separator[1:]
         return wrap
 
     @staticmethod
