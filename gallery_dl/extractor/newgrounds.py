@@ -131,7 +131,8 @@ class NewgroundsVideoExtractor(NewgroundsExtractor):
     filename_fmt = "{category}_{index}.{extension}"
     pattern = [r"(?:https?://)?([^.]+)\.newgrounds\.com/movies/?$"]
     test = [("https://twistedgrim.newgrounds.com/movies", {
-        "url": "618a8f01f35dae140bd0a7fe071f437497555c8f",
+        "pattern": r"ytdl:https?://www\.newgrounds\.com/portal/view/\d+",
+        "count": ">= 29",
     })]
 
     def get_page_urls(self):
