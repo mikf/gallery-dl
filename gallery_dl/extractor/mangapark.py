@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, exception
+import json
 
 
 class MangaparkExtractor():
@@ -112,7 +113,6 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
             ("path"      , "var _book_link = '", "'"),
             ("manga"     , "<h2>", "</h2>"),
             ("title"     , "</a>", "<"),
-            ("count"     , 'page 1">1 / ', '<'),
         ), values={"lang": "en", "language": "English"})[0]
 
         if not data["path"]:
@@ -122,20 +122,18 @@ class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
         data["manga"], _, data["type"] = data["manga"].rpartition(" ")
         data["manga"] = text.unescape(data["manga"])
         data["title"] = data["title"].partition(": ")[2]
-        for key in ("manga_id", "chapter_id", "stream", "count"):
+        for key in ("manga_id", "chapter_id", "stream"):
             data[key] = text.parse_int(data[key])
 
         return data
 
     def get_images(self, page):
-        pos = 0
-        while True:
-            url, pos = text.extract(page, ' target="_blank" href="', '"', pos)
-            if not url:
-                return
-            width , pos = text.extract(page, ' width="', '"', pos)
-            height, pos = text.extract(page, ' _heighth="', '"', pos)
-            yield text.urljoin(self.root, url), {
-                "width": text.parse_int(width),
-                "height": text.parse_int(height),
-            }
+        data = json.loads(text.extract(
+            page, "var _load_pages =", ";")[0] or "[]")
+        return [
+            (text.urljoin(self.root, item["u"]), {
+                "width": text.parse_int(item["w"]),
+                "height": text.parse_int(item["h"]),
+            })
+            for item in data
+        ]

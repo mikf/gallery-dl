@@ -24,8 +24,8 @@ TRAVIS_SKIP = {
 # temporary issues, etc.
 BROKEN = {
     "desuarchive",
+    "mangahere",
     "rbt",
-    "simplyhentai",
 }
 
 
