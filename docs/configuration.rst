@@ -1083,6 +1083,44 @@ Description The command to run.
 =========== =====
 
 
+metadata
+--------
+
+Write image metadata to separate files
+
+metadata.mode
+-------------
+=========== =====
+Type        ``string``
+Default     ``"json"``
+Description Select how to write metadata.
+
+            - ``"json"``: all metadata using `json.dump()
+              <https://docs.python.org/3/library/json.html#json.dump>`_
+            - ``"tags"``: ``tags`` separated by newlines
+            - ``"custom"``: result of applying `metadata.format`_ to a file's
+              metadata dictionary
+=========== =====
+
+metadata.extension
+------------------
+=========== =====
+Type        ``string``
+Default     ``"json"`` or ``"txt"``
+Description Filename extension for metadata files.
+=========== =====
+
+metadata.format
+---------------
+=========== =====
+Type        ``string``
+Example     ``"tags:\n\n{tags:J\n}\n"``
+Description Custom format string to build content of metadata files.
+
+            Note: Only applies for ``"mode": "custom"``.
+=========== =====
+
+
 ugoira
 ------
 
