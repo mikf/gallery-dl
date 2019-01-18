@@ -27,7 +27,7 @@ Flickr               https://www.flickr.com/             |Capabilities-2|       
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag-Searches
 Gfycat               https://gfycat.com/                 individual Images
-HBrowse              http://www.hbrowse.com/             Chapters, Manga
+HBrowse              https://www.hbrowse.com/            Chapters, Manga
 Hentai Cafe          https://hentai.cafe/                Chapters, Manga
 Hentai Foundry       https://www.hentai-foundry.com/     |Capabilities-3|
 Hentai2Read          https://hentai2read.com/            Chapters, Manga

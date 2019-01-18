@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.6.3 - 2019-01-18
+- Added `metadata` post-processor to write image metadata to an external file ([#135](https://github.com/mikf/gallery-dl/issues/135))
+- Added option to reverse chapter order of manga extractors ([#149](https://github.com/mikf/gallery-dl/issues/149))
+- Added authentication support for `danbooru` ([#151](https://github.com/mikf/gallery-dl/issues/151))
+- Added tag metadata for `exhentai` and `hbrowse` galleries
+- Improved `*reactor` extractors ([#148](https://github.com/mikf/gallery-dl/issues/148))
+- Fixed extraction issues for `nhentai` ([#156](https://github.com/mikf/gallery-dl/issues/156)), `pinterest`, `mangapark`
 
 ## 1.6.2 - 2019-01-01
 - Added support for:
