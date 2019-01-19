@@ -245,6 +245,17 @@ Description Default value used for missing or undefined keyword names in
 =========== =====
 
 
+extractor.*.category-transfer
+-----------------------------
+=========== =====
+Type        ``bool``
+Default     Extractor-specific
+Description Transfer an extractor's (sub)category values to all child
+            extractors spawned by it, to let them inherit their parent's
+            config options.
+=========== =====
+
+
 extractor.*.archive
 -------------------
 =========== =====
