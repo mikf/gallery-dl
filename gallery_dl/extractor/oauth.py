@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,8 @@
 
 from .common import Extractor, Message
 from . import deviantart, flickr, reddit, smugmug, tumblr
-from .. import text, oauth, config
+from .. import text, oauth, config, exception
+from ..cache import cache
 import os
 import urllib.parse
 
@@ -82,7 +83,6 @@ class OAuthBase(Extractor):
         data = self.open(authorize_url, params)
 
         # exchange the request token for an access token
-        # self.session.token = data["oauth_token"]
         data = self.session.get(access_token_url, params=data).text
 
         data = text.parse_query(data)
@@ -94,7 +94,8 @@ class OAuthBase(Extractor):
 
     def _oauth2_authorization_code_grant(
             self, client_id, client_secret, auth_url, token_url,
-            scope="read", key="refresh_token", auth=True):
+            scope="read", key="refresh_token", auth=True,
+            message_template=None):
         """Perform an OAuth2 authorization code grant"""
 
         state = "gallery-dl_{}_{}".format(
@@ -147,11 +148,15 @@ class OAuthBase(Extractor):
 
         # display token
         part = key.partition("_")[0]
-        self.send(OAUTH2_MSG_TEMPLATE.format(
+        template = message_template or OAUTH2_MSG_TEMPLATE
+        self.send(template.format(
             category=self.subcategory,
             key=part,
             Key=part.capitalize(),
             token=data[key],
+            instance=getattr(self, "instance", ""),
+            client_id=client_id,
+            client_secret=client_secret,
         ))
 
 
@@ -254,6 +259,55 @@ class OAuthTumblr(OAuthBase):
         )
 
 
+class OAuthMastodon(OAuthBase):
+    subcategory = "mastodon"
+    pattern = ["oauth:mastodon:(?:https?://)?([^/?&#]+)"]
+
+    def __init__(self, match):
+        OAuthBase.__init__(self, match)
+        self.instance = match.group(1)
+
+    def items(self):
+        yield Message.Version, 1
+
+        application = self.oauth_config(self.instance)
+        if not application:
+            application = self._register(self.instance)
+
+        self._oauth2_authorization_code_grant(
+            application["client-id"],
+            application["client-secret"],
+            "https://{}/oauth/authorize".format(self.instance),
+            "https://{}/oauth/token".format(self.instance),
+            key="access_token",
+            message_template=MASTODON_MSG_TEMPLATE,
+        )
+
+    @cache(maxage=10*365*24*60*60, keyarg=1)
+    def _register(self, instance):
+        self.log.info("Registering application for '%s'", instance)
+
+        url = "https://{}/api/v1/apps".format(instance)
+        data = {
+            "client_name": "gdl:" + oauth.nonce(8),
+            "redirect_uris": self.redirect_uri,
+            "scopes": "read",
+        }
+        data = self.session.post(url, data=data).json()
+
+        if "client_id" not in data or "client_secret" not in data:
+            self.log.error("Failed to register new application: '%s'", data)
+            raise exception.StopExtraction()
+
+        data["client-id"] = data.pop("client_id")
+        data["client-secret"] = data.pop("client_secret")
+
+        self.log.info("client-id:\n%s", data["client-id"])
+        self.log.info("client-secret:\n%s", data["client-secret"])
+
+        return data
+
+
 OAUTH1_MSG_TEMPLATE = """
 Your Access Token and Access Token Secret are
 
@@ -289,6 +343,32 @@ Example:
     "extractor": {{
         "{category}": {{
             "{key}-token": "{token}"
+        }}
+    }}
+}}
+"""
+
+
+MASTODON_MSG_TEMPLATE = """
+Your {Key} Token is
+
+{token}
+
+Put this value into your configuration file as
+'extractor.mastodon.{instance}.{key}-token'.
+
+You can also add your 'client-id' and 'client-secret' values
+if you want to register another account in the future.
+
+Example:
+{{
+    "extractor": {{
+        "mastodon": {{
+            "{instance}": {{
+                "{key}-token": "{token}",
+                "client-id": "{client_id}",
+                "client-secret": "{client_secret}"
+            }}
         }}
     }}
 }}
