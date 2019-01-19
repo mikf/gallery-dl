@@ -44,8 +44,8 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
                r"(/manga/[^/?&#]+)/?$"]
     test = [
         ("https://mangapark.me/manga/aria", {
-            "url": "aae6bf44e4360a1b0f5aa5fd74339cac6d616d20",
-            "keyword": "b7440cc4cd68d0262703da1ceadaecd34bdaacb0",
+            "url": "a58be23ef3874fe9705b0b41dd462b67eaaafd9a",
+            "keyword": "b3b5a30aa2a326bc0ca8b74c65b5ecd4bf676ebf",
         }),
         ("https://mangapark.net/manga/aria", None),
         ("https://mangapark.com/manga/aria", None),

@@ -25,6 +25,7 @@ TRAVIS_SKIP = {
 BROKEN = {
     "desuarchive",
     "mangahere",
+    "ngomik",
     "rbt",
 }
 
