@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,6 +16,26 @@ class BehanceExtractor(Extractor):
     """Base class for behance extractors"""
     category = "behance"
     root = "https://www.behance.net"
+
+    def items(self):
+        yield Message.Version, 1
+        for gallery in self.galleries():
+            yield Message.Queue, gallery["url"], gallery
+
+    def galleries(self):
+        """Return all relevant gallery URLs"""
+        return ()
+
+    def _pagination(self, url, key):
+        headers = {"X-Requested-With": "XMLHttpRequest"}
+        params = {}
+
+        while True:
+            data = self.request(url, headers=headers, params=params).json()
+            yield from data[key]
+            if not data.get("offset"):
+                return
+            params["offset"] = data["offset"]
 
 
 class BehanceGalleryExtractor(BehanceExtractor):
@@ -122,8 +142,7 @@ class BehanceUserExtractor(BehanceExtractor):
     """Extractor for a user's galleries from www.behance.net"""
     subcategory = "user"
     categorytransfer = True
-    pattern = [r"(?:https?://)?(?:www\.)?behance\.net"
-               r"/(?!gallery/)([^/?&#]+)/?$"]
+    pattern = [r"(?:https?://)?(?:www\.)?behance\.net/([^/?&#]+)/?$"]
     test = [("https://www.behance.net/alexstrohl", {
         "count": ">= 8",
         "pattern": BehanceGalleryExtractor.pattern[0],
@@ -133,18 +152,24 @@ class BehanceUserExtractor(BehanceExtractor):
         BehanceExtractor.__init__(self)
         self.user = match.group(1)
 
-    def items(self):
+    def galleries(self):
         url = "{}/{}".format(self.root, self.user)
-        headers = {"X-Requested-With": "XMLHttpRequest"}
-        params = {"offset": None}
+        return self._pagination(url, "section_content")
 
-        yield Message.Version, 1
-        while True:
-            data = self.request(url, headers=headers, params=params).json()
 
-            for gallery in data["section_content"]:
-                yield Message.Queue, gallery["url"], gallery
+class BehanceCollectionExtractor(BehanceExtractor):
+    """Extractor for a collection's galleries from www.behance.net"""
+    subcategory = "collection"
+    pattern = [r"(?:https?://)?(?:www\.)?behance\.net/collection/(\d+)"]
+    test = [("https://www.behance.net/collection/170615607/Sky", {
+        "count": ">= 13",
+        "pattern": BehanceGalleryExtractor.pattern[0],
+    })]
 
-            if "offset" not in data:
-                return
-            params["offset"] = data["offset"]
+    def __init__(self, match):
+        BehanceExtractor.__init__(self)
+        self.collection_id = match.group(1)
+
+    def galleries(self):
+        url = "{}/collection/{}/a".format(self.root, self.collection_id)
+        return self._pagination(url, "output")
