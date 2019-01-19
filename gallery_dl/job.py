@@ -37,7 +37,8 @@ class Job():
             "chapter", [], False)
 
         # category transfer
-        if parent and parent.extractor.categorytransfer:
+        if parent and parent.extractor.config(
+                "category-transfer", parent.extractor.categorytransfer):
             self.extractor.category = parent.extractor.category
             self.extractor.subcategory = parent.extractor.subcategory
 
