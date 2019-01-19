@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.6.3 - 2019-01-18
 - Added `metadata` post-processor to write image metadata to an external file ([#135](https://github.com/mikf/gallery-dl/issues/135))
 - Added option to reverse chapter order of manga extractors ([#149](https://github.com/mikf/gallery-dl/issues/149))

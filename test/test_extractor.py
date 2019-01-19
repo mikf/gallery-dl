@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -149,6 +149,8 @@ class TestExtractor(unittest.TestCase):
         def capitalize(c):
             if "-" in c:
                 return string.capwords(c.replace("-", " ")).replace(" ", "")
+            if "." in c:
+                c = c.replace(".", "")
             return c.capitalize()
 
         mapping = {
