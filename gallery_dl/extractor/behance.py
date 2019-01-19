@@ -160,6 +160,7 @@ class BehanceUserExtractor(BehanceExtractor):
 class BehanceCollectionExtractor(BehanceExtractor):
     """Extractor for a collection's galleries from www.behance.net"""
     subcategory = "collection"
+    categorytransfer = True
     pattern = [r"(?:https?://)?(?:www\.)?behance\.net/collection/(\d+)"]
     test = [("https://www.behance.net/collection/170615607/Sky", {
         "count": ">= 13",
