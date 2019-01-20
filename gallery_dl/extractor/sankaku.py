@@ -87,7 +87,7 @@ class SankakuExtractor(SharedConfigExtractor):
         data = {
             "id": text.parse_int(post_id),
             "md5": file_url.rpartition("/")[2].partition(".")[0],
-            "tags": tags,
+            "tags": text.unescape(tags),
             "vote_average": float(vavg or 0),
             "vote_count": text.parse_int(vcnt),
             "created_at": created,
