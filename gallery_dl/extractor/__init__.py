@@ -67,6 +67,7 @@ modules = [
     "nijie",
     "nyafuu",
     "paheal",
+    "photobucket",
     "piczel",
     "pinterest",
     "pixiv",
