@@ -585,6 +585,15 @@ Description Controls how a user is directed to an OAuth authorization site.
 =========== =====
 
 
+extractor.photobucket.subalbums
+-------------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Download subalbums.
+=========== =====
+
+
 extractor.pixiv.ugoira
 ----------------------
 =========== =====
