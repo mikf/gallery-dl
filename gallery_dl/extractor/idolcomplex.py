@@ -52,7 +52,7 @@ class IdolcomplexPostExtractor(IdolcomplexExtractor,
         "keyword": {
             "tags_character": "shani_(the_witcher)",
             "tags_copyright": "the_witcher",
-            "tags_idol": "lyumos",
+            "tags_idol": str,
             "tags_medium": str,
             "tags_general": str,
         },
