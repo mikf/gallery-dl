@@ -30,8 +30,12 @@ class PhotobucketAlbumExtractor(Extractor):
         }),
         ("http://s271.photobucket.com/user/lakerfanryan/library/", {
             "options": (("image-filter", "False"),),
-            "pattern": "http://s271.photobucket.com/user/lakerfanryan/library",
-            "count": ">= 22",
+            "pattern": pattern[0],
+            "count": 1,
+        }),
+        ("http://s271.photobucket.com/user/lakerfanryan/library/Basketball", {
+            "pattern": pattern[0],
+            "count": ">= 9",
         }),
         ("http://s1110.photobucket.com/user/chndrmhn100/library/"
          "Chandu%20is%20the%20King?sort=3&page=1", None),
@@ -74,23 +78,17 @@ class PhotobucketAlbumExtractor(Extractor):
             params["page"] += 1
 
     def subalbums(self):
-        """Yield all subalbum URLs"""
+        """Return all subalbum objects"""
         url = self.root + "/component/Albums-SubalbumList"
-        params = {"albumPath": self.album_path, "json": "1"}
+        params = {
+            "albumPath": self.album_path,
+            "fetchSubAlbumsOnly": "true",
+            "deferCollapsed": "true",
+            "json": "1",
+        }
 
         data = self.request(url, params=params).json()
-        albums = data["body"]["subAlbums"]
-        albums.reverse()
-
-        while albums:
-            album = albums.pop()
-
-            subs = album.pop("subAlbums")
-            if subs:
-                subs.reverse()
-                albums.extend(subs)
-
-            yield album
+        return data["body"]["subAlbums"]
 
 
 class PhotobucketImageExtractor(Extractor):
