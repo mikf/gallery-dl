@@ -274,6 +274,12 @@ def build_parser():
         dest="postprocessors", const=({"name": "metadata"},),
         help="Write metadata to separate JSON files",
     )
+    postprocessor.add_argument(
+        "--write-tags",
+        action=ConfigConstAction, nargs=0,
+        dest="postprocessors", const=({"name": "metadata", "mode": "tags"},),
+        help="Write image tags to separate text files",
+    )
 
     parser.add_argument(
         "urls",
