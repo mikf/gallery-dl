@@ -109,17 +109,29 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
 class NewgroundsImageExtractor(NewgroundsExtractor):
     """Extractor for a single image from newgrounds.com"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:www\.)?newgrounds\.com"
-               r"/art/view/([^/?&#]+)/[^/?&#]+"]
-    test = [("https://www.newgrounds.com/art/view/blitzwuff/ffx", {
-        "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
-        "keyword": "5738e2bf19137898204f36c5ae573826672b612c",
-        "content": "cb067d6593598710292cdd340d350d14a26fe075",
-    })]
+    pattern = [r"(?:https?://)?(?:"
+               r"(?:www\.)?newgrounds\.com/art/view/([^/?&#]+)/[^/?&#]+"
+               r"|art\.ngfiles\.com/images/\d+/\d+_([^_]+)_([^.]+))"]
+    test = [
+        ("https://www.newgrounds.com/art/view/blitzwuff/ffx", {
+            "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
+            "keyword": "5738e2bf19137898204f36c5ae573826672b612c",
+            "content": "cb067d6593598710292cdd340d350d14a26fe075",
+        }),
+        ("https://art.ngfiles.com/images/587000/587551_blitzwuff_ffx.png", {
+            "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
+            "keyword": "5738e2bf19137898204f36c5ae573826672b612c",
+        }),
+    ]
 
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
-        self.page_url = match.group(0)
+        if match.group(2):
+            self.user = match.group(2)
+            self.page_url = "https://www.newgrounds.com/art/view/{}/{}".format(
+                self.user, match.group(3))
+        else:
+            self.page_url = match.group(0)
 
     def get_page_urls(self):
         return (self.page_url,)
