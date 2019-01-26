@@ -475,6 +475,16 @@ Description Minimum wait time in seconds before API requests.
 =========== =====
 
 
+extractor.exhentai.limits
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Check image download limits
+            and stop extraction when they are exceeded.
+=========== =====
+
+
 extractor.exhentai.original
 ---------------------------
 =========== =====
