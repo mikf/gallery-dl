@@ -32,9 +32,12 @@ class ExhentaiExtractor(Extractor):
 
     def __init__(self):
         Extractor.__init__(self)
+        self.limits = self.config("limits", True)
         self.original = self.config("original", True)
         self.wait_min = self.config("wait-min", 3)
         self.wait_max = self.config("wait-max", 6)
+
+        self._remaining = 0
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
         self.session.headers["Referer"] = self.root + "/"
@@ -63,6 +66,7 @@ class ExhentaiExtractor(Extractor):
             self.log.info("no username given; using e-hentai.org")
             self.root = "https://e-hentai.org"
             self.original = False
+            self.limits = False
             self.session.cookies["nw"] = "1"
             return
         cookies = self._login_impl(username, password)
@@ -159,6 +163,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             (self.image_from_page(ipage),), self.images_from_api())
         for url, image in images:
             data.update(image)
+            if self.limits:
+                self._check_limits(data)
             if "/fullimg.php" in url:
                 data["extension"] = ""
                 self.wait(1.5)
@@ -270,6 +276,32 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if page.startswith(("Invalid page", "Keep trying")):
             raise exception.NotFoundError("image page")
         return page
+
+    def _check_limits(self, data):
+        if not self._remaining or data["num"] % 20 == 0:
+            self._update_limits()
+        self._remaining -= data["cost"]
+
+        if self._remaining <= 0:
+            url = "{}/s/{}/{}-{}".format(
+                self.root, data["image_token"], self.gallery_id, data["num"])
+            self.log.error(
+                "Image limit reached! Reset it and continue with "
+                "'%s' as URL.", url)
+            raise exception.StopExtraction()
+
+    def _update_limits(self):
+        url = "https://e-hentai.org/home.php"
+        cookies = {
+            cookie.name: cookie.value
+            for cookie in self.session.cookies
+            if cookie.domain == self.cookiedomain and cookie.name != "igneous"
+        }
+
+        page = self.request(url, cookies=cookies).text
+        current, pos = text.extract(page, "<strong>", "</strong>")
+        maximum, pos = text.extract(page, "<strong>", "</strong>", pos)
+        self._remaining = text.parse_int(maximum) - text.parse_int(current)
 
     @staticmethod
     def _parse_image_info(url):
