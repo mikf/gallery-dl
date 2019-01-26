@@ -11,8 +11,10 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
-import time
+import itertools
 import random
+import time
+import math
 
 
 BASE_PATTERN = r"(?:https?://)?(e[x-]|g\.e-)hentai\.org"
@@ -102,10 +104,12 @@ class ExhentaiExtractor(Extractor):
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
     """Extractor for image galleries from exhentai.org"""
     subcategory = "gallery"
-    pattern = [BASE_PATTERN + r"/g/(\d+)/([\da-f]{10})"]
+    pattern = [BASE_PATTERN +
+               r"(?:/g/(\d+)/([\da-f]{10})"
+               r"|/s/([\da-f]{10})/(\d+)-(\d+))"]
     test = [
         ("https://exhentai.org/g/960460/4f0e369d82/", {
-            "keyword": "900b8dccd23c41a76e915a8df70ae77c4e0f52c7",
+            "keyword": "ba0785e49e3877cfa3f91c1ad9a5ac7816339bf5",
             "content": "493d759de534355c9f55f8e365565b62411de146",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -113,6 +117,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         }),
         ("http://exhentai.org/g/962698/7f02358e00/", {
             "exception": exception.AuthorizationError,
+        }),
+        ("https://exhentai.org/s/3957343c3b/960460-5", {
+            "count": 2,
         }),
         ("https://e-hentai.org/g/960460/4f0e369d82/", None),
         ("https://g.e-hentai.org/g/960460/4f0e369d82/", None),
@@ -122,52 +129,60 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         ExhentaiExtractor.__init__(self)
         self.key = {}
         self.count = 0
-        self.version, self.gid, self.token = match.groups()
-        self.gid = text.parse_int(self.gid)
+        self.gallery_id = text.parse_int(match.group(2) or match.group(5))
+        self.gallery_token = match.group(3)
+        self.image_token = match.group(4)
+        self.image_num = text.parse_int(match.group(6), 1)
 
     def items(self):
         self.login()
-        yield Message.Version, 1
 
-        url = "{}/g/{}/{}/".format(self.root, self.gid, self.token)
-        response = self.request(url, expect=range(400, 500))
-        page = response.text
+        if self.gallery_token:
+            gpage = self._gallery_page()
+            self.image_token = text.extract(gpage, 'hentai.org/s/', '"')[0]
+            self.wait()
+            ipage = self._image_page()
+        else:
+            ipage = self._image_page()
+            part = text.extract(ipage, 'hentai.org/g/', '"')[0]
+            self.gallery_token = part.split("/")[1]
+            self.wait()
+            gpage = self._gallery_page()
 
-        if response.status_code == 404 and "Gallery Not Available" in page:
-            raise exception.AuthorizationError()
-        if page.startswith(("Key missing", "Gallery not found")):
-            raise exception.NotFoundError("gallery")
-
-        data = self.get_job_metadata(page)
+        data = self.get_metadata(gpage)
         self.count = data["count"]
+
+        yield Message.Version, 1
         yield Message.Directory, data
 
-        for url, image in self.get_images(page):
+        images = itertools.chain(
+            (self.image_from_page(ipage),), self.images_from_api())
+        for url, image in images:
             data.update(image)
             if "/fullimg.php" in url:
                 data["extension"] = ""
                 self.wait(1.5)
             yield Message.Url, url, data
 
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
-        data = {
-            "gallery_id"   : self.gid,
-            "gallery_token": self.token,
-        }
+    def get_metadata(self, page):
+        """Extract gallery metadata"""
         data, pos = text.extract_all(page, (
-            ("title"     , '<h1 id="gn">', '</h1>'),
-            ("title_jp"  , '<h1 id="gj">', '</h1>'),
-            ("date"      , '>Posted:</td><td class="gdt2">', '</td>'),
-            ("language"  , '>Language:</td><td class="gdt2">', ' '),
+            ("title"       , '<h1 id="gn">', '</h1>'),
+            ("title_jp"    , '<h1 id="gj">', '</h1>'),
+            ("date"        , '>Posted:</td><td class="gdt2">', '</td>'),
+            ("parent"      , '>Parent:</td><td class="gdt2"><a href="', '"'),
+            ("visible"     , '>Visible:</td><td class="gdt2">', '<'),
+            ("language"    , '>Language:</td><td class="gdt2">', ' '),
             ("gallery_size", '>File Size:</td><td class="gdt2">', '<'),
-            ("count"     , '>Length:</td><td class="gdt2">', ' '),
-        ), values=data)
+            ("count"       , '>Length:</td><td class="gdt2">', ' '),
+        ))
 
         data["lang"] = util.language_to_code(data["language"])
         data["title"] = text.unescape(data["title"])
         data["title_jp"] = text.unescape(data["title_jp"])
         data["count"] = text.parse_int(data["count"])
+        data["gallery_id"] = self.gallery_id
+        data["gallery_token"] = self.gallery_token
         data["gallery_size"] = text.parse_bytes(
             data["gallery_size"].rstrip("Bb"))
         data["tags"] = [
@@ -176,17 +191,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         ]
         return data
 
-    def get_images(self, page):
-        """Collect url and metadata for all images in this gallery"""
-        part = text.extract(page, 'hentai.org/s/', '"')[0]
-        yield self.image_from_page(self.root + "/s/" + part)
-        yield from self.images_from_api()
-
-    def image_from_page(self, url):
+    def image_from_page(self, page):
         """Get image url and data from webpage"""
-        self.wait()
-        page = self.request(url).text
-        data = text.extract_all(page, (
+        info = text.extract_all(page, (
             (None      , '<div id="i3"><a onclick="return load_image(', ''),
             ("nextkey" , "'", "'"),
             ("url"     , '<img id="img" src="', '"'),
@@ -195,21 +202,21 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             ("startkey", 'var startkey="', '";'),
             ("showkey" , 'var showkey="', '";'),
         ))[0]
-        self.key["start"] = data["startkey"]
-        self.key["show"] = data["showkey"]
-        self.key["next"] = data["nextkey"]
+        self.key["start"] = info["startkey"]
+        self.key["show"] = info["showkey"]
+        self.key["next"] = info["nextkey"]
 
-        if self.original and data["origurl"]:
-            part = text.unescape(data["origurl"])
+        if self.original and info["origurl"]:
+            part = text.unescape(info["origurl"])
             url = self.root + "/fullimg.php" + part
-            info = self._parse_original_info(data["originfo"])
+            data = self._parse_original_info(info["originfo"])
         else:
-            url = data["url"]
-            info = self._parse_image_info(url)
+            url = info["url"]
+            data = self._parse_image_info(url)
 
-        info["num"] = 1
-        info["image_token"] = data["startkey"]
-        return url, text.nameext_from_url(data["url"], info)
+        data["num"] = self.image_num
+        data["image_token"] = info["startkey"]
+        return url, text.nameext_from_url(info["url"], data)
 
     def images_from_api(self):
         """Get image url and data from api calls"""
@@ -217,11 +224,11 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         nextkey = self.key["next"]
         request = {
             "method" : "showpage",
-            "gid"    : self.gid,
+            "gid"    : self.gallery_id,
             "imgkey" : nextkey,
             "showkey": self.key["show"],
         }
-        for request["page"] in range(2, self.count + 1):
+        for request["page"] in range(self.image_num + 1, self.count + 1):
             self.wait()
             page = self.request(api_url, method="POST", json=request).json()
             imgkey = nextkey
@@ -232,8 +239,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             if self.original and origurl:
                 url = text.unescape(origurl)
                 data = self._parse_original_info(
-                    text.extract(page["i7"], "ownload original", "<", pos)[0]
-                )
+                    text.extract(page["i7"], "ownload original", "<", pos)[0])
             else:
                 url = imgurl
                 data = self._parse_image_info(url)
@@ -244,6 +250,27 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             request["imgkey"] = nextkey
 
+    def _gallery_page(self):
+        url = "{}/g/{}/{}/".format(
+            self.root, self.gallery_id, self.gallery_token)
+        response = self.request(url, expect=range(400, 500))
+        page = response.text
+
+        if response.status_code == 404 and "Gallery Not Available" in page:
+            raise exception.AuthorizationError()
+        if page.startswith(("Key missing", "Gallery not found")):
+            raise exception.NotFoundError("gallery")
+        return page
+
+    def _image_page(self):
+        url = "{}/s/{}/{}-{}".format(
+            self.root, self.image_token, self.gallery_id, self.image_num)
+        page = self.request(url, expect=range(400, 500)).text
+
+        if page.startswith(("Invalid page", "Keep trying")):
+            raise exception.NotFoundError("image page")
+        return page
+
     @staticmethod
     def _parse_image_info(url):
         parts = url.split("/")[4].split("-")
@@ -251,15 +278,18 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "width": text.parse_int(parts[2]),
             "height": text.parse_int(parts[3]),
             "size": text.parse_int(parts[1]),
+            "cost": 1,
         }
 
     @staticmethod
     def _parse_original_info(info):
         parts = info.lstrip().split(" ")
+        size = text.parse_bytes(parts[3] + parts[4][0])
         return {
             "width": text.parse_int(parts[0]),
             "height": text.parse_int(parts[2]),
-            "size": text.parse_bytes(parts[3] + parts[4][0]),
+            "size": size,
+            "cost": 1 + math.ceil(size * 5 / 1024 / 1024)
         }
 
 
