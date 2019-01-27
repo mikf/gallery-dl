@@ -28,15 +28,22 @@ class PhotobucketAlbumExtractor(Extractor):
             "pattern": r"http://i\d+.photobucket.com/albums/hh280/focolandia",
             "count": ">= 39"
         }),
+        # subalbums from main "directory"
         ("http://s271.photobucket.com/user/lakerfanryan/library/", {
             "options": (("image-filter", "False"),),
             "pattern": pattern[0],
             "count": 1,
         }),
+        # subalbums from subalbum without images
         ("http://s271.photobucket.com/user/lakerfanryan/library/Basketball", {
             "pattern": pattern[0],
             "count": ">= 9",
         }),
+        # private (missing JSON data)
+        ("http://s1277.photobucket.com/user/sinisterkat44/library/", {
+            "count": 0,
+        }),
+
         ("http://s1110.photobucket.com/user/chndrmhn100/library/"
          "Chandu%20is%20the%20King?sort=3&page=1", None),
     ]
@@ -68,7 +75,13 @@ class PhotobucketAlbumExtractor(Extractor):
 
         while True:
             page = self.request(url, params=params).text
-            data = json.loads(text.extract(page, "collectionData:", ",\n")[0])
+            json_data = text.extract(page, "collectionData:", ",\n")[0]
+            if not json_data:
+                msg = text.extract(page, 'libraryPrivacyBlock">', "</div>")[0]
+                msg = ' ("{}")'.format(text.remove_html(msg)) if msg else ""
+                self.log.error("Unable to get JSON data%s", msg)
+                return
+            data = json.loads(json_data)
 
             yield from data["items"]["objects"]
 
@@ -88,7 +101,7 @@ class PhotobucketAlbumExtractor(Extractor):
         }
 
         data = self.request(url, params=params).json()
-        return data["body"]["subAlbums"]
+        return data["body"].get("subAlbums", ())
 
 
 class PhotobucketImageExtractor(Extractor):
