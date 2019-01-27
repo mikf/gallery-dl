@@ -16,7 +16,7 @@ import re
 class MastodonExtractor(Extractor):
     """Base class for mastodon extractors"""
     basecategory = "mastodon"
-    directory_fmt = ["mastodon", "{category}", "{account[username]}"]
+    directory_fmt = ["mastodon", "{instance}", "{account[username]}"]
     filename_fmt = "{category}_{id}_{media[id]}.{extension}"
     archive_fmt = "{media[id]}"
     instance = None
@@ -26,9 +26,12 @@ class MastodonExtractor(Extractor):
         self.instance = match.group(1)
         self.api = MastodonAPI(self, self.instance)
 
-    def config(self, key, default=None):
+    def config(self, key, default=None, *, sentinel=object()):
+        value = Extractor.config(self, key, sentinel)
+        if value is not sentinel:
+            return value
         return config.interpolate(
-            ("extractor", "mastodon", self.category, self.subcategory, key),
+            ("extractor", "mastodon", self.instance, self.subcategory, key),
             default,
         )
 
@@ -46,9 +49,10 @@ class MastodonExtractor(Extractor):
         """Return an iterable containing all relevant Status-objects"""
         return ()
 
-    @staticmethod
-    def prepare(status):
+    def prepare(self, status):
         """Prepare a status object"""
+        status["instance"] = self.instance
+        status["tags"] = [tag["name"] for tag in status["tags"]]
         attachments = status["media_attachments"]
         del status["media_attachments"]
         return attachments
@@ -138,10 +142,14 @@ def generate_extractors():
     """Dynamically generate Extractor classes for Mastodon instances"""
 
     symtable = globals()
-    mastodon = config.get(("extractor", "mastodon")) or {}
+    mastodon = config.get(("extractor", "mastodon"))
 
+    if not mastodon:
+        mastodon = {}
+        config.set(("extractor", "mastodon"), mastodon)
     if "pawoo.net" not in mastodon:
         mastodon["pawoo.net"] = {
+            "category"     : "pawoo",
             "access-token" : "286462927198d0cf3e24683e91c8259a"
                              "ac4367233064e0570ca18df2ac65b226",
             "client-id"    : "97b142b6904abf97a1068d51a7bc2f2f"
@@ -163,10 +171,11 @@ def generate_extractors():
             pattern = [r"(?:https?://)?({})/@[^/?&#]+/(\d+)".format(
                 re.escape(instance))]
 
-        name = re.sub(r"[^A-Za-z]+", "", instance).capitalize()
+        category = info.get("category", instance)
+        name = re.sub(r"[^A-Za-z]+", "", category).capitalize()
 
         for extr in (UserExtractor, StatusExtractor):
-            extr.category = instance
+            extr.category = category
             extr.__name__ = name + extr.__name__
             extr.__doc__ = "{} on {}".format(extr.__base__.__doc__, instance)
             symtable[extr.__name__] = extr
