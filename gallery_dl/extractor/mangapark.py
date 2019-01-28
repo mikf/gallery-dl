@@ -59,7 +59,7 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
         results = []
         data = {"lang": "en", "language": "English"}
         data["manga"] = text.unescape(
-            text.extract(page, '<title>', ' Manga - Read ')[0])
+            text.extract(page, '<title>', ' Manga - ')[0])
 
         for stream in page.split('<div id="stream_')[1:]:
             data["stream"] = text.parse_int(text.extract(stream, '', '"')[0])
