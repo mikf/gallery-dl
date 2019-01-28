@@ -1,20 +1,54 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://luscious.net/"""
+"""Extractors for https://luscious.net/"""
 
-from .common import Extractor, AsynchronousExtractor, Message
-from .. import text, util
+from .common import Extractor, Message
+from .. import text, util, exception
+from ..cache import cache
 
 
-class LusciousAlbumExtractor(AsynchronousExtractor):
-    """Extractor for image albums from luscious.net"""
+class LusciousExtractor(Extractor):
+    """Base class for luscious extractors"""
     category = "luscious"
+    cookiedomain = ".luscious.net"
+    root = "https://members.luscious.net"
+
+    def login(self):
+        """Login and set necessary cookies"""
+        username, password = self._get_auth_info()
+        if username:
+            cookie = self._login_impl(username, password)
+            self.session.cookies.set_cookie(cookie)
+
+    @cache(maxage=13*24*60*60, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+        url = "https://members.luscious.net/accounts/login/"
+        headers = {"Referer": "https://members.luscious.net/login/"}
+        data = {
+            "login": username,
+            "password": password,
+            "remember": "on",
+            "next": ""  "/",
+        }
+        response = self.request(url, method="POST", headers=headers, data=data)
+
+        if "/accounts/login/" in response.url or not response.history:
+            raise exception.AuthenticationError()
+        for cookie in response.history[0].cookies:
+            if cookie.name.startswith("sessionid_"):
+                return cookie
+        raise exception.AuthenticationError()
+
+
+class LusciousAlbumExtractor(LusciousExtractor):
+    """Extractor for image albums from luscious.net"""
     subcategory = "album"
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
@@ -36,13 +70,13 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
         ("https://luscious.net/pictures/c/video_game_manga/album"
          "/okinami-no-koigokoro_277031/sorted/position/id/16528978/@_1", None),
     ]
-    root = "https://luscious.net"
 
     def __init__(self, match):
-        AsynchronousExtractor.__init__(self)
+        LusciousExtractor.__init__(self)
         self.gpart, self.gid = match.groups()
 
     def items(self):
+        self.login()
         url = "{}/albums/{}/".format(self.root, self.gpart)
         page = self.request(url).text
         data = self.get_metadata(page)
@@ -111,9 +145,8 @@ class LusciousAlbumExtractor(AsynchronousExtractor):
             num += 1
 
 
-class LusciousSearchExtractor(Extractor):
+class LusciousSearchExtractor(LusciousExtractor):
     """Extractor for album searches on luscious.net"""
-    category = "luscious"
     subcategory = "search"
     pattern = [(r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
                 r"/((?:albums|c)(?:/(?![^/?&#]+_\d+)[^/?&#]+)+)")]
@@ -126,15 +159,15 @@ class LusciousSearchExtractor(Extractor):
              "count": 21,
          }),
     ]
-    root = "https://luscious.net"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        LusciousExtractor.__init__(self)
         self.path = match.group(1).partition("/page/")[0]
         if not self.path.startswith("albums/"):
             self.path = "albums/" + self.path
 
     def items(self):
+        self.login()
         yield Message.Version, 1
         for album in self.albums():
             url, data = self.parse_album(album)

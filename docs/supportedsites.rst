@@ -12,7 +12,7 @@ arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |Capabilities-0|
-Behance              https://www.behance.net/            Images from Users, Galleries
+Behance              https://www.behance.net/            Images from Users, Collections, Galleries
 BobX                 http://www.bobx.com/dark/           Galleries, Idols
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches         Optional
 Desuarchive          https://desuarchive.org/            Threads
@@ -47,7 +47,7 @@ Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
 KissManga            http://kissmanga.com/               Chapters, Manga
 Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag-Searches
-Luscious             https://luscious.net/               Albums, Search Results
+Luscious             https://luscious.net/               Albums, Search Results                             Optional
 Manga Fox            http://fanfox.net/                  Chapters
 Manga Here           http://www.mangahere.co/            Chapters, Manga
 Manga Stream         https://mangastream.com/            Chapters
@@ -61,7 +61,8 @@ nhentai              https://nhentai.net/                Galleries, Search Resul
 Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
 nijie                https://nijie.info/                 |Capabilities-5|                                   Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
-Pawoo                https://pawoo.net                   Images from Users, Images from Statuses
+Pawoo                https://pawoo.net/                  Images from Users, Images from Statuses
+Photobucket          http://photobucket.com/             Albums, individual Images
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
 Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links, related Pins
 Pixiv                https://www.pixiv.net/              |Capabilities-6|                                   Required

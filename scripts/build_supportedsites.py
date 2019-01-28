@@ -92,6 +92,7 @@ AUTH_MAP = {
     "exhentai"   : "Optional",
     "flickr"     : "Optional (OAuth)",
     "idolcomplex": "Optional",
+    "luscious"   : "Optional",
     "nijie"      : "Required",
     "pixiv"      : "Required",
     "reddit"     : "Optional (OAuth)",
@@ -209,7 +210,7 @@ def get_domain(classes):
             url = cls.test[0][0]
             return url[:url.find("/", 8)+1]
 
-        scheme = "https" if hasattr(cls, "https") and cls.https else "http"
+        scheme = "http" if hasattr(cls, "https") and not cls.https else "https"
         host = cls.__doc__.split()[-1]
         return scheme + "://" + host + "/"
     except (IndexError, AttributeError):
