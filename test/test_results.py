@@ -27,6 +27,7 @@ BROKEN = {
     "mangahere",
     "ngomik",
     "rbt",
+    "simplyhentai",
 }
 
 

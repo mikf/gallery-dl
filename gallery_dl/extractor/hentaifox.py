@@ -8,12 +8,12 @@
 
 """Extractors for https://hentaifox.com/"""
 
-from .common import ChapterExtractor
+from .common import ChapterExtractor, Extractor, Message
 from .. import text
 
 
 class HentaifoxGalleryExtractor(ChapterExtractor):
-    """Extractor for image galleries from hentaifox.com"""
+    """Extractor for image galleries on hentaifox.com"""
     category = "hentaifox"
     subcategory = "gallery"
     filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
@@ -56,3 +56,68 @@ class HentaifoxGalleryExtractor(ChapterExtractor):
             (text.urljoin(self.root, url.replace("t.", ".")), None)
             for url in text.extract_iter(page, 'data-src="', '"')
         ]
+
+
+class HentaifoxSearchExtractor(Extractor):
+    """Extractor for search results and listings on hentaifox.com"""
+    category = "hentaifox"
+    subcategory = "search"
+    pattern = [r"(?:https?://)?(?:www\.)?hentaifox\.com"
+               r"(/(?:parody|tag|artist|character|search)/[^/?%#]+)"]
+    test = [
+        ("https://hentaifox.com/parody/touhou-project/", None),
+        ("https://hentaifox.com/tag/full-color/", None),
+        ("https://hentaifox.com/character/reimu-hakurei/", None),
+        ("https://hentaifox.com/artist/distance/", None),
+        ("https://hentaifox.com/search/touhou/", None,),
+        ("https://hentaifox.com/tag/full-colour/", {
+            "pattern": HentaifoxGalleryExtractor.pattern[0],
+            "count": ">= 40",
+            "keyword": {
+                "url": str,
+                "gallery_id": int,
+                "thumbnail": r"re:https://i\d*.hentaifox.com/\d+/\d+/thumb\.",
+                "title": str,
+                "tags": list,
+            },
+        }),
+    ]
+    root = "https://hentaifox.com"
+
+    def __init__(self, match):
+        Extractor.__init__(self)
+        self.path = match.group(1)
+
+    def items(self):
+        yield Message.Version, 1
+        for gallery in self.galleries():
+            yield Message.Queue, gallery["url"], gallery
+
+    def galleries(self):
+        url = "{}/{}/".format(self.root, self.path)
+
+        while True:
+            page = self.request(url).text
+            info, gpos = text.extract(
+                page, 'class="galleries_overview">', 'class="clear">')
+
+            for ginfo in text.extract_iter(info, '<div class="item', '</a>'):
+                tags , pos = text.extract(ginfo, '', '"')
+                url  , pos = text.extract(ginfo, 'href="', '"', pos)
+                title, pos = text.extract(ginfo, 'alt="', '"', pos)
+                thumb, pos = text.extract(ginfo, 'src="', '"', pos)
+
+                yield {
+                    "url": text.urljoin(self.root, url),
+                    "gallery_id": text.parse_int(
+                        url.strip("/").rpartition("/")[2]),
+                    "thumbnail": text.urljoin(self.root, thumb),
+                    "title": text.unescape(title),
+                    "tags": tags.split(),
+                }
+
+            pos = page.find('class="current"', gpos)
+            url = text.extract(page, 'href="', '"', pos)[0]
+            if pos == -1 or "/pag" not in url:
+                return
+            url = text.urljoin(self.root, url)
