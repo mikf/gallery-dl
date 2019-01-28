@@ -25,6 +25,7 @@ CATEGORY_MAP = {
     "hentai2read"    : "Hentai2Read",
     "hentaicafe"     : "Hentai Cafe",
     "hentaifoundry"  : "Hentai Foundry",
+    "hentaifox"      : "HentaiFox",
     "hentaihere"     : "HentaiHere",
     "hitomi"         : "Hitomi.la",
     "idolcomplex"    : "Idol Complex",

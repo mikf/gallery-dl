@@ -37,6 +37,7 @@ modules = [
     "hentai2read",
     "hentaicafe",
     "hentaifoundry",
+    "hentaifox",
     "hentaihere",
     "hitomi",
     "idolcomplex",
