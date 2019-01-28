@@ -12,23 +12,24 @@ from .common import ChapterExtractor
 from .. import text
 
 
-class HentaifoxChapterExtractor(ChapterExtractor):
-    """Extractor for a single manga chapter from hentaifox.com"""
+class HentaifoxGalleryExtractor(ChapterExtractor):
+    """Extractor for image galleries from hentaifox.com"""
     category = "hentaifox"
-    filename_fmt = "{category}_{chapter_id}_{page:>03}.{extension}"
-    directory_fmt = ["{category}", "{chapter_id} {title}"]
-    archive_fmt = "{chapter_id}_{page}"
+    subcategory = "gallery"
+    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
+    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    archive_fmt = "{gallery_id}_{page}"
     pattern = [r"(?:https?://)?(?:www\.)?hentaifox\.com/gallery/(\d+)"]
     test = [("https://hentaifox.com/gallery/56622/", {
         "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
         "count": 24,
-        "keyword": "a5cfc962e2b2c929942c357bd67f0cc32f834cec",
+        "keyword": "80fc0fb5db9626fffb078dd2e4f9aff4a9348686",
     })]
     root = "https://hentaifox.com"
 
     def __init__(self, match):
-        self.chapter_id = match.group(1)
-        url = "{}/gallery/{}".format(self.root, self.chapter_id)
+        self.gallery_id = match.group(1)
+        url = "{}/gallery/{}".format(self.root, self.gallery_id)
         ChapterExtractor.__init__(self, url)
 
     def get_metadata(self, page):
@@ -44,11 +45,10 @@ class HentaifoxChapterExtractor(ChapterExtractor):
 
         for key, value in data.items():
             data[key] = text.remove_html(value).replace(" , ", ", ")
+        data["gallery_id"] = text.parse_int(self.gallery_id)
         data["title"] = text.unescape(title)
-        data["chapter_id"] = text.parse_int(self.chapter_id)
         data["language"] = "English"
         data["lang"] = "en"
-
         return data
 
     def get_images(self, page):
