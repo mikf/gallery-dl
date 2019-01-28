@@ -154,7 +154,7 @@ class LusciousSearchExtractor(LusciousExtractor):
         ("https://luscious.net/c/hentai/", None),
         ("https://luscious.net/albums/t2/2/c/hentai/sorted/updated"
          "/tagged/+full_color/page/2/", {
-             "pattern": r"https://luscious.net/albums/[^_]+_\d+/",
+             "pattern": r"https://(members\.)?luscious.net/albums/[^_]+_\d+/",
              "range": "20-40",
              "count": 21,
          }),
