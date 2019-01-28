@@ -31,6 +31,7 @@ HBrowse              https://www.hbrowse.com/            Chapters, Manga
 Hentai Cafe          https://hentai.cafe/                Chapters, Manga
 Hentai Foundry       https://www.hentai-foundry.com/     |Capabilities-3|
 Hentai2Read          https://hentai2read.com/            Chapters, Manga
+HentaiFox            https://hentaifox.com/              Chapters
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
