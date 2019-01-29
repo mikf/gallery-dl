@@ -88,6 +88,7 @@ modules = [
     "slideshare",
     "smugmug",
     "thebarchive",
+    "tsumino",
     "tumblr",
     "twitter",
     "wallhaven",
