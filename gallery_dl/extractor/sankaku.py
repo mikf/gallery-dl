@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2018 Mike Fährmann
+# Copyright 2014-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -88,7 +88,7 @@ class SankakuExtractor(SharedConfigExtractor):
             "id": text.parse_int(post_id),
             "md5": file_url.rpartition("/")[2].partition(".")[0],
             "tags": text.unescape(tags),
-            "vote_average": float(vavg or 0),
+            "vote_average": text.parse_float(vavg),
             "vote_count": text.parse_int(vcnt),
             "created_at": created,
             "rating": (rating or "?")[0].lower(),
