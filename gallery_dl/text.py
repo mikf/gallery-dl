@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Collection of functions that work in strings/text"""
+"""Collection of functions that work on strings/text"""
 
 import re
 import html
@@ -47,7 +47,7 @@ def split_html(txt, sep=None):
     """Split input string by html-tags"""
     try:
         return [
-            x for x in re.split("<[^>]+>", txt)
+            x.strip() for x in re.split("<[^>]+>", txt)
             if x and not x.isspace()
         ]
     except TypeError:
@@ -165,6 +165,16 @@ def parse_int(value, default=0):
         return default
 
 
+def parse_float(value, default=0.0):
+    """Convert 'value' to float"""
+    if not value:
+        return default
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
+
+
 def parse_query(qs):
     """Parse a query string into key-value pairs"""
     result = {}
@@ -182,12 +192,11 @@ if os.name == "nt":
 else:
     clean_path = clean_path_posix
 
-urljoin = urllib.parse.urljoin
-unquote = urllib.parse.unquote
-escape = html.escape
 
-try:
-    unescape = html.unescape
-except AttributeError:
-    import html.parser
-    unescape = html.parser.HTMLParser().unescape
+urljoin = urllib.parse.urljoin
+
+quote = urllib.parse.quote
+unquote = urllib.parse.unquote
+
+escape = html.escape
+unescape = html.unescape

@@ -71,8 +71,9 @@ class TestText(unittest.TestCase):
         # standard usage
         self.assertEqual(f(""), empty)
         self.assertEqual(f("Hello World."), ["Hello World."])
-        self.assertEqual(f(" Hello  World.  "), [" Hello  World.  "])
+        self.assertEqual(f(" Hello  World.  "), ["Hello  World."])
         self.assertEqual(f("Hello<br/>World."), result)
+        self.assertEqual(f(" Hello <br/> World.  "), result)
         self.assertEqual(
             f("<div><b class='a'>Hello</b><i>World.</i></div>"), result)
 
@@ -253,6 +254,27 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("zzz"), 0)
         self.assertEqual(f([1, 2, 3]), 0)
         self.assertEqual(f({1: 2, 3: 4}), 0)
+
+        # 'default' argument
+        default = "default"
+        for value in INVALID_ALT:
+            self.assertEqual(f(value, default), default)
+        self.assertEqual(f("zzz", default), default)
+
+    def test_parse_float(self, f=text.parse_float):
+        self.assertEqual(f(0), 0.0)
+        self.assertEqual(f("0"), 0.0)
+        self.assertEqual(f(123), 123.0)
+        self.assertEqual(f("123"), 123.0)
+        self.assertEqual(f(123.456), 123.456)
+        self.assertEqual(f("123.456"), 123.456)
+
+        # invalid arguments
+        for value in INVALID_ALT:
+            self.assertEqual(f(value), 0.0)
+        self.assertEqual(f("zzz"), 0.0)
+        self.assertEqual(f([1, 2, 3]), 0.0)
+        self.assertEqual(f({1: 2, 3: 4}), 0.0)
 
         # 'default' argument
         default = "default"
