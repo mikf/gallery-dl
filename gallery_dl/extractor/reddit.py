@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images subreddits at https://reddit.com/"""
+"""Extract images from subreddits at https://www.reddit.com/"""
 
 from .common import Extractor, Message
 from .. import text, util, extractor, exception

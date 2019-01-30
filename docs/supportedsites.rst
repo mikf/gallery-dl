@@ -17,7 +17,7 @@ BobX                 http://www.bobx.com/dark/           Galleries, Idols
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches         Optional
 Desuarchive          https://desuarchive.org/            Threads
 DeviantArt           https://www.deviantart.com/         |Capabilities-1|                                   Optional (OAuth)
-Doki Reader          https://kobato.hologfx.com/         Chapters, Manga
+Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
@@ -45,13 +45,13 @@ Jaimini's Box        https://jaiminisbox.com/            Chapters, Manga
 Joyreactor           http://joyreactor.cc/               |Capabilities-4|
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
-KissManga            http://kissmanga.com/               Chapters, Manga
+KissManga            https://kissmanga.com/              Chapters, Manga
 Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag-Searches
 Luscious             https://luscious.net/               Albums, Search Results                             Optional
-Manga Fox            http://fanfox.net/                  Chapters
-Manga Here           http://www.mangahere.co/            Chapters, Manga
-Manga Stream         https://mangastream.com/            Chapters
+Manga Fox            https://fanfox.net/                 Chapters
+Manga Here           https://www.mangahere.cc/           Chapters, Manga
+Manga Stream         https://readms.net/                 Chapters
 MangaDex             https://mangadex.org/               Chapters, Manga
 Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.me/               Chapters, Manga
@@ -59,19 +59,19 @@ Mangareader          https://www.mangareader.net/        Chapters, Manga
 Newgrounds           https://www.newgrounds.com/         Images from Users, individual Images, Videos
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
-Niconico Seiga       http://seiga.nicovideo.jp           Images from Users, individual Images               Required
+Niconico Seiga       http://seiga.nicovideo.jp/          Images from Users, individual Images               Required
 nijie                https://nijie.info/                 |Capabilities-5|                                   Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net/                  Images from Users, Images from Statuses
 Photobucket          http://photobucket.com/             Albums, individual Images
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
-Pinterest            https://www.pinterest.com           Boards, Pins, pin.it Links, related Pins
+Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins
 Pixiv                https://www.pixiv.net/              |Capabilities-6|                                   Required
 Pornreactor          http://pornreactor.cc/              |Capabilities-7|
 PowerManga           https://powermanga.org/             Chapters, Manga
-Read Comic Online    http://readcomiconline.to/          Comic-Issues, Comics
+Read Comic Online    https://readcomiconline.to/         Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
-Reddit               https://reddit.com/                 individual Images, Submissions, Subreddits         Optional (OAuth)
+Reddit               https://www.reddit.com/             individual Images, Submissions, Subreddits         Optional (OAuth)
 rule #34             https://rule34.paheal.net/          Posts, Tag-Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag-Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag-Searches
@@ -98,7 +98,7 @@ Imagevenue           http://imagevenue.com/              individual Images
 Imgspice             https://imgspice.com/               individual Images
 Imxto                https://imx.to/                     individual Images
 Pixhost              https://pixhost.to/                 individual Images
-Postimg              https://postimg.org/                individual Images
+Postimg              https://postimages.org/             individual Images
 Turboimagehost       https://www.turboimagehost.com/     individual Images
 ==================== =================================== ================================================== ================
 

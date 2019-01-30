@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from http://kissmanga.com/"""
+"""Extract manga-chapters and entire manga from https://kissmanga.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, cloudflare, aes, exception
 from ..cache import cache
-import re
 import hashlib
 import ast
+import re
 
 IV = [
     0xa5, 0xe8, 0xe2, 0xe9, 0xc2, 0x72, 0x1b, 0xe0,

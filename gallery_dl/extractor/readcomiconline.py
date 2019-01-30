@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract comic-issues and entire comics from http://readcomiconline.to/"""
+"""Extract comic-issues and entire comics from https://readcomiconline.to/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, cloudflare

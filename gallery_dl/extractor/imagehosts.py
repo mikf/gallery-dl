@@ -199,9 +199,9 @@ class PixhostImageExtractor(ImagehostImageExtractor):
 
 
 class PostimgImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from postimg.org"""
+    """Extractor for single images from postimages.org"""
     category = "postimg"
-    pattern = [(r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.org/"
+    pattern = [(r"(?:https?://)?((?:www\.)?(?:postimages|pixxxels)\.org/"
                 r"image/([^/]+)/?)")]
     https = True
     params = None

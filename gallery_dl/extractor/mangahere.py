@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from http://www.mangahere.co/"""
+"""Extract manga-chapters and entire manga from https://www.mangahere.cc/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
@@ -17,7 +17,7 @@ import re
 class MangahereBase():
     """Base class for mangahere extractors"""
     category = "mangahere"
-    root = "http://www.mangahere.cc"
+    root = "https://www.mangahere.cc"
     url_fmt = root + "/manga/{}/{}.html"
 
 
