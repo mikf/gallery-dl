@@ -223,6 +223,7 @@ class ChapterExtractor(Extractor):
         self.url = url
 
     def items(self):
+        self.login()
         page = self.request(self.url).text
         data = self.get_metadata(page)
         imgs = self.get_images(page)
@@ -230,7 +231,7 @@ class ChapterExtractor(Extractor):
         if "count" in data:
             images = zip(
                 range(1, data["count"]+1),
-                imgs
+                imgs,
             )
         else:
             try:
@@ -245,6 +246,9 @@ class ChapterExtractor(Extractor):
             if imgdata:
                 data.update(imgdata)
             yield Message.Url, url, text.nameext_from_url(url, data)
+
+    def login(self):
+        """Login and set necessary cookies"""
 
     def get_metadata(self, page):
         """Return a dict with general metadata"""

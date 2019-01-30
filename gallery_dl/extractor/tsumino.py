@@ -9,7 +9,8 @@
 """Extractors for https://www.tsumino.com/"""
 
 from .common import ChapterExtractor
-from .. import text
+from .. import text, exception
+from ..cache import cache
 
 
 class TsuminoGalleryExtractor(ChapterExtractor):
@@ -19,6 +20,7 @@ class TsuminoGalleryExtractor(ChapterExtractor):
     filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
     directory_fmt = ["{category}", "{gallery_id} {title}"]
     archive_fmt = "{gallery_id}_{page}"
+    cookiedomain = "www.tsumino.com"
     pattern = [r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
                r"/(?:Book/Info|Read/View)/(\d+)"]
     test = [
@@ -35,8 +37,25 @@ class TsuminoGalleryExtractor(ChapterExtractor):
         url = "{}/Book/Info/{}".format(self.root, self.gallery_id)
         ChapterExtractor.__init__(self, url)
 
-        self.session.cookies.setdefault(
-            "ASP.NET_SessionId", "x1drgggilez4cpkttneukrc5")
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+        else:
+            self.session.cookies.setdefault(
+                "ASP.NET_SessionId", "x1drgggilez4cpkttneukrc5")
+
+    @cache(maxage=14*24*60*60, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+        url = "{}/Account/Login".format(self.root)
+        headers = {"Referer": url}
+        data = {"Username": username, "Password": password}
+
+        response = self.request(url, method="POST", headers=headers, data=data)
+        if not response.history:
+            raise exception.AuthenticationError()
+        return {".aotsumino": response.history[0].cookies[".aotsumino"]}
 
     def get_metadata(self, page):
         extr = text.extract

@@ -100,6 +100,7 @@ AUTH_MAP = {
     "sankaku"    : "Optional",
     "seiga"      : "Required",
     "smugmug"    : "Optional (OAuth)",
+    "tsumino"    : "Optional",
     "tumblr"     : "Optional (OAuth)",
     "wallhaven"  : "Optional",
 }
