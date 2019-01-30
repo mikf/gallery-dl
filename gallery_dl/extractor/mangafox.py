@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from http://fanfox.net/"""
+"""Extract manga-chapters and entire manga from https://fanfox.net/"""
 
 from .common import ChapterExtractor
 from .. import text
@@ -24,7 +24,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
         }),
         ("http://mangafox.me/manga/kidou_keisatsu_patlabor/v05/c006.2/", None),
     ]
-    root = "http://m.fanfox.net"
+    root = "https://m.fanfox.net"
 
     def __init__(self, match):
         base, self.cstr, self.volume, self.chapter, self.minor = match.groups()
