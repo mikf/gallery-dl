@@ -23,10 +23,9 @@ class LusciousExtractor(Extractor):
         """Login and set necessary cookies"""
         username, password = self._get_auth_info()
         if username:
-            cookie = self._login_impl(username, password)
-            self.session.cookies.set_cookie(cookie)
+            self._update_cookies(self._login_impl(username, password))
 
-    @cache(maxage=13*24*60*60, keyarg=1)
+    @cache(maxage=14*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
         url = "https://members.luscious.net/accounts/login/"
@@ -37,13 +36,13 @@ class LusciousExtractor(Extractor):
             "remember": "on",
             "next": ""  "/",
         }
-        response = self.request(url, method="POST", headers=headers, data=data)
 
+        response = self.request(url, method="POST", headers=headers, data=data)
         if "/accounts/login/" in response.url or not response.history:
             raise exception.AuthenticationError()
         for cookie in response.history[0].cookies:
             if cookie.name.startswith("sessionid_"):
-                return cookie
+                return {cookie.name: cookie.value}
         raise exception.AuthenticationError()
 
 

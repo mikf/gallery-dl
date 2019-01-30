@@ -119,15 +119,12 @@ class SankakuExtractor(SharedConfigExtractor):
         username, password = self._get_auth_info()
         if username:
             cookies = self._login_impl((username, self.subdomain), password)
-            for key, value in cookies.items():
-                self.session.cookies.set(
-                    key, value, domain=self.cookiedomain)
+            self._update_cookies(cookies)
         else:
             self.logged_in = False
 
     @cache(maxage=90*24*60*60, keyarg=1)
     def _login_impl(self, usertuple, password):
-        """Actual login implementation"""
         username = usertuple[0]
         self.log.info("Logging in as %s", username)
         url = self.root + "/user/authenticate"

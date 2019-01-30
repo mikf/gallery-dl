@@ -62,23 +62,22 @@ class ExhentaiExtractor(Extractor):
         if self._check_cookies(self.cookienames):
             return
         username, password = self._get_auth_info()
-        if not username:
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+        else:
             self.log.info("no username given; using e-hentai.org")
             self.root = "https://e-hentai.org"
             self.original = False
             self.limits = False
             self.session.cookies["nw"] = "1"
-            return
-        cookies = self._login_impl(username, password)
-        for key, value in cookies.items():
-            self.session.cookies.set(
-                key, value, domain=self.cookiedomain)
 
     @cache(maxage=90*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
-        """Actual login implementation"""
         self.log.info("Logging in as %s", username)
         url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
+        headers = {
+            "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1",
+        }
         data = {
             "CookieDate": "1",
             "b": "d",
@@ -87,11 +86,8 @@ class ExhentaiExtractor(Extractor):
             "PassWord": password,
             "ipb_login_submit": "Login!",
         }
-        headers = {
-            "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1"
-        }
-        response = self.request(url, method="POST", data=data, headers=headers)
 
+        response = self.request(url, method="POST", headers=headers, data=data)
         if "You are now logged in as:" not in response.text:
             raise exception.AuthenticationError()
         return {c: response.cookies[c] for c in self.cookienames}
