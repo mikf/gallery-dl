@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,6 +20,7 @@ class NijieExtractor(AsynchronousExtractor):
     filename_fmt = "{category}_{artist_id}_{image_id}_p{index:>02}.{extension}"
     archive_fmt = "{image_id}_{index}"
     cookiedomain = "nijie.info"
+    cookienames = ("nemail", "nlogin")
     root = "https://nijie.info"
     view_url = "https://nijie.info/view.php?id="
     popup_url = "https://nijie.info/view_popup.php?id="
@@ -84,19 +85,19 @@ class NijieExtractor(AsynchronousExtractor):
             })
 
     def login(self):
-        """Login and obtain session cookie"""
-        if not self._check_cookies(("nemail", "nlogin")):
+        """Login and obtain session cookies"""
+        if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
-            self.session.cookies = self._login_impl(username, password)
+            self._update_cookies(self._login_impl(username, password))
 
-    @cache(maxage=30*24*60*60, keyarg=1)
+    @cache(maxage=150*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
-        """Actual login implementation"""
         self.log.info("Logging in as %s", username)
-        data = {"email": username, "password": password}
-        page = self.request(
-            self.root + "/login_int.php", method="POST", data=data).text
-        if "//nijie.info/login.php" in page:
+        url = "{}/login_int.php".format(self.root)
+        data = {"email": username, "password": password, "save": "on"}
+
+        response = self.request(url, method="POST", data=data)
+        if "//nijie.info/login.php" in response.text:
             raise exception.AuthenticationError()
         return self.session.cookies
 

@@ -23,14 +23,11 @@ class WallhavenExtractor(Extractor):
         """Login and set necessary cookies"""
         username, password = self._get_auth_info()
         if username:
-            cookie = self._login_impl(username, password)
-            self.session.cookies.set_cookie(cookie)
+            self._update_cookies(self._login_impl(username, password))
 
     @cache(maxage=365*24*60*60, keyarg=1)
     def _login_impl(self, username, password):
-        """Actual login implementation"""
         self.log.info("Logging in as %s", username)
-
         url = "{}/auth/login".format(self.root)
         page = self.request(url).text
         pos = page.index('name="_token"')
@@ -40,12 +37,12 @@ class WallhavenExtractor(Extractor):
             "password": password,
             "_token": text.extract(page, 'value="', '"', pos)[0]
         }
-        response = self.request(
-            url, method="POST", data=data, allow_redirects=False)
+        response = self.request(url, method="POST", data=data)
 
-        for cookie in response.cookies:
-            if cookie.name.startswith("remember_"):
-                return cookie
+        if response.history:
+            for cookie in response.history[0].cookies:
+                if cookie.name.startswith("remember_"):
+                    return {cookie.name: cookie.value}
         raise exception.AuthenticationError()
 
     def get_wallpaper_data(self, wallpaper_id):
