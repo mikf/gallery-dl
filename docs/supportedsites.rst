@@ -83,7 +83,7 @@ Simply Hentai        https://www.simply-hentai.com/      Galleries, individual I
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |Capabilities-8|                                   Optional (OAuth)
 The /b/ Archive      https://thebarchive.com/            Threads
-Tsumino              https://www.tsumino.com/            Galleries
+Tsumino              https://www.tsumino.com/            Galleries                                          Optional
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
 Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets
 Wallhaven            https://alpha.wallhaven.cc/         individual Images, Search Results                  Optional
