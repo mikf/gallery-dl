@@ -55,15 +55,22 @@ def split_html(txt, sep=None):
 
 
 def filename_from_url(url):
-    """Extract the last part of an url to use as a filename"""
+    """Extract the last part of an URL to use as a filename"""
     try:
         return urllib.parse.urlsplit(url).path.rpartition("/")[2]
     except (TypeError, AttributeError):
         return ""
 
 
+def ext_from_url(url):
+    """Extract the filename extension of an URL"""
+    filename = filename_from_url(url)
+    ext = os.path.splitext(filename)[1]
+    return ext[1:].lower()
+
+
 def nameext_from_url(url, data=None):
-    """Extract the last part of an url and fill 'data' accordingly"""
+    """Extract the last part of an URL and fill 'data' accordingly"""
     if data is None:
         data = {}
     data["filename"] = unquote(filename_from_url(url))
