@@ -3,23 +3,26 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "pypy3"
 env:
   - GALLERYDL_TESTS=core
 matrix:
   include:
     - python: "3.7"
       dist: xenial
-      sudo: true
+    - python: "3.8-dev"
+      dist: xenial
     - python: "3.6"
       env: GALLERYDL_TESTS=results
 
-sudo: false
 git:
   depth: 3
+  quiet: true
 branches:
   only:
   - master
   - /^v\d+\.\d+\.\d+(-\S*)?$/
+  - /^test(-\w+)+$/
 
 script:
   - ./scripts/run_tests.sh
