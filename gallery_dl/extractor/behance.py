@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import json
 
 
 class BehanceExtractor(Extractor):
@@ -20,49 +21,52 @@ class BehanceExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
         for gallery in self.galleries():
-            yield Message.Queue, gallery["url"], gallery
+            yield Message.Queue, gallery["url"], self._update(gallery)
 
     def galleries(self):
         """Return all relevant gallery URLs"""
         return ()
 
-    def _pagination(self, url, key):
-        headers = {"X-Requested-With": "XMLHttpRequest"}
-        params = {}
+    @staticmethod
+    def _update(data):
+        # compress data to simple lists
+        data["fields"] = [field["name"] for field in data["fields"]]
+        data["owners"] = [owner["display_name"] for owner in data["owners"]]
+        if "tags" in data:
+            data["tags"] = [tag["title"] for tag in data["tags"]]
 
-        while True:
-            data = self.request(url, headers=headers, params=params).json()
-            yield from data[key]
-            if not data.get("offset"):
-                return
-            params["offset"] = data["offset"]
+        # backwards compatibility
+        data["gallery_id"] = data["id"]
+        data["title"] = data["name"]
+        data["user"] = ", ".join(data["owners"])
+
+        return data
 
 
 class BehanceGalleryExtractor(BehanceExtractor):
     """Extractor for image galleries from www.behance.net"""
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{user}", "{gallery_id} {title}"]
-    filename_fmt = "{category}_{gallery_id}_{num:>02}.{extension}"
-    archive_fmt = "{gallery_id}_{num}"
+    directory_fmt = ["{category}", "{owners:J, }", "{id} {name}"]
+    filename_fmt = "{category}_{id}_{num:>02}.{extension}"
+    archive_fmt = "{id}_{num}"
     pattern = [r"(?:https?://)?(?:www\.)?behance\.net/gallery/(\d+)"]
     test = [
         ("https://www.behance.net/gallery/17386197/A-Short-Story", {
             "count": 2,
-            "url": "ebe032f78e8af98f9873f85eb77a1e49a3f8e648",
+            "url": "ab79bd3bef8d3ae48e6ac74fd995c1dfaec1b7d2",
             "keyword": {
-                "title": 're:"Hi". A short story about the important things ',
-                "user": "Place Studio, Julio César Velazquez",
+                "id": 17386197,
+                "name": 're:"Hi". A short story about the important things ',
+                "owners": ["Place Studio", "Julio César Velazquez"],
                 "fields": ["Animation", "Character Design", "Directing"],
-                "date": 1401810111,
-                "views": int,
-                "votes": int,
-                "comments": int,
+                "tags": list,
+                "module": dict,
             },
         }),
         ("https://www.behance.net/gallery/21324767/Nevada-City", {
             "count": 6,
-            "url": "2b2a689d57f113617088eeab4dc81b884bf24410",
-            "keyword": {"user": "Alex Strohl"},
+            "url": "0258fe194fe7d828d6f2c7f6086a9a0a4140db1d",
+            "keyword": {"owners": ["Alex Strohl"]},
         }),
     ]
 
@@ -71,71 +75,52 @@ class BehanceGalleryExtractor(BehanceExtractor):
         self.gallery_id = match.group(1)
 
     def items(self):
-        url = "{}/gallery/{}/a".format(self.root, self.gallery_id)
-        page = self.request(url, cookies={"ilo0": "true"}).text
-
-        data = self.get_metadata(page)
-        imgs = self.get_images(page)
+        data = self.get_gallery_data()
+        imgs = self.get_images(data)
         data["count"] = len(imgs)
 
         yield Message.Version, 1
         yield Message.Directory, data
-        for data["num"], url in enumerate(imgs, 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
+        for data["num"], (url, module) in enumerate(imgs, 1):
+            data["module"] = module
+            data["extension"] = text.ext_from_url(url)
+            yield Message.Url, url, data
 
-    def get_metadata(self, page):
-        """Collect metadata for extractor-job"""
-        users, pos = text.extract(
-            page, 'class="project-owner-info ', 'class="project-owner-actions')
-        title, pos = text.extract(
-            page, 'project-title">', '</div>', pos)
-        fields, pos = text.extract(
-            page, '<ul id="project-fields-list">', '</ul>', pos)
-        stats, pos = text.extract(
-            page, '<div id="project-stats">', 'Published', pos)
-        date, pos = text.extract(
-            page, ' data-timestamp="', '"', pos)
-
-        users = self._parse_userinfo(users)
-        stats = text.split_html(stats)
-
-        return {
-            "gallery_id": text.parse_int(self.gallery_id),
-            "title": text.unescape(title or ""),
-            "user": ", ".join(users),
-            "fields": [f for f in text.split_html(fields) if f != ","],
-            "date": text.parse_int(date),
-            "views": text.parse_int(stats[0]),
-            "votes": text.parse_int(stats[1]),
-            "comments": text.parse_int(stats[2]),
+    def get_gallery_data(self):
+        """Collect gallery info dict"""
+        url = "{}/gallery/{}/a".format(self.root, self.gallery_id)
+        cookies = {
+            "_evidon_consent_cookie":
+                '{"consent_date":"2019-01-31T09:41:15.132Z"}',
+            "bcp": "815b5eee-8bdf-4898-ac79-33c2bcc0ed19",
+            "gk_suid": "66981391",
+            "gki": '{"feature_project_view":false,'
+                   '"feature_discover_login_prompt":false,'
+                   '"feature_project_login_prompt":false}',
+            "ilo0": "true",
         }
+        page = self.request(url, cookies=cookies).text
 
-    @staticmethod
-    def get_images(page):
-        """Extract and return a list of all image- and external urls"""
+        data = json.loads(text.extract(
+            page, 'id="beconfig-store_state">', '</script>')[0])
+        return self._update(data["project"]["project"])
+
+    def get_images(self, data):
+        """ """
         results = []
-        for p in text.extract_iter(page, "js-lightbox-slide-content", "<a "):
-            srcset = text.extract(p, 'srcset="', '"')[0]
-            if srcset:
-                url = srcset.rstrip(",").rpartition(",")[2].partition(" ")[0]
-                results.append(url)
-            elif "<iframe " in p:
-                url = text.extract(p, ' src="', '"')[0]
-                results.append("ytdl:" + text.unescape(url))
+
+        for module in data["modules"]:
+
+            if module["type"] == "image":
+                url = module["sizes"]["original"]
+                results.append((url, module))
+
+            elif module["type"] == "embed":
+                embed = module.get("original_embed") or module.get("embed")
+                url = "ytdl:" + text.extract(embed, 'src="', '"')[0]
+                results.append((url, module))
+
         return results
-
-    @staticmethod
-    def _parse_userinfo(users):
-        if users.startswith("multiple"):
-            return [
-                text.remove_html(user)
-                for user in text.extract_iter(
-                    users, '<div class="rf-profile-item__info">', '</a>',
-                )
-            ]
-
-        user = text.extract(users, ' class="profile-list-name"', '</a>')[0]
-        return (user.rpartition(">")[2],)
 
 
 class BehanceUserExtractor(BehanceExtractor):
@@ -153,8 +138,17 @@ class BehanceUserExtractor(BehanceExtractor):
         self.user = match.group(1)
 
     def galleries(self):
-        url = "{}/{}".format(self.root, self.user)
-        return self._pagination(url, "section_content")
+        url = "{}/{}/projects".format(self.root, self.user)
+        headers = {"X-Requested-With": "XMLHttpRequest"}
+        params = {"offset": 0}
+
+        while True:
+            data = self.request(url, headers=headers, params=params).json()
+            work = data["profile"]["activeSection"]["work"]
+            yield from work["projects"]
+            if not work["hasMore"]:
+                return
+            params["offset"] += len(work["projects"])
 
 
 class BehanceCollectionExtractor(BehanceExtractor):
@@ -173,4 +167,12 @@ class BehanceCollectionExtractor(BehanceExtractor):
 
     def galleries(self):
         url = "{}/collection/{}/a".format(self.root, self.collection_id)
-        return self._pagination(url, "output")
+        headers = {"X-Requested-With": "XMLHttpRequest"}
+        params = {}
+
+        while True:
+            data = self.request(url, headers=headers, params=params).json()
+            yield from data["output"]
+            if not data.get("offset"):
+                return
+            params["offset"] = data["offset"]
