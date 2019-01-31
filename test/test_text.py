@@ -105,6 +105,22 @@ class TestText(unittest.TestCase):
         for value in INVALID:
             self.assertEqual(f(value), "")
 
+    def test_ext_from_url(self, f=text.ext_from_url):
+        result = "ext"
+
+        # standard usage
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("filename.ext"), result)
+        self.assertEqual(f("/filename.ext"), result)
+        self.assertEqual(f("example.org/filename.ext"), result)
+        self.assertEqual(f("http://example.org/v2/filename.ext"), result)
+        self.assertEqual(
+            f("http://example.org/v2/filename.ext?param=value#frag"), result)
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value), "")
+
     def test_nameext_from_url(self, f=text.nameext_from_url):
         empty = {"filename": "", "name": "", "extension": ""}
         result = {"filename": "filename.ext",
