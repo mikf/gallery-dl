@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,10 +8,8 @@
 
 """Base classes for extractors for different Futaba Channel-like boards"""
 
-from .common import Extractor, SharedConfigExtractor, Message
+from .common import Extractor, Message
 from .. import text
-import itertools
-import operator
 
 
 class ChanThreadExtractor(Extractor):
@@ -61,58 +59,3 @@ class ChanThreadExtractor(Extractor):
         """Return thread title from first post"""
         title = post["sub"] if "sub" in post else text.remove_html(post["com"])
         return text.unescape(title)[:50]
-
-
-class FoolfuukaThreadExtractor(SharedConfigExtractor):
-    """Base extractor for FoolFuuka based boards/archives"""
-    basecategory = "foolfuuka"
-    subcategory = "thread"
-    directory_fmt = ["{category}", "{board[shortname]}",
-                     "{thread_num}{title:? - //}"]
-    filename_fmt = "{media[media]}"
-    archive_fmt = "{board[shortname]}_{num}_{timestamp}"
-    root = ""
-    referer = True
-
-    def __init__(self, match):
-        SharedConfigExtractor.__init__(self)
-        self.board, self.thread = match.groups()
-        if self.referer:
-            self.session.headers["Referer"] = self.root
-
-    def items(self):
-        op = True
-        yield Message.Version, 1
-        for post in self.posts():
-            if op:
-                yield Message.Directory, post
-                op = False
-            if not post["media"]:
-                continue
-
-            media = post["media"]
-            url = media["media_link"]
-
-            if not url and "remote_media_link" in media:
-                url = self.remote(media)
-            if url.startswith("/"):
-                url = self.root + url
-
-            post["extension"] = url.rpartition(".")[2]
-            yield Message.Url, url, post
-
-    def posts(self):
-        url = self.root + "/_/api/chan/thread/"
-        params = {"board": self.board, "num": self.thread}
-        data = self.request(url, params=params).json()[self.thread]
-
-        # sort post-objects by their key
-        posts = sorted(data.get("posts", {}).items())
-        posts = map(operator.itemgetter(1), posts)
-
-        return itertools.chain((data["op"],), posts)
-
-    def remote(self, media):
-        needle = '<meta http-equiv="Refresh" content="0; url='
-        page = self.request(media["remote_media_link"]).text
-        return text.extract(page, needle, '"')[0]
