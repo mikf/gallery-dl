@@ -25,7 +25,6 @@ class BehanceExtractor(Extractor):
 
     def galleries(self):
         """Return all relevant gallery URLs"""
-        return ()
 
     @staticmethod
     def _update(data):
@@ -105,8 +104,9 @@ class BehanceGalleryExtractor(BehanceExtractor):
             page, 'id="beconfig-store_state">', '</script>')[0])
         return self._update(data["project"]["project"])
 
-    def get_images(self, data):
-        """ """
+    @staticmethod
+    def get_images(data):
+        """Extract image results from an API response"""
         results = []
 
         for module in data["modules"]:
