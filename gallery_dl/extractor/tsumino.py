@@ -119,12 +119,20 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
 
     def get_images(self, page):
         url = "{}/Read/Load/?q={}".format(self.root, self.gallery_id)
-        data = self.request(url, headers={"Referer": self.url}).json()
-        base = self.root + "/Image/Object?name="
+        headers = {"Referer": self.url}
+        response = self.request(url, headers=headers, expect=(404,))
 
+        if response.status_code == 404:
+            url = "{}/Read/View/{}".format(self.root, self.gallery_id)
+            self.log.error(
+                "Failed to get gallery JSON data. Visit '%s' in a browser "
+                "and solve the CAPTCHA to continue.", url)
+            raise exception.StopExtraction()
+
+        base = self.root + "/Image/Object?name="
         return [
             (base + text.quote(name), None)
-            for name in data["reader_page_urls"]
+            for name in response.json()["reader_page_urls"]
         ]
 
 
