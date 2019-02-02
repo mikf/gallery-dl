@@ -117,13 +117,13 @@ class PhotobucketImageExtractor(Extractor):
     test = [
         (("http://s271.photobucket.com/user/lakerfanryan"
           "/media/Untitled-3-1.jpg.html"), {
-            "url": "256fe63bee84762f92337e963ec0baa27bba87e2",
-            "keyword": "81fbe6f5f821a2d20dabb931726ab9e7565ba96d",
+            "url": "3b647deeaffc184cc48c89945f67574559c9051f",
+            "keyword": "a2de4e60d584912537b8025c01bdd1d20bdea735",
         }),
         (("http://s271.photobucket.com/user/lakerfanryan"
           "/media/IsotopeswBros.jpg.html?sort=3&o=2"), {
-            "url": "44e644e29a564398fcb2fd8edce738696afe7208",
-            "keyword": "6addb30d6db6d7c3222761ade37c0bded67e5783",
+            "url": "12c1890c09c9cdb8a88fba7eec13f324796a8d7b",
+            "keyword": "61200a223df6c06f45ac3d30c88b3f5b048ce9a8",
         }),
     ]
 
