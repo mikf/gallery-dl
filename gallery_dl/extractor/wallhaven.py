@@ -90,8 +90,8 @@ class WallhavenSearchExtractor(WallhavenExtractor):
     test = [
         ("https://alpha.wallhaven.cc/search?q=touhou", None),
         (("https://alpha.wallhaven.cc/search?q=id%3A87"
-          "&categories=111&purity=100&sorting=relevance&order=desc&page=3"), {
-            "url": "1b9b6d97b9670e32ef5dd6942a095549ab543d91",
+          "&categories=111&purity=100&sorting=date_added&order=asc&page=3"), {
+            "url": "29b54803e3fae5e337fdd29d47d51302d78bec9a",
             "range": "1-3",
         }),
     ]
