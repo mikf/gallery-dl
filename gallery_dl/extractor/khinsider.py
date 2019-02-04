@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,11 +8,11 @@
 
 """Extract soundtracks from https://downloads.khinsider.com/"""
 
-from .common import AsynchronousExtractor, Message
+from .common import Extractor, Message, AsynchronousMixin
 from .. import text, exception
 
 
-class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
+class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
     """Extractor for soundtracks from khinsider.com"""
     category = "khinsider"
     subcategory = "soundtrack"
@@ -30,7 +30,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousExtractor):
     root = "https://downloads.khinsider.com"
 
     def __init__(self, match):
-        AsynchronousExtractor.__init__(self)
+        Extractor.__init__(self)
         self.album = match.group(1)
 
     def items(self):
