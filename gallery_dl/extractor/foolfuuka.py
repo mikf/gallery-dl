@@ -8,14 +8,14 @@
 
 """Extractors for 4chan archives based on FoolFuuka"""
 
-from .common import SharedConfigExtractor, Message
+from .common import Extractor, Message, SharedConfigMixin
 from .. import text, config
 import itertools
 import operator
 import re
 
 
-class FoolfuukaThreadExtractor(SharedConfigExtractor):
+class FoolfuukaThreadExtractor(SharedConfigMixin, Extractor):
     """Base extractor for FoolFuuka based boards/archives"""
     basecategory = "foolfuuka"
     subcategory = "thread"
@@ -26,7 +26,7 @@ class FoolfuukaThreadExtractor(SharedConfigExtractor):
     root = ""
 
     def __init__(self, match):
-        SharedConfigExtractor.__init__(self)
+        Extractor.__init__(self)
         self.board, self.thread = match.groups()
         self.session.headers["Referer"] = self.root
 

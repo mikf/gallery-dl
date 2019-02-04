@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2018 Mike Fährmann
+# Copyright 2014-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -287,11 +287,11 @@ class MangaExtractor(Extractor):
         """Return a list of all (chapter-url, metadata)-tuples"""
 
 
-class SharedConfigExtractor(Extractor):
-
+class SharedConfigMixin():
+    """Enable sharing of config settings based on 'basecategory'"""
     basecategory = ""
 
-    def config(self, key, default=None, sentinel=object()):
+    def config(self, key, default=None, *, sentinel=object()):
         value = Extractor.config(self, key, sentinel)
         if value is sentinel:
             cat, self.category = self.category, self.basecategory

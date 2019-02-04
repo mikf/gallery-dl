@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Base classes for extractors for danbooru and co"""
 
-from .common import SharedConfigExtractor, Message
+from .common import Extractor, Message, SharedConfigMixin
 from .. import text, exception
 from xml.etree import ElementTree
 import collections
@@ -17,7 +17,7 @@ import operator
 import re
 
 
-class BooruExtractor(SharedConfigExtractor):
+class BooruExtractor(SharedConfigMixin, Extractor):
     """Base class for all booru extractors"""
     basecategory = "booru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"

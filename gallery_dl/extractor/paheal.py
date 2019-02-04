@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,11 +8,11 @@
 
 """Extract images from https://rule34.paheal.net/"""
 
-from .common import SharedConfigExtractor, Message
+from .common import Extractor, Message, SharedConfigMixin
 from .. import text
 
 
-class PahealExtractor(SharedConfigExtractor):
+class PahealExtractor(SharedConfigMixin, Extractor):
     """Base class for paheal extractors"""
     basecategory = "booru"
     category = "paheal"

@@ -8,7 +8,7 @@
 
 """Generic extractors for *reactor sites"""
 
-from .common import SharedConfigExtractor, Message
+from .common import Extractor, Message, SharedConfigMixin
 from .. import text
 import urllib.parse
 import random
@@ -19,7 +19,7 @@ import json
 BASE_PATTERN = r"(?:https?://)?([^/.]+\.reactor\.cc)"
 
 
-class ReactorExtractor(SharedConfigExtractor):
+class ReactorExtractor(SharedConfigMixin, Extractor):
     """Base class for *reactor.cc extractors"""
     basecategory = "reactor"
     directory_fmt = ["{category}"]
@@ -27,7 +27,7 @@ class ReactorExtractor(SharedConfigExtractor):
     archive_fmt = "{post_id}_{num}"
 
     def __init__(self, match):
-        SharedConfigExtractor.__init__(self)
+        Extractor.__init__(self)
         self.url = match.group(0)
         self.root = "http://" + match.group(1)
         self.session.headers["Referer"] = self.root
