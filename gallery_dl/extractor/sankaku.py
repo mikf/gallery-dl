@@ -8,7 +8,7 @@
 
 """Extract images from https://chan.sankakucomplex.com/"""
 
-from .common import SharedConfigExtractor, Message
+from .common import Extractor, Message, SharedConfigMixin
 from .. import text, util, exception
 from ..cache import cache
 import collections
@@ -17,7 +17,7 @@ import time
 import re
 
 
-class SankakuExtractor(SharedConfigExtractor):
+class SankakuExtractor(SharedConfigMixin, Extractor):
     """Base class for sankaku extractors"""
     basecategory = "booru"
     category = "sankaku"
@@ -27,7 +27,7 @@ class SankakuExtractor(SharedConfigExtractor):
     subdomain = "chan"
 
     def __init__(self):
-        SharedConfigExtractor.__init__(self)
+        Extractor.__init__(self)
         self.root = "https://" + self.cookiedomain
         self.logged_in = True
         self.start_page = 1

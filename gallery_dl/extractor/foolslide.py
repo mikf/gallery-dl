@@ -8,19 +8,19 @@
 
 """Extractors for FoOlSlide based sites"""
 
-from .common import SharedConfigExtractor, MangaExtractor, Message
+from .common import Extractor, MangaExtractor, Message, SharedConfigMixin
 from .. import text, util, config
 import base64
 import json
 import re
 
 
-class FoolslideExtractor(SharedConfigExtractor):
+class FoolslideBase(SharedConfigMixin):
     """Base class for FoOlSlide extractors"""
     basecategory = "foolslide"
 
     def request(self, url):
-        return SharedConfigExtractor.request(
+        return Extractor.request(
             self, url, encoding="utf-8", method="POST", data={"adult": "true"})
 
     @staticmethod
@@ -35,7 +35,7 @@ class FoolslideExtractor(SharedConfigExtractor):
         return data
 
 
-class FoolslideChapterExtractor(FoolslideExtractor):
+class FoolslideChapterExtractor(FoolslideBase, Extractor):
     """Base class for chapter extractors for FoOlSlide based sites"""
     subcategory = "chapter"
     directory_fmt = [
@@ -46,7 +46,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
     decode = "default"
 
     def __init__(self, match):
-        FoolslideExtractor.__init__(self)
+        Extractor.__init__(self)
         self.url = self.root + match.group(1)
 
     def items(self):
@@ -98,12 +98,11 @@ class FoolslideChapterExtractor(FoolslideExtractor):
         return json.loads(data)
 
 
-class FoolslideMangaExtractor(FoolslideExtractor, MangaExtractor):
+class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
 
     def __init__(self, match):
-        FoolslideExtractor.__init__(self)
-        self.url = self.root + match.group(1)
+        MangaExtractor.__init__(self, match, self.root + match.group(1))
 
     def chapters(self, page):
         """Return a list of all chapter urls"""
