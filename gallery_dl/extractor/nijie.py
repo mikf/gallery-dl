@@ -8,12 +8,12 @@
 
 """Extract images from https://nijie.info/"""
 
-from .common import AsynchronousExtractor, Message
+from .common import Extractor, Message, AsynchronousMixin
 from .. import text, exception
 from ..cache import cache
 
 
-class NijieExtractor(AsynchronousExtractor):
+class NijieExtractor(AsynchronousMixin, Extractor):
     """Base class for nijie extractors"""
     category = "nijie"
     directory_fmt = ["{category}", "{user_id}"]
@@ -26,7 +26,7 @@ class NijieExtractor(AsynchronousExtractor):
     popup_url = "https://nijie.info/view_popup.php?id="
 
     def __init__(self, match=None):
-        AsynchronousExtractor.__init__(self)
+        Extractor.__init__(self)
         self.session.headers["Referer"] = self.root + "/"
         self.user_id = match.group(1) if match else None
 

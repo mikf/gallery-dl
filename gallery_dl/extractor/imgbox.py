@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2018 Mike Fährmann
+# Copyright 2014-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extract images from galleries at https://imgbox.com/"""
 
-from .common import Extractor, AsynchronousExtractor, Message
+from .common import Extractor, Message, AsynchronousMixin
 from .. import text, exception
 import re
 
@@ -58,7 +58,7 @@ class ImgboxExtractor(Extractor):
         return text.extract(page, '<a href="', '"', pos)[0]
 
 
-class ImgboxGalleryExtractor(AsynchronousExtractor, ImgboxExtractor):
+class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
     """Extractor for image galleries from imgbox.com"""
     subcategory = "gallery"
     directory_fmt = ["{category}", "{title} - {gallery_key}"]
@@ -81,7 +81,7 @@ class ImgboxGalleryExtractor(AsynchronousExtractor, ImgboxExtractor):
     ]
 
     def __init__(self, match):
-        AsynchronousExtractor.__init__(self)
+        ImgboxExtractor.__init__(self)
         self.gallery_key = match.group(1)
         self.image_keys = []
 

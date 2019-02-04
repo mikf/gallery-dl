@@ -8,7 +8,7 @@
 
 """Extractors for https://luscious.net/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, AsynchronousMixin
 from .. import text, util, exception
 from ..cache import cache
 
@@ -46,7 +46,7 @@ class LusciousExtractor(Extractor):
         raise exception.AuthenticationError()
 
 
-class LusciousAlbumExtractor(LusciousExtractor):
+class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
     """Extractor for image albums from luscious.net"""
     subcategory = "album"
     directory_fmt = ["{category}", "{gallery_id} {title}"]

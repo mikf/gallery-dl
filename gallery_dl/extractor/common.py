@@ -175,38 +175,6 @@ class Extractor():
                 setcookie(cookie)
 
 
-class AsynchronousExtractor(Extractor):
-
-    def __init__(self):
-        Extractor.__init__(self)
-        queue_size = int(config.get(("queue-size",), 5))
-        self.__queue = queue.Queue(queue_size)
-        self.__thread = threading.Thread(target=self.async_items, daemon=True)
-
-    def __iter__(self):
-        get = self.__queue.get
-        done = self.__queue.task_done
-
-        self.__thread.start()
-        while True:
-            task = get()
-            if task is None:
-                return
-            if isinstance(task, Exception):
-                raise task
-            yield task
-            done()
-
-    def async_items(self):
-        put = self.__queue.put
-        try:
-            for task in self.items():
-                put(task)
-        except Exception as exc:
-            put(exc)
-        put(None)
-
-
 class ChapterExtractor(Extractor):
 
     subcategory = "chapter"
@@ -285,6 +253,38 @@ class MangaExtractor(Extractor):
 
     def chapters(self, page):
         """Return a list of all (chapter-url, metadata)-tuples"""
+
+
+class AsynchronousMixin():
+    """Run info extraction in a separate thread"""
+
+    def __iter__(self):
+        messages = queue.Queue(5)
+        thread = threading.Thread(
+            target=self.async_items,
+            args=(messages,),
+            daemon=True,
+        )
+
+        thread.start()
+        while True:
+            msg = messages.get()
+            if msg is None:
+                thread.join()
+                return
+            if isinstance(msg, Exception):
+                thread.join()
+                raise msg
+            yield msg
+            messages.task_done()
+
+    def async_items(self, messages):
+        try:
+            for msg in self.items():
+                messages.put(msg)
+        except Exception as exc:
+            messages.put(exc)
+        messages.put(None)
 
 
 class SharedConfigMixin():
