@@ -71,6 +71,39 @@ class FoolfuukaThreadExtractor(SharedConfigExtractor):
         return media["remote_media_link"]
 
 
+def generate_extractors():
+    """Dynamically generate Extractor classes for FoolFuuka instances"""
+
+    symtable = globals()
+    extractors = config.get(("extractor", "foolfuuka"))
+
+    if extractors:
+        EXTRACTORS.update(extractors)
+
+    for category, info in EXTRACTORS.items():
+
+        if not isinstance(info, dict):
+            continue
+
+        root = info["root"]
+        domain = root[root.index(":") + 3:]
+        pattern = info.get("pattern") or re.escape(domain)
+        name = (info.get("name") or category).capitalize()
+
+        class Extr(FoolfuukaThreadExtractor):
+            pass
+
+        Extr.__name__ = Extr.__qualname__ = name + "ThreadExtractor"
+        Extr.__doc__ = "Extractor for threads on " + domain
+        Extr.category = category
+        Extr.pattern = [r"(?:https?://)?" + pattern + r"/([^/]+)/thread/(\d+)"]
+        Extr.test = info.get("test")
+        Extr.root = root
+        if info.get("remote") == "simple":
+            Extr.remote = Extr._remote_simple
+        symtable[Extr.__name__] = Extr
+
+
 EXTRACTORS = {
     "4plebs": {
         "name": "fourplebs",
@@ -146,40 +179,6 @@ EXTRACTORS = {
         })],
     },
 }
-
-
-def generate_extractors():
-    """Dynamically generate Extractor classes for FoolFuuka instances"""
-
-    symtable = globals()
-    extractors = config.get(("extractor", "foolfuuka"))
-
-    if extractors:
-        EXTRACTORS.update(extractors)
-
-    for _category, info in EXTRACTORS.items():
-
-        if not isinstance(info, dict):
-            continue
-
-        _root = info["root"]
-        _domain = _root.rpartition("/")[2]
-        _pattern = info.get("pattern") or re.escape(_domain)
-        _name = info.get("name") or _category
-
-        class ThreadExtractor(FoolfuukaThreadExtractor):
-            category = _category
-            pattern = [r"(?:https?://)?{}/([^/]+)/thread/(\d+)".format(
-                _pattern)]
-            test = info.get("test")
-            root = _root
-
-        if info.get("remote") == "simple":
-            ThreadExtractor.remote = ThreadExtractor._remote_simple
-
-        ThreadExtractor.__name__ = _name.capitalize() + "ThreadExtractor"
-        ThreadExtractor.__doc__ = "Extractor for threads on " + _domain
-        symtable[ThreadExtractor.__name__] = ThreadExtractor
 
 
 generate_extractors()
