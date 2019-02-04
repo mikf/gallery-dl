@@ -157,7 +157,7 @@ def generate_extractors():
 
         category = info.get("category") or instance.replace(".", "")
         root = info.get("root") or "https://" + instance
-        name = info.get("name") or category
+        name = (info.get("name") or category).capitalize()
         token = info.get("access-token")
         pattern = info.get("pattern") or re.escape(instance)
 
@@ -178,7 +178,7 @@ def generate_extractors():
             pass
 
         Extr.__name__ = Extr.__qualname__ = name + "StatusExtractor"
-        Extr.__doc__ = "Extractor for all images of a user on " + instance
+        Extr.__doc__ = "Extractor for images from a status on " + instance
         Extr.category = category
         Extr.instance = instance
         Extr.pattern = [r"(?:https?://)?" + pattern + r"/@[^/?&#]+/(\d+)"]

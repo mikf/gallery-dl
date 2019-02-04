@@ -159,9 +159,7 @@ class TestExtractor(unittest.TestCase):
             "4chan"  : "fourchan",
             "4plebs" : "fourplebs",
             "8chan"  : "infinitychan",
-            "b4k"    : "bfourk",
             "oauth"  : None,
-            "rbt"    : "rebeccablacktech",
         }
 
         for extr in extractor.extractors():
