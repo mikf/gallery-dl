@@ -20,11 +20,11 @@ class MastodonExtractor(Extractor):
     filename_fmt = "{category}_{id}_{media[id]}.{extension}"
     archive_fmt = "{media[id]}"
     instance = None
+    root = None
 
     def __init__(self, match):
         Extractor.__init__(self)
-        self.instance = match.group(1)
-        self.api = MastodonAPI(self, self.instance)
+        self.api = MastodonAPI(self)
 
     def config(self, key, default=None, *, sentinel=object()):
         value = Extractor.config(self, key, sentinel)
@@ -64,7 +64,7 @@ class MastodonUserExtractor(MastodonExtractor):
 
     def __init__(self, match):
         MastodonExtractor.__init__(self, match)
-        self.account_name = match.group(2)
+        self.account_name = match.group(1)
 
     def statuses(self):
         results = self.api.account_search("@" + self.account_name, 1)
@@ -82,7 +82,7 @@ class MastodonStatusExtractor(MastodonExtractor):
 
     def __init__(self, match):
         MastodonExtractor.__init__(self, match)
-        self.status_id = match.group(2)
+        self.status_id = match.group(1)
 
     def statuses(self):
         return (self.api.status(self.status_id),)
@@ -95,11 +95,14 @@ class MastodonAPI():
     https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md
     """
 
-    def __init__(self, extractor, instance, access_token=None):
-        self.instance = instance
+    def __init__(self, extractor, access_token=None):
+        self.root = extractor.root
         self.extractor = extractor
-        self.headers = {"Authorization": "Bearer {}".format(
-            extractor.config("access-token", access_token))}
+
+        if not access_token:
+            access_token = extractor.config(
+                "access-token", extractor.access_token)
+        self.headers = {"Authorization": "Bearer {}".format(access_token)}
 
     def account_search(self, query, limit=40):
         """Search for content"""
@@ -117,13 +120,13 @@ class MastodonAPI():
         return self._call("statuses/" + status_id)
 
     def _call(self, endpoint, params=None):
-        url = "https://{}/api/v1/{}".format(self.instance, endpoint)
+        url = "{}/api/v1/{}".format(self.root, endpoint)
         response = self.extractor.request(
             url, params=params, headers=self.headers)
         return self._parse(response)
 
     def _pagination(self, endpoint, params):
-        url = "https://{}/api/v1/{}".format(self.instance, endpoint)
+        url = "{}/api/v1/{}".format(self.root, endpoint)
         while url:
             response = self.extractor.request(
                 url, params=params, headers=self.headers)
@@ -142,43 +145,59 @@ def generate_extractors():
     """Dynamically generate Extractor classes for Mastodon instances"""
 
     symtable = globals()
-    mastodon = config.get(("extractor", "mastodon"))
+    extractors = config.get(("extractor", "mastodon"))
+    if extractors:
+        EXTRACTORS.update(extractors)
+    config.set(("extractor", "mastodon"), EXTRACTORS)
 
-    if not mastodon:
-        mastodon = {}
-        config.set(("extractor", "mastodon"), mastodon)
-    if "pawoo.net" not in mastodon:
-        mastodon["pawoo.net"] = {
-            "category"     : "pawoo",
-            "access-token" : "286462927198d0cf3e24683e91c8259a"
-                             "ac4367233064e0570ca18df2ac65b226",
-            "client-id"    : "97b142b6904abf97a1068d51a7bc2f2f"
-                             "cf9323cef81f13cb505415716dba7dac",
-            "client-secret": "e45bef4bad45b38abf7d9ef88a646b73"
-                             "75e7fb2532c31a026327a93549236481",
-        }
-
-    for instance, info in mastodon.items():
+    for instance, info in EXTRACTORS.items():
 
         if not isinstance(info, dict):
             continue
 
-        class UserExtractor(MastodonUserExtractor):
-            pattern = [r"(?:https?://)?({})/@([^/?&#]+)(?:/media)?/?$".format(
-                re.escape(instance))]
+        category = info.get("category") or instance.replace(".", "")
+        root = info.get("root") or "https://" + instance
+        name = info.get("name") or category
+        token = info.get("access-token")
+        pattern = info.get("pattern") or re.escape(instance)
 
-        class StatusExtractor(MastodonStatusExtractor):
-            pattern = [r"(?:https?://)?({})/@[^/?&#]+/(\d+)".format(
-                re.escape(instance))]
+        class Extr(MastodonUserExtractor):
+            pass
 
-        category = info.get("category", instance)
-        name = re.sub(r"[^A-Za-z]+", "", category).capitalize()
+        Extr.__name__ = Extr.__qualname__ = name + "UserExtractor"
+        Extr.__doc__ = "Extractor for all images of a user on " + instance
+        Extr.category = category
+        Extr.instance = instance
+        Extr.pattern = [r"(?:https?://)?" + pattern +
+                        r"/@([^/?&#]+)(?:/media)?/?$"]
+        Extr.root = root
+        Extr.access_token = token
+        symtable[Extr.__name__] = Extr
 
-        for extr in (UserExtractor, StatusExtractor):
-            extr.category = category
-            extr.__name__ = name + extr.__name__
-            extr.__doc__ = "{} on {}".format(extr.__base__.__doc__, instance)
-            symtable[extr.__name__] = extr
+        class Extr(MastodonStatusExtractor):
+            pass
+
+        Extr.__name__ = Extr.__qualname__ = name + "StatusExtractor"
+        Extr.__doc__ = "Extractor for all images of a user on " + instance
+        Extr.category = category
+        Extr.instance = instance
+        Extr.pattern = [r"(?:https?://)?" + pattern + r"/@[^/?&#]+/(\d+)"]
+        Extr.root = root
+        Extr.access_token = token
+        symtable[Extr.__name__] = Extr
+
+
+EXTRACTORS = {
+    "pawoo.net": {
+        "category"     : "pawoo",
+        "access-token" : "286462927198d0cf3e24683e91c8259a"
+                         "ac4367233064e0570ca18df2ac65b226",
+        "client-id"    : "97b142b6904abf97a1068d51a7bc2f2f"
+                         "cf9323cef81f13cb505415716dba7dac",
+        "client-secret": "e45bef4bad45b38abf7d9ef88a646b73"
+                         "75e7fb2532c31a026327a93549236481",
+    },
+}
 
 
 generate_extractors()
