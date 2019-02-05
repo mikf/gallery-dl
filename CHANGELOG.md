@@ -1,6 +1,18 @@
 # Changelog
 
-## Unreleased
+## 1.7.0 - 2019-02-05
+- Added support for:
+  - `photobucket` - http://photobucket.com/ ([#117](https://github.com/mikf/gallery-dl/issues/117))
+  - `hentaifox` - https://hentaifox.com/ ([#160](https://github.com/mikf/gallery-dl/issues/160))
+  - `tsumino` - https://www.tsumino.com/ ([#161](https://github.com/mikf/gallery-dl/issues/161))
+- Added the ability to dynamically generate extractors based on a user's config file for
+  - [`mastodon`](https://github.com/tootsuite/mastodon) instances ([#144](https://github.com/mikf/gallery-dl/issues/144))
+  - [`foolslide`](https://github.com/FoolCode/FoOlSlide) based sites
+  - [`foolfuuka`](https://github.com/FoolCode/FoolFuuka) based archives
+- Added an extractor for `behance` collections ([#157](https://github.com/mikf/gallery-dl/issues/157))
+- Added login support for `luscious` ([#159](https://github.com/mikf/gallery-dl/issues/159)) and `tsumino` ([#161](https://github.com/mikf/gallery-dl/issues/161))
+- Added an option to stop downloading if the `exhentai` image limit is exceeded ([#141](https://github.com/mikf/gallery-dl/issues/141))
+- Fixed extraction issues for `behance` and `mangapark`
 
 ## 1.6.3 - 2019-01-18
 - Added `metadata` post-processor to write image metadata to an external file ([#135](https://github.com/mikf/gallery-dl/issues/135))
