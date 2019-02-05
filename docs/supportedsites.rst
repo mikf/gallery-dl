@@ -41,7 +41,7 @@ imgbox               https://imgbox.com/                 Galleries, individual I
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
 Instagram            https://www.instagram.com/          Images from Users, individual Images
-Jaimini's Box        https://jaiminisbox.com/            Chapters, Manga
+Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga
 Joyreactor           http://joyreactor.cc/               |Capabilities-4|
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
@@ -68,7 +68,7 @@ Piczel               https://piczel.tv/                  Images from Users, Fold
 Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins
 Pixiv                https://www.pixiv.net/              |Capabilities-6|                                   Required
 Pornreactor          http://pornreactor.cc/              |Capabilities-7|
-PowerManga           https://powermanga.org/             Chapters, Manga
+PowerManga           https://read.powermanga.org/        Chapters, Manga
 Read Comic Online    https://readcomiconline.to/         Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://www.reddit.com/             individual Images, Submissions, Subreddits         Optional (OAuth)
@@ -78,7 +78,7 @@ Safebooru            https://safebooru.org/              Pools, Posts, Tag-Searc
 Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
 Sea Otter Scans      https://reader.seaotterscans.com/   Chapters, Manga
 Sen Manga            http://raw.senmanga.com/            Chapters
-Sense-Scans          http://sensescans.com/              Chapters, Manga
+Sense-Scans          http://sensescans.com/reader/       Chapters, Manga
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |Capabilities-8|                                   Optional (OAuth)
