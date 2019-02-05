@@ -218,7 +218,6 @@ class JoyreactorTagExtractor(ReactorTagExtractor):
         }),
         ("http://joyreactor.com/tag/Cirno", {
             "url": "a81382a3146da50b647c475f87427a6ca1d737df",
-            "keyword": "dcd3b101cae0a93fbb91281235de1410faf88455",
         }),
     ]
 
@@ -246,7 +245,6 @@ class JoyreactorUserExtractor(ReactorUserExtractor):
         ("http://joyreactor.cc/user/hemantic", None),
         ("http://joyreactor.com/user/Tacoman123", {
             "url": "0444158f17c22f08515ad4e7abf69ad2f3a63b35",
-            "keyword": "1571a81fa5b8bab81528c93065d2460a72e77102",
         }),
     ]
 
@@ -274,7 +272,6 @@ class JoyreactorPostExtractor(ReactorPostExtractor):
         }),
         ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
             "url": "d45337fec926159afe11c59e32d259d793dd00b3",
-            "keyword": "d28e2f44c2d107d549d91c443e489d2454a64181",
         }),
     ]
 
@@ -291,7 +288,8 @@ class PornreactorTagExtractor(ReactorTagExtractor):
     pattern = [PR_BASE_PATTERN + r"/tag/([^/?&#]+)"]
     test = [
         ("http://pornreactor.cc/tag/RiceGnat", {
-            "count": ">= 120",
+            "range": "1-25",
+            "count": ">= 25",
         }),
         ("http://fapreactor.com/tag/RiceGnat", None),
     ]
@@ -304,7 +302,7 @@ class PornreactorSearchExtractor(ReactorSearchExtractor):
     test = [
         ("http://pornreactor.cc/search?q=ecchi+hentai", {
             "range": "1-25",
-            "count": ">= 20",
+            "count": ">= 25",
         }),
         ("http://fapreactor.com/search/ecchi+hentai", None),
     ]
@@ -316,8 +314,8 @@ class PornreactorUserExtractor(ReactorUserExtractor):
     pattern = [PR_BASE_PATTERN + r"/user/([^/?&#]+)"]
     test = [
         ("http://pornreactor.cc/user/Disillusion", {
-            "url": "7e06f87f8dcce3fc7851b6d13aa55712ab45fb04",
-            "keyword": "edfefb54ea4863e3731c508ae6caeb4140be0d31",
+            "range": "1-25",
+            "count": ">= 25",
         }),
         ("http://fapreactor.com/user/Disillusion", None),
     ]
@@ -331,11 +329,9 @@ class PornreactorPostExtractor(ReactorPostExtractor):
     test = [
         ("http://pornreactor.cc/post/863166", {
             "url": "9e5f7b374605cbbd413f4f4babb9d1af6f95b843",
-            "keyword": "6e9e4bd4e2d4f3f2c7936340ec71f8693129f809",
             "content": "3e2a09f8b5e5ed7722f51c5f423ff4c9260fb23e",
         }),
         ("http://fapreactor.com/post/863166", {
             "url": "83ff7c87741c05bcf1de6825e2b4739afeb87ed5",
-            "keyword": "cf8159224fde59c1dab86677514b4aedeb533d66",
         }),
     ]
