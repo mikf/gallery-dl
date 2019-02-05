@@ -208,6 +208,9 @@ def get_domain(classes):
         if url.startswith("http"):
             return url
 
+        if hasattr(cls, "root") and cls.root:
+            return cls.root + "/"
+
         if hasattr(cls, "test") and cls.test:
             url = cls.test[0][0]
             return url[:url.find("/", 8)+1]
