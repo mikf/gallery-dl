@@ -8,14 +8,15 @@
 
 """Collection of extractors for various imagehosts"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, SharedConfigMixin
 from .. import text, exception
 from ..cache import memcache
 from os.path import splitext
 
 
-class ImagehostImageExtractor(Extractor):
+class ImagehostImageExtractor(SharedConfigMixin, Extractor):
     """Base class for single-image extractors for various imagehosts"""
+    basecategory = "imagehost"
     subcategory = "image"
     archive_fmt = "{token}"
     https = False
@@ -72,7 +73,7 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
     pattern = [r"(?:https?://)?(?:www\.)?(imx\.to/i/(\w+))",
                r"(?:https?://)?(?:www\.)?((?:imx\.to|img\.yt)"
                r"/img-([a-z0-9]+)\.html)"]
-    test = [
+    test = (
         ("https://imx.to/i/1qdeva", {  # new-style URL
             "url": "ab2173088a6cdef631d7a47dec4a5da1c6a00130",
             "keyword": "7bb48a2327561ae04ea7a6d4e18e715379e2f497",
@@ -89,7 +90,7 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
         ("https://imx.to/img-57a2050547b98.html", {
             "exception": exception.NotFoundError,
         }),
-    ]
+    )
     https = True
     encoding = "utf-8"
 
@@ -116,11 +117,11 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from acidimg.cc"""
     category = "acidimg"
     pattern = [r"(?:https?://)?((?:www\.)?acidimg\.cc/img-([a-z0-9]+)\.html)"]
-    test = [("https://acidimg.cc/img-5acb6b9de4640.html", {
+    test = ("https://acidimg.cc/img-5acb6b9de4640.html", {
         "url": "f132a630006e8d84f52d59555191ed82b3b64c04",
         "keyword": "183098c59d9244650f666b6cb4df96d76d2aeae8",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
+    })
     https = True
     encoding = "utf-8"
 
@@ -135,12 +136,17 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
 class ImagevenueImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagevenue.com"""
     category = "imagevenue"
-    pattern = [(r"(?:https?://)?(img\d+\.imagevenue\.com/"
-                r"img\.php\?image=(\d+)_[^&#]+)")]
+    pattern = [r"(?:https?://)?(img\d+\.imagevenue\.com"
+               r"/img\.php\?image=(?:[a-z]+_)?(\d+)_[^&#]+)"]
+    test = (("http://img28116.imagevenue.com/img.php"
+             "?image=th_52709_test_122_64lo.jpg"), {
+        "url": "46812995d557f2c6adf0ebd0e631e6e4e45facde",
+        "content": "59ec819cbd972dd9a71f25866fbfc416f2f215b3",
+    })
     params = None
 
     def get_info(self, page):
-        url = text.extract(page, 'SRC="', '"')[0]
+        url = text.extract(page, "SRC='", "'")[0]
         return text.urljoin(self.url, url), url
 
 
@@ -148,11 +154,11 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
     category = "imagetwist"
     pattern = [r"(?:https?://)?((?:www\.)?imagetwist\.com/([a-z0-9]{12}))"]
-    test = [("https://imagetwist.com/4e46hv31tu0q/test.jpg", {
+    test = ("https://imagetwist.com/4e46hv31tu0q/test.jpg", {
         "url": "c999dc1a5dec0525ac9eb8c092f173dfe6dba0b0",
         "keyword": "30dd34dcb06b5b51c6cfff199c610b24edb7b9bc",
         "content": "96b1fd099b06faad5879fce23a7e4eb8290d8810",
-    })]
+    })
     https = True
     params = None
 
@@ -170,10 +176,10 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
 class ImgspiceImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgspice.com"""
     category = "imgspice"
-    pattern = [r"(?:https?://)?((?:www\.)?imgspice\.com/([^/]+))"]
-    test = [("https://imgspice.com/zop38mvvq29u/", {
+    pattern = [r"(?:https?://)?((?:www\.)?imgspice\.com/([^/?&#]+))"]
+    test = ("https://imgspice.com/zop38mvvq29u/", {
         "url": "a45833733c02b64d105363ffd8fd19f06992a2f7",
-    })]
+    })
     https = True
     params = None
 
@@ -186,8 +192,13 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
 class PixhostImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from pixhost.to"""
     category = "pixhost"
-    pattern = [(r"(?:https?://)?((?:www\.)?pixhost\.(?:to|org)/show/"
-                r"\d+/(\d+)_[^/]+)")]
+    pattern = [r"(?:https?://)?((?:www\.)?pixhost\.(?:to|org)"
+               r"/show/\d+/(\d+)_[^/?&#]+)"]
+    test = ("https://pixhost.to/show/224/96246707_test-.png", {
+        "url": "8f3d41fdd2dbec4c844e5ee45bf49961fbd79c67",
+        "keyword": "d7b19630acf8da39036581d3d5597f97da883626",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })
     https = True
     params = None
     cookies = {"pixhostads": "1", "pixhosttest": "1"}
@@ -201,26 +212,32 @@ class PixhostImageExtractor(ImagehostImageExtractor):
 class PostimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from postimages.org"""
     category = "postimg"
-    pattern = [(r"(?:https?://)?((?:www\.)?(?:postimages|pixxxels)\.org/"
-                r"image/([^/]+)/?)")]
+    pattern = [r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
+               r"/(?:image/)?([^/?&#]+)/?)"]
+    test = ("https://postimg.cc/Wtn2b3hC", {
+        "url": "0794cfda9b8951a8ac3aa692472484200254ab86",
+        "keyword": "dd8822e7d359c33dba85280fe31bea7d098cd1d1",
+        "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
+    })
     https = True
     params = None
 
     def get_info(self, page):
-        url = "https:" + text.extract(page, 'data-full="', '"')[0]
-        return url, url
+        url     , pos = text.extract(page, 'id="main-image" src="', '"')
+        filename, pos = text.extract(page, 'class="imagename">', '<', pos)
+        return url, text.unescape(filename)
 
 
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from turboimagehost.com"""
     category = "turboimagehost"
-    pattern = [(r"(?:https?://)?((?:www\.)?turboimagehost\.com/p/(\d+)"
-                r"/[^/]+\.html)")]
-    test = [("https://www.turboimagehost.com/p/39078423/test--.png.html", {
+    pattern = [r"(?:https?://)?((?:www\.)?turboimagehost\.com"
+               r"/p/(\d+)/[^/?&#]+\.html)"]
+    test = ("https://www.turboimagehost.com/p/39078423/test--.png.html", {
         "url": "b94de43612318771ced924cb5085976f13b3b90e",
         "keyword": "c1391465dc7b590b0eb8ea2a8cd235733c6fce2b",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })]
+    })
     https = True
     params = None
 
