@@ -255,8 +255,9 @@ def main():
                 print(extr.__doc__)
                 print("Category:", extr.category,
                       "- Subcategory:", extr.subcategory)
-                if hasattr(extr, "test") and extr.test:
-                    print("Example :", extr.test[0][0])
+                test = next(extr._get_tests(), None)
+                if test:
+                    print("Example :", test[0])
                 print()
         else:
             if not args.urls and not args.inputfile:

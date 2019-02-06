@@ -33,6 +33,7 @@ class TestExtractor(Extractor):
     """
     category = "test"
     pattern = [r"t(?:est)?:([^:]*)(?::([^:]*)(?::(\*|[\d,]*))?)?$"]
+    test = ("test:pixiv", "test:pixiv:user,favorite:0", "test:")
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -59,8 +60,7 @@ class TestExtractor(Extractor):
         tests = [
             test
             for extr in extractors
-            if hasattr(extr, "test")
-            for index, test in enumerate(extr.test)
+            for index, test in enumerate(extr._get_tests())
             if str(index) in self.indices
         ]
 

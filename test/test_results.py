@@ -182,10 +182,8 @@ def generate_tests():
 
     # add 'test_...' methods
     for extr in extractors:
-        if not hasattr(extr, "test") or not extr.test:
-            continue
         name = "test_" + extr.__name__ + "_"
-        for num, tcase in enumerate(extr.test, 1):
+        for num, tcase in enumerate(extr._get_tests(), 1):
             test = _generate_test(extr, tcase)
             test.__name__ = name + str(num)
             setattr(TestExtractorResults, test.__name__, test)
