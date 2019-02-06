@@ -174,6 +174,21 @@ class Extractor():
             for cookie in cookies:
                 setcookie(cookie)
 
+    @classmethod
+    def _get_tests(cls):
+        """Yield an extractor's test cases as (URL, RESULTS) tuples"""
+        if not hasattr(cls, "test") or not cls.test:
+            return
+
+        tests = cls.test
+        if len(tests) == 2 and (not tests[1] or isinstance(tests[1], dict)):
+            tests = (tests,)
+
+        for test in tests:
+            if isinstance(test, str):
+                test = (test, None)
+            yield test
+
 
 class ChapterExtractor(Extractor):
 

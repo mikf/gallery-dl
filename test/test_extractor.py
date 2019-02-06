@@ -11,7 +11,7 @@ import sys
 import unittest
 import string
 
-import gallery_dl.extractor as extractor
+from gallery_dl import extractor
 from gallery_dl.extractor.common import Extractor, Message
 from gallery_dl.extractor.directlink import DirectlinkExtractor as DLExtractor
 
@@ -101,9 +101,7 @@ class TestExtractor(unittest.TestCase):
 
         # collect testcase URLs
         for extr in extractor.extractors():
-            if not hasattr(extr, "test"):
-                continue
-            for testcase in extr.test:
+            for testcase in extr._get_tests():
                 test_urls.append((testcase[0], extr))
 
         # iterate over all testcase URLs

@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.7.0 - 2019-02-05
 - Added support for:
   - `photobucket` - http://photobucket.com/ ([#117](https://github.com/mikf/gallery-dl/issues/117))
