@@ -45,9 +45,10 @@ class FlickrImageExtractor(FlickrExtractor):
     """Extractor for individual images from flickr.com"""
     subcategory = "image"
     archive_fmt = "{id}"
-    pattern = [r"(?:https?://)?(?:www\.|m\.)?flickr\.com/photos/[^/]+/(\d+)",
-               r"(?:https?://)?[^.]+\.static\.?flickr\.com/(?:\d+/)+(\d+)_",
-               r"(?:https?://)?flic\.kr/(p)/([A-Za-z1-9]+)"]
+    pattern = [r"(?:https?://)?(?:"
+               r"(?:(?:www\.|m\.)?flickr\.com/photos/[^/]+/"
+               r"|[^.]+\.static\.?flickr\.com/(?:\d+/)+)(\d+)"
+               r"|flic\.kr/p/([A-Za-z1-9]+))"]
     test = [
         ("https://www.flickr.com/photos/departingyyz/16089302239", {
             "url": "7f0887f5953f61c8b79a695cb102ea309c0346b0",
@@ -66,7 +67,7 @@ class FlickrImageExtractor(FlickrExtractor):
 
     def __init__(self, match):
         FlickrExtractor.__init__(self, match)
-        if self.item_id == "p":
+        if not self.item_id:
             alphabet = ("123456789abcdefghijkmnopqrstu"
                         "vwxyzABCDEFGHJKLMNPQRSTUVWXYZ")
             self.item_id = util.bdecode(match.group(2), alphabet)

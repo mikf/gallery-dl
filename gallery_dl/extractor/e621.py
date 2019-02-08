@@ -21,10 +21,8 @@ class E621Extractor(booru.MoebooruPageMixin, booru.BooruExtractor):
 
 class E621TagExtractor(booru.TagMixin, E621Extractor):
     """Extractor for images from e621.net based on search-tags"""
-    pattern = [
-        r"(?:https?://)?(?:www\.)?e621\.net/post/index/\d+/(?P<tags>[^/?&#]+)",
-        r"(?:https?://)?(?:www\.)?e621\.net/post\?tags=(?P<tags>[^&#]+)",
-    ]
+    pattern = [r"(?:https?://)?(?:www\.)?e621\.net/post"
+               r"(?:/index/\d+/|\?tags=)(?P<tags>[^/?&#]+)"]
     test = [
         ("https://e621.net/post/index/1/anry", {
             "url": "8021e5ea28d47c474c1ffc9bd44863c4d45700ba",

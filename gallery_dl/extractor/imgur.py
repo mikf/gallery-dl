@@ -53,9 +53,8 @@ class ImgurImageExtractor(ImgurExtractor):
     subcategory = "image"
     filename_fmt = "{category}_{hash}{title:?_//}.{extension}"
     archive_fmt = "{hash}"
-    pattern = [(r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
-                r"/(?!gallery)(\w{7}|\w{5})"),
-               (r"(?:https?://)?i\.imgur\.com/(\w{7}|\w{5})[sbtmlh]?\.")]
+    pattern = [r"(?:https?://)?(?:www\.|[im]\.|)?imgur\.com"
+               r"/(?!gallery)(\w{7}|\w{5})[sbtmlh]?\.?"]
     test = [
         ("https://imgur.com/21yMxCS", {
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",

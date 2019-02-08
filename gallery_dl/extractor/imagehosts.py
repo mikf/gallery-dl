@@ -70,9 +70,8 @@ class ImagehostImageExtractor(SharedConfigMixin, Extractor):
 class ImxtoImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imx.to"""
     category = "imxto"
-    pattern = [r"(?:https?://)?(?:www\.)?(imx\.to/i/(\w+))",
-               r"(?:https?://)?(?:www\.)?((?:imx\.to|img\.yt)"
-               r"/img-([a-z0-9]+)\.html)"]
+    pattern = [r"(?:https?://)?(?:www\.)?((?:imx\.to|img\.yt)"
+               r"/(?:i/|img-)(\w+)(\.html)?)"]
     test = (
         ("https://imx.to/i/1qdeva", {  # new-style URL
             "url": "ab2173088a6cdef631d7a47dec4a5da1c6a00130",

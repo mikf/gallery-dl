@@ -28,11 +28,7 @@ class MangapandaMangaExtractor(MangapandaBase, MangareaderMangaExtractor):
 
 class MangapandaChapterExtractor(MangapandaBase, MangareaderChapterExtractor):
     """Extractor for manga-chapters from mangapanda.com"""
-    pattern = [
-        (r"(?:https?://)?(?:www\.)?mangapanda\.com((/[^/?&#]+)/(\d+))"),
-        (r"(?:https?://)?(?:www\.)?mangapanda\.com"
-         r"(/\d+-\d+-\d+(/[^/]+)/chapter-(\d+)\.html)"),
-    ]
+    pattern = [r"(?:https?://)?(?:www\.)?mangapanda\.com((/[^/?&#]+)/(\d+))"]
     test = [("https://www.mangapanda.com/red-storm/2", {
         "url": "1f633f776e950531ba9b1e81965316458e785261",
         "keyword": "32b5e84017c2bf5f122b339ecf40899e41f18cc9",
