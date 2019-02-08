@@ -6,6 +6,7 @@ import datetime
 
 ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.realpath(ROOTDIR))
+
 from gallery_dl import extractor, job, config
 from test.test_results import setup_test_config
 
@@ -19,7 +20,7 @@ tests = [
     if hasattr(extr, "test") and extr.test
     if len(sys.argv) <= 1 or extr.category in sys.argv
 
-    for idx, (url, result) in enumerate(extr.test)
+    for idx, (url, result) in enumerate(extr._get_tests())
     if result
 ]
 

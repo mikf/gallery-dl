@@ -93,33 +93,34 @@ modules = [
 
 
 def find(url):
-    """Find suitable extractor for the given url"""
-    for pattern, klass in _list_patterns():
-        match = pattern.match(url)
-        if match and klass not in _blacklist:
-            return klass(match)
+    """Find a suitable extractor for the given URL"""
+    for cls in _list_classes():
+        match = cls.pattern.match(url)
+        if match and cls not in _blacklist:
+            return cls(match)
     return None
 
 
-def add(klass):
-    """Add 'klass' to the list of available extractors"""
-    _cache.append((re.compile(klass.pattern), klass))
+def add(cls):
+    """Add 'cls' to the list of available extractors"""
+    cls.pattern = re.compile(cls.pattern)
+    _cache.append(cls)
+    return cls
 
 
 def add_module(module):
     """Add all extractors in 'module' to the list of available extractors"""
-    tuples = [
-        (re.compile(klass.pattern), klass)
-        for klass in _get_classes(module)
-    ]
-    _cache.extend(tuples)
-    return tuples
+    classes = _get_classes(module)
+    for cls in classes:
+        cls.pattern = re.compile(cls.pattern)
+    _cache.extend(classes)
+    return classes
 
 
 def extractors():
     """Yield all available extractor classes"""
     return sorted(
-        set(klass for _, klass in _list_patterns()),
+        _list_classes(),
         key=lambda x: x.__name__
     )
 
@@ -128,9 +129,9 @@ class blacklist():
     """Context Manager to blacklist extractor modules"""
     def __init__(self, categories, extractors=None):
         self.extractors = extractors or []
-        for _, klass in _list_patterns():
-            if klass.category in categories:
-                self.extractors.append(klass)
+        for cls in _list_classes():
+            if cls.category in categories:
+                self.extractors.append(cls)
 
     def __enter__(self):
         _blacklist.update(self.extractors)
@@ -147,20 +148,19 @@ _blacklist = set()
 _module_iter = iter(modules)
 
 
-def _list_patterns():
-    """Yield all available (pattern, class) tuples"""
+def _list_classes():
+    """Yield all available extractor classes"""
     yield from _cache
 
     for module_name in _module_iter:
-        yield from add_module(
-            importlib.import_module("."+module_name, __package__)
-        )
+        module = importlib.import_module("."+module_name, __package__)
+        yield from add_module(module)
 
 
 def _get_classes(module):
     """Return a list of all extractor classes in a module"""
     return [
-        klass for klass in module.__dict__.values() if (
-            hasattr(klass, "pattern") and klass.__module__ == module.__name__
+        cls for cls in module.__dict__.values() if (
+            hasattr(cls, "pattern") and cls.__module__ == module.__name__
         )
     ]

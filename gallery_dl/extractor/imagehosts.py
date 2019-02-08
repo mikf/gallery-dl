@@ -228,7 +228,7 @@ class PostimgImageExtractor(ImagehostImageExtractor):
 
 
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from turboimagehost.com"""
+    """Extractor for single images from www.turboimagehost.com"""
     category = "turboimagehost"
     pattern = (r"(?:https?://)?((?:www\.)?turboimagehost\.com"
                r"/p/(\d+)/[^/?&#]+\.html)")
