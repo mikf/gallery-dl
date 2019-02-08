@@ -19,7 +19,7 @@ from gallery_dl.extractor.directlink import DirectlinkExtractor as DLExtractor
 class FakeExtractor(Extractor):
     category = "fake"
     subcategory = "test"
-    pattern = ["fake:"]
+    pattern = "fake:"
 
     def __init__(self, match=None):
         Extractor.__init__(self)
@@ -68,7 +68,7 @@ class TestExtractor(unittest.TestCase):
 
         tuples = extractor.add_module(sys.modules[__name__])
         self.assertEqual(len(tuples), 1)
-        self.assertEqual(tuples[0][0].pattern, FakeExtractor.pattern[0])
+        self.assertEqual(tuples[0][0].pattern, FakeExtractor.pattern)
         self.assertEqual(tuples[0][1], FakeExtractor)
         self.assertIsInstance(extractor.find(uri), FakeExtractor)
 

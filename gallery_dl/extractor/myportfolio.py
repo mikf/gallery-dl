@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,11 +21,11 @@ class MyportfolioGalleryExtractor(Extractor):
     """Extractor for an image gallery on www.myportfolio.com"""
     category = "myportfolio"
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{user}", "{title}"]
+    directory_fmt = ("{category}", "{user}", "{title}")
     filename_fmt = "{num:>02}.{extension}"
     archive_fmt = "{user}_{name}"
-    pattern = [BASE_PATTERN + r"/(?!projects/?$)([^/?&#]+)"]
-    test = [
+    pattern = BASE_PATTERN + r"/(?!projects/?$)([^/?&#]+)"
+    test = (
         ("https://hannahcosgrove.myportfolio.com/chloe", {
             "url": "d5cf993a05439a9d8a99590aa61e14e5ac8d0cd0",
             "keyword": "cdb9ca8bdc16efa6ce04aba384f7932d1610b22f",
@@ -33,7 +33,7 @@ class MyportfolioGalleryExtractor(Extractor):
         ("myportfolio:https://tooco.com.ar/6-of-diamonds-paradise-bird", {
             "count": 3,
         }),
-    ]
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -86,8 +86,8 @@ class MyportfolioUserExtractor(Extractor):
     """Extractor for a user's galleries on www.myportfolio.com"""
     category = "myportfolio"
     subcategory = "user"
-    pattern = [BASE_PATTERN + r"/?$"]
-    test = [
+    pattern = BASE_PATTERN + r"/?$"
+    test = (
         ("https://hannahcosgrove.myportfolio.com/", {
             "pattern": r"https://hannahcosgrove\.myportfolio\.com/[^/?&#+]+$",
             "count": ">= 23",
@@ -95,7 +95,7 @@ class MyportfolioUserExtractor(Extractor):
         ("myportfolio:https://tooco.com.ar/", {
             "count": ">= 40",
         }),
-    ]
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)

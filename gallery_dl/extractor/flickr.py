@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -45,11 +45,11 @@ class FlickrImageExtractor(FlickrExtractor):
     """Extractor for individual images from flickr.com"""
     subcategory = "image"
     archive_fmt = "{id}"
-    pattern = [r"(?:https?://)?(?:"
+    pattern = (r"(?:https?://)?(?:"
                r"(?:(?:www\.|m\.)?flickr\.com/photos/[^/]+/"
                r"|[^.]+\.static\.?flickr\.com/(?:\d+/)+)(\d+)"
-               r"|flic\.kr/p/([A-Za-z1-9]+))"]
-    test = [
+               r"|flic\.kr/p/([A-Za-z1-9]+))")
+    test = (
         ("https://www.flickr.com/photos/departingyyz/16089302239", {
             "url": "7f0887f5953f61c8b79a695cb102ea309c0346b0",
             "keyword": "5ecdaf0192802451b7daca9b81f393f207ff7ee9",
@@ -63,7 +63,7 @@ class FlickrImageExtractor(FlickrExtractor):
             "url": "92c54a00f31040c349cb2abcb1b9abe30cc508ae"}),
         ("https://www.flickr.com/photos/zzz/16089302238", {
             "exception": exception.NotFoundError}),
-    ]
+    )
 
     def __init__(self, match):
         FlickrExtractor.__init__(self, match)
@@ -107,12 +107,12 @@ class FlickrImageExtractor(FlickrExtractor):
 class FlickrAlbumExtractor(FlickrExtractor):
     """Extractor for photo albums from flickr.com"""
     subcategory = "album"
-    directory_fmt = ["{category}", "{subcategory}s",
-                     "{album[id]} - {album[title]}"]
+    directory_fmt = ("{category}", "{subcategory}s",
+                     "{album[id]} - {album[title]}")
     archive_fmt = "a_{album[id]}_{id}"
-    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/"
-               r"photos/([^/]+)/(?:album|set)s(?:/(\d+))?"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?flickr\.com/"
+               r"photos/([^/]+)/(?:album|set)s(?:/(\d+))?")
+    test = (
         (("https://www.flickr.com/photos/shona_s/albums/72157633471741607"), {
             "url": "baf4a3d1b15afcecf9638000a12c0eb3d5df9024",
             "keyword": "b579f19134ab8217f05979e52adf7712898492c7",
@@ -121,7 +121,7 @@ class FlickrAlbumExtractor(FlickrExtractor):
             "url": "657d541470482e0d69deec33ab97a6d7d4af6fe4",
             "keyword": "736a41a7d702f7fe00edc957ae201d84f745e654",
         }),
-    ]
+    )
 
     def __init__(self, match):
         FlickrExtractor.__init__(self, match)
@@ -156,16 +156,16 @@ class FlickrAlbumExtractor(FlickrExtractor):
 class FlickrGalleryExtractor(FlickrExtractor):
     """Extractor for photo galleries from flickr.com"""
     subcategory = "gallery"
-    directory_fmt = ["{category}", "galleries",
-                     "{user[username]} {gallery[id]}"]
+    directory_fmt = ("{category}", "galleries",
+                     "{user[username]} {gallery[id]}")
     archive_fmt = "g_{gallery[id]}_{id}"
-    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/"
-               r"photos/([^/]+)/galleries/(\d+)"]
-    test = [(("https://www.flickr.com/photos/flickr/"
-              "galleries/72157681572514792/"), {
+    pattern = (r"(?:https?://)?(?:www\.)?flickr\.com/"
+               r"photos/([^/]+)/galleries/(\d+)")
+    test = (("https://www.flickr.com/photos/flickr/"
+             "galleries/72157681572514792/"), {
         "url": "1d012592bc7ce3a24b2b025b1176a31e947122f6",
         "keyword": "30cdec50e125f1cdf2425eab6052590535323c2d",
-    })]
+    })
 
     def __init__(self, match):
         FlickrExtractor.__init__(self, match)
@@ -186,13 +186,12 @@ class FlickrGalleryExtractor(FlickrExtractor):
 class FlickrGroupExtractor(FlickrExtractor):
     """Extractor for group pools from flickr.com"""
     subcategory = "group"
-    directory_fmt = ["{category}", "{subcategory}s", "{group[groupname]}"]
+    directory_fmt = ("{category}", "{subcategory}s", "{group[groupname]}")
     archive_fmt = "G_{group[nsid]}_{id}"
-    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/groups/([^/]+)"]
-    test = [("https://www.flickr.com/groups/bird_headshots/", {
-        "pattern": (r"https?://farm\d+\.staticflickr\.com"
-                    r"/\d+/\d+_[0-9a-f]+(_[a-z])?\.[a-z]+"),
-    })]
+    pattern = r"(?:https?://)?(?:www\.)?flickr\.com/groups/([^/]+)"
+    test = ("https://www.flickr.com/groups/bird_headshots/", {
+        "pattern": FlickrImageExtractor.pattern,
+    })
 
     def data(self):
         self.group = self.api.urls_lookupGroup(self.item_id)
@@ -205,13 +204,13 @@ class FlickrGroupExtractor(FlickrExtractor):
 class FlickrUserExtractor(FlickrExtractor):
     """Extractor for the photostream of a flickr user"""
     subcategory = "user"
-    directory_fmt = ["{category}", "{user[username]}"]
+    directory_fmt = ("{category}", "{user[username]}")
     archive_fmt = "u_{user[nsid]}_{id}"
-    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/?$"]
-    test = [("https://www.flickr.com/photos/shona_s/", {
+    pattern = r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/?$"
+    test = ("https://www.flickr.com/photos/shona_s/", {
         "url": "d125b536cd8c4229363276b6c84579c394eec3a2",
         "keyword": "2cdeae22cd9c3ff19ce905215f3782a7494d8264",
-    })]
+    })
 
     def photos(self):
         return self.api.people_getPhotos(self.user["nsid"])
@@ -220,13 +219,13 @@ class FlickrUserExtractor(FlickrExtractor):
 class FlickrFavoriteExtractor(FlickrExtractor):
     """Extractor for favorite photos of a flickr user"""
     subcategory = "favorite"
-    directory_fmt = ["{category}", "{subcategory}s", "{user[username]}"]
+    directory_fmt = ("{category}", "{subcategory}s", "{user[username]}")
     archive_fmt = "f_{user[nsid]}_{id}"
-    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/favorites"]
-    test = [("https://www.flickr.com/photos/shona_s/favorites", {
+    pattern = r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/favorites"
+    test = ("https://www.flickr.com/photos/shona_s/favorites", {
         "url": "5129b3f5bfa83cc25bdae3ce476036de1488dad2",
         "keyword": "0e1c9521b6051411b585c9b41a4dc0bcde20e616",
-    })]
+    })
 
     def photos(self):
         return self.api.favorites_getList(self.user["nsid"])
@@ -235,14 +234,14 @@ class FlickrFavoriteExtractor(FlickrExtractor):
 class FlickrSearchExtractor(FlickrExtractor):
     """Extractor for flickr photos based on search results"""
     subcategory = "search"
-    directory_fmt = ["{category}", "{subcategory}", "{search[text]}"]
+    directory_fmt = ("{category}", "{subcategory}", "{search[text]}")
     archive_fmt = "s_{search}_{id}"
-    pattern = [r"(?:https?://)?(?:www\.)?flickr\.com/search/?\?([^#]+)"]
-    test = [
-        (("https://flickr.com/search/?text=mountain"), None),
-        (("https://flickr.com/search/?text=tree%20cloud%20house"
-          "&color_codes=4&styles=minimalism"), None),
-    ]
+    pattern = r"(?:https?://)?(?:www\.)?flickr\.com/search/?\?([^#]+)"
+    test = (
+        ("https://flickr.com/search/?text=mountain"),
+        ("https://flickr.com/search/?text=tree%20cloud%20house"
+         "&color_codes=4&styles=minimalism"),
+    )
 
     def __init__(self, match):
         FlickrExtractor.__init__(self, match)

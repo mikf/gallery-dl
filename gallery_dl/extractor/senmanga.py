@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from from http://raw.senmanga.com/"""
+"""Extract manga-chapters from from https://raw.senmanga.com/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -16,11 +16,11 @@ class SenmangaChapterExtractor(Extractor):
     """Extractor for manga-chapters from raw.senmanga.com"""
     category = "senmanga"
     subcategory = "chapter"
-    directory_fmt = ["{category}", "{manga}", "{chapter_string}"]
+    directory_fmt = ("{category}", "{manga}", "{chapter_string}")
     filename_fmt = "{manga}_{chapter_string}_{page:>03}.{extension}"
     archive_fmt = "{manga}_{chapter_string}_{page}"
-    pattern = [r"(?:https?://)?raw\.senmanga\.com/([^/]+/[^/]+)"]
-    test = [
+    pattern = r"(?:https?://)?raw\.senmanga\.com/([^/]+/[^/]+)"
+    test = (
         ("http://raw.senmanga.com/Bokura-wa-Minna-Kawaisou/37A/1", {
             "url": "5f95140ff511d8497e2ec08fa7267c6bb231faec",
             "keyword": "705d941a150765edb33cd2707074bd703a93788c",
@@ -30,7 +30,7 @@ class SenmangaChapterExtractor(Extractor):
             "url": "8347b9f00c14b864dd3c19a1f5ae52adb2ef00de",
             "keyword": "8a8ab2529ba2edfc83a6b3a8bede1d6c580db7b4",
         }),
-    ]
+    )
     root = "https://raw.senmanga.com"
 
     def __init__(self, match):

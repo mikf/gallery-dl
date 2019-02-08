@@ -16,13 +16,13 @@ import re
 class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
     """Extractor for manga-chapters from hentai.cafe"""
     category = "hentaicafe"
-    directory_fmt = ["{category}", "{manga}"]
-    pattern = [r"(?:https?://)?(?:www\.)?hentai\.cafe"
-               r"(/manga/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"]
-    test = [("https://hentai.cafe/manga/read/saitom-box/en/0/1/", {
+    directory_fmt = ("{category}", "{manga}")
+    pattern = (r"(?:https?://)?(?:www\.)?hentai\.cafe"
+               r"(/manga/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)")
+    test = ("https://hentai.cafe/manga/read/saitom-box/en/0/1/", {
         "url": "8c6a8c56875ba3ed7ab0a74a64f9960077767fc2",
         "keyword": "1b24a3e8625b89d160d01ce3eb5e5eb12fbbf648",
-    })]
+    })
     root = "https://hentai.cafe"
 
     def get_metadata(self, page):
@@ -37,9 +37,9 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
 class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
     """Extractor for manga from hentai.cafe"""
     category = "hentaicafe"
-    pattern = [r"(?:https?://)?" + r"(?:www\.)?hentai\.cafe"
-               r"((?:/manga/series)?/[^/?&#]+)/?$"]
-    test = [
+    pattern = (r"(?:https?://)?" + r"(?:www\.)?hentai\.cafe"
+               r"((?:/manga/series)?/[^/?&#]+)/?$")
+    test = (
         # single chapter
         ("https://hentai.cafe/hazuki-yuuto-summer-blues/", {
             "url": "f8e24a07d6fbb7c6a6ec5ad8ad8faf2436f8751b",
@@ -53,7 +53,7 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
             "url": "ca3e8a91531fd6acd863d93ac3afbd8ead06a076",
             "keyword": "46012b857eb1a1394bc55c0efe7aa4e7f704d10d",
         }),
-    ]
+    )
     root = "https://hentai.cafe"
     reverse = False
 

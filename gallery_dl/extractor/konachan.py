@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,33 +24,33 @@ class KonachanExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
 
 class KonachanTagExtractor(booru.TagMixin, KonachanExtractor):
     """Extractor for images from konachan.com based on search-tags"""
-    pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
-               r"/post\?(?:[^&#]*&)*tags=(?P<tags>[^&#]+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
+               r"/post\?(?:[^&#]*&)*tags=(?P<tags>[^&#]+)")
+    test = (
         ("https://konachan.com/post?tags=patata", {
             "content": "838cfb815e31f48160855435655ddf7bfc4ecb8d",
         }),
-        ("https://konachan.net/post?tags=patata", None),
-    ]
+        ("https://konachan.net/post?tags=patata"),
+    )
 
 
 class KonachanPoolExtractor(booru.PoolMixin, KonachanExtractor):
     """Extractor for image-pools from konachan.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
-               r"/pool/show/(?P<pool>\d+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
+               r"/pool/show/(?P<pool>\d+)")
+    test = (
         ("https://konachan.com/pool/show/95", {
             "content": "cf0546e38a93c2c510a478f8744e60687b7a8426",
         }),
-        ("https://konachan.net/pool/show/95", None),
-    ]
+        ("https://konachan.net/pool/show/95"),
+    )
 
 
 class KonachanPostExtractor(booru.PostMixin, KonachanExtractor):
     """Extractor for single images from konachan.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
-               r"/post/show/(?P<post>\d+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
+               r"/post/show/(?P<post>\d+)")
+    test = (
         ("https://konachan.com/post/show/205189", {
             "content": "674e75a753df82f5ad80803f575818b8e46e4b65",
             "options": (("tags", True),),
@@ -61,22 +61,22 @@ class KonachanPostExtractor(booru.PostMixin, KonachanExtractor):
                 "tags_general": str,
             },
         }),
-        ("https://konachan.net/post/show/205189", None),
-    ]
+        ("https://konachan.net/post/show/205189"),
+    )
 
 
 class KonachanPopularExtractor(booru.MoebooruPopularMixin, KonachanExtractor):
     """Extractor for popular images from konachan.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
+    pattern = (r"(?:https?://)?(?:www\.)?konachan\.(?P<tld>com|net)"
                r"/post/popular_(?P<scale>by_(?:day|week|month)|recent)"
-               r"(?:\?(?P<query>[^#]*))?"]
-    test = [
+               r"(?:\?(?P<query>[^#]*))?")
+    test = (
         ("https://konachan.com/post/popular_by_month?month=11&year=2010", {
             "count": 20,
         }),
-        ("https://konachan.com/post/popular_recent", None),
-        ("https://konachan.net/post/popular_recent", None),
-    ]
+        ("https://konachan.com/post/popular_recent"),
+        ("https://konachan.net/post/popular_recent"),
+    )
 
     def __init__(self, match):
         super().__init__(match)

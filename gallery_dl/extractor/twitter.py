@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,7 +15,7 @@ from .. import text
 class TwitterExtractor(Extractor):
     """Base class for twitter extractors"""
     category = "twitter"
-    directory_fmt = ["{category}", "{user}"]
+    directory_fmt = ("{category}", "{user}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     root = "https://twitter.com"
@@ -100,13 +100,13 @@ class TwitterExtractor(Extractor):
 class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for all images from a user's timeline"""
     subcategory = "timeline"
-    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/([^/?&#]+)/?$"]
-    test = [("https://twitter.com/PicturesEarth", {
+    pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
+               r"/([^/?&#]+)/?$")
+    test = ("https://twitter.com/PicturesEarth", {
         "range": "1-40",
         "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
         "keyword": "cbae53b6f4ba133078bb13c95dbd3cbb4fa40b9f",
-    })]
+    })
 
     def tweets(self):
         url = "{}/i/profiles/show/{}/timeline/tweets".format(
@@ -117,12 +117,12 @@ class TwitterTimelineExtractor(TwitterExtractor):
 class TwitterMediaExtractor(TwitterExtractor):
     """Extractor for all images from a user's Media Tweets"""
     subcategory = "media"
-    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/([^/?&#]+)/media(?!\w)"]
-    test = [("https://twitter.com/PicturesEarth/media", {
+    pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
+               r"/([^/?&#]+)/media(?!\w)")
+    test = ("https://twitter.com/PicturesEarth/media", {
         "range": "1-40",
         "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
-    })]
+    })
 
     def tweets(self):
         url = "{}/i/profiles/show/{}/media_timeline".format(
@@ -133,9 +133,9 @@ class TwitterMediaExtractor(TwitterExtractor):
 class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for images from individual tweets"""
     subcategory = "tweet"
-    pattern = [r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/([^/?&#]+)/status/(\d+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
+               r"/([^/?&#]+)/status/(\d+)")
+    test = (
         ("https://twitter.com/PicturesEarth/status/672897688871018500", {
             "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
             "keyword": "46c8e739a892000848a8a2184da91346c9cbe4bf",
@@ -145,7 +145,7 @@ class TwitterTweetExtractor(TwitterExtractor):
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
             "keyword": "7729cd3ff16a5647b0b5ffdec9d428c91eedafbe",
         }),
-    ]
+    )
 
     def __init__(self, match):
         TwitterExtractor.__init__(self, match)

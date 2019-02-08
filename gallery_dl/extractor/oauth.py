@@ -162,7 +162,7 @@ class OAuthBase(Extractor):
 
 class OAuthDeviantart(OAuthBase):
     subcategory = "deviantart"
-    pattern = ["oauth:deviantart$"]
+    pattern = "oauth:deviantart$"
     redirect_uri = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
 
     def items(self):
@@ -181,7 +181,7 @@ class OAuthDeviantart(OAuthBase):
 
 class OAuthFlickr(OAuthBase):
     subcategory = "flickr"
-    pattern = ["oauth:flickr$"]
+    pattern = "oauth:flickr$"
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
@@ -202,7 +202,7 @@ class OAuthFlickr(OAuthBase):
 
 class OAuthReddit(OAuthBase):
     subcategory = "reddit"
-    pattern = ["oauth:reddit$"]
+    pattern = "oauth:reddit$"
 
     def items(self):
         yield Message.Version, 1
@@ -219,7 +219,7 @@ class OAuthReddit(OAuthBase):
 
 class OAuthSmugmug(OAuthBase):
     subcategory = "smugmug"
-    pattern = ["oauth:smugmug$"]
+    pattern = "oauth:smugmug$"
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
@@ -240,7 +240,7 @@ class OAuthSmugmug(OAuthBase):
 
 class OAuthTumblr(OAuthBase):
     subcategory = "tumblr"
-    pattern = ["oauth:tumblr$"]
+    pattern = "oauth:tumblr$"
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
@@ -261,7 +261,7 @@ class OAuthTumblr(OAuthBase):
 
 class OAuthMastodon(OAuthBase):
     subcategory = "mastodon"
-    pattern = ["oauth:mastodon:(?:https?://)?([^/?&#]+)"]
+    pattern = "oauth:mastodon:(?:https?://)?([^/?&#]+)"
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)

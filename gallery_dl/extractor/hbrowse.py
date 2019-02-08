@@ -44,12 +44,12 @@ class HbrowseBase():
 
 class HbrowseMangaExtractor(HbrowseBase, MangaExtractor):
     """Extractor for manga from hbrowse.com"""
-    pattern = [r"(?:https?://)?((?:www\.)?hbrowse\.com/\d+)/?$"]
+    pattern = r"(?:https?://)?((?:www\.)?hbrowse\.com/\d+)/?$"
     reverse = False
-    test = [("https://www.hbrowse.com/10363", {
+    test = ("https://www.hbrowse.com/10363", {
         "url": "b89682bfb86c11d2af0dc47463804ec3ac4aadd6",
         "keyword": "4b15fda1858a69de1fbf5afddfe47dd893397312",
-    })]
+    })
 
     def chapters(self, page):
         results = []
@@ -72,16 +72,16 @@ class HbrowseMangaExtractor(HbrowseBase, MangaExtractor):
 
 class HbrowseChapterExtractor(HbrowseBase, ChapterExtractor):
     """Extractor for manga-chapters from hbrowse.com"""
-    directory_fmt = ["{category}", "{manga_id} {manga}", "c{chapter:>05}"]
+    directory_fmt = ("{category}", "{manga_id} {manga}", "c{chapter:>05}")
     filename_fmt = ("{category}_{manga_id}_{chapter:>05}_"
                     "{page:>03}.{extension}")
     archive_fmt = "{manga_id}_{chapter}_{page}"
-    pattern = [r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/c(\d+)"]
-    test = [("https://www.hbrowse.com/10363/c00000", {
+    pattern = r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/c(\d+)"
+    test = ("https://www.hbrowse.com/10363/c00000", {
         "url": "6feefbc9f4b98e20d8425ddffa9dd111791dc3e6",
         "keyword": "95ec73a58aeac57f4dd20f0fa0c2812b045a30e8",
         "content": "44578ebbe176c2c27434966aef22945787e2781e",
-    })]
+    })
 
     def __init__(self, match):
         self.gid, self.chapter = match.groups()

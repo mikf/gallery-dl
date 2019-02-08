@@ -16,7 +16,7 @@ import re
 class MastodonExtractor(Extractor):
     """Base class for mastodon extractors"""
     basecategory = "mastodon"
-    directory_fmt = ["mastodon", "{instance}", "{account[username]}"]
+    directory_fmt = ("mastodon", "{instance}", "{account[username]}")
     filename_fmt = "{category}_{id}_{media[id]}.{extension}"
     archive_fmt = "{media[id]}"
     instance = None
@@ -168,8 +168,8 @@ def generate_extractors():
         Extr.__doc__ = "Extractor for all images of a user on " + instance
         Extr.category = category
         Extr.instance = instance
-        Extr.pattern = [r"(?:https?://)?" + pattern +
-                        r"/@([^/?&#]+)(?:/media)?/?$"]
+        Extr.pattern = (r"(?:https?://)?" + pattern +
+                        r"/@([^/?&#]+)(?:/media)?/?$")
         Extr.root = root
         Extr.access_token = token
         symtable[Extr.__name__] = Extr
@@ -181,7 +181,7 @@ def generate_extractors():
         Extr.__doc__ = "Extractor for images from a status on " + instance
         Extr.category = category
         Extr.instance = instance
-        Extr.pattern = [r"(?:https?://)?" + pattern + r"/@[^/?&#]+/(\d+)"]
+        Extr.pattern = r"(?:https?://)?" + pattern + r"/@[^/?&#]+/(\d+)"
         Extr.root = root
         Extr.access_token = token
         symtable[Extr.__name__] = Extr

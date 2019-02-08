@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,11 +16,11 @@ class WarosuThreadExtractor(Extractor):
     """Extractor for images from threads on warosu.org"""
     category = "warosu"
     subcategory = "thread"
-    directory_fmt = ["{category}", "{board}", "{thread} - {title}"]
+    directory_fmt = ("{category}", "{board}", "{thread} - {title}")
     filename_fmt = "{tim}-{filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
-    pattern = [r"(?:https?://)?(?:www\.)?warosu\.org/([^/]+)/thread/(\d+)"]
-    test = [
+    pattern = r"(?:https?://)?(?:www\.)?warosu\.org/([^/]+)/thread/(\d+)"
+    test = (
         ("https://warosu.org/jp/thread/16656025", {
             "url": "889d57246ed67e491e5b8f7f124e50ea7991e770",
             "keyword": "c00ea4c5460c5986994f17bb8416826d42ca57c0",
@@ -30,7 +30,7 @@ class WarosuThreadExtractor(Extractor):
             "keyword": "7534edf4ec51891dbf44d775b73fbbefd52eec71",
             "content": "d48df0a701e6599312bfff8674f4aa5d4fb8db1c",
         }),
-    ]
+    )
     root = "https://warosu.org"
 
     def __init__(self, match):

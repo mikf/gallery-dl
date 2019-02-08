@@ -22,7 +22,6 @@ BASE_PATTERN = r"(?:https?://)?([^/.]+\.reactor\.cc)"
 class ReactorExtractor(SharedConfigMixin, Extractor):
     """Base class for *reactor.cc extractors"""
     basecategory = "reactor"
-    directory_fmt = ["{category}"]
     filename_fmt = "{post_id}_{num:>02}{title[:100]:?_//}.{extension}"
     archive_fmt = "{post_id}_{num}"
 
@@ -144,10 +143,10 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
 class ReactorTagExtractor(ReactorExtractor):
     """Extractor for tag searches on *reactor.cc sites"""
     subcategory = "tag"
-    directory_fmt = ["{category}", "{search_tags}"]
+    directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "{search_tags}_{post_id}_{num}"
-    pattern = [BASE_PATTERN + r"/tag/([^/?&#]+)"]
-    test = [("http://anime.reactor.cc/tag/Anime+Art", None)]
+    pattern = BASE_PATTERN + r"/tag/([^/?&#]+)"
+    test = ("http://anime.reactor.cc/tag/Anime+Art",)
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
@@ -160,18 +159,18 @@ class ReactorTagExtractor(ReactorExtractor):
 class ReactorSearchExtractor(ReactorTagExtractor):
     """Extractor for search results on *reactor.cc sites"""
     subcategory = "search"
-    directory_fmt = ["{category}", "search", "{search_tags}"]
+    directory_fmt = ("{category}", "search", "{search_tags}")
     archive_fmt = "s_{search_tags}_{post_id}_{num}"
-    pattern = [BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"]
-    test = [("http://anime.reactor.cc/search?q=Art", None)]
+    pattern = BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"
+    test = ("http://anime.reactor.cc/search?q=Art",)
 
 
 class ReactorUserExtractor(ReactorExtractor):
     """Extractor for all posts of a user on *reactor.cc sites"""
     subcategory = "user"
-    directory_fmt = ["{category}", "user", "{user}"]
-    pattern = [BASE_PATTERN + r"/user/([^/?&#]+)"]
-    test = [("http://anime.reactor.cc/user/Shuster", None)]
+    directory_fmt = ("{category}", "user", "{user}")
+    pattern = BASE_PATTERN + r"/user/([^/?&#]+)"
+    test = ("http://anime.reactor.cc/user/Shuster",)
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
@@ -184,8 +183,8 @@ class ReactorUserExtractor(ReactorExtractor):
 class ReactorPostExtractor(ReactorExtractor):
     """Extractor for single posts on *reactor.cc sites"""
     subcategory = "post"
-    pattern = [BASE_PATTERN + r"/post/(\d+)"]
-    test = [("http://anime.reactor.cc/post/3576250", None)]
+    pattern = BASE_PATTERN + r"/post/(\d+)"
+    test = ("http://anime.reactor.cc/post/3576250",)
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
@@ -211,22 +210,22 @@ JR_BASE_PATTERN = r"(?:https?://)?(?:www\.)?(joyreactor\.c(?:c|om))"
 class JoyreactorTagExtractor(ReactorTagExtractor):
     """Extractor for tag searches on joyreactor.cc"""
     category = "joyreactor"
-    pattern = [JR_BASE_PATTERN + r"/tag/([^/?&#]+)"]
-    test = [
+    pattern = JR_BASE_PATTERN + r"/tag/([^/?&#]+)"
+    test = (
         ("http://joyreactor.cc/tag/Advent+Cirno", {
             "count": ">= 17",
         }),
         ("http://joyreactor.com/tag/Cirno", {
             "url": "a81382a3146da50b647c475f87427a6ca1d737df",
         }),
-    ]
+    )
 
 
 class JoyreactorSearchExtractor(ReactorSearchExtractor):
     """Extractor for search results on joyreactor.cc"""
     category = "joyreactor"
-    pattern = [JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"]
-    test = [
+    pattern = JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"
+    test = (
         ("http://joyreactor.cc/search/Cirno+Gifs", {
             "range": "1-25",
             "count": ">= 20",
@@ -234,26 +233,26 @@ class JoyreactorSearchExtractor(ReactorSearchExtractor):
         ("http://joyreactor.com/search?q=Cirno+Gifs", {
             "count": 0,  # no search results on joyreactor.com
         }),
-    ]
+    )
 
 
 class JoyreactorUserExtractor(ReactorUserExtractor):
     """Extractor for all posts of a user on joyreactor.cc"""
     category = "joyreactor"
-    pattern = [JR_BASE_PATTERN + r"/user/([^/?&#]+)"]
-    test = [
-        ("http://joyreactor.cc/user/hemantic", None),
+    pattern = JR_BASE_PATTERN + r"/user/([^/?&#]+)"
+    test = (
+        ("http://joyreactor.cc/user/hemantic"),
         ("http://joyreactor.com/user/Tacoman123", {
             "url": "0444158f17c22f08515ad4e7abf69ad2f3a63b35",
         }),
-    ]
+    )
 
 
 class JoyreactorPostExtractor(ReactorPostExtractor):
     """Extractor for single posts on joyreactor.cc"""
     category = "joyreactor"
-    pattern = [JR_BASE_PATTERN + r"/post/(\d+)"]
-    test = [
+    pattern = JR_BASE_PATTERN + r"/post/(\d+)"
+    test = (
         ("http://joyreactor.com/post/3721876", {  # single image
             "url": "904779f6571436f3d5adbce30c2c272f6401e14a",
             "keyword": "0d231f6ae36c5dca1f7eb71443bab3b2659fcacc",
@@ -273,7 +272,7 @@ class JoyreactorPostExtractor(ReactorPostExtractor):
         ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
             "url": "d45337fec926159afe11c59e32d259d793dd00b3",
         }),
-    ]
+    )
 
 
 # --------------------------------------------------------------------
@@ -285,48 +284,48 @@ PR_BASE_PATTERN = r"(?:https?://)?(?:www\.)?(pornreactor\.cc|fapreactor.com)"
 class PornreactorTagExtractor(ReactorTagExtractor):
     """Extractor for tag searches on pornreactor.cc"""
     category = "pornreactor"
-    pattern = [PR_BASE_PATTERN + r"/tag/([^/?&#]+)"]
-    test = [
+    pattern = PR_BASE_PATTERN + r"/tag/([^/?&#]+)"
+    test = (
         ("http://pornreactor.cc/tag/RiceGnat", {
             "range": "1-25",
             "count": ">= 25",
         }),
-        ("http://fapreactor.com/tag/RiceGnat", None),
-    ]
+        ("http://fapreactor.com/tag/RiceGnat"),
+    )
 
 
 class PornreactorSearchExtractor(ReactorSearchExtractor):
     """Extractor for search results on pornreactor.cc"""
     category = "pornreactor"
-    pattern = [PR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"]
-    test = [
+    pattern = PR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"
+    test = (
         ("http://pornreactor.cc/search?q=ecchi+hentai", {
             "range": "1-25",
             "count": ">= 25",
         }),
-        ("http://fapreactor.com/search/ecchi+hentai", None),
-    ]
+        ("http://fapreactor.com/search/ecchi+hentai"),
+    )
 
 
 class PornreactorUserExtractor(ReactorUserExtractor):
     """Extractor for all posts of a user on pornreactor.cc"""
     category = "pornreactor"
-    pattern = [PR_BASE_PATTERN + r"/user/([^/?&#]+)"]
-    test = [
+    pattern = PR_BASE_PATTERN + r"/user/([^/?&#]+)"
+    test = (
         ("http://pornreactor.cc/user/Disillusion", {
             "range": "1-25",
             "count": ">= 25",
         }),
-        ("http://fapreactor.com/user/Disillusion", None),
-    ]
+        ("http://fapreactor.com/user/Disillusion"),
+    )
 
 
 class PornreactorPostExtractor(ReactorPostExtractor):
     """Extractor for single posts on pornreactor.cc"""
     category = "pornreactor"
     subcategory = "post"
-    pattern = [PR_BASE_PATTERN + r"/post/(\d+)"]
-    test = [
+    pattern = PR_BASE_PATTERN + r"/post/(\d+)"
+    test = (
         ("http://pornreactor.cc/post/863166", {
             "url": "9e5f7b374605cbbd413f4f4babb9d1af6f95b843",
             "content": "3e2a09f8b5e5ed7722f51c5f423ff4c9260fb23e",
@@ -334,4 +333,4 @@ class PornreactorPostExtractor(ReactorPostExtractor):
         ("http://fapreactor.com/post/863166", {
             "url": "83ff7c87741c05bcf1de6825e2b4739afeb87ed5",
         }),
-    ]
+    )

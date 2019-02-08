@@ -23,9 +23,9 @@ class MangahereBase():
 
 class MangahereMangaExtractor(MangahereBase, MangaExtractor):
     """Extractor for manga from mangahere.cc"""
-    pattern = [r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
-               r"([^/]+)/?(?:#.*)?$"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]"
+               r"/manga/([^/]+)/?(?:#.*)?$")
+    test = (
         ("https://www.mangahere.cc/manga/aria/", {
             "url": "e8971b1605d9888d978ebb2895adb1c7c37d663c",
             "keyword": "951eef36a3775525a31ca78c9d9cea546f4cf2f5",
@@ -34,9 +34,9 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
             "url": "6df27c0e105d9ee0b78a7aa77340d0891e6c7fc6",
             "keyword": "9542283639bd082fabf3a14b6695697d3ef15111",
         }),
-        ("http://www.mangahere.co/manga/aria/", None),
-        ("http://m.mangahere.co/manga/aria/", None),
-    ]
+        ("http://www.mangahere.co/manga/aria/"),
+        ("http://m.mangahere.co/manga/aria/"),
+    )
 
     def __init__(self, match):
         url = "{}/manga/{}/".format(self.root, match.group(1))
@@ -68,16 +68,16 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
 
 class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
     """Extractor for manga-chapters from mangahere.cc"""
-    pattern = [(r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
-                r"([^/]+(?:/v0*(\d+))?/c([^/?&#]+))")]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
+               r"([^/]+(?:/v0*(\d+))?/c([^/?&#]+))")
+    test = (
         ("https://www.mangahere.cc/manga/dongguo_xiaojie/c004.2/", {
             "keyword": "0e1cee6dd377da02ad51aa810ba65db3e811aef9",
             "content": "708d475f06893b88549cbd30df1e3f9428f2c884",
         }),
-        ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/", None),
-        ("http://m.mangahere.co/manga/dongguo_xiaojie/c003.2/", None),
-    ]
+        ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
+        ("http://m.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
+    )
 
     def __init__(self, match):
         self.part, self.volume, self.chapter = match.groups()

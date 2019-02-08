@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,11 +16,11 @@ class YukiThreadExtractor(Extractor):
     """Extractor for images from threads on yuki.la"""
     category = "yuki"
     subcategory = "thread"
-    directory_fmt = ["{category}", "{board}", "{thread}{title:? - //}"]
+    directory_fmt = ("{category}", "{board}", "{thread}{title:? - //}")
     filename_fmt = "{time}-{filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
-    pattern = [r"(?:https?://)?yuki\.la/([^/?&#]+)/(\d+)"]
-    test = [
+    pattern = r"(?:https?://)?yuki\.la/([^/?&#]+)/(\d+)"
+    test = (
         ("https://yuki.la/gd/309639", {
             "url": "289e86c5caf673a2515ec5f5f521ac0ae7e189e9",
             "keyword": "01cbe29ae207a5cb7556bcbd5ed481ecdaf32727",
@@ -40,7 +40,7 @@ class YukiThreadExtractor(Extractor):
             "url": "010560bf254bd485e48366c3531728bda4b22583",
             "keyword": "7b736c41e307dcfcb84ef495f29299a6ddd06d67",
         }),
-    ]
+    )
     root = "https://yuki.la"
 
     def __init__(self, match):

@@ -41,14 +41,14 @@ class MangadexExtractor(Extractor):
 class MangadexChapterExtractor(MangadexExtractor):
     """Extractor for manga-chapters from mangadex.org"""
     subcategory = "chapter"
-    directory_fmt = [
+    directory_fmt = (
         "{category}", "{manga}",
-        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}"]
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}")
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     archive_fmt = "{chapter_id}_{page}"
-    pattern = [r"(?:https?://)?(?:www\.)?mangadex\.(?:org|com)/chapter/(\d+)"]
-    test = [
+    pattern = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|com)/chapter/(\d+)"
+    test = (
         ("https://mangadex.org/chapter/122094", {
             "keyword": "7bd7f82ab9d3f06976c4b68afe78d0040851ac3c",
             "content": "7ab3bef5caccb62b881f8e6e70359d3c7be8137f",
@@ -58,7 +58,7 @@ class MangadexChapterExtractor(MangadexExtractor):
             "count": 64,
             "keyword": "435e157dc5529d152458ba751ffe5bfbaf4850fb",
         }),
-    ]
+    )
 
     def __init__(self, match):
         MangadexExtractor.__init__(self)
@@ -110,9 +110,9 @@ class MangadexMangaExtractor(MangadexExtractor):
     """Extractor for manga from mangadex.org"""
     subcategory = "manga"
     categorytransfer = True
-    pattern = [r"(?:https?://)?(?:www\.)?mangadex\.(?:org|com)"
-               r"/(?:title|manga)/(\d+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?mangadex\.(?:org|com)"
+               r"/(?:title|manga)/(\d+)")
+    test = (
         ("https://mangadex.org/manga/2946/souten-no-koumori", {
             "pattern": r"https://mangadex.org/chapter/\d+",
             "keywords": {
@@ -135,8 +135,8 @@ class MangadexMangaExtractor(MangadexExtractor):
         ("https://mangadex.org/title/13004/yorumori-no-kuni-no-sora-ni", {
             "count": 0,
         }),
-        ("https://mangadex.org/title/2946/souten-no-koumori", None),
-    ]
+        ("https://mangadex.org/title/2946/souten-no-koumori"),
+    )
 
     def __init__(self, match):
         MangadexExtractor.__init__(self)

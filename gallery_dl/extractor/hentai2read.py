@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,8 +18,8 @@ class Hentai2readMangaExtractor(MangaExtractor):
     """Extractor for hmanga from hentai2read.com"""
     category = "hentai2read"
     scheme = "https"
-    pattern = [r"(?:https?://)?(?:www\.)?(hentai2read\.com/[^/]+/?)$"]
-    test = [
+    pattern = r"(?:https?://)?(?:www\.)?(hentai2read\.com/[^/]+/?)$"
+    test = (
         ("http://hentai2read.com/amazon_elixir/", {
             "url": "273073752d418ec887d7f7211e42b832e8c403ba",
             "keyword": "13c1ce7e15cbb941f01c843b0e89adc993d939ac",
@@ -28,7 +28,7 @@ class Hentai2readMangaExtractor(MangaExtractor):
             "url": "6595f920a3088a15c2819c502862d45f8eb6bea6",
             "keyword": "675c7b7a4fa52cf569c283553bd16b4200a5cd36",
         }),
-    ]
+    )
 
     def chapters(self, page):
         results = []
@@ -60,11 +60,11 @@ class Hentai2readChapterExtractor(ChapterExtractor):
     """Extractor for a single manga chapter from hentai2read.com"""
     category = "hentai2read"
     archive_fmt = "{chapter_id}_{page}"
-    pattern = [r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/(\d+)"]
-    test = [("http://hentai2read.com/amazon_elixir/1/", {
+    pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com/([^/]+)/(\d+)"
+    test = ("http://hentai2read.com/amazon_elixir/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
         "keyword": "9845105898d28c6a540cffdea60a1a20fab52431",
-    })]
+    })
 
     def __init__(self, match):
         url_title, self.chapter = match.groups()

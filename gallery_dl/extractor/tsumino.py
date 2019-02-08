@@ -44,12 +44,11 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
     """Extractor for image galleries on tsumino.com"""
     subcategory = "gallery"
     filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    directory_fmt = ("{category}", "{gallery_id} {title}")
     archive_fmt = "{gallery_id}_{page}"
-
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
-               r"/(?:Book/Info|Read/View)/(\d+)"]
-    test = [
+    pattern = (r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
+               r"/(?:Book/Info|Read/View)/(\d+)")
+    test = (
         ("https://www.tsumino.com/Book/Info/45834", {
             "url": "ed3e39bc21221fbd21b9a2ba711e8decb6fdc6bc",
             "keyword": {
@@ -73,8 +72,8 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
                 "uploader": "NHNL1"
             },
         }),
-        ("https://www.tsumino.com/Read/View/45834", None),
-    ]
+        ("https://www.tsumino.com/Read/View/45834"),
+    )
 
     def __init__(self, match):
         self.gallery_id = match.group(1)
@@ -139,21 +138,21 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
 class TsuminoSearchExtractor(TsuminoBase, Extractor):
     """Extractor for search results on tsumino.com"""
     subcategory = "search"
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
-               r"/(?:Books/?)?#(.+)"]
-    test = [
+    pattern = (r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
+               r"/(?:Books/?)?#(.+)")
+    test = (
         ("https://www.tsumino.com/Books#?Character=Reimu+Hakurei", {
-            "pattern": TsuminoGalleryExtractor.pattern[0],
+            "pattern": TsuminoGalleryExtractor.pattern,
             "range": "1-40",
             "count": 40,
         }),
         (("http://www.tsumino.com/Books#~(Tags~(~"
           "(Type~7~Text~'Reimu*20Hakurei~Exclude~false)~"
           "(Type~'1~Text~'Pantyhose~Exclude~false)))#"), {
-            "pattern": TsuminoGalleryExtractor.pattern[0],
+            "pattern": TsuminoGalleryExtractor.pattern,
             "count": ">= 3",
         }),
-    ]
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)

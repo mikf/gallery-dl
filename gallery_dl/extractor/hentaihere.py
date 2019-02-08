@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,16 +10,16 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
-import re
 import json
+import re
 
 
 class HentaihereMangaExtractor(MangaExtractor):
     """Extractor for hmanga from hentaihere.com"""
     category = "hentaihere"
-    pattern = [r"(?:https?://)?(?:www\.)?(hentaihere\.com/m/S\d+)/?$"]
+    pattern = r"(?:https?://)?(?:www\.)?(hentaihere\.com/m/S\d+)/?$"
     scheme = "https"
-    test = [
+    test = (
         ("https://hentaihere.com/m/S13812", {
             "url": "d1ba6e28bb2162e844f8559c2b2725ba0a093559",
             "keyword": "13c1ce7e15cbb941f01c843b0e89adc993d939ac",
@@ -28,7 +28,7 @@ class HentaihereMangaExtractor(MangaExtractor):
             "url": "6c5239758dc93f6b1b4175922836c10391b174f7",
             "keyword": "675c7b7a4fa52cf569c283553bd16b4200a5cd36",
         }),
-    ]
+    )
 
     def chapters(self, page):
         results = []
@@ -60,11 +60,11 @@ class HentaihereChapterExtractor(ChapterExtractor):
     """Extractor for a single manga chapter from hentaihere.com"""
     category = "hentaihere"
     archive_fmt = "{chapter_id}_{page}"
-    pattern = [r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/(\d+)"]
-    test = [("https://hentaihere.com/m/S13812/1/1/", {
+    pattern = r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/(\d+)"
+    test = ("https://hentaihere.com/m/S13812/1/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
         "keyword": "e9382a9be337abce3db2b1132e85751379dc05c5",
-    })]
+    })
 
     def __init__(self, match):
         self.manga_id, self.chapter = match.groups()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,7 +15,7 @@ from .. import text
 class PiczelExtractor(Extractor):
     """Base class for piczel extractors"""
     category = "piczel"
-    directory_fmt = ["{category}", "{user[username]}"]
+    directory_fmt = ("{category}", "{user[username]}")
     filename_fmt = "{category}_{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     root = "https://piczel.tv"
@@ -57,10 +57,10 @@ class PiczelExtractor(Extractor):
 class PiczelUserExtractor(PiczelExtractor):
     """Extractor for all images from a user's gallery"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/([^/?&#]+)/?$"]
-    test = [("https://piczel.tv/gallery/Lulena", {
+    pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/([^/?&#]+)/?$"
+    test = ("https://piczel.tv/gallery/Lulena", {
         "count": ">= 13",
-    })]
+    })
 
     def get_images(self):
         url = "{}/api/users/{}/gallery".format(self.api_root, self.item_id)
@@ -70,13 +70,13 @@ class PiczelUserExtractor(PiczelExtractor):
 class PiczelFolderExtractor(PiczelExtractor):
     """Extractor for images inside a user's folder"""
     subcategory = "folder"
-    directory_fmt = ["{category}", "{user[username]}", "{folder[name]}"]
+    directory_fmt = ("{category}", "{user[username]}", "{folder[name]}")
     archive_fmt = "f{folder[id]}_{id}_{num}"
-    pattern = [r"(?:https?://)?(?:www\.)?piczel\.tv"
-               r"/gallery/(?!image)[^/?&#]+/(\d+)"]
-    test = [("https://piczel.tv/gallery/Lulena/1114", {
+    pattern = (r"(?:https?://)?(?:www\.)?piczel\.tv"
+               r"/gallery/(?!image)[^/?&#]+/(\d+)")
+    test = ("https://piczel.tv/gallery/Lulena/1114", {
         "count": ">= 4",
-    })]
+    })
 
     def get_images(self):
         url = "{}/api/gallery/folder/{}".format(self.api_root, self.item_id)
@@ -88,8 +88,8 @@ class PiczelFolderExtractor(PiczelExtractor):
 class PiczelImageExtractor(PiczelExtractor):
     """Extractor for individual images"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/image/(\d+)"]
-    test = [("https://piczel.tv/gallery/image/7807", {
+    pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/image/(\d+)"
+    test = ("https://piczel.tv/gallery/image/7807", {
         "url": "9b9e416b6ab7e58676fab84453d5028f306ece34",
         "content": "df9a053a24234474a19bce2b7e27e0dec23bff87",
         "keyword": {
@@ -111,7 +111,7 @@ class PiczelImageExtractor(PiczelExtractor):
             "user": dict,
             "views": int,
         },
-    })]
+    })
 
     def get_images(self):
         url = "{}/api/gallery/image/{}".format(self.api_root, self.item_id)

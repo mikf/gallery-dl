@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,14 +16,14 @@ class ImgthGalleryExtractor(Extractor):
     """Extractor for image galleries from imgth.com"""
     category = "imgth"
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    directory_fmt = ("{category}", "{gallery_id} {title}")
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     archive_fmt = "{gallery_id}_{num}"
-    pattern = [r"(?:https?://)?imgth\.com/gallery/(\d+)"]
-    test = [("http://imgth.com/gallery/37/wallpaper-anime", {
+    pattern = r"(?:https?://)?imgth\.com/gallery/(\d+)"
+    test = ("http://imgth.com/gallery/37/wallpaper-anime", {
         "url": "4ae1d281ca2b48952cf5cca57e9914402ad72748",
         "keyword": "e62d14f20ded393d28c2789fcc34ea2c30bc6a7c",
-    })]
+    })
 
     def __init__(self, match):
         Extractor.__init__(self)

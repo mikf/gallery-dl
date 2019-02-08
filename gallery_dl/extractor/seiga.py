@@ -69,11 +69,11 @@ class SeigaExtractor(Extractor):
 class SeigaUserExtractor(SeigaExtractor):
     """Extractor for images of a user from seiga.nicovideo.jp"""
     subcategory = "user"
-    directory_fmt = ["{category}", "{user[id]}"]
+    directory_fmt = ("{category}", "{user[id]}")
     filename_fmt = "{category}_{user[id]}_{image_id}.{extension}"
-    pattern = [(r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/"
-                r"user/illust/(\d+)(?:\?(?:[^&]+&)*sort=([^&#]+))?")]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/"
+               r"user/illust/(\d+)(?:\?(?:[^&]+&)*sort=([^&#]+))?")
+    test = (
         ("http://seiga.nicovideo.jp/user/illust/39537793", {
             "pattern": r"https://lohas\.nicoseiga\.jp/priv/[0-9a-f]+/\d+/\d+",
             "count": ">= 4",
@@ -95,9 +95,9 @@ class SeigaUserExtractor(SeigaExtractor):
         ("http://seiga.nicovideo.jp/user/illust/79433", {
             "exception": exception.NotFoundError,
         }),
-        (("http://seiga.nicovideo.jp/user/illust/39537793"
-          "?sort=image_view&target=illust_all"), None),
-    ]
+        ("http://seiga.nicovideo.jp/user/illust/39537793"
+         "?sort=image_view&target=illust_all"),
+    )
 
     def __init__(self, match):
         SeigaExtractor.__init__(self)
@@ -166,10 +166,10 @@ class SeigaImageExtractor(SeigaExtractor):
     """Extractor for single images from seiga.nicovideo.jp"""
     subcategory = "image"
     filename_fmt = "{category}_{image_id}.{extension}"
-    pattern = [r"(?:https?://)?(?:"
+    pattern = (r"(?:https?://)?(?:"
                r"(?:www\.|seiga\.)?nicovideo\.jp/(?:seiga/im|image/source/)"
-               r"|lohas\.nicoseiga\.jp/(?:priv|o)/[^/]+/\d+/)(\d+)"]
-    test = [
+               r"|lohas\.nicoseiga\.jp/(?:priv|o)/[^/]+/\d+/)(\d+)")
+    test = (
         ("http://seiga.nicovideo.jp/seiga/im5977527", {
             "keyword": "f66ba5de33d4ce2cb57f23bb37e1e847e0771c10",
             "content": "d9202292012178374d57fb0126f6124387265297",
@@ -177,7 +177,7 @@ class SeigaImageExtractor(SeigaExtractor):
         ("http://seiga.nicovideo.jp/seiga/im123", {
             "exception": exception.NotFoundError,
         }),
-    ]
+    )
 
     def __init__(self, match):
         SeigaExtractor.__init__(self)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,13 +16,13 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
     """Extractor for image galleries from simply-hentai.com"""
     category = "simplyhentai"
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    directory_fmt = ("{category}", "{gallery_id} {title}")
     filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
     archive_fmt = "{image_id}"
-    pattern = [r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
+    pattern = (r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
                r"(?!/(?:album|gifs?|images?|series)(?:/|$))"
-               r"(?:/(?!(?:page|all-pages)(?:/|\.|$))[^/?&#]+)+)"]
-    test = [
+               r"(?:/(?!(?:page|all-pages)(?:/|\.|$))[^/?&#]+)+)")
+    test = (
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
             "url": "258289249990502c3138719cb89e995a60861e49",
@@ -32,10 +32,10 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
             "exception": exception.GalleryDLException,
         }),
         # custom subdomain
-        ("https://pokemon.simply-hentai.com/mao-friends-9bc39", None),
+        ("https://pokemon.simply-hentai.com/mao-friends-9bc39"),
         # www subdomain, two path segments
-        ("https://www.simply-hentai.com/vocaloid/black-magnet", None),
-    ]
+        ("https://www.simply-hentai.com/vocaloid/black-magnet"),
+    )
 
     def __init__(self, match):
         url = "https://" + match.group(1)
@@ -81,12 +81,12 @@ class SimplyhentaiImageExtractor(Extractor):
     """Extractor for individual images from simply-hentai.com"""
     category = "simplyhentai"
     subcategory = "image"
-    directory_fmt = ["{category}", "{type}s"]
+    directory_fmt = ("{category}", "{type}s")
     filename_fmt = "{category}_{token}{title:?_//}.{extension}"
     archive_fmt = "{token}"
-    pattern = [r"(?:https?://)?(?:www\.)?(simply-hentai\.com"
-               r"/(image|gif)/[^/?&#]+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?(simply-hentai\.com"
+               r"/(image|gif)/[^/?&#]+)")
+    test = (
         (("https://www.simply-hentai.com/image"
           "/pheromomania-vol-1-kanzenban-isao-3949d8b3-400c-4b6"), {
             "url": "0338eb137830ab6f81e5f410d3936ef785d063d9",
@@ -96,7 +96,7 @@ class SimplyhentaiImageExtractor(Extractor):
             "url": "11c060d7ec4dfd0bd105300b6e1fd454674a5af1",
             "keyword": "fbfd5c418f3d9d7d0b0ba0cda0602240820da693",
         }),
-    ]
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -127,11 +127,11 @@ class SimplyhentaiVideoExtractor(Extractor):
     """Extractor for hentai videos from simply-hentai.com"""
     category = "simplyhentai"
     subcategory = "video"
-    directory_fmt = ["{category}", "{type}s"]
+    directory_fmt = ("{category}", "{type}s")
     filename_fmt = "{title}{episode:?_//>02}.{extension}"
     archive_fmt = "{title}_{episode}"
-    pattern = [r"(?:https?://)?(videos\.simply-hentai\.com/[^/?&#]+)"]
-    test = [
+    pattern = r"(?:https?://)?(videos\.simply-hentai\.com/[^/?&#]+)"
+    test = (
         ("https://videos.simply-hentai.com/creamy-pie-episode-02", {
             "pattern": r"https://www\.googleapis\.com/drive/v3/files"
                        r"/0B1ecQ8ZVLm3JcHZzQzBnVy1ZUmc\?alt=media&key=[\w-]+",
@@ -143,7 +143,7 @@ class SimplyhentaiVideoExtractor(Extractor):
             "url": "ad9a36ae06c601b6490e3c401834b4949d947eb0",
             "keyword": "fef03513d5e1a9958d63e45a1d583e2f658b1168",
         }),
-    ]
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)

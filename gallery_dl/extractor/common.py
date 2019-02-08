@@ -26,7 +26,7 @@ class Extractor():
     category = ""
     subcategory = ""
     categorytransfer = False
-    directory_fmt = ["{category}"]
+    directory_fmt = ("{category}",)
     filename_fmt = "{name}.{extension}"
     archive_fmt = ""
     cookiedomain = ""
@@ -193,9 +193,9 @@ class Extractor():
 class ChapterExtractor(Extractor):
 
     subcategory = "chapter"
-    directory_fmt = [
+    directory_fmt = (
         "{category}", "{manga}",
-        "{volume:?v/ />02}c{chapter:>03}{chapter_minor:?//}{title:?: //}"]
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor:?//}{title:?: //}")
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
     archive_fmt = (

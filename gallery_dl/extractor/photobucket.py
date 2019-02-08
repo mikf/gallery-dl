@@ -18,35 +18,34 @@ class PhotobucketAlbumExtractor(Extractor):
     """Extractor for albums on photobucket.com"""
     category = "photobucket"
     subcategory = "album"
-    directory_fmt = ["{category}", "{username}", "{location}"]
+    directory_fmt = ("{category}", "{username}", "{location}")
     filename_fmt = "{offset:>03}{pictureId:?_//}_{titleOrFilename}.{extension}"
     archive_fmt = "{id}"
-    pattern = [r"(?:https?://)?((?:[^.]+\.)?photobucket\.com)"
-               r"/user/[^/?&#]+/library/[^?&#]*"]
-    test = [
+    pattern = (r"(?:https?://)?((?:[^.]+\.)?photobucket\.com)"
+               r"/user/[^/?&#]+/library/[^?&#]*")
+    test = (
         ("http://s258.photobucket.com/user/focolandia/library/", {
             "pattern": r"http://i\d+.photobucket.com/albums/hh280/focolandia",
             "count": ">= 39"
         }),
-        # subalbums from main "directory"
+        # subalbums of main "directory"
         ("http://s271.photobucket.com/user/lakerfanryan/library/", {
             "options": (("image-filter", "False"),),
-            "pattern": pattern[0],
+            "pattern": pattern,
             "count": 1,
         }),
-        # subalbums from subalbum without images
+        # subalbums of subalbum without images
         ("http://s271.photobucket.com/user/lakerfanryan/library/Basketball", {
-            "pattern": pattern[0],
+            "pattern": pattern,
             "count": ">= 9",
         }),
         # private (missing JSON data)
         ("http://s1277.photobucket.com/user/sinisterkat44/library/", {
             "count": 0,
         }),
-
         ("http://s1110.photobucket.com/user/chndrmhn100/library/"
-         "Chandu%20is%20the%20King?sort=3&page=1", None),
-    ]
+         "Chandu%20is%20the%20King?sort=3&page=1"),
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)
@@ -108,13 +107,13 @@ class PhotobucketImageExtractor(Extractor):
     """Extractor for individual images from photobucket.com"""
     category = "photobucket"
     subcategory = "image"
-    directory_fmt = ["{category}", "{username}"]
+    directory_fmt = ("{category}", "{username}")
     filename_fmt = "{pictureId:?/_/}{titleOrFilename}.{extension}"
     archive_fmt = "{username}_{id}"
-    pattern = [r"(?:https?://)?(?:[^.]+\.)?photobucket\.com"
+    pattern = (r"(?:https?://)?(?:[^.]+\.)?photobucket\.com"
                r"(?:/gallery/user/([^/?&#]+)/media/([^/?&#]+)"
-               r"|/user/([^/?&#]+)/media/[^?&#]+\.html)"]
-    test = [
+               r"|/user/([^/?&#]+)/media/[^?&#]+\.html)")
+    test = (
         (("http://s271.photobucket.com/user/lakerfanryan"
           "/media/Untitled-3-1.jpg.html"), {
             "url": "3b647deeaffc184cc48c89945f67574559c9051f",
@@ -125,7 +124,7 @@ class PhotobucketImageExtractor(Extractor):
             "url": "12c1890c09c9cdb8a88fba7eec13f324796a8d7b",
             "keyword": "61200a223df6c06f45ac3d30c88b3f5b048ce9a8",
         }),
-    ]
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)

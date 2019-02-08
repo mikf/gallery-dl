@@ -103,16 +103,14 @@ def find(url):
 
 def add(klass):
     """Add 'klass' to the list of available extractors"""
-    for pattern in klass.pattern:
-        _cache.append((re.compile(pattern), klass))
+    _cache.append((re.compile(klass.pattern), klass))
 
 
 def add_module(module):
     """Add all extractors in 'module' to the list of available extractors"""
     tuples = [
-        (re.compile(pattern), klass)
+        (re.compile(klass.pattern), klass)
         for klass in _get_classes(module)
-        for pattern in klass.pattern
     ]
     _cache.extend(tuples)
     return tuples

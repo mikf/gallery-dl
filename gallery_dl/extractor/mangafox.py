@@ -15,15 +15,15 @@ from .. import text
 class MangafoxChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from fanfox.net"""
     category = "mangafox"
-    pattern = [(r"(?:https?://)?(?:www\.|m\.)?(?:mangafox\.me|fanfox\.net)"
-                r"(/manga/[^/]+/((?:v(\d+)/)?c(\d+)([^/?&#]*)))")]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|m\.)?(?:mangafox\.me|fanfox\.net)"
+               r"(/manga/[^/]+/((?:v(\d+)/)?c(\d+)([^/?&#]*)))")
+    test = (
         ("http://fanfox.net/manga/kidou_keisatsu_patlabor/v05/c006.2/1.html", {
             "keyword": "36b570e9ef11b4748407324fe08bebbe4856e6fd",
             "content": "5c50c252dcf12ffecf68801f4db8a2167265f66c",
         }),
-        ("http://mangafox.me/manga/kidou_keisatsu_patlabor/v05/c006.2/", None),
-    ]
+        ("http://mangafox.me/manga/kidou_keisatsu_patlabor/v05/c006.2/"),
+    )
     root = "https://m.fanfox.net"
 
     def __init__(self, match):

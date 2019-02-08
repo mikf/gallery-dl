@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,7 +29,7 @@ BASE_PATTERN = (
 class DeviantartExtractor(Extractor):
     """Base class for deviantart extractors"""
     category = "deviantart"
-    directory_fmt = ["{category}", "{author[username]!l}"]
+    directory_fmt = ("{category}", "{author[username]!l}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
     root = "https://www.deviantart.com"
 
@@ -202,8 +202,8 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
     archive_fmt = "g_{username}_{index}.{extension}"
-    pattern = [BASE_PATTERN + r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"]
-    test = [
+    pattern = BASE_PATTERN + r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"
+    test = (
         ("https://www.deviantart.com/shimoda7/gallery/", {
             "pattern": r"https://(s3.amazonaws.com/origin-(img|orig)"
                        r".deviantart.net/|images-wixmp-\w+.wixmp.com/)",
@@ -258,11 +258,11 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/shimoda8/gallery/", {
             "exception": exception.NotFoundError,
         }),
-        ("https://www.deviantart.com/shimoda7/gallery/?catpath=/", None),
-        ("https://shimoda7.deviantart.com/gallery/", None),
-        ("https://yakuzafc.deviantart.com/", None),
-        ("https://shimoda7.deviantart.com/gallery/?catpath=/", None),
-    ]
+        ("https://www.deviantart.com/shimoda7/gallery/?catpath=/"),
+        ("https://shimoda7.deviantart.com/gallery/"),
+        ("https://yakuzafc.deviantart.com/"),
+        ("https://shimoda7.deviantart.com/gallery/?catpath=/"),
+    )
 
     def deviations(self):
         if self.flat and not self.group:
@@ -275,10 +275,10 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
 class DeviantartFolderExtractor(DeviantartExtractor):
     """Extractor for deviations inside an artist's gallery folder"""
     subcategory = "folder"
-    directory_fmt = ["{category}", "{folder[owner]}", "{folder[title]}"]
+    directory_fmt = ("{category}", "{folder[owner]}", "{folder[title]}")
     archive_fmt = "F_{folder[uuid]}_{index}.{extension}"
-    pattern = [BASE_PATTERN + r"/gallery/(\d+)/([^/?&#]+)"]
-    test = [
+    pattern = BASE_PATTERN + r"/gallery/(\d+)/([^/?&#]+)"
+    test = (
         ("https://www.deviantart.com/shimoda7/gallery/722019/Miscellaneous", {
             "count": 5,
             "options": (("original", False),),
@@ -287,9 +287,9 @@ class DeviantartFolderExtractor(DeviantartExtractor):
             "count": ">= 4",
             "options": (("original", False),),
         }),
-        ("https://shimoda7.deviantart.com/gallery/722019/Miscellaneous", None),
-        ("https://yakuzafc.deviantart.com/gallery/37412168/Crafts", None),
-    ]
+        ("https://shimoda7.deviantart.com/gallery/722019/Miscellaneous"),
+        ("https://yakuzafc.deviantart.com/gallery/37412168/Crafts"),
+    )
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
@@ -312,8 +312,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
     archive_fmt = "{index}.{extension}"
-    pattern = [BASE_PATTERN + r"/(?:art|journal)/[^/?&#]+-\d+"]
-    test = [
+    pattern = BASE_PATTERN + r"/(?:art|journal)/[^/?&#]+-\d+"
+    test = (
         (("https://www.deviantart.com/shimoda7/art/"
           "For-the-sake-of-a-memory-10073852"), {
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
@@ -326,12 +326,12 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "pattern": (r"https?://s3\.amazonaws\.com/origin-orig\."
                         r"deviantart\.net/a383/f/2013/135/e/7/[^.]+\.jpg\?"),
         }),
-        (("https://shimoda7.deviantart.com/art/"
-          "For-the-sake-of-a-memory-10073852"), None),
-        ("https://zzz.deviantart.com/art/zzz-1234567890", None),
-        (("https://myria-moon.deviantart.com/art/"
-          "Aime-Moi-part-en-vadrouille-261986576"), None),
-    ]
+        ("https://shimoda7.deviantart.com"
+         "/art/For-the-sake-of-a-memory-10073852"),
+        ("https://myria-moon.deviantart.com"
+         "/art/Aime-Moi-part-en-vadrouille-261986576"),
+        ("https://zzz.deviantart.com/art/zzz-1234567890"),
+    )
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
@@ -351,20 +351,20 @@ class DeviantartStashExtractor(DeviantartDeviationExtractor):
     """Extractor for sta.sh-ed deviations"""
     subcategory = "stash"
     archive_fmt = "{index}.{extension}"
-    pattern = [r"(?:https?://)?sta\.sh/()()[a-z0-9]+"]
-    test = [
+    pattern = r"(?:https?://)?sta\.sh/()()[a-z0-9]+"
+    test = (
         ("https://sta.sh/022c83odnaxc", {
             "pattern": r"https://s3.amazonaws.com/origin-orig.deviantart.net",
             "count": 1,
         }),
         ("https://sta.sh/21jf51j7pzl2", {
-            "pattern": pattern[0],
+            "pattern": pattern,
             "count": 4,
         }),
         ("https://sta.sh/abcdefghijkl", {
             "exception": exception.HttpError,
         }),
-    ]
+    )
 
     def deviations(self):
         page = self.request(self.url).text
@@ -382,17 +382,17 @@ class DeviantartStashExtractor(DeviantartDeviationExtractor):
 class DeviantartFavoriteExtractor(DeviantartExtractor):
     """Extractor for an artist's favorites"""
     subcategory = "favorite"
-    directory_fmt = ["{category}", "{username}", "Favourites"]
+    directory_fmt = ("{category}", "{username}", "Favourites")
     archive_fmt = "f_{username}_{index}.{extension}"
-    pattern = [BASE_PATTERN + r"/favourites/?(?:\?catpath=/)?$"]
-    test = [
+    pattern = BASE_PATTERN + r"/favourites/?(?:\?catpath=/)?$"
+    test = (
         ("https://www.deviantart.com/h3813067/favourites/", {
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
-        ("https://www.deviantart.com/h3813067/favourites/?catpath=/", None),
-        ("https://h3813067.deviantart.com/favourites/", None),
-        ("https://h3813067.deviantart.com/favourites/?catpath=/", None),
-    ]
+        ("https://www.deviantart.com/h3813067/favourites/?catpath=/"),
+        ("https://h3813067.deviantart.com/favourites/"),
+        ("https://h3813067.deviantart.com/favourites/?catpath=/"),
+    )
 
     def deviations(self):
         folders = self.api.collections_folders(self.user)
@@ -408,19 +408,19 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
 class DeviantartCollectionExtractor(DeviantartExtractor):
     """Extractor for a single favorite collection"""
     subcategory = "collection"
-    directory_fmt = ["{category}", "{collection[owner]}",
-                     "Favourites", "{collection[title]}"]
+    directory_fmt = ("{category}", "{collection[owner]}",
+                     "Favourites", "{collection[title]}")
     archive_fmt = "C_{collection[uuid]}_{index}.{extension}"
-    pattern = [BASE_PATTERN + r"/favourites/(\d+)/([^/?&#]+)"]
-    test = [
+    pattern = BASE_PATTERN + r"/favourites/(\d+)/([^/?&#]+)"
+    test = (
         (("https://www.deviantart.com/pencilshadings"
           "/favourites/70595441/3D-Favorites"), {
             "count": ">= 20",
             "options": (("original", False),),
         }),
-        (("https://pencilshadings.deviantart.com"
-          "/favourites/70595441/3D-Favorites"), None),
-    ]
+        ("https://pencilshadings.deviantart.com"
+         "/favourites/70595441/3D-Favorites"),
+    )
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
@@ -442,10 +442,10 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
 class DeviantartJournalExtractor(DeviantartExtractor):
     """Extractor for an artist's journals"""
     subcategory = "journal"
-    directory_fmt = ["{category}", "{username}", "Journal"]
+    directory_fmt = ("{category}", "{username}", "Journal")
     archive_fmt = "j_{username}_{index}.{extension}"
-    pattern = [BASE_PATTERN + r"/(?:journal|blog)/?(?:\?catpath=/)?$"]
-    test = [
+    pattern = BASE_PATTERN + r"/(?:journal|blog)/?(?:\?catpath=/)?$"
+    test = (
         ("https://www.deviantart.com/angrywhitewanker/journal/", {
             "url": "38db2a0d3a587a7e0f9dba7ff7d274610ebefe44",
         }),
@@ -457,10 +457,10 @@ class DeviantartJournalExtractor(DeviantartExtractor):
             "count": 0,
             "options": (("journals", "none"),),
         }),
-        ("https://www.deviantart.com/shimoda7/journal/?catpath=/", None),
-        ("https://angrywhitewanker.deviantart.com/journal/", None),
-        ("https://shimoda7.deviantart.com/journal/?catpath=/", None),
-    ]
+        ("https://www.deviantart.com/shimoda7/journal/?catpath=/"),
+        ("https://angrywhitewanker.deviantart.com/journal/"),
+        ("https://shimoda7.deviantart.com/journal/?catpath=/"),
+    )
 
     def deviations(self):
         return self.api.browse_user_journals(self.user, self.offset)
@@ -469,17 +469,17 @@ class DeviantartJournalExtractor(DeviantartExtractor):
 class DeviantartPopularExtractor(DeviantartExtractor):
     """Extractor for popular deviations"""
     subcategory = "popular"
-    directory_fmt = ["{category}", "Popular",
-                     "{popular[range]}", "{popular[search]}"]
+    directory_fmt = ("{category}", "Popular",
+                     "{popular[range]}", "{popular[search]}")
     archive_fmt = "P_{popular[range]}_{popular[search]}_{index}.{extension}"
-    pattern = [r"(?:https?://)?www\.deviantart\.com"
-               r"((?:/\w+)*)/(?:popular-([^/?&#]+))/?(?:\?([^#]*))?"]
-    test = [
+    pattern = (r"(?:https?://)?www\.deviantart\.com"
+               r"((?:/\w+)*)/(?:popular-([^/?&#]+))/?(?:\?([^#]*))?")
+    test = (
         ("https://www.deviantart.com/popular-24-hours/?q=tree+house", {
             "options": (("original", False),),
         }),
-        ("https://www.deviantart.com/artisan/popular-all-time/?q=tree", None),
-    ]
+        ("https://www.deviantart.com/artisan/popular-all-time/?q=tree"),
+    )
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self)

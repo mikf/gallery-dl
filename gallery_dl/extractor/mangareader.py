@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -34,12 +34,12 @@ class MangareaderBase():
 
 class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
     """Extractor for manga from mangareader.net"""
-    pattern = [r"(?:https?://)?((?:www\.)?mangareader\.net/[^/?&#]+)/?$"]
+    pattern = r"(?:https?://)?((?:www\.)?mangareader\.net/[^/?&#]+)/?$"
     reverse = False
-    test = [("https://www.mangareader.net/mushishi", {
+    test = ("https://www.mangareader.net/mushishi", {
         "url": "bc203b858b4ad76e5d77e39118a7be0350e357da",
         "keyword": "031b3ea085921c552de017ecbb9b906e462229c9",
-    })]
+    })
 
     def chapters(self, page):
         results = []
@@ -60,12 +60,12 @@ class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
 class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
     """Extractor for manga-chapters from mangareader.net"""
     archive_fmt = "{manga}_{chapter}_{page}"
-    pattern = [r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/?&#]+)/(\d+))"]
-    test = [(("https://www.mangareader.net/"
-              "karate-shoukoushi-kohinata-minoru/11"), {
+    pattern = r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/?&#]+)/(\d+))"
+    test = (("https://www.mangareader.net"
+             "/karate-shoukoushi-kohinata-minoru/11"), {
         "url": "061cc92a07edf17bb991ce0821fa4c77a147a860",
         "keyword": "2893cfcd1916859fb498f3345f1929f868fe667f",
-    })]
+    })
 
     def __init__(self, match):
         self.part, self.url_title, self.chapter = match.groups()

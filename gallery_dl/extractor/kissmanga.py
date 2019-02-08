@@ -69,15 +69,15 @@ class KissmangaBase():
 
 class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
     """Extractor for manga from kissmanga.com"""
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com"
-               r"(/Manga/[^/?&#]+/?)$"]
-    test = [
+    pattern = (r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com"
+               r"(/Manga/[^/?&#]+/?)$")
+    test = (
         ("https://kissmanga.com/Manga/Dropout", {
             "url": "9e3a6f715b229aa3fafa42a1d5da5d65614cb532",
             "keyword": "32b09711c28b481845acc32e3bb6054cfc90224d",
         }),
-        ("https://kissmanga.com/manga/feng-shen-ji", None),
-    ]
+        ("https://kissmanga.com/manga/feng-shen-ji"),  # lowercase
+    )
 
     def __init__(self, match):
         MangaExtractor.__init__(self, match, self.root + match.group(1))
@@ -104,9 +104,9 @@ class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
 
 class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
     """Extractor for manga-chapters from kissmanga.com"""
-    pattern = [r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com"
-               r"(/Manga/[^/?&#]+/[^/?&#]+\?id=(\d+))"]
-    test = [
+    pattern = (r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com"
+               r"(/Manga/[^/?&#]+/[^/?&#]+\?id=(\d+))")
+    test = (
         ("https://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
             "url": "46e63fd63e9e16f19bc1e6c7a45dc060815642fd",
             "keyword": "4a3a9341d453541de0dbfa24cd6b2e3ed39c0182",
@@ -123,8 +123,8 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
             "count": 49,
             "keyword": "7835a19c9fc54ec4f2b345e8be3e865cfa57da5c",
         }),
-        ("https://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608", None),
-    ]
+        ("https://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608"),
+    )
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, self.root + match.group(1))
