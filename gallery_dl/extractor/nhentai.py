@@ -39,14 +39,14 @@ class NHentaiExtractor(Extractor):
 class NhentaiGalleryExtractor(NHentaiExtractor):
     """Extractor for image galleries from nhentai.net"""
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    directory_fmt = ("{category}", "{gallery_id} {title}")
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     archive_fmt = "{gallery_id}_{num}"
-    pattern = [r"(?:https?://)?nhentai\.net/g/(\d+)"]
-    test = [("https://nhentai.net/g/147850/", {
+    pattern = r"(?:https?://)?nhentai\.net/g/(\d+)"
+    test = ("https://nhentai.net/g/147850/", {
         "url": "5179dbf0f96af44005a0ff705a0ad64ac26547d0",
         "keyword": "2f94976e657f3043a89997e22f4de8e1b22d9175",
-    })]
+    })
 
     def __init__(self, match):
         NHentaiExtractor.__init__(self)
@@ -78,12 +78,12 @@ class NhentaiSearchExtractor(NHentaiExtractor):
     """Extractor for nhentai search results"""
     category = "nhentai"
     subcategory = "search"
-    pattern = [r"(?:https?://)?nhentai\.net/search/?\?([^#]+)"]
-    test = [("https://nhentai.net/search/?q=touhou", {
-        "pattern": NhentaiGalleryExtractor.pattern[0],
+    pattern = r"(?:https?://)?nhentai\.net/search/?\?([^#]+)"
+    test = ("https://nhentai.net/search/?q=touhou", {
+        "pattern": NhentaiGalleryExtractor.pattern,
         "count": 30,
         "range": "1-30",
-    })]
+    })
 
     def __init__(self, match):
         NHentaiExtractor.__init__(self)

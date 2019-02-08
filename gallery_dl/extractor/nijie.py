@@ -16,7 +16,7 @@ from ..cache import cache
 class NijieExtractor(AsynchronousMixin, Extractor):
     """Base class for nijie extractors"""
     category = "nijie"
-    directory_fmt = ["{category}", "{user_id}"]
+    directory_fmt = ("{category}", "{user_id}")
     filename_fmt = "{category}_{artist_id}_{image_id}_p{index:>02}.{extension}"
     archive_fmt = "{image_id}_{index}"
     cookiedomain = "nijie.info"
@@ -122,9 +122,9 @@ class NijieExtractor(AsynchronousMixin, Extractor):
 class NijieUserExtractor(NijieExtractor):
     """Extractor for works of a nijie-user"""
     subcategory = "user"
-    pattern = [(r"(?:https?://)?(?:www\.)?nijie\.info"
-                r"/members(?:_illust)?\.php\?id=(\d+)")]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?nijie\.info"
+               r"/members(?:_illust)?\.php\?id=(\d+)")
+    test = (
         ("https://nijie.info/members_illust.php?id=44", {
             "url": "585d821df4716b1098660a0be426d01db4b65f2a",
             "keyword": "1eb3387196f1f30d6d74a41f4c77faaadd588e52",
@@ -132,8 +132,8 @@ class NijieUserExtractor(NijieExtractor):
         ("https://nijie.info/members_illust.php?id=43", {
             "exception": exception.NotFoundError,
         }),
-        ("https://nijie.info/members.php?id=44", None),
-    ]
+        ("https://nijie.info/members.php?id=44"),
+    )
 
     def get_image_ids(self):
         return self._pagination("members_illust")
@@ -142,13 +142,11 @@ class NijieUserExtractor(NijieExtractor):
 class NijieDoujinExtractor(NijieExtractor):
     """Extractor for doujin entries of a nijie-user"""
     subcategory = "doujin"
-    pattern = [(r"(?:https?://)?(?:www\.)?nijie\.info/"
-                r"members_dojin\.php\?id=(\d+)")]
-    test = [
-        ("https://nijie.info/members_dojin.php?id=6782", {
-            "count": ">= 18",
-        }),
-    ]
+    pattern = (r"(?:https?://)?(?:www\.)?nijie\.info/"
+               r"members_dojin\.php\?id=(\d+)")
+    test = ("https://nijie.info/members_dojin.php?id=6782", {
+        "count": ">= 18",
+    })
 
     def get_image_ids(self):
         return self._pagination("members_dojin")
@@ -157,15 +155,13 @@ class NijieDoujinExtractor(NijieExtractor):
 class NijieFavoriteExtractor(NijieExtractor):
     """Extractor for all favorites/bookmarks of a nijie-user"""
     subcategory = "favorite"
-    directory_fmt = ["{category}", "bookmarks", "{user_id}"]
+    directory_fmt = ("{category}", "bookmarks", "{user_id}")
     archive_fmt = "f_{user_id}_{image_id}_{index}"
-    pattern = [(r"(?:https?://)?(?:www\.)?nijie\.info"
-                r"/user_like_illust_view\.php\?id=(\d+)")]
-    test = [
-        ("https://nijie.info/user_like_illust_view.php?id=44", {
-            "count": ">= 16",
-        }),
-    ]
+    pattern = (r"(?:https?://)?(?:www\.)?nijie\.info"
+               r"/user_like_illust_view\.php\?id=(\d+)")
+    test = ("https://nijie.info/user_like_illust_view.php?id=44", {
+        "count": ">= 16",
+    })
 
     def get_image_ids(self):
         return self._pagination("user_like_illust_view")
@@ -174,9 +170,9 @@ class NijieFavoriteExtractor(NijieExtractor):
 class NijieImageExtractor(NijieExtractor):
     """Extractor for a work/image from nijie.info"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:www\.)?nijie\.info"
-               r"/view(?:_popup)?\.php\?id=(\d+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?nijie\.info"
+               r"/view(?:_popup)?\.php\?id=(\d+)")
+    test = (
         ("https://nijie.info/view.php?id=70720", {
             "url": "a10d4995645b5f260821e32c60a35f73546c2699",
             "keyword": "0728fc3bbef1e192abfd59f88f07921d3d336804",
@@ -185,8 +181,8 @@ class NijieImageExtractor(NijieExtractor):
         ("https://nijie.info/view.php?id=70724", {
             "exception": exception.NotFoundError,
         }),
-        ("https://nijie.info/view_popup.php?id=70720", None),
-    ]
+        ("https://nijie.info/view_popup.php?id=70720"),
+    )
 
     def __init__(self, match):
         NijieExtractor.__init__(self)

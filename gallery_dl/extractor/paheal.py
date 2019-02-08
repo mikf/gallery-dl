@@ -42,13 +42,13 @@ class PahealExtractor(SharedConfigMixin, Extractor):
 class PahealTagExtractor(PahealExtractor):
     """Extractor for images from rule34.paheal.net by search-tags"""
     subcategory = "tag"
-    directory_fmt = ["{category}", "{tags}"]
-    pattern = [r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
-               r"/post/list/([^/?&#]+)"]
-    test = [("https://rule34.paheal.net/post/list/k-on/1", {
+    directory_fmt = ("{category}", "{tags}")
+    pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
+               r"/post/list/([^/?&#]+)")
+    test = ("https://rule34.paheal.net/post/list/k-on/1", {
         "url": "0f5a777cea524635760de32dd85a3de5ac5f3f43",
         "keyword": "fddaa6329bae5b99e8a666eeeb1cb7721d21bf6d",
-    })]
+    })
     per_page = 70
 
     def __init__(self, match):
@@ -92,13 +92,13 @@ class PahealTagExtractor(PahealExtractor):
 class PahealPostExtractor(PahealExtractor):
     """Extractor for single images from rule34.paheal.net"""
     subcategory = "post"
-    pattern = [r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
-               r"/post/view/(\d+)"]
-    test = [("https://rule34.paheal.net/post/view/481609", {
+    pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
+               r"/post/view/(\d+)")
+    test = ("https://rule34.paheal.net/post/view/481609", {
         "url": "3aa2189c8d1fa952a4d3420def93fd2bd54d6741",
         "keyword": "d7a0bd6d8b0a5bd8300857044ed2d53d481d37cf",
         "content": "7b924bcf150b352ac75c9d281d061e174c851a11",
-    })]
+    })
 
     def __init__(self, match):
         PahealExtractor.__init__(self)

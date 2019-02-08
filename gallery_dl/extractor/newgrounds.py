@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,7 +16,7 @@ import json
 class NewgroundsExtractor(Extractor):
     """Base class for newgrounds extractors"""
     category = "newgrounds"
-    directory_fmt = ["{category}", "{user}"]
+    directory_fmt = ("{category}", "{user}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
     archive_fmt = "{index}"
 
@@ -93,14 +93,14 @@ class NewgroundsExtractor(Extractor):
 class NewgroundsUserExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?([^.]+)\.newgrounds\.com(?:/art)?/?$"]
-    test = [
+    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com(?:/art)?/?$"
+    test = (
         ("https://blitzwuff.newgrounds.com/art", {
             "url": "24b19c4a135a09889fac7b46a74e427e4308d02b",
             "keyword": "68c235e5c4ce94f2f9e001d84fe801441e5500f1",
         }),
-        ("https://blitzwuff.newgrounds.com/", None),
-    ]
+        ("https://blitzwuff.newgrounds.com/"),
+    )
 
     def get_page_urls(self):
         return self._pagination(self.root + "/art/page/1")
@@ -109,10 +109,10 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
 class NewgroundsImageExtractor(NewgroundsExtractor):
     """Extractor for a single image from newgrounds.com"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:"
+    pattern = (r"(?:https?://)?(?:"
                r"(?:www\.)?newgrounds\.com/art/view/([^/?&#]+)/[^/?&#]+"
-               r"|art\.ngfiles\.com/images/\d+/\d+_([^_]+)_([^.]+))"]
-    test = [
+               r"|art\.ngfiles\.com/images/\d+/\d+_([^_]+)_([^.]+))")
+    test = (
         ("https://www.newgrounds.com/art/view/blitzwuff/ffx", {
             "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
             "keyword": "5738e2bf19137898204f36c5ae573826672b612c",
@@ -122,7 +122,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
             "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
             "keyword": "5738e2bf19137898204f36c5ae573826672b612c",
         }),
-    ]
+    )
 
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
@@ -141,11 +141,11 @@ class NewgroundsVideoExtractor(NewgroundsExtractor):
     """Extractor for all videos of a newgrounds user"""
     subcategory = "video"
     filename_fmt = "{category}_{index}.{extension}"
-    pattern = [r"(?:https?://)?([^.]+)\.newgrounds\.com/movies/?$"]
-    test = [("https://twistedgrim.newgrounds.com/movies", {
+    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/movies/?$"
+    test = ("https://twistedgrim.newgrounds.com/movies", {
         "pattern": r"ytdl:https?://www\.newgrounds\.com/portal/view/\d+",
         "count": ">= 29",
-    })]
+    })
 
     def get_page_urls(self):
         return self._pagination(self.root + "/movies/page/1")

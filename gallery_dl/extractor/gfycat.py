@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -39,9 +39,9 @@ class GfycatExtractor(Extractor):
 class GfycatImageExtractor(GfycatExtractor):
     """Extractor for individual images from gfycat.com"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:\w+\.)?gfycat\.com"
-               r"/(?:gifs/detail/|\w+/)?([A-Za-z]+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:\w+\.)?gfycat\.com"
+               r"/(?:gifs/detail/|\w+/)?([A-Za-z]+)")
+    test = (
         ("https://gfycat.com/GrayGenerousCowrie", {
             "url": "e0b5e1d7223108249b15c3c7898dd358dbfae045",
             "content": "5786028e04b155baa20b87c5f4f77453cd5edc37",
@@ -67,10 +67,10 @@ class GfycatImageExtractor(GfycatExtractor):
         ("https://gfycat.com/detail/UnequaledHastyAnkole?tagname=aww", {
             "url": "e24c9f69897fd223343782425a429c5cab6a768e",
         }),
-        ("https://gfycat.com/gifs/detail/UnequaledHastyAnkole", None),
-        ("https://gfycat.com/ifr/UnequaledHastyAnkole", None),
-        ("https://gfycat.com/ru/UnequaledHastyAnkole", None),
-    ]
+        ("https://gfycat.com/gifs/detail/UnequaledHastyAnkole"),
+        ("https://gfycat.com/ifr/UnequaledHastyAnkole"),
+        ("https://gfycat.com/ru/UnequaledHastyAnkole"),
+    )
 
     def __init__(self, match):
         GfycatExtractor.__init__(self)

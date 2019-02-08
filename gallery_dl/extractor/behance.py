@@ -45,11 +45,11 @@ class BehanceExtractor(Extractor):
 class BehanceGalleryExtractor(BehanceExtractor):
     """Extractor for image galleries from www.behance.net"""
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{owners:J, }", "{id} {name}"]
+    directory_fmt = ("{category}", "{owners:J, }", "{id} {name}")
     filename_fmt = "{category}_{id}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
-    pattern = [r"(?:https?://)?(?:www\.)?behance\.net/gallery/(\d+)"]
-    test = [
+    pattern = r"(?:https?://)?(?:www\.)?behance\.net/gallery/(\d+)"
+    test = (
         ("https://www.behance.net/gallery/17386197/A-Short-Story", {
             "count": 2,
             "url": "ab79bd3bef8d3ae48e6ac74fd995c1dfaec1b7d2",
@@ -67,7 +67,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
             "url": "0258fe194fe7d828d6f2c7f6086a9a0a4140db1d",
             "keyword": {"owners": ["Alex Strohl"]},
         }),
-    ]
+    )
 
     def __init__(self, match):
         BehanceExtractor.__init__(self)
@@ -127,11 +127,11 @@ class BehanceUserExtractor(BehanceExtractor):
     """Extractor for a user's galleries from www.behance.net"""
     subcategory = "user"
     categorytransfer = True
-    pattern = [r"(?:https?://)?(?:www\.)?behance\.net/([^/?&#]+)/?$"]
-    test = [("https://www.behance.net/alexstrohl", {
+    pattern = r"(?:https?://)?(?:www\.)?behance\.net/([^/?&#]+)/?$"
+    test = ("https://www.behance.net/alexstrohl", {
         "count": ">= 8",
-        "pattern": BehanceGalleryExtractor.pattern[0],
-    })]
+        "pattern": BehanceGalleryExtractor.pattern,
+    })
 
     def __init__(self, match):
         BehanceExtractor.__init__(self)
@@ -155,11 +155,11 @@ class BehanceCollectionExtractor(BehanceExtractor):
     """Extractor for a collection's galleries from www.behance.net"""
     subcategory = "collection"
     categorytransfer = True
-    pattern = [r"(?:https?://)?(?:www\.)?behance\.net/collection/(\d+)"]
-    test = [("https://www.behance.net/collection/170615607/Sky", {
+    pattern = r"(?:https?://)?(?:www\.)?behance\.net/collection/(\d+)"
+    test = ("https://www.behance.net/collection/170615607/Sky", {
         "count": ">= 13",
-        "pattern": BehanceGalleryExtractor.pattern[0],
-    })]
+        "pattern": BehanceGalleryExtractor.pattern,
+    })
 
     def __init__(self, match):
         BehanceExtractor.__init__(self)

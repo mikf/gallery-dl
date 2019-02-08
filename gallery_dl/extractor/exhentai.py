@@ -23,7 +23,7 @@ BASE_PATTERN = r"(?:https?://)?(e[x-]|g\.e-)hentai\.org"
 class ExhentaiExtractor(Extractor):
     """Base class for exhentai extractors"""
     category = "exhentai"
-    directory_fmt = ["{category}", "{gallery_id}"]
+    directory_fmt = ("{category}", "{gallery_id}")
     filename_fmt = "{gallery_id}_{num:>04}_{image_token}_{name}.{extension}"
     archive_fmt = "{gallery_id}_{num}"
     cookiedomain = ".exhentai.org"
@@ -104,10 +104,10 @@ class ExhentaiExtractor(Extractor):
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
     """Extractor for image galleries from exhentai.org"""
     subcategory = "gallery"
-    pattern = [BASE_PATTERN +
+    pattern = (BASE_PATTERN +
                r"(?:/g/(\d+)/([\da-f]{10})"
-               r"|/s/([\da-f]{10})/(\d+)-(\d+))"]
-    test = [
+               r"|/s/([\da-f]{10})/(\d+)-(\d+))")
+    test = (
         ("https://exhentai.org/g/960460/4f0e369d82/", {
             "keyword": "ba0785e49e3877cfa3f91c1ad9a5ac7816339bf5",
             "content": "493d759de534355c9f55f8e365565b62411de146",
@@ -121,9 +121,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         ("https://exhentai.org/s/3957343c3b/960460-5", {
             "count": 2,
         }),
-        ("https://e-hentai.org/g/960460/4f0e369d82/", None),
-        ("https://g.e-hentai.org/g/960460/4f0e369d82/", None),
-    ]
+        ("https://e-hentai.org/g/960460/4f0e369d82/"),
+        ("https://g.e-hentai.org/g/960460/4f0e369d82/"),
+    )
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self)
@@ -324,17 +324,17 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 class ExhentaiSearchExtractor(ExhentaiExtractor):
     """Extractor for exhentai search results"""
     subcategory = "search"
-    pattern = [BASE_PATTERN + r"/?\?(.*)$"]
-    test = [
-        ("https://exhentai.org/?f_search=touhou", None),
+    pattern = BASE_PATTERN + r"/?\?(.*)$"
+    test = (
+        ("https://exhentai.org/?f_search=touhou"),
         (("https://exhentai.org/?f_doujinshi=0&f_manga=0&f_artistcg=0"
           "&f_gamecg=0&f_western=0&f_non-h=1&f_imageset=0&f_cosplay=0"
           "&f_asianporn=0&f_misc=0&f_search=touhou&f_apply=Apply+Filter"), {
-            "pattern": ExhentaiGalleryExtractor.pattern[0],
+            "pattern": ExhentaiGalleryExtractor.pattern,
             "range": "1-30",
             "count": 30,
         }),
-    ]
+    )
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self)
@@ -388,12 +388,12 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
     """Extractor for favorited exhentai galleries"""
     subcategory = "favorite"
-    pattern = [BASE_PATTERN + r"/favorites\.php(?:\?(.*))?"]
-    test = [
-        ("https://exhentai.org/favorites.php", None),
+    pattern = BASE_PATTERN + r"/favorites\.php(?:\?(.*))?"
+    test = (
+        ("https://exhentai.org/favorites.php"),
         ("https://exhentai.org/favorites.php?favcat=1&f_search=touhou"
-         "&f_apply=Search+Favorites", None),
-    ]
+         "&f_apply=Search+Favorites"),
+    )
 
     def __init__(self, match):
         ExhentaiSearchExtractor.__init__(self, match)

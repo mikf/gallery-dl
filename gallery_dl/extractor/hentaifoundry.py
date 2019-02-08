@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,7 +15,7 @@ from .. import text, util, exception
 class HentaifoundryExtractor(Extractor):
     """Base class for hentaifoundry extractors"""
     category = "hentaifoundry"
-    directory_fmt = ["{category}", "{user}"]
+    directory_fmt = ("{category}", "{user}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
     archive_fmt = "{index}"
     root = "https://www.hentai-foundry.com"
@@ -120,17 +120,17 @@ class HentaifoundryExtractor(Extractor):
 class HentaifoundryUserExtractor(HentaifoundryExtractor):
     """Extractor for all images of a hentai-foundry-user"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+    pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
                r"/(?:pictures/user/([^/]+)(?:/page/(\d+))?/?$"
-               r"|user/([^/]+)/profile)"]
-    test = [
+               r"|user/([^/]+)/profile)")
+    test = (
         ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
             "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
             "keyword": "d56e75566dc7dfe71d2ebd08c056a47f8832372d",
         }),
-        ("https://www.hentai-foundry.com/pictures/user/Tenpura/page/3", None),
-        ("https://www.hentai-foundry.com/user/Tenpura/profile", None),
-    ]
+        ("https://www.hentai-foundry.com/pictures/user/Tenpura/page/3"),
+        ("https://www.hentai-foundry.com/user/Tenpura/profile"),
+    )
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(
@@ -146,17 +146,17 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
 class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
     """Extractor for scrap images of a hentai-foundry-user"""
     subcategory = "scraps"
-    directory_fmt = ["{category}", "{user}", "Scraps"]
-    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
-               r"/pictures/user/([^/]+)/scraps(?:/page/(\d+))?"]
-    test = [
+    directory_fmt = ("{category}", "{user}", "Scraps")
+    pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/pictures/user/([^/]+)/scraps(?:/page/(\d+))?")
+    test = (
         ("https://www.hentai-foundry.com/pictures/user/Evulchibi/scraps", {
             "url": "00a11e30b73ff2b00a1fba0014f08d49da0a68ec",
             "keyword": "8c9a2ad4bf20247bcebb7aef3cfe7016f35da4a7",
         }),
-        (("https://www.hentai-foundry.com"
-          "/pictures/user/Evulchibi/scraps/page/3"), None),
-    ]
+        ("https://www.hentai-foundry.com"
+         "/pictures/user/Evulchibi/scraps/page/3"),
+    )
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match.group(1), match.group(2))
@@ -171,18 +171,18 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
 class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
     """Extractor for favorite images of a hentai-foundry-user"""
     subcategory = "favorite"
-    directory_fmt = ["{category}", "{user}", "Favorites"]
+    directory_fmt = ("{category}", "{user}", "Favorites")
     archive_fmt = "f_{user}_{index}"
-    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
-               r"/user/([^/]+)/faves/pictures(?:/page/(\d+))?"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/user/([^/]+)/faves/pictures(?:/page/(\d+))?")
+    test = (
         ("https://www.hentai-foundry.com/user/Tenpura/faves/pictures", {
             "url": "56f9ae2e89fe855e9fe1da9b81e5ec6212b0320b",
             "keyword": "0ab79552ae2fbfcf501ebbebcf19c2dfc9b5eb4e",
         }),
         ("https://www.hentai-foundry.com"
-         "/user/Tenpura/faves/pictures/page/3", None),
-    ]
+         "/user/Tenpura/faves/pictures/page/3"),
+    )
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match.group(1), match.group(2))
@@ -192,11 +192,11 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
 class HentaifoundryRecentExtractor(HentaifoundryExtractor):
     """Extractor for 'Recent Pictures' on hentaifoundry.com"""
     subcategory = "recent"
-    directory_fmt = ["{category}", "Recent Pictures", "{date}"]
+    directory_fmt = ("{category}", "Recent Pictures", "{date}")
     archive_fmt = "r_{index}"
-    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
-               r"/pictures/recent/(\d+-\d+-\d+)(?:/page/(\d+))?"]
-    test = [("http://www.hentai-foundry.com/pictures/recent/2018-09-20", None)]
+    pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/pictures/recent/(\d+-\d+-\d+)(?:/page/(\d+))?")
+    test = ("http://www.hentai-foundry.com/pictures/recent/2018-09-20",)
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, "", match.group(2))
@@ -211,11 +211,11 @@ class HentaifoundryRecentExtractor(HentaifoundryExtractor):
 class HentaifoundryPopularExtractor(HentaifoundryExtractor):
     """Extractor for popular images on hentaifoundry.com"""
     subcategory = "popular"
-    directory_fmt = ["{category}", "Popular Pictures"]
+    directory_fmt = ("{category}", "Popular Pictures")
     archive_fmt = "p_{index}"
-    pattern = [r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
-               r"/pictures/popular(?:/page/(\d+))?"]
-    test = [("http://www.hentai-foundry.com/pictures/popular", None)]
+    pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/pictures/popular(?:/page/(\d+))?")
+    test = ("http://www.hentai-foundry.com/pictures/popular",)
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, "", match.group(1))
@@ -225,9 +225,9 @@ class HentaifoundryPopularExtractor(HentaifoundryExtractor):
 class HentaifoundryImageExtractor(HentaifoundryExtractor):
     """Extractor for a single image from hentaifoundry.com"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:www\.|pictures\.)?hentai-foundry\.com"
-               r"/(?:pictures/user|[^/])/([^/]+)/(\d+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|pictures\.)?hentai-foundry\.com"
+               r"/(?:pictures/user|[^/])/([^/]+)/(\d+)")
+    test = (
         (("https://www.hentai-foundry.com"
           "/pictures/user/Tenpura/407501/shimakaze"), {
             "url": "fbf2fd74906738094e2575d2728e8dc3de18a8a3",
@@ -237,9 +237,9 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
         ("https://www.hentai-foundry.com/pictures/user/Tenpura/340853/", {
             "exception": exception.HttpError,
         }),
-        (("https://pictures.hentai-foundry.com"
-          "/t/Tenpura/407501/Tenpura-407501-shimakaze.png"), None),
-    ]
+        ("https://pictures.hentai-foundry.com"
+         "/t/Tenpura/407501/Tenpura-407501-shimakaze.png"),
+    )
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match.group(1))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2018 Mike Fährmann
+# Copyright 2014-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 class PixivExtractor(Extractor):
     """Base class for pixiv extractors"""
     category = "pixiv"
-    directory_fmt = ["{category}", "{user[id]} {user[account]}"]
+    directory_fmt = ("{category}", "{user[id]} {user[account]}")
     filename_fmt = "{category}_{user[id]}_{id}{num}.{extension}"
     archive_fmt = "{id}{num}.{extension}"
 
@@ -82,10 +82,10 @@ class PixivExtractor(Extractor):
 class PixivUserExtractor(PixivExtractor):
     """Extractor for works of a pixiv-user"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/"
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/"
                r"(?:member(?:_illust)?\.php\?id=(\d+)(?:&([^#]+))?"
-               r"|(?:u(?:ser)?/|(?:mypage\.php)?#id=)(\d+))"]
-    test = [
+               r"|(?:u(?:ser)?/|(?:mypage\.php)?#id=)(\d+))")
+    test = (
         ("http://www.pixiv.net/member_illust.php?id=173530", {
             "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
         }),
@@ -97,12 +97,12 @@ class PixivUserExtractor(PixivExtractor):
         ("http://www.pixiv.net/member_illust.php?id=173531", {
             "exception": exception.NotFoundError,
         }),
-        ("https://www.pixiv.net/u/173530", None),
-        ("https://www.pixiv.net/user/173530", None),
-        ("https://www.pixiv.net/mypage.php#id=173530", None),
-        ("https://www.pixiv.net/#id=173530", None),
-        ("https://touch.pixiv.net/member_illust.php?id=173530", None),
-    ]
+        ("https://www.pixiv.net/u/173530"),
+        ("https://www.pixiv.net/user/173530"),
+        ("https://www.pixiv.net/mypage.php#id=173530"),
+        ("https://www.pixiv.net/#id=173530"),
+        ("https://touch.pixiv.net/member_illust.php?id=173530"),
+    )
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
@@ -125,15 +125,15 @@ class PixivUserExtractor(PixivExtractor):
 class PixivMeExtractor(PixivExtractor):
     """Extractor for pixiv.me URLs"""
     subcategory = "me"
-    pattern = [r"(?:https?://)?pixiv\.me/([^/?&#]+)"]
-    test = [
+    pattern = r"(?:https?://)?pixiv\.me/([^/?&#]+)"
+    test = (
         ("https://pixiv.me/del_shannon", {
             "url": "0b1a18c3e3553c44ee6e0ccc36a7fd906c498e8f",
         }),
         ("https://pixiv.me/del_shanno", {
             "exception": exception.NotFoundError,
         }),
-    ]
+    )
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
@@ -152,12 +152,12 @@ class PixivMeExtractor(PixivExtractor):
 class PixivWorkExtractor(PixivExtractor):
     """Extractor for a single pixiv work/illustration"""
     subcategory = "work"
-    pattern = [r"(?:https?://)?(?:(?:www\.|touch\.)?pixiv\.net"
+    pattern = (r"(?:https?://)?(?:(?:www\.|touch\.)?pixiv\.net"
                r"/member(?:_illust)?\.php\?(?:[^&]+&)*illust_id=(\d+)"
                r"|(?:i(?:\d+\.pixiv|\.pximg)\.net"
                r"/(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}|img\d+/img/[^/]+)"
-               r"|img\d*\.pixiv\.net/img/[^/]+|(?:www\.)?pixiv\.net/i)/(\d+))"]
-    test = [
+               r"|img\d*\.pixiv\.net/img/[^/]+|(?:www\.)?pixiv\.net/i)/(\d+))")
+    test = (
         (("http://www.pixiv.net/member_illust.php"
           "?mode=medium&illust_id=966412"), {
             "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
@@ -173,14 +173,14 @@ class PixivWorkExtractor(PixivExtractor):
             "url": "7267695a985c4db8759bebcf8d21dbdd2d2317ef",
             "keywords": {"frames": list},
         }),
-        (("http://i1.pixiv.net/c/600x600/img-master/"
-          "img/2008/06/13/00/29/13/966412_p0_master1200.jpg"), None),
-        (("https://i.pximg.net/img-original/"
-          "img/2017/04/25/07/33/29/62568267_p0.png"), None),
-        ("https://www.pixiv.net/i/966412", None),
-        ("http://img.pixiv.net/img/soundcross/42626136.jpg", None),
-        ("http://i2.pixiv.net/img76/img/snailrin/42672235.jpg", None),
-    ]
+        ("http://i1.pixiv.net/c/600x600/img-master"
+         "/img/2008/06/13/00/29/13/966412_p0_master1200.jpg"),
+        ("https://i.pximg.net/img-original"
+         "/img/2017/04/25/07/33/29/62568267_p0.png"),
+        ("https://www.pixiv.net/i/966412"),
+        ("http://img.pixiv.net/img/soundcross/42626136.jpg"),
+        ("http://i2.pixiv.net/img76/img/snailrin/42672235.jpg"),
+    )
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
@@ -199,12 +199,12 @@ class PixivWorkExtractor(PixivExtractor):
 class PixivFavoriteExtractor(PixivExtractor):
     """Extractor for all favorites/bookmarks of a pixiv-user"""
     subcategory = "favorite"
-    directory_fmt = ["{category}", "bookmarks",
-                     "{user_bookmark[id]} {user_bookmark[account]}"]
+    directory_fmt = ("{category}", "bookmarks",
+                     "{user_bookmark[id]} {user_bookmark[account]}")
     archive_fmt = "f_{user_bookmark[id]}_{id}{num}.{extension}"
-    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/bookmark\.php(?:\?([^#]*))?"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/bookmark\.php(?:\?([^#]*))?")
+    test = (
         ("https://www.pixiv.net/bookmark.php?id=173530", {
             "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
         }),
@@ -218,9 +218,9 @@ class PixivFavoriteExtractor(PixivExtractor):
             "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
         }),
         # touch URLs
-        ("https://touch.pixiv.net/bookmark.php?id=173530", None),
-        ("https://touch.pixiv.net/bookmark.php", None),
-    ]
+        ("https://touch.pixiv.net/bookmark.php?id=173530"),
+        ("https://touch.pixiv.net/bookmark.php"),
+    )
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
@@ -254,15 +254,15 @@ class PixivRankingExtractor(PixivExtractor):
     """Extractor for pixiv ranking pages"""
     subcategory = "ranking"
     archive_fmt = "r_{ranking[mode]}_{ranking[date]}_{id}{num}.{extension}"
-    directory_fmt = ["{category}", "rankings",
-                     "{ranking[mode]}", "{ranking[date]}"]
-    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/ranking\.php(?:\?([^#]*))?"]
-    test = [
-        ("https://www.pixiv.net/ranking.php?mode=daily&date=20170818", None),
-        ("https://www.pixiv.net/ranking.php", None),
-        ("https://touch.pixiv.net/ranking.php", None),
-    ]
+    directory_fmt = ("{category}", "rankings",
+                     "{ranking[mode]}", "{ranking[date]}")
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/ranking\.php(?:\?([^#]*))?")
+    test = (
+        ("https://www.pixiv.net/ranking.php?mode=daily&date=20170818"),
+        ("https://www.pixiv.net/ranking.php"),
+        ("https://touch.pixiv.net/ranking.php"),
+    )
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
@@ -316,13 +316,13 @@ class PixivSearchExtractor(PixivExtractor):
     """Extractor for pixiv search results"""
     subcategory = "search"
     archive_fmt = "s_{search[word]}_{id}{num}.{extension}"
-    directory_fmt = ["{category}", "search", "{search[word]}"]
-    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/search\.php\?([^#]+)"]
-    test = [
-        ("https://www.pixiv.net/search.php?s_mode=s_tag&word=Original", None),
-        ("https://touch.pixiv.net/search.php?word=Original", None),
-    ]
+    directory_fmt = ("{category}", "search", "{search[word]}")
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/search\.php\?([^#]+)")
+    test = (
+        ("https://www.pixiv.net/search.php?s_mode=s_tag&word=Original"),
+        ("https://touch.pixiv.net/search.php?word=Original"),
+    )
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
@@ -373,13 +373,13 @@ class PixivFollowExtractor(PixivExtractor):
     """Extractor for new illustrations from your followed artists"""
     subcategory = "follow"
     archive_fmt = "F_{user_follow[id]}_{id}{num}.{extension}"
-    directory_fmt = ["{category}", "following"]
-    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/bookmark_new_illust\.php"]
-    test = [
-        ("https://www.pixiv.net/bookmark_new_illust.php", None),
-        ("https://touch.pixiv.net/bookmark_new_illust.php", None),
-    ]
+    directory_fmt = ("{category}", "following")
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/bookmark_new_illust\.php")
+    test = (
+        ("https://www.pixiv.net/bookmark_new_illust.php"),
+        ("https://touch.pixiv.net/bookmark_new_illust.php"),
+    )
 
     def __init__(self, _):
         PixivExtractor.__init__(self)

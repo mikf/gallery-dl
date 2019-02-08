@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,11 +17,11 @@ class HitomiGalleryExtractor(ChapterExtractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    directory_fmt = ("{category}", "{gallery_id} {title}")
     filename_fmt = "{category}_{gallery_id}_{page:>03}_{name}.{extension}"
     archive_fmt = "{gallery_id}_{page}"
-    pattern = [r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)"]
-    test = [
+    pattern = r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)"
+    test = (
         ("https://hitomi.la/galleries/867789.html", {
             "url": "cb759868d090fe0e2655c3e29ebf146054322b6d",
             "keyword": "85e453d01ee7f137669e75a764ccdc65ca092ad2",
@@ -30,8 +30,8 @@ class HitomiGalleryExtractor(ChapterExtractor):
             # "aa" subdomain for gallery-id ending in 1 (#142)
             "pattern": r"https://aa\.hitomi\.la/",
         }),
-        ("https://hitomi.la/reader/867789.html", None),
-    ]
+        ("https://hitomi.la/reader/867789.html"),
+    )
 
     def __init__(self, match):
         self.gid = text.parse_int(match.group(1))

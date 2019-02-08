@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,7 +18,7 @@ class ArtstationExtractor(Extractor):
     """Base class for artstation extractors"""
     category = "artstation"
     filename_fmt = "{category}_{id}_{asset[id]}_{title}.{extension}"
-    directory_fmt = ["{category}", "{userinfo[username]}"]
+    directory_fmt = ("{category}", "{userinfo[username]}")
     archive_fmt = "{asset[id]}"
     root = "https://www.artstation.com"
 
@@ -123,19 +123,19 @@ class ArtstationExtractor(Extractor):
 class ArtstationUserExtractor(ArtstationExtractor):
     """Extractor for all projects of an artstation user"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?(?:(?:www\.)?artstation\.com"
+    pattern = (r"(?:https?://)?(?:(?:www\.)?artstation\.com"
                r"/(?!artwork|projects|search)([^/?&#]+)(?:/albums/all)?"
-               r"|((?!www)\w+)\.artstation\.com(?:/projects)?)/?$"]
-    test = [
+               r"|((?!www)\w+)\.artstation\.com(?:/projects)?)/?$")
+    test = (
         ("https://www.artstation.com/gaerikim/", {
             "pattern": r"https://\w+\.artstation\.com/p/assets"
                        r"/images/images/\d+/\d+/\d+/large/[^/]+",
             "count": ">= 6",
         }),
-        ("https://www.artstation.com/gaerikim/albums/all/", None),
-        ("https://gaerikim.artstation.com/", None),
-        ("https://gaerikim.artstation.com/projects/", None),
-    ]
+        ("https://www.artstation.com/gaerikim/albums/all/"),
+        ("https://gaerikim.artstation.com/"),
+        ("https://gaerikim.artstation.com/projects/"),
+    )
 
     def projects(self):
         url = "{}/users/{}/projects.json".format(self.root, self.user)
@@ -145,21 +145,21 @@ class ArtstationUserExtractor(ArtstationExtractor):
 class ArtstationAlbumExtractor(ArtstationExtractor):
     """Extractor for all projects in an artstation album"""
     subcategory = "album"
-    directory_fmt = ["{category}", "{userinfo[username]}", "Albums",
-                     "{album[id]} - {album[title]}"]
+    directory_fmt = ("{category}", "{userinfo[username]}", "Albums",
+                     "{album[id]} - {album[title]}")
     archive_fmt = "a_{album[id]}_{asset[id]}"
-    pattern = [r"(?:https?://)?(?:(?:www\.)?artstation\.com"
+    pattern = (r"(?:https?://)?(?:(?:www\.)?artstation\.com"
                r"/(?!artwork|projects|search)([^/?&#]+)"
-               r"|((?!www)\w+)\.artstation\.com)/albums/(\d+)"]
-    test = [
+               r"|((?!www)\w+)\.artstation\.com)/albums/(\d+)")
+    test = (
         ("https://www.artstation.com/huimeiye/albums/770899", {
             "count": 2,
         }),
         ("https://www.artstation.com/huimeiye/albums/770898", {
             "exception": exception.NotFoundError,
         }),
-        ("https://huimeiye.artstation.com/albums/770899", None),
-    ]
+        ("https://huimeiye.artstation.com/albums/770899"),
+    )
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
@@ -189,11 +189,11 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
 class ArtstationLikesExtractor(ArtstationExtractor):
     """Extractor for liked projects of an artstation user"""
     subcategory = "likes"
-    directory_fmt = ["{category}", "{userinfo[username]}", "Likes"]
+    directory_fmt = ("{category}", "{userinfo[username]}", "Likes")
     archive_fmt = "f_{userinfo[id]}_{asset[id]}"
-    pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects|search)([^/?&#]+)/likes/?"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
+               r"/(?!artwork|projects|search)([^/?&#]+)/likes/?")
+    test = (
         ("https://www.artstation.com/mikf/likes", {
             "pattern": r"https://\w+\.artstation\.com/p/assets"
                        r"/images/images/\d+/\d+/\d+/large/[^/]+",
@@ -203,7 +203,7 @@ class ArtstationLikesExtractor(ArtstationExtractor):
         ("https://www.artstation.com/sungchoi/likes", {
             "count": 0,
         }),
-    ]
+    )
 
     def projects(self):
         url = "{}/users/{}/likes.json".format(self.root, self.user)
@@ -214,20 +214,20 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
     """Extractor for submissions of artstation challenges"""
     subcategory = "challenge"
     filename_fmt = "{submission_id}_{asset_id}_{name}.{extension}"
-    directory_fmt = ["{category}", "Challenges",
-                     "{challenge[id]} - {challenge[title]}"]
+    directory_fmt = ("{category}", "Challenges",
+                     "{challenge[id]} - {challenge[title]}")
     archive_fmt = "c_{challenge[id]}_{asset_id}"
-    pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
+    pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
                r"/contests/[^/?&#]+/challenges/(\d+)"
-               r"/?(?:\?sorting=([a-z]+))?"]
-    test = [
-        (("https://www.artstation.com/contests/thu-2017/challenges/20"), None),
+               r"/?(?:\?sorting=([a-z]+))?")
+    test = (
+        ("https://www.artstation.com/contests/thu-2017/challenges/20"),
         (("https://www.artstation.com/contests/beyond-human"
           "/challenges/23?sorting=winners"), {
             "range": "1-30",
             "count": 30,
         }),
-    ]
+    )
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self)
@@ -270,13 +270,11 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
 class ArtstationSearchExtractor(ArtstationExtractor):
     """Extractor for artstation search results"""
     subcategory = "search"
-    directory_fmt = ["{category}", "Searches", "{search[searchterm]}"]
+    directory_fmt = ("{category}", "Searches", "{search[searchterm]}")
     archive_fmt = "s_{search[searchterm]}_{asset[id]}"
-    pattern = [r"(?:https?://)?(?:\w+\.)?artstation\.com"
-               r"/search/?\?([^#]+)"]
-    test = [
-        ("https://www.artstation.com/search?sorting=recent&q=ancient", None),
-    ]
+    pattern = (r"(?:https?://)?(?:\w+\.)?artstation\.com"
+               r"/search/?\?([^#]+)")
+    test = ("https://www.artstation.com/search?sorting=recent&q=ancient",)
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self)
@@ -305,9 +303,9 @@ class ArtstationSearchExtractor(ArtstationExtractor):
 class ArtstationImageExtractor(ArtstationExtractor):
     """Extractor for images from a single artstation project"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:\w+\.)?artstation\.com"
-               r"/(?:artwork|projects|search)/(\w+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:\w+\.)?artstation\.com"
+               r"/(?:artwork|projects|search)/(\w+)")
+    test = (
         ("https://www.artstation.com/artwork/LQVJr", {
             "pattern": r"https?://\w+\.artstation\.com/p/assets"
                        r"/images/images/008/760/279/large/.+",
@@ -326,8 +324,8 @@ class ArtstationImageExtractor(ArtstationExtractor):
             "pattern": "ytdl:https://www.youtube.com/embed/JNFfJtwwrU0",
         }),
         # different URL pattern
-        ("https://sungchoi.artstation.com/projects/LQVJr", None),
-    ]
+        ("https://sungchoi.artstation.com/projects/LQVJr"),
+    )
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self)

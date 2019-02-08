@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -27,12 +27,12 @@ class XvideosExtractor(Extractor):
 class XvideosGalleryExtractor(XvideosExtractor):
     """Extractor for user profile galleries from xvideos.com"""
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{user[name]}", "{title}"]
+    directory_fmt = ("{category}", "{user[name]}", "{title}")
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     archive_fmt = "{gallery_id}_{num}"
-    pattern = [r"(?:https?://)?(?:www\.)?xvideos\.com"
-               r"/profiles/([^/?&#]+)/photos/(\d+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
+               r"/profiles/([^/?&#]+)/photos/(\d+)")
+    test = (
         (("https://www.xvideos.com/profiles"
           "/pervertedcouple/photos/751031/random_stuff"), {
             "url": "4f0d992e5dc39def2c3ac8e099d17bf09e76e3c7",
@@ -41,7 +41,7 @@ class XvideosGalleryExtractor(XvideosExtractor):
         ("https://www.xvideos.com/profiles/pervertedcouple/photos/751032/", {
             "exception": exception.NotFoundError,
         }),
-    ]
+    )
 
     def __init__(self, match):
         XvideosExtractor.__init__(self)
@@ -94,9 +94,9 @@ class XvideosUserExtractor(XvideosExtractor):
     """Extractor for user profiles from xvideos.com"""
     subcategory = "user"
     categorytransfer = True
-    pattern = [r"(?:https?://)?(?:www\.)?xvideos\.com"
-               r"/profiles/([^/?&#]+)/?(?:#.*)?$"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
+               r"/profiles/([^/?&#]+)/?(?:#.*)?$")
+    test = (
         ("https://www.xvideos.com/profiles/pervertedcouple", {
             "url": "a413f3e60d6d3a2de79bd44fa3b7a9c03db4336e",
             "keyword": "a796760d34732adc7ec52a8feb057515209a2ca6",
@@ -104,8 +104,8 @@ class XvideosUserExtractor(XvideosExtractor):
         ("https://www.xvideos.com/profiles/niwehrwhernvh", {
             "exception": exception.NotFoundError,
         }),
-        ("https://www.xvideos.com/profiles/pervertedcouple#_tabPhotos", None),
-    ]
+        ("https://www.xvideos.com/profiles/pervertedcouple#_tabPhotos"),
+    )
 
     def __init__(self, match):
         XvideosExtractor.__init__(self)

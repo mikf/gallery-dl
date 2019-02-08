@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2018 Mike Fährmann
+# Copyright 2014-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -75,9 +75,9 @@ class GelbooruExtractor(booru.XmlParserMixin,
 
 class GelbooruTagExtractor(booru.TagMixin, GelbooruExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
-    pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?page=post&s=list&tags=(?P<tags>[^&#]+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
+               r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")
+    test = (
         ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
             "count": 5,
         }),
@@ -85,7 +85,7 @@ class GelbooruTagExtractor(booru.TagMixin, GelbooruExtractor):
             "options": (("api", False),),
             "count": 5,
         }),
-    ]
+    )
 
     def __init__(self, match):
         super().__init__(match)
@@ -107,11 +107,11 @@ class GelbooruTagExtractor(booru.TagMixin, GelbooruExtractor):
 
 class GelbooruPoolExtractor(booru.GelbooruPoolMixin, GelbooruExtractor):
     """Extractor for image-pools from gelbooru.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?page=pool&s=show&id=(?P<pool>\d+)"]
-    test = [("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
+    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
+               r"\?page=pool&s=show&id=(?P<pool>\d+)")
+    test = ("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
         "count": 6,
-    })]
+    })
 
     def get_posts(self):
         return util.advance(self.posts, self.page_start)
@@ -119,12 +119,12 @@ class GelbooruPoolExtractor(booru.GelbooruPoolMixin, GelbooruExtractor):
 
 class GelbooruPostExtractor(booru.PostMixin, GelbooruExtractor):
     """Extractor for single images from gelbooru.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?page=post&s=view&id=(?P<post>\d+)"]
-    test = [("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
+    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
+               r"\?page=post&s=view&id=(?P<post>\d+)")
+    test = ("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
         "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
         "count": 1,
-    })]
+    })
 
     def get_posts(self):
         return (self.post,)

@@ -32,8 +32,12 @@ class TestExtractor(Extractor):
             run all tests
     """
     category = "test"
-    pattern = [r"t(?:est)?:([^:]*)(?::([^:]*)(?::(\*|[\d,]*))?)?$"]
-    test = ("test:pixiv", "test:pixiv:user,favorite:0", "test:")
+    pattern = r"t(?:est)?:([^:]*)(?::([^:]*)(?::(\*|[\d,]*))?)?$"
+    test = (
+        ("test:pixiv"),
+        ("test:pixiv:user,favorite:0"),
+        ("test:"),
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)

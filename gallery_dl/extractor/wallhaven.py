@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -84,17 +84,17 @@ class WallhavenExtractor(Extractor):
 class WallhavenSearchExtractor(WallhavenExtractor):
     """Extractor for search results on wallhaven.cc"""
     subcategory = "search"
-    directory_fmt = ["{category}", "{search[q]}"]
+    directory_fmt = ("{category}", "{search[q]}")
     archive_fmt = "s_{search[q]}_{id}"
-    pattern = [r"(?:https?://)?alpha\.wallhaven\.cc/search\?([^/?#]+)"]
-    test = [
-        ("https://alpha.wallhaven.cc/search?q=touhou", None),
+    pattern = r"(?:https?://)?alpha\.wallhaven\.cc/search\?([^/?#]+)"
+    test = (
+        ("https://alpha.wallhaven.cc/search?q=touhou"),
         (("https://alpha.wallhaven.cc/search?q=id%3A87"
           "&categories=111&purity=100&sorting=date_added&order=asc&page=3"), {
             "url": "29b54803e3fae5e337fdd29d47d51302d78bec9a",
             "range": "1-3",
         }),
-    ]
+    )
     per_page = 24
 
     def __init__(self, match):
@@ -136,9 +136,9 @@ class WallhavenImageExtractor(WallhavenExtractor):
     """Extractor for individual wallpaper on wallhaven.cc"""
     subcategory = "image"
     archive_fmt = "{id}"
-    pattern = [r"(?:https?://)?(?:alpha\.wallhaven\.cc/wallpaper"
-               r"|whvn\.cc)/(\d+)"]
-    test = [
+    pattern = (r"(?:https?://)?(?:alpha\.wallhaven\.cc/wallpaper"
+               r"|whvn\.cc)/(\d+)")
+    test = (
         ("https://alpha.wallhaven.cc/wallpaper/8114", {
             "pattern": "https://[^.]+.wallhaven.cc/[^/]+/full/[^-]+-8114.jpg",
             "content": "497212679383a465da1e35bd75873240435085a2",
@@ -160,8 +160,8 @@ class WallhavenImageExtractor(WallhavenExtractor):
         ("https://alpha.wallhaven.cc/wallpaper/8536", {
             "url": "8431c6f1eec3a6f113980eeec9dfcb707de7ddcf",
         }),
-        ("https://whvn.cc/8114", None),
-    ]
+        ("https://whvn.cc/8114"),
+    )
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self)

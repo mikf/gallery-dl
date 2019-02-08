@@ -145,14 +145,14 @@ class SankakuExtractor(SharedConfigMixin, Extractor):
 class SankakuTagExtractor(SankakuExtractor):
     """Extractor for images from chan.sankakucomplex.com by search-tags"""
     subcategory = "tag"
-    directory_fmt = ["{category}", "{search_tags}"]
+    directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/\?([^#]*)"]
-    test = [
+    pattern = r"(?:https?://)?chan\.sankakucomplex\.com/\?([^#]*)"
+    test = (
         ("https://chan.sankakucomplex.com/?tags=bonocho", {
             "count": 5,
-            "pattern": (r"https://cs\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                        r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+"),
+            "pattern": r"https://cs\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
+                       r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+",
         }),
         # respect 'page' query parameter
         ("https://chan.sankakucomplex.com/?tags=bonocho&page=2", {
@@ -168,9 +168,9 @@ class SankakuTagExtractor(SankakuExtractor):
             "exception": exception.StopExtraction,
         }),
         # match arbitrary query parameters
-        (("https://chan.sankakucomplex.com/"
-            "?tags=marie_rose&page=98&next=3874906&commit=Search"), None),
-    ]
+        ("https://chan.sankakucomplex.com"
+         "/?tags=marie_rose&page=98&next=3874906&commit=Search"),
+    )
     per_page = 20
 
     def __init__(self, match):
@@ -232,12 +232,12 @@ class SankakuTagExtractor(SankakuExtractor):
 class SankakuPoolExtractor(SankakuExtractor):
     """Extractor for image-pools  from chan.sankakucomplex.com"""
     subcategory = "pool"
-    directory_fmt = ["{category}", "pool", "{pool}"]
+    directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/pool/show/(\d+)"]
-    test = [("https://chan.sankakucomplex.com/pool/show/90", {
+    pattern = r"(?:https?://)?chan\.sankakucomplex\.com/pool/show/(\d+)"
+    test = ("https://chan.sankakucomplex.com/pool/show/90", {
         "count": 5,
-    })]
+    })
     per_page = 24
 
     def __init__(self, match):
@@ -272,8 +272,8 @@ class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single images from chan.sankakucomplex.com"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = [r"(?:https?://)?chan\.sankakucomplex\.com/post/show/(\d+)"]
-    test = [("https://chan.sankakucomplex.com/post/show/360451", {
+    pattern = r"(?:https?://)?chan\.sankakucomplex\.com/post/show/(\d+)"
+    test = ("https://chan.sankakucomplex.com/post/show/360451", {
         "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
         "options": (("tags", True),),
         "keyword": {
@@ -284,7 +284,7 @@ class SankakuPostExtractor(SankakuExtractor):
             "tags_character": str,
             "tags_general": str,
         },
-    })]
+    })
 
     def __init__(self, match):
         SankakuExtractor.__init__(self)

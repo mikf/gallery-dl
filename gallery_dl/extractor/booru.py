@@ -137,7 +137,7 @@ class GelbooruPageMixin():
 class TagMixin():
     """Extraction of images based on search-tags"""
     subcategory = "tag"
-    directory_fmt = ["{category}", "{search_tags}"]
+    directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
 
     def __init__(self, match):
@@ -153,7 +153,7 @@ class TagMixin():
 class PoolMixin():
     """Extraction of image-pools"""
     subcategory = "pool"
-    directory_fmt = ["{category}", "pool", "{pool}"]
+    directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
 
     def __init__(self, match):
@@ -212,7 +212,7 @@ class PostMixin():
 class PopularMixin():
     """Extraction and metadata handling for Danbooru v2"""
     subcategory = "popular"
-    directory_fmt = ["{category}", "popular", "{scale}", "{date}"]
+    directory_fmt = ("{category}", "popular", "{scale}", "{date}")
     archive_fmt = "P_{scale[0]}_{date}_{id}"
     page_start = None
     sort = True

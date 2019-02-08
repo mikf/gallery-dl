@@ -16,7 +16,7 @@ class ChanThreadExtractor(Extractor):
     """Base class for extractors for Futaba Channel-like boards"""
     category = "chan"
     subcategory = "thread"
-    directory_fmt = ["{category}", "{board}", "{thread} - {title}"]
+    directory_fmt = ("{category}", "{board}", "{thread} - {title}")
     filename_fmt = "{tim}-{filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     api_url = ""

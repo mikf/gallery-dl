@@ -49,12 +49,12 @@ class LusciousExtractor(Extractor):
 class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
     """Extractor for image albums from luscious.net"""
     subcategory = "album"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    directory_fmt = ("{category}", "{gallery_id} {title}")
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     archive_fmt = "{gallery_id}_{image_id}"
-    pattern = [(r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
-                r"/(?:albums|pictures/c/[^/?&#]+/album)/([^/?&#]+_(\d+))")]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
+               r"/(?:albums|pictures/c/[^/?&#]+/album)/([^/?&#]+_(\d+))")
+    test = (
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
             "keyword": "5ab53959f25a468455f79149461d26547669e50e",
@@ -64,11 +64,11 @@ class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
             "keyword": "3de82f61ad4afd0f546ab5ae5bf9c5388cc9c3db",
         }),
-        ("https://www.luscious.net/albums/okinami_277031/", None),
-        ("https://members.luscious.net/albums/okinami_277031/", None),
+        ("https://www.luscious.net/albums/okinami_277031/"),
+        ("https://members.luscious.net/albums/okinami_277031/"),
         ("https://luscious.net/pictures/c/video_game_manga/album"
-         "/okinami-no-koigokoro_277031/sorted/position/id/16528978/@_1", None),
-    ]
+         "/okinami-no-koigokoro_277031/sorted/position/id/16528978/@_1"),
+    )
 
     def __init__(self, match):
         LusciousExtractor.__init__(self)
@@ -147,17 +147,17 @@ class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
 class LusciousSearchExtractor(LusciousExtractor):
     """Extractor for album searches on luscious.net"""
     subcategory = "search"
-    pattern = [(r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
-                r"/((?:albums|c)(?:/(?![^/?&#]+_\d+)[^/?&#]+)+)")]
-    test = [
-        ("https://luscious.net/c/hentai/", None),
+    pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
+               r"/((?:albums|c)(?:/(?![^/?&#]+_\d+)[^/?&#]+)+)")
+    test = (
+        ("https://luscious.net/c/hentai/"),
         ("https://luscious.net/albums/t2/2/c/hentai/sorted/updated"
          "/tagged/+full_color/page/2/", {
              "pattern": r"https://(members\.)?luscious.net/albums/[^_]+_\d+/",
              "range": "20-40",
              "count": 21,
          }),
-    ]
+    )
 
     def __init__(self, match):
         LusciousExtractor.__init__(self)

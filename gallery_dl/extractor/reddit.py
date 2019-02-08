@@ -27,7 +27,7 @@ class RedditExtractor(Extractor):
         self._visited = set()
 
     def items(self):
-        subre = re.compile(RedditSubmissionExtractor.pattern[0])
+        subre = re.compile(RedditSubmissionExtractor.pattern)
         submissions = self.submissions()
         depth = 0
 
@@ -79,16 +79,16 @@ class RedditExtractor(Extractor):
 class RedditSubredditExtractor(RedditExtractor):
     """Extractor for images from subreddits on reddit.com"""
     subcategory = "subreddit"
-    pattern = [r"(?:https?://)?(?:\w+\.)?reddit\.com/r/([^/?&#]+)"
+    pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/r/([^/?&#]+)"
                r"(/[a-z]+)?/?"
-               r"(?:\?.*?(?:\bt=([a-z]+))?)?$"]
-    test = [
-        ("https://www.reddit.com/r/lavaporn/", None),
-        ("https://www.reddit.com/r/lavaporn/top/?sort=top&t=month", None),
-        ("https://old.reddit.com/r/lavaporn/", None),
-        ("https://np.reddit.com/r/lavaporn/", None),
-        ("https://m.reddit.com/r/lavaporn/", None),
-    ]
+               r"(?:\?.*?(?:\bt=([a-z]+))?)?$")
+    test = (
+        ("https://www.reddit.com/r/lavaporn/"),
+        ("https://www.reddit.com/r/lavaporn/top/?sort=top&t=month"),
+        ("https://old.reddit.com/r/lavaporn/"),
+        ("https://np.reddit.com/r/lavaporn/"),
+        ("https://m.reddit.com/r/lavaporn/"),
+    )
 
     def __init__(self, match):
         RedditExtractor.__init__(self)
@@ -103,19 +103,19 @@ class RedditSubredditExtractor(RedditExtractor):
 class RedditSubmissionExtractor(RedditExtractor):
     """Extractor for images from a submission on reddit.com"""
     subcategory = "submission"
-    pattern = [(r"(?:https?://)?(?:"
-                r"(?:\w+\.)?reddit\.com/r/[^/?&#]+/comments|"
-                r"redd\.it"
-                r")/([a-z0-9]+)")]
-    test = [
+    pattern = (r"(?:https?://)?(?:"
+               r"(?:\w+\.)?reddit\.com/r/[^/?&#]+/comments|"
+               r"redd\.it"
+               r")/([a-z0-9]+)")
+    test = (
         ("https://www.reddit.com/r/lavaporn/comments/2a00np/", {
             "pattern": r"https?://i\.imgur\.com/AaAUCgy\.jpg",
         }),
-        ("https://old.reddit.com/r/lavaporn/comments/2a00np/", None),
-        ("https://np.reddit.com/r/lavaporn/comments/2a00np/", None),
-        ("https://m.reddit.com/r/lavaporn/comments/2a00np/", None),
-        ("https://redd.it/2a00np/", None),
-    ]
+        ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
+        ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
+        ("https://m.reddit.com/r/lavaporn/comments/2a00np/"),
+        ("https://redd.it/2a00np/"),
+    )
 
     def __init__(self, match):
         RedditExtractor.__init__(self)
@@ -130,9 +130,9 @@ class RedditImageExtractor(Extractor):
     category = "reddit"
     subcategory = "image"
     archive_fmt = "{name}"
-    pattern = [r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
-               r"/[^/?&#]+(?:\?[^#]*)?"]
-    test = [
+    pattern = (r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
+               r"/[^/?&#]+(?:\?[^#]*)?")
+    test = (
         ("https://i.redd.it/upjtjcx2npzz.jpg", {
             "url": "0de614900feef103e580b632190458c0b62b641a",
             "content": "cc9a68cf286708d5ce23c68e79cd9cf7826db6a3",
@@ -142,7 +142,7 @@ class RedditImageExtractor(Extractor):
             "url": "f24f25efcedaddeec802e46c60d77ef975dc52a5",
             "content": "541dbcc3ad77aa01ee21ca49843c5e382371fae7",
         }),
-    ]
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)

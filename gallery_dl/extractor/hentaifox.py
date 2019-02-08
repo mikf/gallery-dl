@@ -17,14 +17,14 @@ class HentaifoxGalleryExtractor(ChapterExtractor):
     category = "hentaifox"
     subcategory = "gallery"
     filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    directory_fmt = ("{category}", "{gallery_id} {title}")
     archive_fmt = "{gallery_id}_{page}"
-    pattern = [r"(?:https?://)?(?:www\.)?hentaifox\.com/gallery/(\d+)"]
-    test = [("https://hentaifox.com/gallery/56622/", {
+    pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com/gallery/(\d+)"
+    test = ("https://hentaifox.com/gallery/56622/", {
         "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
         "count": 24,
         "keyword": "80fc0fb5db9626fffb078dd2e4f9aff4a9348686",
-    })]
+    })
     root = "https://hentaifox.com"
 
     def __init__(self, match):
@@ -62,16 +62,15 @@ class HentaifoxSearchExtractor(Extractor):
     """Extractor for search results and listings on hentaifox.com"""
     category = "hentaifox"
     subcategory = "search"
-    pattern = [r"(?:https?://)?(?:www\.)?hentaifox\.com"
-               r"(/(?:parody|tag|artist|character|search)/[^/?%#]+)"]
-    test = [
-        ("https://hentaifox.com/parody/touhou-project/", None),
-        ("https://hentaifox.com/tag/full-color/", None),
-        ("https://hentaifox.com/character/reimu-hakurei/", None),
-        ("https://hentaifox.com/artist/distance/", None),
-        ("https://hentaifox.com/search/touhou/", None,),
+    pattern = (r"(?:https?://)?(?:www\.)?hentaifox\.com"
+               r"(/(?:parody|tag|artist|character|search)/[^/?%#]+)")
+    test = (
+        ("https://hentaifox.com/parody/touhou-project/"),
+        ("https://hentaifox.com/character/reimu-hakurei/"),
+        ("https://hentaifox.com/artist/distance/"),
+        ("https://hentaifox.com/search/touhou/"),
         ("https://hentaifox.com/tag/full-colour/", {
-            "pattern": HentaifoxGalleryExtractor.pattern[0],
+            "pattern": HentaifoxGalleryExtractor.pattern,
             "count": ">= 40",
             "keyword": {
                 "url": str,
@@ -81,7 +80,7 @@ class HentaifoxSearchExtractor(Extractor):
                 "tags": list,
             },
         }),
-    ]
+    )
     root = "https://hentaifox.com"
 
     def __init__(self, match):

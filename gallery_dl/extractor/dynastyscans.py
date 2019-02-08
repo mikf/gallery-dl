@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,8 +17,8 @@ import json
 class DynastyscansChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from dynasty-scans.com"""
     category = "dynastyscans"
-    pattern = [r"(?:https?://)?(?:www\.)?dynasty-scans\.com/chapters/([^/]+)"]
-    test = [
+    pattern = r"(?:https?://)?(?:www\.)?dynasty-scans\.com/chapters/([^/]+)"
+    test = (
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {
             "url": "dce64e8c504118f1ab4135c00245ea12413896cb",
@@ -29,7 +29,7 @@ class DynastyscansChapterExtractor(ChapterExtractor):
             "url": "dbe5bbb74da2edcfb1832895a484e2a40bc8b538",
             "keyword": "1208a102d9a1bb0b0c740a67996d9b26a9357b64",
         }),
-    ]
+    )
     root = "https://dynasty-scans.com"
 
     def __init__(self, match):

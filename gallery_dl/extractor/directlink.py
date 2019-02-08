@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2018 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,10 +17,10 @@ class DirectlinkExtractor(Extractor):
     category = "directlink"
     filename_fmt = "{domain}/{path}"
     archive_fmt = "{domain}/{path}"
-    pattern = [r"https?://(?P<domain>[^/]+)/(?P<path>[^?&#]+\."
+    pattern = (r"https?://(?P<domain>[^/]+)/(?P<path>[^?&#]+\."
                r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus))"
-               r"(?:\?(?P<query>[^/?#]*))?(?:#(?P<fragment>.*))?$"]
-    test = [
+               r"(?:\?(?P<query>[^/?#]*))?(?:#(?P<fragment>.*))?$")
+    test = (
         (("https://en.wikipedia.org/static/images/project-logos/enwiki.png"), {
             "url": "18c5d00077332e98e53be9fed2ee4be66154b88d",
             "keyword": "66bce3a0a6872d8497e1984eb49d54a3ed0d3d5e",
@@ -35,7 +35,7 @@ class DirectlinkExtractor(Extractor):
             "url": "2627e8140727fdf743f86fe18f69f99a052c9718",
             "keyword": "c658b8b6213e46be15a25e492df385ece5771bdf",
         }),
-    ]
+    )
 
     def __init__(self, match):
         Extractor.__init__(self)

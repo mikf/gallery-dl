@@ -40,16 +40,16 @@ class MangaparkBase():
 
 class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
     """Extractor for manga from mangapark.me"""
-    pattern = [r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
-               r"(/manga/[^/?&#]+)/?$"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
+               r"(/manga/[^/?&#]+)/?$")
+    test = (
         ("https://mangapark.me/manga/aria", {
             "url": "a58be23ef3874fe9705b0b41dd462b67eaaafd9a",
             "keyword": "b3b5a30aa2a326bc0ca8b74c65b5ecd4bf676ebf",
         }),
-        ("https://mangapark.net/manga/aria", None),
-        ("https://mangapark.com/manga/aria", None),
-    ]
+        ("https://mangapark.net/manga/aria"),
+        ("https://mangapark.com/manga/aria"),
+    )
 
     def __init__(self, match):
         self.root = self.root_fmt.format(match.group(1))
@@ -79,9 +79,9 @@ class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
 
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.me"""
-    pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
-                r"/manga/([^?&#]+/i\d+)")]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
+               r"/manga/([^?&#]+/i\d+)")
+    test = (
         ("https://mangapark.me/manga/gosu/i811615/c55/1", {
             "count": 50,
             "keyword": "a18e07119b3317d7e795ef37ee69ce0bbb806350",
@@ -95,9 +95,9 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
             "count": 15,
             "keyword": "3abb13e6d1ea7f8808b0ec415270b3afac97f98b",
         }),
-        ("https://mangapark.net/manga/gosu/i811615/c55/1", None),
-        ("https://mangapark.com/manga/gosu/i811615/c55/1", None),
-    ]
+        ("https://mangapark.net/manga/gosu/i811615/c55/1"),
+        ("https://mangapark.com/manga/gosu/i811615/c55/1"),
+    )
 
     def __init__(self, match):
         tld, self.path = match.groups()

@@ -17,7 +17,7 @@ from .. import text
 class InstagramExtractor(Extractor):
     """Base class for instagram extractors"""
     category = "instagram"
-    directory_fmt = ["{category}", "{username}"]
+    directory_fmt = ("{category}", "{username}")
     filename_fmt = "{media_id}.{extension}"
     archive_fmt = "{media_id}"
     root = "https://www.instagram.com"
@@ -111,8 +111,8 @@ class InstagramExtractor(Extractor):
 class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:www\.)?instagram\.com/p/([^/]+)/?"]
-    test = [
+    pattern = r"(?:https?://)?(?:www\.)?instagram\.com/p/([^/]+)/?"
+    test = (
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
             "pattern": r"https://[^/]+\.(cdninstagram\.com|fbcdn\.net)"
@@ -161,7 +161,7 @@ class InstagramImageExtractor(InstagramExtractor):
                 "width": int,
             }
         }),
-    ]
+    )
 
     def __init__(self, match):
         InstagramExtractor.__init__(self)
@@ -175,13 +175,11 @@ class InstagramImageExtractor(InstagramExtractor):
 class InstagramUserExtractor(InstagramExtractor):
     """Extractor for ProfilePage"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?(?:www\.)?instagram\.com/(?!p/)([^/?&#]+)"]
-    test = [
-        ("https://www.instagram.com/instagram/", {
-            "range": "1-12",
-            "count": ">= 12",
-        }),
-    ]
+    pattern = r"(?:https?://)?(?:www\.)?instagram\.com/(?!p/)([^/?&#]+)"
+    test = ("https://www.instagram.com/instagram/", {
+        "range": "1-12",
+        "count": ">= 12",
+    })
 
     def __init__(self, match):
         InstagramExtractor.__init__(self)

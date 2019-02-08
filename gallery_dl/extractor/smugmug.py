@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -51,10 +51,10 @@ class SmugmugExtractor(Extractor):
 class SmugmugAlbumExtractor(SmugmugExtractor):
     """Extractor for smugmug albums"""
     subcategory = "album"
-    directory_fmt = ["{category}", "{User[NickName]}", "{Album[Name]}"]
+    directory_fmt = ("{category}", "{User[NickName]}", "{Album[Name]}")
     archive_fmt = "a_{Album[AlbumKey]}_{Image[ImageKey]}"
-    pattern = [r"smugmug:album:([^:]+)$"]
-    test = [
+    pattern = r"smugmug:album:([^:]+)$"
+    test = (
         ("smugmug:album:ddvxpg", {
             "url": "0429e9bf50ee600674e448934e3882ca1761ae7b",
         }),
@@ -66,7 +66,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
         ("smugmug:album:6VRT8G", {
             "url": "c4a0f4c4bfd514b93cbdeb02b3345bf7ef6604df",
         }),
-    ]
+    )
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self)
@@ -92,10 +92,10 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
 class SmugmugImageExtractor(SmugmugExtractor):
     """Extractor for individual smugmug images"""
     subcategory = "image"
-    directory_fmt = ["{category}", "{User[NickName]}"]
+    directory_fmt = ("{category}", "{User[NickName]}")
     archive_fmt = "{Image[ImageKey]}"
-    pattern = [BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#]+)"]
-    test = [
+    pattern = BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#]+)"
+    test = (
         ("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
             "url": "78f0bf3516b6d670b7319216bdeccb35942ca4cf",
             "keyword": "8ebb25fb493d3cd5cfcb8f3a4601fa721afe1d83",
@@ -106,7 +106,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
             "url": "d4047637947b35e4ef49e3c7cb70303cc224a3a0",
             "keyword": "0a1b12efd789c42d9b061f01b2a1fcfd6af32003",
         }),
-    ]
+    )
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self)
@@ -129,8 +129,8 @@ class SmugmugImageExtractor(SmugmugExtractor):
 class SmugmugPathExtractor(SmugmugExtractor):
     """Extractor for smugmug albums from URL paths and users"""
     subcategory = "path"
-    pattern = [BASE_PATTERN + r"((?:/[^/?&#a-fh-mo-z][^/?&#]*)*)/?$"]
-    test = [
+    pattern = BASE_PATTERN + r"((?:/[^/?&#a-fh-mo-z][^/?&#]*)*)/?$"
+    test = (
         ("https://acapella.smugmug.com/Micro-Macro/Drops/", {
             "pattern": "smugmug:album:ddvxpg$",
         }),
@@ -149,8 +149,8 @@ class SmugmugPathExtractor(SmugmugExtractor):
         ("smugmug:www.creativedogportraits.com/", {
             "pattern": "smugmug:album:txWXzs$",
         }),
-        ("smugmug:https://www.creativedogportraits.com/", None),
-    ]
+        ("smugmug:https://www.creativedogportraits.com/"),
+    )
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self)

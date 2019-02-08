@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -53,9 +53,9 @@ class ImgurImageExtractor(ImgurExtractor):
     subcategory = "image"
     filename_fmt = "{category}_{hash}{title:?_//}.{extension}"
     archive_fmt = "{hash}"
-    pattern = [r"(?:https?://)?(?:www\.|[im]\.|)?imgur\.com"
-               r"/(?!gallery)(\w{7}|\w{5})[sbtmlh]?\.?"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|[im]\.|)?imgur\.com"
+               r"/(?!gallery)(\w{7}|\w{5})[sbtmlh]?\.?")
+    test = (
         ("https://imgur.com/21yMxCS", {
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
@@ -92,14 +92,14 @@ class ImgurImageExtractor(ImgurExtractor):
         ("https://imgur.com/zzzzzzz", {  # not found
             "exception": exception.NotFoundError,
         }),
-        ("https://www.imgur.com/21yMxCS", None),  # www
-        ("https://m.imgur.com/21yMxCS", None),  # mobile
-        ("https://imgur.com/zxaY6", None),  # 5 character key
-        ("https://i.imgur.com/21yMxCS.png", None),  # direct link
-        ("https://i.imgur.com/21yMxCSh.png", None),  # direct link thumbnail
-        ("https://i.imgur.com/zxaY6.gif", None),  # direct link (short)
-        ("https://i.imgur.com/zxaY6s.gif", None),  # direct link (short; thumb)
-    ]
+        ("https://www.imgur.com/21yMxCS"),  # www
+        ("https://m.imgur.com/21yMxCS"),  # mobile
+        ("https://imgur.com/zxaY6"),  # 5 character key
+        ("https://i.imgur.com/21yMxCS.png"),  # direct link
+        ("https://i.imgur.com/21yMxCSh.png"),  # direct link thumbnail
+        ("https://i.imgur.com/zxaY6.gif"),  # direct link (short)
+        ("https://i.imgur.com/zxaY6s.gif"),  # direct link (short; thumb)
+    )
 
     def items(self):
         image = self._get_data(self.item_id)
@@ -113,12 +113,12 @@ class ImgurImageExtractor(ImgurExtractor):
 class ImgurAlbumExtractor(ImgurExtractor):
     """Extractor for image albums from imgur.com"""
     subcategory = "album"
-    directory_fmt = ["{category}", "{album[hash]}{album[title]:? - //}"]
+    directory_fmt = ("{category}", "{album[hash]}{album[title]:? - //}")
     filename_fmt = "{category}_{album[hash]}_{num:>03}_{hash}.{extension}"
     archive_fmt = "{album[hash]}_{hash}"
-    pattern = [r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
-               r"/(?:a|gallery|t/unmuted)/(\w{7}|\w{5})"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
+               r"/(?:a|gallery|t/unmuted)/(\w{7}|\w{5})")
+    test = (
         ("https://imgur.com/a/TcBmP", {
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
             "keyword": {
@@ -160,9 +160,9 @@ class ImgurAlbumExtractor(ImgurExtractor):
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.NotFoundError,
         }),
-        ("https://www.imgur.com/a/TcBmP", None),  # www
-        ("https://m.imgur.com/a/TcBmP", None),  # mobile
-    ]
+        ("https://www.imgur.com/a/TcBmP"),  # www
+        ("https://m.imgur.com/a/TcBmP"),  # mobile
+    )
 
     def items(self):
         album = self._get_data("a/" + self.item_id + "/all")

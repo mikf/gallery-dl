@@ -38,8 +38,8 @@ class FoolslideBase(SharedConfigMixin):
 class FoolslideChapterExtractor(FoolslideBase, Extractor):
     """Base class for chapter extractors for FoOlSlide based sites"""
     subcategory = "chapter"
-    directory_fmt = [
-        "{category}", "{manga}", "{chapter_string}"]
+    directory_fmt = (
+        "{category}", "{manga}", "{chapter_string}")
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     archive_fmt = "{id}"
@@ -153,8 +153,8 @@ def generate_extractors():
         ChExtr.__name__ = ChExtr.__qualname__ = name + "ChapterExtractor"
         ChExtr.__doc__ = "Extractor for manga-chapters from " + domain
         ChExtr.category = category
-        ChExtr.pattern = [r"(?:https?://)?" + pattern +
-                          r"(/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"]
+        ChExtr.pattern = (r"(?:https?://)?" + pattern +
+                          r"(/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)")
         ChExtr.test = info.get("test-chapter")
         ChExtr.root = root
         if "decode" in info:
@@ -167,7 +167,7 @@ def generate_extractors():
         MaExtr.__name__ = MaExtr.__qualname__ = name + "MangaExtractor"
         MaExtr.__doc__ = "Extractor for manga from " + domain
         MaExtr.category = category
-        MaExtr.pattern = [r"(?:https?://)?" + pattern + r"(/series/[^/?&#]+)"]
+        MaExtr.pattern = r"(?:https?://)?" + pattern + r"(/series/[^/?&#]+)"
         MaExtr.test = info.get("test-manga")
         MaExtr.root = root
         symtable[MaExtr.__name__] = MaExtr
@@ -176,65 +176,59 @@ def generate_extractors():
 EXTRACTORS = {
     "dokireader": {
         "root": "https://kobato.hologfx.com/reader",
-        "test-chapter": [
+        "test-chapter":
             (("https://kobato.hologfx.com/reader/read/"
               "hitoribocchi_no_oo_seikatsu/en/3/34"), {
                 "keyword": "998d1d523da028284b8dd4b7b54ceae4af6cb65a",
             }),
-        ],
-        "test-manga": [
+        "test-manga":
             (("https://kobato.hologfx.com/reader/series/"
               "boku_ha_ohimesama_ni_narenai/"), {
                 "url": "1c1f5a7258ce4f631f5fc32be548d78a6a57990d",
                 "keyword": "614d89a6045b85c822cbd3e67578ea7577dfc995",
             }),
-        ],
     },
     "jaiminisbox": {
         "root": "https://jaiminisbox.com/reader",
         "pattern": r"(?:www\.)?jaiminisbox\.com/reader",
         "decode": "base64",
-        "test-chapter": [
+        "test-chapter": (
             ("https://jaiminisbox.com/reader/read/uratarou/en/0/1/", {
                 "keyword": "d8919bc8f0351b44e938862214e654401962b5a5",
             }),
             ("https://jaiminisbox.com/reader/read/dr-stone/en/0/16/", {
                 "keyword": "9b658599651f1ae87cab3e0e29dd21e8337a362c",
             }),
-        ],
-        "test-manga": [
+        ),
+        "test-manga":
             ("https://jaiminisbox.com/reader/series/sora_no_kian/", {
                 "url": "66612be177dc3b3fa1d1f537ef02f4f701b163ea",
                 "keyword": "0908a4145bb03acc4210f5d01169988969f5acd1",
             }),
-        ]
     },
     "kireicake": {
         "root": "https://reader.kireicake.com",
-        "test-chapter": [
+        "test-chapter":
             ("https://reader.kireicake.com/read/wonderland/en/1/1/", {
                 "url": "b2d36bc0bc67e4c461c3a4d6444a2fd339f5d07e",
                 "keyword": "47e0cf69f95ab3b820bda05014aec38d3b824018",
             }),
-        ],
-        "test-manga": [
+        "test-manga":
             ("https://reader.kireicake.com/series/wonderland/", {
                 "url": "d067b649af1cc88fa8c8b698fde04a10909fd169",
                 "keyword": "99caa336a9d48e27e3b8e56a0a1e6faf9fc13a51",
             }),
-        ],
     },
     "powermanga": {
         "root": "https://read.powermanga.org",
         "pattern": r"read(?:er)?\.powermanga\.org",
-        "test-chapter": [
+        "test-chapter":
             (("https://read.powermanga.org"
               "/read/one_piece_digital_colour_comics/en/0/75/"), {
                 "url": "854c5817f8f767e1bccd05fa9d58ffb5a4b09384",
                 "keyword": "9985bcb78491dff9c725958b06bba606be51b6d3",
             }),
-        ],
-        "test-manga": [
+        "test-manga":
             (("https://read.powermanga.org"
               "/series/one_piece_digital_colour_comics/"), {
                 "count": ">= 1",
@@ -250,50 +244,46 @@ EXTRACTORS = {
                     "volume": int,
                 },
             }),
-        ],
     },
     "seaotterscans": {
         "root": "https://reader.seaotterscans.com",
-        "test-chapter": [
+        "test-chapter":
             ("https://reader.seaotterscans.com/read/100_days/en/0/5/", {
                 "url": "63d46b8883cc652dfe8bd5be4492160dd31f06a8",
                 "keyword": "5349c2fbaa88070e6af600de17a6c4e212243e8e",
             }),
-        ],
-        "test-manga": [
+        "test-manga":
             ("https://reader.seaotterscans.com/series/marry_me/", {
                 "url": "fdbacabfa566a6baeb3f01bb46cbda0577bd4bbe",
                 "keyword": "61d3388d73df12f64361892b47a9398df4a5947c",
             }),
-        ],
     },
     "sensescans": {
         "root": "http://sensescans.com/reader",
         "pattern": r"(?:(?:www\.)?sensescans\.com/reader"
                    r"|reader\.sensescans\.com)",
-        "test-chapter": [
-            (("http://reader.sensescans.com/read/"
-              "magi__labyrinth_of_magic/en/37/369/"), {
-                  "url": "a399ef037cdfbc25b09d435cc2ea1e3e454a6812",
-                  "keyword": "43ba75615d3e77d507808b0f3a8fd7fc72232a60",
-            }),
+        "test-chapter": (
             (("http://sensescans.com/reader/read/"
               "magi__labyrinth_of_magic/en/37/369/"), {
                   "url": "a399ef037cdfbc25b09d435cc2ea1e3e454a6812",
                   "keyword": "43ba75615d3e77d507808b0f3a8fd7fc72232a60",
             }),
-        ],
-        "test-manga": [
+            (("http://reader.sensescans.com/read/"
+              "magi__labyrinth_of_magic/en/37/369/"), {
+                  "url": "a399ef037cdfbc25b09d435cc2ea1e3e454a6812",
+                  "keyword": "43ba75615d3e77d507808b0f3a8fd7fc72232a60",
+            }),
+        ),
+        "test-manga":
             ("http://sensescans.com/reader/series/hakkenden/", {
                 "url": "2360ccb0ead0ff2f5e27b7aef7eb17b9329de2f2",
                 "keyword": "122cf92c32e6428c50f56ffaf29d06b96750ed71",
             }),
-        ],
     },
     "worldthree": {
         "root": "http://www.slide.world-three.org",
         "pattern": r"(?:www\.)?slide\.world-three\.org",
-        "test-chapter": [
+        "test-chapter": (
             (("http://www.slide.world-three.org"
               "/read/black_bullet/en/2/7/page/1"), {
                 "url": "be2f04f6e2d311b35188094cfd3e768583271584",
@@ -304,13 +294,12 @@ EXTRACTORS = {
                 "url": "6028ea5ca282744f925dfad92eeb98509f9cc78c",
                 "keyword": "d478e9f20847deb1844dba318acaa8b91c19468a",
             }),
-        ],
-        "test-manga": [
+        ),
+        "test-manga":
             ("http://www.slide.world-three.org/series/black_bullet/", {
                 "url": "5743b93512d26e6b540d90a7a5d69208b6d4a738",
                 "keyword": "3a24f1088b4d7f3b798a96163f21ca251293a120",
             }),
-        ],
     },
 }
 

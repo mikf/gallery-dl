@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -42,7 +42,7 @@ BASE_PATTERN = (
 class TumblrExtractor(Extractor):
     """Base class for tumblr extractors"""
     category = "tumblr"
-    directory_fmt = ["{category}", "{name}"]
+    directory_fmt = ("{category}", "{name}")
     filename_fmt = "{category}_{blog_name}_{id}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
 
@@ -191,8 +191,8 @@ class TumblrExtractor(Extractor):
 class TumblrUserExtractor(TumblrExtractor):
     """Extractor for all images from a tumblr-user"""
     subcategory = "user"
-    pattern = [BASE_PATTERN + r"(?:/page/\d+|/archive)?/?$"]
-    test = [
+    pattern = BASE_PATTERN + r"(?:/page/\d+|/archive)?/?$"
+    test = (
         ("http://demo.tumblr.com/", {
             "pattern": r"https://\d+\.media\.tumblr\.com"
                        r"/tumblr_[^/_]+_\d+\.jpg",
@@ -218,11 +218,11 @@ class TumblrUserExtractor(TumblrExtractor):
             "count": 2,
             "keyword": {"tags": ["test", "private", "hidden"]},
         }),
-        ("https://demo.tumblr.com/page/2", None),
-        ("https://demo.tumblr.com/archive", None),
-        ("tumblr:http://www.b-authentique.com/", None),
-        ("tumblr:www.b-authentique.com", None),
-    ]
+        ("https://demo.tumblr.com/page/2"),
+        ("https://demo.tumblr.com/archive"),
+        ("tumblr:http://www.b-authentique.com/"),
+        ("tumblr:www.b-authentique.com"),
+    )
 
     def posts(self):
         return self.api.posts(self.blog, {})
@@ -231,8 +231,8 @@ class TumblrUserExtractor(TumblrExtractor):
 class TumblrPostExtractor(TumblrExtractor):
     """Extractor for images from a single post on tumblr"""
     subcategory = "post"
-    pattern = [BASE_PATTERN + r"/(?:post|image)/(\d+)"]
-    test = [
+    pattern = BASE_PATTERN + r"/(?:post|image)/(\d+)"
+    test = (
         ("http://demo.tumblr.com/post/459265350", {
             "pattern": (r"https://\d+\.media\.tumblr\.com"
                         r"/tumblr_[^/_]+_1280.jpg"),
@@ -262,8 +262,8 @@ class TumblrPostExtractor(TumblrExtractor):
         ("https://mikf123.tumblr.com/post/181022380064/chat-post", {
             "count": 0,
         }),
-        ("http://demo.tumblr.com/image/459265350", None),
-    ]
+        ("http://demo.tumblr.com/image/459265350"),
+    )
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
@@ -281,11 +281,11 @@ class TumblrPostExtractor(TumblrExtractor):
 class TumblrTagExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user by tag"""
     subcategory = "tag"
-    pattern = [BASE_PATTERN + r"/tagged/([^/?&#]+)"]
-    test = [("http://demo.tumblr.com/tagged/Times%20Square", {
+    pattern = BASE_PATTERN + r"/tagged/([^/?&#]+)"
+    test = ("http://demo.tumblr.com/tagged/Times%20Square", {
         "pattern": (r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg"),
         "count": 1,
-    })]
+    })
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
@@ -298,12 +298,12 @@ class TumblrTagExtractor(TumblrExtractor):
 class TumblrLikesExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user's liked posts"""
     subcategory = "likes"
-    directory_fmt = ["{category}", "{name}", "likes"]
+    directory_fmt = ("{category}", "{name}", "likes")
     archive_fmt = "f_{blog[name]}_{id}_{num}"
-    pattern = [BASE_PATTERN + r"/likes"]
-    test = [("http://mikf123.tumblr.com/likes", {
+    pattern = BASE_PATTERN + r"/likes"
+    test = ("http://mikf123.tumblr.com/likes", {
         "count": 1,
-    })]
+    })
 
     def posts(self):
         return self.api.likes(self.blog)

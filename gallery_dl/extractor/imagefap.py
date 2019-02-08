@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2018 Mike Fährmann
+# Copyright 2016-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,7 +16,7 @@ import json
 class ImagefapExtractor(Extractor):
     """Base class for imagefap extractors"""
     category = "imagefap"
-    directory_fmt = ["{category}", "{gallery_id} {title}"]
+    directory_fmt = ("{category}", "{gallery_id} {title}")
     filename_fmt = "{category}_{gallery_id}_{name}.{extension}"
     archive_fmt = "{gallery_id}_{image_id}"
     root = "https://www.imagefap.com"
@@ -25,9 +25,9 @@ class ImagefapExtractor(Extractor):
 class ImagefapGalleryExtractor(ImagefapExtractor):
     """Extractor for image galleries from imagefap.com"""
     subcategory = "gallery"
-    pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com/"
-                r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?imagefap\.com/"
+               r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")
+    test = (
         ("https://www.imagefap.com/pictures/7102714", {
             "url": "268995eac5d01ddecd0fe58cfa9828390dc85a84",
             "keyword": "3b90205f434bd1e0461bdbd5d2d9c34056b50fe6",
@@ -37,8 +37,8 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
             "url": "14906b4f0b8053d1d69bc730a325acb793cbc898",
             "keyword": "66ccb98b69cb52f89540224260641002f41f6ece",
         }),
-        ("https://www.imagefap.com/gallery.php?gid=7102714", None),
-    ]
+        ("https://www.imagefap.com/gallery.php?gid=7102714"),
+    )
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self)
@@ -94,11 +94,11 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 class ImagefapImageExtractor(ImagefapExtractor):
     """Extractor for single images from imagefap.com"""
     subcategory = "image"
-    pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"]
-    test = [("https://www.imagefap.com/photo/1369341772/", {
+    pattern = r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"
+    test = ("https://www.imagefap.com/photo/1369341772/", {
         "url": "b31ee405b61ff0450020a1bf11c0581ca9adb471",
         "keyword": "b49940c04ed30bfc1c28ec39eb08b3be5753ce8a",
-    })]
+    })
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self)
@@ -133,18 +133,18 @@ class ImagefapUserExtractor(ImagefapExtractor):
     """Extractor for all galleries from a user at imagefap.com"""
     subcategory = "user"
     categorytransfer = True
-    pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/"
+    pattern = (r"(?:https?://)?(?:www\.)?imagefap\.com/"
                r"(?:profile(?:\.php\?user=|/)([^/?&#]+)"
-               r"|usergallery\.php\?userid=(\d+))"]
-    test = [
+               r"|usergallery\.php\?userid=(\d+))")
+    test = (
         ("https://www.imagefap.com/profile/LucyRae/galleries", {
             "url": "d941aa906f56a75972a7a5283030eb9a8d27a4fd",
         }),
         ("https://www.imagefap.com/usergallery.php?userid=1862791", {
             "url": "d941aa906f56a75972a7a5283030eb9a8d27a4fd",
         }),
-        ("https://www.imagefap.com/profile.php?user=LucyRae", None),
-    ]
+        ("https://www.imagefap.com/profile.php?user=LucyRae"),
+    )
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self)

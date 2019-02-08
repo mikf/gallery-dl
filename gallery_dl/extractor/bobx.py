@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,12 +22,12 @@ class BobxExtractor(Extractor):
 class BobxGalleryExtractor(BobxExtractor):
     """Extractor for individual image galleries on bobx.com"""
     subcategory = "gallery"
-    directory_fmt = ["{category}", "{model}", "{title}"]
+    directory_fmt = ("{category}", "{model}", "{title}")
     filename_fmt = "{model}_{image_id}_{num:>03}.{extension}"
     archive_fmt = "{image_id}"
-    pattern = [r"(?:https?://)?(?:www\.)?bobx\.com"
-               r"/([^/]+/[^/]+/photoset/[\w-]+)-\d+-\d+-\d+\.html"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?bobx\.com"
+               r"/([^/]+/[^/]+/photoset/[\w-]+)-\d+-\d+-\d+\.html")
+    test = (
         (("http://www.bobx.com/idol/mikoto-hibi"
           "/photoset/wpb-2018-_11-0-2-8.html"), {
             "url": "93972d6a661f6627e963d62c9d15531e6b36a389",
@@ -39,7 +39,7 @@ class BobxGalleryExtractor(BobxExtractor):
             "url": "f5d6c0cd0881ae6f504c21a90d86e3464dc54e8e",
             "keyword": "43395ac200deaaa50627da666bd02c8f1f86a59d",
         }),
-    ]
+    )
 
     def __init__(self, match):
         BobxExtractor.__init__(self)
@@ -92,10 +92,10 @@ class BobxGalleryExtractor(BobxExtractor):
 class BobxIdolExtractor(BobxExtractor):
     """Extractor for an idol's image galleries on bobx.com"""
     subcategory = "idol"
-    pattern = [r"(?:https?://)?(?:www\.)?bobx\.com/([^/]+/[^/?&#]+)/?$"]
-    test = [("http://www.bobx.com/idol/rin-okabe/", {
+    pattern = r"(?:https?://)?(?:www\.)?bobx\.com/([^/]+/[^/?&#]+)/?$"
+    test = ("http://www.bobx.com/idol/rin-okabe/", {
         "url": "74d80bfcd53b738b31909bb42e5cc97c41b475b8",
-    })]
+    })
 
     def __init__(self, match):
         BobxExtractor.__init__(self)

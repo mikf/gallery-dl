@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -48,19 +48,19 @@ class KomikcastBase():
 
 class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     """Extractor for manga-chapters from komikcast.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?komikcast\.com(/chapter/[^/?&#]+/)"]
-    test = [
+    pattern = r"(?:https?://)?(?:www\.)?komikcast\.com(/chapter/[^/?&#]+/)"
+    test = (
         (("https://komikcast.com/chapter/"
           "apotheosis-chapter-02-2-bahasa-indonesia/"), {
-            "url": "978d3c053d34a77f6ea6e60cbba3deda1e369be8",
+            "url": "2a108bf8a96753266610afef625d248f858e13f3",
             "keyword": "9964a7ce7c8a518aebdccdea0e05858439c7ad92",
         }),
         (("https://komikcast.com/chapter/"
           "tonari-no-kashiwagi-san-chapter-18b/"), {
-            "url": "db5594b025f9d81e4987da538b8599b8dee8851b",
+            "url": "aff90dd21dbb945a726778b10bdef522af7c42fe",
             "keyword": "94bb85aec6654ab5af0c10419ca388fcd9c73b47",
         }),
-    ]
+    )
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, self.root + match.group(1))
@@ -90,15 +90,15 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
 
 class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     """Extractor for manga from komikcast.com"""
-    pattern = [r"(?:https?://)?(?:www\.)?(komikcast\.com"
-               r"/(?:komik/)?[^/?&#]+/?)$"]
-    test = [
+    pattern = (r"(?:https?://)?(?:www\.)?(komikcast\.com"
+               r"/(?:komik/)?[^/?&#]+/?)$")
+    test = (
         ("https://komikcast.com/komik/090-eko-to-issho/", {
             "url": "dc798d107697d1f2309b14ca24ca9dba30c6600f",
             "keyword": "3db7e23e3c108031608fbbeb9334badecd967f95",
         }),
-        ("https://komikcast.com/tonari-no-kashiwagi-san/", None),
-    ]
+        ("https://komikcast.com/tonari-no-kashiwagi-san/"),
+    )
 
     def chapters(self, page):
         results = []
