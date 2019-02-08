@@ -24,7 +24,7 @@ class ArtstationExtractor(Extractor):
 
     def __init__(self, match=None):
         Extractor.__init__(self)
-        self.user = match.group(1) if match else None
+        self.user = match.group(1) or match.group(2) if match else None
         self.external = self.config("external", False)
 
     def items(self):
@@ -123,10 +123,9 @@ class ArtstationExtractor(Extractor):
 class ArtstationUserExtractor(ArtstationExtractor):
     """Extractor for all projects of an artstation user"""
     subcategory = "user"
-    pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects|search)([^/?&#]+)(?:/albums/all)?/?$",
-               r"(?:https?://)?((?!www)\w+)\.artstation\.com"
-               r"(?:/(?:projects/?)?)?$"]
+    pattern = [r"(?:https?://)?(?:(?:www\.)?artstation\.com"
+               r"/(?!artwork|projects|search)([^/?&#]+)(?:/albums/all)?"
+               r"|((?!www)\w+)\.artstation\.com(?:/projects)?)/?$"]
     test = [
         ("https://www.artstation.com/gaerikim/", {
             "pattern": r"https://\w+\.artstation\.com/p/assets"
@@ -149,10 +148,9 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
     directory_fmt = ["{category}", "{userinfo[username]}", "Albums",
                      "{album[id]} - {album[title]}"]
     archive_fmt = "a_{album[id]}_{asset[id]}"
-    pattern = [r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects|search)([^/?&#]+)/albums/(\d+)",
-               r"(?:https?://)?((?!www)\w+)\.artstation\.com"
-               r"/albums/(\d+)"]
+    pattern = [r"(?:https?://)?(?:(?:www\.)?artstation\.com"
+               r"/(?!artwork|projects|search)([^/?&#]+)"
+               r"|((?!www)\w+)\.artstation\.com)/albums/(\d+)"]
     test = [
         ("https://www.artstation.com/huimeiye/albums/770899", {
             "count": 2,
@@ -165,7 +163,7 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
-        self.album_id = text.parse_int(match.group(2))
+        self.album_id = text.parse_int(match.group(3))
 
     def metadata(self):
         userinfo = self.get_user_info(self.user)

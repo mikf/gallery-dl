@@ -82,10 +82,9 @@ class PixivExtractor(Extractor):
 class PixivUserExtractor(PixivExtractor):
     """Extractor for works of a pixiv-user"""
     subcategory = "user"
-    pattern = [(r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-                r"/member(?:_illust)?\.php\?id=(\d+)(?:&([^#]+))?"),
-               (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-                r"/(?:u(?:ser)?/|(?:mypage\.php)?#id=)(\d+)()")]
+    pattern = [r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/"
+               r"(?:member(?:_illust)?\.php\?id=(\d+)(?:&([^#]+))?"
+               r"|(?:u(?:ser)?/|(?:mypage\.php)?#id=)(\d+))"]
     test = [
         ("http://www.pixiv.net/member_illust.php?id=173530", {
             "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
@@ -107,7 +106,7 @@ class PixivUserExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
-        self.user_id = match.group(1)
+        self.user_id = match.group(1) or match.group(3)
         self.query = text.parse_query(match.group(2))
 
     def works(self):
@@ -153,13 +152,11 @@ class PixivMeExtractor(PixivExtractor):
 class PixivWorkExtractor(PixivExtractor):
     """Extractor for a single pixiv work/illustration"""
     subcategory = "work"
-    pattern = [(r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-                r"/member(?:_illust)?\.php\?(?:[^&]+&)*illust_id=(\d+)"),
-               (r"(?:https?://)?i(?:\d+\.pixiv|\.pximg)\.net"
-                r"/(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}"
-                r"|img\d+/img/[^/]+)/(\d+)"),
-               (r"(?:https?://)?img\d*\.pixiv\.net/img/[^/]+/(\d+)"),
-               (r"(?:https?://)?(?:www\.)?pixiv\.net/i/(\d+)")]
+    pattern = [r"(?:https?://)?(?:(?:www\.|touch\.)?pixiv\.net"
+               r"/member(?:_illust)?\.php\?(?:[^&]+&)*illust_id=(\d+)"
+               r"|(?:i(?:\d+\.pixiv|\.pximg)\.net"
+               r"/(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}|img\d+/img/[^/]+)"
+               r"|img\d*\.pixiv\.net/img/[^/]+|(?:www\.)?pixiv\.net/i)/(\d+))"]
     test = [
         (("http://www.pixiv.net/member_illust.php"
           "?mode=medium&illust_id=966412"), {
@@ -187,7 +184,7 @@ class PixivWorkExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self)
-        self.illust_id = match.group(1)
+        self.illust_id = match.group(1) or match.group(2)
         self.load_ugoira = True
         self.work = None
 

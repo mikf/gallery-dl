@@ -133,10 +133,9 @@ class ImagefapUserExtractor(ImagefapExtractor):
     """Extractor for all galleries from a user at imagefap.com"""
     subcategory = "user"
     categorytransfer = True
-    pattern = [(r"(?:https?://)?(?:www\.)?imagefap\.com"
-                r"/profile(?:\.php\?user=|/)([^/?&#]+)"),
-               (r"(?:https?://)?(?:www\.)?imagefap\.com"
-                r"/usergallery\.php\?userid=(\d+)")]
+    pattern = [r"(?:https?://)?(?:www\.)?imagefap\.com/"
+               r"(?:profile(?:\.php\?user=|/)([^/?&#]+)"
+               r"|usergallery\.php\?userid=(\d+))"]
     test = [
         ("https://www.imagefap.com/profile/LucyRae/galleries", {
             "url": "d941aa906f56a75972a7a5283030eb9a8d27a4fd",
@@ -149,12 +148,7 @@ class ImagefapUserExtractor(ImagefapExtractor):
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self)
-        try:
-            self.user_id = int(match.group(1))
-            self.user = None
-        except ValueError:
-            self.user_id = None
-            self.user = match.group(1)
+        self.user, self.user_id = match.groups()
 
     def items(self):
         yield Message.Version, 1
