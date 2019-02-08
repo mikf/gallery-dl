@@ -13,7 +13,6 @@ from .. import text, util, extractor, exception
 from ..cache import cache
 import datetime
 import time
-import re
 
 
 class RedditExtractor(Extractor):
@@ -27,7 +26,7 @@ class RedditExtractor(Extractor):
         self._visited = set()
 
     def items(self):
-        subre = re.compile(RedditSubmissionExtractor.pattern)
+        subre = RedditSubmissionExtractor.pattern
         submissions = self.submissions()
         depth = 0
 

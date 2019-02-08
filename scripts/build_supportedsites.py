@@ -211,13 +211,15 @@ def get_domain(classes):
         if hasattr(cls, "root") and cls.root:
             return cls.root + "/"
 
-        if hasattr(cls, "test") and cls.test:
-            url = cls.test[0][0]
-            return url[:url.find("/", 8)+1]
+        if hasattr(cls, "https"):
+            scheme = "https" if cls.https else "http"
+            domain = cls.__doc__.split()[-1]
+            return "{}://{}/".format(scheme, domain)
 
-        scheme = "http" if hasattr(cls, "https") and not cls.https else "https"
-        host = cls.__doc__.split()[-1]
-        return scheme + "://" + host + "/"
+        test = next(cls._get_tests(), None)
+        if test:
+            url = test[0]
+            return url[:url.find("/", 8)+1]
     except (IndexError, AttributeError):
         pass
     return ""

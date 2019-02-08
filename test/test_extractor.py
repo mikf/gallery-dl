@@ -66,10 +66,10 @@ class TestExtractor(unittest.TestCase):
         uri = "fake:foobar"
         self.assertIsNone(extractor.find(uri))
 
-        tuples = extractor.add_module(sys.modules[__name__])
-        self.assertEqual(len(tuples), 1)
-        self.assertEqual(tuples[0][0].pattern, FakeExtractor.pattern)
-        self.assertEqual(tuples[0][1], FakeExtractor)
+        classes = extractor.add_module(sys.modules[__name__])
+        self.assertEqual(len(classes), 1)
+        self.assertEqual(classes[0].pattern, FakeExtractor.pattern)
+        self.assertEqual(classes[0], FakeExtractor)
         self.assertIsInstance(extractor.find(uri), FakeExtractor)
 
     def test_blacklist(self):
@@ -109,13 +109,13 @@ class TestExtractor(unittest.TestCase):
             matches = []
 
             # ... and apply all regex patterns to each one
-            for pattern, extr2 in extractor._cache:
+            for extr2 in extractor._cache:
 
                 # skip DirectlinkExtractor pattern if it isn't tested
                 if extr1 != DLExtractor and extr2 == DLExtractor:
                     continue
 
-                match = pattern.match(url)
+                match = extr2.pattern.match(url)
                 if match:
                     matches.append(match)
 
