@@ -13,7 +13,7 @@ from .. import text, exception
 import json
 
 
-class HbrowseExtractor():
+class HbrowseBase():
     """Base class for hbrowse extractors"""
     category = "hbrowse"
     root = "https://www.hbrowse.com"
@@ -42,7 +42,7 @@ class HbrowseExtractor():
         return data
 
 
-class HbrowseMangaExtractor(HbrowseExtractor, MangaExtractor):
+class HbrowseMangaExtractor(HbrowseBase, MangaExtractor):
     """Extractor for manga from hbrowse.com"""
     pattern = [r"(?:https?://)?((?:www\.)?hbrowse\.com/\d+)/?$"]
     reverse = False
@@ -70,7 +70,7 @@ class HbrowseMangaExtractor(HbrowseExtractor, MangaExtractor):
             results.append((text.urljoin(self.root, url), data.copy()))
 
 
-class HbrowseChapterExtractor(HbrowseExtractor, ChapterExtractor):
+class HbrowseChapterExtractor(HbrowseBase, ChapterExtractor):
     """Extractor for manga-chapters from hbrowse.com"""
     directory_fmt = ["{category}", "{manga_id} {manga}", "c{chapter:>05}"]
     filename_fmt = ("{category}_{manga_id}_{chapter:>05}_"

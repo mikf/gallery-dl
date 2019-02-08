@@ -13,7 +13,7 @@ from .. import text, exception
 import json
 
 
-class MangaparkExtractor():
+class MangaparkBase():
     """Base class for mangapark extractors"""
     category = "mangapark"
     root_fmt = "https://mangapark.{}"
@@ -38,7 +38,7 @@ class MangaparkExtractor():
                 data["chapter_minor"] = "v" + value
 
 
-class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
+class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
     """Extractor for manga from mangapark.me"""
     pattern = [r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
                r"(/manga/[^/?&#]+)/?$"]
@@ -77,7 +77,7 @@ class MangaparkMangaExtractor(MangaparkExtractor, MangaExtractor):
         return results
 
 
-class MangaparkChapterExtractor(MangaparkExtractor, ChapterExtractor):
+class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.me"""
     pattern = [(r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
                 r"/manga/([^?&#]+/i\d+)")]
