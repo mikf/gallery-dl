@@ -30,21 +30,20 @@ class FakeExtractor(Extractor):
 
 
 class TestExtractor(unittest.TestCase):
+    VALID_URIS = (
+        "https://example.org/file.jpg",
+        "tumblr:foobar",
+        "oauth:flickr",
+        "test:pixiv:",
+        "recursive:https://example.org/document.html",
+    )
 
     def setUp(self):
         extractor._cache.clear()
         extractor._module_iter = iter(extractor.modules)
 
     def test_find(self):
-        valid_uris = (
-            "https://example.org/file.jpg",
-            "tumblr:foobar",
-            "oauth:flickr",
-            "test:pixiv:",
-            "recursive:https://example.org/document.html",
-        )
-
-        for uri in valid_uris:
+        for uri in self.VALID_URIS:
             result = extractor.find(uri)
             self.assertIsInstance(result, Extractor, uri)
 
@@ -95,6 +94,20 @@ class TestExtractor(unittest.TestCase):
             self.assertIsNone(extractor.find(link_uri))
             self.assertIsNone(extractor.find(test_uri))
             self.assertIsNone(extractor.find(fake_uri))
+
+    def test_from_url(self):
+        for uri in self.VALID_URIS:
+            cls = extractor.find(uri).__class__
+            extr = cls.from_url(uri)
+            self.assertIs(type(extr), cls)
+            self.assertIsInstance(extr, Extractor)
+
+        for not_found in ("", "/tmp/file.ext"):
+            self.assertIsNone(FakeExtractor.from_url(not_found))
+
+        for invalid in (None, [], {}, 123, b"test:"):
+            with self.assertRaises(TypeError):
+                FakeExtractor.from_url(invalid)
 
     def test_unique_pattern_matches(self):
         test_urls = []

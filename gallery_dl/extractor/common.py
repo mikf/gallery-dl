@@ -41,6 +41,13 @@ class Extractor():
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
 
+    @classmethod
+    def from_url(cls, url):
+        if isinstance(cls.pattern, str):
+            cls.pattern = re.compile(cls.pattern)
+        match = cls.pattern.match(url)
+        return cls(match) if match else None
+
     def __iter__(self):
         return self.items()
 
