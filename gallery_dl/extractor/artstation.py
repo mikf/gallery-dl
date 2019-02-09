@@ -303,8 +303,9 @@ class ArtstationSearchExtractor(ArtstationExtractor):
 class ArtstationImageExtractor(ArtstationExtractor):
     """Extractor for images from a single artstation project"""
     subcategory = "image"
-    pattern = (r"(?:https?://)?(?:\w+\.)?artstation\.com"
-               r"/(?:artwork|projects|search)/(\w+)")
+    pattern = (r"(?:https?://)?(?:"
+               r"(?:\w+\.)?artstation\.com/(?:artwork|projects|search)"
+               r"|artstn\.co/p)/(\w+)")
     test = (
         ("https://www.artstation.com/artwork/LQVJr", {
             "pattern": r"https?://\w+\.artstation\.com/p/assets"
@@ -323,8 +324,9 @@ class ArtstationImageExtractor(ArtstationExtractor):
             "options": (("external", True),),
             "pattern": "ytdl:https://www.youtube.com/embed/JNFfJtwwrU0",
         }),
-        # different URL pattern
+        # alternate URL patterns
         ("https://sungchoi.artstation.com/projects/LQVJr"),
+        ("https://artstn.co/p/LQVJr"),
     )
 
     def __init__(self, match):
