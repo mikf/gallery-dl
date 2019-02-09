@@ -167,8 +167,8 @@ class SeigaImageExtractor(SeigaExtractor):
     subcategory = "image"
     filename_fmt = "{category}_{image_id}.{extension}"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:www\.|seiga\.)?nicovideo\.jp/(?:seiga/im|image/source/)"
-               r"|lohas\.nicoseiga\.jp/(?:priv|o)/[^/]+/\d+/)(\d+)")
+               r"(?:seiga\.|www\.)?nicovideo\.jp/(?:seiga/im|image/source/)"
+               r"|lohas\.nicoseiga\.jp/(?:thumb|(?:priv|o)/[^/]+/\d+)/)(\d+)")
     test = (
         ("http://seiga.nicovideo.jp/seiga/im5977527", {
             "keyword": "f66ba5de33d4ce2cb57f23bb37e1e847e0771c10",
@@ -177,6 +177,12 @@ class SeigaImageExtractor(SeigaExtractor):
         ("http://seiga.nicovideo.jp/seiga/im123", {
             "exception": exception.NotFoundError,
         }),
+        ("http://seiga.nicovideo.jp/image/source/5977527"),
+        ("https://lohas.nicoseiga.jp/thumb/5977527i"),
+        ("https://lohas.nicoseiga.jp/priv"
+         "/759a4ef1c639106ba4d665ee6333832e647d0e4e/1549727594/5977527"),
+        ("https://lohas.nicoseiga.jp/o"
+         "/759a4ef1c639106ba4d665ee6333832e647d0e4e/1549727594/5977527"),
     )
 
     def __init__(self, match):
