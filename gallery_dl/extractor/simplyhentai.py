@@ -26,7 +26,7 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
             "url": "258289249990502c3138719cb89e995a60861e49",
-            "keyword": "3873c6078ce116e798fac8b7a955e3b3a4f526a6",
+            "keyword": "5ea1498a1a902d76d337946910082755d168b941",
         }),
         ("https://www.simply-hentai.com/notfound", {
             "exception": exception.GalleryDLException,
@@ -61,7 +61,7 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
             "title": text.unescape(title),
             "series": text.remove_html(series),
             "characters": ", ".join(text.split_html(chars)),
-            "tags": ", ".join(text.split_html(tags)),
+            "tags": text.split_html(tags),
             "artist": ", ".join(text.split_html(artist)),
             "lang": util.language_to_code(lang),
             "language": lang,
@@ -90,11 +90,11 @@ class SimplyhentaiImageExtractor(Extractor):
         (("https://www.simply-hentai.com/image"
           "/pheromomania-vol-1-kanzenban-isao-3949d8b3-400c-4b6"), {
             "url": "0338eb137830ab6f81e5f410d3936ef785d063d9",
-            "keyword": "2f673a424cf06e946685660ff5ca5b0e7cf685cc",
+            "keyword": "0209cc8657c80e2b5fed8f2f3f2aa3a57e2cc8b6",
         }),
         ("https://www.simply-hentai.com/gif/8915dfcf-0b6a-47c", {
             "url": "11c060d7ec4dfd0bd105300b6e1fd454674a5af1",
-            "keyword": "fbfd5c418f3d9d7d0b0ba0cda0602240820da693",
+            "keyword": "de26851c4eb7a204364ea26943b1581a0fd43da5",
         }),
     )
 
@@ -107,13 +107,20 @@ class SimplyhentaiImageExtractor(Extractor):
         page = self.request(self.url).text
         url_search = 'data-src="' if self.type == "image" else '<source src="'
 
-        title, pos = text.extract(page, 'property="og:title" content="', '"')
+        title, pos = text.extract(page, '"og:title" content="', '"')
+        descr, pos = text.extract(page, '"og:description" content="', '"', pos)
         url  , pos = text.extract(page, url_search, '"', pos)
-        tags , pos = text.extract(page, '<div class="tags">', '</div>', pos)
+
+        tags = text.extract(descr, " tagged with ", " online for free ")[0]
+        if tags:
+            tags = tags.split(", ")
+            tags[-1] = tags[-1].partition(" ")[2]
+        else:
+            tags = []
 
         data = text.nameext_from_url(url, {
             "title": text.unescape(title) if title else "",
-            "tags": ", ".join(text.split_html(tags)),
+            "tags": tags,
             "type": self.type,
         })
         data["token"] = data["name"].rpartition("_")[2]
@@ -135,13 +142,13 @@ class SimplyhentaiVideoExtractor(Extractor):
         ("https://videos.simply-hentai.com/creamy-pie-episode-02", {
             "pattern": r"https://www\.googleapis\.com/drive/v3/files"
                        r"/0B1ecQ8ZVLm3JcHZzQzBnVy1ZUmc\?alt=media&key=[\w-]+",
-            "keyword": "315201bd4f3ce6bff57f4fbc631788c004d0eb7d",
+            "keyword": "5aefc5c15ae4f56beee93ad2ff2a68cf0c3e6f29",
             "count": 1,
         }),
         (("https://videos.simply-hentai.com"
           "/1715-tifa-in-hentai-gang-bang-3d-movie"), {
             "url": "ad9a36ae06c601b6490e3c401834b4949d947eb0",
-            "keyword": "fef03513d5e1a9958d63e45a1d583e2f658b1168",
+            "keyword": "9cbd03aab04c3f258cb14d13d45c703969ed54ab",
         }),
     )
 
@@ -172,7 +179,7 @@ class SimplyhentaiVideoExtractor(Extractor):
         data = text.nameext_from_url(video_url, {
             "title": text.unescape(title),
             "episode": text.parse_int(episode),
-            "tags": "".join(text.split_html(tags)),
+            "tags": text.split_html(tags)[::2],
             "date": text.remove_html(date),
             "type": "video",
         })
