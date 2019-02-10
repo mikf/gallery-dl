@@ -17,21 +17,20 @@ class NgomikChapterExtractor(ChapterExtractor):
     category = "ngomik"
     root = "http://ngomik.in"
     pattern = (r"(?:https?://)?(?:www\.)?ngomik\.in"
-               r"/manga/([^/?&#]+/chapter-[^/?&#]+)")
-    test = (("http://ngomik.in/manga/chuuko-demo-koi-ga-shitai"
-             "/chapter-21-5?style=list"), {
-        "url": "e87ed713f31d576013f179b50b4e10d7c678e53a",
-        "keyword": "a774caea148fc18a7d889f453dadbe3def9e0c2c",
+               r"/([^/?&#]+-chapter-[^/?&#]+)")
+    test = ("https://www.ngomik.in/14-sai-no-koi-chapter-1-6/", {
+        "url": "8e67fdf751bbc79bc6f4dead7675008ddb8e32a4",
+        "keyword": "7cc913ed2b9018afbd3336755d28b8252d83044c",
     })
 
     def __init__(self, match):
-        url = "{}/manga/{}?style=list".format(self.root, match.group(1))
+        url = "{}/{}".format(self.root, match.group(1))
         ChapterExtractor.__init__(self, url)
 
     def get_metadata(self, page):
         info = text.extract(page, '<title>', "</title>")[0]
-        manga, chapter, _ = info.split(" - ")
-        chapter, sep, minor = chapter.rpartition(" ")[2].partition(".")
+        manga, _, chapter = info.partition(" Chapter ")
+        chapter, sep, minor = chapter.partition(" ")[0].partition(".")
 
         return {
             "manga": text.unescape(manga),
@@ -43,11 +42,8 @@ class NgomikChapterExtractor(ChapterExtractor):
 
     @staticmethod
     def get_images(page):
-        readerarea = text.extract(
-            page, '<div class="page-break', '<div class="select-view')[0]
+        readerarea = text.extract(page, 'id="readerarea"', 'class="chnav"')[0]
         return [
-            (url, None)
-            for url in text.extract_iter(
-                readerarea, ' src="', '"'
-            )
+            (text.unescape(url), None)
+            for url in text.extract_iter(readerarea, ' src="', '"')
         ]
