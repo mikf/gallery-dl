@@ -24,6 +24,42 @@ class ReadcomiconlineBase():
     request = cloudflare.request_func
 
 
+class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
+    """Extractor for comic-issues from readcomiconline.to"""
+    subcategory = "issue"
+    pattern = (r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
+               r"(/Comic/[^/?&#]+/[^/?&#]+\?id=(\d+))")
+    test = ("https://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
+        "url": "2bbab6ec4fbc05d269cca420a82a9b5acda28682",
+        "keyword": "c6de1c9c8a307dc4be56783c4ac6f1338ffac6fc",
+    })
+
+    def __init__(self, match):
+        ChapterExtractor.__init__(self, match)
+        self.issue_id = match.group(2)
+
+    def metadata(self, page):
+        comic, pos = text.extract(page, "   - Read\r\n    ", "\r\n")
+        iinfo, pos = text.extract(page, "    ", "\r\n", pos)
+        match = re.match(r"(?:Issue )?#(\d+)|(.+)", iinfo)
+        return {
+            "comic": comic,
+            "issue": match.group(1) or match.group(2),
+            "issue_id": text.parse_int(self.issue_id),
+            "lang": "en",
+            "language": "English",
+        }
+
+    def images(self, page):
+        self.session.headers["Referer"] = None
+        return [
+            (url, None)
+            for url in text.extract_iter(
+                page, 'lstImages.push("', '"'
+            )
+        ]
+
+
 class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
     """Extractor for comics from readcomiconline.to"""
     subcategory = "comic"
@@ -39,9 +75,6 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
             "keyword": "f5ba5246cd787bb750924d9690cb1549199bd516",
         }),
     )
-
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match, self.root + match.group(1))
 
     def chapters(self, page):
         results = []
@@ -63,39 +96,3 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
                 "lang": "en", "language": "English",
             }))
         return results
-
-
-class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
-    """Extractor for comic-issues from readcomiconline.to"""
-    subcategory = "issue"
-    pattern = (r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
-               r"(/Comic/[^/?&#]+/[^/?&#]+\?id=(\d+))")
-    test = ("https://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
-        "url": "2bbab6ec4fbc05d269cca420a82a9b5acda28682",
-        "keyword": "c6de1c9c8a307dc4be56783c4ac6f1338ffac6fc",
-    })
-
-    def __init__(self, match):
-        ChapterExtractor.__init__(self, match, self.root + match.group(1))
-        self.issue_id = match.group(2)
-
-    def get_metadata(self, page):
-        comic, pos = text.extract(page, "   - Read\r\n    ", "\r\n")
-        iinfo, pos = text.extract(page, "    ", "\r\n", pos)
-        match = re.match(r"(?:Issue )?#(\d+)|(.+)", iinfo)
-        return {
-            "comic": comic,
-            "issue": match.group(1) or match.group(2),
-            "issue_id": text.parse_int(self.issue_id),
-            "lang": "en",
-            "language": "English",
-        }
-
-    def get_images(self, page):
-        self.session.headers["Referer"] = None
-        return [
-            (url, None)
-            for url in text.extract_iter(
-                page, 'lstImages.push("', '"'
-            )
-        ]

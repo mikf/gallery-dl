@@ -19,7 +19,7 @@ class HentaifoxGalleryExtractor(ChapterExtractor):
     filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
     directory_fmt = ("{category}", "{gallery_id} {title}")
     archive_fmt = "{gallery_id}_{page}"
-    pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com/gallery/(\d+)"
+    pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com(/gallery/(\d+))"
     test = ("https://hentaifox.com/gallery/56622/", {
         "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
         "count": 24,
@@ -28,11 +28,10 @@ class HentaifoxGalleryExtractor(ChapterExtractor):
     root = "https://hentaifox.com"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
-        url = "{}/gallery/{}".format(self.root, self.gallery_id)
-        ChapterExtractor.__init__(self, match, url)
+        ChapterExtractor.__init__(self, match)
+        self.gallery_id = match.group(2)
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         title, pos = text.extract(page, "<h1>", "</h1>")
         data = text.extract_all(page, (
             ("parodies"  , ">Parodies:"  , "</a></span>"),
@@ -51,7 +50,7 @@ class HentaifoxGalleryExtractor(ChapterExtractor):
         data["lang"] = "en"
         return data
 
-    def get_images(self, page):
+    def images(self, page):
         return [
             (text.urljoin(self.root, url.replace("t.", ".")), None)
             for url in text.extract_iter(page, 'data-src="', '"')

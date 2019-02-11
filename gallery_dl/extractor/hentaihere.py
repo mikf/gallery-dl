@@ -14,11 +14,55 @@ import json
 import re
 
 
-class HentaihereMangaExtractor(MangaExtractor):
-    """Extractor for hmanga from hentaihere.com"""
+class HentaihereBase():
+    """Base class for hentaihere extractors"""
     category = "hentaihere"
-    pattern = r"(?:https?://)?(?:www\.)?(hentaihere\.com/m/S\d+)/?$"
-    scheme = "https"
+    root = "https://hentaihere.com"
+
+
+class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
+    """Extractor for a single manga chapter from hentaihere.com"""
+    archive_fmt = "{chapter_id}_{page}"
+    pattern = r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/(\d+)"
+    test = ("https://hentaihere.com/m/S13812/1/1/", {
+        "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
+        "keyword": "e9382a9be337abce3db2b1132e85751379dc05c5",
+    })
+
+    def __init__(self, match):
+        self.manga_id, self.chapter = match.groups()
+        url = "{}/m/S{}/{}/1".format(self.root, self.manga_id, self.chapter)
+        ChapterExtractor.__init__(self, match, url)
+
+    def metadata(self, page):
+        title = text.extract(page, "<title>", "</title>")[0]
+        chapter_id = text.extract(page, 'report/C', '"')[0]
+        pattern = r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by (.+) at "
+        match = re.match(pattern, title)
+        return {
+            "manga": match.group(1),
+            "manga_id": text.parse_int(self.manga_id),
+            "chapter": text.parse_int(self.chapter),
+            "chapter_id": text.parse_int(chapter_id),
+            "type": match.group(2),
+            "title": match.group(3),
+            "author": match.group(4),
+            "lang": "en",
+            "language": "English",
+        }
+
+    @staticmethod
+    def images(page):
+        images = text.extract(page, "var rff_imageList = ", ";")[0]
+        return [
+            ("https://hentaicdn.com/hentai" + part, None)
+            for part in json.loads(images)
+        ]
+
+
+class HentaihereMangaExtractor(HentaihereBase, MangaExtractor):
+    """Extractor for hmanga from hentaihere.com"""
+    pattern = r"(?:https?://)?(?:www\.)?hentaihere\.com(/m/S\d+)/?$"
     test = (
         ("https://hentaihere.com/m/S13812", {
             "url": "d1ba6e28bb2162e844f8559c2b2725ba0a093559",
@@ -33,7 +77,7 @@ class HentaihereMangaExtractor(MangaExtractor):
     def chapters(self, page):
         results = []
         manga_id = text.parse_int(
-            self.url.rstrip("/").rpartition("/")[2][1:])
+            self.manga_url.rstrip("/").rpartition("/")[2][1:])
         manga, pos = text.extract(
             page, '<span itemprop="name">', '</span>')
         mtype, pos = text.extract(
@@ -54,45 +98,3 @@ class HentaihereMangaExtractor(MangaExtractor):
                 "chapter": text.parse_int(chapter),
                 "title": title, "lang": "en", "language": "English",
             }))
-
-
-class HentaihereChapterExtractor(ChapterExtractor):
-    """Extractor for a single manga chapter from hentaihere.com"""
-    category = "hentaihere"
-    archive_fmt = "{chapter_id}_{page}"
-    pattern = r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/(\d+)"
-    test = ("https://hentaihere.com/m/S13812/1/1/", {
-        "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-        "keyword": "e9382a9be337abce3db2b1132e85751379dc05c5",
-    })
-
-    def __init__(self, match):
-        self.manga_id, self.chapter = match.groups()
-        url = "https://hentaihere.com/m/S{}/{}/1".format(
-            self.manga_id, self.chapter)
-        ChapterExtractor.__init__(self, match, url)
-
-    def get_metadata(self, page):
-        title = text.extract(page, "<title>", "</title>")[0]
-        chapter_id = text.extract(page, 'report/C', '"')[0]
-        pattern = r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by (.+) at "
-        match = re.match(pattern, title)
-        return {
-            "manga": match.group(1),
-            "manga_id": text.parse_int(self.manga_id),
-            "chapter": text.parse_int(self.chapter),
-            "chapter_id": text.parse_int(chapter_id),
-            "type": match.group(2),
-            "title": match.group(3),
-            "author": match.group(4),
-            "lang": "en",
-            "language": "English",
-        }
-
-    @staticmethod
-    def get_images(page):
-        images = text.extract(page, "var rff_imageList = ", ";")[0]
-        return [
-            ("https://hentaicdn.com/hentai" + part, None)
-            for part in json.loads(images)
-        ]

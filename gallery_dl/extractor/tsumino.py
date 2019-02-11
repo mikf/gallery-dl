@@ -80,7 +80,7 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
         url = "{}/Book/Info/{}".format(self.root, self.gallery_id)
         ChapterExtractor.__init__(self, match, url)
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         extr = text.extract
         title, pos = extr(page, '"og:title" content="', '"')
         thumb, pos = extr(page, '"og:image" content="', '"', pos)
@@ -116,9 +116,9 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
             "lang": "en",
         }
 
-    def get_images(self, page):
+    def images(self, page):
         url = "{}/Read/Load/?q={}".format(self.root, self.gallery_id)
-        headers = {"Referer": self.url}
+        headers = {"Referer": self.chapter_url}
         response = self.request(url, headers=headers, expect=(404,))
 
         if response.status_code == 404:

@@ -38,6 +38,68 @@ class MangaparkBase():
                 data["chapter_minor"] = "v" + value
 
 
+class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
+    """Extractor for manga-chapters from mangapark.me"""
+    pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
+               r"/manga/([^?&#]+/i\d+)")
+    test = (
+        ("https://mangapark.me/manga/gosu/i811615/c55/1", {
+            "count": 50,
+            "keyword": "a18e07119b3317d7e795ef37ee69ce0bbb806350",
+        }),
+        (("https://mangapark.me/manga"
+          "/ad-astra-per-aspera-hata-kenjirou/i662054/c001.2/1"), {
+            "count": 40,
+            "keyword": "3f286631279e2017ce87c1b8db05d7b3f15e2971",
+        }),
+        ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/i655476/c70/1", {
+            "count": 15,
+            "keyword": "3abb13e6d1ea7f8808b0ec415270b3afac97f98b",
+        }),
+        ("https://mangapark.net/manga/gosu/i811615/c55/1"),
+        ("https://mangapark.com/manga/gosu/i811615/c55/1"),
+    )
+
+    def __init__(self, match):
+        tld, self.path = match.groups()
+        self.root = self.root_fmt.format(tld)
+        url = "{}/manga/{}?zoom=2".format(self.root, self.path)
+        ChapterExtractor.__init__(self, match, url)
+
+    def metadata(self, page):
+        data = text.extract_all(page, (
+            ("manga_id"  , "var _manga_id = '", "'"),
+            ("chapter_id", "var _book_id = '", "'"),
+            ("stream"    , "var _stream = '", "'"),
+            ("path"      , "var _book_link = '", "'"),
+            ("manga"     , "<h2>", "</h2>"),
+            ("title"     , "</a>", "<"),
+        ), values={"lang": "en", "language": "English"})[0]
+
+        if not data["path"]:
+            raise exception.NotFoundError("chapter")
+        self.parse_chapter_path(data["path"], data)
+
+        data["manga"], _, data["type"] = data["manga"].rpartition(" ")
+        data["manga"] = text.unescape(data["manga"])
+        data["title"] = data["title"].partition(": ")[2]
+        for key in ("manga_id", "chapter_id", "stream"):
+            data[key] = text.parse_int(data[key])
+
+        return data
+
+    def images(self, page):
+        data = json.loads(text.extract(
+            page, "var _load_pages =", ";")[0] or "[]")
+        return [
+            (text.urljoin(self.root, item["u"]), {
+                "width": text.parse_int(item["w"]),
+                "height": text.parse_int(item["h"]),
+            })
+            for item in data
+        ]
+
+
 class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
     """Extractor for manga from mangapark.me"""
     pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
@@ -75,65 +137,3 @@ class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
                 results.append((self.root + path, data.copy()))
 
         return results
-
-
-class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
-    """Extractor for manga-chapters from mangapark.me"""
-    pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
-               r"/manga/([^?&#]+/i\d+)")
-    test = (
-        ("https://mangapark.me/manga/gosu/i811615/c55/1", {
-            "count": 50,
-            "keyword": "a18e07119b3317d7e795ef37ee69ce0bbb806350",
-        }),
-        (("https://mangapark.me/manga"
-          "/ad-astra-per-aspera-hata-kenjirou/i662054/c001.2/1"), {
-            "count": 40,
-            "keyword": "3f286631279e2017ce87c1b8db05d7b3f15e2971",
-        }),
-        ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/i655476/c70/1", {
-            "count": 15,
-            "keyword": "3abb13e6d1ea7f8808b0ec415270b3afac97f98b",
-        }),
-        ("https://mangapark.net/manga/gosu/i811615/c55/1"),
-        ("https://mangapark.com/manga/gosu/i811615/c55/1"),
-    )
-
-    def __init__(self, match):
-        tld, self.path = match.groups()
-        self.root = self.root_fmt.format(tld)
-        url = "{}/manga/{}?zoom=2".format(self.root, self.path)
-        ChapterExtractor.__init__(self, match, url)
-
-    def get_metadata(self, page):
-        data = text.extract_all(page, (
-            ("manga_id"  , "var _manga_id = '", "'"),
-            ("chapter_id", "var _book_id = '", "'"),
-            ("stream"    , "var _stream = '", "'"),
-            ("path"      , "var _book_link = '", "'"),
-            ("manga"     , "<h2>", "</h2>"),
-            ("title"     , "</a>", "<"),
-        ), values={"lang": "en", "language": "English"})[0]
-
-        if not data["path"]:
-            raise exception.NotFoundError("chapter")
-        self.parse_chapter_path(data["path"], data)
-
-        data["manga"], _, data["type"] = data["manga"].rpartition(" ")
-        data["manga"] = text.unescape(data["manga"])
-        data["title"] = data["title"].partition(": ")[2]
-        for key in ("manga_id", "chapter_id", "stream"):
-            data[key] = text.parse_int(data[key])
-
-        return data
-
-    def get_images(self, page):
-        data = json.loads(text.extract(
-            page, "var _load_pages =", ";")[0] or "[]")
-        return [
-            (text.urljoin(self.root, item["u"]), {
-                "width": text.parse_int(item["w"]),
-                "height": text.parse_int(item["h"]),
-            })
-            for item in data
-        ]

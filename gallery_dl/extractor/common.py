@@ -207,16 +207,17 @@ class ChapterExtractor(Extractor):
         "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
     archive_fmt = (
         "{manga}_{chapter}{chapter_minor}_{page}")
+    root = ""
 
-    def __init__(self, match, url):
+    def __init__(self, match, url=None):
         Extractor.__init__(self, match)
-        self.url = url
+        self.chapter_url = url or self.root + match.group(1)
 
     def items(self):
         self.login()
-        page = self.request(self.url).text
-        data = self.get_metadata(page)
-        imgs = self.get_images(page)
+        page = self.request(self.chapter_url).text
+        data = self.metadata(page)
+        imgs = self.images(page)
 
         if "count" in data:
             images = zip(
@@ -240,10 +241,10 @@ class ChapterExtractor(Extractor):
     def login(self):
         """Login and set necessary cookies"""
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         """Return a dict with general metadata"""
 
-    def get_images(self, page):
+    def images(self, page):
         """Return a list of all (image-url, metadata)-tuples"""
 
 
@@ -251,19 +252,19 @@ class MangaExtractor(Extractor):
 
     subcategory = "manga"
     categorytransfer = True
-    scheme = "http"
-    root = ""
     reverse = True
+    root = ""
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
-        self.url = url or self.scheme + "://" + match.group(1)
+        self.manga_url = url or self.root + match.group(1)
 
         if self.config("chapter-reverse", False):
             self.reverse = not self.reverse
 
     def items(self):
-        page = self.request(self.url).text
+        self.login()
+        page = self.request(self.manga_url).text
 
         chapters = self.chapters(page)
         if self.reverse:
@@ -272,6 +273,9 @@ class MangaExtractor(Extractor):
         yield Message.Version, 1
         for chapter, data in chapters:
             yield Message.Queue, chapter, data
+
+    def login(self):
+        """Login and set necessary cookies"""
 
     def chapters(self, page):
         """Return a list of all (chapter-url, metadata)-tuples"""

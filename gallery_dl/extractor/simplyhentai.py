@@ -42,7 +42,7 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
         ChapterExtractor.__init__(self, match, url)
         self.session.headers["Referer"] = url
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         extr = text.extract
         title , pos = extr(page, '<meta property="og:title" content="', '"')
         if not title:
@@ -68,9 +68,10 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
             "date": text.remove_html(date),
         }
 
-    def get_images(self, _):
+    def images(self, _):
+        url = self.chapter_url + "/all-pages"
         headers = {"Accept": "application/json"}
-        images = self.request(self.url + "/all-pages", headers=headers).json()
+        images = self.request(url, headers=headers).json()
         return [
             (urls["full"], {"image_id": text.parse_int(image_id)})
             for image_id, urls in sorted(images.items())

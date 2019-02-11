@@ -16,7 +16,6 @@ import re
 class KomikcastBase():
     """Base class for komikcast extractors"""
     category = "komikcast"
-    scheme = "https"
     root = "https://komikcast.com"
 
     request = cloudflare.request_func
@@ -62,15 +61,12 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
         }),
     )
 
-    def __init__(self, match):
-        ChapterExtractor.__init__(self, match, self.root + match.group(1))
-
-    def get_metadata(self, page):
+    def metadata(self, page):
         info = text.extract(page, '<b>', "</b>")[0]
         return self.parse_chapter_string(info)
 
     @staticmethod
-    def get_images(page):
+    def images(page):
         readerarea = text.extract(
             page, '<div id="readerarea">', '<div class="navig">')[0]
         return [
@@ -90,8 +86,8 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
 
 class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     """Extractor for manga from komikcast.com"""
-    pattern = (r"(?:https?://)?(?:www\.)?(komikcast\.com"
-               r"/(?:komik/)?[^/?&#]+/?)$")
+    pattern = (r"(?:https?://)?(?:www\.)?komikcast\.com"
+               r"(/(?:komik/)?[^/?&#]+)/?$")
     test = (
         ("https://komikcast.com/komik/090-eko-to-issho/", {
             "url": "dc798d107697d1f2309b14ca24ca9dba30c6600f",

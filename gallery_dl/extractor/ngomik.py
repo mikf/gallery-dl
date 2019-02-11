@@ -17,17 +17,13 @@ class NgomikChapterExtractor(ChapterExtractor):
     category = "ngomik"
     root = "http://ngomik.in"
     pattern = (r"(?:https?://)?(?:www\.)?ngomik\.in"
-               r"/([^/?&#]+-chapter-[^/?&#]+)")
+               r"(/[^/?&#]+-chapter-[^/?&#]+)")
     test = ("https://www.ngomik.in/14-sai-no-koi-chapter-1-6/", {
         "url": "8e67fdf751bbc79bc6f4dead7675008ddb8e32a4",
         "keyword": "7cc913ed2b9018afbd3336755d28b8252d83044c",
     })
 
-    def __init__(self, match):
-        url = "{}/{}".format(self.root, match.group(1))
-        ChapterExtractor.__init__(self, match, url)
-
-    def get_metadata(self, page):
+    def metadata(self, page):
         info = text.extract(page, '<title>', "</title>")[0]
         manga, _, chapter = info.partition(" Chapter ")
         chapter, sep, minor = chapter.partition(" ")[0].partition(".")
@@ -41,7 +37,7 @@ class NgomikChapterExtractor(ChapterExtractor):
         }
 
     @staticmethod
-    def get_images(page):
+    def images(page):
         readerarea = text.extract(page, 'id="readerarea"', 'class="chnav"')[0]
         return [
             (text.unescape(url), None)
