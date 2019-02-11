@@ -10,14 +10,14 @@
 
 from .common import ChapterExtractor
 from .. import text
-import re
 import json
+import re
 
 
 class DynastyscansChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from dynasty-scans.com"""
     category = "dynastyscans"
-    pattern = r"(?:https?://)?(?:www\.)?dynasty-scans\.com/chapters/([^/]+)"
+    pattern = r"(?:https?://)?(?:www\.)?dynasty-scans\.com(/chapters/[^/?&#]+)"
     test = (
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {
@@ -32,13 +32,7 @@ class DynastyscansChapterExtractor(ChapterExtractor):
     )
     root = "https://dynasty-scans.com"
 
-    def __init__(self, match):
-        self.chaptername = match.group(1)
-        url = self.root + "/chapters/" + self.chaptername
-        ChapterExtractor.__init__(self, match, url)
-
-    def get_metadata(self, page):
-        """Collect metadata for extractor-job"""
+    def metadata(self, page):
         info  , pos = text.extract(page, "<h3 id='chapter-title'><b>", "</b>")
         author, pos = text.extract(page, " by ", "</a>", pos)
         group , pos = text.extract(page, '"icon-print"></i> ', '</span>', pos)
@@ -64,8 +58,7 @@ class DynastyscansChapterExtractor(ChapterExtractor):
             "language": "English",
         }
 
-    def get_images(self, page):
-        """Extract list of all image-urls for a manga chapter"""
+    def images(self, page):
         data = text.extract(page, "var pages = ", ";\n")[0]
         return [
             (self.root + img["image"], None)

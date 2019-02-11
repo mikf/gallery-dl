@@ -41,14 +41,14 @@ class SenmangaChapterExtractor(Extractor):
         self.session.headers["Referer"] = self.chapter_url
 
     def items(self):
-        data = self.get_job_metadata()
+        data = self.metadata()
         yield Message.Version, 1
         yield Message.Directory, data
         for data["page"] in range(1, data["count"]+1):
             data["extension"] = None
             yield Message.Url, self.img_url + str(data["page"]), data
 
-    def get_job_metadata(self):
+    def metadata(self):
         """Collect metadata for extractor-job"""
         page = self.request(self.chapter_url).text
         self.session.cookies.clear()

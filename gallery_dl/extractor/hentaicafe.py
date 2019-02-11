@@ -25,10 +25,10 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
     })
     root = "https://hentai.cafe"
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         info = text.unescape(text.extract(page, '<title>', '</title>')[0])
         manga, _, chapter_string = info.partition(" :: ")
-        return self.parse_chapter_url(self.url, {
+        return self.parse_chapter_url(self.chapter_url, {
             "manga": manga,
             "chapter_string": chapter_string.rstrip(" :"),
         })
@@ -58,7 +58,7 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
     reverse = False
 
     def chapters(self, page):
-        if "/manga/series/" in self.url:
+        if "/manga/series/" in self.manga_url:
             chapters = foolslide.FoolslideMangaExtractor.chapters(self, page)
             chapters.reverse()
             return chapters

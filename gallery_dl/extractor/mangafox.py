@@ -31,7 +31,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
         self.urlbase = self.root + base
         ChapterExtractor.__init__(self, match, self.urlbase + "/1.html")
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         manga, pos = text.extract(page, "<title>", "</title>")
         count, pos = text.extract(
             page, ">", "<", page.find("</select>", pos) - 20)
@@ -49,7 +49,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
             "cid": text.parse_int(cid),
         }
 
-    def get_images(self, page):
+    def images(self, page):
         pnum = 1
         while True:
             url, pos = text.extract(page, '<img src="', '"')

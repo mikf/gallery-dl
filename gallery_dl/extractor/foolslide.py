@@ -8,7 +8,8 @@
 
 """Extractors for FoOlSlide based sites"""
 
-from .common import Extractor, MangaExtractor, Message, SharedConfigMixin
+from .common import (
+    Extractor, ChapterExtractor, MangaExtractor, Message, SharedConfigMixin)
 from .. import text, util, config
 import base64
 import json
@@ -35,24 +36,17 @@ class FoolslideBase(SharedConfigMixin):
         return data
 
 
-class FoolslideChapterExtractor(FoolslideBase, Extractor):
+class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
     """Base class for chapter extractors for FoOlSlide based sites"""
-    subcategory = "chapter"
     directory_fmt = (
         "{category}", "{manga}", "{chapter_string}")
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     archive_fmt = "{id}"
     decode = "default"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.url = self.root + match.group(1)
-
     def items(self):
-        page = self.request(self.url).text
-        data = self.get_metadata(page)
-        imgs = self.get_images(page)
+        page = self.request(self.chapter_url).text
+        data = self.metadata(page)
+        imgs = self.images(page)
 
         data["count"] = len(imgs)
         data["chapter_id"] = text.parse_int(imgs[0]["chapter_id"])
@@ -73,20 +67,18 @@ class FoolslideChapterExtractor(FoolslideBase, Extractor):
             text.nameext_from_url(data["filename"], data)
             yield Message.Url, url, data
 
-    def get_metadata(self, page):
-        """Collect metadata for extractor-job"""
+    def metadata(self, page):
         _      , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
         manga  , pos = text.extract(page, 'title="', '"', pos)
         chapter, pos = text.extract(page, 'title="', '"', pos)
         chapter = text.unescape(chapter)
-        return self.parse_chapter_url(self.url, {
+        return self.parse_chapter_url(self.chapter_url, {
             "manga": text.unescape(manga).strip(),
             "title": chapter.partition(":")[2].strip(),
             "chapter_string": chapter,
         })
 
-    def get_images(self, page):
-        """Return a list of all images in this chapter"""
+    def images(self, page):
         if self.decode == "base64":
             base64_data = text.extract(page, 'atob("', '"')[0].encode()
             data = base64.b64decode(base64_data).decode()
@@ -101,11 +93,7 @@ class FoolslideChapterExtractor(FoolslideBase, Extractor):
 class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
 
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match, self.root + match.group(1))
-
     def chapters(self, page):
-        """Return a list of all chapter urls"""
         manga , pos = text.extract(page, '<h1 class="title">', '</h1>')
         author, pos = text.extract(page, '<b>Author</b>: ', '<br', pos)
         artist, pos = text.extract(page, '<b>Artist</b>: ', '<br', pos)

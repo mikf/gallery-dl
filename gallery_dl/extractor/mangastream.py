@@ -16,8 +16,8 @@ class MangastreamChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from mangastream.com"""
     category = "mangastream"
     archive_fmt = "{chapter_id}_{page}"
-    pattern = (r"(?:https?://)?(?:www\.)?(?:readms\.net|mangastream\.com)/"
-               r"r(?:ead)?/([^/]*/([^/]+)/(\d+))")
+    pattern = (r"(?:https?://)?(?:www\.)?(?:readms\.net|mangastream\.com)"
+               r"/r(?:ead)?/([^/]*/([^/]+)/(\d+))")
     test = (
         ("https://readms.net/r/onepunch_man/087/4874/1"),
         ("https://mangastream.com/r/onepunch_man/087/4874/1"),
@@ -29,7 +29,7 @@ class MangastreamChapterExtractor(ChapterExtractor):
         url = "{}/r/{}".format(self.root, self.part)
         ChapterExtractor.__init__(self, match, url)
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         manga, pos = text.extract(
             page, '<span class="hidden-xs hidden-sm">', "<")
         pos = page.find(self.part, pos)
@@ -45,7 +45,7 @@ class MangastreamChapterExtractor(ChapterExtractor):
             "language": "English",
         }
 
-    def get_images(self, page):
+    def images(self, page):
         while True:
             pos = page.index(' class="page"')
             next_url = text.extract(page, ' href="', '"', pos)[0]

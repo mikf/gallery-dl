@@ -66,8 +66,8 @@ class MangadexChapterExtractor(MangadexExtractor):
         self.data = None
 
     def items(self):
-        data = self.get_metadata()
-        imgs = self.get_images()
+        data = self.metadata()
+        imgs = self.images()
         data["count"] = len(imgs)
 
         yield Message.Version, 1
@@ -75,7 +75,7 @@ class MangadexChapterExtractor(MangadexExtractor):
         for data["page"], url in enumerate(imgs, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
-    def get_metadata(self):
+    def metadata(self):
         """Return a dict with general metadata"""
         cdata = self.chapter_data(self.chapter_id)
         mdata = self.manga_data(cdata["manga_id"])
@@ -98,7 +98,7 @@ class MangadexChapterExtractor(MangadexExtractor):
             "language": cdata["lang_name"],
         }
 
-    def get_images(self):
+    def images(self):
         """Return a list of all image URLs"""
         base = self.data["server"] + self.data["hash"] + "/"
         if base.startswith("/"):

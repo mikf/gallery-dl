@@ -38,7 +38,7 @@ class FallenangelsChapterExtractor(ChapterExtractor):
             self.version, self.manga, self.chapter)
         ChapterExtractor.__init__(self, match, url)
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         lang = "vi" if self.version == "truyen" else "en"
         data = {
             "chapter": self.chapter,
@@ -52,7 +52,7 @@ class FallenangelsChapterExtractor(ChapterExtractor):
         ), values=data)[0]
 
     @staticmethod
-    def get_images(page):
+    def images(page):
         return [
             (img["page_image"], None)
             for img in json.loads(
@@ -65,7 +65,6 @@ class FallenangelsMangaExtractor(MangaExtractor):
     """Extractor for manga from fascans.com"""
     category = "fallenangels"
     pattern = r"(?:https?://)?((manga|truyen)\.fascans\.com/manga/[^/]+)/?$"
-    scheme = "https"
     test = (
         ("http://manga.fascans.com/manga/trinity-seven", {
             "url": "92699a250ff7d5adcf4b06e6a45b0c05f3426643",
@@ -78,8 +77,9 @@ class FallenangelsMangaExtractor(MangaExtractor):
     )
 
     def __init__(self, match):
-        MangaExtractor.__init__(self, match)
+        url = "https://" + match.group(1)
         self.lang = "vi" if match.group(2) == "truyen" else "en"
+        MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):
         language = util.code_to_language(self.lang)

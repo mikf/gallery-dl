@@ -21,10 +21,72 @@ class MangahereBase():
     url_fmt = mobile_root + "/manga/{}/{}.html"
 
 
+class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
+    """Extractor for manga-chapters from mangahere.cc"""
+    pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
+               r"([^/]+(?:/v0*(\d+))?/c([^/?&#]+))")
+    test = (
+        ("https://www.mangahere.cc/manga/dongguo_xiaojie/c004.2/", {
+            "keyword": "6407556817bd1fd2bdc8dee3fd2a718f5724ddc0",
+            "content": "708d475f06893b88549cbd30df1e3f9428f2c884",
+        }),
+        ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
+        ("http://m.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
+    )
+
+    def __init__(self, match):
+        self.part, self.volume, self.chapter = match.groups()
+        url = self.url_fmt.format(self.part, 1)
+        ChapterExtractor.__init__(self, match, url)
+
+    def metadata(self, page):
+        pos = page.index("</select>")
+        count     , pos = text.extract(page, ">", "<", pos - 20)
+        manga_id  , pos = text.extract(page, "series_id = ", ";", pos)
+        chapter_id, pos = text.extract(page, "chapter_id = ", ";", pos)
+        manga     , pos = text.extract(page, '"name":"', '"', pos)
+        chapter, dot, minor = self.chapter.partition(".")
+
+        return {
+            "manga": text.unescape(manga),
+            "manga_id": text.parse_int(manga_id),
+            "title": self._get_title(),
+            "volume": text.parse_int(self.volume),
+            "chapter": text.parse_int(chapter),
+            "chapter_minor": dot + minor,
+            "chapter_id": text.parse_int(chapter_id),
+            "count": text.parse_int(count),
+            "lang": "en",
+            "language": "English",
+        }
+
+    def images(self, page):
+        pnum = 1
+
+        while True:
+            url, pos = text.extract(page, '<img src="', '"')
+            yield url, None
+            url, pos = text.extract(page, ' src="', '"', pos)
+            yield url, None
+            pnum += 2
+            page = self.request(self.url_fmt.format(self.part, pnum)).text
+
+    def _get_title(self):
+        url = "{}/manga/{}/".format(self.root, self.part)
+        page = self.request(url).text
+
+        try:
+            pos = page.index(self.part) + len(self.part)
+            pos = page.index(self.part, pos) + len(self.part)
+            return text.extract(page, ' title="', '"', pos)[0]
+        except ValueError:
+            return ""
+
+
 class MangahereMangaExtractor(MangahereBase, MangaExtractor):
     """Extractor for manga from mangahere.cc"""
     pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]"
-               r"/manga/([^/]+)/?(?:#.*)?$")
+               r"(/manga/[^/]+)/?(?:#.*)?$")
     test = (
         ("https://www.mangahere.cc/manga/aria/", {
             "url": "23ad9256f7392de5973b79a36f6875e9fdcb7563",
@@ -37,10 +99,6 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
         ("https://www.mangahere.co/manga/aria/"),
         ("https://m.mangahere.co/manga/aria/"),
     )
-
-    def __init__(self, match):
-        url = "{}/manga/{}/".format(self.root, match.group(1))
-        MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):
         results = []
@@ -77,67 +135,3 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
                 "lang": "en",
                 "language": "English",
             }))
-
-
-class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
-    """Extractor for manga-chapters from mangahere.cc"""
-    pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
-               r"([^/]+(?:/v0*(\d+))?/c([^/?&#]+))")
-    test = (
-        ("https://www.mangahere.cc/manga/dongguo_xiaojie/c004.2/", {
-            "keyword": "6407556817bd1fd2bdc8dee3fd2a718f5724ddc0",
-            "content": "708d475f06893b88549cbd30df1e3f9428f2c884",
-        }),
-        ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
-        ("http://m.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
-    )
-
-    def __init__(self, match):
-        self.part, self.volume, self.chapter = match.groups()
-        url = self.url_fmt.format(self.part, 1)
-        ChapterExtractor.__init__(self, match, url)
-
-    def get_metadata(self, page):
-        """Collect metadata for extractor-job"""
-        pos = page.index("</select>")
-        count     , pos = text.extract(page, ">", "<", pos - 20)
-        manga_id  , pos = text.extract(page, "series_id = ", ";", pos)
-        chapter_id, pos = text.extract(page, "chapter_id = ", ";", pos)
-        manga     , pos = text.extract(page, '"name":"', '"', pos)
-        chapter, dot, minor = self.chapter.partition(".")
-
-        return {
-            "manga": text.unescape(manga),
-            "manga_id": text.parse_int(manga_id),
-            "title": self._get_title(),
-            "volume": text.parse_int(self.volume),
-            "chapter": text.parse_int(chapter),
-            "chapter_minor": dot + minor,
-            "chapter_id": text.parse_int(chapter_id),
-            "count": text.parse_int(count),
-            "lang": "en",
-            "language": "English",
-        }
-
-    def get_images(self, page):
-        """Yield all image-urls for this chapter"""
-        pnum = 1
-
-        while True:
-            url, pos = text.extract(page, '<img src="', '"')
-            yield url, None
-            url, pos = text.extract(page, ' src="', '"', pos)
-            yield url, None
-            pnum += 2
-            page = self.request(self.url_fmt.format(self.part, pnum)).text
-
-    def _get_title(self):
-        url = "{}/manga/{}/".format(self.root, self.part)
-        page = self.request(url).text
-
-        try:
-            pos = page.index(self.part) + len(self.part)
-            pos = page.index(self.part, pos) + len(self.part)
-            return text.extract(page, ' title="', '"', pos)[0]
-        except ValueError:
-            return ""

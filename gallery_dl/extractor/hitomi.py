@@ -38,8 +38,9 @@ class HitomiGalleryExtractor(ChapterExtractor):
         url = "https://hitomi.la/galleries/{}.html".format(self.gid)
         ChapterExtractor.__init__(self, match, url)
 
-    def get_metadata(self, page, extr=text.extract):
+    def metadata(self, page):
         pos = page.index('<h1><a href="/reader/')
+        extr = text.extract
         title , pos = extr(page, '.html">', '<', pos)
         artist, pos = extr(page, '<h2>', '</h2>', pos)
         group , pos = extr(page, '<td>Group</td><td>', '</td>', pos)
@@ -65,7 +66,7 @@ class HitomiGalleryExtractor(ChapterExtractor):
             "tags": self._prepare(tags),
         }
 
-    def get_images(self, page):
+    def images(self, page):
         # see https://ltn.hitomi.la/common.js
         frontends = 2
         offset = self.gid % frontends if self.gid % 10 != 1 else 0

@@ -42,9 +42,39 @@ class HbrowseBase():
         return data
 
 
+class HbrowseChapterExtractor(HbrowseBase, ChapterExtractor):
+    """Extractor for manga-chapters from hbrowse.com"""
+    directory_fmt = ("{category}", "{manga_id} {manga}", "c{chapter:>05}")
+    filename_fmt = ("{category}_{manga_id}_{chapter:>05}_"
+                    "{page:>03}.{extension}")
+    archive_fmt = "{manga_id}_{chapter}_{page}"
+    pattern = r"(?:https?://)?(?:www\.)?hbrowse\.com(/(\d+)/c(\d+))"
+    test = ("https://www.hbrowse.com/10363/c00000", {
+        "url": "6feefbc9f4b98e20d8425ddffa9dd111791dc3e6",
+        "keyword": "95ec73a58aeac57f4dd20f0fa0c2812b045a30e8",
+        "content": "44578ebbe176c2c27434966aef22945787e2781e",
+    })
+
+    def __init__(self, match):
+        self.path, self.gid, self.chapter = match.groups()
+        self.path += "/"
+        ChapterExtractor.__init__(self, match)
+
+    def metadata(self, page):
+        return self.parse_page(page, {
+            "manga_id": text.parse_int(self.gid),
+            "chapter": text.parse_int(self.chapter)
+        })
+
+    def images(self, page):
+        base = self.root + "/data" + self.path
+        json_data = text.extract(page, ';list = ', ',"zzz"')[0] + "]"
+        return [(base + name, None) for name in json.loads(json_data)]
+
+
 class HbrowseMangaExtractor(HbrowseBase, MangaExtractor):
     """Extractor for manga from hbrowse.com"""
-    pattern = r"(?:https?://)?((?:www\.)?hbrowse\.com/\d+)/?$"
+    pattern = r"(?:https?://)?(?:www\.)?hbrowse\.com(/\d+)/?$"
     reverse = False
     test = ("https://www.hbrowse.com/10363", {
         "url": "b89682bfb86c11d2af0dc47463804ec3ac4aadd6",
@@ -55,7 +85,7 @@ class HbrowseMangaExtractor(HbrowseBase, MangaExtractor):
         results = []
         data = self.parse_page(page, {
             "manga_id": text.parse_int(
-                self.url.rstrip("/").rpartition("/")[2])
+                self.manga_url.rstrip("/").rpartition("/")[2])
         })
 
         pos = 0
@@ -68,33 +98,3 @@ class HbrowseMangaExtractor(HbrowseBase, MangaExtractor):
             data["chapter"] = text.parse_int(url.rpartition("/")[2][1:])
             data["title"] = title
             results.append((text.urljoin(self.root, url), data.copy()))
-
-
-class HbrowseChapterExtractor(HbrowseBase, ChapterExtractor):
-    """Extractor for manga-chapters from hbrowse.com"""
-    directory_fmt = ("{category}", "{manga_id} {manga}", "c{chapter:>05}")
-    filename_fmt = ("{category}_{manga_id}_{chapter:>05}_"
-                    "{page:>03}.{extension}")
-    archive_fmt = "{manga_id}_{chapter}_{page}"
-    pattern = r"(?:https?://)?(?:www\.)?hbrowse\.com/(\d+)/c(\d+)"
-    test = ("https://www.hbrowse.com/10363/c00000", {
-        "url": "6feefbc9f4b98e20d8425ddffa9dd111791dc3e6",
-        "keyword": "95ec73a58aeac57f4dd20f0fa0c2812b045a30e8",
-        "content": "44578ebbe176c2c27434966aef22945787e2781e",
-    })
-
-    def __init__(self, match):
-        self.gid, self.chapter = match.groups()
-        self.path = "/{}/c{}/".format(self.gid, self.chapter)
-        ChapterExtractor.__init__(self, match, self.root + self.path)
-
-    def get_metadata(self, page):
-        return self.parse_page(page, {
-            "manga_id": text.parse_int(self.gid),
-            "chapter": text.parse_int(self.chapter)
-        })
-
-    def get_images(self, page):
-        base = self.root + "/data" + self.path
-        json_data = text.extract(page, ';list = ', ',"zzz"')[0] + "]"
-        return [(base + name, None) for name in json.loads(json_data)]
