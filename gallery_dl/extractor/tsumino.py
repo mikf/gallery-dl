@@ -49,15 +49,15 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
     pattern = (r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
                r"/(?:Book/Info|Read/View)/(\d+)")
     test = (
-        ("https://www.tsumino.com/Book/Info/45834", {
-            "url": "ed3e39bc21221fbd21b9a2ba711e8decb6fdc6bc",
+        ("https://www.tsumino.com/Book/Info/40996", {
+            "url": "84bf30a86623039fc87855680fada884dc8a1ddd",
             "keyword": {
                 "artist": "Itou Life",
                 "characters": "Carmilla, Gudako, Gudao, Lancelot, Nightingale",
                 "collection": "",
                 "count": 42,
-                "date": "2019 January 27",
-                "gallery_id": 45834,
+                "date": "2018 June 29",
+                "gallery_id": 40996,
                 "group": "Itou Life",
                 "lang": "en",
                 "language": "English",
@@ -65,11 +65,11 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
                 "parodies": "Fate/Grand Order",
                 "rating": float,
                 "tags": str,
-                "thumbnail": "http://www.tsumino.com/Image/Thumb/45834",
-                "title": r"re:\[Remove\] Shikoshiko Daisuki Nightingale",
+                "thumbnail": "http://www.tsumino.com/Image/Thumb/40996",
+                "title": r"re:Shikoshiko Daisuki Nightingale \+ Kaijou Gentei",
                 "title_jp": "シコシコ大好きナイチンゲール + 会場限定おまけ本",
                 "type": "Doujinshi",
-                "uploader": "NHNL1"
+                "uploader": "sehki"
             },
         }),
         ("https://www.tsumino.com/Read/View/45834"),
