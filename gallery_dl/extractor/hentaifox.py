@@ -30,7 +30,7 @@ class HentaifoxGalleryExtractor(ChapterExtractor):
     def __init__(self, match):
         self.gallery_id = match.group(1)
         url = "{}/gallery/{}".format(self.root, self.gallery_id)
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         title, pos = text.extract(page, "<h1>", "</h1>")
@@ -84,7 +84,7 @@ class HentaifoxSearchExtractor(Extractor):
     root = "https://hentaifox.com"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.path = match.group(1)
 
     def items(self):

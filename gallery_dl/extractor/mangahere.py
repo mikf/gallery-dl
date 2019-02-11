@@ -94,7 +94,8 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
 
     def __init__(self, match):
         self.part, self.volume, self.chapter = match.groups()
-        ChapterExtractor.__init__(self, self.url_fmt.format(self.part, 1))
+        url = self.url_fmt.format(self.part, 1)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""

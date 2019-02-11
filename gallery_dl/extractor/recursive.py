@@ -23,7 +23,7 @@ class RecursiveExtractor(Extractor):
     })
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.session.mount("file://", FileAdapter())
         self.url = match.group(1)
 

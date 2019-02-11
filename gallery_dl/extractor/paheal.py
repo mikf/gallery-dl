@@ -52,7 +52,7 @@ class PahealTagExtractor(PahealExtractor):
     per_page = 70
 
     def __init__(self, match):
-        PahealExtractor.__init__(self)
+        PahealExtractor.__init__(self, match)
         self.tags = text.unquote(match.group(1))
 
     def get_metadata(self):
@@ -101,7 +101,7 @@ class PahealPostExtractor(PahealExtractor):
     })
 
     def __init__(self, match):
-        PahealExtractor.__init__(self)
+        PahealExtractor.__init__(self, match)
         self.post_id = match.group(1)
 
     def get_posts(self):

@@ -36,7 +36,7 @@ class MyportfolioGalleryExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.domain = match.group(1) or match.group(2)
         self.gallery = match.group(3)
 
@@ -98,7 +98,7 @@ class MyportfolioUserExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.domain = match.group(1) or match.group(2)
         self.prefix = "myportfolio:" if match.group(1) else ""
 

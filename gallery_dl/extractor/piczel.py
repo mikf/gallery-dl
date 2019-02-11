@@ -22,7 +22,7 @@ class PiczelExtractor(Extractor):
     api_root = "https://apollo.piczel.tv"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.item_id = match.group(1)
 
     def items(self):

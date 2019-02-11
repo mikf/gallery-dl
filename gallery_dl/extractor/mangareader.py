@@ -69,7 +69,7 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
 
     def __init__(self, match):
         self.part, self.url_title, self.chapter = match.groups()
-        ChapterExtractor.__init__(self, self.root + self.part)
+        ChapterExtractor.__init__(self, match, self.root + self.part)
 
     def get_metadata(self, chapter_page):
         """Collect metadata for extractor-job"""

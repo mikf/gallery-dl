@@ -39,7 +39,7 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
 
     def __init__(self, match):
         url = "https://" + match.group(1)
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
         self.session.headers["Referer"] = url
 
     def get_metadata(self, page):
@@ -99,7 +99,7 @@ class SimplyhentaiImageExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.url = "https://www." + match.group(1)
         self.type = match.group(2)
 
@@ -153,7 +153,7 @@ class SimplyhentaiVideoExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.url = "https://" + match.group(1)
 
     def items(self):

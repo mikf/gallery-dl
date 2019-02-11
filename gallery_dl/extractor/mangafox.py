@@ -29,7 +29,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
     def __init__(self, match):
         base, self.cstr, self.volume, self.chapter, self.minor = match.groups()
         self.urlbase = self.root + base
-        ChapterExtractor.__init__(self, self.urlbase + "/1.html")
+        ChapterExtractor.__init__(self, match, self.urlbase + "/1.html")
 
     def get_metadata(self, page):
         manga, pos = text.extract(page, "<title>", "</title>")

@@ -34,7 +34,7 @@ class WarosuThreadExtractor(Extractor):
     root = "https://warosu.org"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.board, self.thread = match.groups()
 
     def items(self):

@@ -26,7 +26,7 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
     archive_fmt = "{post_id}_{num}"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.url = match.group(0)
         self.root = "http://" + match.group(1)
         self.session.headers["Referer"] = self.root

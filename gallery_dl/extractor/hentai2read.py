@@ -69,7 +69,7 @@ class Hentai2readChapterExtractor(ChapterExtractor):
     def __init__(self, match):
         url_title, self.chapter = match.groups()
         url = "https://hentai2read.com/{}/{}/".format(url_title, self.chapter)
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         title, pos = text.extract(page, "<title>", "</title>")

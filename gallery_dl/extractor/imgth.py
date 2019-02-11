@@ -26,7 +26,7 @@ class ImgthGalleryExtractor(Extractor):
     })
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.gid = match.group(1)
         self.url = "https://imgth.com/gallery/" + self.gid + "/g/page/"
 

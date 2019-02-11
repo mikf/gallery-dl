@@ -46,7 +46,7 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
     )
 
     def __init__(self, match):
-        ImagebamExtractor.__init__(self)
+        ImagebamExtractor.__init__(self, match)
         self.gallery_key = match.group(1)
 
     def items(self):
@@ -99,7 +99,7 @@ class ImagebamImageExtractor(ImagebamExtractor):
     )
 
     def __init__(self, match):
-        ImagebamExtractor.__init__(self)
+        ImagebamExtractor.__init__(self, match)
         self.image_key = match.group(1)
 
     def items(self):

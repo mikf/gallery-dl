@@ -76,7 +76,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     })
 
     def __init__(self, match):
-        ChapterExtractor.__init__(self, self.root + match.group(1))
+        ChapterExtractor.__init__(self, match, self.root + match.group(1))
         self.issue_id = match.group(2)
 
     def get_metadata(self, page):

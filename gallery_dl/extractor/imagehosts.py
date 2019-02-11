@@ -26,7 +26,7 @@ class ImagehostImageExtractor(SharedConfigMixin, Extractor):
     encoding = None
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.url = ("https://" if self.https else "http://") + match.group(1)
         self.token = match.group(2)
         if self.params == "simple":

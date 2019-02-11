@@ -19,8 +19,8 @@ class RedditExtractor(Extractor):
     """Base class for reddit extractors"""
     category = "reddit"
 
-    def __init__(self):
-        Extractor.__init__(self)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
         self.api = RedditAPI(self)
         self.max_depth = int(self.config("recursion", 0))
         self._visited = set()
@@ -90,7 +90,7 @@ class RedditSubredditExtractor(RedditExtractor):
     )
 
     def __init__(self, match):
-        RedditExtractor.__init__(self)
+        RedditExtractor.__init__(self, match)
         self.subreddit, self.order, self.timeframe = match.groups()
 
     def submissions(self):
@@ -117,7 +117,7 @@ class RedditSubmissionExtractor(RedditExtractor):
     )
 
     def __init__(self, match):
-        RedditExtractor.__init__(self)
+        RedditExtractor.__init__(self, match)
         self.submission_id = match.group(1)
 
     def submissions(self):
@@ -144,7 +144,7 @@ class RedditImageExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.url = match.group(0)
 
     def items(self):

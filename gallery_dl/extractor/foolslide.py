@@ -46,7 +46,7 @@ class FoolslideChapterExtractor(FoolslideBase, Extractor):
     decode = "default"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.url = self.root + match.group(1)
 
     def items(self):

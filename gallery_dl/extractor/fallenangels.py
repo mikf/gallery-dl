@@ -36,7 +36,7 @@ class FallenangelsChapterExtractor(ChapterExtractor):
         self.version, self.manga, self.chapter, self.minor = match.groups()
         url = "https://{}.fascans.com/manga/{}/{}/1".format(
             self.version, self.manga, self.chapter)
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         lang = "vi" if self.version == "truyen" else "en"

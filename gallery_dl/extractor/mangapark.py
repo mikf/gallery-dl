@@ -103,7 +103,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
         tld, self.path = match.groups()
         self.root = self.root_fmt.format(tld)
         url = "{}/manga/{}?zoom=2".format(self.root, self.path)
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         data = text.extract_all(page, (

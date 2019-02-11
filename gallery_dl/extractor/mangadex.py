@@ -61,7 +61,7 @@ class MangadexChapterExtractor(MangadexExtractor):
     )
 
     def __init__(self, match):
-        MangadexExtractor.__init__(self)
+        MangadexExtractor.__init__(self, match)
         self.chapter_id = match.group(1)
         self.data = None
 
@@ -139,7 +139,7 @@ class MangadexMangaExtractor(MangadexExtractor):
     )
 
     def __init__(self, match):
-        MangadexExtractor.__init__(self)
+        MangadexExtractor.__init__(self, match)
         self.manga_id = text.parse_int(match.group(1))
 
     def items(self):

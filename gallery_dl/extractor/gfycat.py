@@ -18,8 +18,8 @@ class GfycatExtractor(Extractor):
     archive_fmt = "{gfyName}"
     root = "https://gfycat.com"
 
-    def __init__(self):
-        Extractor.__init__(self)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
         self.formats = (self.config("format", "mp4"), "mp4", "webm", "gif")
 
     def _select_format(self, gfyitem):
@@ -73,7 +73,7 @@ class GfycatImageExtractor(GfycatExtractor):
     )
 
     def __init__(self, match):
-        GfycatExtractor.__init__(self)
+        GfycatExtractor.__init__(self, match)
         self.gfycat_id = match.group(1)
 
     def items(self):

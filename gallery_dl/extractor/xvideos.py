@@ -44,7 +44,7 @@ class XvideosGalleryExtractor(XvideosExtractor):
     )
 
     def __init__(self, match):
-        XvideosExtractor.__init__(self)
+        XvideosExtractor.__init__(self, match)
         self.user, self.gid = match.groups()
         self.url = "https://www.xvideos.com/profiles/{}/photos/{}".format(
             self.user, self.gid)
@@ -108,7 +108,7 @@ class XvideosUserExtractor(XvideosExtractor):
     )
 
     def __init__(self, match):
-        XvideosExtractor.__init__(self)
+        XvideosExtractor.__init__(self, match)
         self.user = match.group(1)
         self.url = "https://www.xvideos.com/profiles/" + self.user
 

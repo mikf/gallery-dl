@@ -71,7 +71,7 @@ class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
     )
 
     def __init__(self, match):
-        LusciousExtractor.__init__(self)
+        LusciousExtractor.__init__(self, match)
         self.gpart, self.gid = match.groups()
 
     def items(self):
@@ -160,7 +160,7 @@ class LusciousSearchExtractor(LusciousExtractor):
     )
 
     def __init__(self, match):
-        LusciousExtractor.__init__(self)
+        LusciousExtractor.__init__(self, match)
         self.path = match.group(1).partition("/page/")[0]
         if not self.path.startswith("albums/"):
             self.path = "albums/" + self.path

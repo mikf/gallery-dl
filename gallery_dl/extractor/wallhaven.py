@@ -98,7 +98,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
     per_page = 24
 
     def __init__(self, match):
-        WallhavenExtractor.__init__(self)
+        WallhavenExtractor.__init__(self, match)
         self.params = text.parse_query(match.group(1))
 
     def items(self):
@@ -164,7 +164,7 @@ class WallhavenImageExtractor(WallhavenExtractor):
     )
 
     def __init__(self, match):
-        WallhavenExtractor.__init__(self)
+        WallhavenExtractor.__init__(self, match)
         self.wallpaper_id = match.group(1)
 
     def items(self):

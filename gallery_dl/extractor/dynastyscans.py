@@ -35,7 +35,7 @@ class DynastyscansChapterExtractor(ChapterExtractor):
     def __init__(self, match):
         self.chaptername = match.group(1)
         url = self.root + "/chapters/" + self.chaptername
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""

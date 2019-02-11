@@ -81,7 +81,7 @@ class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
     )
 
     def __init__(self, match):
-        ImgboxExtractor.__init__(self)
+        ImgboxExtractor.__init__(self, match)
         self.gallery_key = match.group(1)
         self.image_keys = []
 
@@ -120,7 +120,7 @@ class ImgboxImageExtractor(ImgboxExtractor):
     )
 
     def __init__(self, match):
-        ImgboxExtractor.__init__(self)
+        ImgboxExtractor.__init__(self, match)
         self.image_key = match.group(1)
 
     def get_image_keys(self):

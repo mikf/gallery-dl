@@ -30,7 +30,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
     root = "https://downloads.khinsider.com"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.album = match.group(1)
 
     def items(self):

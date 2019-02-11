@@ -21,7 +21,7 @@ class NewgroundsExtractor(Extractor):
     archive_fmt = "{index}"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.user = match.group(1)
         self.root = "https://{}.newgrounds.com".format(self.user)
 

@@ -63,7 +63,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     )
 
     def __init__(self, match):
-        ChapterExtractor.__init__(self, self.root + match.group(1))
+        ChapterExtractor.__init__(self, match, self.root + match.group(1))
 
     def get_metadata(self, page):
         info = text.extract(page, '<b>', "</b>")[0]

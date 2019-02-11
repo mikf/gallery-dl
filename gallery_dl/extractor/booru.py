@@ -29,7 +29,7 @@ class BooruExtractor(SharedConfigMixin, Extractor):
     sort = False
 
     def __init__(self, match):
-        super().__init__()
+        super().__init__(match)
         self.params = {}
         self.extags = self.post_url and self.config("tags", False)
 
@@ -87,7 +87,7 @@ class BooruExtractor(SharedConfigMixin, Extractor):
         return {}
 
     def extended_tags(self, image, page=None):
-        """Rerieve extended tag information"""
+        """Retrieve extended tag information"""
         if not page:
             url = self.post_url.format(image["id"])
             page = self.request(url).text

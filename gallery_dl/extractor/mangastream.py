@@ -27,7 +27,7 @@ class MangastreamChapterExtractor(ChapterExtractor):
     def __init__(self, match):
         self.part, self.chapter, self.chapter_id = match.groups()
         url = "{}/r/{}".format(self.root, self.part)
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         manga, pos = text.extract(

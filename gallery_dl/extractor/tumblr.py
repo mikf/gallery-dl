@@ -47,7 +47,7 @@ class TumblrExtractor(Extractor):
     archive_fmt = "{id}_{num}"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.blog = match.group(1) or match.group(2)
         self.api = TumblrAPI(self)
 

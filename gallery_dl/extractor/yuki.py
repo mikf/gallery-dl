@@ -44,7 +44,7 @@ class YukiThreadExtractor(Extractor):
     root = "https://yuki.la"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.board, self.thread = match.groups()
 
     def items(self):

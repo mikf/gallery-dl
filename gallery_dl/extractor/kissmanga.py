@@ -127,7 +127,7 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
     )
 
     def __init__(self, match):
-        ChapterExtractor.__init__(self, self.root + match.group(1))
+        ChapterExtractor.__init__(self, match, self.root + match.group(1))
         self.chapter_id = match.group(2)
         self.session.headers["Referer"] = self.root
 
