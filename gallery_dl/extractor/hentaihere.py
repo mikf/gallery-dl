@@ -70,7 +70,7 @@ class HentaihereChapterExtractor(ChapterExtractor):
         self.manga_id, self.chapter = match.groups()
         url = "https://hentaihere.com/m/S{}/{}/1".format(
             self.manga_id, self.chapter)
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         title = text.extract(page, "<title>", "</title>")[0]

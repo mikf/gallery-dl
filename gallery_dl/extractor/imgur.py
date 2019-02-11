@@ -18,7 +18,7 @@ class ImgurExtractor(Extractor):
     category = "imgur"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.item_id = match.group(1)
         self.mp4 = self.config("mp4", True)
 

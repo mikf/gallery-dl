@@ -164,7 +164,7 @@ class InstagramImageExtractor(InstagramExtractor):
     )
 
     def __init__(self, match):
-        InstagramExtractor.__init__(self)
+        InstagramExtractor.__init__(self, match)
         self.shortcode = match.group(1)
 
     def instagrams(self):
@@ -182,7 +182,7 @@ class InstagramUserExtractor(InstagramExtractor):
     })
 
     def __init__(self, match):
-        InstagramExtractor.__init__(self)
+        InstagramExtractor.__init__(self, match)
         self.username = match.group(1)
 
     def instagrams(self):

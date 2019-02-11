@@ -86,7 +86,7 @@ class HbrowseChapterExtractor(HbrowseBase, ChapterExtractor):
     def __init__(self, match):
         self.gid, self.chapter = match.groups()
         self.path = "/{}/c{}/".format(self.gid, self.chapter)
-        ChapterExtractor.__init__(self, self.root + self.path)
+        ChapterExtractor.__init__(self, match, self.root + self.path)
 
     def get_metadata(self, page):
         return self.parse_page(page, {

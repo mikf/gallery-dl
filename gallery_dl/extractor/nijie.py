@@ -25,10 +25,10 @@ class NijieExtractor(AsynchronousMixin, Extractor):
     view_url = "https://nijie.info/view.php?id="
     popup_url = "https://nijie.info/view_popup.php?id="
 
-    def __init__(self, match=None):
-        Extractor.__init__(self)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.user_id = match.group(1)
         self.session.headers["Referer"] = self.root + "/"
-        self.user_id = match.group(1) if match else None
 
     def items(self):
         self.login()
@@ -185,7 +185,7 @@ class NijieImageExtractor(NijieExtractor):
     )
 
     def __init__(self, match):
-        NijieExtractor.__init__(self)
+        NijieExtractor.__init__(self, match)
         self.image_id = match.group(1)
         self.page = ""
 

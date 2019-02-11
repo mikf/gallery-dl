@@ -31,7 +31,7 @@ class Extractor():
     archive_fmt = ""
     cookiedomain = ""
 
-    def __init__(self):
+    def __init__(self, match):
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
         self._set_headers()
@@ -208,8 +208,8 @@ class ChapterExtractor(Extractor):
     archive_fmt = (
         "{manga}_{chapter}{chapter_minor}_{page}")
 
-    def __init__(self, url):
-        Extractor.__init__(self)
+    def __init__(self, match, url):
+        Extractor.__init__(self, match)
         self.url = url
 
     def items(self):
@@ -256,7 +256,7 @@ class MangaExtractor(Extractor):
     reverse = True
 
     def __init__(self, match, url=None):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.url = url or self.scheme + "://" + match.group(1)
 
         if self.config("chapter-reverse", False):

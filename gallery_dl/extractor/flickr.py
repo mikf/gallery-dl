@@ -18,7 +18,7 @@ class FlickrExtractor(Extractor):
     filename_fmt = "{category}_{id}.{extension}"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.api = FlickrAPI(self)
         self.item_id = match.group(1)
         self.user = None

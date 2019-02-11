@@ -21,8 +21,8 @@ class PixivExtractor(Extractor):
     filename_fmt = "{category}_{user[id]}_{id}{num}.{extension}"
     archive_fmt = "{id}{num}.{extension}"
 
-    def __init__(self):
-        Extractor.__init__(self)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
         self.api = PixivAppAPI(self)
         self.user_id = -1
         self.load_ugoira = self.config("ugoira", True)
@@ -105,7 +105,7 @@ class PixivUserExtractor(PixivExtractor):
     )
 
     def __init__(self, match):
-        PixivExtractor.__init__(self)
+        PixivExtractor.__init__(self, match)
         self.user_id = match.group(1) or match.group(3)
         self.query = text.parse_query(match.group(2))
 
@@ -136,7 +136,7 @@ class PixivMeExtractor(PixivExtractor):
     )
 
     def __init__(self, match):
-        PixivExtractor.__init__(self)
+        PixivExtractor.__init__(self, match)
         self.account = match.group(1)
 
     def items(self):
@@ -183,7 +183,7 @@ class PixivWorkExtractor(PixivExtractor):
     )
 
     def __init__(self, match):
-        PixivExtractor.__init__(self)
+        PixivExtractor.__init__(self, match)
         self.illust_id = match.group(1) or match.group(2)
         self.load_ugoira = True
         self.work = None
@@ -223,7 +223,7 @@ class PixivFavoriteExtractor(PixivExtractor):
     )
 
     def __init__(self, match):
-        PixivExtractor.__init__(self)
+        PixivExtractor.__init__(self, match)
         self.query = text.parse_query(match.group(1))
         if "id" not in self.query:
             self.subcategory = "bookmark"
@@ -265,7 +265,7 @@ class PixivRankingExtractor(PixivExtractor):
     )
 
     def __init__(self, match):
-        PixivExtractor.__init__(self)
+        PixivExtractor.__init__(self, match)
         self.query = match.group(1)
         self.mode = self.date = None
 
@@ -325,7 +325,7 @@ class PixivSearchExtractor(PixivExtractor):
     )
 
     def __init__(self, match):
-        PixivExtractor.__init__(self)
+        PixivExtractor.__init__(self, match)
         self.query = match.group(1)
         self.word = self.sort = self.target = None
 
@@ -380,9 +380,6 @@ class PixivFollowExtractor(PixivExtractor):
         ("https://www.pixiv.net/bookmark_new_illust.php"),
         ("https://touch.pixiv.net/bookmark_new_illust.php"),
     )
-
-    def __init__(self, _):
-        PixivExtractor.__init__(self)
 
     def works(self):
         return self.api.illust_follow()

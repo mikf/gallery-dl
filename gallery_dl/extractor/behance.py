@@ -70,7 +70,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
     )
 
     def __init__(self, match):
-        BehanceExtractor.__init__(self)
+        BehanceExtractor.__init__(self, match)
         self.gallery_id = match.group(1)
 
     def items(self):
@@ -134,7 +134,7 @@ class BehanceUserExtractor(BehanceExtractor):
     })
 
     def __init__(self, match):
-        BehanceExtractor.__init__(self)
+        BehanceExtractor.__init__(self, match)
         self.user = match.group(1)
 
     def galleries(self):
@@ -162,7 +162,7 @@ class BehanceCollectionExtractor(BehanceExtractor):
     })
 
     def __init__(self, match):
-        BehanceExtractor.__init__(self)
+        BehanceExtractor.__init__(self, match)
         self.collection_id = match.group(1)
 
     def galleries(self):

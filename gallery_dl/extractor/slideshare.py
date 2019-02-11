@@ -40,7 +40,7 @@ class SlidesharePresentationExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.user, self.presentation = match.groups()
 
     def items(self):

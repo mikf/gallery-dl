@@ -22,9 +22,9 @@ class ArtstationExtractor(Extractor):
     archive_fmt = "{asset[id]}"
     root = "https://www.artstation.com"
 
-    def __init__(self, match=None):
-        Extractor.__init__(self)
-        self.user = match.group(1) or match.group(2) if match else None
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.user = match.group(1) or match.group(2)
         self.external = self.config("external", False)
 
     def items(self):
@@ -230,7 +230,7 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
     )
 
     def __init__(self, match):
-        ArtstationExtractor.__init__(self)
+        ArtstationExtractor.__init__(self, match)
         self.challenge_id = match.group(1)
         self.sorting = match.group(2) or "popular"
 
@@ -277,7 +277,7 @@ class ArtstationSearchExtractor(ArtstationExtractor):
     test = ("https://www.artstation.com/search?sorting=recent&q=ancient",)
 
     def __init__(self, match):
-        ArtstationExtractor.__init__(self)
+        ArtstationExtractor.__init__(self, match)
         query = text.parse_query(match.group(1))
         self.searchterm = query.get("q", "")
         self.order = query.get("sorting", "recent").lower()
@@ -330,7 +330,7 @@ class ArtstationImageExtractor(ArtstationExtractor):
     )
 
     def __init__(self, match):
-        ArtstationExtractor.__init__(self)
+        ArtstationExtractor.__init__(self, match)
         self.project_id = match.group(1)
         self.assets = None
 

@@ -26,8 +26,8 @@ class SankakuExtractor(SharedConfigMixin, Extractor):
     cookiedomain = "chan.sankakucomplex.com"
     subdomain = "chan"
 
-    def __init__(self):
-        Extractor.__init__(self)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
         self.root = "https://" + self.cookiedomain
         self.logged_in = True
         self.start_page = 1
@@ -174,7 +174,7 @@ class SankakuTagExtractor(SankakuExtractor):
     per_page = 20
 
     def __init__(self, match):
-        SankakuExtractor.__init__(self)
+        SankakuExtractor.__init__(self, match)
         query = text.parse_query(match.group(1))
         self.tags = text.unquote(query.get("tags", "").replace("+", " "))
         self.start_page = text.parse_int(query.get("page"), 1)
@@ -241,7 +241,7 @@ class SankakuPoolExtractor(SankakuExtractor):
     per_page = 24
 
     def __init__(self, match):
-        SankakuExtractor.__init__(self)
+        SankakuExtractor.__init__(self, match)
         self.pool_id = match.group(1)
 
     def skip(self, num):
@@ -287,7 +287,7 @@ class SankakuPostExtractor(SankakuExtractor):
     })
 
     def __init__(self, match):
-        SankakuExtractor.__init__(self)
+        SankakuExtractor.__init__(self, match)
         self.post_id = match.group(1)
 
     def get_posts(self):

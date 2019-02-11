@@ -30,8 +30,8 @@ class ExhentaiExtractor(Extractor):
     cookienames = ("ipb_member_id", "ipb_pass_hash")
     root = "https://exhentai.org"
 
-    def __init__(self):
-        Extractor.__init__(self)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
         self.limits = self.config("limits", True)
         self.original = self.config("original", True)
         self.wait_min = self.config("wait-min", 3)
@@ -126,7 +126,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     )
 
     def __init__(self, match):
-        ExhentaiExtractor.__init__(self)
+        ExhentaiExtractor.__init__(self, match)
         self.key = {}
         self.count = 0
         self.gallery_id = text.parse_int(match.group(2) or match.group(5))
@@ -337,7 +337,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
     )
 
     def __init__(self, match):
-        ExhentaiExtractor.__init__(self)
+        ExhentaiExtractor.__init__(self, match)
         self.params = text.parse_query(match.group(1) or "")
         self.params["page"] = text.parse_int(self.params.get("page"))
         self.url = self.root

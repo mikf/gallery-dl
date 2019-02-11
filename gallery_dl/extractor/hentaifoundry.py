@@ -21,8 +21,8 @@ class HentaifoundryExtractor(Extractor):
     root = "https://www.hentai-foundry.com"
     per_page = 25
 
-    def __init__(self, user="", page=1):
-        Extractor.__init__(self)
+    def __init__(self, match, user="", page=1):
+        Extractor.__init__(self, match)
         self.url = ""
         self.user = user
         self.start_post = 0
@@ -134,7 +134,7 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(
-            self, match.group(1) or match.group(3), match.group(2))
+            self, match, match.group(1) or match.group(3), match.group(2))
         self.url = "{}/pictures/user/{}".format(self.root, self.user)
 
     def get_job_metadata(self):
@@ -159,7 +159,8 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
     )
 
     def __init__(self, match):
-        HentaifoundryExtractor.__init__(self, match.group(1), match.group(2))
+        HentaifoundryExtractor.__init__(
+            self, match, match.group(1), match.group(2))
         self.url = "{}/pictures/user/{}/scraps".format(self.root, self.user)
 
     def get_job_metadata(self):
@@ -185,7 +186,8 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
     )
 
     def __init__(self, match):
-        HentaifoundryExtractor.__init__(self, match.group(1), match.group(2))
+        HentaifoundryExtractor.__init__(
+            self, match, match.group(1), match.group(2))
         self.url = "{}/user/{}/faves/pictures".format(self.root, self.user)
 
 
@@ -199,7 +201,7 @@ class HentaifoundryRecentExtractor(HentaifoundryExtractor):
     test = ("http://www.hentai-foundry.com/pictures/recent/2018-09-20",)
 
     def __init__(self, match):
-        HentaifoundryExtractor.__init__(self, "", match.group(2))
+        HentaifoundryExtractor.__init__(self, match, "", match.group(2))
         self.date = match.group(1)
         self.url = "{}/pictures/recent/{}".format(self.root, self.date)
 
@@ -218,7 +220,7 @@ class HentaifoundryPopularExtractor(HentaifoundryExtractor):
     test = ("http://www.hentai-foundry.com/pictures/popular",)
 
     def __init__(self, match):
-        HentaifoundryExtractor.__init__(self, "", match.group(1))
+        HentaifoundryExtractor.__init__(self, match, "", match.group(1))
         self.url = self.root + "/pictures/popular"
 
 
@@ -242,7 +244,7 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
     )
 
     def __init__(self, match):
-        HentaifoundryExtractor.__init__(self, match.group(1))
+        HentaifoundryExtractor.__init__(self, match, match.group(1))
         self.index = match.group(2)
 
     def items(self):

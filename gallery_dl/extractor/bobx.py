@@ -18,6 +18,10 @@ class BobxExtractor(Extractor):
     root = "http://www.bobx.com"
     per_page = 80
 
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.path = match.group(1)
+
 
 class BobxGalleryExtractor(BobxExtractor):
     """Extractor for individual image galleries on bobx.com"""
@@ -40,10 +44,6 @@ class BobxGalleryExtractor(BobxExtractor):
             "keyword": "43395ac200deaaa50627da666bd02c8f1f86a59d",
         }),
     )
-
-    def __init__(self, match):
-        BobxExtractor.__init__(self)
-        self.path = match.group(1)
 
     def items(self):
         num = 0
@@ -97,12 +97,9 @@ class BobxIdolExtractor(BobxExtractor):
         "url": "74d80bfcd53b738b31909bb42e5cc97c41b475b8",
     })
 
-    def __init__(self, match):
-        BobxExtractor.__init__(self)
-        self.url = "{}/{}/".format(self.root, match.group(1))
-
     def items(self):
-        page = self.request(self.url).text
+        url = "{}/{}/".format(self.root, self.path)
+        page = self.request(url).text
         skip = True
 
         yield Message.Version, 1
@@ -111,4 +108,4 @@ class BobxIdolExtractor(BobxExtractor):
             skip = not skip
             if skip:
                 continue
-            yield Message.Queue, "{}photoset/{}".format(self.url, part), {}
+            yield Message.Queue, "{}photoset/{}".format(url, part), {}

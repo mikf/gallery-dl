@@ -38,7 +38,7 @@ class DirectlinkExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.data = match.groupdict()
         self.url = match.string
 

@@ -36,7 +36,7 @@ class HitomiGalleryExtractor(ChapterExtractor):
     def __init__(self, match):
         self.gid = text.parse_int(match.group(1))
         url = "https://hitomi.la/galleries/{}.html".format(self.gid)
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page, extr=text.extract):
         pos = page.index('<h1><a href="/reader/')

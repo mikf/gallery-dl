@@ -23,7 +23,7 @@ class MastodonExtractor(Extractor):
     root = None
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.api = MastodonAPI(self)
 
     def config(self, key, default=None, *, sentinel=object()):

@@ -21,9 +21,6 @@ class FakeExtractor(Extractor):
     subcategory = "test"
     pattern = "fake:"
 
-    def __init__(self, match=None):
-        Extractor.__init__(self)
-
     def items(self):
         yield Message.Version, 1
         yield Message.Url, "text:foobar", {}

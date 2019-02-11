@@ -34,12 +34,12 @@ class DeviantartExtractor(Extractor):
     root = "https://www.deviantart.com"
 
     def __init__(self, match=None):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.api = DeviantartAPI(self)
         self.offset = 0
         self.flat = self.config("flat", True)
         self.original = self.config("original", True)
-        self.user = match.group(1) or match.group(2) if match else None
+        self.user = match.group(1) or match.group(2)
         self.group = False
 
         self.commit_journal = {
@@ -482,8 +482,9 @@ class DeviantartPopularExtractor(DeviantartExtractor):
     )
 
     def __init__(self, match):
-        DeviantartExtractor.__init__(self)
+        DeviantartExtractor.__init__(self, match)
         self.search_term = self.time_range = self.category_path = None
+        self.user = ""
 
         path, trange, query = match.groups()
         if path:

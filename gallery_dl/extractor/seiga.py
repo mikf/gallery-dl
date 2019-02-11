@@ -19,8 +19,8 @@ class SeigaExtractor(Extractor):
     archive_fmt = "{image_id}"
     cookiedomain = ".nicovideo.jp"
 
-    def __init__(self):
-        Extractor.__init__(self)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
         self.start_image = 0
 
     def items(self):
@@ -100,7 +100,7 @@ class SeigaUserExtractor(SeigaExtractor):
     )
 
     def __init__(self, match):
-        SeigaExtractor.__init__(self)
+        SeigaExtractor.__init__(self, match)
         self.user_id, self.order = match.groups()
         self.start_page = 1
 
@@ -186,7 +186,7 @@ class SeigaImageExtractor(SeigaExtractor):
     )
 
     def __init__(self, match):
-        SeigaExtractor.__init__(self)
+        SeigaExtractor.__init__(self, match)
         self.image_id = match.group(1)
 
     def skip(self, num):

@@ -25,7 +25,7 @@ class NgomikChapterExtractor(ChapterExtractor):
 
     def __init__(self, match):
         url = "{}/{}".format(self.root, match.group(1))
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         info = text.extract(page, '<title>', "</title>")[0]

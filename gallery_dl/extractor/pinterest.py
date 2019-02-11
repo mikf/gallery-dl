@@ -22,8 +22,8 @@ class PinterestExtractor(Extractor):
     filename_fmt = "{category}_{id}.{extension}"
     archive_fmt = "{id}"
 
-    def __init__(self):
-        Extractor.__init__(self)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
         self.api = PinterestAPI(self)
 
     def items(self):
@@ -70,7 +70,7 @@ class PinterestPinExtractor(PinterestExtractor):
     )
 
     def __init__(self, match):
-        PinterestExtractor.__init__(self)
+        PinterestExtractor.__init__(self, match)
         self.pin_id = match.group(1)
         self.pin = None
 
@@ -99,7 +99,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     )
 
     def __init__(self, match):
-        PinterestExtractor.__init__(self)
+        PinterestExtractor.__init__(self, match)
         self.user = text.unquote(match.group(1))
         self.board = text.unquote(match.group(2))
         self.board_id = 0
@@ -161,7 +161,7 @@ class PinterestPinitExtractor(PinterestExtractor):
     )
 
     def __init__(self, match):
-        PinterestExtractor.__init__(self)
+        PinterestExtractor.__init__(self, match)
         self.shortened_id = match.group(1)
 
     def items(self):

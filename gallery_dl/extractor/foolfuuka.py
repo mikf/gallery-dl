@@ -26,7 +26,7 @@ class FoolfuukaThreadExtractor(SharedConfigMixin, Extractor):
     root = ""
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.board, self.thread = match.groups()
         self.session.headers["Referer"] = self.root
 

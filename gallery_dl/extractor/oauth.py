@@ -22,7 +22,7 @@ class OAuthBase(Extractor):
     redirect_uri = "http://localhost:6414/"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.client = None
 
     def oauth_config(self, key, default=None):

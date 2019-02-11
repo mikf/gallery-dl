@@ -49,7 +49,7 @@ class NhentaiGalleryExtractor(NHentaiExtractor):
     })
 
     def __init__(self, match):
-        NHentaiExtractor.__init__(self)
+        NHentaiExtractor.__init__(self, match)
         self.gid = match.group(1)
 
     def items(self):
@@ -86,7 +86,7 @@ class NhentaiSearchExtractor(NHentaiExtractor):
     })
 
     def __init__(self, match):
-        NHentaiExtractor.__init__(self)
+        NHentaiExtractor.__init__(self, match)
         self.params = text.parse_query(match.group(1))
 
     def items(self):

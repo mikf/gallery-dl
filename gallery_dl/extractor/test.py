@@ -40,7 +40,7 @@ class TestExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         categories, subcategories, indices = match.groups()
         self.categories = self._split(categories)
         self.subcategories = self._split(subcategories)

@@ -27,7 +27,7 @@ class FutabaThreadExtractor(Extractor):
     })
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         url, self.server, self.board, self.thread = match.groups()
         self.url = "https://" + url + ".htm"
 

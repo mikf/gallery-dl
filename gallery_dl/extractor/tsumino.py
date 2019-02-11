@@ -78,7 +78,7 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
     def __init__(self, match):
         self.gallery_id = match.group(1)
         url = "{}/Book/Info/{}".format(self.root, self.gallery_id)
-        ChapterExtractor.__init__(self, url)
+        ChapterExtractor.__init__(self, match, url)
 
     def get_metadata(self, page):
         extr = text.extract
@@ -155,7 +155,7 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.query = match.group(1)
 
     def items(self):

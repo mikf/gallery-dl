@@ -33,8 +33,8 @@ class SmugmugExtractor(Extractor):
         "Uris": None,
     }
 
-    def __init__(self):
-        Extractor.__init__(self)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
         self.api = SmugmugAPI(self)
 
     @staticmethod
@@ -69,7 +69,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
     )
 
     def __init__(self, match):
-        SmugmugExtractor.__init__(self)
+        SmugmugExtractor.__init__(self, match)
         self.album_id = match.group(1)
 
     def items(self):
@@ -109,7 +109,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
     )
 
     def __init__(self, match):
-        SmugmugExtractor.__init__(self)
+        SmugmugExtractor.__init__(self, match)
         self.image_id = match.group(3)
 
     def items(self):
@@ -153,7 +153,7 @@ class SmugmugPathExtractor(SmugmugExtractor):
     )
 
     def __init__(self, match):
-        SmugmugExtractor.__init__(self)
+        SmugmugExtractor.__init__(self, match)
         self.domain, self.user, self.path = match.groups()
 
     def items(self):

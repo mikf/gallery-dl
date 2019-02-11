@@ -34,7 +34,7 @@ class SenmangaChapterExtractor(Extractor):
     root = "https://raw.senmanga.com"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         part = match.group(1)
         self.chapter_url = "{}/{}/".format(self.root, part)
         self.img_url = "{}/viewer/{}/".format(self.root, part)

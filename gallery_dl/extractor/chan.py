@@ -23,7 +23,7 @@ class ChanThreadExtractor(Extractor):
     file_url = ""
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.metadata = {
             "board": match.group(1),
             "thread": match.group(2),

@@ -21,7 +21,7 @@ class TwitterExtractor(Extractor):
     root = "https://twitter.com"
 
     def __init__(self, match):
-        Extractor.__init__(self)
+        Extractor.__init__(self, match)
         self.user = match.group(1)
         self.retweets = self.config("retweets", True)
         self.videos = self.config("videos", False)

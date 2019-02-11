@@ -41,7 +41,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
     )
 
     def __init__(self, match):
-        ImagefapExtractor.__init__(self)
+        ImagefapExtractor.__init__(self, match)
         self.gid = match.group(1)
         self.image_id = ""
 
@@ -101,7 +101,7 @@ class ImagefapImageExtractor(ImagefapExtractor):
     })
 
     def __init__(self, match):
-        ImagefapExtractor.__init__(self)
+        ImagefapExtractor.__init__(self, match)
         self.image_id = match.group(1)
 
     def items(self):
@@ -147,7 +147,7 @@ class ImagefapUserExtractor(ImagefapExtractor):
     )
 
     def __init__(self, match):
-        ImagefapExtractor.__init__(self)
+        ImagefapExtractor.__init__(self, match)
         self.user, self.user_id = match.groups()
 
     def items(self):
