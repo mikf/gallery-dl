@@ -143,10 +143,6 @@ class RedditImageExtractor(Extractor):
         }),
     )
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.url = match.group(0)
-
     def items(self):
         data = text.nameext_from_url(self.url)
         yield Message.Version, 1

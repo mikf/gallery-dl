@@ -16,9 +16,10 @@ import json
 class XvideosExtractor(Extractor):
     """Base class for xvideos extractors"""
     category = "xvideos"
+    root = "https://www.xvideos.com"
 
-    def get_page(self, codes=(403, 404)):
-        response = self.request(self.url, expect=codes)
+    def get_page(self, url, codes=(403, 404)):
+        response = self.request(url, expect=codes)
         if response.status_code in codes:
             raise exception.NotFoundError(self.subcategory)
         return response.text
@@ -46,11 +47,10 @@ class XvideosGalleryExtractor(XvideosExtractor):
     def __init__(self, match):
         XvideosExtractor.__init__(self, match)
         self.user, self.gid = match.groups()
-        self.url = "https://www.xvideos.com/profiles/{}/photos/{}".format(
-            self.user, self.gid)
 
     def items(self):
-        page = self.get_page()
+        url = "{}/profiles/{}/photos/{}".format(self.root, self.user, self.gid)
+        page = self.get_page(url)
         data = self.get_metadata(page)
         imgs = self.get_images(page)
         data["count"] = len(imgs)
@@ -110,10 +110,10 @@ class XvideosUserExtractor(XvideosExtractor):
     def __init__(self, match):
         XvideosExtractor.__init__(self, match)
         self.user = match.group(1)
-        self.url = "https://www.xvideos.com/profiles/" + self.user
 
     def items(self):
-        page = self.get_page()
+        url = "{}/profiles/{}".format(self.root, self.user)
+        page = self.get_page(url)
         data = json.loads(text.extract(
             page, "xv.conf=", ";</script>")[0])["data"]
 

@@ -19,8 +19,8 @@ class FutabaThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board_name}", "{thread}")
     filename_fmt = "{tim}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
-    urlfmt = "https://{server}.2chan.net/{board}/src/{filename}"
-    pattern = r"(?:https?://)?(([^.]+)\.2chan\.net/([^/]+)/res/(\d+))"
+    url_fmt = "https://{server}.2chan.net/{board}/src/{filename}"
+    pattern = r"(?:https?://)?([^.]+)\.2chan\.net/([^/]+)/res/(\d+)"
     test = ("http://dec.2chan.net/70/res/947.htm", {
         "url": "c5c12b80b290e224b6758507b3bb952044f4595b",
         "keyword": "4bd22e7a9c3636faecd6ea7082509e8655e10dd0",
@@ -28,22 +28,23 @@ class FutabaThreadExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        url, self.server, self.board, self.thread = match.groups()
-        self.url = "https://" + url + ".htm"
+        self.server, self.board, self.thread = match.groups()
 
     def items(self):
-        page = self.request(self.url).text
-        data = self.get_metadata(page)
+        url = "https://{}.2chan.net/{}/res/{}.htm".format(
+            self.server, self.board, self.thread)
+        page = self.request(url).text
+        data = self.metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
         for post in self.posts(page):
             if "filename" not in post:
                 continue
             post.update(data)
-            url = self.urlfmt.format_map(post)
+            url = self.url_fmt.format_map(post)
             yield Message.Url, url, post
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         """Collect metadata for extractor-job"""
         title = text.extract(page, "<title>", "</title>")[0]
         title, _, boardname = title.rpartition(" - ")

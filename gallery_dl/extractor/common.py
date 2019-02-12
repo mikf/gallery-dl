@@ -34,6 +34,7 @@ class Extractor():
     def __init__(self, match):
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
+        self.url = match.string
         self._set_headers()
         self._set_cookies()
         self._set_proxies()

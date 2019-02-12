@@ -312,7 +312,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
     archive_fmt = "{index}.{extension}"
-    pattern = BASE_PATTERN + r"/(?:art|journal)/[^/?&#]+-\d+"
+    pattern = BASE_PATTERN + r"/((?:art|journal)/[^/?&#]+-\d+)"
     test = (
         (("https://www.deviantart.com/shimoda7/art/"
           "For-the-sake-of-a-memory-10073852"), {
@@ -335,23 +335,22 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.url = match.group(0)
-        if not self.url.startswith("http"):
-            self.url = "https://" + self.url
+        self.path = match.group(3)
 
     def deviations(self):
-        response = self.request(self.url, expect=range(400, 500))
+        url = "{}/{}/{}".format(self.root, self.user, self.path)
+        response = self.request(url, expect=range(400, 500))
         deviation_id = text.extract(response.text, '//deviation/', '"')[0]
         if response.status_code >= 400 or not deviation_id:
             raise exception.NotFoundError("image")
         return (self.api.deviation(deviation_id),)
 
 
-class DeviantartStashExtractor(DeviantartDeviationExtractor):
+class DeviantartStashExtractor(DeviantartExtractor):
     """Extractor for sta.sh-ed deviations"""
     subcategory = "stash"
     archive_fmt = "{index}.{extension}"
-    pattern = r"(?:https?://)?sta\.sh/()()[a-z0-9]+"
+    pattern = r"(?:https?://)?sta\.sh/([a-z0-9]+)"
     test = (
         ("https://sta.sh/022c83odnaxc", {
             "pattern": r"https://s3.amazonaws.com/origin-orig.deviantart.net",
@@ -366,8 +365,13 @@ class DeviantartStashExtractor(DeviantartDeviationExtractor):
         }),
     )
 
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self, match)
+        self.stash_id = match.group(1)
+
     def deviations(self):
-        page = self.request(self.url).text
+        url = "https://sta.sh/" + self.stash_id
+        page = self.request(url).text
         deviation_id = text.extract(page, '//deviation/', '"')[0]
 
         if deviation_id:

@@ -101,11 +101,11 @@ class SimplyhentaiImageExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.url = "https://www." + match.group(1)
+        self.page_url = "https://www." + match.group(1)
         self.type = match.group(2)
 
     def items(self):
-        page = self.request(self.url).text
+        page = self.request(self.page_url).text
         url_search = 'data-src="' if self.type == "image" else '<source src="'
 
         title, pos = text.extract(page, '"og:title" content="', '"')
@@ -155,10 +155,10 @@ class SimplyhentaiVideoExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.url = "https://" + match.group(1)
+        self.page_url = "https://" + match.group(1)
 
     def items(self):
-        page = self.request(self.url).text
+        page = self.request(self.page_url).text
 
         title, pos = text.extract(page, "<title>", "</title>")
         tags , pos = text.extract(page, ">Tags</div>", "</div>", pos)

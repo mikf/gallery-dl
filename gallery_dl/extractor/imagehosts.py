@@ -27,7 +27,8 @@ class ImagehostImageExtractor(SharedConfigMixin, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.url = ("https://" if self.https else "http://") + match.group(1)
+        self.page_url = "http{}://{}".format(
+            "s" if self.https else "", match.group(1))
         self.token = match.group(2)
         if self.params == "simple":
             self.params = {
@@ -47,7 +48,7 @@ class ImagehostImageExtractor(SharedConfigMixin, Extractor):
 
     def items(self):
         page = self.request(
-            self.url,
+            self.page_url,
             method=self.method,
             data=self.params,
             cookies=self.cookies,
@@ -95,11 +96,11 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
 
     def __init__(self, match):
         ImagehostImageExtractor.__init__(self, match)
-        if "/img-" in self.url:
-            self.url = self.url.replace("img.yt", "imx.to")
-            self.urlext = True
+        if "/img-" in self.page_url:
+            self.page_url = self.page_url.replace("img.yt", "imx.to")
+            self.url_ext = True
         else:
-            self.urlext = False
+            self.url_ext = False
 
     def get_info(self, page):
         url, pos = text.extract(
@@ -107,7 +108,7 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
         if not url:
             raise exception.NotFoundError("image")
         filename, pos = text.extract(page, ' title="', '"', pos)
-        if self.urlext and filename:
+        if self.url_ext and filename:
             filename += splitext(url)[1]
         return url, filename or url
 
@@ -146,7 +147,7 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
 
     def get_info(self, page):
         url = text.extract(page, "SRC='", "'")[0]
-        return text.urljoin(self.url, url), url
+        return text.urljoin(self.page_url, url), url
 
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):
@@ -164,7 +165,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
     @property
     @memcache(maxage=3*60*60)
     def cookies(self):
-        return self.request(self.url).cookies
+        return self.request(self.page_url).cookies
 
     def get_info(self, page):
         url     , pos = text.extract(page, 'center;"><img src="', '"')
