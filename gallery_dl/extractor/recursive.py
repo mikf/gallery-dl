@@ -17,20 +17,18 @@ import re
 class RecursiveExtractor(Extractor):
     """Extractor that fetches URLs from a remote or local source"""
     category = "recursive"
-    pattern = r"r(?:ecursive)?:(.+)"
+    pattern = r"r(?:ecursive)?:"
     test = ("recursive:https://pastebin.com/raw/FLwrCYsT", {
         "url": "eee86d65c346361b818e8f4b2b307d9429f136a2",
     })
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.session.mount("file://", FileAdapter())
-        self.url = match.group(1)
-
     def items(self):
         blist = self.config(
             "blacklist", {"directlink"} | util.SPECIAL_EXTRACTORS)
-        page = self.request(self.url).text
+
+        self.session.mount("file://", FileAdapter())
+        page = self.request(self.url.partition(":")[2]).text
+
         yield Message.Version, 1
         with extractor.blacklist(blist):
             for match in re.finditer(r"https?://[^\s\"']+", page):

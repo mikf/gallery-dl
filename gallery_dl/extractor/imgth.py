@@ -28,34 +28,29 @@ class ImgthGalleryExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.gid = match.group(1)
-        self.url = "https://imgth.com/gallery/" + self.gid + "/g/page/"
+        self.url_base = "https://imgth.com/gallery/" + self.gid + "/g/page/"
 
     def items(self):
-        page = self.request(self.url + "0").text
-        data = self.get_job_metadata(page)
+        page = self.request(self.url_base + "0").text
+        data = self.metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
-        for data["num"], url in enumerate(self.get_images(page), 1):
+        for data["num"], url in enumerate(self.images(page), 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
-    def get_images(self, page):
+    def images(self, page):
         """Yield all image urls for this gallery"""
         pnum = 0
         while True:
-            pos = 0
-            page = text.extract(page, '<ul class="thumbnails">', '</ul>')[0]
-            while True:
-                url, pos = text.extract(page, '<img src="', '"', pos)
-                if not url:
-                    break
+            thumbs = text.extract(page, '<ul class="thumbnails">', '</ul>')[0]
+            for url in text.extract_iter(thumbs, '<img src="', '"'):
                 yield "https://imgth.com/images/" + url[24:]
-            pos = page.find('<li class="next">', pos)
-            if pos == -1:
+            if '<li class="next">' not in page:
                 return
             pnum += 1
-            page = self.request(self.url + str(pnum)).text
+            page = self.request(self.url_base + str(pnum)).text
 
-    def get_job_metadata(self, page):
+    def metadata(self, page):
         """Collect metadata for extractor-job"""
         return text.extract_all(page, (
             ("title", '<h1>', '</h1>'),

@@ -50,7 +50,6 @@ class PhotobucketAlbumExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.album_path = ""
-        self.url = match.group(0)
         self.root = "http://" + match.group(1)
         self.session.headers["Referer"] = self.url
 
@@ -128,7 +127,6 @@ class PhotobucketImageExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.url = match.group(0)
         self.user = match.group(1) or match.group(3)
         self.media_id = match.group(2)
         self.session.headers["Referer"] = self.url

@@ -340,7 +340,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
         ExhentaiExtractor.__init__(self, match)
         self.params = text.parse_query(match.group(1) or "")
         self.params["page"] = text.parse_int(self.params.get("page"))
-        self.url = self.root
+        self.search_url = self.root
 
     def items(self):
         self.login()
@@ -348,7 +348,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
         yield Message.Version, 1
 
         while True:
-            page = self.request(self.url, params=self.params).text
+            page = self.request(self.search_url, params=self.params).text
 
             for row in text.extract_iter(page, '<tr class="gtr', '</tr>'):
                 yield self._parse_row(row)
@@ -397,7 +397,7 @@ class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
 
     def __init__(self, match):
         ExhentaiSearchExtractor.__init__(self, match)
-        self.url = self.root + "/favorites.php"
+        self.search_url = self.root + "/favorites.php"
 
     def init(self):
         # The first request to '/favorites.php' will return an empty list

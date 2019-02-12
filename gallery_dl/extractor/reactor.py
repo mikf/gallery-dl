@@ -27,7 +27,6 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.url = match.group(0)
         self.root = "http://" + match.group(1)
         self.session.headers["Referer"] = self.root
 

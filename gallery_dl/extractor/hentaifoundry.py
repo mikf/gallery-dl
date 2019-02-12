@@ -23,7 +23,7 @@ class HentaifoundryExtractor(Extractor):
 
     def __init__(self, match, user="", page=1):
         Extractor.__init__(self, match)
-        self.url = ""
+        self.page_url = ""
         self.user = user
         self.start_post = 0
         self.start_page = text.parse_int(page, 1)
@@ -55,7 +55,7 @@ class HentaifoundryExtractor(Extractor):
         num = self.start_page
 
         while True:
-            page = self.request("{}/page/{}".format(self.url, num)).text
+            page = self.request("{}/page/{}".format(self.page_url, num)).text
             yield from text.extract_iter(page, 'thumbTitle"><a href="', '"')
 
             if 'class="pager"' not in page or 'class="last hidden"' in page:
@@ -135,10 +135,10 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
     def __init__(self, match):
         HentaifoundryExtractor.__init__(
             self, match, match.group(1) or match.group(3), match.group(2))
-        self.url = "{}/pictures/user/{}".format(self.root, self.user)
+        self.page_url = "{}/pictures/user/{}".format(self.root, self.user)
 
     def get_job_metadata(self):
-        page = self.request(self.url + "?enterAgree=1").text
+        page = self.request(self.page_url + "?enterAgree=1").text
         count = text.extract(page, ">Pictures (", ")")[0]
         return {"user": self.user, "count": text.parse_int(count)}
 
@@ -161,10 +161,11 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
     def __init__(self, match):
         HentaifoundryExtractor.__init__(
             self, match, match.group(1), match.group(2))
-        self.url = "{}/pictures/user/{}/scraps".format(self.root, self.user)
+        self.page_url = "{}/pictures/user/{}/scraps".format(
+            self.root, self.user)
 
     def get_job_metadata(self):
-        page = self.request(self.url + "?enterAgree=1").text
+        page = self.request(self.page_url + "?enterAgree=1").text
         count = text.extract(page, ">Scraps (", ")")[0]
         return {"user": self.user, "count": text.parse_int(count)}
 
@@ -188,7 +189,8 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
     def __init__(self, match):
         HentaifoundryExtractor.__init__(
             self, match, match.group(1), match.group(2))
-        self.url = "{}/user/{}/faves/pictures".format(self.root, self.user)
+        self.page_url = "{}/user/{}/faves/pictures".format(
+            self.root, self.user)
 
 
 class HentaifoundryRecentExtractor(HentaifoundryExtractor):
@@ -203,7 +205,7 @@ class HentaifoundryRecentExtractor(HentaifoundryExtractor):
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match, "", match.group(2))
         self.date = match.group(1)
-        self.url = "{}/pictures/recent/{}".format(self.root, self.date)
+        self.page_url = "{}/pictures/recent/{}".format(self.root, self.date)
 
     def get_job_metadata(self):
         self.request(self.root + "/?enterAgree=1")
@@ -221,7 +223,7 @@ class HentaifoundryPopularExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match, "", match.group(1))
-        self.url = self.root + "/pictures/popular"
+        self.page_url = self.root + "/pictures/popular"
 
 
 class HentaifoundryImageExtractor(HentaifoundryExtractor):
