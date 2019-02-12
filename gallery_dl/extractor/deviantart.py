@@ -377,10 +377,11 @@ class DeviantartStashExtractor(DeviantartExtractor):
         if deviation_id:
             yield self.api.deviation(deviation_id)
         else:
+            data = {"_extractor": DeviantartStashExtractor}
             page = text.extract(
                 page, '<div id="stash-body"', '<div class="footer"')[0]
             for url in text.extract_iter(page, '<a href="', '"'):
-                yield url, {}
+                yield url, data
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):

@@ -199,4 +199,5 @@ class LusciousSearchExtractor(LusciousExtractor):
             "count": text.parse_int(count),
             "date": date,
             "tags": text.remove_html(tags.partition(">")[2]),
+            "_extractor": LusciousAlbumExtractor,
         }

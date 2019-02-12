@@ -106,8 +106,9 @@ class MyportfolioUserExtractor(Extractor):
         url = "https://" + self.domain
         page = self.request(url).text
         main = text.extract(page, "<main>", "</main>")[0]
+        data = {"_extractor": MyportfolioGalleryExtractor}
 
         yield Message.Version, 1
         for path in text.extract_iter(main, ' href="', '"'):
             if path and path[0] == "/":
-                yield Message.Queue, self.prefix + url + path, {}
+                yield Message.Queue, self.prefix + url + path, data

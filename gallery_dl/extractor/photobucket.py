@@ -64,6 +64,7 @@ class PhotobucketAlbumExtractor(Extractor):
 
         if self.config("subalbums", True):
             for album in self.subalbums():
+                album["_extractor"] = PhotobucketAlbumExtractor
                 yield Message.Queue, album["url"], album
 
     def images(self):

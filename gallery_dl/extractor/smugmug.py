@@ -135,7 +135,7 @@ class SmugmugPathExtractor(SmugmugExtractor):
             "pattern": "smugmug:album:ddvxpg$",
         }),
         ("https://acapella.smugmug.com/", {
-            "pattern": r"smugmug:album:\w+$",
+            "pattern": SmugmugAlbumExtractor.pattern,
             "url": "797eb1cbbf5ad8ecac8ee4eedc6466ed77a65d68",
         }),
         # gallery node without owner
@@ -178,11 +178,13 @@ class SmugmugPathExtractor(SmugmugExtractor):
 
             for node in nodes:
                 album_id = node["Uris"]["Album"].rpartition("/")[2]
+                node["_extractor"] = SmugmugAlbumExtractor
                 yield Message.Queue, "smugmug:album:" + album_id, node
 
         else:
             for album in self.api.user_albums(self.user):
                 uri = "smugmug:album:" + album["AlbumKey"]
+                album["_extractor"] = SmugmugAlbumExtractor
                 yield Message.Queue, uri, album
 
     def album_nodes(self, root):

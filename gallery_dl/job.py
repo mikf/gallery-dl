@@ -20,13 +20,14 @@ class Job():
     """Base class for Job-types"""
     ulog = None
 
-    def __init__(self, url, parent=None):
-        self.url = url
-        self.extractor = extractor.find(url)
-        if self.extractor is None:
-            raise exception.NoExtractorError(url)
+    def __init__(self, extr, parent=None):
+        if isinstance(extr, str):
+            extr = extractor.find(extr)
+        if not extr:
+            raise exception.NoExtractorError()
+        self.extractor = extr
         self.extractor.log.debug(
-            "Using %s for '%s'", self.extractor.__class__.__name__, url)
+            "Using %s for '%s'", extr.__class__.__name__, extr.url)
 
         # url predicates
         self.pred_url = self._prepare_predicates(
@@ -56,10 +57,10 @@ class Job():
             log.error("Authentication failed: %s", msg)
         except exception.AuthorizationError:
             log.error("You do not have permission to access the resource "
-                      "at '%s'", self.url)
+                      "at '%s'", self.extractor.url)
         except exception.NotFoundError as exc:
             res = str(exc) or "resource (gallery/image/user)"
-            log.error("The %s at '%s' does not exist", res, self.url)
+            log.error("The %s at '%s' does not exist", res, self.extractor.url)
         except exception.HttpError as exc:
             err = exc.args[0]
             if isinstance(err, Exception):
@@ -243,9 +244,13 @@ class DownloadJob(Job):
             self.pathfmt.set_directory(keywords)
 
     def handle_queue(self, url, keywords):
-        try:
-            self.__class__(url, self).run()
-        except exception.NoExtractorError:
+        if "_extractor" in keywords:
+            extr = keywords["_extractor"].from_url(url)
+        else:
+            extr = extractor.find(url)
+        if extr:
+            self.__class__(extr, self).run()
+        else:
             self._write_unsupported(url)
 
     def handle_finalize(self):
@@ -389,6 +394,8 @@ class KeywordJob(Job):
         """Print key-value pairs with formatting"""
         suffix = "]" if prefix else ""
         for key, value in sorted(keywords.items()):
+            if key[0] == "_":
+                continue
             key = prefix + key + suffix
 
             if isinstance(value, dict):
@@ -512,7 +519,7 @@ class TestJob(DownloadJob):
         if to_list:
             self.list_keyword.append(kwdict.copy())
         self.hash_keyword.update(
-            json.dumps(kwdict, sort_keys=True).encode())
+            json.dumps(kwdict, sort_keys=True, default=str).encode())
 
     def update_archive(self, kwdict):
         """Update the archive-id hash"""
@@ -555,7 +562,7 @@ class DataJob(Job):
         # dump to 'file'
         json.dump(
             self.data, self.file,
-            sort_keys=True, indent=2, ensure_ascii=self.ascii,
+            sort_keys=True, indent=2, ensure_ascii=self.ascii, default=str,
         )
         self.file.write("\n")
 

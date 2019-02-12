@@ -173,6 +173,7 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "date": info["timestamp"],
                 "lang": lang,
                 "language": util.code_to_language(lang),
+                "_extractor": MangadexChapterExtractor,
             })
 
         results.sort(key=lambda x: (x["chapter"], x["chapter_minor"]))
