@@ -154,7 +154,11 @@ class ImagefapUserExtractor(ImagefapExtractor):
         yield Message.Version, 1
         for gid, name in self.get_gallery_data():
             url = "{}/gallery/{}".format(self.root, gid)
-            data = {"gallery_id": text.parse_int(gid), "title": name}
+            data = {
+                "gallery_id": text.parse_int(gid),
+                "title": text.unescape(name),
+                "_extractor": ImagefapGalleryExtractor,
+            }
             yield Message.Queue, url, data
 
     def get_gallery_data(self):

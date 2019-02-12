@@ -91,9 +91,10 @@ class NhentaiSearchExtractor(NHentaiExtractor):
 
     def items(self):
         yield Message.Version, 1
+        data = {"_extractor": NhentaiGalleryExtractor}
         for gid in self._pagination(self.params):
             url = "{}/g/{}/".format(self.root, gid)
-            yield Message.Queue, url, {}
+            yield Message.Queue, url, data
 
     def _pagination(self, params):
         url = "{}/search/".format(self.root)

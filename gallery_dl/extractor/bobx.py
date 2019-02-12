@@ -99,6 +99,7 @@ class BobxIdolExtractor(BobxExtractor):
 
     def items(self):
         url = "{}/{}/".format(self.root, self.path)
+        data = {"_extractor": BobxGalleryExtractor}
         page = self.request(url).text
         skip = True
 
@@ -108,4 +109,4 @@ class BobxIdolExtractor(BobxExtractor):
             skip = not skip
             if skip:
                 continue
-            yield Message.Queue, "{}photoset/{}".format(url, part), {}
+            yield Message.Queue, "{}photoset/{}".format(url, part), data

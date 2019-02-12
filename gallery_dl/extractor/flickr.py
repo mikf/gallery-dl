@@ -119,7 +119,7 @@ class FlickrAlbumExtractor(FlickrExtractor):
         }),
         ("https://www.flickr.com/photos/shona_s/albums", {
             "url": "657d541470482e0d69deec33ab97a6d7d4af6fe4",
-            "keyword": "736a41a7d702f7fe00edc957ae201d84f745e654",
+            "keyword": "ef654bfbc4ce7b74ad74e7d772e5466285ffc581",
         }),
     )
 
@@ -135,6 +135,7 @@ class FlickrAlbumExtractor(FlickrExtractor):
     def _album_items(self):
         yield Message.Version, 1
         data = FlickrExtractor.data(self)
+        data["_extractor"] = FlickrAlbumExtractor
 
         for albums in self.api.photosets_getList(self.user["nsid"]):
             for album in albums["photoset"]:

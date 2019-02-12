@@ -112,6 +112,7 @@ class HentaifoxSearchExtractor(Extractor):
                     "thumbnail": text.urljoin(self.root, thumb),
                     "title": text.unescape(title),
                     "tags": tags.split(),
+                    "_extractor": HentaifoxGalleryExtractor,
                 }
 
             pos = page.find('class="current"', gpos)

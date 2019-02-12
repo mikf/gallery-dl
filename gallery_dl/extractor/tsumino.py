@@ -162,6 +162,7 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
         yield Message.Version, 1
         for gallery in self.galleries():
             url = "{}/Book/Info/{}".format(self.root, gallery["Id"])
+            gallery["_extractor"] = TsuminoGalleryExtractor
             yield Message.Queue, url, gallery
 
     def galleries(self):

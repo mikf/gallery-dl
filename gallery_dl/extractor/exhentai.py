@@ -338,7 +338,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(1) or "")
+        self.params = text.parse_query(match.group(2) or "")
         self.params["page"] = text.parse_int(self.params.get("page"))
         self.search_url = self.root
 
@@ -376,6 +376,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
             "gallery_id": text.parse_int(parts[1]),
             "gallery_token": parts[2],
             "title": text.unescape(title),
+            "_extractor": ExhentaiGalleryExtractor,
             key: last,
         }
 

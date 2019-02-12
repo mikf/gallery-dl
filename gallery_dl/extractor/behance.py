@@ -21,6 +21,7 @@ class BehanceExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
         for gallery in self.galleries():
+            gallery["_extractor"] = BehanceGalleryExtractor
             yield Message.Queue, gallery["url"], self._update(gallery)
 
     def galleries(self):
