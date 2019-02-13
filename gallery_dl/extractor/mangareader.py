@@ -95,8 +95,9 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
 
 class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
     """Extractor for manga from mangareader.net"""
-    pattern = r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/?&#]+)/?$"
+    chapterclass = MangareaderChapterExtractor
     reverse = False
+    pattern = r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/?&#]+)/?$"
     test = ("https://www.mangareader.net/mushishi", {
         "url": "bc203b858b4ad76e5d77e39118a7be0350e357da",
         "keyword": "031b3ea085921c552de017ecbb9b906e462229c9",

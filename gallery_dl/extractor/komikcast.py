@@ -86,6 +86,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
 
 class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     """Extractor for manga from komikcast.com"""
+    chapterclass = KomikcastChapterExtractor
     pattern = (r"(?:https?://)?(?:www\.)?komikcast\.com"
                r"(/(?:komik/)?[^/?&#]+)/?$")
     test = (

@@ -102,6 +102,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
 
 class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
     """Extractor for manga from mangapark.me"""
+    chapterclass = MangaparkChapterExtractor
     pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
                r"(/manga/[^/?&#]+)/?$")
     test = (

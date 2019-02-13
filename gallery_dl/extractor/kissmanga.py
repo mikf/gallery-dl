@@ -180,6 +180,7 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
 
 class KissmangaMangaExtractor(KissmangaBase, MangaExtractor):
     """Extractor for manga from kissmanga.com"""
+    chapterclass = KissmangaChapterExtractor
     pattern = (r"(?i)(?:https?://)?(?:www\.)?kissmanga\.com"
                r"(/Manga/[^/?&#]+/?)$")
     test = (

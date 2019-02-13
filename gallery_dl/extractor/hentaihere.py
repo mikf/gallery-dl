@@ -62,6 +62,7 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
 
 class HentaihereMangaExtractor(HentaihereBase, MangaExtractor):
     """Extractor for hmanga from hentaihere.com"""
+    chapterclass = HentaihereChapterExtractor
     pattern = r"(?:https?://)?(?:www\.)?hentaihere\.com(/m/S\d+)/?$"
     test = (
         ("https://hentaihere.com/m/S13812", {

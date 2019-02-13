@@ -62,6 +62,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
 class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
     """Extractor for comics from readcomiconline.to"""
+    chapterclass = ReadcomiconlineIssueExtractor
     subcategory = "comic"
     pattern = (r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
                r"(/Comic/[^/?&#]+/?)$")

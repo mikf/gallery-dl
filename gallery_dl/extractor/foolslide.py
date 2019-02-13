@@ -158,6 +158,7 @@ def generate_extractors():
         MaExtr.pattern = r"(?:https?://)?" + pattern + r"(/series/[^/?&#]+)"
         MaExtr.test = info.get("test-manga")
         MaExtr.root = root
+        MaExtr.chapterclass = ChExtr
         symtable[MaExtr.__name__] = MaExtr
 
 
