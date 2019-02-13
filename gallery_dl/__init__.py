@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2018 Mike Fährmann
+# Copyright 2014-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,88 +21,9 @@ if sys.hexversion < 0x3040000:
 
 import json
 import logging
-from . import version, config, option, extractor, job, util, exception
+from . import version, config, option, output, extractor, job, util, exception
 
 __version__ = version.__version__
-log = logging.getLogger("gallery-dl")
-
-LOG_FORMAT = "[{name}][{levelname}] {message}"
-LOG_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"
-LOG_LEVEL = logging.INFO
-
-def initialize_logging(loglevel):
-    """Setup basic logging functionality before configfiles have been loaded"""
-    # convert levelnames to lowercase
-    for level in (10, 20, 30, 40, 50):
-        name = logging.getLevelName(level)
-        logging.addLevelName(level, name.lower())
-    # setup basic logging to stderr
-    formatter = logging.Formatter(LOG_FORMAT, LOG_FORMAT_DATE, "{")
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    handler.setLevel(loglevel)
-    root = logging.getLogger()
-    root.setLevel(logging.NOTSET)
-    root.addHandler(handler)
-
-
-def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
-    """Setup a new logging handler"""
-    opts = config.interpolate(("output", key))
-    if not opts:
-        return None
-    if not isinstance(opts, dict):
-        opts = {"path": opts}
-
-    path = opts.get("path")
-    mode = opts.get("mode", "w")
-    encoding = opts.get("encoding", "utf-8")
-    try:
-        path = util.expand_path(path)
-        handler = logging.FileHandler(path, mode, encoding)
-    except (OSError, ValueError) as exc:
-        log.warning("%s: %s", key, exc)
-        return None
-    except TypeError as exc:
-        log.warning("%s: missing or invalid path (%s)", key, exc)
-        return None
-
-    level = opts.get("level", lvl)
-    logfmt = opts.get("format", fmt)
-    datefmt = opts.get("format-date", LOG_FORMAT_DATE)
-    formatter = logging.Formatter(logfmt, datefmt, "{")
-    handler.setFormatter(formatter)
-    handler.setLevel(level)
-
-    return handler
-
-
-def configure_logging_handler(key, handler):
-    """Configure a logging handler"""
-    opts = config.interpolate(("output", key))
-    if not opts:
-        return
-    if isinstance(opts, str):
-        opts = {"format": opts}
-    if handler.level == LOG_LEVEL and "level" in opts:
-        handler.setLevel(opts["level"])
-    if "format" in opts or "format-date" in opts:
-        logfmt = opts.get("format", LOG_FORMAT)
-        datefmt = opts.get("format-date", LOG_FORMAT_DATE)
-        formatter = logging.Formatter(logfmt, datefmt, "{")
-        handler.setFormatter(formatter)
-
-
-def replace_std_streams(errors="replace"):
-    """Replace standard streams and set their error handlers to 'errors'"""
-    for name in ("stdout", "stdin", "stderr"):
-        stream = getattr(sys, name)
-        setattr(sys, name, stream.__class__(
-            stream.buffer,
-            errors=errors,
-            newline=stream.newlines,
-            line_buffering=stream.line_buffering,
-        ))
 
 
 def progress(urls, pformat):
@@ -115,7 +36,7 @@ def progress(urls, pformat):
         yield pinfo["url"]
 
 
-def parse_inputfile(file):
+def parse_inputfile(file, log):
     """Filter and process strings from an input file.
 
     Lines starting with '#' and empty lines will be ignored.
@@ -187,12 +108,11 @@ def parse_inputfile(file):
 def main():
     try:
         if sys.stdout.encoding.lower() != "utf-8":
-            replace_std_streams()
+            output.replace_std_streams()
 
         parser = option.build_parser()
         args = parser.parse_args()
-
-        initialize_logging(args.loglevel)
+        log = output.initialize_logging(args.loglevel)
 
         # configuration
         if args.load_config:
@@ -205,10 +125,12 @@ def main():
             config.set(key, value)
 
         # stream logging handler
-        configure_logging_handler("log", logging.getLogger().handlers[0])
+        output.configure_logging_handler(
+            "log", logging.getLogger().handlers[0])
 
         # file logging handler
-        handler = setup_logging_handler("logfile", lvl=args.loglevel)
+        handler = output.setup_logging_handler(
+            "logfile", lvl=args.loglevel)
         if handler:
             logging.getLogger().addHandler(handler)
 
@@ -284,13 +206,14 @@ def main():
                         file = sys.stdin
                     else:
                         file = open(args.inputfile, encoding="utf-8")
-                    urls += parse_inputfile(file)
+                    urls += parse_inputfile(file, log)
                     file.close()
                 except OSError as exc:
                     log.warning("input file: %s", exc)
 
             # unsupported file logging handler
-            handler = setup_logging_handler("unsupportedfile", fmt="{message}")
+            handler = output.setup_logging_handler(
+                "unsupportedfile", fmt="{message}")
             if handler:
                 ulog = logging.getLogger("unsupported")
                 ulog.addHandler(handler)

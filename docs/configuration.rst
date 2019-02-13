@@ -1432,7 +1432,14 @@ Description Extended logging output configuration.
 
             * format
                 * Format string for logging messages
-                  (see `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__)
+
+                  In addition to the default
+                  `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__,
+                  it is also possible to access the current
+                  `extractor <https://github.com/mikf/gallery-dl/blob/2e516a1e3e09cb8a9e36a8f6f7e41ce8d4402f5a/gallery_dl/extractor/common.py#L24>`__
+                  and `job <https://github.com/mikf/gallery-dl/blob/2e516a1e3e09cb8a9e36a8f6f7e41ce8d4402f5a/gallery_dl/job.py#L19>`__
+                  objects as well as their attributes
+                  (e.g. ``"{extractor.url}"``)
                 * Default: ``"[{name}][{levelname}] {message}"``
             * format-date
                 * Format string for ``{asctime}`` fields in logging messages

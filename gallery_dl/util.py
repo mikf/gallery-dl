@@ -140,6 +140,28 @@ CODES = {
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
 
 
+class UniversalNone():
+    """None-style object that also supports __getattr__ and __getitem__"""
+    def __getattr__(self, _):
+        return self
+
+    def __getitem__(self, _):
+        return self
+
+    @staticmethod
+    def __bool__():
+        return False
+
+    @staticmethod
+    def __str__():
+        return "None"
+
+    __repr__ = __str__
+
+
+NONE = UniversalNone()
+
+
 def build_predicate(predicates):
     if not predicates:
         return lambda url, kwds: True
