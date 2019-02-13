@@ -25,9 +25,11 @@ class Job():
             extr = extractor.find(extr)
         if not extr:
             raise exception.NoExtractorError()
+
         self.extractor = extr
-        self.extractor.log.debug(
-            "Using %s for '%s'", extr.__class__.__name__, extr.url)
+        extr.log.extractor = extr
+        extr.log.job = self
+        extr.log.debug("Using %s for '%s'", extr.__class__.__name__, extr.url)
 
         # url predicates
         self.pred_url = self._prepare_predicates(
