@@ -253,6 +253,7 @@ class MangaExtractor(Extractor):
 
     subcategory = "manga"
     categorytransfer = True
+    chapterclass = None
     reverse = True
     root = ""
 
@@ -273,6 +274,7 @@ class MangaExtractor(Extractor):
 
         yield Message.Version, 1
         for chapter, data in chapters:
+            data["_extractor"] = self.chapterclass
             yield Message.Queue, chapter, data
 
     def login(self):

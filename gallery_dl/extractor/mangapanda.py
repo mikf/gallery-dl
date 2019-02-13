@@ -28,6 +28,7 @@ class MangapandaChapterExtractor(MangapandaBase, MangareaderChapterExtractor):
 
 class MangapandaMangaExtractor(MangapandaBase, MangareaderMangaExtractor):
     """Extractor for manga from mangapanda.com"""
+    chapterclass = MangapandaChapterExtractor
     pattern = r"(?:https?://)?(?:www\.)?mangapanda\.com(/[^/?&#]+)/?$"
     test = ("https://www.mangapanda.com/mushishi", {
         "url": "357f965732371cac1990fee8b480f62e29141a42",

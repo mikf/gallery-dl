@@ -85,6 +85,7 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
 
 class MangahereMangaExtractor(MangahereBase, MangaExtractor):
     """Extractor for manga from mangahere.cc"""
+    chapterclass = MangahereChapterExtractor
     pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]"
                r"(/manga/[^/]+)/?(?:#.*)?$")
     test = (

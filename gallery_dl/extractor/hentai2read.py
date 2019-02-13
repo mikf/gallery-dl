@@ -62,6 +62,7 @@ class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
 
 class Hentai2readMangaExtractor(Hentai2readBase, MangaExtractor):
     """Extractor for hmanga from hentai2read.com"""
+    chapterclass = Hentai2readChapterExtractor
     pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?&#]+)/?$"
     test = (
         ("https://hentai2read.com/amazon_elixir/", {

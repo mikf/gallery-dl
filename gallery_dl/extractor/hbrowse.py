@@ -74,8 +74,9 @@ class HbrowseChapterExtractor(HbrowseBase, ChapterExtractor):
 
 class HbrowseMangaExtractor(HbrowseBase, MangaExtractor):
     """Extractor for manga from hbrowse.com"""
-    pattern = r"(?:https?://)?(?:www\.)?hbrowse\.com(/\d+)/?$"
+    chapterclass = HbrowseChapterExtractor
     reverse = False
+    pattern = r"(?:https?://)?(?:www\.)?hbrowse\.com(/\d+)/?$"
     test = ("https://www.hbrowse.com/10363", {
         "url": "b89682bfb86c11d2af0dc47463804ec3ac4aadd6",
         "keyword": "4b15fda1858a69de1fbf5afddfe47dd893397312",

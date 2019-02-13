@@ -63,6 +63,7 @@ class FallenangelsChapterExtractor(ChapterExtractor):
 
 class FallenangelsMangaExtractor(MangaExtractor):
     """Extractor for manga from fascans.com"""
+    chapterclass = FallenangelsChapterExtractor
     category = "fallenangels"
     pattern = r"(?:https?://)?((manga|truyen)\.fascans\.com/manga/[^/]+)/?$"
     test = (
