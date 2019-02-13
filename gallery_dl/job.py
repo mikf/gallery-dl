@@ -170,6 +170,11 @@ class Job():
         if self.ulog:
             self.ulog.info(url)
 
+    @staticmethod
+    def _filter(kwdict):
+        """Return a copy of 'kwdict' without "private" entries"""
+        return {k: v for k, v in kwdict.items() if k[0] != "_"}
+
 
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
@@ -516,8 +521,9 @@ class TestJob(DownloadJob):
 
     def update_keyword(self, kwdict, to_list=True):
         """Update the keyword hash"""
+        kwdict = self._filter(kwdict)
         if to_list:
-            self.list_keyword.append(kwdict.copy())
+            self.list_keyword.append(kwdict)
         self.hash_keyword.update(
             json.dumps(kwdict, sort_keys=True, default=str).encode())
 
@@ -566,17 +572,17 @@ class DataJob(Job):
         )
         self.file.write("\n")
 
-    def handle_url(self, url, keywords):
-        self.data.append((Message.Url, url, keywords.copy()))
+    def handle_url(self, url, kwdict):
+        self.data.append((Message.Url, url, self._filter(kwdict)))
 
-    def handle_urllist(self, urls, keywords):
-        self.data.append((Message.Urllist, list(urls), keywords.copy()))
+    def handle_urllist(self, urls, kwdict):
+        self.data.append((Message.Urllist, list(urls), self._filter(kwdict)))
 
-    def handle_directory(self, keywords):
-        self.data.append((Message.Directory, keywords.copy()))
+    def handle_directory(self, kwdict):
+        self.data.append((Message.Directory, self._filter(kwdict)))
 
-    def handle_queue(self, url, keywords):
-        self.data.append((Message.Queue, url, keywords.copy()))
+    def handle_queue(self, url, kwdict):
+        self.data.append((Message.Queue, url, self._filter(kwdict)))
 
     def handle_finalize(self):
         self.file.close()
