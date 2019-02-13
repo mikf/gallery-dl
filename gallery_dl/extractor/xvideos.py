@@ -99,7 +99,7 @@ class XvideosUserExtractor(XvideosExtractor):
     test = (
         ("https://www.xvideos.com/profiles/pervertedcouple", {
             "url": "a413f3e60d6d3a2de79bd44fa3b7a9c03db4336e",
-            "keyword": "ef941489354fd8f4754c8a87cffd5e2429a6387c",
+            "keyword": "a796760d34732adc7ec52a8feb057515209a2ca6",
         }),
         ("https://www.xvideos.com/profiles/niwehrwhernvh", {
             "exception": exception.NotFoundError,
