@@ -155,7 +155,7 @@ class TumblrExtractor(Extractor):
     def _prepare(url, post):
         text.nameext_from_url(url, post)
         post["num"] += 1
-        post["hash"] = post["name"].partition("_")[2]
+        post["hash"] = post["filename"].partition("_")[2]
         return Message.Url, url, post
 
     @staticmethod
@@ -163,12 +163,12 @@ class TumblrExtractor(Extractor):
         text.nameext_from_url(url, post)
         post["num"] += 1
 
-        parts = post["name"].split("_")
+        parts = post["filename"].split("_")
         try:
             post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
         except IndexError:
             # filename doesn't follow the usual pattern (#129)
-            post["hash"] = post["name"]
+            post["hash"] = post["filename"]
 
         return Message.Url, url, post
 

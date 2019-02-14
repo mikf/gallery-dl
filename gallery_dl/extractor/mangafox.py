@@ -19,7 +19,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
                r"(/manga/[^/]+/((?:v(\d+)/)?c(\d+)([^/?&#]*)))")
     test = (
         ("http://fanfox.net/manga/kidou_keisatsu_patlabor/v05/c006.2/1.html", {
-            "keyword": "36b570e9ef11b4748407324fe08bebbe4856e6fd",
+            "keyword": "5661dab258d42d09d98f194f7172fb9851a49766",
             "content": "5c50c252dcf12ffecf68801f4db8a2167265f66c",
         }),
         ("http://mangafox.me/manga/kidou_keisatsu_patlabor/v05/c006.2/"),

@@ -52,7 +52,7 @@ class FlickrImageExtractor(FlickrExtractor):
     test = (
         ("https://www.flickr.com/photos/departingyyz/16089302239", {
             "url": "7f0887f5953f61c8b79a695cb102ea309c0346b0",
-            "keyword": "5ecdaf0192802451b7daca9b81f393f207ff7ee9",
+            "keyword": "9ab391f989e50a9e3679303f1e2111d84dce3d2e",
             "content": "6aaad7512d335ca93286fe2046e7fe3bb93d808e",
         }),
         ("http://c2.staticflickr.com/2/1475/24531000464_9a7503ae68_b.jpg", {
@@ -115,7 +115,7 @@ class FlickrAlbumExtractor(FlickrExtractor):
     test = (
         (("https://www.flickr.com/photos/shona_s/albums/72157633471741607"), {
             "url": "baf4a3d1b15afcecf9638000a12c0eb3d5df9024",
-            "keyword": "b579f19134ab8217f05979e52adf7712898492c7",
+            "keyword": "67ada37649e1219a414838027c3ee187119dcb33",
         }),
         ("https://www.flickr.com/photos/shona_s/albums", {
             "url": "657d541470482e0d69deec33ab97a6d7d4af6fe4",
@@ -165,7 +165,7 @@ class FlickrGalleryExtractor(FlickrExtractor):
     test = (("https://www.flickr.com/photos/flickr/"
              "galleries/72157681572514792/"), {
         "url": "1d012592bc7ce3a24b2b025b1176a31e947122f6",
-        "keyword": "30cdec50e125f1cdf2425eab6052590535323c2d",
+        "keyword": "6abe4920dca5b79127fee16d90564665d379bb29",
     })
 
     def __init__(self, match):
@@ -210,7 +210,7 @@ class FlickrUserExtractor(FlickrExtractor):
     pattern = r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/?$"
     test = ("https://www.flickr.com/photos/shona_s/", {
         "url": "d125b536cd8c4229363276b6c84579c394eec3a2",
-        "keyword": "2cdeae22cd9c3ff19ce905215f3782a7494d8264",
+        "keyword": "3ef7783add7a34db1cf214da7d6502d3f24e897d",
     })
 
     def photos(self):
@@ -225,7 +225,7 @@ class FlickrFavoriteExtractor(FlickrExtractor):
     pattern = r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/favorites"
     test = ("https://www.flickr.com/photos/shona_s/favorites", {
         "url": "5129b3f5bfa83cc25bdae3ce476036de1488dad2",
-        "keyword": "0e1c9521b6051411b585c9b41a4dc0bcde20e616",
+        "keyword": "ed56cda8c1067a44eb45f1df5f079a9a3a4470c6",
     })
 
     def photos(self):

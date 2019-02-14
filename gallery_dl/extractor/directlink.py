@@ -23,17 +23,17 @@ class DirectlinkExtractor(Extractor):
     test = (
         (("https://en.wikipedia.org/static/images/project-logos/enwiki.png"), {
             "url": "18c5d00077332e98e53be9fed2ee4be66154b88d",
-            "keyword": "66bce3a0a6872d8497e1984eb49d54a3ed0d3d5e",
+            "keyword": "e81b9fe3022e971365dd859f38e4ef717a6c69ed",
         }),
         # more complex example
         ("https://example.org/path/file.webm?que=1&ry=2#fragment", {
             "url": "fd4aec8a32842343394e6078a06c3e6b647bf671",
-            "keyword": "ed008f35fc18dddb2f448a18d160c949bb3b054c",
+            "keyword": "ff75764b1ae66615b723a6357b8193fa2de84678",
         }),
         # percent-encoded characters
         ("https://example.org/%27%3C%23/%23%3E%27.jpg?key=%3C%26%3E", {
             "url": "2627e8140727fdf743f86fe18f69f99a052c9718",
-            "keyword": "c658b8b6213e46be15a25e492df385ece5771bdf",
+            "keyword": "4d19dc12e41ffcb4cbec2013e335cf482377c35e",
         }),
     )
 

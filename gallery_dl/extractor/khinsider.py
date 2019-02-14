@@ -17,7 +17,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
     category = "khinsider"
     subcategory = "soundtrack"
     directory_fmt = ("{category}", "{album}")
-    archive_fmt = "{album}_{name}.{extension}"
+    archive_fmt = "{album}_{filename}.{extension}"
     pattern = (r"(?:https?://)?downloads\.khinsider\.com"
                r"/game-soundtracks/album/([^/?&#]+)")
     test = (("https://downloads.khinsider.com"
@@ -25,7 +25,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
         "pattern": r"https?://\d+\.\d+\.\d+\.\d+/ost/horizon-riders-wii/[^/]+"
                    r"/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack\.mp3",
         "count": 1,
-        "keyword": "d91cf3edee6713b536eaf3995743f0be7dc72f68",
+        "keyword": "b4f460c78dd23e1f1121f4ac784dd67ded7c2679",
     })
     root = "https://downloads.khinsider.com"
 

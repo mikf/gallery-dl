@@ -127,7 +127,7 @@ class NijieUserExtractor(NijieExtractor):
     test = (
         ("https://nijie.info/members_illust.php?id=44", {
             "url": "585d821df4716b1098660a0be426d01db4b65f2a",
-            "keyword": "1eb3387196f1f30d6d74a41f4c77faaadd588e52",
+            "keyword": "d629c69e3172db1d7e026145e8eb640ac31ac16a",
         }),
         ("https://nijie.info/members_illust.php?id=43", {
             "exception": exception.NotFoundError,
@@ -175,7 +175,7 @@ class NijieImageExtractor(NijieExtractor):
     test = (
         ("https://nijie.info/view.php?id=70720", {
             "url": "a10d4995645b5f260821e32c60a35f73546c2699",
-            "keyword": "0728fc3bbef1e192abfd59f88f07921d3d336804",
+            "keyword": "408393d010307c76d52cbd0a4368d6d357805aea",
             "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
         }),
         ("https://nijie.info/view.php?id=70724", {

@@ -122,9 +122,8 @@ class TestText(unittest.TestCase):
             self.assertEqual(f(value), "")
 
     def test_nameext_from_url(self, f=text.nameext_from_url):
-        empty = {"filename": "", "name": "", "extension": ""}
-        result = {"filename": "filename.ext",
-                  "name": "filename", "extension": "ext"}
+        empty = {"filename": "", "extension": ""}
+        result = {"filename": "filename", "extension": "ext"}
 
         # standard usage
         self.assertEqual(f(""), empty)

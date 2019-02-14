@@ -52,12 +52,12 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
         (("https://komikcast.com/chapter/"
           "apotheosis-chapter-02-2-bahasa-indonesia/"), {
             "url": "2a108bf8a96753266610afef625d248f858e13f3",
-            "keyword": "9964a7ce7c8a518aebdccdea0e05858439c7ad92",
+            "keyword": "5c677ec86957f3bdad2bd5102a69a872a11c0f92",
         }),
         (("https://komikcast.com/chapter/"
           "tonari-no-kashiwagi-san-chapter-18b/"), {
             "url": "aff90dd21dbb945a726778b10bdef522af7c42fe",
-            "keyword": "94bb85aec6654ab5af0c10419ca388fcd9c73b47",
+            "keyword": "2469acd77c635fedcc131b5d40e7acc36e4674ad",
         }),
     )
 

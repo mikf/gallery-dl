@@ -74,19 +74,19 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
     test = (
         ("https://kissmanga.com/Manga/Dropout/Ch-000---Oneshot-?id=145847", {
             "url": "46e63fd63e9e16f19bc1e6c7a45dc060815642fd",
-            "keyword": "4a3a9341d453541de0dbfa24cd6b2e3ed39c0182",
+            "keyword": "1cd0b5214ac7ae4d53e2fd8fec40ceec84cd09bf",
         }),
         ("https://kissmanga.com/Manga/Urban-Tales/a?id=256717", {
             "url": "c26be8bf9c2abacee2076979d021634092cf38f1",
-            "keyword": "ffc11b630da44fe67709ed0473756cf51b90a05c",
+            "keyword": "e1d16780df8e04076ed2b5f0637c5b710ec2f2ea",
         }),
         ("https://kissmanga.com/Manga/Monster/Monster-79?id=7608", {
             "count": 23,
-            "keyword": "d47c94f4c57f4ab690a34b60fefac7b294468856",
+            "keyword": "f433a7a8fae840e17dace316a243fa27faab86de",
         }),
         ("https://kissmanga.com/Manga/Houseki-no-Kuni/Oneshot?id=404189", {
             "count": 49,
-            "keyword": "7835a19c9fc54ec4f2b345e8be3e865cfa57da5c",
+            "keyword": "d44d1b21d08e4dbf888b0c450a3f1bc919588b4f",
         }),
         ("https://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608"),
     )

@@ -97,7 +97,7 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
     test = (
         ("https://blitzwuff.newgrounds.com/art", {
             "url": "24b19c4a135a09889fac7b46a74e427e4308d02b",
-            "keyword": "68c235e5c4ce94f2f9e001d84fe801441e5500f1",
+            "keyword": "f221ddb00f51aa4f17a73809fd9be3c3352fc6b7",
         }),
         ("https://blitzwuff.newgrounds.com/"),
     )
@@ -115,12 +115,12 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
     test = (
         ("https://www.newgrounds.com/art/view/blitzwuff/ffx", {
             "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
-            "keyword": "5738e2bf19137898204f36c5ae573826672b612c",
+            "keyword": "731bf24b9fa7da3bdf094a0f6d181123aae16394",
             "content": "cb067d6593598710292cdd340d350d14a26fe075",
         }),
         ("https://art.ngfiles.com/images/587000/587551_blitzwuff_ffx.png", {
             "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
-            "keyword": "5738e2bf19137898204f36c5ae573826672b612c",
+            "keyword": "731bf24b9fa7da3bdf094a0f6d181123aae16394",
         }),
     )
 

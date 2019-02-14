@@ -23,7 +23,7 @@ class HentaifoxGalleryExtractor(ChapterExtractor):
     test = ("https://hentaifox.com/gallery/56622/", {
         "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
         "count": 24,
-        "keyword": "80fc0fb5db9626fffb078dd2e4f9aff4a9348686",
+        "keyword": "d0df47e073e32a7752236ab151949c3820f9d81e",
     })
     root = "https://hentaifox.com"
 

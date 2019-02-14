@@ -23,12 +23,12 @@ class MyportfolioGalleryExtractor(Extractor):
     subcategory = "gallery"
     directory_fmt = ("{category}", "{user}", "{title}")
     filename_fmt = "{num:>02}.{extension}"
-    archive_fmt = "{user}_{name}"
+    archive_fmt = "{user}_{filename}"
     pattern = BASE_PATTERN + r"/(?!projects/?$)([^/?&#]+)"
     test = (
         ("https://hannahcosgrove.myportfolio.com/chloe", {
             "url": "d5cf993a05439a9d8a99590aa61e14e5ac8d0cd0",
-            "keyword": "cdb9ca8bdc16efa6ce04aba384f7932d1610b22f",
+            "keyword": "89b055a6ce833ba4f060ab1f97f086e58ce8bbd1",
         }),
         ("myportfolio:https://tooco.com.ar/6-of-diamonds-paradise-bird", {
             "count": 3,

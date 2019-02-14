@@ -26,7 +26,7 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
             "url": "258289249990502c3138719cb89e995a60861e49",
-            "keyword": "5ea1498a1a902d76d337946910082755d168b941",
+            "keyword": "468a0a3db4fc6ad7fcae0facefb9753831c0404d",
         }),
         ("https://www.simply-hentai.com/notfound", {
             "exception": exception.GalleryDLException,
@@ -91,11 +91,11 @@ class SimplyhentaiImageExtractor(Extractor):
         (("https://www.simply-hentai.com/image"
           "/pheromomania-vol-1-kanzenban-isao-3949d8b3-400c-4b6"), {
             "url": "0338eb137830ab6f81e5f410d3936ef785d063d9",
-            "keyword": "0209cc8657c80e2b5fed8f2f3f2aa3a57e2cc8b6",
+            "keyword": "e10e5588481cab68329ef6ec1e5325206b2079a2",
         }),
         ("https://www.simply-hentai.com/gif/8915dfcf-0b6a-47c", {
             "url": "11c060d7ec4dfd0bd105300b6e1fd454674a5af1",
-            "keyword": "de26851c4eb7a204364ea26943b1581a0fd43da5",
+            "keyword": "dd97a4bb449c397d6fec9f43a1303c0fb168ae65",
         }),
     )
 
@@ -124,7 +124,7 @@ class SimplyhentaiImageExtractor(Extractor):
             "tags": tags,
             "type": self.type,
         })
-        data["token"] = data["name"].rpartition("_")[2]
+        data["token"] = data["filename"].rpartition("_")[2]
 
         yield Message.Version, 1
         yield Message.Directory, data
@@ -143,13 +143,13 @@ class SimplyhentaiVideoExtractor(Extractor):
         ("https://videos.simply-hentai.com/creamy-pie-episode-02", {
             "pattern": r"https://www\.googleapis\.com/drive/v3/files"
                        r"/0B1ecQ8ZVLm3JcHZzQzBnVy1ZUmc\?alt=media&key=[\w-]+",
-            "keyword": "5aefc5c15ae4f56beee93ad2ff2a68cf0c3e6f29",
+            "keyword": "29d63987fed33f0a9f4b3786d1d71b03d793250a",
             "count": 1,
         }),
         (("https://videos.simply-hentai.com"
           "/1715-tifa-in-hentai-gang-bang-3d-movie"), {
             "url": "ad9a36ae06c601b6490e3c401834b4949d947eb0",
-            "keyword": "9cbd03aab04c3f258cb14d13d45c703969ed54ab",
+            "keyword": "c561341aa3c6999f615abf1971d28fb2a83da2a7",
         }),
     )
 

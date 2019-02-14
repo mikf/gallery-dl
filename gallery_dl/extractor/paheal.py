@@ -47,7 +47,7 @@ class PahealTagExtractor(PahealExtractor):
                r"/post/list/([^/?&#]+)")
     test = ("https://rule34.paheal.net/post/list/k-on/1", {
         "url": "0f5a777cea524635760de32dd85a3de5ac5f3f43",
-        "keyword": "fddaa6329bae5b99e8a666eeeb1cb7721d21bf6d",
+        "keyword": "2ee365be3f21f40529ca742485de8f8090dcff7d",
     })
     per_page = 70
 
@@ -96,7 +96,7 @@ class PahealPostExtractor(PahealExtractor):
                r"/post/view/(\d+)")
     test = ("https://rule34.paheal.net/post/view/481609", {
         "url": "3aa2189c8d1fa952a4d3420def93fd2bd54d6741",
-        "keyword": "d7a0bd6d8b0a5bd8300857044ed2d53d481d37cf",
+        "keyword": "99f631ebbde1324bbbedec40f0d4d6858619ba84",
         "content": "7b924bcf150b352ac75c9d281d061e174c851a11",
     })
 

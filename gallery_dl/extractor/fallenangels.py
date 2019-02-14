@@ -21,14 +21,14 @@ class FallenangelsChapterExtractor(ChapterExtractor):
     test = (
         ("https://manga.fascans.com/manga/chronos-ruler/20/1", {
             "url": "4604a7914566cc2da0ff789aa178e2d1c8c241e3",
-            "keyword": "4e1722cf0ed8ee5fc5c64147ac3f39342e767cd8",
+            "keyword": "2dfcc50020e32cd207be88e2a8fac0933e36bdfb",
         }),
         ("http://truyen.fascans.com/manga/hungry-marie/8", {
             "url": "1f923d9cb337d5e7bbf4323719881794a951c6ae",
-            "keyword": "c7beeb7d8a65d5d8ab451f076f584bd4d52b7210",
+            "keyword": "2bdb7334c0e3eceb9946ffd3132df679b4a94f6a",
         }),
         ("http://manga.fascans.com/manga/rakudai-kishi-no-eiyuutan/19.5", {
-            "keyword": "bf7dd1c462a80ffe50b92fec00b7acda2f8b800e",
+            "keyword": "9fcca4c1a90d11f00764f62477ebe10bd408021c",
         }),
     )
 

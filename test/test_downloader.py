@@ -45,7 +45,7 @@ class TestDownloaderBase(unittest.TestCase):
         kwdict = {
             "category": "test",
             "subcategory": "test",
-            "name": name,
+            "filename": name,
             "extension": extension,
         }
         pathfmt = PathFormat(cls.extractor)

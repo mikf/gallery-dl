@@ -213,7 +213,7 @@ class ArtstationLikesExtractor(ArtstationExtractor):
 class ArtstationChallengeExtractor(ArtstationExtractor):
     """Extractor for submissions of artstation challenges"""
     subcategory = "challenge"
-    filename_fmt = "{submission_id}_{asset_id}_{name}.{extension}"
+    filename_fmt = "{submission_id}_{asset_id}_{filename}.{extension}"
     directory_fmt = ("{category}", "Challenges",
                      "{challenge[id]} - {challenge[title]}")
     archive_fmt = "c_{challenge[id]}_{asset_id}"

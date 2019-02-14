@@ -128,7 +128,7 @@ class RedditImageExtractor(Extractor):
     """Extractor for reddit-hosted images"""
     category = "reddit"
     subcategory = "image"
-    archive_fmt = "{name}"
+    archive_fmt = "{filename}"
     pattern = (r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
                r"/[^/?&#]+(?:\?[^#]*)?")
     test = (

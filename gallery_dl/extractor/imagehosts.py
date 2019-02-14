@@ -76,12 +76,12 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
     test = (
         ("https://imx.to/i/1qdeva", {  # new-style URL
             "url": "ab2173088a6cdef631d7a47dec4a5da1c6a00130",
-            "keyword": "7bb48a2327561ae04ea7a6d4e18e715379e2f497",
+            "keyword": "1153a986c939d7aed599905588f5c940048bc517",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
         }),
         ("https://imx.to/img-57a2050547b97.html", {  # old-style URL
             "url": "a83fe6ef1909a318c4d49fcf2caf62f36c3f9204",
-            "keyword": "451ad3d4745489c2e663acb1281d89c36ada940a",
+            "keyword": "fd2240aee77a21b8252d5b829a1f7e542f927f09",
             "content": "54592f2635674c25677c6872db3709d343cdf92f",
         }),
         ("https://img.yt/img-57a2050547b97.html", {  # img.yt domain
@@ -119,7 +119,7 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
     pattern = r"(?:https?://)?((?:www\.)?acidimg\.cc/img-([a-z0-9]+)\.html)"
     test = ("https://acidimg.cc/img-5acb6b9de4640.html", {
         "url": "f132a630006e8d84f52d59555191ed82b3b64c04",
-        "keyword": "183098c59d9244650f666b6cb4df96d76d2aeae8",
+        "keyword": "a8bb9ab8b2f6844071945d31f8c6e04724051f37",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
     https = True
@@ -156,7 +156,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
     pattern = r"(?:https?://)?((?:www\.)?imagetwist\.com/([a-z0-9]{12}))"
     test = ("https://imagetwist.com/4e46hv31tu0q/test.jpg", {
         "url": "c999dc1a5dec0525ac9eb8c092f173dfe6dba0b0",
-        "keyword": "30dd34dcb06b5b51c6cfff199c610b24edb7b9bc",
+        "keyword": "a9f2e01757ec96d4ee4752cbd8446ede80f7935e",
         "content": "96b1fd099b06faad5879fce23a7e4eb8290d8810",
     })
     https = True
@@ -196,7 +196,7 @@ class PixhostImageExtractor(ImagehostImageExtractor):
                r"/show/\d+/(\d+)_[^/?&#]+)")
     test = ("https://pixhost.to/show/224/96246707_test-.png", {
         "url": "8f3d41fdd2dbec4c844e5ee45bf49961fbd79c67",
-        "keyword": "d7b19630acf8da39036581d3d5597f97da883626",
+        "keyword": "ecefe2d5814286f9d1dff3d88d9bdc78dd456c5d",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
     https = True
@@ -216,7 +216,7 @@ class PostimgImageExtractor(ImagehostImageExtractor):
                r"/(?:image/)?([^/?&#]+)/?)")
     test = ("https://postimg.cc/Wtn2b3hC", {
         "url": "0794cfda9b8951a8ac3aa692472484200254ab86",
-        "keyword": "dd8822e7d359c33dba85280fe31bea7d098cd1d1",
+        "keyword": "2d05808d04e4e83e33200db83521af06e3147a84",
         "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
     })
     https = True
@@ -235,7 +235,7 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
                r"/p/(\d+)/[^/?&#]+\.html)")
     test = ("https://www.turboimagehost.com/p/39078423/test--.png.html", {
         "url": "b94de43612318771ced924cb5085976f13b3b90e",
-        "keyword": "c1391465dc7b590b0eb8ea2a8cd235733c6fce2b",
+        "keyword": "704757ca8825f51cec516ec44c1e627c1f2058ca",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
     https = True
