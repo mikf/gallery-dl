@@ -254,19 +254,19 @@ class JoyreactorPostExtractor(ReactorPostExtractor):
     test = (
         ("http://joyreactor.com/post/3721876", {  # single image
             "url": "904779f6571436f3d5adbce30c2c272f6401e14a",
-            "keyword": "0d231f6ae36c5dca1f7eb71443bab3b2659fcacc",
+            "keyword": "e8deb51e66325341fe33f6e99938b8548093d34b",
         }),
         ("http://joyreactor.com/post/3713804", {  # 4 images
             "url": "99c614416b959f22001f7da3f68df03b1551abdf",
-            "keyword": "1f0bf40f5030c803de6f8969099689e36fe885e6",
+            "keyword": "c5a6893e2425d31393139e355370e208754eb8fa",
         }),
         ("http://joyreactor.com/post/3726210", {  # gif / video
             "url": "33a48e1eca6cb2d298fbbb6536b3283799d6515b",
-            "keyword": "b2514c20f59b9c521545e96ca1a9ad504d6fa7e5",
+            "keyword": "11cfce3f2ea336979ca6cc5da604fbe02aeda345",
         }),
         ("http://joyreactor.com/post/3668724", {  # youtube embed
             "url": "be2589e2e8f3ffcaf41b34bc28bfad850ccea34a",
-            "keyword": "97e2cdef751fba13e43d789ddfb806683a903fae",
+            "keyword": "889206164b4a180aed6bf6186d2456cf31afbed8",
         }),
         ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
             "url": "d45337fec926159afe11c59e32d259d793dd00b3",

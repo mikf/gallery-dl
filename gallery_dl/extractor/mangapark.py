@@ -45,16 +45,16 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     test = (
         ("https://mangapark.me/manga/gosu/i811615/c55/1", {
             "count": 50,
-            "keyword": "a18e07119b3317d7e795ef37ee69ce0bbb806350",
+            "keyword": "373d678048d29492f9763743ccaa9b6d840f17cf",
         }),
         (("https://mangapark.me/manga"
           "/ad-astra-per-aspera-hata-kenjirou/i662054/c001.2/1"), {
             "count": 40,
-            "keyword": "3f286631279e2017ce87c1b8db05d7b3f15e2971",
+            "keyword": "8e9cce4ed0e25d12a45e02f840d6f32ef838e257",
         }),
         ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/i655476/c70/1", {
             "count": 15,
-            "keyword": "3abb13e6d1ea7f8808b0ec415270b3afac97f98b",
+            "keyword": "19f730617074d65f91c0781f429de324890925bf",
         }),
         ("https://mangapark.net/manga/gosu/i811615/c55/1"),
         ("https://mangapark.com/manga/gosu/i811615/c55/1"),

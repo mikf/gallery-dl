@@ -24,7 +24,8 @@ class ExhentaiExtractor(Extractor):
     """Base class for exhentai extractors"""
     category = "exhentai"
     directory_fmt = ("{category}", "{gallery_id}")
-    filename_fmt = "{gallery_id}_{num:>04}_{image_token}_{name}.{extension}"
+    filename_fmt = (
+        "{gallery_id}_{num:>04}_{image_token}_{filename}.{extension}")
     archive_fmt = "{gallery_id}_{num}"
     cookiedomain = ".exhentai.org"
     cookienames = ("ipb_member_id", "ipb_pass_hash")
@@ -109,7 +110,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
         ("https://exhentai.org/g/960460/4f0e369d82/", {
-            "keyword": "ba0785e49e3877cfa3f91c1ad9a5ac7816339bf5",
+            "keyword": "993bfaf68b4823084fbd0d3339564666463b1432",
             "content": "493d759de534355c9f55f8e365565b62411de146",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {

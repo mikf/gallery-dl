@@ -27,7 +27,7 @@ class Extractor():
     subcategory = ""
     categorytransfer = False
     directory_fmt = ("{category}",)
-    filename_fmt = "{name}.{extension}"
+    filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
     cookiedomain = ""
 

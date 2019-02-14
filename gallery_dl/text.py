@@ -73,8 +73,8 @@ def nameext_from_url(url, data=None):
     """Extract the last part of an URL and fill 'data' accordingly"""
     if data is None:
         data = {}
-    data["filename"] = unquote(filename_from_url(url))
-    data["name"], ext = os.path.splitext(data["filename"])
+    name = unquote(filename_from_url(url))
+    data["filename"], ext = os.path.splitext(name)
     data["extension"] = ext[1:].lower()
     return data
 

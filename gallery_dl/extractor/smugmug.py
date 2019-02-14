@@ -98,13 +98,13 @@ class SmugmugImageExtractor(SmugmugExtractor):
     test = (
         ("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
             "url": "78f0bf3516b6d670b7319216bdeccb35942ca4cf",
-            "keyword": "8ebb25fb493d3cd5cfcb8f3a4601fa721afe1d83",
+            "keyword": "f913cc0db3fa4b3799828a25a426fcc0aa80784c",
             "content": "64a8f69a1d824921eebbdf2420087937adfa45cd",
         }),
         # no "ImageOwner"
         ("https://www.smugmug.com/gallery/n-GLCjnD/i-JD62fQk", {
             "url": "d4047637947b35e4ef49e3c7cb70303cc224a3a0",
-            "keyword": "0a1b12efd789c42d9b061f01b2a1fcfd6af32003",
+            "keyword": "63ed3f5f9e5d52e317a83a8c7c8f1c3d6a2239fc",
         }),
     )
 

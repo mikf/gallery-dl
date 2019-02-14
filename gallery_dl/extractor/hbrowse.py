@@ -51,7 +51,7 @@ class HbrowseChapterExtractor(HbrowseBase, ChapterExtractor):
     pattern = r"(?:https?://)?(?:www\.)?hbrowse\.com(/(\d+)/c(\d+))"
     test = ("https://www.hbrowse.com/10363/c00000", {
         "url": "6feefbc9f4b98e20d8425ddffa9dd111791dc3e6",
-        "keyword": "95ec73a58aeac57f4dd20f0fa0c2812b045a30e8",
+        "keyword": "274996f6c809e5250b6ff3abbc5147e29f89d9a5",
         "content": "44578ebbe176c2c27434966aef22945787e2781e",
     })
 

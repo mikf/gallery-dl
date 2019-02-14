@@ -126,7 +126,7 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
     test = (
         ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
             "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
-            "keyword": "d56e75566dc7dfe71d2ebd08c056a47f8832372d",
+            "keyword": "63ad576f87f82fa166ca4676761762f7f8496cf5",
         }),
         ("https://www.hentai-foundry.com/pictures/user/Tenpura/page/3"),
         ("https://www.hentai-foundry.com/user/Tenpura/profile"),
@@ -152,7 +152,7 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
     test = (
         ("https://www.hentai-foundry.com/pictures/user/Evulchibi/scraps", {
             "url": "00a11e30b73ff2b00a1fba0014f08d49da0a68ec",
-            "keyword": "8c9a2ad4bf20247bcebb7aef3cfe7016f35da4a7",
+            "keyword": "410c6c900cfd23a8dd1e53dfcc97a79ea68c3359",
         }),
         ("https://www.hentai-foundry.com"
          "/pictures/user/Evulchibi/scraps/page/3"),
@@ -180,7 +180,7 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
     test = (
         ("https://www.hentai-foundry.com/user/Tenpura/faves/pictures", {
             "url": "56f9ae2e89fe855e9fe1da9b81e5ec6212b0320b",
-            "keyword": "0ab79552ae2fbfcf501ebbebcf19c2dfc9b5eb4e",
+            "keyword": "2b9478725e66d46ea043fa87476bbd28546958e7",
         }),
         ("https://www.hentai-foundry.com"
          "/user/Tenpura/faves/pictures/page/3"),
@@ -235,7 +235,7 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
         (("https://www.hentai-foundry.com"
           "/pictures/user/Tenpura/407501/shimakaze"), {
             "url": "fbf2fd74906738094e2575d2728e8dc3de18a8a3",
-            "keyword": "aa64a4cfcd9c254ee143d9a3522195d11f8c1fb8",
+            "keyword": "cbb9381e6c2acce58db4adf4efc0ad7d138bddc4",
             "content": "91bf01497c39254b6dfb234a18e8f01629c77fd1",
         }),
         ("https://www.hentai-foundry.com/pictures/user/Tenpura/340853/", {

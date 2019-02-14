@@ -18,13 +18,13 @@ class HitomiGalleryExtractor(ChapterExtractor):
     category = "hitomi"
     subcategory = "gallery"
     directory_fmt = ("{category}", "{gallery_id} {title}")
-    filename_fmt = "{category}_{gallery_id}_{page:>03}_{name}.{extension}"
+    filename_fmt = "{category}_{gallery_id}_{page:>03}_{filename}.{extension}"
     archive_fmt = "{gallery_id}_{page}"
     pattern = r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)"
     test = (
         ("https://hitomi.la/galleries/867789.html", {
             "url": "cb759868d090fe0e2655c3e29ebf146054322b6d",
-            "keyword": "85e453d01ee7f137669e75a764ccdc65ca092ad2",
+            "keyword": "52951edb50163180eb669a78aef0bab0522d32b7",
         }),
         ("https://hitomi.la/galleries/1036181.html", {
             # "aa" subdomain for gallery-id ending in 1 (#142)

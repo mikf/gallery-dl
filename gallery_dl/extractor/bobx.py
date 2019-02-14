@@ -35,13 +35,13 @@ class BobxGalleryExtractor(BobxExtractor):
         (("http://www.bobx.com/idol/mikoto-hibi"
           "/photoset/wpb-2018-_11-0-2-8.html"), {
             "url": "93972d6a661f6627e963d62c9d15531e6b36a389",
-            "keyword": "03505f6d3cdab7b5579431bfe8622eeffd36f533",
+            "keyword": "6c620862db494ed05e69356ba30e604b167b0670",
             "content": "3f176b7fe752524cec21a763aa55567e41181e07",
         }),
         (("http://www.bobx.com/idol/nashiko-momotsuki"
           "/photoset/wpb-net-_221---2018-08---magic-of-summer-0-10-10.html"), {
             "url": "f5d6c0cd0881ae6f504c21a90d86e3464dc54e8e",
-            "keyword": "43395ac200deaaa50627da666bd02c8f1f86a59d",
+            "keyword": "f4819c75f494044348889ecd27771508464c0f5f",
         }),
     )
 
@@ -61,7 +61,7 @@ class BobxGalleryExtractor(BobxExtractor):
                 url = text.urljoin(self.root, url.replace("-preview-", "-"))
                 data = text.nameext_from_url(url, data)
                 data["image_id"] = text.parse_int(
-                    data["name"].rpartition("-")[2])
+                    data["filename"].rpartition("-")[2])
                 data["num"] += 1
                 yield Message.Url, url, data
 

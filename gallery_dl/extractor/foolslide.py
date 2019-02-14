@@ -168,7 +168,7 @@ EXTRACTORS = {
         "test-chapter":
             (("https://kobato.hologfx.com/reader/read/"
               "hitoribocchi_no_oo_seikatsu/en/3/34"), {
-                "keyword": "998d1d523da028284b8dd4b7b54ceae4af6cb65a",
+                "keyword": "6e719ac86f0c6dab89390dd7e507e678459e0dbc",
             }),
         "test-manga":
             (("https://kobato.hologfx.com/reader/series/"
@@ -183,10 +183,10 @@ EXTRACTORS = {
         "decode": "base64",
         "test-chapter": (
             ("https://jaiminisbox.com/reader/read/uratarou/en/0/1/", {
-                "keyword": "d8919bc8f0351b44e938862214e654401962b5a5",
+                "keyword": "6009af77cc9c05528ab1fdda47b1ad9d4811c673",
             }),
             ("https://jaiminisbox.com/reader/read/dr-stone/en/0/16/", {
-                "keyword": "9b658599651f1ae87cab3e0e29dd21e8337a362c",
+                "keyword": "8607375c24b1d0db7f52d059ef5baff793aa458e",
             }),
         ),
         "test-manga":
@@ -200,7 +200,7 @@ EXTRACTORS = {
         "test-chapter":
             ("https://reader.kireicake.com/read/wonderland/en/1/1/", {
                 "url": "b2d36bc0bc67e4c461c3a4d6444a2fd339f5d07e",
-                "keyword": "47e0cf69f95ab3b820bda05014aec38d3b824018",
+                "keyword": "9f80947920a325e33aea7f5cd69ea669171903b6",
             }),
         "test-manga":
             ("https://reader.kireicake.com/series/wonderland/", {
@@ -215,7 +215,7 @@ EXTRACTORS = {
             (("https://read.powermanga.org"
               "/read/one_piece_digital_colour_comics/en/0/75/"), {
                 "url": "854c5817f8f767e1bccd05fa9d58ffb5a4b09384",
-                "keyword": "9985bcb78491dff9c725958b06bba606be51b6d3",
+                "keyword": "a60c42f2634b7387899299d411ff494ed0ad6dbe",
             }),
         "test-manga":
             (("https://read.powermanga.org"
@@ -239,7 +239,7 @@ EXTRACTORS = {
         "test-chapter":
             ("https://reader.seaotterscans.com/read/100_days/en/0/5/", {
                 "url": "63d46b8883cc652dfe8bd5be4492160dd31f06a8",
-                "keyword": "5349c2fbaa88070e6af600de17a6c4e212243e8e",
+                "keyword": "401d55b900d69a3732c7221755543e17c4771dd3",
             }),
         "test-manga":
             ("https://reader.seaotterscans.com/series/marry_me/", {
@@ -255,12 +255,12 @@ EXTRACTORS = {
             (("http://sensescans.com/reader/read/"
               "magi__labyrinth_of_magic/en/37/369/"), {
                   "url": "a399ef037cdfbc25b09d435cc2ea1e3e454a6812",
-                  "keyword": "43ba75615d3e77d507808b0f3a8fd7fc72232a60",
+                  "keyword": "07acd84fb18a9f1fd6dff5befe711bcca0ff9988",
             }),
             (("http://reader.sensescans.com/read/"
               "magi__labyrinth_of_magic/en/37/369/"), {
                   "url": "a399ef037cdfbc25b09d435cc2ea1e3e454a6812",
-                  "keyword": "43ba75615d3e77d507808b0f3a8fd7fc72232a60",
+                  "keyword": "07acd84fb18a9f1fd6dff5befe711bcca0ff9988",
             }),
         ),
         "test-manga":
@@ -276,12 +276,12 @@ EXTRACTORS = {
             (("http://www.slide.world-three.org"
               "/read/black_bullet/en/2/7/page/1"), {
                 "url": "be2f04f6e2d311b35188094cfd3e768583271584",
-                "keyword": "28edfeccc92f7ea29546d5616e689dcfcbac59d9",
+                "keyword": "967d536a65de4d52478d5b666a1760b181eddb6e",
             }),
             (("http://www.slide.world-three.org"
               "/read/idolmster_cg_shuffle/en/0/4/2/"), {
                 "url": "6028ea5ca282744f925dfad92eeb98509f9cc78c",
-                "keyword": "d478e9f20847deb1844dba318acaa8b91c19468a",
+                "keyword": "f3cfe2ad3388991f1d045c85d0fa94795a7694dc",
             }),
         ),
         "test-manga":

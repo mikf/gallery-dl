@@ -22,7 +22,7 @@ class ImgthGalleryExtractor(Extractor):
     pattern = r"(?:https?://)?imgth\.com/gallery/(\d+)"
     test = ("http://imgth.com/gallery/37/wallpaper-anime", {
         "url": "4ae1d281ca2b48952cf5cca57e9914402ad72748",
-        "keyword": "e62d14f20ded393d28c2789fcc34ea2c30bc6a7c",
+        "keyword": "6f8c00d6849ea89d1a028764675ec1fe9dbd87e2",
     })
 
     def __init__(self, match):

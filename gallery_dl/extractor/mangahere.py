@@ -27,7 +27,7 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
                r"([^/]+(?:/v0*(\d+))?/c([^/?&#]+))")
     test = (
         ("https://www.mangahere.cc/manga/dongguo_xiaojie/c004.2/", {
-            "keyword": "6407556817bd1fd2bdc8dee3fd2a718f5724ddc0",
+            "keyword": "7c98d7b50a47e6757b089aa875a53aa970cac66f",
             "content": "708d475f06893b88549cbd30df1e3f9428f2c884",
         }),
         ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/"),

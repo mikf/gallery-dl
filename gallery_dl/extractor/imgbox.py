@@ -62,18 +62,18 @@ class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
     """Extractor for image galleries from imgbox.com"""
     subcategory = "gallery"
     directory_fmt = ("{category}", "{title} - {gallery_key}")
-    filename_fmt = "{num:>03}-{name}.{extension}"
+    filename_fmt = "{num:>03}-{filename}.{extension}"
     archive_fmt = "{gallery_key}_{image_key}"
     pattern = r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"
     test = (
         ("https://imgbox.com/g/JaX5V5HX7g", {
             "url": "678f0bca1251d810372326ea4f16582cafa800e4",
-            "keyword": "92499344257cf8c72695a8dab4ccc15ca7655c1e",
+            "keyword": "4b1e62820ac2c6205b7ad0b6322cc8e00dbe1b0c",
             "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
         }),
         ("https://imgbox.com/g/cUGEkRbdZZ", {
             "url": "d839d47cbbbeb121f83c520072512f7e51f52107",
-            "keyword": "b352ca26009ba10d80b5e46067a78b4a51c6c2c9",
+            "keyword": "fb0427b87983197849fb2887905e758f3e50cb6e",
         }),
         ("https://imgbox.com/g/JaX5V5HX7h", {
             "exception": exception.NotFoundError,
@@ -111,7 +111,7 @@ class ImgboxImageExtractor(ImgboxExtractor):
     test = (
         ("https://imgbox.com/qHhw7lpG", {
             "url": "d931f675a9b848fa7cb9077d6c2b14eb07bdb80f",
-            "keyword": "a7a65a05a49d9a0eae95d637019af55faad09c5e",
+            "keyword": "dfc72310026b45f3feb4f9cada20c79b2575e1af",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
         }),
         ("https://imgbox.com/qHhw7lpH", {

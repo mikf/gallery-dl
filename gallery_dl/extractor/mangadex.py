@@ -50,13 +50,13 @@ class MangadexChapterExtractor(MangadexExtractor):
     pattern = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|com)/chapter/(\d+)"
     test = (
         ("https://mangadex.org/chapter/122094", {
-            "keyword": "7bd7f82ab9d3f06976c4b68afe78d0040851ac3c",
+            "keyword": "1c834dca33025f521e1874aee1f71c51e28ebf99",
             "content": "7ab3bef5caccb62b881f8e6e70359d3c7be8137f",
         }),
         # oneshot
         ("https://mangadex.org/chapter/138086", {
             "count": 64,
-            "keyword": "435e157dc5529d152458ba751ffe5bfbaf4850fb",
+            "keyword": "178777bd0352fb19eb934cbee5630d16e3fb60ab",
         }),
     )
 

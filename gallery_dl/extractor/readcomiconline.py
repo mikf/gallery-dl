@@ -31,7 +31,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
                r"(/Comic/[^/?&#]+/[^/?&#]+\?id=(\d+))")
     test = ("https://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
         "url": "2bbab6ec4fbc05d269cca420a82a9b5acda28682",
-        "keyword": "c6de1c9c8a307dc4be56783c4ac6f1338ffac6fc",
+        "keyword": "30fe110273e871305001f33c18634516a0a51421",
     })
 
     def __init__(self, match):

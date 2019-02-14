@@ -20,7 +20,7 @@ class NgomikChapterExtractor(ChapterExtractor):
                r"(/[^/?&#]+-chapter-[^/?&#]+)")
     test = ("https://www.ngomik.in/14-sai-no-koi-chapter-1-6/", {
         "url": "8e67fdf751bbc79bc6f4dead7675008ddb8e32a4",
-        "keyword": "7cc913ed2b9018afbd3336755d28b8252d83044c",
+        "keyword": "204d177f09d438fd50c9c28d98c73289194640d8",
     })
 
     def metadata(self, page):

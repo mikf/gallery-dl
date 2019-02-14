@@ -17,7 +17,7 @@ class ImagefapExtractor(Extractor):
     """Base class for imagefap extractors"""
     category = "imagefap"
     directory_fmt = ("{category}", "{gallery_id} {title}")
-    filename_fmt = "{category}_{gallery_id}_{name}.{extension}"
+    filename_fmt = "{category}_{gallery_id}_{filename}.{extension}"
     archive_fmt = "{gallery_id}_{image_id}"
     root = "https://www.imagefap.com"
 
@@ -30,12 +30,12 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
     test = (
         ("https://www.imagefap.com/pictures/7102714", {
             "url": "268995eac5d01ddecd0fe58cfa9828390dc85a84",
-            "keyword": "3b90205f434bd1e0461bdbd5d2d9c34056b50fe6",
+            "keyword": "b5bd65ab2ff574ed1639db9a43c7b1b8583c85ef",
             "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
         ("https://www.imagefap.com/gallery/5486966", {
             "url": "14906b4f0b8053d1d69bc730a325acb793cbc898",
-            "keyword": "66ccb98b69cb52f89540224260641002f41f6ece",
+            "keyword": "ab90972f3527a2011478fabc621a2c99a541f752",
         }),
         ("https://www.imagefap.com/gallery.php?gid=7102714"),
     )
@@ -97,7 +97,7 @@ class ImagefapImageExtractor(ImagefapExtractor):
     pattern = r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"
     test = ("https://www.imagefap.com/photo/1369341772/", {
         "url": "b31ee405b61ff0450020a1bf11c0581ca9adb471",
-        "keyword": "b49940c04ed30bfc1c28ec39eb08b3be5753ce8a",
+        "keyword": "eadaa8f8012298384996efd21cf1f9e9e0dddb9b",
     })
 
     def __init__(self, match):

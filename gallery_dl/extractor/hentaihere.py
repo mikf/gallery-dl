@@ -26,7 +26,7 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
     pattern = r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/(\d+)"
     test = ("https://hentaihere.com/m/S13812/1/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-        "keyword": "e9382a9be337abce3db2b1132e85751379dc05c5",
+        "keyword": "cbcee0c0eb178c4b87f06a834085784f8dddad24",
     })
 
     def __init__(self, match):
