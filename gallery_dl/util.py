@@ -75,9 +75,9 @@ def transform_dict(a, func):
             a[key] = func(value)
 
 
-def number_to_string(value):
+def number_to_string(value, numbers=(int, float)):
     """Convert numbers (int, float) to string; Return everything else as is."""
-    return str(value) if isinstance(value, (int, float)) else value
+    return str(value) if value.__class__ in numbers else value
 
 
 def expand_path(path):
@@ -141,8 +141,10 @@ SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
 
 
 class UniversalNone():
-    """None-style object that also supports __getattr__ and __getitem__"""
-    def __getattr__(self, _):
+    """None-style object that supports more operations than None itself"""
+    __slots__ = ()
+
+    def __getattribute__(self, _):
         return self
 
     def __getitem__(self, _):
