@@ -42,12 +42,12 @@ class PahealExtractor(SharedConfigMixin, Extractor):
 class PahealTagExtractor(PahealExtractor):
     """Extractor for images from rule34.paheal.net by search-tags"""
     subcategory = "tag"
-    directory_fmt = ("{category}", "{tags}")
+    directory_fmt = ("{category}", "{search_tags}")
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/list/([^/?&#]+)")
     test = ("https://rule34.paheal.net/post/list/k-on/1", {
         "url": "0f5a777cea524635760de32dd85a3de5ac5f3f43",
-        "keyword": "2ee365be3f21f40529ca742485de8f8090dcff7d",
+        "keyword": "4cb563a2bdcb443e1087aa11eb0f7add03aa8bd2",
     })
     per_page = 70
 
@@ -56,7 +56,7 @@ class PahealTagExtractor(PahealExtractor):
         self.tags = text.unquote(match.group(1))
 
     def get_metadata(self):
-        return {"tags": self.tags}
+        return {"search_tags": self.tags}
 
     def get_posts(self):
         pnum = 1
