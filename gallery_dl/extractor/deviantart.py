@@ -22,7 +22,7 @@ import re
 BASE_PATTERN = (
     r"(?:https?://)?(?:"
     r"(?:www\.)?deviantart\.com/([\w-]+)|"
-    r"([\w-]+)\.deviantart\.com)"
+    r"(?!www\.)([\w-]+)\.deviantart\.com)"
 )
 
 
