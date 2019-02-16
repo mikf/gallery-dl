@@ -78,6 +78,7 @@ modules = [
     "twitter",
     "wallhaven",
     "warosu",
+    "weibo",
     "yandere",
     "xvideos",
     "yuki",
