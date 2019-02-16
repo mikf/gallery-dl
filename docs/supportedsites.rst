@@ -77,7 +77,7 @@ Rule 34              https://rule34.xxx/                 Pools, Posts, Tag-Searc
 Safebooru            https://safebooru.org/              Pools, Posts, Tag-Searches
 Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
 Sea Otter Scans      https://reader.seaotterscans.com/   Chapters, Manga
-Sen Manga            http://raw.senmanga.com/            Chapters
+Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          http://sensescans.com/reader/       Chapters, Manga
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
 SlideShare           https://www.slideshare.net/         Presentations
@@ -88,6 +88,7 @@ Tumblr               https://www.tumblr.com/             Images from Users, Like
 Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets
 Wallhaven            https://alpha.wallhaven.cc/         individual Images, Search Results                  Optional
 Warosu               https://warosu.org/                 Threads
+Weibo                https://www.weibo.com/              Images from Users, Images from Statuses
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 XVideos              https://www.xvideos.com/            Images from Users, Galleries
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
