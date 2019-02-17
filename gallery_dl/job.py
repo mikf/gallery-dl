@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,6 @@
 import sys
 import time
 import json
-import hashlib
 import logging
 from . import extractor, downloader, postprocessor
 from . import config, text, util, output, exception
@@ -447,99 +446,6 @@ class UrlJob(Job):
             UrlJob(url, self, self.depth + 1).run()
         except exception.NoExtractorError:
             self._write_unsupported(url)
-
-
-class TestJob(DownloadJob):
-    """Generate test-results for extractor runs"""
-
-    class HashIO():
-        """Minimal file-like interface"""
-
-        def __init__(self, hashobj):
-            self.hashobj = hashobj
-            self.path = ""
-            self.size = 0
-            self.has_extension = True
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *args):
-            pass
-
-        def open(self, mode):
-            self.size = 0
-            return self
-
-        def write(self, content):
-            """Update SHA1 hash"""
-            self.size += len(content)
-            self.hashobj.update(content)
-
-        def tell(self):
-            return self.size
-
-        def part_size(self):
-            return 0
-
-    def __init__(self, url, parent=None, content=False):
-        DownloadJob.__init__(self, url, parent)
-        self.content = content
-        self.list_url = []
-        self.list_keyword = []
-        self.list_archive = []
-        self.hash_url = hashlib.sha1()
-        self.hash_keyword = hashlib.sha1()
-        self.hash_archive = hashlib.sha1()
-        self.hash_content = hashlib.sha1()
-        if content:
-            self.fileobj = self.HashIO(self.hash_content)
-            self.get_downloader("http")._check_extension = lambda a, b: None
-
-    def run(self):
-        for msg in self.extractor:
-            self.dispatch(msg)
-
-    def handle_url(self, url, keywords):
-        self.update_url(url)
-        self.update_keyword(keywords)
-        self.update_archive(keywords)
-        self.update_content(url)
-
-    def handle_urllist(self, urls, keywords):
-        self.handle_url(urls[0], keywords)
-
-    def handle_directory(self, keywords):
-        self.update_keyword(keywords, False)
-
-    def handle_queue(self, url, keywords):
-        self.update_url(url)
-        self.update_keyword(keywords)
-
-    def update_url(self, url):
-        """Update the URL hash"""
-        self.list_url.append(url)
-        self.hash_url.update(url.encode())
-
-    def update_keyword(self, kwdict, to_list=True):
-        """Update the keyword hash"""
-        kwdict = self._filter(kwdict)
-        if to_list:
-            self.list_keyword.append(kwdict)
-        self.hash_keyword.update(
-            json.dumps(kwdict, sort_keys=True, default=str).encode())
-
-    def update_archive(self, kwdict):
-        """Update the archive-id hash"""
-        archive_id = self.extractor.archive_fmt.format_map(kwdict)
-        self.list_archive.append(archive_id)
-        self.hash_archive.update(archive_id.encode())
-
-    def update_content(self, url):
-        """Update the content hash"""
-        if self.content:
-            scheme = url.partition(":")[0]
-            self.get_downloader(scheme).download(url, self.fileobj)
 
 
 class DataJob(Job):
