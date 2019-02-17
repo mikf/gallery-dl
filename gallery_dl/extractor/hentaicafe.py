@@ -56,6 +56,7 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
     )
     root = "https://hentai.cafe"
     reverse = False
+    chapterclass = HentaicafeChapterExtractor
 
     def chapters(self, page):
         if "/manga/series/" in self.manga_url:

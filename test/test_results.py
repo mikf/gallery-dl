@@ -10,6 +10,8 @@
 import os
 import sys
 import re
+import json
+import hashlib
 import unittest
 from gallery_dl import extractor, job, config, exception
 
@@ -24,34 +26,6 @@ TRAVIS_SKIP = {
 # temporary issues, etc.
 BROKEN = {
 }
-
-
-def setup_test_config():
-    name = "gallerydl"
-    email = "gallerydl@openaliasbox.org"
-
-    config.clear()
-    config.set(("cache", "file"), ":memory:")
-    config.set(("downloader", "part"), False)
-    config.set(("extractor", "timeout"), 60)
-    config.set(("extractor", "username"), name)
-    config.set(("extractor", "password"), name)
-    config.set(("extractor", "nijie", "username"), email)
-    config.set(("extractor", "seiga", "username"), email)
-    config.set(("extractor", "danbooru", "username"), None)
-
-    config.set(("extractor", "deviantart", "client-id"), "7777")
-    config.set(("extractor", "deviantart", "client-secret"),
-               "ff14994c744d9208e5caeec7aab4a026")
-
-    config.set(("extractor", "tumblr", "api-key"),
-               "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
-    config.set(("extractor", "tumblr", "api-secret"),
-               "6wxAK2HwrXdedn7VIoZWxGqVhZ8JdYKDLjiQjL46MLqGuEtyVj")
-    config.set(("extractor", "tumblr", "access-token"),
-               "N613fPV6tOZQnyn0ERTuoEZn0mEqG8m2K8M3ClSJdEHZJuqFdG")
-    config.set(("extractor", "tumblr", "access-token-secret"),
-               "sgOA7ZTT4FBXdOGGVV331sSp0jHYp4yMDRslbhaQf7CaS71i4O")
 
 
 class TestExtractorResults(unittest.TestCase):
@@ -74,7 +48,7 @@ class TestExtractorResults(unittest.TestCase):
         else:
             content = False
 
-        tjob = job.TestJob(url, content=content)
+        tjob = ResultJob(url, content=content)
         self.assertEqual(extr, tjob.extractor.__class__)
 
         if not result:
@@ -93,6 +67,14 @@ class TestExtractorResults(unittest.TestCase):
 
         # test archive-id uniqueness
         self.assertEqual(len(set(tjob.list_archive)), len(tjob.list_archive))
+
+        # test '_extractor' entries
+        if tjob.queue:
+            for url, kwdict in zip(tjob.list_url, tjob.list_keyword):
+                if "_extractor" in kwdict:
+                    extr = kwdict["_extractor"].from_url(url)
+                    self.assertIsInstance(extr, kwdict["_extractor"])
+                    self.assertEqual(extr.url, url)
 
         # test extraction results
         if "url" in result:
@@ -142,6 +124,123 @@ class TestExtractorResults(unittest.TestCase):
                 self.assertEqual(value, test, msg=key)
 
 
+class ResultJob(job.DownloadJob):
+    """Generate test-results for extractor runs"""
+
+    def __init__(self, url, parent=None, content=False):
+        job.DownloadJob.__init__(self, url, parent)
+        self.queue = False
+        self.content = content
+        self.list_url = []
+        self.list_keyword = []
+        self.list_archive = []
+        self.hash_url = hashlib.sha1()
+        self.hash_keyword = hashlib.sha1()
+        self.hash_archive = hashlib.sha1()
+        self.hash_content = hashlib.sha1()
+        if content:
+            self.fileobj = FakePathfmt(self.hash_content)
+            self.get_downloader("http")._check_extension = lambda a, b: None
+
+    def run(self):
+        for msg in self.extractor:
+            self.dispatch(msg)
+
+    def handle_url(self, url, keywords):
+        self.update_url(url)
+        self.update_keyword(keywords)
+        self.update_archive(keywords)
+        self.update_content(url)
+
+    def handle_directory(self, keywords):
+        self.update_keyword(keywords, False)
+
+    def handle_queue(self, url, keywords):
+        self.queue = True
+        self.update_url(url)
+        self.update_keyword(keywords)
+
+    def update_url(self, url):
+        self.list_url.append(url)
+        self.hash_url.update(url.encode())
+
+    def update_keyword(self, kwdict, to_list=True):
+        if to_list:
+            self.list_keyword.append(kwdict)
+        kwdict = self._filter(kwdict)
+        self.hash_keyword.update(
+            json.dumps(kwdict, sort_keys=True, default=str).encode())
+
+    def update_archive(self, kwdict):
+        archive_id = self.extractor.archive_fmt.format_map(kwdict)
+        self.list_archive.append(archive_id)
+        self.hash_archive.update(archive_id.encode())
+
+    def update_content(self, url):
+        if self.content:
+            scheme = url.partition(":")[0]
+            self.get_downloader(scheme).download(url, self.fileobj)
+
+
+class FakePathfmt():
+    """Minimal file-like interface"""
+
+    def __init__(self, hashobj):
+        self.hashobj = hashobj
+        self.path = ""
+        self.size = 0
+        self.has_extension = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def open(self, mode):
+        self.size = 0
+        return self
+
+    def write(self, content):
+        """Update SHA1 hash"""
+        self.size += len(content)
+        self.hashobj.update(content)
+
+    def tell(self):
+        return self.size
+
+    def part_size(self):
+        return 0
+
+
+def setup_test_config():
+    name = "gallerydl"
+    email = "gallerydl@openaliasbox.org"
+
+    config.clear()
+    config.set(("cache", "file"), ":memory:")
+    config.set(("downloader", "part"), False)
+    config.set(("extractor", "timeout"), 60)
+    config.set(("extractor", "username"), name)
+    config.set(("extractor", "password"), name)
+    config.set(("extractor", "nijie", "username"), email)
+    config.set(("extractor", "seiga", "username"), email)
+    config.set(("extractor", "danbooru", "username"), None)
+
+    config.set(("extractor", "deviantart", "client-id"), "7777")
+    config.set(("extractor", "deviantart", "client-secret"),
+               "ff14994c744d9208e5caeec7aab4a026")
+
+    config.set(("extractor", "tumblr", "api-key"),
+               "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
+    config.set(("extractor", "tumblr", "api-secret"),
+               "6wxAK2HwrXdedn7VIoZWxGqVhZ8JdYKDLjiQjL46MLqGuEtyVj")
+    config.set(("extractor", "tumblr", "access-token"),
+               "N613fPV6tOZQnyn0ERTuoEZn0mEqG8m2K8M3ClSJdEHZJuqFdG")
+    config.set(("extractor", "tumblr", "access-token-secret"),
+               "sgOA7ZTT4FBXdOGGVV331sSp0jHYp4yMDRslbhaQf7CaS71i4O")
+
+
 def generate_tests():
     """Dynamically generate extractor unittests"""
     def _generate_test(extr, tcase):
@@ -165,16 +264,14 @@ def generate_tests():
         skip = set(BROKEN)
         if "CI" in os.environ and "TRAVIS" in os.environ:
             skip |= set(TRAVIS_SKIP)
-        print("skipping:", ", ".join(skip))
+        if skip:
+            print("skipping:", ", ".join(skip))
         fltr = lambda c, bc: c not in skip  # noqa: E731
 
     # filter available extractor classes
     extractors = [
         extr for extr in extractor.extractors()
-        if fltr(
-            extr.category,
-            extr.basecategory if hasattr(extr, "basecategory") else None
-        )
+        if fltr(extr.category, getattr(extr, "basecategory", None))
     ]
 
     # add 'test_...' methods
