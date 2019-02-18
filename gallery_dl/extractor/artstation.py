@@ -300,6 +300,29 @@ class ArtstationSearchExtractor(ArtstationExtractor):
         return self._pagination(url, params)
 
 
+class ArtstationArtworkExtractor(ArtstationExtractor):
+    """Extractor for projects on artstation's artwork page"""
+    subcategory = "artwork"
+    directory_fmt = ("{category}", "Artworks", "{artwork[sorting]!c}")
+    archive_fmt = "A_{asset[id]}"
+    pattern = (r"(?:https?://)?(?:\w+\.)?artstation\.com"
+               r"/artwork/?\?([^#]+)")
+    test = ("https://www.artstation.com/artwork?sorting=latest",)
+
+    def __init__(self, match):
+        ArtstationExtractor.__init__(self, match)
+        self.query = text.parse_query(match.group(1))
+
+    def metadata(self):
+        return {"artwork": self.query}
+
+    def projects(self):
+        url = "{}/projects.json".format(self.root)
+        params = self.query.copy()
+        params["page"] = 1
+        return self._pagination(url, params)
+
+
 class ArtstationImageExtractor(ArtstationExtractor):
     """Extractor for images from a single artstation project"""
     subcategory = "image"
