@@ -104,7 +104,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 ==================== =================================== ================================================== ================
 
 .. |Site-0| replace:: yuki.la 4chan archive
-.. |Capabilities-0| replace:: Images from Users, Albums, Challenges, individual Images, Likes, Search Results
+.. |Capabilities-0| replace:: Images from Users, Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results
 .. |Capabilities-1| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Sta.sh
 .. |Capabilities-2| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
 .. |Capabilities-3| replace:: Images from Users, Favorites, individual Images, Popular Images, Recent Images, Scraps
