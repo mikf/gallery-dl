@@ -18,7 +18,7 @@ Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, 
 Desuarchive          https://desuarchive.org/            Threads
 DeviantArt           https://www.deviantart.com/         |Capabilities-1|                                   Optional (OAuth)
 Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
-Dynasty Reader       https://dynasty-scans.com/          Chapters
+Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Images, Search Results
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga

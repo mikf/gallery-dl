@@ -8,16 +8,43 @@
 
 """Extract manga-chapters from https://dynasty-scans.com/"""
 
-from .common import ChapterExtractor
+from .common import ChapterExtractor, Extractor, Message
 from .. import text
 import json
 import re
 
 
-class DynastyscansChapterExtractor(ChapterExtractor):
-    """Extractor for manga-chapters from dynasty-scans.com"""
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?dynasty-scans\.com"
+
+
+class DynastyscansBase():
+    """Base class for dynastyscans extractors"""
     category = "dynastyscans"
-    pattern = r"(?:https?://)?(?:www\.)?dynasty-scans\.com(/chapters/[^/?&#]+)"
+    root = "https://dynasty-scans.com"
+
+    def _parse_image_page(self, image_id):
+        url = "{}/images/{}".format(self.root, image_id)
+        page = self.request(url).text
+
+        date, pos = text.extract(page, "class='create_at'>", "</span>")
+        tags, pos = text.extract(page, "class='tags'>", "</span>", pos)
+        src , pos = text.extract(page, "class='btn-group'>", "</div>", pos)
+        url , pos = text.extract(page, ' src="', '"', pos)
+
+        src = text.extract(src, 'href="', '"')[0] if "Source<" in src else ""
+
+        return {
+            "url": self.root + url,
+            "image_id": text.parse_int(image_id),
+            "tags": text.split_html(text.unescape(tags)),
+            "date": text.remove_html(date),
+            "source": text.unescape(src),
+        }
+
+
+class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
+    """Extractor for manga-chapters from dynasty-scans.com"""
+    pattern = BASE_PATTERN + r"(/chapters/[^/?&#]+)"
     test = (
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {
@@ -30,7 +57,6 @@ class DynastyscansChapterExtractor(ChapterExtractor):
             "keyword": "22b35029bc65d6d95db2e2c147b0a37f2d290f29",
         }),
     )
-    root = "https://dynasty-scans.com"
 
     def metadata(self, page):
         info  , pos = text.extract(page, "<h3 id='chapter-title'><b>", "</b>")
@@ -64,3 +90,63 @@ class DynastyscansChapterExtractor(ChapterExtractor):
             (self.root + img["image"], None)
             for img in json.loads(data)
         ]
+
+
+class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
+    """Extrator for image search results on dynasty-scans.com"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "Images")
+    filename_fmt = "{image_id}.{extension}"
+    archive_fmt = "i_{image_id}"
+    pattern = BASE_PATTERN + r"/images(?:\?([^#]+))?$"
+    test = ("https://dynasty-scans.com/images?with[]=4930&with[]=5211", {
+        "url": "6b570eedd8a741c2cd34fb98b22a49d772f84191",
+        "keyword": "2a8f3d30584c637a0dd64ce8a0a2e81edaa6bca4",
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.search_query = match.group(1)
+
+    def items(self):
+        yield Message.Version, 1
+        yield Message.Directory, {}
+        for image_id in self.images():
+            data = self._parse_image_page(image_id)
+            url = data.pop("url")
+            yield Message.Url, url, text.nameext_from_url(url, data)
+
+    def images(self):
+        url = self.root + "/images?" + self.search_query
+        params = {"page": 1}
+
+        while True:
+            page = self.request(url, params=params).text
+            yield from text.extract_iter(page, '"/images/', '"')
+            if 'rel="next"' not in page:
+                return
+            params["page"] += 1
+
+
+class DynastyscansImageExtractor(DynastyscansBase, Extractor):
+    """Extractor for individual images on dynasty-scans.com"""
+    subcategory = "image"
+    directory_fmt = ("{category}", "Images")
+    filename_fmt = "{image_id}.{extension}"
+    pattern = BASE_PATTERN + r"/images/(\d+)"
+    test = ("https://dynasty-scans.com/images/1245", {
+        "url": "15e54bd94148a07ed037f387d046c27befa043b2",
+        "keyword": "384889567a19d2e907ff13f65b42f9560e15172d",
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.image_id = match.group(1)
+
+    def items(self):
+        data = self._parse_image_page(self.image_id)
+        url = data.pop("url")
+
+        yield Message.Version, 1
+        yield Message.Directory, data
+        yield Message.Url, url, text.nameext_from_url(url, data)
