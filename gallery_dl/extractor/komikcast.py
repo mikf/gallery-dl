@@ -51,13 +51,13 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     test = (
         (("https://komikcast.com/chapter/"
           "apotheosis-chapter-02-2-bahasa-indonesia/"), {
-            "url": "2a108bf8a96753266610afef625d248f858e13f3",
-            "keyword": "5c677ec86957f3bdad2bd5102a69a872a11c0f92",
+            "url": "9a83891748e51a885d918032274706e9c76d01ca",
+            "keyword": "f3938e1aff9ad1f302f52447e9781b21f6da26d4",
         }),
         (("https://komikcast.com/chapter/"
           "tonari-no-kashiwagi-san-chapter-18b/"), {
             "url": "aff90dd21dbb945a726778b10bdef522af7c42fe",
-            "keyword": "2469acd77c635fedcc131b5d40e7acc36e4674ad",
+            "keyword": "19b5783864c4299913de436513b124b028b557c1",
         }),
     )
 
@@ -70,16 +70,8 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
         readerarea = text.extract(
             page, '<div id="readerarea">', '<div class="navig">')[0]
         return [
-            (text.unescape(url), {
-                "width": text.parse_int(width),
-                "height": text.parse_int(height),
-            })
-            for url, width, height in re.findall(
-                r"<img[^>]*? src=[\"']([^\"']+)[\"']"
-                r"(?:\s+data-original-width=[\"']([^\"']+)[\"'])?"
-                r"(?:\s+data-original-height=[\"']([^\"']+)[\"'])?",
-                readerarea
-            )
+            (text.unescape(url), None)
+            for url in re.findall(r"\bsrc=[\"']([^\"']+)", readerarea)
             if "/Banner-" not in url
         ]
 
