@@ -103,11 +103,13 @@ class TumblrExtractor(Extractor):
                     del photo["alt_sizes"]
                     yield self._prepare_image(photo["url"], post)
 
-            if "audio_url" in post:  # type: "audio"
-                yield self._prepare(post["audio_url"], post)
+            url = post.get("audio_url")  # type: "audio"
+            if url:
+                yield self._prepare(url, post)
 
-            if "video_url" in post:  # type: "video"
-                yield self._prepare(_original_video(post["video_url"]), post)
+            url = post.get("video_url")  # type: "video"
+            if url:
+                yield self._prepare(_original_video(url), post)
 
             if self.inline and "reblog" in post:  # inline media
                 # only "chat" posts are missing a "reblog" key in their
@@ -124,8 +126,10 @@ class TumblrExtractor(Extractor):
                 post["extension"] = None
                 with extractor.blacklist(("tumblr",)):
                     for key in ("permalink_url", "url"):
-                        if key in post:
-                            yield Message.Queue, post[key], post
+                        url = post.get(key)
+                        if url:
+                            yield Message.Queue, url, post
+                            break
 
     def posts(self):
         """Return an iterable containing all relevant posts"""
@@ -261,6 +265,9 @@ class TumblrPostExtractor(TumblrExtractor):
         }),
         ("https://mikf123.tumblr.com/post/181022380064/chat-post", {
             "count": 0,
+        }),
+        ("http://pinetre-3.tumblr.com/post/181904381470/via", {
+            "count": 0,  # audio post with "null" as URL
         }),
         ("http://demo.tumblr.com/image/459265350"),
     )
