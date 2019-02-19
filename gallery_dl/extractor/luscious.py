@@ -64,6 +64,13 @@ class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
             "keyword": "3de82f61ad4afd0f546ab5ae5bf9c5388cc9c3db",
         }),
+        ("https://luscious.net/albums/not-found_277035/", {
+            "exception": exception.NotFoundError,
+        }),
+        ("https://members.luscious.net/albums/login-required_323871/", {
+            "options": (("username", None),),
+            "exception": exception.AuthorizationError,
+        }),
         ("https://www.luscious.net/albums/okinami_277031/"),
         ("https://members.luscious.net/albums/okinami_277031/"),
         ("https://luscious.net/pictures/c/video_game_manga/album"
@@ -78,15 +85,22 @@ class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
         self.login()
         url = "{}/albums/{}/".format(self.root, self.gpart)
         page = self.request(url).text
-        data = self.get_metadata(page)
+        data = self.metadata(page)
         yield Message.Version, 1
         yield Message.Directory, data
-        for url, image in self.get_images(page):
+        for url, image in self.images(page):
             image.update(data)
             yield Message.Url, url, image
 
-    def get_metadata(self, page):
+    def metadata(self, page):
         """Collect metadata for extractor-job"""
+        pos = page.find("<h1>404 Not Found</h1>")
+        if pos >= 0:
+            msg = text.extract(page, '<div class="content">', '</div>', pos)[0]
+            if msg and "content is not available" in msg:
+                raise exception.AuthorizationError()
+            raise exception.NotFoundError("album")
+
         data = text.extract_all(page, (
             ("tags"    , '<meta name="keywords" content="', '"'),
             ("title"   , '"og:title" content="', '"'),
@@ -103,8 +117,9 @@ class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
             data["artist"] = None
         return data
 
-    def get_images(self, page, extr=text.extract):
-        """Collect image-urls and -metadata"""
+    def images(self, page):
+        """Collect image-URLs and -metadata"""
+        extr = text.extract
         num = 1
 
         if 'class="search_filter' in page:
