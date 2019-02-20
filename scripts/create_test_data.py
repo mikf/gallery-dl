@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,21 +9,29 @@
 
 """Create testdata for extractor tests"""
 
+import sys
+import os.path
 import argparse
-from gallery_dl import job, config, extractor
+
+ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.realpath(ROOTDIR))
+
+from gallery_dl import extractor
+from test.test_results import ResultJob, setup_test_config
+
 
 TESTDATA_FMT = """
-    test = [("{}", {{
+    test = ("{}", {{
         "url": "{}",
         "keyword": "{}",
         "content": "{}",
-    }})]
+    }})
 """
 
 TESTDATA_EXCEPTION_FMT = """
-    test = [("{}", {{
+    test = ("{}", {{
         "exception": exception.{},
-    }})]
+    }})
 """
 
 
@@ -43,10 +51,10 @@ def main():
     else:
         urls = args.urls
 
-    config.load()
-    config.set(("downloader", "part"), False)
+    setup_test_config()
+
     for url in urls:
-        tjob = job.TestJob(url, content=args.content)
+        tjob = ResultJob(url, content=args.content)
         try:
             tjob.run()
         except Exception as exc:
