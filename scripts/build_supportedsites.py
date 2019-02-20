@@ -2,10 +2,11 @@
 
 import sys
 import os.path
+import collections
 
 ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.realpath(ROOTDIR))
-import gallery_dl.extractor  # noqa
+from gallery_dl import extractor  # noqa
 
 
 CATEGORY_MAP = {
@@ -66,6 +67,7 @@ CATEGORY_MAP = {
 }
 
 SUBCATEGORY_MAP = {
+    "artwork": "Artwork Listings",
     "doujin" : "Doujin",
     "gallery": "Galleries",
     "image"  : "individual Images",
@@ -106,176 +108,143 @@ AUTH_MAP = {
 }
 
 IGNORE_LIST = (
+    "directlink",
     "oauth",
+    "recursive",
+    "test",
 )
 
 
-class RstColumn():
-    _substitutions = []
+def domain(cls):
+    """Return the web-domain related to an extractor class"""
+    url = sys.modules[cls.__module__].__doc__.split()[-1]
+    if url.startswith("http"):
+        return url
 
-    def __init__(self, title, data, size=None):
-        self.data = self._transform(data)
-        self._subs = []
-        self._substitutions.append(self._subs)
+    if hasattr(cls, "root") and cls.root:
+        return cls.root + "/"
 
-        if not size:
-            self.size = max(len(value) for value in data + [title])
-        else:
-            self.size = size
+    if hasattr(cls, "https"):
+        scheme = "https" if cls.https else "http"
+        netloc = cls.__doc__.split()[-1]
+        return "{}://{}/".format(scheme, netloc)
 
-        self.title = self._pad(title)
-        for i, value in enumerate(self.data):
-            self.data[i] = self._pad(value)
+    test = next(cls._get_tests(), None)
+    if test:
+        url = test[0]
+        return url[:url.find("/", 8)+1]
 
-    def __str__(self):
-        return self.title
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, key):
-        return self.data[key] if key < len(self.data) else [""]
-
-    def _transform(self, data):
-        return [
-            value if isinstance(value, str) else ", ".join(value)
-            for value in data
-        ]
-
-    def _pad(self, s):
-        if len(s) <= self.size:
-            return s + " " * (self.size - len(s))
-        else:
-            return self._substitute(s)
-
-    def _substitute(self, value):
-        sub = "|{}-{}|".format(self.title.strip(), len(self._subs))
-        self._subs.append((sub, value))
-        return sub + " " * (self.size - len(sub))
-
-
-class RstTable():
-
-    def __init__(self, columns):
-        self.columns = columns
-        self.rowcount = max(len(col) for col in columns)
-        self.sep = " ".join("=" * col.size for col in columns)
-
-    def __iter__(self):
-        yield self.sep
-        yield " ".join(col.title for col in self.columns)
-        yield self.sep
-        for i in range(self.rowcount):
-            yield self._format_row(i)
-        yield self.sep
-
-    def _format_row(self, row):
-        return " ".join(col[row] for col in self.columns)
-
-
-def build_list():
-    extractors = []
-    classes = []
-    last = None
-
-    for extr in gallery_dl.extractor.extractors():
-        if not extr.category or extr.category in IGNORE_LIST:
-            continue
-        if extr.category == last or not last:
-            classes.append(extr)
-        elif last:
-            if classes[0].subcategory:
-                extractors.append(classes)
-            classes = [extr]
-        last = extr.category
-    extractors.append(classes)
-
-    for extrlist in extractors:
-        extrlist.sort(key=subcategory_key)
-        for extr in extrlist:
-            extr.cat = map_category(extr.category)
-            extr.subcat = map_subcategory(extr.subcategory)
-    extractors.sort(key=category_key)
-
-    return extractors
-
-
-def get_domain(classes):
-    try:
-        cls = classes[0]
-
-        url = sys.modules[cls.__module__].__doc__.split()[-1]
-        if url.startswith("http"):
-            return url
-
-        if hasattr(cls, "root") and cls.root:
-            return cls.root + "/"
-
-        if hasattr(cls, "https"):
-            scheme = "https" if cls.https else "http"
-            domain = cls.__doc__.split()[-1]
-            return "{}://{}/".format(scheme, domain)
-
-        test = next(cls._get_tests(), None)
-        if test:
-            url = test[0]
-            return url[:url.find("/", 8)+1]
-    except (IndexError, AttributeError):
-        pass
     return ""
 
 
-def map_category(c):
-    return CATEGORY_MAP.get(c, c.capitalize())
+def category_text(cls):
+    """Return a human-readable representation of a category"""
+    c = cls.category
+    return CATEGORY_MAP.get(c) or c.capitalize()
 
 
-def map_subcategory(sc):
+def subcategory_text(cls):
+    """Return a human-readable representation of a subcategory"""
+    sc = cls.subcategory
     if sc in SUBCATEGORY_MAP:
         return SUBCATEGORY_MAP[sc]
     sc = sc.capitalize()
     return sc if sc.endswith("s") else sc + "s"
 
 
-def category_key(extrlist):
-    key = extrlist[0].cat.lower()
-    if len(extrlist) == 1 and extrlist[0].__module__.endswith(".imagehosts"):
+def category_key(cls):
+    """Generate sorting keys by category"""
+    key = category_text(cls).lower()
+    if cls.__module__.endswith(".imagehosts"):
         key = "zz" + key
     return key
 
 
 def subcategory_key(cls):
+    """Generate sorting keys by subcategory"""
     if cls.subcategory in ("user", "issue"):
         return "A"
     return cls.subcategory
 
 
-extractors = build_list()
-columns = [
-    RstColumn("Site", [
-        extrlist[0].cat
-        for extrlist in extractors
-    ], 20),
-    RstColumn("URL", [
-        get_domain(extrlist)
-        for extrlist in extractors
-    ], 35),
-    RstColumn("Capabilities", [
-        ", ".join(extr.subcat for extr in extrlist if extr.subcat)
-        for extrlist in extractors
-    ], 50),
-    RstColumn("Authentication", [
-        AUTH_MAP.get(extrlist[0].category, "")
-        for extrlist in extractors
-    ]),
-]
+def build_extractor_list():
+    """Generate a sorted list of lists of extractor classes"""
+    extractors = collections.defaultdict(list)
+
+    # get lists of extractor classes grouped by category
+    for extr in extractor.extractors():
+        if not extr.category or extr.category in IGNORE_LIST:
+            continue
+        extractors[extr.category].append(extr)
+
+    # sort extractor lists with the same category
+    for extrlist in extractors.values():
+        extrlist.sort(key=subcategory_key)
+
+    # sort lists by category
+    return sorted(
+        extractors.values(),
+        key=lambda lst: category_key(lst[0]),
+    )
+
+
+# define table columns
+COLUMNS = (
+    ("Site", 20,
+     lambda x: category_text(x[0])),
+    ("URL" , 35,
+     lambda x: domain(x[0])),
+    ("Capabilities", 50,
+     lambda x: ", ".join(subcategory_text(extr) for extr in x
+                         if subcategory_text(extr))),
+    ("Authentication", 16,
+     lambda x: AUTH_MAP.get(x[0].category, "")),
+)
+
+
+def write_output(fobj, columns, extractors):
+
+    def pad(output, col, category=None):
+        size = col[1]
+        output = output if isinstance(output, str) else col[2](output)
+
+        if len(output) > size:
+            sub = "|{}-{}|".format(category, col[0][0])
+            subs.append((sub, output))
+            output = sub
+
+        return output + " " * (size - len(output))
+
+    w = fobj.write
+    subs = []
+
+    # caption
+    w("Supported Sites\n")
+    w("===============\n")
+
+    # table head
+    sep = " ".join("=" * c[1] for c in columns) + "\n"
+    w(sep)
+    w(" ".join(pad(c[0], c) for c in columns).strip() + "\n")
+    w(sep)
+
+    # table body
+    for lst in extractors:
+        w(" ".join(
+            pad(col[2](lst), col, lst[0].category)
+            for col in columns
+        ).strip())
+        w("\n")
+
+    # table bottom
+    w(sep)
+    w("\n")
+
+    # substitutions
+    for sub, value in subs:
+        w(".. {} replace:: {}\n".format(sub, value))
+
 
 outfile = sys.argv[1] if len(sys.argv) > 1 else "supportedsites.rst"
 with open(os.path.join(ROOTDIR, "docs", outfile), "w") as file:
-    file.write("Supported Sites\n"
-               "===============\n")
-    for line in RstTable(columns):
-        file.write(line.rstrip() + "\n")
-    file.write("\n")
-    for subs in RstColumn._substitutions:
-        for sub, val in subs:
-            file.write(".. {} replace:: {}\n".format(sub, val))
+    write_output(file, COLUMNS, build_extractor_list())
