@@ -59,7 +59,7 @@ Mangareader          https://www.mangareader.net/        Chapters, Manga
 Newgrounds           https://www.newgrounds.com/         Images from Users, individual Images, Videos
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
-Niconico Seiga       http://seiga.nicovideo.jp/          Images from Users, individual Images               Required
+Niconico Seiga       https://seiga.nicovideo.jp/         Images from Users, individual Images               Required
 nijie                https://nijie.info/                 |nijie-C|                                          Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net/                  Images from Users, Images from Statuses
