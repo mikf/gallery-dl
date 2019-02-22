@@ -79,6 +79,14 @@ Python 3.4 interpreter and all required packages included.
 Put this file in your `PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__
 or use it from the current directory and you are good to go,
 
+Snap
+----
+
+Linux users that are using a distro that is supported by Snapd_ can install *gallery-dl* from the Snap Store:
+
+.. code:: bash
+
+    $ snap install gallery-dl
 
 Usage
 =====
@@ -218,6 +226,7 @@ access to *gallery-dl*. Authorize it and you will he shown one or more
 .. _Requests:   http://docs.python-requests.org/en/master/
 .. _FFmpeg:     https://www.ffmpeg.org/
 .. _youtube-dl: https://rg3.github.io/youtube-dl/
+.. _Snapd:      https://docs.snapcraft.io/installing-snapd/6735
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
