@@ -69,6 +69,7 @@ Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Li
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
 Pornreactor          http://pornreactor.cc/              |pornreactor-C|
 PowerManga           https://read.powermanga.org/        Chapters, Manga
+Pururin              https://pururin.io/                 Galleries
 Read Comic Online    https://readcomiconline.to/         Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://www.reddit.com/             individual Images, Submissions, Subreddits         Optional (OAuth)

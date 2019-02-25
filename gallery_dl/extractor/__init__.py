@@ -62,6 +62,7 @@ modules = [
     "piczel",
     "pinterest",
     "pixiv",
+    "pururin",
     "reactor",
     "readcomiconline",
     "reddit",
