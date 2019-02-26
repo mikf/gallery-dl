@@ -8,7 +8,7 @@
 
 """Extractors for https://www.tsumino.com/"""
 
-from .common import ChapterExtractor, Extractor, Message
+from .common import GalleryExtractor, Extractor, Message
 from .. import text, exception
 from ..cache import cache
 
@@ -40,12 +40,8 @@ class TsuminoBase():
         return {".aotsumino": response.history[0].cookies[".aotsumino"]}
 
 
-class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
+class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
     """Extractor for image galleries on tsumino.com"""
-    subcategory = "gallery"
-    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    archive_fmt = "{gallery_id}_{page}"
     pattern = (r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
                r"/(?:Book/Info|Read/View)/(\d+)")
     test = (
@@ -78,7 +74,7 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
     def __init__(self, match):
         self.gallery_id = match.group(1)
         url = "{}/Book/Info/{}".format(self.root, self.gallery_id)
-        ChapterExtractor.__init__(self, match, url)
+        GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
         extr = text.extract

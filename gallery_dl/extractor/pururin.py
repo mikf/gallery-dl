@@ -8,18 +8,14 @@
 
 """Extractors for https://pururin.io/"""
 
-from .common import ChapterExtractor
+from .common import GalleryExtractor
 from .. import text, util
 import json
 
 
-class PururinGalleryExtractor(ChapterExtractor):
+class PururinGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries on pururin.io"""
     category = "pururin"
-    subcategory = "gallery"
-    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    archive_fmt = "{gallery_id}_{page}"
     pattern = r"(?:https?://)?(?:www\.)?pururin\.io/(?:gallery|read)/(\d+)"
     test = ("https://pururin.io/gallery/38661/iowant-2", {
         "pattern": r"https://cdn.pururin.io/assets/images/data/38661/\d+\.jpg",
@@ -35,8 +31,8 @@ class PururinGalleryExtractor(ChapterExtractor):
             "lang": "en",
             "language": "English",
             "parody": "Kantai Collection",
+            "rating": float,
             "scanlator": "",
-            "score": float,
             "tags": list,
             "title": "Iowant 2!!",
             "title_jp": str,
@@ -49,7 +45,7 @@ class PururinGalleryExtractor(ChapterExtractor):
     def __init__(self, match):
         self.gallery_id = match.group(1)
         url = "{}/gallery/{}/x".format(self.root, self.gallery_id)
-        ChapterExtractor.__init__(self, match, url)
+        GalleryExtractor.__init__(self, match, url)
 
         self._ext = ""
         self._cnt = 0
@@ -67,7 +63,7 @@ class PururinGalleryExtractor(ChapterExtractor):
             ("scanlator" , "<td>Scanlator</td>" , "</td>"),
             ("convention", "<td>Convention</td>", "</td>"),
             ("uploader"  , "<td>Uploader</td>"  , "</td>"),
-            ("score"     , " :rating='"         , "'"),
+            ("rating"    , " :rating='"         , "'"),
         ))[0]
 
         url = "{}/read/{}/01/x".format(self.root, self.gallery_id)
@@ -79,16 +75,20 @@ class PururinGalleryExtractor(ChapterExtractor):
         self._cnt = info["total_pages"]
 
         for key in ("tags", "characters"):
-            data[key] = self._extract_list(data[key])
+            data[key] = [
+                text.unescape(item)
+                for item in text.extract_iter(data[key], 'title="', '"')
+            ]
         for key in ("artist", "group", "parody", "type", "collection",
                     "language", "scanlator", "convention"):
-            data[key] = self._extract_one(data[key])
+            data[key] = text.unescape(text.extract(
+                data[key], 'title="', '"')[0] or "")
 
         data["gallery_id"] = text.parse_int(self.gallery_id)
         data["title"] = info["title"]
         data["title_jp"] = info.get("j_title") or ""
         data["uploader"] = text.remove_html(data["uploader"])
-        data["score"] = text.parse_float(data["score"])
+        data["rating"] = text.parse_float(data["rating"])
         data["lang"] = util.language_to_code(data["language"])
         return data
 
@@ -96,12 +96,3 @@ class PururinGalleryExtractor(ChapterExtractor):
         ufmt = "https://cdn.pururin.io/assets/images/data/{}/{{}}.{}".format(
             self.gallery_id, self._ext)
         return [(ufmt.format(num), None) for num in range(1, self._cnt + 1)]
-
-    @staticmethod
-    def _extract_list(value):
-        return [text.unescape(item)
-                for item in text.extract_iter(value, 'title="', '"')]
-
-    @staticmethod
-    def _extract_one(value):
-        return text.unescape(text.extract(value, 'title="', '"')[0] or "")
