@@ -8,18 +8,14 @@
 
 """Extract images from https://hitomi.la/"""
 
-from .common import ChapterExtractor
+from .common import GalleryExtractor
 from .. import text, util
 import string
 
 
-class HitomiGalleryExtractor(ChapterExtractor):
+class HitomiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
-    subcategory = "gallery"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    filename_fmt = "{category}_{gallery_id}_{page:>03}_{filename}.{extension}"
-    archive_fmt = "{gallery_id}_{page}"
     pattern = r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)"
     test = (
         ("https://hitomi.la/galleries/867789.html", {
@@ -36,7 +32,7 @@ class HitomiGalleryExtractor(ChapterExtractor):
     def __init__(self, match):
         self.gid = text.parse_int(match.group(1))
         url = "https://hitomi.la/galleries/{}.html".format(self.gid)
-        ChapterExtractor.__init__(self, match, url)
+        GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
         pos = page.index('<h1><a href="/reader/')

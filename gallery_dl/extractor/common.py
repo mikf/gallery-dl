@@ -284,6 +284,14 @@ class MangaExtractor(Extractor):
         """Return a list of all (chapter-url, metadata)-tuples"""
 
 
+class GalleryExtractor(ChapterExtractor):
+
+    subcategory = "gallery"
+    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
+    directory_fmt = ("{category}", "{gallery_id} {title}")
+    archive_fmt = "{gallery_id}_{page}"
+
+
 class AsynchronousMixin():
     """Run info extraction in a separate thread"""
 

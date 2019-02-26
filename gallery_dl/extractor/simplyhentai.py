@@ -8,16 +8,13 @@
 
 """Extract hentai-manga from https://www.simply-hentai.com/"""
 
-from .common import Extractor, ChapterExtractor, Message
+from .common import GalleryExtractor, Extractor, Message
 from .. import text, util, exception
 
 
-class SimplyhentaiGalleryExtractor(ChapterExtractor):
+class SimplyhentaiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from simply-hentai.com"""
     category = "simplyhentai"
-    subcategory = "gallery"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
     archive_fmt = "{image_id}"
     pattern = (r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
                r"(?!/(?:album|gifs?|images?|series)(?:/|$))"
@@ -39,7 +36,7 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
 
     def __init__(self, match):
         url = "https://" + match.group(1)
-        ChapterExtractor.__init__(self, match, url)
+        GalleryExtractor.__init__(self, match, url)
         self.session.headers["Referer"] = url
 
     def metadata(self, page):
