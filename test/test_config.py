@@ -19,7 +19,7 @@ class TestConfig(unittest.TestCase):
         fd, self._configfile = tempfile.mkstemp()
         with os.fdopen(fd, "w") as file:
             file.write('{"a": "1", "b": {"a": 2, "c": "text"}}')
-        config.load(self._configfile)
+        config.load((self._configfile,))
 
     def tearDown(self):
         config.clear()

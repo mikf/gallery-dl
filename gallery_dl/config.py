@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -39,11 +39,9 @@ else:
 # --------------------------------------------------------------------
 # public interface
 
-def load(*files, format="json", strict=False):
+def load(files=None, strict=False, fmt="json"):
     """Load JSON configuration files"""
-    configfiles = files or _default_configs
-
-    if format == "yaml":
+    if fmt == "yaml":
         try:
             import yaml
             parsefunc = yaml.safe_load
@@ -53,23 +51,24 @@ def load(*files, format="json", strict=False):
     else:
         parsefunc = json.load
 
-    for conf in configfiles:
+    for path in files or _default_configs:
+        path = util.expand_path(path)
         try:
-            path = util.expand_path(conf)
             with open(path, encoding="utf-8") as file:
                 confdict = parsefunc(file)
+        except OSError as exc:
+            if strict:
+                log.error("%s", exc)
+                sys.exit(1)
+        except Exception as exc:
+            log.warning("Could not parse '%s': %s", path, exc)
+            if strict:
+                sys.exit(2)
+        else:
             if not _config:
                 _config.update(confdict)
             else:
                 util.combine_dict(_config, confdict)
-        except FileNotFoundError:
-            if strict:
-                log.error("Configuration file '%s' not found", path)
-                sys.exit(1)
-        except Exception as exc:
-            log.warning("Could not parse '%s':  %s", path, exc)
-            if strict:
-                sys.exit(2)
 
 
 def clear():
@@ -137,7 +136,7 @@ def unset(keys, conf=_config):
 
 
 class apply():
-    """Context Manager to temporarily apply a collection of key-value pairs"""
+    """Context Manager: apply a collection of key-value pairs"""
     _sentinel = object()
 
     def __init__(self, kvlist):
