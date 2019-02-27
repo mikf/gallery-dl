@@ -118,9 +118,9 @@ def main():
         if args.load_config:
             config.load()
         if args.cfgfiles:
-            config.load(*args.cfgfiles, strict=True)
+            config.load(args.cfgfiles, strict=True)
         if args.yamlfiles:
-            config.load(*args.yamlfiles, format="yaml", strict=True)
+            config.load(args.yamlfiles, strict=True, fmt="yaml")
         for key, value in args.options:
             config.set(key, value)
 
