@@ -8,73 +8,100 @@
 
 """Extract images from https://nhentai.net/"""
 
-from .common import Extractor, Message
-from .. import text
+from .common import GalleryExtractor, Extractor, Message
+from .. import text, util
+import collections
 import json
 
 
-class NHentaiExtractor(Extractor):
+class NhentaiBase():
     """Base class for nhentai extractors"""
     category = "nhentai"
     root = "https://nhentai.net"
     media_url = "https://i.nhentai.net"
 
-    @staticmethod
-    def transform_to_metadata(ginfo):
-        """Transform an nhentai API response into compatible metadata"""
-        title_en = ginfo["title"].get("english", "")
-        title_ja = ginfo["title"].get("japanese", "")
-        return {
-            "gallery_id": ginfo["id"],
-            "upload_date": ginfo["upload_date"],
-            "media_id": ginfo["media_id"],
-            "scanlator": ginfo["scanlator"],
-            "count": ginfo["num_pages"],
-            "title": title_en or title_ja,
-            "title_en": title_en,
-            "title_ja": title_ja,
-        }
 
-
-class NhentaiGalleryExtractor(NHentaiExtractor):
+class NhentaiGalleryExtractor(NhentaiBase, GalleryExtractor):
     """Extractor for image galleries from nhentai.net"""
-    subcategory = "gallery"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
-    archive_fmt = "{gallery_id}_{num}"
-    pattern = r"(?:https?://)?nhentai\.net/g/(\d+)"
+    pattern = r"(?:https?://)?nhentai\.net(/g/(\d+))"
     test = ("https://nhentai.net/g/147850/", {
         "url": "5179dbf0f96af44005a0ff705a0ad64ac26547d0",
-        "keyword": "2f94976e657f3043a89997e22f4de8e1b22d9175",
+        "keyword": {
+            "title"     : r"re:\[Morris\] Amazon no Hiyaku \| Amazon Elixir",
+            "title_en"  : str,
+            "title_ja"  : str,
+            "gallery_id": 147850,
+            "media_id"  : 867789,
+            "date"      : 1446050915,
+            "scanlator" : "",
+            "artist"    : ["morris"],
+            "group"     : list,
+            "parody"    : list,
+            "characters": list,
+            "tags"      : list,
+            "type"      : "manga",
+            "language"  : ["translated", "english"],
+            "lang"      : "en",
+            "width"     : int,
+            "height"    : int,
+        },
     })
 
     def __init__(self, match):
-        NHentaiExtractor.__init__(self, match)
-        self.gid = match.group(1)
+        GalleryExtractor.__init__(self, match)
+        self.gallery_id = match.group(2)
+        self.data = None
 
-    def items(self):
-        ginfo = self.get_gallery_info(self.gid)
-        data = self.transform_to_metadata(ginfo)
-        urlfmt = "{}/galleries/{}/{{}}.{{}}".format(
-            self.media_url, data["media_id"])
+    def metadata(self, page):
+        data = json.loads(text.extract(page, "N.gallery(", ");")[0])
+        self.data = data
+
+        title_en = data["title"].get("english", "")
+        title_ja = data["title"].get("japanese", "")
+
+        info = collections.defaultdict(list)
+        for tag in data["tags"]:
+            info[tag["type"]].append(tag["name"])
+
+        for language in info["language"]:
+            if language != "translated":
+                lang = util.language_to_code(language)
+                break
+        else:
+            lang = ""
+
+        return {
+            "title"     : title_en or title_ja,
+            "title_en"  : title_en,
+            "title_ja"  : title_ja,
+            "gallery_id": data["id"],
+            "media_id"  : text.parse_int(data["media_id"]),
+            "date"      : data["upload_date"],
+            "scanlator" : data["scanlator"],
+            "artist"    : info["artist"],
+            "group"     : info["group"],
+            "parody"    : info["parody"],
+            "characters": info["character"],
+            "tags"      : info["tag"],
+            "type"      : info["category"][0] if info["category"] else "",
+            "language"  : info["language"],
+            "lang"      : lang,
+        }
+
+    def images(self, _):
+        ufmt = "{}/galleries/{}/{{}}.{{}}".format(
+            self.media_url, self.data["media_id"])
         extdict = {"j": "jpg", "p": "png", "g": "gif"}
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["num"], image in enumerate(ginfo["images"]["pages"], 1):
-            ext = extdict.get(image["t"], "jpg")
-            data["width"] = image["w"]
-            data["height"] = image["h"]
-            data["extension"] = ext
-            yield Message.Url, urlfmt.format(data["num"], ext), data
 
-    def get_gallery_info(self, gallery_id):
-        """Extract and return info about a gallery by ID"""
-        url = "{}/g/{}".format(self.root, gallery_id)
-        page = self.request(url).text
-        return json.loads(text.extract(page, "N.gallery(", ");")[0])
+        return [
+            (ufmt.format(num, extdict.get(img["t"], "jpg")), {
+                "width": img["w"], "height": img["h"],
+            })
+            for num, img in enumerate(self.data["images"]["pages"], 1)
+        ]
 
 
-class NhentaiSearchExtractor(NHentaiExtractor):
+class NhentaiSearchExtractor(NhentaiBase, Extractor):
     """Extractor for nhentai search results"""
     category = "nhentai"
     subcategory = "search"
@@ -86,14 +113,14 @@ class NhentaiSearchExtractor(NHentaiExtractor):
     })
 
     def __init__(self, match):
-        NHentaiExtractor.__init__(self, match)
+        Extractor.__init__(self, match)
         self.params = text.parse_query(match.group(1))
 
     def items(self):
         yield Message.Version, 1
         data = {"_extractor": NhentaiGalleryExtractor}
-        for gid in self._pagination(self.params):
-            url = "{}/g/{}/".format(self.root, gid)
+        for gallery_id in self._pagination(self.params):
+            url = "{}/g/{}/".format(self.root, gallery_id)
             yield Message.Queue, url, data
 
     def _pagination(self, params):
@@ -102,9 +129,7 @@ class NhentaiSearchExtractor(NHentaiExtractor):
 
         while True:
             page = self.request(url, params=params).text
-
             yield from text.extract_iter(page, 'href="/g/', '/')
-
             if 'class="next"' not in page:
                 return
             params["page"] += 1
