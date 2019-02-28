@@ -463,12 +463,60 @@ class DeviantartJournalExtractor(DeviantartExtractor):
             "options": (("journals", "none"),),
         }),
         ("https://www.deviantart.com/shimoda7/journal/?catpath=/"),
-        ("https://angrywhitewanker.deviantart.com/journal/"),
+        ("https://shimoda7.deviantart.com/journal/"),
         ("https://shimoda7.deviantart.com/journal/?catpath=/"),
     )
 
     def deviations(self):
         return self.api.browse_user_journals(self.user, self.offset)
+
+
+class DeviantartScrapsExtractor(DeviantartExtractor):
+    """Extractor for an artist's scraps"""
+    subcategory = "scraps"
+    directory_fmt = ("{category}", "{username}", "Scraps")
+    archive_fmt = "s_{username}_{index}.{extension}"
+    pattern = BASE_PATTERN + r"/gallery/\?catpath=scraps\b"
+    test = (
+        ("https://www.deviantart.com/shimoda7/gallery/?catpath=scraps", {
+            "count": 12,
+            "options": (("original", False),),
+        }),
+        ("https://shimoda7.deviantart.com/gallery/?catpath=scraps"),
+    )
+
+    def deviations(self):
+        url = "{}/{}/gallery/?catpath=scraps".format(self.root, self.user)
+        page = self.request(url).text
+        csrf, pos = text.extract(page, '"csrf":"', '"')
+        iid , pos = text.extract(page, '"requestid":"', '"', pos)
+
+        url = "https://www.deviantart.com/dapi/v1/gallery/0"
+        data = {
+            "username": self.user,
+            "offset": self.offset,
+            "limit": "24",
+            "catpath": "scraps",
+            "_csrf": csrf,
+            "dapiIid": iid + "-jsok7403-1.1"
+        }
+
+        while True:
+            content = self.request(
+                url, method="POST", data=data).json()["content"]
+
+            for item in content["results"]:
+                if item["html"].startswith('<div class="ad-container'):
+                    continue
+                deviation_url = text.extract(item["html"], 'href="', '"')[0]
+                page = self.request(deviation_url).text
+                deviation_id = text.extract(page, '//deviation/', '"')[0]
+                if deviation_id:
+                    yield self.api.deviation(deviation_id)
+
+            if not content["has_more"]:
+                return
+            data["offset"] = content["next_offset"]
 
 
 class DeviantartPopularExtractor(DeviantartExtractor):
