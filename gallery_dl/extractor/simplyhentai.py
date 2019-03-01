@@ -23,7 +23,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
             "url": "258289249990502c3138719cb89e995a60861e49",
-            "keyword": "468a0a3db4fc6ad7fcae0facefb9753831c0404d",
+            "keyword": "18ab9defca53dbb2aeb7965193e93e0ea125b76b",
         }),
         ("https://www.simply-hentai.com/notfound", {
             "exception": exception.GalleryDLException,
@@ -55,14 +55,14 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
 
         return {
             "gallery_id": text.parse_int(gid),
-            "title": text.unescape(title),
-            "series": text.remove_html(series),
-            "characters": ", ".join(text.split_html(chars)),
-            "tags": text.split_html(tags),
-            "artist": ", ".join(text.split_html(artist)),
-            "lang": util.language_to_code(lang),
-            "language": lang,
-            "date": text.remove_html(date),
+            "title"     : text.unescape(title),
+            "artist"    : text.split_html(artist),
+            "parody"    : text.split_html(series),
+            "characters": text.split_html(chars),
+            "tags"      : text.split_html(tags),
+            "lang"      : util.language_to_code(lang),
+            "language"  : lang,
+            "date"      : text.remove_html(date),
         }
 
     def images(self, _):

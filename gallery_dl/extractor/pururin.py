@@ -20,24 +20,24 @@ class PururinGalleryExtractor(GalleryExtractor):
     test = ("https://pururin.io/gallery/38661/iowant-2", {
         "pattern": r"https://cdn.pururin.io/assets/images/data/38661/\d+\.jpg",
         "keyword": {
-            "artist": "Shoda Norihiro",
+            "title"     : "Iowant 2!!",
+            "title_en"  : "Iowant 2!!",
+            "title_jp"  : "",
+            "gallery_id": 38661,
+            "count"     : 19,
+            "artist"    : ["Shoda Norihiro"],
+            "group"     : ["Obsidian Order"],
+            "parody"    : ["Kantai Collection"],
             "characters": ["Iowa", "Teitoku"],
+            "tags"      : list,
+            "type"      : "Doujinshi",
             "collection": "",
             "convention": "C92",
-            "count": 19,
-            "extension": "jpg",
-            "gallery_id": 38661,
-            "group": "Obsidian Order",
-            "lang": "en",
-            "language": "English",
-            "parody": "Kantai Collection",
-            "rating": float,
-            "scanlator": "",
-            "tags": list,
-            "title": "Iowant 2!!",
-            "title_jp": str,
-            "type": "Doujinshi",
-            "uploader": "demo"
+            "rating"    : float,
+            "uploader"  : "demo",
+            "scanlator" : "",
+            "lang"      : "en",
+            "language"  : "English",
         }
     })
     root = "https://pururin.io"
@@ -74,18 +74,19 @@ class PururinGalleryExtractor(GalleryExtractor):
         self._ext = info["image_extension"]
         self._cnt = info["total_pages"]
 
-        for key in ("tags", "characters"):
+        for key in ("artist", "group", "parody", "tags", "characters"):
             data[key] = [
                 text.unescape(item)
                 for item in text.extract_iter(data[key], 'title="', '"')
             ]
-        for key in ("artist", "group", "parody", "type", "collection",
-                    "language", "scanlator", "convention"):
+        for key in ("type", "collection", "language", "scanlator",
+                    "convention"):
             data[key] = text.unescape(text.extract(
                 data[key], 'title="', '"')[0] or "")
 
         data["gallery_id"] = text.parse_int(self.gallery_id)
-        data["title"] = info["title"]
+        data["title"] = info["title"] or info.get("j_title") or ""
+        data["title_en"] = info["title"]
         data["title_jp"] = info.get("j_title") or ""
         data["uploader"] = text.remove_html(data["uploader"])
         data["rating"] = text.parse_float(data["rating"])
