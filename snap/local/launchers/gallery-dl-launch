@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# This is the maintainence launcher for the snap, make necessary runtime environment changes to make the snap work here.  You may also insert security confinement/deprecation/obsoletion notice of the snap here.
+
+set \
+	-o errexit \
+	-o errtrace \
+	-o nounset \
+	-o pipefail
+
+if ! test -v SNAP_ARCH_TRIPLET; then
+	printf 'Error: SNAP_ARCH_TRIPLET not set, this launcher requires workaround-snap-arch-triplet-launch launcher to work.\n' >&2
+	exit 1
+fi
+
+# Satisfy FFmpeg's usr/lib/ARCH/pulseaudio/libpulsecommon-11.1.so dependency
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}":"$SNAP"/usr/lib/"${SNAP_ARCH_TRIPLET}"/pulseaudio
+
+# Use user's real home directory for canonical configuration path access
+# FIXME: Waiting for Snap Store assertion
+declare REALHOME="$(
+	getent passwd "${USER}" \
+		| cut --delimiter=: --fields=6
+)"
+
+if ! test -f "${SNAP_USER_COMMON}"/.config/gallery-dl/config.json \
+	&& ! test -f "${SNAP_USER_COMMON}"/.gallery-dl.conf; then
+	declare userwide_config_file
+
+	for possible_config_file in \
+		"${REALHOME}"/.config/gallery-dl/config.json \
+		"${REALHOME}"/.gallery-dl.conf; do
+		if test -f "${possible_config_file}"; then
+			userwide_config_file="${possible_config_file}"
+		fi
+	done
+
+	if test -v userwide_config_file; then
+		printf -- \
+			'gallery-dl-launch: It appears that you have a gallery-dl configuration in your home directory, currently the snap distribution of gallery-dl cannot access it until you create a link via running the following command in the terminal:\n\n'
+		printf -- \
+			'gallery-dl-launch:     ln %s %s\n\n' \
+			"${userwide_config_file}" \
+			"~/snap/$SNAP_NAME/common/.gallery-dl.conf"
+	fi
+fi
+
+#HOME="${REALHOME}"
+
+# Finally run the next part of the command chain
+exec "${@}"
