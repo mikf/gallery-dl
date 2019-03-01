@@ -20,7 +20,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
     test = (
         ("https://hitomi.la/galleries/867789.html", {
             "url": "cb759868d090fe0e2655c3e29ebf146054322b6d",
-            "keyword": "52951edb50163180eb669a78aef0bab0522d32b7",
+            "keyword": "07536afc5696cb4983a4831ab4c70c1d155f875c",
         }),
         ("https://hitomi.la/galleries/1036181.html", {
             # "aa" subdomain for gallery-id ending in 1 (#142)
@@ -30,8 +30,8 @@ class HitomiGalleryExtractor(GalleryExtractor):
     )
 
     def __init__(self, match):
-        self.gid = text.parse_int(match.group(1))
-        url = "https://hitomi.la/galleries/{}.html".format(self.gid)
+        self.gallery_id = text.parse_int(match.group(1))
+        url = "https://hitomi.la/galleries/{}.html".format(self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -49,23 +49,22 @@ class HitomiGalleryExtractor(GalleryExtractor):
         lang = None if lang == "N/A" else text.remove_html(lang)
 
         return {
-            "gallery_id": self.gid,
-            "title": text.unescape(" ".join(title.split())),
-            "artist": self._prepare(artist),
-            "group": self._prepare(group),
-            "type": text.remove_html(gtype).capitalize(),
-            "lang": util.language_to_code(lang),
-            "language": lang,
-            "date": date,
-            "series": self._prepare(series),
+            "gallery_id": self.gallery_id,
+            "title"     : text.unescape(title.strip()),
+            "artist"    : self._prepare(artist),
+            "group"     : self._prepare(group),
+            "parody"    : self._prepare(series),
             "characters": self._prepare(chars),
-            "tags": self._prepare(tags),
+            "tags"      : self._prepare(tags),
+            "type"      : text.remove_html(gtype).capitalize(),
+            "lang"      : util.language_to_code(lang),
+            "language"  : lang,
+            "date"      : date,
         }
 
     def images(self, page):
         # see https://ltn.hitomi.la/common.js
-        frontends = 2
-        offset = self.gid % frontends if self.gid % 10 != 1 else 0
+        offset = self.gallery_id % 2 if self.gallery_id % 10 != 1 else 0
         subdomain = chr(97 + offset) + "a"
         base = "https://" + subdomain + ".hitomi.la/galleries/"
 
@@ -78,10 +77,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
 
     @staticmethod
     def _prepare(value):
-        if not value or "<ul " not in value:
-            return ""
-        value = ", ".join(text.extract_iter(
-            value, '.html">', '<'))
-        return string.capwords(
-            text.unescape(value)
-        )
+        return [
+            text.unescape(string.capwords(v))
+            for v in text.extract_iter(value or "", '.html">', '<')
+        ]

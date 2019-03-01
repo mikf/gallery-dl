@@ -32,6 +32,7 @@ class NhentaiGalleryExtractor(NhentaiBase, GalleryExtractor):
             "title_ja"  : str,
             "gallery_id": 147850,
             "media_id"  : 867789,
+            "count"     : 16,
             "date"      : 1446050915,
             "scanlator" : "",
             "artist"    : ["morris"],
@@ -40,8 +41,8 @@ class NhentaiGalleryExtractor(NhentaiBase, GalleryExtractor):
             "characters": list,
             "tags"      : list,
             "type"      : "manga",
-            "language"  : ["translated", "english"],
             "lang"      : "en",
+            "language"  : "English",
             "width"     : int,
             "height"    : int,
         },
@@ -63,12 +64,11 @@ class NhentaiGalleryExtractor(NhentaiBase, GalleryExtractor):
         for tag in data["tags"]:
             info[tag["type"]].append(tag["name"])
 
+        language = ""
         for language in info["language"]:
             if language != "translated":
-                lang = util.language_to_code(language)
+                language = language.capitalize()
                 break
-        else:
-            lang = ""
 
         return {
             "title"     : title_en or title_ja,
@@ -84,8 +84,8 @@ class NhentaiGalleryExtractor(NhentaiBase, GalleryExtractor):
             "characters": info["character"],
             "tags"      : info["tag"],
             "type"      : info["category"][0] if info["category"] else "",
-            "language"  : info["language"],
-            "lang"      : lang,
+            "lang"      : util.language_to_code(language),
+            "language"  : language,
         }
 
     def images(self, _):

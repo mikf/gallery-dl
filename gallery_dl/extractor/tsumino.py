@@ -48,24 +48,24 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
         ("https://www.tsumino.com/Book/Info/40996", {
             "url": "84bf30a86623039fc87855680fada884dc8a1ddd",
             "keyword": {
-                "artist": "Itou Life",
-                "characters": "Carmilla, Gudako, Gudao, Lancelot, Nightingale",
-                "collection": "",
-                "count": 42,
-                "date": "2018 June 29",
+                "title"     : r"re:Shikoshiko Daisuki Nightingale \+ Kaijou",
+                "title_en"  : r"re:Shikoshiko Daisuki Nightingale \+ Kaijou",
+                "title_jp"  : "シコシコ大好きナイチンゲール + 会場限定おまけ本",
                 "gallery_id": 40996,
-                "group": "Itou Life",
-                "lang": "en",
-                "language": "English",
-                "page": int,
-                "parodies": "Fate/Grand Order",
-                "rating": float,
-                "tags": str,
-                "thumbnail": "http://www.tsumino.com/Image/Thumb/40996",
-                "title": r"re:Shikoshiko Daisuki Nightingale \+ Kaijou Gentei",
-                "title_jp": "シコシコ大好きナイチンゲール + 会場限定おまけ本",
-                "type": "Doujinshi",
-                "uploader": "sehki"
+                "date"      : "2018 June 29",
+                "count"     : 42,
+                "collection": "",
+                "artist"    : ["Itou Life"],
+                "group"     : ["Itou Life"],
+                "parody"    : ["Fate/Grand Order"],
+                "characters": list,
+                "tags"      : list,
+                "type"      : "Doujinshi",
+                "rating"    : float,
+                "uploader"  : "sehki",
+                "lang"      : "en",
+                "language"  : "English",
+                "thumbnail" : "http://www.tsumino.com/Image/Thumb/40996",
             },
         }),
         ("https://www.tsumino.com/Read/View/45834"),
@@ -81,6 +81,8 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
         title, pos = extr(page, '"og:title" content="', '"')
         thumb, pos = extr(page, '"og:image" content="', '"', pos)
         title_en, _, title_jp = text.unescape(title).partition("/")
+        title_en = title_en.strip()
+        title_jp = title_jp.strip()
 
         uploader  , pos = extr(page, 'id="Uploader">'  , '</div>', pos)
         date      , pos = extr(page, 'id="Uploaded">'  , '</div>', pos)
@@ -95,19 +97,20 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
 
         return {
             "gallery_id": text.parse_int(self.gallery_id),
-            "title": title_en.strip(),
-            "title_jp": title_jp.strip(),
+            "title": title_en or title_jp,
+            "title_en": title_en,
+            "title_jp": title_jp,
             "thumbnail": thumb,
             "uploader": text.remove_html(uploader),
             "date": date.strip(),
             "rating": text.parse_float(rating.partition(" ")[0]),
             "type": text.remove_html(gtype),
             "collection": text.remove_html(collection),
-            "group": text.remove_html(group),
-            "artist": ", ".join(text.split_html(artist)),
-            "parodies": ", ".join(text.split_html(parody)),
-            "characters": ", ".join(text.split_html(character)),
-            "tags": ", ".join(text.split_html(tags)),
+            "group": text.split_html(group),
+            "artist": text.split_html(artist),
+            "parody": text.split_html(parody),
+            "characters": text.split_html(character),
+            "tags": text.split_html(tags),
             "language": "English",
             "lang": "en",
         }

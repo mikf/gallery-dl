@@ -12,16 +12,20 @@ from .common import GalleryExtractor, Extractor, Message
 from .. import text
 
 
-class HentaifoxGalleryExtractor(GalleryExtractor):
-    """Extractor for image galleries on hentaifox.com"""
+class HentaifoxBase():
+    """Base class for hentaifox extractors"""
     category = "hentaifox"
+    root = "https://hentaifox.com"
+
+
+class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
+    """Extractor for image galleries on hentaifox.com"""
     pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com(/gallery/(\d+))"
     test = ("https://hentaifox.com/gallery/56622/", {
         "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
         "count": 24,
-        "keyword": "d0df47e073e32a7752236ab151949c3820f9d81e",
+        "keyword": "38f8517605feb6854d48833297da6b05c6541b69",
     })
-    root = "https://hentaifox.com"
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)
@@ -30,7 +34,7 @@ class HentaifoxGalleryExtractor(GalleryExtractor):
     def metadata(self, page):
         title, pos = text.extract(page, "<h1>", "</h1>")
         data = text.extract_all(page, (
-            ("parodies"  , ">Parodies:"  , "</a></span>"),
+            ("parody"    , ">Parodies:"  , "</a></span>"),
             ("characters", ">Characters:", "</a></span>"),
             ("tags"      , ">Tags:"      , "</a></span>"),
             ("artist"    , ">Artists:"   , "</a></span>"),
@@ -39,9 +43,10 @@ class HentaifoxGalleryExtractor(GalleryExtractor):
         ), pos)[0]
 
         for key, value in data.items():
-            data[key] = text.remove_html(value).replace(" , ", ", ")
+            data[key] = text.split_html(value)[::2]
         data["gallery_id"] = text.parse_int(self.gallery_id)
         data["title"] = text.unescape(title)
+        data["type"] = data["type"][0] if data["type"] else ""
         data["language"] = "English"
         data["lang"] = "en"
         return data
@@ -53,9 +58,8 @@ class HentaifoxGalleryExtractor(GalleryExtractor):
         ]
 
 
-class HentaifoxSearchExtractor(Extractor):
+class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
     """Extractor for search results and listings on hentaifox.com"""
-    category = "hentaifox"
     subcategory = "search"
     pattern = (r"(?:https?://)?(?:www\.)?hentaifox\.com"
                r"(/(?:parody|tag|artist|character|search)/[^/?%#]+)")
@@ -76,7 +80,6 @@ class HentaifoxSearchExtractor(Extractor):
             },
         }),
     )
-    root = "https://hentaifox.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
