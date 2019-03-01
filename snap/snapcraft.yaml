@@ -1,0 +1,92 @@
+%YAML 1.1
+---
+# Snapcraft Recipe for gallery-dl
+# ------------------------------
+# This file is in the YAML data serialization format:
+# http://yaml.org
+# For the spec. of writing this file refer the following documentation:
+# * The snapcraft format
+#   https://docs.snapcraft.io/the-snapcraft-format/8337
+# * Snap Documentation
+#   https://docs.snapcraft.io
+# * Topics under the doc category in the Snapcraft Forum
+#   https://forum.snapcraft.io/c/doc
+# For support refer to the snapcraft section in the Snapcraft Forum:
+# https://forum.snapcraft.io/c/snapcraft
+name: gallery-dl
+license: GPL-2.0
+base: core18
+summary: Download image-galleries and -collections from several image hosting sites
+description: |
+  `gallery-dl` is a command-line program to download image-galleries and -collections from several image hosting sites (see [Supported Sites](https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst)). It is a cross-platform tool with many configuration options and powerful filenaming capabilities.
+
+version: determined-by-version-script
+version-script: git describe --always --dirty --tags | sed 's/^v//'
+
+confinement: strict
+grade: stable
+
+plugs:
+  # For `xdg-open` command access for opening OAuth authentication webpages
+  desktop:
+
+  # Storage access
+  home:
+  removable-media: # Non-A/C
+
+  # Network access
+  network:
+
+  # For network service for recieving OAuth callback tokens
+  network-bind:
+
+  # Configuration access
+  # FIXME: Waiting for the Snap Store autoconnection assertion
+  # https://forum.snapcraft.io/t/interface-auto-connection-request-for-the-gallery-dl-snap/10092
+  #personal-files:
+    #read:
+    #- $HOME/.config/gallery-dl
+    #- $HOME/.gallery-dl.conf
+  #system-files:
+    #read:
+    #- /etc/gallery-dl.conf
+
+parts:
+  # Launcher programs to fix problems at runtime
+  launchers:
+    source: snap/local/launchers
+    plugin: dump
+    organize:
+      '*': bin/
+
+  gallery-dl:
+    source: .
+    plugin: python
+
+  ffmpeg:
+    plugin: nil
+    stage-packages:
+    - ffmpeg
+    - libavcodec57
+    - libavdevice57
+    - libavfilter6
+    - libavformat57
+    - libavresample3
+    - libavutil55
+    - libpostproc54
+    - libpulse0
+    - libslang2
+    - libswresample2
+    - libswscale4
+
+apps:
+  gallery-dl:
+    adapter: full
+    command-chain:
+    - bin/workaround-snap-arch-triplet-launch
+    - bin/gallery-dl-launch
+    command: bin/gallery-dl
+    environment:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      HOME: $SNAP_USER_COMMON
