@@ -30,7 +30,6 @@ if os.name == "nt":
 else:
     _default_configs = [
         "/etc/gallery-dl.conf",
-        "${HOME}/.config/gallery/config.json",
         "${HOME}/.config/gallery-dl/config.json",
         "${HOME}/.gallery-dl.conf",
     ]
