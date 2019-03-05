@@ -395,7 +395,7 @@ class Formatter():
             funcs.append(func(key))
 
         if conversion:
-            funcs.append(self.conversions[conversion])
+            funcs.append(self.CONVERSIONS[conversion])
 
         if format_spec:
             if format_spec[0] == "?":
