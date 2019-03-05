@@ -86,6 +86,7 @@ modules = [
     "foolfuuka",
     "foolslide",
     "mastodon",
+    "shopify",
     "imagehosts",
     "directlink",
     "recursive",

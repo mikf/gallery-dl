@@ -19,13 +19,17 @@ from gallery_dl import extractor, job, config, exception
 # these don't work on Travis CI
 TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie", "bobx",
-    "archivedmoe", "archiveofsins", "thebarchive", "fireden",
+    "archivedmoe", "archiveofsins", "thebarchive", "fireden", "4plebs",
     "sankaku", "idolcomplex", "mangahere", "readcomiconline",
 }
 
 # temporary issues, etc.
 BROKEN = {
+    "fallenangels",
+    "komikcast",
     "mangapark",
+    "myportfolio",
+    "seaotterscans",
 }
 
 
