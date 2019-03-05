@@ -22,6 +22,7 @@ Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Im
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
+Fashion Nova         https://www.fashionnova.com/        Collections, Products
 Fireden              https://boards.fireden.net/         Threads
 Flickr               https://www.flickr.com/             |flickr-C|                                         Optional (OAuth)
 Futaba Channel       https://www.2chan.net/              Threads

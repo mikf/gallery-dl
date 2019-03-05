@@ -22,6 +22,7 @@ CATEGORY_MAP = {
     "e621"           : "e621",
     "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
+    "fashionnova"    : "Fashion Nova",
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
     "hentaicafe"     : "Hentai Cafe",
