@@ -14,7 +14,7 @@ import re
 
 
 class ShopifyExtractor(SharedConfigMixin, Extractor):
-    """Base class for shopify extractors"""
+    """Base class for Shopify extractors"""
     basecategory = "shopify"
     filename_fmt = "{product[title]}_{num:>02}_{id}.{extension}"
     archive_fmt = "{id}"
@@ -89,7 +89,7 @@ class ShopifyProductExtractor(ShopifyExtractor):
 
 
 def generate_extractors():
-    """Dynamically generate Extractor classes for FoOlSlide instances"""
+    """Dynamically generate Extractor classes for Shopify instances"""
     symtable = globals()
     extractors = config.get(("extractor", "shopify"))
 
