@@ -7,7 +7,7 @@ Site                 URL                                 Capabilities           
 4chan                https://www.4chan.org/              Threads
 4plebs               https://archive.4plebs.org/         Threads
 8chan                https://8ch.net/                    Threads
-Adobe Portfolio      https://www.myportfolio.com/        Images from Users, Galleries
+Adobe Portfolio      https://www.myportfolio.com/        Galleries
 arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads

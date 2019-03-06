@@ -28,7 +28,6 @@ BROKEN = {
     "fallenangels",
     "komikcast",
     "mangapark",
-    "myportfolio",
     "seaotterscans",
 }
 
