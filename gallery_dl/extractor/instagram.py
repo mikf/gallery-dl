@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2018 Leonardo Taccari
+# Copyright 2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -111,7 +112,7 @@ class InstagramExtractor(Extractor):
 class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
     subcategory = "image"
-    pattern = r"(?:https?://)?(?:www\.)?instagram\.com/p/([^/]+)/?"
+    pattern = r"(?:https?://)?(?:www\.)?instagram\.com/p/([^/?&#]+)"
     test = (
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
@@ -175,7 +176,8 @@ class InstagramImageExtractor(InstagramExtractor):
 class InstagramUserExtractor(InstagramExtractor):
     """Extractor for ProfilePage"""
     subcategory = "user"
-    pattern = r"(?:https?://)?(?:www\.)?instagram\.com/(?!p/)([^/?&#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/(?!p/|explore/|directory/|accounts/)([^/?&#]+)")
     test = ("https://www.instagram.com/instagram/", {
         "range": "1-12",
         "count": ">= 12",
