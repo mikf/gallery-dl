@@ -12,11 +12,6 @@ from .common import Extractor, Message
 from .. import text
 
 
-BASE_PATTERN = (
-    r"(?:myportfolio:(?:https?://)?([^/]+)|"
-    r"(?:https?://)?([^.]+\.myportfolio\.com))")
-
-
 class MyportfolioGalleryExtractor(Extractor):
     """Extractor for an image gallery on www.myportfolio.com"""
     category = "myportfolio"
@@ -24,38 +19,56 @@ class MyportfolioGalleryExtractor(Extractor):
     directory_fmt = ("{category}", "{user}", "{title}")
     filename_fmt = "{num:>02}.{extension}"
     archive_fmt = "{user}_{filename}"
-    pattern = BASE_PATTERN + r"/(?!projects/?$)([^/?&#]+)"
+    pattern = (r"(?:myportfolio:(?:https?://)?([^/]+)|"
+               r"(?:https?://)?([^.]+\.myportfolio\.com))"
+               r"(/[^/?&#]+)?")
     test = (
         ("https://hannahcosgrove.myportfolio.com/chloe", {
             "url": "d5cf993a05439a9d8a99590aa61e14e5ac8d0cd0",
             "keyword": "89b055a6ce833ba4f060ab1f97f086e58ce8bbd1",
         }),
+        ("https://hannahcosgrove.myportfolio.com/lfw", {
+            "pattern": r"https://hannahcosgrove\.myportfolio\.com/[^/?&#+]+$",
+            "count": ">= 8",
+        }),
         ("myportfolio:https://tooco.com.ar/6-of-diamonds-paradise-bird", {
             "count": 3,
+        }),
+        ("myportfolio:https://tooco.com.ar/", {
+            "count": ">= 40",
         }),
     )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.domain = match.group(1) or match.group(2)
-        self.gallery = match.group(3)
+        domain1, domain2, self.path = match.groups()
+        self.domain = domain1 or domain2
+        self.prefix = "myportfolio:" if domain1 else ""
 
     def items(self):
-        url = "https://{}/{}".format(self.domain, self.gallery)
+        yield Message.Version, 1
+        url = "https://" + self.domain + (self.path or "")
         page = self.request(url).text
 
-        data = self.get_metadata(page)
-        imgs = self.get_images(page)
-        data["count"] = len(imgs)
+        projects = text.extract(
+            page, '<section class="project-covers', '</section>')[0]
 
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["num"], url in enumerate(imgs, 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
+        if projects:
+            data = {"_extractor": MyportfolioGalleryExtractor}
+            base = self.prefix + "https://" + self.domain
+            for path in text.extract_iter(projects, ' href="', '"'):
+                yield Message.Queue, base + path, data
+        else:
+            data = self.metadata(page)
+            imgs = self.images(page)
+            data["count"] = len(imgs)
+            yield Message.Directory, data
+            for data["num"], url in enumerate(imgs, 1):
+                yield Message.Url, url, text.nameext_from_url(url, data)
 
     @staticmethod
-    def get_metadata(page):
-        """Collect metadata for extractor-job"""
+    def metadata(page):
+        """Collect general image metadata"""
         # og:title contains data as "<user> - <title>", but both
         # <user> and <title> can contain a "-" as well, so we get the title
         # from somewhere else and cut that amount from the og:title content
@@ -77,38 +90,6 @@ class MyportfolioGalleryExtractor(Extractor):
         }
 
     @staticmethod
-    def get_images(page):
+    def images(page):
         """Extract and return a list of all image-urls"""
         return list(text.extract_iter(page, 'js-lightbox" data-src="', '"'))
-
-
-class MyportfolioUserExtractor(Extractor):
-    """Extractor for a user's galleries on www.myportfolio.com"""
-    category = "myportfolio"
-    subcategory = "user"
-    pattern = BASE_PATTERN + r"/?$"
-    test = (
-        ("https://hannahcosgrove.myportfolio.com/", {
-            "pattern": r"https://hannahcosgrove\.myportfolio\.com/[^/?&#+]+$",
-            "count": ">= 23",
-        }),
-        ("myportfolio:https://tooco.com.ar/", {
-            "count": ">= 40",
-        }),
-    )
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.domain = match.group(1) or match.group(2)
-        self.prefix = "myportfolio:" if match.group(1) else ""
-
-    def items(self):
-        url = "https://" + self.domain
-        page = self.request(url).text
-        main = text.extract(page, "<main>", "</main>")[0]
-        data = {"_extractor": MyportfolioGalleryExtractor}
-
-        yield Message.Version, 1
-        for path in text.extract_iter(main, ' href="', '"'):
-            if path and path[0] == "/":
-                yield Message.Queue, self.prefix + url + path, data
