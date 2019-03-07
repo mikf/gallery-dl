@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message, SharedConfigMixin
 from .. import text, config
+import time
 import re
 
 
@@ -23,6 +24,20 @@ class ShopifyExtractor(SharedConfigMixin, Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.item_url = self.root + match.group(1)
+
+    def request(self, url, method="GET", expect=(429, 430), **kwargs):
+        tries = 0
+        kwargs["expect"] = expect
+        while True:
+            response = Extractor.request(self, url, method, **kwargs)
+            if response.status_code not in expect:
+                return response
+            tries += 1
+            waittime = 2 ** (tries + 2)
+            self.log.warning(
+                "HTTP status %s: %s - Waiting for %d seconds",
+                response.status_code, response.reason, waittime)
+            time.sleep(waittime)
 
     def items(self):
         data = self.metadata()
