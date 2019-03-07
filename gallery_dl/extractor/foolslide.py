@@ -9,11 +9,16 @@
 """Extractors for FoOlSlide based sites"""
 
 from .common import (
-    Extractor, ChapterExtractor, MangaExtractor, Message, SharedConfigMixin)
-from .. import text, util, config
+    Extractor,
+    ChapterExtractor,
+    MangaExtractor,
+    SharedConfigMixin,
+    Message,
+    generate_extractors,
+)
+from .. import text, util
 import base64
 import json
-import re
 
 
 class FoolslideBase(SharedConfigMixin):
@@ -41,6 +46,7 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
     directory_fmt = (
         "{category}", "{manga}", "{chapter_string}")
     archive_fmt = "{id}"
+    pattern_fmt = r"(/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     decode = "default"
 
     def items(self):
@@ -92,6 +98,7 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
 
 class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
+    pattern_fmt = r"(/series/[^/?&#]+)"
 
     def chapters(self, page):
         manga , pos = text.extract(page, '<h1 class="title">', '</h1>')
@@ -116,52 +123,6 @@ class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
             })))
 
 
-def generate_extractors():
-    """Dynamically generate Extractor classes for FoOlSlide instances"""
-
-    symtable = globals()
-    extractors = config.get(("extractor", "foolslide"))
-
-    if extractors:
-        EXTRACTORS.update(extractors)
-
-    for category, info in EXTRACTORS.items():
-
-        if not isinstance(info, dict):
-            continue
-
-        root = info["root"]
-        domain = root[root.index(":") + 3:]
-        pattern = info.get("pattern") or re.escape(domain)
-        name = (info.get("name") or category).capitalize()
-
-        class ChExtr(FoolslideChapterExtractor):
-            pass
-
-        ChExtr.__name__ = ChExtr.__qualname__ = name + "ChapterExtractor"
-        ChExtr.__doc__ = "Extractor for manga-chapters from " + domain
-        ChExtr.category = category
-        ChExtr.pattern = (r"(?:https?://)?" + pattern +
-                          r"(/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)")
-        ChExtr.test = info.get("test-chapter")
-        ChExtr.root = root
-        if "decode" in info:
-            ChExtr.decode = info["decode"]
-        symtable[ChExtr.__name__] = ChExtr
-
-        class MaExtr(FoolslideMangaExtractor):
-            pass
-
-        MaExtr.__name__ = MaExtr.__qualname__ = name + "MangaExtractor"
-        MaExtr.__doc__ = "Extractor for manga from " + domain
-        MaExtr.category = category
-        MaExtr.pattern = r"(?:https?://)?" + pattern + r"(/series/[^/?&#]+)"
-        MaExtr.test = info.get("test-manga")
-        MaExtr.root = root
-        MaExtr.chapterclass = ChExtr
-        symtable[MaExtr.__name__] = MaExtr
-
-
 EXTRACTORS = {
     "dokireader": {
         "root": "https://kobato.hologfx.com/reader",
@@ -180,7 +141,7 @@ EXTRACTORS = {
     "jaiminisbox": {
         "root": "https://jaiminisbox.com/reader",
         "pattern": r"(?:www\.)?jaiminisbox\.com/reader",
-        "decode": "base64",
+        "extra": {"decode": "base64"},
         "test-chapter": (
             ("https://jaiminisbox.com/reader/read/uratarou/en/0/1/", {
                 "keyword": "6009af77cc9c05528ab1fdda47b1ad9d4811c673",
@@ -290,7 +251,10 @@ EXTRACTORS = {
                 "keyword": "3a24f1088b4d7f3b798a96163f21ca251293a120",
             }),
     },
+    "_ckey": "chapterclass",
 }
 
-
-generate_extractors()
+generate_extractors(EXTRACTORS, globals(), (
+    FoolslideChapterExtractor,
+    FoolslideMangaExtractor,
+))

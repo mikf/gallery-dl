@@ -8,8 +8,8 @@
 
 """Extractors for Shopify instances"""
 
-from .common import Extractor, Message, SharedConfigMixin
-from .. import text, config
+from .common import Extractor, Message, SharedConfigMixin, generate_extractors
+from .. import text
 import time
 import re
 
@@ -63,13 +63,13 @@ class ShopifyExtractor(SharedConfigMixin, Extractor):
 
     def products(self):
         """Return an iterable with all relevant product URLs"""
-        return ()
 
 
 class ShopifyCollectionExtractor(ShopifyExtractor):
     """Base class for collection extractors for Shopify based sites"""
     subcategory = "collection"
     directory_fmt = ("{category}", "{collection[title]}")
+    pattern_fmt = r"(/collections/[\w-]+)/?(?:\?([^#]+))?(?:$|#)"
 
     def __init__(self, match):
         ShopifyExtractor.__init__(self, match)
@@ -98,58 +98,23 @@ class ShopifyProductExtractor(ShopifyExtractor):
     """Base class for product extractors for Shopify based sites"""
     subcategory = "product"
     directory_fmt = ("{category}", "Products")
+    pattern_fmt = r"((?:/collections/[\w-]+)?/products/[\w-]+)"
 
     def products(self):
         return (self.item_url,)
-
-
-def generate_extractors():
-    """Dynamically generate Extractor classes for Shopify instances"""
-    symtable = globals()
-    extractors = config.get(("extractor", "shopify"))
-
-    if extractors:
-        EXTRACTORS.update(extractors)
-
-    for category, info in EXTRACTORS.items():
-
-        if not isinstance(info, dict):
-            continue
-
-        root = info["root"]
-        domain = root[root.index(":") + 3:]
-        pattern = info.get("pattern") or re.escape(domain)
-        name = (info.get("name") or category).capitalize()
-
-        class CoExtr(ShopifyCollectionExtractor):
-            pass
-
-        CoExtr.__name__ = CoExtr.__qualname__ = name + "CollectionExtractor"
-        CoExtr.__doc__ = "Extractor for product collections from " + domain
-        CoExtr.category = category
-        CoExtr.pattern = (r"(?:https?://)?" + pattern +
-                          r"(/collections/[\w-]+)/?(?:\?([^#]+))?(?:$|#)")
-        CoExtr.test = info.get("test-collection")
-        CoExtr.root = root
-        symtable[CoExtr.__name__] = CoExtr
-
-        class PrExtr(ShopifyProductExtractor):
-            pass
-
-        PrExtr.__name__ = PrExtr.__qualname__ = name + "ProductExtractor"
-        PrExtr.__doc__ = "Extractor for individual products from " + domain
-        PrExtr.category = category
-        PrExtr.pattern = (r"(?:https?://)?" + pattern +
-                          r"((?:/collections/[\w-]+)?/products/[\w-]+)")
-        PrExtr.test = info.get("test-product")
-        PrExtr.root = root
-        symtable[PrExtr.__name__] = PrExtr
 
 
 EXTRACTORS = {
     "fashionnova": {
         "root": "https://www.fashionnova.com",
         "pattern": r"(?:www\.)?fashionnova\.com",
+        "test-product": (
+            ("https://www.fashionnova.com/products/essential-slide-red", {
+                "pattern": r"https?://cdn\.shopify.com/",
+                "count": 3,
+            }),
+            ("https://www.fashionnova.com/collections/flats/products/name"),
+        ),
         "test-collection": (
             ("https://www.fashionnova.com/collections/mini-dresses", {
                 "range": "1-20",
@@ -158,13 +123,11 @@ EXTRACTORS = {
             ("https://www.fashionnova.com/collections/mini-dresses/?page=1"),
             ("https://www.fashionnova.com/collections/mini-dresses#1"),
         ),
-        "test-product": (
-            ("https://www.fashionnova.com/products"
-             "/only-here-tonight-cut-out-dress-black"),
-            ("https://www.fashionnova.com/collections/mini-dresses/products"
-             "/only-here-tonight-cut-out-dress-black"),
-        )
+
     },
 }
 
-generate_extractors()
+generate_extractors(EXTRACTORS, globals(), (
+    ShopifyProductExtractor,
+    ShopifyCollectionExtractor,
+))
