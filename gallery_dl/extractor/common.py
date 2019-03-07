@@ -337,6 +337,48 @@ class SharedConfigMixin():
         return value
 
 
+def generate_extractors(extractor_data, symtable, classes):
+    """Dynamically generate Extractor classes"""
+    extractors = config.get(("extractor", classes[0].basecategory))
+    ckey = extractor_data.get("_ckey")
+    prev = None
+
+    if extractors:
+        extractor_data.update(extractors)
+
+    for category, info in extractor_data.items():
+
+        if not isinstance(info, dict):
+            continue
+
+        root = info["root"]
+        domain = root[root.index(":") + 3:]
+        pattern = info.get("pattern") or re.escape(domain)
+        name = (info.get("name") or category).capitalize()
+
+        for cls in classes:
+
+            class Extr(cls):
+                pass
+            Extr.__module__ = cls.__module__
+            Extr.__name__ = Extr.__qualname__ = \
+                name + cls.subcategory.capitalize() + "Extractor"
+            Extr.__doc__ = \
+                "Extractor for " + cls.subcategory + "s from " + domain
+            Extr.category = category
+            Extr.pattern = r"(?:https?://)?" + pattern + cls.pattern_fmt
+            Extr.test = info.get("test-" + cls.subcategory)
+            Extr.root = root
+
+            if "extra" in info:
+                for key, value in info["extra"].items():
+                    setattr(Extr, key, value)
+            if prev and ckey:
+                setattr(Extr, ckey, prev)
+
+            symtable[Extr.__name__] = prev = Extr
+
+
 # Reduce strictness of the expected magic string in cookiejar files.
 # (This allows the use of Wget-generated cookiejars without modification)
 
