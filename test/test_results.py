@@ -25,10 +25,9 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "fallenangels",
-    "komikcast",
+    "dokireader",  # expired cert
     "mangapark",
-    "seaotterscans",
+    "seaotterscans",  # "Name or service not known"
 }
 
 
