@@ -51,7 +51,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     test = (
         (("https://komikcast.com/chapter/"
           "apotheosis-chapter-02-2-bahasa-indonesia/"), {
-            "url": "9a83891748e51a885d918032274706e9c76d01ca",
+            "url": "f6b43fbc027697749b3ea1c14931c83f878d7936",
             "keyword": "f3938e1aff9ad1f302f52447e9781b21f6da26d4",
         }),
         (("https://komikcast.com/chapter/"
