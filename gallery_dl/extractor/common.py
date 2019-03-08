@@ -389,18 +389,13 @@ http.cookiejar.MozillaCookieJar.magic_re = re.compile(
 # The first import of requests happens inside this file.
 # If we are running on Windows and the from requests expected certificate file
 # is missing (which happens in a standalone executable from py2exe), the
-# requests.Session object gets monkey patched to always set its 'verify'
-# attribute to False to avoid an exception being thrown when attempting to
-# access https:// URLs.
+# 'verify' option is globally set to False to avoid an exception being thrown
+# when attempting to access https:// URLs.
 
 if os.name == "nt":
     import os.path
     import requests.certs
     import requests.packages.urllib3 as ulib3
     if not os.path.isfile(requests.certs.where()):
-        def patched_init(self):
-            session_init(self)
-            self.verify = False
-        session_init = requests.Session.__init__
-        requests.Session.__init__ = patched_init
+        config.set(("verify",), False)
         ulib3.disable_warnings(ulib3.exceptions.InsecureRequestWarning)
