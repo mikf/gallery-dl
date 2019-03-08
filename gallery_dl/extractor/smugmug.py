@@ -19,11 +19,10 @@ BASE_PATTERN = (
 class SmugmugExtractor(Extractor):
     """Base class for smugmug extractors"""
     category = "smugmug"
-    filename_fmt = ("{category}_{User[NickName]:?/_/}"
-                    "{Image[UploadKey]}_{Image[ImageKey]}.{extension}")
+    filename_fmt = ("{Image[FileName]}")
     empty_user = {
         "Uri": "",
-        "ResponseLevel": "Public",
+        "ResponseLevel": "Private",
         "Name": "",
         "NickName": "",
         "QuickShare": False,
@@ -36,13 +35,35 @@ class SmugmugExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.api = SmugmugAPI(self)
+        #needed to download non-public images
+        self.session = self.api.session
 
     @staticmethod
     def _apply_largest(image, delete=True):
-        largest = image["Uris"]["LargestImage"]
+
+
+        if any(map(lambda _:_.startswith('VideoSize'), image['Uris']['ImageSizeDetails'].keys())):
+
+            largest_video = 0
+            largest_video_key = None
+
+            for k in image['Uris']['ImageSizeDetails'].keys():
+                if not k.startswith('VideoSize'):
+                    continue
+
+                sz = image['Uris']['ImageSizeDetails'][k]['Size']
+                if sz > largest_video:
+                    largest_video = sz
+                    largest_video_key = k
+
+            largest = image['Uris']['ImageSizeDetails'][largest_video_key]
+            image['FileName'] = image['FileName']+'.mp4'
+        else :
+            largest = image["Uris"]["ImageSizeDetails"]["ImageSizeOriginal"]
+
         if delete:
             del image["Uris"]
-        for key in ("Url", "Width", "Height", "MD5", "Size", "Watermarked"):
+        for key in ("Url", "Width", "Height", "MD5", "Size", "Watermarked", "FileName"):
             if key in largest:
                 image[key] = largest[key]
         return image["Url"]
@@ -52,7 +73,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
     """Extractor for smugmug albums"""
     subcategory = "album"
     directory_fmt = ("{category}", "{User[NickName]}", "{Album[Name]}")
-    archive_fmt = "a_{Album[AlbumKey]}_{Image[ImageKey]}"
+    archive_fmt = "a_{Album[AlbumKey]}_{Image[FileName]}"
     pattern = r"smugmug:album:([^:]+)$"
     test = (
         ("smugmug:album:ddvxpg", {
@@ -83,7 +104,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
         yield Message.Version, 1
         yield Message.Directory, data
 
-        for image in self.api.album_images(self.album_id, "LargestImage"):
+        for image in self.api.album_images(self.album_id, "ImageSizeDetails"):
             url = self._apply_largest(image)
             data["Image"] = image
             yield Message.Url, url, text.nameext_from_url(url, data)
@@ -93,7 +114,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
     """Extractor for individual smugmug images"""
     subcategory = "image"
     directory_fmt = ("{category}", "{User[NickName]}")
-    archive_fmt = "{Image[ImageKey]}"
+    archive_fmt = "{Image[FileName]}"
     pattern = BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#]+)"
     test = (
         ("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
@@ -113,7 +134,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
         self.image_id = match.group(3)
 
     def items(self):
-        image = self.api.image(self.image_id, "LargestImage,ImageOwner")
+        image = self.api.image(self.image_id, "ImageSizeDetails,ImageOwner")
         user = image["Uris"].get("ImageOwner") or self.empty_user.copy()
         url = self._apply_largest(image)
 
