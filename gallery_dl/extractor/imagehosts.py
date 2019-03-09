@@ -177,16 +177,21 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgspice.com"""
     category = "imgspice"
     pattern = r"(?:https?://)?((?:www\.)?imgspice\.com/([^/?&#]+))"
-    test = ("https://imgspice.com/zop38mvvq29u/", {
-        "url": "a45833733c02b64d105363ffd8fd19f06992a2f7",
+    test = ("https://imgspice.com/nwfwtpyog50y/test.png.html", {
+        "url": "b8c30a8f51ee1012959a4cfd46197fabf14de984",
+        "keyword": "100e310a19a2fa22d87e1bbc427ecb9f6501e0c0",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
     https = True
     params = None
 
     def get_info(self, page):
-        filename, pos = text.extract(page, '<td nowrap>', '</td>')
-        url     , pos = text.extract(page, '<img src="https://img', '"', pos)
-        return "https://img" + url, text.unescape(filename)
+        pos = page.find('id="imgpreview"')
+        if pos < 0:
+            raise exception.NotFoundError("image")
+        url , pos = text.extract(page, 'src="', '"', pos)
+        name, pos = text.extract(page, 'alt="', '"', pos)
+        return url, text.unescape(name)
 
 
 class PixhostImageExtractor(ImagehostImageExtractor):
