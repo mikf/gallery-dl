@@ -745,6 +745,15 @@ Description Minimum and maximum wait time in seconds between each image
 =========== =====
 
 
+extractor.smugmug.videos
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Download video files.
+=========== =====
+
+
 extractor.tumblr.avatar
 -----------------------
 =========== =====
