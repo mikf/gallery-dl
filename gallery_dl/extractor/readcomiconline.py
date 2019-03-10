@@ -9,7 +9,7 @@
 """Extract comic-issues and entire comics from https://readcomiconline.to/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, cloudflare
+from .. import text
 import re
 
 
@@ -20,8 +20,6 @@ class ReadcomiconlineBase():
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     archive_fmt = "{issue_id}_{page}"
     root = "https://readcomiconline.to"
-
-    request = cloudflare.request_func
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):

@@ -9,16 +9,11 @@
 """Extract manga-chapters and entire manga from https://kissmanga.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, cloudflare, aes, exception
+from .. import text, aes, exception
 from ..cache import cache
 import hashlib
 import ast
 import re
-
-IV = [
-    0xa5, 0xe8, 0xe2, 0xe9, 0xc2, 0x72, 0x1b, 0xe0,
-    0xa8, 0x4a, 0xd6, 0x60, 0xc4, 0x72, 0xc1, 0xf3
-]
 
 
 class KissmangaBase():
@@ -28,10 +23,10 @@ class KissmangaBase():
     root = "https://kissmanga.com"
 
     def request(self, url):
-        response = cloudflare.request_func(self, url)
+        response = super().request(url)
         if response.history and "/Message/AreYouHuman?" in response.url:
             self.log.error("Requesting too many pages caused a redirect to %s."
-                           " Try visiting this URL in your browser and solving"
+                           " Try visiting this URL in your browser and solve"
                            " the CAPTCHA to continue.", response.url)
             raise exception.StopExtraction()
         return response
@@ -112,8 +107,10 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
         self.session.headers["Referer"] = None
         try:
             key = self.build_aes_key(page)
+            iv = (0xa5, 0xe8, 0xe2, 0xe9, 0xc2, 0x72, 0x1b, 0xe0,
+                  0xa8, 0x4a, 0xd6, 0x60, 0xc4, 0x72, 0xc1, 0xf3)
             return [
-                (aes.aes_cbc_decrypt_text(data, key, IV), None)
+                (aes.aes_cbc_decrypt_text(data, key, iv), None)
                 for data in text.extract_iter(
                     page, 'lstImages.push(wrapKA("', '"'
                 )
