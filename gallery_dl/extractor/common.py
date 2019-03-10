@@ -18,7 +18,7 @@ import requests
 import threading
 import http.cookiejar
 from .message import Message
-from .. import config, text, exception
+from .. import config, text, exception, cloudflare
 
 
 class Extractor():
@@ -86,6 +86,10 @@ class Extractor():
                     if encoding:
                         response.encoding = encoding
                     return response
+                if cloudflare.is_challenge(response):
+                    self.log.info("Solving Cloudflare challenge")
+                    url = cloudflare.solve_challenge(session, response, kwargs)
+                    continue
 
                 msg = "{}: {} for url: {}".format(code, response.reason, url)
                 if code < 500 and code != 429:
