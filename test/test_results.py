@@ -27,7 +27,6 @@ TRAVIS_SKIP = {
 BROKEN = {
     "dokireader",  # expired cert
     "mangapark",
-    "seaotterscans",  # "Name or service not known"
 }
 
 
