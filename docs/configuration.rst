@@ -940,7 +940,7 @@ downloader.ytdl.format
 Type        ``string``
 Default     youtube-dl's default, currently ``"bestvideo+bestaudio/best"``
 Description Video `format selection
-            <https://github.com/rg3/youtube-dl#format-selection>`__
+            <https://github.com/ytdl-org/youtube-dl#format-selection>`__
             directly passed to youtube-dl.
 =========== =====
 
@@ -972,7 +972,7 @@ Example     .. code::
 
 Description | Additional options passed directly to the ``YoutubeDL`` constructor.
             | All available options can be found in `youtube-dl's docstrings
-              <https://github.com/rg3/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
+              <https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
 =========== =====
 
 
@@ -1531,4 +1531,4 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
 .. _datetime.max:      https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _Authentication:    https://github.com/mikf/gallery-dl#5authentication
-.. _youtube-dl:        https://github.com/rg3/youtube-dl
+.. _youtube-dl:        https://github.com/ytdl-org/youtube-dl

@@ -2,8 +2,8 @@
 
 # This is a stripped down version of youtube-dl's aes module.
 # All credit for this code goes to the authors of the youtube-dl project.
-# https://rg3.github.io/youtube-dl/
-# https://github.com/rg3/youtube-dl/
+# https://ytdl-org.github.io/youtube-dl/
+# https://github.com/ytdl-org/youtube-dl/
 
 import base64
 from math import ceil
