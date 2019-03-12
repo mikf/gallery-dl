@@ -23,14 +23,13 @@ class FoolfuukaThreadExtractor(SharedConfigMixin, Extractor):
     filename_fmt = "{media[media]}"
     archive_fmt = "{board[shortname]}_{num}_{timestamp}"
     pattern_fmt = r"/([^/]+)/thread/(\d+)"
-    resolve = "default"
-    root = ""
+    external = "default"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.board, self.thread = match.groups()
         self.session.headers["Referer"] = self.root
-        if self.resolve == "direct":
+        if self.external == "direct":
             self.remote = self._remote_direct
 
     def items(self):
@@ -108,7 +107,7 @@ EXTRACTORS = {
     },
     "b4k": {
         "root": "https://arch.b4k.co",
-        "extra": {"resolve": "direct"},
+        "extra": {"external": "direct"},
         "test-thread": ("https://arch.b4k.co/meta/thread/196/", {
             "url": "cdd4931ac1cd00264b0b54e2e3b0d8f6ae48957e",
         }),

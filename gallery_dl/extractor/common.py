@@ -30,14 +30,16 @@ class Extractor():
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
     cookiedomain = ""
+    root = ""
+    test = None
 
     def __init__(self, match):
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
         self.url = match.string
-        self._set_headers()
-        self._set_cookies()
-        self._set_proxies()
+        self._init_headers()
+        self._init_cookies()
+        self._init_proxies()
         self._retries = self.config("retries", 5)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
@@ -121,14 +123,14 @@ class Extractor():
 
         return username, password
 
-    def _set_headers(self):
+    def _init_headers(self):
         """Set additional headers for the 'session' object"""
         self.session.headers["Accept-Language"] = "en-US,en;q=0.5"
         self.session.headers["User-Agent"] = self.config(
             "user-agent", ("Mozilla/5.0 (X11; Linux x86_64; rv:62.0) "
                            "Gecko/20100101 Firefox/62.0"))
 
-    def _set_proxies(self):
+    def _init_proxies(self):
         """Update the session's proxy map"""
         proxies = self.config("proxy")
         if proxies:
@@ -142,21 +144,40 @@ class Extractor():
             else:
                 self.log.warning("invalid proxy specifier: %s", proxies)
 
-    def _set_cookies(self):
+    def _init_cookies(self):
         """Populate the session's cookiejar"""
         cookies = self.config("cookies")
         if cookies:
             if isinstance(cookies, dict):
-                setcookie = self.session.cookies.set
-                for name, value in cookies.items():
-                    setcookie(name, value, domain=self.cookiedomain)
+                self._update_cookies_dict(cookies, self.cookiedomain)
             else:
+                cookiejar = http.cookiejar.MozillaCookieJar()
                 try:
-                    cj = http.cookiejar.MozillaCookieJar()
-                    cj.load(cookies)
-                    self.session.cookies.update(cj)
+                    cookiejar.load(cookies)
                 except OSError as exc:
                     self.log.warning("cookies: %s", exc)
+                else:
+                    self.session.cookies.update(cookiejar)
+
+    def _update_cookies(self, cookies, *, domain=""):
+        """Update the session's cookiejar with 'cookies'"""
+        if isinstance(cookies, dict):
+            self._update_cookies_dict(cookies, domain or self.cookiedomain)
+        else:
+            setcookie = self.session.cookies.set_cookie
+            try:
+                cookies = iter(cookies)
+            except TypeError:
+                setcookie(cookies)
+            else:
+                for cookie in cookies:
+                    setcookie(cookie)
+
+    def _update_cookies_dict(self, cookiedict, domain):
+        """Update cookiejar with name-value pairs from a dict"""
+        setcookie = self.session.cookies.set
+        for name, value in cookiedict.items():
+            setcookie(name, value, domain=domain)
 
     def _check_cookies(self, cookienames, *, domain=""):
         """Check if all 'cookienames' are in the session's cookiejar"""
@@ -169,30 +190,13 @@ class Extractor():
             return False
         return True
 
-    def _update_cookies(self, cookies, *, domain=""):
-        """Update the session's cookiejar with 'cookies'"""
-        if isinstance(cookies, dict):
-            if not domain:
-                domain = self.cookiedomain
-            setcookie = self.session.cookies.set
-            for name, value in cookies.items():
-                setcookie(name, value, domain=domain)
-        else:
-            try:
-                cookies = iter(cookies)
-            except TypeError:
-                cookies = (cookies,)
-            setcookie = self.session.cookies.set_cookie
-            for cookie in cookies:
-                setcookie(cookie)
-
     @classmethod
     def _get_tests(cls):
         """Yield an extractor's test cases as (URL, RESULTS) tuples"""
-        if not hasattr(cls, "test") or not cls.test:
+        tests = cls.test
+        if not tests:
             return
 
-        tests = cls.test
         if len(tests) == 2 and (not tests[1] or isinstance(tests[1], dict)):
             tests = (tests,)
 
@@ -212,7 +216,6 @@ class ChapterExtractor(Extractor):
         "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
     archive_fmt = (
         "{manga}_{chapter}{chapter_minor}_{page}")
-    root = ""
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
@@ -259,7 +262,6 @@ class MangaExtractor(Extractor):
     categorytransfer = True
     chapterclass = None
     reverse = True
-    root = ""
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
