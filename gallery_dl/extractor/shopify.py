@@ -19,7 +19,6 @@ class ShopifyExtractor(SharedConfigMixin, Extractor):
     basecategory = "shopify"
     filename_fmt = "{product[title]}_{num:>02}_{id}.{extension}"
     archive_fmt = "{id}"
-    root = ""
 
     def __init__(self, match):
         Extractor.__init__(self, match)
