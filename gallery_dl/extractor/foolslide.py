@@ -195,19 +195,6 @@ EXTRACTORS = {
                 },
             }),
     },
-    "seaotterscans": {
-        "root": "https://reader.seaotterscans.com",
-        "test-chapter":
-            ("https://reader.seaotterscans.com/read/100_days/en/0/5/", {
-                "url": "63d46b8883cc652dfe8bd5be4492160dd31f06a8",
-                "keyword": "401d55b900d69a3732c7221755543e17c4771dd3",
-            }),
-        "test-manga":
-            ("https://reader.seaotterscans.com/series/marry_me/", {
-                "url": "fdbacabfa566a6baeb3f01bb46cbda0577bd4bbe",
-                "keyword": "61d3388d73df12f64361892b47a9398df4a5947c",
-            }),
-    },
     "sensescans": {
         "root": "http://sensescans.com/reader",
         "pattern": r"(?:(?:www\.)?sensescans\.com/reader"

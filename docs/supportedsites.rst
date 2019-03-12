@@ -78,7 +78,6 @@ rule #34             https://rule34.paheal.net/          Posts, Tag-Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag-Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag-Searches
 Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
-Sea Otter Scans      https://reader.seaotterscans.com/   Chapters, Manga
 Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          http://sensescans.com/reader/       Chapters, Manga
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
