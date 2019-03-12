@@ -217,7 +217,7 @@ access to *gallery-dl*. Authorize it and you will he shown one or more
 .. _pip:        https://pip.pypa.io/en/stable/
 .. _Requests:   http://docs.python-requests.org/en/master/
 .. _FFmpeg:     https://www.ffmpeg.org/
-.. _youtube-dl: https://rg3.github.io/youtube-dl/
+.. _youtube-dl: https://ytdl-org.github.io/youtube-dl/
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
