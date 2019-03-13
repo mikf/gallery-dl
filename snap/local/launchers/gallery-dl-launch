@@ -7,14 +7,6 @@ set \
 	-o nounset \
 	-o pipefail
 
-if ! test -v SNAP_ARCH_TRIPLET; then
-	printf 'Error: SNAP_ARCH_TRIPLET not set, this launcher requires workaround-snap-arch-triplet-launch launcher to work.\n' >&2
-	exit 1
-fi
-
-# Satisfy FFmpeg's usr/lib/ARCH/pulseaudio/libpulsecommon-11.1.so dependency
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}":"$SNAP"/usr/lib/"${SNAP_ARCH_TRIPLET}"/pulseaudio
-
 # Use user's real home directory for canonical configuration path access
 # FIXME: Waiting for Snap Store assertion
 declare REALHOME="$(
