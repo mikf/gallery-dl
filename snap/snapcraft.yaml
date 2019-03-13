@@ -20,9 +20,7 @@ summary: Download image-galleries and -collections from several image hosting si
 description: |
   `gallery-dl` is a command-line program to download image-galleries and -collections from several image hosting sites (see [Supported Sites](https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst)). It is a cross-platform tool with many configuration options and powerful filenaming capabilities.
 
-version: determined-by-version-script
-version-script: git describe --always --dirty --tags | sed 's/^v//'
-
+adopt-info: gallery-dl
 confinement: strict
 grade: stable
 
@@ -59,8 +57,19 @@ parts:
     organize:
       '*': bin/
 
+  selective-pull:
+    plugin: nil
+    build-packages:
+    - git
+    stage-snaps:
+    - selective-pull
+
   gallery-dl:
+    after:
+    - selective-pull
+
     source: .
+    override-pull: $SNAPCRAFT_STAGE/scriptlets/selective-pull
     plugin: python
 
   ffmpeg:
