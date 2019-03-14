@@ -90,7 +90,7 @@ class NijieExtractor(AsynchronousMixin, Extractor):
             username, password = self._get_auth_info()
             self._update_cookies(self._login_impl(username, password))
 
-    @cache(maxage=150*24*60*60, keyarg=1)
+    @cache(maxage=150*24*3600, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
         url = "{}/login_int.php".format(self.root)

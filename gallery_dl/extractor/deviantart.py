@@ -665,7 +665,7 @@ class DeviantartAPI():
         """Authenticate the application by requesting an access token"""
         self.headers["Authorization"] = self._authenticate_impl(refresh_token)
 
-    @cache(maxage=3590, keyarg=1)
+    @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, refresh_token):
         """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"
@@ -748,7 +748,7 @@ class DeviantartAPI():
         return result
 
 
-@cache(maxage=365*24*60*60, keyarg=0)
+@cache(maxage=10*365*24*3600, keyarg=0)
 def _refresh_token_cache(original_token, new_token=None):
     return new_token or original_token
 

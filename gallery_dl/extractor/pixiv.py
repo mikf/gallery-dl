@@ -423,7 +423,7 @@ class PixivAppAPI():
         self.user, auth = self._login_impl(self.username, self.password)
         self.extractor.session.headers["Authorization"] = auth
 
-    @cache(maxage=3590, keyarg=1)
+    @cache(maxage=3600, keyarg=1)
     def _login_impl(self, username, password):
         url = "https://oauth.secure.pixiv.net/auth/token"
         data = {
@@ -511,6 +511,6 @@ class PixivAppAPI():
             params = text.parse_query(query)
 
 
-@cache(maxage=365*24*60*60, keyarg=0)
+@cache(maxage=10*365*24*3600, keyarg=0)
 def _refresh_token_cache(username):
     return None

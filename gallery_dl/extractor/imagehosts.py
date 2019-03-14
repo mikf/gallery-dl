@@ -163,7 +163,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
     params = None
 
     @property
-    @memcache(maxage=3*60*60)
+    @memcache(maxage=3*3600)
     def cookies(self):
         return self.request(self.page_url).cookies
 
