@@ -211,7 +211,7 @@ class RedditAPI():
         access_token = self._authenticate_impl(self.refresh_token)
         self.extractor.session.headers["Authorization"] = access_token
 
-    @cache(maxage=3590, keyarg=1)
+    @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, refresh_token=None):
         """Actual authenticate implementation"""
         url = "https://www.reddit.com/api/v1/access_token"

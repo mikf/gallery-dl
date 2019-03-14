@@ -72,7 +72,7 @@ class ExhentaiExtractor(Extractor):
             self.limits = False
             self.session.cookies["nw"] = "1"
 
-    @cache(maxage=90*24*60*60, keyarg=1)
+    @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
         url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
