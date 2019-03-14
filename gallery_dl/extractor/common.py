@@ -90,7 +90,9 @@ class Extractor():
                     return response
                 if cloudflare.is_challenge(response):
                     self.log.info("Solving Cloudflare challenge")
-                    url = cloudflare.solve_challenge(session, response, kwargs)
+                    url, domain, cookies = cloudflare.solve_challenge(
+                        session, response, kwargs)
+                    cloudflare.cookies.update(self.category, (domain, cookies))
                     continue
 
                 msg = "{}: {} for url: {}".format(code, response.reason, url)
@@ -158,6 +160,11 @@ class Extractor():
                     self.log.warning("cookies: %s", exc)
                 else:
                     self.session.cookies.update(cookiejar)
+
+        cookies = cloudflare.cookies(self.category)
+        if cookies:
+            domain, cookies = cookies
+            self._update_cookies_dict(cookies, domain)
 
     def _update_cookies(self, cookies, *, domain=""):
         """Update the session's cookiejar with 'cookies'"""
