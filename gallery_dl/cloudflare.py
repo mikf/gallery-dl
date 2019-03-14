@@ -13,6 +13,7 @@ import time
 import operator
 import urllib.parse
 from . import text
+from .cache import memcache
 
 
 def is_challenge(response):
@@ -47,7 +48,14 @@ def solve_challenge(session, response, kwargs):
     location = cf_response.headers["Location"]
     if location[0] == "/":
         location = root + location
-    return location
+
+    for cookie in cf_response.cookies:
+        if cookie.name == "cf_clearance":
+            return location, cookie.domain, {
+                cookie.name: cookie.value,
+                "__cfduid" : response.cookies.get("__cfduid", ""),
+            }
+    return location, "", {}
 
 
 def solve_js_challenge(page, netloc):
@@ -126,3 +134,8 @@ VALUES = {
     "!+": 1,
     "+!!": 1,
 }
+
+
+@memcache(keyarg=0)
+def cookies(category):
+    return None
