@@ -69,6 +69,28 @@ Navigate into the respective directory and run the :code:`setup.py` file.
     $ cd gallery-dl
     $ python setup.py install
 
+Run in docker
+------------------------------------
+
+Build the docker image with
+
+    $ docker build -t gallerydl .
+
+After this you can start gallery-dl over docker with a singel command.
+
+
+    $ docker run gallerydl
+    
+
+Dont forget to mount a volume to keep your downloaded files.
+
+
+    $ docker run --rm -v <path>:/download gallerydl
+
+
+Example:
+
+    $ docker run --rm -v /home/christopher/downloads:/download gallerydl http://danbooru.donmai.us/posts?tags=bonocho
 
 Standalone Executable (Windows only)
 ------------------------------------
