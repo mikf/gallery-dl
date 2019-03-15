@@ -1,6 +1,32 @@
 # Changelog
 
-## Unreleased
+## 1.8.0 - 2019-03-15
+### Added
+- Support for:
+  - `weibo` - https://www.weibo.com/
+  - `pururin` - https://pururin.io/ ([#174](https://github.com/mikf/gallery-dl/issues/174))
+  - `fashionnove` - https://www.fashionnova.com ([#175](https://github.com/mikf/gallery-dl/issues/175))
+  - `shopify` sites in general ([#175](https://github.com/mikf/gallery-dl/issues/175))
+- Snap packaging ([#169](https://github.com/mikf/gallery-dl/issues/169), [#170](https://github.com/mikf/gallery-dl/issues/170), [#187](https://github.com/mikf/gallery-dl/issues/187), [#188](https://github.com/mikf/gallery-dl/issues/188))
+- Automatic Cloudflare DDoS protection bypass
+- Extractor and Job information for logging format strings
+- `dynastyscans` image and search extractors ([#163](https://github.com/mikf/gallery-dl/issues/163))
+- `deviantart` scraps extractor ([#168](https://github.com/mikf/gallery-dl/issues/168))
+- `artstation` extractor for artwork listings ([#172](https://github.com/mikf/gallery-dl/issues/172))
+- `smugmug` video support and improved image format selection ([#183](https://github.com/mikf/gallery-dl/issues/183))
+### Changed
+- More metadata for `nhentai` galleries
+- Combined `myportfolio` extractors into one
+- Renamed `name` metadata field to `filename` and removed the original `filename` field
+- Simplified and improved internal data structures
+- Optimized creation of child extractors
+### Fixed
+- Filter empty `tumblr` URLs ([#165](https://github.com/mikf/gallery-dl/issues/165))
+- Filter ads and improve connection speed on `hentaifoundry`
+- Show proper error messages if `luscious` galleries are unavailable
+- Miscellaneous issues on `mangahere`, `ngomik`, `simplyhentai`, `imgspice`
+### Removed
+- `seaotterscans`
 
 ## 1.7.0 - 2019-02-05
 - Added support for:
