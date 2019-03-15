@@ -25,8 +25,8 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "dokireader",  # expired cert
     "mangapark",
+    "simplyhentai",
 }
 
 

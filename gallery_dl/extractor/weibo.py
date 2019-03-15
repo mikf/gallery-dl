@@ -116,10 +116,10 @@ class WeiboStatusExtractor(WeiboExtractor):
                r"/(?:detail|status)/(\d+)")
     test = (
         ("https://m.weibo.cn/detail/4323047042991618", {
-            "pattern": r"https://wx\d+.sinaimg.cn/large/\w+.jpg",
+            "pattern": r"https?://wx\d+.sinaimg.cn/large/\w+.jpg",
         }),
         ("https://m.weibo.cn/detail/4339748116375525", {
-            "pattern": r"http://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_hd",
+            "pattern": r"https?://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_hd",
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
     )
