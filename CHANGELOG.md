@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.8.0 - 2019-03-15
 ### Added
 - Support for:

@@ -334,6 +334,9 @@ class TumblrAPI(oauth.OAuth1API):
 
     def avatar(self, blog, size="512"):
         """Retrieve a blog avatar"""
+        if self.api_key:
+            url_fmt = "https://api.tumblr.com/v2/blog/{}/avatar/{}?api_key={}"
+            return url_fmt.format(blog, size, self.api_key)
         params = {"size": size}
         data = self._call(blog, "avatar", params, allow_redirects=False)
         return data["avatar_url"]
