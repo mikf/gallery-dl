@@ -11,6 +11,7 @@ import importlib
 
 modules = [
     "2chan",
+    "35photo",
     "3dbooru",
     "4chan",
     "8chan",

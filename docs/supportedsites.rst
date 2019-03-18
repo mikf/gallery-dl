@@ -3,6 +3,7 @@ Supported Sites
 ==================== =================================== ================================================== ================
 Site                 URL                                 Capabilities                                       Authentication
 ==================== =================================== ================================================== ================
+35PHOTO              https://35photo.pro/                Images from Users, Genres, individual Images
 3dbooru              http://behoimi.org/                 Pools, Popular Images, Posts, Tag-Searches
 4chan                https://www.4chan.org/              Threads
 4plebs               https://archive.4plebs.org/         Threads

@@ -177,6 +177,8 @@ class TestExtractor(unittest.TestCase):
                     capitalize(category),
                     capitalize(extr.subcategory),
                 )
+                if expected[0].isdigit():
+                    expected = "_" + expected
                 self.assertEqual(expected, extr.__name__)
 
 
