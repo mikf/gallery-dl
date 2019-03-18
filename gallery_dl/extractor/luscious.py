@@ -166,7 +166,7 @@ class LusciousSearchExtractor(LusciousExtractor):
                r"/((?:albums|c)(?:/(?![^/?&#]+_\d+)[^/?&#]+)+)")
     test = (
         ("https://luscious.net/c/hentai/"),
-        ("https://luscious.net/albums/t2/2/c/hentai/sorted/updated"
+        ("https://luscious.net/albums/c/hentai/sorted/updated"
          "/tagged/+full_color/page/2/", {
              "pattern": r"https://(members\.)?luscious.net/albums/[^_]+_\d+/",
              "range": "20-40",
