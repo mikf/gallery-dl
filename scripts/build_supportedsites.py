@@ -11,6 +11,7 @@ from gallery_dl import extractor  # noqa
 
 CATEGORY_MAP = {
     "2chan"          : "Futaba Channel",
+    "35photo"        : "35PHOTO",
     "archivedmoe"    : "Archived.Moe",
     "archiveofsins"  : "Archive of Sins",
     "artstation"     : "ArtStation",
