@@ -7,6 +7,7 @@ Site                 URL                                 Capabilities           
 3dbooru              http://behoimi.org/                 Pools, Popular Images, Posts, Tag-Searches
 4chan                https://www.4chan.org/              Threads
 4plebs               https://archive.4plebs.org/         Threads
+500px                https://500px.com/                  Images from Users, Galleries, individual Images
 8chan                https://8ch.net/                    Threads
 Adobe Portfolio      https://www.myportfolio.com/        Galleries
 arch.b4k.co          https://arch.b4k.co/                Threads
