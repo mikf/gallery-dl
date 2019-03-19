@@ -14,6 +14,7 @@ modules = [
     "35photo",
     "3dbooru",
     "4chan",
+    "500px",
     "8chan",
     "artstation",
     "behance",
