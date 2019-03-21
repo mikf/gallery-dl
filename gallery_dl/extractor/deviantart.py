@@ -71,6 +71,11 @@ class DeviantartExtractor(Extractor):
                 content = deviation["content"]
                 if self.original and deviation["is_downloadable"]:
                     self._update_content(deviation, content)
+                if content["src"].startswith("https://images-wixmp-"):
+                    # see https://github.com/r888888888/danbooru/issues/4069
+                    content["src"] = re.sub(
+                        r"(/f/[^/]+/[^/]+)/v\d+/.*",
+                        r"/intermediary\1", content["src"])
                 yield self.commit(deviation, content)
 
             if "videos" in deviation:
@@ -326,6 +331,13 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "pattern": (r"https?://s3\.amazonaws\.com/origin-orig\."
                         r"deviantart\.net/a383/f/2013/135/e/7/[^.]+\.jpg\?"),
         }),
+        # wixmp URL rewrite
+        (("https://www.deviantart.com/citizenfresh/art/"
+          "Hverarond-14-the-beauty-of-the-earth-789295466"), {
+            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
+                        r"/intermediary/f/[^/]+/[^.]+\.jpg$")
+        }),
+        # old-style URLs
         ("https://shimoda7.deviantart.com"
          "/art/For-the-sake-of-a-memory-10073852"),
         ("https://myria-moon.deviantart.com"
