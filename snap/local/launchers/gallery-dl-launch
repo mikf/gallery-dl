@@ -13,30 +13,7 @@ declare REALHOME="$(
 	getent passwd "${USER}" \
 		| cut --delimiter=: --fields=6
 )"
-
-if ! test -f "${SNAP_USER_COMMON}"/.config/gallery-dl/config.json \
-	&& ! test -f "${SNAP_USER_COMMON}"/.gallery-dl.conf; then
-	declare userwide_config_file
-
-	for possible_config_file in \
-		"${REALHOME}"/.config/gallery-dl/config.json \
-		"${REALHOME}"/.gallery-dl.conf; do
-		if test -f "${possible_config_file}"; then
-			userwide_config_file="${possible_config_file}"
-		fi
-	done
-
-	if test -v userwide_config_file; then
-		printf -- \
-			'gallery-dl-launch: It appears that you have a gallery-dl configuration in your home directory, currently the snap distribution of gallery-dl cannot access it until you create a link via running the following command in the terminal:\n\n'
-		printf -- \
-			'gallery-dl-launch:     ln %s %s\n\n' \
-			"${userwide_config_file}" \
-			"~/snap/$SNAP_NAME/common/.gallery-dl.conf"
-	fi
-fi
-
-#HOME="${REALHOME}"
+HOME="${REALHOME}"
 
 # Finally run the next part of the command chain
 exec "${@}"

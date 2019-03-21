@@ -39,15 +39,13 @@ plugs:
   network-bind:
 
   # Configuration access
-  # FIXME: Waiting for the Snap Store autoconnection assertion
-  # https://forum.snapcraft.io/t/interface-auto-connection-request-for-the-gallery-dl-snap/10092
-  #personal-files:
-    #read:
-    #- $HOME/.config/gallery-dl
-    #- $HOME/.gallery-dl.conf
-  #system-files:
-    #read:
-    #- /etc/gallery-dl.conf
+  personal-files:
+    read:
+    - $HOME/.config/gallery-dl
+    - $HOME/.gallery-dl.conf
+  system-files:
+    read:
+    - /etc/gallery-dl.conf
 
 parts:
   # Launcher programs to fix problems at runtime
