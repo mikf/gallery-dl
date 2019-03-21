@@ -563,7 +563,10 @@ class DeviantartPopularExtractor(DeviantartExtractor):
 
 
 class DeviantartAPI():
-    """Minimal interface for the deviantart API"""
+    """Minimal interface for the DeviantArt API
+
+    Ref: https://www.deviantart.com/developers/http/v1/20160316
+    """
     CLIENT_ID = "5388"
     CLIENT_SECRET = "76b08c69cfb27f26d6161f9ab6d061a1"
 
@@ -579,6 +582,7 @@ class DeviantartAPI():
         self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
+        self.metadata = extractor.config("metadata", False)
 
         self.refresh_token = extractor.config("refresh-token")
         self.client_id = extractor.config("client-id", self.CLIENT_ID)
@@ -619,7 +623,8 @@ class DeviantartAPI():
     def deviation(self, deviation_id):
         """Query and return info about a single Deviation"""
         endpoint = "deviation/" + deviation_id
-        return self._call(endpoint)
+        deviation = self._call(endpoint)
+        return self._extend((deviation,))[0]
 
     def deviation_content(self, deviation_id):
         """Get extended content of a single Deviation"""
@@ -632,6 +637,15 @@ class DeviantartAPI():
         endpoint = "deviation/download/" + deviation_id
         params = {"mature_content": self.mature}
         return self._call(endpoint, params)
+
+    def deviation_metadata(self, deviations):
+        """ Fetch deviation metadata for a set of deviations"""
+        endpoint = "deviation/metadata?" + "&".join(
+            "deviationids[{}]={}".format(num, deviation["deviationid"])
+            for num, deviation in enumerate(deviations)
+        )
+        params = {"mature_content": self.mature}
+        return self._call(endpoint, params)["metadata"]
 
     def gallery(self, username, folder_id="", offset=0):
         """Yield all Deviation-objects contained in a gallery folder"""
@@ -737,7 +751,7 @@ class DeviantartAPI():
                 self.log.debug("Switching to private access token")
                 public = False
                 continue
-            yield from data["results"]
+            yield from self._extend(data["results"])
             if not data["has_more"]:
                 return
             params["offset"] = data["next_offset"]
@@ -746,6 +760,15 @@ class DeviantartAPI():
         result = []
         result.extend(self._pagination(endpoint, params))
         return result
+
+    def _extend(self, deviations):
+        """Add extended metadata to a list of deviation objects"""
+        if self.metadata:
+            for deviation, metadata in zip(
+                    deviations, self.deviation_metadata(deviations)):
+                deviation.update(metadata)
+                deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
+        return deviations
 
 
 @cache(maxage=10*365*24*3600, keyarg=0)

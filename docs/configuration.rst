@@ -437,6 +437,17 @@ Description Enable mature content.
 =========== =====
 
 
+extractor.deviantart.metadata
+-----------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Request extended metadata for deviation objects to additionally
+            provide ``description``, ``tags``, ``license`` and ``is_watching``
+            fields.
+=========== =====
+
+
 extractor.deviantart.original
 -----------------------------
 =========== =====
