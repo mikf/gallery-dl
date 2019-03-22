@@ -69,6 +69,8 @@ parts:
     source: .
     override-pull: $SNAPCRAFT_STAGE/scriptlets/selective-pull
     plugin: python
+    python-packages:
+    - youtube_dl
 
   ffmpeg:
     plugin: nil
