@@ -82,14 +82,14 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     test = (
         ("https://komikcast.com/komik/090-eko-to-issho/", {
             "url": "dc798d107697d1f2309b14ca24ca9dba30c6600f",
-            "keyword": "3db7e23e3c108031608fbbeb9334badecd967f95",
+            "keyword": "837a7e96867344ff59d840771c04c20dc46c0ab1",
         }),
         ("https://komikcast.com/tonari-no-kashiwagi-san/"),
     )
 
     def chapters(self, page):
         results = []
-        data = self.get_metadata(page)
+        data = self.metadata(page)
 
         for item in text.extract_iter(
                 page, '<span class="leftoff"><a href="', '</a>'):
@@ -99,16 +99,16 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
         return results
 
     @staticmethod
-    def get_metadata(page):
+    def metadata(page):
         """Return a dict with general metadata"""
-        manga , pos = text.extract(page, "<title>", "</title>")
-        author, pos = text.extract(page, "<th>Author</th><td>", "</td>", pos)
-        genres, pos = text.extract(page, "<th>Genres </th><td>", "</td>", pos)
-        mtype , pos = text.extract(page, "<th>Type </th><td>", "</td>", pos)
+        manga , pos = text.extract(page, "<title>" , "</title>")
+        genres, pos = text.extract(page, ">Genres:", "</span>", pos)
+        author, pos = text.extract(page, ">Author:", "</span>", pos)
+        mtype , pos = text.extract(page, ">Type:"  , "</span>", pos)
 
         return {
             "manga": text.unescape(manga.rpartition(" - ")[0]),
-            "author": text.unescape(author),
-            "genres": text.remove_html(genres).replace(" , ", ", "),
+            "author": text.remove_html(author),
+            "genres": text.split_html(genres)[::2],
             "type": text.remove_html(mtype),
         }
