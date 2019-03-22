@@ -35,6 +35,7 @@ modules = [
     "hentaifox",
     "hentaihere",
     "hitomi",
+    "hypnohub",
     "idolcomplex",
     "imagebam",
     "imagefap",
