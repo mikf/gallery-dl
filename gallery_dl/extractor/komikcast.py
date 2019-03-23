@@ -107,7 +107,7 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
         mtype , pos = text.extract(page, ">Type:"  , "</span>", pos)
 
         return {
-            "manga": text.unescape(manga.rpartition(" - ")[0]),
+            "manga": text.unescape(manga[:-12]),
             "author": text.remove_html(author),
             "genres": text.split_html(genres)[::2],
             "type": text.remove_html(mtype),
