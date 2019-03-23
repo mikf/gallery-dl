@@ -54,8 +54,13 @@ class InstagramExtractor(Extractor):
 
         medias = []
         if media['__typename'] == 'GraphSidecar':
+            yi = 0
             for n in media['edge_sidecar_to_children']['edges']:
                 children = n['node']
+                ytdl_metadata = {}
+                if children['__typename'] == 'GraphVideo':
+                    yi += 1
+                    ytdl_metadata['_ytdl_index'] = yi
                 medias.append({
                     'media_id': children['id'],
                     'shortcode': children['shortcode'],
@@ -66,6 +71,7 @@ class InstagramExtractor(Extractor):
                     'sidecar_media_id': media['id'],
                     'sidecar_shortcode': media['shortcode'],
                     **common,
+                    **ytdl_metadata,
                 })
         else:
             medias.append({
