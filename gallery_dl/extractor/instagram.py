@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Leonardo Taccari
-# Copyright 2019 Mike Fährmann
+# Copyright 2018-2019 Leonardo Taccari, Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,11 +31,6 @@ class InstagramExtractor(Extractor):
             if data['typename'] == 'GraphImage':
                 yield Message.Url, data['display_url'], \
                     text.nameext_from_url(data['display_url'], data)
-            elif data['typename'] == 'GraphSidecar':
-                # TODO: Extract all images in edge_sidecar_to_children
-                # TODO: instead of just extracting the main one!
-                yield Message.Url, data['display_url'], \
-                    text.nameext_from_url(data['display_url'], data)
             elif data['typename'] == 'GraphVideo':
                 yield Message.Url, \
                     'ytdl:{}/p/{}/'.format(self.root, data['shortcode']), data
@@ -50,19 +44,41 @@ class InstagramExtractor(Extractor):
         shared_data = self._extract_shared_data(page)
         media = shared_data['entry_data']['PostPage'][0]['graphql']['shortcode_media']
 
-        return {
-            'media_id': media['id'],
-            'shortcode': media['shortcode'],
-            'typename': media['__typename'],
-            'display_url': media['display_url'],
-            'height': text.parse_int(media['dimensions']['height']),
-            'width': text.parse_int(media['dimensions']['width']),
+        common = {
             'comments': text.parse_int(media['edge_media_to_comment']['count']),
             'likes': text.parse_int(media['edge_media_preview_like']['count']),
             'owner_id': media['owner']['id'],
             'username': media['owner']['username'],
             'fullname': media['owner']['full_name'],
         }
+
+        medias = []
+        if media['__typename'] == 'GraphSidecar':
+            for n in media['edge_sidecar_to_children']['edges']:
+                children = n['node']
+                medias.append({
+                    'media_id': children['id'],
+                    'shortcode': children['shortcode'],
+                    'typename': children['__typename'],
+                    'display_url': children['display_url'],
+                    'height': text.parse_int(children['dimensions']['height']),
+                    'width': text.parse_int(children['dimensions']['width']),
+                    'sidecar_media_id': media['id'],
+                    'sidecar_shortcode': media['shortcode'],
+                    **common,
+                })
+        else:
+            medias.append({
+                'media_id': media['id'],
+                'shortcode': media['shortcode'],
+                'typename': media['__typename'],
+                'display_url': media['display_url'],
+                'height': text.parse_int(media['dimensions']['height']),
+                'width': text.parse_int(media['dimensions']['width']),
+                **common,
+            })
+
+        return medias
 
     def _extract_profilepage(self, url):
         page = self.request(url).text
@@ -86,7 +102,8 @@ class InstagramExtractor(Extractor):
 
             for s in shortcodes:
                 url = '{}/p/{}/'.format(self.root, s)
-                yield self._extract_postpage(url)
+                for p in self._extract_postpage(url):
+                    yield p
 
             if not has_next_page:
                 break
@@ -133,18 +150,13 @@ class InstagramImageExtractor(InstagramExtractor):
 
         # GraphSidecar
         ("https://www.instagram.com/p/BoHk1haB5tM/", {
-            "pattern": r"https://[^/]+\.(cdninstagram\.com|fbcdn\.net)"
-                       r"/vp/[0-9a-f]+/[0-9A-F]+/t51.2885-15/e35"
-                       r"/40758827_2138611023072230_4073975203662780931_n.jpg",
+            "count": 5,
             "keyword": {
+                "sidecar_media_id": "1875629777499953996",
+                "sidecar_shortcode": "BoHk1haB5tM",
                 "comments": int,
-                "height": int,
                 "likes": int,
-                "media_id": "1875629777499953996",
-                "shortcode": "BoHk1haB5tM",
-                "typename": "GraphSidecar",
                 "username": "instagram",
-                "width": int,
             }
         }),
 
@@ -170,7 +182,7 @@ class InstagramImageExtractor(InstagramExtractor):
 
     def instagrams(self):
         url = '{}/p/{}/'.format(self.root, self.shortcode)
-        return (self._extract_postpage(url),)
+        return self._extract_postpage(url)
 
 
 class InstagramUserExtractor(InstagramExtractor):
