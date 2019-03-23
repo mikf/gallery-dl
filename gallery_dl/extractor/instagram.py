@@ -18,7 +18,7 @@ class InstagramExtractor(Extractor):
     """Base class for instagram extractors"""
     category = "instagram"
     directory_fmt = ("{category}", "{username}")
-    filename_fmt = "{media_id}.{extension}"
+    filename_fmt = "{sidecar_media_id:?/_/}{media_id}.{extension}"
     archive_fmt = "{media_id}"
     root = "https://www.instagram.com"
 
