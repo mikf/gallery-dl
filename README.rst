@@ -200,7 +200,7 @@ To link your account to *gallery-dl*, start by invoking it with
     $ gallery-dl oauth:flickr
 
 You will be sent to the site's authorization page and asked to grant read
-access to *gallery-dl*. Authorize it and you will he shown one or more
+access to *gallery-dl*. Authorize it and you will be shown one or more
 "tokens", which should be added to your configuration file.
 
 
