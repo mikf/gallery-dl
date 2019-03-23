@@ -102,8 +102,7 @@ class InstagramExtractor(Extractor):
 
             for s in shortcodes:
                 url = '{}/p/{}/'.format(self.root, s)
-                for p in self._extract_postpage(url):
-                    yield p
+                yield from self._extract_postpage(url)
 
             if not has_next_page:
                 break
