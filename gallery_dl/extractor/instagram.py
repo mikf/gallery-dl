@@ -57,11 +57,7 @@ class InstagramExtractor(Extractor):
             yi = 0
             for n in media['edge_sidecar_to_children']['edges']:
                 children = n['node']
-                ytdl_metadata = {}
-                if children['__typename'] == 'GraphVideo':
-                    yi += 1
-                    ytdl_metadata['_ytdl_index'] = yi
-                medias.append({
+                media_data = {
                     'media_id': children['id'],
                     'shortcode': children['shortcode'],
                     'typename': children['__typename'],
@@ -70,19 +66,24 @@ class InstagramExtractor(Extractor):
                     'width': text.parse_int(children['dimensions']['width']),
                     'sidecar_media_id': media['id'],
                     'sidecar_shortcode': media['shortcode'],
-                    **common,
-                    **ytdl_metadata,
-                })
+                }
+                if children['__typename'] == 'GraphVideo':
+                    media_data["_ytdl_index"] = yi
+                    yi += 1
+                media_data.update(common)
+                medias.append(media_data)
+
         else:
-            medias.append({
+            media_data = {
                 'media_id': media['id'],
                 'shortcode': media['shortcode'],
                 'typename': media['__typename'],
                 'display_url': media['display_url'],
                 'height': text.parse_int(media['dimensions']['height']),
                 'width': text.parse_int(media['dimensions']['width']),
-                **common,
-            })
+            }
+            media_data.update(common)
+            medias.append(media_data)
 
         return medias
 
@@ -179,6 +180,17 @@ class InstagramImageExtractor(InstagramExtractor):
                 "width": int,
             }
         }),
+
+        # GraphSidecar with 2 embedded GraphVideo objects
+        ("https://www.instagram.com/p/BtOvDOfhvRr/", {
+            "count": 2,
+            "url": "e290d4180a58ae50c910d51d3b04d5f5c4622cd7",
+            "keyword": {
+                "sidecar_media_id": "1967717017113261163",
+                "sidecar_shortcode": "BtOvDOfhvRr",
+                "_ytdl_index": int,
+            }
+        })
     )
 
     def __init__(self, match):
