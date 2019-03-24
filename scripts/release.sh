@@ -98,7 +98,7 @@ supportedsites() {
     cd "${ROOTDIR}"
     echo Checking if "${SUPPORTEDSITES}" is up to date
 
-    ./scripts/build_supportedsites.py
+    ./scripts/supportedsites.py
     if ! git diff --quiet "${SUPPORTEDSITES}"; then
         echo "updated ${SUPPORTEDSITES} contains changes"
         exit 4

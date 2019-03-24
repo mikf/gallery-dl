@@ -51,7 +51,7 @@ for action in option.build_parser()._actions:
             opts.append(opt)
 
 
-PATH = os.path.join(ROOTDIR, "gallery-dl.bash-completion")
+PATH = os.path.join(ROOTDIR, "gallery-dl.bash_completion")
 with open(PATH, "w", encoding="utf-8") as file:
     file.write(TEMPLATE % {
         "opts"    : " ".join(opts),
