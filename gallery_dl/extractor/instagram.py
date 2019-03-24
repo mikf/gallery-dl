@@ -22,10 +22,15 @@ class InstagramExtractor(Extractor):
     archive_fmt = "{media_id}"
     root = "https://www.instagram.com"
 
+    def get_metadata(self):
+        return {}
+
     def items(self):
         yield Message.Version, 1
 
+        metadata = self.get_metadata()
         for data in self.instagrams():
+            data.update(metadata)
             yield Message.Directory, data
 
             if data['typename'] == 'GraphImage':
@@ -87,25 +92,43 @@ class InstagramExtractor(Extractor):
 
         return medias
 
-    def _extract_profilepage(self, url):
+    def _extract_page(self, url, page_type):
+        shared_data_fields = {
+            'ProfilePage': {
+                'node': 'user',
+                'node_id': 'id',
+                'edge_to_medias': 'edge_owner_to_timeline_media',
+                'variables_id': 'id',
+                'query_hash': '66eb9403e44cc12e5b5ecda48b667d41',
+            },
+            'TagPage': {
+                'node': 'hashtag',
+                'node_id': 'name',
+                'edge_to_medias': 'edge_hashtag_to_media',
+                'variables_id': 'tag_name',
+                'query_hash': 'f92f56d47dc7a55b606908374b43a314',
+            },
+        }
+
         page = self.request(url).text
         shared_data = self._extract_shared_data(page)
+        psdf = shared_data_fields[page_type]
 
         while True:
-            # Deal with different structure of profile pages: the first page
+            # Deal with different structure of pages: the first page
             # has interesting data in `entry_data', next pages in `data'.
             if 'entry_data' in shared_data:
-                base_shared_data = shared_data['entry_data']['ProfilePage'][0]['graphql']
+                base_shared_data = shared_data['entry_data'][page_type][0]['graphql']
 
-                # `rhx_gis' and `user_id' are available only in the first page
+                # `rhx_gis' and variables_id are available only in the first page
                 rhx_gis = shared_data['rhx_gis']
-                user_id = base_shared_data['user']['id']
+                variables_id = base_shared_data[psdf['node']][psdf['node_id']]
             else:
                 base_shared_data = shared_data['data']
 
-            timeline = base_shared_data['user']['edge_owner_to_timeline_media']
-            has_next_page = timeline['page_info']['has_next_page']
-            shortcodes = [n['node']['shortcode'] for n in timeline['edges']]
+            medias = base_shared_data[psdf['node']][psdf['edge_to_medias']]
+            has_next_page = medias['page_info']['has_next_page']
+            shortcodes = [n['node']['shortcode'] for n in medias['edges']]
 
             for s in shortcodes:
                 url = '{}/p/{}/'.format(self.root, s)
@@ -114,9 +137,10 @@ class InstagramExtractor(Extractor):
             if not has_next_page:
                 break
 
-            end_cursor = timeline['page_info']['end_cursor']
-            variables = '{{"id":"{}","first":12,"after":"{}"}}'.format(
-                user_id,
+            end_cursor = medias['page_info']['end_cursor']
+            variables = '{{"{}":"{}","first":12,"after":"{}"}}'.format(
+                psdf['variables_id'],
+                variables_id,
                 end_cursor,
             )
             xigis = '{}:{}'.format(rhx_gis, variables)
@@ -126,10 +150,16 @@ class InstagramExtractor(Extractor):
             }
             url = '{}/graphql/query/?query_hash={}&variables={}'.format(
                 self.root,
-                '66eb9403e44cc12e5b5ecda48b667d41',
+                psdf['query_hash'],
                 variables,
             )
             shared_data = self.request(url, headers=headers).json()
+
+    def _extract_profilepage(self, url):
+        yield from self._extract_page(url, 'ProfilePage')
+
+    def _extract_tagpage(self, url):
+        yield from self._extract_page(url, 'TagPage')
 
 
 class InstagramImageExtractor(InstagramExtractor):
@@ -219,3 +249,26 @@ class InstagramUserExtractor(InstagramExtractor):
     def instagrams(self):
         url = '{}/{}/'.format(self.root, self.username)
         return self._extract_profilepage(url)
+
+
+class InstagramTagExtractor(InstagramExtractor):
+    """Extractor for TagPage"""
+    subcategory = "tag"
+    directory_fmt = ("{category}", "{subcategory}", "{tag}")
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/explore/tags/([^/?&#]+)")
+    test = ("https://www.instagram.com/explore/tags/instagram/", {
+        "range": "1-12",
+        "count": ">= 12",
+    })
+
+    def __init__(self, match):
+        InstagramExtractor.__init__(self, match)
+        self.tag = match.group(1)
+
+    def get_metadata(self):
+        return {"tag": self.tag}
+
+    def instagrams(self):
+        url = '{}/explore/tags/{}/'.format(self.root, self.tag)
+        return self._extract_tagpage(url)
