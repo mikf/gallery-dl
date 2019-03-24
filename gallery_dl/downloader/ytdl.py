@@ -42,7 +42,11 @@ class YoutubeDLDownloader(DownloaderBase):
             return False
 
         if "entries" in info_dict:
-            return self._download_playlist(pathfmt, info_dict)
+            index = pathfmt.keywords.get("_ytdl_index")
+            if index is None:
+                return self._download_playlist(pathfmt, info_dict)
+            else:
+                info_dict = info_dict["entries"][index]
         return self._download_video(pathfmt, info_dict)
 
     def _download_video(self, pathfmt, info_dict):
