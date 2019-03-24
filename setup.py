@@ -91,7 +91,7 @@ setup(
         "gallery_dl.postprocessor",
     ],
     data_files = [
-        ('etc/bash_completion.d', ['gallery-dl.bash-completion']),
+        ('etc/bash_completion.d', ['gallery-dl.bash_completion']),
         ('share/man/man1'       , ['gallery-dl.1']),
     ],
     keywords="image gallery downloader crawler scraper",
