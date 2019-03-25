@@ -34,6 +34,7 @@ def solve_challenge(session, response, kwargs):
         kwargs["params"].copy() if "params" in kwargs else {})
 
     page = response.text
+    params["s"] = text.extract(page, 'name="s" value="', '"')[0]
     params["pass"] = text.extract(page, 'name="pass" value="', '"')[0]
     params["jschl_vc"] = text.extract(page, 'name="jschl_vc" value="', '"')[0]
     params["jschl_answer"] = solve_js_challenge(page, parsed.netloc)
