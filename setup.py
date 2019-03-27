@@ -83,6 +83,7 @@ data_files = [
     for (path, files) in [
         ('etc/bash_completion.d', ['gallery-dl.bash_completion']),
         ('share/man/man1'       , ['gallery-dl.1']),
+        ('share/man/man5'       , ['gallery-dl.conf.5']),
     ]
 ]
 

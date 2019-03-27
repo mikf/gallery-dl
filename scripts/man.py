@@ -7,6 +7,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import re
 import sys
 import os.path
 import datetime
@@ -18,7 +19,12 @@ import gallery_dl.option  # noqa
 import gallery_dl.version  # noqa
 
 
-TEMPLATE = r""".TH "gallery-dl" "1" "$(date)s" "$(version)s" ""
+def build_gallery_dl_1(path=None):
+
+    OPTS_FMT = """.TP\n.B "{}" {}\n{}"""
+
+    TEMPLATE = r"""
+.TH "GALLERY-DL" "1" "$(date)s" "$(version)s" "gallery-dl Manual"
 .\" disable hyphenation
 .nh
 
@@ -56,7 +62,7 @@ Scan \f[I]URL\f[] for other URLs and invoke \f[B]gallery-dl\f[] on them.
 gallery-dl oauth:\f[I]SITE\-NAME\f[]
 Gain OAuth authentication tokens for
 .IR deviantart ,
-.IR  flickr ,
+.IR flickr ,
 .IR reddit ,
 .IR smugmug ", and"
 .IR tumblr .
@@ -84,26 +90,217 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
 .BR gallery-dl.conf (5)
 """
 
-OPTS_FMT = r""".TP
-.B "{}" {}
-{}
+    options = []
+    for action in gallery_dl.option.build_parser()._actions:
+        if action.help.startswith("=="):
+            continue
+        options.append(OPTS_FMT.format(
+            ", ".join(action.option_strings).replace("-", r"\-"),
+            r"\f[I]{}\f[]".format(action.metavar) if action.metavar else "",
+            action.help,
+        ))
+
+    if not path:
+        path = os.path.join(ROOTDIR, "gallery-dl.1")
+    with open(path, "w", encoding="utf-8") as file:
+        file.write(TEMPLATE.lstrip() % {
+            "options": "\n".join(options),
+            "version": gallery_dl.version.__version__,
+            "date"   : datetime.datetime.now(),
+        })
+
+
+def build_gallery_dl_conf_5(path=None):
+
+    TEMPLATE = r"""
+.TH "GALLERY-DL.CONF" "5" "$(date)s" "$(version)s" "gallery-dl Manual"
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+
+.SH NAME
+gallery-dl.conf \- gallery-dl configuration file
+
+.SH DESCRIPTION
+gallery-dl will search for configuration files in the following places
+every time it is started, unless
+.B --ignore-config
+is specified:
+.PP
+.RS 4
+.nf
+.I /etc/gallery-dl.conf
+.I $HOME/.config/gallery-dl/config.json
+.I $HOME/.gallery-dl.conf
+.fi
+.RE
+.PP
+It is also possible to specify additional configuration files with the
+.B -c/--config
+command-line option or to add further option values with
+.B -o/--option
+as <key>=<value> pairs,
+
+Configuration files are JSON-based and therefore don't allow any ordinary
+comments, but, since unused keys are simply ignored, it is possible to utilize
+those as makeshift comments by settings their values to arbitrary strings.
+
+.SH EXAMPLE
+{
+.RS 4
+"base-directory": "/tmp/",
+.br
+"extractor": {
+.RS 4
+"pixiv": {
+.RS 4
+"directory": ["Pixiv", "Works", "{user[id]}"],
+.br
+"filename": "{id}{num}.{extension}",
+.br
+"username": "foo",
+.br
+"password": "bar"
+.RE
+},
+.br
+"flickr": {
+.RS 4
+"_comment": "OAuth keys for account 'foobar'",
+.br
+"access-token": "0123456789-0123456789abcdef",
+.br
+"access-token-secret": "fedcba9876543210"
+.RE
+}
+.RE
+},
+.br
+"downloader": {
+.RS 4
+"retries": 3,
+.br
+"timeout": 2.5
+.RE
+}
+.RE
+}
+
+%(options)s
+
+.SH BUGS
+https://github.com/mikf/gallery-dl/issues
+
+.SH AUTHORS
+Mike Fährmann <mike_faehrmann@web.de>
+.br
+and https://github.com/mikf/gallery-dl/graphs/contributors
+
+.SH "SEE ALSO"
+.BR gallery-dl (1)
 """
 
+    sections = parse_docs_configuration()
+    content = []
 
-options = []
-for action in gallery_dl.option.build_parser()._actions:
-    if action.help.startswith("=="):
-        continue
-    options.append(OPTS_FMT.format(
-        ", ".join(action.option_strings).replace("-", r"\-"),
-        r"\f[I]{}\f[]".format(action.metavar) if action.metavar else "",
-        action.help,
-    ))
+    for sec_name, section in sections.items():
+        content.append(".SH " + sec_name.upper())
 
-PATH = os.path.join(ROOTDIR, "gallery-dl.1")
-with open(PATH, "w", encoding="utf-8") as file:
-    file.write(TEMPLATE % {
-        "options": "\n".join(options),
-        "version": gallery_dl.version.__version__,
-        "date"   : datetime.datetime.now(),
-    })
+        for opt_name, option in section.items():
+            content.append(".SS " + opt_name)
+
+            for field, text in option.items():
+                if field in ("Type", "Default"):
+                    content.append('.IP "{}:" {}'.format(field, len(field)+2))
+                    content.append(strip_rst(text))
+                else:
+                    content.append('.IP "{}:" 4'.format(field))
+                    content.append(strip_rst(text, field != "Example"))
+
+    if not path:
+        path = os.path.join(ROOTDIR, "gallery-dl.conf.5")
+    with open(path, "w", encoding="utf-8") as file:
+        file.write(TEMPLATE.lstrip() % {
+            "options": "\n".join(content),
+            "version": gallery_dl.version.__version__,
+            "date"   : datetime.datetime.now(),
+        })
+
+
+def parse_docs_configuration():
+
+    doc_path = os.path.join(ROOTDIR, "docs", "configuration.rst")
+    with open(doc_path, encoding="utf-8") as file:
+        doc_lines = file.readlines()
+
+    sections = {}
+    sec_name = None
+    options = None
+    opt_name = None
+    opt_desc = None
+    name = None
+    last = last2 = None
+    for line in doc_lines:
+
+        # start of new section
+        if re.match(r"^=+$", line):
+            if sec_name and options:
+                sections[sec_name] = options
+            sec_name = last.strip()
+            options = {}
+
+        elif re.match(r"^=+ =+$", line):
+            # start of option table
+            if re.match(r"^-+$", last):
+                opt_name = last2.strip()
+                opt_desc = {}
+            # end of option table
+            elif opt_desc:
+                options[opt_name] = opt_desc
+                opt_name = None
+                name = None
+
+        # inside option table
+        elif opt_name:
+            if line[0].isalpha():
+                name, _, line = line.partition(" ")
+                opt_desc[name] = ""
+            line = line.strip()
+            if line.startswith(("* ", "- ")):
+                line = "\n" + line
+            elif line.startswith("| "):
+                line = line[2:] + "\n.br"
+            opt_desc[name] += line + "\n"
+
+        last2 = last
+        last = line
+    sections[sec_name] = options
+
+    return sections
+
+
+def strip_rst(text, extended=True, *, ITALIC=r"\\f[I]\1\\f[]", REGULAR=r"\1"):
+
+    text = text.replace("\\", "\\\\")
+
+    # ``foo``
+    repl = ITALIC if extended else REGULAR
+    text = re.sub(r"``([^`]+)``", repl, text)
+    # |foo|_
+    text = re.sub(r"\|([^|]+)\|_*", ITALIC, text)
+    # `foo`_
+    text = re.sub(r"`([^`]+)`_+", ITALIC, text)
+    # `foo`
+    text = re.sub(r"`([^`]+)`", REGULAR, text)
+    # foo_
+    text = re.sub(r"([A-Za-z0-9-]+)_+(?=\s)", ITALIC, text)
+    # -------
+    text = re.sub(r"---+", "", text)
+
+    return text
+
+
+if __name__ == "__main__":
+    build_gallery_dl_1()
+    build_gallery_dl_conf_5()
