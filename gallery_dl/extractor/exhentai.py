@@ -339,52 +339,29 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(2) or "")
+        self.params = text.parse_query(match.group(2))
         self.params["page"] = text.parse_int(self.params.get("page"))
         self.search_url = self.root
 
     def items(self):
         self.login()
-        self.init()
         yield Message.Version, 1
 
         while True:
+            last = None
             page = self.request(self.search_url, params=self.params).text
 
-            for row in text.extract_iter(page, '<tr class="gtr', '</tr>'):
-                yield self._parse_row(row)
+            for gallery in ExhentaiGalleryExtractor.pattern.finditer(page):
+                url = gallery.group(0)
+                if url == last:
+                    continue
+                last = url
+                yield Message.Queue, url, {}
 
             if 'class="ptdd">&gt;<' in page or ">No hits found</p>" in page:
                 return
             self.params["page"] += 1
             self.wait()
-
-    def init(self):
-        pass
-
-    def _parse_row(self, row, extr=text.extract):
-        """Parse information of a single result row"""
-        gtype, pos = extr(row, ' alt="', '"')
-        date , pos = extr(row, 'nowrap">', '<', pos)
-        url  , pos = extr(row, ' class="it5"><a href="', '"', pos)
-        title, pos = extr(row, '>', '<', pos)
-        key , last = self._parse_last(row, pos)
-        parts = url.rsplit("/", 3)
-
-        return Message.Queue, url, {
-            "type": gtype,
-            "date": date,
-            "gallery_id": text.parse_int(parts[1]),
-            "gallery_token": parts[2],
-            "title": text.unescape(title),
-            "_extractor": ExhentaiGalleryExtractor,
-            key: last,
-        }
-
-    def _parse_last(self, row, pos):
-        """Parse the last column of a result row"""
-        return "uploader", text.remove_html(
-            text.extract(row, '<td class="itu">', '</td>', pos)[0])
 
 
 class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
@@ -400,15 +377,3 @@ class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
     def __init__(self, match):
         ExhentaiSearchExtractor.__init__(self, match)
         self.search_url = self.root + "/favorites.php"
-
-    def init(self):
-        # The first request to '/favorites.php' will return an empty list
-        # if the 's' cookie isn't set (maybe on some other conditions as well),
-        # so we make a "noop" request to get all the correct cookie values
-        # and to get a filled favorite list on the next one.
-        # TODO: proper cookie storage
-        self.request(self.url)
-        self.wait(1.5)
-
-    def _parse_last(self, row, pos):
-        return "date_favorited", text.extract(row, 'nowrap">', '<', pos)[0]
