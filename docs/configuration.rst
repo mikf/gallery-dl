@@ -418,9 +418,9 @@ Type        ``string``
 Default     ``"html"``
 Description Selects the output format of journal entries.
 
-            - ``"html"``: HTML with (roughly) the same layout as on DeviantArt.
-            - ``"text"``: Plain text with image references and HTML tags removed.
-            - ``"none"``: Don't download journals.
+            * ``"html"``: HTML with (roughly) the same layout as on DeviantArt.
+            * ``"text"``: Plain text with image references and HTML tags removed.
+            * ``"none"``: Don't download journals.
 =========== =====
 
 
@@ -857,8 +857,8 @@ Type        ``bool``
 Default     ``false``
 Description Reverse the order of chapter URLs extracted from manga pages.
 
-            * `true`: Start with the latest chapter
-            * `false`: Start with the first chapter
+            * ``true``: Start with the latest chapter
+            * ``false``: Start with the first chapter
 =========== =====
 
 
@@ -1145,10 +1145,10 @@ Type        ``string``
 Default     ``"json"``
 Description Select how to write metadata.
 
-            - ``"json"``: all metadata using `json.dump()
+            * ``"json"``: all metadata using `json.dump()
               <https://docs.python.org/3/library/json.html#json.dump>`_
-            - ``"tags"``: ``tags`` separated by newlines
-            - ``"custom"``: result of applying `metadata.format`_ to a file's
+            * ``"tags"``: ``tags`` separated by newlines
+            * ``"custom"``: result of applying `metadata.format`_ to a file's
               metadata dictionary
 =========== =====
 
@@ -1224,10 +1224,10 @@ Type        ``string``
 Default     ``"auto"``
 Description Controls the frame rate argument (``-r``) for FFmpeg
 
-            - ``"auto"``: Automatically assign a fitting frame rate
+            * ``"auto"``: Automatically assign a fitting frame rate
               based on delays between frames.
-            - any other ``string``:  Use this value as argument for ``-r``.
-            - ``null`` or an empty ``string``: Don't set an explicit frame rate.
+            * any other ``string``:  Use this value as argument for ``-r``.
+            * ``null`` or an empty ``string``: Don't set an explicit frame rate.
 =========== =====
 
 ugoira.keep-files
@@ -1321,14 +1321,14 @@ extractor.deviantart.client-id & .client-secret
 -----------------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and visit DeviantArt's
+How To      * login and visit DeviantArt's
               `Applications & Keys <https://www.deviantart.com/developers/apps>`__
               section
-            - click "Register your Application"
-            - scroll to "OAuth2 Redirect URI Whitelist (Required)"
+            * click "Register your Application"
+            * scroll to "OAuth2 Redirect URI Whitelist (Required)"
               and enter "https://mikf.github.io/gallery-dl/oauth-redirect.html"
-            - click "Save" (top right)
-            - copy ``client_id`` and ``client_secret`` of your new
+            * click "Save" (top right)
+            * copy ``client_id`` and ``client_secret`` of your new
               application and put them in your configuration file
 =========== =====
 
@@ -1337,12 +1337,12 @@ extractor.flickr.api-key & .api-secret
 --------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and `Create an App <https://www.flickr.com/services/apps/create/apply/>`__
+How To      * login and `Create an App <https://www.flickr.com/services/apps/create/apply/>`__
               in Flickr's `App Garden <https://www.flickr.com/services/>`__
-            - click "APPLY FOR A NON-COMMERCIAL KEY"
-            - fill out the form with a random name and description
+            * click "APPLY FOR A NON-COMMERCIAL KEY"
+            * fill out the form with a random name and description
               and click "SUBMIT"
-            - copy ``Key`` and ``Secret`` and put them in your configuration
+            * copy ``Key`` and ``Secret`` and put them in your configuration
               file
 =========== =====
 
@@ -1359,15 +1359,15 @@ extractor.reddit.client-id & .user-agent
 ----------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and visit the `apps <https://www.reddit.com/prefs/apps/>`__
+How To      * login and visit the `apps <https://www.reddit.com/prefs/apps/>`__
               section of your account's preferences
-            - click the "are you a developer? create an app..." button
-            - fill out the form, choose "installed app", preferably set
+            * click the "are you a developer? create an app..." button
+            * fill out the form, choose "installed app", preferably set
               "http://localhost:6414/" as "redirect uri" and finally click
               "create app"
-            - copy the client id (third line, under your application's name and
+            * copy the client id (third line, under your application's name and
               "installed app") and put it in your configuration file
-            - use "``Python:<application name>:v1.0 (by /u/<username>)``" as
+            * use "``Python:<application name>:v1.0 (by /u/<username>)``" as
               user-agent and replace ``<application name>`` and ``<username>``
               accordingly (see Reddit's
               `API access rules <https://github.com/reddit/reddit/wiki/API>`__)
@@ -1378,12 +1378,12 @@ extractor.smugmug.api-key & .api-secret
 ---------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and `Apply for an API Key <https://api.smugmug.com/api/developer/apply>`__
-            - use a random name and description,
+How To      * login and `Apply for an API Key <https://api.smugmug.com/api/developer/apply>`__
+            * use a random name and description,
               set "Type" to "Application", "Platform" to "All",
               and "Use" to "Non-Commercial"
-            - fill out the two checkboxes at the bottom and click "Apply"
-            - copy ``API Key`` and ``API Secret``
+            * fill out the two checkboxes at the bottom and click "Apply"
+            * copy ``API Key`` and ``API Secret``
               and put them in your configuration file
 =========== =====
 
@@ -1392,15 +1392,15 @@ extractor.tumblr.api-key & .api-secret
 --------------------------------------
 =========== =====
 Type        ``string``
-How To      - login and visit Tumblr's
+How To      * login and visit Tumblr's
               `Applications <https://www.tumblr.com/oauth/apps>`__ section
-            - click "Register application"
-            - fill out the form: use a random name and description, set
+            * click "Register application"
+            * fill out the form: use a random name and description, set
               https://example.org/ as "Application Website" and "Default
               callback URL"
-            - solve Google's "I'm not a robot" challenge and click "Register"
-            - click "Show secret key" (below "OAuth Consumer Key")
-            - copy your ``OAuth Consumer Key`` and ``Secret Key``
+            * solve Google's "I'm not a robot" challenge and click "Register"
+            * click "Show secret key" (below "OAuth Consumer Key")
+            * copy your ``OAuth Consumer Key`` and ``Secret Key``
               and put them in your configuration file
 =========== =====
 
