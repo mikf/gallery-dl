@@ -8,7 +8,6 @@ set \
 	-o pipefail
 
 # Use user's real home directory for canonical configuration path access
-# FIXME: Waiting for Snap Store assertion
 declare REALHOME="$(
 	getent passwd "${USER}" \
 		| cut --delimiter=: --fields=6

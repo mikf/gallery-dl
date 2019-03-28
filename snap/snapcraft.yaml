@@ -100,5 +100,3 @@ apps:
 
       # Satisfy FFmpeg's libpulsecommon dependency
       LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
-
-      HOME: $SNAP_USER_COMMON
