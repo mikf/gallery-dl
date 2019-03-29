@@ -155,7 +155,7 @@ class LusciousSearchExtractor(LusciousBase, Extractor):
     """Extractor for album searches on luscious.net"""
     subcategory = "search"
     pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
-               r"/((?:albums|manga|pictures)(?:/(?![^/?&#]+_\d+)[^/?&#]+)*)")
+               r"/(albums(?:/(?![^/?&#]+_\d+)[^/?&#]+)+|manga|pictures)/?$")
     test = (
         ("https://luscious.net/manga/"),
         ("https://members.luscious.net/albums/sorted/updated/album_type/manga"
