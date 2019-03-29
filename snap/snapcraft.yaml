@@ -74,8 +74,15 @@ parts:
       $SNAPCRAFT_STAGE/scriptlets/selective-checkout
 
     plugin: python
+    build-packages:
+    - make
     python-packages:
     - youtube_dl
+    override-build: |
+      # build manpages and bash completion
+      make
+
+      snapcraftctl build
 
   ffmpeg:
     plugin: nil
@@ -99,6 +106,7 @@ apps:
     command-chain:
     - bin/gallery-dl-launch
     command: bin/gallery-dl
+    completer: etc/bash_completion.d/gallery-dl.bash_completion
     environment:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
