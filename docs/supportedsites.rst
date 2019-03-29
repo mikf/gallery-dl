@@ -37,13 +37,14 @@ Hentai2Read          https://hentai2read.com/            Chapters, Manga
 HentaiFox            https://hentaifox.com/              Galleries, Search Results
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries
+Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag-Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
 ImageFap             https://imagefap.com/               Images from Users, Galleries, individual Images
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
-Instagram            https://www.instagram.com/          Images from Users, individual Images
+Instagram            https://www.instagram.com/          Images from Users, individual Images, Tag-Searches
 Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga
 Joyreactor           http://joyreactor.cc/               |joyreactor-C|
 Khinsider            https://downloads.khinsider.com/    Soundtracks
