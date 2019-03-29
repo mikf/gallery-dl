@@ -8,22 +8,26 @@ PYTHON ?= /usr/bin/env python3
 # set SYSCONFDIR to /etc if PREFIX=/usr or PREFIX=/usr/local
 SYSCONFDIR = $(shell if [ $(PREFIX) = /usr -o $(PREFIX) = /usr/local ]; then echo /etc; else echo $(PREFIX)/etc; fi)
 
-all: gallery-dl.1 gallery-dl.conf.5 gallery-dl.bash_completion docs/supportedsites.rst
+all: man completion docs/supportedsites.rst
 
 clean:
 	$(RM) gallery-dl.1 gallery-dl.conf.5 gallery-dl.bash_completion
 	$(RM) -r build/
 
-install: gallery-dl.1 gallery-dl.conf.5 gallery-dl.bash_completion
+install: man completion
 	$(PYTHON) setup.py install
 
-release: gallery-dl.1 gallery-dl.conf.5 gallery-dl.bash_completion docs/supportedsites.rst
+release: man completion docs/supportedsites.rst
 	scripts/release.sh
 
 test:
 	scripts/run_tests.sh
 
-.PHONY: all clean install release test
+completion: gallery-dl.bash_completion
+
+man: gallery-dl.1 gallery-dl.conf.5
+
+.PHONY: all clean install release test completion man
 
 docs/supportedsites.rst: gallery_dl/*/*.py scripts/supportedsites.py
 	$(PYTHON) scripts/supportedsites.py
