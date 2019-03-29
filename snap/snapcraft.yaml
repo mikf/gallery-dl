@@ -80,7 +80,10 @@ parts:
     - youtube_dl
     override-build: |
       # build manpages and bash completion
-      make
+      make \
+        gallery-dl.1 \
+        gallery-dl.conf.5 \
+        gallery-dl.bash_completion
 
       snapcraftctl build
 
