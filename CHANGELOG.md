@@ -1,6 +1,21 @@
 # Changelog
 
-## Unreleased
+## 1.8.1 - 2019-03-29
+### Added
+- Support for:
+  - `35photo` - https://35photo.pro/ ([#162](https://github.com/mikf/gallery-dl/issues/162))
+  - `500px` - https://500px.com/ ([#185](https://github.com/mikf/gallery-dl/issues/185))
+- `instagram` extractor for hashtags ([#202](https://github.com/mikf/gallery-dl/issues/202))
+- Option to get more metadata on `deviantart` ([#189](https://github.com/mikf/gallery-dl/issues/189))
+- Man pages and bash completion ([#150](https://github.com/mikf/gallery-dl/issues/150))
+- Snap improvements ([#197](https://github.com/mikf/gallery-dl/issues/197), [#199](https://github.com/mikf/gallery-dl/issues/199), [#207](https://github.com/mikf/gallery-dl/issues/207))
+### Changed
+- Metadata for `luscious` albums
+- FFmpeg arguments for `--ugoira-conv`
+### Fixed
+- `tumblr` avatar URLs when not using OAuth1.0 ([#193](https://github.com/mikf/gallery-dl/issues/193))
+- `instagram` multi-image posts ([#178](https://github.com/mikf/gallery-dl/issues/178), [#201](https://github.com/mikf/gallery-dl/issues/201))
+- Miscellaneous issues on `exhentai`, `komikcast`
 
 ## 1.8.0 - 2019-03-15
 ### Added
