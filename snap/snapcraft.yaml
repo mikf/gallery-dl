@@ -55,19 +55,24 @@ parts:
     organize:
       '*': bin/
 
-  selective-pull:
+  # Check out the tagged release revision if it isn’t promoted to the stable channel
+  # https://forum.snapcraft.io/t/selective-checkout-check-out-the-tagged-release-revision-if-it-isnt-promoted-to-the-stable-channel/10617
+  selective-checkout:
     plugin: nil
     build-packages:
     - git
     stage-snaps:
-    - selective-pull
+    - selective-checkout
 
   gallery-dl:
     after:
-    - selective-pull
+    - selective-checkout
 
     source: .
-    override-pull: $SNAPCRAFT_STAGE/scriptlets/selective-pull
+    override-pull: |
+      snapcraftctl pull
+      $SNAPCRAFT_STAGE/scriptlets/selective-checkout
+
     plugin: python
     python-packages:
     - youtube_dl
