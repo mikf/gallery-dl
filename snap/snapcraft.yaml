@@ -55,22 +55,34 @@ parts:
     organize:
       '*': bin/
 
-  selective-pull:
+  # Check out the tagged release revision if it isn’t promoted to the stable channel
+  # https://forum.snapcraft.io/t/selective-checkout-check-out-the-tagged-release-revision-if-it-isnt-promoted-to-the-stable-channel/10617
+  selective-checkout:
     plugin: nil
     build-packages:
     - git
     stage-snaps:
-    - selective-pull
+    - selective-checkout
 
   gallery-dl:
     after:
-    - selective-pull
+    - selective-checkout
 
     source: .
-    override-pull: $SNAPCRAFT_STAGE/scriptlets/selective-pull
+    override-pull: |
+      snapcraftctl pull
+      $SNAPCRAFT_STAGE/scriptlets/selective-checkout
+
     plugin: python
+    build-packages:
+    - make
     python-packages:
     - youtube_dl
+    override-build: |
+      # build manpages and bash completion
+      make
+
+      snapcraftctl build
 
   ffmpeg:
     plugin: nil
@@ -94,11 +106,10 @@ apps:
     command-chain:
     - bin/gallery-dl-launch
     command: bin/gallery-dl
+    completer: etc/bash_completion.d/gallery-dl.bash_completion
     environment:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
 
       # Satisfy FFmpeg's libpulsecommon dependency
       LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
-
-      HOME: $SNAP_USER_COMMON
