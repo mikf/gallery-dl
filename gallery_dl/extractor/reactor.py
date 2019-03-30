@@ -123,6 +123,8 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
 
             if image.startswith("<iframe "):  # embed
                 url = "ytdl:" + text.unescape(url)
+            else:
+                url = url.replace("/post/", "/post/full/")
 
             yield {
                 "file_url": url,
@@ -215,7 +217,7 @@ class JoyreactorTagExtractor(ReactorTagExtractor):
             "count": ">= 17",
         }),
         ("http://joyreactor.com/tag/Cirno", {
-            "url": "a81382a3146da50b647c475f87427a6ca1d737df",
+            "url": "2a9c0f668d4d8b25c9a22145762c07512d63ba07",
         }),
     )
 
@@ -242,7 +244,7 @@ class JoyreactorUserExtractor(ReactorUserExtractor):
     test = (
         ("http://joyreactor.cc/user/hemantic"),
         ("http://joyreactor.com/user/Tacoman123", {
-            "url": "0444158f17c22f08515ad4e7abf69ad2f3a63b35",
+            "url": "452cd0fa23e2ad0e122c296ba75aa7f0b29329f6",
         }),
     )
 
@@ -253,23 +255,23 @@ class JoyreactorPostExtractor(ReactorPostExtractor):
     pattern = JR_BASE_PATTERN + r"/post/(\d+)"
     test = (
         ("http://joyreactor.com/post/3721876", {  # single image
-            "url": "904779f6571436f3d5adbce30c2c272f6401e14a",
-            "keyword": "e8deb51e66325341fe33f6e99938b8548093d34b",
+            "url": "6ce09f239d8b7fdf6dd1664c2afc39618cc87663",
+            "keyword": "454feed5cd357d5d0512b35f72123db531689075",
         }),
         ("http://joyreactor.com/post/3713804", {  # 4 images
-            "url": "99c614416b959f22001f7da3f68df03b1551abdf",
-            "keyword": "c5a6893e2425d31393139e355370e208754eb8fa",
+            "url": "f08ac8493ca0619a3e3c6bedb8d8374af3eec304",
+            "keyword": "80fc8a08115f6e847fce1a110367924faec9e34e",
         }),
         ("http://joyreactor.com/post/3726210", {  # gif / video
-            "url": "33a48e1eca6cb2d298fbbb6536b3283799d6515b",
-            "keyword": "11cfce3f2ea336979ca6cc5da604fbe02aeda345",
+            "url": "83c1f7437e3cd011a0e26420a21baf1c3a8fbbdd",
+            "keyword": "a505a16b72969643e7a310ed49ed513870ea0d32",
         }),
         ("http://joyreactor.com/post/3668724", {  # youtube embed
             "url": "be2589e2e8f3ffcaf41b34bc28bfad850ccea34a",
             "keyword": "889206164b4a180aed6bf6186d2456cf31afbed8",
         }),
         ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
-            "url": "d45337fec926159afe11c59e32d259d793dd00b3",
+            "url": "ac900743ed7cf1baf3db3b531c3bc414bf1ffcde",
         }),
     )
 
@@ -326,10 +328,10 @@ class PornreactorPostExtractor(ReactorPostExtractor):
     pattern = PR_BASE_PATTERN + r"/post/(\d+)"
     test = (
         ("http://pornreactor.cc/post/863166", {
-            "url": "9e5f7b374605cbbd413f4f4babb9d1af6f95b843",
-            "content": "3e2a09f8b5e5ed7722f51c5f423ff4c9260fb23e",
+            "url": "680db1e33ca92ff70b2c0e1708c471cbe2201324",
+            "content": "ec6b0568bfb1803648744077da082d14de844340",
         }),
         ("http://fapreactor.com/post/863166", {
-            "url": "83ff7c87741c05bcf1de6825e2b4739afeb87ed5",
+            "url": "864ecd5785e4898301aa8d054dd653b1165be158",
         }),
     )
