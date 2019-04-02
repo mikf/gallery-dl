@@ -83,6 +83,7 @@ modules = [
     "wallhaven",
     "warosu",
     "weibo",
+    "wikiart",
     "yandere",
     "xvideos",
     "yuki",

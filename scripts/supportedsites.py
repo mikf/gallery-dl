@@ -63,6 +63,7 @@ CATEGORY_MAP = {
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
     "thebarchive"    : "The /b/ Archive",
+    "wikiart"        : "WikiArt.org",
     "worldthree"     : "World Three",
     "xvideos"        : "XVideos",
     "yuki"           : "yuki.la 4chan archive",
@@ -70,6 +71,7 @@ CATEGORY_MAP = {
 
 SUBCATEGORY_MAP = {
     "artwork": "Artwork Listings",
+    "artists": "",
     "doujin" : "Doujin",
     "gallery": "Galleries",
     "image"  : "individual Images",
