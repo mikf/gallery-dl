@@ -60,6 +60,7 @@ MangaDex             https://mangadex.org/               Chapters, Manga
 Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.me/               Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
+Mangoxo              https://www.mangoxo.com/            Albums, Channels
 Newgrounds           https://www.newgrounds.com/         Images from Users, individual Images, Videos
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results

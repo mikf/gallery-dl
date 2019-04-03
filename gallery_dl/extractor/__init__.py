@@ -55,6 +55,7 @@ modules = [
     "mangapark",
     "mangareader",
     "mangastream",
+    "mangoxo",
     "myportfolio",
     "newgrounds",
     "ngomik",
