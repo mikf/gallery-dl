@@ -35,12 +35,12 @@ class WikiartExtractor(Extractor):
             yield Message.Url, url, text.nameext_from_url(url, painting)
 
     def metadata(self):
-        """ """
+        """Return a dict with general metadata"""
 
     def paintings(self):
-        """ """
+        """Return an iterable containing all relevant 'painting' objects"""
 
-    def _pagination(self, url, key="Paintings", extra_params=None):
+    def _pagination(self, url, extra_params=None, key="Paintings"):
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "Referer": url,
@@ -82,7 +82,6 @@ class WikiartArtistExtractor(WikiartExtractor):
         return {"artist": self.request(url).json()}
 
     def paintings(self):
-        """ """
         url = "{}/{}/{}/mode/all-paintings".format(
             self.root, self.lang, self.artist)
         return self._pagination(url)
@@ -130,6 +129,6 @@ class WikiartArtistsExtractor(WikiartExtractor):
             self.root, self.lang, self.group)
         params = {"json": "3", "searchterm": self.type}
 
-        for artist in self._pagination(url, "Artists", params):
+        for artist in self._pagination(url, params, "Artists"):
             artist["_extractor"] = WikiartArtistExtractor
             yield Message.Queue, self.root + artist["artistUrl"], artist
