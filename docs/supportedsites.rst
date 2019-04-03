@@ -68,7 +68,7 @@ Niconico Seiga       https://seiga.nicovideo.jp/         Images from Users, indi
 nijie                https://nijie.info/                 |nijie-C|                                          Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Pawoo                https://pawoo.net/                  Images from Users, Images from Statuses
-Photobucket          http://photobucket.com/             Albums, individual Images
+Photobucket          https://photobucket.com/            Albums, individual Images
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
 Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required

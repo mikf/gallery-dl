@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://photobucket.com/"""
+"""Extract images from https://photobucket.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
@@ -24,33 +24,33 @@ class PhotobucketAlbumExtractor(Extractor):
     pattern = (r"(?:https?://)?((?:[^.]+\.)?photobucket\.com)"
                r"/user/[^/?&#]+/library/[^?&#]*")
     test = (
-        ("http://s258.photobucket.com/user/focolandia/library/", {
-            "pattern": r"http://i\d+.photobucket.com/albums/hh280/focolandia",
+        ("https://s258.photobucket.com/user/focolandia/library/", {
+            "pattern": r"https?://[oi]+\d+.photobucket.com/albums/hh280/",
             "count": ">= 39"
         }),
         # subalbums of main "directory"
-        ("http://s271.photobucket.com/user/lakerfanryan/library/", {
+        ("https://s271.photobucket.com/user/lakerfanryan/library/", {
             "options": (("image-filter", "False"),),
             "pattern": pattern,
             "count": 1,
         }),
         # subalbums of subalbum without images
-        ("http://s271.photobucket.com/user/lakerfanryan/library/Basketball", {
+        ("https://s271.photobucket.com/user/lakerfanryan/library/Basketball", {
             "pattern": pattern,
             "count": ">= 9",
         }),
         # private (missing JSON data)
-        ("http://s1277.photobucket.com/user/sinisterkat44/library/", {
+        ("https://s1277.photobucket.com/user/sinisterkat44/library/", {
             "count": 0,
         }),
-        ("http://s1110.photobucket.com/user/chndrmhn100/library/"
+        ("https://s1110.photobucket.com/user/chndrmhn100/library/"
          "Chandu%20is%20the%20King?sort=3&page=1"),
     )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.album_path = ""
-        self.root = "http://" + match.group(1)
+        self.root = "https://" + match.group(1)
         self.session.headers["Referer"] = self.url
 
     def items(self):
@@ -114,12 +114,12 @@ class PhotobucketImageExtractor(Extractor):
                r"(?:/gallery/user/([^/?&#]+)/media/([^/?&#]+)"
                r"|/user/([^/?&#]+)/media/[^?&#]+\.html)")
     test = (
-        (("http://s271.photobucket.com/user/lakerfanryan"
+        (("https://s271.photobucket.com/user/lakerfanryan"
           "/media/Untitled-3-1.jpg.html"), {
             "url": "3b647deeaffc184cc48c89945f67574559c9051f",
             "keyword": "a2de4e60d584912537b8025c01bdd1d20bdea735",
         }),
-        (("http://s271.photobucket.com/user/lakerfanryan"
+        (("https://s271.photobucket.com/user/lakerfanryan"
           "/media/IsotopeswBros.jpg.html?sort=3&o=2"), {
             "url": "12c1890c09c9cdb8a88fba7eec13f324796a8d7b",
             "keyword": "61200a223df6c06f45ac3d30c88b3f5b048ce9a8",
@@ -133,7 +133,7 @@ class PhotobucketImageExtractor(Extractor):
         self.session.headers["Referer"] = self.url
 
     def items(self):
-        url = "http://photobucket.com/galleryd/search.php"
+        url = "https://photobucket.com/galleryd/search.php"
         params = {"userName": self.user, "searchTerm": "", "ref": ""}
 
         if self.media_id:
@@ -151,11 +151,11 @@ class PhotobucketImageExtractor(Extractor):
             tries += 1
             self.log.debug("'%s'", image["message"])
         else:
-            self.log.error("photobucket says: '%s'", image["message"])
+            self.log.error("%s", image["message"])
             raise exception.StopExtraction()
 
         # adjust metadata entries to be at least somewhat similar
-        # to the 'album' extractor
+        # to what the 'album' extractor provides
         if "media" in image:
             image = image["media"][image["mediaIndex"]]
             image["albumView"] = data["mediaDocuments"]["albumView"]
