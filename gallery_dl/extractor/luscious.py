@@ -67,7 +67,7 @@ class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
-            "keyword": "f8e5e7b32a7ff777cae5a89e93d06eb51afe3f48",
+            "keyword": "c147d8ef90843f68e37ed15e4fe017e62fc97c96",
         }),
         ("https://luscious.net/albums/not-found_277035/", {
             "exception": exception.NotFoundError,

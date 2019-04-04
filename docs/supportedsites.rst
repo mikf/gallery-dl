@@ -98,6 +98,7 @@ WikiArt.org          https://www.wikiart.org/            Artists, Artworks
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 XVideos              https://www.xvideos.com/            Images from Users, Galleries
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
+yaplog!              https://yaplog.jp/                  Images from Users, Posts
 |yuki-S|             https://yuki.la/                    Threads
 Acidimg              https://acidimg.cc/                 individual Images
 Imagetwist           https://imagetwist.com/             individual Images

@@ -66,6 +66,7 @@ CATEGORY_MAP = {
     "wikiart"        : "WikiArt.org",
     "worldthree"     : "World Three",
     "xvideos"        : "XVideos",
+    "yaplog"         : "yaplog!",
     "yuki"           : "yuki.la 4chan archive",
 }
 
