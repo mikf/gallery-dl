@@ -8,63 +8,73 @@
 
 """Extractors for https://yaplog.jp/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, AsynchronousMixin
 from .. import text, util
 
 
-class YaplogExtractor(Extractor):
+class YaplogExtractor(AsynchronousMixin, Extractor):
     """Base class for yaplog extractors"""
     category = "yaplog"
     root = "https://yaplog.jp"
     filename_fmt = "{post_id}_{image_id}_{title}.{extension}"
     directory_fmt = ("{category}", "{user}")
-    archive_fmt = "{post_id}_{image_id}"
+    archive_fmt = "{user}_{image_id}"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = None
+        self.user = match.group(1)
 
     def items(self):
         yield Message.Version, 1
-        for images, data in self.posts():
+        for urls, data in self.posts():
             yield Message.Directory, data
-            for url in images:
-                iid, _, ext = url.rpartition("/")[2].rpartition(".")
+            for num, url in enumerate(urls, 1):
+                page = self.request(url).text if num > 1 else url
+                iurl = text.extract(page, '<img src="', '"')[0]
+                iid, _, ext = iurl.rpartition("/")[2].rpartition(".")
                 image = {
+                    "url"      : iurl,
+                    "num"      : num,
                     "image_id" : text.parse_int(iid.partition("_")[0]),
                     "extension": ext,
                 }
                 image.update(data)
-                yield Message.Url, url, image
+                yield Message.Url, iurl, image
 
     def posts(self):
         """Return an iterable with (data, image URLs) tuples"""
 
-    def _extract_post(self, url):
+    def _parse_post(self, url):
         page = self.request(url).text
         title, pos = text.extract(page, 'class="title">', '<')
         date , pos = text.extract(page, 'class="date">' , '<', pos)
-        post , pos = text.extract(page, '/archive/'     , '"', pos)
-        url  , pos = text.extract(page, 'class="last"><a href="', '"', pos)
+        pid  , pos = text.extract(page, '/archive/'     , '"', pos)
+        prev , pos = text.extract(page, 'class="last"><a href="', '"', pos)
 
-        return url, self._images_from_post(page), {
-            "post_id": text.parse_int(post),
+        urls = list(text.extract_iter(page, '<li><a href="', '"', pos))
+        urls[0] = page  # cache HTML of first page
+
+        if len(urls) == 24 and text.extract(page, '(1/', ')')[0] != '24':
+            # there are a maximum of 24 image entries in an /image/ page
+            # -> search /archive/ page for the rest
+            url = "{}/{}/archive/{}".format(self.root, self.user, pid)
+            page = self.request(url).text
+
+            base = "{}/{}/image/{}/".format(self.root, self.user, pid)
+            for part in util.advance(text.extract_iter(
+                    page, base, '"', pos), 24):
+                urls.append(base + part)
+
+        return prev, urls, {
+            "post_id": text.parse_int(pid),
             "title"  : text.unescape(title[:-3]),
             "user"   : self.user,
             "date"   : date,
         }
 
-    def _images_from_post(self, post):
-        urls = text.extract_iter(post, '<li><a href="', '"')
-
-        yield text.extract(post, '<img src="', '"')[0]
-        for url in util.advance(urls, 1):
-            post = self.request(url).text
-            yield text.extract(post, '<img src="', '"')[0]
-
 
 class YaplogUserExtractor(YaplogExtractor):
-    """Extractor for all images from a blog on yaplog.jp"""
+    """Extractor for a user's blog on yaplog.jp"""
     subcategory = "user"
     pattern = r"(?:https://)?(?:www\.)?yaplog\.jp/(\w+)/?(?:$|[?&#])"
     test = ("https://yaplog.jp/omitakashi3", {
@@ -72,32 +82,28 @@ class YaplogUserExtractor(YaplogExtractor):
         "count": ">= 2",
     })
 
-    def __init__(self, match):
-        YaplogExtractor.__init__(self, match)
-        self.user = match.group(1)
-
     def posts(self):
         url = "{}/{}/image/".format(self.root, self.user)
         while url:
-            url, images, data = self._extract_post(url)
+            url, images, data = self._parse_post(url)
             yield images, data
 
 
 class YaplogPostExtractor(YaplogExtractor):
-    """Extractor for images from a single blog post on yaplog.jp"""
+    """Extractor for images from a blog post on yaplog.jp"""
     subcategory = "post"
     pattern = (r"(?:https://)?(?:www\.)?yaplog\.jp"
                r"/(\w+)/(?:archive|image)/(\d+)")
     test = ("https://yaplog.jp/imamiami0726/image/1299", {
         "url": "896cae20fa718735a57e723c48544e830ff31345",
-        "keyword": "5c700cb6c505d50b6161c9a3559a186d378eabe3",
+        "keyword": "9bb89e959bb518a8797242aa3e03e17caa00beba",
     })
 
     def __init__(self, match):
         YaplogExtractor.__init__(self, match)
-        self.user, self.post_id = match.groups()
+        self.post_id = match.group(2)
 
     def posts(self):
         url = "{}/{}/image/{}".format(self.root, self.user, self.post_id)
-        _, images, data = self._extract_post(url)
+        _, images, data = self._parse_post(url)
         return ((images, data),)
