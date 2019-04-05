@@ -28,7 +28,7 @@ class MangoxoAlbumExtractor(MangoxoBase, Extractor):
     filename_fmt = "{album[id]}_{num:>03}.{extension}"
     directory_fmt = ("{category}", "{channel[name]}", "{album[name]}")
     archive_fmt = "{album[id]}_{num}"
-    pattern = r"(?:https://)?(?:www\.)?mangoxo\.com/album/(\w+)"
+    pattern = r"(?:https?://)?(?:www\.)?mangoxo\.com/album/(\w+)"
     test = ("https://www.mangoxo.com/album/lzVOv1Q9", {
         "url": "ad921fe62663b06e7d73997f7d00646cab7bdd0d",
         "keyword": {
@@ -105,7 +105,7 @@ class MangoxoAlbumExtractor(MangoxoBase, Extractor):
 class MangoxoChannelExtractor(MangoxoBase, Extractor):
     """Extractor for all albums on a mangoxo channel"""
     subcategory = "channel"
-    pattern = r"(?:https://)?(?:www\.)?mangoxo\.com/channel/(\w+)"
+    pattern = r"(?:https?://)?(?:www\.)?mangoxo\.com/channel/(\w+)"
     test = ("https://www.mangoxo.com/channel/QeYKRkO0", {
         "pattern": MangoxoAlbumExtractor.pattern,
         "range": "1-30",
