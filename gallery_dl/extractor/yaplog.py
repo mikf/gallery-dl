@@ -76,7 +76,7 @@ class YaplogExtractor(AsynchronousMixin, Extractor):
 class YaplogUserExtractor(YaplogExtractor):
     """Extractor for a user's blog on yaplog.jp"""
     subcategory = "user"
-    pattern = r"(?:https://)?(?:www\.)?yaplog\.jp/(\w+)/?(?:$|[?&#])"
+    pattern = r"(?:https?://)?(?:www\.)?yaplog\.jp/(\w+)/?(?:$|[?&#])"
     test = ("https://yaplog.jp/omitakashi3", {
         "pattern": r"https://img.yaplog.jp/img/18/pc/o/m/i/omitakashi3/0/",
         "count": ">= 2",
@@ -92,7 +92,7 @@ class YaplogUserExtractor(YaplogExtractor):
 class YaplogPostExtractor(YaplogExtractor):
     """Extractor for images from a blog post on yaplog.jp"""
     subcategory = "post"
-    pattern = (r"(?:https://)?(?:www\.)?yaplog\.jp"
+    pattern = (r"(?:https?://)?(?:www\.)?yaplog\.jp"
                r"/(\w+)/(?:archive|image)/(\d+)")
     test = ("https://yaplog.jp/imamiami0726/image/1299", {
         "url": "896cae20fa718735a57e723c48544e830ff31345",

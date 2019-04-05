@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https://)?(?:www\.)?wikiart\.org/([a-z]+)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?wikiart\.org/([a-z]+)"
 
 
 class WikiartExtractor(Extractor):
