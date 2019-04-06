@@ -40,6 +40,7 @@ CATEGORY_MAP = {
     "jaiminisbox"    : "Jaimini's Box",
     "kireicake"      : "Kirei Cake",
     "kissmanga"      : "KissManga",
+    "livedoor"       : "livedoor Blog",
     "mangadex"       : "MangaDex",
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",

@@ -52,6 +52,7 @@ Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
 KissManga            https://kissmanga.com/              Chapters, Manga
 Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag-Searches
+livedoor Blog        http://blog.livedoor.jp/            Blogs, Posts
 Luscious             https://luscious.net/               Albums, Search Results                             Optional
 Manga Fox            https://fanfox.net/                 Chapters
 Manga Here           https://www.mangahere.cc/           Chapters, Manga
