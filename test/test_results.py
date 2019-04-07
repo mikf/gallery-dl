@@ -227,6 +227,7 @@ def setup_test_config():
     config.set(("extractor", "nijie", "username"), email)
     config.set(("extractor", "seiga", "username"), email)
     config.set(("extractor", "danbooru", "username"), None)
+    config.set(("extractor", "twitter" , "username"), None)
 
     config.set(("extractor", "deviantart", "client-id"), "7777")
     config.set(("extractor", "deviantart", "client-secret"),
