@@ -9,7 +9,8 @@
 """Extract images from https://twitter.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 
 
 class TwitterExtractor(Extractor):
@@ -27,6 +28,7 @@ class TwitterExtractor(Extractor):
         self.videos = self.config("videos", False)
 
     def items(self):
+        self.login()
         yield Message.Version, 1
         yield Message.Directory, self.metadata()
 
@@ -53,6 +55,35 @@ class TwitterExtractor(Extractor):
 
     def tweets(self):
         """Yield HTML content of all relevant tweets"""
+
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=360*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        page = self.request(self.root + "/login").text
+        pos = page.index('name="authenticity_token"')
+        token = text.extract(page, 'value="', '"', pos-80)[0]
+
+        url = self.root + "/sessions"
+        data = {
+            "session[username_or_email]": username,
+            "session[password]"         : password,
+            "authenticity_token"        : token,
+            "ui_metrics"                : '{"rf":{},"s":""}',
+            "scribe_log"                : "",
+            "redirect_after_login"      : "",
+            "remember_me"               : "1",
+        }
+        response = self.request(url, method="POST", data=data)
+
+        if "/error" in response.url:
+            raise exception.AuthenticationError()
+        return self.session.cookies
 
     @staticmethod
     def _data_from_tweet(tweet):

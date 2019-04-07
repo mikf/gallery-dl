@@ -110,6 +110,7 @@ AUTH_MAP = {
     "smugmug"    : "Optional (OAuth)",
     "tsumino"    : "Optional",
     "tumblr"     : "Optional (OAuth)",
+    "twitter"    : "Optional",
     "wallhaven"  : "Optional",
 }
 

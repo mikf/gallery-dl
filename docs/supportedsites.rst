@@ -91,7 +91,7 @@ SmugMug              https://www.smugmug.com/            |smugmug-C|            
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
-Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets
+Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets                 Optional
 Wallhaven            https://alpha.wallhaven.cc/         individual Images, Search Results                  Optional
 Warosu               https://warosu.org/                 Threads
 Weibo                https://www.weibo.com/              Images from Users, Images from Statuses
@@ -99,7 +99,7 @@ WikiArt.org          https://www.wikiart.org/            Artists, Artworks
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 XVideos              https://www.xvideos.com/            Images from Users, Galleries
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
-yaplog!              https://yaplog.jp/                  Images from Users, Posts
+yaplog!              https://yaplog.jp/                  Blogs, Posts
 |yuki-S|             https://yuki.la/                    Threads
 Acidimg              https://acidimg.cc/                 individual Images
 Imagetwist           https://imagetwist.com/             individual Images
