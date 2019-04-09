@@ -9,13 +9,45 @@
 """Extractors for https://www.mangoxo.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 
 
 class MangoxoBase():
     """Base class for mangoxo extractors"""
     category = "mangoxo"
     root = "https://www.mangoxo.com"
+    cookiedomain = "www.mangoxo.com"
+    cookienames = ("SESSION",)
+    _warning = True
+
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+        elif MangoxoBase._warning:
+            MangoxoBase._warning = False
+            self.log.warning("Unauthenticated users cannot see "
+                             "more than 5 images per album")
+
+    @cache(maxage=3*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/login/loginxmm"
+        headers = {
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": self.root + "/login",
+        }
+        data = {
+            "name": username,
+            "password": password,
+        }
+        response = self.request(url, method="POST", headers=headers, data=data)
+        session = response.cookies.get("SESSION")
+        if not session:
+            raise exception.AuthenticationError()
+        return {"SESSION": session}
 
     @staticmethod
     def _total_pages(page):
@@ -53,6 +85,7 @@ class MangoxoAlbumExtractor(MangoxoBase, Extractor):
         self.album_id = match.group(1)
 
     def items(self):
+        self.login()
         url = "{}/album/{}/".format(self.root, self.album_id)
         page = self.request(url).text
         data = self.metadata(page)
@@ -117,6 +150,7 @@ class MangoxoChannelExtractor(MangoxoBase, Extractor):
         self.channel_id = match.group(1)
 
     def items(self):
+        self.login()
         yield Message.Version, 1
         url = "{}/channel/{}/".format(self.root, self.channel_id)
         num = total = 1
