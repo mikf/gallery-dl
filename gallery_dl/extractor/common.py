@@ -127,10 +127,17 @@ class Extractor():
 
     def _init_headers(self):
         """Set additional headers for the 'session' object"""
-        self.session.headers["Accept-Language"] = "en-US,en;q=0.5"
-        self.session.headers["User-Agent"] = self.config(
+        headers = self.session.headers
+        headers.clear()
+
+        headers["User-Agent"] = self.config(
             "user-agent", ("Mozilla/5.0 (X11; Linux x86_64; rv:62.0) "
                            "Gecko/20100101 Firefox/62.0"))
+        headers["Accept"] = "*/*"
+        headers["Accept-Language"] = "en-US,en;q=0.5"
+        headers["Accept-Encoding"] = "gzip, deflate"
+        headers["Connection"] = "keep-alive"
+        headers["Upgrade-Insecure-Requests"] = "1"
 
     def _init_proxies(self):
         """Update the session's proxy map"""
