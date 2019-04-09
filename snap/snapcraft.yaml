@@ -63,6 +63,8 @@ parts:
     - git
     stage-snaps:
     - selective-checkout
+    prime:
+    - -*
 
   gallery-dl:
     after:
