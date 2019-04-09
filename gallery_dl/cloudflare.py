@@ -11,6 +11,7 @@
 import re
 import time
 import operator
+import collections
 import urllib.parse
 from . import text, exception
 from .cache import memcache
@@ -32,11 +33,9 @@ def solve_challenge(session, response, kwargs):
     parsed = urllib.parse.urlsplit(response.url)
     root = parsed.scheme + "://" + parsed.netloc
 
-    cf_kwargs = kwargs.copy()
-    headers = cf_kwargs["headers"] = (
-        kwargs["headers"].copy() if "headers" in kwargs else {})
-    params = cf_kwargs["params"] = (
-        kwargs["params"].copy() if "params" in kwargs else {})
+    cf_kwargs = {}
+    headers = cf_kwargs["headers"] = collections.OrderedDict()
+    params = cf_kwargs["params"] = collections.OrderedDict()
 
     page = response.text
     params["s"] = text.extract(page, 'name="s" value="', '"')[0]
@@ -49,7 +48,7 @@ def solve_challenge(session, response, kwargs):
 
     url = root + "/cdn-cgi/l/chk_jschl"
     cf_kwargs["allow_redirects"] = False
-    cf_response = session.request(response.request.method, url, **cf_kwargs)
+    cf_response = session.request("GET", url, **cf_kwargs)
 
     location = cf_response.headers.get("Location")
     if not location:
