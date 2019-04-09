@@ -102,7 +102,7 @@ setup(
     license="GPLv2",
     python_requires=">=3.4",
     install_requires=[
-        "requests >= 2.4.2",
+        "requests>=2.11.0",
     ],
     packages=[
         "gallery_dl",
