@@ -102,6 +102,7 @@ AUTH_MAP = {
     "flickr"     : "Optional (OAuth)",
     "idolcomplex": "Optional",
     "luscious"   : "Optional",
+    "mangoxo"    : "Optional",
     "nijie"      : "Required",
     "pixiv"      : "Required",
     "reddit"     : "Optional (OAuth)",
