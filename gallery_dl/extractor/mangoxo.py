@@ -13,7 +13,7 @@ from .. import text, exception
 from ..cache import cache
 
 
-class MangoxoBase():
+class MangoxoExtractor(Extractor):
     """Base class for mangoxo extractors"""
     category = "mangoxo"
     root = "https://www.mangoxo.com"
@@ -25,8 +25,8 @@ class MangoxoBase():
         username, password = self._get_auth_info()
         if username:
             self._update_cookies(self._login_impl(username, password))
-        elif MangoxoBase._warning:
-            MangoxoBase._warning = False
+        elif MangoxoExtractor._warning:
+            MangoxoExtractor._warning = False
             self.log.warning("Unauthenticated users cannot see "
                              "more than 5 images per album")
 
@@ -54,7 +54,7 @@ class MangoxoBase():
         return text.parse_int(text.extract(page, "total :", ",")[0])
 
 
-class MangoxoAlbumExtractor(MangoxoBase, Extractor):
+class MangoxoAlbumExtractor(MangoxoExtractor):
     """Extractor for albums on mangoxo.com"""
     subcategory = "album"
     filename_fmt = "{album[id]}_{num:>03}.{extension}"
@@ -81,7 +81,7 @@ class MangoxoAlbumExtractor(MangoxoBase, Extractor):
     })
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
+        MangoxoExtractor.__init__(self, match)
         self.album_id = match.group(1)
 
     def items(self):
@@ -135,7 +135,7 @@ class MangoxoAlbumExtractor(MangoxoBase, Extractor):
             page = self.request(url + str(num)).text
 
 
-class MangoxoChannelExtractor(MangoxoBase, Extractor):
+class MangoxoChannelExtractor(MangoxoExtractor):
     """Extractor for all albums on a mangoxo channel"""
     subcategory = "channel"
     pattern = r"(?:https?://)?(?:www\.)?mangoxo\.com/channel/(\w+)"
@@ -146,20 +146,20 @@ class MangoxoChannelExtractor(MangoxoBase, Extractor):
     })
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
+        MangoxoExtractor.__init__(self, match)
         self.channel_id = match.group(1)
 
     def items(self):
         self.login()
-        yield Message.Version, 1
-        url = "{}/channel/{}/".format(self.root, self.channel_id)
         num = total = 1
+        url = "{}/channel/{}/album/".format(self.root, self.channel_id)
+        yield Message.Version, 1
 
         while True:
             page = self.request(url + str(num)).text
 
             for album in text.extract_iter(
-                    page, 'class="orange link" href="', '"'):
+                    page, '<a class="link black" href="', '"'):
                 yield Message.Queue, album, {}
 
             if num == 1:
