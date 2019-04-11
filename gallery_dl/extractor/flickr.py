@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, oauth, util, exception
-import random
 
 
 class FlickrExtractor(Extractor):
@@ -26,13 +25,12 @@ class FlickrExtractor(Extractor):
         self.load_extra = self.config("metadata", False)
 
     def items(self):
-        farm = "//farm{}.".format(random.randint(1, 9))
         info = self.data()
         yield Message.Version, 1
         yield Message.Directory, info
         for photo in self.photos():
             photo.update(info)
-            url = photo["photo"]["source"].replace("//live.", farm)
+            url = photo["photo"]["source"]
             yield Message.Url, url, text.nameext_from_url(url, photo)
 
     def data(self):
@@ -96,8 +94,7 @@ class FlickrImageExtractor(FlickrExtractor):
             info = {"id": self.item_id}
 
         info["photo"] = size
-        farm = "//farm{}.".format(random.randint(1, 9))
-        url = size["source"].replace("//live.", farm)
+        url = size["source"]
         text.nameext_from_url(url, info)
 
         yield Message.Version, 1
