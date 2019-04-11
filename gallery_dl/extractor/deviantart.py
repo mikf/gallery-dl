@@ -235,7 +235,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
                 "deviationid": str,
                 "?download_filesize": int,
                 "extension": str,
-                "index": str,
+                "index": int,
                 "is_deleted": bool,
                 "is_downloadable": bool,
                 "is_favourited": bool,
