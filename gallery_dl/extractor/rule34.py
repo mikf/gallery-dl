@@ -31,9 +31,9 @@ class Rule34TagExtractor(booru.TagMixin, Rule34Extractor):
     pattern = (r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
                r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")
     test = ("https://rule34.xxx/index.php?page=post&s=list&tags=danraku", {
-        "content": "a01768c6f86f32eb7ebbdeb87c30b0d9968d7f97",
+        "content": "97e4bbf86c3860be18de384d02d544251afe1d45",
         "pattern": r"https?://([^.]+\.)?rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
-        "count": 2,
+        "count": 1,
     })
 
 
@@ -50,13 +50,14 @@ class Rule34PostExtractor(booru.PostMixin, Rule34Extractor):
     """Extractor for single images from rule34.xxx"""
     pattern = (r"(?:https?://)?(?:www\.)?rule34\.xxx/(?:index\.php)?"
                r"\?page=post&s=view&id=(?P<post>\d+)")
-    test = ("https://rule34.xxx/index.php?page=post&s=view&id=1974854", {
-        "content": "fd2820df78fb937532da0a46f7af6cefc4dc94be",
+    test = ("https://rule34.xxx/index.php?page=post&s=view&id=1995545", {
+        "content": "97e4bbf86c3860be18de384d02d544251afe1d45",
         "options": (("tags", True),),
         "keyword": {
             "tags_artist": "danraku",
-            "tags_character": "io_(pso2)",
-            "tags_copyright": "phantasy_star phantasy_star_online_2",
+            "tags_character": "kashima_(kantai_collection)",
+            "tags_copyright": "kantai_collection",
             "tags_general": str,
+            "tags_metadata": str,
         },
     })
