@@ -71,8 +71,9 @@ class DeviantartExtractor(Extractor):
                 content = deviation["content"]
                 if self.original and deviation["is_downloadable"]:
                     self._update_content(deviation, content)
-                if content["src"].startswith("https://images-wixmp-"):
-                    # see https://github.com/r888888888/danbooru/issues/4069
+                if deviation["index"] <= 790677560 and \
+                        content["src"].startswith("https://images-wixmp-"):
+                    # https://github.com/r888888888/danbooru/issues/4069
                     content["src"] = re.sub(
                         r"(/f/[^/]+/[^/]+)/v\d+/.*",
                         r"/intermediary\1", content["src"])
@@ -97,7 +98,8 @@ class DeviantartExtractor(Extractor):
     def prepare(self, deviation):
         """Adjust the contents of a Deviation-object"""
         try:
-            deviation["index"] = deviation["url"].rpartition("-")[2]
+            deviation["index"] = text.parse_int(
+                deviation["url"].rpartition("-")[2])
         except KeyError:
             deviation["index"] = 0
         if self.user:
