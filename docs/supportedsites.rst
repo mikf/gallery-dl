@@ -73,6 +73,7 @@ Photobucket          https://photobucket.com/            Albums, individual Imag
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
 Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
+Pixnet               https://www.pixnet.net/             |pixnet-C|
 Pornreactor          http://pornreactor.cc/              |pornreactor-C|
 PowerManga           https://read.powermanga.org/        Chapters, Manga
 Pururin              https://pururin.io/                 Galleries
@@ -118,6 +119,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |joyreactor-C| replace:: Images from Users, Posts, Search Results, Tag-Searches
 .. |nijie-C| replace:: Images from Users, Doujin, Favorites, individual Images
 .. |pixiv-C| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
+.. |pixnet-C| replace:: Images from Users, Folders, individual Images, Sets
 .. |pornreactor-C| replace:: Images from Users, Posts, Search Results, Tag-Searches
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |yuki-S| replace:: yuki.la 4chan archive
