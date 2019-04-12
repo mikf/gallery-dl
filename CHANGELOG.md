@@ -1,9 +1,23 @@
 # Changelog
 
-## Unreleased
+## 1.8.2 - 2019-04-12
+### Additions
+- Support for
+  - `pixnet`   - https://www.pixnet.net/  ([#177](https://github.com/mikf/gallery-dl/issues/177))
+  - `wikiart`  - https://www.wikiart.org/ ([#179](https://github.com/mikf/gallery-dl/issues/179))
+  - `mangoxo`  - https://www.mangoxo.com/ ([#184](https://github.com/mikf/gallery-dl/issues/184))
+  - `yaplog`   - https://yaplog.jp/       ([#190](https://github.com/mikf/gallery-dl/issues/190))
+  - `livedoor` - http://blog.livedoor.jp/ ([#190](https://github.com/mikf/gallery-dl/issues/190))
+- Login support for `mangoxo` ([#184](https://github.com/mikf/gallery-dl/issues/184)) and `twitter` ([#214](https://github.com/mikf/gallery-dl/issues/214))
+### Changes
+- Increased required `Requests` version to 2.11.0
+### Fixes
+- Improved image quality on `reactor` sites ([#210](https://github.com/mikf/gallery-dl/issues/210))
+- Support `imagebam` galleries with more than 100 images ([#219](https://github.com/mikf/gallery-dl/issues/219))
+- Updated Cloudflare bypass code
 
 ## 1.8.1 - 2019-03-29
-### Added
+### Additions
 - Support for:
   - `35photo` - https://35photo.pro/ ([#162](https://github.com/mikf/gallery-dl/issues/162))
   - `500px` - https://500px.com/ ([#185](https://github.com/mikf/gallery-dl/issues/185))
@@ -11,16 +25,16 @@
 - Option to get more metadata on `deviantart` ([#189](https://github.com/mikf/gallery-dl/issues/189))
 - Man pages and bash completion ([#150](https://github.com/mikf/gallery-dl/issues/150))
 - Snap improvements ([#197](https://github.com/mikf/gallery-dl/issues/197), [#199](https://github.com/mikf/gallery-dl/issues/199), [#207](https://github.com/mikf/gallery-dl/issues/207))
-### Changed
-- Metadata for `luscious` albums
-- FFmpeg arguments for `--ugoira-conv`
-### Fixed
-- `tumblr` avatar URLs when not using OAuth1.0 ([#193](https://github.com/mikf/gallery-dl/issues/193))
-- `instagram` multi-image posts ([#178](https://github.com/mikf/gallery-dl/issues/178), [#201](https://github.com/mikf/gallery-dl/issues/201))
-- Miscellaneous issues on `exhentai`, `komikcast`
+### Changes
+- Better FFmpeg arguments for `--ugoira-conv`
+- Adjusted metadata for `luscious` albums
+### Fixes
+- Proper handling of `instagram` multi-image posts ([#178](https://github.com/mikf/gallery-dl/issues/178), [#201](https://github.com/mikf/gallery-dl/issues/201))
+- Fixed `tumblr` avatar URLs when not using OAuth1.0 ([#193](https://github.com/mikf/gallery-dl/issues/193))
+- Miscellaneous fixes for `exhentai`, `komikcast`
 
 ## 1.8.0 - 2019-03-15
-### Added
+### Additions
 - Support for:
   - `weibo` - https://www.weibo.com/
   - `pururin` - https://pururin.io/ ([#174](https://github.com/mikf/gallery-dl/issues/174))
@@ -33,18 +47,18 @@
 - `deviantart` scraps extractor ([#168](https://github.com/mikf/gallery-dl/issues/168))
 - `artstation` extractor for artwork listings ([#172](https://github.com/mikf/gallery-dl/issues/172))
 - `smugmug` video support and improved image format selection ([#183](https://github.com/mikf/gallery-dl/issues/183))
-### Changed
+### Changes
 - More metadata for `nhentai` galleries
 - Combined `myportfolio` extractors into one
 - Renamed `name` metadata field to `filename` and removed the original `filename` field
 - Simplified and improved internal data structures
 - Optimized creation of child extractors
-### Fixed
+### Fixes
 - Filter empty `tumblr` URLs ([#165](https://github.com/mikf/gallery-dl/issues/165))
 - Filter ads and improve connection speed on `hentaifoundry`
 - Show proper error messages if `luscious` galleries are unavailable
-- Miscellaneous issues on `mangahere`, `ngomik`, `simplyhentai`, `imgspice`
-### Removed
+- Miscellaneous fixes for `mangahere`, `ngomik`, `simplyhentai`, `imgspice`
+### Removals
 - `seaotterscans`
 
 ## 1.7.0 - 2019-02-05
@@ -71,7 +85,7 @@
 
 ## 1.6.2 - 2019-01-01
 - Added support for:
-  - `instagram` - https://www.instagram.com ([#134](https://github.com/mikf/gallery-dl/issues/134))
+  - `instagram` - https://www.instagram.com/ ([#134](https://github.com/mikf/gallery-dl/issues/134))
 - Added support for multiple items on sta.sh pages ([#113](https://github.com/mikf/gallery-dl/issues/113))
 - Added option to download `tumblr` avatars ([#137](https://github.com/mikf/gallery-dl/issues/137))
 - Changed defaults for visited post types and inline media on `tumblr`
