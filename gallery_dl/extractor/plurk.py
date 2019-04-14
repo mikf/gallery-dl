@@ -9,7 +9,7 @@
 """Extractors for https://www.plurk.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, extractor, exception
 import datetime
 import json
 import re
@@ -21,13 +21,39 @@ class PlurkExtractor(Extractor):
     root = "https://www.plurk.com"
 
     def items(self):
+        urls = self._urls_ex if self.config("comments", False) else self._urls
+
         yield Message.Version, 1
-        for plurk in self.plurks():
-            for url in text.extract_iter(plurk["content"], ' href="', '"'):
-                yield Message.Queue, url, plurk
+        with extractor.blacklist(("plurk",)):
+            for plurk in self.plurks():
+                for url in urls(plurk):
+                    yield Message.Queue, url, plurk
 
     def plurks(self):
         """Return an iterable with all relevant 'plurk' objects"""
+
+    @staticmethod
+    def _urls(obj):
+        """Extract URLs from a 'plurk' object"""
+        return text.extract_iter(obj["content"], ' href="', '"')
+
+    def _urls_ex(self, plurk):
+        """Extract URLs from a 'plurk' and its comments"""
+        yield from self._urls(plurk)
+        for comment in self._comments(plurk):
+            yield from self._urls(comment)
+
+    def _comments(self, plurk):
+        """Return an iterable with a 'plurk's comments"""
+        url = "https://www.plurk.com/Responses/get"
+        data = {"plurk_id": plurk["id"], "count": "200"}
+
+        while True:
+            info = self.request(url, "POST", data=data).json()
+            yield from info["responses"]
+            if not info["has_newer"]:
+                return
+            data["from_response_id"] = info["responses"][-1]["id"]
 
     @staticmethod
     def _load(data):
@@ -56,13 +82,8 @@ class PlurkTimelineExtractor(PlurkExtractor):
         plurks = self._load(text.extract(page, "_PLURKS = ", ";\n", pos)[0])
 
         url = "https://www.plurk.com/TimeLine/getPlurks"
-        headers = {
-            "Referer": self.root + "/",
-            "X-Requested-With": "XMLHttpRequest",
-        }
-        data = {
-            "user_id": user_id.strip(),
-        }
+        data = {"user_id": user_id.strip()}
+        headers = {"Referer": url, "X-Requested-With": "XMLHttpRequest"}
 
         while plurks:
             yield from plurks
@@ -70,8 +91,7 @@ class PlurkTimelineExtractor(PlurkExtractor):
             offset = datetime.datetime.strptime(
                 plurks[-1]["posted"], "%a, %d %b %Y %H:%M:%S %Z")
             data["offset"] = offset.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            response = self.request(
-                url, method="POST", headers=headers, data=data)
+            response = self.request(url, "POST", headers=headers, data=data)
             plurks = response.json()["plurks"]
 
 
@@ -79,9 +99,16 @@ class PlurkPostExtractor(PlurkExtractor):
     """Extractor for URLs from a Plurk post"""
     subcategory = "post"
     pattern = r"(?:https?://)?(?:www\.)?plurk\.com/p/(\w+)"
-    test = ("https://www.plurk.com/p/i701j1", {
-        "url": "2115f208564591b8748525c2807a84596aaaaa5f",
-    })
+    test = (
+        ("https://www.plurk.com/p/i701j1", {
+            "url": "2115f208564591b8748525c2807a84596aaaaa5f",
+            "count": 3,
+        }),
+        ("https://www.plurk.com/p/i701j1", {
+            "options": (("comments", True),),
+            "count": ">= 210",
+        }),
+    )
 
     def __init__(self, match):
         PlurkExtractor.__init__(self, match)

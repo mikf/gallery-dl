@@ -627,6 +627,15 @@ Description Download Pixiv's Ugoira animations or ignore them.
 =========== =====
 
 
+extractor.plurk.comments
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Also search Plurk comments for URLs.
+=========== =====
+
+
 extractor.reactor.wait-min & .wait-max
 --------------------------------------
 =========== =====
