@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+### Additions
+- Support for
+  - `plurk` - https://www.plurk.com/ (#212)
+
 ## 1.8.2 - 2019-04-12
 ### Additions
 - Support for
