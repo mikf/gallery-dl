@@ -23,11 +23,14 @@ release: man completion docs/supportedsites.rst
 test:
 	scripts/run_tests.sh
 
+executable:
+	scripts/pyinstaller.py
+
 completion: gallery-dl.bash_completion
 
 man: gallery-dl.1 gallery-dl.conf.5
 
-.PHONY: all clean install release test completion man
+.PHONY: all clean install release test executable completion man
 
 docs/supportedsites.rst: gallery_dl/*/*.py scripts/supportedsites.py
 	$(PYTHON) scripts/supportedsites.py
