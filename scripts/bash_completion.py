@@ -7,13 +7,10 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import sys
-import os.path
+"""Generate bash completion script from gallery-dl's argument parser"""
 
-ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.realpath(ROOTDIR))
-
-from gallery_dl import option  # noqa
+import util
+from gallery_dl import option
 
 
 TEMPLATE = """_gallery_dl()
@@ -50,8 +47,7 @@ for action in option.build_parser()._actions:
         if opt.startswith("--"):
             opts.append(opt)
 
-
-PATH = os.path.join(ROOTDIR, "gallery-dl.bash_completion")
+PATH = util.path("gallery-dl.bash_completion")
 with open(PATH, "w", encoding="utf-8") as file:
     file.write(TEMPLATE % {
         "opts"    : " ".join(opts),

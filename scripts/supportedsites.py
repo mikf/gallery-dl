@@ -1,12 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""Generate a reStructuredText document with all supported sites"""
 
 import sys
-import os.path
 import collections
 
-ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.realpath(ROOTDIR))
-from gallery_dl import extractor  # noqa
+import util
+from gallery_dl import extractor
 
 
 CATEGORY_MAP = {
@@ -254,5 +255,5 @@ def write_output(fobj, columns, extractors):
 
 
 outfile = sys.argv[1] if len(sys.argv) > 1 else "supportedsites.rst"
-with open(os.path.join(ROOTDIR, "docs", outfile), "w") as file:
+with open(util.path("docs", outfile), "w") as file:
     write_output(file, COLUMNS, build_extractor_list())
