@@ -1,12 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""Collect results of extractor unit tests"""
 
 import sys
 import os.path
 import datetime
 
-ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.realpath(ROOTDIR))
-
+import util
 from gallery_dl import extractor, job, config
 from test.test_results import setup_test_config
 
@@ -27,7 +28,7 @@ tests = [
 
 # setup target directory
 
-path = os.path.join(ROOTDIR, "archive/testdb", str(datetime.date.today()))
+path = util.path("archive", "testdb", str(datetime.date.today()))
 os.makedirs(path, exist_ok=True)
 
 

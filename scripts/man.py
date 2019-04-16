@@ -7,16 +7,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+"""Generate man pages"""
+
 import re
-import sys
-import os.path
 import datetime
 
-ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.realpath(ROOTDIR))
-
-import gallery_dl.option  # noqa
-import gallery_dl.version  # noqa
+import util
+import gallery_dl.option
+import gallery_dl.version
 
 
 def build_gallery_dl_1(path=None):
@@ -24,7 +22,7 @@ def build_gallery_dl_1(path=None):
     OPTS_FMT = """.TP\n.B "{}" {}\n{}"""
 
     TEMPLATE = r"""
-.TH "GALLERY-DL" "1" "$(date)s" "$(version)s" "gallery-dl Manual"
+.TH "GALLERY-DL" "1" "%(date)s" "%(version)s" "gallery-dl Manual"
 .\" disable hyphenation
 .nh
 
@@ -101,19 +99,19 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
         ))
 
     if not path:
-        path = os.path.join(ROOTDIR, "gallery-dl.1")
+        path = util.path("gallery-dl.1")
     with open(path, "w", encoding="utf-8") as file:
         file.write(TEMPLATE.lstrip() % {
             "options": "\n".join(options),
             "version": gallery_dl.version.__version__,
-            "date"   : datetime.datetime.now(),
+            "date"   : datetime.datetime.now().strftime("%Y-%m-%d"),
         })
 
 
 def build_gallery_dl_conf_5(path=None):
 
     TEMPLATE = r"""
-.TH "GALLERY-DL.CONF" "5" "$(date)s" "$(version)s" "gallery-dl Manual"
+.TH "GALLERY-DL.CONF" "5" "%(date)s" "%(version)s" "gallery-dl Manual"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -219,18 +217,18 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
                     content.append(strip_rst(text, field != "Example"))
 
     if not path:
-        path = os.path.join(ROOTDIR, "gallery-dl.conf.5")
+        path = util.path("gallery-dl.conf.5")
     with open(path, "w", encoding="utf-8") as file:
         file.write(TEMPLATE.lstrip() % {
             "options": "\n".join(content),
             "version": gallery_dl.version.__version__,
-            "date"   : datetime.datetime.now(),
+            "date"   : datetime.datetime.now().strftime("%Y-%m-%d"),
         })
 
 
 def parse_docs_configuration():
 
-    doc_path = os.path.join(ROOTDIR, "docs", "configuration.rst")
+    doc_path = util.path("docs", "configuration.rst")
     with open(doc_path, encoding="utf-8") as file:
         doc_lines = file.readlines()
 

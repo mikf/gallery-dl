@@ -9,13 +9,9 @@
 
 """Create testdata for extractor tests"""
 
-import sys
-import os.path
 import argparse
 
-ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.realpath(ROOTDIR))
-
+import util  # noqa
 from gallery_dl import extractor
 from test.test_results import ResultJob, setup_test_config
 
