@@ -42,16 +42,26 @@ update-dev() {
     git add "gallery_dl/version.py" "${CHANGELOG}"
 }
 
-build() {
+build-python() {
     cd "${ROOTDIR}"
     echo Building bdist_wheel and sdist
 
     python setup.py bdist_wheel sdist
 }
 
-build-windows() {
+build-linux() {
     cd "${ROOTDIR}"
+    echo Building Linux executable
+
+    make executable
+}
+
+build-windows() {
+    cd "${ROOTDIR}/dist"
     echo Building Windows executable
+
+    # remove old executable
+    rm -f "gallery-dl.exe"
 
     # build windows exe in vm
     ln -fs "${ROOTDIR}" /tmp/
@@ -60,6 +70,7 @@ build-windows() {
     while [ ! -e "gallery-dl.exe" ] ; do
         sleep 5
     done
+    sleep 2
 
     # check exe version
     OUTPUT="$(wine gallery-dl.exe --version)"
@@ -67,10 +78,6 @@ build-windows() {
         echo "exe version mismatch: ${OUTPUT} != ${NEWVERSION}"
         exit 3
     fi
-    if [ -e "dist/gallery-dl.exe" ]; then
-        mv -f "dist/gallery-dl.exe" "dist/gallery-dl-v${OLDVERSION}.exe"
-    fi
-    mv "gallery-dl.exe" "./dist/"
 }
 
 sign() {
@@ -79,15 +86,16 @@ sign() {
 
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}-py3-none-any.whl
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}.tar.gz
-    gpg --detach-sign gallery-dl.exe
+    gpg --detach-sign --yes gallery-dl.exe
+    gpg --detach-sign --yes gallery-dl.bin
 }
 
 changelog() {
     cd "${ROOTDIR}"
     echo Updating "${CHANGELOG}"
 
-    # replace "#NN" with link to actual issue
-    # insert new version and date
+    # - replace "#NN" with link to actual issue
+    # - insert new version and date
     sed -i \
         -e "s*\([( ]\)#\([0-9]\+\)*\1[#\2](https://github.com/mikf/gallery-dl/issues/\2)*g" \
         -e "s*^## [Uu]nreleased*## ${NEWVERSION} - $(date +%Y-%m-%d)*" \
@@ -149,7 +157,8 @@ prompt
 supportedsites
 cleanup
 update
-build
+build-python
+build-linux
 build-windows
 sign
 changelog
