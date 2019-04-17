@@ -8,7 +8,6 @@
 
 """Common classes and constants used by extractor modules."""
 
-import os
 import re
 import time
 import netrc
@@ -401,21 +400,5 @@ def generate_extractors(extractor_data, symtable, classes):
 
 # Reduce strictness of the expected magic string in cookiejar files.
 # (This allows the use of Wget-generated cookiejars without modification)
-
 http.cookiejar.MozillaCookieJar.magic_re = re.compile(
     "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
-
-
-# The first import of requests happens inside this file.
-# If we are running on Windows and the from requests expected certificate file
-# is missing (which happens in a standalone executable from py2exe), the
-# 'verify' option is globally set to False to avoid an exception being thrown
-# when attempting to access https:// URLs.
-
-if os.name == "nt":
-    import os.path
-    import requests.certs
-    import requests.packages.urllib3 as ulib3
-    if not os.path.isfile(requests.certs.where()):
-        config.set(("verify",), False)
-        ulib3.disable_warnings(ulib3.exceptions.InsecureRequestWarning)
