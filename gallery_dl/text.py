@@ -135,12 +135,18 @@ def extract_all(txt, rules, pos=0, values=None):
 
 
 def extract_iter(txt, begin, end, pos=0):
-    """Yield all values obtained by repeated calls to text.extract"""
-    while True:
-        value, pos = extract(txt, begin, end, pos)
-        if value is None:
-            return
-        yield value
+    """Yield values that would be returned by repeated calls of extract()"""
+    index = txt.index
+    lbeg = len(begin)
+    lend = len(end)
+    try:
+        while True:
+            first = index(begin, pos) + lbeg
+            last = index(end, first)
+            pos = last + lend
+            yield txt[first:last]
+    except (ValueError, TypeError, AttributeError):
+        return
 
 
 def parse_bytes(value, default=0, suffixes="bkmgtp"):
