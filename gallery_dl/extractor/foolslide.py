@@ -38,6 +38,7 @@ class FoolslideBase(SharedConfigMixin):
         data["volume"] = text.parse_int(info[2])
         data["chapter"] = text.parse_int(info[3])
         data["chapter_minor"] = "." + info[4] if len(info) >= 5 else ""
+        data["title"] = data["chapter_string"].partition(":")[2].strip()
         return data
 
 
@@ -74,14 +75,11 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
             yield Message.Url, url, data
 
     def metadata(self, page):
-        _      , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
-        manga  , pos = text.extract(page, 'title="', '"', pos)
-        chapter, pos = text.extract(page, 'title="', '"', pos)
-        chapter = text.unescape(chapter)
+        extr = text.extract_from(page)
+        extr('<h1 class="tbtitle dnone">', '')
         return self.parse_chapter_url(self.chapter_url, {
-            "manga": text.unescape(manga).strip(),
-            "title": chapter.partition(":")[2].strip(),
-            "chapter_string": chapter,
+            "manga"         : text.unescape(extr('title="', '"')).strip(),
+            "chapter_string": text.unescape(extr('title="', '"')),
         })
 
     def images(self, page):
@@ -101,25 +99,20 @@ class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
     pattern_fmt = r"(/series/[^/?&#]+)"
 
     def chapters(self, page):
-        manga , pos = text.extract(page, '<h1 class="title">', '</h1>')
-        author, pos = text.extract(page, '<b>Author</b>: ', '<br', pos)
-        artist, pos = text.extract(page, '<b>Artist</b>: ', '<br', pos)
-        manga = text.unescape(manga).strip()
+        extr = text.extract_from(page)
+        manga = text.unescape(extr('<h1 class="title">', '</h1>')).strip()
+        author = extr('<b>Author</b>: ', '<br')
+        artist = extr('<b>Artist</b>: ', '<br')
 
         results = []
         while True:
-            url, pos = text.extract(
-                page, '<div class="title"><a href="', '"', pos)
+            url = extr('<div class="title"><a href="', '"')
             if not url:
                 return results
-
-            chapter, pos = text.extract(page, 'title="', '"', pos)
-            group  , pos = text.extract(page, 'title="', '"', pos)
-
             results.append((url, self.parse_chapter_url(url, {
                 "manga": manga, "author": author, "artist": artist,
-                "group": group, "chapter_string": chapter,
-                "title": chapter.partition(": ")[2] or "",
+                "chapter_string": extr('title="', '"'),
+                "group"         : extr('title="', '"'),
             })))
 
 
@@ -166,7 +159,7 @@ EXTRACTORS = {
         "test-manga":
             ("https://reader.kireicake.com/series/wonderland/", {
                 "url": "d067b649af1cc88fa8c8b698fde04a10909fd169",
-                "keyword": "99caa336a9d48e27e3b8e56a0a1e6faf9fc13a51",
+                "keyword": "268f43772fb239888ca5c5f6a4f65f99ffb3eefb",
             }),
     },
     "powermanga": {
@@ -214,7 +207,7 @@ EXTRACTORS = {
         "test-manga":
             ("http://sensescans.com/reader/series/hakkenden/", {
                 "url": "2360ccb0ead0ff2f5e27b7aef7eb17b9329de2f2",
-                "keyword": "122cf92c32e6428c50f56ffaf29d06b96750ed71",
+                "keyword": "4919f2bfed38e3a34dc984ec8d1dbd7a03044e23",
             }),
     },
     "worldthree": {

@@ -21,7 +21,7 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
                r"(/manga/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)")
     test = ("https://hentai.cafe/manga/read/saitom-box/en/0/1/", {
         "url": "8c6a8c56875ba3ed7ab0a74a64f9960077767fc2",
-        "keyword": "3688ddd3f3077c93eaa8021477ef66d18dc6c159",
+        "keyword": "7182d262810faa692827c947d2f360dfcb8d5e43",
     })
     root = "https://hentai.cafe"
 
@@ -51,7 +51,7 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
         # foolslide URL
         ("https://hentai.cafe/manga/series/saitom-box/", {
             "url": "ca3e8a91531fd6acd863d93ac3afbd8ead06a076",
-            "keyword": "46012b857eb1a1394bc55c0efe7aa4e7f704d10d",
+            "keyword": "f0ece32d958f889d8229ed4052716d398a0a875c",
         }),
     )
     root = "https://hentai.cafe"

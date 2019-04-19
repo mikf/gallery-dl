@@ -24,21 +24,21 @@ class DynastyscansBase():
 
     def _parse_image_page(self, image_id):
         url = "{}/images/{}".format(self.root, image_id)
-        page = self.request(url).text
+        extr = text.extract_from(self.request(url).text)
 
-        date, pos = text.extract(page, "class='create_at'>", "</span>")
-        tags, pos = text.extract(page, "class='tags'>", "</span>", pos)
-        src , pos = text.extract(page, "class='btn-group'>", "</div>", pos)
-        url , pos = text.extract(page, ' src="', '"', pos)
+        date = extr("class='create_at'>", "</span>")
+        tags = extr("class='tags'>", "</span>")
+        src = extr("class='btn-group'>", "</div>")
+        url = extr(' src="', '"')
 
         src = text.extract(src, 'href="', '"')[0] if "Source<" in src else ""
 
         return {
-            "url": self.root + url,
+            "url"     : self.root + url,
             "image_id": text.parse_int(image_id),
-            "tags": text.split_html(text.unescape(tags)),
-            "date": text.remove_html(date),
-            "source": text.unescape(src),
+            "tags"    : text.split_html(text.unescape(tags)),
+            "date"    : text.remove_html(date),
+            "source"  : text.unescape(src),
         }
 
 
@@ -59,28 +59,26 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
     )
 
     def metadata(self, page):
-        info  , pos = text.extract(page, "<h3 id='chapter-title'><b>", "</b>")
-        author, pos = text.extract(page, " by ", "</a>", pos)
-        group , pos = text.extract(page, '"icon-print"></i> ', '</span>', pos)
-        date  , pos = text.extract(page, '"icon-calendar"></i> ', '<', pos)
-
+        extr = text.extract_from(page)
         match = re.match(
             (r"(?:<a[^>]*>)?([^<]+)(?:</a>)?"  # manga name
              r"(?: ch(\d+)([^:<]*))?"  # chapter info
              r"(?:: (.+))?"),  # title
-            info
+            extr("<h3 id='chapter-title'><b>", "</b>"),
         )
+        author = extr(" by ", "</a>")
+        group = extr('"icon-print"></i> ', '</span>')
 
         return {
-            "manga": text.unescape(match.group(1)),
-            "chapter": text.parse_int(match.group(2)),
+            "manga"   : text.unescape(match.group(1)),
+            "chapter" : text.parse_int(match.group(2)),
             "chapter_minor": match.group(3) or "",
-            "title": text.unescape(match.group(4) or ""),
-            "author": text.remove_html(author),
-            "group": (text.remove_html(group) or
-                      text.extract(group, ' alt="', '"')[0] or ""),
-            "date": date,
-            "lang": "en",
+            "title"   : text.unescape(match.group(4) or ""),
+            "author"  : text.remove_html(author),
+            "group"   : (text.remove_html(group) or
+                         text.extract(group, ' alt="', '"')[0] or ""),
+            "date"    : extr('"icon-calendar"></i> ', '<'),
+            "lang"    : "en",
             "language": "English",
         }
 

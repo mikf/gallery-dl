@@ -87,18 +87,15 @@ class TwitterExtractor(Extractor):
 
     @staticmethod
     def _data_from_tweet(tweet):
-        data = text.extract_all(tweet, (
-            ("tweet_id"  , 'data-tweet-id="'   , '"'),
-            ("retweet_id", 'data-retweet-id="' , '"'),
-            ("retweeter" , 'data-retweeter="'  , '"'),
-            ("user"      , 'data-screen-name="', '"'),
-            ("username"  , 'data-name="'       , '"'),
-            ("user_id"   , 'data-user-id="'    , '"'),
-        ))[0]
-        for key in ("tweet_id", "retweet_id", "user_id"):
-            data[key] = text.parse_int(data[key])
-        data["retweeter"] = data["retweeter"] or ""
-        return data
+        extr = text.extract_from(tweet)
+        return {
+            "tweet_id"  : text.parse_int(extr('data-tweet-id="'  , '"')),
+            "retweet_id": text.parse_int(extr('data-retweet-id="', '"')),
+            "retweeter" : extr('data-retweeter="'  , '"'),
+            "user"      : extr('data-screen-name="', '"'),
+            "username"  : extr('data-name="'       , '"'),
+            "user_id"   : text.parse_int(extr('data-user-id="'   , '"')),
+        }
 
     def _tweets_from_api(self, url):
         params = {

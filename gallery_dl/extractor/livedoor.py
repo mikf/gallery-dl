@@ -38,18 +38,14 @@ class LivedoorExtractor(Extractor):
         """Return an iterable with post objects"""
 
     def _load(self, data, body):
-        pid  , pos = text.extract(data, "id : '"   , "'")
-        title, pos = text.extract(data, "title : '", "'", pos)
-        cat1 , pos = text.extract(data, "name:'"   , "'", pos)
-        cat2 , pos = text.extract(data, "name:'"   , "'", pos)
-        date , pos = text.extract(data, "date : '" , "'", pos)
-        tags , pos = text.extract(body, '</dt><dd>', '</dl>')
+        extr = text.extract_from(data)
+        tags = text.extract(body, '</dt><dd>', '</dl>')[0]
 
         return {
-            "id"        : text.parse_int(pid),
-            "title"     : title,
-            "date"      : date,
-            "categories": [cat1, cat2],
+            "id"        : text.parse_int(extr("id : '", "'")),
+            "title"     : extr("title : '", "'"),
+            "categories": [extr("name:'", "'"), extr("name:'", "'")],
+            "date"      : extr("date : '", "'"),
             "tags"      : text.split_html(tags),
             "user"      : self.user,
             "body"      : body,
@@ -108,22 +104,15 @@ class LivedoorBlogExtractor(LivedoorExtractor):
         url = "{}/{}".format(self.root, self.user)
 
         while url:
-            page = self.request(url).text
-            pos = 0
-
+            extr = text.extract_from(self.request(url).text)
             while True:
-                data, pos = text.extract(page, '.articles.push(', ');', pos)
+                data = extr('.articles.push(', ');')
                 if not data:
                     break
-                body, pos = text.extract(
-                    page,
-                    '<div class="article-body-inner">',
-                    '<!-- articleBody End -->',
-                    pos,
-                )
+                body = extr('<div class="article-body-inner">',
+                            '<!-- articleBody End -->')
                 yield self._load(data, body)
-
-            url = text.extract(page, '<a rel="next" href="', '"', pos)[0]
+            url = extr('<a rel="next" href="', '"')
 
 
 class LivedoorPostExtractor(LivedoorExtractor):
@@ -148,13 +137,8 @@ class LivedoorPostExtractor(LivedoorExtractor):
     def posts(self):
         url = "{}/{}/archives/{}.html".format(
             self.root, self.user, self.post_id)
-        page = self.request(url).text
-
-        data, pos = text.extract(page, 'articles :', '</script>')
-        body, pos = text.extract(
-            page,
-            '<div class="article-body-inner">',
-            '<!-- articleBody End -->',
-            pos,
-        )
+        extr = text.extract_from(self.request(url).text)
+        data = extr('articles :', '</script>')
+        body = extr('<div class="article-body-inner">',
+                    '<!-- articleBody End -->')
         return (self._load(data, body),)

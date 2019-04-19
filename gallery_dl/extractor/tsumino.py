@@ -77,42 +77,31 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        extr = text.extract
-        title, pos = extr(page, '"og:title" content="', '"')
-        thumb, pos = extr(page, '"og:image" content="', '"', pos)
+        extr = text.extract_from(page)
+        title = extr('"og:title" content="', '"')
         title_en, _, title_jp = text.unescape(title).partition("/")
         title_en = title_en.strip()
         title_jp = title_jp.strip()
 
-        uploader  , pos = extr(page, 'id="Uploader">'  , '</div>', pos)
-        date      , pos = extr(page, 'id="Uploaded">'  , '</div>', pos)
-        rating    , pos = extr(page, 'id="Rating">'    , '</div>', pos)
-        gtype     , pos = extr(page, 'id="Category">'  , '</div>', pos)
-        collection, pos = extr(page, 'id="Collection">', '</div>', pos)
-        group     , pos = extr(page, 'id="Group">'     , '</div>', pos)
-        artist    , pos = extr(page, 'id="Artist">'    , '</div>', pos)
-        parody    , pos = extr(page, 'id="Parody">'    , '</div>', pos)
-        character , pos = extr(page, 'id="Character">' , '</div>', pos)
-        tags      , pos = extr(page, 'id="Tag">'       , '</div>', pos)
-
         return {
             "gallery_id": text.parse_int(self.gallery_id),
-            "title": title_en or title_jp,
-            "title_en": title_en,
-            "title_jp": title_jp,
-            "thumbnail": thumb,
-            "uploader": text.remove_html(uploader),
-            "date": date.strip(),
-            "rating": text.parse_float(rating.partition(" ")[0]),
-            "type": text.remove_html(gtype),
-            "collection": text.remove_html(collection),
-            "group": text.split_html(group),
-            "artist": text.split_html(artist),
-            "parody": text.split_html(parody),
-            "characters": text.split_html(character),
-            "tags": text.split_html(tags),
-            "language": "English",
-            "lang": "en",
+            "title"     : title_en or title_jp,
+            "title_en"  : title_en,
+            "title_jp"  : title_jp,
+            "thumbnail" : extr('"og:image" content="', '"'),
+            "uploader"  : text.remove_html(extr('id="Uploader">', '</div>')),
+            "date"      : extr('id="Uploaded">', '</div>').strip(),
+            "rating"    : text.parse_float(extr(
+                'id="Rating">', '</div>').partition(" ")[0]),
+            "type"      : text.remove_html(extr('id="Category">'  , '</div>')),
+            "collection": text.remove_html(extr('id="Collection">', '</div>')),
+            "group"     : text.split_html(extr('id="Group">'      , '</div>')),
+            "artist"    : text.split_html(extr('id="Artist">'     , '</div>')),
+            "parody"    : text.split_html(extr('id="Parody">'     , '</div>')),
+            "characters": text.split_html(extr('id="Character">'  , '</div>')),
+            "tags"      : text.split_html(extr('id="Tag">'        , '</div>')),
+            "language"  : "English",
+            "lang"      : "en",
         }
 
     def images(self, page):

@@ -31,25 +31,21 @@ class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
         GalleryExtractor.__init__(self, match)
         self.gallery_id = match.group(2)
 
-    def metadata(self, page):
-        title, pos = text.extract(page, "<h1>", "</h1>")
-        data = text.extract_all(page, (
-            ("parody"    , ">Parodies:"  , "</a></span>"),
-            ("characters", ">Characters:", "</a></span>"),
-            ("tags"      , ">Tags:"      , "</a></span>"),
-            ("artist"    , ">Artists:"   , "</a></span>"),
-            ("group"     , ">Groups:"    , "</a></span>"),
-            ("type"      , ">Category:"  , "</a></span>"),
-        ), pos)[0]
+    def metadata(self, page, split=text.split_html):
+        extr = text.extract_from(page)
 
-        for key, value in data.items():
-            data[key] = text.split_html(value)[::2]
-        data["gallery_id"] = text.parse_int(self.gallery_id)
-        data["title"] = text.unescape(title)
-        data["type"] = data["type"][0] if data["type"] else ""
-        data["language"] = "English"
-        data["lang"] = "en"
-        return data
+        return {
+            "gallery_id": text.parse_int(self.gallery_id),
+            "title"     : text.unescape(extr("<h1>", "</h1>")),
+            "parody"    : split(extr(">Parodies:"  , "</a></span>"))[::2],
+            "characters": split(extr(">Characters:", "</a></span>"))[::2],
+            "tags"      : split(extr(">Tags:"      , "</a></span>"))[::2],
+            "artist"    : split(extr(">Artists:"   , "</a></span>"))[::2],
+            "group"     : split(extr(">Groups:"    , "</a></span>"))[::2],
+            "type"      : text.remove_html(extr(">Category:", "</a></span>")),
+            "language"  : "English",
+            "lang"      : "en",
+        }
 
     def images(self, page):
         return [
