@@ -149,6 +149,20 @@ def extract_iter(txt, begin, end, pos=0):
         return
 
 
+def extract_from(txt, pos=0, default=""):
+    """Returns a function object that extracts from 'txt'"""
+    def extr(begin, end, index=txt.index, txt=txt):
+        nonlocal pos
+        try:
+            first = index(begin, pos) + len(begin)
+            last = index(end, first)
+            pos = last + len(end)
+            return txt[first:last]
+        except (ValueError, TypeError, AttributeError):
+            return default
+    return extr
+
+
 def parse_bytes(value, default=0, suffixes="bkmgtp"):
     """Convert a bytes-amount ("500k", "2.5M", ...) to int"""
     try:
