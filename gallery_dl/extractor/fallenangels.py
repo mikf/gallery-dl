@@ -39,17 +39,16 @@ class FallenangelsChapterExtractor(ChapterExtractor):
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
+        extr = text.extract_from(page)
         lang = "vi" if self.version == "truyen" else "en"
-        data = {
-            "chapter": self.chapter,
+        return {
+            "manga"   : extr('name="description" content="', ' Chapter '),
+            "title"   : extr(':  ', ' - Page 1'),
+            "chapter" : self.chapter,
             "chapter_minor": self.minor or "",
-            "lang": lang,
+            "lang"    : lang,
             "language": util.code_to_language(lang),
         }
-        return text.extract_all(page, (
-            ("manga", 'name="description" content="', ' Chapter '),
-            ("title", ':  ', ' - Page 1'),
-        ), values=data)[0]
 
     @staticmethod
     def images(page):
@@ -83,26 +82,24 @@ class FallenangelsMangaExtractor(MangaExtractor):
         MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):
-        language = util.code_to_language(self.lang)
+        extr = text.extract_from(page)
         results = []
-        pos = 0
-        while True:
-            test, pos = text.extract(page, '<li style="', '', pos)
-            if test is None:
-                return results
-            volume , pos = text.extract(page, 'class="volume-', '"', pos)
-            url    , pos = text.extract(page, 'href="', '"', pos)
-            chapter, pos = text.extract(page, '>', '<', pos)
-            title  , pos = text.extract(page, '<em>', '</em>', pos)
+        language = util.code_to_language(self.lang)
+        while extr('<li style="', '"'):
+            vol = extr('class="volume-', '"')
+            url = extr('href="', '"')
+            cha = extr('>', '<')
+            title = extr('<em>', '</em>')
 
-            manga, _, chapter = chapter.rpartition(" ")
+            manga, _, chapter = cha.rpartition(" ")
             chapter, dot, minor = chapter.partition(".")
             results.append((url, {
-                "manga": manga,
-                "title": text.unescape(title),
-                "volume": text.parse_int(volume),
-                "chapter": text.parse_int(chapter),
+                "manga"   : manga,
+                "title"   : text.unescape(title),
+                "volume"  : text.parse_int(vol),
+                "chapter" : text.parse_int(chapter),
                 "chapter_minor": dot + minor,
-                "lang": self.lang,
+                "lang"    : self.lang,
                 "language": language,
             }))
+        return results
