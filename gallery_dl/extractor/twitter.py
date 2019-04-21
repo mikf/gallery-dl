@@ -134,7 +134,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     test = ("https://twitter.com/PicturesEarth", {
         "range": "1-40",
         "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
-        "keyword": "d406beda07f6f644abd460ddb9af2469ee65c187",
+        "keyword": "46f680d81a59e4d0e8b4ac25411bc3ec94c73a93",
     })
 
     def tweets(self):
@@ -167,13 +167,13 @@ class TwitterTweetExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/PicturesEarth/status/672897688871018500", {
             "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
-            "keyword": "64353df74105fa8814319fdcd3c34575195c39cc",
+            "keyword": "da59634e33a7210bd24f9152af9ac560f6b1b601",
             "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
         }),
         # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "6616de44cf8f87226047ef673e528233f76735d0",
+            "keyword": "43d98ab448193f0d4f30aa571a4b6bda9b6a5692",
         }),
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {
