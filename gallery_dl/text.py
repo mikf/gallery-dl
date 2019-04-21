@@ -11,6 +11,7 @@
 import re
 import html
 import os.path
+import datetime
 import urllib.parse
 
 
@@ -212,6 +213,14 @@ def parse_query(qs):
     except AttributeError:
         pass
     return result
+
+
+def parse_timestamp(ts, default=None):
+    """Create a datetime object from a unix timestamp"""
+    try:
+        return datetime.datetime.fromtimestamp(int(ts))
+    except (TypeError, ValueError, OverflowError):
+        return default
 
 
 if os.name == "nt":

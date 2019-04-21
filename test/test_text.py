@@ -8,6 +8,7 @@
 # published by the Free Software Foundation.
 
 import unittest
+import datetime
 
 from gallery_dl import text
 
@@ -335,6 +336,19 @@ class TestText(unittest.TestCase):
         # invalid arguments
         for value in INVALID:
             self.assertEqual(f(value), {})
+
+    def test_parse_timestamp(self, f=text.parse_timestamp):
+        null = datetime.datetime.fromtimestamp(0)
+        value = datetime.datetime.fromtimestamp(1555816235)
+
+        self.assertEqual(f(0)           , null)
+        self.assertEqual(f("0")         , null)
+        self.assertEqual(f(1555816235)  , value)
+        self.assertEqual(f("1555816235"), value)
+
+        for value in INVALID_ALT:
+            self.assertEqual(f(value), None)
+            self.assertEqual(f(value, "foo"), "foo")
 
 
 if __name__ == '__main__':
