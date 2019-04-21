@@ -95,6 +95,7 @@ class TwitterExtractor(Extractor):
             "user"      : extr('data-screen-name="', '"'),
             "username"  : extr('data-name="'       , '"'),
             "user_id"   : text.parse_int(extr('data-user-id="'   , '"')),
+            "date"      : text.parse_timestamp(extr('data-time="', '"')),
         }
 
     def _tweets_from_api(self, url):
@@ -133,7 +134,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     test = ("https://twitter.com/PicturesEarth", {
         "range": "1-40",
         "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
-        "keyword": "19c02623fa144ca9a863b1f687ab749b3b8e38a5",
+        "keyword": "d406beda07f6f644abd460ddb9af2469ee65c187",
     })
 
     def tweets(self):
@@ -166,12 +167,18 @@ class TwitterTweetExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/PicturesEarth/status/672897688871018500", {
             "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
-            "keyword": "fb19f00ab96a854f7de6e1eb85d632565c8a1a43",
+            "keyword": "64353df74105fa8814319fdcd3c34575195c39cc",
             "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
         }),
+        # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "3e665d795fcd3ddd0c2f18c9b6b56fc3267fdf7d",
+            "keyword": "6616de44cf8f87226047ef673e528233f76735d0",
+        }),
+        # video
+        ("https://twitter.com/perrypumas/status/1065692031626829824", {
+            "options": (("videos", True),),
+            "pattern": r"ytdl:https://twitter.com/perrypumas/status/\d+",
         }),
     )
 
