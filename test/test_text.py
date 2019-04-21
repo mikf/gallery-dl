@@ -338,8 +338,8 @@ class TestText(unittest.TestCase):
             self.assertEqual(f(value), {})
 
     def test_parse_timestamp(self, f=text.parse_timestamp):
-        null = datetime.datetime.fromtimestamp(0)
-        value = datetime.datetime.fromtimestamp(1555816235)
+        null = datetime.datetime.utcfromtimestamp(0)
+        value = datetime.datetime.utcfromtimestamp(1555816235)
 
         self.assertEqual(f(0)           , null)
         self.assertEqual(f("0")         , null)

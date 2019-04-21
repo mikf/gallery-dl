@@ -218,7 +218,7 @@ def parse_query(qs):
 def parse_timestamp(ts, default=None):
     """Create a datetime object from a unix timestamp"""
     try:
-        return datetime.datetime.fromtimestamp(int(ts))
+        return datetime.datetime.utcfromtimestamp(int(ts))
     except (TypeError, ValueError, OverflowError):
         return default
 
