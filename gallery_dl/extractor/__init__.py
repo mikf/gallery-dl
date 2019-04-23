@@ -78,6 +78,7 @@ modules = [
     "sankaku",
     "seiga",
     "senmanga",
+    "sexcom",
     "simplyhentai",
     "slideshare",
     "smugmug",
