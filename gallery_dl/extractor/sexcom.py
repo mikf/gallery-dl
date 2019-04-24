@@ -157,3 +157,38 @@ class SexcomBoardExtractor(SexcomExtractor):
     def pins(self):
         url = "{}/user/{}/{}/".format(self.root, self.user, self.board)
         return self._pagination(url)
+
+
+class SexcomSearchExtractor(SexcomExtractor):
+    """Extractor for search results on www.sex.com"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "search", "{search[query]}")
+    pattern = (r"(?:https?://)?(?:www\.)?sex\.com/((?:"
+               r"(pic|gif|video)s/([^/?&#]+)|search/(pic|gif|video)s"
+               r")/?(?:\?([^#]+))?)")
+    test = (
+        ("https://www.sex.com/search/pics?query=ecchi", {
+            "range": "1-10",
+            "count": 10,
+        }),
+        ("https://www.sex.com/videos/hentai/", {
+            "range": "1-10",
+            "count": 10,
+        }),
+    )
+
+    def __init__(self, match):
+        SexcomExtractor.__init__(self, match)
+        self.path = match.group(1)
+
+        self.search = text.parse_query(match.group(5))
+        self.search["type"] = match.group(2) or match.group(4)
+        if "query" not in self.search:
+            self.search["query"] = match.group(3) or ""
+
+    def metadata(self):
+        return {"search": self.search}
+
+    def pins(self):
+        url = "{}/{}".format(self.root, self.path)
+        return self._pagination(url)
