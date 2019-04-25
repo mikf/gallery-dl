@@ -166,19 +166,39 @@ def cache(maxage=3600, keyarg=None):
     return wrap
 
 
-try:
-    path = config.get(("cache", "file"), "")
-    if path is None:
-        raise RuntimeError()
-    elif not path:
+def clear():
+    """Delete all database entries"""
+    db = DatabaseCacheDecorator.db
+
+    if db:
+        rowcount = 0
+        cursor = db.cursor()
+        try:
+            cursor.execute("DELETE FROM data")
+        except sqlite3.OperationalError:
+            pass  # database is not initialized,  can't be modified, etc.
+        else:
+            rowcount = cursor.rowcount
+            db.commit()
+            cursor.execute("VACUUM")
+        return rowcount
+
+    return None
+
+
+def _path():
+    path = config.get(("cache", "file"), -1)
+
+    if path == -1:
         import tempfile
         import os.path
-        path = os.path.join(tempfile.gettempdir(), ".gallery-dl.cache")
-    else:
-        path = util.expand_path(path)
+        return os.path.join(tempfile.gettempdir(), ".gallery-dl.cache")
 
+    return util.expand_path(path)
+
+
+try:
     DatabaseCacheDecorator.db = sqlite3.connect(
-        path, timeout=30, check_same_thread=False)
-
-except (RuntimeError, sqlite3.OperationalError):
+        _path(), timeout=30, check_same_thread=False)
+except (TypeError, sqlite3.OperationalError):
     cache = memcache  # noqa: F811
