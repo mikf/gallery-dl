@@ -96,15 +96,21 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
     directory_fmt = ("{category}", "Images")
     filename_fmt = "{image_id}.{extension}"
     archive_fmt = "i_{image_id}"
-    pattern = BASE_PATTERN + r"/images(?:\?([^#]+))?$"
-    test = ("https://dynasty-scans.com/images?with[]=4930&with[]=5211", {
-        "url": "6b570eedd8a741c2cd34fb98b22a49d772f84191",
-        "keyword": "2a8f3d30584c637a0dd64ce8a0a2e81edaa6bca4",
-    })
+    pattern = BASE_PATTERN + r"/images/?(?:\?([^#]+))?$"
+    test = (
+        ("https://dynasty-scans.com/images?with[]=4930&with[]=5211", {
+            "url": "6b570eedd8a741c2cd34fb98b22a49d772f84191",
+            "keyword": "2a8f3d30584c637a0dd64ce8a0a2e81edaa6bca4",
+        }),
+        ("https://dynasty-scans.com/images", {
+            "range": "1",
+            "count": 1,
+        }),
+    )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.search_query = match.group(1)
+        self.query = match.group(1) or ""
 
     def items(self):
         yield Message.Version, 1
@@ -115,7 +121,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
     def images(self):
-        url = self.root + "/images?" + self.search_query
+        url = self.root + "/images?" + self.query.replace("[]", "%5B%5D")
         params = {"page": 1}
 
         while True:
