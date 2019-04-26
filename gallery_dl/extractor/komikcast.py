@@ -57,6 +57,9 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
             "url": "aff90dd21dbb945a726778b10bdef522af7c42fe",
             "keyword": "19b5783864c4299913de436513b124b028b557c1",
         }),
+        (("https://komikcast.com/chapter/090-eko-to-issho-chapter-1/"), {
+            "url": "cda104a32ea2b06b3d6b096726622f519ed1fa33",
+        }),
     )
 
     def metadata(self, page):
@@ -69,7 +72,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
             page, '<div id="readerarea">', '<div class="navig">')[0]
         return [
             (text.unescape(url), None)
-            for url in re.findall(r"<img\s+src=[\"']([^\"']+)", readerarea)
+            for url in re.findall(r"<img[^>]* src=[\"']([^\"']+)", readerarea)
             if "/Banner-" not in url
         ]
 
