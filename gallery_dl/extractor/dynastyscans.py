@@ -100,7 +100,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
     test = (
         ("https://dynasty-scans.com/images?with[]=4930&with[]=5211", {
             "url": "6b570eedd8a741c2cd34fb98b22a49d772f84191",
-            "keyword": "2a8f3d30584c637a0dd64ce8a0a2e81edaa6bca4",
+            "keyword": "a1e2d05c1406a08b02f347389616a6babb1b50bf",
         }),
         ("https://dynasty-scans.com/images", {
             "range": "1",
@@ -116,9 +116,9 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
         yield Message.Version, 1
         yield Message.Directory, {}
         for image_id in self.images():
-            data = self._parse_image_page(image_id)
-            url = data.pop("url")
-            yield Message.Url, url, text.nameext_from_url(url, data)
+            image = self._parse_image_page(image_id)
+            url = image["url"]
+            yield Message.Url, url, text.nameext_from_url(url, image)
 
     def images(self):
         url = self.root + "/images?" + self.query.replace("[]", "%5B%5D")
@@ -132,25 +132,14 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
             params["page"] += 1
 
 
-class DynastyscansImageExtractor(DynastyscansBase, Extractor):
+class DynastyscansImageExtractor(DynastyscansSearchExtractor):
     """Extractor for individual images on dynasty-scans.com"""
     subcategory = "image"
-    directory_fmt = ("{category}", "Images")
-    filename_fmt = "{image_id}.{extension}"
     pattern = BASE_PATTERN + r"/images/(\d+)"
     test = ("https://dynasty-scans.com/images/1245", {
         "url": "15e54bd94148a07ed037f387d046c27befa043b2",
-        "keyword": "384889567a19d2e907ff13f65b42f9560e15172d",
+        "keyword": "3b630c6139e5ff06e141541d57960f8a2957efbb",
     })
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.image_id = match.group(1)
-
-    def items(self):
-        data = self._parse_image_page(self.image_id)
-        url = data.pop("url")
-
-        yield Message.Version, 1
-        yield Message.Directory, data
-        yield Message.Url, url, text.nameext_from_url(url, data)
+    def images(self):
+        return (self.query,)
