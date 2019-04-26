@@ -103,6 +103,7 @@ setup(
     python_requires=">=3.4",
     install_requires=[
         "requests>=2.11.0",
+        "urllib3>=1.16, !=1.24.1, !=1.24.2",
     ],
     packages=[
         "gallery_dl",
