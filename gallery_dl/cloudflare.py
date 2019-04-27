@@ -59,8 +59,11 @@ def solve_challenge(session, response, kwargs):
         log.debug("Headers:\n%s", cf_response.headers)
         log.debug("Content:\n%s", cf_response.text)
         raise exception.StopExtraction()
+
     if location[0] == "/":
         location = root + location
+    else:
+        location = re.sub(r"(https?):/(?!/)", r"\1://", location)
 
     for cookie in cf_response.cookies:
         if cookie.name == "cf_clearance":
