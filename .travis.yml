@@ -14,6 +14,13 @@ matrix:
       dist: xenial
     - python: "3.6"
       env: GALLERYDL_TESTS=results
+    - language: minimal
+      dist: xenial
+      addons:
+        snaps:
+          - name: snapcraft
+            classic: true
+      env: SNAP_TESTS=true
 
 git:
   depth: 3
@@ -25,4 +32,5 @@ branches:
   - /^test(-\w+)+$/
 
 script:
-  - ./scripts/run_tests.sh
+  - 'if test "${SNAP_TESTS}" != true; then ./scripts/run_tests.sh; else true; fi'
+  - 'if test "${SNAP_TESTS}" = true; then sudo apt update && snapcraft --destructive-mode && sudo snap try && snap run gallery-dl --verbose https://twitter.com/ubuntu/status/1121001597092364288; else true; fi'
