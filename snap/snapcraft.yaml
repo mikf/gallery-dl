@@ -15,7 +15,7 @@
 # https://forum.snapcraft.io/c/snapcraft
 name: gallery-dl
 license: GPL-2.0
-base: core18
+base: core
 summary: Download image-galleries and -collections from several image hosting sites
 description: |
   `gallery-dl` is a command-line program to download image-galleries and -collections from several image hosting sites (see [Supported Sites][1]). It is a cross-platform tool with many configuration options and powerful filenaming capabilities.
@@ -92,17 +92,6 @@ parts:
     plugin: nil
     stage-packages:
     - ffmpeg
-    - libavcodec57
-    - libavdevice57
-    - libavfilter6
-    - libavformat57
-    - libavresample3
-    - libavutil55
-    - libpostproc54
-    - libpulse0
-    - libslang2
-    - libswresample2
-    - libswscale4
 
 apps:
   gallery-dl:
