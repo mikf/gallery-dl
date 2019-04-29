@@ -102,8 +102,8 @@ setup(
     license="GPLv2",
     python_requires=">=3.4",
     install_requires=[
-        "requests>=2.11.0",
-        "urllib3>=1.16, !=1.24.1, !=1.24.2",
+        "requests>=2.11.0, <2.22.0",
+        "urllib3>=1.16, <1.25, !=1.24.1, !=1.24.2",
     ],
     packages=[
         "gallery_dl",
