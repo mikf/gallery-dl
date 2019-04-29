@@ -13,7 +13,6 @@ from .. import text, exception
 from ..cache import cache, memcache
 import itertools
 import mimetypes
-import datetime
 import time
 import math
 import re
@@ -107,6 +106,8 @@ class DeviantartExtractor(Extractor):
         deviation["da_category"] = deviation["category"]
         deviation["published_time"] = text.parse_int(
             deviation["published_time"])
+        deviation["date"] = text.parse_timestamp(
+            deviation["published_time"])
 
     @staticmethod
     def commit(deviation, target):
@@ -120,7 +121,6 @@ class DeviantartExtractor(Extractor):
         url = deviation["url"]
         thumbs = deviation["thumbs"]
         html = journal["html"]
-        date = datetime.datetime.utcfromtimestamp(deviation["published_time"])
         shadow = SHADOW_TEMPLATE.format_map(thumbs[0]) if thumbs else ""
 
         if "css" in journal:
@@ -131,7 +131,7 @@ class DeviantartExtractor(Extractor):
         if html.find('<div class="boxtop journaltop">', 0, 250) != -1:
             needle = '<div class="boxtop journaltop">'
             header = HEADER_CUSTOM_TEMPLATE.format(
-                title=title, url=url, date=str(date),
+                title=title, url=url, date=deviation["date"],
             )
         else:
             needle = '<div usr class="gr">'
@@ -151,7 +151,7 @@ class DeviantartExtractor(Extractor):
                 url=url,
                 userurl="{}/{}/".format(self.root, urlname),
                 username=username,
-                date=date,
+                date=deviation["date"],
                 categories=categories,
             )
 
@@ -168,7 +168,6 @@ class DeviantartExtractor(Extractor):
 
     @staticmethod
     def _commit_journal_text(deviation, journal):
-        date = datetime.datetime.utcfromtimestamp(deviation["published_time"])
         content = "\n".join(
             text.unescape(text.remove_html(txt))
             for txt in journal["html"].rpartition("<script")[0].split("<br />")
@@ -176,7 +175,7 @@ class DeviantartExtractor(Extractor):
         txt = JOURNAL_TEMPLATE_TEXT.format(
             title=deviation["title"],
             username=deviation["author"]["username"],
-            date=date,
+            date=deviation["date"],
             content=content,
         )
 
@@ -232,6 +231,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
                     "width": int,
                 },
                 "da_category": str,
+                "date": "type:datetime",
                 "deviationid": str,
                 "?download_filesize": int,
                 "extension": str,
