@@ -87,6 +87,7 @@ class TumblrExtractor(Extractor):
             post["reblogged"] = reblog
 
             post["blog"] = blog
+            post["date"] = text.parse_timestamp(post["timestamp"])
             post["num"] = 0
 
             if "trail" in post:
