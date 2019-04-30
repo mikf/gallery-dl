@@ -152,7 +152,7 @@ class ResultJob(job.DownloadJob):
         for msg in self.extractor:
             self.dispatch(msg)
 
-    def handle_url(self, url, keywords):
+    def handle_url(self, url, keywords, fallback=None):
         self.update_url(url)
         self.update_keyword(keywords)
         self.update_archive(keywords)
