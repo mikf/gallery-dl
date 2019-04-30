@@ -20,6 +20,7 @@ class TwitterExtractor(Extractor):
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     root = "https://twitter.com"
+    sizes = (":orig", ":large", ":medium", ":small")
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -41,7 +42,8 @@ class TwitterExtractor(Extractor):
                 tweet, 'data-image-url="', '"')
             for data["num"], url in enumerate(images, 1):
                 text.nameext_from_url(url, data)
-                yield Message.Url, url + ":orig", data
+                urls = [url + size for size in self.sizes]
+                yield Message.Urllist, urls, data
 
             if self.videos and "-videoContainer" in tweet:
                 data["num"] = 1
