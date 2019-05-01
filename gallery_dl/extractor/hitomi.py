@@ -40,32 +40,23 @@ class HitomiGalleryExtractor(GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        pos = page.index('<h1><a href="/reader/')
-        extr = text.extract
-        title , pos = extr(page, '.html">', '<', pos)
-        artist, pos = extr(page, '<h2>', '</h2>', pos)
-        group , pos = extr(page, '<td>Group</td><td>', '</td>', pos)
-        gtype , pos = extr(page, '<td>Type</td><td>', '</td>', pos)
-        lang  , pos = extr(page, '<td>Language</td><td>', '</td>', pos)
-        series, pos = extr(page, '<td>Series</td><td>', '</td>', pos)
-        chars , pos = extr(page, '<td>Characters</td><td>', '</td>', pos)
-        tags  , pos = extr(page, '<td>Tags</td><td>', '</td>', pos)
-        date  , pos = extr(page, '<span class="date">', '</span>', pos)
-        lang = None if lang == "N/A" else text.remove_html(lang)
-
-        return {
+        extr = text.extract_from(page, page.index('<h1><a href="/reader/'))
+        data = {
             "gallery_id": self.gallery_id,
-            "title"     : text.unescape(title.strip()),
-            "artist"    : self._prepare(artist),
-            "group"     : self._prepare(group),
-            "parody"    : self._prepare(series),
-            "characters": self._prepare(chars),
-            "tags"      : self._prepare(tags),
-            "type"      : text.remove_html(gtype).capitalize(),
-            "lang"      : util.language_to_code(lang),
-            "language"  : lang,
-            "date"      : date,
+            "title"     : text.unescape(extr('.html">', '<').strip()),
+            "artist"    : self._prep(extr('<h2>', '</h2>')),
+            "group"     : self._prep(extr('<td>Group</td><td>', '</td>')),
+            "type"      : self._prep_1(extr('<td>Type</td><td>', '</td>')),
+            "language"  : self._prep_1(extr('<td>Language</td><td>', '</td>')),
+            "parody"    : self._prep(extr('<td>Series</td><td>', '</td>')),
+            "characters": self._prep(extr('<td>Characters</td><td>', '</td>')),
+            "tags"      : self._prep(extr('<td>Tags</td><td>', '</td>')),
+            "date"      : extr('<span class="date">', '</span>'),
         }
+        if data["language"] == "N/A":
+            data["language"] = None
+        data["lang"] = util.language_to_code(data["language"])
+        return data
 
     def images(self, page):
         # see https://ltn.hitomi.la/common.js
@@ -84,8 +75,12 @@ class HitomiGalleryExtractor(GalleryExtractor):
         ]
 
     @staticmethod
-    def _prepare(value):
+    def _prep(value):
         return [
             text.unescape(string.capwords(v))
             for v in text.extract_iter(value or "", '.html">', '<')
         ]
+
+    @staticmethod
+    def _prep_1(value):
+        return text.remove_html(value).capitalize()
