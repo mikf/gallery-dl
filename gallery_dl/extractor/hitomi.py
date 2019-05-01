@@ -26,6 +26,11 @@ class HitomiGalleryExtractor(GalleryExtractor):
             # "aa" subdomain for gallery-id ending in 1 (#142)
             "pattern": r"https://aa\.hitomi\.la/",
         }),
+        ("https://hitomi.la/galleries/1401410.html", {
+            # download test
+            "range": "1",
+            "content": "b3ca8c6c8cc5826cf8b4ceb7252943abad7b8b4c",
+        }),
         ("https://hitomi.la/reader/867789.html"),
     )
 
@@ -67,6 +72,9 @@ class HitomiGalleryExtractor(GalleryExtractor):
         offset = self.gallery_id % 2 if self.gallery_id % 10 != 1 else 0
         subdomain = chr(97 + offset) + "a"
         base = "https://" + subdomain + ".hitomi.la/galleries/"
+
+        # set Referer header before image downloads (#239)
+        self.session.headers["Referer"] = self.chapter_url
 
         return [
             (base + urlpart, None)
