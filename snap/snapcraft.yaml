@@ -41,11 +41,13 @@ plugs:
   network-bind:
 
   # Configuration access
-  personal-files:
+  config-gallery-dl:
+    interface: personal-files
     read:
     - $HOME/.config/gallery-dl
     - $HOME/.gallery-dl.conf
-  system-files:
+  etc-gallery-dl:
+    interface: system-files
     read:
     - /etc/gallery-dl.conf
 
