@@ -1,12 +1,23 @@
 # Changelog
 
-## Unreleased
+## 1.8.3 - 2019-05-04
 ### Additions
 - Support for
-  - `plurk`  - https://www.plurk.com/ (#212)
-  - `sexcom` - https://www.sex.com/   (#147)
+  - `plurk`  - https://www.plurk.com/ ([#212](https://github.com/mikf/gallery-dl/issues/212))
+  - `sexcom` - https://www.sex.com/   ([#147](https://github.com/mikf/gallery-dl/issues/147))
+- `--clear-cache`
+- `date` metadata fields for `deviantart`, `twitter`, and `tumblr` ([#224](https://github.com/mikf/gallery-dl/issues/224), [#232](https://github.com/mikf/gallery-dl/issues/232))
 ### Changes
-- Standalone Windows executables use PyInstaller and Python 3.7
+- Standalone executables are now built using PyInstaller:
+  - uses the latest CPython interpreter (Python 3.7.3)
+  - available on several platforms (Windows, Linux, macOS)
+  - includes the `certifi` CA bundle, `youtube-dl`, and `pyOpenSSL` on Windows
+### Fixes
+- Patch `urllib3`'s  default list of SSL/TLS ciphers to prevent Cloudflare CAPTCHAs ([#227](https://github.com/mikf/gallery-dl/issues/227))
+  (Windows users need to install `pyOpenSSL` for this to take effect)
+- Provide fallback URLs for `twitter` images ([#237](https://github.com/mikf/gallery-dl/issues/237))
+- Send `Referer` headers when downloading from `hitomi` ([#239](https://github.com/mikf/gallery-dl/issues/239))
+- Updated login procedure on `mangoxo`
 
 ## 1.8.2 - 2019-04-12
 ### Additions
