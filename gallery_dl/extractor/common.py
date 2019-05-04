@@ -405,30 +405,26 @@ http.cookiejar.MozillaCookieJar.magic_re = re.compile(
 
 # Update default cipher list of urllib3 < 1.25
 # to fix issues with Cloudflare and, by extension, Artstation (#227)
-try:
-    import urllib3
-except ImportError:
-    pass
-else:
-    if urllib3.__version__ < "1.25":
-        from urllib3.util import ssl_
-        logging.getLogger("gallery-dl").debug(
-            "updating default urllib3 ciphers")
-        # cipher list taken from urllib3 1.25
-        # https://github.com/urllib3/urllib3/blob/1.25/src/urllib3/util/ssl_.py
-        ssl_.DEFAULT_CIPHERS = (
-            "ECDHE+AESGCM:"
-            "ECDHE+CHACHA20:"
-            "DHE+AESGCM:"
-            "DHE+CHACHA20:"
-            "ECDH+AESGCM:"
-            "DH+AESGCM:"
-            "ECDH+AES:"
-            "DH+AES:"
-            "RSA+AESGCM:"
-            "RSA+AES:"
-            "!aNULL:"
-            "!eNULL:"
-            "!MD5:"
-            "!DSS"
-        )
+import requests.packages.urllib3 as urllib3  # noqa
+if urllib3.__version__ < "1.25":
+    from requests.packages.urllib3.util import ssl_
+    logging.getLogger("gallery-dl").debug(
+        "updating default urllib3 ciphers")
+    # cipher list taken from urllib3 1.25
+    # https://github.com/urllib3/urllib3/blob/1.25/src/urllib3/util/ssl_.py
+    ssl_.DEFAULT_CIPHERS = (
+        "ECDHE+AESGCM:"
+        "ECDHE+CHACHA20:"
+        "DHE+AESGCM:"
+        "DHE+CHACHA20:"
+        "ECDH+AESGCM:"
+        "DH+AESGCM:"
+        "ECDH+AES:"
+        "DH+AES:"
+        "RSA+AESGCM:"
+        "RSA+AES:"
+        "!aNULL:"
+        "!eNULL:"
+        "!MD5:"
+        "!DSS"
+    )
