@@ -22,6 +22,7 @@ Optional
 
 - FFmpeg_: Pixiv Ugoira to WebM conversion
 - youtube-dl_: Video downloads
+- pyOpenSSL_: Accessing Cloudflare protected sites
 
 
 Installation
@@ -70,14 +71,19 @@ Navigate into the respective directory and run the :code:`setup.py` file.
     $ python setup.py install
 
 
-Standalone Executable (Windows only)
-------------------------------------
+Standalone Executable
+---------------------
 
-Windows users can download a `standalone executable`_, which comes with a
-Python 3.4 interpreter and all required packages included.
+Download a standalone executable file,
+put it into your `PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__,
+and run it inside a command prompt (like ``cmd.exe``).
 
-Put this file in your `PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__
-or use it from the current directory and you are good to go,
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.8.3/gallery-dl.exe>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.8.3/gallery-dl.bin>`__
+
+These executables include a Python 3.7 interpreter
+and all required Python packages.
+
 
 Snap
 ----
@@ -87,6 +93,7 @@ Linux users that are using a distro that is supported by Snapd_ can install *gal
 .. code:: bash
 
     $ snap install gallery-dl
+
 
 Usage
 =====
@@ -216,8 +223,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
-.. _standalone executable:   https://github.com/mikf/gallery-dl/releases/download/v1.8.2/gallery-dl.exe
-.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.8.2.zip
+.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.8.3.zip
 .. _dev:                     https://github.com/mikf/gallery-dl/archive/master.zip
 
 .. _Python:     https://www.python.org/downloads/
@@ -226,7 +232,8 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _Requests:   http://docs.python-requests.org/en/master/
 .. _FFmpeg:     https://www.ffmpeg.org/
 .. _youtube-dl: https://ytdl-org.github.io/youtube-dl/
-.. _Snapd:      https://docs.snapcraft.io/installing-snapd/6735
+.. _pyOpenSSL:  https://pyopenssl.org/
+.. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
