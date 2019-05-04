@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# This is the maintainence launcher for the snap, make necessary runtime environment changes to make the snap work here.  You may also insert security confinement/deprecation/obsoletion notice of the snap here.
+
+set \
+	-o errexit \
+	-o errtrace \
+	-o nounset \
+	-o pipefail
+
+# Use user's real home directory for canonical configuration path access
+declare REALHOME="$(
+	getent passwd "${USER}" \
+		| cut --delimiter=: --fields=6
+)"
+HOME="${REALHOME}"
+
+if ! test -f "${SNAP_USER_COMMON}"/marker_disable_interface_warning; then
+	# Warn if the `removable-media` interface isn't connected
+	if ! ls /media &>/dev/null; then
+		printf -- \
+			"It seems that this snap isn't connected to the \`removable-media\` security confinement interface.  If you want to save the files under \`/media\`, \`/run/media\`, or \`/mnt\` directories you need to connect this snap to the \`removable-media\` interface by running the following command in a terminal:\\n\\n    sudo snap connect %s:removable-media\\n\\n" \
+			"${SNAP_NAME}" \
+			>&2
+		printf -- \
+			"To disable this warning create an empty file at the following path:\\n\\n    %s/marker_disable_interface_warning\\n\\n" \
+			"${SNAP_USER_COMMON}" \
+			>&2
+	fi
+fi
+
+# Finally run the next part of the command chain
+exec "${@}"

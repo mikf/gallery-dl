@@ -9,7 +9,8 @@
 """Extract images from https://twitter.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 
 
 class TwitterExtractor(Extractor):
@@ -19,6 +20,7 @@ class TwitterExtractor(Extractor):
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     root = "https://twitter.com"
+    sizes = (":orig", ":large", ":medium", ":small")
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -27,6 +29,7 @@ class TwitterExtractor(Extractor):
         self.videos = self.config("videos", False)
 
     def items(self):
+        self.login()
         yield Message.Version, 1
         yield Message.Directory, self.metadata()
 
@@ -39,7 +42,8 @@ class TwitterExtractor(Extractor):
                 tweet, 'data-image-url="', '"')
             for data["num"], url in enumerate(images, 1):
                 text.nameext_from_url(url, data)
-                yield Message.Url, url + ":orig", data
+                urls = [url + size for size in self.sizes]
+                yield Message.Urllist, urls, data
 
             if self.videos and "-videoContainer" in tweet:
                 data["num"] = 1
@@ -54,20 +58,47 @@ class TwitterExtractor(Extractor):
     def tweets(self):
         """Yield HTML content of all relevant tweets"""
 
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=360*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        page = self.request(self.root + "/login").text
+        pos = page.index('name="authenticity_token"')
+        token = text.extract(page, 'value="', '"', pos-80)[0]
+
+        url = self.root + "/sessions"
+        data = {
+            "session[username_or_email]": username,
+            "session[password]"         : password,
+            "authenticity_token"        : token,
+            "ui_metrics"                : '{"rf":{},"s":""}',
+            "scribe_log"                : "",
+            "redirect_after_login"      : "",
+            "remember_me"               : "1",
+        }
+        response = self.request(url, method="POST", data=data)
+
+        if "/error" in response.url:
+            raise exception.AuthenticationError()
+        return self.session.cookies
+
     @staticmethod
     def _data_from_tweet(tweet):
-        data = text.extract_all(tweet, (
-            ("tweet_id"  , 'data-tweet-id="'   , '"'),
-            ("retweet_id", 'data-retweet-id="' , '"'),
-            ("retweeter" , 'data-retweeter="'  , '"'),
-            ("user"      , 'data-screen-name="', '"'),
-            ("username"  , 'data-name="'       , '"'),
-            ("user_id"   , 'data-user-id="'    , '"'),
-        ))[0]
-        for key in ("tweet_id", "retweet_id", "user_id"):
-            data[key] = text.parse_int(data[key])
-        data["retweeter"] = data["retweeter"] or ""
-        return data
+        extr = text.extract_from(tweet)
+        return {
+            "tweet_id"  : text.parse_int(extr('data-tweet-id="'  , '"')),
+            "retweet_id": text.parse_int(extr('data-retweet-id="', '"')),
+            "retweeter" : extr('data-retweeter="'  , '"'),
+            "user"      : extr('data-screen-name="', '"'),
+            "username"  : extr('data-name="'       , '"'),
+            "user_id"   : text.parse_int(extr('data-user-id="'   , '"')),
+            "date"      : text.parse_timestamp(extr('data-time="', '"')),
+        }
 
     def _tweets_from_api(self, url):
         params = {
@@ -105,7 +136,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     test = ("https://twitter.com/PicturesEarth", {
         "range": "1-40",
         "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
-        "keyword": "19c02623fa144ca9a863b1f687ab749b3b8e38a5",
+        "keyword": "46f680d81a59e4d0e8b4ac25411bc3ec94c73a93",
     })
 
     def tweets(self):
@@ -138,12 +169,18 @@ class TwitterTweetExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/PicturesEarth/status/672897688871018500", {
             "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
-            "keyword": "fb19f00ab96a854f7de6e1eb85d632565c8a1a43",
+            "keyword": "da59634e33a7210bd24f9152af9ac560f6b1b601",
             "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
         }),
+        # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "3e665d795fcd3ddd0c2f18c9b6b56fc3267fdf7d",
+            "keyword": "43d98ab448193f0d4f30aa571a4b6bda9b6a5692",
+        }),
+        # video
+        ("https://twitter.com/perrypumas/status/1065692031626829824", {
+            "options": (("videos", True),),
+            "pattern": r"ytdl:https://twitter.com/perrypumas/status/\d+",
         }),
     )
 

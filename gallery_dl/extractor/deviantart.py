@@ -13,7 +13,6 @@ from .. import text, exception
 from ..cache import cache, memcache
 import itertools
 import mimetypes
-import datetime
 import time
 import math
 import re
@@ -71,6 +70,12 @@ class DeviantartExtractor(Extractor):
                 content = deviation["content"]
                 if self.original and deviation["is_downloadable"]:
                     self._update_content(deviation, content)
+                if deviation["index"] <= 790677560 and \
+                        content["src"].startswith("https://images-wixmp-"):
+                    # https://github.com/r888888888/danbooru/issues/4069
+                    content["src"] = re.sub(
+                        r"(/f/[^/]+/[^/]+)/v\d+/.*",
+                        r"/intermediary\1", content["src"])
                 yield self.commit(deviation, content)
 
             if "videos" in deviation:
@@ -92,13 +97,16 @@ class DeviantartExtractor(Extractor):
     def prepare(self, deviation):
         """Adjust the contents of a Deviation-object"""
         try:
-            deviation["index"] = deviation["url"].rpartition("-")[2]
+            deviation["index"] = text.parse_int(
+                deviation["url"].rpartition("-")[2])
         except KeyError:
             deviation["index"] = 0
         if self.user:
             deviation["username"] = self.user
         deviation["da_category"] = deviation["category"]
         deviation["published_time"] = text.parse_int(
+            deviation["published_time"])
+        deviation["date"] = text.parse_timestamp(
             deviation["published_time"])
 
     @staticmethod
@@ -113,7 +121,6 @@ class DeviantartExtractor(Extractor):
         url = deviation["url"]
         thumbs = deviation["thumbs"]
         html = journal["html"]
-        date = datetime.datetime.utcfromtimestamp(deviation["published_time"])
         shadow = SHADOW_TEMPLATE.format_map(thumbs[0]) if thumbs else ""
 
         if "css" in journal:
@@ -124,7 +131,7 @@ class DeviantartExtractor(Extractor):
         if html.find('<div class="boxtop journaltop">', 0, 250) != -1:
             needle = '<div class="boxtop journaltop">'
             header = HEADER_CUSTOM_TEMPLATE.format(
-                title=title, url=url, date=str(date),
+                title=title, url=url, date=deviation["date"],
             )
         else:
             needle = '<div usr class="gr">'
@@ -144,7 +151,7 @@ class DeviantartExtractor(Extractor):
                 url=url,
                 userurl="{}/{}/".format(self.root, urlname),
                 username=username,
-                date=date,
+                date=deviation["date"],
                 categories=categories,
             )
 
@@ -161,7 +168,6 @@ class DeviantartExtractor(Extractor):
 
     @staticmethod
     def _commit_journal_text(deviation, journal):
-        date = datetime.datetime.utcfromtimestamp(deviation["published_time"])
         content = "\n".join(
             text.unescape(text.remove_html(txt))
             for txt in journal["html"].rpartition("<script")[0].split("<br />")
@@ -169,7 +175,7 @@ class DeviantartExtractor(Extractor):
         txt = JOURNAL_TEMPLATE_TEXT.format(
             title=deviation["title"],
             username=deviation["author"]["username"],
-            date=date,
+            date=deviation["date"],
             content=content,
         )
 
@@ -225,10 +231,11 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
                     "width": int,
                 },
                 "da_category": str,
+                "date": "type:datetime",
                 "deviationid": str,
                 "?download_filesize": int,
                 "extension": str,
-                "index": str,
+                "index": int,
                 "is_deleted": bool,
                 "is_downloadable": bool,
                 "is_favourited": bool,
@@ -326,6 +333,13 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "pattern": (r"https?://s3\.amazonaws\.com/origin-orig\."
                         r"deviantart\.net/a383/f/2013/135/e/7/[^.]+\.jpg\?"),
         }),
+        # wixmp URL rewrite
+        (("https://www.deviantart.com/citizenfresh/art/"
+          "Hverarond-14-the-beauty-of-the-earth-789295466"), {
+            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
+                        r"/intermediary/f/[^/]+/[^.]+\.jpg$")
+        }),
+        # old-style URLs
         ("https://shimoda7.deviantart.com"
          "/art/For-the-sake-of-a-memory-10073852"),
         ("https://myria-moon.deviantart.com"
@@ -463,12 +477,60 @@ class DeviantartJournalExtractor(DeviantartExtractor):
             "options": (("journals", "none"),),
         }),
         ("https://www.deviantart.com/shimoda7/journal/?catpath=/"),
-        ("https://angrywhitewanker.deviantart.com/journal/"),
+        ("https://shimoda7.deviantart.com/journal/"),
         ("https://shimoda7.deviantart.com/journal/?catpath=/"),
     )
 
     def deviations(self):
         return self.api.browse_user_journals(self.user, self.offset)
+
+
+class DeviantartScrapsExtractor(DeviantartExtractor):
+    """Extractor for an artist's scraps"""
+    subcategory = "scraps"
+    directory_fmt = ("{category}", "{username}", "Scraps")
+    archive_fmt = "s_{username}_{index}.{extension}"
+    pattern = BASE_PATTERN + r"/gallery/\?catpath=scraps\b"
+    test = (
+        ("https://www.deviantart.com/shimoda7/gallery/?catpath=scraps", {
+            "count": 12,
+            "options": (("original", False),),
+        }),
+        ("https://shimoda7.deviantart.com/gallery/?catpath=scraps"),
+    )
+
+    def deviations(self):
+        url = "{}/{}/gallery/?catpath=scraps".format(self.root, self.user)
+        page = self.request(url).text
+        csrf, pos = text.extract(page, '"csrf":"', '"')
+        iid , pos = text.extract(page, '"requestid":"', '"', pos)
+
+        url = "https://www.deviantart.com/dapi/v1/gallery/0"
+        data = {
+            "username": self.user,
+            "offset": self.offset,
+            "limit": "24",
+            "catpath": "scraps",
+            "_csrf": csrf,
+            "dapiIid": iid + "-jsok7403-1.1"
+        }
+
+        while True:
+            content = self.request(
+                url, method="POST", data=data).json()["content"]
+
+            for item in content["results"]:
+                if item["html"].startswith('<div class="ad-container'):
+                    continue
+                deviation_url = text.extract(item["html"], 'href="', '"')[0]
+                page = self.request(deviation_url).text
+                deviation_id = text.extract(page, '//deviation/', '"')[0]
+                if deviation_id:
+                    yield self.api.deviation(deviation_id)
+
+            if not content["has_more"]:
+                return
+            data["offset"] = content["next_offset"]
 
 
 class DeviantartPopularExtractor(DeviantartExtractor):
@@ -515,7 +577,10 @@ class DeviantartPopularExtractor(DeviantartExtractor):
 
 
 class DeviantartAPI():
-    """Minimal interface for the deviantart API"""
+    """Minimal interface for the DeviantArt API
+
+    Ref: https://www.deviantart.com/developers/http/v1/20160316
+    """
     CLIENT_ID = "5388"
     CLIENT_SECRET = "76b08c69cfb27f26d6161f9ab6d061a1"
 
@@ -531,6 +596,7 @@ class DeviantartAPI():
         self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
+        self.metadata = extractor.config("metadata", False)
 
         self.refresh_token = extractor.config("refresh-token")
         self.client_id = extractor.config("client-id", self.CLIENT_ID)
@@ -571,7 +637,8 @@ class DeviantartAPI():
     def deviation(self, deviation_id):
         """Query and return info about a single Deviation"""
         endpoint = "deviation/" + deviation_id
-        return self._call(endpoint)
+        deviation = self._call(endpoint)
+        return self._extend((deviation,))[0]
 
     def deviation_content(self, deviation_id):
         """Get extended content of a single Deviation"""
@@ -584,6 +651,15 @@ class DeviantartAPI():
         endpoint = "deviation/download/" + deviation_id
         params = {"mature_content": self.mature}
         return self._call(endpoint, params)
+
+    def deviation_metadata(self, deviations):
+        """ Fetch deviation metadata for a set of deviations"""
+        endpoint = "deviation/metadata?" + "&".join(
+            "deviationids[{}]={}".format(num, deviation["deviationid"])
+            for num, deviation in enumerate(deviations)
+        )
+        params = {"mature_content": self.mature}
+        return self._call(endpoint, params)["metadata"]
 
     def gallery(self, username, folder_id="", offset=0):
         """Yield all Deviation-objects contained in a gallery folder"""
@@ -617,7 +693,7 @@ class DeviantartAPI():
         """Authenticate the application by requesting an access token"""
         self.headers["Authorization"] = self._authenticate_impl(refresh_token)
 
-    @cache(maxage=3590, keyarg=1)
+    @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, refresh_token):
         """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"
@@ -689,7 +765,7 @@ class DeviantartAPI():
                 self.log.debug("Switching to private access token")
                 public = False
                 continue
-            yield from data["results"]
+            yield from self._extend(data["results"])
             if not data["has_more"]:
                 return
             params["offset"] = data["next_offset"]
@@ -699,8 +775,17 @@ class DeviantartAPI():
         result.extend(self._pagination(endpoint, params))
         return result
 
+    def _extend(self, deviations):
+        """Add extended metadata to a list of deviation objects"""
+        if self.metadata:
+            for deviation, metadata in zip(
+                    deviations, self.deviation_metadata(deviations)):
+                deviation.update(metadata)
+                deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
+        return deviations
 
-@cache(maxage=365*24*60*60, keyarg=0)
+
+@cache(maxage=10*365*24*3600, keyarg=0)
 def _refresh_token_cache(original_token, new_token=None):
     return new_token or original_token
 

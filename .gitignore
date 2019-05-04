@@ -57,3 +57,19 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Manpages
+gallery-dl.1
+gallery-dl.conf.5
+
+# Bash completion
+gallery-dl.bash_completion
+
+# Snap packaging specific
+/snap/.snapcraft/
+/parts/
+/stage/
+/prime/
+
+/*.snap
+/*_source.tar.bz2

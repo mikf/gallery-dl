@@ -118,9 +118,9 @@ def main():
         if args.load_config:
             config.load()
         if args.cfgfiles:
-            config.load(*args.cfgfiles, strict=True)
+            config.load(args.cfgfiles, strict=True)
         if args.yamlfiles:
-            config.load(*args.yamlfiles, format="yaml", strict=True)
+            config.load(args.yamlfiles, strict=True, fmt="yaml")
         for key, value in args.options:
             config.set(key, value)
 
@@ -181,6 +181,18 @@ def main():
                 if test:
                     print("Example :", test[0])
                 print()
+        elif args.clear_cache:
+            from . import cache
+            log = logging.getLogger("cache")
+            cnt = cache.clear()
+
+            if cnt is None:
+                log.error("Database file not available")
+            else:
+                log.info(
+                    "Deleted %d %s from '%s'",
+                    cnt, "entry" if cnt == 1 else "entries", cache._path(),
+                )
         else:
             if not args.urls and not args.inputfile:
                 parser.error(

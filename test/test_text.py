@@ -8,6 +8,7 @@
 # published by the Free Software Foundation.
 
 import unittest
+import datetime
 
 from gallery_dl import text
 
@@ -235,6 +236,23 @@ class TestText(unittest.TestCase):
         self.assertEqual(
             g(txt, "[", "]", 6), ["a", "d"])
 
+    def test_extract_from(self, f=text.extract_from):
+        txt = "[c][b][a]: xyz! [d][e"
+
+        e = f(txt)
+        self.assertEqual(e("[", "]"), "c")
+        self.assertEqual(e("[", "]"), "b")
+        self.assertEqual(e("[", "]"), "a")
+        self.assertEqual(e("[", "]"), "d")
+        self.assertEqual(e("[", "]"), "")
+        self.assertEqual(e("[", "]"), "")
+
+        e = f(txt, pos=6, default="END")
+        self.assertEqual(e("[", "]"), "a")
+        self.assertEqual(e("[", "]"), "d")
+        self.assertEqual(e("[", "]"), "END")
+        self.assertEqual(e("[", "]"), "END")
+
     def test_parse_bytes(self, f=text.parse_bytes):
         self.assertEqual(f("0"), 0)
         self.assertEqual(f("50"), 50)
@@ -318,6 +336,19 @@ class TestText(unittest.TestCase):
         # invalid arguments
         for value in INVALID:
             self.assertEqual(f(value), {})
+
+    def test_parse_timestamp(self, f=text.parse_timestamp):
+        null = datetime.datetime.utcfromtimestamp(0)
+        value = datetime.datetime.utcfromtimestamp(1555816235)
+
+        self.assertEqual(f(0)           , null)
+        self.assertEqual(f("0")         , null)
+        self.assertEqual(f(1555816235)  , value)
+        self.assertEqual(f("1555816235"), value)
+
+        for value in INVALID_ALT:
+            self.assertEqual(f(value), None)
+            self.assertEqual(f(value, "foo"), "foo")
 
 
 if __name__ == '__main__':

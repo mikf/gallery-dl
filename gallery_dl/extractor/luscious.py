@@ -8,12 +8,12 @@
 
 """Extractors for https://luscious.net/"""
 
-from .common import Extractor, Message, AsynchronousMixin
-from .. import text, util, exception
+from .common import GalleryExtractor, Extractor, Message
+from .. import text, exception
 from ..cache import cache
 
 
-class LusciousExtractor(Extractor):
+class LusciousBase(Extractor):
     """Base class for luscious extractors"""
     category = "luscious"
     cookiedomain = ".luscious.net"
@@ -25,7 +25,7 @@ class LusciousExtractor(Extractor):
         if username:
             self._update_cookies(self._login_impl(username, password))
 
-    @cache(maxage=14*24*60*60, keyarg=1)
+    @cache(maxage=14*24*3600, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
         url = "https://members.luscious.net/accounts/login/"
@@ -34,7 +34,7 @@ class LusciousExtractor(Extractor):
             "login": username,
             "password": password,
             "remember": "on",
-            "next": ""  "/",
+            "next": "/",
         }
 
         response = self.request(url, method="POST", headers=headers, data=data)
@@ -45,24 +45,29 @@ class LusciousExtractor(Extractor):
                 return {cookie.name: cookie.value}
         raise exception.AuthenticationError()
 
+    @staticmethod
+    def _parse_tags(tags):
+        return [
+            text.unescape(tag.replace(":_", ":"))
+            for tag in text.extract_iter(tags or "", "/tagged/+", "/")
+        ]
 
-class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
+
+class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
     """Extractor for image albums from luscious.net"""
     subcategory = "album"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     archive_fmt = "{gallery_id}_{image_id}"
     pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
                r"/(?:albums|pictures/c/[^/?&#]+/album)/([^/?&#]+_(\d+))")
     test = (
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
-            "keyword": "5ab53959f25a468455f79149461d26547669e50e",
+            "keyword": "f9c34e1a5b0c1f119e9f644c99933ecf7d7dbfd2",
             "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
-            "keyword": "3de82f61ad4afd0f546ab5ae5bf9c5388cc9c3db",
+            "keyword": "c147d8ef90843f68e37ed15e4fe017e62fc97c96",
         }),
         ("https://luscious.net/albums/not-found_277035/", {
             "exception": exception.NotFoundError,
@@ -78,22 +83,11 @@ class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
     )
 
     def __init__(self, match):
-        LusciousExtractor.__init__(self, match)
-        self.gpart, self.gid = match.groups()
-
-    def items(self):
-        self.login()
-        url = "{}/albums/{}/".format(self.root, self.gpart)
-        page = self.request(url).text
-        data = self.metadata(page)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for url, image in self.images(page):
-            image.update(data)
-            yield Message.Url, url, image
+        path, self.gallery_id = match.groups()
+        url = "{}/albums/{}/".format(self.root, path)
+        GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        """Collect metadata for extractor-job"""
         pos = page.find("<h1>404 Not Found</h1>")
         if pos >= 0:
             msg = text.extract(page, '<div class="content">', '</div>', pos)[0]
@@ -101,84 +95,82 @@ class LusciousAlbumExtractor(AsynchronousMixin, LusciousExtractor):
                 raise exception.AuthorizationError()
             raise exception.NotFoundError("album")
 
-        data = text.extract_all(page, (
-            ("tags"    , '<meta name="keywords" content="', '"'),
-            ("title"   , '"og:title" content="', '"'),
-            (None      , '<li class="user_info">', ''),
-            ("count"   , '<p>', ' '),
-            (None      , '<p>Section:', ''),
-            ("section" , '>', '<'),
-            ("language", '<p>Language:', ' '),
-        ), values={"gallery_id": self.gid})[0]
-        data["lang"] = util.language_to_code(data["language"])
-        try:
-            data["artist"] = text.extract(data["tags"], "rtist: ", ",")[0]
-        except AttributeError:
-            data["artist"] = None
-        return data
+        title, pos = text.extract(page, '"og:title" content="', '"')
+        info , pos = text.extract(page, '<li class="user_info">', "", pos)
+        if info is None:
+            count, pos = text.extract(page, '>Pages:', '<', pos)
+        else:
+            count, pos = text.extract(page, '<p>', ' ', pos)
+        genre, pos = text.extract(page, '<p>Genre:', '</p>', pos)
+        tags , pos = text.extract(page, '"tag_list static">', '</ol>', pos)
+
+        return {
+            "gallery_id": text.parse_int(self.gallery_id),
+            "title": text.unescape(title or ""),
+            "count": text.parse_int(count),
+            "genre": text.remove_html(genre),
+            "tags" : self._parse_tags(tags),
+        }
 
     def images(self, page):
-        """Collect image-URLs and -metadata"""
         extr = text.extract
-        num = 1
 
         if 'class="search_filter' in page:
             url = "{}/pictures/album/x_{}/sorted/oldest/page/1/".format(
-                self.root, self.gid)
+                self.root, self.gallery_id)
             page = self.request(url).text
             pos = page.find('<div id="picture_page_')
         else:
             pos = page.find('<div class="album_cover_item">')
+
         url = extr(page, '<a href="', '"', pos)[0]
+        iurl = None
 
         while url and not url.endswith("/more_like_this/"):
             page = self.request(self.root + url).text
 
-            if num == 1:
+            if not iurl:  # first loop iteraton
                 current = extr(page, '"pj_current_page" value="', '"')[0]
                 if current and current != "1":
                     url = "{}/albums/{}/jump_to_page/1/".format(
-                        self.root, self.gid)
+                        self.root, self.gallery_id)
                     page = self.request(url, method="POST").text
 
-            imgid, pos = extr(url , '/id/', '/')
-            url  , pos = extr(page, '<link rel="next" href="', '"')
-            name , pos = extr(page, '<h1 id="picture_title">', '</h1>', pos)
-            _    , pos = extr(page, '<ul class="image_option_icons">', '', pos)
-            iurl , pos = extr(page, '<li><a href="', '"', pos+100)
+            iid , pos = extr(url , '/id/', '/')
+            url , pos = extr(page, '<link rel="next" href="', '"')
+            name, pos = extr(page, '<h1 id="picture_title">', '</h1>', pos)
+            _   , pos = extr(page, '<ul class="image_option_icons">', '', pos)
+            iurl, pos = extr(page, '<li><a href="', '"', pos+100)
 
             if iurl[0] == "/":
                 iurl = text.urljoin(self.root, iurl)
 
             yield iurl, {
-                "num": num,
                 "name": name,
-                "extension": iurl.rpartition(".")[2],
-                "image_id": imgid,
+                "image_id": text.parse_int(iid),
             }
-            num += 1
 
 
-class LusciousSearchExtractor(LusciousExtractor):
+class LusciousSearchExtractor(LusciousBase, Extractor):
     """Extractor for album searches on luscious.net"""
     subcategory = "search"
     pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
-               r"/((?:albums|c)(?:/(?![^/?&#]+_\d+)[^/?&#]+)+)")
+               r"/(albums(?:/(?![^/?&#]+_\d+)[^/?&#]+)+|manga|pictures)/?$")
     test = (
-        ("https://luscious.net/c/hentai/"),
-        ("https://luscious.net/albums/t2/2/c/hentai/sorted/updated"
-         "/tagged/+full_color/page/2/", {
-             "pattern": r"https://(members\.)?luscious.net/albums/[^_]+_\d+/",
+        ("https://luscious.net/manga/"),
+        ("https://members.luscious.net/albums/sorted/updated/album_type/manga"
+         "/content_id/2/tagged/+full_color/page/1/", {
+             "pattern": LusciousAlbumExtractor.pattern,
              "range": "20-40",
              "count": 21,
          }),
     )
 
     def __init__(self, match):
-        LusciousExtractor.__init__(self, match)
+        Extractor.__init__(self, match)
         self.path = match.group(1).partition("/page/")[0]
         if not self.path.startswith("albums/"):
-            self.path = "albums/" + self.path
+            self.path = "albums/sorted/updated/album_type/" + self.path
 
     def items(self):
         self.login()
@@ -210,9 +202,9 @@ class LusciousSearchExtractor(LusciousExtractor):
         return text.urljoin(self.root, url), {
             "title": text.unescape(title or ""),
             "description": text.unescape(desc or ""),
-            "gallery_id": url.rpartition("_")[2].rstrip("/"),
+            "gallery_id": text.parse_int(url.rpartition("_")[2].rstrip("/")),
             "count": text.parse_int(count),
             "date": date,
-            "tags": text.remove_html(tags.partition(">")[2]),
+            "tags": self._parse_tags(tags),
             "_extractor": LusciousAlbumExtractor,
         }

@@ -123,7 +123,7 @@ class SankakuExtractor(SharedConfigMixin, Extractor):
         else:
             self.logged_in = False
 
-    @cache(maxage=90*24*60*60, keyarg=1)
+    @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, usertuple, password):
         username = usertuple[0]
         self.log.info("Logging in as %s", username)

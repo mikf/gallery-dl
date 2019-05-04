@@ -11,6 +11,7 @@
 import re
 import html
 import os.path
+import datetime
 import urllib.parse
 
 
@@ -135,12 +136,32 @@ def extract_all(txt, rules, pos=0, values=None):
 
 
 def extract_iter(txt, begin, end, pos=0):
-    """Yield all values obtained by repeated calls to text.extract"""
-    while True:
-        value, pos = extract(txt, begin, end, pos)
-        if value is None:
-            return
-        yield value
+    """Yield values that would be returned by repeated calls of extract()"""
+    index = txt.index
+    lbeg = len(begin)
+    lend = len(end)
+    try:
+        while True:
+            first = index(begin, pos) + lbeg
+            last = index(end, first)
+            pos = last + lend
+            yield txt[first:last]
+    except (ValueError, TypeError, AttributeError):
+        return
+
+
+def extract_from(txt, pos=0, default=""):
+    """Returns a function object that extracts from 'txt'"""
+    def extr(begin, end, index=txt.index, txt=txt):
+        nonlocal pos
+        try:
+            first = index(begin, pos) + len(begin)
+            last = index(end, first)
+            pos = last + len(end)
+            return txt[first:last]
+        except (ValueError, TypeError, AttributeError):
+            return default
+    return extr
 
 
 def parse_bytes(value, default=0, suffixes="bkmgtp"):
@@ -192,6 +213,14 @@ def parse_query(qs):
     except AttributeError:
         pass
     return result
+
+
+def parse_timestamp(ts, default=None):
+    """Create a datetime object from a unix timestamp"""
+    try:
+        return datetime.datetime.utcfromtimestamp(int(ts))
+    except (TypeError, ValueError, OverflowError):
+        return default
 
 
 if os.name == "nt":

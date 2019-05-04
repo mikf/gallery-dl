@@ -1,0 +1,110 @@
+%YAML 1.1
+---
+# Snapcraft Recipe for gallery-dl
+# ------------------------------
+# This file is in the YAML data serialization format:
+# http://yaml.org
+# For the spec. of writing this file refer the following documentation:
+# * The snapcraft format
+#   https://docs.snapcraft.io/the-snapcraft-format/8337
+# * Snap Documentation
+#   https://docs.snapcraft.io
+# * Topics under the doc category in the Snapcraft Forum
+#   https://forum.snapcraft.io/c/doc
+# For support refer to the snapcraft section in the Snapcraft Forum:
+# https://forum.snapcraft.io/c/snapcraft
+name: gallery-dl
+license: GPL-2.0
+base: core
+summary: Download image-galleries and -collections from several image hosting sites
+description: |
+  `gallery-dl` is a command-line program to download image-galleries and -collections from several image hosting sites (see [Supported Sites][1]). It is a cross-platform tool with many configuration options and powerful filenaming capabilities.
+
+  [1]: https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
+
+adopt-info: gallery-dl
+confinement: strict
+grade: stable
+
+plugs:
+  # For `xdg-open` command access for opening OAuth authentication webpages
+  desktop:
+
+  # Storage access
+  home:
+  removable-media: # Non-A/C
+
+  # Network access
+  network:
+
+  # For network service for recieving OAuth callback tokens
+  network-bind:
+
+  # Configuration access
+  config-gallery-dl:
+    interface: personal-files
+    read:
+    - $HOME/.config/gallery-dl
+    - $HOME/.gallery-dl.conf
+  etc-gallery-dl:
+    interface: system-files
+    read:
+    - /etc/gallery-dl.conf
+
+parts:
+  # Launcher programs to fix problems at runtime
+  launchers:
+    source: snap/local/launchers
+    plugin: dump
+    organize:
+      '*': bin/
+
+  # Check out the tagged release revision if it isn’t promoted to the stable channel
+  # https://forum.snapcraft.io/t/selective-checkout-check-out-the-tagged-release-revision-if-it-isnt-promoted-to-the-stable-channel/10617
+  selective-checkout:
+    plugin: nil
+    build-packages:
+    - git
+    stage-snaps:
+    - selective-checkout
+    prime:
+    - -*
+
+  gallery-dl:
+    after:
+    - selective-checkout
+
+    source: .
+    override-pull: |
+      snapcraftctl pull
+      $SNAPCRAFT_STAGE/scriptlets/selective-checkout
+
+    plugin: python
+    build-packages:
+    - make
+    python-packages:
+    - youtube_dl
+    override-build: |
+      # build manpages and bash completion
+      make man completion
+
+      snapcraftctl build
+
+  ffmpeg:
+    plugin: nil
+    stage-packages:
+    - ffmpeg
+
+apps:
+  gallery-dl:
+    adapter: full
+    command-chain:
+    - bin/gallery-dl-launch
+    command: bin/gallery-dl
+    completer: etc/bash_completion.d/gallery-dl.bash_completion
+    environment:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+
+      # Satisfy FFmpeg's libpulsecommon dependency
+      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio

@@ -9,11 +9,16 @@
 """Extractors for FoOlSlide based sites"""
 
 from .common import (
-    Extractor, ChapterExtractor, MangaExtractor, Message, SharedConfigMixin)
-from .. import text, util, config
+    Extractor,
+    ChapterExtractor,
+    MangaExtractor,
+    SharedConfigMixin,
+    Message,
+    generate_extractors,
+)
+from .. import text, util
 import base64
 import json
-import re
 
 
 class FoolslideBase(SharedConfigMixin):
@@ -33,6 +38,7 @@ class FoolslideBase(SharedConfigMixin):
         data["volume"] = text.parse_int(info[2])
         data["chapter"] = text.parse_int(info[3])
         data["chapter_minor"] = "." + info[4] if len(info) >= 5 else ""
+        data["title"] = data["chapter_string"].partition(":")[2].strip()
         return data
 
 
@@ -41,6 +47,7 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
     directory_fmt = (
         "{category}", "{manga}", "{chapter_string}")
     archive_fmt = "{id}"
+    pattern_fmt = r"(/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     decode = "default"
 
     def items(self):
@@ -68,14 +75,11 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
             yield Message.Url, url, data
 
     def metadata(self, page):
-        _      , pos = text.extract(page, '<h1 class="tbtitle dnone">', '')
-        manga  , pos = text.extract(page, 'title="', '"', pos)
-        chapter, pos = text.extract(page, 'title="', '"', pos)
-        chapter = text.unescape(chapter)
+        extr = text.extract_from(page)
+        extr('<h1 class="tbtitle dnone">', '')
         return self.parse_chapter_url(self.chapter_url, {
-            "manga": text.unescape(manga).strip(),
-            "title": chapter.partition(":")[2].strip(),
-            "chapter_string": chapter,
+            "manga"         : text.unescape(extr('title="', '"')).strip(),
+            "chapter_string": text.unescape(extr('title="', '"')),
         })
 
     def images(self, page):
@@ -92,74 +96,24 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
 
 class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
+    pattern_fmt = r"(/series/[^/?&#]+)"
 
     def chapters(self, page):
-        manga , pos = text.extract(page, '<h1 class="title">', '</h1>')
-        author, pos = text.extract(page, '<b>Author</b>: ', '<br', pos)
-        artist, pos = text.extract(page, '<b>Artist</b>: ', '<br', pos)
-        manga = text.unescape(manga).strip()
+        extr = text.extract_from(page)
+        manga = text.unescape(extr('<h1 class="title">', '</h1>')).strip()
+        author = extr('<b>Author</b>: ', '<br')
+        artist = extr('<b>Artist</b>: ', '<br')
 
         results = []
         while True:
-            url, pos = text.extract(
-                page, '<div class="title"><a href="', '"', pos)
+            url = extr('<div class="title"><a href="', '"')
             if not url:
                 return results
-
-            chapter, pos = text.extract(page, 'title="', '"', pos)
-            group  , pos = text.extract(page, 'title="', '"', pos)
-
             results.append((url, self.parse_chapter_url(url, {
                 "manga": manga, "author": author, "artist": artist,
-                "group": group, "chapter_string": chapter,
-                "title": chapter.partition(": ")[2] or "",
+                "chapter_string": extr('title="', '"'),
+                "group"         : extr('title="', '"'),
             })))
-
-
-def generate_extractors():
-    """Dynamically generate Extractor classes for FoOlSlide instances"""
-
-    symtable = globals()
-    extractors = config.get(("extractor", "foolslide"))
-
-    if extractors:
-        EXTRACTORS.update(extractors)
-
-    for category, info in EXTRACTORS.items():
-
-        if not isinstance(info, dict):
-            continue
-
-        root = info["root"]
-        domain = root[root.index(":") + 3:]
-        pattern = info.get("pattern") or re.escape(domain)
-        name = (info.get("name") or category).capitalize()
-
-        class ChExtr(FoolslideChapterExtractor):
-            pass
-
-        ChExtr.__name__ = ChExtr.__qualname__ = name + "ChapterExtractor"
-        ChExtr.__doc__ = "Extractor for manga-chapters from " + domain
-        ChExtr.category = category
-        ChExtr.pattern = (r"(?:https?://)?" + pattern +
-                          r"(/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)")
-        ChExtr.test = info.get("test-chapter")
-        ChExtr.root = root
-        if "decode" in info:
-            ChExtr.decode = info["decode"]
-        symtable[ChExtr.__name__] = ChExtr
-
-        class MaExtr(FoolslideMangaExtractor):
-            pass
-
-        MaExtr.__name__ = MaExtr.__qualname__ = name + "MangaExtractor"
-        MaExtr.__doc__ = "Extractor for manga from " + domain
-        MaExtr.category = category
-        MaExtr.pattern = r"(?:https?://)?" + pattern + r"(/series/[^/?&#]+)"
-        MaExtr.test = info.get("test-manga")
-        MaExtr.root = root
-        MaExtr.chapterclass = ChExtr
-        symtable[MaExtr.__name__] = MaExtr
 
 
 EXTRACTORS = {
@@ -180,7 +134,7 @@ EXTRACTORS = {
     "jaiminisbox": {
         "root": "https://jaiminisbox.com/reader",
         "pattern": r"(?:www\.)?jaiminisbox\.com/reader",
-        "decode": "base64",
+        "extra": {"decode": "base64"},
         "test-chapter": (
             ("https://jaiminisbox.com/reader/read/uratarou/en/0/1/", {
                 "keyword": "6009af77cc9c05528ab1fdda47b1ad9d4811c673",
@@ -205,7 +159,7 @@ EXTRACTORS = {
         "test-manga":
             ("https://reader.kireicake.com/series/wonderland/", {
                 "url": "d067b649af1cc88fa8c8b698fde04a10909fd169",
-                "keyword": "99caa336a9d48e27e3b8e56a0a1e6faf9fc13a51",
+                "keyword": "268f43772fb239888ca5c5f6a4f65f99ffb3eefb",
             }),
     },
     "powermanga": {
@@ -234,19 +188,6 @@ EXTRACTORS = {
                 },
             }),
     },
-    "seaotterscans": {
-        "root": "https://reader.seaotterscans.com",
-        "test-chapter":
-            ("https://reader.seaotterscans.com/read/100_days/en/0/5/", {
-                "url": "63d46b8883cc652dfe8bd5be4492160dd31f06a8",
-                "keyword": "401d55b900d69a3732c7221755543e17c4771dd3",
-            }),
-        "test-manga":
-            ("https://reader.seaotterscans.com/series/marry_me/", {
-                "url": "fdbacabfa566a6baeb3f01bb46cbda0577bd4bbe",
-                "keyword": "61d3388d73df12f64361892b47a9398df4a5947c",
-            }),
-    },
     "sensescans": {
         "root": "http://sensescans.com/reader",
         "pattern": r"(?:(?:www\.)?sensescans\.com/reader"
@@ -266,7 +207,7 @@ EXTRACTORS = {
         "test-manga":
             ("http://sensescans.com/reader/series/hakkenden/", {
                 "url": "2360ccb0ead0ff2f5e27b7aef7eb17b9329de2f2",
-                "keyword": "122cf92c32e6428c50f56ffaf29d06b96750ed71",
+                "keyword": "4919f2bfed38e3a34dc984ec8d1dbd7a03044e23",
             }),
     },
     "worldthree": {
@@ -290,7 +231,10 @@ EXTRACTORS = {
                 "keyword": "3a24f1088b4d7f3b798a96163f21ca251293a120",
             }),
     },
+    "_ckey": "chapterclass",
 }
 
-
-generate_extractors()
+generate_extractors(EXTRACTORS, globals(), (
+    FoolslideChapterExtractor,
+    FoolslideMangaExtractor,
+))

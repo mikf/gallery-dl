@@ -93,6 +93,22 @@ class TestPredicate(unittest.TestCase):
         self.assertTrue(pred("text:123", dummy))
         self.assertTrue(pred("text:123", dummy))
 
+    def test_filter_predicate(self):
+        url = ""
+
+        pred = util.FilterPredicate("a < 3")
+        self.assertTrue(pred(url, {"a": 2}))
+        self.assertFalse(pred(url, {"a": 3}))
+
+        with self.assertRaises(SyntaxError):
+            util.FilterPredicate("(")
+
+        with self.assertRaises(exception.FilterError):
+            util.FilterPredicate("a > 1")(url, {"a": None})
+
+        with self.assertRaises(exception.FilterError):
+            util.FilterPredicate("b > 1")(url, {"a": 2})
+
     def test_build_predicate(self):
         pred = util.build_predicate([])
         self.assertIsInstance(pred, type(lambda: True))
@@ -148,6 +164,7 @@ class TestFormatter(unittest.TestCase):
         "a": "hElLo wOrLd",
         "b": "äöü",
         "l": ["a", "b", "c"],
+        "n": None,
         "u": "%27%3C%20/%20%3E%27",
         "name": "Name",
         "title1": "Title",
@@ -167,6 +184,9 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!r}", "'" + self.kwdict["a"] + "'")
         self._run_test("{a!a}", "'" + self.kwdict["a"] + "'")
         self._run_test("{b!a}", "'\\xe4\\xf6\\xfc'")
+        self._run_test("{a!S}", self.kwdict["a"])
+        self._run_test("{l!S}", "a, b, c")
+        self._run_test("{n!S}", "")
         with self.assertRaises(KeyError):
             self._run_test("{a!q}", "hello world")
 
@@ -332,6 +352,20 @@ class TestOther(unittest.TestCase):
         self.assertEqual(f({1: 2}), {1: 2})
         self.assertEqual(f(True)  , True)
         self.assertEqual(f(None)  , None)
+
+    def test_to_string(self, f=util.to_string):
+        self.assertEqual(f(1)    , "1")
+        self.assertEqual(f(1.0)  , "1.0")
+        self.assertEqual(f("1.0"), "1.0")
+
+        self.assertEqual(f("")   , "")
+        self.assertEqual(f(None) , "")
+        self.assertEqual(f(0)    , "")
+
+        self.assertEqual(f(["a"]), "a")
+        self.assertEqual(f([1])  , "1")
+        self.assertEqual(f(["a", "b", "c"]), "a, b, c")
+        self.assertEqual(f([1, 2, 3]), "1, 2, 3")
 
     def test_universal_none(self):
         obj = util.NONE

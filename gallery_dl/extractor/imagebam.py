@@ -26,6 +26,11 @@ class ImagebamExtractor(Extractor):
         data["image_id"] = data["image_key"][6:]
         return image_url
 
+    def request_page(self, url):
+        """Retrive the main part of a gallery page"""
+        page = self.request(text.urljoin(self.root, url)).text
+        return text.extract(page, "<fieldset>", "</fieldset>")[0]
+
 
 class ImagebamGalleryExtractor(ImagebamExtractor):
     """Extractor for image galleries from imagebam.com"""
@@ -40,6 +45,11 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
             "keyword": "9e25b8827474ac93c54855e798d60aa3cbecbd7a",
             "content": "596e6bfa157f2c7169805d50075c2986549973a8",
         }),
+        ("http://www.imagebam.com/gallery/op9dwcklwdrrguibnkoe7jxgvig30o5p", {
+            #  more than 100 images; see issue #219
+            "count": 107,
+            "url": "f92ce5b17676b6ea69288f0aef26f4cdbea7fd8d",
+        }),
         ("http://www.imagebam.com/gallery/gsl8teckymt4vbvx1stjkyk37j70va2c", {
             "exception": exception.NotFoundError,
         }),
@@ -51,10 +61,9 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
 
     def items(self):
         url = "{}/gallery/{}".format(self.root, self.gallery_key)
-        page = self.request(url).text
-        if ">Error<" in page:
+        page = self.request_page(url)
+        if not page or ">Error<" in page:
             raise exception.NotFoundError("gallery")
-        page = text.extract(page, "<fieldset>", "</fieldset>")[0]
 
         data = self.get_metadata(page)
         imgs = self.get_image_pages(page)
@@ -76,10 +85,18 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
             ("description", ":#FCFCFC;'>", "</div>"),
         ))[0]
 
-    @staticmethod
-    def get_image_pages(page):
+    def get_image_pages(self, page):
         """Return a list of all image pages"""
-        return list(text.extract_iter(page, "<a href='", "'"))
+        pages = []
+        while True:
+            pages.extend(text.extract_iter(page, "\n<a href='", "'"))
+            pos = page.find('"pagination_current"')
+            if pos > 0:
+                url = text.extract(page, "<a href='", "'", pos)[0]
+                if url:
+                    page = self.request_page(url)
+                    continue
+            return pages
 
 
 class ImagebamImageExtractor(ImagebamExtractor):

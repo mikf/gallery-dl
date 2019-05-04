@@ -8,47 +8,44 @@
 
 """Extractors for https://hentaifox.com/"""
 
-from .common import ChapterExtractor, Extractor, Message
+from .common import GalleryExtractor, Extractor, Message
 from .. import text
 
 
-class HentaifoxGalleryExtractor(ChapterExtractor):
-    """Extractor for image galleries on hentaifox.com"""
+class HentaifoxBase():
+    """Base class for hentaifox extractors"""
     category = "hentaifox"
-    subcategory = "gallery"
-    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    archive_fmt = "{gallery_id}_{page}"
+    root = "https://hentaifox.com"
+
+
+class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
+    """Extractor for image galleries on hentaifox.com"""
     pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com(/gallery/(\d+))"
     test = ("https://hentaifox.com/gallery/56622/", {
         "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
         "count": 24,
-        "keyword": "d0df47e073e32a7752236ab151949c3820f9d81e",
+        "keyword": "38f8517605feb6854d48833297da6b05c6541b69",
     })
-    root = "https://hentaifox.com"
 
     def __init__(self, match):
-        ChapterExtractor.__init__(self, match)
+        GalleryExtractor.__init__(self, match)
         self.gallery_id = match.group(2)
 
-    def metadata(self, page):
-        title, pos = text.extract(page, "<h1>", "</h1>")
-        data = text.extract_all(page, (
-            ("parodies"  , ">Parodies:"  , "</a></span>"),
-            ("characters", ">Characters:", "</a></span>"),
-            ("tags"      , ">Tags:"      , "</a></span>"),
-            ("artist"    , ">Artists:"   , "</a></span>"),
-            ("group"     , ">Groups:"    , "</a></span>"),
-            ("type"      , ">Category:"  , "</a></span>"),
-        ), pos)[0]
+    def metadata(self, page, split=text.split_html):
+        extr = text.extract_from(page)
 
-        for key, value in data.items():
-            data[key] = text.remove_html(value).replace(" , ", ", ")
-        data["gallery_id"] = text.parse_int(self.gallery_id)
-        data["title"] = text.unescape(title)
-        data["language"] = "English"
-        data["lang"] = "en"
-        return data
+        return {
+            "gallery_id": text.parse_int(self.gallery_id),
+            "title"     : text.unescape(extr("<h1>", "</h1>")),
+            "parody"    : split(extr(">Parodies:"  , "</a></span>"))[::2],
+            "characters": split(extr(">Characters:", "</a></span>"))[::2],
+            "tags"      : split(extr(">Tags:"      , "</a></span>"))[::2],
+            "artist"    : split(extr(">Artists:"   , "</a></span>"))[::2],
+            "group"     : split(extr(">Groups:"    , "</a></span>"))[::2],
+            "type"      : text.remove_html(extr(">Category:", "</a></span>")),
+            "language"  : "English",
+            "lang"      : "en",
+        }
 
     def images(self, page):
         return [
@@ -57,9 +54,8 @@ class HentaifoxGalleryExtractor(ChapterExtractor):
         ]
 
 
-class HentaifoxSearchExtractor(Extractor):
+class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
     """Extractor for search results and listings on hentaifox.com"""
-    category = "hentaifox"
     subcategory = "search"
     pattern = (r"(?:https?://)?(?:www\.)?hentaifox\.com"
                r"(/(?:parody|tag|artist|character|search)/[^/?%#]+)")
@@ -80,7 +76,6 @@ class HentaifoxSearchExtractor(Extractor):
             },
         }),
     )
-    root = "https://hentaifox.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

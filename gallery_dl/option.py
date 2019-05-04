@@ -93,6 +93,11 @@ def build_parser():
         metavar="URL", action=ConfigAction, dest="proxy",
         help="Use the specified proxy",
     )
+    general.add_argument(
+        "--clear-cache",
+        dest="clear_cache", action="store_true",
+        help="Delete all cached login sessions, cookies, etc.",
+    )
 
     output = parser.add_argument_group("Output Options")
     output.add_argument(
@@ -265,7 +270,8 @@ def build_parser():
     postprocessor.add_argument(
         "--ugoira-conv",
         action=ConfigConstAction, nargs=0,
-        dest="postprocessors", const=({"name": "ugoira"},),
+        dest="postprocessors", const=({"name": "ugoira", "ffmpeg-args": (
+            "-c:v", "libvpx", "-crf", "4", "-b:v", "5000k", "-an")},),
         help="Convert Pixiv Ugoira to WebM (requires FFmpeg)",
     )
     postprocessor.add_argument(

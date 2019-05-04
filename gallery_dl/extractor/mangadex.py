@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, util
+from ..cache import memcache
 
 
 class MangadexExtractor(Extractor):
@@ -30,12 +31,11 @@ class MangadexExtractor(Extractor):
         url = "{}/api/chapter/{}".format(self.root, chapter_id)
         return self.request(url).json()
 
-    def manga_data(self, manga_id, *, cache={}):
+    @memcache(keyarg=1)
+    def manga_data(self, manga_id):
         """Request API results for 'manga_id'"""
-        if manga_id not in cache:
-            url = "{}/api/manga/{}".format(self.root, manga_id)
-            cache[manga_id] = self.request(url).json()
-        return cache[manga_id]
+        url = "{}/api/manga/{}".format(self.root, manga_id)
+        return self.request(url).json()
 
 
 class MangadexChapterExtractor(MangadexExtractor):

@@ -113,15 +113,16 @@ class WeiboStatusExtractor(WeiboExtractor):
     """Extractor for images from a status on weibo.cn"""
     subcategory = "status"
     pattern = (r"(?:https?://)?(?:www\.|m\.)?weibo\.c(?:om|n)"
-               r"/(?:detail|status)/(\d+)")
+               r"/(?:detail|status|\d+)/(\d+)")
     test = (
         ("https://m.weibo.cn/detail/4323047042991618", {
-            "pattern": r"https://wx\d+.sinaimg.cn/large/\w+.jpg",
+            "pattern": r"https?://wx\d+.sinaimg.cn/large/\w+.jpg",
         }),
         ("https://m.weibo.cn/detail/4339748116375525", {
-            "pattern": r"http://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_hd",
+            "pattern": r"https?://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_hd",
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
+        ("https://m.weibo.cn/5746766133/4339748116375525"),
     )
 
     def __init__(self, match):

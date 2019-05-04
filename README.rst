@@ -208,7 +208,7 @@ To link your account to *gallery-dl*, start by invoking it with
     $ gallery-dl oauth:flickr
 
 You will be sent to the site's authorization page and asked to grant read
-access to *gallery-dl*. Authorize it and you will he shown one or more
+access to *gallery-dl*. Authorize it and you will be shown one or more
 "tokens", which should be added to your configuration file.
 
 
@@ -216,8 +216,8 @@ access to *gallery-dl*. Authorize it and you will he shown one or more
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
-.. _standalone executable:   https://github.com/mikf/gallery-dl/releases/download/v1.7.0/gallery-dl.exe
-.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.7.0.zip
+.. _standalone executable:   https://github.com/mikf/gallery-dl/releases/download/v1.8.2/gallery-dl.exe
+.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.8.2.zip
 .. _dev:                     https://github.com/mikf/gallery-dl/archive/master.zip
 
 .. _Python:     https://www.python.org/downloads/
@@ -225,7 +225,7 @@ access to *gallery-dl*. Authorize it and you will he shown one or more
 .. _pip:        https://pip.pypa.io/en/stable/
 .. _Requests:   http://docs.python-requests.org/en/master/
 .. _FFmpeg:     https://www.ffmpeg.org/
-.. _youtube-dl: https://rg3.github.io/youtube-dl/
+.. _youtube-dl: https://ytdl-org.github.io/youtube-dl/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd/6735
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 

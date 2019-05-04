@@ -8,7 +8,7 @@
 
 """Extractors for https://www.tsumino.com/"""
 
-from .common import ChapterExtractor, Extractor, Message
+from .common import GalleryExtractor, Extractor, Message
 from .. import text, exception
 from ..cache import cache
 
@@ -27,7 +27,7 @@ class TsuminoBase():
             self.session.cookies.setdefault(
                 "ASP.NET_SessionId", "x1drgggilez4cpkttneukrc5")
 
-    @cache(maxage=14*24*60*60, keyarg=1)
+    @cache(maxage=14*24*3600, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
         url = "{}/Account/Login".format(self.root)
@@ -40,36 +40,32 @@ class TsuminoBase():
         return {".aotsumino": response.history[0].cookies[".aotsumino"]}
 
 
-class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
+class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
     """Extractor for image galleries on tsumino.com"""
-    subcategory = "gallery"
-    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    archive_fmt = "{gallery_id}_{page}"
     pattern = (r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
                r"/(?:Book/Info|Read/View)/(\d+)")
     test = (
         ("https://www.tsumino.com/Book/Info/40996", {
             "url": "84bf30a86623039fc87855680fada884dc8a1ddd",
             "keyword": {
-                "artist": "Itou Life",
-                "characters": "Carmilla, Gudako, Gudao, Lancelot, Nightingale",
-                "collection": "",
-                "count": 42,
-                "date": "2018 June 29",
+                "title"     : r"re:Shikoshiko Daisuki Nightingale \+ Kaijou",
+                "title_en"  : r"re:Shikoshiko Daisuki Nightingale \+ Kaijou",
+                "title_jp"  : "シコシコ大好きナイチンゲール + 会場限定おまけ本",
                 "gallery_id": 40996,
-                "group": "Itou Life",
-                "lang": "en",
-                "language": "English",
-                "page": int,
-                "parodies": "Fate/Grand Order",
-                "rating": float,
-                "tags": str,
-                "thumbnail": "http://www.tsumino.com/Image/Thumb/40996",
-                "title": r"re:Shikoshiko Daisuki Nightingale \+ Kaijou Gentei",
-                "title_jp": "シコシコ大好きナイチンゲール + 会場限定おまけ本",
-                "type": "Doujinshi",
-                "uploader": "sehki"
+                "date"      : "2018 June 29",
+                "count"     : 42,
+                "collection": "",
+                "artist"    : ["Itou Life"],
+                "group"     : ["Itou Life"],
+                "parody"    : ["Fate/Grand Order"],
+                "characters": list,
+                "tags"      : list,
+                "type"      : "Doujinshi",
+                "rating"    : float,
+                "uploader"  : "sehki",
+                "lang"      : "en",
+                "language"  : "English",
+                "thumbnail" : "http://www.tsumino.com/Image/Thumb/40996",
             },
         }),
         ("https://www.tsumino.com/Read/View/45834"),
@@ -78,42 +74,34 @@ class TsuminoGalleryExtractor(TsuminoBase, ChapterExtractor):
     def __init__(self, match):
         self.gallery_id = match.group(1)
         url = "{}/Book/Info/{}".format(self.root, self.gallery_id)
-        ChapterExtractor.__init__(self, match, url)
+        GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        extr = text.extract
-        title, pos = extr(page, '"og:title" content="', '"')
-        thumb, pos = extr(page, '"og:image" content="', '"', pos)
+        extr = text.extract_from(page)
+        title = extr('"og:title" content="', '"')
         title_en, _, title_jp = text.unescape(title).partition("/")
-
-        uploader  , pos = extr(page, 'id="Uploader">'  , '</div>', pos)
-        date      , pos = extr(page, 'id="Uploaded">'  , '</div>', pos)
-        rating    , pos = extr(page, 'id="Rating">'    , '</div>', pos)
-        gtype     , pos = extr(page, 'id="Category">'  , '</div>', pos)
-        collection, pos = extr(page, 'id="Collection">', '</div>', pos)
-        group     , pos = extr(page, 'id="Group">'     , '</div>', pos)
-        artist    , pos = extr(page, 'id="Artist">'    , '</div>', pos)
-        parody    , pos = extr(page, 'id="Parody">'    , '</div>', pos)
-        character , pos = extr(page, 'id="Character">' , '</div>', pos)
-        tags      , pos = extr(page, 'id="Tag">'       , '</div>', pos)
+        title_en = title_en.strip()
+        title_jp = title_jp.strip()
 
         return {
             "gallery_id": text.parse_int(self.gallery_id),
-            "title": title_en.strip(),
-            "title_jp": title_jp.strip(),
-            "thumbnail": thumb,
-            "uploader": text.remove_html(uploader),
-            "date": date.strip(),
-            "rating": text.parse_float(rating.partition(" ")[0]),
-            "type": text.remove_html(gtype),
-            "collection": text.remove_html(collection),
-            "group": text.remove_html(group),
-            "artist": ", ".join(text.split_html(artist)),
-            "parodies": ", ".join(text.split_html(parody)),
-            "characters": ", ".join(text.split_html(character)),
-            "tags": ", ".join(text.split_html(tags)),
-            "language": "English",
-            "lang": "en",
+            "title"     : title_en or title_jp,
+            "title_en"  : title_en,
+            "title_jp"  : title_jp,
+            "thumbnail" : extr('"og:image" content="', '"'),
+            "uploader"  : text.remove_html(extr('id="Uploader">', '</div>')),
+            "date"      : extr('id="Uploaded">', '</div>').strip(),
+            "rating"    : text.parse_float(extr(
+                'id="Rating">', '</div>').partition(" ")[0]),
+            "type"      : text.remove_html(extr('id="Category">'  , '</div>')),
+            "collection": text.remove_html(extr('id="Collection">', '</div>')),
+            "group"     : text.split_html(extr('id="Group">'      , '</div>')),
+            "artist"    : text.split_html(extr('id="Artist">'     , '</div>')),
+            "parody"    : text.split_html(extr('id="Parody">'     , '</div>')),
+            "characters": text.split_html(extr('id="Character">'  , '</div>')),
+            "tags"      : text.split_html(extr('id="Tag">'        , '</div>')),
+            "language"  : "English",
+            "lang"      : "en",
         }
 
     def images(self, page):

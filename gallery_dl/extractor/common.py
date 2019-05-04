@@ -8,7 +8,6 @@
 
 """Common classes and constants used by extractor modules."""
 
-import os
 import re
 import time
 import netrc
@@ -18,7 +17,7 @@ import requests
 import threading
 import http.cookiejar
 from .message import Message
-from .. import config, text, exception
+from .. import config, text, exception, cloudflare
 
 
 class Extractor():
@@ -30,14 +29,16 @@ class Extractor():
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
     cookiedomain = ""
+    root = ""
+    test = None
 
     def __init__(self, match):
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
         self.url = match.string
-        self._set_headers()
-        self._set_cookies()
-        self._set_proxies()
+        self._init_headers()
+        self._init_cookies()
+        self._init_proxies()
         self._retries = self.config("retries", 5)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
@@ -86,6 +87,12 @@ class Extractor():
                     if encoding:
                         response.encoding = encoding
                     return response
+                if cloudflare.is_challenge(response):
+                    self.log.info("Solving Cloudflare challenge")
+                    url, domain, cookies = cloudflare.solve_challenge(
+                        session, response, kwargs)
+                    cloudflare.cookies.update(self.category, (domain, cookies))
+                    continue
 
                 msg = "{}: {} for url: {}".format(code, response.reason, url)
                 if code < 500 and code != 429:
@@ -117,14 +124,21 @@ class Extractor():
 
         return username, password
 
-    def _set_headers(self):
+    def _init_headers(self):
         """Set additional headers for the 'session' object"""
-        self.session.headers["Accept-Language"] = "en-US,en;q=0.5"
-        self.session.headers["User-Agent"] = self.config(
+        headers = self.session.headers
+        headers.clear()
+
+        headers["User-Agent"] = self.config(
             "user-agent", ("Mozilla/5.0 (X11; Linux x86_64; rv:62.0) "
                            "Gecko/20100101 Firefox/62.0"))
+        headers["Accept"] = "*/*"
+        headers["Accept-Language"] = "en-US,en;q=0.5"
+        headers["Accept-Encoding"] = "gzip, deflate"
+        headers["Connection"] = "keep-alive"
+        headers["Upgrade-Insecure-Requests"] = "1"
 
-    def _set_proxies(self):
+    def _init_proxies(self):
         """Update the session's proxy map"""
         proxies = self.config("proxy")
         if proxies:
@@ -138,21 +152,45 @@ class Extractor():
             else:
                 self.log.warning("invalid proxy specifier: %s", proxies)
 
-    def _set_cookies(self):
+    def _init_cookies(self):
         """Populate the session's cookiejar"""
         cookies = self.config("cookies")
         if cookies:
             if isinstance(cookies, dict):
-                setcookie = self.session.cookies.set
-                for name, value in cookies.items():
-                    setcookie(name, value, domain=self.cookiedomain)
+                self._update_cookies_dict(cookies, self.cookiedomain)
             else:
+                cookiejar = http.cookiejar.MozillaCookieJar()
                 try:
-                    cj = http.cookiejar.MozillaCookieJar()
-                    cj.load(cookies)
-                    self.session.cookies.update(cj)
+                    cookiejar.load(cookies)
                 except OSError as exc:
                     self.log.warning("cookies: %s", exc)
+                else:
+                    self.session.cookies.update(cookiejar)
+
+        cookies = cloudflare.cookies(self.category)
+        if cookies:
+            domain, cookies = cookies
+            self._update_cookies_dict(cookies, domain)
+
+    def _update_cookies(self, cookies, *, domain=""):
+        """Update the session's cookiejar with 'cookies'"""
+        if isinstance(cookies, dict):
+            self._update_cookies_dict(cookies, domain or self.cookiedomain)
+        else:
+            setcookie = self.session.cookies.set_cookie
+            try:
+                cookies = iter(cookies)
+            except TypeError:
+                setcookie(cookies)
+            else:
+                for cookie in cookies:
+                    setcookie(cookie)
+
+    def _update_cookies_dict(self, cookiedict, domain):
+        """Update cookiejar with name-value pairs from a dict"""
+        setcookie = self.session.cookies.set
+        for name, value in cookiedict.items():
+            setcookie(name, value, domain=domain)
 
     def _check_cookies(self, cookienames, *, domain=""):
         """Check if all 'cookienames' are in the session's cookiejar"""
@@ -165,30 +203,13 @@ class Extractor():
             return False
         return True
 
-    def _update_cookies(self, cookies, *, domain=""):
-        """Update the session's cookiejar with 'cookies'"""
-        if isinstance(cookies, dict):
-            if not domain:
-                domain = self.cookiedomain
-            setcookie = self.session.cookies.set
-            for name, value in cookies.items():
-                setcookie(name, value, domain=domain)
-        else:
-            try:
-                cookies = iter(cookies)
-            except TypeError:
-                cookies = (cookies,)
-            setcookie = self.session.cookies.set_cookie
-            for cookie in cookies:
-                setcookie(cookie)
-
     @classmethod
     def _get_tests(cls):
         """Yield an extractor's test cases as (URL, RESULTS) tuples"""
-        if not hasattr(cls, "test") or not cls.test:
+        tests = cls.test
+        if not tests:
             return
 
-        tests = cls.test
         if len(tests) == 2 and (not tests[1] or isinstance(tests[1], dict)):
             tests = (tests,)
 
@@ -208,7 +229,6 @@ class ChapterExtractor(Extractor):
         "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
     archive_fmt = (
         "{manga}_{chapter}{chapter_minor}_{page}")
-    root = ""
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
@@ -255,7 +275,6 @@ class MangaExtractor(Extractor):
     categorytransfer = True
     chapterclass = None
     reverse = True
-    root = ""
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
@@ -282,6 +301,14 @@ class MangaExtractor(Extractor):
 
     def chapters(self, page):
         """Return a list of all (chapter-url, metadata)-tuples"""
+
+
+class GalleryExtractor(ChapterExtractor):
+
+    subcategory = "gallery"
+    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
+    directory_fmt = ("{category}", "{gallery_id} {title}")
+    archive_fmt = "{gallery_id}_{page}"
 
 
 class AsynchronousMixin():
@@ -329,28 +356,79 @@ class SharedConfigMixin():
         return value
 
 
+def generate_extractors(extractor_data, symtable, classes):
+    """Dynamically generate Extractor classes"""
+    extractors = config.get(("extractor", classes[0].basecategory))
+    ckey = extractor_data.get("_ckey")
+    prev = None
+
+    if extractors:
+        extractor_data.update(extractors)
+
+    for category, info in extractor_data.items():
+
+        if not isinstance(info, dict):
+            continue
+
+        root = info["root"]
+        domain = root[root.index(":") + 3:]
+        pattern = info.get("pattern") or re.escape(domain)
+        name = (info.get("name") or category).capitalize()
+
+        for cls in classes:
+
+            class Extr(cls):
+                pass
+            Extr.__module__ = cls.__module__
+            Extr.__name__ = Extr.__qualname__ = \
+                name + cls.subcategory.capitalize() + "Extractor"
+            Extr.__doc__ = \
+                "Extractor for " + cls.subcategory + "s from " + domain
+            Extr.category = category
+            Extr.pattern = r"(?:https?://)?" + pattern + cls.pattern_fmt
+            Extr.test = info.get("test-" + cls.subcategory)
+            Extr.root = root
+
+            if "extra" in info:
+                for key, value in info["extra"].items():
+                    setattr(Extr, key, value)
+            if prev and ckey:
+                setattr(Extr, ckey, prev)
+
+            symtable[Extr.__name__] = prev = Extr
+
+
 # Reduce strictness of the expected magic string in cookiejar files.
 # (This allows the use of Wget-generated cookiejars without modification)
-
 http.cookiejar.MozillaCookieJar.magic_re = re.compile(
     "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
 
-
-# The first import of requests happens inside this file.
-# If we are running on Windows and the from requests expected certificate file
-# is missing (which happens in a standalone executable from py2exe), the
-# requests.Session object gets monkey patched to always set its 'verify'
-# attribute to False to avoid an exception being thrown when attempting to
-# access https:// URLs.
-
-if os.name == "nt":
-    import os.path
-    import requests.certs
-    import requests.packages.urllib3 as ulib3
-    if not os.path.isfile(requests.certs.where()):
-        def patched_init(self):
-            session_init(self)
-            self.verify = False
-        session_init = requests.Session.__init__
-        requests.Session.__init__ = patched_init
-        ulib3.disable_warnings(ulib3.exceptions.InsecureRequestWarning)
+# Update default cipher list of urllib3 < 1.25
+# to fix issues with Cloudflare and, by extension, Artstation (#227)
+try:
+    import urllib3
+except ImportError:
+    pass
+else:
+    if urllib3.__version__ < "1.25":
+        from urllib3.util import ssl_
+        logging.getLogger("gallery-dl").debug(
+            "updating default urllib3 ciphers")
+        # cipher list taken from urllib3 1.25
+        # https://github.com/urllib3/urllib3/blob/1.25/src/urllib3/util/ssl_.py
+        ssl_.DEFAULT_CIPHERS = (
+            "ECDHE+AESGCM:"
+            "ECDHE+CHACHA20:"
+            "DHE+AESGCM:"
+            "DHE+CHACHA20:"
+            "ECDH+AESGCM:"
+            "DH+AESGCM:"
+            "ECDH+AES:"
+            "DH+AES:"
+            "RSA+AESGCM:"
+            "RSA+AES:"
+            "!aNULL:"
+            "!eNULL:"
+            "!MD5:"
+            "!DSS"
+        )

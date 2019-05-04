@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,14 @@
 
 import importlib
 import logging
+
+modules = [
+    "classify",
+    "exec",
+    "metadata",
+    "ugoira",
+    "zip",
+]
 
 log = logging.getLogger("postprocessor")
 
@@ -21,7 +29,7 @@ def find(name):
     except KeyError:
         klass = None
         try:
-            if "." not in name:  # prevent relative imports
+            if name in modules:  # prevent unwanted imports
                 module = importlib.import_module("." + name, __package__)
                 klass = module.__postprocessor__
         except (ImportError, AttributeError, TypeError):

@@ -80,6 +80,18 @@ def number_to_string(value, numbers=(int, float)):
     return str(value) if value.__class__ in numbers else value
 
 
+def to_string(value):
+    """str() with "better" defaults"""
+    if not value:
+        return ""
+    if value.__class__ is list:
+        try:
+            return ", ".join(value)
+        except Exception:
+            return ", ".join(map(str, value))
+    return str(value)
+
+
 def expand_path(path):
     """Expand environment variables and tildes (~)"""
     if not path:
@@ -335,12 +347,13 @@ class Formatter():
         Joins elements of a list (or string) using <separator>
         Example: {f:J - /} -> "a - b - c" (if "f" is ["a", "b", "c"])
     """
-    conversions = {
+    CONVERSIONS = {
         "l": str.lower,
         "u": str.upper,
         "c": str.capitalize,
         "C": string.capwords,
         "U": urllib.parse.unquote,
+        "S": to_string,
         "s": str,
         "r": repr,
         "a": ascii,
@@ -382,7 +395,7 @@ class Formatter():
             funcs.append(func(key))
 
         if conversion:
-            funcs.append(self.conversions[conversion])
+            funcs.append(self.CONVERSIONS[conversion])
 
         if format_spec:
             if format_spec[0] == "?":

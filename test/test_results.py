@@ -19,8 +19,8 @@ from gallery_dl import extractor, job, config, exception
 # these don't work on Travis CI
 TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie", "bobx",
-    "archivedmoe", "archiveofsins", "thebarchive", "fireden",
-    "sankaku", "idolcomplex", "mangahere", "readcomiconline",
+    "archivedmoe", "archiveofsins", "thebarchive", "fireden", "4plebs",
+    "sankaku", "idolcomplex", "mangahere", "readcomiconline", "mangadex",
 }
 
 # temporary issues, etc.
@@ -119,8 +119,13 @@ class TestExtractorResults(unittest.TestCase):
                 self._test_kwdict(value, test)
             elif isinstance(test, type):
                 self.assertIsInstance(value, test, msg=key)
-            elif isinstance(test, str) and test.startswith("re:"):
-                self.assertRegex(value, test[3:], msg=key)
+            elif isinstance(test, str):
+                if test.startswith("re:"):
+                    self.assertRegex(value, test[3:], msg=key)
+                elif test.startswith("type:"):
+                    self.assertEqual(type(value).__name__, test[5:], msg=key)
+                else:
+                    self.assertEqual(value, test, msg=key)
             else:
                 self.assertEqual(value, test, msg=key)
 
@@ -147,7 +152,7 @@ class ResultJob(job.DownloadJob):
         for msg in self.extractor:
             self.dispatch(msg)
 
-    def handle_url(self, url, keywords):
+    def handle_url(self, url, keywords, fallback=None):
         self.update_url(url)
         self.update_keyword(keywords)
         self.update_archive(keywords)
@@ -227,6 +232,8 @@ def setup_test_config():
     config.set(("extractor", "nijie", "username"), email)
     config.set(("extractor", "seiga", "username"), email)
     config.set(("extractor", "danbooru", "username"), None)
+    config.set(("extractor", "twitter" , "username"), None)
+    config.set(("extractor", "mangoxo" , "password"), "VZ8DL3983u")
 
     config.set(("extractor", "deviantart", "client-id"), "7777")
     config.set(("extractor", "deviantart", "client-secret"),

@@ -5,6 +5,7 @@ from __future__ import unicode_literals, print_function
 
 import sys
 import os.path
+import warnings
 
 if sys.hexversion < 0x3040000:
     sys.exit("Python 3.4+ required")
@@ -21,6 +22,15 @@ def read(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
     with open(path, encoding="utf-8") as file:
         return file.read()
+
+def check_file(fname):
+    if os.path.exists(fname):
+        return True
+    warnings.warn(
+        "Not including file '{}' since it is not present. "
+        "Run 'make' to build all automatically generated files.".format(fname)
+    )
+    return False
 
 
 # get version without importing the package
@@ -68,6 +78,16 @@ else:
         "scripts": ["bin/gallery-dl"]
     }
 
+data_files = [
+    (path, [f for f in files if check_file(f)])
+    for (path, files) in [
+        ('etc/bash_completion.d', ['gallery-dl.bash_completion']),
+        ('share/man/man1'       , ['gallery-dl.1']),
+        ('share/man/man5'       , ['gallery-dl.conf.5']),
+    ]
+]
+
+
 setup(
     name="gallery_dl",
     version=__version__,
@@ -82,7 +102,7 @@ setup(
     license="GPLv2",
     python_requires=">=3.4",
     install_requires=[
-        "requests >= 2.4.2",
+        "requests>=2.11.0",
     ],
     packages=[
         "gallery_dl",
@@ -90,6 +110,7 @@ setup(
         "gallery_dl.downloader",
         "gallery_dl.postprocessor",
     ],
+    data_files=data_files,
     keywords="image gallery downloader crawler scraper",
     classifiers=[
         "Development Status :: 5 - Production/Stable",

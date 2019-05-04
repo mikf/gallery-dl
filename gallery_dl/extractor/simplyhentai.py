@@ -8,16 +8,13 @@
 
 """Extract hentai-manga from https://www.simply-hentai.com/"""
 
-from .common import Extractor, ChapterExtractor, Message
+from .common import GalleryExtractor, Extractor, Message
 from .. import text, util, exception
 
 
-class SimplyhentaiGalleryExtractor(ChapterExtractor):
+class SimplyhentaiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from simply-hentai.com"""
     category = "simplyhentai"
-    subcategory = "gallery"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
     archive_fmt = "{image_id}"
     pattern = (r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
                r"(?!/(?:album|gifs?|images?|series)(?:/|$))"
@@ -26,7 +23,7 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
             "url": "258289249990502c3138719cb89e995a60861e49",
-            "keyword": "468a0a3db4fc6ad7fcae0facefb9753831c0404d",
+            "keyword": "18ab9defca53dbb2aeb7965193e93e0ea125b76b",
         }),
         ("https://www.simply-hentai.com/notfound", {
             "exception": exception.GalleryDLException,
@@ -39,7 +36,7 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
 
     def __init__(self, match):
         url = "https://" + match.group(1)
-        ChapterExtractor.__init__(self, match, url)
+        GalleryExtractor.__init__(self, match, url)
         self.session.headers["Referer"] = url
 
     def metadata(self, page):
@@ -58,14 +55,14 @@ class SimplyhentaiGalleryExtractor(ChapterExtractor):
 
         return {
             "gallery_id": text.parse_int(gid),
-            "title": text.unescape(title),
-            "series": text.remove_html(series),
-            "characters": ", ".join(text.split_html(chars)),
-            "tags": text.split_html(tags),
-            "artist": ", ".join(text.split_html(artist)),
-            "lang": util.language_to_code(lang),
-            "language": lang,
-            "date": text.remove_html(date),
+            "title"     : text.unescape(title),
+            "artist"    : text.split_html(artist),
+            "parody"    : text.split_html(series),
+            "characters": text.split_html(chars),
+            "tags"      : text.split_html(tags),
+            "lang"      : util.language_to_code(lang),
+            "language"  : lang,
+            "date"      : text.remove_html(date),
         }
 
     def images(self, _):
