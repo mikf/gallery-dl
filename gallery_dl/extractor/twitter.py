@@ -124,8 +124,12 @@ class TwitterExtractor(Extractor):
 
             if not data["has_more_items"]:
                 return
-            params["max_position"] = text.extract(
-                tweet, 'data-tweet-id="', '"')[0]
+
+            position = text.parse_int(text.extract(
+                tweet, 'data-tweet-id="', '"')[0])
+            if "max_position" in params and position >= params["max_position"]:
+                return
+            params["max_position"] = position
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
