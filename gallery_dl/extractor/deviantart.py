@@ -68,14 +68,18 @@ class DeviantartExtractor(Extractor):
 
             if "content" in deviation:
                 content = deviation["content"]
-                if self.original and deviation["is_downloadable"]:
+
+                if self.original and deviation["is_downloadable"] and \
+                        text.ext_from_url(content["src"]) != "gif":
                     self._update_content(deviation, content)
+
                 if deviation["index"] <= 790677560 and \
                         content["src"].startswith("https://images-wixmp-"):
                     # https://github.com/r888888888/danbooru/issues/4069
                     content["src"] = re.sub(
                         r"(/f/[^/]+/[^/]+)/v\d+/.*",
                         r"/intermediary\1", content["src"])
+
                 yield self.commit(deviation, content)
 
             if "videos" in deviation:
@@ -338,6 +342,12 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
           "Hverarond-14-the-beauty-of-the-earth-789295466"), {
             "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
                         r"/intermediary/f/[^/]+/[^.]+\.jpg$")
+        }),
+        # non-download URL for GIFs (#242)
+        (("https://www.deviantart.com/skatergators/art/"
+          "COM-Monique-Model-781571783"), {
+            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
+                        r"/f/[^/]+/[^.]+\.gif\?token="),
         }),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
