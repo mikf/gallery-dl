@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixes
+- Download original GIF animations from `deviantart` (#242)
+
 ## 1.8.3 - 2019-05-04
 ### Additions
 - Support for
