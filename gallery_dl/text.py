@@ -223,6 +223,20 @@ def parse_timestamp(ts, default=None):
         return default
 
 
+def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z"):
+    """Create a datetime object by parsing 'date_string'"""
+    try:
+        d = datetime.datetime.strptime(date_string, format)
+        o = d.utcoffset()
+        if o is not None:
+            d = d.replace(tzinfo=None) - o  # convert to naive UTC
+        return d
+    except TypeError:
+        return None
+    except (ValueError, OverflowError):
+        return date_string
+
+
 if os.name == "nt":
     clean_path = clean_path_windows
 else:

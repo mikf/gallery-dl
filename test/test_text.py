@@ -350,6 +350,21 @@ class TestText(unittest.TestCase):
             self.assertEqual(f(value), None)
             self.assertEqual(f(value, "foo"), "foo")
 
+    def test_parse_datetime(self, f=text.parse_datetime):
+        null = datetime.datetime.utcfromtimestamp(0)
+
+        self.assertEqual(f("1970-01-01T00:00:00+00:00"), null)
+        self.assertEqual(f("1970.01.01", "%Y.%m.%d")   , null)
+
+        self.assertEqual(
+            f("2019-05-07T21:25:02+09:00"),
+            datetime.datetime(2019, 5, 7, 12, 25, 2),
+        )
+
+        for value in INVALID:
+            self.assertEqual(f(value), None)
+        self.assertEqual(f("1970.01.01"), "1970.01.01")
+
 
 if __name__ == '__main__':
     unittest.main()
