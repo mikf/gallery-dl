@@ -110,7 +110,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
         ("https://exhentai.org/g/960460/4f0e369d82/", {
-            "keyword": "993bfaf68b4823084fbd0d3339564666463b1432",
+            "keyword": "1532ca4d0e4e0738dc994ca725a228af04a4e480",
             "content": "493d759de534355c9f55f8e365565b62411de146",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -169,57 +169,55 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
     def get_metadata(self, page):
         """Extract gallery metadata"""
-        data, pos = text.extract_all(page, (
-            ("title"       , '<h1 id="gn">', '</h1>'),
-            ("title_jp"    , '<h1 id="gj">', '</h1>'),
-            ("date"        , '>Posted:</td><td class="gdt2">', '</td>'),
-            ("parent"      , '>Parent:</td><td class="gdt2"><a href="', '"'),
-            ("visible"     , '>Visible:</td><td class="gdt2">', '<'),
-            ("language"    , '>Language:</td><td class="gdt2">', ' '),
-            ("gallery_size", '>File Size:</td><td class="gdt2">', '<'),
-            ("count"       , '>Length:</td><td class="gdt2">', ' '),
-        ))
+        extr = text.extract_from(page)
+        data = {
+            "gallery_id"   : self.gallery_id,
+            "gallery_token": self.gallery_token,
+            "title"        : text.unescape(extr('<h1 id="gn">', '</h1>')),
+            "title_jp"     : text.unescape(extr('<h1 id="gj">', '</h1>')),
+            "date"         : text.parse_datetime(extr(
+                '>Posted:</td><td class="gdt2">', '</td>'), "%Y-%m-%d %H:%M"),
+            "parent"       : extr(
+                '>Parent:</td><td class="gdt2"><a href="', '"'),
+            "visible"      : extr(
+                '>Visible:</td><td class="gdt2">', '<'),
+            "language"     : extr(
+                '>Language:</td><td class="gdt2">', ' '),
+            "gallery_size" : text.parse_bytes(extr(
+                '>File Size:</td><td class="gdt2">', '<').rstrip("Bb")),
+            "count"        : text.parse_int(extr(
+                '>Length:</td><td class="gdt2">', ' ')),
+        }
 
         data["lang"] = util.language_to_code(data["language"])
-        data["title"] = text.unescape(data["title"])
-        data["title_jp"] = text.unescape(data["title_jp"])
-        data["count"] = text.parse_int(data["count"])
-        data["gallery_id"] = self.gallery_id
-        data["gallery_token"] = self.gallery_token
-        data["gallery_size"] = text.parse_bytes(
-            data["gallery_size"].rstrip("Bb"))
         data["tags"] = [
             text.unquote(tag)
-            for tag in text.extract_iter(page, 'hentai.org/tag/', '"', pos)
+            for tag in text.extract_iter(page, 'hentai.org/tag/', '"')
         ]
+
         return data
 
     def image_from_page(self, page):
         """Get image url and data from webpage"""
-        info = text.extract_all(page, (
-            (None      , '<div id="i3"><a onclick="return load_image(', ''),
-            ("nextkey" , "'", "'"),
-            ("url"     , '<img id="img" src="', '"'),
-            ("origurl" , 'hentai.org/fullimg.php', '"'),
-            ("originfo", 'ownload original', '<'),
-            ("startkey", 'var startkey="', '";'),
-            ("showkey" , 'var showkey="', '";'),
-        ))[0]
-        self.key["start"] = info["startkey"]
-        self.key["show"] = info["showkey"]
-        self.key["next"] = info["nextkey"]
+        pos = page.index('<div id="i3"><a onclick="return load_image(') + 26
+        extr = text.extract_from(page, pos)
 
-        if self.original and info["origurl"]:
-            part = text.unescape(info["origurl"])
-            url = self.root + "/fullimg.php" + part
-            data = self._parse_original_info(info["originfo"])
+        self.key["next"] = extr("'", "'")
+        iurl = extr('<img id="img" src="', '"')
+        orig = extr('hentai.org/fullimg.php', '"')
+
+        if self.original and orig:
+            url = self.root + "/fullimg.php" + text.unescape(orig)
+            data = self._parse_original_info(extr('ownload original', '<'))
         else:
-            url = info["url"]
+            url = iurl
             data = self._parse_image_info(url)
 
         data["num"] = self.image_num
-        data["image_token"] = info["startkey"]
-        return url, text.nameext_from_url(info["url"], data)
+        data["image_token"] = self.key["start"] = extr('var startkey="', '";')
+        self.key["show"] = extr('var showkey="', '";')
+
+        return url, text.nameext_from_url(iurl, data)
 
     def images_from_api(self):
         """Get image url and data from api calls"""
