@@ -42,7 +42,7 @@ class PixivExtractor(Extractor):
             del work["meta_pages"]
             work["num"] = ""
             work["tags"] = [tag["name"] for tag in work["tags"]]
-            work["date"] = text.parse_datetime(work["create_date"])
+            work["date"] = text.parse_datetime(work["create_date"][:-3] + "00")
             work.update(metadata)
 
             yield Message.Directory, work
