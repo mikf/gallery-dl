@@ -50,7 +50,6 @@ class InstagramExtractor(Extractor):
         media = shared_data['entry_data']['PostPage'][0]['graphql']['shortcode_media']
 
         common = {
-            'comments': text.parse_int(media['edge_media_to_comment']['count']),
             'likes': text.parse_int(media['edge_media_preview_like']['count']),
             'owner_id': media['owner']['id'],
             'username': media['owner']['username'],
@@ -173,7 +172,6 @@ class InstagramImageExtractor(InstagramExtractor):
                        r"/vp/[0-9a-f]+/[0-9A-F]+/t51.2885-15/e35"
                        r"/44877605_725955034447492_3123079845831750529_n.jpg",
             "keyword": {
-                "comments": int,
                 "height": int,
                 "likes": int,
                 "media_id": "1922949326347663701",
@@ -190,7 +188,6 @@ class InstagramImageExtractor(InstagramExtractor):
             "keyword": {
                 "sidecar_media_id": "1875629777499953996",
                 "sidecar_shortcode": "BoHk1haB5tM",
-                "comments": int,
                 "likes": int,
                 "username": "instagram",
             }
@@ -200,7 +197,6 @@ class InstagramImageExtractor(InstagramExtractor):
         ("https://www.instagram.com/p/Bqxp0VSBgJg/", {
             "url": "8f38c1cf460c9804842f7306c487410f33f82e7e",
             "keyword": {
-                "comments": int,
                 "height": int,
                 "likes": int,
                 "media_id": "1923502432034620000",
