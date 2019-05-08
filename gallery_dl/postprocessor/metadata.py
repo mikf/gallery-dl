@@ -10,6 +10,7 @@
 
 from .common import PostProcessor
 from .. import util
+import datetime
 import json
 
 
@@ -61,12 +62,20 @@ class MetadataPP(PostProcessor):
         file.write("\n")
 
     def _write_json(self, file, pathfmt):
+        class GalleryDLJSONEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, datetime.datetime):
+                    return obj.isoformat()
+                # Let the base class default method raise the TypeError
+                return json.JSONEncoder.default(self, obj)
+
         json.dump(
             pathfmt.keywords,
             file,
             sort_keys=True,
             indent=self.indent,
             ensure_ascii=self.ascii,
+            cls=GalleryDLJSONEncoder,
         )
 
 
