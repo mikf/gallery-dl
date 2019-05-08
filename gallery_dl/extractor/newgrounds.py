@@ -31,8 +31,9 @@ class NewgroundsExtractor(Extractor):
         yield Message.Directory, data
 
         for page_url in self.get_page_urls():
-            url, image = self.parse_page_data(page_url)
+            image = self.parse_page_data(page_url)
             image.update(data)
+            url = image["url"]
             yield Message.Url, url, text.nameext_from_url(url, image)
 
     def get_metadata(self):
@@ -44,31 +45,28 @@ class NewgroundsExtractor(Extractor):
 
     def parse_page_data(self, page_url):
         """Collect url and metadata from an image page"""
-        page = self.request(page_url).text
-
-        full, pos = text.extract(page, '"full_image_text":', '});')
-        desc, pos = text.extract(page, '"og:description" content="', '"', pos)
-        rate, pos = text.extract(page, 'class="rated-', '"', pos)
-        tags, pos = text.extract(page, '<dd class="tags momag">', '</dd>', pos)
-
-        full = json.loads(full)
-        url   , pos = text.extract(full, 'src="', '"')
-        title , pos = text.extract(full, 'alt="', '"', pos)
-        width , pos = text.extract(full, 'width="', '"', pos)
-        height, pos = text.extract(full, 'height="', '"', pos)
-
-        tags = text.split_html(tags)
-        tags.sort()
-
-        return url, {
-            "title": text.unescape(title),
-            "description": text.unescape(desc),
-            "width": text.parse_int(width),
-            "height": text.parse_int(height),
-            "index": text.parse_int(url.rpartition("/")[2].partition("_")[0]),
-            "tags": tags,
-            "rating": rate,
+        extr = text.extract_from(self.request(page_url).text)
+        full = text.extract_from(json.loads(extr('"full_image_text":', '});')))
+        data = {
+            "description": text.unescape(extr(':description" content="', '"')),
+            "date"       : extr('itemprop="datePublished" content="', '"'),
+            "rating"     : extr('class="rated-', '"'),
+            "favorites"  : text.parse_int(extr('id="faves_load">', '<')),
+            "score"      : text.parse_float(extr('id="score_number">', '<')),
+            "url"        : full('src="', '"'),
+            "title"      : text.unescape(full('alt="', '"')),
+            "width"      : text.parse_int(full('width="', '"')),
+            "height"     : text.parse_int(full('height="', '"')),
         }
+
+        tags = text.split_html(extr('<dd class="tags momag">', '</dd>'))
+        tags.sort()
+        data["tags"] = tags
+
+        data["date"] = text.parse_datetime(data["date"])
+        data["index"] = text.parse_int(
+            data["url"].rpartition("/")[2].partition("_")[0])
+        return data
 
     def _pagination(self, url):
         headers = {
@@ -97,7 +95,7 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
     test = (
         ("https://blitzwuff.newgrounds.com/art", {
             "url": "24b19c4a135a09889fac7b46a74e427e4308d02b",
-            "keyword": "f221ddb00f51aa4f17a73809fd9be3c3352fc6b7",
+            "keyword": "2aab0532a894ff3cf88dd01ce5c60f114011b268",
         }),
         ("https://blitzwuff.newgrounds.com/"),
     )
@@ -115,12 +113,12 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
     test = (
         ("https://www.newgrounds.com/art/view/blitzwuff/ffx", {
             "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
-            "keyword": "731bf24b9fa7da3bdf094a0f6d181123aae16394",
+            "keyword": "cbe90f8f32da4341938f59b08d70f76137028a7e",
             "content": "cb067d6593598710292cdd340d350d14a26fe075",
         }),
         ("https://art.ngfiles.com/images/587000/587551_blitzwuff_ffx.png", {
             "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
-            "keyword": "731bf24b9fa7da3bdf094a0f6d181123aae16394",
+            "keyword": "cbe90f8f32da4341938f59b08d70f76137028a7e",
         }),
     )
 
@@ -151,6 +149,7 @@ class NewgroundsVideoExtractor(NewgroundsExtractor):
         return self._pagination(self.root + "/movies/page/1")
 
     def parse_page_data(self, page_url):
-        return "ytdl:" + page_url, {
-            "index": text.parse_int(page_url.rpartition("/")[2])
+        return {
+            "url"  : "ytdl:" + page_url,
+            "index": text.parse_int(page_url.rpartition("/")[2]),
         }
