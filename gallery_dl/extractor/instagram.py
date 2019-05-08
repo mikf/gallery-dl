@@ -50,6 +50,7 @@ class InstagramExtractor(Extractor):
         media = shared_data['entry_data']['PostPage'][0]['graphql']['shortcode_media']
 
         common = {
+            'date': text.parse_timestamp(media['taken_at_timestamp']),
             'likes': text.parse_int(media['edge_media_preview_like']['count']),
             'owner_id': media['owner']['id'],
             'username': media['owner']['username'],
@@ -172,6 +173,7 @@ class InstagramImageExtractor(InstagramExtractor):
                        r"/vp/[0-9a-f]+/[0-9A-F]+/t51.2885-15/e35"
                        r"/44877605_725955034447492_3123079845831750529_n.jpg",
             "keyword": {
+                "date": "type:datetime",
                 "height": int,
                 "likes": int,
                 "media_id": "1922949326347663701",
@@ -197,6 +199,7 @@ class InstagramImageExtractor(InstagramExtractor):
         ("https://www.instagram.com/p/Bqxp0VSBgJg/", {
             "url": "8f38c1cf460c9804842f7306c487410f33f82e7e",
             "keyword": {
+                "date": "type:datetime",
                 "height": int,
                 "likes": int,
                 "media_id": "1923502432034620000",
