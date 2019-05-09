@@ -226,12 +226,15 @@ def parse_timestamp(ts, default=None):
 def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z"):
     """Create a datetime object by parsing 'date_string'"""
     try:
+        if format.endswith("%z") and date_string[-3] == ":":
+            # workaround for Python < 3.7: +00:00 -> +0000
+            date_string = date_string[:-3] + date_string[-2:]
         d = datetime.datetime.strptime(date_string, format)
         o = d.utcoffset()
         if o is not None:
             d = d.replace(tzinfo=None) - o  # convert to naive UTC
         return d
-    except TypeError:
+    except (TypeError, IndexError, KeyError):
         return None
     except (ValueError, OverflowError):
         return date_string
