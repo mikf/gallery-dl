@@ -109,7 +109,7 @@ EXTRACTORS = {
         "root": "https://arch.b4k.co",
         "extra": {"external": "direct"},
         "test-thread": ("https://arch.b4k.co/meta/thread/196/", {
-            "url": "cdd4931ac1cd00264b0b54e2e3b0d8f6ae48957e",
+            "url": "9b0ae01292133268fe9178b71332da1ee25b7704",
         }),
     },
     "desuarchive": {

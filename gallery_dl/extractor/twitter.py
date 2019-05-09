@@ -137,10 +137,10 @@ class TwitterTimelineExtractor(TwitterExtractor):
     subcategory = "timeline"
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
                r"/([^/?&#]+)/?$")
-    test = ("https://twitter.com/PicturesEarth", {
+    test = ("https://twitter.com/supernaturepics", {
         "range": "1-40",
-        "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
-        "keyword": "46f680d81a59e4d0e8b4ac25411bc3ec94c73a93",
+        "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
+        "keyword": "7210d679606240405e0cf62cbc67596e81a7a250",
     })
 
     def tweets(self):
@@ -154,9 +154,9 @@ class TwitterMediaExtractor(TwitterExtractor):
     subcategory = "media"
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
                r"/([^/?&#]+)/media(?!\w)")
-    test = ("https://twitter.com/PicturesEarth/media", {
+    test = ("https://twitter.com/supernaturepics/media", {
         "range": "1-40",
-        "url": "2f4d51cbba81e56c1c755677b3ad58fc167c9771",
+        "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
     })
 
     def tweets(self):
@@ -171,10 +171,10 @@ class TwitterTweetExtractor(TwitterExtractor):
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
                r"/([^/?&#]+)/status/(\d+)")
     test = (
-        ("https://twitter.com/PicturesEarth/status/672897688871018500", {
-            "url": "d9e68d41301d2fe382eb27711dea28366be03b1a",
-            "keyword": "da59634e33a7210bd24f9152af9ac560f6b1b601",
-            "content": "a1f2f04cb2d8df24b1afa7a39910afda23484342",
+        ("https://twitter.com/supernaturepics/status/604341487988576256", {
+            "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",
+            "keyword": "1b8afb93cc04a9f44d89173f8facc61c3a6caf91",
+            "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
         }),
         # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
