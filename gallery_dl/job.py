@@ -8,7 +8,6 @@
 
 import sys
 import time
-import json
 import logging
 from . import extractor, downloader, postprocessor
 from . import config, text, util, output, exception
@@ -469,16 +468,13 @@ class DataJob(Job):
         except BaseException:
             pass
 
+        # convert numbers to string
         if config.get(("output", "num-to-str"), False):
             for msg in self.data:
                 util.transform_dict(msg[-1], util.number_to_string)
 
         # dump to 'file'
-        json.dump(
-            self.data, self.file,
-            sort_keys=True, indent=2, ensure_ascii=self.ascii, default=str,
-        )
-        self.file.write("\n")
+        util.dump_json(self.data, self.file, self.ascii, 2)
 
     def handle_url(self, url, kwdict):
         self.data.append((Message.Url, url, self._filter(kwdict)))

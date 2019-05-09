@@ -11,6 +11,7 @@
 import re
 import os
 import sys
+import json
 import shutil
 import string
 import _string
@@ -90,6 +91,18 @@ def to_string(value):
         except Exception:
             return ", ".join(map(str, value))
     return str(value)
+
+
+def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
+    """Serialize 'obj' as JSON and write it to 'fp'"""
+    json.dump(
+        obj, fp,
+        ensure_ascii=ensure_ascii,
+        indent=indent,
+        default=str,
+        sort_keys=True,
+    )
+    fp.write("\n")
 
 
 def expand_path(path):
