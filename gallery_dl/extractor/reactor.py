@@ -46,7 +46,7 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
         yield Message.Directory, data
         for post in self.posts():
             for image in self._parse_post(post):
-                url = image["file_url"]
+                url = image["url"]
                 image.update(data)
                 yield Message.Url, url, text.nameext_from_url(url, image)
 
@@ -102,7 +102,7 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
                 return
 
         num = 0
-        date = data["datePublished"]
+        date = text.parse_datetime(data["datePublished"])
         user = data["author"]["name"]
         description = text.unescape(data["description"])
         title, _, tags = text.unescape(data["headline"]).partition(" / ")
@@ -111,6 +111,7 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
 
         if not tags:
             title, tags = tags, title
+        tags = tags.split(" :: ")
 
         for image in images:
             url = text.extract(image, ' src="', '"')[0]
@@ -123,11 +124,11 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
 
             if image.startswith("<iframe "):  # embed
                 url = "ytdl:" + text.unescape(url)
-            else:
+            elif "/post/webm/" not in url and "/post/mp4/" not in url:
                 url = url.replace("/post/", "/post/full/")
 
             yield {
-                "file_url": url,
+                "url": url,
                 "post_id": post_id,
                 "image_id": text.parse_int(image_id),
                 "width": text.parse_int(width),
@@ -198,7 +199,7 @@ class ReactorPostExtractor(ReactorExtractor):
         for image in self._parse_post(post[pos:]):
             if image["num"] == 1:
                 yield Message.Directory, image
-            url = image["file_url"]
+            url = image["url"]
             yield Message.Url, url, text.nameext_from_url(url, image)
 
 
@@ -217,7 +218,7 @@ class JoyreactorTagExtractor(ReactorTagExtractor):
             "count": ">= 17",
         }),
         ("http://joyreactor.com/tag/Cirno", {
-            "url": "2a9c0f668d4d8b25c9a22145762c07512d63ba07",
+            "url": "de1e60c15bfb07a0e9603b00dc3d05f60edc7914",
         }),
     )
 
@@ -256,19 +257,19 @@ class JoyreactorPostExtractor(ReactorPostExtractor):
     test = (
         ("http://joyreactor.com/post/3721876", {  # single image
             "url": "6ce09f239d8b7fdf6dd1664c2afc39618cc87663",
-            "keyword": "454feed5cd357d5d0512b35f72123db531689075",
+            "keyword": "966d2acd462732a9ed823a9db5ed19f95734fd10",
         }),
         ("http://joyreactor.com/post/3713804", {  # 4 images
             "url": "f08ac8493ca0619a3e3c6bedb8d8374af3eec304",
-            "keyword": "80fc8a08115f6e847fce1a110367924faec9e34e",
+            "keyword": "84e34d402342607045a65fab6d4d593d146c238a",
         }),
         ("http://joyreactor.com/post/3726210", {  # gif / video
-            "url": "83c1f7437e3cd011a0e26420a21baf1c3a8fbbdd",
-            "keyword": "a505a16b72969643e7a310ed49ed513870ea0d32",
+            "url": "33a48e1eca6cb2d298fbbb6536b3283799d6515b",
+            "keyword": "dbe148d576f2fc9431020c557ddb78f449e48c47",
         }),
         ("http://joyreactor.com/post/3668724", {  # youtube embed
             "url": "be2589e2e8f3ffcaf41b34bc28bfad850ccea34a",
-            "keyword": "889206164b4a180aed6bf6186d2456cf31afbed8",
+            "keyword": "da61b9e2887db95759950df5fb89c9d32f8e7651",
         }),
         ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
             "url": "ac900743ed7cf1baf3db3b531c3bc414bf1ffcde",

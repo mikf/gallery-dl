@@ -50,10 +50,9 @@ class MetadataPP(PostProcessor):
             return
 
         if not isinstance(tags, list):
-            for separator in (" :: ", ", ", " "):
-                taglist = tags.split(separator)
-                if len(taglist) >= len(tags) / 16:
-                    break
+            taglist = tags.split(", ")
+            if len(taglist) < len(tags) / 16:
+                taglist = tags.split(" ")
             tags = taglist
 
         file.write("\n".join(tags))
