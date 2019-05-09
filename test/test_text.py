@@ -353,9 +353,14 @@ class TestText(unittest.TestCase):
     def test_parse_datetime(self, f=text.parse_datetime):
         null = datetime.datetime.utcfromtimestamp(0)
 
-        self.assertEqual(f("1970-01-01T00:00:00+0000"), null)
-        self.assertEqual(f("1970.01.01", "%Y.%m.%d")  , null)
+        self.assertEqual(f("1970-01-01T00:00:00+00:00"), null)
+        self.assertEqual(f("1970-01-01T00:00:00+0000") , null)
+        self.assertEqual(f("1970.01.01", "%Y.%m.%d")   , null)
 
+        self.assertEqual(
+            f("2019-05-07T21:25:02+09:00"),
+            datetime.datetime(2019, 5, 7, 12, 25, 2),
+        )
         self.assertEqual(
             f("2019-05-07T21:25:02+0900"),
             datetime.datetime(2019, 5, 7, 12, 25, 2),
