@@ -263,27 +263,27 @@ def build_parser():
     postprocessor = parser.add_argument_group("Post-processing Options")
     postprocessor.add_argument(
         "--zip",
-        action=ConfigConstAction, nargs=0,
-        dest="postprocessors", const=({"name": "zip"},),
+        action="append_const",
+        dest="postprocessors", const={"name": "zip"},
         help="Store downloaded files in a ZIP archive",
     )
     postprocessor.add_argument(
         "--ugoira-conv",
-        action=ConfigConstAction, nargs=0,
-        dest="postprocessors", const=({"name": "ugoira", "ffmpeg-args": (
-            "-c:v", "libvpx", "-crf", "4", "-b:v", "5000k", "-an")},),
+        action="append_const",
+        dest="postprocessors", const={"name": "ugoira", "ffmpeg-args": (
+            "-c:v", "libvpx", "-crf", "4", "-b:v", "5000k", "-an")},
         help="Convert Pixiv Ugoira to WebM (requires FFmpeg)",
     )
     postprocessor.add_argument(
         "--write-metadata",
-        action=ConfigConstAction, nargs=0,
-        dest="postprocessors", const=({"name": "metadata"},),
+        action="append_const",
+        dest="postprocessors", const={"name": "metadata"},
         help="Write metadata to separate JSON files",
     )
     postprocessor.add_argument(
         "--write-tags",
-        action=ConfigConstAction, nargs=0,
-        dest="postprocessors", const=({"name": "metadata", "mode": "tags"},),
+        action="append_const",
+        dest="postprocessors", const={"name": "metadata", "mode": "tags"},
         help="Write image tags to separate text files",
     )
 

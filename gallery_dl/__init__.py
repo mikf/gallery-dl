@@ -121,6 +121,8 @@ def main():
             config.load(args.cfgfiles, strict=True)
         if args.yamlfiles:
             config.load(args.yamlfiles, strict=True, fmt="yaml")
+        if args.postprocessors:
+            config.set(("postprocessors", ), args.postprocessors)
         for key, value in args.options:
             config.set(key, value)
 
