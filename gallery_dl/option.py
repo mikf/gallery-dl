@@ -11,7 +11,7 @@
 import argparse
 import logging
 import json
-from .version import __version__
+from . import job, version
 
 
 class ConfigAction(argparse.Action):
@@ -70,27 +70,27 @@ def build_parser():
     )
     general.add_argument(
         "--version",
-        action="version", version=__version__,
+        action="version", version=version.__version__,
         help="Print program version and exit",
     )
     general.add_argument(
         "-d", "--dest",
-        metavar="DEST", action=ConfigAction, dest="base-directory",
+        dest="base-directory", metavar="DEST", action=ConfigAction,
         help="Destination directory",
     )
     general.add_argument(
         "-i", "--input-file",
-        metavar="FILE", dest="inputfile",
+        dest="inputfile", metavar="FILE",
         help="Download URLs found in FILE ('-' for stdin)",
     )
     general.add_argument(
         "--cookies",
-        metavar="FILE", action=ConfigAction, dest="cookies",
+        dest="cookies", metavar="FILE", action=ConfigAction,
         help="File to load additional cookies from",
     )
     general.add_argument(
         "--proxy",
-        metavar="URL", action=ConfigAction, dest="proxy",
+        dest="proxy", metavar="URL", action=ConfigAction,
         help="Use the specified proxy",
     )
     general.add_argument(
@@ -101,49 +101,57 @@ def build_parser():
 
     output = parser.add_argument_group("Output Options")
     output.add_argument(
-        "-q", "--quiet", dest="loglevel", action="store_const",
-        const=logging.ERROR, default=logging.INFO,
+        "-q", "--quiet",
+        dest="loglevel", default=logging.INFO,
+        action="store_const", const=logging.ERROR,
         help="Activate quiet mode",
     )
     output.add_argument(
-        "-v", "--verbose", dest="loglevel", action="store_const",
-        const=logging.DEBUG, default=logging.INFO,
+        "-v", "--verbose",
+        dest="loglevel",
+        action="store_const", const=logging.DEBUG,
         help="Print various debugging information",
     )
     output.add_argument(
-        "-g", "--get-urls", dest="list_urls", action="count",
+        "-g", "--get-urls",
+        dest="list_urls", action="count",
         help="Print URLs instead of downloading",
     )
     output.add_argument(
-        "-j", "--dump-json", dest="list_data", action="store_true",
+        "-j", "--dump-json",
+        dest="jobtype", action="store_const", const=job.DataJob,
         help="Print JSON information",
     )
     output.add_argument(
-        "-s", "--simulate", dest="simulate", action="store_true",
+        "-s", "--simulate",
+        dest="jobtype", action="store_const", const=job.SimulationJob,
         help="Simulate data extraction; do not download anything",
     )
     output.add_argument(
-        "-K", "--list-keywords", dest="list_keywords", action="store_true",
+        "-K", "--list-keywords",
+        dest="jobtype", action="store_const", const=job.KeywordJob,
         help=("Print a list of available keywords and example values "
               "for the given URLs"),
     )
     output.add_argument(
-        "--list-modules", dest="list_modules", action="store_true",
+        "--list-modules",
+        dest="list_modules", action="store_true",
         help="Print a list of available extractor modules",
     )
     output.add_argument(
-        "--list-extractors", dest="list_extractors", action="store_true",
+        "--list-extractors",
+        dest="list_extractors", action="store_true",
         help=("Print a list of extractor classes "
               "with description, (sub)category and example URL"),
     )
     output.add_argument(
         "--write-log",
-        metavar="FILE", dest="logfile", action=ConfigAction,
+        dest="logfile", metavar="FILE", action=ConfigAction,
         help="Write logging output to FILE",
     )
     output.add_argument(
         "--write-unsupported",
-        metavar="FILE", dest="unsupportedfile", action=ConfigAction,
+        dest="unsupportedfile", metavar="FILE", action=ConfigAction,
         help=("Write URLs, which get emitted by other extractors but cannot "
               "be handled, to FILE"),
     )
@@ -151,37 +159,37 @@ def build_parser():
     downloader = parser.add_argument_group("Downloader Options")
     downloader.add_argument(
         "-r", "--limit-rate",
-        metavar="RATE", action=ConfigAction, dest="rate",
+        dest="rate", metavar="RATE", action=ConfigAction,
         help="Maximum download rate (e.g. 500k or 2.5M)",
     )
     downloader.add_argument(
         "-R", "--retries",
-        metavar="RETRIES", action=ConfigAction, dest="retries", type=int,
+        dest="retries", metavar="RETRIES", type=int, action=ConfigAction,
         help="Number of retries (default: 5)",
     )
     downloader.add_argument(
         "--http-timeout",
-        metavar="SECONDS", action=ConfigAction, dest="timeout", type=float,
+        dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
         help="Timeout for HTTP connections (defaut: 30.0)",
     )
     downloader.add_argument(
         "--sleep",
-        metavar="SECONDS", action=ConfigAction, dest="sleep", type=float,
+        dest="sleep", metavar="SECONDS", type=float, action=ConfigAction,
         help="Number of seconds to sleep before each download",
     )
     downloader.add_argument(
         "--no-part",
-        action=ConfigConstAction, nargs=0, dest="part", const=False,
+        dest="part", nargs=0, action=ConfigConstAction, const=False,
         help="Do not use .part files",
     )
     downloader.add_argument(
         "--no-check-certificate",
-        action=ConfigConstAction, nargs=0, dest="verify", const=False,
+        dest="verify", nargs=0, action=ConfigConstAction, const=False,
         help="Disable HTTPS certificate validation",
     )
     downloader.add_argument(
         "--abort-on-skip",
-        action=ConfigConstAction, nargs=0, dest="skip", const="abort",
+        dest="skip", nargs=0, action=ConfigConstAction, const="abort",
         help=("Abort extractor run if a file download would normally be "
               "skipped, i.e. if a file with the same filename already exists"),
     )
@@ -189,64 +197,64 @@ def build_parser():
     configuration = parser.add_argument_group("Configuration Options")
     configuration.add_argument(
         "-c", "--config",
-        metavar="CFG", dest="cfgfiles", action="append",
+        dest="cfgfiles", metavar="FILE", action="append",
         help="Additional configuration files",
     )
     configuration.add_argument(
+        "--config-yaml",
+        dest="yamlfiles", metavar="FILE", action="append",
+        help=argparse.SUPPRESS,
+    )
+    configuration.add_argument(
         "-o", "--option",
-        metavar="OPT", action=ParseAction, dest="options", default=[],
+        dest="options", metavar="OPT", action=ParseAction, default=[],
         help="Additional '<key>=<value>' option values",
     )
     configuration.add_argument(
-        "--ignore-config", dest="load_config", action="store_false",
+        "--ignore-config",
+        dest="load_config", action="store_false",
         help="Do not read the default configuration files",
-    )
-    configuration.add_argument(
-        "--config-yaml",
-        metavar="CFG", dest="yamlfiles", action="append",
-        help=argparse.SUPPRESS,
     )
 
     authentication = parser.add_argument_group("Authentication Options")
     authentication.add_argument(
         "-u", "--username",
-        metavar="USER", action=ConfigAction, dest="username",
-        help="A username to login with"
+        dest="username", metavar="USER", action=ConfigAction,
+        help="Username to login with",
     )
     authentication.add_argument(
         "-p", "--password",
-        metavar="PASS", action=ConfigAction, dest="password",
-        help="The password associated with the given username",
+        dest="password", metavar="PASS", action=ConfigAction,
+        help="Password belonging to the given username",
     )
     authentication.add_argument(
         "--netrc",
-        action=ConfigConstAction, nargs=0, dest="netrc", const=True,
+        dest="netrc", nargs=0, action=ConfigConstAction, const=True,
         help="Enable .netrc authentication data",
     )
 
     selection = parser.add_argument_group("Selection Options")
     selection.add_argument(
         "--download-archive",
-        metavar="FILE", dest="archive", action=ConfigAction,
+        dest="archive", metavar="FILE", action=ConfigAction,
         help=("Record all downloaded files in the archive file and "
-              "skip downloading any file already in it.")
+              "skip downloading any file already in it."),
     )
     selection.add_argument(
         "--range",
-        metavar="RANGE", dest="image-range", action=ConfigAction,
-        help=("Index-range specifying which images to download. "
-              "For example '--range -2,4,6-8,10-' will download images with "
-              "index 1, 2, 4, 6, 7, 8 and 10 up to the last one"),
+        dest="image-range", metavar="RANGE", action=ConfigAction,
+        help=("Index-range(s) specifying which images to download. "
+              "For example '5-10' or '1,3-5,10-'"),
     )
     selection.add_argument(
         "--chapter-range",
-        metavar="RANGE", dest="chapter-range", action=ConfigAction,
+        dest="chapter-range", metavar="RANGE", action=ConfigAction,
         help=("Like '--range', but applies to manga-chapters "
               "and other delegated URLs"),
     )
     selection.add_argument(
         "--filter",
-        metavar="EXPR", dest="image-filter", action=ConfigAction,
+        dest="image-filter", metavar="EXPR", action=ConfigAction,
         help=("Python expression controlling which images to download. "
               "Files for which the expression evaluates to False are ignored. "
               "Available keys are the filename-specific ones listed by '-K'. "
@@ -255,7 +263,7 @@ def build_parser():
     )
     selection.add_argument(
         "--chapter-filter",
-        metavar="EXPR", dest="chapter-filter", action=ConfigAction,
+        dest="chapter-filter", metavar="EXPR", action=ConfigAction,
         help=("Like '--filter', but applies to manga-chapters "
               "and other delegated URLs"),
     )
@@ -263,33 +271,33 @@ def build_parser():
     postprocessor = parser.add_argument_group("Post-processing Options")
     postprocessor.add_argument(
         "--zip",
-        action="append_const",
-        dest="postprocessors", const={"name": "zip"},
+        dest="postprocessors",
+        action="append_const", const={"name": "zip"},
         help="Store downloaded files in a ZIP archive",
     )
     postprocessor.add_argument(
         "--ugoira-conv",
-        action="append_const",
-        dest="postprocessors", const={"name": "ugoira", "ffmpeg-args": (
+        dest="postprocessors",
+        action="append_const", const={"name": "ugoira", "ffmpeg-args": (
             "-c:v", "libvpx", "-crf", "4", "-b:v", "5000k", "-an")},
         help="Convert Pixiv Ugoira to WebM (requires FFmpeg)",
     )
     postprocessor.add_argument(
         "--write-metadata",
-        action="append_const",
-        dest="postprocessors", const={"name": "metadata"},
+        dest="postprocessors",
+        action="append_const", const={"name": "metadata"},
         help="Write metadata to separate JSON files",
     )
     postprocessor.add_argument(
         "--write-tags",
-        action="append_const",
-        dest="postprocessors", const={"name": "metadata", "mode": "tags"},
+        dest="postprocessors",
+        action="append_const", const={"name": "metadata", "mode": "tags"},
         help="Write image tags to separate text files",
     )
 
     parser.add_argument(
         "urls",
-        nargs="*", metavar="URL",
+        metavar="URL", nargs="*",
         help=argparse.SUPPRESS,
     )
 
