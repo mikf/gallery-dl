@@ -34,6 +34,7 @@ modules = [
     "hentaifoundry",
     "hentaifox",
     "hentaihere",
+    "hentainexus",
     "hitomi",
     "hypnohub",
     "idolcomplex",
