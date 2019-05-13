@@ -53,9 +53,9 @@ class TestCookiejar(unittest.TestCase):
 
         cookie = next(iter(cookies))
         self.assertEqual(cookie.domain, ".example.org")
-        self.assertEqual(cookie.path, "/")
-        self.assertEqual(cookie.name, "NAME")
-        self.assertEqual(cookie.value, "VALUE")
+        self.assertEqual(cookie.path  , "/")
+        self.assertEqual(cookie.name  , "NAME")
+        self.assertEqual(cookie.value , "VALUE")
 
     def test_invalid_cookiefile(self):
         self._test_warning(self.invalid_cookiefile, http.cookiejar.LoadError)
@@ -86,14 +86,14 @@ class TestCookiedict(unittest.TestCase):
     def test_dict(self):
         cookies = extractor.find("test:").session.cookies
         self.assertEqual(len(cookies), len(self.cdict))
-        self.assertEqual(sorted(cookies.keys()), sorted(self.cdict.keys()))
+        self.assertEqual(sorted(cookies), sorted(self.cdict))
         self.assertEqual(sorted(cookies.values()), sorted(self.cdict.values()))
 
     def test_domain(self):
         for category in ["exhentai", "nijie", "sankaku", "seiga"]:
             extr = _get_extractor(category)
             cookies = extr.session.cookies
-            for key in self.cdict.keys():
+            for key in self.cdict:
                 self.assertTrue(key in cookies)
             for c in cookies:
                 self.assertEqual(c.domain, extr.cookiedomain)
@@ -107,9 +107,9 @@ class TestCookieLogin(unittest.TestCase):
     def test_cookie_login(self):
         extr_cookies = {
             "exhentai": ("ipb_member_id", "ipb_pass_hash"),
-            "nijie": ("nemail", "nlogin"),
-            "sankaku": ("login", "pass_hash"),
-            "seiga": ("user_session",),
+            "nijie"   : ("nemail", "nlogin"),
+            "sankaku" : ("login", "pass_hash"),
+            "seiga"   : ("user_session",),
         }
         for category, cookienames in extr_cookies.items():
             cookies = {name: "value" for name in cookienames}
