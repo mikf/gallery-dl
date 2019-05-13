@@ -49,7 +49,7 @@ class LusciousBase(Extractor):
     def _parse_tags(tags):
         return [
             text.unescape(tag.replace(":_", ":"))
-            for tag in text.extract_iter(tags or "", "/tagged/+", "/")
+            for tag in text.extract_iter(tags or "", "/tags/", "/")
         ]
 
 
@@ -62,12 +62,12 @@ class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
     test = (
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
-            "keyword": "f9c34e1a5b0c1f119e9f644c99933ecf7d7dbfd2",
+            "keyword": "c597c132834f4990f90bf5dee5de2a9d4ba263a4",
             "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
-            "keyword": "c147d8ef90843f68e37ed15e4fe017e62fc97c96",
+            "keyword": "e1202078b504adeccd521aa932f456a5a85479a0",
         }),
         ("https://luscious.net/albums/not-found_277035/", {
             "exception": exception.NotFoundError,
@@ -102,14 +102,16 @@ class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
         else:
             count, pos = text.extract(page, '<p>', ' ', pos)
         genre, pos = text.extract(page, '<p>Genre:', '</p>', pos)
+        adnce, pos = text.extract(page, '<p>Audience:', '</p>', pos)
         tags , pos = text.extract(page, '"tag_list static">', '</ol>', pos)
 
         return {
             "gallery_id": text.parse_int(self.gallery_id),
-            "title": text.unescape(title or ""),
-            "count": text.parse_int(count),
-            "genre": text.remove_html(genre),
-            "tags" : self._parse_tags(tags),
+            "title"     : text.unescape(title or ""),
+            "count"     : text.parse_int(count),
+            "genre"     : text.remove_html(genre),
+            "audience"  : text.remove_html(adnce),
+            "tags"      : self._parse_tags(tags),
         }
 
     def images(self, page):
