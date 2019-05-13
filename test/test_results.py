@@ -55,7 +55,8 @@ class TestExtractorResults(unittest.TestCase):
         if not result:
             return
         if "exception" in result:
-            self.assertRaises(result["exception"], tjob.run)
+            with self.assertRaises(result["exception"]):
+                tjob.run()
             return
         try:
             tjob.run()

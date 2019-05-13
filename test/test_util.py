@@ -304,12 +304,17 @@ class TestOther(unittest.TestCase):
             util.advance(util.advance(items, 1), 2), range(3, 5))
 
     def test_raises(self):
-        self.assertRaises(Exception, util.raises(Exception()))
+        func = util.raises(Exception())
+        with self.assertRaises(Exception):
+            func()
 
         func = util.raises(ValueError(1))
-        self.assertRaises(Exception, func)
-        self.assertRaises(Exception, func)
-        self.assertRaises(Exception, func)
+        with self.assertRaises(ValueError):
+            func()
+        with self.assertRaises(ValueError):
+            func()
+        with self.assertRaises(ValueError):
+            func()
 
     def test_combine_dict(self):
         self.assertEqual(
