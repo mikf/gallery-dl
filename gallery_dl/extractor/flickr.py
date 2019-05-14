@@ -22,23 +22,23 @@ class FlickrExtractor(Extractor):
         self.api = FlickrAPI(self)
         self.item_id = match.group(1)
         self.user = None
-        self.load_extra = self.config("metadata", False)
 
     def items(self):
-        info = self.data()
+        data = self.metadata()
         yield Message.Version, 1
-        yield Message.Directory, info
+        yield Message.Directory, data
         for photo in self.photos():
-            photo.update(info)
-            url = photo["photo"]["source"]
+            photo.update(data)
+            url = photo["url"]
             yield Message.Url, url, text.nameext_from_url(url, photo)
 
-    def data(self):
+    def metadata(self):
+        """Return general metadata"""
         self.user = self.api.urls_lookupUser(self.item_id)
         return {"user": self.user}
 
     def photos(self):
-        return []
+        """Return an iterable with all relevant photo objects"""
 
 
 class FlickrImageExtractor(FlickrExtractor):
@@ -54,18 +54,22 @@ class FlickrImageExtractor(FlickrExtractor):
             "pattern": pattern,
             "content": "0821a28ee46386e85b02b67cf2720063440a228c",
             "keyword": {
+                "comments": int,
+                "description": str,
                 "extension": "jpg",
                 "filename": "16089302239_de18cd8017_b",
-                "id": "16089302239",
-                "photo": {
-                    "height": "683",
-                    "label": "Large",
-                    "media": "photo",
-                    "source": str,
-                    "url": str,
-                    "width": "1024"
-                },
+                "id": 16089302239,
+                "height": 683,
+                "label": "Large",
+                "media": "photo",
+                "url": str,
+                "views": int,
+                "width": 1024,
             },
+        }),
+        ("https://www.flickr.com/photos/145617051@N08/46733161535", {
+            "count": 1,
+            "keyword": {"media": "video"},
         }),
         ("http://c2.staticflickr.com/2/1475/24531000464_9a7503ae68_b.jpg", {
             "pattern": pattern}),
@@ -85,35 +89,31 @@ class FlickrImageExtractor(FlickrExtractor):
             self.item_id = util.bdecode(match.group(2), alphabet)
 
     def items(self):
-        size = self.api.photos_getSizes(self.item_id)[-1]
+        photo = self.api.photos_getInfo(self.item_id)
 
-        if self.load_extra:
-            info = self.api.photos_getInfo(self.item_id)
-            self._clean(info)
+        if photo["media"] == "video" and self.api.videos:
+            self.api._extract_video(photo)
         else:
-            info = {"id": self.item_id}
-
-        info["photo"] = size
-        url = size["source"]
-        text.nameext_from_url(url, info)
-
-        yield Message.Version, 1
-        yield Message.Directory, info
-        yield Message.Url, url, info
-
-    @staticmethod
-    def _clean(photo):
-        del photo["comments"]
-        del photo["views"]
+            self.api._extract_photo(photo)
 
         photo["title"] = photo["title"]["_content"]
+        photo["comments"] = text.parse_int(photo["comments"]["_content"])
+        photo["description"] = photo["description"]["_content"]
         photo["tags"] = [t["raw"] for t in photo["tags"]["tag"]]
+        photo["date"] = text.parse_timestamp(photo["dateuploaded"])
+        photo["views"] = text.parse_int(photo["views"])
+        photo["id"] = text.parse_int(photo["id"])
 
         if "location" in photo:
             location = photo["location"]
             for key, value in location.items():
                 if isinstance(value, dict):
                     location[key] = value["_content"]
+
+        url = photo["url"]
+        yield Message.Version, 1
+        yield Message.Directory, photo
+        yield Message.Url, url, text.nameext_from_url(url, photo)
 
 
 class FlickrAlbumExtractor(FlickrExtractor):
@@ -146,18 +146,17 @@ class FlickrAlbumExtractor(FlickrExtractor):
 
     def _album_items(self):
         yield Message.Version, 1
-        data = FlickrExtractor.data(self)
+        data = FlickrExtractor.metadata(self)
         data["_extractor"] = FlickrAlbumExtractor
 
-        for albums in self.api.photosets_getList(self.user["nsid"]):
-            for album in albums["photoset"]:
-                self.api._clean_info(album).update(data)
-                url = "https://www.flickr.com/photos/{}/albums/{}".format(
-                    self.user["path_alias"], album["id"])
-                yield Message.Queue, url, album
+        for album in self.api.photosets_getList(self.user["nsid"]):
+            self.api._clean_info(album).update(data)
+            url = "https://www.flickr.com/photos/{}/albums/{}".format(
+                self.user["path_alias"], album["id"])
+            yield Message.Queue, url, album
 
-    def data(self):
-        data = FlickrExtractor.data(self)
+    def metadata(self):
+        data = FlickrExtractor.metadata(self)
         data["album"] = self.api.photosets_getInfo(
             self.album_id, self.user["nsid"])
         return data
@@ -184,13 +183,10 @@ class FlickrGalleryExtractor(FlickrExtractor):
         FlickrExtractor.__init__(self, match)
         self.gallery_id = match.group(2)
 
-    def data(self):
-        info = FlickrExtractor.data(self)
-        if self.load_extra:
-            info["gallery"] = self.api.galleries_getInfo(self.gallery_id)
-        else:
-            info["gallery"] = {"id": self.gallery_id}
-        return info
+    def metadata(self):
+        data = FlickrExtractor.metadata(self)
+        data["gallery"] = self.api.galleries_getInfo(self.gallery_id)
+        return data
 
     def photos(self):
         return self.api.galleries_getPhotos(self.gallery_id)
@@ -207,7 +203,7 @@ class FlickrGroupExtractor(FlickrExtractor):
         "count": "> 150",
     })
 
-    def data(self):
+    def metadata(self):
         self.group = self.api.urls_lookupGroup(self.item_id)
         return {"group": self.group}
 
@@ -263,7 +259,7 @@ class FlickrSearchExtractor(FlickrExtractor):
         if "text" not in self.search:
             self.search["text"] = ""
 
-    def data(self):
+    def metadata(self):
         return {"search": self.search}
 
     def photos(self):
@@ -276,23 +272,36 @@ class FlickrAPI(oauth.OAuth1API):
     API_KEY = "ac4fd7aa98585b9eee1ba761c209de68"
     API_SECRET = "3adb0f568dc68393"
     FORMATS = [
-        ("o", "Original", None),
-        ("k", "Large 2048", 2048),
-        ("h", "Large 1600", 1600),
-        ("l", "Large", 1024),
-        ("c", "Medium 800", 800),
-        ("z", "Medium 640", 640),
-        ("m", "Medium", 500),
-        ("n", "Small 320", 320),
-        ("s", "Small", 240),
+        ("o", "Original"    , None),
+        ("k", "Large 2048"  , 2048),
+        ("h", "Large 1600"  , 1600),
+        ("l", "Large"       , 1024),
+        ("c", "Medium 800"  , 800),
+        ("z", "Medium 640"  , 640),
+        ("m", "Medium"      , 500),
+        ("n", "Small 320"   , 320),
+        ("s", "Small"       , 240),
         ("q", "Large Square", 150),
-        ("t", "Thumbnail", 100),
-        ("s", "Square", 75),
+        ("t", "Thumbnail"   , 100),
+        ("s", "Square"      , 75),
     ]
+    VIDEO_FORMATS = {
+        "orig"       : 9,
+        "1080p"      : 8,
+        "720p"       : 7,
+        "360p"       : 6,
+        "288p"       : 5,
+        "700"        : 4,
+        "300"        : 3,
+        "100"        : 2,
+        "appletv"    : 1,
+        "iphone_wifi": 0,
+    }
 
     def __init__(self, extractor):
         oauth.OAuth1API.__init__(self, extractor)
 
+        self.videos = extractor.config("videos", True)
         self.maxsize = extractor.config("size-max")
         if isinstance(self.maxsize, str):
             for fmt, fmtname, fmtwidth in self.FORMATS:
@@ -313,7 +322,7 @@ class FlickrAPI(oauth.OAuth1API):
     def favorites_getList(self, user_id):
         """Returns a list of the user's favorite photos."""
         params = {"user_id": user_id}
-        return self._listing("favorites.getList", params)
+        return self._pagination("favorites.getList", params)
 
     def galleries_getInfo(self, gallery_id):
         """Gets information about a gallery."""
@@ -324,17 +333,17 @@ class FlickrAPI(oauth.OAuth1API):
     def galleries_getPhotos(self, gallery_id):
         """Return the list of photos for a gallery."""
         params = {"gallery_id": gallery_id}
-        return self._listing("galleries.getPhotos", params)
+        return self._pagination("galleries.getPhotos", params)
 
     def groups_pools_getPhotos(self, group_id):
         """Returns a list of pool photos for a given group."""
         params = {"group_id": group_id}
-        return self._listing("groups.pools.getPhotos", params)
+        return self._pagination("groups.pools.getPhotos", params)
 
     def people_getPhotos(self, user_id):
         """Return photos from the given user's photostream."""
         params = {"user_id": user_id}
-        return self._listing("people.getPhotos", params)
+        return self._pagination("people.getPhotos", params)
 
     def photos_getInfo(self, photo_id):
         """Get information about a photo."""
@@ -345,11 +354,6 @@ class FlickrAPI(oauth.OAuth1API):
         """Returns the available sizes for a photo."""
         params = {"photo_id": photo_id}
         sizes = self._call("photos.getSizes", params)["sizes"]["size"]
-        if sizes[-1]["media"] == "video":
-            # filter all non-video and mobile entries
-            sizes = [size for size in sizes
-                     if size["media"] == "video" and
-                     not size["label"].startswith(("Mobile ", "Video "))]
         if self.maxsize:
             for index, size in enumerate(sizes):
                 if index > 0 and (int(size["width"]) > self.maxsize or
@@ -360,7 +364,7 @@ class FlickrAPI(oauth.OAuth1API):
 
     def photos_search(self, params):
         """Return a list of photos matching some criteria."""
-        return self._listing("photos.search", params.copy())
+        return self._pagination("photos.search", params.copy())
 
     def photosets_getInfo(self, photoset_id, user_id):
         """Gets information about a photoset."""
@@ -371,12 +375,12 @@ class FlickrAPI(oauth.OAuth1API):
     def photosets_getList(self, user_id):
         """Returns the photosets belonging to the specified user."""
         params = {"user_id": user_id}
-        return self._pagination("photosets.getList", params)
+        return self._pagination_sets("photosets.getList", params)
 
     def photosets_getPhotos(self, photoset_id):
         """Get the list of photos in a set."""
         params = {"photoset_id": photoset_id}
-        return self._listing("photosets.getPhotos", params)
+        return self._pagination("photosets.getPhotos", params, "photoset")
 
     def urls_lookupGroup(self, groupname):
         """Returns a group NSID, given the url to a group's page."""
@@ -393,6 +397,15 @@ class FlickrAPI(oauth.OAuth1API):
         return {"nsid": user["id"],
                 "path_alias": username,
                 "username": user["username"]["_content"]}
+
+    def video_getStreamInfo(self, video_id, secret=None):
+        """Returns all available video streams"""
+        params = {"photo_id": video_id}
+        if not secret:
+            secret = self._call("photos.getInfo", params)["photo"]["secret"]
+        params["secret"] = secret
+        stream = self._call("video.getStreamInfo", params)["streams"]["stream"]
+        return max(stream, key=lambda s: self.VIDEO_FORMATS.get(s["type"], 0))
 
     def _call(self, method, params):
         params["method"] = "flickr." + method
@@ -412,65 +425,79 @@ class FlickrAPI(oauth.OAuth1API):
             raise exception.StopExtraction()
         return data
 
-    def _pagination(self, method, params):
-        params["extras"] = ",".join("url_" + fmt[0] for fmt in self.formats)
+    def _pagination(self, method, params, key="photos"):
+        params["extras"] = "description,date_upload,tags,views,media,"
+        params["extras"] += ",".join("url_" + fmt[0] for fmt in self.formats)
         params["page"] = 1
 
         while True:
-            data = self._call(method, params)
-
-            for key, obj in data.items():
-                if not key.startswith("stat"):
-                    break
-            del obj["page"]
-            del obj["perpage"]
-            if "per_page" in obj:
-                del obj["per_page"]
-
-            yield obj
-
-            if params["page"] >= obj["pages"]:
-                break
+            data = self._call(method, params)[key]
+            yield from map(self._extract_format, data["photo"])
+            if params["page"] >= data["pages"]:
+                return
             params["page"] += 1
 
-    def _listing(self, method, params):
-        for photos in self._pagination(method, params):
-            for photo in photos["photo"]:
-                self._extract_format(photo)
-                yield photo
+    def _pagination_sets(self, method, params):
+        params["page"] = 1
+
+        while True:
+            data = self._call(method, params)["photosets"]
+            yield from data["photoset"]
+            if params["page"] >= data["pages"]:
+                return
+            params["page"] += 1
 
     def _extract_format(self, photo):
+        photo["description"] = photo["description"]["_content"].strip()
+        photo["views"] = text.parse_int(photo["views"])
+        photo["date"] = text.parse_timestamp(photo["dateupload"])
+        photo["tags"] = photo["tags"].split()
+        photo["id"] = text.parse_int(photo["id"])
+
+        if photo["media"] == "video" and self.videos:
+            return self._extract_video(photo)
+
         for fmt, fmtname, fmtwidth in self.formats:
             key = "url_" + fmt
             if key in photo:
-                width, height = photo["width_" + fmt], photo["height_" + fmt]
-                if self.maxsize and (int(width) > self.maxsize or
-                                     int(height) > self.maxsize):
+                photo["width"] = text.parse_int(photo["width_" + fmt])
+                photo["height"] = text.parse_int(photo["height_" + fmt])
+                if self.maxsize and (photo["width"] > self.maxsize or
+                                     photo["height"] > self.maxsize):
                     continue
-                # generate photo info
-                photo["photo"] = {
-                    "source": photo[key],
-                    "width" : width,
-                    "height": height,
-                    "label" : fmtname,
-                    "media" : "photo",
-                }
+                photo["url"] = photo[key]
+                photo["label"] = fmtname
+
                 # remove excess data
                 keys = [
-                    key for key in photo.keys()
+                    key for key in photo
                     if key.startswith(("url_", "width_", "height_"))
                 ]
                 for key in keys:
                     del photo[key]
                 break
         else:
-            # extra API call to get photo url and size
-            photo["photo"] = self.photos_getSizes(photo["id"])[-1]
+            self._extract_photo(photo)
+
+        return photo
+
+    def _extract_photo(self, photo):
+        size = self.photos_getSizes(photo["id"])[-1]
+        photo["url"] = size["source"]
+        photo["label"] = size["label"]
+        photo["width"] = text.parse_int(size["width"])
+        photo["height"] = text.parse_int(size["height"])
+        return photo
+
+    def _extract_video(self, photo):
+        stream = self.video_getStreamInfo(photo["id"], photo.get("secret"))
+        photo["url"] = stream["_content"]
+        photo["label"] = stream["type"]
+        photo["width"] = photo["height"] = 0
+        return photo
 
     @staticmethod
     def _clean_info(info):
-        del info["count_views"]
-        del info["count_comments"]
         info["title"] = info["title"]["_content"]
         info["description"] = info["description"]["_content"]
         return info
