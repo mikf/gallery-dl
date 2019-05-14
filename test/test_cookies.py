@@ -86,7 +86,7 @@ class TestCookiedict(unittest.TestCase):
     def test_dict(self):
         cookies = extractor.find("test:").session.cookies
         self.assertEqual(len(cookies), len(self.cdict))
-        self.assertEqual(sorted(cookies), sorted(self.cdict))
+        self.assertEqual(sorted(cookies.keys()), sorted(self.cdict.keys()))
         self.assertEqual(sorted(cookies.values()), sorted(self.cdict.values()))
 
     def test_domain(self):
