@@ -529,12 +529,12 @@ Description The ``access_token`` and ``access_token_secret`` values you get
 =========== =====
 
 
-extractor.flickr.metadata
--------------------------
+extractor.flickr.videos
+-----------------------
 =========== =====
 Type        ``bool``
-Default     ``false``
-Description Load additional metadata when using the single-image extractor.
+Default     ``true``
+Description Extract and download videos.
 =========== =====
 
 
