@@ -8,7 +8,7 @@
 
 """Extractors for https://hentainexus.com/"""
 
-from .common import GalleryExtractor
+from .common import GalleryExtractor, Extractor, Message
 from .. import text, util
 import json
 
@@ -58,3 +58,40 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         base = extr('"', '"')
 
         return [(base + img, None) for img in json.loads(imgs)]
+
+
+class HentainexusSearchExtractor(Extractor):
+    """Extractor for search results on hentainexus.com"""
+    category = "hentainexus"
+    subcategory = "search"
+    root = "https://hentainexus.com"
+    pattern = (r"(?i)(?:https?://)?(?:www\.)?hentainexus\.com"
+               r"(?:/page/\d+)?/?(?:\?(q=[^/?#]+))?$")
+    test = (
+        ("https://hentainexus.com/?q=tag:%22heart+pupils%22%20tag:group", {
+            "pattern": HentainexusGalleryExtractor.pattern,
+            "count": ">= 50",
+        }),
+        ("https://hentainexus.com/page/3?q=tag:%22heart+pupils%22"),
+    )
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.params = text.parse_query(match.group(1))
+
+    def items(self):
+        yield Message.Version, 1
+        params = self.params
+        path = "/"
+
+        while path:
+            page = self.request(self.root + path, params=params).text
+            extr = text.extract_from(page)
+
+            while True:
+                gallery_id = extr('<a href="/view/', '"')
+                if not gallery_id:
+                    break
+                yield Message.Queue, self.root + "/view/" + gallery_id, {}
+
+            path = extr('class="pagination-next" href="', '"')
