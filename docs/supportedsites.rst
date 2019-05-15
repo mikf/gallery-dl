@@ -36,7 +36,7 @@ Hentai Foundry       https://www.hentai-foundry.com/     |hentaifoundry-C|
 Hentai2Read          https://hentai2read.com/            Chapters, Manga
 HentaiFox            https://hentaifox.com/              Galleries, Search Results
 HentaiHere           https://hentaihere.com/             Chapters, Manga
-Hentainexus          https://hentainexus.com/            Galleries
+Hentainexus          https://hentainexus.com/            Galleries, Search Results
 Hitomi.la            https://hitomi.la/                  Galleries
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag-Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
