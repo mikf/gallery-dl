@@ -412,6 +412,8 @@ if urllib3.__version__ < "1.25":
         "updating default urllib3 ciphers")
     # cipher list taken from urllib3 1.25
     # https://github.com/urllib3/urllib3/blob/1.25/src/urllib3/util/ssl_.py
+    # with additions from
+    # https://github.com/Anorov/cloudflare-scrape/pull/242
     ssl_.DEFAULT_CIPHERS = (
         "ECDHE+AESGCM:"
         "ECDHE+CHACHA20:"
@@ -423,6 +425,8 @@ if urllib3.__version__ < "1.25":
         "DH+AES:"
         "RSA+AESGCM:"
         "RSA+AES:"
+        "!ECDHE+SHA:"
+        "!AES128-SHA:"
         "!aNULL:"
         "!eNULL:"
         "!MD5:"
