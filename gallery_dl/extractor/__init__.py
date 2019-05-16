@@ -64,6 +64,7 @@ modules = [
     "nhentai",
     "nijie",
     "paheal",
+    "patreon",
     "photobucket",
     "piczel",
     "pinterest",
