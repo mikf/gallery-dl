@@ -69,6 +69,7 @@ nhentai              https://nhentai.net/                Galleries, Search Resul
 Niconico Seiga       https://seiga.nicovideo.jp/         Images from Users, individual Images               Required
 nijie                https://nijie.info/                 |nijie-C|                                          Required
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
+Patreon              https://www.patreon.com/            Images from Users, Creators
 Pawoo                https://pawoo.net/                  Images from Users, Images from Statuses
 Photobucket          https://photobucket.com/            Albums, individual Images
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
