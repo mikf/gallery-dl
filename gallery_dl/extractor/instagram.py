@@ -120,8 +120,7 @@ class InstagramExtractor(Extractor):
             if 'entry_data' in shared_data:
                 base_shared_data = shared_data['entry_data'][page_type][0]['graphql']
 
-                # `rhx_gis' and variables_id are available only in the first page
-                rhx_gis = shared_data['rhx_gis']
+                # variables_id is available only in the first page
                 variables_id = base_shared_data[psdf['node']][psdf['node_id']]
             else:
                 base_shared_data = shared_data['data']
@@ -143,10 +142,9 @@ class InstagramExtractor(Extractor):
                 variables_id,
                 end_cursor,
             )
-            xigis = '{}:{}'.format(rhx_gis, variables)
             headers = {
                 "X-Requested-With": "XMLHttpRequest",
-                "X-Instagram-GIS": hashlib.md5(xigis.encode()).hexdigest(),
+                "X-Instagram-GIS": hashlib.md5(variables.encode()).hexdigest(),
             }
             url = '{}/graphql/query/?query_hash={}&variables={}'.format(
                 self.root,
