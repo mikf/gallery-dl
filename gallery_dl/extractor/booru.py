@@ -94,7 +94,7 @@ class BooruExtractor(SharedConfigMixin, Extractor):
         tags = collections.defaultdict(list)
         tags_html = text.extract(page, '<ul id="tag-', '</ul>')[0]
         pattern = re.compile(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"']+)", re.S)
-        for tag_type, tag_name in pattern.findall(tags_html):
+        for tag_type, tag_name in pattern.findall(tags_html or ""):
             tags[tag_type].append(text.unquote(tag_name))
         for key, value in tags.items():
             image["tags_" + key] = " ".join(value)
