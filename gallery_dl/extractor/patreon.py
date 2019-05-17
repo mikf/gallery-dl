@@ -17,7 +17,7 @@ class PatreonExtractor(Extractor):
     """Base class for patreon extractors"""
     category = "patreon"
     root = "https://www.patreon.com"
-    directory_fmt = ("{category}", "{user[full_name]}")
+    directory_fmt = ("{category}", "{creator[full_name]}")
     filename_fmt = "{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     _warning = True
@@ -25,8 +25,9 @@ class PatreonExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
 
-        if self._warning and "session_id" not in self.session.cookies:
-            self.log.warning("no 'session_id' cookie set")
+        if self._warning:
+            if "session_id" not in self.session.cookies:
+                self.log.warning("no 'session_id' cookie set")
             PatreonExtractor._warning = False
 
         for post in self.posts():
@@ -73,9 +74,10 @@ class PatreonExtractor(Extractor):
             # update posts
             for post in posts["data"]:
                 attr = post["attributes"]
-                attr["id"] = post["id"]
-                attr["date"] = text.parse_timestamp(attr["published_at"])
-                attr["user"] = self._user(
+                attr["id"] = text.parse_int(post["id"])
+                attr["date"] = text.parse_datetime(
+                    attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                attr["creator"] = self._user(
                     post["relationships"]["user"]["links"]["related"])
 
                 # add attachments to post attributes
@@ -99,6 +101,8 @@ class PatreonExtractor(Extractor):
         user = self.request(url).json()["data"]
         attr = user["attributes"]
         attr["id"] = user["id"]
+        attr["date"] = text.parse_datetime(
+            attr["created"], "%Y-%m-%dT%H:%M:%S.%f%z")
         return attr
 
     @staticmethod
@@ -134,6 +138,18 @@ class PatreonCreatorExtractor(PatreonExtractor):
     test = ("https://www.patreon.com/koveliana", {
         "range": "1-25",
         "count": ">= 25",
+        "keyword": {
+            "attachments": list,
+            "comment_count": int,
+            "content": str,
+            "creator": dict,
+            "date": "type:datetime",
+            "id": int,
+            "like_count": int,
+            "post_type": str,
+            "published_at": str,
+            "title": str,
+        },
     })
 
     def __init__(self, match):
