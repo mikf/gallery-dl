@@ -117,14 +117,10 @@ class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
     def images(self, page):
         extr = text.extract
 
-        if 'class="search_filter' in page:
-            url = "{}/pictures/album/x_{}/sorted/oldest/page/1/".format(
-                self.root, self.gallery_id)
-            page = self.request(url).text
-            pos = page.find('<div id="picture_page_')
-        else:
-            pos = page.find('<div class="album_cover_item">')
-
+        url = "{}/pictures/album/x_{}/sorted/old/page/1/".format(
+            self.root, self.gallery_id)
+        page = self.request(url).text
+        pos = page.find('<div id="picture_page_')
         url = extr(page, '<a href="', '"', pos)[0]
         iurl = None
 
