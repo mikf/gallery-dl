@@ -1,8 +1,22 @@
 # Changelog
 
-## Unreleased
+## 1.8.4 - 2019-05-17
+### Additions
+- Support for
+  - `patreon`     - https://www.patreon.com/ ([#226](https://github.com/mikf/gallery-dl/issues/226))
+  - `hentainexus` - https://hentainexus.com/ ([#256](https://github.com/mikf/gallery-dl/issues/256))
+- `date` metadata fields for `pixiv` ([#248](https://github.com/mikf/gallery-dl/issues/248)), `instagram` ([#250](https://github.com/mikf/gallery-dl/issues/250)), `exhentai`, and `newgrounds`
+### Changes
+- Improved `flickr` metadata and video extraction ([#246](https://github.com/mikf/gallery-dl/issues/246))
 ### Fixes
-- Download original GIF animations from `deviantart` (#242)
+- Download original GIF animations from `deviantart` ([#242](https://github.com/mikf/gallery-dl/issues/242))
+- Ignore missing `edge_media_to_comment` fields on `instagram` ([#250](https://github.com/mikf/gallery-dl/issues/250))
+- Fix serialization of `datetime` objects for `--write-metadata` ([#251](https://github.com/mikf/gallery-dl/issues/251), [#252](https://github.com/mikf/gallery-dl/issues/252))
+- Allow multiple post-processor command-line options at once ([#253](https://github.com/mikf/gallery-dl/issues/253))
+- Prevent crash on `booru` sites when no tags are available ([#259](https://github.com/mikf/gallery-dl/issues/259))
+- Fix extraction on `instagram` after `rhx_gis` field removal ([#266](https://github.com/mikf/gallery-dl/issues/266))
+- Avoid Cloudflare CAPTCHAs for Python interpreters built against OpenSSL < 1.1.1
+- Miscellaneous fixes for `luscious`
 
 ## 1.8.3 - 2019-05-04
 ### Additions
