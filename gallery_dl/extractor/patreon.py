@@ -43,24 +43,23 @@ class PatreonExtractor(Extractor):
 
             if postfile:
                 post["num"] += 1
-                url = postfile["url"]
-                yield Message.Url, url, text.nameext_from_url(url, post)
+                text.nameext_from_url(postfile["name"], post)
+                yield Message.Url, postfile["url"], post
 
             for attachment in post["attachments"]:
                 post["num"] += 1
-                url = attachment["url"]
-                yield Message.Url, url, text.nameext_from_url(url, post)
+                text.nameext_from_url(attachment["name"], post)
+                yield Message.Url, attachment["url"], post
 
     def posts(self):
         """Return all relevant post objects"""
 
     def _pagination(self, url):
         headers = {"Referer": self.root}
-        params = {}
         empty = []
 
         while url:
-            posts = self.request(url, headers=headers, params=params).json()
+            posts = self.request(url, headers=headers).json()
 
             if "included" not in posts:
                 return
