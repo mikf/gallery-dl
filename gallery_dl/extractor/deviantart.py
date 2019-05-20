@@ -416,6 +416,10 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     pattern = BASE_PATTERN + r"/favourites/?(?:\?catpath=/)?$"
     test = (
         ("https://www.deviantart.com/h3813067/favourites/", {
+            "options": (("metadata", True), ("flat", False)),  # issue #271
+            "count": 1,
+        }),
+        ("https://www.deviantart.com/h3813067/favourites/", {
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://www.deviantart.com/h3813067/favourites/?catpath=/"),
@@ -642,7 +646,7 @@ class DeviantartAPI():
         endpoint = "collections/folders"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
-        return self._pagination_list(endpoint, params)
+        return self._pagination_folders(endpoint, params)
 
     def deviation(self, deviation_id):
         """Query and return info about a single Deviation"""
@@ -691,7 +695,7 @@ class DeviantartAPI():
         endpoint = "gallery/folders"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
-        return self._pagination_list(endpoint, params)
+        return self._pagination_folders(endpoint, params)
 
     @memcache(keyarg=1)
     def user_profile(self, username):
@@ -763,7 +767,7 @@ class DeviantartAPI():
                 self.log.error(msg)
                 return data
 
-    def _pagination(self, endpoint, params):
+    def _pagination(self, endpoint, params, extend=True):
         public = True
         while True:
             data = self._call(endpoint, params, public=public)
@@ -775,23 +779,26 @@ class DeviantartAPI():
                 self.log.debug("Switching to private access token")
                 public = False
                 continue
-            yield from self._extend(data["results"])
+
+            if extend and self.metadata:
+                self._extend(data["results"])
+            yield from data["results"]
+
             if not data["has_more"]:
                 return
             params["offset"] = data["next_offset"]
 
-    def _pagination_list(self, endpoint, params):
+    def _pagination_folders(self, endpoint, params):
         result = []
-        result.extend(self._pagination(endpoint, params))
+        result.extend(self._pagination(endpoint, params, False))
         return result
 
     def _extend(self, deviations):
         """Add extended metadata to a list of deviation objects"""
-        if self.metadata:
-            for deviation, metadata in zip(
-                    deviations, self.deviation_metadata(deviations)):
-                deviation.update(metadata)
-                deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
+        for deviation, metadata in zip(
+                deviations, self.deviation_metadata(deviations)):
+            deviation.update(metadata)
+            deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
         return deviations
 
 
