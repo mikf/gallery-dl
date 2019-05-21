@@ -403,32 +403,30 @@ def generate_extractors(extractor_data, symtable, classes):
 http.cookiejar.MozillaCookieJar.magic_re = re.compile(
     "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
 
-# Update default cipher list of urllib3 < 1.25
+# Update default cipher list of urllib3
 # to fix issues with Cloudflare and, by extension, Artstation (#227)
-import requests.packages.urllib3 as urllib3  # noqa
-if urllib3.__version__ < "1.25":
-    from requests.packages.urllib3.util import ssl_
-    logging.getLogger("gallery-dl").debug(
-        "updating default urllib3 ciphers")
-    # cipher list taken from urllib3 1.25
-    # https://github.com/urllib3/urllib3/blob/1.25/src/urllib3/util/ssl_.py
-    # with additions from
-    # https://github.com/Anorov/cloudflare-scrape/pull/242
-    ssl_.DEFAULT_CIPHERS = (
-        "ECDHE+AESGCM:"
-        "ECDHE+CHACHA20:"
-        "DHE+AESGCM:"
-        "DHE+CHACHA20:"
-        "ECDH+AESGCM:"
-        "DH+AESGCM:"
-        "ECDH+AES:"
-        "DH+AES:"
-        "RSA+AESGCM:"
-        "RSA+AES:"
-        "!ECDHE+SHA:"
-        "!AES128-SHA:"
-        "!aNULL:"
-        "!eNULL:"
-        "!MD5:"
-        "!DSS"
-    )
+from requests.packages.urllib3.util import ssl_  # noqa
+logging.getLogger("gallery-dl").debug("updating default urllib3 ciphers")
+
+# cipher list taken from urllib3 1.25
+# https://github.com/urllib3/urllib3/blob/1.25/src/urllib3/util/ssl_.py
+# with additions from
+# https://github.com/Anorov/cloudflare-scrape/pull/242
+ssl_.DEFAULT_CIPHERS = (
+    "ECDHE+AESGCM:"
+    "ECDHE+CHACHA20:"
+    "DHE+AESGCM:"
+    "DHE+CHACHA20:"
+    "ECDH+AESGCM:"
+    "DH+AESGCM:"
+    "ECDH+AES:"
+    "DH+AES:"
+    "RSA+AESGCM:"
+    "RSA+AES:"
+    "!ECDHE+SHA:"
+    "!AES128-SHA:"
+    "!aNULL:"
+    "!eNULL:"
+    "!MD5:"
+    "!DSS"
+)
