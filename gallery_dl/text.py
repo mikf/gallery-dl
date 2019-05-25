@@ -228,8 +228,10 @@ def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z"):
     try:
         if format.endswith("%z") and date_string[-3] == ":":
             # workaround for Python < 3.7: +00:00 -> +0000
-            date_string = date_string[:-3] + date_string[-2:]
-        d = datetime.datetime.strptime(date_string, format)
+            ds = date_string[:-3] + date_string[-2:]
+        else:
+            ds = date_string
+        d = datetime.datetime.strptime(ds, format)
         o = d.utcoffset()
         if o is not None:
             d = d.replace(tzinfo=None) - o  # convert to naive UTC
