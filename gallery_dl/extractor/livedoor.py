@@ -16,7 +16,6 @@ class LivedoorExtractor(Extractor):
     """Base class for livedoor extractors"""
     category = "livedoor"
     root = "http://blog.livedoor.jp"
-    img_root = "http://livedoor.blogimg.jp"
     filename_fmt = "{post[id]}_{post[title]}_{num:>02}.{extension}"
     directory_fmt = ("{category}", "{post[user]}")
     archive_fmt = "{post[id]}_{hash}"
@@ -59,7 +58,7 @@ class LivedoorExtractor(Extractor):
             src = text.extract(img, 'src="', '"')[0]
             alt = text.extract(img, 'alt="', '"')[0]
 
-            if src.startswith(self.img_root):
+            if "://livedoor.blogimg.jp/" in src:
                 url = src.replace("-s.", ".")
             else:
                 url = text.urljoin(self.root, src)
@@ -84,7 +83,7 @@ class LivedoorBlogExtractor(LivedoorExtractor):
     test = ("http://blog.livedoor.jp/zatsu_ke/", {
         "range": "1-50",
         "count": 50,
-        "pattern": r"http://livedoor.blogimg.jp/zatsu_ke/imgs/\w/\w/\w+\.\w+",
+        "pattern": r"https?://livedoor.blogimg.jp/\w+/imgs/\w/\w/\w+\.\w+",
         "keyword": {
             "post": {
                 "categories": list,
