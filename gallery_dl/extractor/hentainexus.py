@@ -21,8 +21,8 @@ class HentainexusGalleryExtractor(GalleryExtractor):
                r"/(?:view|read)/(\d+)")
     test = (
         ("https://hentainexus.com/view/5688", {
-            "url": "57238d6e76a199298c9866bbcfaa111c0fa164b0",
-            "keyword": "5b254937a180b5c2cef303324cd5f7f6fec98d55",
+            "url": "746d0043e20030f1171aae5ea113176607302517",
+            "keyword": "b05986369fbaf29cfa08b118960d92c49e59524b",
         }),
         ("https://hentainexus.com/read/5688"),
     )
@@ -54,10 +54,8 @@ class HentainexusGalleryExtractor(GalleryExtractor):
     def images(self, page):
         url = "{}/read/{}".format(self.root, self.gallery_id)
         extr = text.extract_from(self.request(url).text)
-        imgs = extr("initReader(", "]") + "]"
-        base = extr('"', '"')
-
-        return [(base + img, None) for img in json.loads(imgs)]
+        urls = extr("initReader(", "]") + "]"
+        return [(url, None) for url in json.loads(urls)]
 
 
 class HentainexusSearchExtractor(Extractor):
