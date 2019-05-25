@@ -365,6 +365,10 @@ class TestText(unittest.TestCase):
             f("2019-05-07T21:25:02+0900"),
             datetime.datetime(2019, 5, 7, 12, 25, 2),
         )
+        self.assertEqual(
+            f("2019-05-07 21:25:02"),
+            "2019-05-07 21:25:02",
+        )
 
         for value in INVALID:
             self.assertEqual(f(value), None)
