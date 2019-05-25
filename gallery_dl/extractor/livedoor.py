@@ -42,9 +42,10 @@ class LivedoorExtractor(Extractor):
 
         return {
             "id"        : text.parse_int(extr("id : '", "'")),
-            "title"     : extr("title : '", "'"),
+            "title"     : text.unescape(extr("title : '", "'")),
             "categories": [extr("name:'", "'"), extr("name:'", "'")],
-            "date"      : extr("date : '", "'"),
+            "date"      : text.parse_datetime(
+                extr("date : '", "'"), "%Y-%m-%d %H:%M:%S"),
             "tags"      : text.split_html(tags),
             "user"      : self.user,
             "body"      : body,
@@ -87,7 +88,7 @@ class LivedoorBlogExtractor(LivedoorExtractor):
         "keyword": {
             "post": {
                 "categories": list,
-                "date": str,
+                "date": "type:datetime",
                 "id": int,
                 "tags": list,
                 "title": str,
