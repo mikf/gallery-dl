@@ -24,10 +24,10 @@ class KissmangaBase():
 
     def request(self, url):
         response = super().request(url)
-        if response.history and "/Message/AreYouHuman?" in response.url:
-            self.log.error("Requesting too many pages caused a redirect to %s."
-                           " Try visiting this URL in your browser and solve"
-                           " the CAPTCHA to continue.", response.url)
+        if response.history and "/AreYouHuman" in response.url:
+            self.log.error("Redirect to \n%s\n"
+                           "Visit this URL in your browser and solve "
+                           "the CAPTCHA to continue.", response.url)
             raise exception.StopExtraction()
         return response
 
