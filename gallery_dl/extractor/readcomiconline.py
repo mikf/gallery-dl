@@ -9,7 +9,7 @@
 """Extract comic-issues and entire comics from https://readcomiconline.to/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
+from .. import text, exception
 import re
 
 
@@ -20,6 +20,15 @@ class ReadcomiconlineBase():
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     archive_fmt = "{issue_id}_{page}"
     root = "https://readcomiconline.to"
+
+    def request(self, url):
+        response = super().request(url)
+        if response.history and "/AreYouHuman" in response.url:
+            self.log.error("Redirect to \n%s\n"
+                           "Visit this URL in your browser and solve "
+                           "the CAPTCHA to continue.", response.url)
+            raise exception.StopExtraction()
+        return response
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
@@ -49,7 +58,6 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         }
 
     def images(self, page):
-        self.session.headers["Referer"] = None
         return [
             (url, None)
             for url in text.extract_iter(

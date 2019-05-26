@@ -111,13 +111,13 @@ class SmugmugImageExtractor(SmugmugExtractor):
     test = (
         ("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
             "url": "78f0bf3516b6d670b7319216bdeccb35942ca4cf",
-            "keyword": "008a29d6e90729ef7639617db6c049ecb1d0ab54",
+            "keyword": "b298ef7ed2b1918263b6a7dc6f56e54401584381",
             "content": "64a8f69a1d824921eebbdf2420087937adfa45cd",
         }),
         # video
         ("https://tstravels.smugmug.com/Dailies/Daily-Dose-2015/i-39JFNzB", {
             "url": "04d0ab1ff829ca7d78f5acb5548953df08e9a5ee",
-            "keyword": "cafec30861ac7569b12a2a6b671b4b5ce273b370",
+            "keyword": "c708c4b9527a2fb29396c19f7628f9cf4b0b3a39",
         }),
     )
 
