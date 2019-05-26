@@ -17,7 +17,6 @@ from os.path import join
 
 import gallery_dl.config as config
 import gallery_dl.extractor as extractor
-from gallery_dl.extractor.message import Message
 
 CKEY = ("cookies",)
 
@@ -121,9 +120,10 @@ class TestCookieLogin(unittest.TestCase):
 
 
 def _get_extractor(category):
-    for msg in extractor.find("test:" + category):
-        if msg[0] == Message.Queue:
-            return extractor.find(msg[1])
+    for extr in extractor.extractors():
+        if extr.category == category and hasattr(extr, "_login_impl"):
+            url = next(extr._get_tests())[0]
+            return extr.from_url(url)
 
 
 if __name__ == "__main__":
