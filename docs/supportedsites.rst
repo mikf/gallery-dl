@@ -87,7 +87,7 @@ rule #34             https://rule34.paheal.net/          Posts, Tag-Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag-Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag-Searches
 Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
-Sankaku Complex      https://www.sankakucomplex.com/     Articles
+Sankaku Complex      https://www.sankakucomplex.com/     Articles, Tag-Searches
 Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          http://sensescans.com/reader/       Chapters, Manga
 Sex.com              https://www.sex.com/                Boards, Pins, Search Results
