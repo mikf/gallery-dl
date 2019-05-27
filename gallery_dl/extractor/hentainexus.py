@@ -85,11 +85,12 @@ class HentainexusSearchExtractor(Extractor):
         while path:
             page = self.request(self.root + path, params=params).text
             extr = text.extract_from(page)
+            data = {"_extractor": HentainexusGalleryExtractor}
 
             while True:
                 gallery_id = extr('<a href="/view/', '"')
                 if not gallery_id:
                     break
-                yield Message.Queue, self.root + "/view/" + gallery_id, {}
+                yield Message.Queue, self.root + "/view/" + gallery_id, data
 
             path = extr('class="pagination-next" href="', '"')
