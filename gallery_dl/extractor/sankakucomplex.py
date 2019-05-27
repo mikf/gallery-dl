@@ -34,11 +34,11 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
     test = (
         ("https://www.sankakucomplex.com/2019/05/11/twitter-cosplayers", {
             "url": "4a9ecc5ae917fbce469280da5b6a482510cae84d",
-            "keyword": "35cd2a0aba712d6b0e27a9fa2a5e823199d10ca0",
+            "keyword": "4b3b5766b277a5d0acbec90fa8f2343262b07efd",
         }),
         ("https://www.sankakucomplex.com/2009/12/01/sexy-goddesses-of-2ch", {
             "url": "a1e249173fd6c899a8134fcfbd9c925588a63f7c",
-            "keyword": "8bf60e62fb5e9f2caabb29c16ed58d7e0dcf247f",
+            "keyword": "f47a416d680717855bbc3e4f0cd44479f61d9aa4",
         }),
     )
 
@@ -47,16 +47,17 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
         extr = text.extract_from(self.request(url).text)
         data = {
             "title"      : text.unescape(
-                extr('"og:title" content="', '"')),
+                extr('property="og:title" content="', '"')),
             "description": text.unescape(
-                extr('"og:description" content="', '"')),
+                extr('property="og:description" content="', '"')),
             "date"       : text.parse_datetime(
-                extr('"og:updated_time" content="', '"')),
+                extr('property="article:published_time" content="', '"')),
         }
         imgs = self.images(extr)
         data["count"] = len(imgs)
         data["tags"] = text.split_html(extr('="meta-tags">', '</div>'))[::2]
 
+        yield Message.Version, 1
         yield Message.Directory, data
         for img in imgs:
             img.update(data)
@@ -94,6 +95,7 @@ class SankakucomplexTagExtractor(SankakucomplexExtractor):
     test = (
         ("https://www.sankakucomplex.com/tag/cosplay/", {
             "range": "1-50",
+            "count": 50,
             "pattern": SankakucomplexArticleExtractor.pattern,
         }),
         ("https://www.sankakucomplex.com/category/anime/"),
@@ -105,6 +107,7 @@ class SankakucomplexTagExtractor(SankakucomplexExtractor):
         last = None
         data = {"_extractor": SankakucomplexArticleExtractor}
 
+        yield Message.Version, 1
         while True:
             url = "{}/{}/page/{}/".format(self.root, self.path, pnum)
             response = self.request(url, expect=(404,))
@@ -114,5 +117,4 @@ class SankakucomplexTagExtractor(SankakucomplexExtractor):
                 if url != last:
                     last = url
                     yield Message.Queue, url, data
-            return
             pnum += 1
