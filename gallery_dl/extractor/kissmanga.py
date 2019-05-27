@@ -8,7 +8,7 @@
 
 """Extract manga-chapters and entire manga from https://kissmanga.com/"""
 
-from .common import ChapterExtractor, MangaExtractor
+from .common import ChapterExtractor, MangaExtractor, Extractor
 from .. import text, aes, exception
 from ..cache import cache
 import hashlib
@@ -16,20 +16,34 @@ import ast
 import re
 
 
-class KissmangaBase():
+class RedirectMixin():
+    """Detect and handle redirects to CAPTCHA pages"""
+
+    def request(self, url):
+        while True:
+            response = Extractor.request(self, url)
+            if not response.history or "/AreYouHuman" not in response.url:
+                return response
+            if self.config("captcha", "stop") == "wait":
+                self.log.warning(
+                    "Redirect to \n%s\nVisit this URL in your browser, solve "
+                    "the CAPTCHA, and press ENTER to continue", response.url)
+                try:
+                    input()
+                except (EOFError, OSError):
+                    pass
+            else:
+                self.log.error(
+                    "Redirect to \n%s\nVisit this URL in your browser and "
+                    "solve the CAPTCHA to continue", response.url)
+                raise exception.StopExtraction()
+
+
+class KissmangaBase(RedirectMixin):
     """Base class for kissmanga extractors"""
     category = "kissmanga"
     archive_fmt = "{chapter_id}_{page}"
     root = "https://kissmanga.com"
-
-    def request(self, url):
-        response = super().request(url)
-        if response.history and "/AreYouHuman" in response.url:
-            self.log.error("Redirect to \n%s\n"
-                           "Visit this URL in your browser and solve "
-                           "the CAPTCHA to continue.", response.url)
-            raise exception.StopExtraction()
-        return response
 
     @staticmethod
     def parse_chapter_string(data):
