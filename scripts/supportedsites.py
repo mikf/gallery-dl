@@ -57,6 +57,7 @@ CATEGORY_MAP = {
     "rbt"            : "RebeccaBlackTech",
     "rule34"         : "Rule 34",
     "sankaku"        : "Sankaku Channel",
+    "sankakucomplex" : "Sankaku Complex",
     "seaotterscans"  : "Sea Otter Scans",
     "seiga"          : "Niconico Seiga",
     "senmanga"       : "Sen Manga",
