@@ -9,26 +9,18 @@
 """Extract comic-issues and entire comics from https://readcomiconline.to/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, exception
+from .kissmanga import RedirectMixin
+from .. import text
 import re
 
 
-class ReadcomiconlineBase():
+class ReadcomiconlineBase(RedirectMixin):
     """Base class for readcomiconline extractors"""
     category = "readcomiconline"
     directory_fmt = ("{category}", "{comic}", "{issue:>03}")
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     archive_fmt = "{issue_id}_{page}"
     root = "https://readcomiconline.to"
-
-    def request(self, url):
-        response = super().request(url)
-        if response.history and "/AreYouHuman" in response.url:
-            self.log.error("Redirect to \n%s\n"
-                           "Visit this URL in your browser and solve "
-                           "the CAPTCHA to continue.", response.url)
-            raise exception.StopExtraction()
-        return response
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):

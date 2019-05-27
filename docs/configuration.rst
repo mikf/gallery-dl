@@ -593,6 +593,18 @@ Description Controls whether to choose the GIF or MP4 version of an animation.
 =========== =====
 
 
+extractor.kissmanga.captcha
+---------------------------
+=========== =====
+Type        ``string``
+Default     ``"stop"``
+Description Controls how to handle redirects to CAPTCHA pages.
+
+            * ``"stop``: Stop the current extractor run.
+            * ``"wait``: Ask the user to solve the CAPTCHA and wait.
+=========== =====
+
+
 extractor.oauth.browser
 -----------------------
 =========== =====
@@ -643,6 +655,18 @@ Type        ``float``
 Default     ``3.0`` and ``6.0``
 Description Minimum and maximum wait time in seconds between HTTP requests
             during the extraction process.
+=========== =====
+
+
+extractor.readcomiconline.captcha
+---------------------------------
+=========== =====
+Type        ``string``
+Default     ``"stop"``
+Description Controls how to handle redirects to CAPTCHA pages.
+
+            * ``"stop``: Stop the current extractor run.
+            * ``"wait``: Ask the user to solve the CAPTCHA and wait.
 =========== =====
 
 
