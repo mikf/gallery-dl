@@ -84,3 +84,35 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
                 "num"   : num,
             }))
             urls.add(url)
+
+
+class SankakucomplexTagExtractor(SankakucomplexExtractor):
+    """Extractor for sankakucomplex blog articles by tag or author"""
+    subcategory = "tag"
+    pattern = (r"(?:https?://)?www\.sankakucomplex\.com"
+               r"/((?:tag|category|author)/[^/&?#]+)")
+    test = (
+        ("https://www.sankakucomplex.com/tag/cosplay/", {
+            "range": "1-50",
+            "pattern": SankakucomplexArticleExtractor.pattern,
+        }),
+        ("https://www.sankakucomplex.com/category/anime/"),
+        ("https://www.sankakucomplex.com/author/rift/page/5/"),
+    )
+
+    def items(self):
+        pnum = 1
+        last = None
+        data = {"_extractor": SankakucomplexArticleExtractor}
+
+        while True:
+            url = "{}/{}/page/{}/".format(self.root, self.path, pnum)
+            response = self.request(url, expect=(404,))
+            if response.status_code == 404:
+                return
+            for url in text.extract_iter(response.text, 'data-direct="', '"'):
+                if url != last:
+                    last = url
+                    yield Message.Queue, url, data
+            return
+            pnum += 1
