@@ -78,6 +78,7 @@ modules = [
     "rule34",
     "safebooru",
     "sankaku",
+    "sankakucomplex",
     "seiga",
     "senmanga",
     "sexcom",
