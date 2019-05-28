@@ -44,6 +44,7 @@ modules = [
     "imgth",
     "imgur",
     "instagram",
+    "keenspot",
     "khinsider",
     "kissmanga",
     "komikcast",
