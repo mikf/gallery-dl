@@ -124,6 +124,16 @@ def extract(txt, begin, end, pos=0):
         return None, pos
 
 
+def rextract(txt, begin, end, pos=-1):
+    try:
+        lbeg = len(begin)
+        first = txt.rindex(begin, 0, pos)
+        last = txt.index(end, first + lbeg)
+        return txt[first + lbeg:last], first
+    except (ValueError, TypeError, AttributeError):
+        return None, pos
+
+
 def extract_all(txt, rules, pos=0, values=None):
     """Calls extract for each rule and returns the result in a dict"""
     if values is None:
