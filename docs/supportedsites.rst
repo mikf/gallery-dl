@@ -48,6 +48,7 @@ imgur                https://imgur.com/                  Albums, individual Imag
 Instagram            https://www.instagram.com/          Images from Users, individual Images, Tag-Searches
 Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga
 Joyreactor           http://joyreactor.cc/               |joyreactor-C|
+Keenspot             http://www.keenspot.com/            Comics
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
 KissManga            https://kissmanga.com/              Chapters, Manga
