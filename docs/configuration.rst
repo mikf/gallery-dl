@@ -411,6 +411,19 @@ Description Select the directory structure created by the Gallery- and
 =========== =====
 
 
+extractor.deviantart.folders
+----------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Provide a ``folders`` metadata field that contains the names of all
+            folders a deviation is present in.
+
+            Note: Gathering this information requires a lot of API calls.
+            Use with caution.
+=========== =====
+
+
 extractor.deviantart.journals
 -----------------------------
 =========== =====
