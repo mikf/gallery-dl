@@ -11,10 +11,11 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache, memcache
+import collections
 import itertools
 import mimetypes
-import time
 import math
+import time
 import re
 
 
@@ -265,6 +266,17 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/yakuzafc", {
             "pattern": r"https://www.deviantart.com/yakuzafc/gallery/0/",
             "count": ">= 15",
+        }),
+        ("https://www.deviantart.com/justatest235723", {
+            "count": 2,
+            "options": (("metadata", 1), ("folders", 1), ("original", 0)),
+            "keyword": {
+                "description": str,
+                "folders": list,
+                "is_watching": bool,
+                "license": str,
+                "tags": list,
+            },
         }),
         ("https://www.deviantart.com/shimoda8/gallery/", {
             "exception": exception.NotFoundError,
@@ -611,6 +623,7 @@ class DeviantartAPI():
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
         self.metadata = extractor.config("metadata", False)
+        self.folders = extractor.config("folders", False)
 
         self.refresh_token = extractor.config("refresh-token")
         self.client_id = extractor.config("client-id", self.CLIENT_ID)
@@ -652,7 +665,11 @@ class DeviantartAPI():
         """Query and return info about a single Deviation"""
         endpoint = "deviation/" + deviation_id
         deviation = self._call(endpoint)
-        return self._extend((deviation,))[0]
+        if self.metadata:
+            self._metadata((deviation,))
+        if self.folders:
+            self._folders((deviation,))
+        return deviation
 
     def deviation_content(self, deviation_id):
         """Get extended content of a single Deviation"""
@@ -675,12 +692,12 @@ class DeviantartAPI():
         params = {"mature_content": self.mature}
         return self._call(endpoint, params)["metadata"]
 
-    def gallery(self, username, folder_id="", offset=0):
+    def gallery(self, username, folder_id="", offset=0, extend=True):
         """Yield all Deviation-objects contained in a gallery folder"""
         endpoint = "gallery/" + folder_id
         params = {"username": username, "offset": offset, "limit": 24,
                   "mature_content": self.mature, "mode": "newest"}
-        return self._pagination(endpoint, params)
+        return self._pagination(endpoint, params, extend)
 
     def gallery_all(self, username, offset=0):
         """Yield all Deviation-objects of a specific user"""
@@ -780,8 +797,11 @@ class DeviantartAPI():
                 public = False
                 continue
 
-            if extend and self.metadata:
-                self._extend(data["results"])
+            if extend:
+                if self.metadata:
+                    self._metadata(data["results"])
+                if self.folders:
+                    self._folders(data["results"])
             yield from data["results"]
 
             if not data["has_more"]:
@@ -793,13 +813,41 @@ class DeviantartAPI():
         result.extend(self._pagination(endpoint, params, False))
         return result
 
-    def _extend(self, deviations):
-        """Add extended metadata to a list of deviation objects"""
+    def _metadata(self, deviations):
+        """Add extended metadata to each deviation object"""
         for deviation, metadata in zip(
                 deviations, self.deviation_metadata(deviations)):
             deviation.update(metadata)
             deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
         return deviations
+
+    def _folders(self, deviations):
+        """Add a list of all containing folders to each deviation object"""
+        for deviation in deviations:
+            deviation["folders"] = self._folders_map(
+                deviation["author"]["username"])[deviation["deviationid"]]
+
+    @memcache(keyarg=1)
+    def _folders_map(self, username):
+        """Generate a deviation_id -> folders mapping for 'username'"""
+        self.log.info("Collecting folder information for '%s'", username)
+        folders = self.gallery_folders(username)
+
+        # add parent names to folders, but ignore "Featured" as parent
+        fmap = {}
+        featured = folders[0]["folderid"]
+        for folder in folders:
+            if folder["parent"] and folder["parent"] != featured:
+                folder["name"] = fmap[folder["parent"]] + "/" + folder["name"]
+            fmap[folder["folderid"]] = folder["name"]
+
+        # map deviationids to folder names
+        dmap = collections.defaultdict(list)
+        for folder in folders:
+            for deviation in self.gallery(
+                    username, folder["folderid"], 0, False):
+                dmap[deviation["deviationid"]].append(folder["name"])
+        return dmap
 
 
 @cache(maxage=10*365*24*3600, keyarg=0)
