@@ -176,7 +176,7 @@ class FlickrGalleryExtractor(FlickrExtractor):
     test = (("https://www.flickr.com/photos/flickr/"
              "galleries/72157681572514792/"), {
         "pattern": FlickrImageExtractor.pattern,
-        "count": 12,
+        "count": ">= 10",
     })
 
     def __init__(self, match):
