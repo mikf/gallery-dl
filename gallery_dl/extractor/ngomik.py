@@ -10,6 +10,7 @@
 
 from .common import ChapterExtractor
 from .. import text
+import re
 
 
 class NgomikChapterExtractor(ChapterExtractor):
@@ -18,10 +19,15 @@ class NgomikChapterExtractor(ChapterExtractor):
     root = "http://ngomik.in"
     pattern = (r"(?:https?://)?(?:www\.)?ngomik\.in"
                r"(/[^/?&#]+-chapter-[^/?&#]+)")
-    test = ("https://www.ngomik.in/14-sai-no-koi-chapter-1-6/", {
-        "url": "8e67fdf751bbc79bc6f4dead7675008ddb8e32a4",
-        "keyword": "204d177f09d438fd50c9c28d98c73289194640d8",
-    })
+    test = (
+        ("https://www.ngomik.in/14-sai-no-koi-chapter-1-6/", {
+            "url": "8e67fdf751bbc79bc6f4dead7675008ddb8e32a4",
+            "keyword": "204d177f09d438fd50c9c28d98c73289194640d8",
+        }),
+        ("https://ngomik.in/break-blade-chapter-26/", {
+            "count": 34,
+        }),
+    )
 
     def metadata(self, page):
         info = text.extract(page, '<title>', "</title>")[0]
@@ -38,8 +44,8 @@ class NgomikChapterExtractor(ChapterExtractor):
 
     @staticmethod
     def images(page):
-        readerarea = text.extract(page, 'id="readerarea"', 'class="chnav"')[0]
+        readerarea = text.extract(page, 'id=readerarea', 'class=chnav')[0]
         return [
             (text.unescape(url), None)
-            for url in text.extract_iter(readerarea, ' src="', '"')
+            for url in re.findall(r"\ssrc=[\"']?([^\"' >]+)", readerarea)
         ]
