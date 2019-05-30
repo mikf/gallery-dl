@@ -884,6 +884,18 @@ Description Use `youtube-dl`_ to download from video tweets.
 =========== =====
 
 
+extractor.wallhaven.api-key
+---------------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description Your  `API Key <https://wallhaven.cc/settings/account>`__ to use
+            your account's browsing settings and default filters when searching.
+
+            See https://wallhaven.cc/help/api for more information.
+=========== =====
+
+
 extractor.[booru].tags
 ----------------------
 =========== =====
