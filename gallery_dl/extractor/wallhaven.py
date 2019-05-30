@@ -6,79 +6,21 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://alpha.wallhaven.cc/"""
+"""Extract images from https://wallhaven.cc/"""
 
 from .common import Extractor, Message
-from .. import text, exception
-from ..cache import cache
+from .. import text
 
 
 class WallhavenExtractor(Extractor):
     """Base class for wallhaven extractors"""
     category = "wallhaven"
-    filename_fmt = "{category}_{id}_{width}x{height}.{extension}"
-    root = "https://alpha.wallhaven.cc"
+    filename_fmt = "{category}_{id}_{resolution}.{extension}"
+    root = "https://wallhaven.cc"
 
-    def login(self):
-        """Login and set necessary cookies"""
-        username, password = self._get_auth_info()
-        if username:
-            self._update_cookies(self._login_impl(username, password))
-
-    @cache(maxage=365*24*3600, keyarg=1)
-    def _login_impl(self, username, password):
-        self.log.info("Logging in as %s", username)
-        url = "{}/auth/login".format(self.root)
-        page = self.request(url).text
-        pos = page.index('name="_token"')
-
-        data = {
-            "username": username,
-            "password": password,
-            "_token": text.extract(page, 'value="', '"', pos)[0]
-        }
-        response = self.request(url, method="POST", data=data)
-
-        if response.history:
-            for cookie in response.history[0].cookies:
-                if cookie.name.startswith("remember_"):
-                    return {cookie.name: cookie.value}
-        raise exception.AuthenticationError()
-
-    def get_wallpaper_data(self, wallpaper_id):
-        """Extract url and metadata for a wallpaper"""
-        url = "{}/wallpaper/{}".format(self.root, wallpaper_id)
-        page = self.request(url).text
-
-        title, pos = text.extract(page, 'name="title" content="', '"')
-        url, pos = text.extract(
-            page, 'property="og:image" content="', '"', pos)
-        resolution, pos = text.extract(
-            page, '<h3 class="showcase-resolution"', '<', pos)
-        colors  , pos = text.extract(page, '<ul ', '</ul>', pos)
-        uploader, pos = text.extract(page, 'alt="', '"', pos)
-        date    , pos = text.extract(page, 'datetime="', '"', pos)
-        category, pos = text.extract(page, 'Category</dt><dd>', '<', pos)
-        size    , pos = text.extract(page, 'Size</dt><dd>', '<', pos)
-        views   , pos = text.extract(page, 'Views</dt><dd>', '<', pos)
-        favs    , pos = text.extract(page, 'Favorites</dt><dd>', '</dt>', pos)
-
-        width, _, height = resolution.rpartition(">")[2].partition("x")
-
-        return text.urljoin(self.root, url), {
-            "id": text.parse_int(wallpaper_id),
-            "width": text.parse_int(width),
-            "height": text.parse_int(height),
-            "colors": list(text.extract_iter(colors, '#', '"')),
-            "tags": title.rpartition(" | ")[0].lstrip("#").split(", #"),
-            "uploader": text.unescape(uploader),
-            "wh_category": category,
-            "date": date,
-            "size": size,
-            "views": text.parse_int(views.replace(",", "")),
-            "favorites": text.parse_int(
-                text.remove_html(favs).partition(" ")[0]),
-        }
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.api = WallhavenAPI(self)
 
 
 class WallhavenSearchExtractor(WallhavenExtractor):
@@ -86,81 +28,67 @@ class WallhavenSearchExtractor(WallhavenExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "{search[q]}")
     archive_fmt = "s_{search[q]}_{id}"
-    pattern = r"(?:https?://)?alpha\.wallhaven\.cc/search\?([^/?#]+)"
+    pattern = r"(?:https?://)?wallhaven\.cc/search(?:/?\?([^/?#]+))?"
     test = (
-        ("https://alpha.wallhaven.cc/search?q=touhou"),
-        (("https://alpha.wallhaven.cc/search?q=id%3A87"
+        ("https://wallhaven.cc/search?q=touhou"),
+        (("https://wallhaven.cc/search?q=id%3A87"
           "&categories=111&purity=100&sorting=date_added&order=asc&page=3"), {
-            "url": "29b54803e3fae5e337fdd29d47d51302d78bec9a",
-            "range": "1-3",
+            "count": 4,
+            "url": "d024bc11895d758b76ffdb0fa85a627e53f072cf",
         }),
     )
-    per_page = 24
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
         self.params = text.parse_query(match.group(1))
 
     def items(self):
-        self.login()
         yield Message.Version, 1
         yield Message.Directory, {"search": self.params}
-
-        for wp_id in self.wallpapers():
-            wp_url, wp_data = self.get_wallpaper_data(wp_id)
-            wp_data["search"] = self.params
-            yield Message.Url, wp_url, wp_data
-
-    def wallpapers(self):
-        """Yield wallpaper IDs from search results"""
-        url = "{}/search".format(self.root)
-        params = self.params.copy()
-        headers = {
-            "Referer": url,
-            "X-Requested-With": "XMLHttpRequest",
-        }
-
-        params["page"] = 1
-        while True:
-            page = self.request(url, params=params, headers=headers).text
-
-            ids = list(text.extract_iter(page, 'data-wallpaper-id="', '"'))
-            yield from ids
-
-            if len(ids) < self.per_page:
-                return
-            params["page"] += 1
+        for wp in self.api.search(self.params.copy()):
+            wp["search"] = self.params
+            yield Message.Url, wp["url"], wp
 
 
 class WallhavenImageExtractor(WallhavenExtractor):
     """Extractor for individual wallpaper on wallhaven.cc"""
     subcategory = "image"
     archive_fmt = "{id}"
-    pattern = (r"(?:https?://)?(?:alpha\.wallhaven\.cc/wallpaper"
-               r"|whvn\.cc)/(\d+)")
+    pattern = (r"(?:https?://)?(?:wallhaven\.cc/w/|whvn\.cc/"
+               r"|w\.wallhaven\.cc/[a-z]+/\w\w/wallhaven-)(\w+)")
     test = (
-        ("https://alpha.wallhaven.cc/wallpaper/8114", {
-            "pattern": "https://[^.]+.wallhaven.cc/[^/]+/full/[^-]+-8114.jpg",
+        ("https://wallhaven.cc/w/01w334", {
+            "pattern": "https://[^.]+.wallhaven.cc/full/01/[^-]+-01w334.jpg",
             "content": "497212679383a465da1e35bd75873240435085a2",
             "keyword": {
-                "id": 8114,
-                "width": 1920,
-                "height": 1200,
-                "colors": list,
-                "tags": list,
-                "uploader": "AksumkA",
-                "date": "2014-08-31T06:17:19+00:00",
-                "wh_category": "Anime",
-                "size": "272.3 KiB",
-                "views": int,
-                "favorites": int,
+                "id"         : "01w334",
+                "width"      : 1920,
+                "height"     : 1200,
+                "resolution" : "1920x1200",
+                "ratio"      : 1.6,
+                "colors"     : list,
+                "tags"       : list,
+                "file_size"  : 278799,
+                "file_type"  : "image/jpeg",
+                "purity"     : "sfw",
+                "short_url"  : "https://whvn.cc/01w334",
+                "source"     : str,
+                "uploader"   : {
+                    "group"    : "Owner/Developer",
+                    "username" : "AksumkA",
+                },
+                "date"       : "type:datetime",
+                "wh_category": "anime",
+                "views"      : int,
+                "favorites"  : int,
             },
         }),
         # NSFW
-        ("https://alpha.wallhaven.cc/wallpaper/8536", {
-            "url": "8431c6f1eec3a6f113980eeec9dfcb707de7ddcf",
+        ("https://wallhaven.cc/w/dge6v3", {
+            "url": "e4b802e70483f659d790ad5d0bd316245badf2ec",
         }),
-        ("https://whvn.cc/8114"),
+        ("https://whvn.cc/01w334"),
+        ("https://w.wallhaven.cc/full/01/wallhaven-01w334.jpg"),
     )
 
     def __init__(self, match):
@@ -168,8 +96,53 @@ class WallhavenImageExtractor(WallhavenExtractor):
         self.wallpaper_id = match.group(1)
 
     def items(self):
-        self.login()
-        url, data = self.get_wallpaper_data(self.wallpaper_id)
+        data = self.api.info(self.wallpaper_id)
         yield Message.Version, 1
         yield Message.Directory, data
-        yield Message.Url, url, data
+        yield Message.Url, data["url"], data
+
+
+class WallhavenAPI():
+    """Minimal interface to wallhaven's API"""
+
+    def __init__(self, extractor):
+        self.extractor = extractor
+
+        key = extractor.config("api-key")
+        if key is None:
+            key = "25HYZenXTICjzBZXzFSg98uJtcQVrDs2"
+            extractor.log.debug("Using default API Key")
+        else:
+            extractor.log.debug("Using custom API Key")
+        self.headers = {"X-API-Key": key}
+
+    def info(self, wallpaper_id):
+        url = "https://wallhaven.cc/api/v1/w/" + wallpaper_id
+        return self._update(self._call(url)["data"])
+
+    def search(self, params):
+        url = "https://wallhaven.cc/api/v1/search"
+        while True:
+            data = self._call(url, params)
+            yield from map(self._update, data["data"])
+            if data["meta"]["current_page"] >= data["meta"]["last_page"]:
+                return
+            params["page"] = data["meta"]["current_page"] + 1
+
+    def _call(self, url, params=None):
+        return self.extractor.request(
+            url, headers=self.headers, params=params).json()
+
+    @staticmethod
+    def _update(wp):
+        width, _, height = wp["resolution"].partition("x")
+        wp["url"] = wp.pop("path")
+        if "tags" in wp:
+            wp["tags"] = [t["name"] for t in wp["tags"]]
+        wp["date"] = text.parse_datetime(
+            wp.pop("created_at"), "%Y-%m-%d %H:%M:%S")
+        wp["ratio"] = text.parse_float(wp["ratio"])
+        wp["width"] = wp.pop("dimension_x")
+        wp["height"] = wp.pop("dimension_y")
+        wp["wh_category"] = wp["category"]
+        return text.nameext_from_url(wp["url"], wp)

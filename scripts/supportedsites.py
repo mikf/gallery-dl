@@ -115,7 +115,6 @@ AUTH_MAP = {
     "tsumino"    : "Optional",
     "tumblr"     : "Optional (OAuth)",
     "twitter"    : "Optional",
-    "wallhaven"  : "Optional",
 }
 
 IGNORE_LIST = (

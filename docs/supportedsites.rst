@@ -99,7 +99,7 @@ The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
 Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets                 Optional
-Wallhaven            https://alpha.wallhaven.cc/         individual Images, Search Results                  Optional
+Wallhaven            https://wallhaven.cc/               individual Images, Search Results
 Warosu               https://warosu.org/                 Threads
 Weibo                https://www.weibo.com/              Images from Users, Images from Statuses
 WikiArt.org          https://www.wikiart.org/            Artists, Artworks
