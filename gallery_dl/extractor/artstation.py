@@ -41,7 +41,6 @@ class ArtstationExtractor(Extractor):
                     player = adict["player_embedded"]
                     url = text.extract(player, 'src="', '"')[0]
                     if not url.startswith(self.root):
-                        text.nameext_from_url(url, asset)
                         yield Message.Url, "ytdl:" + url, asset
                         continue
 
