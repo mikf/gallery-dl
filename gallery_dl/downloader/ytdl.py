@@ -50,6 +50,8 @@ class YoutubeDLDownloader(DownloaderBase):
         return self._download_video(pathfmt, info_dict)
 
     def _download_video(self, pathfmt, info_dict):
+        if "url" in info_dict:
+            text.nameext_from_url(info_dict["url"], pathfmt.keywords)
         pathfmt.set_extension(info_dict["ext"])
         if pathfmt.exists():
             pathfmt.temppath = ""
