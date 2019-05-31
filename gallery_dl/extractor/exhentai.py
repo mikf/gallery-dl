@@ -32,6 +32,9 @@ class ExhentaiExtractor(Extractor):
     root = "https://exhentai.org"
 
     def __init__(self, match):
+        if match.group(1) != "ex":
+            self.root = "https://e-hentai.org"
+            self.cookiedomain = ".e-hentai.org"
         Extractor.__init__(self, match)
         self.limits = self.config("limits", True)
         self.original = self.config("original", True)
@@ -122,7 +125,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         ("https://exhentai.org/s/3957343c3b/960460-5", {
             "count": 2,
         }),
-        ("https://e-hentai.org/g/960460/4f0e369d82/"),
+        ("https://e-hentai.org/s/3957343c3b/960460-5", {
+            "count": 2,
+        }),
         ("https://g.e-hentai.org/g/960460/4f0e369d82/"),
     )
 
