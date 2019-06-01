@@ -1,6 +1,24 @@
 # Changelog
 
-## Unreleased
+## 1.8.5 - 2019-06-01
+### Additions
+- Support for
+  - `keenspot`       - http://keenspot.com/           ([#223](https://github.com/mikf/gallery-dl/issues/223))
+  - `sankakucomplex` - https://www.sankakucomplex.com ([#258](https://github.com/mikf/gallery-dl/issues/258))
+- `folders` option for `deviantart` to add a list of containing folders to each file ([#276](https://github.com/mikf/gallery-dl/issues/276))
+- `captcha` option for `kissmanga` and `readcomiconline` to control CAPTCHA handling ([#279](https://github.com/mikf/gallery-dl/issues/279))
+- `filename` metadata for files downloaded with youtube-dl ([#291](https://github.com/mikf/gallery-dl/issues/291))
+### Changes
+- Adjust `wallhaven` extractors to new page layout:
+  - use API and add `api-key` option
+  - removed traditional login support
+- Provide original filenames for `patreon` downloads ([#268](https://github.com/mikf/gallery-dl/issues/268))
+- Use e-hentai.org or exhentai.org depending on input URL ([#278](https://github.com/mikf/gallery-dl/issues/278))
+### Fixes
+- Fix pagination over `sankaku` popular listings ([#265](https://github.com/mikf/gallery-dl/issues/265))
+- Fix folder and collection extraction on `deviantart` ([#271](https://github.com/mikf/gallery-dl/issues/271))
+- Detect "AreYouHuman" redirects on `readcomiconline` ([#279](https://github.com/mikf/gallery-dl/issues/279))
+- Miscellaneous fixes for `hentainexus`, `livedoor`, `ngomik`
 
 ## 1.8.4 - 2019-05-17
 ### Additions
