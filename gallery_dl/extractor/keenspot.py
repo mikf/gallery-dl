@@ -19,7 +19,7 @@ class KeenspotComicExtractor(Extractor):
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{comic}_{filename}"
-    pattern = r"(?:https?://)?(?!www\.|forums\.)([^.]+)\.keenspot\.com"
+    pattern = r"(?:https?://)?(?!www\.|forums\.)([^.]+)\.keenspot\.com(/.+)?"
     test = (
         ("http://marksmen.keenspot.com/", {  # link
             "range": "1-3",
@@ -37,13 +37,20 @@ class KeenspotComicExtractor(Extractor):
             "range": "1-3",
             "url": "de21b12887ef31ff82edccbc09d112e3885c3aab"
         }),
+        ("http://twokinds.keenspot.com/comic/1066/", {  # "random" access
+            "range": "1-3",
+            "url": "97e2a6ed8ba1709314f2449f84b6b1ce5db21c04",
+        })
     )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self._next = None
-        self.comic = match.group(1)
+        self.comic = match.group(1).lower()
+        self.path = match.group(2)
         self.root = "http://" + self.comic + ".keenspot.com"
+        self._needle = ""
+        self._image = 'class="ksc"'
+        self._next = self._next_needle
 
     def items(self):
         data = {"comic": self.comic}
@@ -51,42 +58,80 @@ class KeenspotComicExtractor(Extractor):
         yield Message.Directory, data
 
         url = self._first(self.request(self.root + "/").text)
-        while url:
-            if url[0] == "/":
-                url = self.root + url
-            page = self.request(url).text
+        if self.path:
+            url = self.root + self.path
 
-            for img in text.extract_iter(page, 'class="ksc"', '>'):
-                img = text.extract(img, 'src="', '"')[0]
+        ilen = len(self._image)
+        while url and url != "/":
+            page = self.request(text.urljoin(self.root, url)).text
+
+            pos = 0
+            while True:
+                pos = page.find(self._image, pos)
+                if pos < 0:
+                    break
+                img, pos = text.extract(page, 'src="', '"', pos + ilen)
+                if img.endswith(".js"):
+                    continue
                 if img[0] == "/":
                     img = self.root + img
+                elif "youtube.com/" in img:
+                    img = "ytdl:" + img
                 yield Message.Url, img, text.nameext_from_url(img, data)
 
             url = self._next(page)
 
     def _first(self, page):
+        if self.comic == "brawlinthefamily":
+            self._next = self._next_brawl
+            self._image = '<div id="comic">'
+            return "http://brawlinthefamily.keenspot.com/comic/theshowdown/"
+
         url = text.extract(page, '<link rel="first" href="', '"')[0]
-        if url and not url.startswith("index"):
-            self._next = self._next_link
+        if url:
+            if self.comic == "porcelain":
+                self._needle = 'id="porArchivetop_"'
+            else:
+                self._next = self._next_link
             return url
 
         pos = page.find('id="first_day1"')
         if pos >= 0:
             self._next = self._next_id
-            return text.rextract(page, '<a href="', '"', pos)[0]
+            return text.rextract(page, 'href="', '"', pos)[0]
 
         pos = page.find('>FIRST PAGE<')
         if pos >= 0:
-            self._next = self._next_id
-            return text.rextract(page, '<a href="', '"', pos)[0]
+            if self.comic == "lastblood":
+                self._next = self._next_lastblood
+                self._image = '<div id="comic">'
+            else:
+                self._next = self._next_id
+            return text.rextract(page, 'href="', '"', pos)[0]
 
         pos = page.find('<div id="kscomicpart"')
         if pos >= 0:
-            self._next = self._next_ks
+            self._needle = '<a href="/archive.html'
             return text.extract(page, 'href="', '"', pos)[0]
+
+        pos = page.find('>First Comic<')  # twokinds
+        if pos >= 0:
+            self._image = '<article class="comic">'
+            self._needle = 'class="navarchive"'
+            return text.rextract(page, 'href="', '"', pos)[0]
+
+        pos = page.find('id="flip_FirstDay"')  # flipside
+        if pos >= 0:
+            self._image = 'class="flip_Pages ksc"'
+            self._needle = 'id="flip_ArcButton"'
+            return text.rextract(page, 'href="', '"', pos)[0]
 
         self.log.error("Unrecognized page layout")
         return None
+
+    def _next_needle(self, page):
+        pos = page.index(self._needle) + len(self._needle)
+        return text.extract(page, 'href="', '"', pos)[0]
 
     @staticmethod
     def _next_link(page):
@@ -98,6 +143,12 @@ class KeenspotComicExtractor(Extractor):
         return text.rextract(page, 'href="', '"', pos)[0] if pos >= 0 else None
 
     @staticmethod
-    def _next_ks(page):
-        pos = page.index('<a href="/archive.html') + 22
-        return text.extract(page, 'href="', '"', pos)[0]
+    def _next_lastblood(page):
+        pos = page.index("link rel='next'")
+        return text.extract(page, "href='", "'", pos)[0]
+
+    @staticmethod
+    def _next_brawl(page):
+        pos = page.index("comic-nav-next")
+        url = text.rextract(page, 'href="', '"', pos)[0]
+        return None if "?random" in url else url
