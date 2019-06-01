@@ -26,6 +26,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "fallenangels",
     "mangapark",
     "simplyhentai",
 }
@@ -38,6 +39,17 @@ class TestExtractorResults(unittest.TestCase):
 
     def tearDown(self):
         config.clear()
+
+    @classmethod
+    def setUpClass(cls):
+        cls._skipped = []
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls._skipped:
+            print("\n\nSkipped tests:")
+            for url, exc in cls._skipped:
+                print('- {} ("{}")'.format(url, exc))
 
     def _run_test(self, extr, url, result):
         if result:
@@ -65,7 +77,10 @@ class TestExtractorResults(unittest.TestCase):
         except exception.StopExtraction:
             pass
         except exception.HttpError as exc:
-            if re.match(r"5\d\d: ", str(exc)):
+            exc = str(exc)
+            if re.match(r"5\d\d: ", exc) or \
+                    re.search(r"\bRead timed out\b", exc):
+                self._skipped.append((url, exc))
                 self.skipTest(exc)
             raise
 
