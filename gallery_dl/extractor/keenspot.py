@@ -48,6 +48,7 @@ class KeenspotComicExtractor(Extractor):
         self.comic = match.group(1).lower()
         self.path = match.group(2)
         self.root = "http://" + self.comic + ".keenspot.com"
+
         self._needle = ""
         self._image = 'class="ksc"'
         self._next = self._next_needle
@@ -61,8 +62,10 @@ class KeenspotComicExtractor(Extractor):
         if self.path:
             url = self.root + self.path
 
+        prev = None
         ilen = len(self._image)
-        while url and url != "/":
+        while url and url != prev:
+            prev = url
             page = self.request(text.urljoin(self.root, url)).text
 
             pos = 0
