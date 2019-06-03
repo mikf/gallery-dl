@@ -17,7 +17,7 @@ class DirectlinkExtractor(Extractor):
     category = "directlink"
     filename_fmt = "{domain}/{path}"
     archive_fmt = "{domain}/{path}"
-    pattern = (r"https?://(?P<domain>[^/]+)/(?P<path>[^?&#]+\."
+    pattern = (r"(?i)https?://(?P<domain>[^/?&#]+)/(?P<path>[^?&#]+\."
                r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus))"
                r"(?:\?(?P<query>[^/?#]*))?(?:#(?P<fragment>.*))?$")
     test = (
@@ -35,6 +35,10 @@ class DirectlinkExtractor(Extractor):
             "url": "2627e8140727fdf743f86fe18f69f99a052c9718",
             "keyword": "4d19dc12e41ffcb4cbec2013e335cf482377c35e",
         }),
+        # upper case file extension (#296)
+        ("https://post-phinf.pstatic.net/MjAxOTA1MjlfMTQ4/MDAxNTU5MTI2NjcyNTkw"
+         ".JUzkGb4V6dj9DXjLclrOoqR64uDxHFUO5KDriRdKpGwg.88mCtd4iT1NHlpVKSCaUpP"
+         "mZPiDgT8hmQdQ5K_gYyu0g.JPEG/2.JPG"),
     )
 
     def __init__(self, match):
