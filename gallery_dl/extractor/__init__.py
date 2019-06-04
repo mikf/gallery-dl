@@ -93,6 +93,7 @@ modules = [
     "warosu",
     "weibo",
     "wikiart",
+    "xhamster",
     "xvideos",
     "yandere",
     "yaplog",

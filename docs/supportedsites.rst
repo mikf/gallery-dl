@@ -104,6 +104,7 @@ Warosu               https://warosu.org/                 Threads
 Weibo                https://www.weibo.com/              Images from Users, Images from Statuses
 WikiArt.org          https://www.wikiart.org/            Artists, Artworks
 World Three          http://www.slide.world-three.org/   Chapters, Manga
+xHamster             https://xhamster.com/               Images from Users, Galleries
 XVideos              https://www.xvideos.com/            Images from Users, Galleries
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
 yaplog!              https://yaplog.jp/                  Blogs, Posts

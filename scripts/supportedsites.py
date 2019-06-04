@@ -69,6 +69,7 @@ CATEGORY_MAP = {
     "thebarchive"    : "The /b/ Archive",
     "wikiart"        : "WikiArt.org",
     "worldthree"     : "World Three",
+    "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
     "yaplog"         : "yaplog!",
     "yuki"           : "yuki.la 4chan archive",
