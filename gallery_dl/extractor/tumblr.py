@@ -268,7 +268,10 @@ class TumblrPostExtractor(TumblrExtractor):
             "count": 0,
         }),
         ("http://pinetre-3.tumblr.com/post/181904381470/via", {
-            "count": 0,  # audio post with "null" as URL
+            "count": 0,  # audio post with "null" as URL (#165)
+        }),
+        ("http://ziemniax.tumblr.com/post/109697912859/", {
+            "exception": exception.NotFoundError,  # HTML response (#297)
         }),
         ("http://demo.tumblr.com/image/459265350"),
     )
@@ -372,12 +375,18 @@ class TumblrAPI(oauth.OAuth1API):
             blog, endpoint)
 
         response = self.request(url, params=params, **kwargs)
-        data = response.json()
-        status = data["meta"]["status"]
 
-        if 200 <= status < 400:
-            return data["response"]
-        elif status == 403:
+        try:
+            data = response.json()
+        except ValueError:
+            data = response.text
+            status = response.status_code
+        else:
+            status = data["meta"]["status"]
+            if 200 <= status < 400:
+                return data["response"]
+
+        if status == 403:
             raise exception.AuthorizationError()
         elif status == 404:
             raise exception.NotFoundError("user or post")
