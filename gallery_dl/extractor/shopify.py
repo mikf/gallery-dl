@@ -24,12 +24,12 @@ class ShopifyExtractor(SharedConfigMixin, Extractor):
         Extractor.__init__(self, match)
         self.item_url = self.root + match.group(1)
 
-    def request(self, url, method="GET", expect=(429, 430), **kwargs):
+    def request(self, url, method="GET", expect=range(400, 500), **kwargs):
         tries = 0
         kwargs["expect"] = expect
         while True:
             response = Extractor.request(self, url, method, **kwargs)
-            if response.status_code not in expect:
+            if response.status_code not in (429, 430):
                 return response
             tries += 1
             waittime = 2 ** (tries + 2)
@@ -45,8 +45,12 @@ class ShopifyExtractor(SharedConfigMixin, Extractor):
 
         headers = {"X-Requested-With": "XMLHttpRequest"}
         for url in self.products():
-            product = self.request(
-                url + ".json", headers=headers).json()["product"]
+            response = self.request(url + ".json", headers=headers)
+            if response.status_code >= 400:
+                self.log.warning('Skipping %s ("%d: %s")',
+                                 url, response.status_code, response.reason)
+                continue
+            product = response.json()["product"]
             del product["image"]
 
             for num, image in enumerate(product.pop("images"), 1):
