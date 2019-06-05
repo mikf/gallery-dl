@@ -28,7 +28,6 @@ TRAVIS_SKIP = {
 BROKEN = {
     "fallenangels",
     "mangapark",
-    "simplyhentai",
 }
 
 
