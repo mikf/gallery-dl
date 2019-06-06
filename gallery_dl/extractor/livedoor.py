@@ -59,6 +59,8 @@ class LivedoorExtractor(Extractor):
             src = text.extract(img, 'src="', '"')[0]
             alt = text.extract(img, 'alt="', '"')[0]
 
+            if not src:
+                continue
             if "://livedoor.blogimg.jp/" in src:
                 url = src.replace("-s.", ".")
             else:
@@ -81,24 +83,30 @@ class LivedoorBlogExtractor(LivedoorExtractor):
     """Extractor for a user's blog on blog.livedoor.jp"""
     subcategory = "blog"
     pattern = r"(?:https?://)?blog\.livedoor\.jp/(\w+)/?(?:$|[?&#])"
-    test = ("http://blog.livedoor.jp/zatsu_ke/", {
-        "range": "1-50",
-        "count": 50,
-        "pattern": r"https?://livedoor.blogimg.jp/\w+/imgs/\w/\w/\w+\.\w+",
-        "keyword": {
-            "post": {
-                "categories": list,
-                "date": "type:datetime",
-                "id": int,
-                "tags": list,
-                "title": str,
-                "user": "zatsu_ke"
+    test = (
+        ("http://blog.livedoor.jp/zatsu_ke/", {
+            "range": "1-50",
+            "count": 50,
+            "pattern": r"https?://livedoor.blogimg.jp/\w+/imgs/\w/\w/\w+\.\w+",
+            "keyword": {
+                "post": {
+                    "categories": list,
+                    "date": "type:datetime",
+                    "id": int,
+                    "tags": list,
+                    "title": str,
+                    "user": "zatsu_ke"
+                },
+                "filename": str,
+                "hash": r"re:\w{4,}",
+                "num": int,
             },
-            "filename": str,
-            "hash": r"re:\w{4,}",
-            "num": int,
-        },
-    })
+        }),
+        ("http://blog.livedoor.jp/uotapo/", {
+            "range": "1-5",
+            "count": 5,
+        }),
+    )
 
     def posts(self):
         url = "{}/{}".format(self.root, self.user)
@@ -109,8 +117,8 @@ class LivedoorBlogExtractor(LivedoorExtractor):
                 data = extr('.articles.push(', ');')
                 if not data:
                     break
-                body = extr('<div class="article-body-inner">',
-                            '<!-- articleBody End -->')
+                body = extr('class="article-body-inner">',
+                            'class="article-footer">')
                 yield self._load(data, body)
             url = extr('<a rel="next" href="', '"')
 
@@ -128,6 +136,10 @@ class LivedoorPostExtractor(LivedoorExtractor):
             "url": "fc1d6a9557245b5a27d3a10bf0fa9922ef377215",
             "keyword": "0229072abb5cd8a221df72e0ffdfc13336c0e9ce",
         }),
+        ("http://blog.livedoor.jp/uotapo/archives/1050616939.html", {
+            "url": "3f3581807ec4776e6a67ed7985a22494d4bc4904",
+            "keyword": "2eb3e383c68e909c4dd3d563c16d0b6e2fe6627b",
+        }),
     )
 
     def __init__(self, match):
@@ -139,6 +151,6 @@ class LivedoorPostExtractor(LivedoorExtractor):
             self.root, self.user, self.post_id)
         extr = text.extract_from(self.request(url).text)
         data = extr('articles :', '</script>')
-        body = extr('<div class="article-body-inner">',
-                    '<!-- articleBody End -->')
+        body = extr('class="article-body-inner">',
+                    'class="article-footer">')
         return (self._load(data, body),)
