@@ -369,6 +369,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         ("https://zzz.deviantart.com/art/zzz-1234567890"),
     )
 
+    skip = Extractor.skip
+
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.path = match.group(3)
@@ -400,6 +402,8 @@ class DeviantartStashExtractor(DeviantartExtractor):
             "exception": exception.HttpError,
         }),
     )
+
+    skip = Extractor.skip
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
