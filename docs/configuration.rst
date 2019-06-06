@@ -395,6 +395,18 @@ Description Try to follow external URLs of embedded players.
 =========== =====
 
 
+extractor.deviantart.external
+-----------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Try to follow external URLs in description fields.
+
+            Note: deviantart.metadata_ needs to be enabled to make descriptions
+            available.
+=========== =====
+
+
 extractor.deviantart.flat
 -------------------------
 =========== =====
@@ -1586,6 +1598,7 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _skipped: `extractor.*.skip`_
 .. _`date-min and date-max`: `extractor.reddit.date-min & .date-max`_
 .. _date-format: extractor.reddit.date-format_
+.. _deviantart.metadata: extractor.deviantart.metadata_
 
 .. _.netrc:            https://stackoverflow.com/tags/.netrc/info
 .. _tempfile.gettempdir(): https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir

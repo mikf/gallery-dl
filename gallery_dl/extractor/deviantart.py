@@ -39,6 +39,7 @@ class DeviantartExtractor(Extractor):
         self.offset = 0
         self.flat = self.config("flat", True)
         self.original = self.config("original", True)
+        self.external = self.config("external", False)
         self.user = match.group(1) or match.group(2)
         self.group = False
 
@@ -94,6 +95,13 @@ class DeviantartExtractor(Extractor):
             if "excerpt" in deviation and self.commit_journal:
                 journal = self.api.deviation_content(deviation["deviationid"])
                 yield self.commit_journal(deviation, journal)
+
+            if self.external:
+                for url in text.extract_iter(
+                        deviation.get("description", ""), 'href="', '"'):
+                    if "deviantart.com/users/outgoing?" in url:
+                        url = text.unquote(url.partition("?")[2])
+                    yield Message.Queue, url, deviation
 
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
@@ -360,6 +368,14 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
           "COM-Monique-Model-781571783"), {
             "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
                         r"/f/[^/]+/[^.]+\.gif\?token="),
+        }),
+        # external URLs from description (#302)
+        (("https://www.deviantart.com/uotapo/art/"
+          "INANAKI-Memorial-Humane7-590297498"), {
+            "options": (("external", 1), ("metadata", 1), ("original", 0)),
+            "pattern": r"https?://(sta\.sh|youtu\.be)/\w+$",
+            "range": "2-",
+            "count": 6,
         }),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
