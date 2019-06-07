@@ -72,6 +72,7 @@ modules = [
     "pixiv",
     "pixnet",
     "plurk",
+    "pornhub",
     "pururin",
     "reactor",
     "readcomiconline",
