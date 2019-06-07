@@ -33,10 +33,10 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
     test = (
         ("https://xhamster.com/photos/gallery/11748968", {
             "pattern": r"https://thumb-p\d+.xhcdn.com/./[\w/-]+_1000.jpg$",
-            "count": 143,
+            "count": ">= 144",
             "keyword": {
                 "comments": int,
-                "count": 143,
+                "count": int,
                 "favorite": bool,
                 "id": int,
                 "num": int,
