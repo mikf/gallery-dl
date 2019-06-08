@@ -395,18 +395,6 @@ Description Try to follow external URLs of embedded players.
 =========== =====
 
 
-extractor.deviantart.external
------------------------------
-=========== =====
-Type        ``bool``
-Default     ``false``
-Description Try to follow external URLs in description fields.
-
-            Note: deviantart.metadata_ needs to be enabled to make descriptions
-            available.
-=========== =====
-
-
 extractor.deviantart.flat
 -------------------------
 =========== =====
@@ -496,6 +484,17 @@ Description The ``refresh_token`` value you get from linking your
 
             Using a ``refresh_token`` allows you to access private or otherwise
             not publicly available deviations.
+=========== =====
+
+
+extractor.deviantart.stash
+--------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Extract Sta.sh resources from description texts.
+
+            Note: Enabling this option also enables deviantart.metadata_.
 =========== =====
 
 
