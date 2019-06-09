@@ -64,6 +64,7 @@ CATEGORY_MAP = {
     "sensescans"     : "Sense-Scans",
     "sexcom"         : "Sex.com",
     "simplyhentai"   : "Simply Hentai",
+    "slickpic"       : "SlickPic",
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
     "thebarchive"    : "The /b/ Archive",
