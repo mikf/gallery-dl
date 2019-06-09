@@ -94,6 +94,7 @@ Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          http://sensescans.com/reader/       Chapters, Manga
 Sex.com              https://www.sex.com/                Boards, Pins, Search Results
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
+SlickPic             https://www.slickpic.com//          Albums
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (OAuth)
 The /b/ Archive      https://thebarchive.com/            Threads

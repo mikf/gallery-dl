@@ -85,6 +85,7 @@ modules = [
     "senmanga",
     "sexcom",
     "simplyhentai",
+    "slickpic",
     "slideshare",
     "smugmug",
     "tsumino",
