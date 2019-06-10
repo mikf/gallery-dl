@@ -9,6 +9,7 @@ Site                 URL                                 Capabilities           
 4plebs               https://archive.4plebs.org/         Threads
 500px                https://500px.com/                  Images from Users, Galleries, individual Images
 8chan                https://8ch.net/                    Threads
+8muses               https://www.8muses.com/             Albums
 Adobe Portfolio      https://www.myportfolio.com/        Galleries
 arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads

@@ -16,6 +16,7 @@ modules = [
     "4chan",
     "500px",
     "8chan",
+    "8muses",
     "artstation",
     "behance",
     "bobx",
