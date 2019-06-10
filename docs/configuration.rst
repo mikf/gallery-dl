@@ -395,6 +395,17 @@ Description Try to follow external URLs of embedded players.
 =========== =====
 
 
+extractor.deviantart.extra
+--------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Download extra Sta.sh resources from description texts.
+
+            Note: Enabling this option also enables deviantart.metadata_.
+=========== =====
+
+
 extractor.deviantart.flat
 -------------------------
 =========== =====
@@ -484,17 +495,6 @@ Description The ``refresh_token`` value you get from linking your
 
             Using a ``refresh_token`` allows you to access private or otherwise
             not publicly available deviations.
-=========== =====
-
-
-extractor.deviantart.stash
---------------------------
-=========== =====
-Type        ``bool``
-Default     ``false``
-Description Extract Sta.sh resources from description texts.
-
-            Note: Enabling this option also enables deviantart.metadata_.
 =========== =====
 
 
