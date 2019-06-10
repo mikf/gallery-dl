@@ -38,12 +38,12 @@ class DeviantartExtractor(Extractor):
         self.api = DeviantartAPI(self)
         self.offset = 0
         self.flat = self.config("flat", True)
-        self.stash = self.config("stash", False)
+        self.extra = self.config("extra", False)
         self.original = self.config("original", True)
         self.user = match.group(1) or match.group(2)
         self.group = False
 
-        if self.stash:
+        if self.extra:
             self.api.metadata = True
 
         self.commit_journal = {
@@ -99,7 +99,7 @@ class DeviantartExtractor(Extractor):
                 journal = self.api.deviation_content(deviation["deviationid"])
                 yield self.commit_journal(deviation, journal)
 
-            if self.stash:
+            if self.extra:
                 for match in DeviantartStashExtractor.pattern.finditer(
                         deviation.get("description", "")):
                     deviation["_extractor"] = DeviantartStashExtractor
@@ -374,7 +374,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         # external URLs from description (#302)
         (("https://www.deviantart.com/uotapo/art/"
           "INANAKI-Memorial-Humane7-590297498"), {
-            "options": (("stash", 1), ("original", 0)),
+            "options": (("extra", 1), ("original", 0)),
             "pattern": r"https?://sta\.sh/\w+$",
             "range": "2-",
             "count": 4,
