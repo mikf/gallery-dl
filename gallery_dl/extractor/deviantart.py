@@ -87,6 +87,10 @@ class DeviantartExtractor(Extractor):
 
                 yield self.commit(deviation, content)
 
+            elif deviation["is_downloadable"]:
+                content = self.api.deviation_download(deviation["deviationid"])
+                yield self.commit(deviation, content)
+
             if "videos" in deviation:
                 video = max(deviation["videos"],
                             key=lambda x: text.parse_int(x["quality"][:-1]))
@@ -415,6 +419,10 @@ class DeviantartStashExtractor(DeviantartExtractor):
         ("https://sta.sh/21jf51j7pzl2", {
             "pattern": pattern,
             "count": 4,
+        }),
+        # downloadable, but no "content" field (#307)
+        ("https://sta.sh/024t4coz16mi", {
+            "count": 1,
         }),
         ("https://sta.sh/abcdefghijkl", {
             "exception": exception.HttpError,
