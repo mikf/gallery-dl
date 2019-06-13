@@ -37,7 +37,7 @@ class MangoxoExtractor(Extractor):
         page = self.request(self.root + "/login/").text
         token = text.extract(page, 'id="loginToken" value="', '"')[0]
         if not token:
-            self.log.warning("failed to extract 'loginToken'")
+            self.log.debug("failed to extract 'loginToken'")
 
         url = self.root + "/login/loginxmm"
         headers = {
