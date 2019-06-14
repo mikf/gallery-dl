@@ -117,3 +117,24 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
             "whq"   : "1",
         }
         return self.request(url, method="POST", data=data).json()["list"]
+
+
+class SlickpicUserExtractor(SlickpicExtractor):
+    subcategory = "user"
+    pattern = BASE_PATTERN + r"(?:/gallery)?/?(?:$|[?#])"
+    test = (
+        ("https://mattcrandall.slickpic.com/gallery/", {
+            "count": ">= 358",
+            "pattern": SlickpicAlbumExtractor.pattern,
+        }),
+        ("https://mattcrandall.slickpic.com/"),
+    )
+
+    def items(self):
+        page = self.request(self.root + "/gallery?viewer").text
+        data = {"_extractor": SlickpicAlbumExtractor}
+        base = self.root + "/albums/"
+
+        yield Message.Version, 1
+        for album in text.extract_iter(page, 'href="' + base, '"'):
+            yield Message.Queue, base + album, data
