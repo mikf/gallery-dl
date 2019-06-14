@@ -21,7 +21,8 @@ class _8musesAlbumExtractor(Extractor):
     filename_fmt = "{page:>03}.{extension}"
     archive_fmt = "{hash}"
     root = "https://www.8muses.com"
-    pattern = r"(?:https?://)?(?:www\.)?8muses\.com(/comics/album/[^?&#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?8muses\.com"
+               r"(/comics/album/[^?&#]+)(\?[^#]+)?")
     test = (
         ("https://www.8muses.com/comics/album/Fakku-Comics/santa/Im-Sorry", {
             "url": "82449d6a26a29204695cba5d52c3ec60170bc159",
@@ -52,42 +53,59 @@ class _8musesAlbumExtractor(Extractor):
                 "private": False,
             },
         }),
+        ("https://www.8muses.com/comics/album/Fakku-Comics/6?sort=az", {
+            "count": ">= 70",
+            "keyword": {"name": r"re:^[S-Zs-z]"},
+        }),
     )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.path = match.group(1)
+        self.params = match.group(2) or ""
 
     def items(self):
-        data = self._unobfuscate(text.extract(
-            self.request(self.root + self.path).text,
-            '<script id="ractive-public" type="text/plain">', '</script>')[0])
+        url = self.root + self.path + self.params
 
-        if data.get("pictures"):
-            images = data["pictures"]
-            album = self._make_album(data["album"])
-            yield Message.Directory, {"album": album, "count": len(images)}
-            for num, image in enumerate(images, 1):
-                url = self.root + "/image/fl/" + image["publicUri"]
-                img = {
-                    "url"      : url,
-                    "page"     : num,
-                    "hash"     : image["publicUri"],
-                    "count"    : len(images),
-                    "album"    : album,
-                    "extension": "jpg",
-                }
-                yield Message.Url, url, img
+        while True:
+            data = self._unobfuscate(text.extract(
+                self.request(url).text,
+                'id="ractive-public" type="text/plain">', '</script>')[0])
 
-        if data.get("albums"):
-            for album in data["albums"]:
-                url = self.root + "/comics/album/" + album["permalink"]
-                album = {
-                    "url"    : url,
-                    "name"   : album["name"],
-                    "private": album["isPrivate"],
-                }
-                yield Message.Queue, url, album
+            images = data.get("pictures")
+            if images:
+                count = len(images)
+                album = self._make_album(data["album"])
+                yield Message.Directory, {"album": album, "count": count}
+                for num, image in enumerate(images, 1):
+                    url = self.root + "/image/fl/" + image["publicUri"]
+                    img = {
+                        "url"      : url,
+                        "page"     : num,
+                        "hash"     : image["publicUri"],
+                        "count"    : count,
+                        "album"    : album,
+                        "extension": "jpg",
+                    }
+                    yield Message.Url, url, img
+
+            albums = data.get("albums")
+            if albums:
+                for album in albums:
+                    url = self.root + "/comics/album/" + album["permalink"]
+                    album = {
+                        "url"    : url,
+                        "name"   : album["name"],
+                        "private": album["isPrivate"],
+                    }
+                    yield Message.Queue, url, album
+
+            if data["page"] >= data["pages"]:
+                return
+            path, _, num = self.path.rstrip("/").rpartition("/")
+            path = path if num.isdecimal() else self.path
+            url = "{}{}/{}{}".format(
+                self.root, path, data["page"] + 1, self.params)
 
     def _make_album(self, album):
         return {
