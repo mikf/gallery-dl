@@ -271,6 +271,18 @@ class TestText(unittest.TestCase):
         self.assertEqual(e("[", "]"), "END")
         self.assertEqual(e("[", "]"), "END")
 
+    def test_parse_unicode_escapes(self, f=text.parse_unicode_escapes):
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("foobar"), "foobar")
+        self.assertEqual(f("foo’bar"), "foo’bar")
+        self.assertEqual(f("foo\\u2019bar"), "foo’bar")
+        self.assertEqual(f("foo\\u201bar"), "foo‛ar")
+        self.assertEqual(f("foo\\u201zar"), "foo\\u201zar")
+        self.assertEqual(
+            f("\\u2018foo\\u2019\\u2020bar\\u00ff"),
+            "‘foo’†barÿ",
+        )
+
     def test_parse_bytes(self, f=text.parse_bytes):
         self.assertEqual(f("0"), 0)
         self.assertEqual(f("50"), 50)
