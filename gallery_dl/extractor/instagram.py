@@ -55,6 +55,10 @@ class InstagramExtractor(Extractor):
             'owner_id': media['owner']['id'],
             'username': media['owner']['username'],
             'fullname': media['owner']['full_name'],
+            'description': text.parse_unicode_escapes('\n'.join(
+                edge['node']['text']
+                for edge in media['edge_media_to_caption']['edges']
+            )),
         }
 
         medias = []
@@ -172,6 +176,7 @@ class InstagramImageExtractor(InstagramExtractor):
                        r"/44877605_725955034447492_3123079845831750529_n.jpg",
             "keyword": {
                 "date": "type:datetime",
+                "description": str,
                 "height": int,
                 "likes": int,
                 "media_id": "1922949326347663701",
@@ -198,6 +203,7 @@ class InstagramImageExtractor(InstagramExtractor):
             "url": "8f38c1cf460c9804842f7306c487410f33f82e7e",
             "keyword": {
                 "date": "type:datetime",
+                "description": str,
                 "height": int,
                 "likes": int,
                 "media_id": "1923502432034620000",
