@@ -35,16 +35,19 @@ class DeviantartExtractor(Extractor):
 
     def __init__(self, match=None):
         Extractor.__init__(self, match)
-        self.api = DeviantartAPI(self)
         self.offset = 0
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.original = self.config("original", True)
         self.user = match.group(1) or match.group(2)
         self.group = False
+        self.api = DeviantartAPI(self)
 
-        if self.extra:
-            self.api.metadata = True
+        if self.original != "image":
+            self._update_content = self._update_content_default
+        else:
+            self._update_content = self._update_content_image
+            self.original = True
 
         self.commit_journal = {
             "html": self._commit_journal_html,
@@ -111,7 +114,6 @@ class DeviantartExtractor(Extractor):
 
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
-        return []
 
     def prepare(self, deviation):
         """Adjust the contents of a Deviation-object"""
@@ -203,9 +205,10 @@ class DeviantartExtractor(Extractor):
 
     @staticmethod
     def _find_folder(folders, name):
-        pattern = r"[^\w]*" + name.replace("-", r"[^\w]+") + r"[^\w]*$"
+        pattern = re.compile(
+            r"[^\w]*" + name.replace("-", r"[^\w]+") + r"[^\w]*$")
         for folder in folders:
-            if re.match(pattern, folder["name"]):
+            if pattern.match(folder["name"]):
                 return folder
         raise exception.NotFoundError("folder")
 
@@ -213,14 +216,15 @@ class DeviantartExtractor(Extractor):
         url = "{}/{}/{}/0/".format(self.root, self.user, category)
         return [(url + folder["name"], folder) for folder in folders]
 
-    def _update_content(self, deviation, content):
+    def _update_content_default(self, deviation, content):
+        content.update(self.api.deviation_download(deviation["deviationid"]))
+
+    def _update_content_image(self, deviation, content):
         data = self.api.deviation_download(deviation["deviationid"])
-        if self.original == "images":
-            url = data["src"].partition("?")[0]
-            mtype = mimetypes.guess_type(url, False)[0]
-            if not mtype or not mtype.startswith("image/"):
-                return
-        content.update(data)
+        url = data["src"].partition("?")[0]
+        mtype = mimetypes.guess_type(url, False)[0]
+        if mtype and mtype.startswith("image/"):
+            content.update(data)
 
 
 class DeviantartGalleryExtractor(DeviantartExtractor):
@@ -277,10 +281,12 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
                 "username": "shimoda7",
             },
         }),
+        # group
         ("https://www.deviantart.com/yakuzafc", {
             "pattern": r"https://www.deviantart.com/yakuzafc/gallery/0/",
             "count": ">= 15",
         }),
+        # 'folders' option (#276)
         ("https://www.deviantart.com/justatest235723", {
             "count": 2,
             "options": (("metadata", 1), ("folders", 1), ("original", 0)),
@@ -295,6 +301,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/shimoda8/gallery/", {
             "exception": exception.NotFoundError,
         }),
+        # old-style URLs
         ("https://www.deviantart.com/shimoda7/gallery/?catpath=/"),
         ("https://shimoda7.deviantart.com/gallery/"),
         ("https://yakuzafc.deviantart.com/"),
@@ -304,9 +311,8 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     def deviations(self):
         if self.flat and not self.group:
             return self.api.gallery_all(self.user, self.offset)
-        else:
-            folders = self.api.gallery_folders(self.user)
-            return self._folder_urls(folders, "gallery")
+        folders = self.api.gallery_folders(self.user)
+        return self._folder_urls(folders, "gallery")
 
 
 class DeviantartFolderExtractor(DeviantartExtractor):
@@ -316,10 +322,12 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     archive_fmt = "F_{folder[uuid]}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/gallery/(\d+)/([^/?&#]+)"
     test = (
+        # user
         ("https://www.deviantart.com/shimoda7/gallery/722019/Miscellaneous", {
             "count": 5,
             "options": (("original", False),),
         }),
+        # group
         ("https://www.deviantart.com/yakuzafc/gallery/37412168/Crafts", {
             "count": ">= 4",
             "options": (("original", False),),
@@ -330,8 +338,8 @@ class DeviantartFolderExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        _, _, fid, self.fname = match.groups()
-        self.folder = {"owner": self.user, "index": fid}
+        self.fname = match.group(4)
+        self.folder = {"owner": self.user, "index": match.group(3)}
 
     def deviations(self):
         folders = self.api.gallery_folders(self.user)
@@ -353,6 +361,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     test = (
         (("https://www.deviantart.com/shimoda7/art/"
           "For-the-sake-of-a-memory-10073852"), {
+            "options": (("original", 0),),
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://www.deviantart.com/zzz/art/zzz-1234567890", {
@@ -416,6 +425,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
             "pattern": r"https://s3.amazonaws.com/origin-orig.deviantart.net",
             "count": 1,
         }),
+        # multiple stash items
         ("https://sta.sh/21jf51j7pzl2", {
             "pattern": pattern,
             "count": 4,
@@ -433,6 +443,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
+        self.user = None
         self.stash_id = match.group(1)
 
     def deviations(self):
@@ -476,8 +487,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                 self.api.collections(self.user, folder["folderid"])
                 for folder in folders
             )
-        else:
-            return self._folder_urls(folders, "favourites")
+        return self._folder_urls(folders, "favourites")
 
 
 class DeviantartCollectionExtractor(DeviantartExtractor):
@@ -652,8 +662,9 @@ class DeviantartAPI():
         self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
-        self.metadata = extractor.config("metadata", False)
+
         self.folders = extractor.config("folders", False)
+        self.metadata = extractor.extra or extractor.config("metadata", False)
 
         self.refresh_token = extractor.config("refresh-token")
         self.client_id = extractor.config("client-id", self.CLIENT_ID)
@@ -799,9 +810,9 @@ class DeviantartAPI():
                 if self.delay > self.delay_min:
                     self.delay -= 1
                 return data
-            elif expect_error:
+            if expect_error:
                 return None
-            elif data.get("error_description") == "User not found.":
+            if data.get("error_description") == "User not found.":
                 raise exception.NotFoundError("user or group")
 
             self.log.debug(response.text)
