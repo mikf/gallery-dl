@@ -119,7 +119,7 @@ class KeenspotComicExtractor(Extractor):
 
         pos = page.find('>First Comic<')  # twokinds
         if pos >= 0:
-            self._image = '<article class="comic">'
+            self._image = '</header>'
             self._needle = 'class="navarchive"'
             return text.rextract(page, 'href="', '"', pos)[0]
 
