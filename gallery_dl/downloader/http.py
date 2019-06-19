@@ -151,6 +151,9 @@ class HttpDownloader(DownloaderBase):
         self.downloading = False
         if adj_ext:
             pathfmt.set_extension(adj_ext)
+        filetime = response.headers.get("Last-Modified")
+        if filetime:
+            pathfmt.keywords["_filetime"] = filetime
         return True
 
     def receive(self, response, file):
