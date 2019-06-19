@@ -12,6 +12,7 @@ import re
 import os
 import sys
 import json
+import time
 import shutil
 import string
 import _string
@@ -19,6 +20,7 @@ import sqlite3
 import datetime
 import operator
 import itertools
+import email.utils
 import urllib.parse
 from . import text, exception
 
@@ -613,17 +615,23 @@ class PathFormat():
             os.unlink(self.temppath)
             return
 
-        if self.temppath == self.realpath:
-            return
+        if self.temppath != self.realpath:
+            # move temp file to its actual location
+            try:
+                os.replace(self.temppath, self.realpath)
+            except OSError:
+                shutil.copyfile(self.temppath, self.realpath)
+                os.unlink(self.temppath)
 
-        try:
-            os.replace(self.temppath, self.realpath)
-            return
-        except OSError:
-            pass
-
-        shutil.copyfile(self.temppath, self.realpath)
-        os.unlink(self.temppath)
+        if "_filetime" in self.keywords:
+            # try to set file times
+            try:
+                filetime = email.utils.mktime_tz(email.utils.parsedate_tz(
+                    self.keywords["_filetime"]))
+                if filetime:
+                    os.utime(self.realpath, (time.time(), filetime))
+            except Exception:
+                pass
 
     @staticmethod
     def adjust_path(path):
