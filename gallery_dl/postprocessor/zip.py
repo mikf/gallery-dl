@@ -55,5 +55,11 @@ class ZipPP(PostProcessor):
             except OSError:
                 pass
 
+            if not self.zfile.NameToInfo:
+                try:
+                    os.unlink(self.zfile.filename)
+                except OSError:
+                    pass
+
 
 __postprocessor__ = ZipPP
