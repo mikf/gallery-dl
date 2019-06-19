@@ -134,9 +134,6 @@ class TestTextDownloader(TestDownloaderBase):
     def test_text_offset(self):
         self._run_test("text:foobar", "foo", "foobar", "txt", "txt")
 
-    def test_text_extension(self):
-        self._run_test("text:foobar", None, "foobar", None, "txt")
-
     def test_text_empty(self):
         self._run_test("text:", None, "", "txt", "txt")
 
