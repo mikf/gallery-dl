@@ -25,6 +25,7 @@ class HttpDownloader(DownloaderBase):
         self.retries = self.config("retries", extractor._retries)
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
+        self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
         self.downloading = False
         self.chunk_size = 16384
@@ -151,9 +152,10 @@ class HttpDownloader(DownloaderBase):
         self.downloading = False
         if adj_ext:
             pathfmt.set_extension(adj_ext)
-        filetime = response.headers.get("Last-Modified")
-        if filetime:
-            pathfmt.keywords["_filetime"] = filetime
+        if self.mtime:
+            filetime = response.headers.get("Last-Modified")
+            if filetime:
+                pathfmt.keywords["_filetime"] = filetime
         return True
 
     def receive(self, response, file):

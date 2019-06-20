@@ -27,6 +27,7 @@ class YoutubeDLDownloader(DownloaderBase):
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
             "nopart": not self.part,
+            "updatetime": self.config("mtime", True),
         }
         options.update(self.config("raw-options") or {})
 
