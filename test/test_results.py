@@ -165,7 +165,7 @@ class ResultJob(job.DownloadJob):
         self.hash_content = hashlib.sha1()
         if content:
             self.fileobj = FakePathfmt(self.hash_content)
-            self.get_downloader("http")._check_extension = lambda a, b: None
+            self.get_downloader("http").check_extension = lambda a, b: None
 
     def run(self):
         for msg in self.extractor:
@@ -214,6 +214,7 @@ class FakePathfmt():
         self.hashobj = hashobj
         self.path = ""
         self.size = 0
+        self.keywords = {}
         self.has_extension = True
 
     def __enter__(self):
