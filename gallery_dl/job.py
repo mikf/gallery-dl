@@ -281,20 +281,22 @@ class DownloadJob(Job):
 
     def get_downloader(self, scheme):
         """Return a downloader suitable for 'scheme'"""
-        if scheme == "https":
-            scheme = "http"
         try:
             return self.downloaders[scheme]
         except KeyError:
             pass
 
         klass = downloader.find(scheme)
-        if klass and config.get(("downloader", scheme, "enabled"), True):
+        if klass and config.get(("downloader", klass.scheme, "enabled"), True):
             instance = klass(self.extractor, self.out)
         else:
             instance = None
             self.log.error("'%s:' URLs are not supported/enabled", scheme)
-        self.downloaders[scheme] = instance
+
+        if klass.scheme == "http":
+            self.downloaders["http"] = self.downloaders["https"] = instance
+        else:
+            self.downloaders[scheme] = instance
         return instance
 
     def initialize(self, keywords=None):
