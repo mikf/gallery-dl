@@ -945,6 +945,16 @@ Description Enable/Disable this downloader module.
 =========== =====
 
 
+downloader.*.mtime
+------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Use |Last-Modified|_ HTTP response headers
+            to set file modification times.
+=========== =====
+
+
 downloader.*.part
 -----------------
 =========== =====
@@ -1589,6 +1599,7 @@ Description An object with the ``name`` of a post-processor and its options.
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
 .. |datetime.max| replace:: ``datetime.max``
 .. |Path| replace:: ``Path``
+.. |Last-Modified| replace:: ``Last-Modified``
 .. |Logging Configuration| replace:: ``Logging Configuration``
 .. |Postprocessor Configuration| replace:: ``Postprocessor Configuration``
 .. |strptime| replace:: strftime() and strptime() Behavior
@@ -1604,6 +1615,7 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _requests.request(): https://docs.python-requests.org/en/master/api/#requests.request
 .. _timeout:           https://docs.python-requests.org/en/latest/user/advanced/#timeouts
 .. _verify:            https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
+.. _Last-Modified:     https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
 .. _`Requests' proxy documentation`: http://docs.python-requests.org/en/master/user/advanced/#proxies
 .. _format string:     https://docs.python.org/3/library/string.html#formatstrings
 .. _format strings:    https://docs.python.org/3/library/string.html#formatstrings
