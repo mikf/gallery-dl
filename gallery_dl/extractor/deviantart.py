@@ -408,7 +408,12 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
     def deviations(self):
         url = "{}/{}/{}".format(self.root, self.user, self.path)
-        response = self.request(url, expect=range(400, 500))
+        cookies = {"userinfo": (
+            '__167217c8e6aac1a3331f;{"username":"","uniqueid":"ab2e8b184471bf0'
+            'e3f8ed3ee7a3220aa","vd":"Bc7vEx,BdC7Fy,A,J,A,,B,A,B,BdC7Fy,BdC7XU'
+            ',J,J,A,BdC7XU,13,A,B,A,,A,A,B,A,A,,A","attr":56}'
+        )}
+        response = self.request(url, cookies=cookies, expect=range(400, 500))
         deviation_id = text.extract(response.text, '//deviation/', '"')[0]
         if response.status_code >= 400 or not deviation_id:
             raise exception.NotFoundError("image")
