@@ -10,8 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-import requests.packages.urllib3.util.connection as u3_conn
-import socket
 
 
 class HentaifoundryExtractor(Extractor):
@@ -29,10 +27,6 @@ class HentaifoundryExtractor(Extractor):
         self.user = user
         self.start_post = 0
         self.start_page = text.parse_int(page, 1)
-
-    def request(*args, **kwargs):
-        with disable_ipv6():
-            return Extractor.request(*args, **kwargs)
 
     def items(self):
         data = self.get_job_metadata()
@@ -268,14 +262,3 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
 
     def skip(self, _):
         return 0
-
-
-class disable_ipv6():
-    """Context Manager: Reject IPv6 addresses during DNS lookup"""
-    _allowed_gai_family = u3_conn.allowed_gai_family
-
-    def __enter__(self):
-        u3_conn.allowed_gai_family = lambda: socket.AF_INET
-
-    def __exit__(self, etype, value, traceback):
-        u3_conn.allowed_gai_family = disable_ipv6._allowed_gai_family
