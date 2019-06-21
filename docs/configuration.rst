@@ -1518,7 +1518,7 @@ Logging Configuration
 =========== =====
 Type        ``object``
 
-Example     .. code::
+Examples    .. code::
 
                 {
                     "format": "{asctime} {name}: {message}",
@@ -1527,10 +1527,21 @@ Example     .. code::
                     "encoding": "ascii"
                 }
 
+                {
+                    "level": "debug",
+                    "format": {
+                        "debug"  : "debug: {message}",
+                        "info"   : "[{name}] {message}",
+                        "warning": "Warning: {message}",
+                        "error"  : "ERROR: {message}"
+                    }
+                }
+
 Description Extended logging output configuration.
 
             * format
-                * Format string for logging messages
+                * General format string for logging messages
+                  or a dictionary with format strings for each loglevel.
 
                   In addition to the default
                   `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__,
