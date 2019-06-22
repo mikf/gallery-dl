@@ -65,6 +65,7 @@ modules = [
     "ngomik",
     "nhentai",
     "nijie",
+    "nsfwalbum",
     "paheal",
     "patreon",
     "photobucket",

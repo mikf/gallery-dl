@@ -70,6 +70,7 @@ Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       https://seiga.nicovideo.jp/         Images from Users, individual Images               Required
 nijie                https://nijie.info/                 |nijie-C|                                          Required
+NSFWalbum.com        https://nsfwalbum.com/              Albums
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Patreon              https://www.patreon.com/            Images from Users, Creators
 Pawoo                https://pawoo.net/                  Images from Users, Images from Statuses
