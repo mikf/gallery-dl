@@ -1,0 +1,61 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2019 Mike Fährmann
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extractors for https://nsfwalbum.com/"""
+
+from .common import GalleryExtractor
+from .. import text
+
+
+class NsfwalbumAlbumExtractor(GalleryExtractor):
+    """Extractor for image albums on nsfwalbum.com"""
+    category = "nsfwalbum"
+    subcategory = "album"
+    root = "https://nsfwalbum.com"
+    filename_fmt = "{album_id}_{page:>03}_{id}.{extension}"
+    archive_fmt = "{id}"
+    pattern = r"(?:https?://)?(?:www\.)?nsfwalbum\.com(/album/(\d+))"
+    test = ("https://nsfwalbum.com/album/295201", {
+        "range": "1-5",
+        "url": "e60eced1873215f5deee1ca7226d60cb4dcc051c",
+        "keyword": "e0573ecb1966611e96d10172a3ca1db1078a7984",
+    })
+
+    def __init__(self, match):
+        self.album_id = match.group(2)
+        GalleryExtractor.__init__(self, match)
+
+    def metadata(self, page):
+        extr = text.extract_from(page)
+        return {
+            "album_id": text.parse_int(self.album_id),
+            "title"   : text.unescape(extr('<h6>', '</h6>')),
+            "models"  : text.split_html(extr('"models"> Models:', '</div>')),
+            "studio"  : text.remove_html(extr('"models"> Studio:', '</div>')),
+        }
+
+    def images(self, page):
+        iframe = self.root + "/iframe_image.php?id="
+        backend = self.root + "/backend.php"
+        for image_id in text.extract_iter(page, 'data-img-id="', '"'):
+            spirit = text.extract(self.request(
+                iframe + image_id).text, 'giraffe.annihilate("', '"')[0]
+            params = {"spirit": self._annihilate(spirit), "photo": image_id}
+            data = self.request(backend, params=params).json()
+            yield data[0], {
+                "id"    : text.parse_int(image_id),
+                "width" : text.parse_int(data[1]),
+                "height": text.parse_int(data[2]),
+            }
+
+    @staticmethod
+    def _annihilate(value, base=6):
+        return "".join(
+            chr(ord(char) ^ base)
+            for char in value
+        )
