@@ -341,6 +341,7 @@ class Formatter():
     - "c": calls str.capitalize
     - "C": calls string.capwords
     - "U": calls urllib.parse.unquote
+    - "S": calls util.to_string()
     - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
 
     Extra Format Specifiers:
@@ -359,6 +360,10 @@ class Formatter():
     - "J<separator>/":
         Joins elements of a list (or string) using <separator>
         Example: {f:J - /} -> "a - b - c" (if "f" is ["a", "b", "c"])
+
+    - "R<old>/<new>/":
+        Replaces all occurrences of <old> with <new>
+        Example: {f:R /_/} -> "f_o_o_b_a_r" (if "f" is "f o o b a r")
     """
     CONVERSIONS = {
         "l": str.lower,
@@ -417,6 +422,8 @@ class Formatter():
                 func = self._format_maxlen
             elif format_spec[0] == "J":
                 func = self._format_join
+            elif format_spec[0] == "R":
+                func = self._format_replace
             else:
                 func = self._format_default
             fmt = func(format_spec)
@@ -482,6 +489,15 @@ class Formatter():
             return format(obj, format_spec)
         separator, _, format_spec = format_spec.partition("/")
         separator = separator[1:]
+        return wrap
+
+    @staticmethod
+    def _format_replace(format_spec):
+        def wrap(obj):
+            obj = obj.replace(old, new)
+            return format(obj, format_spec)
+        old, new, format_spec = format_spec.split("/", 2)
+        old = old[1:]
         return wrap
 
     @staticmethod
