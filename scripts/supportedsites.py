@@ -69,6 +69,7 @@ CATEGORY_MAP = {
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
     "thebarchive"    : "The /b/ Archive",
+    "vanillarock"    : "もえぴりあ",
     "wikiart"        : "WikiArt.org",
     "worldthree"     : "World Three",
     "xhamster"       : "xHamster",
