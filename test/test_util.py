@@ -264,6 +264,15 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:J/}"      , self.kwdict["a"])
         self._run_test("{a:J, /}"    , ", ".join(self.kwdict["a"]))
 
+    def test_replace(self):
+        self._run_test("{a:Rh/C/}"  , "CElLo wOrLd")
+        self._run_test("{a!l:Rh/C/}", "Cello world")
+        self._run_test("{a!u:Rh/C/}", "HELLO WORLD")
+
+        self._run_test("{a!l:Rl/_/}", "he__o wor_d")
+        self._run_test("{a!l:Rl//}" , "heo word")
+        self._run_test("{name:Rame/othing/}", "Nothing")
+
     def _run_test(self, format_string, result, default=None):
         formatter = util.Formatter(format_string, default)
         output = formatter.format_map(self.kwdict)
