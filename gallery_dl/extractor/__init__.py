@@ -93,6 +93,7 @@ modules = [
     "tsumino",
     "tumblr",
     "twitter",
+    "vanillarock",
     "wallhaven",
     "warosu",
     "weibo",
