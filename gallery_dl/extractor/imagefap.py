@@ -21,6 +21,10 @@ class ImagefapExtractor(Extractor):
     archive_fmt = "{gallery_id}_{image_id}"
     root = "https://www.imagefap.com"
 
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.session.headers["Referer"] = self.root
+
 
 class ImagefapGalleryExtractor(ImagefapExtractor):
     """Extractor for image galleries from imagefap.com"""
