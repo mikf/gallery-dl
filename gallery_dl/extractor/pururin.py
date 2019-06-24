@@ -17,29 +17,34 @@ class PururinGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries on pururin.io"""
     category = "pururin"
     pattern = r"(?:https?://)?(?:www\.)?pururin\.io/(?:gallery|read)/(\d+)"
-    test = ("https://pururin.io/gallery/38661/iowant-2", {
-        "pattern": r"https://cdn.pururin.io/assets/images/data/38661/\d+\.jpg",
-        "keyword": {
-            "title"     : "Iowant 2!!",
-            "title_en"  : "Iowant 2!!",
-            "title_jp"  : "",
-            "gallery_id": 38661,
-            "count"     : 19,
-            "artist"    : ["Shoda Norihiro"],
-            "group"     : ["Obsidian Order"],
-            "parody"    : ["Kantai Collection"],
-            "characters": ["Iowa", "Teitoku"],
-            "tags"      : list,
-            "type"      : "Doujinshi",
-            "collection": "",
-            "convention": "C92",
-            "rating"    : float,
-            "uploader"  : "demo",
-            "scanlator" : "",
-            "lang"      : "en",
-            "language"  : "English",
-        }
-    })
+    test = (
+        ("https://pururin.io/gallery/38661/iowant-2", {
+            "pattern": r"https://cdn.pururin.io/\w+/images/data/\d+/\d+\.jpg",
+            "keyword": {
+                "title"     : "Iowant 2!!",
+                "title_en"  : "Iowant 2!!",
+                "title_jp"  : "",
+                "gallery_id": 38661,
+                "count"     : 19,
+                "artist"    : ["Shoda Norihiro"],
+                "group"     : ["Obsidian Order"],
+                "parody"    : ["Kantai Collection"],
+                "characters": ["Iowa", "Teitoku"],
+                "tags"      : list,
+                "type"      : "Doujinshi",
+                "collection": "",
+                "convention": "C92",
+                "rating"    : float,
+                "uploader"  : "demo",
+                "scanlator" : "",
+                "lang"      : "en",
+                "language"  : "English",
+            }
+        }),
+        ("https://pururin.io/gallery/7661/unisis-team-vanilla", {
+            "count": 17,
+        }),
+    )
     root = "https://pururin.io"
 
     def __init__(self, match):
@@ -51,45 +56,43 @@ class PururinGalleryExtractor(GalleryExtractor):
         self._cnt = 0
 
     def metadata(self, page):
-        data = text.extract_all(page, (
-            ("artist"    , "<td>Artist</td>"    , "</td>"),
-            ("group"     , "<td>Circle</td>"    , "</td>"),
-            ("parody"    , "<td>Parody</td>"    , "</td>"),
-            ("tags"      , "<td>Contents</td>"  , "</td>"),
-            ("type"      , "<td>Category</td>"  , "</td>"),
-            ("characters", "<td>Character</td>" , "</td>"),
-            ("collection", "<td>Collection</td>", "</td>"),
-            ("language"  , "<td>Language</td>"  , "</td>"),
-            ("scanlator" , "<td>Scanlator</td>" , "</td>"),
-            ("convention", "<td>Convention</td>", "</td>"),
-            ("uploader"  , "<td>Uploader</td>"  , "</td>"),
-            ("rating"    , " :rating='"         , "'"),
-        ))[0]
+        extr = text.extract_from(page)
+
+        def _lst(key, e=extr):
+            return [
+                text.unescape(item)
+                for item in text.extract_iter(e(key, "</td>"), 'title="', '"')
+            ]
+
+        def _str(key, e=extr):
+            return text.unescape(text.extract(
+                e(key, "</td>"), 'title="', '"')[0] or "")
 
         url = "{}/read/{}/01/x".format(self.root, self.gallery_id)
         page = self.request(url).text
         info = json.loads(text.unescape(text.extract(
             page, ':gallery="', '"')[0]))
-
         self._ext = info["image_extension"]
         self._cnt = info["total_pages"]
 
-        for key in ("artist", "group", "parody", "tags", "characters"):
-            data[key] = [
-                text.unescape(item)
-                for item in text.extract_iter(data[key], 'title="', '"')
-            ]
-        for key in ("type", "collection", "language", "scanlator",
-                    "convention"):
-            data[key] = text.unescape(text.extract(
-                data[key], 'title="', '"')[0] or "")
-
-        data["gallery_id"] = text.parse_int(self.gallery_id)
-        data["title"] = info["title"] or info.get("j_title") or ""
-        data["title_en"] = info["title"]
-        data["title_jp"] = info.get("j_title") or ""
-        data["uploader"] = text.remove_html(data["uploader"])
-        data["rating"] = text.parse_float(data["rating"])
+        data = {
+            "gallery_id": text.parse_int(self.gallery_id),
+            "title"     : info["title"] or info.get("j_title") or "",
+            "title_en"  : info["title"],
+            "title_jp"  : info.get("j_title") or "",
+            "artist"    : _lst("<td>Artist</td>"),
+            "group"     : _lst("<td>Circle</td>"),
+            "parody"    : _lst("<td>Parody</td>"),
+            "tags"      : _lst("<td>Contents</td>"),
+            "type"      : _str("<td>Category</td>"),
+            "characters": _lst("<td>Character</td>"),
+            "collection": _str("<td>Collection</td>"),
+            "language"  : _str("<td>Language</td>"),
+            "scanlator" : _str("<td>Scanlator</td>"),
+            "convention": _str("<td>Convention</td>"),
+            "uploader"  : text.remove_html(extr("<td>Uploader</td>", "</td>")),
+            "rating"    : text.parse_float(extr(" :rating='"       , "'")),
+        }
         data["lang"] = util.language_to_code(data["language"])
         return data
 
