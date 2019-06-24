@@ -18,6 +18,7 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
     subcategory = "album"
     root = "https://nsfwalbum.com"
     filename_fmt = "{album_id}_{page:>03}_{id}.{extension}"
+    directory_fmt = ("{category}", "{album_id} {title}")
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?(?:www\.)?nsfwalbum\.com(/album/(\d+))"
     test = ("https://nsfwalbum.com/album/295201", {
