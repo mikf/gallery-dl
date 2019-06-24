@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import hashlib
 
 
 class MangoxoExtractor(Extractor):
@@ -46,7 +47,7 @@ class MangoxoExtractor(Extractor):
         }
         data = {
             "name": username,
-            "password": password,
+            "password": hashlib.md5(password.encode()).hexdigest(),
             "loginToken": token,
         }
         response = self.request(url, method="POST", headers=headers, data=data)
