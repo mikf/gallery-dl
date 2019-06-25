@@ -226,6 +226,14 @@ class DeviantartExtractor(Extractor):
         if mtype and mtype.startswith("image/"):
             content.update(data)
 
+    def _html_request(self, url, **kwargs):
+        cookies = {"userinfo": (
+            '__167217c8e6aac1a3331f;{"username":"","uniqueid":"ab2e8b184471bf0'
+            'e3f8ed3ee7a3220aa","vd":"Bc7vEx,BdC7Fy,A,J,A,,B,A,B,BdC7Fy,BdC7XU'
+            ',J,J,A,BdC7XU,13,A,B,A,,A,A,B,A,A,,A","attr":56}'
+        )}
+        return self.request(url, cookies=cookies, **kwargs)
+
 
 class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
@@ -408,12 +416,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
     def deviations(self):
         url = "{}/{}/{}".format(self.root, self.user, self.path)
-        cookies = {"userinfo": (
-            '__167217c8e6aac1a3331f;{"username":"","uniqueid":"ab2e8b184471bf0'
-            'e3f8ed3ee7a3220aa","vd":"Bc7vEx,BdC7Fy,A,J,A,,B,A,B,BdC7Fy,BdC7XU'
-            ',J,J,A,BdC7XU,13,A,B,A,,A,A,B,A,A,,A","attr":56}'
-        )}
-        response = self.request(url, cookies=cookies, expect=range(400, 500))
+        response = self._html_request(url, expect=range(400, 500))
         deviation_id = text.extract(response.text, '//deviation/', '"')[0]
         if response.status_code >= 400 or not deviation_id:
             raise exception.NotFoundError("image")
@@ -572,7 +575,7 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
 
     def deviations(self):
         url = "{}/{}/gallery/?catpath=scraps".format(self.root, self.user)
-        page = self.request(url).text
+        page = self._html_request(url).text
         csrf, pos = text.extract(page, '"csrf":"', '"')
         iid , pos = text.extract(page, '"requestid":"', '"', pos)
 
@@ -594,7 +597,7 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
                 if item["html"].startswith('<div class="ad-container'):
                     continue
                 deviation_url = text.extract(item["html"], 'href="', '"')[0]
-                page = self.request(deviation_url).text
+                page = self._html_request(deviation_url).text
                 deviation_id = text.extract(page, '//deviation/', '"')[0]
                 if deviation_id:
                     yield self.api.deviation(deviation_id)
