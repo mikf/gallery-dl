@@ -13,7 +13,7 @@ import re
 import json
 import hashlib
 import unittest
-from gallery_dl import extractor, job, config, exception
+from gallery_dl import extractor, util, job, config, exception
 
 
 # these don't work on Travis CI
@@ -161,8 +161,12 @@ class ResultJob(job.DownloadJob):
         self.hash_archive = hashlib.sha1()
         self.hash_content = hashlib.sha1()
         if content:
-            self.fileobj = FakePathfmt(self.hash_content)
+            self.fileobj = TestPathfmt(self.hash_content)
             self.get_downloader("http")._check_extension = lambda a, b: None
+
+        self.format_directory = TestFormatter(
+            "".join(self.extractor.directory_fmt))
+        self.format_filename = TestFormatter(self.extractor.filename_fmt)
 
     def run(self):
         for msg in self.extractor:
@@ -173,9 +177,11 @@ class ResultJob(job.DownloadJob):
         self.update_keyword(keywords)
         self.update_archive(keywords)
         self.update_content(url)
+        self.format_filename.format_map(keywords)
 
     def handle_directory(self, keywords):
         self.update_keyword(keywords, False)
+        self.format_directory.format_map(keywords)
 
     def handle_queue(self, url, keywords):
         self.queue = True
@@ -204,8 +210,7 @@ class ResultJob(job.DownloadJob):
             self.get_downloader(scheme).download(url, self.fileobj)
 
 
-class FakePathfmt():
-    """Minimal file-like interface"""
+class TestPathfmt():
 
     def __init__(self, hashobj):
         self.hashobj = hashobj
@@ -233,6 +238,32 @@ class FakePathfmt():
 
     def part_size(self):
         return 0
+
+
+class TestFormatter(util.Formatter):
+
+    @staticmethod
+    def _noop(_):
+        return ""
+
+    def _apply_simple(self, key, fmt):
+        if key == "extension" or "._format_optional." in repr(fmt):
+            return self._noop
+
+        def wrap(obj):
+            return fmt(obj[key])
+        return wrap
+
+    def _apply(self, key, funcs, fmt):
+        if key == "extension" or "._format_optional." in repr(fmt):
+            return self._noop
+
+        def wrap(obj):
+            obj = obj[key]
+            for func in funcs:
+                obj = func(obj)
+            return fmt(obj)
+        return wrap
 
 
 def setup_test_config():
