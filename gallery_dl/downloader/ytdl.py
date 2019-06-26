@@ -37,6 +37,9 @@ class YoutubeDLDownloader(DownloaderBase):
         self.ytdl = YoutubeDL(options)
 
     def download(self, url, pathfmt):
+        for cookie in self.session.cookies:
+            self.ytdl.cookiejar.set_cookie(cookie)
+
         try:
             info_dict = self.ytdl.extract_info(url[5:], download=False)
         except Exception:
