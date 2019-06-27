@@ -16,6 +16,7 @@ import string
 class HitomiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
+    root = "https://hitomi.la"
     pattern = r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)"
     test = (
         ("https://hitomi.la/galleries/867789.html", {
@@ -31,12 +32,17 @@ class HitomiGalleryExtractor(GalleryExtractor):
             "range": "1",
             "content": "b3ca8c6c8cc5826cf8b4ceb7252943abad7b8b4c",
         }),
+        ("https://hitomi.la/galleries/733697.html", {
+            # Game CG with scenes (#321)
+            "url": "c2a84185f467450b8b9b72fbe40c0649029ce007",
+            "count": 210,
+        }),
         ("https://hitomi.la/reader/867789.html"),
     )
 
     def __init__(self, match):
         self.gallery_id = text.parse_int(match.group(1))
-        url = "https://hitomi.la/galleries/{}.html".format(self.gallery_id)
+        url = "{}/galleries/{}.html".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -67,11 +73,18 @@ class HitomiGalleryExtractor(GalleryExtractor):
         # set Referer header before image downloads (#239)
         self.session.headers["Referer"] = self.chapter_url
 
+        # handle Game CG galleries with scenes (#321)
+        scenes = text.extract(page, "var scene_indexes = [", "]")[0]
+        if scenes and scenes.strip():
+            url = "{}/reader/{}.html".format(self.root, self.gallery_id)
+            page = self.request(url).text
+            begin, end = ">//g.hitomi.la/galleries/", "</div>"
+        else:
+            begin, end = "'//tn.hitomi.la/smalltn/", ".jpg',"
+
         return [
             (base + urlpart, None)
-            for urlpart in text.extract_iter(
-                page, "'//tn.hitomi.la/smalltn/", ".jpg',"
-            )
+            for urlpart in text.extract_iter(page, begin, end)
         ]
 
     @staticmethod
