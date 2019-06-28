@@ -124,7 +124,8 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
             iv = (0xa5, 0xe8, 0xe2, 0xe9, 0xc2, 0x72, 0x1b, 0xe0,
                   0xa8, 0x4a, 0xd6, 0x60, 0xc4, 0x72, 0xc1, 0xf3)
             return [
-                (aes.aes_cbc_decrypt_text(data, key, iv), None)
+                (aes.aes_cbc_decrypt_text(
+                    data, key, iv).partition("&")[0], None)
                 for data in text.extract_iter(
                     page, 'lstImages.push(wrapKA("', '"'
                 )
