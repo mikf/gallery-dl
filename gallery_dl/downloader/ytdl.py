@@ -27,6 +27,7 @@ class YoutubeDLDownloader(DownloaderBase):
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
             "nopart": not self.part,
+            "updatetime": self.config("mtime", True),
         }
         options.update(self.config("raw-options") or {})
 
@@ -36,6 +37,9 @@ class YoutubeDLDownloader(DownloaderBase):
         self.ytdl = YoutubeDL(options)
 
     def download(self, url, pathfmt):
+        for cookie in self.session.cookies:
+            self.ytdl.cookiejar.set_cookie(cookie)
+
         try:
             info_dict = self.ytdl.extract_info(url[5:], download=False)
         except Exception:

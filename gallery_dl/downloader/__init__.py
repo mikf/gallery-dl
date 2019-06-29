@@ -22,15 +22,23 @@ def find(scheme):
     try:
         return _cache[scheme]
     except KeyError:
-        klass = None
+        pass
+
+    klass = None
+    if scheme == "https":
+        scheme = "http"
+    if scheme in modules:  # prevent unwanted imports
         try:
-            if scheme in modules:  # prevent unwanted imports
-                module = importlib.import_module("." + scheme, __package__)
-                klass = module.__downloader__
-        except (ImportError, AttributeError, TypeError):
+            module = importlib.import_module("." + scheme, __package__)
+            klass = module.__downloader__
+        except ImportError:
             pass
+
+    if scheme == "http":
+        _cache["http"] = _cache["https"] = klass
+    else:
         _cache[scheme] = klass
-        return klass
+    return klass
 
 
 # --------------------------------------------------------------------
