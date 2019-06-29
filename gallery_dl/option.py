@@ -183,6 +183,12 @@ def build_parser():
         help="Do not use .part files",
     )
     downloader.add_argument(
+        "--no-mtime",
+        dest="mtime", nargs=0, action=ConfigConstAction, const=False,
+        help=("Do not set file modification times according to "
+              "Last-Modified HTTP response headers")
+    )
+    downloader.add_argument(
         "--no-check-certificate",
         dest="verify", nargs=0, action=ConfigConstAction, const=False,
         help="Disable HTTPS certificate validation",

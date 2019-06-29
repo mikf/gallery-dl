@@ -35,6 +35,30 @@ class Logger(logging.Logger):
         return rv
 
 
+class Formatter(logging.Formatter):
+    """Custom formatter that supports different formats per loglevel"""
+
+    def __init__(self, fmt, datefmt):
+        if not isinstance(fmt, dict):
+            fmt = {"debug": fmt, "info": fmt, "warning": fmt, "error": fmt}
+        self.formats = fmt
+        self.datefmt = datefmt
+
+    def format(self, record):
+        record.message = record.getMessage()
+        fmt = self.formats[record.levelname]
+        if "{asctime" in fmt:
+            record.asctime = self.formatTime(record, self.datefmt)
+        msg = fmt.format_map(record.__dict__)
+        if record.exc_info and not record.exc_text:
+            record.exc_text = self.formatException(record.exc_info)
+        if record.exc_text:
+            msg = msg + "\n" + record.exc_text
+        if record.stack_info:
+            msg = msg + "\n" + record.stack_info
+        return msg
+
+
 def initialize_logging(loglevel):
     """Setup basic logging functionality before configfiles have been loaded"""
     # convert levelnames to lowercase
@@ -46,7 +70,7 @@ def initialize_logging(loglevel):
     logging.Logger.manager.setLoggerClass(Logger)
 
     # setup basic logging to stderr
-    formatter = logging.Formatter(LOG_FORMAT, LOG_FORMAT_DATE, "{")
+    formatter = Formatter(LOG_FORMAT, LOG_FORMAT_DATE)
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     handler.setLevel(loglevel)
@@ -80,13 +104,11 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
             "%s: missing or invalid path (%s)", key, exc)
         return None
 
-    level = opts.get("level", lvl)
-    logfmt = opts.get("format", fmt)
-    datefmt = opts.get("format-date", LOG_FORMAT_DATE)
-    formatter = logging.Formatter(logfmt, datefmt, "{")
-    handler.setFormatter(formatter)
-    handler.setLevel(level)
-
+    handler.setLevel(opts.get("level", lvl))
+    handler.setFormatter(Formatter(
+        opts.get("format", fmt),
+        opts.get("format-date", LOG_FORMAT_DATE),
+    ))
     return handler
 
 
@@ -100,10 +122,10 @@ def configure_logging_handler(key, handler):
     if handler.level == LOG_LEVEL and "level" in opts:
         handler.setLevel(opts["level"])
     if "format" in opts or "format-date" in opts:
-        logfmt = opts.get("format", LOG_FORMAT)
-        datefmt = opts.get("format-date", LOG_FORMAT_DATE)
-        formatter = logging.Formatter(logfmt, datefmt, "{")
-        handler.setFormatter(formatter)
+        handler.setFormatter(Formatter(
+            opts.get("format", LOG_FORMAT),
+            opts.get("format-date", LOG_FORMAT_DATE),
+        ))
 
 
 # --------------------------------------------------------------------

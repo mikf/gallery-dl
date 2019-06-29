@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.8.7 - 2019-06-28
 ### Additions
 - Support for

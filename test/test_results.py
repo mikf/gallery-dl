@@ -161,9 +161,10 @@ class ResultJob(job.DownloadJob):
         self.hash_keyword = hashlib.sha1()
         self.hash_archive = hashlib.sha1()
         self.hash_content = hashlib.sha1()
+
         if content:
             self.fileobj = TestPathfmt(self.hash_content)
-            self.get_downloader("http")._check_extension = lambda a, b: None
+            self.get_downloader("http").check_extension = lambda a, b: None
 
         self.format_directory = TestFormatter(
             "".join(self.extractor.directory_fmt))
@@ -217,6 +218,7 @@ class TestPathfmt():
         self.hashobj = hashobj
         self.path = ""
         self.size = 0
+        self.keywords = {}
         self.has_extension = True
 
     def __enter__(self):
@@ -279,9 +281,10 @@ def setup_test_config():
     config.set(("extractor", "password"), name)
     config.set(("extractor", "nijie", "username"), email)
     config.set(("extractor", "seiga", "username"), email)
-    config.set(("extractor", "danbooru", "username"), None)
-    config.set(("extractor", "twitter" , "username"), None)
-    config.set(("extractor", "mangoxo" , "password"), "VZ8DL3983u")
+    config.set(("extractor", "danbooru" , "username"), None)
+    config.set(("extractor", "instagram", "username"), None)
+    config.set(("extractor", "twitter"  , "username"), None)
+    config.set(("extractor", "mangoxo"  , "password"), "VZ8DL3983u")
 
     config.set(("extractor", "deviantart", "client-id"), "7777")
     config.set(("extractor", "deviantart", "client-secret"),

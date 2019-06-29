@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2018 Mike Fährmann
+# Copyright 2014-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,24 +14,13 @@ from .common import DownloaderBase
 class TextDownloader(DownloaderBase):
     scheme = "text"
 
-    def __init__(self, extractor, output):
-        DownloaderBase.__init__(self, extractor, output)
-        self.content = b""
-
-    def connect(self, url, offset):
-        data = url.encode()
-        self.content = data[offset + 5:]
-        return offset, len(data) - 5
-
-    def receive(self, file):
-        file.write(self.content)
-
-    def reset(self):
-        self.content = b""
-
-    @staticmethod
-    def get_extension():
-        return "txt"
+    def download(self, url, pathfmt):
+        if self.part:
+            pathfmt.part_enable(self.partdir)
+        self.out.start(pathfmt.path)
+        with pathfmt.open("wb") as file:
+            file.write(url.encode()[5:])
+        return True
 
 
 __downloader__ = TextDownloader

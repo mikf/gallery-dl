@@ -46,7 +46,7 @@ ImageFap             https://imagefap.com/               Images from Users, Gall
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
-Instagram            https://www.instagram.com/          Images from Users, individual Images, Tag-Searches
+Instagram            https://www.instagram.com/          Images from Users, individual Images, Tag-Searches Optional
 Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga
 Joyreactor           http://joyreactor.cc/               |joyreactor-C|
 Keenspot             http://www.keenspot.com/            Comics

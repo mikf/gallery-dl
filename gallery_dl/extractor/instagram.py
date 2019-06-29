@@ -11,7 +11,8 @@
 import hashlib
 import json
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 
 
 class InstagramExtractor(Extractor):
@@ -21,11 +22,14 @@ class InstagramExtractor(Extractor):
     filename_fmt = "{sidecar_media_id:?/_/}{media_id}.{extension}"
     archive_fmt = "{media_id}"
     root = "https://www.instagram.com"
+    cookiedomain = ".instagram.com"
+    cookienames = ("sessionid",)
 
     def get_metadata(self):
         return {}
 
     def items(self):
+        self.login()
         yield Message.Version, 1
 
         metadata = self.get_metadata()
@@ -39,6 +43,46 @@ class InstagramExtractor(Extractor):
             elif data['typename'] == 'GraphVideo':
                 yield Message.Url, \
                     'ytdl:{}/p/{}/'.format(self.root, data['shortcode']), data
+
+    def login(self):
+        if self._check_cookies(self.cookienames):
+            return
+        username, password = self._get_auth_info()
+        if username:
+            self.session.cookies.set("ig_cb", "1", domain="www.instagram.com")
+            self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=360*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        page = self.request(self.root + "/accounts/login/").text
+        headers = {
+            "Referer"         : self.root + "/accounts/login/",
+            "X-IG-App-ID"     : "936619743392459",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+
+        response = self.request(self.root + "/web/__mid/", headers=headers)
+        headers["X-CSRFToken"] = response.cookies["csrftoken"]
+        headers["X-Instagram-AJAX"] = text.extract(
+            page, '"rollout_hash":"', '"')[0]
+
+        url = self.root + "/accounts/login/ajax/"
+        data = {
+            "username"     : username,
+            "password"     : password,
+            "queryParams"  : "{}",
+            "optIntoOneTap": "true",
+        }
+        response = self.request(url, method="POST", headers=headers, data=data)
+
+        if not response.json().get("authenticated"):
+            raise exception.AuthenticationError()
+        return {
+            key: self.session.cookies.get(key)
+            for key in ("sessionid", "mid", "csrftoken")
+        }
 
     def _extract_shared_data(self, page):
         return json.loads(text.extract(page,
