@@ -122,7 +122,9 @@ def main():
         if args.yamlfiles:
             config.load(args.yamlfiles, strict=True, fmt="yaml")
         if args.postprocessors:
-            config.set(("postprocessors", ), args.postprocessors)
+            config.set(("postprocessors",), args.postprocessors)
+        if args.abort:
+            config.set(("skip",), "abort:" + str(args.abort))
         for key, value in args.options:
             config.set(key, value)
 

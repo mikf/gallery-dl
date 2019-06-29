@@ -11,6 +11,7 @@
 import argparse
 import logging
 import json
+import sys
 from . import job, version
 
 
@@ -23,6 +24,14 @@ class ConfigAction(argparse.Action):
 class ConfigConstAction(argparse.Action):
     """Set argparse const values as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
+        namespace.options.append(((self.dest,), self.const))
+
+
+class DeprecatedConfigConstAction(argparse.Action):
+    """Set argparse const values as config values + deprecation warning"""
+    def __call__(self, parser, namespace, values, option_string=None):
+        print("warning: {} is deprecated. Use {} instead.".format(
+            "/".join(self.option_strings), self.choices), file=sys.stderr)
         namespace.options.append(((self.dest,), self.const))
 
 
@@ -168,6 +177,13 @@ def build_parser():
         help="Number of retries (default: 5)",
     )
     downloader.add_argument(
+        "-A", "--abort",
+        dest="abort", metavar="N", type=int,
+        help=("Abort extractor run after N consecutive file downloads have "
+              "been skipped, e.g. if files with the same filename already "
+              "exist"),
+    )
+    downloader.add_argument(
         "--http-timeout",
         dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
         help="Timeout for HTTP connections (defaut: 30.0)",
@@ -195,9 +211,9 @@ def build_parser():
     )
     downloader.add_argument(
         "--abort-on-skip",
-        dest="skip", nargs=0, action=ConfigConstAction, const="abort",
-        help=("Abort extractor run if a file download would normally be "
-              "skipped, i.e. if a file with the same filename already exists"),
+        action=DeprecatedConfigConstAction,
+        dest="skip", nargs=0, const="abort", choices="-A/--abort",
+        help=argparse.SUPPRESS,
     )
 
     configuration = parser.add_argument_group("Configuration Options")
