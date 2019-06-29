@@ -381,6 +381,28 @@ Description Like `image-filter`__, but applies to delegated URLs
 __ `extractor.*.image-filter`_
 
 
+extractor.*.image-unique
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Ignore image URLs that have been encountered before during the
+            current extractor run.
+=========== =====
+
+
+extractor.*.chapter-unique
+--------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Like `image-unique`__, but applies to delegated URLs
+            like manga-chapters, etc.
+=========== =====
+
+__ `extractor.*.image-unique`_
+
+
 
 Extractor-specific Options
 ==========================

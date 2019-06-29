@@ -29,15 +29,9 @@ class Job():
         extr.log.job = self
         extr.log.debug("Using %s for '%s'", extr.__class__.__name__, extr.url)
 
-        # url predicates
-        self.pred_url = self._prepare_predicates(
-            "image", [util.UniquePredicate()], True)
+        self.pred_url = self._prepare_predicates("image", True)
+        self.pred_queue = self._prepare_predicates("chapter", False)
 
-        # queue predicates
-        self.pred_queue = self._prepare_predicates(
-            "chapter", [], False)
-
-        # category transfer
         if parent and parent.extractor.config(
                 "category-transfer", parent.extractor.categorytransfer):
             self.extractor.category = parent.extractor.category
@@ -142,7 +136,12 @@ class Job():
         if self.userkwds:
             kwdict.update(self.userkwds)
 
-    def _prepare_predicates(self, target, predicates, skip=True):
+    def _prepare_predicates(self, target, skip=True):
+        predicates = []
+
+        if self.extractor.config(target + "-unique"):
+            predicates.append(util.UniquePredicate())
+
         pfilter = self.extractor.config(target + "-filter")
         if pfilter:
             try:
