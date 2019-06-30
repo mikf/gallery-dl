@@ -64,10 +64,10 @@ class HttpDownloader(DownloaderBase):
             if tries:
                 if response:
                     response.close()
-                self.log.warning("%s (%d/%d)", msg, tries, self.retries)
-                if tries >= self.retries:
+                self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
+                if tries > self.retries:
                     return False
-                time.sleep(tries)
+                time.sleep(min(2 ** (tries-1), 1800))
             tries += 1
 
             # check for .part file
@@ -142,6 +142,7 @@ class HttpDownloader(DownloaderBase):
                 if size and file.tell() < size:
                     msg = "filesize mismatch ({} < {})".format(
                         file.tell(), size)
+                    print()
                     continue
 
                 # check filename extension

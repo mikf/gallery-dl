@@ -39,7 +39,7 @@ class Extractor():
         self._init_headers()
         self._init_cookies()
         self._init_proxies()
-        self._retries = self.config("retries", 5)
+        self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
 
@@ -65,9 +65,9 @@ class Extractor():
 
     def request(self, url, method="GET", *, session=None,
                 encoding=None, expect=(), retries=None, **kwargs):
-        tries = 0
-        retries = retries or self._retries
-        session = session or self.session
+        tries = 1
+        retries = self._retries if retries is None else retries
+        session = self.session if session is None else session
         kwargs.setdefault("timeout", self._timeout)
         kwargs.setdefault("verify", self._verify)
 
@@ -98,11 +98,11 @@ class Extractor():
                 if code < 500 and code != 429:
                     break
 
-            tries += 1
-            self.log.debug("%s (%d/%d)", msg, tries, retries)
-            if tries >= retries:
+            self.log.debug("%s (%s/%s)", msg, tries, retries+1)
+            if tries > retries:
                 break
-            time.sleep(2 ** tries)
+            time.sleep(min(2 ** (tries-1), 1800))
+            tries += 1
 
         raise exception.HttpError(msg)
 
