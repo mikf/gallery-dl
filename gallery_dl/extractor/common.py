@@ -43,6 +43,9 @@ class Extractor():
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
 
+        if self._retries < 0:
+            self._retries = float("inf")
+
     @classmethod
     def from_url(cls, url):
         if isinstance(cls.pattern, str):

@@ -301,7 +301,8 @@ extractor.*.retries
 =========== =====
 Type        ``integer``
 Default     ``4``
-Description Number of times a failed HTTP request is retried before giving up.
+Description Maximum number of times a failed HTTP request is retried before
+            giving up or ``-1`` for infinite retries.
 =========== =====
 
 
@@ -1024,7 +1025,8 @@ downloader.*.retries
 =========== =====
 Type        ``integer``
 Default     `extractor.*.retries`_
-Description Number of retries during file downloads.
+Description Maximum number of retries during file downloads
+            or ``-1`` for infinite retries.
 =========== =====
 
 

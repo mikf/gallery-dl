@@ -30,6 +30,8 @@ class HttpDownloader(DownloaderBase):
         self.downloading = False
         self.chunk_size = 16384
 
+        if self.retries < 0:
+            self.retries = float("inf")
         if self.rate:
             self.rate = text.parse_bytes(self.rate)
             if not self.rate:
