@@ -173,8 +173,9 @@ def build_parser():
     )
     downloader.add_argument(
         "-R", "--retries",
-        dest="retries", metavar="RETRIES", type=int, action=ConfigAction,
-        help="Number of retries (default: 4)",
+        dest="retries", metavar="N", type=int, action=ConfigAction,
+        help=("Maximum number of retries for failed HTTP requests "
+              "or -1 for infinite retries (default: 4)"),
     )
     downloader.add_argument(
         "-A", "--abort",

@@ -20,10 +20,11 @@ class YoutubeDLDownloader(DownloaderBase):
     def __init__(self, extractor, output):
         DownloaderBase.__init__(self, extractor, output)
 
+        retries = self.config("retries", extractor._retries)
         options = {
             "format": self.config("format") or None,
             "ratelimit": text.parse_bytes(self.config("rate"), None),
-            "retries": self.config("retries", extractor._retries),
+            "retries": retries+1 if retries >= 0 else float("inf"),
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
             "nopart": not self.part,
