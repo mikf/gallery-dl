@@ -300,7 +300,7 @@ extractor.*.retries
 -------------------
 =========== =====
 Type        ``integer``
-Default     ``5``
+Default     ``4``
 Description Number of times a failed HTTP request is retried before giving up.
 =========== =====
 
