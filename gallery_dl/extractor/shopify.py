@@ -89,10 +89,14 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
         while True:
             page = self.request(self.item_url, params=params).text
             urls = search_re.findall(page)
+            last = None
 
             if not urls:
                 return
             for path in urls:
+                if last == path:
+                    continue
+                last = path
                 yield self.root + path
             params["page"] += 1
 
