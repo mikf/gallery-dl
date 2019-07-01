@@ -12,9 +12,13 @@ import os
 import time
 import mimetypes
 from requests.exceptions import RequestException, ConnectionError, Timeout
-from ssl import SSLError
 from .common import DownloaderBase
 from .. import text
+
+try:
+    from OpenSSL.SSL import Error as SSLError
+except ImportError:
+    from ssl import SSLError
 
 
 class HttpDownloader(DownloaderBase):
