@@ -23,9 +23,9 @@ class SexcomExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
         yield Message.Directory, self.metadata()
-        for url in self.pins():
-            pin = self._parse_pin(url)
-            yield Message.Url, pin["url"], pin
+        for pin in map(self._parse_pin, self.pins()):
+            if pin:
+                yield Message.Url, pin["url"], pin
 
     def metadata(self):
         return {}
@@ -49,8 +49,13 @@ class SexcomExtractor(Extractor):
                 return
             url = text.urljoin(self.root, url)
 
-    def _parse_pin(self, pin_url):
-        extr = text.extract_from(self.request(pin_url).text)
+    def _parse_pin(self, url, expect=range(400, 429)):
+        response = self.request(url, expect=expect)
+        if response.status_code >= 400:
+            self.log.warning("Unable to fetch %s (%s: %s)",
+                             url, response.status_code, response.reason)
+            return None
+        extr = text.extract_from(response.text)
         data = {}
 
         data["thumbnail"] = extr('itemprop="thumbnail" content="', '"')
@@ -123,6 +128,10 @@ class SexcomPinExtractor(SexcomExtractor):
         # pornhub embed
         ("https://www.sex.com/pin/55847384-very-nicely-animated/", {
             "pattern": "ytdl:https://www.pornhub.com/embed/ph56ef24b6750f2",
+        }),
+        # 404
+        ("https://www.sex.com/pin/55847385/", {
+            "count": 0,
         }),
     )
 
