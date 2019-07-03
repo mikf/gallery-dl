@@ -93,10 +93,10 @@ class SexcomExtractor(Extractor):
 
 
 class SexcomPinExtractor(SexcomExtractor):
-    """Extractor a pinned image or video on www.sex.com"""
+    """Extractor for a pinned image or video on www.sex.com"""
     subcategory = "pin"
     directory_fmt = ("{category}",)
-    pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+)"
+    pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+)(?!.*#related$)"
     test = (
         # picture
         ("https://www.sex.com/pin/56714360/", {
@@ -141,6 +141,25 @@ class SexcomPinExtractor(SexcomExtractor):
 
     def pins(self):
         return ("{}/pin/{}/".format(self.root, self.pin_id),)
+
+
+class SexcomRelatedPinExtractor(SexcomPinExtractor):
+    """Extractor for related pins on www.sex.com"""
+    subcategory = "related-pin"
+    directory_fmt = ("{category}", "related {original_pin[pin_id]}")
+    pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+).*#related$"
+    test = ("https://www.sex.com/pin/56714360/#related", {
+        "count": 24,
+    })
+
+    def metadata(self):
+        pin = self._parse_pin(SexcomPinExtractor.pins(self)[0])
+        return {"original_pin": pin}
+
+    def pins(self):
+        url = "{}/pin/related?pinId={}&limit=24&offset=0".format(
+            self.root, self.pin_id)
+        return self._pagination(url)
 
 
 class SexcomBoardExtractor(SexcomExtractor):
