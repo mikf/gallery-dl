@@ -94,7 +94,7 @@ Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag-Searc
 Sankaku Complex      https://www.sankakucomplex.com/     Articles, Tag-Searches
 Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          http://sensescans.com/reader/       Chapters, Manga
-Sex.com              https://www.sex.com/                Boards, Pins, Search Results
+Sex.com              https://www.sex.com/                Boards, Pins, related Pins, Search Results
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
 SlickPic             https://www.slickpic.com/           Images from Users, Albums
 SlideShare           https://www.slideshare.net/         Presentations
