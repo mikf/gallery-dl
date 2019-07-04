@@ -24,6 +24,7 @@ modules = [
     "deviantart",
     "dynastyscans",
     "e621",
+    "erolord",
     "exhentai",
     "fallenangels",
     "flickr",
