@@ -235,8 +235,7 @@ class RedditAPI():
         url = "https://oauth.reddit.com" + endpoint
         params["raw_json"] = 1
         self.authenticate()
-        response = self.extractor.request(
-            url, params=params, expect=range(400, 500))
+        response = self.extractor.request(url, params=params, fatal=False)
         remaining = response.headers.get("x-ratelimit-remaining")
         if remaining and float(remaining) < 2:
             wait = int(response.headers["x-ratelimit-reset"])

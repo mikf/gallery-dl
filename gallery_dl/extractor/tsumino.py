@@ -107,9 +107,9 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
     def images(self, page):
         url = "{}/Read/Load/?q={}".format(self.root, self.gallery_id)
         headers = {"Referer": self.chapter_url}
-        response = self.request(url, headers=headers, expect=(404,))
+        response = self.request(url, headers=headers, fatal=False)
 
-        if response.status_code == 404:
+        if response.status_code >= 400:
             url = "{}/Read/View/{}".format(self.root, self.gallery_id)
             self.log.error(
                 "Failed to get gallery JSON data. Visit '%s' in a browser "

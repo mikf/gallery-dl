@@ -16,16 +16,15 @@ import json
 class ImgurExtractor(Extractor):
     """Base class for imgur extractors"""
     category = "imgur"
+    root = "https://imgur.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.item_id = match.group(1)
         self.mp4 = self.config("mp4", True)
 
-    def _get_data(self, urlpart):
-        response = self.request("https://imgur.com/" + urlpart, expect=(404,))
-        if response.status_code == 404:
-            raise exception.NotFoundError(self.subcategory)
+    def _get_data(self, path):
+        response = self.request(self.root + path, notfound=self.subcategory)
         data = text.extract(response.text, "image               : ", ",\n")[0]
         return self._clean(json.loads(data))
 
@@ -102,7 +101,7 @@ class ImgurImageExtractor(ImgurExtractor):
     )
 
     def items(self):
-        image = self._get_data(self.item_id)
+        image = self._get_data("/" + self.item_id)
         url = self._prepare(image)
 
         yield Message.Version, 1
@@ -165,13 +164,13 @@ class ImgurAlbumExtractor(ImgurExtractor):
     )
 
     def items(self):
-        album = self._get_data("a/" + self.item_id + "/all")
+        album = self._get_data("/a/" + self.item_id + "/all")
         images = album["album_images"]["images"]
         del album["album_images"]
 
         if int(album["num_images"]) > len(images):
-            url = ("https://imgur.com/ajaxalbums/getimages/" +
-                   self.item_id + "/hit.json")
+            url = "{}/ajaxalbums/getimages/{}/hit.json".format(
+                self.root, self.item_id)
             images = self.request(url).json()["data"]["images"]
 
         yield Message.Version, 1

@@ -66,8 +66,8 @@ class Extractor():
         return config.interpolate(
             ("extractor", self.category, self.subcategory, key), default)
 
-    def request(self, url, method="GET", *, session=None,
-                encoding=None, expect=(), retries=None, **kwargs):
+    def request(self, url, method="GET", *, session=None, retries=None,
+                encoding=None, fatal=True, notfound=None, **kwargs):
         tries = 1
         retries = self._retries if retries is None else retries
         session = self.session if session is None else session
@@ -86,10 +86,13 @@ class Extractor():
                 raise exception.HttpError(exc)
             else:
                 code = response.status_code
-                if 200 <= code < 400 or code in expect:
+                if 200 <= code < 400 or not fatal and \
+                        (400 <= code < 429 or 431 <= code < 500):
                     if encoding:
                         response.encoding = encoding
                     return response
+                if notfound and code == 404:
+                    raise exception.NotFoundError(notfound)
                 if cloudflare.is_challenge(response):
                     self.log.info("Solving Cloudflare challenge")
                     url, domain, cookies = cloudflare.solve_challenge(
@@ -98,7 +101,7 @@ class Extractor():
                     continue
 
                 msg = "{}: {} for url: {}".format(code, response.reason, url)
-                if code < 500 and code != 429:
+                if code < 500 and code != 429 and code != 430:
                     break
 
             self.log.debug("%s (%s/%s)", msg, tries, retries+1)

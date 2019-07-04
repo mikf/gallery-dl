@@ -110,8 +110,8 @@ class SankakucomplexTagExtractor(SankakucomplexExtractor):
         yield Message.Version, 1
         while True:
             url = "{}/{}/page/{}/".format(self.root, self.path, pnum)
-            response = self.request(url, expect=(404,))
-            if response.status_code == 404:
+            response = self.request(url, fatal=False)
+            if response.status_code >= 400:
                 return
             for url in text.extract_iter(response.text, 'data-direct="', '"'):
                 if url != last:

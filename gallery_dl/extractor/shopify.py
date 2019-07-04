@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message, SharedConfigMixin, generate_extractors
 from .. import text
-import time
 import re
 
 
@@ -24,19 +23,9 @@ class ShopifyExtractor(SharedConfigMixin, Extractor):
         Extractor.__init__(self, match)
         self.item_url = self.root + match.group(1)
 
-    def request(self, url, method="GET", expect=range(400, 500), **kwargs):
-        tries = 0
-        kwargs["expect"] = expect
-        while True:
-            response = Extractor.request(self, url, method, **kwargs)
-            if response.status_code not in (429, 430):
-                return response
-            tries += 1
-            waittime = 2 ** (tries + 2)
-            self.log.warning(
-                "HTTP status %s: %s - Waiting for %d seconds",
-                response.status_code, response.reason, waittime)
-            time.sleep(waittime)
+    def request(self, url, **kwargs):
+        kwargs["retries"] = float("inf")
+        return Extractor.request(self, url, **kwargs)
 
     def items(self):
         data = self.metadata()
@@ -45,9 +34,10 @@ class ShopifyExtractor(SharedConfigMixin, Extractor):
 
         headers = {"X-Requested-With": "XMLHttpRequest"}
         for url in self.products():
-            response = self.request(url + ".json", headers=headers)
+            response = self.request(
+                url + ".json", headers=headers, fatal=False)
             if response.status_code >= 400:
-                self.log.warning('Skipping %s ("%d: %s")',
+                self.log.warning('Skipping %s ("%s: %s")',
                                  url, response.status_code, response.reason)
                 continue
             product = response.json()["product"]
