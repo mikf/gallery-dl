@@ -143,9 +143,7 @@ class PixivMeExtractor(PixivExtractor):
     def items(self):
         url = "https://pixiv.me/" + self.account
         response = self.request(
-            url, method="HEAD", allow_redirects=False, expect=(404,))
-        if response.status_code == 404:
-            raise exception.NotFoundError("user")
+            url, method="HEAD", allow_redirects=False, notfound="user")
         yield Message.Version, 1
         yield Message.Queue, response.headers["Location"], {}
 
@@ -445,7 +443,7 @@ class PixivAppAPI():
             data["password"] = password
 
         response = self.extractor.request(
-            url, method="POST", data=data, expect=(400,))
+            url, method="POST", data=data, fatal=False)
         if response.status_code >= 400:
             raise exception.AuthenticationError()
 
@@ -491,10 +489,9 @@ class PixivAppAPI():
         url = "https://app-api.pixiv.net/" + endpoint
 
         self.login()
-        response = self.extractor.request(
-            url, params=params, expect=range(400, 500))
+        response = self.extractor.request(url, params=params, fatal=False)
 
-        if 200 <= response.status_code < 400:
+        if response.status_code < 400:
             return response.json()
         if response.status_code == 404:
             raise exception.NotFoundError()

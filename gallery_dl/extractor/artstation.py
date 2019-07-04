@@ -79,9 +79,7 @@ class ArtstationExtractor(Extractor):
     def get_user_info(self, username):
         """Return metadata for a specific user"""
         url = "{}/users/{}/quick.json".format(self.root, username.lower())
-        response = self.request(url, expect=(404,))
-        if response.status_code == 404:
-            raise exception.NotFoundError("user")
+        response = self.request(url, notfound="user")
         return response.json()
 
     def _pagination(self, url, params=None):

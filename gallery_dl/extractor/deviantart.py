@@ -416,7 +416,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
     def deviations(self):
         url = "{}/{}/{}".format(self.root, self.user, self.path)
-        response = self._html_request(url, expect=range(400, 500))
+        response = self._html_request(url, fatal=False)
         deviation_id = text.extract(response.text, '//deviation/', '"')[0]
         if response.status_code >= 400 or not deviation_id:
             raise exception.NotFoundError("image")
@@ -767,7 +767,7 @@ class DeviantartAPI():
     def user_profile(self, username):
         """Get user profile information"""
         endpoint = "user/profile/" + username
-        return self._call(endpoint, expect_error=True)
+        return self._call(endpoint, fatal=False)
 
     def authenticate(self, refresh_token):
         """Authenticate the application by requesting an access token"""
@@ -797,7 +797,7 @@ class DeviantartAPI():
             _refresh_token_cache.update(refresh_token, data["refresh_token"])
         return "Bearer " + data["access_token"]
 
-    def _call(self, endpoint, params=None, expect_error=False, public=True):
+    def _call(self, endpoint, params=None, fatal=True, public=True):
         """Call an API endpoint"""
         url = "https://www.deviantart.com/api/v1/oauth2/" + endpoint
         while True:
@@ -806,11 +806,7 @@ class DeviantartAPI():
 
             self.authenticate(None if public else self.refresh_token)
             response = self.extractor.request(
-                url,
-                params=params,
-                headers=self.headers,
-                expect=range(400, 500),
-            )
+                url, headers=self.headers, params=params, fatal=False)
             data = response.json()
             status = response.status_code
 
@@ -818,7 +814,7 @@ class DeviantartAPI():
                 if self.delay > self.delay_min:
                     self.delay -= 1
                 return data
-            if expect_error:
+            if not fatal:
                 return None
             if data.get("error_description") == "User not found.":
                 raise exception.NotFoundError("user or group")

@@ -259,7 +259,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def _gallery_page(self):
         url = "{}/g/{}/{}/".format(
             self.root, self.gallery_id, self.gallery_token)
-        response = self.request(url, expect=range(400, 500))
+        response = self.request(url, fatal=False)
         page = response.text
 
         if response.status_code == 404 and "Gallery Not Available" in page:
@@ -271,7 +271,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def _image_page(self):
         url = "{}/s/{}/{}-{}".format(
             self.root, self.image_token, self.gallery_id, self.image_num)
-        page = self.request(url, expect=range(400, 500)).text
+        page = self.request(url, fatal=False).text
 
         if page.startswith(("Invalid page", "Keep trying")):
             raise exception.NotFoundError("image page")

@@ -43,9 +43,7 @@ class SeigaExtractor(Extractor):
         """Get url for an image with id 'image_id'"""
         url = "{}/image/source/{}".format(self.root, image_id)
         response = self.request(
-            url, method="HEAD", allow_redirects=False, expect=(404,))
-        if response.status_code == 404:
-            raise exception.NotFoundError("image")
+            url, method="HEAD", allow_redirects=False, notfound="image")
         return response.headers["Location"].replace("/o/", "/priv/", 1)
 
     def login(self):

@@ -18,12 +18,6 @@ class XvideosExtractor(Extractor):
     category = "xvideos"
     root = "https://www.xvideos.com"
 
-    def get_page(self, url, codes=(403, 404)):
-        response = self.request(url, expect=codes)
-        if response.status_code in codes:
-            raise exception.NotFoundError(self.subcategory)
-        return response.text
-
 
 class XvideosGalleryExtractor(XvideosExtractor):
     """Extractor for user profile galleries from xvideos.com"""
@@ -50,7 +44,7 @@ class XvideosGalleryExtractor(XvideosExtractor):
 
     def items(self):
         url = "{}/profiles/{}/photos/{}".format(self.root, self.user, self.gid)
-        page = self.get_page(url)
+        page = self.request(url, notfound=self.subcategory).text
         data = self.get_metadata(page)
         imgs = self.get_images(page)
         data["count"] = len(imgs)
@@ -113,7 +107,7 @@ class XvideosUserExtractor(XvideosExtractor):
 
     def items(self):
         url = "{}/profiles/{}".format(self.root, self.user)
-        page = self.get_page(url)
+        page = self.request(url, notfound=self.subcategory).text
         data = json.loads(text.extract(
             page, "xv.conf=", ";</script>")[0])["data"]
 

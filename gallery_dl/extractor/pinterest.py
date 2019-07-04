@@ -228,14 +228,14 @@ class PinterestAPI():
         params = {"data": json.dumps({"options": options}), "source_url": ""}
 
         response = self.extractor.request(
-            url, params=params, headers=self.HEADERS, expect=range(400, 500))
+            url, params=params, headers=self.HEADERS, fatal=False)
 
         try:
             data = response.json()
         except ValueError:
             data = {}
 
-        if 200 <= response.status_code < 400 and not response.history:
+        if response.status_code < 400 and not response.history:
             return data
 
         if response.status_code == 404 or response.history:

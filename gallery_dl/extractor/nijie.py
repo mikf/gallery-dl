@@ -106,13 +106,8 @@ class NijieExtractor(AsynchronousMixin, Extractor):
         params = {"id": self.user_id, "p": 1}
 
         while True:
-            response = self.request(url, params=params, expect=(404,))
-            if response.status_code == 404:
-                raise exception.NotFoundError("artist")
-
-            page = response.text
-            ids = list(text.extract_iter(page, ' illust_id="', '"'))
-            yield from ids
+            page = self.request(url, params=params, notfound="artist").text
+            yield from text.extract_iter(page, 'illust_id="', '"')
 
             if '<a rel="next"' not in page:
                 return
@@ -190,10 +185,8 @@ class NijieImageExtractor(NijieExtractor):
         self.page = ""
 
     def get_job_metadata(self):
-        response = self.request(self.view_url + self.image_id, expect=(404,))
-        if response.status_code == 404:
-            raise exception.NotFoundError("image")
-        self.page = response.text
+        self.page = self.request(
+            self.view_url + self.image_id, notfound="image").text
         self.user_id = text.extract(
             self.page, '"sameAs": "https://nijie.info/members.php?id=', '"')[0]
         return NijieExtractor.get_job_metadata(self)
