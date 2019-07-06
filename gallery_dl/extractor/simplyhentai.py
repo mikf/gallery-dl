@@ -23,7 +23,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
             "url": "258289249990502c3138719cb89e995a60861e49",
-            "keyword": "18ab9defca53dbb2aeb7965193e93e0ea125b76b",
+            "keyword": "eba83ccdbab3022a2280c77aa747f9458196138b",
         }),
         ("https://www.simply-hentai.com/notfound", {
             "exception": exception.GalleryDLException,
@@ -40,30 +40,26 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         self.session.headers["Referer"] = url
 
     def metadata(self, page):
-        extr = text.extract
-        title , pos = extr(page, '<meta property="og:title" content="', '"')
+        extr = text.extract_from(page)
+        split = text.split_html
+
+        title = extr('<meta property="og:title" content="', '"')
         if not title:
             raise exception.NotFoundError("gallery")
-        gid   , pos = extr(page, '/Album/', '/', pos)
-        series, pos = extr(page, 'box-title">Series</div>', '</div>', pos)
-        lang  , pos = extr(page, 'box-title">Language</div>', '</div>', pos)
-        chars , pos = extr(page, 'box-title">Characters</div>', '</div>', pos)
-        tags  , pos = extr(page, 'box-title">Tags</div>', '</div>', pos)
-        artist, pos = extr(page, 'box-title">Artists</div>', '</div>', pos)
-        date  , pos = extr(page, 'Uploaded', '</div>', pos)
-        lang = text.remove_html(lang) if lang else None
-
-        return {
-            "gallery_id": text.parse_int(gid),
+        data = {
             "title"     : text.unescape(title),
-            "artist"    : text.split_html(artist),
-            "parody"    : text.split_html(series),
-            "characters": text.split_html(chars),
-            "tags"      : text.split_html(tags),
-            "lang"      : util.language_to_code(lang),
-            "language"  : lang,
-            "date"      : text.remove_html(date),
+            "gallery_id": text.parse_int(extr('/Album/', '/')),
+            "parody"    : split(extr('box-title">Series</div>', '</div>')),
+            "language"  : text.remove_html(extr(
+                'box-title">Language</div>', '</div>')) or None,
+            "characters": split(extr('box-title">Characters</div>', '</div>')),
+            "tags"      : split(extr('box-title">Tags</div>', '</div>')),
+            "artist"    : split(extr('box-title">Artists</div>', '</div>')),
+            "date"      : text.parse_datetime(text.remove_html(
+                extr('Uploaded', '</div>')), "%d.%m.%Y"),
         }
+        data["lang"] = util.language_to_code(data["language"])
+        return data
 
     def images(self, _):
         url = self.chapter_url + "/all-pages"
@@ -102,12 +98,11 @@ class SimplyhentaiImageExtractor(Extractor):
         self.type = match.group(2)
 
     def items(self):
-        page = self.request(self.page_url).text
-        url_search = 'data-src="' if self.type == "image" else '<source src="'
-
-        title, pos = text.extract(page, '"og:title" content="', '"')
-        descr, pos = text.extract(page, '"og:description" content="', '"', pos)
-        url  , pos = text.extract(page, url_search, '"', pos)
+        extr = text.extract_from(self.request(self.page_url).text)
+        title = extr('"og:title" content="'      , '"')
+        descr = extr('"og:description" content="', '"')
+        url = extr('&quot;image&quot;:&quot;'  , '&')
+        url = extr("&quot;content&quot;:&quot;", "&") or url
 
         tags = text.extract(descr, " tagged with ", " online for free ")[0]
         if tags:
@@ -140,13 +135,13 @@ class SimplyhentaiVideoExtractor(Extractor):
         ("https://videos.simply-hentai.com/creamy-pie-episode-02", {
             "pattern": r"https://www\.googleapis\.com/drive/v3/files"
                        r"/0B1ecQ8ZVLm3JcHZzQzBnVy1ZUmc\?alt=media&key=[\w-]+",
-            "keyword": "29d63987fed33f0a9f4b3786d1d71b03d793250a",
+            "keyword": "706790708b14773efc1e075ddd3b738a375348a5",
             "count": 1,
         }),
         (("https://videos.simply-hentai.com"
           "/1715-tifa-in-hentai-gang-bang-3d-movie"), {
             "url": "ad9a36ae06c601b6490e3c401834b4949d947eb0",
-            "keyword": "c561341aa3c6999f615abf1971d28fb2a83da2a7",
+            "keyword": "f9dad94fbde9c95859e631ff4f07297a9567b874",
         }),
     )
 
@@ -178,8 +173,9 @@ class SimplyhentaiVideoExtractor(Extractor):
             "title": text.unescape(title),
             "episode": text.parse_int(episode),
             "tags": text.split_html(tags)[::2],
-            "date": text.remove_html(date),
             "type": "video",
+            "date": text.parse_datetime(text.remove_html(
+                date), "%B %d, %Y %H:%M"),
         })
 
         yield Message.Version, 1
