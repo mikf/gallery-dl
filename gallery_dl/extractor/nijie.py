@@ -121,7 +121,7 @@ class NijieUserExtractor(NijieExtractor):
                r"/members(?:_illust)?\.php\?id=(\d+)")
     test = (
         ("https://nijie.info/members_illust.php?id=44", {
-            "url": "4725cf3cd9cff4715db3c7e04dd7c323b9f2dec5",
+            "url": "66c4ff94c6e77c0765dd88f2d8c663055fda573e",
             "keyword": "d629c69e3172db1d7e026145e8eb640ac31ac16a",
         }),
         ("https://nijie.info/members_illust.php?id=43", {
@@ -169,7 +169,7 @@ class NijieImageExtractor(NijieExtractor):
                r"/view(?:_popup)?\.php\?id=(\d+)")
     test = (
         ("https://nijie.info/view.php?id=70720", {
-            "url": "c1881afd89b79af3d166545de15bab4d1e32c340",
+            "url": "5497f897311397dafa188521258624346a0af2a3",
             "keyword": "408393d010307c76d52cbd0a4368d6d357805aea",
             "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
         }),
