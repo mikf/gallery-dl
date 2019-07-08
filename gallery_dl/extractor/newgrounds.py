@@ -48,22 +48,20 @@ class NewgroundsExtractor(Extractor):
         extr = text.extract_from(self.request(page_url).text)
         full = text.extract_from(json.loads(extr('"full_image_text":', '});')))
         data = {
+            "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
-            "date"       : extr('itemprop="datePublished" content="', '"'),
+            "date"       : text.parse_datetime(extr(
+                'itemprop="datePublished" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
             "favorites"  : text.parse_int(extr('id="faves_load">', '<')),
             "score"      : text.parse_float(extr('id="score_number">', '<')),
+            "tags"       : text.split_html(extr(
+                '<dd class="tags momag">', '</dd>')),
             "url"        : full('src="', '"'),
-            "title"      : text.unescape(full('alt="', '"')),
             "width"      : text.parse_int(full('width="', '"')),
             "height"     : text.parse_int(full('height="', '"')),
         }
-
-        tags = text.split_html(extr('<dd class="tags momag">', '</dd>'))
-        tags.sort()
-        data["tags"] = tags
-
-        data["date"] = text.parse_datetime(data["date"])
+        data["tags"].sort()
         data["index"] = text.parse_int(
             data["url"].rpartition("/")[2].partition("_")[0])
         return data
