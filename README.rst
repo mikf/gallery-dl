@@ -22,6 +22,7 @@ Optional
 
 - FFmpeg_: Pixiv Ugoira to WebM conversion
 - youtube-dl_: Video downloads
+- pyOpenSSL_: Access Cloudflare protected sites
 
 
 Installation
@@ -231,6 +232,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _Requests:   http://docs.python-requests.org/en/master/
 .. _FFmpeg:     https://www.ffmpeg.org/
 .. _youtube-dl: https://ytdl-org.github.io/youtube-dl/
+.. _pyOpenSSL:  https://pyopenssl.org/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 

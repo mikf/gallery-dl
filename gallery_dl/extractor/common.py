@@ -99,6 +99,14 @@ class Extractor():
                         session, response, kwargs)
                     cloudflare.cookies.update(self.category, (domain, cookies))
                     continue
+                if cloudflare.is_captcha(response):
+                    try:
+                        import OpenSSL  # noqa
+                    except ImportError:
+                        msg = " - Install 'pyOpenSSL' and try again"
+                    else:
+                        msg = ""
+                    self.log.warning("Cloudflare CAPTCHA" + msg)
 
                 msg = "{}: {} for url: {}".format(code, response.reason, url)
                 if code < 500 and code != 429 and code != 430:
@@ -409,15 +417,10 @@ def generate_extractors(extractor_data, symtable, classes):
 http.cookiejar.MozillaCookieJar.magic_re = re.compile(
     "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
 
-# Update default cipher list of urllib3
-# to fix issues with Cloudflare and, by extension, Artstation (#227)
-from requests.packages.urllib3.util import ssl_  # noqa
-logging.getLogger("gallery-dl").debug("updating default urllib3 ciphers")
-
-# cipher list taken from urllib3 1.25
+# Update default cipher list of urllib3 to avoid Cloudflare CAPTCHAs
+# List taken from urllib3 1.25:
 # https://github.com/urllib3/urllib3/blob/1.25/src/urllib3/util/ssl_.py
-# with additions from
-# https://github.com/Anorov/cloudflare-scrape/pull/242
+from requests.packages.urllib3.util import ssl_  # noqa
 ssl_.DEFAULT_CIPHERS = (
     "ECDHE+AESGCM:"
     "ECDHE+CHACHA20:"
@@ -429,8 +432,6 @@ ssl_.DEFAULT_CIPHERS = (
     "DH+AES:"
     "RSA+AESGCM:"
     "RSA+AES:"
-    "!ECDHE+SHA:"
-    "!AES128-SHA:"
     "!aNULL:"
     "!eNULL:"
     "!MD5:"
