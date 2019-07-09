@@ -72,7 +72,6 @@ class _35photoExtractor(Extractor):
             "user"       : data["user_login"],
             "user_id"    : data["user_id"],
             "user_name"  : data["user_name"],
-            "other"      : data["otherData"],
         }
 
         if "series" in data:
@@ -89,6 +88,8 @@ class _35photoExtractor(Extractor):
     def _photo_ids(page):
         """Extract unique photo IDs and return them as sorted list"""
         #  searching for photo-id="..." doesn't always work (see unit tests)
+        if not page:
+            return ()
         return sorted(
             set(text.extract_iter(page, "/photo_", "/")),
             key=text.parse_int,
@@ -100,7 +101,7 @@ class _35photoUserExtractor(_35photoExtractor):
     """Extractor for all images of a user on 35photo.pro"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro"
-               r"/(?!photo_|genre_)([^/?&#]+)")
+               r"/(?!photo_|genre_|rating/)([^/?&#]+)")
     test = (
         ("https://35photo.pro/liya", {
             "pattern": r"https://m\d+.35photo.pro/photos_(main|series)/.*.jpg",
@@ -146,7 +147,14 @@ class _35photoGenreExtractor(_35photoExtractor):
         ("https://35photo.pro/genre_109/", {
             "range": "1-30",
         }),
-        ("https://35photo.pro/genre_109/new/"),
+        ("https://35photo.pro/genre_103/", {
+            "range": "1-30",
+            "count": 30,
+        }),
+        ("https://35photo.pro/genre_103/new/", {
+            "range": "1-30",
+            "count": 30,
+        }),
     )
 
     def __init__(self, match):
@@ -165,6 +173,8 @@ class _35photoGenreExtractor(_35photoExtractor):
         }
 
     def photos(self):
+        if not self.photo_ids:
+            return ()
         return self._pagination({
             "page": "genre",
             "community_id": self.genre_id,
@@ -193,7 +203,6 @@ class _35photoImageExtractor(_35photoExtractor):
             "user"       : "liya",
             "user_id"    : 20415,
             "user_name"  : "Liya Mirzaeva",
-            "other"      : str,
         },
     })
 
