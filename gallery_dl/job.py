@@ -307,7 +307,10 @@ class DownloadJob(Job):
         self.pathfmt = util.PathFormat(self.extractor)
         if keywords:
             self.pathfmt.set_directory(keywords)
+
         self.sleep = self.extractor.config("sleep")
+        if not self.extractor.config("download", True):
+            self.download = lambda x: True
 
         skip = self.extractor.config("skip", True)
         if skip:
