@@ -190,14 +190,18 @@ class DownloadJob(Job):
 
     def handle_url(self, url, keywords, fallback=None):
         """Download the resource specified in 'url'"""
+        postprocessors = self.postprocessors
+        pathfmt = self.pathfmt
+        archive = self.archive
+
         # prepare download
-        self.pathfmt.set_keywords(keywords)
+        pathfmt.set_keywords(keywords)
 
-        if self.postprocessors:
-            for pp in self.postprocessors:
-                pp.prepare(self.pathfmt)
+        if postprocessors:
+            for pp in postprocessors:
+                pp.prepare(pathfmt)
 
-        if self.pathfmt.exists(self.archive):
+        if pathfmt.exists(archive):
             self.handle_skip()
             return
 
@@ -214,24 +218,24 @@ class DownloadJob(Job):
                     break
             else:
                 # download failed
-                self.log.error(
-                    "Failed to download %s", self.pathfmt.filename or url)
+                self.log.error("Failed to download %s",
+                               pathfmt.filename or url)
                 return
 
-        if not self.pathfmt.temppath:
+        if not pathfmt.temppath:
             self.handle_skip()
             return
 
         # run post processors
-        if self.postprocessors:
-            for pp in self.postprocessors:
-                pp.run(self.pathfmt)
+        if postprocessors:
+            for pp in postprocessors:
+                pp.run(pathfmt)
 
         # download succeeded
-        self.pathfmt.finalize()
-        self.out.success(self.pathfmt.path, 0)
-        if self.archive:
-            self.archive.add(keywords)
+        pathfmt.finalize()
+        self.out.success(pathfmt.path, 0)
+        if archive:
+            archive.add(keywords)
         self._skipcnt = 0
 
     def handle_urllist(self, urls, keywords):
