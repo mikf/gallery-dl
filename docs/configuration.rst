@@ -334,6 +334,22 @@ Description Controls whether to verify SSL/TLS certificates for HTTPS requests.
 =========== =====
 
 
+extractor.*.download
+--------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Controls whether to download media files.
+
+            Setting this to ``false`` won't download any files, but all other
+            functions (postprocessors_, `download archive`_, etc.)
+            will be executed as normal.
+=========== =====
+
+.. _postprocessors: `extractor.*.postprocessors`_
+.. _download archive: `extractor.*.archive`_
+
+
 extractor.*.image-range
 -----------------------
 =========== =====
