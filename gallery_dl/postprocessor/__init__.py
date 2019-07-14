@@ -15,6 +15,7 @@ modules = [
     "classify",
     "exec",
     "metadata",
+    "mtime",
     "ugoira",
     "zip",
 ]
