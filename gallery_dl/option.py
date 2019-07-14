@@ -322,6 +322,12 @@ def build_parser():
         action="append_const", const={"name": "metadata", "mode": "tags"},
         help="Write image tags to separate text files",
     )
+    postprocessor.add_argument(
+        "--mtime-from-date",
+        dest="postprocessors",
+        action="append_const", const={"name": "mtime"},
+        help="Set file modification times according to 'date' metadata",
+    )
 
     parser.add_argument(
         "urls",

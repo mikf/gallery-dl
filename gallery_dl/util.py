@@ -20,8 +20,8 @@ import sqlite3
 import datetime
 import operator
 import itertools
-import email.utils
 import urllib.parse
+from email.utils import mktime_tz, parsedate_tz
 from . import text, exception
 
 
@@ -639,15 +639,16 @@ class PathFormat():
                 shutil.copyfile(self.temppath, self.realpath)
                 os.unlink(self.temppath)
 
-        if "_filetime" in self.keywords:
-            # try to set file times
-            try:
-                filetime = email.utils.mktime_tz(email.utils.parsedate_tz(
-                    self.keywords["_filetime"]))
-                if filetime:
-                    os.utime(self.realpath, (time.time(), filetime))
-            except Exception:
-                pass
+        if "_mtime" in self.keywords:
+            # set file modification time
+            mtime = self.keywords["_mtime"]
+            if mtime:
+                try:
+                    if isinstance(mtime, str):
+                        mtime = mktime_tz(parsedate_tz(mtime))
+                    os.utime(self.realpath, (time.time(), mtime))
+                except Exception:
+                    pass
 
     @staticmethod
     def adjust_path(path):

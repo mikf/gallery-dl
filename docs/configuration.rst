@@ -1290,6 +1290,23 @@ Description Custom format string to build content of metadata files.
 =========== =====
 
 
+mtime
+-----
+
+Set file modification time according to its metadata
+
+mtime.key
+---------
+=========== =====
+Type        ``string``
+Default     ``"date"``
+Description Name of the metadata field whose value should be used.
+
+            This value must either be a UNIX timestamp or a
+            |datetime|_ object.
+=========== =====
+
+
 ugoira
 ------
 
@@ -1648,6 +1665,7 @@ Description An object with the ``name`` of a post-processor and its options.
 .. |verify| replace:: ``verify``
 .. |mature_content| replace:: ``mature_content``
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
+.. |datetime| replace:: ``datetime``
 .. |datetime.max| replace:: ``datetime.max``
 .. |Path| replace:: ``Path``
 .. |Last-Modified| replace:: ``Last-Modified``
@@ -1673,6 +1691,7 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _strptime:          https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _mature_content:    https://www.deviantart.com/developers/http/v1/20160316/object/deviation
 .. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
+.. _datetime:          https://docs.python.org/3/library/datetime.html#datetime-objects
 .. _datetime.max:      https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _Authentication:    https://github.com/mikf/gallery-dl#5authentication
 .. _youtube-dl:        https://github.com/ytdl-org/youtube-dl
