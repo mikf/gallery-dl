@@ -30,9 +30,10 @@ def find(scheme):
     if scheme in modules:  # prevent unwanted imports
         try:
             module = importlib.import_module("." + scheme, __package__)
-            klass = module.__downloader__
         except ImportError:
             pass
+        else:
+            klass = module.__downloader__
 
     if scheme == "http":
         _cache["http"] = _cache["https"] = klass
