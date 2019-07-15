@@ -35,6 +35,7 @@ class TwitterExtractor(Extractor):
 
         for tweet in self.tweets():
             data = self._data_from_tweet(tweet)
+
             if not self.retweets and data["retweet_id"]:
                 continue
 
@@ -98,6 +99,9 @@ class TwitterExtractor(Extractor):
             "username"  : extr('data-name="'       , '"'),
             "user_id"   : text.parse_int(extr('data-user-id="'   , '"')),
             "date"      : text.parse_timestamp(extr('data-time="', '"')),
+            "content"   : text.unescape(text.remove_html(extr(
+                '<div class="js-tweet-text-container">', '\n</div>'
+            ))).replace(" @ ", " @").replace(" # ", " #"),
         }
 
     def _tweets_from_api(self, url):
@@ -140,7 +144,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     test = ("https://twitter.com/supernaturepics", {
         "range": "1-40",
         "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
-        "keyword": "7210d679606240405e0cf62cbc67596e81a7a250",
+        "keyword": "d07e8d2dd4ece0dc93e068579f8fb75d83d16767",
     })
 
     def tweets(self):
@@ -173,13 +177,13 @@ class TwitterTweetExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics/status/604341487988576256", {
             "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",
-            "keyword": "1b8afb93cc04a9f44d89173f8facc61c3a6caf91",
+            "keyword": "d6149c5734f2e91d29a99600592e04b349daaedb",
             "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
         }),
         # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "43d98ab448193f0d4f30aa571a4b6bda9b6a5692",
+            "keyword": "cc9860f46ec0d0f19da2232281544b85d573eb13",
         }),
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {
@@ -199,4 +203,4 @@ class TwitterTweetExtractor(TwitterExtractor):
         url = "{}/{}/status/{}".format(self.root, self.user, self.tweet_id)
         page = self.request(url).text
         return (text.extract(
-            page, '<div class="tweet ', '<ul class="stats')[0],)
+            page, '<div class="tweet ', 'class="js-tweet-stats-container')[0],)
