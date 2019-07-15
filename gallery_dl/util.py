@@ -532,7 +532,7 @@ class PathFormat():
 
         self.basedirectory = expand_path(
             extractor.config("base-directory", (".", "gallery-dl")))
-        if os.altsep:
+        if os.altsep and os.altsep in self.basedirectory:
             self.basedirectory = self.basedirectory.replace(os.altsep, os.sep)
 
     def open(self, mode="wb"):
@@ -541,13 +541,9 @@ class PathFormat():
 
     def exists(self, archive=None):
         """Return True if the file exists on disk or in 'archive'"""
-        if (archive and archive.check(self.keywords) or
-                self.has_extension and os.path.exists(self.realpath)):
-            if not self.has_extension:
-                # adjust display name
-                self.set_extension("")
-                if self.path[-1] == ".":
-                    self.path = self.path[:-1]
+        if archive and archive.check(self.keywords):
+            return self.fix_extension()
+        if self.has_extension and os.path.exists(self.realpath):
             return True
         return False
 
@@ -589,6 +585,14 @@ class PathFormat():
         self.has_extension = real
         self.keywords["extension"] = extension
         self.build_path()
+
+    def fix_extension(self, _=None):
+        if not self.has_extension:
+            self.set_extension("")
+            if self.path[-1] == ".":
+                self.path = self.path[:-1]
+                self.temppath = self.realpath = self.realpath[:-1]
+        return True
 
     def build_path(self):
         """Use filename-keywords and directory to build a full path"""
