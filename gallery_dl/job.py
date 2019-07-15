@@ -310,7 +310,7 @@ class DownloadJob(Job):
 
         self.sleep = self.extractor.config("sleep")
         if not self.extractor.config("download", True):
-            self.download = lambda x: True
+            self.download = self.pathfmt.fix_extension
 
         skip = self.extractor.config("skip", True)
         if skip:
