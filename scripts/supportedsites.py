@@ -237,6 +237,7 @@ def write_output(fobj, columns, extractors):
     # caption
     w("Supported Sites\n")
     w("===============\n")
+    w("Unless otherwise known, assume all sites to be NSFW\n\n")
 
     # table head
     sep = " ".join("=" * c[1] for c in columns) + "\n"
