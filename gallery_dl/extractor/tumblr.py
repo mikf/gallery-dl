@@ -65,11 +65,15 @@ class TumblrExtractor(Extractor):
         if self.reblogs == "same-blog":
             self._skip_reblog = self._skip_reblog_same_blog
 
+        self.date_min, self.api.before = self._get_date_min_max(0, None)
+
     def items(self):
         blog = None
         yield Message.Version, 1
 
         for post in self.posts():
+            if self.date_min > post["timestamp"]:
+                return
             if post["type"] not in self.types:
                 continue
             if not blog:
@@ -223,6 +227,11 @@ class TumblrUserExtractor(TumblrExtractor):
             "count": 2,
             "keyword": {"tags": ["test", "private", "hidden"]},
         }),
+        ("https://mikf123.tumblr.com/", {  # date-min/-max/-format (#337)
+            "count": 4,
+            "options": (("date-min", "201804"), ("date-max", "201805"),
+                        ("date-format", "%Y%m"))
+        }),
         ("https://demo.tumblr.com/page/2"),
         ("https://demo.tumblr.com/archive"),
         ("tumblr:http://www.b-authentique.com/"),
@@ -280,6 +289,7 @@ class TumblrPostExtractor(TumblrExtractor):
         TumblrExtractor.__init__(self, match)
         self.post_id = match.group(3)
         self.reblogs = True
+        self.date_min = 0
 
     def posts(self):
         return self.api.posts(self.blog, {"id": self.post_id})
@@ -328,7 +338,7 @@ class TumblrAPI(oauth.OAuth1API):
 
     def __init__(self, extractor):
         oauth.OAuth1API.__init__(self, extractor)
-        self.posts_type = None
+        self.posts_type = self.before = None
 
     def info(self, blog):
         """Return general information about a blog"""
@@ -350,6 +360,8 @@ class TumblrAPI(oauth.OAuth1API):
         params.update({"offset": 0, "limit": 50, "reblog_info": "true"})
         if self.posts_type:
             params["type"] = self.posts_type
+        if self.before:
+            params["before"] = self.before
         while True:
             data = self._call(blog, "posts", params)
             self.BLOG_CACHE[blog] = data["blog"]
@@ -360,7 +372,7 @@ class TumblrAPI(oauth.OAuth1API):
 
     def likes(self, blog):
         """Retrieve liked posts"""
-        params = {"limit": 50}
+        params = {"limit": "50", "before": self.before}
         while True:
             posts = self._call(blog, "likes", params)["liked_posts"]
             if not posts:
