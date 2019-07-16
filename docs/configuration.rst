@@ -420,6 +420,18 @@ Description Like `image-unique`__, but applies to delegated URLs
 __ `extractor.*.image-unique`_
 
 
+extractor.*.date-format
+----------------------------
+=========== =====
+Type        ``string``
+Default     ``"%Y-%m-%dT%H:%M:%S"``
+Description Format string used to parse ``string`` values of
+            `date-min` and `date-max`.
+
+            See |strptime|_ for a list of formatting directives.
+=========== =====
+
+
 
 Extractor-specific Options
 ==========================
@@ -776,24 +788,9 @@ Description Retrieve additional comments by resolving the ``more`` comment
 extractor.reddit.date-min & .date-max
 -------------------------------------
 =========== =====
-Type        ``integer`` or ``string``
+Type        |Date|_
 Default     ``0`` and ``253402210800`` (timestamp of |datetime.max|_)
 Description Ignore all submissions posted before/after this date.
-
-            * If this is an ``integer``, it represents the date as UTC timestamp.
-            * If this is a ``string``, it will get parsed according to date-format_.
-=========== =====
-
-
-extractor.reddit.date-format
-----------------------------
-=========== =====
-Type        ``string``
-Default     ``"%Y-%m-%dT%H:%M:%S"``
-Description An explicit format string used to parse the ``string`` values of
-            `date-min and date-max`_.
-
-            See |strptime|_ for a list of formatting directives.
 =========== =====
 
 
@@ -867,6 +864,15 @@ extractor.tumblr.avatar
 Type        ``bool``
 Default     ``false``
 Description Download blog avatars.
+=========== =====
+
+
+extractor.tumblr.date-min & .date-max
+-------------------------------------
+=========== =====
+Type        |Date|_
+Default     ``0`` and ``null``
+Description Ignore all posts published before/after this date.
 =========== =====
 
 
@@ -1546,6 +1552,20 @@ Custom Types
 ============
 
 
+Date
+----
+=========== =====
+Type        ``string`` or ``integer``
+Examples    * ``"2019-01-01T00:00:00"``
+            * ``"2019"`` with ``"%Y"`` as date-format_
+            * ``1546297200``
+Description A |Date|_ value represents a specific point in time.
+
+            * If given as ``string``, it is parsed according to date-format_.
+            * If given as ``integer``, it is interpreted as UTC timestamp.
+=========== =====
+
+
 Path
 ----
 =========== =====
@@ -1667,6 +1687,7 @@ Description An object with the ``name`` of a post-processor and its options.
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
 .. |datetime| replace:: ``datetime``
 .. |datetime.max| replace:: ``datetime.max``
+.. |Date| replace:: ``Date``
 .. |Path| replace:: ``Path``
 .. |Last-Modified| replace:: ``Last-Modified``
 .. |Logging Configuration| replace:: ``Logging Configuration``
@@ -1675,8 +1696,7 @@ Description An object with the ``name`` of a post-processor and its options.
 
 .. _base-directory: `extractor.*.base-directory`_
 .. _skipped: `extractor.*.skip`_
-.. _`date-min and date-max`: `extractor.reddit.date-min & .date-max`_
-.. _date-format: extractor.reddit.date-format_
+.. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: extractor.deviantart.metadata_
 
 .. _.netrc:            https://stackoverflow.com/tags/.netrc/info
