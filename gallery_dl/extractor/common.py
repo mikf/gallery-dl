@@ -13,6 +13,7 @@ import time
 import netrc
 import queue
 import logging
+import datetime
 import requests
 import threading
 import http.cookiejar
@@ -216,6 +217,20 @@ class Extractor():
         except KeyError:
             return False
         return True
+
+    def _get_date_min_max(self, dmin=None, dmax=None):
+        """Retrieve and parse 'date-min' and 'date-max' config values"""
+        def get(key, default):
+            ts = self.config(key, default)
+            if isinstance(ts, str):
+                try:
+                    ts = int(datetime.datetime.strptime(ts, fmt).timestamp())
+                except ValueError as exc:
+                    self.log.warning("Unable to parse '%s': %s", key, exc)
+                    ts = default
+            return ts
+        fmt = self.config("date-format", "%Y-%m-%dT%H:%M:%S")
+        return get("date-min", dmin), get("date-max", dmax)
 
     @classmethod
     def _get_tests(cls):

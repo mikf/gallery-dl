@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, extractor, exception
 from ..cache import cache
-import datetime
 import time
 
 
@@ -251,12 +250,9 @@ class RedditAPI():
         return data
 
     def _pagination(self, endpoint, params, _empty=()):
-        date_fmt = self.extractor.config("date-format", "%Y-%m-%dT%H:%M:%S")
-        date_min = self._parse_datetime("date-min", 0, date_fmt)
-        date_max = self._parse_datetime("date-max", 253402210800, date_fmt)
-
         id_min = self._parse_id("id-min", 0)
         id_max = self._parse_id("id-max", 2147483647)
+        date_min, date_max = self.extractor._get_date_min_max(0, 253402210800)
 
         while True:
             data = self._call(endpoint, params)["data"]
@@ -292,16 +288,6 @@ class RedditAPI():
                 queue += comment["replies"]["data"]["children"]
         if link_id and extra:
             yield from self.morechildren(link_id, extra)
-
-    def _parse_datetime(self, key, default, fmt):
-        ts = self.extractor.config(key, default)
-        if isinstance(ts, str):
-            try:
-                ts = int(datetime.datetime.strptime(ts, fmt).timestamp())
-            except ValueError as exc:
-                self.log.warning("Unable to parse '%s': %s", key, exc)
-                ts = default
-        return ts
 
     def _parse_id(self, key, default):
         sid = self.extractor.config(key)
