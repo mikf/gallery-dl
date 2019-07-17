@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import re
 
 
 class TwitterExtractor(Extractor):
@@ -26,7 +27,12 @@ class TwitterExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.retweets = self.config("retweets", True)
+        self.content = self.config("content", False)
         self.videos = self.config("videos", False)
+
+        if self.content:
+            self._emoji_sub = re.compile(
+                r'<img class="Emoji [^>]+ alt="([^"]+)"[^>]*>').sub
 
     def items(self):
         self.login()
@@ -88,10 +94,9 @@ class TwitterExtractor(Extractor):
             raise exception.AuthenticationError()
         return self.session.cookies
 
-    @staticmethod
-    def _data_from_tweet(tweet):
+    def _data_from_tweet(self, tweet):
         extr = text.extract_from(tweet)
-        return {
+        data = {
             "tweet_id"  : text.parse_int(extr('data-tweet-id="'  , '"')),
             "retweet_id": text.parse_int(extr('data-retweet-id="', '"')),
             "retweeter" : extr('data-retweeter="'  , '"'),
@@ -99,10 +104,15 @@ class TwitterExtractor(Extractor):
             "username"  : extr('data-name="'       , '"'),
             "user_id"   : text.parse_int(extr('data-user-id="'   , '"')),
             "date"      : text.parse_timestamp(extr('data-time="', '"')),
-            "content"   : text.unescape(text.remove_html(extr(
-                '<div class="js-tweet-text-container">', '\n</div>'
-            ))).replace(" @ ", " @").replace(" # ", " #"),
         }
+        if self.content:
+            content = extr('<div class="js-tweet-text-container">', '\n</div>')
+            if '<img class="Emoji ' in content:
+                content = self._emoji_sub(r"\1", content)
+            content = text.unescape(text.remove_html(content, "", ""))
+            cl, _, cr = content.rpartition("pic.twitter.com/")
+            data["content"] = cl if cl and len(cr) < 16 else content
+        return data
 
     def _tweets_from_api(self, url):
         params = {
@@ -144,7 +154,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     test = ("https://twitter.com/supernaturepics", {
         "range": "1-40",
         "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
-        "keyword": "d07e8d2dd4ece0dc93e068579f8fb75d83d16767",
+        "keyword": "7210d679606240405e0cf62cbc67596e81a7a250",
     })
 
     def tweets(self):
@@ -177,18 +187,23 @@ class TwitterTweetExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics/status/604341487988576256", {
             "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",
-            "keyword": "d6149c5734f2e91d29a99600592e04b349daaedb",
+            "keyword": "1b8afb93cc04a9f44d89173f8facc61c3a6caf91",
             "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
         }),
         # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "cc9860f46ec0d0f19da2232281544b85d573eb13",
+            "keyword": "43d98ab448193f0d4f30aa571a4b6bda9b6a5692",
         }),
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {
             "options": (("videos", True),),
             "pattern": r"ytdl:https://twitter.com/perrypumas/status/\d+",
+        }),
+        # content with emoji, newlines, hashtags (#338)
+        ("https://twitter.com/yumi_san0112/status/1151144618936823808", {
+            "options": (("content", True),),
+            "keyword": "b13b6c4cd0b0c15b2ea7685479e7fedde3c47b9e",
         }),
     )
 
