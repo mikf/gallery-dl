@@ -107,7 +107,7 @@ EXTRACTORS = {
         "pattern": r"(?:www\.)?fashionnova\.com",
         "test-product": (
             ("https://www.fashionnova.com/products/essential-slide-red", {
-                "pattern": r"https?://cdn\.shopify.com/",
+                "pattern": r"https?://cdn\d*\.shopify.com/",
                 "count": 3,
             }),
             ("https://www.fashionnova.com/collections/flats/products/name"),
