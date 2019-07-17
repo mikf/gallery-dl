@@ -36,12 +36,15 @@ def clean_xml(xmldata, repl=""):
     return xmldata
 
 
-def remove_html(txt):
+def remove_html(txt, repl=" ", sep=" "):
     """Remove html-tags from a string"""
     try:
-        return " ".join(re.sub("<[^>]+>", " ", txt).split())
+        txt = re.sub("<[^>]+>", repl, txt)
     except TypeError:
         return ""
+    if sep:
+        return sep.join(txt.split())
+    return txt.strip()
 
 
 def split_html(txt, sep=None):
