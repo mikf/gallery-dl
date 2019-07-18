@@ -432,23 +432,23 @@ def generate_extractors(extractor_data, symtable, classes):
 http.cookiejar.MozillaCookieJar.magic_re = re.compile(
     "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
 
-# Update default cipher list of urllib3 to avoid Cloudflare CAPTCHAs
-# List taken from urllib3 1.25:
-# https://github.com/urllib3/urllib3/blob/1.25/src/urllib3/util/ssl_.py
+# Replace default cipher list of urllib3
+# with the one used by Firefox to avoid Cloudflare CAPTCHAs
 from requests.packages.urllib3.util import ssl_  # noqa
 ssl_.DEFAULT_CIPHERS = (
-    "ECDHE+AESGCM:"
-    "ECDHE+CHACHA20:"
-    "DHE+AESGCM:"
-    "DHE+CHACHA20:"
-    "ECDH+AESGCM:"
-    "DH+AESGCM:"
-    "ECDH+AES:"
-    "DH+AES:"
-    "RSA+AESGCM:"
-    "RSA+AES:"
-    "!aNULL:"
-    "!eNULL:"
-    "!MD5:"
-    "!DSS"
+    "ECDHE-ECDSA-AES128-GCM-SHA256:"
+    "ECDHE-RSA-AES128-GCM-SHA256:"
+    "ECDHE-ECDSA-CHACHA20-POLY1305:"
+    "ECDHE-RSA-CHACHA20-POLY1305:"
+    "ECDHE-ECDSA-AES256-GCM-SHA384:"
+    "ECDHE-RSA-AES256-GCM-SHA384:"
+    "ECDHE-ECDSA-AES256-SHA:"
+    "ECDHE-ECDSA-AES128-SHA:"
+    "ECDHE-RSA-AES128-SHA:"
+    "ECDHE-RSA-AES256-SHA:"
+    "DHE-RSA-AES128-SHA:"
+    "DHE-RSA-AES256-SHA:"
+    "AES128-SHA:"
+    "AES256-SHA:"
+    "DES-CBC3-SHA"
 )
