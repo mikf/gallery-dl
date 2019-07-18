@@ -217,7 +217,7 @@ extractor.*.user-agent
 ----------------------
 =========== =====
 Type        ``string``
-Default     ``"Mozilla/5.0 (X11; Linux x86_64; rv:62.0) Gecko/20100101 Firefox/62.0"``
+Default     ``"Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0"``
 Description User-Agent header value to be used for HTTP requests.
 
             Note: This option has no effect on `pixiv` and
@@ -1454,6 +1454,19 @@ Description Path of the SQLite3 database used to cache login sessions,
 
             Set this option to ``null`` or an invalid path to disable
             this cache.
+=========== =====
+
+
+ciphers
+-------
+=========== =====
+Type        ``bool`` or ``string``
+Default     ``true``
+Description * ``true``: Update urllib3's default cipher list
+            * ``false``: Leave the default cipher list as is
+            * Any ``string``: Replace urllib3's default ciphers with these
+              (See `SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
+              for details)
 =========== =====
 
 
