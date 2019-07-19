@@ -31,8 +31,7 @@ class _500pxExtractor(Extractor):
 
         for photo in self.photos():
             url = photo["images"][-1]["url"]
-            fmt = photo["image_format"]
-            photo["extension"] = "jpg" if fmt == "jpeg" else fmt
+            photo["extension"] = photo["image_format"]
             if data:
                 photo.update(data)
             if first:
@@ -59,7 +58,7 @@ class _500pxExtractor(Extractor):
             "include_releases"      : "true",
             "liked_by"              : "1",
             "following_sample"      : "100",
-            "image_size"            : "32768",
+            "image_size"            : "4096",
             "ids"                   : ",".join(str(p["id"]) for p in photos),
         }
 
@@ -90,7 +89,7 @@ class _500pxUserExtractor(_500pxExtractor):
     pattern = (r"(?:https?://)?500px\.com"
                r"/(?!photo/)([^/?&#]+)/?(?:$|\?|#)")
     test = ("https://500px.com/light_expression_photography", {
-        "pattern": r"https?://drscdn.500px.org/photo/\d+/m%3D5000/v2",
+        "pattern": r"https?://drscdn.500px.org/photo/\d+/m%3D4096/v2",
         "range": "1-99",
         "count": 99,
     })
@@ -124,7 +123,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
     pattern = (r"(?:https?://)?500px\.com"
                r"/(?!photo/)([^/?&#]+)/galleries/([^/?&#]+)")
     test = ("https://500px.com/fashvamp/galleries/lera", {
-        "url": "8a520272ece83278166b4f8556f9c9da43c43c45",
+        "url": "002dc81dee5b4a655f0e31ad8349e8903b296df6",
         "count": 3,
         "keyword": {
             "gallery": dict,
@@ -144,7 +143,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
         page = self.request(url).text
         self.csrf_token, pos = text.extract(page, 'csrf-token" content="', '"')
         self.user_id   , pos = text.extract(page, 'App.CuratorId =', '\n', pos)
-        self.user_id = self.user_id.strip()
+        self.user_id = self.user_id.strip(" '\";")
 
         # get gallery metadata; transform gallery name into id
         url = "https://api.500px.com/v1/users/{}/galleries/{}".format(
@@ -174,37 +173,30 @@ class _500pxImageExtractor(_500pxExtractor):
     subcategory = "image"
     pattern = r"(?:https?://)?500px\.com/photo/(\d+)"
     test = ("https://500px.com/photo/222049255/queen-of-coasts", {
-        "url": "d1eda7afeaa589f71f05b9bb5c0694e3ffb357cd",
+        "url": "fbdf7df39325cae02f5688e9f92935b0e7113315",
         "count": 1,
         "keyword": {
             "camera": "Canon EOS 600D",
             "camera_info": dict,
-            "collections_count": int,
             "comments": list,
             "comments_count": int,
-            "converted": False,
-            "converted_bits": int,
-            "created_at": "2017-08-01T04:40:05-04:00",
-            "crop_version": 0,
+            "created_at": "2017-08-01T08:40:05+00:00",
             "description": str,
-            "editored_by": dict,
+            "editored_by": None,
             "editors_choice": False,
             "extension": "jpg",
-            "favorites_count": int,
             "feature": "popular",
             "feature_date": "2017-08-01T09:58:28+00:00",
             "focal_length": "208",
             "height": 3111,
             "id": 222049255,
-            "image_format": "jpeg",
-            "image_url": str,
+            "image_format": "jpg",
+            "image_url": list,
             "images": list,
             "iso": "100",
             "lens": "EF-S55-250mm f/4-5.6 IS II",
             "lens_info": dict,
-            "license_type": 0,
-            "licensed_at": None,
-            "liked": False,
+            "liked": None,
             "location": None,
             "location_details": dict,
             "name": "Queen Of Coasts",
@@ -212,15 +204,11 @@ class _500pxImageExtractor(_500pxExtractor):
             "privacy": False,
             "profile": True,
             "rating": float,
-            "sales_count": int,
             "status": 1,
-            "store_download": False,
-            "store_height": 3111,
-            "store_width": 4637,
             "tags": list,
-            "taken_at": "2017-05-04T13:36:51-04:00",
+            "taken_at": "2017-05-04T17:36:51+00:00",
             "times_viewed": int,
-            "url": "/photo/222049255/queen-of-coasts-by-olesya-nabieva",
+            "url": "/photo/222049255/Queen-Of-Coasts-by-Olesya-Nabieva",
             "user": dict,
             "user_id": 12847235,
             "votes_count": int,
