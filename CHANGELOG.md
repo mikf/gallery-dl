@@ -1,6 +1,30 @@
 # Changelog
 
-## Unreleased
+## 1.9.0 - 2019-07-19
+### Additions
+- Support for
+  - `erolord` - http://erolord.com/ ([#326](https://github.com/mikf/gallery-dl/issues/326))
+- Add login support for `instagram` ([#195](https://github.com/mikf/gallery-dl/issues/195))
+- Add `--no-download` and `extractor.*.download` disable file downloads ([#220](https://github.com/mikf/gallery-dl/issues/220))
+- Add `-A/--abort` to specify the number of consecutive download skips before aborting
+- Interpret `-1` as infinite retries ([#300](https://github.com/mikf/gallery-dl/issues/300))
+- Implement custom log message formats per log-level ([#304](https://github.com/mikf/gallery-dl/issues/304))
+- Implement an `mtime` post-processor that sets file modification times according to metadata fields ([#332](https://github.com/mikf/gallery-dl/issues/332))
+- Implement a `twitter.content` option to enable tweet text extraction ([#333](https://github.com/mikf/gallery-dl/issues/333), [#338](https://github.com/mikf/gallery-dl/issues/338))
+- Enable `date-min/-max/-format` options for `tumblr` ([#337](https://github.com/mikf/gallery-dl/issues/337))
+### Changes
+- Set file modification times according to their `Last-Modified` header when downloading ([#236](https://github.com/mikf/gallery-dl/issues/236), [#277](https://github.com/mikf/gallery-dl/issues/277))
+  - Use `--no-mtime` or `downloader.*.mtime` to disable this behavior
+- Duplicate download URLs are no longer silently ignored (controllable with `extractor.*.image-unique`)
+- Deprecate `--abort-on-skip`
+### Fixes
+- Retry downloads on OpenSSL exceptions ([#324](https://github.com/mikf/gallery-dl/issues/324))
+- Ignore unavailable pins on `sexcom` instead of raising an exception ([#325](https://github.com/mikf/gallery-dl/issues/325))
+- Use Firefox's SSL/TLS ciphers to prevent Cloudflare CAPTCHAs ([#342](https://github.com/mikf/gallery-dl/issues/342))
+- Improve folder name matching on `deviantart` ([#343](https://github.com/mikf/gallery-dl/issues/343))
+- Forward cookies to `youtube-dl` to allow downloading private videos
+- Miscellaneous fixes for `35photo`, `500px`, `newgrounds`, `simplyhentai`
+
 
 ## 1.8.7 - 2019-06-28
 ### Additions
