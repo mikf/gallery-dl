@@ -211,7 +211,7 @@ class TumblrUserExtractor(TumblrExtractor):
         ("http://demo.tumblr.com/", {
             "pattern": (r"https?://(?:$|"
                         r"\d+\.media\.tumblr\.com/.+_1280\.jpg|"
-                        r"w+\.tumblr\.com/audio_file/demo/\d+/tumblr_\w+)"),
+                        r"a\.tumblr\.com/tumblr_\w+)"),
             "count": 3,
             "options": (("posts", "all"), ("external", True))
         }),

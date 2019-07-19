@@ -69,11 +69,11 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
     archive_fmt = "a_{Album[AlbumKey]}_{Image[ImageKey]}"
     pattern = r"smugmug:album:([^:]+)$"
     test = (
-        ("smugmug:album:ddvxpg", {
-            "url": "0429e9bf50ee600674e448934e3882ca1761ae7b",
+        ("smugmug:album:cr4C7f", {
+            "url": "1436ee98d5797b308ecce5862e4885944f59c03c",
         }),
         # empty
-        ("smugmug:album:SXvjbW", {
+        ("smugmug:album:Fb7hMs", {
             "count": 0,
         }),
         # no "User"
@@ -109,10 +109,10 @@ class SmugmugImageExtractor(SmugmugExtractor):
     archive_fmt = "{Image[ImageKey]}"
     pattern = BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#-]+)"
     test = (
-        ("https://acapella.smugmug.com/Micro-Macro/Drops/i-g2Dmf9z", {
-            "url": "78f0bf3516b6d670b7319216bdeccb35942ca4cf",
-            "keyword": "b298ef7ed2b1918263b6a7dc6f56e54401584381",
-            "content": "64a8f69a1d824921eebbdf2420087937adfa45cd",
+        ("https://tdm.smugmug.com/Nature/Dove/i-kCsLJT6", {
+            "url": "f624ad7293afd6412a7d34e3950a118596c36c85",
+            "keyword": "ea70e93be5067dca988d871dcf9afac491a189a4",
+            "content": "ecbd9d7b4f75a637abc8d35319be9ec065a44eb0",
         }),
         # video
         ("https://tstravels.smugmug.com/Dailies/Daily-Dose-2015/i-39JFNzB", {
@@ -142,12 +142,12 @@ class SmugmugPathExtractor(SmugmugExtractor):
     subcategory = "path"
     pattern = BASE_PATTERN + r"((?:/[^/?&#a-fh-mo-z][^/?&#]*)*)/?$"
     test = (
-        ("https://acapella.smugmug.com/Micro-Macro/Drops/", {
-            "pattern": "smugmug:album:ddvxpg$",
+        ("https://tdm.smugmug.com/Nature/Dove", {
+            "pattern": "smugmug:album:cr4C7f$",
         }),
-        ("https://acapella.smugmug.com/", {
+        ("https://tdm.smugmug.com/", {
             "pattern": SmugmugAlbumExtractor.pattern,
-            "url": "797eb1cbbf5ad8ecac8ee4eedc6466ed77a65d68",
+            "url": "1640028712875b90974e5aecd91b60e6de6138c7",
         }),
         # gallery node without owner
         ("https://www.smugmug.com/gallery/n-GLCjnD/", {

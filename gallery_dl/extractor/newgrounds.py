@@ -93,7 +93,7 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
     test = (
         ("https://blitzwuff.newgrounds.com/art", {
             "url": "24b19c4a135a09889fac7b46a74e427e4308d02b",
-            "keyword": "2aab0532a894ff3cf88dd01ce5c60f114011b268",
+            "keyword": "98566e0c8096a8099b8d71962fea7e31c8b098d4",
         }),
         ("https://blitzwuff.newgrounds.com/"),
     )
