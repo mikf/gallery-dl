@@ -13,6 +13,7 @@ Site                 URL                                 Capabilities           
 8chan                https://8ch.net/                    Threads
 8muses               https://www.8muses.com/             Albums
 Adobe Portfolio      https://www.myportfolio.com/        Galleries
+Adult Empire         https://www.adultempire.com/        Galleries
 arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
