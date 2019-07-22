@@ -96,6 +96,7 @@ modules = [
     "tumblr",
     "twitter",
     "vanillarock",
+    "vsco",
     "wallhaven",
     "warosu",
     "weibo",
