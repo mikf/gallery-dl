@@ -108,6 +108,24 @@ Description Directory path used as the base for all download destinations.
 =========== =====
 
 
+extractor.*.restrict-filenames
+------------------------------
+=========== =====
+Type        ``string``
+Default     ``"auto"``
+Example     ``"/!? ()[]{}"``
+Description Characters to replace with underscores (``_``) when generating
+            directory and file names.
+
+            Special values:
+
+            * ``"auto"``: Use characters from ``"unix"`` or ``"windows"``
+              depending on the local operating system
+            * ``"unix"``: ``"/"``
+            * ``"windows"``: ``"<>:\"\\|/?*"``
+=========== =====
+
+
 extractor.*.skip
 ----------------
 =========== =====

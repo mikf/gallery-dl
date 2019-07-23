@@ -535,6 +535,27 @@ class PathFormat():
         if os.altsep and os.altsep in self.basedirectory:
             self.basedirectory = self.basedirectory.replace(os.altsep, os.sep)
 
+        restrict = extractor.config("restrict-filenames", "auto")
+        if restrict == "auto":
+            restrict = "<>:\"\\/|?*" if os.name == "nt" else "/"
+        elif restrict == "unix":
+            restrict = "/"
+        elif restrict == "windows":
+            restrict = "<>:\"\\/|?*"
+        self.clean_path = self._build_cleanfunc(restrict)
+
+    @staticmethod
+    def _build_cleanfunc(repl):
+        if not repl:
+            return lambda x: x
+        elif len(repl) == 1:
+            def func(x, r=repl):
+                return x.replace(r, "_")
+        else:
+            def func(x, sub=re.compile("[" + re.escape(repl) + "]").sub):
+                return sub("_", x)
+        return func
+
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
         return open(self.temppath, mode)
@@ -551,7 +572,7 @@ class PathFormat():
         """Build directory path and create it if necessary"""
         try:
             segments = [
-                text.clean_path(
+                self.clean_path(
                     Formatter(segment, self.kwdefault)
                     .format_map(keywords).strip())
                 for segment in self.directory_fmt
@@ -597,7 +618,7 @@ class PathFormat():
     def build_path(self):
         """Use filename-keywords and directory to build a full path"""
         try:
-            self.filename = text.clean_path(
+            self.filename = self.clean_path(
                 self.formatter.format_map(self.keywords))
         except Exception as exc:
             raise exception.FormatError(exc, "filename")

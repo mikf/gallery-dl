@@ -139,26 +139,6 @@ class TestText(unittest.TestCase):
         for value in INVALID:
             self.assertEqual(f(value), empty)
 
-    def test_clean_path_windows(self, f=text.clean_path_windows):
-        self.assertEqual(f(""), "")
-        self.assertEqual(f("foo"), "foo")
-        self.assertEqual(f("foo/bar"), "foo_bar")
-        self.assertEqual(f("foo<>:\"\\/|?*bar"), "foo_________bar")
-
-        # invalid arguments
-        for value in INVALID:
-            self.assertEqual(f(value), "")
-
-    def test_clean_path_posix(self, f=text.clean_path_posix):
-        self.assertEqual(f(""), "")
-        self.assertEqual(f("foo"), "foo")
-        self.assertEqual(f("foo/bar"), "foo_bar")
-        self.assertEqual(f("foo<>:\"\\/|?*bar"), "foo<>:\"\\_|?*bar")
-
-        # invalid arguments
-        for value in INVALID:
-            self.assertEqual(f(value), "")
-
     def test_extract(self, f=text.extract):
         txt = "<a><b>"
         self.assertEqual(f(txt, "<", ">"), ("a" , 3))

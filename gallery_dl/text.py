@@ -83,22 +83,6 @@ def nameext_from_url(url, data=None):
     return data
 
 
-def clean_path_windows(path):
-    """Remove illegal characters from a path-segment (Windows)"""
-    try:
-        return re.sub(r'[<>:"\\/|?*]', "_", path)
-    except TypeError:
-        return ""
-
-
-def clean_path_posix(path):
-    """Remove illegal characters from a path-segment (Posix)"""
-    try:
-        return path.replace("/", "_")
-    except AttributeError:
-        return ""
-
-
 def extract(txt, begin, end, pos=0):
     """Extract the text between 'begin' and 'end' from 'txt'
 
@@ -264,12 +248,6 @@ def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z"):
         return None
     except (ValueError, OverflowError):
         return date_string
-
-
-if os.name == "nt":
-    clean_path = clean_path_windows
-else:
-    clean_path = clean_path_posix
 
 
 urljoin = urllib.parse.urljoin
