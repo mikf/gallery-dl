@@ -1108,6 +1108,15 @@ Description Video `format selection
 =========== =====
 
 
+downloader.ytdl.forward-cookies
+-------------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Forward cookies to youtube-dl.
+=========== =====
+
+
 downloader.ytdl.logging
 -----------------------
 =========== =====

@@ -34,12 +34,15 @@ class YoutubeDLDownloader(DownloaderBase):
 
         if self.config("logging", True):
             options["logger"] = self.log
+        self.forward_cookies = self.config("forward-cookies", True)
 
         self.ytdl = YoutubeDL(options)
 
     def download(self, url, pathfmt):
-        for cookie in self.session.cookies:
-            self.ytdl.cookiejar.set_cookie(cookie)
+        if self.forward_cookies:
+            set_cookie = self.ytdl.cookiejar.set_cookie
+            for cookie in self.session.cookies:
+                set_cookie(cookie)
 
         try:
             info_dict = self.ytdl.extract_info(url[5:], download=False)
