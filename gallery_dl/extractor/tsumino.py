@@ -65,7 +65,7 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
                 "uploader"  : "sehki",
                 "lang"      : "en",
                 "language"  : "English",
-                "thumbnail" : "http://www.tsumino.com/Image/Thumb/40996",
+                "thumbnail" : "re:https?://www.tsumino.com/Image/Thumb/40996",
             },
         }),
         ("https://www.tsumino.com/Read/View/45834"),
