@@ -26,9 +26,8 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "komikcast",
-    "konachan",
     "mangapark",
+    "piczel",
 }
 
 
