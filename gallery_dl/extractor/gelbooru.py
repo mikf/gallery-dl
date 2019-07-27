@@ -30,6 +30,7 @@ class GelbooruExtractor(booru.XmlParserMixin,
             self.params.update({"page": "dapi", "s": "post", "q": "index"})
         else:
             self.items = self.items_noapi
+            self.session.cookies["fringeBenefits"] = "yup"
 
     def items_noapi(self):
         data = self.get_metadata()
