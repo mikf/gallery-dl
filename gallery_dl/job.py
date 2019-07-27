@@ -81,7 +81,8 @@ class Job():
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
             log.debug("", exc_info=True)
-        self.handle_finalize()
+        finally:
+            self.handle_finalize()
 
     def dispatch(self, msg):
         """Call the appropriate message handler"""
