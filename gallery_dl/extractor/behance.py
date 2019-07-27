@@ -30,7 +30,8 @@ class BehanceExtractor(Extractor):
     @staticmethod
     def _update(data):
         # compress data to simple lists
-        data["fields"] = [field["name"] for field in data["fields"]]
+        if data["fields"] and isinstance(data["fields"][0], dict):
+            data["fields"] = [field["name"] for field in data["fields"]]
         data["owners"] = [owner["display_name"] for owner in data["owners"]]
         if "tags" in data:
             data["tags"] = [tag["title"] for tag in data["tags"]]
@@ -140,11 +141,11 @@ class BehanceUserExtractor(BehanceExtractor):
 
     def galleries(self):
         url = "{}/{}/projects".format(self.root, self.user)
-        headers = {"X-Requested-With": "XMLHttpRequest"}
         params = {"offset": 0}
+        headers = {"X-Requested-With": "XMLHttpRequest"}
 
         while True:
-            data = self.request(url, headers=headers, params=params).json()
+            data = self.request(url, params=params, headers=headers).json()
             work = data["profile"]["activeSection"]["work"]
             yield from work["projects"]
             if not work["hasMore"]:
@@ -157,8 +158,8 @@ class BehanceCollectionExtractor(BehanceExtractor):
     subcategory = "collection"
     categorytransfer = True
     pattern = r"(?:https?://)?(?:www\.)?behance\.net/collection/(\d+)"
-    test = ("https://www.behance.net/collection/170615607/Sky", {
-        "count": ">= 13",
+    test = ("https://www.behance.net/collection/71340149/inspiration", {
+        "count": ">= 145",
         "pattern": BehanceGalleryExtractor.pattern,
     })
 
@@ -168,12 +169,13 @@ class BehanceCollectionExtractor(BehanceExtractor):
 
     def galleries(self):
         url = "{}/collection/{}/a".format(self.root, self.collection_id)
+        params = {"offset": 0}
         headers = {"X-Requested-With": "XMLHttpRequest"}
-        params = {}
 
         while True:
-            data = self.request(url, headers=headers, params=params).json()
-            yield from data["output"]
-            if not data.get("offset"):
+            data = self.request(url, params=params, headers=headers).json()
+            for item in data["items"]:
+                yield item["project"]
+            if len(data["items"]) < 40:
                 return
-            params["offset"] = data["offset"]
+            params["offset"] += len(data["items"])
