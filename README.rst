@@ -171,7 +171,8 @@ Some extractors require you to provide valid login-credentials in the form of
 a username & password pair.
 This is necessary for ``pixiv``, ``nijie`` and ``seiga``
 and optional (but strongly recommended) for ``exhentai``,  ``luscious``,
-``sankaku``, ``idolcomplex``, ``tsumino`` and ``wallhaven``.
+``sankaku``, ``idolcomplex``, ``tsumino``, ``wallhaven``, ``twitter`` 
+and ``danbooru``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)

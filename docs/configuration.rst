@@ -167,7 +167,8 @@ Description The username and password to use when attempting to log in to
             Specifying username and password is
             required for the ``pixiv``, ``nijie`` and ``seiga`` modules and
             optional (but strongly recommended) for ``danbooru``, ``exhentai``,
-            ``sankaku`` and ``idolcomplex``.
+            ``sankaku``, ``idolcomplex``, ``luscious``, ``tsumino``,
+            ``wallhaven`` and ``twitter``.
 
             These values can also be set via the ``-u/--username`` and
             ``-p/--password`` command-line options or by using a |.netrc|_ file.
