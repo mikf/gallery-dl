@@ -1465,6 +1465,22 @@ Default     ``false``
 Description Keep the actual files after writing them to a ZIP archive.
 =========== =====
 
+zip.mode
+--------
+=========== =====
+Type        ``string``
+Default     ``"default"``
+Description * ``"default"``: Write the central directory file header
+              once after everything is done or an exception is raised.
+
+            * ``"safe"``: Update the central directory file header
+              each time a file is stored in a ZIP archive.
+
+              This greatly reduces the chance a ZIP archive gets corrupted in
+              case the Python interpreter gets shut down unexpectedly
+              (power outage, SIGKILL) but is also a lot slower.
+=========== =====
+
 
 
 Miscellaneous Options
