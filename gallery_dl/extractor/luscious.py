@@ -62,7 +62,7 @@ class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
     test = (
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
-            "keyword": "c597c132834f4990f90bf5dee5de2a9d4ba263a4",
+            "keyword": "c0536584fc455c67940b032e6b833343871ae93d",
             "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {

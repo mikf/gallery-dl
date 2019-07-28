@@ -44,7 +44,7 @@ class NgomikChapterExtractor(ChapterExtractor):
 
     @staticmethod
     def images(page):
-        readerarea = text.extract(page, 'id=readerarea', 'class=chnav')[0]
+        readerarea = text.extract(page, 'id="readerarea"', 'class="chnav"')[0]
         return [
             (text.unescape(url), None)
             for url in re.findall(r"\ssrc=[\"']?([^\"' >]+)", readerarea)

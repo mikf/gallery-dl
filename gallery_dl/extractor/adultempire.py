@@ -21,7 +21,7 @@ class AdultempireGalleryExtractor(GalleryExtractor):
     test = (
         ("https://www.adultempire.com/5998/gallery.html", {
             "range": "1",
-            "keyword": "9057a960a7224873431612e4c95b88b2e8b5c97b",
+            "keyword": "0533ef1184892be8ac02b17286797c95f389ba63",
             "content": "5c6beb31e5e3cdc90ee5910d5c30f9aaec977b9e",
         }),
         ("https://www.adultdvdempire.com/5683/gallery.html", {
