@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from galleries at https://exhentai.org/"""
+"""Extractors for https://e-hentai.org/"""
 
 from .common import Extractor, Message
 from .. import text, util, exception
@@ -27,14 +27,11 @@ class ExhentaiExtractor(Extractor):
     filename_fmt = (
         "{gallery_id}_{num:>04}_{image_token}_{filename}.{extension}")
     archive_fmt = "{gallery_id}_{num}"
-    cookiedomain = ".exhentai.org"
+    cookiedomain = ".e-hentai.org"
     cookienames = ("ipb_member_id", "ipb_pass_hash")
-    root = "https://exhentai.org"
+    root = "https://e-hentai.org"
 
     def __init__(self, match):
-        if match.group(1) != "ex":
-            self.root = "https://e-hentai.org"
-            self.cookiedomain = ".e-hentai.org"
         Extractor.__init__(self, match)
         self.limits = self.config("limits", True)
         self.original = self.config("original", True)
@@ -45,13 +42,7 @@ class ExhentaiExtractor(Extractor):
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
         self.session.headers["Referer"] = self.root + "/"
-
-    def request(self, *args, **kwargs):
-        response = Extractor.request(self, *args, **kwargs)
-        if self._is_sadpanda(response):
-            self.log.info("sadpanda.jpg")
-            raise exception.AuthorizationError()
-        return response
+        self.session.cookies.set("nw", "1", domain=self.cookiedomain)
 
     def wait(self, waittime=None):
         """Wait for a randomly chosen amount of seconds"""
@@ -69,11 +60,8 @@ class ExhentaiExtractor(Extractor):
         if username:
             self._update_cookies(self._login_impl(username, password))
         else:
-            self.log.info("no username given; using e-hentai.org")
-            self.root = "https://e-hentai.org"
             self.original = False
             self.limits = False
-            self.session.cookies["nw"] = "1"
 
     @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
@@ -95,14 +83,6 @@ class ExhentaiExtractor(Extractor):
         if "You are now logged in as:" not in response.text:
             raise exception.AuthenticationError()
         return {c: response.cookies[c] for c in self.cookienames}
-
-    @staticmethod
-    def _is_sadpanda(response):
-        """Return True if the response object contains a sad panda"""
-        return (
-            response.headers.get("Content-Length") == "9615" and
-            "sadpanda.jpg" in response.headers.get("Content-Disposition", "")
-        )
 
 
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
@@ -372,7 +352,10 @@ class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favorites\.php(?:\?(.*))?"
     test = (
-        ("https://exhentai.org/favorites.php"),
+        ("https://exhentai.org/favorites.php", {
+            "count": 1,
+            "pattern": r"https?://e-hentai\.org/g/1200119/d55c44d3d0"
+        }),
         ("https://exhentai.org/favorites.php?favcat=1&f_search=touhou"
          "&f_apply=Search+Favorites"),
     )
