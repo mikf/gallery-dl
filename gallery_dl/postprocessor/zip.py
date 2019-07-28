@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -25,7 +25,7 @@ class ZipPP(PostProcessor):
     def __init__(self, pathfmt, options):
         PostProcessor.__init__(self)
         self.delete = not options.get("keep-files", False)
-        self.ext = "." + options.get("extension", "zip")
+        ext = "." + options.get("extension", "zip")
         algorithm = options.get("compression", "store")
         if algorithm not in self.COMPRESSION_ALGORITHMS:
             self.log.warning(
@@ -34,29 +34,45 @@ class ZipPP(PostProcessor):
             algorithm = "store"
 
         self.path = pathfmt.realdirectory
-        self.zfile = zipfile.ZipFile(
-            self.path + self.ext, "a",
-            self.COMPRESSION_ALGORITHMS[algorithm], True)
+        args = (self.path + ext, "a",
+                self.COMPRESSION_ALGORITHMS[algorithm], True)
 
-    def run(self, pathfmt):
+        if options.get("mode") == "safe":
+            self.run = self._write_safe
+            self.zfile = None
+            self.args = args
+        else:
+            self.run = self._write
+            self.zfile = zipfile.ZipFile(*args)
+
+    def _write(self, pathfmt, zfile=None):
         # 'NameToInfo' is not officially documented, but it's available
         # for all supported Python versions and using it directly is a lot
-        # better than calling getinfo()
-        if pathfmt.filename not in self.zfile.NameToInfo:
-            self.zfile.write(pathfmt.temppath, pathfmt.filename)
+        # faster than calling getinfo()
+        if zfile is None:
+            zfile = self.zfile
+        if pathfmt.filename not in zfile.NameToInfo:
+            zfile.write(pathfmt.temppath, pathfmt.filename)
             pathfmt.delete = self.delete
 
+    def _write_safe(self, pathfmt):
+        with zipfile.ZipFile(*self.args) as zfile:
+            self._write(pathfmt, zfile)
+
     def finalize(self):
-        self.zfile.close()
+        if self.zfile:
+            self.zfile.close()
 
         if self.delete:
             try:
+                # remove target directory
                 os.rmdir(self.path)
             except OSError:
                 pass
 
-            if not self.zfile.NameToInfo:
+            if self.zfile and not self.zfile.NameToInfo:
                 try:
+                    # delete empty zip archive
                     os.unlink(self.zfile.filename)
                 except OSError:
                     pass
