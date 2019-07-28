@@ -283,9 +283,9 @@ class SankakuPostExtractor(SankakuExtractor):
         "options": (("tags", True),),
         "keyword": {
             "tags_artist": "bonocho",
-            "tags_copyright": "batman_(series) the_dark_knight",
-            "tags_medium": "sketch copyright_name",
             "tags_studio": "dc_comics",
+            "tags_medium": "sketch copyright_name",
+            "tags_copyright": str,
             "tags_character": str,
             "tags_general": str,
         },
