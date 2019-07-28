@@ -24,7 +24,7 @@ CATEGORY_MAP = {
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
     "erolord"        : "EroLord.com",
-    "exhentai"       : "ExHentai",
+    "exhentai"       : "E-Hentai",
     "fallenangels"   : "Fallen Angels Scans",
     "fashionnova"    : "Fashion Nova",
     "hbrowse"        : "HBrowse",
