@@ -28,7 +28,7 @@ class ExhentaiExtractor(Extractor):
         "{gallery_id}_{num:>04}_{image_token}_{filename}.{extension}")
     archive_fmt = "{gallery_id}_{num}"
     cookiedomain = ".e-hentai.org"
-    cookienames = ("ipb_member_id", "ipb_pass_hash")
+    cookienames = ("ipb_member_id", "ipb_pass_hash", "sk")
     root = "https://e-hentai.org"
 
     def __init__(self, match):
@@ -66,10 +66,13 @@ class ExhentaiExtractor(Extractor):
     @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
+        bounce = self.root + "/bounce_login.php?b=d&bt=1-1"
+
+        self.request(self.root + "/home.php")
+        self.wait(1)
+
         url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
-        headers = {
-            "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1",
-        }
+        headers = {"Referer": bounce}
         data = {
             "CookieDate": "1",
             "b": "d",
@@ -78,11 +81,20 @@ class ExhentaiExtractor(Extractor):
             "PassWord": password,
             "ipb_login_submit": "Login!",
         }
-
         response = self.request(url, method="POST", headers=headers, data=data)
-        if "You are now logged in as:" not in response.text:
+        if b"You are now logged in as:" not in response.content:
             raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in self.cookienames}
+
+        self.wait(1)
+        self.request(bounce)
+        self.wait(1)
+        self.request(self.root + "/uconfig.php")
+
+        return {
+            c.name: c.value
+            for c in self.session.cookies
+            if c.domain == self.cookiedomain
+        }
 
 
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
@@ -92,23 +104,21 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"(?:/g/(\d+)/([\da-f]{10})"
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
-        ("https://exhentai.org/g/960460/4f0e369d82/", {
-            "keyword": "1532ca4d0e4e0738dc994ca725a228af04a4e480",
-            "content": "493d759de534355c9f55f8e365565b62411de146",
+        ("https://e-hentai.org/g/1200119/d55c44d3d0/", {
+            "keyword": "1b353fad00dff0665b1746cdd151ab5cc326df23",
+            "content": "e9891a4c017ed0bb734cd1efba5cd03f594d31ff",
         }),
-        ("https://exhentai.org/g/960461/4f0e369d82/", {
+        ("https://e-hentai.org/g/960461/4f0e369d82/", {
             "exception": exception.NotFoundError,
         }),
-        ("http://exhentai.org/g/962698/7f02358e00/", {
+        ("http://e-hentai.org/g/962698/7f02358e00/", {
             "exception": exception.AuthorizationError,
-        }),
-        ("https://exhentai.org/s/3957343c3b/960460-5", {
-            "count": 2,
         }),
         ("https://e-hentai.org/s/3957343c3b/960460-5", {
             "count": 2,
         }),
-        ("https://g.e-hentai.org/g/960460/4f0e369d82/"),
+        ("https://exhentai.org/g/1200119/d55c44d3d0/"),
+        ("https://g.e-hentai.org/g/1200119/d55c44d3d0/"),
     )
 
     def __init__(self, match):
@@ -310,7 +320,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
     subcategory = "search"
     pattern = BASE_PATTERN + r"/?\?(.*)$"
     test = (
-        ("https://exhentai.org/?f_search=touhou"),
+        ("https://e-hentai.org/?f_search=touhou"),
         (("https://exhentai.org/?f_doujinshi=0&f_manga=0&f_artistcg=0"
           "&f_gamecg=0&f_western=0&f_non-h=1&f_imageset=0&f_cosplay=0"
           "&f_asianporn=0&f_misc=0&f_search=touhou&f_apply=Apply+Filter"), {
@@ -352,7 +362,7 @@ class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favorites\.php(?:\?(.*))?"
     test = (
-        ("https://exhentai.org/favorites.php", {
+        ("https://e-hentai.org/favorites.php", {
             "count": 1,
             "pattern": r"https?://e-hentai\.org/g/1200119/d55c44d3d0"
         }),
