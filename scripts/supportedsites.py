@@ -123,6 +123,8 @@ AUTH_MAP = {
     "tsumino"    : "Optional",
     "tumblr"     : "Optional (OAuth)",
     "twitter"    : "Optional",
+    "wallhaven"  : ("Optional (`API Key "
+                    "<configuration.rst#extractorwallhavenapi-key>`__)"),
 }
 
 IGNORE_LIST = (

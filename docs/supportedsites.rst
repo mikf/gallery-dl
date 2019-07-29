@@ -108,7 +108,7 @@ Tsumino              https://www.tsumino.com/            Galleries, Search Resul
 Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
 Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets                 Optional
 VSCO                 https://vsco.co/                    Images from Users, Collections, individual Images
-Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  Optional
+Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  |wallhaven-A|
 Warosu               https://warosu.org/                 Threads
 Weibo                https://www.weibo.com/              Images from Users, Images from Statuses
 WikiArt.org          https://www.wikiart.org/            Artists, Artworks
@@ -139,4 +139,5 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |pixnet-C| replace:: Images from Users, Folders, individual Images, Sets
 .. |pornreactor-C| replace:: Images from Users, Posts, Search Results, Tag-Searches
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
+.. |wallhaven-A| replace:: Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 .. |yuki-S| replace:: yuki.la 4chan archive

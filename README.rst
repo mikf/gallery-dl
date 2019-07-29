@@ -168,11 +168,11 @@ Username & Password
 -------------------
 
 Some extractors require you to provide valid login-credentials in the form of
-a username & password pair.
-This is necessary for ``pixiv``, ``nijie`` and ``seiga``
-and optional (but strongly recommended) for ``exhentai``,  ``luscious``,
-``sankaku``, ``idolcomplex``, ``tsumino``, ``wallhaven``, ``twitter`` 
-and ``danbooru``.
+a username & password pair. This is necessary for
+``pixiv``, ``nijie``, and ``seiga``
+and optional (but strongly recommended) for
+``danbooru``, ``exhentai``, ``idolcomplex``, ``instagram``,
+``luscious``, ``sankaku``, ``tsumino``, and ``twitter``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
