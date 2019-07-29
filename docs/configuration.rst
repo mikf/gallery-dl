@@ -164,10 +164,11 @@ Default     ``null``
 Description The username and password to use when attempting to log in to
             another site.
 
-            Specifying username and password is
-            required for the ``pixiv``, ``nijie`` and ``seiga`` modules and
-            optional (but strongly recommended) for ``danbooru``, ``exhentai``,
-            ``sankaku`` and ``idolcomplex``.
+            Specifying username and password is required for the
+            ``pixiv``, ``nijie``, and ``seiga``
+            modules and optional (but strongly recommended) for
+            ``danbooru``, ``exhentai``, ``idolcomplex``, ``instagram``,
+            ``luscious``, ``sankaku``, ``tsumino``, and ``twitter``.
 
             These values can also be set via the ``-u/--username`` and
             ``-p/--password`` command-line options or by using a |.netrc|_ file.
