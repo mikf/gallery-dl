@@ -31,6 +31,8 @@ class ExhentaiExtractor(Extractor):
     cookienames = ("ipb_member_id", "ipb_pass_hash", "sk")
     root = "https://e-hentai.org"
 
+    LIMIT = False
+
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.limits = self.config("limits", True)
@@ -54,6 +56,9 @@ class ExhentaiExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
+        if self.LIMIT:
+            self.log.error("Image limit reached!")
+            raise exception.StopExtraction()
         if self._check_cookies(self.cookienames):
             return
         username, password = self._get_auth_info()
@@ -133,15 +138,14 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def items(self):
         self.login()
 
+        if self.limits:
+            self._init_limits()
+
         if self.gallery_token:
             gpage = self._gallery_page()
             self.image_token = text.extract(gpage, 'hentai.org/s/', '"')[0]
-            if "hentai.org/mpv/" in gpage:
-                self.log.warning("Extraction with Multi-Page Viewer "
-                                 "enabled is not supported")
             if not self.image_token:
-                self.log.error("Failed to extract image token "
-                               "from gallery page")
+                self.log.error("Failed to extract initial image token")
                 self.log.debug("Page content:\n%s", gpage)
                 return
             self.wait()
@@ -149,6 +153,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         else:
             ipage = self._image_page()
             part = text.extract(ipage, 'hentai.org/g/', '"')[0]
+            if not part:
+                self.log.error("Failed to extract gallery token")
+                self.log.debug("Page content:\n%s", ipage)
+                return
             self.gallery_token = part.split("/")[1]
             self.wait()
             gpage = self._gallery_page()
@@ -217,8 +225,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 url = iurl
                 data = self._parse_image_info(url)
         except IndexError:
-            self.log.warning("Unable to parse image info for '%s'", url)
+            self.log.error("Unable to parse image info for '%s'", url)
             self.log.debug("Page content:\n%s", page)
+            raise exception.StopExtraction()
 
         data["num"] = self.image_num
         data["image_token"] = self.key["start"] = extr('var startkey="', '";')
@@ -253,8 +262,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                     url = imgurl
                     data = self._parse_image_info(url)
             except IndexError:
-                self.log.warning("Unable to parse image info for '%s'", url)
+                self.log.error("Unable to parse image info for '%s'", url)
                 self.log.debug("Page content:\n%s", page)
+                raise exception.StopExtraction()
 
             data["num"] = request["page"]
             data["image_token"] = imgkey
@@ -272,6 +282,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             raise exception.AuthorizationError()
         if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
+        if "hentai.org/mpv/" in page:
+            self.log.warning("Enabled Multi-Page Viewer is not supported")
         return page
 
     def _image_page(self):
@@ -283,28 +295,28 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             raise exception.NotFoundError("image page")
         return page
 
+    def _init_limits(self):
+        self._update_limits()
+        if self._remaining <= 0:
+            self.log.error("Image limit reached!")
+            ExhentaiExtractor.LIMIT = True
+            raise exception.StopExtraction()
+
     def _check_limits(self, data):
-        if not self._remaining or data["num"] % 20 == 0:
+        if data["num"] % 20 == 0:
             self._update_limits()
         self._remaining -= data["cost"]
 
         if self._remaining <= 0:
             url = "{}/s/{}/{}-{}".format(
                 self.root, data["image_token"], self.gallery_id, data["num"])
-            self.log.error(
-                "Image limit reached! Reset it and continue with "
-                "'%s' as URL.", url)
+            self.log.error("Image limit reached! Continue with "
+                           "'%s' as URL after resetting it.", url)
+            ExhentaiExtractor.LIMIT = True
             raise exception.StopExtraction()
 
     def _update_limits(self):
-        url = "https://e-hentai.org/home.php"
-        cookies = {
-            cookie.name: cookie.value
-            for cookie in self.session.cookies
-            if cookie.domain == self.cookiedomain and cookie.name != "igneous"
-        }
-
-        page = self.request(url, cookies=cookies).text
+        page = self.request(self.root + "/home.php").text
         current, pos = text.extract(page, "<strong>", "</strong>")
         maximum, pos = text.extract(page, "<strong>", "</strong>", pos)
         self._remaining = text.parse_int(maximum) - text.parse_int(current)
