@@ -136,6 +136,14 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if self.gallery_token:
             gpage = self._gallery_page()
             self.image_token = text.extract(gpage, 'hentai.org/s/', '"')[0]
+            if "hentai.org/mpv/" in gpage:
+                self.log.warning("Extraction with Multi-Page Viewer "
+                                 "enabled is not supported")
+            if not self.image_token:
+                self.log.error("Failed to extract image token "
+                               "from gallery page")
+                self.log.debug("Page content:\n%s", gpage)
+                return
             self.wait()
             ipage = self._image_page()
         else:
@@ -201,12 +209,16 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         iurl = extr('<img id="img" src="', '"')
         orig = extr('hentai.org/fullimg.php', '"')
 
-        if self.original and orig:
-            url = self.root + "/fullimg.php" + text.unescape(orig)
-            data = self._parse_original_info(extr('ownload original', '<'))
-        else:
-            url = iurl
-            data = self._parse_image_info(url)
+        try:
+            if self.original and orig:
+                url = self.root + "/fullimg.php" + text.unescape(orig)
+                data = self._parse_original_info(extr('ownload original', '<'))
+            else:
+                url = iurl
+                data = self._parse_image_info(url)
+        except IndexError:
+            self.log.warning("Unable to parse image info for '%s'", url)
+            self.log.debug("Page content:\n%s", page)
 
         data["num"] = self.image_num
         data["image_token"] = self.key["start"] = extr('var startkey="', '";')
@@ -232,13 +244,17 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             imgurl , pos = text.extract(page["i3"], 'id="img" src="', '"', pos)
             origurl, pos = text.extract(page["i7"], '<a href="', '"')
 
-            if self.original and origurl:
-                url = text.unescape(origurl)
-                data = self._parse_original_info(
-                    text.extract(page["i7"], "ownload original", "<", pos)[0])
-            else:
-                url = imgurl
-                data = self._parse_image_info(url)
+            try:
+                if self.original and origurl:
+                    url = text.unescape(origurl)
+                    data = self._parse_original_info(text.extract(
+                        page["i7"], "ownload original", "<", pos)[0])
+                else:
+                    url = imgurl
+                    data = self._parse_image_info(url)
+            except IndexError:
+                self.log.warning("Unable to parse image info for '%s'", url)
+                self.log.debug("Page content:\n%s", page)
 
             data["num"] = request["page"]
             data["image_token"] = imgkey
