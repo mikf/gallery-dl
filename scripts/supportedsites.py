@@ -37,6 +37,7 @@ CATEGORY_MAP = {
     "idolcomplex"    : "Idol Complex",
     "imagebam"       : "ImageBam",
     "imagefap"       : "ImageFap",
+    "imgbb"          : "ImgBB",
     "imgbox"         : "imgbox",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
