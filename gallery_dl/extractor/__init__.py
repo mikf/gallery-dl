@@ -43,6 +43,7 @@ modules = [
     "idolcomplex",
     "imagebam",
     "imagefap",
+    "imgbb",
     "imgbox",
     "imgth",
     "imgur",
