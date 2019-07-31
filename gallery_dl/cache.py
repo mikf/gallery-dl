@@ -9,9 +9,9 @@
 """Decorators to keep function results in an in-memory and database cache"""
 
 import sqlite3
-import pathlib
 import pickle
 import time
+import os
 import functools
 from . import config, util
 
@@ -200,8 +200,10 @@ def _path():
 
 try:
     dbfile = _path()
-    pathlib.Path(dbfile).touch(mode=0o600)
+    if os.name != "nt":
+        # restrict access permissions for new db files
+        os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
     DatabaseCacheDecorator.db = sqlite3.connect(
         dbfile, timeout=30, check_same_thread=False)
-except (PermissionError, TypeError, sqlite3.OperationalError):
+except (OSError, TypeError, sqlite3.OperationalError):
     cache = memcache  # noqa: F811
