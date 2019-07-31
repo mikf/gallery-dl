@@ -189,13 +189,17 @@ def clear():
 
 def _path():
     path = config.get(("cache", "file"), -1)
+    if path != -1:
+        return util.expand_path(path)
 
-    if path == -1:
+    if os.name == "nt":
         import tempfile
-        import os.path
-        return os.path.join(tempfile.gettempdir(), ".gallery-dl.cache")
+        cachedir = tempfile.gettempdir()
+    else:
+        cachedir = util.expand_path(
+            os.environ.get("XDG_CACHE_HOME", "~/.cache"))
 
-    return util.expand_path(path)
+    return os.path.join(cachedir, ".gallery-dl.cache")
 
 
 try:
