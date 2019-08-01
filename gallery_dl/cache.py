@@ -194,12 +194,12 @@ def _path():
 
     if os.name == "nt":
         import tempfile
-        cachedir = tempfile.gettempdir()
-    else:
-        cachedir = util.expand_path(
-            os.environ.get("XDG_CACHE_HOME", "~/.cache"))
+        return os.path.join(tempfile.gettempdir(), ".gallery-dl.cache")
 
-    return os.path.join(cachedir, ".gallery-dl.cache")
+    cachedir = util.expand_path(os.path.join(
+        os.environ.get("XDG_CACHE_HOME", "~/.cache"), "gallery-dl"))
+    os.makedirs(cachedir, exist_ok=True)
+    return os.path.join(cachedir, "cache.sqlite3")
 
 
 try:

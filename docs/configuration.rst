@@ -1493,7 +1493,7 @@ cache.file
 =========== =====
 Type        |Path|_
 Default     * |tempfile.gettempdir()|_ + ``".gallery-dl.cache"`` on Windows
-            * (``$XDG_CACHE_HOME`` or ``"~/.cache"``) + ``".gallery-dl.cache"`` on all other platforms
+            * (``$XDG_CACHE_HOME`` or ``"~/.cache"``) + ``"/gallery-dl/cache.sqlite3"`` on all other platforms
 Description Path of the SQLite3 database used to cache login sessions,
             cookies and API tokens across `gallery-dl` invocations.
 
