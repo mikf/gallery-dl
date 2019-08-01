@@ -112,6 +112,7 @@ class VscoCollectionExtractor(VscoExtractor):
     """Extractor for images from a collection on vsco.co"""
     subcategory = "collection"
     directory_fmt = ("{category}", "{user}", "collection")
+    archive_fmt = "c_{user}_{id}"
     pattern = BASE_PATTERN + r"/collection/"
     test = ("https://vsco.co/vsco/collection/1", {
         "range": "1-80",

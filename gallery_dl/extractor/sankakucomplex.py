@@ -34,11 +34,11 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
     test = (
         ("https://www.sankakucomplex.com/2019/05/11/twitter-cosplayers", {
             "url": "4a9ecc5ae917fbce469280da5b6a482510cae84d",
-            "keyword": "4b3b5766b277a5d0acbec90fa8f2343262b07efd",
+            "keyword": "bfe08310e7d9a572f568f6900e0ed0eb295aa2b3",
         }),
         ("https://www.sankakucomplex.com/2009/12/01/sexy-goddesses-of-2ch", {
             "url": "a1e249173fd6c899a8134fcfbd9c925588a63f7c",
-            "keyword": "f47a416d680717855bbc3e4f0cd44479f61d9aa4",
+            "keyword": "e78fcc23c2711befc0969a45ea5082a29efccf68",
         }),
     )
 
