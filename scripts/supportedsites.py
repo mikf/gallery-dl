@@ -112,6 +112,7 @@ AUTH_MAP = {
     "exhentai"   : "Optional",
     "flickr"     : "Optional (OAuth)",
     "idolcomplex": "Optional",
+    "imgbb"      : "Optional",
     "instagram"  : "Optional",
     "luscious"   : "Optional",
     "mangoxo"    : "Optional",

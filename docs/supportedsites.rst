@@ -47,7 +47,7 @@ Hypnohub             https://hypnohub.net/               Pools, Popular Images, 
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
 ImageFap             https://imagefap.com/               Images from Users, Galleries, individual Images
-ImgBB                https://imgbb.com/                  Albums
+ImgBB                https://imgbb.com/                  Images from Users, Albums                          Optional
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
