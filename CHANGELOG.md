@@ -1,6 +1,30 @@
 # Changelog
 
-## Unreleased
+## 1.10.0 - 2019-08-01
+### Warning
+- Prior to version 1.10.0 all cache files were created world readable (mode `644`)
+  leading to possible sensitive information disclosure on multi-user systems
+- It is recommended to restrict access permissions of already existing files
+  (`/tmp/.gallery-dl.cache`) with `chmod 600`
+- Windows users should not be affected
+### Additions
+- Support for
+  - `vsco`        - https://vsco.co/             ([#331](https://github.com/mikf/gallery-dl/issues/331))
+  - `imgbb`       - https://imgbb.com/           ([#361](https://github.com/mikf/gallery-dl/issues/361))
+  - `adultempire` - https://www.adultempire.com/ ([#340](https://github.com/mikf/gallery-dl/issues/340))
+- `restrict-filenames` option to create Windows-compatible filenames on any platform ([#348](https://github.com/mikf/gallery-dl/issues/348))
+- `forward-cookies` option to control cookie forwarding to youtube-dl ([#352](https://github.com/mikf/gallery-dl/issues/352))
+### Changes
+- The default cache file location on non-Windows systems is now
+  - `$XDG_CACHE_HOME/gallery-dl/cache.sqlite3` or
+  - `~/.cache/gallery-dl/cache.sqlite3`
+- New cache files are created with mode `600`
+- `exhentai` extractors will always use `e-hentai.org` as domain
+- Logging in with `exhentai` now collects more cookies than just `ipb_member_id` and `ipb_pass_hash`
+### Fixes
+- Better handling of `exhentai` image limits and errors ([#356](https://github.com/mikf/gallery-dl/issues/356), [#360](https://github.com/mikf/gallery-dl/issues/360))
+- Try to prevent ZIP file corruption ([#355](https://github.com/mikf/gallery-dl/issues/355))
+- Miscellaneous fixes for `behance`, `ngomik`
 
 ## 1.9.0 - 2019-07-19
 ### Additions
@@ -26,7 +50,6 @@
 - Improve folder name matching on `deviantart` ([#343](https://github.com/mikf/gallery-dl/issues/343))
 - Forward cookies to `youtube-dl` to allow downloading private videos
 - Miscellaneous fixes for `35photo`, `500px`, `newgrounds`, `simplyhentai`
-
 
 ## 1.8.7 - 2019-06-28
 ### Additions
