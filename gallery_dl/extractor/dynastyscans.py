@@ -100,7 +100,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
     test = (
         ("https://dynasty-scans.com/images?with[]=4930&with[]=5211", {
             "url": "6b570eedd8a741c2cd34fb98b22a49d772f84191",
-            "keyword": "a1e2d05c1406a08b02f347389616a6babb1b50bf",
+            "keyword": "fa7ff94f82cdf942f7734741d758f160a6b0905a",
         }),
         ("https://dynasty-scans.com/images", {
             "range": "1",
