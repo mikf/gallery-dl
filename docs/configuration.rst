@@ -555,6 +555,15 @@ Description Download original files if available.
 =========== =====
 
 
+extractor.deviantart.quality
+----------------------------
+=========== =====
+Type        ``integer``
+Default     ``100``
+Description JPEG compression quality for newer images hosted on wixmp servers.
+=========== =====
+
+
 extractor.deviantart.refresh-token
 ----------------------------------
 =========== =====
