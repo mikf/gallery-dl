@@ -38,10 +38,14 @@ class DeviantartExtractor(Extractor):
         self.offset = 0
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
+        self.quality = self.config("quality", "100")
         self.original = self.config("original", True)
         self.user = match.group(1) or match.group(2)
         self.group = False
         self.api = DeviantartAPI(self)
+
+        if self.quality:
+            self.quality = "q_{}".format(self.quality)
 
         if self.original != "image":
             self._update_content = self._update_content_default
@@ -81,12 +85,15 @@ class DeviantartExtractor(Extractor):
                         text.ext_from_url(content["src"]) != "gif":
                     self._update_content(deviation, content)
 
-                if deviation["index"] <= 790677560 and \
-                        content["src"].startswith("https://images-wixmp-"):
-                    # https://github.com/r888888888/danbooru/issues/4069
-                    content["src"] = re.sub(
-                        r"(/f/[^/]+/[^/]+)/v\d+/.*",
-                        r"/intermediary\1", content["src"])
+                if content["src"].startswith("https://images-wixmp-"):
+                    if deviation["index"] <= 790677560:
+                        # https://github.com/r888888888/danbooru/issues/4069
+                        content["src"] = re.sub(
+                            r"(/f/[^/]+/[^/]+)/v\d+/.*",
+                            r"/intermediary\1", content["src"])
+                    if self.quality:
+                        content["src"] = re.sub(
+                            r"q_\d+", self.quality, content["src"])
 
                 yield self.commit(deviation, content)
 
@@ -384,6 +391,11 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
           "Hverarond-14-the-beauty-of-the-earth-789295466"), {
             "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
                         r"/intermediary/f/[^/]+/[^.]+\.jpg$")
+        }),
+        # wixmp URL rewrite v2 (#369)
+        (("https://www.deviantart.com/josephbiwald/art/"
+          "Destiny-2-Warmind-Secondary-Keyart-804940104"), {
+            "pattern": r"https://images-wixmp-\w+\.wixmp\.com/.*,q_100,"
         }),
         # non-download URL for GIFs (#242)
         (("https://www.deviantart.com/skatergators/art/"
