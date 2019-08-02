@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+## Fixes
+- Restore functionality of both domains for `exhentai` extractors
+
 ## 1.10.0 - 2019-08-01
 ### Warning
 - Prior to version 1.10.0 all cache files were created world readable (mode `644`)
@@ -20,7 +24,6 @@
   - `~/.cache/gallery-dl/cache.sqlite3`
 - New cache files are created with mode `600`
 - `exhentai` extractors will always use `e-hentai.org` as domain
-- Logging in with `exhentai` now collects more cookies than just `ipb_member_id` and `ipb_pass_hash`
 ### Fixes
 - Better handling of `exhentai` image limits and errors ([#356](https://github.com/mikf/gallery-dl/issues/356), [#360](https://github.com/mikf/gallery-dl/issues/360))
 - Try to prevent ZIP file corruption ([#355](https://github.com/mikf/gallery-dl/issues/355))

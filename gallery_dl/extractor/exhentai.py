@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://e-hentai.org/"""
+"""Extractors for https://e-hentai.org/ and https://exhentai.org/"""
 
 from .common import Extractor, Message
 from .. import text, util, exception
@@ -23,17 +23,21 @@ BASE_PATTERN = r"(?:https?://)?(e[x-]|g\.e-)hentai\.org"
 class ExhentaiExtractor(Extractor):
     """Base class for exhentai extractors"""
     category = "exhentai"
-    directory_fmt = ("{category}", "{gallery_id}")
+    directory_fmt = ("{category}", "{gallery_id} {title}")
     filename_fmt = (
         "{gallery_id}_{num:>04}_{image_token}_{filename}.{extension}")
     archive_fmt = "{gallery_id}_{num}"
-    cookiedomain = ".e-hentai.org"
-    cookienames = ("ipb_member_id", "ipb_pass_hash", "sk")
-    root = "https://e-hentai.org"
+    cookienames = ("ipb_member_id", "ipb_pass_hash")
+    cookiedomain = ".exhentai.org"
+    root = "https://exhentai.org"
 
     LIMIT = False
 
     def __init__(self, match):
+        version = match.group(1)
+        if version != "ex":
+            self.root = "https://e-hentai.org"
+            self.cookiedomain = ".e-hentai.org"
         Extractor.__init__(self, match)
         self.limits = self.config("limits", True)
         self.original = self.config("original", True)
@@ -44,7 +48,15 @@ class ExhentaiExtractor(Extractor):
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
         self.session.headers["Referer"] = self.root + "/"
-        self.session.cookies.set("nw", "1", domain=self.cookiedomain)
+        if version != "ex":
+            self.session.cookies.set("nw", "1", domain=self.cookiedomain)
+
+    def request(self, *args, **kwargs):
+        response = Extractor.request(self, *args, **kwargs)
+        if self._is_sadpanda(response):
+            self.log.info("sadpanda.jpg")
+            raise exception.AuthorizationError()
+        return response
 
     def wait(self, waittime=None):
         """Wait for a randomly chosen amount of seconds"""
@@ -65,19 +77,19 @@ class ExhentaiExtractor(Extractor):
         if username:
             self._update_cookies(self._login_impl(username, password))
         else:
+            self.log.info("no username given; using e-hentai.org")
+            self.root = "https://e-hentai.org"
             self.original = False
             self.limits = False
+            self.session.cookies["nw"] = "1"
 
     @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
-        bounce = self.root + "/bounce_login.php?b=d&bt=1-1"
-
-        self.request(self.root + "/home.php")
-        self.wait(1)
-
         url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
-        headers = {"Referer": bounce}
+        headers = {
+            "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1",
+        }
         data = {
             "CookieDate": "1",
             "b": "d",
@@ -86,20 +98,19 @@ class ExhentaiExtractor(Extractor):
             "PassWord": password,
             "ipb_login_submit": "Login!",
         }
+
         response = self.request(url, method="POST", headers=headers, data=data)
         if b"You are now logged in as:" not in response.content:
             raise exception.AuthenticationError()
+        return {c: response.cookies[c] for c in self.cookienames}
 
-        self.wait(1)
-        self.request(bounce)
-        self.wait(1)
-        self.request(self.root + "/uconfig.php")
-
-        return {
-            c.name: c.value
-            for c in self.session.cookies
-            if c.domain == self.cookiedomain
-        }
+    @staticmethod
+    def _is_sadpanda(response):
+        """Return True if the response object contains a sad panda"""
+        return (
+            response.headers.get("Content-Length") == "9615" and
+            "sadpanda.jpg" in response.headers.get("Content-Disposition", "")
+        )
 
 
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
@@ -109,20 +120,22 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"(?:/g/(\d+)/([\da-f]{10})"
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
-        ("https://e-hentai.org/g/1200119/d55c44d3d0/", {
+        ("https://exhentai.org/g/1200119/d55c44d3d0/", {
             "keyword": "1b353fad00dff0665b1746cdd151ab5cc326df23",
             "content": "e9891a4c017ed0bb734cd1efba5cd03f594d31ff",
         }),
-        ("https://e-hentai.org/g/960461/4f0e369d82/", {
+        ("https://exhentai.org/g/960461/4f0e369d82/", {
             "exception": exception.NotFoundError,
         }),
-        ("http://e-hentai.org/g/962698/7f02358e00/", {
+        ("http://exhentai.org/g/962698/7f02358e00/", {
             "exception": exception.AuthorizationError,
         }),
-        ("https://e-hentai.org/s/3957343c3b/960460-5", {
+        ("https://exhentai.org/s/f68367b4c8/1200119-3", {
             "count": 2,
         }),
-        ("https://exhentai.org/g/1200119/d55c44d3d0/"),
+        ("https://e-hentai.org/s/f68367b4c8/1200119-3", {
+            "count": 2,
+        }),
         ("https://g.e-hentai.org/g/1200119/d55c44d3d0/"),
     )
 
@@ -316,9 +329,17 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             raise exception.StopExtraction()
 
     def _update_limits(self):
-        page = self.request(self.root + "/home.php").text
+        url = "https://e-hentai.org/home.php"
+        cookies = {
+            cookie.name: cookie.value
+            for cookie in self.session.cookies
+            if cookie.domain == self.cookiedomain and cookie.name != "igneous"
+        }
+
+        page = self.request(url, cookies=cookies).text
         current, pos = text.extract(page, "<strong>", "</strong>")
         maximum, pos = text.extract(page, "<strong>", "</strong>", pos)
+        self.log.debug("Image Limits: %s/%s", current, maximum)
         self._remaining = text.parse_int(maximum) - text.parse_int(current)
 
     @staticmethod
