@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.10.1 - 2019-08-02
 ## Fixes
 - Restore functionality of both domains for `exhentai` extractors

@@ -18,7 +18,6 @@ class PixivExtractor(Extractor):
     """Base class for pixiv extractors"""
     category = "pixiv"
     directory_fmt = ("{category}", "{user[id]} {user[account]}")
-    filename_fmt = "{category}_{user[id]}_{id}{num}.{extension}"
     archive_fmt = "{id}{num}.{extension}"
 
     def __init__(self, match):
@@ -60,15 +59,13 @@ class PixivExtractor(Extractor):
 
             elif work["page_count"] == 1:
                 url = meta_single_page["original_image_url"]
-                work["extension"] = url.rpartition(".")[2]
-                yield Message.Url, url, work
+                yield Message.Url, url, text.nameext_from_url(url, work)
 
             else:
                 for num, img in enumerate(meta_pages):
                     url = img["image_urls"]["original"]
                     work["num"] = "_p{:02}".format(num)
-                    work["extension"] = url.rpartition(".")[2]
-                    yield Message.Url, url, work
+                    yield Message.Url, url, text.nameext_from_url(url, work)
 
     def works(self):
         """Return an iterable containing all relevant 'work'-objects"""
