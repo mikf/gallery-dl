@@ -4,7 +4,7 @@
 
 ## 1.10.1 - 2019-08-02
 ## Fixes
-- Restore functionality of both domains for `exhentai` extractors
+- Use the correct domain for exhentai.org input URLs
 
 ## 1.10.0 - 2019-08-01
 ### Warning
