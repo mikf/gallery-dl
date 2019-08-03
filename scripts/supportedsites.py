@@ -24,7 +24,8 @@ CATEGORY_MAP = {
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
     "erolord"        : "EroLord.com",
-    "exhentai"       : "E-Hentai",
+    "e-hentai"       : "E-Hentai",
+    "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
     "fashionnova"    : "Fashion Nova",
     "hbrowse"        : "HBrowse",
@@ -109,6 +110,7 @@ SUBCATEGORY_MAP = {
 AUTH_MAP = {
     "danbooru"   : "Optional",
     "deviantart" : "Optional (OAuth)",
+    "e-hentai"   : "Optional",
     "exhentai"   : "Optional",
     "flickr"     : "Optional (OAuth)",
     "idolcomplex": "Optional",
@@ -202,6 +204,15 @@ def build_extractor_list():
     # sort extractor lists with the same category
     for extrlist in extractors.values():
         extrlist.sort(key=subcategory_key)
+
+    # ugly hack to add e-hentai.org
+    eh = []
+    for extr in extractors["exhentai"]:
+        class eh_extr(extr):
+            category = "e-hentai"
+            root = "https://e-hentai.org"
+        eh.append(eh_extr)
+    extractors["e-hentai"] = eh
 
     # sort lists by category
     return sorted(
