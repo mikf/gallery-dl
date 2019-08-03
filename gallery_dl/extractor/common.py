@@ -87,7 +87,8 @@ class Extractor():
                 raise exception.HttpError(exc)
             else:
                 code = response.status_code
-                if 200 <= code < 400 or not fatal and \
+                if 200 <= code < 400 or fatal is None and \
+                        (400 <= code < 500) or not fatal and \
                         (400 <= code < 429 or 431 <= code < 500):
                     if encoding:
                         response.encoding = encoding
