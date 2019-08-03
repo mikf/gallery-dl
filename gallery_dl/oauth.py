@@ -127,6 +127,6 @@ class OAuth1API():
             self.api_key = api_key
 
     def request(self, url, method="GET", **kwargs):
-        kwargs["fatal"] = False
+        kwargs["fatal"] = None
         kwargs["session"] = self.session
         return self.extractor.request(url, method, **kwargs)

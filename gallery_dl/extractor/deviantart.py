@@ -817,7 +817,7 @@ class DeviantartAPI():
 
             self.authenticate(None if public else self.refresh_token)
             response = self.extractor.request(
-                url, headers=self.headers, params=params, fatal=False)
+                url, headers=self.headers, params=params, fatal=None)
             data = response.json()
             status = response.status_code
 
