@@ -21,12 +21,12 @@ class AdultempireGalleryExtractor(GalleryExtractor):
     test = (
         ("https://www.adultempire.com/5998/gallery.html", {
             "range": "1",
-            "keyword": "0533ef1184892be8ac02b17286797c95f389ba63",
+            "keyword": "25c8171f5623678491a0d7bdf38a7a6ebfa4a361",
             "content": "5c6beb31e5e3cdc90ee5910d5c30f9aaec977b9e",
         }),
         ("https://www.adultdvdempire.com/5683/gallery.html", {
             "url": "b12cd1a65cae8019d837505adb4d6a2c1ed4d70d",
-            "keyword": "59fe5d95929efc5040a819a5f77aba7a022bb85a",
+            "keyword": "0fe9a6e3f0a331b95ba77f66a643705ca86e8ec5",
         }),
     )
 
@@ -42,8 +42,8 @@ class AdultempireGalleryExtractor(GalleryExtractor):
             "studio"    : extr(">studio</small>", "<").strip(),
             "date"      : text.parse_datetime(extr(
                 ">released</small>", "<").strip(), "%m/%d/%Y"),
-            "actors"    : text.split_html(extr(
-                '<ul class="item-details item-cast-list ', '</ul>'))[1:],
+            "actors"    : sorted(text.split_html(extr(
+                '<ul class="item-details item-cast-list ', '</ul>'))[1:]),
         }
 
     def images(self, page):
