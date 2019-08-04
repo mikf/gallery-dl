@@ -18,7 +18,8 @@ class PixivExtractor(Extractor):
     """Base class for pixiv extractors"""
     category = "pixiv"
     directory_fmt = ("{category}", "{user[id]} {user[account]}")
-    archive_fmt = "{id}{num}.{extension}"
+    filename_fmt = "{category}_{user[id]}_{id}_p{num}.{extension}"
+    archive_fmt = "{id}{suffix}.{extension}"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -39,9 +40,10 @@ class PixivExtractor(Extractor):
             del work["meta_single_page"]
             del work["image_urls"]
             del work["meta_pages"]
-            work["num"] = ""
+            work["num"] = 0
             work["tags"] = [tag["name"] for tag in work["tags"]]
             work["date"] = text.parse_datetime(work["create_date"])
+            work["suffix"] = ""
             work.update(metadata)
 
             yield Message.Directory, work
@@ -54,17 +56,16 @@ class PixivExtractor(Extractor):
                 url = ugoira["zip_urls"]["medium"].replace(
                     "_ugoira600x600", "_ugoira1920x1080")
                 work["frames"] = ugoira["frames"]
-                work["extension"] = "zip"
-                yield Message.Url, url, work
+                yield Message.Url, url, text.nameext_from_url(url, work)
 
             elif work["page_count"] == 1:
                 url = meta_single_page["original_image_url"]
                 yield Message.Url, url, text.nameext_from_url(url, work)
 
             else:
-                for num, img in enumerate(meta_pages):
+                for work["num"], img in enumerate(meta_pages):
                     url = img["image_urls"]["original"]
-                    work["num"] = "_p{:02}".format(num)
+                    work["suffix"] = "_p{:02}".format(work["num"])
                     yield Message.Url, url, text.nameext_from_url(url, work)
 
     def works(self):
