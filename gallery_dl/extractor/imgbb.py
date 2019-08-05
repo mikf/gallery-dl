@@ -17,6 +17,7 @@ import json
 class ImgbbExtractor(Extractor):
     """Base class for imgbb extractors"""
     category = "imgbb"
+    directory_fmt = ("{category}", "{user}")
     filename_fmt = "{title} {id}.{extension}"
     archive_fmt = "{id}"
     root = "https://imgbb.com"
@@ -145,7 +146,6 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
 class ImgbbUserExtractor(ImgbbExtractor):
     """Extractor for user profiles in imgbb.com"""
     subcategory = "user"
-    directory_fmt = ("{category}", "{user}")
     pattern = r"(?:https?://)?([^.]+)\.imgbb\.com/?(?:\?([^#]+))?$"
     test = ("https://folkie.imgbb.com", {
         "range": "1-80",
@@ -177,3 +177,34 @@ class ImgbbUserExtractor(ImgbbExtractor):
             "params_hidden[userid]": user,
             "params_hidden[from]"  : "user",
         })
+
+
+class ImgbbImageExtractor(ImgbbExtractor):
+    subcategory = "image"
+    pattern = r"(?:https?://)?ibb\.co/(?!album/)([^/?&#]+)"
+    test = ("https://ibb.co/NLZHgqS", {
+        "url": "fbca86bac09de6fc0304054b2170b423ca1e84fa",
+        "keyword": "5d70e779bad03b2dc5273b627638045168671157",
+    })
+
+    def __init__(self, match):
+        ImgbbExtractor.__init__(self, match)
+        self.image_id = match.group(1)
+
+    def items(self):
+        url = "https://ibb.co/" + self.image_id
+        extr = text.extract_from(self.request(url).text)
+
+        image = {
+            "id"    : self.image_id,
+            "title" : text.unescape(extr('"og:title" content="', '"')),
+            "url"   : extr('"og:image" content="', '"'),
+            "width" : text.parse_int(extr('"og:image:width" content="', '"')),
+            "height": text.parse_int(extr('"og:image:height" content="', '"')),
+            "user"  : extr('rel="author">', '<').lower(),
+        }
+        image["extension"] = text.ext_from_url(image["url"])
+
+        yield Message.Version, 1
+        yield Message.Directory, image
+        yield Message.Url, image["url"], image
