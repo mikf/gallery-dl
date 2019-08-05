@@ -48,11 +48,11 @@ Hypnohub             https://hypnohub.net/               Pools, Popular Images, 
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
 ImageFap             https://imagefap.com/               Images from Users, Galleries, individual Images
-ImgBB                https://imgbb.com/                  Images from Users, Albums                          Optional
+ImgBB                https://imgbb.com/                  Images from Users, Albums, individual Images       Optional
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  Albums, individual Images
-Instagram            https://www.instagram.com/          Images from Users, individual Images, Tag-Searches Optional
+Instagram            https://www.instagram.com/          |instagram-C|                                      Optional
 Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga
 Joyreactor           http://joyreactor.cc/               |joyreactor-C|
 Keenspot             http://www.keenspot.com/            Comics
@@ -135,6 +135,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh
 .. |flickr-C| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
 .. |hentaifoundry-C| replace:: Images from Users, Favorites, individual Images, Popular Images, Recent Images, Scraps
+.. |instagram-C| replace:: Images from Users, individual Images, Stories, Tag-Searches
 .. |joyreactor-C| replace:: Images from Users, Posts, Search Results, Tag-Searches
 .. |nijie-C| replace:: Images from Users, Doujin, Favorites, individual Images
 .. |pixiv-C| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
