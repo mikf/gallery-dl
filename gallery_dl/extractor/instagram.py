@@ -37,7 +37,7 @@ class InstagramExtractor(Extractor):
             data.update(metadata)
             yield Message.Directory, data
 
-            if data['typename'] == 'GraphImage':
+            if data['typename'] in ('GraphImage', 'GraphStoryImage', 'GraphStoryVideo'):
                 yield Message.Url, data['display_url'], \
                     text.nameext_from_url(data['display_url'], data)
             elif data['typename'] == 'GraphVideo':
@@ -140,6 +140,67 @@ class InstagramExtractor(Extractor):
 
         return medias
 
+    def _extract_stories(self, url):
+        page = self.request(url).text
+        shared_data = self._extract_shared_data(page)
+
+        # If no stories are present the URL redirect to `ProfilePage'
+        if 'StoriesPage' not in shared_data['entry_data']:
+            return []
+
+        user_id = shared_data['entry_data']['StoriesPage'][0]['user']['id']
+        variables = (
+            '{{'
+            '"reel_ids":["{user_id}"],'
+            '"tag_names":[],"location_ids":[],'
+            '"highlight_reel_ids":[],"precomposed_overlay":true,'
+            '"show_story_viewer_list":true,'
+            '"story_viewer_fetch_count":50,"story_viewer_cursor":"",'
+            '"stories_video_dash_manifest":false}}'
+        ).format(user_id=user_id)
+        headers = {
+            "X-Requested-With": "XMLHttpRequest",
+        }
+        url = '{}/graphql/query/?query_hash={}&variables={}'.format(
+            self.root,
+            'cda12de4f7fd3719c0569ce03589f4c4',
+            variables,
+        )
+        shared_data = self.request(url, headers=headers).json()
+
+        # If there are stories present but the user is not authenticated or
+        # does not have permissions no stories are returned.
+        if not shared_data['data']['reels_media']:
+            return []   # no stories present
+
+        medias = []
+        for media in shared_data['data']['reels_media'][0]['items']:
+            media_data = {
+                'owner_id': media['owner']['id'],
+                'username': media['owner']['username'],
+                'date': text.parse_timestamp(media['taken_at_timestamp']),
+                'expires': text.parse_timestamp(media['expiring_at_timestamp']),
+                'media_id': media['id'],
+                'typename': media['__typename'],
+            }
+            if media['__typename'] == 'GraphStoryImage':
+                media_data.update({
+                    'display_url': media['display_url'],
+                    'height': text.parse_int(media['dimensions']['height']),
+                    'width': text.parse_int(media['dimensions']['width']),
+                })
+            elif media['__typename'] == 'GraphStoryVideo':
+                vr = media['video_resources'][0]
+                media_data.update({
+                    'duration': text.parse_float(media['video_duration']),
+                    'display_url': vr['src'],
+                    'height': text.parse_int(vr['config_height']),
+                    'width': text.parse_int(vr['config_width']),
+                })
+            medias.append(media_data)
+
+        return medias
+
     def _extract_page(self, url, page_type):
         shared_data_fields = {
             'ProfilePage': {
@@ -206,6 +267,9 @@ class InstagramExtractor(Extractor):
 
     def _extract_tagpage(self, url):
         yield from self._extract_page(url, 'TagPage')
+
+    def _extract_storiespage(self, url):
+        yield from self._extract_stories(url)
 
 
 class InstagramImageExtractor(InstagramExtractor):
@@ -283,7 +347,7 @@ class InstagramUserExtractor(InstagramExtractor):
     """Extractor for ProfilePage"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?!p/|explore/|directory/|accounts/)([^/?&#]+)")
+               r"/(?!p/|explore/|directory/|accounts/|stories/)([^/?&#]+)")
     test = ("https://www.instagram.com/instagram/", {
         "range": "1-12",
         "count": ">= 12",
@@ -319,3 +383,19 @@ class InstagramTagExtractor(InstagramExtractor):
     def instagrams(self):
         url = '{}/explore/tags/{}/'.format(self.root, self.tag)
         return self._extract_tagpage(url)
+
+
+class InstagramStoriesExtractor(InstagramExtractor):
+    """Extractor for StoriesPage"""
+    subcategory = "stories"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/stories/([^/?&#]+)")
+    test = ("https://www.instagram.com/stories/instagram/",)
+
+    def __init__(self, match):
+        InstagramExtractor.__init__(self, match)
+        self.username = match.group(1)
+
+    def instagrams(self):
+        url = '{}/stories/{}/'.format(self.root, self.username)
+        return self._extract_storiespage(url)
