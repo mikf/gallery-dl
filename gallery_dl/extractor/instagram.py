@@ -390,6 +390,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
     subcategory = "stories"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/stories/([^/?&#]+)")
+    test = ("https://www.instagram.com/stories/instagram/",)
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
