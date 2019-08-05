@@ -37,9 +37,7 @@ class InstagramExtractor(Extractor):
             data.update(metadata)
             yield Message.Directory, data
 
-            if data['typename'] == 'GraphImage' or \
-               data['typename'] == 'GraphStoryImage' or \
-               data['typename'] == 'GraphStoryVideo':
+            if data['typename'] in ('GraphImage', 'GraphStoryImage', 'GraphStoryVideo'):
                 yield Message.Url, data['display_url'], \
                     text.nameext_from_url(data['display_url'], data)
             elif data['typename'] == 'GraphVideo':
@@ -151,13 +149,15 @@ class InstagramExtractor(Extractor):
             return []
 
         user_id = shared_data['entry_data']['StoriesPage'][0]['user']['id']
-        variables = '{' + \
-            '"reel_ids":["{}"],'.format(user_id) + \
-            '"tag_names":[],"location_ids":[],' + \
-            '"highlight_reel_ids":[],"precomposed_overlay":true,' + \
-            '"show_story_viewer_list":true,' + \
-            '"story_viewer_fetch_count":50,"story_viewer_cursor":"",' + \
-            '"stories_video_dash_manifest":false}'
+        variables = (
+            '{{'
+            '"reel_ids":["{user_id}"],'
+            '"tag_names":[],"location_ids":[],'
+            '"highlight_reel_ids":[],"precomposed_overlay":true,'
+            '"show_story_viewer_list":true,'
+            '"story_viewer_fetch_count":50,"story_viewer_cursor":"",'
+            '"stories_video_dash_manifest":false}}'
+        ).format(user_id=user_id)
         headers = {
             "X-Requested-With": "XMLHttpRequest",
         }
