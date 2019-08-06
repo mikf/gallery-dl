@@ -29,7 +29,7 @@ class PururinGalleryExtractor(GalleryExtractor):
                 "artist"    : ["Shoda Norihiro"],
                 "group"     : ["Obsidian Order"],
                 "parody"    : ["Kantai Collection"],
-                "characters": ["Iowa", "Teitoku"],
+                "characters": ["Admiral", "Iowa"],
                 "tags"      : list,
                 "type"      : "Doujinshi",
                 "collection": "",
