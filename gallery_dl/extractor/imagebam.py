@@ -41,14 +41,14 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
     pattern = r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([0-9a-z]+)"
     test = (
         ("http://www.imagebam.com/gallery/adz2y0f9574bjpmonaismyrhtjgvey4o", {
-            "url": "fb01925129a1ff1941762eaa3a2783a66de6847f",
+            "url": "76d976788ae2757ac81694736b07b72356f5c4c8",
             "keyword": "9e25b8827474ac93c54855e798d60aa3cbecbd7a",
             "content": "596e6bfa157f2c7169805d50075c2986549973a8",
         }),
         ("http://www.imagebam.com/gallery/op9dwcklwdrrguibnkoe7jxgvig30o5p", {
             #  more than 100 images; see issue #219
             "count": 107,
-            "url": "f92ce5b17676b6ea69288f0aef26f4cdbea7fd8d",
+            "url": "32ae6fe5dc3e4ca73ff6252e522d16473595d1d1",
         }),
         ("http://www.imagebam.com/gallery/gsl8teckymt4vbvx1stjkyk37j70va2c", {
             "exception": exception.NotFoundError,
@@ -108,7 +108,7 @@ class ImagebamImageExtractor(ImagebamExtractor):
                r"/(?:image/|(?:[0-9a-f]{2}/){3})([0-9a-f]+)")
     test = (
         ("http://www.imagebam.com/image/94d56c502511890", {
-            "url": "b384893c35a01a09c58018db71ddc4cf2480be95",
+            "url": "5e9ba3b1451f8ded0ae3a1b84402888893915d4a",
             "keyword": "4263d4840007524129792b8587a562b5d20c2687",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
         }),
