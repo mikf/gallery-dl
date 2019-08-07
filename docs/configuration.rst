@@ -1107,6 +1107,16 @@ Description Certificate validation during file downloads.
 =========== =====
 
 
+downloader.http.adjust-extensions
+---------------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Check the file headers of ``jpg``, ``png``, and ``gif`` files
+            and adjust their filename extensions if they do not match.
+=========== =====
+
+
 downloader.ytdl.format
 ----------------------
 =========== =====

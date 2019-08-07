@@ -166,7 +166,6 @@ class ResultJob(job.DownloadJob):
 
         if content:
             self.fileobj = TestPathfmt(self.hash_content)
-            self.get_downloader("http").check_extension = lambda a, b: None
 
         self.format_directory = TestFormatter(
             "".join(self.extractor.directory_fmt))
@@ -278,6 +277,7 @@ def setup_test_config():
     config.clear()
     config.set(("cache", "file"), ":memory:")
     config.set(("downloader", "part"), False)
+    config.set(("downloader", "adjust-extensions"), False)
     config.set(("extractor", "timeout"), 60)
     config.set(("extractor", "username"), name)
     config.set(("extractor", "password"), name)
