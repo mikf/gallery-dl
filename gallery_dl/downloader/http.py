@@ -26,6 +26,7 @@ class HttpDownloader(DownloaderBase):
 
     def __init__(self, extractor, output):
         DownloaderBase.__init__(self, extractor, output)
+        self.adjust_extension = self.config("adjust-extensions", True)
         self.retries = self.config("retries", extractor._retries)
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
@@ -59,7 +60,6 @@ class HttpDownloader(DownloaderBase):
 
     def _download_impl(self, url, pathfmt):
         response = None
-        adj_ext = None
         tries = 0
         msg = ""
 
@@ -152,13 +152,14 @@ class HttpDownloader(DownloaderBase):
                     continue
 
                 # check filename extension
-                adj_ext = self.check_extension(file, pathfmt)
+                if self.adjust_extension:
+                    adj_ext = self.check_extension(file, pathfmt)
+                    if adj_ext:
+                        pathfmt.set_extension(adj_ext)
 
             break
 
         self.downloading = False
-        if adj_ext:
-            pathfmt.set_extension(adj_ext)
         if self.mtime:
             pathfmt.keywords["_mtime"] = response.headers.get("Last-Modified")
         return True
