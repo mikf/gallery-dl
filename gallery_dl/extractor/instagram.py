@@ -204,13 +204,23 @@ class InstagramExtractor(Extractor):
     def _extract_page(self, url, page_type):
         shared_data_fields = {
             'ProfilePage': {
+                'page': 'ProfilePage',
                 'node': 'user',
                 'node_id': 'id',
                 'edge_to_medias': 'edge_owner_to_timeline_media',
                 'variables_id': 'id',
                 'query_hash': '66eb9403e44cc12e5b5ecda48b667d41',
             },
+            'ProfileChannelPage': {
+                'page': 'ProfilePage',
+                'node': 'user',
+                'node_id': 'id',
+                'edge_to_medias': 'edge_felix_video_timeline',
+                'variables_id': 'id',
+                'query_hash': 'bc78b344a68ed16dd5d7f264681c4c76',
+            },
             'TagPage': {
+                'page': 'TagPage',
                 'node': 'hashtag',
                 'node_id': 'name',
                 'edge_to_medias': 'edge_hashtag_to_media',
@@ -227,7 +237,7 @@ class InstagramExtractor(Extractor):
             # Deal with different structure of pages: the first page
             # has interesting data in `entry_data', next pages in `data'.
             if 'entry_data' in shared_data:
-                base_shared_data = shared_data['entry_data'][page_type][0]['graphql']
+                base_shared_data = shared_data['entry_data'][psdf['page']][0]['graphql']
 
                 # variables_id is available only in the first page
                 variables_id = base_shared_data[psdf['node']][psdf['node_id']]
@@ -265,6 +275,9 @@ class InstagramExtractor(Extractor):
     def _extract_profilepage(self, url):
         yield from self._extract_page(url, 'ProfilePage')
 
+    def _extract_profilechannelpage(self, url):
+        yield from self._extract_page(url, 'ProfileChannelPage')
+
     def _extract_tagpage(self, url):
         yield from self._extract_page(url, 'TagPage')
 
@@ -275,7 +288,7 @@ class InstagramExtractor(Extractor):
 class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
     subcategory = "image"
-    pattern = r"(?:https?://)?(?:www\.)?instagram\.com/p/([^/?&#]+)"
+    pattern = r"(?:https?://)?(?:www\.)?instagram\.com/(?:p|tv)/([^/?&#]+)"
     test = (
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
@@ -322,6 +335,22 @@ class InstagramImageExtractor(InstagramExtractor):
             }
         }),
 
+        # GraphVideo (IGTV)
+        ("https://www.instagram.com/tv/BkQjCfsBIzi/", {
+            "url": "64208f408e11cbbca86c2df4488e90262ae9d9ec",
+            "keyword": {
+                "date": "type:datetime",
+                "description": str,
+                "height": int,
+                "likes": int,
+                "media_id": "1806097553666903266",
+                "shortcode": "BkQjCfsBIzi",
+                "typename": "GraphVideo",
+                "username": "instagram",
+                "width": int,
+            }
+        }),
+
         # GraphSidecar with 2 embedded GraphVideo objects
         ("https://www.instagram.com/p/BtOvDOfhvRr/", {
             "count": 2,
@@ -347,7 +376,8 @@ class InstagramUserExtractor(InstagramExtractor):
     """Extractor for ProfilePage"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?!p/|explore/|directory/|accounts/|stories/)([^/?&#]+)")
+               r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
+               r"([^/?&#]+)/?$")
     test = ("https://www.instagram.com/instagram/", {
         "range": "1-12",
         "count": ">= 12",
@@ -360,6 +390,26 @@ class InstagramUserExtractor(InstagramExtractor):
     def instagrams(self):
         url = '{}/{}/'.format(self.root, self.username)
         return self._extract_profilepage(url)
+
+
+class InstagramProfileChannelExtractor(InstagramExtractor):
+    """Extractor for ProfilePage channel"""
+    subcategory = "user"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
+               r"([^/?&#]+)/channel")
+    test = ("https://www.instagram.com/instagram/channel/", {
+        "range": "1-12",
+        "count": ">= 12",
+    })
+
+    def __init__(self, match):
+        InstagramExtractor.__init__(self, match)
+        self.username = match.group(1)
+
+    def instagrams(self):
+        url = '{}/{}/channel/'.format(self.root, self.username)
+        return self._extract_profilechannelpage(url)
 
 
 class InstagramTagExtractor(InstagramExtractor):
