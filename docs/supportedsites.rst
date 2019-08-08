@@ -135,7 +135,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh
 .. |flickr-C| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
 .. |hentaifoundry-C| replace:: Images from Users, Favorites, individual Images, Popular Images, Recent Images, Scraps
-.. |instagram-C| replace:: Images from Users, individual Images, Stories, Tag-Searches
+.. |instagram-C| replace:: Images from Users, Channels, individual Images, Stories, Tag-Searches
 .. |joyreactor-C| replace:: Images from Users, Posts, Search Results, Tag-Searches
 .. |nijie-C| replace:: Images from Users, Doujin, Favorites, individual Images
 .. |pixiv-C| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
