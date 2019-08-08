@@ -316,7 +316,9 @@ class DownloadJob(Job):
         skip = self.extractor.config("skip", True)
         if skip:
             self._skipexc = None
-            if isinstance(skip, str):
+            if skip == "enumerate":
+                self.pathfmt.check_file = self.pathfmt._enum_file
+            elif isinstance(skip, str):
                 skip, _, smax = skip.partition(":")
                 if skip == "abort":
                     self._skipexc = exception.StopExtraction

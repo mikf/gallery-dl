@@ -131,8 +131,11 @@ extractor.*.skip
 =========== =====
 Type        ``bool`` or ``string``
 Default     ``true``
-Description Controls the behavior when downloading files whose filename
-            already exists.
+Description Controls the behavior when downloading files that have been
+            downloaded before, i.e. a file with the same filename already
+            exists or its ID is in a `download archive`__.
+
+            __ `extractor.*.archive`_
 
             * ``true``: Skip downloads
             * ``false``: Overwrite already existing files
@@ -144,6 +147,9 @@ Description Controls the behavior when downloading files whose filename
             * ``"exit"``: Exit the program altogether
             * ``"exit:N"``: Skip downloads and exit the program
               after ``N`` consecutive skips
+
+            * ``"enumerate"``: Append a numeric suffix to the end of the
+              original filename (``file.ext.1``, ``file.ext.2``, etc)
 =========== =====
 
 
