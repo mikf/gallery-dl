@@ -529,6 +529,7 @@ class PathFormat():
         self.filename = ""
         self.directory = self.realdirectory = ""
         self.path = self.realpath = self.temppath = ""
+        self.suffix = ""
 
         self.basedirectory = expand_path(
             extractor.config("base-directory", (".", "gallery-dl")))
@@ -565,8 +566,24 @@ class PathFormat():
         if archive and archive.check(self.keywords):
             return self.fix_extension()
         if self.has_extension and os.path.exists(self.realpath):
-            return True
+            return self.check_file()
         return False
+
+    @staticmethod
+    def check_file():
+        return True
+
+    def _enum_file(self):
+        num = 1
+        while True:
+            suffix = "." + str(num)
+            rpath = self.realpath + suffix
+            if not os.path.exists(rpath):
+                self.path += suffix
+                self.realpath = rpath
+                self.suffix = suffix
+                return False
+            num += 1
 
     def set_directory(self, keywords):
         """Build directory path and create it if necessary"""
@@ -596,7 +613,7 @@ class PathFormat():
     def set_keywords(self, keywords):
         """Set filename keywords"""
         self.keywords = keywords
-        self.temppath = ""
+        self.temppath = self.suffix = ""
         self.has_extension = bool(keywords.get("extension"))
         if self.has_extension:
             self.build_path()
@@ -623,7 +640,7 @@ class PathFormat():
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
-        filename = os.sep + self.filename
+        filename = os.sep + self.filename + self.suffix
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
         if not self.temppath:
