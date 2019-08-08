@@ -392,9 +392,9 @@ class InstagramUserExtractor(InstagramExtractor):
         return self._extract_profilepage(url)
 
 
-class InstagramProfileChannelExtractor(InstagramExtractor):
+class InstagramChannelExtractor(InstagramExtractor):
     """Extractor for ProfilePage channel"""
-    subcategory = "user"
+    subcategory = "channel"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
                r"([^/?&#]+)/channel")
