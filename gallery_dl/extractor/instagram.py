@@ -8,11 +8,10 @@
 
 """Extract images from https://www.instagram.com/"""
 
-import hashlib
-import json
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import json
 
 
 class InstagramExtractor(Extractor):
@@ -209,7 +208,7 @@ class InstagramExtractor(Extractor):
                 'node_id': 'id',
                 'edge_to_medias': 'edge_owner_to_timeline_media',
                 'variables_id': 'id',
-                'query_hash': '66eb9403e44cc12e5b5ecda48b667d41',
+                'query_hash': 'f2405b236d85e8296cf30347c9f08c2a',
             },
             'ProfileChannelPage': {
                 'page': 'ProfilePage',
@@ -225,13 +224,14 @@ class InstagramExtractor(Extractor):
                 'node_id': 'name',
                 'edge_to_medias': 'edge_hashtag_to_media',
                 'variables_id': 'tag_name',
-                'query_hash': 'f92f56d47dc7a55b606908374b43a314',
+                'query_hash': 'f12c9ec5e46a3173b2969c712ad84744',
             },
         }
 
         page = self.request(url).text
         shared_data = self._extract_shared_data(page)
         psdf = shared_data_fields[page_type]
+        csrf = shared_data["config"]["csrf_token"]
 
         while True:
             # Deal with different structure of pages: the first page
@@ -263,7 +263,8 @@ class InstagramExtractor(Extractor):
             )
             headers = {
                 "X-Requested-With": "XMLHttpRequest",
-                "X-Instagram-GIS": hashlib.md5(variables.encode()).hexdigest(),
+                "X-CSRFToken": csrf,
+                "X-IG-App-ID": "936619743392459",
             }
             url = '{}/graphql/query/?query_hash={}&variables={}'.format(
                 self.root,
@@ -379,8 +380,8 @@ class InstagramUserExtractor(InstagramExtractor):
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
                r"([^/?&#]+)/?$")
     test = ("https://www.instagram.com/instagram/", {
-        "range": "1-12",
-        "count": ">= 12",
+        "range": "1-16",
+        "count": ">= 16",
     })
 
     def __init__(self, match):
@@ -399,8 +400,8 @@ class InstagramChannelExtractor(InstagramExtractor):
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
                r"([^/?&#]+)/channel")
     test = ("https://www.instagram.com/instagram/channel/", {
-        "range": "1-12",
-        "count": ">= 12",
+        "range": "1-16",
+        "count": ">= 16",
     })
 
     def __init__(self, match):
@@ -419,8 +420,8 @@ class InstagramTagExtractor(InstagramExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/explore/tags/([^/?&#]+)")
     test = ("https://www.instagram.com/explore/tags/instagram/", {
-        "range": "1-12",
-        "count": ">= 12",
+        "range": "1-16",
+        "count": ">= 16",
     })
 
     def __init__(self, match):
