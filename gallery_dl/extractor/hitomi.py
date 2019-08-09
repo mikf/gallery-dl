@@ -21,7 +21,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
     test = (
         ("https://hitomi.la/galleries/867789.html", {
             "url": "cb759868d090fe0e2655c3e29ebf146054322b6d",
-            "keyword": "067b5d9b9c0f98530cd5dd2444e0f5a5b4b00d38",
+            "keyword": "d097a8db8e810045131b4510c41714004f9eff3a",
         }),
         ("https://hitomi.la/galleries/1036181.html", {
             # "aa" subdomain for gallery-id ending in 1 (#142)
