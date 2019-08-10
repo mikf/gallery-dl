@@ -140,29 +140,37 @@ class InstagramExtractor(Extractor):
         return medias
 
     def _extract_stories(self, url):
-        page = self.request(url).text
-        shared_data = self._extract_shared_data(page)
+        if self.highlight_id:
+            user_id = ''
+            highlight_id = '"{}"'.format(self.highlight_id)
+            query_hash = '30a89afdd826d78a5376008a7b81c205'
+        else:
+            page = self.request(url).text
+            shared_data = self._extract_shared_data(page)
 
-        # If no stories are present the URL redirect to `ProfilePage'
-        if 'StoriesPage' not in shared_data['entry_data']:
-            return []
+            # If no stories are present the URL redirects to `ProfilePage'
+            if 'StoriesPage' not in shared_data['entry_data']:
+                return []
 
-        user_id = shared_data['entry_data']['StoriesPage'][0]['user']['id']
+            user_id = '"{}"'.format(
+                shared_data['entry_data']['StoriesPage'][0]['user']['id'])
+            highlight_id = ''
+            query_hash = 'cda12de4f7fd3719c0569ce03589f4c4'
+
         variables = (
             '{{'
-            '"reel_ids":["{user_id}"],'
-            '"tag_names":[],"location_ids":[],'
-            '"highlight_reel_ids":[],"precomposed_overlay":true,'
+            '"reel_ids":[{}],"tag_names":[],"location_ids":[],'
+            '"highlight_reel_ids":[{}],"precomposed_overlay":true,'
             '"show_story_viewer_list":true,'
             '"story_viewer_fetch_count":50,"story_viewer_cursor":"",'
             '"stories_video_dash_manifest":false}}'
-        ).format(user_id=user_id)
+        ).format(user_id, highlight_id)
         headers = {
             "X-Requested-With": "XMLHttpRequest",
         }
         url = '{}/graphql/query/?query_hash={}&variables={}'.format(
             self.root,
-            'cda12de4f7fd3719c0569ce03589f4c4',
+            query_hash,
             variables,
         )
         shared_data = self.request(url, headers=headers).json()
@@ -440,12 +448,15 @@ class InstagramStoriesExtractor(InstagramExtractor):
     """Extractor for StoriesPage"""
     subcategory = "stories"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/stories/([^/?&#]+)")
-    test = ("https://www.instagram.com/stories/instagram/",)
+               r"/stories/([^/?&#]+)(?:/(\d+))?")
+    test = (
+        ("https://www.instagram.com/stories/instagram/"),
+        ("https://www.instagram.com/stories/highlights/18042509488170095/"),
+    )
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
-        self.username = match.group(1)
+        self.username, self.highlight_id = match.groups()
 
     def instagrams(self):
         url = '{}/stories/{}/'.format(self.root, self.username)
