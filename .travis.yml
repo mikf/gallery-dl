@@ -16,11 +16,18 @@ matrix:
       env: GALLERYDL_TESTS=results
     - language: minimal
       dist: xenial
+      env: GALLERYDL_TESTS=snap
       addons:
         snaps:
           - name: snapcraft
             classic: true
-      env: SNAP_TESTS=true
+      install:
+        - true
+      script:
+        - sudo apt update
+        - snapcraft --destructive-mode
+        - sudo snap try
+        - snap run gallery-dl --verbose https://twitter.com/ubuntu/status/1121001597092364288
 
 git:
   depth: 3
@@ -31,6 +38,7 @@ branches:
   - /^v\d+\.\d+\.\d+(-\S*)?$/
   - /^test(-\w+)+$/
 
+install:
+  - pip install -r requirements.txt pyOpenSSL
 script:
-  - 'if test "${SNAP_TESTS}" != true; then ./scripts/run_tests.sh; else true; fi'
-  - 'if test "${SNAP_TESTS}" = true; then sudo apt update && snapcraft --destructive-mode && sudo snap try && snap run gallery-dl --verbose https://twitter.com/ubuntu/status/1121001597092364288; else true; fi'
+  - ./scripts/run_tests.sh
