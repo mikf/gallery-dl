@@ -590,19 +590,27 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
         csrf, pos = text.extract(page, '"csrf":"', '"')
         iid , pos = text.extract(page, '"requestid":"', '"', pos)
 
-        url = "https://www.deviantart.com/dapi/v1/gallery/0"
+        params = {
+            "iid": iid + "-jz6wpfib-1.1",
+            "mp": 0,
+        }
+        headers = {
+            "Referer": url,
+        }
         data = {
             "username": self.user,
             "offset": self.offset,
             "limit": "24",
             "catpath": "scraps",
             "_csrf": csrf,
-            "dapiIid": iid + "-jsok7403-1.1"
+            "dapiIid": params["iid"]
         }
+        url = "https://www.deviantart.com/dapi/v1/gallery/0"
 
         while True:
             content = self.request(
-                url, method="POST", data=data).json()["content"]
+                url, method="POST", params=params,
+                headers=headers, data=data).json()["content"]
 
             for item in content["results"]:
                 if item["html"].startswith('<div class="ad-container'):
@@ -616,6 +624,8 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
             if not content["has_more"]:
                 return
             data["offset"] = content["next_offset"]
+            data["_csrf"] = text.extract(page, '"csrf":"', '"')[0]
+            params["mp"] += 1
 
 
 class DeviantartPopularExtractor(DeviantartExtractor):
