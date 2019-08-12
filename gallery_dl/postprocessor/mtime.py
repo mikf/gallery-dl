@@ -19,9 +19,9 @@ class MtimePP(PostProcessor):
         self.key = options.get("key", "date")
 
     def run(self, pathfmt):
-        mtime = pathfmt.keywords.get(self.key)
+        mtime = pathfmt.kwdict.get(self.key)
         ts = getattr(mtime, "timestamp", None)
-        pathfmt.keywords["_mtime"] = ts() if ts else parse_int(mtime)
+        pathfmt.kwdict["_mtime"] = ts() if ts else parse_int(mtime)
 
 
 __postprocessor__ = MtimePP

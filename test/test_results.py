@@ -218,8 +218,8 @@ class TestPathfmt():
         self.hashobj = hashobj
         self.path = ""
         self.size = 0
-        self.keywords = {}
-        self.has_extension = True
+        self.kwdict = {}
+        self.extension = "jpg"
 
     def __enter__(self):
         return self

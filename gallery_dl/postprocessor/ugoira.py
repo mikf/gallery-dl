@@ -52,13 +52,13 @@ class UgoiraPP(PostProcessor):
     def prepare(self, pathfmt):
         self._frames = None
 
-        if pathfmt.keywords["extension"] != "zip":
+        if pathfmt.extension != "zip":
             return
 
-        if "frames" in pathfmt.keywords:
-            self._frames = pathfmt.keywords["frames"]
-        elif "pixiv_ugoira_frame_data" in pathfmt.keywords:
-            self._frames = pathfmt.keywords["pixiv_ugoira_frame_data"]["data"]
+        if "frames" in pathfmt.kwdict:
+            self._frames = pathfmt.kwdict["frames"]
+        elif "pixiv_ugoira_frame_data" in pathfmt.kwdict:
+            self._frames = pathfmt.kwdict["pixiv_ugoira_frame_data"]["data"]
         else:
             return
 

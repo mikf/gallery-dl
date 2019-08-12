@@ -36,15 +36,14 @@ class MetadataPP(PostProcessor):
     def run(self, pathfmt):
         path = "{}.{}".format(pathfmt.realpath, self.extension)
         with open(path, "w", encoding="utf-8") as file:
-            self.write(file, pathfmt)
+            self.write(file, pathfmt.kwdict)
 
-    def _write_custom(self, file, pathfmt):
-        output = self.formatter.format_map(pathfmt.keywords)
+    def _write_custom(self, file, kwdict):
+        output = self.formatter.format_map(kwdict)
         file.write(output)
 
-    def _write_tags(self, file, pathfmt):
-        kwds = pathfmt.keywords
-        tags = kwds.get("tags") or kwds.get("tag_string")
+    def _write_tags(self, file, kwdict):
+        tags = kwdict.get("tags") or kwdict.get("tag_string")
 
         if not tags:
             return
@@ -58,8 +57,8 @@ class MetadataPP(PostProcessor):
         file.write("\n".join(tags))
         file.write("\n")
 
-    def _write_json(self, file, pathfmt):
-        util.dump_json(pathfmt.keywords, file, self.ascii, self.indent)
+    def _write_json(self, file, kwdict):
+        util.dump_json(kwdict, file, self.ascii, self.indent)
 
 
 __postprocessor__ = MetadataPP

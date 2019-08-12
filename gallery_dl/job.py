@@ -196,7 +196,7 @@ class DownloadJob(Job):
         archive = self.archive
 
         # prepare download
-        pathfmt.set_keywords(keywords)
+        pathfmt.set_filename(keywords)
 
         if postprocessors:
             for pp in postprocessors:
@@ -364,7 +364,7 @@ class SimulationJob(DownloadJob):
     """Simulate the extraction process without downloading anything"""
 
     def handle_url(self, url, keywords, fallback=None):
-        self.pathfmt.set_keywords(keywords)
+        self.pathfmt.set_filename(keywords)
         self.out.skip(self.pathfmt.path)
         if self.sleep:
             time.sleep(self.sleep)
