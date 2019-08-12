@@ -523,13 +523,12 @@ class PathFormat():
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
-        self.delete = False
-        self.has_extension = False
-        self.keywords = {}
-        self.filename = ""
         self.directory = self.realdirectory = ""
+        self.filename = ""
+        self.extension = ""
+        self.kwdict = {}
+        self.delete = False
         self.path = self.realpath = self.temppath = ""
-        self.suffix = ""
 
         self.basedirectory = expand_path(
             extractor.config("base-directory", (".", "gallery-dl")))
@@ -563,9 +562,9 @@ class PathFormat():
 
     def exists(self, archive=None):
         """Return True if the file exists on disk or in 'archive'"""
-        if archive and archive.check(self.keywords):
+        if archive and archive.check(self.kwdict):
             return self.fix_extension()
-        if self.has_extension and os.path.exists(self.realpath):
+        if self.extension and os.path.exists(self.realpath):
             return self.check_file()
         return False
 
@@ -576,71 +575,79 @@ class PathFormat():
     def _enum_file(self):
         num = 1
         while True:
-            suffix = "." + str(num)
-            rpath = self.realpath + suffix
-            if not os.path.exists(rpath):
-                self.path += suffix
-                self.realpath = rpath
-                self.suffix = suffix
+            self.set_extension("{}.{}".format(num, self.extension), False)
+            if not os.path.exists(self.realpath):
                 return False
             num += 1
 
-    def set_directory(self, keywords):
+    def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
+
+        # Build path segments by applying 'kwdict' to directory format strings
         try:
             segments = [
                 self.clean_path(
                     Formatter(segment, self.kwdefault)
-                    .format_map(keywords).strip())
+                    .format_map(kwdict).strip())
                 for segment in self.directory_fmt
             ]
         except Exception as exc:
             raise exception.FormatError(exc, "directory")
 
-        self.directory = os.path.join(
-            self.basedirectory,
-            *segments
-        )
+        # Join path segements
+        self.directory = os.path.join(self.basedirectory, *segments)
 
-        # remove trailing path separator;
+        # Remove trailing path separator;
         # occurs if the last argument to os.path.join() is an empty string
         if self.directory[-1] == os.sep:
             self.directory = self.directory[:-1]
 
-        self.realdirectory = self.adjust_path(self.directory)
+        # Enable longer-than-260-character paths on Windows
+        if os.name == "nt":
+            self.realdirectory = "\\\\?\\" + os.path.abspath(self.directory)
+        else:
+            self.realdirectory = self.directory
+
+        # Create directory tree
         os.makedirs(self.realdirectory, exist_ok=True)
 
-    def set_keywords(self, keywords):
-        """Set filename keywords"""
-        self.keywords = keywords
-        self.temppath = self.suffix = ""
-        self.has_extension = bool(keywords.get("extension"))
-        if self.has_extension:
+    def set_filename(self, kwdict):
+        """Set general filename data"""
+        self.kwdict = kwdict
+        self.temppath = ""
+        self.extension = kwdict["extension"]
+
+        if self.extension:
             self.build_path()
 
     def set_extension(self, extension, real=True):
-        """Set the 'extension' keyword"""
-        self.has_extension = real
-        self.keywords["extension"] = extension
+        """Set filename extension"""
+        if real:
+            self.extension = extension
+        self.kwdict["extension"] = extension
         self.build_path()
 
     def fix_extension(self, _=None):
-        if not self.has_extension:
-            self.set_extension("")
+        """Fix filenames without a given filename extension"""
+        if not self.extension:
+            self.set_extension("", False)
             if self.path[-1] == ".":
                 self.path = self.path[:-1]
                 self.temppath = self.realpath = self.realpath[:-1]
         return True
 
     def build_path(self):
-        """Use filename-keywords and directory to build a full path"""
+        """Use filename metadata and directory to build a full path"""
+
+        # Apply 'kwdict' to filename format string
         try:
             self.filename = self.clean_path(
-                self.formatter.format_map(self.keywords))
+                self.formatter.format_map(self.kwdict))
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
-        filename = os.sep + self.filename + self.suffix
+        # Combine directory and filename to full paths
+        filename = os.sep + self.filename
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
         if not self.temppath:
@@ -648,7 +655,7 @@ class PathFormat():
 
     def part_enable(self, part_directory=None):
         """Enable .part file usage"""
-        if self.has_extension:
+        if self.extension:
             self.temppath += ".part"
         else:
             self.set_extension("part", False)
@@ -674,16 +681,16 @@ class PathFormat():
             return
 
         if self.temppath != self.realpath:
-            # move temp file to its actual location
+            # Move temp file to its actual location
             try:
                 os.replace(self.temppath, self.realpath)
             except OSError:
                 shutil.copyfile(self.temppath, self.realpath)
                 os.unlink(self.temppath)
 
-        if "_mtime" in self.keywords:
-            # set file modification time
-            mtime = self.keywords["_mtime"]
+        if "_mtime" in self.kwdict:
+            # Set file modification time
+            mtime = self.kwdict["_mtime"]
             if mtime:
                 try:
                     if isinstance(mtime, str):
@@ -691,11 +698,6 @@ class PathFormat():
                     os.utime(self.realpath, (time.time(), mtime))
                 except Exception:
                     pass
-
-    @staticmethod
-    def adjust_path(path):
-        """Enable longer-than-260-character paths on windows"""
-        return "\\\\?\\" + os.path.abspath(path) if os.name == "nt" else path
 
 
 class DownloadArchive():

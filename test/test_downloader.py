@@ -120,7 +120,7 @@ class TestDownloaderBase(unittest.TestCase):
         }
         pathfmt = PathFormat(cls.extractor)
         pathfmt.set_directory(kwdict)
-        pathfmt.set_keywords(kwdict)
+        pathfmt.set_filename(kwdict)
 
         if content:
             mode = "w" + ("b" if isinstance(content, bytes) else "")
@@ -145,7 +145,7 @@ class TestDownloaderBase(unittest.TestCase):
 
         # test filename extension
         self.assertEqual(
-            pathfmt.keywords["extension"],
+            pathfmt.extension,
             expected_extension,
         )
         self.assertEqual(

@@ -114,7 +114,7 @@ class HttpDownloader(DownloaderBase):
             size = text.parse_int(size)
 
             # set missing filename extension
-            if not pathfmt.has_extension:
+            if not pathfmt.extension:
                 pathfmt.set_extension(self.get_extension(response))
                 if pathfmt.exists():
                     pathfmt.temppath = ""
@@ -153,7 +153,7 @@ class HttpDownloader(DownloaderBase):
 
                 # check filename extension
                 if self.adjust_extension:
-                    adj_ext = self.check_extension(file, pathfmt)
+                    adj_ext = self.check_extension(file, pathfmt.extension)
                     if adj_ext:
                         pathfmt.set_extension(adj_ext)
 
@@ -161,7 +161,7 @@ class HttpDownloader(DownloaderBase):
 
         self.downloading = False
         if self.mtime:
-            pathfmt.keywords["_mtime"] = response.headers.get("Last-Modified")
+            pathfmt.kwdict["_mtime"] = response.headers.get("Last-Modified")
         return True
 
     def receive(self, response, file):
@@ -197,9 +197,8 @@ class HttpDownloader(DownloaderBase):
         return "txt"
 
     @staticmethod
-    def check_extension(file, pathfmt):
+    def check_extension(file, extension):
         """Check filename extension against fileheader"""
-        extension = pathfmt.keywords["extension"]
         if extension in FILETYPE_CHECK:
             file.seek(0)
             header = file.read(8)

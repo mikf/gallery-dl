@@ -33,7 +33,7 @@ class ClassifyPP(PostProcessor):
         }
 
     def prepare(self, pathfmt):
-        ext = pathfmt.keywords.get("extension")
+        ext = pathfmt.extension
 
         if ext in self.mapping:
             self._dir = pathfmt.realdirectory + os.sep + self.mapping[ext]

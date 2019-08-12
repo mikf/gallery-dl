@@ -50,7 +50,7 @@ class YoutubeDLDownloader(DownloaderBase):
             return False
 
         if "entries" in info_dict:
-            index = pathfmt.keywords.get("_ytdl_index")
+            index = pathfmt.kwdict.get("_ytdl_index")
             if index is None:
                 return self._download_playlist(pathfmt, info_dict)
             else:
@@ -59,7 +59,7 @@ class YoutubeDLDownloader(DownloaderBase):
 
     def _download_video(self, pathfmt, info_dict):
         if "url" in info_dict:
-            text.nameext_from_url(info_dict["url"], pathfmt.keywords)
+            text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
         pathfmt.set_extension(info_dict["ext"])
         if pathfmt.exists():
             pathfmt.temppath = ""
