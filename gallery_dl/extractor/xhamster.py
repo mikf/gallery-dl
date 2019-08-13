@@ -13,13 +13,16 @@ from .. import text
 import json
 
 
-BASE_PATTERN = r"(?:https?://)?(?:[^.]+\.)?xhamster\.(?:com|one|desi)"
+BASE_PATTERN = r"(?:https?://)?((?:[^.]+\.)?xhamster\d?\.(?:com|one|desi))"
 
 
 class XhamsterExtractor(Extractor):
     """Base class for xhamster extractors"""
     category = "xhamster"
-    root = "https://xhamster.com"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.root = "https://" + match.group(1)
 
 
 class XhamsterGalleryExtractor(XhamsterExtractor):
@@ -66,16 +69,21 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
                 },
             },
         }),
+        ("https://jp.xhamster2.com/photos/gallery/11748968", {
+            "pattern": r"https://thumb-p\d+.xhcdn.com/./[\w/-]+_1000.jpg$",
+            "count": ">= 144",
+        }),
         ("https://xhamster.com/photos/gallery/make-the-world-better-11748968"),
         ("https://xhamster.com/photos/gallery/11748968"),
         ("https://xhamster.one/photos/gallery/11748968"),
         ("https://xhamster.desi/photos/gallery/11748968"),
+        ("https://xhamster2.com/photos/gallery/11748968"),
         ("https://en.xhamster.com/photos/gallery/11748968"),
     )
 
     def __init__(self, match):
         XhamsterExtractor.__init__(self, match)
-        self.path = match.group(1)
+        self.path = match.group(2)
         self.data = None
 
     def items(self):
@@ -154,7 +162,7 @@ class XhamsterUserExtractor(XhamsterExtractor):
 
     def __init__(self, match):
         XhamsterExtractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match.group(2)
 
     def items(self):
         yield Message.Version, 1
