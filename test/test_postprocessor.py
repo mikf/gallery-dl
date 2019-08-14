@@ -10,7 +10,7 @@
 import os.path
 import zipfile
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone as tz
 
 import unittest
 from unittest.mock import Mock, mock_open, patch
@@ -239,22 +239,22 @@ class MtimeTest(BasePostprocessorTest):
         self.assertEqual(pp.key, "date")
 
     def test_mtime_datetime(self):
-        pp = self._create(None, {"date": datetime(1980, 1, 1)})
+        pp = self._create(None, {"date": datetime(1980, 1, 1, tzinfo=tz.utc)})
         pp.prepare(self.pathfmt)
         pp.run(self.pathfmt)
-        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315529200)
+        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 
     def test_mtime_timestamp(self):
-        pp = self._create(None, {"date": 315529200})
+        pp = self._create(None, {"date": 315532800})
         pp.prepare(self.pathfmt)
         pp.run(self.pathfmt)
-        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315529200)
+        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 
     def test_mtime_custom(self):
-        pp = self._create({"key": "foo"}, {"foo": 315529200})
+        pp = self._create({"key": "foo"}, {"foo": 315532800})
         pp.prepare(self.pathfmt)
         pp.run(self.pathfmt)
-        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315529200)
+        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 
 
 class ZipTest(BasePostprocessorTest):
