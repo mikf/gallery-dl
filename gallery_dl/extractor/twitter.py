@@ -54,6 +54,7 @@ class TwitterExtractor(Extractor):
 
             if self.videos and "-videoContainer" in tweet:
                 data["num"] = 1
+                data["extension"] = None
                 url = "ytdl:{}/{}/status/{}".format(
                     self.root, data["user"], data["tweet_id"])
                 yield Message.Url, url, data

@@ -78,6 +78,7 @@ class SexcomExtractor(Extractor):
                     path += "/hd"
                 data["url"] = self.root + path
             else:
+                data["extension"] = None
                 data["url"] = "ytdl:" + text.extract(
                     extr('<iframe', '>'), ' src="', '"')[0]
         else:
