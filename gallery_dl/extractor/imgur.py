@@ -20,13 +20,19 @@ class ImgurExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.item_id = match.group(1)
+        self.key = match.group(1)
         self.mp4 = self.config("mp4", True)
 
-    def _get_data(self, path):
+    def _extract_data(self, path):
         response = self.request(self.root + path, notfound=self.subcategory)
-        data = text.extract(response.text, "image               : ", ",\n")[0]
-        return self._clean(json.loads(data))
+        data = json.loads(text.extract(
+            response.text, "image               : ", ",\n")[0])
+        try:
+            del data["adConfig"]
+            del data["isAd"]
+        except KeyError:
+            pass
+        return data
 
     def _prepare(self, image):
         image["ext"] = image["ext"].partition("?")[0]
@@ -37,18 +43,9 @@ class ImgurExtractor(Extractor):
         image["extension"] = image["ext"][1:]
         return url
 
-    @staticmethod
-    def _clean(data):
-        try:
-            del data["adConfig"]
-            del data["isAd"]
-        except KeyError:
-            pass
-        return data
-
 
 class ImgurImageExtractor(ImgurExtractor):
-    """Extractor for individual images from imgur.com"""
+    """Extractor for individual images on imgur.com"""
     subcategory = "image"
     filename_fmt = "{category}_{hash}{title:?_//}.{extension}"
     archive_fmt = "{hash}"
@@ -101,22 +98,21 @@ class ImgurImageExtractor(ImgurExtractor):
     )
 
     def items(self):
-        image = self._get_data("/" + self.item_id)
+        image = self._extract_data("/" + self.key)
         url = self._prepare(image)
-
         yield Message.Version, 1
         yield Message.Directory, image
         yield Message.Url, url, image
 
 
 class ImgurAlbumExtractor(ImgurExtractor):
-    """Extractor for image albums from imgur.com"""
+    """Extractor for imgur albums"""
     subcategory = "album"
     directory_fmt = ("{category}", "{album[hash]}{album[title]:? - //}")
     filename_fmt = "{category}_{album[hash]}_{num:>03}_{hash}.{extension}"
     archive_fmt = "{album[hash]}_{hash}"
     pattern = (r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
-               r"/(?:a|gallery|t/unmuted)/(\w{7}|\w{5})")
+               r"/(?:a|t/unmuted)/(\w{7}|\w{5})")
     test = (
         ("https://imgur.com/a/TcBmP", {
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
@@ -147,7 +143,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
                 "width": int,
             },
         }),
-        ("https://imgur.com/gallery/eD9CT", {  # large album
+        ("https://imgur.com/a/eD9CT", {  # large album
             "url": "4ee94de31ff26be416271bc0b1ea27b9349c9937",
         }),
         ("https://imgur.com/a/RhJXhVT/all", {  # 7 character album hash
@@ -164,13 +160,14 @@ class ImgurAlbumExtractor(ImgurExtractor):
     )
 
     def items(self):
-        album = self._get_data("/a/" + self.item_id + "/all")
+        album = self._extract_data("/a/" + self.key + "/all")
+        album["title"] = album["title"].strip()
         images = album["album_images"]["images"]
         del album["album_images"]
 
         if int(album["num_images"]) > len(images):
             url = "{}/ajaxalbums/getimages/{}/hit.json".format(
-                self.root, self.item_id)
+                self.root, self.key)
             images = self.request(url).json()["data"]["images"]
 
         yield Message.Version, 1
@@ -180,3 +177,33 @@ class ImgurAlbumExtractor(ImgurExtractor):
             image["num"] = num
             image["album"] = album
             yield Message.Url, url, image
+
+
+class ImgurGalleryExtractor(ImgurExtractor):
+    """Extractor for imgur galleries"""
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
+               r"/gallery/(\w{7}|\w{5})")
+    test = (
+        ("https://imgur.com/gallery/zf2fIms", {  # non-album gallery (#380)
+            "pattern": "https://imgur.com/zf2fIms",
+        }),
+        ("https://imgur.com/gallery/eD9CT", {
+            "pattern": "https://imgur.com/a/eD9CT",
+        }),
+    )
+
+    def items(self):
+        url = self.root + "/a/" + self.key
+        response = self.request(url, method="HEAD", fatal=False)
+
+        if response.status_code < 400:
+            extr = ImgurAlbumExtractor
+            path = "/a/"
+        else:
+            extr = ImgurImageExtractor
+            path = "/"
+
+        response.close()
+        yield Message.Version, 1
+        yield Message.Queue, self.root + path + self.key, {"_extractor": extr}

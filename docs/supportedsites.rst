@@ -51,7 +51,7 @@ ImageFap             https://imagefap.com/               Images from Users, Gall
 ImgBB                https://imgbb.com/                  Images from Users, Albums, individual Images       Optional
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
-imgur                https://imgur.com/                  Albums, individual Images
+imgur                https://imgur.com/                  Albums, Galleries, individual Images
 Instagram            https://www.instagram.com/          |instagram-C|                                      Optional
 Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga
 Joyreactor           http://joyreactor.cc/               |joyreactor-C|
