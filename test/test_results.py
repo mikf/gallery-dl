@@ -87,13 +87,17 @@ class TestExtractorResults(unittest.TestCase):
         # test archive-id uniqueness
         self.assertEqual(len(set(tjob.list_archive)), len(tjob.list_archive))
 
-        # test '_extractor' entries
         if tjob.queue:
+            # test '_extractor' entries
             for url, kwdict in zip(tjob.list_url, tjob.list_keyword):
                 if "_extractor" in kwdict:
                     extr = kwdict["_extractor"].from_url(url)
                     self.assertIsInstance(extr, kwdict["_extractor"])
                     self.assertEqual(extr.url, url)
+        else:
+            # test 'extension' entries
+            for kwdict in tjob.list_keyword:
+                self.assertIn("extension", kwdict)
 
         # test extraction results
         if "url" in result:

@@ -40,6 +40,7 @@ class InstagramExtractor(Extractor):
                 yield Message.Url, data['display_url'], \
                     text.nameext_from_url(data['display_url'], data)
             elif data['typename'] == 'GraphVideo':
+                data["extension"] = None
                 yield Message.Url, \
                     'ytdl:{}/p/{}/'.format(self.root, data['shortcode']), data
 
