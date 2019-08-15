@@ -18,7 +18,7 @@ class PixivExtractor(Extractor):
     """Base class for pixiv extractors"""
     category = "pixiv"
     directory_fmt = ("{category}", "{user[id]} {user[account]}")
-    filename_fmt = "{category}_{user[id]}_{id}_p{num}.{extension}"
+    filename_fmt = "{id}_p{num}.{extension}"
     archive_fmt = "{id}{suffix}.{extension}"
 
     def __init__(self, match):
