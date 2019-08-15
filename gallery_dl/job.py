@@ -336,7 +336,8 @@ class DownloadJob(Job):
 
         postprocessors = self.extractor.config("postprocessors")
         if postprocessors:
-            self.postprocessors = []
+            pp_list = []
+
             for pp_dict in postprocessors:
                 whitelist = pp_dict.get("whitelist")
                 blacklist = pp_dict.get("blacklist")
@@ -355,9 +356,12 @@ class DownloadJob(Job):
                         "'%s' initialization failed:  %s: %s",
                         name, exc.__class__.__name__, exc)
                 else:
-                    self.postprocessors.append(pp_obj)
-            self.extractor.log.debug(
-                "Active postprocessor modules: %s", self.postprocessors)
+                    pp_list.append(pp_obj)
+
+            if pp_list:
+                self.postprocessors = pp_list
+                self.extractor.log.debug(
+                    "Active postprocessor modules: %s", pp_list)
 
 
 class SimulationJob(DownloadJob):
