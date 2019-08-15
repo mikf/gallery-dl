@@ -230,7 +230,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _Python:     https://www.python.org/downloads/
 .. _PyPI:       https://pypi.org/
 .. _pip:        https://pip.pypa.io/en/stable/
-.. _Requests:   http://docs.python-requests.org/en/master/
+.. _Requests:   https://2.python-requests.org/en/master/#requests-http-for-humans
 .. _FFmpeg:     https://www.ffmpeg.org/
 .. _youtube-dl: https://ytdl-org.github.io/youtube-dl/
 .. _pyOpenSSL:  https://pyopenssl.org/

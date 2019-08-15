@@ -1797,7 +1797,7 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _timeout:           https://docs.python-requests.org/en/latest/user/advanced/#timeouts
 .. _verify:            https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
 .. _Last-Modified:     https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
-.. _`Requests' proxy documentation`: http://docs.python-requests.org/en/master/user/advanced/#proxies
+.. _`Requests' proxy documentation`: https://2.python-requests.org/en/master/user/advanced/#proxies
 .. _format string:     https://docs.python.org/3/library/string.html#formatstrings
 .. _format strings:    https://docs.python.org/3/library/string.html#formatstrings
 .. _strptime:          https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
@@ -1805,5 +1805,5 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
 .. _datetime:          https://docs.python.org/3/library/datetime.html#datetime-objects
 .. _datetime.max:      https://docs.python.org/3/library/datetime.html#datetime.datetime.max
-.. _Authentication:    https://github.com/mikf/gallery-dl#5authentication
+.. _Authentication:    https://github.com/mikf/gallery-dl#authentication
 .. _youtube-dl:        https://github.com/ytdl-org/youtube-dl
