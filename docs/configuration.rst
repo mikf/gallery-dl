@@ -108,21 +108,36 @@ Description Directory path used as the base for all download destinations.
 =========== =====
 
 
-extractor.*.restrict-filenames
-------------------------------
+extractor.*.path-restrict
+-------------------------
 =========== =====
 Type        ``string``
 Default     ``"auto"``
-Example     ``"/!? ()[]{}"``
-Description Characters to replace with underscores (``_``) when generating
-            directory and file names.
+Example     ``"/!? (){}"``
+Description Set of characters to replace with underscores (``_``)
+            in generated path segment names.
 
             Special values:
 
             * ``"auto"``: Use characters from ``"unix"`` or ``"windows"``
               depending on the local operating system
             * ``"unix"``: ``"/"``
-            * ``"windows"``: ``"<>:\"\\|/?*"``
+            * ``"windows"``: ``"\\\\|/<>:\"?*"``
+
+            Note: In a set with 2 or more characters, ``[]^-\`` need to be
+            escaped with backslashes, e.g. ``"\\[\\]"``
+=========== =====
+
+
+extractor.*.path-remove
+-----------------------
+=========== =====
+Type        ``string``
+Default     ``"\\u0000-\\u001f\\u007f"`` (ASCII control characters)
+Description Set of characters to remove from generated path names.
+
+            Note: In a set with 2 or more characters, ``[]^-\`` need to be
+            escaped with backslashes, e.g. ``"\\[\\]"``
 =========== =====
 
 
