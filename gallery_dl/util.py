@@ -566,7 +566,7 @@ class PathFormat():
 
     def exists(self, archive=None):
         """Return True if the file exists on disk or in 'archive'"""
-        if archive and archive.check(self.kwdict):
+        if archive and self.kwdict in archive:
             return self.fix_extension()
         if self.extension and os.path.exists(self.realpath):
             return self.check_file()
@@ -719,8 +719,8 @@ class DownloadArchive():
             "archive-format", extractor.archive_fmt)
         ).format_map
 
-    def check(self, kwdict):
-        """Return True if item described by 'kwdict' exists in archive"""
+    def __contains__(self, kwdict):
+        """Return True if the item described by 'kwdict' exists in archive"""
         key = self.keygen(kwdict)
         self.cursor.execute(
             "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
