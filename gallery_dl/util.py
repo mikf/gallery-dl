@@ -526,6 +526,7 @@ class PathFormat():
         self.directory = self.realdirectory = ""
         self.filename = ""
         self.extension = ""
+        self.prefix = ""
         self.kwdict = {}
         self.delete = False
         self.path = self.realpath = self.temppath = ""
@@ -579,7 +580,8 @@ class PathFormat():
     def _enum_file(self):
         num = 1
         while True:
-            self.set_extension("{}.{}".format(num, self.extension), False)
+            self.prefix = str(num) + "."
+            self.set_extension(self.extension, False)
             if not os.path.exists(self.realpath):
                 return False
             num += 1
@@ -621,7 +623,7 @@ class PathFormat():
     def set_filename(self, kwdict):
         """Set general filename data"""
         self.kwdict = kwdict
-        self.temppath = ""
+        self.temppath = self.prefix = ""
         self.extension = kwdict["extension"]
 
         if self.extension:
@@ -631,7 +633,7 @@ class PathFormat():
         """Set filename extension"""
         if real:
             self.extension = extension
-        self.kwdict["extension"] = extension
+        self.kwdict["extension"] = self.prefix + extension
         self.build_path()
 
     def fix_extension(self, _=None):
