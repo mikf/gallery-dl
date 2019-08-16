@@ -117,6 +117,8 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
             url = text.extract(image, ' src="', '"')[0]
             if not url:
                 continue
+            if url.startswith("//"):
+                url = "http:" + url
             width = text.extract(image, ' width="', '"')[0]
             height = text.extract(image, ' height="', '"')[0]
             image_id = url.rpartition("-")[2].partition(".")[0]
@@ -268,8 +270,8 @@ class JoyreactorPostExtractor(ReactorPostExtractor):
             "keyword": "dbe148d576f2fc9431020c557ddb78f449e48c47",
         }),
         ("http://joyreactor.com/post/3668724", {  # youtube embed
-            "url": "be2589e2e8f3ffcaf41b34bc28bfad850ccea34a",
-            "keyword": "da61b9e2887db95759950df5fb89c9d32f8e7651",
+            "url": "bf1666eddcff10c9b58f6be63fa94e4e13074214",
+            "keyword": "989112c7888e9cc80fd35870180c6c98165d953b",
         }),
         ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
             "url": "ac900743ed7cf1baf3db3b531c3bc414bf1ffcde",
