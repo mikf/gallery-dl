@@ -535,25 +535,29 @@ class PathFormat():
         if os.altsep and os.altsep in self.basedirectory:
             self.basedirectory = self.basedirectory.replace(os.altsep, os.sep)
 
-        restrict = extractor.config("restrict-filenames", "auto")
+        restrict = extractor.config("path-restrict", "auto")
         if restrict == "auto":
-            restrict = "<>:\"\\/|?*" if os.name == "nt" else "/"
+            restrict = "\\\\|/<>:\"?*" if os.name == "nt" else "/"
         elif restrict == "unix":
             restrict = "/"
         elif restrict == "windows":
-            restrict = "<>:\"\\/|?*"
-        self.clean_path = self._build_cleanfunc(restrict)
+            restrict = "\\\\|/<>:\"?*"
+
+        remove = extractor.config("path-remove", "\x00-\x1f\x7f")
+
+        self.clean_segment = self._build_cleanfunc(restrict, "_")
+        self.clean_path = self._build_cleanfunc(remove, "")
 
     @staticmethod
-    def _build_cleanfunc(repl):
-        if not repl:
+    def _build_cleanfunc(chars, repl):
+        if not chars:
             return lambda x: x
-        elif len(repl) == 1:
-            def func(x, r=repl):
-                return x.replace(r, "_")
+        elif len(chars) == 1:
+            def func(x, c=chars, r=repl):
+                return x.replace(c, r)
         else:
-            def func(x, sub=re.compile("[" + re.escape(repl) + "]").sub):
-                return sub("_", x)
+            def func(x, sub=re.compile("[" + chars + "]").sub, r=repl):
+                return sub(r, x)
         return func
 
     def open(self, mode="wb"):
@@ -586,16 +590,19 @@ class PathFormat():
         # Build path segments by applying 'kwdict' to directory format strings
         try:
             segments = [
-                self.clean_path(
+                self.clean_segment(
                     Formatter(segment, self.kwdefault)
-                    .format_map(kwdict).strip())
+                    .format_map(kwdict)
+                    .strip()
+                )
                 for segment in self.directory_fmt
             ]
         except Exception as exc:
             raise exception.FormatError(exc, "directory")
 
         # Join path segements
-        self.directory = os.path.join(self.basedirectory, *segments)
+        self.directory = self.clean_path(os.path.join(
+            self.basedirectory, *segments))
 
         # Remove trailing path separator;
         # occurs if the last argument to os.path.join() is an empty string
@@ -641,8 +648,8 @@ class PathFormat():
 
         # Apply 'kwdict' to filename format string
         try:
-            self.filename = self.clean_path(
-                self.formatter.format_map(self.kwdict))
+            self.filename = self.clean_path(self.clean_segment(
+                self.formatter.format_map(self.kwdict)))
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
