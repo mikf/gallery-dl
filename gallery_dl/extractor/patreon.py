@@ -11,6 +11,8 @@
 from .common import Extractor, Message
 from .. import text
 from ..cache import memcache
+import collections
+import json
 
 
 class PatreonExtractor(Extractor):
@@ -37,72 +39,101 @@ class PatreonExtractor(Extractor):
             content = post.get("content")
             postfile = post.get("post_file")
 
-            for url in text.extract_iter(content or "", 'src="', '"'):
-                post["num"] += 1
-                yield Message.Url, url, text.nameext_from_url(url, post)
-
             if postfile:
                 post["num"] += 1
+                post["type"] = "postfile"
                 text.nameext_from_url(postfile["name"], post)
                 yield Message.Url, postfile["url"], post
+                postfile_id = "/" + postfile["url"].split("/")[-2] + "/"
+
+            for image in post["images"]:
+                url = image.get("download_url")
+                if not url:
+                    continue
+                if postfile and postfile_id in url:
+                    postfile = None
+                    continue
+                post["num"] += 1
+                post["type"] = "image"
+                text.nameext_from_url(self._filename(url) or url, post)
+                yield Message.Url, url, post
 
             for attachment in post["attachments"]:
                 post["num"] += 1
+                post["type"] = "attachment"
                 text.nameext_from_url(attachment["name"], post)
                 yield Message.Url, attachment["url"], post
+
+            if content:
+                for url in text.extract_iter(content, 'src="', '"'):
+                    post["num"] += 1
+                    post["type"] = "content"
+                    yield Message.Url, url, text.nameext_from_url(url, post)
 
     def posts(self):
         """Return all relevant post objects"""
 
     def _pagination(self, url):
         headers = {"Referer": self.root}
-        empty = []
 
         while url:
             posts = self.request(url, headers=headers).json()
 
-            if "included" not in posts:
-                return
-
-            # collect attachments
-            attachments = {}
-            for inc in posts["included"]:
-                if inc["type"] == "attachment":
-                    attachments[inc["id"]] = inc["attributes"]
-
-            # update posts
-            for post in posts["data"]:
-                attr = post["attributes"]
-                attr["id"] = text.parse_int(post["id"])
-                attr["date"] = text.parse_datetime(
-                    attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-                attr["creator"] = self._user(
-                    post["relationships"]["user"]["links"]["related"])
-
-                # add attachments to post attributes
-                files = post["relationships"].get("attachments")
-                if files:
-                    attr["attachments"] = [
-                        attachments[f["id"]]
-                        for f in files["data"]
-                    ]
-                else:
-                    attr["attachments"] = empty
-
-                yield attr
+            if "included" in posts:
+                included = self._transform(posts["included"])
+                for post in posts["data"]:
+                    yield self._process(post, included)
 
             if "links" not in posts:
                 return
             url = posts["links"].get("next")
 
+    def _process(self, post, included):
+        """Process and extend a 'post' object"""
+        attr = post["attributes"]
+        attr["id"] = text.parse_int(post["id"])
+        attr["images"] = self._files(post, included, "images")
+        attr["attachments"] = self._files(post, included, "attachments")
+        attr["date"] = text.parse_datetime(
+            attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        attr["creator"] = self._user(
+            post["relationships"]["user"]["links"]["related"])
+        return attr
+
+    @staticmethod
+    def _transform(included):
+        """Transform 'included' into an easier to handle format"""
+        result = collections.defaultdict(dict)
+        for inc in included:
+            result[inc["type"]][inc["id"]] = inc["attributes"]
+        return result
+
+    @staticmethod
+    def _files(post, included, key):
+        """Build a list of files"""
+        files = post["relationships"].get(key)
+        if files and files.get("data"):
+            return [
+                included[file["type"]][file["id"]]
+                for file in files["data"]
+            ]
+        return []
+
     @memcache(keyarg=1)
     def _user(self, url):
+        """Fetch user information"""
         user = self.request(url).json()["data"]
         attr = user["attributes"]
         attr["id"] = user["id"]
         attr["date"] = text.parse_datetime(
             attr["created"], "%Y-%m-%dT%H:%M:%S.%f%z")
         return attr
+
+    def _filename(self, url):
+        """Fetch filename from its Content-Disposition header"""
+        response = self.request(url, method="HEAD", fatal=False)
+        cd = response.headers.get("Content-Disposition")
+        return text.extract(cd, 'filename="', '"')[0]
 
     @staticmethod
     def _build_url(endpoint, query):
@@ -133,7 +164,8 @@ class PatreonCreatorExtractor(PatreonExtractor):
     """Extractor for a creator's works"""
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
-               r"/(?!(?:home|join|login|signup)(?:$|[/?&#]))([^/?&#]+)/?")
+               r"/(?!(?:home|join|posts|login|signup)(?:$|[/?&#]))"
+               r"([^/?&#]+)/?")
     test = ("https://www.patreon.com/koveliana", {
         "range": "1-25",
         "count": ">= 25",
@@ -144,6 +176,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
             "creator": dict,
             "date": "type:datetime",
             "id": int,
+            "images": list,
             "like_count": int,
             "post_type": str,
             "published_at": str,
@@ -181,3 +214,26 @@ class PatreonUserExtractor(PatreonExtractor):
             "&filter[is_following]=true"
         ))
         return self._pagination(url)
+
+
+class PatreonPostExtractor(PatreonExtractor):
+    """Extractor for media from a single post"""
+    subcategory = "post"
+    pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
+               r"/posts/[^/?&#]*?(\d+)")
+    test = ("https://www.patreon.com/posts/precious-metal-23563293", {
+        "count": 4,
+    })
+
+    def __init__(self, match):
+        PatreonExtractor.__init__(self, match)
+        self.post_id = match.group(1)
+
+    def posts(self):
+        url = "{}/posts/{}".format(self.root, self.post_id)
+        page = self.request(url).text
+        data = text.extract(page, "window.patreon.bootstrap,", "\n});")[0]
+        post = json.loads(data + "}")["post"]
+
+        included = self._transform(post["included"])
+        return (self._process(post["data"], included),)

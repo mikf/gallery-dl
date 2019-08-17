@@ -78,7 +78,7 @@ Niconico Seiga       https://seiga.nicovideo.jp/         Images from Users, indi
 nijie                https://nijie.info/                 |nijie-C|                                          Required
 NSFWalbum.com        https://nsfwalbum.com/              Albums
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
-Patreon              https://www.patreon.com/            Images from Users, Creators
+Patreon              https://www.patreon.com/            Images from Users, Creators, Posts
 Pawoo                https://pawoo.net/                  Images from Users, Images from Statuses
 Photobucket          https://photobucket.com/            Albums, individual Images
 Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
