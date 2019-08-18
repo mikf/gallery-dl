@@ -35,28 +35,27 @@ class PatreonExtractor(Extractor):
         for post in self.posts():
             yield Message.Directory, post
 
+            ids = set()
             post["num"] = 0
             content = post.get("content")
             postfile = post.get("post_file")
-
-            if postfile:
-                post["num"] += 1
-                post["type"] = "postfile"
-                text.nameext_from_url(postfile["name"], post)
-                yield Message.Url, postfile["url"], post
-                postfile_id = "/" + postfile["url"].split("/")[-2] + "/"
 
             for image in post["images"]:
                 url = image.get("download_url")
                 if not url:
                     continue
-                if postfile and postfile_id in url:
-                    postfile = None
-                    continue
+                ids.add(url.split("/")[-2])
+                name = image.get("file_name") or self._filename(url) or url
+
                 post["num"] += 1
                 post["type"] = "image"
-                text.nameext_from_url(self._filename(url) or url, post)
-                yield Message.Url, url, post
+                yield Message.Url, url, text.nameext_from_url(name, post)
+
+            if postfile and postfile["url"].split("/")[-2] not in ids:
+                post["num"] += 1
+                post["type"] = "postfile"
+                text.nameext_from_url(postfile["name"], post)
+                yield Message.Url, postfile["url"], post
 
             for attachment in post["attachments"]:
                 post["num"] += 1
@@ -140,9 +139,10 @@ class PatreonExtractor(Extractor):
         return (
             "https://www.patreon.com/api/" + endpoint +
 
-            "?include=user,attachments,user_defined_tags,campaign,poll.choices"
-            ",poll.current_user_responses.user,poll.current_user_responses.cho"
-            "ice,poll.current_user_responses.poll,access_rules.tier.null"
+            "?include=user,images,attachments,user_defined_tags,campaign,poll."
+            "choices,poll.current_user_responses.user,poll.current_user_respon"
+            "ses.choice,poll.current_user_responses.poll,access_rules.tier.nul"
+            "l"
 
             "&fields[post]=change_visibility_at,comment_count,content,current_"
             "user_can_delete,current_user_can_view,current_user_has_liked,embe"
