@@ -40,17 +40,18 @@ class SankakuExtractor(SharedConfigMixin, Extractor):
 
     def items(self):
         self.login()
-        data = self.get_metadata()
 
         yield Message.Version, 1
-        yield Message.Directory, data
+        data = self.get_metadata()
 
         for post_id in util.advance(self.get_posts(), self.start_post):
             self.wait()
             post = self.get_post_data(post_id)
             url = post["file_url"]
             post.update(data)
-            yield Message.Url, url, text.nameext_from_url(url, post)
+            text.nameext_from_url(url, post)
+            yield Message.Directory, post
+            yield Message.Url, url, post
 
     def skip(self, num):
         self.start_post += num
