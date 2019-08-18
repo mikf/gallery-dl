@@ -41,10 +41,8 @@ class BooruExtractor(SharedConfigMixin, Extractor):
         return pages * self.per_page
 
     def items(self):
-        data = self.get_metadata()
-
         yield Message.Version, 1
-        yield Message.Directory, data
+        data = self.get_metadata()
 
         self.reset_page()
         while True:
@@ -59,9 +57,11 @@ class BooruExtractor(SharedConfigMixin, Extractor):
                 if url.startswith("/"):
                     url = text.urljoin(self.api_url, url)
                 image.update(data)
+                text.nameext_from_url(url, image)
                 if self.extags:
                     self.extended_tags(image)
-                yield Message.Url, url, text.nameext_from_url(url, image)
+                yield Message.Directory, image
+                yield Message.Url, url, image
 
             if len(images) < self.per_page:
                 return

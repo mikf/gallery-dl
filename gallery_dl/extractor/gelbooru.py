@@ -33,16 +33,16 @@ class GelbooruExtractor(booru.XmlParserMixin,
             self.session.cookies["fringeBenefits"] = "yup"
 
     def items_noapi(self):
-        data = self.get_metadata()
-
         yield Message.Version, 1
-        yield Message.Directory, data
+        data = self.get_metadata()
 
         for post in self.get_posts():
             post = self.get_post_data(post)
             url = post["file_url"]
             post.update(data)
-            yield Message.Url, url, text.nameext_from_url(url, post)
+            text.nameext_from_url(url, post)
+            yield Message.Directory, post
+            yield Message.Url, url, post
 
     def get_posts(self):
         """Return an iterable containing all relevant post objects"""
