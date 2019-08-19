@@ -103,7 +103,7 @@ class HttpDownloader(DownloaderBase):
             elif code == 206:  # Partial Content
                 offset = filesize
                 size = response.headers["Content-Range"].rpartition("/")[2]
-            elif code == 416:  # Requested Range Not Satisfiable
+            elif code == 416 and filesize:  # Requested Range Not Satisfiable
                 break
             else:
                 msg = "{}: {} for url: {}".format(code, response.reason, url)
