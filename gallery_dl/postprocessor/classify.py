@@ -47,10 +47,9 @@ class ClassifyPP(PostProcessor):
 
     @staticmethod
     def _build_paths(pathfmt, extra):
-        path = pathfmt.realdirectory + os.sep + extra
+        path = pathfmt.realdirectory + extra
         pathfmt.realpath = path + os.sep + pathfmt.filename
-        pathfmt.path = (pathfmt.directory + os.sep +
-                        extra + os.sep + pathfmt.filename)
+        pathfmt.path = pathfmt.directory + extra + os.sep + pathfmt.filename
         return path
 
 
