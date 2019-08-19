@@ -391,9 +391,17 @@ class Formatter():
             if field_name:
                 self.fields.append((
                     len(self.result),
-                    self._field_access(field_name, format_spec, conversion)
+                    self._field_access(field_name, format_spec, conversion),
                 ))
                 self.result.append("")
+
+        if len(self.result) == 1:
+            if self.fields:
+                self.format_map = self.fields[0][1]
+            else:
+                self.format_map = lambda _: format_string
+            del self.result
+            del self.fields
 
     def format_map(self, kwargs):
         """Apply 'kwargs' to the initial format_string and return its result"""
@@ -512,16 +520,23 @@ class Formatter():
 class PathFormat():
 
     def __init__(self, extractor):
-        self.filename_fmt = extractor.config(
-            "filename", extractor.filename_fmt)
-        self.directory_fmt = extractor.config(
-            "directory", extractor.directory_fmt)
-        self.kwdefault = extractor.config("keywords-default")
+        filename_fmt = extractor.config("filename", extractor.filename_fmt)
+        directory_fmt = extractor.config("directory", extractor.directory_fmt)
+        kwdefault = extractor.config("keywords-default")
 
         try:
-            self.formatter = Formatter(self.filename_fmt, self.kwdefault)
+            self.filename_formatter = Formatter(
+                filename_fmt, kwdefault).format_map
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
+
+        try:
+            self.directory_formatters = [
+                Formatter(dirfmt, kwdefault).format_map
+                for dirfmt in directory_fmt
+            ]
+        except Exception as exc:
+            raise exception.FormatError(exc, "directory")
 
         self.directory = self.realdirectory = ""
         self.filename = ""
@@ -535,6 +550,8 @@ class PathFormat():
             extractor.config("base-directory", (".", "gallery-dl")))
         if os.altsep and os.altsep in self.basedirectory:
             self.basedirectory = self.basedirectory.replace(os.altsep, os.sep)
+        if self.basedirectory[-1] != os.sep:
+            self.basedirectory += os.sep
 
         restrict = extractor.config("path-restrict", "auto")
         if restrict == "auto":
@@ -592,30 +609,27 @@ class PathFormat():
         # Build path segments by applying 'kwdict' to directory format strings
         try:
             segments = [
-                self.clean_segment(
-                    Formatter(segment, self.kwdefault)
-                    .format_map(kwdict)
-                    .strip()
-                )
-                for segment in self.directory_fmt
+                self.clean_segment(format_map(kwdict).strip())
+                for format_map in self.directory_formatters
             ]
         except Exception as exc:
             raise exception.FormatError(exc, "directory")
 
         # Join path segements
-        self.directory = self.clean_path(os.path.join(
-            self.basedirectory, *segments))
+        directory = self.clean_path(
+            self.basedirectory + os.sep.join(segments))
 
         # Remove trailing path separator;
-        # occurs if the last argument to os.path.join() is an empty string
-        if self.directory[-1] == os.sep:
-            self.directory = self.directory[:-1]
+        # occurs if the last segment is an empty string
+        if directory[-1] == os.sep:
+            directory = directory[:-1]
+        self.directory = directory
 
         # Enable longer-than-260-character paths on Windows
         if os.name == "nt":
-            self.realdirectory = "\\\\?\\" + os.path.abspath(self.directory)
+            self.realdirectory = "\\\\?\\" + os.path.abspath(directory)
         else:
-            self.realdirectory = self.directory
+            self.realdirectory = directory
 
         # Create directory tree
         os.makedirs(self.realdirectory, exist_ok=True)
@@ -651,7 +665,7 @@ class PathFormat():
         # Apply 'kwdict' to filename format string
         try:
             self.filename = self.clean_path(self.clean_segment(
-                self.formatter.format_map(self.kwdict)))
+                self.filename_formatter(self.kwdict)))
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
