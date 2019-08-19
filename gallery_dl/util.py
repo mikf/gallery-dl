@@ -546,12 +546,13 @@ class PathFormat():
         self.delete = False
         self.path = self.realpath = self.temppath = ""
 
-        self.basedirectory = expand_path(
+        basedir = expand_path(
             extractor.config("base-directory", (".", "gallery-dl")))
-        if os.altsep and os.altsep in self.basedirectory:
-            self.basedirectory = self.basedirectory.replace(os.altsep, os.sep)
-        if self.basedirectory[-1] != os.sep:
-            self.basedirectory += os.sep
+        if os.altsep and os.altsep in basedir:
+            basedir = basedir.replace(os.altsep, os.sep)
+        if basedir[-1] != os.sep:
+            basedir += os.sep
+        self.basedirectory = basedir
 
         restrict = extractor.config("path-restrict", "auto")
         if restrict == "auto":
@@ -616,18 +617,17 @@ class PathFormat():
             raise exception.FormatError(exc, "directory")
 
         # Join path segements
-        directory = self.clean_path(
-            self.basedirectory + os.sep.join(segments))
+        sep = os.sep
+        directory = self.clean_path(self.basedirectory + sep.join(segments))
 
-        # Remove trailing path separator;
-        # occurs if the last segment is an empty string
-        if directory[-1] == os.sep:
-            directory = directory[:-1]
+        # Ensure directory ends with a path separator
+        if directory[-1] != sep:
+            directory += sep
         self.directory = directory
 
         # Enable longer-than-260-character paths on Windows
         if os.name == "nt":
-            self.realdirectory = "\\\\?\\" + os.path.abspath(directory)
+            self.realdirectory = "\\\\?\\" + os.path.abspath(directory) + sep
         else:
             self.realdirectory = directory
 
@@ -664,13 +664,12 @@ class PathFormat():
 
         # Apply 'kwdict' to filename format string
         try:
-            self.filename = self.clean_path(self.clean_segment(
+            self.filename = filename = self.clean_path(self.clean_segment(
                 self.filename_formatter(self.kwdict)))
         except Exception as exc:
             raise exception.FormatError(exc, "filename")
 
         # Combine directory and filename to full paths
-        filename = os.sep + self.filename
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
         if not self.temppath:
