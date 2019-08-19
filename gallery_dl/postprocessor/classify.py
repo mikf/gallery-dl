@@ -34,16 +34,24 @@ class ClassifyPP(PostProcessor):
 
     def prepare(self, pathfmt):
         ext = pathfmt.extension
-
         if ext in self.mapping:
-            self._dir = pathfmt.realdirectory + os.sep + self.mapping[ext]
-            pathfmt.realpath = self._dir + os.sep + pathfmt.filename
-        else:
-            self._dir = None
+            # set initial paths to enable download skips
+            self._build_paths(pathfmt, self.mapping[ext])
 
     def run(self, pathfmt):
-        if self._dir:
-            os.makedirs(self._dir, exist_ok=True)
+        ext = pathfmt.extension
+        if ext in self.mapping:
+            # rebuild paths in case the filename extension changed
+            path = self._build_paths(pathfmt, self.mapping[ext])
+            os.makedirs(path, exist_ok=True)
+
+    @staticmethod
+    def _build_paths(pathfmt, extra):
+        path = pathfmt.realdirectory + os.sep + extra
+        pathfmt.realpath = path + os.sep + pathfmt.filename
+        pathfmt.path = (pathfmt.directory + os.sep +
+                        extra + os.sep + pathfmt.filename)
+        return path
 
 
 __postprocessor__ = ClassifyPP
