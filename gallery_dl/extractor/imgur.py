@@ -161,7 +161,6 @@ class ImgurAlbumExtractor(ImgurExtractor):
 
     def items(self):
         album = self._extract_data("/a/" + self.key + "/all")
-        album["title"] = album["title"].strip()
         images = album["album_images"]["images"]
         del album["album_images"]
 
@@ -195,15 +194,14 @@ class ImgurGalleryExtractor(ImgurExtractor):
 
     def items(self):
         url = self.root + "/a/" + self.key
-        response = self.request(url, method="HEAD", fatal=False)
+        with self.request(url, method="HEAD", fatal=False) as response:
+            code = response.status_code
 
-        if response.status_code < 400:
+        if code < 400:
             extr = ImgurAlbumExtractor
-            path = "/a/"
         else:
             extr = ImgurImageExtractor
-            path = "/"
+            url = self.root + "/" + self.key
 
-        response.close()
         yield Message.Version, 1
-        yield Message.Queue, self.root + path + self.key, {"_extractor": extr}
+        yield Message.Queue, url, {"_extractor": extr}
