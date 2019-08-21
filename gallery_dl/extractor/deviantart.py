@@ -27,7 +27,7 @@ BASE_PATTERN = (
 
 
 class DeviantartExtractor(Extractor):
-    """Base class for deviantart extractors"""
+    """Base class for deviantart extractors using the OAuth API"""
     category = "deviantart"
     directory_fmt = ("{category}", "{author[username]!l}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
@@ -232,14 +232,6 @@ class DeviantartExtractor(Extractor):
         if mtype and mtype.startswith("image/"):
             content.update(data)
 
-    def _html_request(self, url, **kwargs):
-        cookies = {"userinfo": (
-            '__167217c8e6aac1a3331f;{"username":"","uniqueid":"ab2e8b184471bf0'
-            'e3f8ed3ee7a3220aa","vd":"Bc7vEx,BdC7Fy,A,J,A,,B,A,B,BdC7Fy,BdC7XU'
-            ',J,J,A,BdC7XU,13,A,B,A,,A,A,B,A,A,,A","attr":56}'
-        )}
-        return self.request(url, cookies=cookies, **kwargs)
-
 
 class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
@@ -365,73 +357,6 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     def prepare(self, deviation):
         DeviantartExtractor.prepare(self, deviation)
         deviation["folder"] = self.folder
-
-
-class DeviantartDeviationExtractor(DeviantartExtractor):
-    """Extractor for single deviations"""
-    subcategory = "deviation"
-    archive_fmt = "{index}.{extension}"
-    pattern = BASE_PATTERN + r"/((?:art|journal)/[^/?&#]+-\d+)"
-    test = (
-        (("https://www.deviantart.com/shimoda7/art/"
-          "For-the-sake-of-a-memory-10073852"), {
-            "options": (("original", 0),),
-            "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
-        }),
-        ("https://www.deviantart.com/zzz/art/zzz-1234567890", {
-            "exception": exception.NotFoundError,
-        }),
-        (("https://www.deviantart.com/myria-moon/art/"
-          "Aime-Moi-part-en-vadrouille-261986576"), {
-            "pattern": (r"https?://s3\.amazonaws\.com/origin-orig\."
-                        r"deviantart\.net/a383/f/2013/135/e/7/[^.]+\.jpg\?"),
-        }),
-        # wixmp URL rewrite
-        (("https://www.deviantart.com/citizenfresh/art/"
-          "Hverarond-14-the-beauty-of-the-earth-789295466"), {
-            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
-                        r"/intermediary/f/[^/]+/[^.]+\.jpg$")
-        }),
-        # wixmp URL rewrite v2 (#369)
-        (("https://www.deviantart.com/josephbiwald/art/"
-          "Destiny-2-Warmind-Secondary-Keyart-804940104"), {
-            "pattern": r"https://images-wixmp-\w+\.wixmp\.com/.*,q_100,"
-        }),
-        # non-download URL for GIFs (#242)
-        (("https://www.deviantart.com/skatergators/art/"
-          "COM-Monique-Model-781571783"), {
-            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
-                        r"/f/[^/]+/[^.]+\.gif\?token="),
-        }),
-        # external URLs from description (#302)
-        (("https://www.deviantart.com/uotapo/art/"
-          "INANAKI-Memorial-Humane7-590297498"), {
-            "options": (("extra", 1), ("original", 0)),
-            "pattern": r"https?://sta\.sh/\w+$",
-            "range": "2-",
-            "count": 4,
-        }),
-        # old-style URLs
-        ("https://shimoda7.deviantart.com"
-         "/art/For-the-sake-of-a-memory-10073852"),
-        ("https://myria-moon.deviantart.com"
-         "/art/Aime-Moi-part-en-vadrouille-261986576"),
-        ("https://zzz.deviantart.com/art/zzz-1234567890"),
-    )
-
-    skip = Extractor.skip
-
-    def __init__(self, match):
-        DeviantartExtractor.__init__(self, match)
-        self.path = match.group(3)
-
-    def deviations(self):
-        url = "{}/{}/{}".format(self.root, self.user, self.path)
-        response = self._html_request(url, fatal=False)
-        deviation_id = text.extract(response.text, '//deviation/', '"')[0]
-        if response.status_code >= 400 or not deviation_id:
-            raise exception.NotFoundError("image")
-        return (self.api.deviation(deviation_id),)
 
 
 class DeviantartStashExtractor(DeviantartExtractor):
@@ -570,64 +495,6 @@ class DeviantartJournalExtractor(DeviantartExtractor):
         return self.api.browse_user_journals(self.user, self.offset)
 
 
-class DeviantartScrapsExtractor(DeviantartExtractor):
-    """Extractor for an artist's scraps"""
-    subcategory = "scraps"
-    directory_fmt = ("{category}", "{username}", "Scraps")
-    archive_fmt = "s_{username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/gallery/\?catpath=scraps\b"
-    test = (
-        ("https://www.deviantart.com/shimoda7/gallery/?catpath=scraps", {
-            "count": 12,
-            "options": (("original", False),),
-        }),
-        ("https://shimoda7.deviantart.com/gallery/?catpath=scraps"),
-    )
-
-    def deviations(self):
-        url = "{}/{}/gallery/?catpath=scraps".format(self.root, self.user)
-        page = self._html_request(url).text
-        csrf, pos = text.extract(page, '"csrf":"', '"')
-        iid , pos = text.extract(page, '"requestid":"', '"', pos)
-
-        params = {
-            "iid": iid + "-jz6wpfib-1.1",
-            "mp": 0,
-        }
-        headers = {
-            "Referer": url,
-        }
-        data = {
-            "username": self.user,
-            "offset": self.offset,
-            "limit": "24",
-            "catpath": "scraps",
-            "_csrf": csrf,
-            "dapiIid": params["iid"]
-        }
-        url = "https://www.deviantart.com/dapi/v1/gallery/0"
-
-        while True:
-            content = self.request(
-                url, method="POST", params=params,
-                headers=headers, data=data).json()["content"]
-
-            for item in content["results"]:
-                if item["html"].startswith('<div class="ad-container'):
-                    continue
-                deviation_url = text.extract(item["html"], 'href="', '"')[0]
-                page = self._html_request(deviation_url).text
-                deviation_id = text.extract(page, '//deviation/', '"')[0]
-                if deviation_id:
-                    yield self.api.deviation(deviation_id)
-
-            if not content["has_more"]:
-                return
-            data["offset"] = content["next_offset"]
-            data["_csrf"] = text.extract(page, '"csrf":"', '"')[0]
-            params["mp"] += 1
-
-
 class DeviantartPopularExtractor(DeviantartExtractor):
     """Extractor for popular deviations"""
     subcategory = "popular"
@@ -669,6 +536,217 @@ class DeviantartPopularExtractor(DeviantartExtractor):
     def prepare(self, deviation):
         DeviantartExtractor.prepare(self, deviation)
         deviation["popular"] = self.popular
+
+
+class DeviantartExtractorV2(Extractor):
+    """Base class for deviantart extractors using the NAPI"""
+    category = "deviantart"
+    directory_fmt = ("{category}", "{author[username]!l}")
+    filename_fmt = "{category}_{index}_{title}.{extension}"
+    root = "https://www.deviantart.com"
+
+    def __init__(self, match=None):
+        Extractor.__init__(self, match)
+        self.offset = 0
+        self.extra = self.config("extra", False)
+        self.quality = self.config("quality", "100")
+        self.user = match.group(1) or match.group(2)
+
+        if self.quality:
+            self.quality = "q_{}".format(self.quality)
+
+    def items(self):
+        url = (
+            self.root + "/_napi/da-browse/shared_api/deviation/extended_fetch"
+        )
+        params = {
+            "deviationid"    : None,
+            "username"       : None,
+            "type"           : None,
+            "include_session": "false",
+        }
+        headers = {
+            "Referer": self.root,
+        }
+
+        yield Message.Version, 1
+        for params["deviationid"], params["username"], params["type"] \
+                in self.deviations():
+            data = self.request(url, params=params, headers=headers).json()
+            if "deviation" not in data:
+                self.log.warning("Skipping %s", params["deviationid"])
+                continue
+            deviation = data["deviation"]
+            extended = deviation["extended"]
+            del deviation["extended"]
+
+            deviation["stats"] = extended["stats"]
+            deviation["stats"]["comments"] = data["comments"]["total"]
+            deviation["description"] = extended.get("description", "")
+            deviation["tags"] = [t["name"] for t in extended.get("tags") or ()]
+            deviation["index"] = deviation["deviationId"]
+            deviation["username"] = params["username"].lower()
+            deviation["date"] = text.parse_datetime(
+                deviation["publishedTime"])
+            deviation["published_time"] = int(deviation["date"].timestamp())
+
+            deviation["category_path"] = "/".join(
+                extended[key]["displayNameEn"]
+                for key in ("typeFacet", "contentFacet", "categoryFacet")
+                if key in extended
+            )
+
+            lfile = deviation["files"][-1]
+            if lfile["type"] == "gif":
+                deviation["target"] = lfile
+
+            elif lfile["type"] == "video":
+                # select largest video
+                deviation["target"] = max(
+                    deviation["files"],
+                    key=lambda x: text.parse_int(x.get("quality", "")[:-1])
+                )
+
+            elif lfile["type"] == "flash":
+                if lfile["src"].startswith("https://sandbox.deviantart.com"):
+                    # extract SWF file from "sandbox"
+                    lfile["src"] = text.extract(
+                        self.request(lfile["src"]).text,
+                        'id="sandboxembed" src="', '"',
+                    )[0]
+                deviation["target"] = lfile
+
+            elif "download" in extended:
+                deviation["target"] = extended["download"]
+                deviation["target"]["src"] = extended["download"]["url"]
+
+            else:
+                deviation["target"] = lfile
+
+            src = deviation["target"]["src"]
+            if src.startswith("https://images-wixmp-"):
+                if deviation["index"] <= 790677560:
+                    # https://github.com/r888888888/danbooru/issues/4069
+                    src = re.sub(
+                        r"(/f/[^/]+/[^/]+)/v\d+/.*",
+                        r"/intermediary\1", src)
+                if self.quality:
+                    src = re.sub(
+                        r"q_\d+", self.quality, src)
+                deviation["target"]["src"] = src
+
+            text.nameext_from_url(src, deviation)
+            yield Message.Directory, deviation
+            yield Message.Url, src, deviation
+
+            if self.extra:
+                for match in DeviantartStashExtractor.pattern.finditer(
+                        deviation["description"]):
+                    deviation["_extractor"] = DeviantartStashExtractor
+                    yield Message.Queue, match.group(0), deviation
+
+
+class DeviantartDeviationExtractor(DeviantartExtractorV2):
+    """Extractor for single deviations"""
+    subcategory = "deviation"
+    archive_fmt = "{index}.{extension}"
+    pattern = BASE_PATTERN + r"/(art|journal)/(?:[^/?&#]+-)?(\d+)"
+    test = (
+        (("https://www.deviantart.com/shimoda7/art/"
+          "For-the-sake-of-a-memory-10073852"), {
+            "options": (("original", 0),),
+            "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
+        }),
+        ("https://www.deviantart.com/zzz/art/zzz-1234567890", {
+            "count": 0,
+        }),
+        (("https://www.deviantart.com/myria-moon/art/"
+          "Aime-Moi-part-en-vadrouille-261986576"), {
+            "pattern": (r"https://www.deviantart.com/download/261986576"
+                        r"/[\w-]+\.jpg\?token=\w+&ts=\d+"),
+        }),
+        # wixmp URL rewrite
+        (("https://www.deviantart.com/citizenfresh/art/"
+          "Hverarond-14-the-beauty-of-the-earth-789295466"), {
+            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
+                        r"/intermediary/f/[^/]+/[^.]+\.jpg$")
+        }),
+        # wixmp URL rewrite v2 (#369)
+        (("https://www.deviantart.com/josephbiwald/art/"
+          "Destiny-2-Warmind-Secondary-Keyart-804940104"), {
+            "pattern": r"https://images-wixmp-\w+\.wixmp\.com/.*,q_100,"
+        }),
+        # non-download URL for GIFs (#242)
+        (("https://www.deviantart.com/skatergators/art/"
+          "COM-Monique-Model-781571783"), {
+            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
+                        r"/f/[^/]+/[^.]+\.gif\?token="),
+        }),
+        # external URLs from description (#302)
+        (("https://www.deviantart.com/uotapo/art/"
+          "INANAKI-Memorial-Humane7-590297498"), {
+            "options": (("extra", 1), ("original", 0)),
+            "pattern": r"https?://sta\.sh/\w+$",
+            "range": "2-",
+            "count": 4,
+        }),
+        # old-style URLs
+        ("https://shimoda7.deviantart.com"
+         "/art/For-the-sake-of-a-memory-10073852"),
+        ("https://myria-moon.deviantart.com"
+         "/art/Aime-Moi-part-en-vadrouille-261986576"),
+        ("https://zzz.deviantart.com/art/zzz-1234567890"),
+    )
+
+    skip = Extractor.skip
+
+    def __init__(self, match):
+        DeviantartExtractorV2.__init__(self, match)
+        self.type = match.group(3)
+        self.deviation_id = match.group(4)
+
+    def deviations(self):
+        return ((self.deviation_id, self.user, self.type),)
+
+
+class DeviantartScrapsExtractor(DeviantartExtractorV2):
+    """Extractor for an artist's scraps"""
+    subcategory = "scraps"
+    directory_fmt = ("{category}", "{username}", "Scraps")
+    archive_fmt = "s_{username}_{index}.{extension}"
+    pattern = BASE_PATTERN + r"/gallery/(?:\?catpath=)?scraps\b"
+    test = (
+        ("https://www.deviantart.com/shimoda7/gallery/scraps", {
+            "count": 12,
+        }),
+        ("https://www.deviantart.com/shimoda7/gallery/?catpath=scraps"),
+        ("https://shimoda7.deviantart.com/gallery/?catpath=scraps"),
+    )
+
+    def deviations(self):
+        url = self.root + "/_napi/da-user-profile/api/gallery/contents"
+        params = {
+            "username"     : self.user,
+            "offset"       : self.offset,
+            "limit"        : "24",
+            "scraps_folder": "true",
+        }
+        headers = {
+            "Referer": "{}/{}/gallery/scraps".format(self.root, self.user),
+        }
+
+        while True:
+            data = self.request(url, params=params, headers=headers).json()
+
+            for obj in data["results"]:
+                deviation = obj["deviation"]
+                user = deviation["author"]["username"]
+                type = "journal" if deviation["isJournal"] else "art"
+                yield deviation["deviationId"], user, type
+
+            if not data["hasMore"]:
+                return
+            params["offset"] = data["nextOffset"]
 
 
 class DeviantartAPI():
