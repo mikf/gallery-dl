@@ -95,7 +95,7 @@ class ClassifyTest(BasePostprocessorTest):
 
         pp.prepare(self.pathfmt)
         path = os.path.join(self.dir.name, "test", "Pictures")
-        self.assertEqual(pp._dir, path)
+        self.assertEqual(self.pathfmt.path, path + "/file.jpg")
         self.assertEqual(self.pathfmt.realpath, path + "/file.jpg")
 
         with patch("os.makedirs") as mkdirs:
@@ -107,7 +107,7 @@ class ClassifyTest(BasePostprocessorTest):
         rp = self.pathfmt.realpath
 
         pp.prepare(self.pathfmt)
-        self.assertEqual(pp._dir, None)
+        self.assertEqual(self.pathfmt.path, rp)
         self.assertEqual(self.pathfmt.realpath, rp)
 
         with patch("os.makedirs") as mkdirs:
@@ -127,7 +127,7 @@ class ClassifyTest(BasePostprocessorTest):
 
         pp.prepare(self.pathfmt)
         path = os.path.join(self.dir.name, "test", "foo", "bar")
-        self.assertEqual(pp._dir, path)
+        self.assertEqual(self.pathfmt.path, path + "/file.foo")
         self.assertEqual(self.pathfmt.realpath, path + "/file.foo")
 
         with patch("os.makedirs") as mkdirs:
