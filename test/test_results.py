@@ -29,6 +29,7 @@ BROKEN = {
     "8chan",
     "imgth",
     "mangapark",
+    "simplyhentai",
 }
 
 
