@@ -8,14 +8,16 @@
 
 """Extract hentai-manga from https://www.simply-hentai.com/"""
 
-from .common import GalleryExtractor, Extractor, Message
+from .common import GalleryExtractor
 from .. import text, util, exception
+import json
 
 
 class SimplyhentaiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from simply-hentai.com"""
     category = "simplyhentai"
     archive_fmt = "{image_id}"
+    root = "https://www.simply-hentai.com"
     pattern = (r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
                r"(?!/(?:album|gifs?|images?|series)(?:/|$))"
                r"(?:/(?!(?:page|all-pages)(?:/|\.|$))[^/?&#]+)+)")
@@ -23,7 +25,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
             "url": "258289249990502c3138719cb89e995a60861e49",
-            "keyword": "eba83ccdbab3022a2280c77aa747f9458196138b",
+            "keyword": "8b2400e4b466e8f46802fa5a6b917d2788bb7e8e",
         }),
         ("https://www.simply-hentai.com/notfound", {
             "exception": exception.GalleryDLException,
@@ -40,144 +42,30 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         self.session.headers["Referer"] = url
 
     def metadata(self, page):
-        extr = text.extract_from(page)
-        split = text.split_html
-
-        title = extr('<meta property="og:title" content="', '"')
-        if not title:
+        path = text.extract(page, '<a class="preview" href="', '"')[0]
+        if not path:
             raise exception.NotFoundError("gallery")
-        data = {
-            "title"     : text.unescape(title),
-            "gallery_id": text.parse_int(extr('/Album/', '/')),
-            "parody"    : split(extr('box-title">Series</div>', '</div>')),
-            "language"  : text.remove_html(extr(
-                'box-title">Language</div>', '</div>')) or None,
-            "characters": split(extr('box-title">Characters</div>', '</div>')),
-            "tags"      : split(extr('box-title">Tags</div>', '</div>')),
-            "artist"    : split(extr('box-title">Artists</div>', '</div>')),
-            "date"      : text.parse_datetime(text.remove_html(
-                extr('Uploaded', '</div>')), "%d.%m.%Y"),
+        page = self.request(self.root + path).text
+        data = json.loads(text.unescape(text.extract(
+            page, 'data-react-class="Reader" data-react-props="', '"')[0]))
+        self.manga = manga = data["manga"]
+
+        return {
+            "title"     : manga["title"],
+            "parody"    : manga["series"]["title"],
+            "language"  : manga["language"]["name"],
+            "lang"      : util.language_to_code(manga["language"]["name"]),
+            "characters": [x["name"] for x in manga["characters"]],
+            "tags"      : [x["name"] for x in manga["tags"]],
+            "artist"    : [x["name"] for x in manga["artists"]],
+            "gallery_id": text.parse_int(text.extract(
+                manga["images"][0]["sizes"]["full"], "/Album/", "/")[0]),
+            "date"      : text.parse_datetime(
+                manga["publish_date"], "%Y-%m-%dT%H:%M:%S.%f%z"),
         }
-        data["lang"] = util.language_to_code(data["language"])
-        return data
 
     def images(self, _):
-        url = self.chapter_url + "/all-pages"
-        headers = {"Accept": "application/json"}
-        images = self.request(url, headers=headers).json()
         return [
-            (urls["full"], {"image_id": text.parse_int(image_id)})
-            for image_id, urls in sorted(images.items())
+            (image["sizes"]["full"], {"image_id": image["id"]})
+            for image in self.manga["images"]
         ]
-
-
-class SimplyhentaiImageExtractor(Extractor):
-    """Extractor for individual images from simply-hentai.com"""
-    category = "simplyhentai"
-    subcategory = "image"
-    directory_fmt = ("{category}", "{type}s")
-    filename_fmt = "{category}_{token}{title:?_//}.{extension}"
-    archive_fmt = "{token}"
-    pattern = (r"(?:https?://)?(?:www\.)?(simply-hentai\.com"
-               r"/(image|gif)/[^/?&#]+)")
-    test = (
-        (("https://www.simply-hentai.com/image"
-          "/pheromomania-vol-1-kanzenban-isao-3949d8b3-400c-4b6"), {
-            "url": "0338eb137830ab6f81e5f410d3936ef785d063d9",
-            "keyword": "e10e5588481cab68329ef6ec1e5325206b2079a2",
-        }),
-        ("https://www.simply-hentai.com/gif/8915dfcf-0b6a-47c", {
-            "url": "11c060d7ec4dfd0bd105300b6e1fd454674a5af1",
-            "keyword": "dd97a4bb449c397d6fec9f43a1303c0fb168ae65",
-        }),
-    )
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.page_url = "https://www." + match.group(1)
-        self.type = match.group(2)
-
-    def items(self):
-        extr = text.extract_from(self.request(self.page_url).text)
-        title = extr('"og:title" content="'      , '"')
-        descr = extr('"og:description" content="', '"')
-        url = extr('&quot;image&quot;:&quot;'  , '&')
-        url = extr("&quot;content&quot;:&quot;", "&") or url
-
-        tags = text.extract(descr, " tagged with ", " online for free ")[0]
-        if tags:
-            tags = tags.split(", ")
-            tags[-1] = tags[-1].partition(" ")[2]
-        else:
-            tags = []
-
-        data = text.nameext_from_url(url, {
-            "title": text.unescape(title) if title else "",
-            "tags": tags,
-            "type": self.type,
-        })
-        data["token"] = data["filename"].rpartition("_")[2]
-
-        yield Message.Version, 1
-        yield Message.Directory, data
-        yield Message.Url, url, data
-
-
-class SimplyhentaiVideoExtractor(Extractor):
-    """Extractor for hentai videos from simply-hentai.com"""
-    category = "simplyhentai"
-    subcategory = "video"
-    directory_fmt = ("{category}", "{type}s")
-    filename_fmt = "{title}{episode:?_//>02}.{extension}"
-    archive_fmt = "{title}_{episode}"
-    pattern = r"(?:https?://)?(videos\.simply-hentai\.com/[^/?&#]+)"
-    test = (
-        ("https://videos.simply-hentai.com/creamy-pie-episode-02", {
-            "pattern": r"https://www\.googleapis\.com/drive/v3/files"
-                       r"/0B1ecQ8ZVLm3JcHZzQzBnVy1ZUmc\?alt=media&key=[\w-]+",
-            "keyword": "706790708b14773efc1e075ddd3b738a375348a5",
-            "count": 1,
-        }),
-        (("https://videos.simply-hentai.com"
-          "/1715-tifa-in-hentai-gang-bang-3d-movie"), {
-            "url": "ad9a36ae06c601b6490e3c401834b4949d947eb0",
-            "keyword": "f9dad94fbde9c95859e631ff4f07297a9567b874",
-        }),
-    )
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.page_url = "https://" + match.group(1)
-
-    def items(self):
-        page = self.request(self.page_url).text
-
-        title, pos = text.extract(page, "<title>", "</title>")
-        tags , pos = text.extract(page, ">Tags</div>", "</div>", pos)
-        date , pos = text.extract(page, ">Upload Date</div>", "</div>", pos)
-        title = title.rpartition(" - ")[0]
-
-        if "<video" in page:
-            video_url = text.extract(page, '<source src="', '"', pos)[0]
-            episode = 0
-        else:
-            # video url from myhentai.tv embed
-            pos = page.index('<div class="video-frame-container">', pos)
-            embed_url = text.extract(page, 'src="', '"', pos)[0].replace(
-                "embedplayer.php?link=", "embed.php?name=")
-            embed_page = self.request(embed_url).text
-            video_url = text.extract(embed_page, '"file":"', '"')[0]
-            title, _, episode = title.rpartition(" Episode ")
-
-        data = text.nameext_from_url(video_url, {
-            "title": text.unescape(title),
-            "episode": text.parse_int(episode),
-            "tags": text.split_html(tags)[::2],
-            "type": "video",
-            "date": text.parse_datetime(text.remove_html(
-                date), "%B %d, %Y %H:%M"),
-        })
-
-        yield Message.Version, 1
-        yield Message.Directory, data
-        yield Message.Url, video_url, data
