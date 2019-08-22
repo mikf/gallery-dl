@@ -101,7 +101,7 @@ Sankaku Complex      https://www.sankakucomplex.com/     Articles, Tag-Searches
 Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          http://sensescans.com/reader/       Chapters, Manga
 Sex.com              https://www.sex.com/                Boards, Pins, related Pins, Search Results
-Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
+Simply Hentai        https://www.simply-hentai.com/      Galleries
 SlickPic             https://www.slickpic.com/           Images from Users, Albums
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (OAuth)
