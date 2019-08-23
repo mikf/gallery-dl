@@ -78,8 +78,8 @@ Download a standalone executable file,
 put it into your `PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__,
 and run it inside a command prompt (like ``cmd.exe``).
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.10.1/gallery-dl.exe>`__
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.10.1/gallery-dl.bin>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.10.2/gallery-dl.exe>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.10.2/gallery-dl.bin>`__
 
 These executables include a Python 3.7 interpreter
 and all required Python packages.
@@ -224,7 +224,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
-.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.10.1.zip
+.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.10.2.zip
 .. _dev:                     https://github.com/mikf/gallery-dl/archive/master.zip
 
 .. _Python:     https://www.python.org/downloads/

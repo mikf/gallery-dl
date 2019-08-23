@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## 1.10.2 - 2019-08-23
+### Additions
+- Support for `instagram` stories and IGTV ([#371](https://github.com/mikf/gallery-dl/issues/371), [#373](https://github.com/mikf/gallery-dl/issues/373))
+- Support for individual `imgbb` images ([#363](https://github.com/mikf/gallery-dl/issues/363))
+- `deviantart.quality` option to set the JPEG compression quality for newer images ([#369](https://github.com/mikf/gallery-dl/issues/369))
+- `enumerate` option for `extractor.skip` ([#306](https://github.com/mikf/gallery-dl/issues/306))
+- `adjust-extensions` option to control filename extension adjustments
+- `path-remove` option to remove control characters etc. from filesystem paths
+### Changes
+- Rename `restrict-filenames` to `path-restrict`
+- Adjust `pixiv` metadata and default filename format ([#366](https://github.com/mikf/gallery-dl/issues/366))
+  - Set `filename` to `"{category}_{user[id]}_{id}{suffix}.{extension}"` to restore the old default
+- Improve and optimize directory and filename generation
+### Fixes
+- Allow the `classify` post-processor to handle files with unknown filename extension ([#138](https://github.com/mikf/gallery-dl/issues/138))
+- Fix rate limit handling for OAuth APIs ([#368](https://github.com/mikf/gallery-dl/issues/368))
+- Fix artwork and scraps extraction on `deviantart` ([#376](https://github.com/mikf/gallery-dl/issues/376), [#392](https://github.com/mikf/gallery-dl/issues/392))
+- Distinguish between `imgur` album and gallery URLs ([#380](https://github.com/mikf/gallery-dl/issues/380))
+- Prevent crash when using `--ugoira-conv` ([#382](https://github.com/mikf/gallery-dl/issues/382))
+- Handle multi-image posts on `patreon` ([#383](https://github.com/mikf/gallery-dl/issues/383))
+- Miscellaneous fixes for `*reactor`, `simplyhentai`
 
 ## 1.10.1 - 2019-08-02
 ## Fixes
