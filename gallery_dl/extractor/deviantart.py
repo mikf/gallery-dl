@@ -140,8 +140,13 @@ class DeviantartExtractor(Extractor):
     @staticmethod
     def commit(deviation, target):
         url = target["src"]
-        deviation["target"] = text.nameext_from_url(url, target.copy())
-        deviation["extension"] = deviation["target"]["extension"]
+        thumb = deviation["thumbs"][0]["src"] if "thumbs" in deviation else url
+        target = text.nameext_from_url(thumb, target.copy())
+        if target["filename"].endswith("-150"):
+            target["filename"] = target["filename"][:-4]
+        deviation["target"] = target
+        deviation["filename"] = target["filename"]
+        deviation["extension"] = target["extension"] = text.ext_from_url(url)
         return Message.Url, url, deviation
 
     def _commit_journal_html(self, deviation, journal):
@@ -570,80 +575,89 @@ class DeviantartExtractorV2(Extractor):
         }
 
         yield Message.Version, 1
-        for params["deviationid"], params["username"], params["type"] \
-                in self.deviations():
+        for deviation in self.deviations():
+            params["deviationid"] = deviation["deviationId"]
+            params["username"] = deviation["author"]["username"]
+            params["type"] = "journal" if deviation["isJournal"] else "art"
             data = self.request(url, params=params, headers=headers).json()
+
             if "deviation" not in data:
                 self.log.warning("Skipping %s", params["deviationid"])
                 continue
-            deviation = data["deviation"]
-            extended = deviation["extended"]
-            del deviation["extended"]
+            deviation = self._extract(data)
 
-            deviation["stats"] = extended["stats"]
-            deviation["stats"]["comments"] = data["comments"]["total"]
-            deviation["description"] = extended.get("description", "")
-            deviation["tags"] = [t["name"] for t in extended.get("tags") or ()]
-            deviation["index"] = deviation["deviationId"]
-            deviation["username"] = params["username"].lower()
-            deviation["date"] = text.parse_datetime(
-                deviation["publishedTime"])
-            deviation["published_time"] = int(deviation["date"].timestamp())
-
-            deviation["category_path"] = "/".join(
-                extended[key]["displayNameEn"]
-                for key in ("typeFacet", "contentFacet", "categoryFacet")
-                if key in extended
-            )
-
-            lfile = deviation["files"][-1]
-            if lfile["type"] == "gif":
-                deviation["target"] = lfile
-
-            elif lfile["type"] == "video":
-                # select largest video
-                deviation["target"] = max(
-                    deviation["files"],
-                    key=lambda x: text.parse_int(x.get("quality", "")[:-1])
-                )
-
-            elif lfile["type"] == "flash":
-                if lfile["src"].startswith("https://sandbox.deviantart.com"):
-                    # extract SWF file from "sandbox"
-                    lfile["src"] = text.extract(
-                        self.request(lfile["src"]).text,
-                        'id="sandboxembed" src="', '"',
-                    )[0]
-                deviation["target"] = lfile
-
-            elif "download" in extended:
-                deviation["target"] = extended["download"]
-                deviation["target"]["src"] = extended["download"]["url"]
-
-            else:
-                deviation["target"] = lfile
-
-            src = deviation["target"]["src"]
-            if src.startswith("https://images-wixmp-"):
-                if deviation["index"] <= 790677560:
-                    # https://github.com/r888888888/danbooru/issues/4069
-                    src = re.sub(
-                        r"(/f/[^/]+/[^/]+)/v\d+/.*",
-                        r"/intermediary\1", src)
-                if self.quality:
-                    src = re.sub(
-                        r"q_\d+", self.quality, src)
-                deviation["target"]["src"] = src
-
-            text.nameext_from_url(src, deviation)
             yield Message.Directory, deviation
-            yield Message.Url, src, deviation
-
+            yield Message.Url, deviation["target"]["src"], deviation
             if self.extra:
                 for match in DeviantartStashExtractor.pattern.finditer(
                         deviation["description"]):
                     deviation["_extractor"] = DeviantartStashExtractor
                     yield Message.Queue, match.group(0), deviation
+
+    def _extract(self, data):
+        deviation = data["deviation"]
+        extended = deviation["extended"]
+        files = deviation["files"]
+        del deviation["extended"]
+        del deviation["files"]
+
+        # prepare deviation metadata
+        deviation["description"] = extended.get("description", "")
+        deviation["username"] = self.user.lower()
+        deviation["stats"] = extended["stats"]
+        deviation["stats"]["comments"] = data["comments"]["total"]
+        deviation["index"] = deviation["deviationId"]
+        deviation["tags"] = [t["name"] for t in extended.get("tags") or ()]
+        deviation["date"] = text.parse_datetime(
+            deviation["publishedTime"])
+        deviation["category_path"] = "/".join(
+            extended[key]["displayNameEn"]
+            for key in ("typeFacet", "contentFacet", "categoryFacet")
+            if key in extended
+        )
+
+        # extract download target
+        target = files[-1]
+        name = files[0]["src"]
+
+        if target["type"] == "gif":
+            pass
+        elif target["type"] == "video":
+            # select largest video
+            target = max(
+                files, key=lambda x: text.parse_int(x.get("quality", "")[:-1]))
+            name = target["src"]
+        elif target["type"] == "flash":
+            if target["src"].startswith("https://sandbox.deviantart.com"):
+                # extract SWF file from "sandbox"
+                target["src"] = text.extract(
+                    self.request(target["src"]).text,
+                    'id="sandboxembed" src="', '"',
+                )[0]
+        elif "download" in extended:
+            target = extended["download"]
+            target["src"] = target["url"]
+            del target["url"]
+
+        # url rewrites
+        if target["src"].startswith("https://images-wixmp-"):
+            if deviation["index"] <= 790677560:
+                # https://github.com/r888888888/danbooru/issues/4069
+                target["src"] = re.sub(
+                    r"(/f/[^/]+/[^/]+)/v\d+/.*",
+                    r"/intermediary\1", target["src"])
+            if self.quality:
+                target["src"] = re.sub(
+                    r"q_\d+", self.quality, target["src"])
+
+        text.nameext_from_url(name, target)
+        if target["filename"].endswith("-150"):
+            target["filename"] = target["filename"][:-4]
+        deviation["target"] = target
+        deviation["filename"] = target["filename"]
+        deviation["extension"] = target["extension"] = (
+            text.ext_from_url(target["src"]))
+        return deviation
 
 
 class DeviantartDeviationExtractor(DeviantartExtractorV2):
@@ -652,43 +666,60 @@ class DeviantartDeviationExtractor(DeviantartExtractorV2):
     archive_fmt = "{index}.{extension}"
     pattern = BASE_PATTERN + r"/(art|journal)/(?:[^/?&#]+-)?(\d+)"
     test = (
-        (("https://www.deviantart.com/shimoda7/art/"
-          "For-the-sake-of-a-memory-10073852"), {
+        (("https://www.deviantart.com/shimoda7/art/For-the-sake-10073852"), {
             "options": (("original", 0),),
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://www.deviantart.com/zzz/art/zzz-1234567890", {
             "count": 0,
         }),
-        (("https://www.deviantart.com/myria-moon/art/"
-          "Aime-Moi-part-en-vadrouille-261986576"), {
+        (("https://www.deviantart.com/myria-moon/art/Aime-Moi-261986576"), {
             "pattern": (r"https://www.deviantart.com/download/261986576"
                         r"/[\w-]+\.jpg\?token=\w+&ts=\d+"),
         }),
         # wixmp URL rewrite
-        (("https://www.deviantart.com/citizenfresh/art/"
-          "Hverarond-14-the-beauty-of-the-earth-789295466"), {
+        (("https://www.deviantart.com/citizenfresh/art/Hverarond-789295466"), {
             "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
                         r"/intermediary/f/[^/]+/[^.]+\.jpg$")
         }),
         # wixmp URL rewrite v2 (#369)
-        (("https://www.deviantart.com/josephbiwald/art/"
-          "Destiny-2-Warmind-Secondary-Keyart-804940104"), {
+        (("https://www.deviantart.com/josephbiwald/art/Destiny-2-804940104"), {
             "pattern": r"https://images-wixmp-\w+\.wixmp\.com/.*,q_100,"
         }),
         # non-download URL for GIFs (#242)
-        (("https://www.deviantart.com/skatergators/art/"
-          "COM-Monique-Model-781571783"), {
+        (("https://www.deviantart.com/skatergators/art/COM-Moni-781571783"), {
             "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
                         r"/f/[^/]+/[^.]+\.gif\?token="),
         }),
         # external URLs from description (#302)
-        (("https://www.deviantart.com/uotapo/art/"
-          "INANAKI-Memorial-Humane7-590297498"), {
+        (("https://www.deviantart.com/uotapo/art/INANAKI-Memo-590297498"), {
             "options": (("extra", 1), ("original", 0)),
             "pattern": r"https?://sta\.sh/\w+$",
             "range": "2-",
             "count": 4,
+        }),
+        # video
+        ("https://www.deviantart.com/chi-u/art/-VIDEO-Brushes-330774593", {
+            "url": "3b6e6e761d2d393fa61a4dc3ed6e7db51b14d07b",
+            "keyword": {
+                "target": {
+                    "duration": 306,
+                    "extension": "mp4",
+                    "filename": r"re:_video____brushes_\w+_by_chi_u-d5gxnb5",
+                    "filesize": 9963639,
+                    "quality": "1080p",
+                    "src": str,
+                    "type": "video",
+                },
+            }
+        }),
+        # archive
+        ("https://www.deviantart.com/itsvenue/art/-brush-pngs-14-763300948", {
+            "pattern": r"https://.+deviantart.com/download/763300948/.*\.rar",
+        }),
+        # swf
+        ("https://www.deviantart.com/ikatxfruti/art/Bang-Bang-528130222", {
+            "pattern": r"https://images-wixmp-.*wixmp.com/f/.*\.swf",
         }),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
@@ -706,7 +737,11 @@ class DeviantartDeviationExtractor(DeviantartExtractorV2):
         self.deviation_id = match.group(4)
 
     def deviations(self):
-        return ((self.deviation_id, self.user, self.type),)
+        return ({
+            "deviationId": self.deviation_id,
+            "author"     : {"username": self.user},
+            "isJournal"  : self.type == "journal",
+        },)
 
 
 class DeviantartScrapsExtractor(DeviantartExtractorV2):
@@ -739,10 +774,7 @@ class DeviantartScrapsExtractor(DeviantartExtractorV2):
             data = self.request(url, params=params, headers=headers).json()
 
             for obj in data["results"]:
-                deviation = obj["deviation"]
-                user = deviation["author"]["username"]
-                type = "journal" if deviation["isJournal"] else "art"
-                yield deviation["deviationId"], user, type
+                yield obj["deviation"]
 
             if not data["hasMore"]:
                 return
