@@ -144,6 +144,9 @@ class DeviantartExtractor(Extractor):
         target = text.nameext_from_url(thumb, target.copy())
         if target["filename"].endswith("-150"):
             target["filename"] = target["filename"][:-4]
+        if not target["filename"].count("-"):
+            name, _, hid = target["filename"].rpartition("_")
+            target["filename"] = name + "-" + hid
         deviation["target"] = target
         deviation["filename"] = target["filename"]
         deviation["extension"] = target["extension"] = text.ext_from_url(url)
@@ -653,6 +656,9 @@ class DeviantartExtractorV2(Extractor):
         text.nameext_from_url(name, target)
         if target["filename"].endswith("-150"):
             target["filename"] = target["filename"][:-4]
+        if not target["filename"].count("-"):
+            name, _, hid = target["filename"].rpartition("_")
+            target["filename"] = name + "-" + hid
         deviation["target"] = target
         deviation["filename"] = target["filename"]
         deviation["extension"] = target["extension"] = (
