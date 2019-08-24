@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.10.2 - 2019-08-23
 ### Additions
 - Support for `instagram` stories and IGTV ([#371](https://github.com/mikf/gallery-dl/issues/371), [#373](https://github.com/mikf/gallery-dl/issues/373))
