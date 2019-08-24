@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://piczel.tv/"""
+"""Extractors for https://piczel.tv/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -19,21 +19,12 @@ class PiczelExtractor(Extractor):
     filename_fmt = "{category}_{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     root = "https://piczel.tv"
-    api_root = "https://apollo.piczel.tv"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.item_id = match.group(1)
 
     def items(self):
-        first = True
         yield Message.Version, 1
-        for image in self.unpack(self.get_images()):
-            if first:
-                yield Message.Directory, image
-                first = False
-            path = image["image"]["image"]["url"]
-            url = "{}/static/{}".format(self.api_root, path)
+        for image in self.unpack(self.images()):
+            url = self.root + "/static" + image["image"]["image"]["url"]
+            yield Message.Directory, image
             yield Message.Url, url, text.nameext_from_url(url, image)
 
     @staticmethod
@@ -50,21 +41,40 @@ class PiczelExtractor(Extractor):
                 image["num"] = 0
                 yield image
 
-    def get_images(self):
+    def images(self):
         """Return an iterable with all relevant image objects"""
+
+    def _pagination(self, url, folder_id=None):
+        params = {
+            "hideNsfw" : "false",
+            "from_id"  : None,
+            "folder_id": folder_id,
+        }
+
+        while True:
+            data = self.request(url, params=params).json()
+            yield from data
+
+            if len(data) < 32:
+                return
+            params["from_id"] = data[-1]["id"]
 
 
 class PiczelUserExtractor(PiczelExtractor):
     """Extractor for all images from a user's gallery"""
     subcategory = "user"
     pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/([^/?&#]+)/?$"
-    test = ("https://piczel.tv/gallery/Lulena", {
-        "count": ">= 13",
+    test = ("https://piczel.tv/gallery/Maximumwarp", {
+        "count": ">= 50",
     })
 
-    def get_images(self):
-        url = "{}/api/users/{}/gallery".format(self.api_root, self.item_id)
-        return self.request(url).json()
+    def __init__(self, match):
+        PiczelExtractor.__init__(self, match)
+        self.user = match.group(1)
+
+    def images(self):
+        url = "{}/api/users/{}/gallery".format(self.root, self.user)
+        return self._pagination(url)
 
 
 class PiczelFolderExtractor(PiczelExtractor):
@@ -73,16 +83,18 @@ class PiczelFolderExtractor(PiczelExtractor):
     directory_fmt = ("{category}", "{user[username]}", "{folder[name]}")
     archive_fmt = "f{folder[id]}_{id}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?piczel\.tv"
-               r"/gallery/(?!image)[^/?&#]+/(\d+)")
+               r"/gallery/(?!image)([^/?&#]+)/(\d+)")
     test = ("https://piczel.tv/gallery/Lulena/1114", {
         "count": ">= 4",
     })
 
-    def get_images(self):
-        url = "{}/api/gallery/folder/{}".format(self.api_root, self.item_id)
-        images = self.request(url).json()
-        images.reverse()
-        return images
+    def __init__(self, match):
+        PiczelExtractor.__init__(self, match)
+        self.user, self.folder_id = match.groups()
+
+    def images(self):
+        url = "{}/api/users/{}/gallery".format(self.root, self.user)
+        return self._pagination(url, self.folder_id)
 
 
 class PiczelImageExtractor(PiczelExtractor):
@@ -90,7 +102,7 @@ class PiczelImageExtractor(PiczelExtractor):
     subcategory = "image"
     pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/image/(\d+)"
     test = ("https://piczel.tv/gallery/image/7807", {
-        "url": "9b9e416b6ab7e58676fab84453d5028f306ece34",
+        "url": "85225dd53a03c3b6028f6c4a45b71eccc07f7066",
         "content": "df9a053a24234474a19bce2b7e27e0dec23bff87",
         "keyword": {
             "created_at": "2018-07-22T05:13:58.000Z",
@@ -113,6 +125,10 @@ class PiczelImageExtractor(PiczelExtractor):
         },
     })
 
-    def get_images(self):
-        url = "{}/api/gallery/image/{}".format(self.api_root, self.item_id)
+    def __init__(self, match):
+        PiczelExtractor.__init__(self, match)
+        self.image_id = match.group(1)
+
+    def images(self):
+        url = "{}/api/gallery/image/{}".format(self.root, self.image_id)
         return (self.request(url).json(),)
