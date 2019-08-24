@@ -1171,6 +1171,25 @@ Description | Route youtube-dl's output through gallery-dl's logging system.
 =========== =====
 
 
+downloader.ytdl.outtmpl
+-----------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Description The `Output Template <https://github.com/ytdl-org/youtube-dl#output-template>`__
+            used to generate filenames for files downloaded with youtube-dl.
+
+            Special values:
+
+            * ``null``: generate filenames with `extractor.*.filename`_
+            * ``"default"``: use youtube-dl's default, currently ``"%(title)s-%(id)s.%(ext)s"``
+
+            Note: An output template other than ``null`` might
+            cause unexpected results in combination with other options
+            (e.g. ``"skip": "enumerate"``)
+=========== =====
+
+
 downloader.ytdl.raw-options
 ---------------------------
 =========== =====

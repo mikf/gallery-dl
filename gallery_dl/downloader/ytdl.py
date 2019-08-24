@@ -8,7 +8,7 @@
 
 """Downloader module for URLs requiring youtube-dl support"""
 
-from youtube_dl import YoutubeDL
+from youtube_dl import YoutubeDL, DEFAULT_OUTTMPL
 from .common import DownloaderBase
 from .. import text
 import os
@@ -36,6 +36,9 @@ class YoutubeDLDownloader(DownloaderBase):
             options["logger"] = self.log
         self.forward_cookies = self.config("forward-cookies", True)
 
+        outtmpl = self.config("outtmpl")
+        self.outtmpl = DEFAULT_OUTTMPL if outtmpl == "default" else outtmpl
+
         self.ytdl = YoutubeDL(options)
 
     def download(self, url, pathfmt):
@@ -60,7 +63,17 @@ class YoutubeDLDownloader(DownloaderBase):
     def _download_video(self, pathfmt, info_dict):
         if "url" in info_dict:
             text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
-        pathfmt.set_extension(info_dict["ext"])
+
+        if self.outtmpl:
+            self.ytdl.params["outtmpl"] = self.outtmpl
+            pathfmt.filename = filename = self.ytdl.prepare_filename(info_dict)
+            pathfmt.extension = info_dict["ext"]
+            pathfmt.path = pathfmt.directory + filename
+            pathfmt.realpath = pathfmt.temppath = (
+                pathfmt.realdirectory + filename)
+        else:
+            pathfmt.set_extension(info_dict["ext"])
+
         if pathfmt.exists():
             pathfmt.temppath = ""
             return True
