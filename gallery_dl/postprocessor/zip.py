@@ -34,7 +34,7 @@ class ZipPP(PostProcessor):
             algorithm = "store"
 
         self.path = pathfmt.realdirectory
-        args = (self.path + ext, "a",
+        args = (self.path[:-1] + ext, "a",
                 self.COMPRESSION_ALGORITHMS[algorithm], True)
 
         if options.get("mode") == "safe":
