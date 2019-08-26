@@ -58,7 +58,6 @@ class BasePostprocessorTest(unittest.TestCase):
     def setUpClass(cls):
         cls.extractor = extractor.find("test:")
         cls.dir = tempfile.TemporaryDirectory()
-        cls.fnum = 0
         config.set(("base-directory",), cls.dir.name)
 
     @classmethod
@@ -173,7 +172,10 @@ class MetadataTest(BasePostprocessorTest):
 """)
 
     def test_metadata_tags(self):
-        pp = self._create({"mode": "tags"}, {"tags": ["foo", "bar", "baz"]})
+        pp = self._create(
+            {"mode": "tags"},
+            {"tags": ["foo", "bar", "baz"]},
+        )
         self.assertEqual(pp.write, pp._write_tags)
         self.assertEqual(pp.extension, "txt")
 
@@ -186,7 +188,10 @@ class MetadataTest(BasePostprocessorTest):
         self.assertEqual(self._output(m), "foo\nbar\nbaz\n")
 
     def test_metadata_tags_split_1(self):
-        pp = self._create({"mode": "tags"}, {"tags": "foo, bar, baz"})
+        pp = self._create(
+            {"mode": "tags"},
+            {"tags": "foo, bar, baz"},
+        )
         with patch("builtins.open", mock_open()) as m:
             pp.prepare(self.pathfmt)
             pp.run(self.pathfmt)
@@ -203,7 +208,10 @@ class MetadataTest(BasePostprocessorTest):
         self.assertEqual(self._output(m), "foobar1\nfoobar2\nfoobarbaz\n")
 
     def test_metadata_tags_tagstring(self):
-        pp = self._create({"mode": "tags"}, {"tag_string": "foo, bar, baz"})
+        pp = self._create(
+            {"mode": "tags"},
+            {"tag_string": "foo, bar, baz"},
+        )
         with patch("builtins.open", mock_open()) as m:
             pp.prepare(self.pathfmt)
             pp.run(self.pathfmt)
@@ -266,8 +274,7 @@ class ZipTest(BasePostprocessorTest):
         self.assertEqual(pp.delete, True)
         self.assertFalse(hasattr(pp, "args"))
         self.assertEqual(pp.zfile.compression, zipfile.ZIP_STORED)
-        self.assertEqual(
-            pp.zfile.filename, self.pathfmt.realdirectory + ".zip")
+        self.assertTrue(pp.zfile.filename.endswith("/test.zip"))
 
     def test_zip_options(self):
         pp = self._create({
@@ -277,8 +284,7 @@ class ZipTest(BasePostprocessorTest):
         })
         self.assertEqual(pp.delete, False)
         self.assertEqual(pp.zfile.compression, zipfile.ZIP_DEFLATED)
-        self.assertEqual(
-            pp.zfile.filename, self.pathfmt.realdirectory + ".cbz")
+        self.assertTrue(pp.zfile.filename.endswith("/test.cbz"))
 
     def test_zip_safe(self):
         pp = self._create({"mode": "safe"})
@@ -286,8 +292,84 @@ class ZipTest(BasePostprocessorTest):
         self.assertEqual(pp.path, self.pathfmt.realdirectory)
         self.assertEqual(pp.run, pp._write_safe)
         self.assertEqual(pp.args, (
-            pp.path + ".zip", "a", zipfile.ZIP_STORED, True
+            pp.path[:-1] + ".zip", "a", zipfile.ZIP_STORED, True,
         ))
+        self.assertTrue(pp.args[0].endswith("/test.zip"))
+
+    def test_zip_write(self):
+        pp = self._create()
+        nti = pp.zfile.NameToInfo
+
+        with tempfile.NamedTemporaryFile("w", dir=self.dir.name) as file:
+            file.write("foobar\n")
+
+            # write dummy file with 3 different names
+            for i in range(3):
+                name = "file{}.ext".format(i)
+                self.pathfmt.temppath = file.name
+                self.pathfmt.filename = name
+
+                pp.prepare(self.pathfmt)
+                pp.run(self.pathfmt)
+
+                self.assertEqual(len(nti), i+1)
+                self.assertIn(name, nti)
+
+            # check file contents
+            self.assertEqual(len(nti), 3)
+            self.assertIn("file0.ext", nti)
+            self.assertIn("file1.ext", nti)
+            self.assertIn("file2.ext", nti)
+
+            # write the last file a second time (will be skipped)
+            pp.prepare(self.pathfmt)
+            pp.run(self.pathfmt)
+            self.assertEqual(len(pp.zfile.NameToInfo), 3)
+
+        # close file
+        pp.finalize()
+
+        # reopen to check persistence
+        with zipfile.ZipFile(pp.zfile.filename) as file:
+            nti = file.NameToInfo
+            self.assertEqual(len(pp.zfile.NameToInfo), 3)
+            self.assertIn("file0.ext", pp.zfile.NameToInfo)
+            self.assertIn("file1.ext", pp.zfile.NameToInfo)
+            self.assertIn("file2.ext", pp.zfile.NameToInfo)
+
+        os.unlink(pp.zfile.filename)
+
+    def test_zip_write_mock(self):
+
+        def side_effect(_, name):
+            pp.zfile.NameToInfo.add(name)
+
+        pp = self._create()
+        pp.zfile = Mock()
+        pp.zfile.NameToInfo = set()
+        pp.zfile.write.side_effect = side_effect
+
+        # write 3 files
+        for i in range(3):
+            self.pathfmt.temppath = self.pathfmt.realdirectory + "file.ext"
+            self.pathfmt.filename = "file{}.ext".format(i)
+            pp.prepare(self.pathfmt)
+            pp.run(self.pathfmt)
+
+        # write the last file a second time (will be skipped)
+        pp.prepare(self.pathfmt)
+        pp.run(self.pathfmt)
+
+        pp.finalize()
+
+        self.assertEqual(pp.zfile.write.call_count, 3)
+        for call in pp.zfile.write.call_args_list:
+            args, kwargs = call
+            self.assertEqual(len(args), 2)
+            self.assertEqual(len(kwargs), 0)
+            self.assertEqual(args[0], self.pathfmt.temppath)
+            self.assertRegex(args[1], r"file\d\.ext")
+        self.assertEqual(pp.zfile.close.call_count, 1)
 
 
 if __name__ == "__main__":
