@@ -25,12 +25,20 @@ class FlickrExtractor(Extractor):
 
     def items(self):
         data = self.metadata()
+        extract = self.api._extract_format
         yield Message.Version, 1
         yield Message.Directory, data
         for photo in self.photos():
-            photo.update(data)
-            url = photo["url"]
-            yield Message.Url, url, text.nameext_from_url(url, photo)
+            try:
+                photo = extract(photo)
+            except Exception as exc:
+                self.log.warning(
+                    "Skipping %s (%s)", photo["id"], exc.__class__.__name__)
+                self.log.debug("", exc_info=True)
+            else:
+                photo.update(data)
+                url = photo["url"]
+                yield Message.Url, url, text.nameext_from_url(url, photo)
 
     def metadata(self):
         """Return general metadata"""
@@ -432,7 +440,7 @@ class FlickrAPI(oauth.OAuth1API):
 
         while True:
             data = self._call(method, params)[key]
-            yield from map(self._extract_format, data["photo"])
+            yield from data["photo"]
             if params["page"] >= data["pages"]:
                 return
             params["page"] += 1
