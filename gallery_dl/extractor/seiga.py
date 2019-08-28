@@ -70,7 +70,7 @@ class SeigaUserExtractor(SeigaExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "{user[id]}")
     filename_fmt = "{category}_{user[id]}_{image_id}.{extension}"
-    pattern = (r"(?:https?://)?(?:www\.|seiga\.)?nicovideo\.jp/"
+    pattern = (r"(?:https?://)?(?:www\.|(?:sp\.)?seiga\.)?nicovideo\.jp/"
                r"user/illust/(\d+)(?:\?(?:[^&]+&)*sort=([^&#]+))?")
     test = (
         ("https://seiga.nicovideo.jp/user/illust/39537793", {
@@ -96,6 +96,7 @@ class SeigaUserExtractor(SeigaExtractor):
         }),
         ("https://seiga.nicovideo.jp/user/illust/39537793"
          "?sort=image_view&target=illust_all"),
+        ("https://sp.seiga.nicovideo.jp/user/illust/39537793"),
     )
 
     def __init__(self, match):
@@ -167,6 +168,7 @@ class SeigaImageExtractor(SeigaExtractor):
     filename_fmt = "{category}_{image_id}.{extension}"
     pattern = (r"(?:https?://)?(?:"
                r"(?:seiga\.|www\.)?nicovideo\.jp/(?:seiga/im|image/source/)"
+               r"|sp\.seiga\.nicovideo\.jp/seiga/#!/im"
                r"|lohas\.nicoseiga\.jp/(?:thumb|(?:priv|o)/[^/]+/\d+)/)(\d+)")
     test = (
         ("https://seiga.nicovideo.jp/seiga/im5977527", {
@@ -177,6 +179,7 @@ class SeigaImageExtractor(SeigaExtractor):
             "exception": exception.NotFoundError,
         }),
         ("https://seiga.nicovideo.jp/image/source/5977527"),
+        ("https://sp.seiga.nicovideo.jp/seiga/#!/im5977527"),
         ("https://lohas.nicoseiga.jp/thumb/5977527i"),
         ("https://lohas.nicoseiga.jp/priv"
          "/759a4ef1c639106ba4d665ee6333832e647d0e4e/1549727594/5977527"),
