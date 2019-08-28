@@ -608,11 +608,13 @@ class PathFormat():
         """Build directory path and create it if necessary"""
 
         # Build path segments by applying 'kwdict' to directory format strings
+        segments = []
+        append = segments.append
         try:
-            segments = [
-                self.clean_segment(format_map(kwdict).strip())
-                for format_map in self.directory_formatters
-            ]
+            for formatter in self.directory_formatters:
+                segment = formatter(kwdict).strip()
+                if segment:
+                    append(self.clean_segment(segment))
         except Exception as exc:
             raise exception.FormatError(exc, "directory")
 
@@ -620,16 +622,20 @@ class PathFormat():
         sep = os.sep
         directory = self.clean_path(self.basedirectory + sep.join(segments))
 
-        # Ensure directory ends with a path separator
-        if directory[-1] != sep:
+        # Ensure 'directory' ends with a path separator
+        if segments:
             directory += sep
         self.directory = directory
 
-        # Enable longer-than-260-character paths on Windows
         if os.name == "nt":
-            self.realdirectory = "\\\\?\\" + os.path.abspath(directory) + sep
-        else:
-            self.realdirectory = directory
+            # Enable longer-than-260-character paths on Windows
+            directory = "\\\\?\\" + os.path.abspath(directory)
+
+            # abspath() in Python 3.7+ removes trailing path separators (#402)
+            if directory[-1] != sep:
+                directory += sep
+
+        self.realdirectory = directory
 
         # Create directory tree
         os.makedirs(self.realdirectory, exist_ok=True)
