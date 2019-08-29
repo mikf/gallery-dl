@@ -26,7 +26,7 @@ class AdultempireGalleryExtractor(GalleryExtractor):
         }),
         ("https://www.adultdvdempire.com/5683/gallery.html", {
             "url": "b12cd1a65cae8019d837505adb4d6a2c1ed4d70d",
-            "keyword": "0fe9a6e3f0a331b95ba77f66a643705ca86e8ec5",
+            "keyword": "9634eb16cc6dbf347eb9dcdd9b2a499dfd04d167",
         }),
     )
 
