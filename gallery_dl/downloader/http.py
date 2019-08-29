@@ -38,11 +38,12 @@ class HttpDownloader(DownloaderBase):
         if self.retries < 0:
             self.retries = float("inf")
         if self.rate:
-            self.rate = text.parse_bytes(self.rate)
-            if not self.rate:
-                self.log.warning("Invalid rate limit specified")
-            elif self.rate < self.chunk_size:
-                self.chunk_size = self.rate
+            rate = text.parse_bytes(self.rate)
+            if not rate:
+                self.log.warning("Invalid rate limit (%r)", self.rate)
+            elif rate < self.chunk_size:
+                self.chunk_size = rate
+            self.rate = rate
 
     def download(self, url, pathfmt):
         try:
@@ -124,10 +125,10 @@ class HttpDownloader(DownloaderBase):
             if not offset:
                 mode = "w+b"
                 if filesize:
-                    self.log.info("Unable to resume partial download")
+                    self.log.debug("Unable to resume partial download")
             else:
                 mode = "r+b"
-                self.log.info("Resuming download at byte %d", offset)
+                self.log.debug("Resuming download at byte %d", offset)
 
             # start downloading
             self.out.start(pathfmt.path)
