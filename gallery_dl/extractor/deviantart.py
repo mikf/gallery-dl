@@ -9,7 +9,7 @@
 """Extract images from https://www.deviantart.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache, memcache
 import collections
 import itertools
@@ -137,18 +137,21 @@ class DeviantartExtractor(Extractor):
         deviation["date"] = text.parse_timestamp(
             deviation["published_time"])
 
+        # filename metadata
+        alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
+        sub = re.compile(r"\W").sub
+        deviation["filename"] = "".join((
+            sub("_", deviation["title"].lower()), "_by_",
+            sub("_", deviation["author"]["username"].lower()), "-d",
+            util.bencode(deviation["index"], alphabet),
+        ))
+
     @staticmethod
     def commit(deviation, target):
         url = target["src"]
-        thumb = deviation["thumbs"][0]["src"] if "thumbs" in deviation else url
-        target = text.nameext_from_url(thumb, target.copy())
-        if target["filename"].endswith("-150"):
-            target["filename"] = target["filename"][:-4]
-        if not target["filename"].count("-"):
-            name, _, hid = target["filename"].rpartition("_")
-            target["filename"] = name + "-" + hid
+        target = target.copy()
+        target["filename"] = deviation["filename"]
         deviation["target"] = target
-        deviation["filename"] = target["filename"]
         deviation["extension"] = target["extension"] = text.ext_from_url(url)
         return Message.Url, url, deviation
 
@@ -621,7 +624,6 @@ class DeviantartExtractorV2(Extractor):
 
         # extract download target
         target = files[-1]
-        name = files[0]["src"]
 
         if target["type"] == "gif":
             pass
@@ -629,7 +631,6 @@ class DeviantartExtractorV2(Extractor):
             # select largest video
             target = max(
                 files, key=lambda x: text.parse_int(x.get("quality", "")[:-1]))
-            name = target["src"]
         elif target["type"] == "flash":
             if target["src"].startswith("https://sandbox.deviantart.com"):
                 # extract SWF file from "sandbox"
@@ -653,16 +654,19 @@ class DeviantartExtractorV2(Extractor):
                 target["src"] = re.sub(
                     r"q_\d+", self.quality, target["src"])
 
-        text.nameext_from_url(name, target)
-        if target["filename"].endswith("-150"):
-            target["filename"] = target["filename"][:-4]
-        if not target["filename"].count("-"):
-            name, _, hid = target["filename"].rpartition("_")
-            target["filename"] = name + "-" + hid
-        deviation["target"] = target
-        deviation["filename"] = target["filename"]
+        # filename and extension metadata
+        alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
+        sub = re.compile(r"\W").sub
+        deviation["filename"] = target["filename"] = "".join((
+            sub("_", deviation["title"].lower()), "_by_",
+            sub("_", deviation["author"]["username"].lower()), "-d",
+            util.bencode(deviation["index"], alphabet),
+        ))
         deviation["extension"] = target["extension"] = (
-            text.ext_from_url(target["src"]))
+            text.ext_from_url(target["src"])
+        )
+        deviation["target"] = target
+
         return deviation
 
 

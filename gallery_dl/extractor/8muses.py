@@ -55,7 +55,7 @@ class _8musesAlbumExtractor(Extractor):
         }),
         ("https://www.8muses.com/comics/album/Fakku-Comics/6?sort=az", {
             "count": ">= 70",
-            "keyword": {"name": r"re:^[S-Zs-z]"},
+            "keyword": {"name": r"re:^[R-Zr-z]"},
         }),
     )
 
