@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## 1.10.3 - 2019-08-30
+### Additions
+- Provide `filename` metadata for all `deviantart` files ([#392](https://github.com/mikf/gallery-dl/issues/392), [#400](https://github.com/mikf/gallery-dl/issues/400))
+- Implement a `ytdl.outtmpl` option to let youtube-dl handle filenames by itself ([#395](https://github.com/mikf/gallery-dl/issues/395))
+- Support `seiga` mobile URLs ([#401](https://github.com/mikf/gallery-dl/issues/401))
+### Fixes
+- Extract more than the first 32 posts from `piczel` galleries ([#396](https://github.com/mikf/gallery-dl/issues/396))
+- Fix filenames of archives created with `--zip` ([#397](https://github.com/mikf/gallery-dl/issues/397))
+- Skip unavailable images and videos on `flickr` ([#398](https://github.com/mikf/gallery-dl/issues/398))
+- Fix filesystem paths on Windows with Python 3.6 and lower ([#402](https://github.com/mikf/gallery-dl/issues/402))
 
 ## 1.10.2 - 2019-08-23
 ### Additions
