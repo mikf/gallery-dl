@@ -158,12 +158,16 @@ class DeviantartExtractor(Extractor):
     def _commit_journal_html(self, deviation, journal):
         title = text.escape(deviation["title"])
         url = deviation["url"]
-        thumbs = deviation["thumbs"]
+        thumbs = deviation.get("thumbs") or deviation.get("files")
         html = journal["html"]
         shadow = SHADOW_TEMPLATE.format_map(thumbs[0]) if thumbs else ""
 
         if "css" in journal:
             css, cls = journal["css"], "withskin"
+        elif html.startswith("<style"):
+            css, _, html = html.partition("</style>")
+            css = css.partition(">")[2]
+            cls = "withskin"
         else:
             css, cls = "", "journal-green"
 
@@ -194,22 +198,25 @@ class DeviantartExtractor(Extractor):
                 categories=categories,
             )
 
+        if needle in html:
+            html = html.replace(needle, header, 1)
+        else:
+            html = JOURNAL_TEMPLATE_HTML_EXTRA.format(header, html)
+
         html = JOURNAL_TEMPLATE_HTML.format(
-            title=title,
-            html=html.replace(needle, header, 1),
-            shadow=shadow,
-            css=css,
-            cls=cls,
-        )
+            title=title, html=html, shadow=shadow, css=css, cls=cls)
 
         deviation["extension"] = "htm"
         return Message.Url, html, deviation
 
     @staticmethod
     def _commit_journal_text(deviation, journal):
+        html = journal["html"]
+        if html.startswith("<style"):
+            html = html.partition("</style>")[2]
         content = "\n".join(
             text.unescape(text.remove_html(txt))
-            for txt in journal["html"].rpartition("<script")[0].split("<br />")
+            for txt in html.rpartition("<script")[0].split("<br />")
         )
         txt = JOURNAL_TEMPLATE_TEXT.format(
             title=deviation["title"],
@@ -305,7 +312,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
         }),
         # 'folders' option (#276)
         ("https://www.deviantart.com/justatest235723", {
-            "count": 2,
+            "count": 3,
             "options": (("metadata", 1), ("folders", 1), ("original", 0)),
             "keyword": {
                 "description": str,
@@ -484,19 +491,21 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     subcategory = "journal"
     directory_fmt = ("{category}", "{username}", "Journal")
     archive_fmt = "j_{username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/(?:journal|blog)/?(?:\?catpath=/)?$"
+    pattern = BASE_PATTERN + r"/(?:posts(?:/journals)?|journal)/?(?:\?.*)?$"
     test = (
-        ("https://www.deviantart.com/angrywhitewanker/journal/", {
+        ("https://www.deviantart.com/angrywhitewanker/posts/journals/", {
             "url": "38db2a0d3a587a7e0f9dba7ff7d274610ebefe44",
         }),
-        ("https://www.deviantart.com/angrywhitewanker/journal/", {
+        ("https://www.deviantart.com/angrywhitewanker/posts/journals/", {
             "url": "b2a8e74d275664b1a4acee0fca0a6fd33298571e",
             "options": (("journals", "text"),),
         }),
-        ("https://www.deviantart.com/angrywhitewanker/journal/", {
+        ("https://www.deviantart.com/angrywhitewanker/posts/journals/", {
             "count": 0,
             "options": (("journals", "none"),),
         }),
+        ("https://www.deviantart.com/shimoda7/posts/"),
+        ("https://www.deviantart.com/shimoda7/journal/"),
         ("https://www.deviantart.com/shimoda7/journal/?catpath=/"),
         ("https://shimoda7.deviantart.com/journal/"),
         ("https://shimoda7.deviantart.com/journal/?catpath=/"),
@@ -549,22 +558,8 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         deviation["popular"] = self.popular
 
 
-class DeviantartExtractorV2(Extractor):
+class DeviantartExtractorV2(DeviantartExtractor):
     """Base class for deviantart extractors using the NAPI"""
-    category = "deviantart"
-    directory_fmt = ("{category}", "{author[username]!l}")
-    filename_fmt = "{category}_{index}_{title}.{extension}"
-    root = "https://www.deviantart.com"
-
-    def __init__(self, match=None):
-        Extractor.__init__(self, match)
-        self.offset = 0
-        self.extra = self.config("extra", False)
-        self.quality = self.config("quality", "100")
-        self.user = match.group(1) or match.group(2)
-
-        if self.quality:
-            self.quality = "q_{}".format(self.quality)
 
     def items(self):
         url = (
@@ -625,7 +620,11 @@ class DeviantartExtractorV2(Extractor):
         # extract download target
         target = files[-1]
 
-        if target["type"] == "gif":
+        if deviation["isJournal"] and self.commit_journal:
+            journal = deviation["textContent"]
+            journal["html"] = journal["html"]["markup"]
+            target["src"] = self.commit_journal(deviation, journal)[1]
+        elif target["type"] == "gif":
             pass
         elif target["type"] == "video":
             # select largest video
@@ -642,9 +641,7 @@ class DeviantartExtractorV2(Extractor):
             target = extended["download"]
             target["src"] = target["url"]
             del target["url"]
-
-        # url rewrites
-        if target["src"].startswith("https://images-wixmp-"):
+        elif target["src"].startswith("https://images-wixmp-"):
             if deviation["index"] <= 790677560:
                 # https://github.com/r888888888/danbooru/issues/4069
                 target["src"] = re.sub(
@@ -662,9 +659,10 @@ class DeviantartExtractorV2(Extractor):
             sub("_", deviation["author"]["username"].lower()), "-d",
             util.bencode(deviation["index"], alphabet),
         ))
-        deviation["extension"] = target["extension"] = (
-            text.ext_from_url(target["src"])
-        )
+        if "extension" not in deviation:
+            deviation["extension"] = target["extension"] = (
+                text.ext_from_url(target["src"])
+            )
         deviation["target"] = target
 
         return deviation
@@ -1121,6 +1119,27 @@ roses/cssmin/desktop.css?1491362542749" >
 </body>
 </html>
 """
+
+JOURNAL_TEMPLATE_HTML_EXTRA = """\
+<div id="devskin0"><div class="negate-box-margin" style="">\
+<div usr class="gr-box gr-genericbox"
+        ><i usr class="gr1"><i></i></i
+        ><i usr class="gr2"><i></i></i
+        ><i usr class="gr3"><i></i></i
+        ><div usr class="gr-top">
+            <i usr class="tri"></i>
+            {}
+            </div>
+    </div><div usr class="gr-body"><div usr class="gr">
+            <div class="grf-indent">
+            <div class="text">
+                {}            </div>
+        </div>
+                </div></div>
+        <i usr class="gr3 gb"></i>
+        <i usr class="gr2 gb"></i>
+        <i usr class="gr1 gb gb1"></i>    </div>
+    </div></div>"""
 
 JOURNAL_TEMPLATE_TEXT = """text:{title}
 by {username}, {date}
