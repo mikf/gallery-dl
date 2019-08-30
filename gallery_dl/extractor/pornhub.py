@@ -123,7 +123,7 @@ class PornhubUserExtractor(PornhubExtractor):
     test = (
         ("https://www.pornhub.com/users/flyings0l0/photos/public", {
             "pattern": PornhubGalleryExtractor.pattern,
-            "count": ">= 8",
+            "count": ">= 6",
         }),
         ("https://www.pornhub.com/users/flyings0l0/"),
         ("https://www.pornhub.com/users/flyings0l0/photos/public"),

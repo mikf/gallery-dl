@@ -581,7 +581,8 @@ extractor.deviantart.quality
 =========== =====
 Type        ``integer``
 Default     ``100``
-Description JPEG compression quality for newer images hosted on wixmp servers.
+Description JPEG quality level of newer images for which
+            an original file download is not available.
 =========== =====
 
 
