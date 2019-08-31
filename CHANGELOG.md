@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.10.3 - 2019-08-30
 ### Additions
 - Provide `filename` metadata for all `deviantart` files ([#392](https://github.com/mikf/gallery-dl/issues/392), [#400](https://github.com/mikf/gallery-dl/issues/400))

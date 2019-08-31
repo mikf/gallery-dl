@@ -486,6 +486,18 @@ Description Try to follow external URLs of embedded players.
 =========== =====
 
 
+extractor.danbooru.ugoira
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Controls the download target for Ugoira posts.
+
+            * ``true``: Original ZIP archives
+            * ``false``: Converted video files
+=========== =====
+
+
 extractor.deviantart.extra
 --------------------------
 =========== =====

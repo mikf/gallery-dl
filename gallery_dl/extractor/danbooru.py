@@ -28,6 +28,7 @@ class DanbooruExtractor(booru.DanbooruPageMixin, booru.BooruExtractor):
         self.scheme = "https" if self.subdomain == "danbooru" else "http"
         self.api_url = "{scheme}://{subdomain}.donmai.us/posts.json".format(
             scheme=self.scheme, subdomain=self.subdomain)
+        self.ugoira = self.config("ugoira", True)
 
         username, api_key = self._get_auth_info()
         if username:
@@ -63,9 +64,15 @@ class DanbooruPoolExtractor(booru.PoolMixin, DanbooruExtractor):
 class DanbooruPostExtractor(booru.PostMixin, DanbooruExtractor):
     """Extractor for single images from danbooru"""
     pattern = BASE_PATTERN + r"/posts/(?P<post>\d+)"
-    test = ("https://danbooru.donmai.us/posts/294929", {
-        "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
-    })
+    test = (
+        ("https://danbooru.donmai.us/posts/294929", {
+            "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
+        }),
+        ("https://danbooru.donmai.us/posts/3613024", {
+            "pattern": r"https?://.+\.webm$",
+            "options": (("ugoira", False),)
+        })
+    )
 
 
 class DanbooruPopularExtractor(booru.PopularMixin, DanbooruExtractor):
