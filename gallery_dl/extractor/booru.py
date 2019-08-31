@@ -27,6 +27,7 @@ class BooruExtractor(SharedConfigMixin, Extractor):
     page_start = 1
     page_limit = None
     sort = False
+    ugoira = True
 
     def __init__(self, match):
         super().__init__(match)
@@ -51,7 +52,11 @@ class BooruExtractor(SharedConfigMixin, Extractor):
 
             for image in images:
                 try:
-                    url = image["file_url"]
+                    if "pixiv_ugoira_frame_data" in image and \
+                            "large_file_url" in image and not self.ugoira:
+                        url = image["large_file_url"]
+                    else:
+                        url = image["file_url"]
                 except KeyError:
                     continue
                 if url.startswith("/"):
