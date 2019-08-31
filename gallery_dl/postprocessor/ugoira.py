@@ -103,20 +103,26 @@ class UgoiraPP(PostProcessor):
 
             # invoke ffmpeg
             pathfmt.set_extension(self.extension)
-            if self.twopass:
-                if "-f" not in args:
-                    args += ["-f", self.extension]
-                args += ["-passlogfile", tempdir + "/ffmpeg2pass", "-pass"]
-                self._exec(args + ["1", "-y", os.devnull])
-                self._exec(args + ["2", pathfmt.realpath])
+            try:
+                if self.twopass:
+                    if "-f" not in args:
+                        args += ["-f", self.extension]
+                    args += ["-passlogfile", tempdir + "/ffmpeg2pass", "-pass"]
+                    self._exec(args + ["1", "-y", os.devnull])
+                    self._exec(args + ["2", pathfmt.realpath])
+                else:
+                    args.append(pathfmt.realpath)
+                    self._exec(args)
+            except OSError as exc:
+                print()
+                self.log.error("Unable to invoke FFmpeg (%s: %s)",
+                               exc.__class__.__name__, exc)
+                pathfmt.realpath = pathfmt.temppath
             else:
-                args.append(pathfmt.realpath)
-                self._exec(args)
-
-        if self.delete:
-            pathfmt.delete = True
-        else:
-            pathfmt.set_extension("zip")
+                if self.delete:
+                    pathfmt.delete = True
+                else:
+                    pathfmt.set_extension("zip")
 
     def _exec(self, args):
         out = None if self.output else subprocess.DEVNULL
