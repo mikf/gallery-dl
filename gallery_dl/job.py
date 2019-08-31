@@ -297,7 +297,7 @@ class DownloadJob(Job):
             instance = None
             self.log.error("'%s:' URLs are not supported/enabled", scheme)
 
-        if klass.scheme == "http":
+        if klass and klass.scheme == "http":
             self.downloaders["http"] = self.downloaders["https"] = instance
         else:
             self.downloaders[scheme] = instance
