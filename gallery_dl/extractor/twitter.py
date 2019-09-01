@@ -151,12 +151,15 @@ class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for all images from a user's timeline"""
     subcategory = "timeline"
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/([^/?&#]+)/?$")
-    test = ("https://twitter.com/supernaturepics", {
-        "range": "1-40",
-        "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
-        "keyword": "7210d679606240405e0cf62cbc67596e81a7a250",
-    })
+               r"/([^/?&#]+)/?(?:[?#].*)?$")
+    test = (
+        ("https://twitter.com/supernaturepics", {
+            "range": "1-40",
+            "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
+            "keyword": "7210d679606240405e0cf62cbc67596e81a7a250",
+        }),
+        ("https://mobile.twitter.com/supernaturepics?p=i"),
+    )
 
     def tweets(self):
         url = "{}/i/profiles/show/{}/timeline/tweets".format(
@@ -169,10 +172,13 @@ class TwitterMediaExtractor(TwitterExtractor):
     subcategory = "media"
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
                r"/([^/?&#]+)/media(?!\w)")
-    test = ("https://twitter.com/supernaturepics/media", {
-        "range": "1-40",
-        "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
-    })
+    test = (
+        ("https://twitter.com/supernaturepics/media", {
+            "range": "1-40",
+            "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
+        }),
+        ("https://mobile.twitter.com/supernaturepics/media#t"),
+    )
 
     def tweets(self):
         url = "{}/i/profiles/show/{}/media_timeline".format(
@@ -206,6 +212,11 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("content", True),),
             "keyword": "b13b6c4cd0b0c15b2ea7685479e7fedde3c47b9e",
         }),
+        # Reply to another tweet (#403)
+        ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
+            "options": (("videos", True),),
+            "pattern": r"ytdl:https://twitter.com/.*/1103767554424598528$",
+        }),
     )
 
     def __init__(self, match):
@@ -216,7 +227,9 @@ class TwitterTweetExtractor(TwitterExtractor):
         return {"user": self.user, "tweet_id": self.tweet_id}
 
     def tweets(self):
+        self.session.cookies.clear()
         url = "{}/{}/status/{}".format(self.root, self.user, self.tweet_id)
         page = self.request(url).text
-        return (text.extract(
-            page, '<div class="tweet ', 'class="js-tweet-stats-container')[0],)
+        end = page.index('class="js-tweet-stats-container')
+        beg = page.rindex('<div class="tweet ', 0, end)
+        return (page[beg:end],)
