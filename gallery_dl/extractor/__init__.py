@@ -29,6 +29,7 @@ modules = [
     "exhentai",
     "fallenangels",
     "flickr",
+    "fuskator",
     "gelbooru",
     "gfycat",
     "hbrowse",
