@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
 from datetime import datetime, timedelta
+import hashlib
 
 
 class PixivExtractor(Extractor):
@@ -395,6 +396,8 @@ class PixivAppAPI():
     """
     CLIENT_ID = "MOBrBDS8blbauoSck0ZfDbtuzpyT"
     CLIENT_SECRET = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj"
+    HASH_SECRET = ("28c1fdd170a5204386cb1313c7077b34"
+                   "f83e4aaf4aa829ce78c231e05b0bae2c")
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -406,7 +409,6 @@ class PixivAppAPI():
             "client-id", self.CLIENT_ID)
         self.client_secret = extractor.config(
             "client-secret", self.CLIENT_SECRET)
-
         extractor.session.headers.update({
             "App-OS": "ios",
             "App-OS-Version": "10.3.1",
@@ -440,8 +442,15 @@ class PixivAppAPI():
             data["username"] = username
             data["password"] = password
 
+        time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        headers = {
+            "X-Client-Time": time,
+            "X-Client-Hash": hashlib.md5(
+                (time + self.HASH_SECRET).encode()).hexdigest(),
+        }
+
         response = self.extractor.request(
-            url, method="POST", data=data, fatal=False)
+            url, method="POST", headers=headers, data=data, fatal=False)
         if response.status_code >= 400:
             raise exception.AuthenticationError()
 
