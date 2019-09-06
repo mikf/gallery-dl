@@ -54,6 +54,7 @@ modules = [
     "kissmanga",
     "komikcast",
     "konachan",
+    "lineblog",
     "livedoor",
     "luscious",
     "mangadex",
