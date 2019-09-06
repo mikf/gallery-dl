@@ -38,17 +38,19 @@ class LivedoorExtractor(Extractor):
 
     def _load(self, data, body):
         extr = text.extract_from(data)
-        tags = text.extract(body, '</dt><dd>', '</dl>')[0]
+        tags = text.extract(body, 'class="article-tags">', '</dl>')[0]
+        about = extr('rdf:about="', '"')
 
         return {
-            "id"        : text.parse_int(extr("id : '", "'")),
-            "title"     : text.unescape(extr("title : '", "'")),
-            "categories": [extr("name:'", "'"), extr("name:'", "'")],
-            "date"      : text.parse_datetime(
-                extr("date : '", "'"), "%Y-%m-%d %H:%M:%S"),
-            "tags"      : text.split_html(tags),
-            "user"      : self.user,
-            "body"      : body,
+            "id"         : text.parse_int(
+                about.rpartition("/")[2].partition(".")[0]),
+            "title"      : text.unescape(extr('dc:title="', '"')),
+            "categories" : extr('dc:subject="', '"').partition(",")[::2],
+            "description": extr('dc:description="', '"'),
+            "date"       : text.parse_datetime(extr('dc:date="', '"')),
+            "tags"       : text.split_html(tags)[1:] if tags else [],
+            "user"       : self.user,
+            "body"       : body,
         }
 
     def _images(self, post):
@@ -90,16 +92,17 @@ class LivedoorBlogExtractor(LivedoorExtractor):
             "pattern": r"https?://livedoor.blogimg.jp/\w+/imgs/\w/\w/\w+\.\w+",
             "keyword": {
                 "post": {
-                    "categories": list,
-                    "date": "type:datetime",
-                    "id": int,
-                    "tags": list,
-                    "title": str,
-                    "user": "zatsu_ke"
+                    "categories" : tuple,
+                    "date"       : "type:datetime",
+                    "description": str,
+                    "id"         : int,
+                    "tags"       : list,
+                    "title"      : str,
+                    "user"       : "zatsu_ke"
                 },
                 "filename": str,
-                "hash": r"re:\w{4,}",
-                "num": int,
+                "hash"    : r"re:\w{4,}",
+                "num"     : int,
             },
         }),
         ("http://blog.livedoor.jp/uotapo/", {
@@ -110,11 +113,10 @@ class LivedoorBlogExtractor(LivedoorExtractor):
 
     def posts(self):
         url = "{}/{}".format(self.root, self.user)
-
         while url:
             extr = text.extract_from(self.request(url).text)
             while True:
-                data = extr('.articles.push(', ');')
+                data = extr('<rdf:RDF', '</rdf:RDF>')
                 if not data:
                     break
                 body = extr('class="article-body-inner">',
@@ -130,15 +132,15 @@ class LivedoorPostExtractor(LivedoorExtractor):
     test = (
         ("http://blog.livedoor.jp/zatsu_ke/archives/51493859.html", {
             "url": "8826fe623f19dc868e7538e8519bf8491e92a0a2",
-            "keyword": "52fcba9253a000c339bcd658572d252e282626af",
+            "keyword": "83993111d5d0c08d021196802dd36b73f04c7057",
         }),
         ("http://blog.livedoor.jp/amaumauma/archives/7835811.html", {
             "url": "fc1d6a9557245b5a27d3a10bf0fa9922ef377215",
-            "keyword": "0229072abb5cd8a221df72e0ffdfc13336c0e9ce",
+            "keyword": "fd700760c98897c3125328e157972f905fd34aaa",
         }),
         ("http://blog.livedoor.jp/uotapo/archives/1050616939.html", {
             "url": "3f3581807ec4776e6a67ed7985a22494d4bc4904",
-            "keyword": "2eb3e383c68e909c4dd3d563c16d0b6e2fe6627b",
+            "keyword": "9e319413a42e08d32f0dcbe8aa3b452ad41aa906",
         }),
     )
 
@@ -150,7 +152,6 @@ class LivedoorPostExtractor(LivedoorExtractor):
         url = "{}/{}/archives/{}.html".format(
             self.root, self.user, self.post_id)
         extr = text.extract_from(self.request(url).text)
-        data = extr('articles :', '</script>')
-        body = extr('class="article-body-inner">',
-                    'class="article-footer">')
+        data = extr('<rdf:RDF', '</rdf:RDF>')
+        body = extr('class="article-body-inner">', 'class="article-footer">')
         return (self._load(data, body),)
