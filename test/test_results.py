@@ -30,7 +30,6 @@ BROKEN = {
     "imgth",
     "mangapark",
     "mangoxo",
-    "tumblr",
 }
 
 
