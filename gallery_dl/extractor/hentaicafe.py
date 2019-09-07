@@ -10,6 +10,7 @@
 
 from . import foolslide
 from .. import text
+from .common import Extractor
 from ..cache import memcache
 import re
 
@@ -64,6 +65,7 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
     )
     root = "https://hentai.cafe"
     reverse = False
+    request = Extractor.request
     chapterclass = HentaicafeChapterExtractor
 
     def chapters(self, page):
