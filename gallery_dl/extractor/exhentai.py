@@ -151,9 +151,6 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def items(self):
         self.login()
 
-        if self.limits:
-            self._init_limits()
-
         if self.gallery_token:
             gpage = self._gallery_page()
             self.image_token = text.extract(gpage, 'hentai.org/s/', '"')[0]
@@ -308,15 +305,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             raise exception.NotFoundError("image page")
         return page
 
-    def _init_limits(self):
-        self._update_limits()
-        if self._remaining <= 0:
-            self.log.error("Image limit reached!")
-            ExhentaiExtractor.LIMIT = True
-            raise exception.StopExtraction()
-
     def _check_limits(self, data):
-        if data["num"] % 20 == 0:
+        if not self._remaining or data["num"] % 20 == 0:
             self._update_limits()
         self._remaining -= data["cost"]
 
@@ -360,7 +350,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "width": text.parse_int(parts[0]),
             "height": text.parse_int(parts[2]),
             "size": size,
-            "cost": 1 + math.ceil(size * 5 / 1024 / 1024)
+            # 1 initial point + 1 per 0.1 MB
+            "cost": 1 + math.ceil(size / 104857.6)
         }
 
 
