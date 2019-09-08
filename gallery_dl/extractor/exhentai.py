@@ -121,7 +121,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
         ("https://exhentai.org/g/1200119/d55c44d3d0/", {
-            "keyword": "1b353fad00dff0665b1746cdd151ab5cc326df23",
+            "keyword": "3eeae7bde70dd992402d4cc0230ea0f2c4af46c5",
             "content": "e9891a4c017ed0bb734cd1efba5cd03f594d31ff",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {

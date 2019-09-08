@@ -152,8 +152,8 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
                r"/pictures/user/([^/]+)/scraps(?:/page/(\d+))?")
     test = (
         ("https://www.hentai-foundry.com/pictures/user/Evulchibi/scraps", {
-            "url": "00a11e30b73ff2b00a1fba0014f08d49da0a68ec",
-            "keyword": "410c6c900cfd23a8dd1e53dfcc97a79ea68c3359",
+            "url": "7cd9c6ec6258c4ab8c44991f7731be82337492a7",
+            "keyword": "40b07a9822b6b868fea2fa9b1c0b212ae8735da7",
         }),
         ("https://www.hentai-foundry.com"
          "/pictures/user/Evulchibi/scraps/page/3"),

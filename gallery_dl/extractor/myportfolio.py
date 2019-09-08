@@ -23,9 +23,9 @@ class MyportfolioGalleryExtractor(Extractor):
                r"(?:https?://)?([^.]+\.myportfolio\.com))"
                r"(/[^/?&#]+)?")
     test = (
-        ("https://hannahcosgrove.myportfolio.com/robyn", {
-            "url": "93b5430e765e53564b13e7d9c64c30c286011a6b",
-            "keyword": "25cb3dbdad6b011242a133f30ec598318b7512e8",
+        ("https://hannahcosgrove.myportfolio.com/niamh-1", {
+            "url": "8cbd73a73e5bf3b4f5d1b1d4a1eb114c01a72a66",
+            "keyword": "7a460bb5641e648ae70702ff91c2fb11054b0e0b",
         }),
         ("https://hannahcosgrove.myportfolio.com/lfw", {
             "pattern": r"https://hannahcosgrove\.myportfolio\.com/[^/?&#+]+$",
