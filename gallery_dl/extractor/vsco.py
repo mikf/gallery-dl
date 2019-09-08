@@ -86,12 +86,15 @@ class VscoExtractor(Extractor):
 class VscoUserExtractor(VscoExtractor):
     """Extractor for images from a user on vsco.co"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/images/"
-    test = ("https://vsco.co/missuri/images/1", {
-        "range": "1-80",
-        "count": 80,
-        "pattern": r"https://im\.vsco\.co/[^/]+/[0-9a-f/]+/vsco\w+\.\w+",
-    })
+    pattern = BASE_PATTERN + r"(?:/images(?:/\d+)?)?/?(?:$|[?#])"
+    test = (
+        ("https://vsco.co/missuri/images/1", {
+            "range": "1-80",
+            "count": 80,
+            "pattern": r"https://im\.vsco\.co/[^/]+/[0-9a-f/]+/vsco\w+\.\w+",
+        }),
+        ("https://vsco.co/missuri"),
+    )
 
     def images(self):
         url = "{}/{}/images/1".format(self.root, self.user)

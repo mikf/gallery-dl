@@ -151,7 +151,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for all images from a user's timeline"""
     subcategory = "timeline"
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/([^/?&#]+)/?(?:[?#].*)?$")
+               r"/([^/?&#]+)/?(?:$|[?#])")
     test = (
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
