@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased
+## 1.10.4 - 2019-09-08
+### Additions
+- Support for
+  - `lineblog` - https://www.lineblog.me/ ([#404](https://github.com/mikf/gallery-dl/issues/404))
+  - `fuskator` - https://fuskator.com/    ([#407](https://github.com/mikf/gallery-dl/issues/407))
+- `ugoira` option for `danbooru` to download pre-rendered ugoira animations ([#406](https://github.com/mikf/gallery-dl/issues/406))
+### Fixes
+- Download the correct files from `twitter` replies ([#403](https://github.com/mikf/gallery-dl/issues/403))
+- Prevent crash when trying to use unavailable downloader modules ([#405](https://github.com/mikf/gallery-dl/issues/405))
+- Fix `pixiv` authentication ([#411](https://github.com/mikf/gallery-dl/issues/411))
+- Improve `exhentai` image limit checks
+- Miscellaneous fixes for `hentaicafe`, `simplyhentai`, `tumblr`
 
 ## 1.10.3 - 2019-08-30
 ### Additions
