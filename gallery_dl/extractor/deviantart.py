@@ -873,6 +873,8 @@ class DeviantartAPI():
 
     def deviation_metadata(self, deviations):
         """ Fetch deviation metadata for a set of deviations"""
+        if not deviations:
+            return []
         endpoint = "deviation/metadata?" + "&".join(
             "deviationids[{}]={}".format(num, deviation["deviationid"])
             for num, deviation in enumerate(deviations)
@@ -975,13 +977,18 @@ class DeviantartAPI():
             if "results" not in data:
                 self.log.error("Unexpected API response: %s", data)
                 return
-            if (public and self.refresh_token and
-                    len(data["results"]) < params["limit"]):
-                self.log.debug("Switching to private access token")
-                public = False
-                continue
 
             if extend:
+                if public and len(data["results"]) < params["limit"]:
+                    if self.refresh_token:
+                        self.log.debug("Switching to private access token")
+                        public = False
+                        continue
+                    elif data["has_more"]:
+                        self.log.warning(
+                            "Private deviations detected! Run 'gallery-dl "
+                            "oauth:deviantart' and follow the instructions to "
+                            "be able to access them.")
                 if self.metadata:
                     self._metadata(data["results"])
                 if self.folders:
@@ -1003,7 +1010,6 @@ class DeviantartAPI():
                 deviations, self.deviation_metadata(deviations)):
             deviation.update(metadata)
             deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
-        return deviations
 
     def _folders(self, deviations):
         """Add a list of all containing folders to each deviation object"""
