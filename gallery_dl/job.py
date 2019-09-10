@@ -332,7 +332,14 @@ class DownloadJob(Job):
         archive = self.extractor.config("archive")
         if archive:
             path = util.expand_path(archive)
-            self.archive = util.DownloadArchive(path, self.extractor)
+            try:
+                self.archive = util.DownloadArchive(path, self.extractor)
+            except Exception as exc:
+                self.extractor.log.warning(
+                    "Failed to open download archive at '%s' ('%s: %s')",
+                    path, exc.__class__.__name__, exc)
+            else:
+                self.extractor.log.debug("Using download archive '%s'", path)
 
         postprocessors = self.extractor.config("postprocessors")
         if postprocessors:
