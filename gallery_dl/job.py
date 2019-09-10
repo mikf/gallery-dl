@@ -266,6 +266,8 @@ class DownloadJob(Job):
         if self.postprocessors:
             for pp in self.postprocessors:
                 pp.finalize()
+        if self.archive:
+            self.archive.close()
 
     def handle_skip(self):
         self.out.skip(self.pathfmt.path)
