@@ -733,6 +733,7 @@ class DownloadArchive():
     def __init__(self, path, extractor):
         con = sqlite3.connect(path)
         con.isolation_level = None
+        self.close = con.close
         self.cursor = con.cursor()
         self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
                             "(entry PRIMARY KEY) WITHOUT ROWID")
