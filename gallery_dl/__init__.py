@@ -248,7 +248,7 @@ def main():
                     log.error("No suitable extractor found for '%s'", url)
 
     except KeyboardInterrupt:
-        print("\nKeyboardInterrupt", file=sys.stderr)
+        sys.exit("\nKeyboardInterrupt")
     except BrokenPipeError:
         pass
     except IOError as exc:
