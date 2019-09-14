@@ -620,7 +620,7 @@ class DeviantartExtractorV2(DeviantartExtractor):
         # extract download target
         target = files[-1]
 
-        if deviation["isJournal"] and self.commit_journal:
+        if "textContent" in deviation and self.commit_journal:
             journal = deviation["textContent"]
             journal["html"] = journal["html"]["markup"]
             target["src"] = self.commit_journal(deviation, journal)[1]
@@ -728,6 +728,16 @@ class DeviantartDeviationExtractor(DeviantartExtractorV2):
         # swf
         ("https://www.deviantart.com/ikatxfruti/art/Bang-Bang-528130222", {
             "pattern": r"https://images-wixmp-.*wixmp.com/f/.*\.swf",
+        }),
+        # journal
+        ("https://www.deviantart.com/shimoda7/journal/ARTility-583755752", {
+            "url": "f33f8127ab71819be7de849175b6d5f8b37bb629",
+            "pattern": "text:<!DOCTYPE html>\n",
+        }),
+        # journal-like post with isJournal == False (#419)
+        ("https://www.deviantart.com/gliitchlord/art/brashstrokes-812942668", {
+            "url": "1534d6ea0561247ab921d07505e57a9d663a833b",
+            "pattern": "text:<!DOCTYPE html>\n",
         }),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
