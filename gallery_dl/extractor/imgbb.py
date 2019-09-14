@@ -28,7 +28,10 @@ class ImgbbExtractor(Extractor):
 
     def items(self):
         self.login()
-        page = self.request(self.page_url, params={"sort": self.sort}).text
+        response = self.request(self.page_url, params={"sort": self.sort})
+        if response.history and response.url.startswith(self.root):
+            raise exception.NotFoundError(self.subcategory)
+        page = response.text
         data = self.metadata(page)
         first = True
 
@@ -97,16 +100,24 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
     directory_fmt = ("{category}", "{user}", "{album_name} {album_id}")
     pattern = r"(?:https?://)?ibb\.co/album/([^/?&#]+)/?(?:\?([^#]+))?"
     test = (
-        ("https://ibb.co/album/c6p5Yv", {
+        ("https://ibb.co/album/i5PggF", {
             "range": "1-80",
-            "url": "8adaf0f7dfc19ff8bc4712c97f534af8b1e06412",
-            "keyword": "155b665a53e83d359e914cab7c69d5b829444d64",
+            "url": "570872b6eb3e11cf10b618922b780fed204c3f09",
+            "keyword": "0f2fc956728c36540c577578bd168d2459d6ae4b",
         }),
-        ("https://ibb.co/album/c6p5Yv?sort=title_asc", {
+        ("https://ibb.co/album/i5PggF?sort=title_asc", {
             "range": "1-80",
-            "url": "d6c45041d5c8323c435b183a976f3fde2af7c547",
-            "keyword": "30c3262214e2044bbcf6bf2dee8e3ca7ebd62b71",
+            "url": "e2e387b8fdb3690bd75d804d0af2833112e385cd",
+            "keyword": "a307fc9d2085bdc0eb7c538c8d866c59198d460c",
         }),
+        # deleted
+        ("https://ibb.co/album/fDArrF", {
+            "exception": exception.NotFoundError,
+        }),
+        # private
+        ("https://ibb.co/album/hqgWrF", {
+            "exception": exception.HttpError,
+        })
     )
 
     def __init__(self, match):
@@ -182,9 +193,18 @@ class ImgbbUserExtractor(ImgbbExtractor):
 class ImgbbImageExtractor(ImgbbExtractor):
     subcategory = "image"
     pattern = r"(?:https?://)?ibb\.co/(?!album/)([^/?&#]+)"
-    test = ("https://ibb.co/NLZHgqS", {
-        "url": "fbca86bac09de6fc0304054b2170b423ca1e84fa",
-        "keyword": "5d70e779bad03b2dc5273b627638045168671157",
+    test = ("https://ibb.co/fUqh5b", {
+        "pattern": "https://image.ibb.co/dY5FQb/Arundel-Ireeman-5.jpg",
+        "content": "c5a0965178a8b357acd8aa39660092918c63795e",
+        "keyword": {
+            "id"    : "fUqh5b",
+            "title" : "Arundel Ireeman 5",
+            "url"   : "https://image.ibb.co/dY5FQb/Arundel-Ireeman-5.jpg",
+            "width" : 960,
+            "height": 719,
+            "user"  : "folkie",
+            "extension": "jpg",
+        },
     })
 
     def __init__(self, match):
