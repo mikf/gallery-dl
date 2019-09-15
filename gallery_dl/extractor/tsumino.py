@@ -37,22 +37,22 @@ class TsuminoBase():
         response = self.request(url, method="POST", headers=headers, data=data)
         if not response.history:
             raise exception.AuthenticationError()
-        return {".aotsumino": response.history[0].cookies[".aotsumino"]}
+        return self.session.cookies
 
 
 class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
     """Extractor for image galleries on tsumino.com"""
     pattern = (r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
-               r"/(?:Book/Info|Read/View)/(\d+)")
+               r"/(?:entry|Book/Info|Read/(?:Index|View))/(\d+)")
     test = (
-        ("https://www.tsumino.com/Book/Info/40996", {
-            "url": "84bf30a86623039fc87855680fada884dc8a1ddd",
+        ("https://www.tsumino.com/entry/40996", {
+            "pattern": r"https://content.tsumino.com/parts/40996/\d+\?key=\w+",
             "keyword": {
                 "title"     : r"re:Shikoshiko Daisuki Nightingale \+ Kaijou",
                 "title_en"  : r"re:Shikoshiko Daisuki Nightingale \+ Kaijou",
                 "title_jp"  : "シコシコ大好きナイチンゲール + 会場限定おまけ本",
                 "gallery_id": 40996,
-                "date"      : "2018 June 29",
+                "date"      : "type:datetime",
                 "count"     : 42,
                 "collection": "",
                 "artist"    : ["Itou Life"],
@@ -65,15 +65,17 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
                 "uploader"  : "sehki",
                 "lang"      : "en",
                 "language"  : "English",
-                "thumbnail" : "re:https?://www.tsumino.com/Image/Thumb/40996",
+                "thumbnail" : "https://content.tsumino.com/thumbs/40996/1",
             },
         }),
+        ("https://www.tsumino.com/Book/Info/40996"),
         ("https://www.tsumino.com/Read/View/45834"),
+        ("https://www.tsumino.com/Read/Index/45834"),
     )
 
     def __init__(self, match):
         self.gallery_id = match.group(1)
-        url = "{}/Book/Info/{}".format(self.root, self.gallery_id)
+        url = "{}/entry/{}".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -90,7 +92,8 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
             "title_jp"  : title_jp,
             "thumbnail" : extr('"og:image" content="', '"'),
             "uploader"  : text.remove_html(extr('id="Uploader">', '</div>')),
-            "date"      : extr('id="Uploaded">', '</div>').strip(),
+            "date"      : text.parse_datetime(
+                extr('id="Uploaded">', '</div>').strip(), "%Y %B %d"),
             "rating"    : text.parse_float(extr(
                 'id="Rating">', '</div>').partition(" ")[0]),
             "type"      : text.remove_html(extr('id="Category">'  , '</div>')),
@@ -105,21 +108,24 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
         }
 
     def images(self, page):
-        url = "{}/Read/Load/?q={}".format(self.root, self.gallery_id)
+        url = "{}/Read/Index/{}?page=1".format(self.root, self.gallery_id)
         headers = {"Referer": self.chapter_url}
         response = self.request(url, headers=headers, fatal=False)
 
-        if response.status_code >= 400:
-            url = "{}/Read/View/{}".format(self.root, self.gallery_id)
+        if "/Auth/" in response.url:
             self.log.error(
                 "Failed to get gallery JSON data. Visit '%s' in a browser "
-                "and solve the CAPTCHA to continue.", url)
+                "and solve the CAPTCHA to continue.", response.url)
             raise exception.StopExtraction()
 
-        base = self.root + "/Image/Object?name="
+        page = response.text
+        tpl, pos = text.extract(page, 'data-cdn="', '"')
+        cnt, pos = text.extract(page, '> of ', '<', pos)
+        base, _, params = text.unescape(tpl).partition("[PAGE]")
+
         return [
-            (base + text.quote(name), None)
-            for name in response.json()["reader_page_urls"]
+            (base + str(i) + params, None)
+            for i in range(1, text.parse_int(cnt)+1)
         ]
 
 
@@ -149,13 +155,13 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
     def items(self):
         yield Message.Version, 1
         for gallery in self.galleries():
-            url = "{}/Book/Info/{}".format(self.root, gallery["Id"])
+            url = "{}/entry/{}".format(self.root, gallery["id"])
             gallery["_extractor"] = TsuminoGalleryExtractor
             yield Message.Queue, url, gallery
 
     def galleries(self):
         """Return all gallery results matching 'self.query'"""
-        url = "{}/Books/Operate".format(self.root)
+        url = "{}/Search/Operate?type=Book".format(self.root)
         headers = {
             "Referer": "{}/".format(self.root),
             "X-Requested-With": "XMLHttpRequest",
@@ -176,10 +182,10 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
             info = self.request(
                 url, method="POST", headers=headers, data=data).json()
 
-            for gallery in info["Data"]:
-                yield gallery["Entry"]
+            for gallery in info["data"]:
+                yield gallery["entry"]
 
-            if info["PageNumber"] >= info["PageCount"]:
+            if info["pageNumber"] >= info["pageCount"]:
                 return
             data["PageNumber"] += 1
 
