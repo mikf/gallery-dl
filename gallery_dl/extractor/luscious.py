@@ -74,7 +74,7 @@ class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
         }),
         ("https://members.luscious.net/albums/login-required_323871/", {
             "options": (("username", None),),
-            "exception": exception.AuthorizationError,
+            "exception": exception.HttpError,
         }),
         ("https://www.luscious.net/albums/okinami_277031/"),
         ("https://members.luscious.net/albums/okinami_277031/"),
@@ -88,14 +88,14 @@ class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        pos = page.find("<h1>404 Not Found</h1>")
-        if pos >= 0:
+        title, pos = text.extract(page, '"og:title" content="', '"')
+
+        if title is None:
             msg = text.extract(page, '<div class="content">', '</div>', pos)[0]
-            if msg and "content is not available" in msg:
-                raise exception.AuthorizationError()
+            if msg:
+                raise exception.AuthorizationError(msg)
             raise exception.NotFoundError("album")
 
-        title, pos = text.extract(page, '"og:title" content="', '"')
         info , pos = text.extract(page, '<li class="user_info">', "", pos)
         if info is None:
             count, pos = text.extract(page, '>Pages:', '<', pos)
