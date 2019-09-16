@@ -22,8 +22,8 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
     test = (
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
-            "url": "258289249990502c3138719cb89e995a60861e49",
-            "keyword": "eba83ccdbab3022a2280c77aa747f9458196138b",
+            "url": "21613585ae5ec2f69ea579e9713f536fceab5bd5",
+            "keyword": "bf75f9ff0fb60756b1b9b92403526a72d9178d23",
         }),
         ("https://www.simply-hentai.com/notfound", {
             "exception": exception.GalleryDLException,
@@ -112,6 +112,9 @@ class SimplyhentaiImageExtractor(Extractor):
         else:
             tags = []
 
+        if url.startswith("//"):
+            url = "https:" + url
+
         data = text.nameext_from_url(url, {
             "title": text.unescape(title) if title else "",
             "tags": tags,
@@ -169,6 +172,9 @@ class SimplyhentaiVideoExtractor(Extractor):
             embed_page = self.request(embed_url).text
             video_url = text.extract(embed_page, '"file":"', '"')[0]
             title, _, episode = title.rpartition(" Episode ")
+
+        if video_url.startswith("//"):
+            video_url = "https:" + video_url
 
         data = text.nameext_from_url(video_url, {
             "title": text.unescape(title),

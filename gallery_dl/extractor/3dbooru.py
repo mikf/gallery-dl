@@ -71,7 +71,7 @@ class ThreedeebooruPopularExtractor(booru.MoebooruPopularMixin,
                r"/post/popular_(?P<scale>by_(?:day|week|month)|recent)"
                r"(?:\?(?P<query>[^#]*))?")
     test = ("http://behoimi.org/post/popular_by_month?month=2&year=2013", {
-        "url": "c70268dce441a9ccc3383c244ec15edb059f494f",
+        "url": "f5a26c624da9a3d1dbc610e4a614bc57df6251c5",
         "count": 20,
     })
 
