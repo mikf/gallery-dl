@@ -205,3 +205,40 @@ class ImgurGalleryExtractor(ImgurExtractor):
 
         yield Message.Version, 1
         yield Message.Queue, url, {"_extractor": extr}
+
+
+class ImgurUserExtractor(ImgurExtractor):
+    """Extractor for all images posted by a user"""
+    subcategory = "user"
+    pattern = (r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
+               r"/user/([^/?&#]+)(?:/submitted|/posts)?/?")
+    test = (
+        ("https://imgur.com/user/Miguenzo", {
+
+        }),
+        ("https://imgur.com/user/Miguenzo/submitted"),
+        ("https://imgur.com/user/Miguenzo/submitted/newest"),
+        ("https://imgur.com/user/Miguenzo/posts"),
+    )
+
+    def items(self):
+        num = 0
+        base = "{}/user/{}/submitted".format(self.root, self.key)
+        data = {"_extractor": ImgurGalleryExtractor}
+        headers = {
+            "Referer": base,
+            "X-Requested-With": "XMLHttpRequest",
+        }
+
+        while True:
+            cnt = 0
+            url = "{}/page/{}?scrolling".format(base, num)
+            page = self.request(url, headers=headers).text
+
+            for path in text.extract_iter(page, '<a href="', '"'):
+                cnt += 1
+                yield Message.Queue, self.root + path, data
+
+            if cnt < 60:
+                return
+            num += 1
