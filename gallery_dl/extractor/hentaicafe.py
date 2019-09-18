@@ -45,7 +45,7 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
     """Extractor for manga from hentai.cafe"""
     category = "hentaicafe"
     pattern = (r"(?:https?://)?" + r"(?:www\.)?hentai\.cafe"
-               r"((?:/manga/series)?/[^/?&#]+)/?$")
+               r"(/hc\.fyi/\d+|(?:/manga/series)?/[^/?&#]+)/?$")
     test = (
         # single chapter
         ("https://hentai.cafe/hazuki-yuuto-summer-blues/", {
@@ -57,11 +57,17 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
             "url": "ca3e8a91531fd6acd863d93ac3afbd8ead06a076",
             "keyword": "28271062d7b4a2f99a0e1a894f69af8c5581a6bb",
         }),
+        # new-style URL
+        ("https://hentai.cafe/hc.fyi/2782", {
+            "url": "ca3e8a91531fd6acd863d93ac3afbd8ead06a076",
+            "keyword": "28271062d7b4a2f99a0e1a894f69af8c5581a6bb",
+        }),
         # foolslide URL
         ("https://hentai.cafe/manga/series/saitom-box/", {
             "url": "ca3e8a91531fd6acd863d93ac3afbd8ead06a076",
             "keyword": "f0ece32d958f889d8229ed4052716d398a0a875c",
         }),
+
     )
     root = "https://hentai.cafe"
     reverse = False
