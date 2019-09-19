@@ -10,13 +10,18 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+import itertools
 import json
+
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.|[im]\.)?imgur\.com"
 
 
 class ImgurExtractor(Extractor):
     """Base class for imgur extractors"""
     category = "imgur"
     root = "https://imgur.com"
+    api_root = "https://api.imgur.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -43,14 +48,40 @@ class ImgurExtractor(Extractor):
         image["extension"] = image["ext"][1:]
         return url
 
+    def _items_apiv3(self, urlfmt):
+        album_ex = ImgurAlbumExtractor
+        image_ex = ImgurImageExtractor
+
+        params = {
+            "IMGURPLATFORM" : "web",
+            "album_previews": "0",
+            "client_id"     : "546c25a59c58ad7",
+        }
+        headers = {
+            "Origin" : self.root,
+            "Referer": self.root + "/",
+        }
+
+        yield Message.Version, 1
+
+        for num in itertools.count(0):
+            url = urlfmt.format(num)
+            data = self.request(url, params=params, headers=headers).json()
+
+            for item in data["data"]:
+                item["_extractor"] = album_ex if item["is_album"] else image_ex
+                yield Message.Queue, item["link"], item
+
+            if len(data["data"]) < 60:
+                return
+
 
 class ImgurImageExtractor(ImgurExtractor):
     """Extractor for individual images on imgur.com"""
     subcategory = "image"
     filename_fmt = "{category}_{hash}{title:?_//}.{extension}"
     archive_fmt = "{hash}"
-    pattern = (r"(?:https?://)?(?:www\.|[im]\.|)?imgur\.com"
-               r"/(?!gallery)(\w{7}|\w{5})[sbtmlh]?\.?")
+    pattern = BASE_PATTERN + r"/(?!gallery)(\w{7}|\w{5})[sbtmlh]?\.?"
     test = (
         ("https://imgur.com/21yMxCS", {
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
@@ -111,8 +142,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
     directory_fmt = ("{category}", "{album[hash]}{album[title]:? - //}")
     filename_fmt = "{category}_{album[hash]}_{num:>03}_{hash}.{extension}"
     archive_fmt = "{album[hash]}_{hash}"
-    pattern = (r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
-               r"/(?:a|t/unmuted)/(\w{7}|\w{5})")
+    pattern = BASE_PATTERN + r"/(?:a|t/unmuted)/(\w{7}|\w{5})"
     test = (
         ("https://imgur.com/a/TcBmP", {
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
@@ -181,8 +211,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
 class ImgurGalleryExtractor(ImgurExtractor):
     """Extractor for imgur galleries"""
     subcategory = "gallery"
-    pattern = (r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
-               r"/gallery/(\w{7}|\w{5})")
+    pattern = BASE_PATTERN + r"/gallery/(\w{7}|\w{5})"
     test = (
         ("https://imgur.com/gallery/zf2fIms", {  # non-album gallery (#380)
             "pattern": "https://imgur.com/zf2fIms",
@@ -210,35 +239,34 @@ class ImgurGalleryExtractor(ImgurExtractor):
 class ImgurUserExtractor(ImgurExtractor):
     """Extractor for all images posted by a user"""
     subcategory = "user"
-    pattern = (r"(?:https?://)?(?:www\.|m\.)?imgur\.com"
-               r"/user/([^/?&#]+)(?:/submitted|/posts)?/?")
+    pattern = BASE_PATTERN + r"/user/([^/?&#]+)(?:/posts|/submitted)?/?$"
     test = (
         ("https://imgur.com/user/Miguenzo", {
-
+            "range": "1-100",
+            "count": 100,
+            "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+"
         }),
-        ("https://imgur.com/user/Miguenzo/submitted"),
-        ("https://imgur.com/user/Miguenzo/submitted/newest"),
         ("https://imgur.com/user/Miguenzo/posts"),
+        ("https://imgur.com/user/Miguenzo/submitted"),
     )
 
     def items(self):
-        num = 0
-        base = "{}/user/{}/submitted".format(self.root, self.key)
-        data = {"_extractor": ImgurGalleryExtractor}
-        headers = {
-            "Referer": base,
-            "X-Requested-With": "XMLHttpRequest",
-        }
+        urlfmt = "{}/3/account/{}/submissions/{{}}/newest".format(
+            self.api_root, self.key)
+        return self._items_apiv3(urlfmt)
 
-        while True:
-            cnt = 0
-            url = "{}/page/{}?scrolling".format(base, num)
-            page = self.request(url, headers=headers).text
 
-            for path in text.extract_iter(page, '<a href="', '"'):
-                cnt += 1
-                yield Message.Queue, self.root + path, data
+class ImgurFavoriteExtractor(ImgurExtractor):
+    """Extractor for a user's favorites"""
+    subcategory = "favorite"
+    pattern = BASE_PATTERN + r"/user/([^/?&#]+)/favorites"
+    test = ("https://imgur.com/user/Miguenzo/favorites", {
+        "range": "1-100",
+        "count": 100,
+        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+"
+    })
 
-            if cnt < 60:
-                return
-            num += 1
+    def items(self):
+        urlfmt = "{}/3/account/{}/gallery_favorites/{{}}/newest".format(
+            self.api_root, self.key)
+        return self._items_apiv3(urlfmt)
