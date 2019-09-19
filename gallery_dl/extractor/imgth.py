@@ -44,7 +44,7 @@ class ImgthGalleryExtractor(Extractor):
         while True:
             thumbs = text.extract(page, '<ul class="thumbnails">', '</ul>')[0]
             for url in text.extract_iter(thumbs, '<img src="', '"'):
-                yield "https://imgth.com/images/" + url[24:]
+                yield "https://imgth.com/images" + url[24:]
             if '<li class="next">' not in page:
                 return
             pnum += 1
