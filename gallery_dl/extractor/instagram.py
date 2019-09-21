@@ -84,13 +84,24 @@ class InstagramExtractor(Extractor):
             for key in ("sessionid", "mid", "csrftoken")
         }
 
-    def _extract_shared_data(self, page):
-        return json.loads(text.extract(page,
-                          'window._sharedData = ', ';</script>')[0])
+    def _request_graphql(self, variables, query_hash, csrf=None):
+        headers = {
+            'X-CSRFToken': csrf,
+            'X-IG-App-ID': '936619743392459',
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+        url = '{}/graphql/query/?query_hash={}&variables={}'.format(
+            self.root, query_hash, variables,
+        )
+        return self.request(url, headers=headers).json()
+
+    def _extract_shared_data(self, url):
+        page = self.request(url).text
+        data = text.extract(page, 'window._sharedData = ', ';</script>')[0]
+        return json.loads(data)
 
     def _extract_postpage(self, url):
-        page = self.request(url).text
-        shared_data = self._extract_shared_data(page)
+        shared_data = self._extract_shared_data(url)
         media = shared_data['entry_data']['PostPage'][0]['graphql']['shortcode_media']
 
         common = {
@@ -121,7 +132,7 @@ class InstagramExtractor(Extractor):
                     'sidecar_shortcode': media['shortcode'],
                 }
                 if children['__typename'] == 'GraphVideo':
-                    media_data["_ytdl_index"] = yi
+                    media_data['_ytdl_index'] = yi
                     yi += 1
                 media_data.update(common)
                 medias.append(media_data)
@@ -146,8 +157,7 @@ class InstagramExtractor(Extractor):
             highlight_id = '"{}"'.format(self.highlight_id)
             query_hash = '30a89afdd826d78a5376008a7b81c205'
         else:
-            page = self.request(url).text
-            shared_data = self._extract_shared_data(page)
+            shared_data = self._extract_shared_data(url)
 
             # If no stories are present the URL redirects to `ProfilePage'
             if 'StoriesPage' not in shared_data['entry_data']:
@@ -164,17 +174,10 @@ class InstagramExtractor(Extractor):
             '"highlight_reel_ids":[{}],"precomposed_overlay":true,'
             '"show_story_viewer_list":true,'
             '"story_viewer_fetch_count":50,"story_viewer_cursor":"",'
-            '"stories_video_dash_manifest":false}}'
+            '"stories_video_dash_manifest":false'
+            '}}'
         ).format(user_id, highlight_id)
-        headers = {
-            "X-Requested-With": "XMLHttpRequest",
-        }
-        url = '{}/graphql/query/?query_hash={}&variables={}'.format(
-            self.root,
-            query_hash,
-            variables,
-        )
-        shared_data = self.request(url, headers=headers).json()
+        shared_data = self._request_graphql(variables, query_hash)
 
         # If there are stories present but the user is not authenticated or
         # does not have permissions no stories are returned.
@@ -209,38 +212,8 @@ class InstagramExtractor(Extractor):
 
         return medias
 
-    def _extract_page(self, url, page_type):
-        shared_data_fields = {
-            'ProfilePage': {
-                'page': 'ProfilePage',
-                'node': 'user',
-                'node_id': 'id',
-                'edge_to_medias': 'edge_owner_to_timeline_media',
-                'variables_id': 'id',
-                'query_hash': 'f2405b236d85e8296cf30347c9f08c2a',
-            },
-            'ProfileChannelPage': {
-                'page': 'ProfilePage',
-                'node': 'user',
-                'node_id': 'id',
-                'edge_to_medias': 'edge_felix_video_timeline',
-                'variables_id': 'id',
-                'query_hash': 'bc78b344a68ed16dd5d7f264681c4c76',
-            },
-            'TagPage': {
-                'page': 'TagPage',
-                'node': 'hashtag',
-                'node_id': 'name',
-                'edge_to_medias': 'edge_hashtag_to_media',
-                'variables_id': 'tag_name',
-                'query_hash': 'f12c9ec5e46a3173b2969c712ad84744',
-            },
-        }
-
-        page = self.request(url).text
-        shared_data = self._extract_shared_data(page)
-        psdf = shared_data_fields[page_type]
-        csrf = shared_data["config"]["csrf_token"]
+    def _extract_page(self, shared_data, psdf):
+        csrf = shared_data['config']['csrf_token']
 
         while True:
             # Deal with different structure of pages: the first page
@@ -270,29 +243,9 @@ class InstagramExtractor(Extractor):
                 variables_id,
                 end_cursor,
             )
-            headers = {
-                "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": csrf,
-                "X-IG-App-ID": "936619743392459",
-            }
-            url = '{}/graphql/query/?query_hash={}&variables={}'.format(
-                self.root,
-                psdf['query_hash'],
-                variables,
+            shared_data = self._request_graphql(
+                variables, psdf['query_hash'], csrf,
             )
-            shared_data = self.request(url, headers=headers).json()
-
-    def _extract_profilepage(self, url):
-        yield from self._extract_page(url, 'ProfilePage')
-
-    def _extract_profilechannelpage(self, url):
-        yield from self._extract_page(url, 'ProfileChannelPage')
-
-    def _extract_tagpage(self, url):
-        yield from self._extract_page(url, 'TagPage')
-
-    def _extract_storiespage(self, url):
-        yield from self._extract_stories(url)
 
 
 class InstagramImageExtractor(InstagramExtractor):
@@ -399,7 +352,16 @@ class InstagramUserExtractor(InstagramExtractor):
 
     def instagrams(self):
         url = '{}/{}/'.format(self.root, self.username)
-        return self._extract_profilepage(url)
+        shared_data = self._extract_shared_data(url)
+
+        return self._extract_page(shared_data, {
+            'page': 'ProfilePage',
+            'node': 'user',
+            'node_id': 'id',
+            'variables_id': 'id',
+            'edge_to_medias': 'edge_owner_to_timeline_media',
+            'query_hash': 'f2405b236d85e8296cf30347c9f08c2a',
+        })
 
 
 class InstagramChannelExtractor(InstagramExtractor):
@@ -419,7 +381,16 @@ class InstagramChannelExtractor(InstagramExtractor):
 
     def instagrams(self):
         url = '{}/{}/channel/'.format(self.root, self.username)
-        return self._extract_profilechannelpage(url)
+        shared_data = self._extract_shared_data(url)
+
+        return self._extract_page(shared_data, {
+            'page': 'ProfilePage',
+            'node': 'user',
+            'node_id': 'id',
+            'variables_id': 'id',
+            'edge_to_medias': 'edge_felix_video_timeline',
+            'query_hash': 'bc78b344a68ed16dd5d7f264681c4c76',
+        })
 
 
 class InstagramTagExtractor(InstagramExtractor):
@@ -442,7 +413,16 @@ class InstagramTagExtractor(InstagramExtractor):
 
     def instagrams(self):
         url = '{}/explore/tags/{}/'.format(self.root, self.tag)
-        return self._extract_tagpage(url)
+        shared_data = self._extract_shared_data(url)
+
+        return self._extract_page(shared_data, {
+            'page': 'TagPage',
+            'node': 'hashtag',
+            'node_id': 'name',
+            'variables_id': 'tag_name',
+            'edge_to_medias': 'edge_hashtag_to_media',
+            'query_hash': 'f12c9ec5e46a3173b2969c712ad84744',
+        })
 
 
 class InstagramStoriesExtractor(InstagramExtractor):
@@ -461,4 +441,4 @@ class InstagramStoriesExtractor(InstagramExtractor):
 
     def instagrams(self):
         url = '{}/stories/{}/'.format(self.root, self.username)
-        return self._extract_storiespage(url)
+        return self._extract_stories(url)
