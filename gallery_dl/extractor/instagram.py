@@ -43,6 +43,10 @@ class InstagramExtractor(Extractor):
                 data["extension"] = None
                 yield Message.Url, \
                     'ytdl:{}/p/{}/'.format(self.root, data['shortcode']), data
+            elif data['typename'] == 'GraphHighlightReel':
+                url = '{}/stories/highlights/{}/'.format(self.root, data['id'])
+                data['_extractor'] = InstagramStoriesExtractor
+                yield Message.Queue, url, data
 
     def login(self):
         if self._check_cookies(self.cookienames):
@@ -212,6 +216,36 @@ class InstagramExtractor(Extractor):
 
         return medias
 
+    def _extract_story_highlights(self, shared_data):
+        graphql = shared_data['entry_data']['ProfilePage'][0]['graphql']
+        variables = (
+            '{{'
+            '"user_id":"{}","include_chaining":true,'
+            '"include_reel":true,"include_suggested_users":false,'
+            '"include_logged_out_extras":false,'
+            '"include_highlight_reels":true'
+            '}}'
+        ).format(graphql['user']['id'])
+
+        data = self._request_graphql(
+            variables,
+            'aec5501414615eca36a9acf075655b1e',
+            shared_data['config']['csrf_token'],
+        )
+
+        highlights = []
+        for edge in data['data']['user']['edge_highlight_reels']['edges']:
+            story = edge['node']
+            highlights.append({
+                'id'      : story['id'],
+                'title'   : story['title'],
+                'owner_id': story['owner']['id'],
+                'username': story['owner']['username'],
+                'typename': story['__typename'],
+            })
+
+        return highlights
+
     def _extract_page(self, shared_data, psdf):
         csrf = shared_data['config']['csrf_token']
 
@@ -335,16 +369,43 @@ class InstagramImageExtractor(InstagramExtractor):
         return self._extract_postpage(url)
 
 
+class InstagramStoriesExtractor(InstagramExtractor):
+    """Extractor for StoriesPage"""
+    subcategory = "stories"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/stories/([^/?&#]+)(?:/(\d+))?")
+    test = (
+        ("https://www.instagram.com/stories/instagram/"),
+        ("https://www.instagram.com/stories/highlights/18042509488170095/"),
+    )
+
+    def __init__(self, match):
+        InstagramExtractor.__init__(self, match)
+        self.username, self.highlight_id = match.groups()
+
+    def instagrams(self):
+        url = '{}/stories/{}/'.format(self.root, self.username)
+        return self._extract_stories(url)
+
+
 class InstagramUserExtractor(InstagramExtractor):
     """Extractor for ProfilePage"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
                r"([^/?&#]+)/?$")
-    test = ("https://www.instagram.com/instagram/", {
-        "range": "1-16",
-        "count": ">= 16",
-    })
+    test = (
+        ("https://www.instagram.com/instagram/", {
+            "range": "1-16",
+            "count": ">= 16",
+        }),
+        ("https://www.instagram.com/instagram/", {
+            "options": (("highlights", True),),
+            "pattern": InstagramStoriesExtractor.pattern,
+            "range": "1-2",
+            "count": 2,
+        }),
+    )
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
@@ -354,7 +415,10 @@ class InstagramUserExtractor(InstagramExtractor):
         url = '{}/{}/'.format(self.root, self.username)
         shared_data = self._extract_shared_data(url)
 
-        return self._extract_page(shared_data, {
+        if self.config('highlights'):
+            yield from self._extract_story_highlights(shared_data)
+
+        yield from self._extract_page(shared_data, {
             'page': 'ProfilePage',
             'node': 'user',
             'node_id': 'id',
@@ -423,22 +487,3 @@ class InstagramTagExtractor(InstagramExtractor):
             'edge_to_medias': 'edge_hashtag_to_media',
             'query_hash': 'f12c9ec5e46a3173b2969c712ad84744',
         })
-
-
-class InstagramStoriesExtractor(InstagramExtractor):
-    """Extractor for StoriesPage"""
-    subcategory = "stories"
-    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/stories/([^/?&#]+)(?:/(\d+))?")
-    test = (
-        ("https://www.instagram.com/stories/instagram/"),
-        ("https://www.instagram.com/stories/highlights/18042509488170095/"),
-    )
-
-    def __init__(self, match):
-        InstagramExtractor.__init__(self, match)
-        self.username, self.highlight_id = match.groups()
-
-    def instagrams(self):
-        url = '{}/stories/{}/'.format(self.root, self.username)
-        return self._extract_stories(url)

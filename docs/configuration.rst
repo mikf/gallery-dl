@@ -730,6 +730,16 @@ Description Controls whether to choose the GIF or MP4 version of an animation.
 =========== =====
 
 
+extractor.instagram.highlights
+------------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Include *Story Highlights* when downloading a user profile.
+            (requires authentication)
+=========== =====
+
+
 extractor.kissmanga.captcha
 ---------------------------
 =========== =====
