@@ -5,11 +5,11 @@ Unless otherwise known, assume all sites to be NSFW
 ==================== =================================== ================================================== ================
 Site                 URL                                 Capabilities                                       Authentication
 ==================== =================================== ================================================== ================
-35PHOTO              https://35photo.pro/                Images from Users, Genres, individual Images
+35PHOTO              https://35photo.pro/                Genres, individual Images, User Profiles
 3dbooru              http://behoimi.org/                 Pools, Popular Images, Posts, Tag-Searches
 4chan                https://www.4chan.org/              Threads
 4plebs               https://archive.4plebs.org/         Threads
-500px                https://500px.com/                  Images from Users, Galleries, individual Images
+500px                https://500px.com/                  Galleries, individual Images, User Profiles
 8chan                https://8ch.net/                    Threads
 8muses               https://www.8muses.com/             Albums
 Adobe Portfolio      https://www.myportfolio.com/        Galleries
@@ -18,7 +18,7 @@ arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |artstation-C|
-Behance              https://www.behance.net/            Images from Users, Collections, Galleries
+Behance              https://www.behance.net/            Collections, Galleries, User Profiles
 BobX                 http://www.bobx.com/dark/           Galleries, Idols
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches         Optional
 Desuarchive          https://desuarchive.org/            Threads
@@ -48,14 +48,14 @@ Hitomi.la            https://hitomi.la/                  Galleries
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag-Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag-Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
-ImageFap             https://imagefap.com/               Images from Users, Galleries, individual Images
-ImgBB                https://imgbb.com/                  Images from Users, Albums, individual Images       Optional
+ImageFap             https://imagefap.com/               Galleries, individual Images, User Profiles
+ImgBB                https://imgbb.com/                  Albums, individual Images, User Profiles           Optional
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  |imgur-C|
 Instagram            https://www.instagram.com/          |instagram-C|                                      Optional
 Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga
-Joyreactor           http://joyreactor.cc/               |joyreactor-C|
+Joyreactor           http://joyreactor.com/              Posts, Search Results, Tag-Searches, User Profiles
 Keenspot             http://www.keenspot.com/            Comics
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
@@ -73,28 +73,28 @@ Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.me/               Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
-Newgrounds           https://www.newgrounds.com/         Images from Users, individual Images, Videos
+Newgrounds           https://www.newgrounds.com/         individual Images, User Profiles, Videos
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
-Niconico Seiga       https://seiga.nicovideo.jp/         Images from Users, individual Images               Required
+Niconico Seiga       https://seiga.nicovideo.jp/         individual Images, User Profiles                   Required
 nijie                https://nijie.info/                 |nijie-C|                                          Required
 NSFWalbum.com        https://nsfwalbum.com/              Albums
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
-Patreon              https://www.patreon.com/            Images from Users, Creators, Posts
-Pawoo                https://pawoo.net/                  Images from Users, Images from Statuses
+Patreon              https://www.patreon.com/            Creators, Posts, User Profiles
+Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles
 Photobucket          https://photobucket.com/            Albums, individual Images
-Piczel               https://piczel.tv/                  Images from Users, Folders, individual Images
+Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
 Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
-Pixnet               https://www.pixnet.net/             |pixnet-C|
+Pixnet               https://www.pixnet.net/             Folders, individual Images, Sets, User Profiles
 Plurk                https://www.plurk.com/              Posts, Timelines
-Pornhub              https://www.pornhub.com/            Images from Users, Galleries
-Pornreactor          http://pornreactor.cc/              |pornreactor-C|
+Pornhub              https://www.pornhub.com/            Galleries, User Profiles
+Pornreactor          http://pornreactor.cc/              Posts, Search Results, Tag-Searches, User Profiles
 PowerManga           https://read.powermanga.org/        Chapters, Manga
 Pururin              https://pururin.io/                 Galleries
 Read Comic Online    https://readcomiconline.to/         Comic-Issues, Comics
 RebeccaBlackTech     https://rbt.asia/                   Threads
-Reddit               https://www.reddit.com/             individual Images, Submissions, Subreddits         Optional (OAuth)
+Reddit               https://www.reddit.com/             |reddit-C|                                         Optional (OAuth)
 rule #34             https://rule34.paheal.net/          Posts, Tag-Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag-Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag-Searches
@@ -104,21 +104,21 @@ Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          http://sensescans.com/reader/       Chapters, Manga
 Sex.com              https://www.sex.com/                Boards, Pins, related Pins, Search Results
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
-SlickPic             https://www.slickpic.com/           Images from Users, Albums
+SlickPic             https://www.slickpic.com/           Albums, User Profiles
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (OAuth)
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
-Tumblr               https://www.tumblr.com/             Images from Users, Likes, Posts, Tag-Searches      Optional (OAuth)
+Tumblr               https://www.tumblr.com/             Likes, Posts, Tag-Searches, User Profiles          Optional (OAuth)
 Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets                 Optional
-VSCO                 https://vsco.co/                    Images from Users, Collections, individual Images
+VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  |wallhaven-A|
 Warosu               https://warosu.org/                 Threads
-Weibo                https://www.weibo.com/              Images from Users, Images from Statuses
+Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
 WikiArt.org          https://www.wikiart.org/            Artists, Artworks
 World Three          http://www.slide.world-three.org/   Chapters, Manga
-xHamster             https://xhamster.com/               Images from Users, Galleries
-XVideos              https://www.xvideos.com/            Images from Users, Galleries
+xHamster             https://xhamster.com/               Galleries, User Profiles
+XVideos              https://www.xvideos.com/            Galleries, User Profiles
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag-Searches
 yaplog!              https://yaplog.jp/                  Blogs, Posts
 |yuki-S|             https://yuki.la/                    Threads
@@ -133,17 +133,15 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 もえぴりあ                https://vanilla-rock.com/           Posts, Tag-Searches
 ==================== =================================== ================================================== ================
 
-.. |artstation-C| replace:: Images from Users, Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results
+.. |artstation-C| replace:: Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results, User Profiles
 .. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh
-.. |flickr-C| replace:: Images from Users, Albums, Favorites, Galleries, Groups, individual Images, Search Results
-.. |hentaifoundry-C| replace:: Images from Users, Favorites, individual Images, Popular Images, Recent Images, Scraps
-.. |imgur-C| replace:: Images from Users, Albums, Favorites, Galleries, individual Images
-.. |instagram-C| replace:: Images from Users, Channels, individual Images, Stories, Tag-Searches
-.. |joyreactor-C| replace:: Images from Users, Posts, Search Results, Tag-Searches
-.. |nijie-C| replace:: Images from Users, Doujin, Favorites, individual Images
-.. |pixiv-C| replace:: Images from Users, Favorites, Follows, pixiv.me Links, Rankings, Search Results, Individual Images
-.. |pixnet-C| replace:: Images from Users, Folders, individual Images, Sets
-.. |pornreactor-C| replace:: Images from Users, Posts, Search Results, Tag-Searches
+.. |flickr-C| replace:: Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles
+.. |hentaifoundry-C| replace:: Favorites, individual Images, Popular Images, Recent Images, Scraps, User Profiles
+.. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, User Profiles
+.. |instagram-C| replace:: Channels, individual Images, Stories, Tag-Searches, User Profiles
+.. |nijie-C| replace:: Doujin, Favorites, individual Images, User Profiles
+.. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, Individual Images
+.. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |wallhaven-A| replace:: Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 .. |yuki-S| replace:: yuki.la 4chan archive

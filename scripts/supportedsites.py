@@ -102,7 +102,7 @@ SUBCATEGORY_MAP = {
     "stash"  : "Sta.sh",
     "status" : "Images from Statuses",
     "tag"    : "Tag-Searches",
-    "user"   : "Images from Users",
+    "user"   : "User Profiles",
     "work"   : "Individual Images",
     "related-pin"  : "related Pins",
     "related-board": "",
@@ -187,7 +187,7 @@ def category_key(cls):
 
 def subcategory_key(cls):
     """Generate sorting keys by subcategory"""
-    if cls.subcategory in ("user", "issue"):
+    if cls.subcategory == "issue":
         return "A"
     return cls.subcategory
 
