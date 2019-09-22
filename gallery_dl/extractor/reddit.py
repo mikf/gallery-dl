@@ -31,7 +31,8 @@ class RedditExtractor(Extractor):
 
         yield Message.Version, 1
         with extractor.blacklist(
-                util.SPECIAL_EXTRACTORS, [RedditSubredditExtractor]):
+                util.SPECIAL_EXTRACTORS,
+                (RedditSubredditExtractor, RedditUserExtractor)):
             while True:
                 extra = []
                 for url, data in self._urls(submissions):
@@ -95,6 +96,29 @@ class RedditSubredditExtractor(RedditExtractor):
 
     def submissions(self):
         return self.api.submissions_subreddit(self.subreddit, self.params)
+
+
+class RedditUserExtractor(RedditExtractor):
+    """Extractor for URLs from posts by a reddit user"""
+    subcategory = "user"
+    pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
+               r"([^/?&#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?")
+    test = (
+        ("https://www.reddit.com/user/username/", {
+            "count": ">= 2",
+        }),
+        ("https://www.reddit.com/user/username/gilded/?sort=top&t=month"),
+        ("https://old.reddit.com/user/username/"),
+        ("https://www.reddit.com/u/username/"),
+    )
+
+    def __init__(self, match):
+        RedditExtractor.__init__(self, match)
+        self.user = match.group(1)
+        self.params = text.parse_query(match.group(2))
+
+    def submissions(self):
+        return self.api.submissions_user(self.user, self.params)
 
 
 class RedditSubmissionExtractor(RedditExtractor):
@@ -183,6 +207,12 @@ class RedditAPI():
     def submissions_subreddit(self, subreddit, params):
         """Collect all (submission, comments)-tuples of a subreddit"""
         endpoint = "/r/" + subreddit + "/.json"
+        params["limit"] = 100
+        return self._pagination(endpoint, params)
+
+    def submissions_user(self, user, params):
+        """Collect all (submission, comments)-tuples posted by a user"""
+        endpoint = "/user/" + user + "/.json"
         params["limit"] = 100
         return self._pagination(endpoint, params)
 
