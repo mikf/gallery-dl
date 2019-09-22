@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from subreddits at https://www.reddit.com/"""
+"""Extractors for https://www.reddit.com/"""
 
 from .common import Extractor, Message
 from .. import text, util, extractor, exception
@@ -68,18 +68,18 @@ class RedditExtractor(Extractor):
                     submission["selftext_html"] or "", ' href="', '"'):
                 yield url, submission
 
-            for comment in comments:
-                for url in text.extract_iter(
-                        comment["body_html"] or "", ' href="', '"'):
-                    yield url, comment
+            if comments:
+                for comment in comments:
+                    for url in text.extract_iter(
+                            comment["body_html"] or "", ' href="', '"'):
+                        yield url, comment
 
 
 class RedditSubredditExtractor(RedditExtractor):
-    """Extractor for images from subreddits on reddit.com"""
+    """Extractor for URLs from subreddits on reddit.com"""
     subcategory = "subreddit"
-    pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/r/([^/?&#]+)"
-               r"(/[a-z]+)?/?"
-               r"(?:\?.*?(?:\bt=([a-z]+))?)?$")
+    pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/r/"
+               r"([^/?&#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?(?:$|#)")
     test = (
         ("https://www.reddit.com/r/lavaporn/"),
         ("https://www.reddit.com/r/lavaporn/top/?sort=top&t=month"),
@@ -90,16 +90,15 @@ class RedditSubredditExtractor(RedditExtractor):
 
     def __init__(self, match):
         RedditExtractor.__init__(self, match)
-        self.subreddit, self.order, self.timeframe = match.groups()
+        self.subreddit = match.group(1)
+        self.params = text.parse_query(match.group(2))
 
     def submissions(self):
-        subreddit = self.subreddit + (self.order or "")
-        params = {"t": self.timeframe} if self.timeframe else {}
-        return self.api.submissions_subreddit(subreddit, params)
+        return self.api.submissions_subreddit(self.subreddit, self.params)
 
 
 class RedditSubmissionExtractor(RedditExtractor):
-    """Extractor for images from a submission on reddit.com"""
+    """Extractor for URLs from a submission on reddit.com"""
     subcategory = "submission"
     pattern = (r"(?:https?://)?(?:"
                r"(?:\w+\.)?reddit\.com/r/[^/?&#]+/comments|"
@@ -249,7 +248,7 @@ class RedditAPI():
             raise Exception(data["message"])
         return data
 
-    def _pagination(self, endpoint, params, _empty=()):
+    def _pagination(self, endpoint, params):
         id_min = self._parse_id("id-min", 0)
         id_max = self._parse_id("id-max", 2147483647)
         date_min, date_max = self.extractor._get_date_min_max(0, 253402210800)
@@ -267,7 +266,7 @@ class RedditAPI():
                         except exception.AuthorizationError:
                             pass
                     else:
-                        yield submission, _empty
+                        yield submission, None
 
             if not data["after"]:
                 return
