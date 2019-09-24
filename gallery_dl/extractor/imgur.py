@@ -244,7 +244,7 @@ class ImgurUserExtractor(ImgurExtractor):
         ("https://imgur.com/user/Miguenzo", {
             "range": "1-100",
             "count": 100,
-            "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+"
+            "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
         }),
         ("https://imgur.com/user/Miguenzo/posts"),
         ("https://imgur.com/user/Miguenzo/submitted"),
@@ -263,7 +263,7 @@ class ImgurFavoriteExtractor(ImgurExtractor):
     test = ("https://imgur.com/user/Miguenzo/favorites", {
         "range": "1-100",
         "count": 100,
-        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+"
+        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
     })
 
     def items(self):

@@ -23,7 +23,7 @@ class HypnohubTagExtractor(booru.TagMixin, HypnohubExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?hypnohub\.net"
                r"/post\?(?:[^&#]*&)*tags=(?P<tags>[^&#]+)")
     test = ("https://hypnohub.net/post?tags=gonoike_biwa", {
-        "url": "6bebc4318489ee37e0c3b814352acd6783ba95d6",
+        "url": "0deaf1a2f832cfc4354c531259b949e850da1e7e",
     })
 
 
