@@ -151,13 +151,13 @@ class PixivWorkExtractor(PixivExtractor):
     """Extractor for a single pixiv work/illustration"""
     subcategory = "work"
     pattern = (r"(?:https?://)?(?:(?:www\.|touch\.)?pixiv\.net"
-               r"/member(?:_illust)?\.php\?(?:[^&]+&)*illust_id=(\d+)"
+               r"/(?:(?:en/)?artworks/"
+               r"|member_illust\.php\?(?:[^&]+&)*illust_id=)(\d+)"
                r"|(?:i(?:\d+\.pixiv|\.pximg)\.net"
                r"/(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}|img\d+/img/[^/]+)"
                r"|img\d*\.pixiv\.net/img/[^/]+|(?:www\.)?pixiv\.net/i)/(\d+))")
     test = (
-        (("http://www.pixiv.net/member_illust.php"
-          "?mode=medium&illust_id=966412"), {
+        ("https://www.pixiv.net/artworks/966412", {
             "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
             "content": "69a8edfb717400d1c2e146ab2b30d2c235440c5a",
         }),
@@ -171,6 +171,8 @@ class PixivWorkExtractor(PixivExtractor):
             "url": "7267695a985c4db8759bebcf8d21dbdd2d2317ef",
             "keywords": {"frames": list},
         }),
+        ("https://www.pixiv.net/en/artworks/966412"),
+        ("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=96641"),
         ("http://i1.pixiv.net/c/600x600/img-master"
          "/img/2008/06/13/00/29/13/966412_p0_master1200.jpg"),
         ("https://i.pximg.net/img-original"
