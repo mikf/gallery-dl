@@ -190,7 +190,7 @@ class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for images from individual tweets"""
     subcategory = "tweet"
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/([^/?&#]+)/status/(\d+)")
+               r"/([^/?&#]+|i/web)/status/(\d+)")
     test = (
         ("https://twitter.com/supernaturepics/status/604341487988576256", {
             "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",
@@ -217,6 +217,10 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("videos", True),),
             "pattern": r"ytdl:https://twitter.com/.*/1103767554424598528$",
         }),
+        # /i/web/ URL
+        ("https://twitter.com/i/web/status/1155074198240292865", {
+            "pattern": r"https://pbs.twimg.com/media/EAel0vUUYAAZ4Bq.jpg:orig",
+        }),
     )
 
     def __init__(self, match):
@@ -228,7 +232,7 @@ class TwitterTweetExtractor(TwitterExtractor):
 
     def tweets(self):
         self.session.cookies.clear()
-        url = "{}/{}/status/{}".format(self.root, self.user, self.tweet_id)
+        url = "{}/i/web/status/{}".format(self.root, self.tweet_id)
         page = self.request(url).text
         end = page.index('class="js-tweet-stats-container')
         beg = page.rindex('<div class="tweet ', 0, end)
