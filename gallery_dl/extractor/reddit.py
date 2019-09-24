@@ -32,7 +32,7 @@ class RedditExtractor(Extractor):
         yield Message.Version, 1
         with extractor.blacklist(
                 util.SPECIAL_EXTRACTORS,
-                (RedditSubredditExtractor, RedditUserExtractor)):
+                [RedditSubredditExtractor, RedditUserExtractor]):
             while True:
                 extra = []
                 for url, data in self._urls(submissions):
