@@ -828,6 +828,12 @@ class DeviantartAPI():
         self.client_secret = extractor.config(
             "client-secret", self.CLIENT_SECRET)
 
+        self.log.debug(
+            "Using %s API credentials (client-id %s)",
+            "default" if self.client_id == self.CLIENT_ID else "custom",
+            self.client_id,
+        )
+
     def browse_popular(self, query=None, timerange=None,
                        category_path=None, offset=0):
         """Yield popular deviations"""
