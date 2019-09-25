@@ -965,7 +965,7 @@ class DeviantartAPI():
                 if self.delay > self.delay_min:
                     self.delay -= 1
                 return data
-            if not fatal:
+            if not fatal and status != 429:
                 return None
             if data.get("error_description") == "User not found.":
                 raise exception.NotFoundError("user or group")
