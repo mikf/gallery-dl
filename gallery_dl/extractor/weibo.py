@@ -25,17 +25,13 @@ class WeiboExtractor(Extractor):
         self.retweets = self.config("retweets", True)
 
     def items(self):
-        first = True
+        yield Message.Version, 1
 
         for status in self.statuses():
 
+            yield Message.Directory, status
             obj = status
             num = 1
-
-            if first:
-                yield Message.Version, 1
-                yield Message.Directory, status
-                first = False
 
             while True:
 
@@ -44,11 +40,13 @@ class WeiboExtractor(Extractor):
                         pid = image["pid"]
                         if "large" in image:
                             image = image["large"]
+                        geo = image.get("geo") or {}
                         data = text.nameext_from_url(image["url"], {
-                            "num": num,
-                            "pid": pid,
-                            "width": text.parse_int(image["geo"]["width"]),
-                            "height": text.parse_int(image["geo"]["height"]),
+                            "num"   : num,
+                            "pid"   : pid,
+                            "url"   : image["url"],
+                            "width" : text.parse_int(geo.get("width")),
+                            "height": text.parse_int(geo.get("height")),
                             "status": status,
                         })
                         yield Message.Url, image["url"], data
@@ -56,15 +54,18 @@ class WeiboExtractor(Extractor):
 
                 if "page_info" in obj and "media_info" in obj["page_info"]:
                     info = obj["page_info"]["media_info"]
-                    url = info.get("stream_url_hd") or info["stream_url"]
-                    data = text.nameext_from_url(url, {
-                        "num": num,
-                        "url": url,
-                        "width": 0,
-                        "height": 0,
-                        "status": status,
-                    })
-                    yield Message.Url, url, data
+                    url = info.get("stream_url_hd") or info.get("stream_url")
+
+                    if url and not info.get("goto"):
+                        data = text.nameext_from_url(url, {
+                            "num"   : num,
+                            "pid"   : 0,
+                            "url"   : url,
+                            "width" : 0,
+                            "height": 0,
+                            "status": status,
+                        })
+                        yield Message.Url, url, data
 
                 if self.retweets and "retweeted_status" in obj:
                     obj = obj["retweeted_status"]
@@ -104,7 +105,7 @@ class WeiboUserExtractor(WeiboExtractor):
                 if "mblog" in card:
                     yield card["mblog"]
 
-            if len(data["data"]["cards"]) < 5:
+            if not data["data"]["cards"]:
                 return
             params["page"] += 1
 
@@ -120,6 +121,10 @@ class WeiboStatusExtractor(WeiboExtractor):
         }),
         ("https://m.weibo.cn/detail/4339748116375525", {
             "pattern": r"https?://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_hd",
+        }),
+        # unavailable video (#427)
+        ("https://m.weibo.cn/status/4268682979207023", {
+            "count": 0,
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
