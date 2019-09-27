@@ -213,7 +213,7 @@ class OAuthReddit(OAuthBase):
             "",
             "https://www.reddit.com/api/v1/authorize",
             "https://www.reddit.com/api/v1/access_token",
-            scope="read",
+            scope="read history",
         )
 
 
