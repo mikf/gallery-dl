@@ -30,12 +30,12 @@ class NijieExtractor(AsynchronousMixin, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user_id = match.group(1)
+        self.user_id = text.parse_int(match.group(1))
+        self.user_name = None
         self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
         self.login()
-        metadata = self.metadata()
         yield Message.Version, 1
 
         for image_id in self.image_ids():
@@ -46,7 +46,6 @@ class NijieExtractor(AsynchronousMixin, Extractor):
             page = response.text
 
             data = self._extract_data(page)
-            data.update(metadata)
             data["image_id"] = text.parse_int(image_id)
             yield Message.Directory, data
 
@@ -56,24 +55,19 @@ class NijieExtractor(AsynchronousMixin, Extractor):
                     image["extension"] = "jpg"
                 yield Message.Url, image["url"], image
 
-    def metadata(self):
-        """Collect metadata for extractor-job"""
-        return {"user_id": text.parse_int(self.user_id)}
-
     def image_ids(self):
         """Collect all relevant image-ids"""
-        return ()
 
     @staticmethod
     def _extract_data(page):
         """Extract image metadata from 'page'"""
         extr = text.extract_from(page)
         keywords = text.unescape(extr(
-            'name="keywords" content="', '"')).split(",")
-        return {
+            'name="keywords" content="', '" />')).split(",")
+        data = {
             "title"      : keywords[0].strip(),
             "description": text.unescape(extr(
-                '"og:description" content="', '"')),
+                '"description": "', '"').replace("&amp;", "&")),
             "date"       : text.parse_datetime(extr(
                 '"datePublished": "', '"')[:-4] + "+0900",
                 "%a %d %b %Y %I:%M:%S %p%z"),
@@ -82,6 +76,9 @@ class NijieExtractor(AsynchronousMixin, Extractor):
             "artist_name": keywords[1],
             "tags"       : keywords[2:-1],
         }
+        data["user_id"] = data["artist_id"]
+        data["user_name"] = data["artist_name"]
+        return data
 
     @staticmethod
     def _extract_images(page):
@@ -118,6 +115,10 @@ class NijieExtractor(AsynchronousMixin, Extractor):
 
         while True:
             page = self.request(url, params=params, notfound="artist").text
+
+            if not self.user_name:
+                self.user_name = text.unescape(text.extract(
+                    page, '<br />', '<')[0] or "")
             yield from text.extract_iter(page, 'illust_id="', '"')
 
             if '<a rel="next"' not in page:
@@ -145,6 +146,7 @@ class NijieUserExtractor(NijieExtractor):
                 "title": str,
                 "url": r"re:https://pic.nijie.net/\d+/nijie_picture/.*jpg$",
                 "user_id": 44,
+                "user_name": "ED",
             },
         }),
         ("https://nijie.info/members_illust.php?id=43", {
@@ -163,6 +165,10 @@ class NijieDoujinExtractor(NijieExtractor):
     pattern = BASE_PATTERN + r"/members_dojin\.php\?id=(\d+)"
     test = ("https://nijie.info/members_dojin.php?id=6782", {
         "count": ">= 18",
+        "keyword": {
+            "user_id"  : 6782,
+            "user_name": "ジョニー＠アビオン村",
+        },
     })
 
     def image_ids(self):
@@ -177,10 +183,20 @@ class NijieFavoriteExtractor(NijieExtractor):
     pattern = BASE_PATTERN + r"/user_like_illust_view\.php\?id=(\d+)"
     test = ("https://nijie.info/user_like_illust_view.php?id=44", {
         "count": ">= 16",
+        "keyword": {
+            "user_id"  : 44,
+            "user_name": "ED",
+        },
     })
 
     def image_ids(self):
         return self._pagination("user_like_illust_view")
+
+    def _extract_data(self, page):
+        data = NijieExtractor._extract_data(page)
+        data["user_id"] = self.user_id
+        data["user_name"] = self.user_name
+        return data
 
 
 class NijieImageExtractor(NijieExtractor):
@@ -190,7 +206,7 @@ class NijieImageExtractor(NijieExtractor):
     test = (
         ("https://nijie.info/view.php?id=70720", {
             "url": "5497f897311397dafa188521258624346a0af2a3",
-            "keyword": "7b7cfc89fa59652a100f94d4b765130d93281c66",
+            "keyword": "fd12bca6f4402a0c996315d28c65f7914ad70c51",
             "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
         }),
         ("https://nijie.info/view.php?id=70724", {
@@ -203,14 +219,5 @@ class NijieImageExtractor(NijieExtractor):
         NijieExtractor.__init__(self, match)
         self.image_id = match.group(1)
 
-    def metadata(self):
-        return {}
-
     def image_ids(self):
         return (self.image_id,)
-
-    @staticmethod
-    def _extract_data(page):
-        data = NijieExtractor._extract_data(page)
-        data["user_id"] = data["artist_id"]
-        return data
