@@ -603,8 +603,8 @@ extractor.deviantart.refresh-token
 =========== =====
 Type        ``string``
 Default     ``null``
-Description The ``refresh_token`` value you get from linking your
-            DeviantArt account to *gallery-dl*.
+Description The ``refresh_token`` value you get from
+            `linking your DeviantArt account to gallery-dl <OAuth_>`__.
 
             Using a ``refresh_token`` allows you to access private or otherwise
             not publicly available deviations.
@@ -662,7 +662,7 @@ extractor.flickr.access-token & .access-token-secret
 Type        ``string``
 Default     ``null``
 Description The ``access_token`` and ``access_token_secret`` values you get
-            from linking your Flickr account to *gallery-dl*.
+            from `linking your Flickr account to gallery-dl <OAuth_>`__.
 =========== =====
 
 
@@ -830,7 +830,7 @@ Description A list of extractor categories which should be ignored when using
 extractor.reddit.comments
 -------------------------
 =========== =====
-Type        ``integer`` or ``string``
+Type        ``integer``
 Default     ``500``
 Description The value of the ``limit`` parameter when loading
             a submission and its comments.
@@ -840,7 +840,7 @@ Description The value of the ``limit`` parameter when loading
             Reddit's internal default and maximum values for this parameter
             appear to be 200 and 500 respectively.
 
-            The value `0` ignores all comments and significantly reduces the
+            The value ``0`` ignores all comments and significantly reduces the
             time required when scanning a subreddit.
 =========== =====
 
@@ -897,8 +897,8 @@ extractor.reddit.refresh-token
 =========== =====
 Type        ``string``
 Default     ``null``
-Description The ``refresh_token`` value you get from linking your
-            Reddit account to *gallery-dl*.
+Description The ``refresh_token`` value you get from
+            `linking your Reddit account to gallery-dl <OAuth_>`__.
 
             Using a ``refresh_token`` allows you to access private or otherwise
             not publicly available subreddits, given that your account is
@@ -1863,4 +1863,5 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _datetime:          https://docs.python.org/3/library/datetime.html#datetime-objects
 .. _datetime.max:      https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _Authentication:    https://github.com/mikf/gallery-dl#authentication
+.. _OAuth:             https://github.com/mikf/gallery-dl#oauth
 .. _youtube-dl:        https://github.com/ytdl-org/youtube-dl
