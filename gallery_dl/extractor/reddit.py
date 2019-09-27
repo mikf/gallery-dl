@@ -179,7 +179,7 @@ class RedditAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.comments = extractor.config("comments", 500)
+        self.comments = text.parse_int(extractor.config("comments", 500))
         self.morecomments = extractor.config("morecomments", False)
         self.refresh_token = extractor.config("refresh-token")
         self.log = extractor.log
@@ -191,7 +191,7 @@ class RedditAPI():
             self.client_id = None
             self.log.warning(
                 "Conflicting values for 'client-id' and 'user-agent': "
-                "override either both or none of them.")
+                "overwrite either both or none of them.")
         else:
             self.client_id = client_id
             extractor.session.headers["User-Agent"] = user_agent
