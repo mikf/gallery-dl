@@ -21,10 +21,10 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
     directory_fmt = ("{category}", "{album_id} {title}")
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?(?:www\.)?nsfwalbum\.com(/album/(\d+))"
-    test = ("https://nsfwalbum.com/album/295201", {
+    test = ("https://nsfwalbum.com/album/401611", {
         "range": "1-5",
-        "url": "e60eced1873215f5deee1ca7226d60cb4dcc051c",
-        "keyword": "e0573ecb1966611e96d10172a3ca1db1078a7984",
+        "url": "b0481fc7fad5982da397b6359fbed8421b8ba284",
+        "keyword": "fc1ad4ebcd6d4cf32da15203120112b8bcf12eec",
     })
 
     def __init__(self, match):
