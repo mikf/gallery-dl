@@ -1,6 +1,20 @@
 # Changelog
 
-## Unreleased
+## 1.10.5 - 2019-09-28
+### Additions
+- `instagram.highlights` option to include highlighted stories when downloading user profiles ([#329](https://github.com/mikf/gallery-dl/issues/329))
+- Support for `/user/` URLs on `reddit` ([#350](https://github.com/mikf/gallery-dl/issues/350))
+- Support for `imgur` user profiles and favorites ([#420](https://github.com/mikf/gallery-dl/issues/420))
+- Additional metadata fields on `nijie`([#423](https://github.com/mikf/gallery-dl/issues/423))
+### Fixes
+- Improve handling of private `deviantart` artworks ([#414](https://github.com/mikf/gallery-dl/issues/414)) and 429 status codes ([#424](https://github.com/mikf/gallery-dl/issues/424))
+- Prevent fatal errors when trying to open download-archive files ([#417](https://github.com/mikf/gallery-dl/issues/417))
+- Detect and ignore unavailable videos on `weibo` ([#427](https://github.com/mikf/gallery-dl/issues/427))
+- Update the `scope` of new `reddit` refresh-tokens ([#428](https://github.com/mikf/gallery-dl/issues/428))
+- Fix inconsistencies with the `reddit.comments` option ([#429](https://github.com/mikf/gallery-dl/issues/429))
+- Extend URL patterns for `hentaicafe` manga and `pixiv` artworks
+- Improve detection of unavailable albums on `luscious` and `imgbb`
+- Miscellaneous fixes for `tsumino`
 
 ## 1.10.4 - 2019-09-08
 ### Additions
