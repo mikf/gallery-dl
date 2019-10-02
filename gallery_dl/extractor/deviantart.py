@@ -32,6 +32,8 @@ class DeviantartExtractor(Extractor):
     directory_fmt = ("{category}", "{author[username]!l}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
     root = "https://www.deviantart.com"
+    cookiedomain = ".deviantart.com"
+    cookienames = ("auth", "auth_secure", "userinfo")
 
     def __init__(self, match=None):
         Extractor.__init__(self, match)
@@ -51,7 +53,36 @@ class DeviantartExtractor(Extractor):
             "text": self._build_journal_text,
         }.get(self.config("journals", "html"))
 
+    def login(self):
+        if self._check_cookies(self.cookienames):
+            return
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=28*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+        extr = text.extract_from(self.request(self.root + "/users/login").text)
+
+        url = self.root + "/_sisu/do/signin"
+        headers = {"Referer": self.root + "/users/login"}
+        data = {"username": username, "password": password, "remember": "on"}
+
+        while True:
+            name = extr('type="hidden" name="', '"')
+            if not name:
+                break
+            data[name] = extr('value="', '"')
+
+        response = self.request(url, method="POST", headers=headers, data=data)
+        if "loggedin=1" not in response.url:
+            raise exception.AuthenticationError()
+        return self.session.cookies
+
     def items(self):
+        self.login()
+
         url = (
             self.root + "/_napi/da-browse/shared_api/deviation/extended_fetch"
         )
