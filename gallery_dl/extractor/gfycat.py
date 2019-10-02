@@ -14,7 +14,7 @@ from .common import Extractor, Message
 class GfycatExtractor(Extractor):
     """Base class for gfycat extractors"""
     category = "gfycat"
-    filename_fmt = "{category}_{gfyName}.{extension}"
+    filename_fmt = "{category}_{gfyName}{title:?_//}.{extension}"
     archive_fmt = "{gfyName}"
     root = "https://gfycat.com"
 
