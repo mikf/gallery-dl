@@ -73,7 +73,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
         return [
             (text.unescape(url), None)
             for url in re.findall(r"<img[^>]* src=[\"']([^\"']+)", readerarea)
-            if "/Banner-" not in url
+            if "/Banner-" not in url and "/WM-Sampingan." not in url
         ]
 
 
