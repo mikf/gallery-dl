@@ -33,8 +33,11 @@ class BehanceExtractor(Extractor):
         if data["fields"] and isinstance(data["fields"][0], dict):
             data["fields"] = [field["name"] for field in data["fields"]]
         data["owners"] = [owner["display_name"] for owner in data["owners"]]
-        if "tags" in data:
-            data["tags"] = [tag["title"] for tag in data["tags"]]
+
+        tags = data.get("tags") or ()
+        if tags and isinstance(tags[0], dict):
+            tags = [tag["title"] for tag in tags]
+        data["tags"] = tags
 
         # backwards compatibility
         data["gallery_id"] = data["id"]
