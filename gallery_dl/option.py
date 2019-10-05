@@ -27,6 +27,15 @@ class ConfigConstAction(argparse.Action):
         namespace.options.append(((self.dest,), self.const))
 
 
+class AppendCommandAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        items = getattr(namespace, self.dest, None) or []
+        val = self.const.copy()
+        val["command"] = values
+        items.append(val)
+        setattr(namespace, self.dest, items)
+
+
 class DeprecatedConfigConstAction(argparse.Action):
     """Set argparse const values as config values + deprecation warning"""
     def __call__(self, parser, namespace, values, option_string=None):
@@ -302,6 +311,12 @@ def build_parser():
         dest="postprocessors",
         action="append_const", const={"name": "zip"},
         help="Store downloaded files in a ZIP archive",
+    )
+    postprocessor.add_argument(
+        "--exec",
+        dest="postprocessors", metavar="CMD",
+        action=AppendCommandAction, const={"name": "exec"},
+        help="Execute CMD for each downloaded file",
     )
     postprocessor.add_argument(
         "--ugoira-conv",
