@@ -8,23 +8,30 @@
 
 """Common classes and constants used by postprocessor modules."""
 
-from . import log
+import logging
 
 
 class PostProcessor():
     """Base class for postprocessors"""
-    log = log
 
-    def prepare(self, pathfmt):
-        """ """
+    def __init__(self):
+        name = self.__class__.__name__[:-2].lower()
+        self.log = logging.getLogger("postprocessor." + name)
 
-    def run(self, pathfmt):
+    @staticmethod
+    def prepare(pathfmt):
+        """Update file paths, etc."""
+
+    @staticmethod
+    def run(pathfmt):
         """Execute the postprocessor for a file"""
 
-    def run_after(self, pathfmt):
+    @staticmethod
+    def run_after(pathfmt):
         """Execute postprocessor after moving a file to its target location"""
 
-    def finalize(self):
+    @staticmethod
+    def finalize():
         """Cleanup"""
 
     def __repr__(self):
