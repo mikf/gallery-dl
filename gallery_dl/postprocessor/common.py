@@ -21,6 +21,9 @@ class PostProcessor():
     def run(self, pathfmt):
         """Execute the postprocessor for a file"""
 
+    def run_after(self, pathfmt):
+        """Execute postprocessor after moving a file to its target location"""
+
     def finalize(self):
         """Cleanup"""
 

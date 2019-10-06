@@ -237,6 +237,9 @@ class DownloadJob(Job):
         self.out.success(pathfmt.path, 0)
         if archive:
             archive.add(keywords)
+        if postprocessors:
+            for pp in postprocessors:
+                pp.run_after(pathfmt)
         self._skipcnt = 0
 
     def handle_urllist(self, urls, keywords):
