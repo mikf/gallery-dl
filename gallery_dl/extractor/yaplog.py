@@ -12,6 +12,9 @@ from .common import Extractor, Message, AsynchronousMixin
 from .. import text, util
 
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?yaplog\.jp/([\w-]+)"
+
+
 class YaplogExtractor(AsynchronousMixin, Extractor):
     """Base class for yaplog extractors"""
     category = "yaplog"
@@ -76,7 +79,7 @@ class YaplogExtractor(AsynchronousMixin, Extractor):
 class YaplogBlogExtractor(YaplogExtractor):
     """Extractor for a user's blog on yaplog.jp"""
     subcategory = "blog"
-    pattern = r"(?:https?://)?(?:www\.)?yaplog\.jp/(\w+)/?(?:$|[?&#])"
+    pattern = BASE_PATTERN + r"/?(?:$|[?&#])"
     test = ("https://yaplog.jp/omitakashi3", {
         "pattern": r"https://img.yaplog.jp/img/18/pc/o/m/i/omitakashi3/0/",
         "count": ">= 2",
@@ -92,12 +95,15 @@ class YaplogBlogExtractor(YaplogExtractor):
 class YaplogPostExtractor(YaplogExtractor):
     """Extractor for images from a blog post on yaplog.jp"""
     subcategory = "post"
-    pattern = (r"(?:https?://)?(?:www\.)?yaplog\.jp"
-               r"/(\w+)/(?:archive|image)/(\d+)")
-    test = ("https://yaplog.jp/imamiami0726/image/1299", {
-        "url": "896cae20fa718735a57e723c48544e830ff31345",
-        "keyword": "f8d8781e61c4c38238a7622d6df6c905f864e5d3",
-    })
+    pattern = BASE_PATTERN + r"/(?:archive|image)/(\d+)"
+    test = (
+        ("https://yaplog.jp/imamiami0726/image/1299", {
+            "url": "896cae20fa718735a57e723c48544e830ff31345",
+            "keyword": "f8d8781e61c4c38238a7622d6df6c905f864e5d3",
+        }),
+        # blog names with '-' (#443)
+        ("https://yaplog.jp/a-pierrot-o/image/3946/22779"),
+    )
 
     def __init__(self, match):
         YaplogExtractor.__init__(self, match)
