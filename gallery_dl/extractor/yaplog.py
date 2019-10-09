@@ -34,6 +34,8 @@ class YaplogExtractor(AsynchronousMixin, Extractor):
             for num, url in enumerate(urls, 1):
                 page = self.request(url).text if num > 1 else url
                 iurl = text.extract(page, '<img src="', '"')[0]
+                if iurl[0] == "/":
+                    iurl = text.urljoin(self.root, iurl)
                 iid, _, ext = iurl.rpartition("/")[2].rpartition(".")
                 image = {
                     "url"      : iurl,
@@ -100,6 +102,10 @@ class YaplogPostExtractor(YaplogExtractor):
         ("https://yaplog.jp/imamiami0726/image/1299", {
             "url": "896cae20fa718735a57e723c48544e830ff31345",
             "keyword": "f8d8781e61c4c38238a7622d6df6c905f864e5d3",
+        }),
+        # complete image URLs (#443)
+        ("https://yaplog.jp/msjane/archive/246", {
+            "pattern": r"https://yaplog.jp/cv/msjane/img/246/img\d+_t.jpg"
         }),
         # blog names with '-' (#443)
         ("https://yaplog.jp/a-pierrot-o/image/3946/22779"),
