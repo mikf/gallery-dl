@@ -47,12 +47,6 @@ class DeviantartExtractor(Extractor):
         if self.quality:
             self.quality = "q_{}".format(self.quality)
 
-        if self.original != "image":
-            self._update_content = self._update_content_default
-        else:
-            self._update_content = self._update_content_image
-            self.original = True
-
         self.commit_journal = {
             "html": self._commit_journal_html,
             "text": self._commit_journal_text,
@@ -240,15 +234,29 @@ class DeviantartExtractor(Extractor):
         url = "{}/{}/{}/0/".format(self.root, self.user, category)
         return [(url + folder["name"], folder) for folder in folders]
 
-    def _update_content_default(self, deviation, content):
-        content.update(self.api.deviation_download(deviation["deviationid"]))
-
-    def _update_content_image(self, deviation, content):
-        data = self.api.deviation_download(deviation["deviationid"])
-        url = data["src"].partition("?")[0]
-        mtype = mimetypes.guess_type(url, False)[0]
-        if mtype and mtype.startswith("image/"):
-            content.update(data)
+    def _update_content(self, deviation, content):
+        try:
+            data = self.api.deviation_extended_fetch(
+                deviation["index"],
+                deviation["author"]["username"],
+                "journal" if "excerpt" in deviation else "art",
+            )
+            download = data["deviation"]["extended"]["download"]
+            download["src"] = download["url"]
+        except Exception as e:
+            self.log.warning(
+                "Unable to fetch original download URL for ID %s ('%s: %s')",
+                deviation["index"], e.__class__.__name__, e,
+            )
+            self.log.debug("Server response: %s", data)
+        else:
+            if self.original == "image":
+                url = data["src"].partition("?")[0]
+                mtype = mimetypes.guess_type(url, False)[0]
+                if not mtype or not mtype.startswith("image/"):
+                    return
+            del download["url"]
+            content.update(download)
 
 
 class DeviantartGalleryExtractor(DeviantartExtractor):
@@ -258,8 +266,8 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     pattern = BASE_PATTERN + r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery/", {
-            "pattern": r"https://(s3.amazonaws.com/origin-(img|orig)"
-                       r".deviantart.net/|images-wixmp-\w+.wixmp.com/)",
+            "pattern": r"https://(www.deviantart.com/download/\d+/"
+                       r"|images-wixmp-[^.]+.wixmp.com/f/.+/.+.jpg\?token=.+)",
             "count": ">= 30",
             "keyword": {
                 "allows_comments": bool,
@@ -562,28 +570,17 @@ class DeviantartExtractorV2(DeviantartExtractor):
     """Base class for deviantart extractors using the NAPI"""
 
     def items(self):
-        url = (
-            self.root + "/_napi/da-browse/shared_api/deviation/extended_fetch"
-        )
-        params = {
-            "deviationid"    : None,
-            "username"       : None,
-            "type"           : None,
-            "include_session": "false",
-        }
-        headers = {
-            "Referer": self.root,
-        }
-
         yield Message.Version, 1
         for deviation in self.deviations():
-            params["deviationid"] = deviation["deviationId"]
-            params["username"] = deviation["author"]["username"]
-            params["type"] = "journal" if deviation["isJournal"] else "art"
-            data = self.request(url, params=params, headers=headers).json()
+            data = self.api.deviation_extended_fetch(
+                deviation["deviationId"],
+                deviation["author"]["username"],
+                "journal" if deviation["isJournal"] else "art",
+            )
 
             if "deviation" not in data:
-                self.log.warning("Skipping %s", params["deviationid"])
+                self.log.warning("Skipping ID %s", deviation["deviationId"])
+                self.log.debug("Server response: %s", data)
                 continue
             deviation = self._extract(data)
 
@@ -886,6 +883,19 @@ class DeviantartAPI():
         endpoint = "deviation/download/" + deviation_id
         params = {"mature_content": self.mature}
         return self._call(endpoint, params)
+
+    def deviation_extended_fetch(self, deviation_id, user, kind):
+        url = ("https://www.deviantart.com/_napi/da-browse/shared_api"
+               "/deviation/extended_fetch")
+        headers = {"Referer": "https://www.deviantart.com/"}
+        params = {
+            "deviationid"    : deviation_id,
+            "username"       : user,
+            "type"           : kind,
+            "include_session": "false",
+        }
+        return self.extractor.request(
+            url, headers=headers, params=params, fatal=None).json()
 
     def deviation_metadata(self, deviations):
         """ Fetch deviation metadata for a set of deviations"""
