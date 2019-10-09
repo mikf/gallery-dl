@@ -20,12 +20,9 @@ class HitomiGalleryExtractor(GalleryExtractor):
     pattern = r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)"
     test = (
         ("https://hitomi.la/galleries/867789.html", {
-            "url": "cb759868d090fe0e2655c3e29ebf146054322b6d",
+            "pattern": r"https://aa.hitomi.la/galleries/867789/\d+.jpg",
             "keyword": "d097a8db8e810045131b4510c41714004f9eff3a",
-        }),
-        ("https://hitomi.la/galleries/1036181.html", {
-            # "aa" subdomain for gallery-id ending in 1 (#142)
-            "pattern": r"https://aa\.hitomi\.la/",
+            "count": 16,
         }),
         ("https://hitomi.la/galleries/1401410.html", {
             # download test
@@ -41,14 +38,14 @@ class HitomiGalleryExtractor(GalleryExtractor):
     )
 
     def __init__(self, match):
-        self.gallery_id = text.parse_int(match.group(1))
+        self.gallery_id = match.group(1)
         url = "{}/galleries/{}.html".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
         extr = text.extract_from(page, page.index('<h1><a href="/reader/'))
         data = {
-            "gallery_id": self.gallery_id,
+            "gallery_id": text.parse_int(self.gallery_id),
             "title"     : text.unescape(extr('.html">', '<').strip()),
             "artist"    : self._prep(extr('<h2>', '</h2>')),
             "group"     : self._prep(extr('<td>Group</td><td>', '</td>')),
@@ -66,7 +63,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
 
     def images(self, page):
         # see https://ltn.hitomi.la/common.js
-        offset = self.gallery_id % 2 if self.gallery_id % 10 != 1 else 0
+        offset = text.parse_int(self.gallery_id[-1]) % 3
         subdomain = chr(97 + offset) + "a"
         base = "https://" + subdomain + ".hitomi.la/galleries/"
 
