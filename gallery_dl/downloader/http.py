@@ -236,6 +236,13 @@ MIMETYPE_MAP = {
     "audio/ogg": "ogg",
     "audio/mpeg": "mp3",
 
+    "application/zip": "zip",
+    "application/x-zip": "zip",
+    "application/x-zip-compressed": "zip",
+    "application/x-rar": "rar",
+    "application/x-rar-compressed": "rar",
+    "application/x-7z-compressed": "7z",
+
     "application/ogg": "ogg",
     "application/octet-stream": "bin",
 }
