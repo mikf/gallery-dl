@@ -92,7 +92,8 @@ class DeviantartExtractor(Extractor):
                 yield self.commit(deviation, content)
 
             elif deviation["is_downloadable"]:
-                content = self.api.deviation_download(deviation["deviationid"])
+                content = {}
+                self._update_content(deviation, content)
                 yield self.commit(deviation, content)
 
             if "videos" in deviation:
@@ -392,7 +393,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
     pattern = r"(?:https?://)?sta\.sh/([a-z0-9]+)"
     test = (
         ("https://sta.sh/022c83odnaxc", {
-            "pattern": r"https://s3.amazonaws.com/origin-orig.deviantart.net",
+            "pattern": r"https://sta.sh/download/7549925030122512/.+\?token=",
             "count": 1,
         }),
         # multiple stash items
@@ -402,6 +403,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
         }),
         # downloadable, but no "content" field (#307)
         ("https://sta.sh/024t4coz16mi", {
+            "pattern": r"https://sta.sh/download/7800709982190282/.+\?token=",
             "count": 1,
         }),
         ("https://sta.sh/abcdefghijkl", {
@@ -419,16 +421,34 @@ class DeviantartStashExtractor(DeviantartExtractor):
     def deviations(self):
         url = "https://sta.sh/" + self.stash_id
         page = self.request(url).text
-        deviation_id = text.extract(page, '//deviation/', '"')[0]
+        deviation_id, pos = text.extract(page, '//deviation/', '"')
 
         if deviation_id:
-            yield self.api.deviation(deviation_id)
+            deviation = self.api.deviation(deviation_id)
+            pos = page.find("dev-page-download", pos)
+            if pos >= 0:
+                deviation["_download"] = {
+                    "width" : text.parse_int(text.extract(
+                        page, 'data-download_width="' , '"', pos)[0]),
+                    "height": text.parse_int(text.extract(
+                        page, 'data-download_height="', '"', pos)[0]),
+                    "src"   : text.unescape(text.extract(
+                        page, 'data-download_url="'   , '"', pos)[0]),
+                }
+            return (deviation,)
         else:
             data = {"_extractor": DeviantartStashExtractor}
             page = text.extract(
-                page, '<div id="stash-body"', '<div class="footer"')[0]
-            for url in text.extract_iter(page, '<a href="', '"'):
-                yield url, data
+                page, 'id="stash-body"', 'class="footer"', pos)[0]
+            return [
+                (url, data)
+                for url in text.extract_iter(page, '<a href="', '"')
+            ]
+
+    def _update_content(self, deviation, content):
+        if "_download" in deviation:
+            content.update(deviation["_download"])
+            del deviation["_download"]
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
