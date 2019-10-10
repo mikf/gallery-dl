@@ -57,7 +57,8 @@ class YaplogExtractor(AsynchronousMixin, Extractor):
         prev , pos = text.extract(page, 'class="last"><a href="', '"', pos)
 
         urls = list(text.extract_iter(page, '<li><a href="', '"', pos))
-        urls[0] = page  # cache HTML of first page
+        if urls:
+            urls[0] = page  # cache HTML of first page
 
         if len(urls) == 24 and text.extract(page, '(1/', ')')[0] != '24':
             # there are a maximum of 24 image entries in an /image/ page
@@ -106,6 +107,10 @@ class YaplogPostExtractor(YaplogExtractor):
         # complete image URLs (#443)
         ("https://yaplog.jp/msjane/archive/246", {
             "pattern": r"https://yaplog.jp/cv/msjane/img/246/img\d+_t.jpg"
+        }),
+        # empty post (#443)
+        ("https://yaplog.jp/f_l_a_s_c_o/image/872", {
+            "count": 0,
         }),
         # blog names with '-' (#443)
         ("https://yaplog.jp/a-pierrot-o/image/3946/22779"),
