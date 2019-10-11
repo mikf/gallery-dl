@@ -1574,7 +1574,7 @@ cache.file
 ----------
 =========== =====
 Type        |Path|_
-Default     * |tempfile.gettempdir()|_ + ``".gallery-dl.cache"`` on Windows
+Default     * |tempfile.gettempdir()|__ + ``".gallery-dl.cache"`` on Windows
             * (``$XDG_CACHE_HOME`` or ``"~/.cache"``) + ``"/gallery-dl/cache.sqlite3"`` on all other platforms
 Description Path of the SQLite3 database used to cache login sessions,
             cookies and API tokens across `gallery-dl` invocations.
@@ -1582,6 +1582,8 @@ Description Path of the SQLite3 database used to cache login sessions,
             Set this option to ``null`` or an invalid path to disable
             this cache.
 =========== =====
+
+__ gettempdir_
 
 
 ciphers
@@ -1848,20 +1850,20 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: extractor.deviantart.metadata_
 
-.. _.netrc:            https://stackoverflow.com/tags/.netrc/info
-.. _tempfile.gettempdir(): https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
-.. _requests.request(): https://docs.python-requests.org/en/master/api/#requests.request
-.. _timeout:           https://docs.python-requests.org/en/latest/user/advanced/#timeouts
-.. _verify:            https://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
-.. _Last-Modified:     https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
-.. _`Requests' proxy documentation`: https://2.python-requests.org/en/master/user/advanced/#proxies
-.. _format string:     https://docs.python.org/3/library/string.html#formatstrings
-.. _format strings:    https://docs.python.org/3/library/string.html#formatstrings
-.. _strptime:          https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
-.. _mature_content:    https://www.deviantart.com/developers/http/v1/20160316/object/deviation
-.. _webbrowser.open(): https://docs.python.org/3/library/webbrowser.html
-.. _datetime:          https://docs.python.org/3/library/datetime.html#datetime-objects
-.. _datetime.max:      https://docs.python.org/3/library/datetime.html#datetime.datetime.max
-.. _Authentication:    https://github.com/mikf/gallery-dl#authentication
-.. _OAuth:             https://github.com/mikf/gallery-dl#oauth
-.. _youtube-dl:        https://github.com/ytdl-org/youtube-dl
+.. _.netrc:             https://stackoverflow.com/tags/.netrc/info
+.. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
+.. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects
+.. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
+.. _format string:      https://docs.python.org/3/library/string.html#formatstrings
+.. _format strings:     https://docs.python.org/3/library/string.html#formatstrings
+.. _gettempdir:         https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
+.. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
+.. _webbrowser.open():  https://docs.python.org/3/library/webbrowser.html
+.. _mature_content:     https://www.deviantart.com/developers/http/v1/20160316/object/deviation
+.. _Authentication:     https://github.com/mikf/gallery-dl#authentication
+.. _OAuth:              https://github.com/mikf/gallery-dl#oauth
+.. _youtube-dl:         https://github.com/ytdl-org/youtube-dl
+.. _requests.request(): https://requests.readthedocs.io/en/master/api/#requests.request
+.. _timeout:            https://requests.readthedocs.io/en/master/user/advanced/#timeouts
+.. _verify:             https://requests.readthedocs.io/en/master/user/advanced/#ssl-cert-verification
+.. _`Requests' proxy documentation`: https://requests.readthedocs.io/en/master/user/advanced/#proxies

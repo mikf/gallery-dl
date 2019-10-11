@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.10.5 - 2019-09-28
 ### Additions
 - `instagram.highlights` option to include highlighted stories when downloading user profiles ([#329](https://github.com/mikf/gallery-dl/issues/329))
