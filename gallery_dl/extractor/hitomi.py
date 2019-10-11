@@ -34,15 +34,36 @@ class HitomiGalleryExtractor(GalleryExtractor):
             "url": "c2a84185f467450b8b9b72fbe40c0649029ce007",
             "count": 210,
         }),
+        ("https://hitomi.la/galleries/1045954.html", {
+            # fallback for galleries only available through /reader/ URLs
+            "url": "055c898a36389719799d6bce76889cc4ea4421fc",
+            "count": 1413,
+        }),
         ("https://hitomi.la/reader/867789.html"),
     )
 
     def __init__(self, match):
         self.gallery_id = match.group(1)
+        self.fallback = False
         url = "{}/galleries/{}.html".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 
+    def request(self, url, **kwargs):
+        response = GalleryExtractor.request(self, url, fatal=False, **kwargs)
+        if response.status_code == 404:
+            self.fallback = True
+            url = url.replace("/galleries/", "/reader/")
+            response = GalleryExtractor.request(self, url, **kwargs)
+        return response
+
     def metadata(self, page):
+        if self.fallback:
+            return {
+                "gallery_id": text.parse_int(self.gallery_id),
+                "title": text.unescape(text.extract(
+                    page, "<title>", "<")[0].rpartition(" | ")[0]),
+            }
+
         extr = text.extract_from(page, page.index('<h1><a href="/reader/'))
         data = {
             "gallery_id": text.parse_int(self.gallery_id),
@@ -75,6 +96,8 @@ class HitomiGalleryExtractor(GalleryExtractor):
         if scenes and scenes.strip():
             url = "{}/reader/{}.html".format(self.root, self.gallery_id)
             page = self.request(url).text
+            begin, end = ">//g.hitomi.la/galleries/", "</div>"
+        elif self.fallback:
             begin, end = ">//g.hitomi.la/galleries/", "</div>"
         else:
             begin, end = "'//tn.hitomi.la/smalltn/", ".jpg',"
