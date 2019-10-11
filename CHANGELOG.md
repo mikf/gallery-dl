@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## 1.10.6 - 2019-10-11
+### Additions
+- `--exec` command-line option to specify a command to run after each file download ([#421](https://github.com/mikf/gallery-dl/issues/421))
+### Changes
+- Include titles in `gfycat` default filenames ([#434](https://github.com/mikf/gallery-dl/issues/434))
+### Fixes
+- Fetch working download URLs for `deviantart` ([#436](https://github.com/mikf/gallery-dl/issues/436))
+- Various fixes and improvements for `yaplog` blogs ([#443](https://github.com/mikf/gallery-dl/issues/443))
+- Fix image URL generation for `hitomi` galleries
+- Miscellaneous fixes for `behance` and `xvideos`
 
 ## 1.10.5 - 2019-09-28
 ### Additions
