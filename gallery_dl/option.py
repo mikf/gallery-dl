@@ -316,7 +316,8 @@ def build_parser():
         "--exec",
         dest="postprocessors", metavar="CMD",
         action=AppendCommandAction, const={"name": "exec"},
-        help="Execute CMD for each downloaded file",
+        help=("Execute CMD for each downloaded file. "
+              "Example: --exec 'magick convert {} {}.png && rm {}'"),
     )
     postprocessor.add_argument(
         "--ugoira-conv",
