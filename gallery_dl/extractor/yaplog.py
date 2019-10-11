@@ -36,11 +36,13 @@ class YaplogExtractor(AsynchronousMixin, Extractor):
                 iurl = text.extract(page, '<img src="', '"')[0]
                 if iurl[0] == "/":
                     iurl = text.urljoin(self.root, iurl)
-                iid, _, ext = iurl.rpartition("/")[2].rpartition(".")
+                name, _, ext = iurl.rpartition("/")[2].rpartition(".")
+                iid = name.rpartition("_")[0] or name
                 image = {
                     "url"      : iurl,
                     "num"      : num,
-                    "id"       : text.parse_int(iid.partition("_")[0]),
+                    "id"       : text.parse_int(iid, iid),
+                    "filename" : name,
                     "extension": ext,
                     "post"     : post,
                 }
@@ -75,7 +77,7 @@ class YaplogExtractor(AsynchronousMixin, Extractor):
             "id"   : text.parse_int(pid),
             "title": text.unescape(title[:-3]),
             "user" : self.user,
-            "date" : date,
+            "date" : text.parse_datetime(date, "%B %d [%a], %Y, %H:%M"),
         }
 
 
@@ -102,7 +104,7 @@ class YaplogPostExtractor(YaplogExtractor):
     test = (
         ("https://yaplog.jp/imamiami0726/image/1299", {
             "url": "896cae20fa718735a57e723c48544e830ff31345",
-            "keyword": "f8d8781e61c4c38238a7622d6df6c905f864e5d3",
+            "keyword": "22df8ad6cb534514c6bb2ff000381d156769a620",
         }),
         # complete image URLs (#443)
         ("https://yaplog.jp/msjane/archive/246", {
