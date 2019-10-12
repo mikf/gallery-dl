@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.10.6 - 2019-10-11
 ### Additions
 - `--exec` command-line option to specify a command to run after each file download ([#421](https://github.com/mikf/gallery-dl/issues/421))
