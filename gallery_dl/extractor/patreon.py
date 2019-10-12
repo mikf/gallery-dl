@@ -76,6 +76,8 @@ class PatreonExtractor(Extractor):
         headers = {"Referer": self.root}
 
         while url:
+            if not url.startswith("http"):
+                url = "https://" + url.lstrip("/:")
             posts = self.request(url, headers=headers).json()
 
             if "included" in posts:
