@@ -55,6 +55,7 @@ CATEGORY_MAP = {
     "myportfolio"    : "Adobe Portfolio",
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
+    "nozomi"         : "Nozomi.la",
     "nsfwalbum"      : "NSFWalbum.com",
     "nyafuu"         : "Nyafuu Archive",
     "paheal"         : "rule #34",
