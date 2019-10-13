@@ -70,6 +70,7 @@ modules = [
     "ngomik",
     "nhentai",
     "nijie",
+    "nozomi",
     "nsfwalbum",
     "paheal",
     "patreon",
