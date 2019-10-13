@@ -603,11 +603,15 @@ extractor.deviantart.refresh-token
 =========== =====
 Type        ``string``
 Default     ``null``
-Description The ``refresh_token`` value you get from
+Description The ``refresh-token`` value you get from
             `linking your DeviantArt account to gallery-dl <OAuth_>`__.
 
-            Using a ``refresh_token`` allows you to access private or otherwise
+            Using a ``refresh-token`` allows you to access private or otherwise
             not publicly available deviations.
+
+            Note: Authenticating with a ``refresh-token`` requires persistent
+            storage in a `cache file <cache.file_>`__.
+            Otherwise the token will become invalid after its first use.
 =========== =====
 
 
@@ -897,10 +901,10 @@ extractor.reddit.refresh-token
 =========== =====
 Type        ``string``
 Default     ``null``
-Description The ``refresh_token`` value you get from
+Description The ``refresh-token`` value you get from
             `linking your Reddit account to gallery-dl <OAuth_>`__.
 
-            Using a ``refresh_token`` allows you to access private or otherwise
+            Using a ``refresh-token`` allows you to access private or otherwise
             not publicly available subreddits, given that your account is
             authorized to do so,
             but requests to the reddit API are going to be rate limited
