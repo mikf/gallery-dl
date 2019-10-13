@@ -974,11 +974,12 @@ class DeviantartAPI():
 
         auth = (self.client_id, self.client_secret)
         response = self.extractor.request(
-            url, method="POST", data=data, auth=auth)
+            url, method="POST", data=data, auth=auth, fatal=False)
         data = response.json()
 
         if response.status_code != 200:
-            raise exception.AuthenticationError('"{} ({})"'.format(
+            self.log.debug("Server response: %s", data)
+            raise exception.AuthenticationError('"{}" ({})'.format(
                 data.get("error_description"), data.get("error")))
         if refresh_token:
             _refresh_token_cache.update(refresh_token, data["refresh_token"])
