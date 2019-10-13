@@ -259,12 +259,17 @@ class RedditAPI():
             data = {"grant_type": ("https://oauth.reddit.com/"
                                    "grants/installed_client"),
                     "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
+
+        auth = (self.client_id, "")
         response = self.extractor.request(
-            url, method="POST", data=data, auth=(self.client_id, ""))
+            url, method="POST", data=data, auth=auth, fatal=False)
+        data = response.json()
+
         if response.status_code != 200:
-            raise exception.AuthenticationError('"{} ({})"'.format(
-                response.json().get("message"), response.status_code))
-        return "Bearer " + response.json()["access_token"]
+            self.log.debug("Server response: %s", data)
+            raise exception.AuthenticationError('"{}: {}"'.format(
+                data.get("error"), data.get("message")))
+        return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, params):
         url = "https://oauth.reddit.com" + endpoint
