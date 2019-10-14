@@ -26,7 +26,7 @@ class NozomiExtractor(Extractor):
         self.session.headers["Origin"] = self.root
         self.session.headers["Referer"] = self.root + "/"
 
-        for post_id in self.posts():
+        for post_id in map(str, self.posts()):
             url = "https://j.nozomi.la/post/{}/{}/{}.json".format(
                 post_id[-1], post_id[-3:-1], post_id)
             image = self.request(url).json()
@@ -39,13 +39,13 @@ class NozomiExtractor(Extractor):
             image["date"] = text.parse_datetime(
                 image["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
             image["url"] = text.urljoin(self.root, image["imageurl"])
+            text.nameext_from_url(image["url"], image)
+            image.update(data)
 
             for key in ("general", "imageurl", "imageurls"):
                 if key in image:
                     del image[key]
 
-            image.update(data)
-            text.nameext_from_url(image["url"], image)
             yield Message.Directory, image
             yield Message.Url, image["url"], image
 
@@ -110,28 +110,60 @@ class NozomiTagExtractor(NozomiExtractor):
     archive_fmt = "t_{search_tags}_{postid}"
     pattern = r"(?:https?://)?nozomi\.la/tag/([^/?&#]+)-\d+\."
     test = ("https://nozomi.la/tag/3:1_aspect_ratio-1.html", {
-        "pattern": r"https://i.nozomi.la/\w/\w\w/\w+\.\w+",
+        "pattern": r"^https://i.nozomi.la/\w/\w\w/\w+\.\w+$",
         "count": ">= 75",
         "range": "1-75",
     })
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
-        self.tags = text.unescape(match.group(1))
+        self.tags = text.unquote(match.group(1)).lower()
 
     def metadata(self):
         return {"search_tags": self.tags}
 
     def posts(self):
-        i = 0
         url = "https://n.nozomi.la/nozomi/{}.nozomi".format(self.tags)
+        i = 0
 
         while True:
             headers = {"Range": "bytes={}-{}".format(i, i+255)}
             response = self.request(url, headers=headers)
-            yield from map(str, self._unpack(response.content))
+            yield from self._unpack(response.content)
 
             i += 256
             cr = response.headers.get("Content-Range", "").rpartition("/")[2]
             if text.parse_int(cr, i) <= i:
                 return
+
+
+class NozomiSearchExtractor(NozomiExtractor):
+    """Extractor for search results on nozomi.la"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "{search_tags:J }")
+    archive_fmt = "t_{search_tags}_{postid}"
+    pattern = r"(?:https?://)?nozomi\.la/search\.html\?q=([^&#]+)"
+    test = ("https://nozomi.la/search.html?q=hibiscus%203:4_ratio#1", {
+        "count": ">= 5",
+    })
+
+    def __init__(self, match):
+        NozomiExtractor.__init__(self, match)
+        self.tags = text.unquote(match.group(1)).lower().split()
+
+    def metadata(self):
+        return {"search_tags": self.tags}
+
+    def posts(self):
+        result = set()
+
+        for tag in self.tags:
+            url = "https://j.nozomi.la/nozomi/{}.nozomi".format(tag)
+            items = self._unpack(self.request(url).content)
+
+            if result:
+                result.intersection_update(items)
+            else:
+                result.update(items)
+
+        return result
