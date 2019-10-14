@@ -78,7 +78,7 @@ Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       https://seiga.nicovideo.jp/         individual Images, User Profiles                   Required
 nijie                https://nijie.info/                 |nijie-C|                                          Required
-Nozomi.la            https://nozomi.la/                  Posts, Tag-Searches
+Nozomi.la            https://nozomi.la/                  Posts, Search Results, Tag-Searches
 NSFWalbum.com        https://nsfwalbum.com/              Albums
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
 Patreon              https://www.patreon.com/            Creators, Posts, User Profiles
