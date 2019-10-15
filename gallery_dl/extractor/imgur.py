@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+from ..cache import cache
 import itertools
 import json
 
@@ -27,6 +28,30 @@ class ImgurExtractor(Extractor):
         Extractor.__init__(self, match)
         self.key = match.group(1)
         self.mp4 = self.config("mp4", True)
+
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=180*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = "{}/signin?invokedBy=Regular%20Sign%20In".format(self.root)
+        headers = {"Referer": url}
+        data = {
+            "username": username,
+            "password": password,
+            "remember": "remember",
+            "submit"  : "",
+        }
+
+        response = self.request(url, method="POST", headers=headers, data=data)
+        if not response.history:
+            error = text.extract(response.text, 'class="error">', '<')[0] or ""
+            raise exception.AuthenticationError(error.strip())
+        return self.session.cookies
 
     def _extract_data(self, path):
         response = self.request(self.root + path, notfound=self.subcategory)
@@ -49,6 +74,7 @@ class ImgurExtractor(Extractor):
         return url
 
     def _items_apiv3(self, urlfmt):
+        self.login()
         album_ex = ImgurAlbumExtractor
         image_ex = ImgurImageExtractor
 
@@ -129,6 +155,7 @@ class ImgurImageExtractor(ImgurExtractor):
     )
 
     def items(self):
+        self.login()
         image = self._extract_data("/" + self.key)
         url = self._prepare(image)
         yield Message.Version, 1
@@ -190,6 +217,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
     )
 
     def items(self):
+        self.login()
         album = self._extract_data("/a/" + self.key + "/all")
         images = album["album_images"]["images"]
         del album["album_images"]
@@ -222,6 +250,7 @@ class ImgurGalleryExtractor(ImgurExtractor):
     )
 
     def items(self):
+        self.login()
         url = self.root + "/a/" + self.key
         with self.request(url, method="HEAD", fatal=False) as response:
             code = response.status_code
