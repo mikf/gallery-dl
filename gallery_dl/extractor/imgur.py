@@ -54,9 +54,17 @@ class ImgurExtractor(Extractor):
         return self.session.cookies
 
     def _extract_data(self, path):
-        response = self.request(self.root + path, notfound=self.subcategory)
-        data = json.loads(text.extract(
-            response.text, "image               : ", ",\n")[0])
+        page = self.request(self.root + path, notfound=self.subcategory).text
+        data = text.extract(page, "image               : ", ",\n")[0]
+
+        if not data:
+            if ">Sign in required<" in page:
+                self.log.error("'Sign in required'")
+            else:
+                self.log.error("Unable to extract JSON data")
+            raise exception.StopExtraction()
+        data = json.loads(data)
+
         try:
             del data["adConfig"]
             del data["isAd"]
@@ -218,7 +226,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
 
     def items(self):
         self.login()
-        album = self._extract_data("/a/" + self.key + "/all")
+        album = self._extract_data("/a/" + self.key)
         images = album["album_images"]["images"]
         del album["album_images"]
 
