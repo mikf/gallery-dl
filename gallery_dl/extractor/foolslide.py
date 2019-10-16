@@ -44,14 +44,13 @@ class FoolslideBase(SharedConfigMixin):
 
 class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
     """Base class for chapter extractors for FoOlSlide based sites"""
-    directory_fmt = (
-        "{category}", "{manga}", "{chapter_string}")
+    directory_fmt = ("{category}", "{manga}", "{chapter_string}")
     archive_fmt = "{id}"
     pattern_fmt = r"(/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     decode = "default"
 
     def items(self):
-        page = self.request(self.chapter_url).text
+        page = self.request(self.gallery_url).text
         data = self.metadata(page)
         imgs = self.images(page)
 
@@ -77,7 +76,7 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
     def metadata(self, page):
         extr = text.extract_from(page)
         extr('<h1 class="tbtitle dnone">', '')
-        return self.parse_chapter_url(self.chapter_url, {
+        return self.parse_chapter_url(self.gallery_url, {
             "manga"         : text.unescape(extr('title="', '"')).strip(),
             "chapter_string": text.unescape(extr('title="', '"')),
         })

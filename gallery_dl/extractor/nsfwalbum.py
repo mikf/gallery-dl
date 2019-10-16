@@ -17,14 +17,14 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
     category = "nsfwalbum"
     subcategory = "album"
     root = "https://nsfwalbum.com"
-    filename_fmt = "{album_id}_{page:>03}_{id}.{extension}"
+    filename_fmt = "{album_id}_{num:>03}_{id}.{extension}"
     directory_fmt = ("{category}", "{album_id} {title}")
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?(?:www\.)?nsfwalbum\.com(/album/(\d+))"
     test = ("https://nsfwalbum.com/album/401611", {
         "range": "1-5",
         "url": "b0481fc7fad5982da397b6359fbed8421b8ba284",
-        "keyword": "fc1ad4ebcd6d4cf32da15203120112b8bcf12eec",
+        "keyword": "e98f9b0d473c00000831618d0235863b1dd78294",
     })
 
     def __init__(self, match):

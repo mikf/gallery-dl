@@ -24,7 +24,7 @@ class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
     test = ("https://hentaifox.com/gallery/56622/", {
         "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
         "count": 24,
-        "keyword": "38f8517605feb6854d48833297da6b05c6541b69",
+        "keyword": "903ebe227d85e484460382fc6cbab42be7a244d5",
     })
 
     def __init__(self, match):

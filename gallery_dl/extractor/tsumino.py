@@ -109,7 +109,7 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
 
     def images(self, page):
         url = "{}/Read/Index/{}?page=1".format(self.root, self.gallery_id)
-        headers = {"Referer": self.chapter_url}
+        headers = {"Referer": self.gallery_url}
         response = self.request(url, headers=headers, fatal=False)
 
         if "/Auth/" in response.url:

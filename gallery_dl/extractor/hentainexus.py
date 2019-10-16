@@ -22,7 +22,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
     test = (
         ("https://hentainexus.com/view/5688", {
             "url": "746d0043e20030f1171aae5ea113176607302517",
-            "keyword": "b05986369fbaf29cfa08b118960d92c49e59524b",
+            "keyword": "9512cf5f258130e5f75de9954d7a13217c2405e7",
         }),
         ("https://hentainexus.com/read/5688"),
     )

@@ -249,24 +249,21 @@ class Extractor():
             yield test
 
 
-class ChapterExtractor(Extractor):
+class GalleryExtractor(Extractor):
 
-    subcategory = "chapter"
-    directory_fmt = (
-        "{category}", "{manga}",
-        "{volume:?v/ />02}c{chapter:>03}{chapter_minor:?//}{title:?: //}")
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
-    archive_fmt = (
-        "{manga}_{chapter}{chapter_minor}_{page}")
+    subcategory = "gallery"
+    filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
+    directory_fmt = ("{category}", "{gallery_id} {title}")
+    archive_fmt = "{gallery_id}_{num}"
+    enum = "num"
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
-        self.chapter_url = url or self.root + match.group(1)
+        self.gallery_url = self.root + match.group(1) if url is None else url
 
     def items(self):
         self.login()
-        page = self.request(self.chapter_url).text
+        page = self.request(self.gallery_url).text
         data = self.metadata(page)
         imgs = self.images(page)
 
@@ -284,7 +281,7 @@ class ChapterExtractor(Extractor):
 
         yield Message.Version, 1
         yield Message.Directory, data
-        for data["page"], (url, imgdata) in images:
+        for data[self.enum], (url, imgdata) in images:
             if imgdata:
                 data.update(imgdata)
             yield Message.Url, url, text.nameext_from_url(url, data)
@@ -297,6 +294,19 @@ class ChapterExtractor(Extractor):
 
     def images(self, page):
         """Return a list of all (image-url, metadata)-tuples"""
+
+
+class ChapterExtractor(GalleryExtractor):
+
+    subcategory = "chapter"
+    directory_fmt = (
+        "{category}", "{manga}",
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor:?//}{title:?: //}")
+    filename_fmt = (
+        "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
+    archive_fmt = (
+        "{manga}_{chapter}{chapter_minor}_{page}")
+    enum = "page"
 
 
 class MangaExtractor(Extractor):
@@ -331,14 +341,6 @@ class MangaExtractor(Extractor):
 
     def chapters(self, page):
         """Return a list of all (chapter-url, metadata)-tuples"""
-
-
-class GalleryExtractor(ChapterExtractor):
-
-    subcategory = "gallery"
-    filename_fmt = "{category}_{gallery_id}_{page:>03}.{extension}"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    archive_fmt = "{gallery_id}_{page}"
 
 
 class AsynchronousMixin():

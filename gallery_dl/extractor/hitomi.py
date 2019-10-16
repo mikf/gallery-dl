@@ -21,7 +21,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
     test = (
         ("https://hitomi.la/galleries/867789.html", {
             "pattern": r"https://aa.hitomi.la/galleries/867789/\d+.jpg",
-            "keyword": "d097a8db8e810045131b4510c41714004f9eff3a",
+            "keyword": "6701f8f588f119ef84cd29bdf99a399417b0a6a2",
             "count": 16,
         }),
         ("https://hitomi.la/galleries/1401410.html", {
@@ -89,7 +89,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
         base = "https://" + subdomain + ".hitomi.la/galleries/"
 
         # set Referer header before image downloads (#239)
-        self.session.headers["Referer"] = self.chapter_url
+        self.session.headers["Referer"] = self.gallery_url
 
         # handle Game CG galleries with scenes (#321)
         scenes = text.extract(page, "var scene_indexes = [", "]")[0]

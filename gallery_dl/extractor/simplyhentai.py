@@ -23,7 +23,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
             "url": "21613585ae5ec2f69ea579e9713f536fceab5bd5",
-            "keyword": "bf75f9ff0fb60756b1b9b92403526a72d9178d23",
+            "keyword": "9e87a0973553b2922ddee37958b8f5d87910af72",
         }),
         ("https://www.simply-hentai.com/notfound", {
             "exception": exception.GalleryDLException,
@@ -43,7 +43,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         extr = text.extract_from(page)
         split = text.split_html
 
-        self.chapter_url = extr('<link rel="canonical" href="', '"')
+        self.gallery_url = extr('<link rel="canonical" href="', '"')
         title = extr('<meta property="og:title" content="', '"')
         if not title:
             raise exception.NotFoundError("gallery")
@@ -63,7 +63,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        url = self.chapter_url + "/all-pages"
+        url = self.gallery_url + "/all-pages"
         headers = {"Accept": "application/json"}
         images = self.request(url, headers=headers).json()
         return [
