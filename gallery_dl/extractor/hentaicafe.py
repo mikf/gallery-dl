@@ -31,10 +31,10 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
         info = text.unescape(text.extract(page, '<title>', '</title>')[0])
         manga, _, chapter_string = info.partition(" :: ")
 
-        data = self._data(self.chapter_url.split("/")[5])
+        data = self._data(self.gallery_url.split("/")[5])
         data["manga"] = manga
         data["chapter_string"] = chapter_string.rstrip(" :")
-        return self.parse_chapter_url(self.chapter_url, data)
+        return self.parse_chapter_url(self.gallery_url, data)
 
     @memcache(keyarg=1)
     def _data(self, manga):

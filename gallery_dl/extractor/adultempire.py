@@ -21,12 +21,12 @@ class AdultempireGalleryExtractor(GalleryExtractor):
     test = (
         ("https://www.adultempire.com/5998/gallery.html", {
             "range": "1",
-            "keyword": "25c8171f5623678491a0d7bdf38a7a6ebfa4a361",
+            "keyword": "5b3266e69801db0d78c22181da23bc102886e027",
             "content": "5c6beb31e5e3cdc90ee5910d5c30f9aaec977b9e",
         }),
         ("https://www.adultdvdempire.com/5683/gallery.html", {
             "url": "b12cd1a65cae8019d837505adb4d6a2c1ed4d70d",
-            "keyword": "9634eb16cc6dbf347eb9dcdd9b2a499dfd04d167",
+            "keyword": "8d448d79c4ac5f5b10a3019d5b5129ddb43655e5",
         }),
     )
 
@@ -55,4 +55,4 @@ class AdultempireGalleryExtractor(GalleryExtractor):
             if len(urls) < 24:
                 return
             params["page"] += 1
-            page = self.request(self.chapter_url, params=params).text
+            page = self.request(self.gallery_url, params=params).text

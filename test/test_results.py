@@ -27,6 +27,8 @@ TRAVIS_SKIP = {
 # temporary issues, etc.
 BROKEN = {
     "8chan",
+    "hentaifoundry",
+    "luscious",
     "mangapark",
 }
 
