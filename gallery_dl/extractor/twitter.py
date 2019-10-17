@@ -115,17 +115,18 @@ class TwitterExtractor(Extractor):
             data["content"] = cl if cl and len(cr) < 16 else content
         return data
 
-    def _tweets_from_api(self, url):
+    def _tweets_from_api(self, url, max_position=None):
         params = {
             "include_available_features": "1",
             "include_entities": "1",
+            "max_position": max_position,
             "reset_error_state": "false",
             "lang": "en",
         }
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "X-Twitter-Active-User": "yes",
-            "Referer": "{}/{}".format(self.root, self.user)
+            "Referer": self.root + "/",
         }
 
         while True:
@@ -142,21 +143,21 @@ class TwitterExtractor(Extractor):
 
             if "min_position" in data:
                 position = data["min_position"]
-                if "max_position" in params and position == params["max_position"]:
+                if position == max_position:
                     return
             else:
                 position = text.parse_int(text.extract(
                     tweet, 'data-tweet-id="', '"')[0])
-                if "max_position" in params and position >= params["max_position"]:
+                if max_position and position >= max_position:
                     return
-            params["max_position"] = position
+            params["max_position"] = max_position = position
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for all images from a user's timeline"""
     subcategory = "timeline"
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/((?!search)[^/?&#]+)/?(?:$|[?#])")
+               r"/(?!search)([^/?&#]+)/?(?:$|[?#])")
     test = (
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
@@ -167,6 +168,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     )
 
     def tweets(self):
+
         url = "{}/i/profiles/show/{}/timeline/tweets".format(
             self.root, self.user)
         return self._tweets_from_api(url)
@@ -176,7 +178,7 @@ class TwitterMediaExtractor(TwitterExtractor):
     """Extractor for all images from a user's Media Tweets"""
     subcategory = "media"
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/((?!search)[^/?&#]+)/media(?!\w)")
+               r"/(?!search)([^/?&#]+)/media(?!\w)")
     test = (
         ("https://twitter.com/supernaturepics/media", {
             "range": "1-40",
@@ -190,17 +192,26 @@ class TwitterMediaExtractor(TwitterExtractor):
             self.root, self.user)
         return self._tweets_from_api(url)
 
+
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for all images from a search timeline"""
     subcategory = "search"
+    directory_fmt = ("{category}", "Search", "{search}")
     pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/search[^q]+q=([^/?&#]+)(?:$|&)")
-    test = ()
-    
+               r"/search/?\?(?:[^&#]+&)*q=([^&#]+)")
+    test = ("https://twitter.com/search?q=nature", {
+        "range": "1-40",
+        "count": 40,
+    })
+
+    def metadata(self):
+        return {"search": self.user}
+
     def tweets(self):
         url = "{}/i/search/timeline?f=tweets&q={}".format(
             self.root, self.user)
-        return self._tweets_from_api(url)
+        return self._tweets_from_api(url, "-1")
+
 
 class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for images from individual tweets"""
