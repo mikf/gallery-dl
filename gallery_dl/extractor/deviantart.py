@@ -264,7 +264,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
     archive_fmt = "g_{username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"(?:/(?:gallery/?(?:\?catpath=/)?)?)?$"
+    pattern = BASE_PATTERN + r"(?:/(?:gallery(?:/all|/?\?catpath=)?/?)?)?$"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery/", {
             "pattern": r"https://(www.deviantart.com/download/\d+/"
@@ -334,10 +334,14 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/shimoda8/gallery/", {
             "exception": exception.NotFoundError,
         }),
-        # old-style URLs
+
+        ("https://www.deviantart.com/shimoda7"),
+        ("https://www.deviantart.com/shimoda7/gallery"),
+        ("https://www.deviantart.com/shimoda7/gallery/all"),
         ("https://www.deviantart.com/shimoda7/gallery/?catpath=/"),
+        ("https://shimoda7.deviantart.com/"),
         ("https://shimoda7.deviantart.com/gallery/"),
-        ("https://yakuzafc.deviantart.com/"),
+        ("https://shimoda7.deviantart.com/gallery/all/"),
         ("https://shimoda7.deviantart.com/gallery/?catpath=/"),
     )
 
