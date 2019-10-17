@@ -155,11 +155,20 @@ class NozomiSearchExtractor(NozomiExtractor):
         return {"search_tags": self.tags}
 
     def posts(self):
+        index = None
         result = set()
 
+        def nozomi(path):
+            url = "https://j.nozomi.la/" + path + ".nozomi"
+            return self._unpack(self.request(url).content)
+
         for tag in self.tags:
-            url = "https://j.nozomi.la/nozomi/{}.nozomi".format(tag)
-            items = self._unpack(self.request(url).content)
+            if tag[0] == "-":
+                if not index:
+                    index = set(nozomi("index"))
+                items = index.difference(nozomi("nozomi/" + tag[1:]))
+            else:
+                items = nozomi("nozomi/" + tag)
 
             if result:
                 result.intersection_update(items)
