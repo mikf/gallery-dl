@@ -29,8 +29,15 @@ class NozomiExtractor(Extractor):
         for post_id in map(str, self.posts()):
             url = "https://j.nozomi.la/post/{}/{}/{}.json".format(
                 post_id[-1], post_id[-3:-1], post_id)
-            image = self.request(url).json()
+            response = self.request(url, fatal=False)
 
+            if response.status_code >= 400:
+                self.log.warning(
+                    "Skipping post %s ('%s %s')",
+                    post_id, response.status_code, response.reason)
+                continue
+
+            image = response.json()
             image["tags"] = self._list(image.get("general"))
             image["artist"] = self._list(image.get("artist"))
             image["copyright"] = self._list(image.get("copyright"))
