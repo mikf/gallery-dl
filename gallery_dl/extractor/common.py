@@ -18,7 +18,7 @@ import requests
 import threading
 import http.cookiejar
 from .message import Message
-from .. import config, text, exception, cloudflare
+from .. import config, text, util, exception, cloudflare
 
 
 class Extractor():
@@ -43,6 +43,7 @@ class Extractor():
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
+        self._cookiefile = None
 
         if self._retries < 0:
             self._retries = float("inf")
@@ -174,19 +175,36 @@ class Extractor():
         if cookies:
             if isinstance(cookies, dict):
                 self._update_cookies_dict(cookies, self.cookiedomain)
-            else:
+            elif isinstance(cookies, str):
+                cookiefile = util.expand_path(cookies)
                 cookiejar = http.cookiejar.MozillaCookieJar()
                 try:
-                    cookiejar.load(cookies)
+                    cookiejar.load(cookiefile)
                 except OSError as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
                     self.session.cookies.update(cookiejar)
+                    self._cookiefile = cookiefile
+            else:
+                self.log.warning(
+                    "expected 'dict' or 'str' value for 'cookies' option, "
+                    "got '%s' (%s)", cookies.__class__.__name__, cookies)
 
         cookies = cloudflare.cookies(self.category)
         if cookies:
             domain, cookies = cookies
             self._update_cookies_dict(cookies, domain)
+
+    def _store_cookies(self):
+        """Store the session's cookiejar in a cookies.txt file"""
+        if self._cookiefile and self.config("cookies-update", False):
+            cookiejar = http.cookiejar.MozillaCookieJar()
+            for cookie in self.session.cookies:
+                cookiejar.set_cookie(cookie)
+            try:
+                cookiejar.save(self.cookiefile)
+            except OSError as exc:
+                self.log.warning("cookies: %s", exc)
 
     def _update_cookies(self, cookies, *, domain=""):
         """Update the session's cookiejar with 'cookies'"""

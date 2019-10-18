@@ -271,6 +271,8 @@ class DownloadJob(Job):
                 pp.finalize()
         if self.archive:
             self.archive.close()
+        if self.pathfmt:
+            self.extractor._store_cookies()
 
     def handle_skip(self):
         self.out.skip(self.pathfmt.path)
