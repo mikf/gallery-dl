@@ -223,6 +223,16 @@ Description Source to read additional cookies from.
 =========== =====
 
 
+extractor.*.cookies-update
+--------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description If `extractor.*.cookies`_ specifies a cookies.txt file, update its
+            contents with cookies received during data extraction.
+=========== =====
+
+
 extractor.*.proxy
 -----------------
 =========== =====
