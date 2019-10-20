@@ -73,6 +73,7 @@ Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.me/               Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
+Naver                https://blog.naver.com/             Blogs, Posts
 Newgrounds           https://www.newgrounds.com/         individual Images, User Profiles, Videos
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
@@ -111,7 +112,7 @@ SmugMug              https://www.smugmug.com/            |smugmug-C|            
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag-Searches, User Profiles          Optional (OAuth)
-Twitter              https://twitter.com/                Media Timelines, Timelines, Tweets                 Optional
+Twitter              https://twitter.com/                Media Timelines, Search Results, Timelines, Tweets Optional
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  |wallhaven-A|
 Warosu               https://warosu.org/                 Threads
