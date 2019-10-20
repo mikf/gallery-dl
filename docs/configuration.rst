@@ -1631,12 +1631,17 @@ Type        ``string``
 How To      * login and visit DeviantArt's
               `Applications & Keys <https://www.deviantart.com/developers/apps>`__
               section
-            * click "Register your Application"
+            * click "Register Application"
             * scroll to "OAuth2 Redirect URI Whitelist (Required)"
               and enter "https://mikf.github.io/gallery-dl/oauth-redirect.html"
-            * click "Save" (top right)
+            * scroll to the bottom and agree to the API License Agreement.
+              Submission Policy, and Terms of Service.
+            * click "Save"
             * copy ``client_id`` and ``client_secret`` of your new
               application and put them in your configuration file
+              as ``"client-id"`` and ``"client-secret"``
+            * get a new `refresh-token <extractor.deviantart.refresh-token_>`__
+              if necessary
 =========== =====
 
 
