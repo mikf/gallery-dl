@@ -66,6 +66,7 @@ modules = [
     "mangastream",
     "mangoxo",
     "myportfolio",
+    "naver",
     "newgrounds",
     "ngomik",
     "nhentai",
