@@ -150,7 +150,7 @@ class SexcomRelatedPinExtractor(SexcomPinExtractor):
     directory_fmt = ("{category}", "related {original_pin[pin_id]}")
     pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+).*#related$"
     test = ("https://www.sex.com/pin/56714360/#related", {
-        "count": 24,
+        "count": ">= 22",
     })
 
     def metadata(self):
