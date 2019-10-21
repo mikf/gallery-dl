@@ -84,12 +84,12 @@ class SimplyhentaiImageExtractor(Extractor):
     test = (
         (("https://www.simply-hentai.com/image"
           "/pheromomania-vol-1-kanzenban-isao-3949d8b3-400c-4b6"), {
-            "url": "0338eb137830ab6f81e5f410d3936ef785d063d9",
+            "url": "3d8eb55240a960134891bd77fe1df7988fcdc455",
             "keyword": "e10e5588481cab68329ef6ec1e5325206b2079a2",
         }),
         ("https://www.simply-hentai.com/gif/8915dfcf-0b6a-47c", {
-            "url": "11c060d7ec4dfd0bd105300b6e1fd454674a5af1",
-            "keyword": "dd97a4bb449c397d6fec9f43a1303c0fb168ae65",
+            "url": "f73916527211b4a40f26568ee26cd8999f5f4f30",
+            "keyword": "f94d775177fed918759c8a78a50976f867425b48",
         }),
     )
 

@@ -168,7 +168,6 @@ class TwitterTimelineExtractor(TwitterExtractor):
     )
 
     def tweets(self):
-
         url = "{}/i/profiles/show/{}/timeline/tweets".format(
             self.root, self.user)
         return self._tweets_from_api(url)
@@ -237,7 +236,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # content with emoji, newlines, hashtags (#338)
         ("https://twitter.com/yumi_san0112/status/1151144618936823808", {
             "options": (("content", True),),
-            "keyword": "b13b6c4cd0b0c15b2ea7685479e7fedde3c47b9e",
+            "keyword": "b133464b73aec33871521ab021a3166204194285",
         }),
         # Reply to another tweet (#403)
         ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
