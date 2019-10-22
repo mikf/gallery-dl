@@ -64,7 +64,7 @@ Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag-Searches
 LINE BLOG            https://www.lineblog.me/            Blogs, Posts
 livedoor Blog        http://blog.livedoor.jp/            Blogs, Posts
-Luscious             https://luscious.net/               Albums, Search Results                             Optional
+Luscious             https://members.luscious.net/       Albums, Search Results
 Manga Fox            https://fanfox.net/                 Chapters
 Manga Here           https://www.mangahere.cc/           Chapters, Manga
 Manga Stream         https://readms.net/                 Chapters
