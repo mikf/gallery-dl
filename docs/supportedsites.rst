@@ -52,7 +52,7 @@ ImageFap             https://imagefap.com/               Galleries, individual I
 ImgBB                https://imgbb.com/                  Albums, individual Images, User Profiles           Optional
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
-imgur                https://imgur.com/                  |imgur-C|                                          Optional
+imgur                https://imgur.com/                  |imgur-C|
 Instagram            https://www.instagram.com/          |instagram-C|                                      Optional
 Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga
 Joyreactor           http://joyreactor.com/              Posts, Search Results, Tag-Searches, User Profiles

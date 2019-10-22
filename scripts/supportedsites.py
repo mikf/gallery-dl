@@ -118,7 +118,6 @@ AUTH_MAP = {
     "idolcomplex": "Optional",
     "imgbb"      : "Optional",
     "instagram"  : "Optional",
-    "imgur"      : "Optional",
     "mangoxo"    : "Optional",
     "nijie"      : "Required",
     "pixiv"      : "Required",
