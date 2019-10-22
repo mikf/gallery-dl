@@ -119,7 +119,6 @@ AUTH_MAP = {
     "imgbb"      : "Optional",
     "instagram"  : "Optional",
     "imgur"      : "Optional",
-    "luscious"   : "Optional",
     "mangoxo"    : "Optional",
     "nijie"      : "Required",
     "pixiv"      : "Required",

@@ -6,75 +6,62 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://luscious.net/"""
+"""Extractors for https://members.luscious.net/"""
 
-from .common import GalleryExtractor, Extractor, Message
+from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache
 
 
-class LusciousBase(Extractor):
+class LusciousExtractor(Extractor):
     """Base class for luscious extractors"""
     category = "luscious"
     cookiedomain = ".luscious.net"
     root = "https://members.luscious.net"
 
-    def login(self):
-        """Login and set necessary cookies"""
-        username, password = self._get_auth_info()
-        if username:
-            self._update_cookies(self._login_impl(username, password))
-
-    @cache(maxage=14*24*3600, keyarg=1)
-    def _login_impl(self, username, password):
-        self.log.info("Logging in as %s", username)
-        url = "https://members.luscious.net/accounts/login/"
-        headers = {"Referer": "https://members.luscious.net/login/"}
+    def _graphql(self, op, variables, query):
         data = {
-            "login": username,
-            "password": password,
-            "remember": "on",
-            "next": "/",
+            "id": 1,
+            "operationName": op,
+            "query": query,
+            "variables": variables,
         }
+        response = self.request(
+            "{}/graphql/nobatch/?operationName={}".format(self.root, op),
+            method="POST", json=data, fatal=False,
+        )
 
-        response = self.request(url, method="POST", headers=headers, data=data)
-        if "/accounts/login/" in response.url or not response.history:
-            raise exception.AuthenticationError()
-        for cookie in response.history[0].cookies:
-            if cookie.name.startswith("sessionid_"):
-                return {cookie.name: cookie.value}
-        raise exception.AuthenticationError()
+        if response.status_code >= 400:
+            self.log.error("GraphQL query failed ('%s %s')",
+                           response.status_code, response.reason)
+            self.log.debug("Server response: %s", response.text)
+            raise exception.StopExtraction()
 
-    @staticmethod
-    def _parse_tags(tags):
-        return [
-            text.unescape(tag.replace(":_", ":"))
-            for tag in text.extract_iter(tags or "", "/tags/", "/")
-        ]
+        return response.json()["data"]
 
 
-class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
+class LusciousAlbumExtractor(LusciousExtractor):
     """Extractor for image albums from luscious.net"""
     subcategory = "album"
-    archive_fmt = "{gallery_id}_{image_id}"
+    filename_fmt = "{category}_{album[id]}_{num:>03}.{extension}"
+    directory_fmt = ("{category}", "{album[id]} {album[title]}")
+    archive_fmt = "{album[id]}_{id}"
     pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
-               r"/(?:albums|pictures/c/[^/?&#]+/album)/([^/?&#]+_(\d+))")
+               r"/(?:albums|pictures/c/[^/?&#]+/album)/[^/?&#]+_(\d+)")
     test = (
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
-            "keyword": "07c0b915f2ab1cc3bbf28b76e7950fccee1213f3",
+            #  "keyword": "07c0b915f2ab1cc3bbf28b76e7950fccee1213f3",
             "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
-            "keyword": "e1202078b504adeccd521aa932f456a5a85479a0",
+            #  "keyword": "e1202078b504adeccd521aa932f456a5a85479a0",
         }),
         ("https://luscious.net/albums/not-found_277035/", {
             "exception": exception.NotFoundError,
         }),
         ("https://members.luscious.net/albums/login-required_323871/", {
-            "options": (("username", None),),
-            "exception": exception.HttpError,
+            "count": 78,
         }),
         ("https://www.luscious.net/albums/okinami_277031/"),
         ("https://members.luscious.net/albums/okinami_277031/"),
@@ -83,126 +70,130 @@ class LusciousAlbumExtractor(LusciousBase, GalleryExtractor):
     )
 
     def __init__(self, match):
-        path, self.gallery_id = match.groups()
-        url = "{}/albums/{}/".format(self.root, path)
-        GalleryExtractor.__init__(self, match, url)
+        LusciousExtractor.__init__(self, match)
+        self.album_id = match.group(1)
 
-    def metadata(self, page):
-        title, pos = text.extract(page, '"og:title" content="', '"')
+    def items(self):
+        album = self.metadata()
+        yield Message.Version, 1
+        yield Message.Directory, {"album": album}
+        for num, image in enumerate(self.images(), 1):
+            image["num"] = num
+            image["album"] = album
+            url = image["url_to_video"] or image["url_to_original"]
+            yield Message.Url, url, text.nameext_from_url(url, image)
 
-        if title is None:
-            msg = text.extract(page, '<div class="content">', '</div>', pos)[0]
-            if msg:
-                raise exception.AuthorizationError(msg)
-            raise exception.NotFoundError("album")
-
-        info , pos = text.extract(page, '<li class="user_info">', "", pos)
-        if info is None:
-            count, pos = text.extract(page, '>Pages:', '<', pos)
-        else:
-            count, pos = text.extract(page, '<p>', ' ', pos)
-        genre, pos = text.extract(page, '<p>Genre:', '</p>', pos)
-        adnce, pos = text.extract(page, '<p>Audience:', '</p>', pos)
-        tags , pos = text.extract(page, '"tag_list static">', '</ol>', pos)
-
-        return {
-            "gallery_id": text.parse_int(self.gallery_id),
-            "title"     : text.unescape(title or ""),
-            "count"     : text.parse_int(count),
-            "genre"     : text.remove_html(genre),
-            "audience"  : text.remove_html(adnce),
-            "tags"      : self._parse_tags(tags),
+    def metadata(self):
+        variables = {
+            "id": self.album_id,
         }
+        query = (
+            "query AlbumGet($id: ID!) { album { get(id: $id) { ... on Album { "
+            "...AlbumStandard } ... on MutationError { errors { code message }"
+            " } } } } fragment AlbumStandard on Album { __typename id title la"
+            "bels description created modified like_status number_of_favorites"
+            " rating status marked_for_deletion marked_for_processing number_o"
+            "f_pictures number_of_animated_pictures slug is_manga url download"
+            "_url permissions cover { width height size url } created_by { id "
+            "name display_name user_title name display_name avatar { url size "
+            "} url } content { id title url } language { id title url } tags {"
+            " id category slug text url count } genres { id title slug url } a"
+            "udiences { id title url url } last_viewed_picture { id position u"
+            "rl } }"
+        )
 
-    def images(self, page):
-        extr = text.extract
+        data = self._graphql("AlbumGet", variables, query)["album"]["get"]
+        if "errors" in data:
+            raise exception.NotFoundError("album")
+        return data
 
-        url = "{}/pictures/album/x_{}/sorted/old/page/1/".format(
-            self.root, self.gallery_id)
-        page = self.request(url).text
-        pos = page.find('<div id="picture_page_')
-        url = extr(page, '<a href="', '"', pos)[0]
-        iurl = None
+    def images(self):
+        variables = {
+            "input": {
+                "filters": [{
+                    "name" : "album_id",
+                    "value": self.album_id,
+                }],
+                "display": "position",
+                "page"   : 1,
+            },
+        }
+        query = (
+            "query AlbumListOwnPictures($input: PictureListInput!) { picture {"
+            " list(input: $input) { info { ...FacetCollectionInfo } items { .."
+            ".PictureStandardWithoutAlbum } } } } fragment FacetCollectionInfo"
+            " on FacetCollectionInfo { page has_next_page has_previous_page to"
+            "tal_items total_pages items_per_page url_complete url_filters_onl"
+            "y } fragment PictureStandardWithoutAlbum on Picture { __typename "
+            "id title created like_status number_of_comments number_of_favorit"
+            "es status width height resolution aspect_ratio url_to_original ur"
+            "l_to_video is_animated position tags { id category slug text url "
+            "} permissions url thumbnails { width height size url } }"
+        )
 
-        while url and not url.endswith("/more_like_this/"):
-            page = self.request(self.root + url).text
+        while True:
+            data = self._graphql("AlbumListOwnPictures", variables, query)
+            yield from data["picture"]["list"]["items"]
 
-            if not iurl:  # first loop iteraton
-                current = extr(page, '"pj_current_page" value="', '"')[0]
-                if current and current != "1":
-                    url = "{}/albums/{}/jump_to_page/1/".format(
-                        self.root, self.gallery_id)
-                    page = self.request(url, method="POST").text
-
-            iid , pos = extr(url , '/id/', '/')
-            url , pos = extr(page, '<link rel="next" href="', '"')
-            name, pos = extr(page, '<h1 id="picture_title">', '</h1>', pos)
-            _   , pos = extr(page, '<ul class="image_option_icons">', '', pos)
-            iurl, pos = extr(page, '<li><a href="', '"', pos+100)
-
-            if iurl[0] == "/":
-                iurl = text.urljoin(self.root, iurl)
-
-            yield iurl, {
-                "name": name,
-                "image_id": text.parse_int(iid),
-            }
+            if not data["picture"]["list"]["info"]["has_next_page"]:
+                return
+            variables["input"]["page"] += 1
 
 
-class LusciousSearchExtractor(LusciousBase, Extractor):
+class LusciousSearchExtractor(LusciousExtractor):
     """Extractor for album searches on luscious.net"""
     subcategory = "search"
     pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
-               r"/(albums(?:/(?![^/?&#]+_\d+)[^/?&#]+)+|manga|pictures)/?$")
+               r"/albums/list/?(?:\?([^#]+))?")
     test = (
-        ("https://luscious.net/manga/"),
-        ("https://members.luscious.net/albums/sorted/updated/album_type/manga"
-         "/content_id/2/tagged/+full_color/page/1/", {
+        ("https://members.luscious.net/albums/list/"),
+        ("https://members.luscious.net/albums/list/"
+         "?display=date_newest&language_ids=%2B1&tagged=+full_color&page=1", {
              "pattern": LusciousAlbumExtractor.pattern,
-             "range": "20-40",
-             "count": 21,
+             "range": "41-60",
+             "count": 20,
          }),
     )
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.path = match.group(1).partition("/page/")[0]
-        if not self.path.startswith("albums/"):
-            self.path = "albums/sorted/updated/album_type/" + self.path
+        LusciousExtractor.__init__(self, match)
+        self.query = match.group(1)
 
     def items(self):
-        self.login()
-        yield Message.Version, 1
-        for album in self.albums():
-            url, data = self.parse_album(album)
-            yield Message.Queue, url, data
+        query = text.parse_query(self.query)
+        display = query.pop("display", "date_newest")
+        page = query.pop("page", None)
 
-    def albums(self, pnum=1):
-        while True:
-            url = "{}/{}/page/{}/.json/".format(self.root, self.path, pnum)
-            data = self.request(url).json()
-
-            yield from text.extract_iter(
-                data["html"], "<figcaption>", "</figcaption>")
-
-            if data["paginator_complete"]:
-                return
-            pnum += 1
-
-    def parse_album(self, album):
-        url  , pos = text.extract(album, 'href="', '"')
-        title, pos = text.extract(album, ">", "<", pos)
-        count, pos = text.extract(album, "# of pictures:", "<", pos)
-        date , pos = text.extract(album, "Updated:&nbsp;", "<", pos)
-        desc , pos = text.extract(album, "class='desc'>", "<", pos)
-        tags , pos = text.extract(album, "<ol ", "</ol>", pos)
-
-        return text.urljoin(self.root, url), {
-            "title": text.unescape(title or ""),
-            "description": text.unescape(desc or ""),
-            "gallery_id": text.parse_int(url.rpartition("_")[2].rstrip("/")),
-            "count": text.parse_int(count),
-            "date": date,
-            "tags": self._parse_tags(tags),
-            "_extractor": LusciousAlbumExtractor,
+        variables = {
+            "input": {
+                "display": display,
+                "filters": [{"name": n, "value": v} for n, v in query.items()],
+                "page": text.parse_int(page, 1),
+            },
         }
+        query = (
+            "query AlbumListWithPeek($input: AlbumListInput!) { album { list(i"
+            "nput: $input) { info { ...FacetCollectionInfo } items { ...AlbumM"
+            "inimal peek_thumbnails { width height size url } } } } } fragment"
+            " FacetCollectionInfo on FacetCollectionInfo { page has_next_page "
+            "has_previous_page total_items total_pages items_per_page url_comp"
+            "lete url_filters_only } fragment AlbumMinimal on Album { __typena"
+            "me id title labels description created modified number_of_favorit"
+            "es number_of_pictures slug is_manga url download_url cover { widt"
+            "h height size url } content { id title url } language { id title "
+            "url } tags { id category slug text url count } genres { id title "
+            "slug url } audiences { id title url } }"
+        )
+
+        yield Message.Version, 1
+        while True:
+            data = self._graphql("AlbumListWithPeek", variables, query)
+
+            for album in data["album"]["list"]["items"]:
+                album["url"] = self.root + album["url"]
+                album["_extractor"] = LusciousAlbumExtractor
+                yield Message.Queue, album["url"], album
+
+            if not data["album"]["list"]["info"]["has_next_page"]:
+                return
+            variables["input"]["page"] += 1
