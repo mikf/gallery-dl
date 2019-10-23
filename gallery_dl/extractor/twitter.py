@@ -257,9 +257,15 @@ class TwitterTweetExtractor(TwitterExtractor):
         return {"user": self.user, "tweet_id": self.tweet_id}
 
     def tweets(self):
-        self.session.cookies.clear()
         url = "{}/i/web/status/{}".format(self.root, self.tweet_id)
-        page = self.request(url).text
+        cookies = {"app_shell_visited": "1"}
+        headers = {
+            "Referer"   : url,
+            "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; "
+                          "Trident/7.0; rv:11.0) like Gecko",
+        }
+
+        page = self.request(url, cookies=cookies, headers=headers).text
         end = page.index('class="js-tweet-stats-container')
         beg = page.rindex('<div class="tweet ', 0, end)
         return (page[beg:end],)
