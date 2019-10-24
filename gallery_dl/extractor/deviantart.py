@@ -58,9 +58,12 @@ class DeviantartExtractor(Extractor):
 
     def items(self):
         if self.user:
-            self.group = not self.api.user_profile(self.user)
+            profile = self.api.user_profile(self.user)
+            self.group = not profile
             if self.group:
                 self.subcategory = "group-" + self.subcategory
+            else:
+                self.user = profile["user"]["username"]
 
         yield Message.Version, 1
         for deviation in self.deviations():
