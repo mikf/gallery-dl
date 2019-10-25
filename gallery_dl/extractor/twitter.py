@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache
+from ..cache import cache, memcache
 import re
 
 
@@ -26,6 +26,7 @@ class TwitterExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
+        self.logged_in = False
         self.retweets = self.config("retweets", True)
         self.content = self.config("content", False)
         self.videos = self.config("videos", False)
@@ -53,10 +54,17 @@ class TwitterExtractor(Extractor):
                 yield Message.Urllist, urls, data
 
             if self.videos and "-videoContainer" in tweet:
+                url = self._video_from_tweet(data["tweet_id"])
+                ext = text.ext_from_url(url)
+
+                if ext == "m3u8":
+                    url = "ytdl:" + url
+                    data["extension"] = "mp4"
+                    data["_ytdl_extra"] = {"protocol": "m3u8_native"}
+                else:
+                    data["extension"] = ext
                 data["num"] = 1
-                data["extension"] = None
-                url = "ytdl:{}/{}/status/{}".format(
-                    self.root, data["user"], data["tweet_id"])
+
                 yield Message.Url, url, data
 
     def metadata(self):
@@ -70,6 +78,7 @@ class TwitterExtractor(Extractor):
         username, password = self._get_auth_info()
         if username:
             self._update_cookies(self._login_impl(username, password))
+            self.logged_in = True
 
     @cache(maxage=360*24*3600, keyarg=1)
     def _login_impl(self, username, password):
@@ -114,6 +123,36 @@ class TwitterExtractor(Extractor):
             cl, _, cr = content.rpartition("pic.twitter.com/")
             data["content"] = cl if cl and len(cr) < 16 else content
         return data
+
+    def _video_from_tweet(self, tweet_id):
+        url = "https://api.twitter.com/1.1/videos/tweet/config/{}.json".format(
+            tweet_id)
+        cookies = None
+        headers = {
+            "Origin"       : self.root,
+            "Referer"      : "{}/i/web/status/{}".format(self.root, tweet_id),
+            "x-csrf-token" : self.session.cookies.get("ct0"),
+            "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekM"
+                             "xqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28N"
+                             "HfOPqkca3qaAxGfsyKCs0wRbw",
+        }
+
+        if self.logged_in:
+            headers["x-twitter-auth-type"] = "OAuth2Session"
+        else:
+            token = self._guest_token(headers)
+            cookies = {"gt": token}
+            headers["x-guest-token"] = token
+
+        data = self.request(url, cookies=cookies, headers=headers).json()
+        return data["track"]["playbackUrl"]
+
+    @memcache()
+    def _guest_token(self, headers):
+        return self.request(
+            "https://api.twitter.com/1.1/guest/activate.json",
+            method="POST", headers=headers,
+        ).json().get("guest_token")
 
     def _tweets_from_api(self, url, max_position=None):
         params = {
@@ -231,7 +270,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {
             "options": (("videos", True),),
-            "pattern": r"ytdl:https://twitter.com/perrypumas/status/\d+",
+            "pattern": r"ytdl:https://video.twimg.com/ext_tw_video/.*.m3u8",
         }),
         # content with emoji, newlines, hashtags (#338)
         ("https://twitter.com/yumi_san0112/status/1151144618936823808", {
@@ -241,7 +280,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # Reply to another tweet (#403)
         ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
             "options": (("videos", True),),
-            "pattern": r"ytdl:https://twitter.com/.*/1103767554424598528$",
+            "pattern": r"ytdl:https://video.twimg.com/ext_tw_video/.*.m3u8",
         }),
         # /i/web/ URL
         ("https://twitter.com/i/web/status/1155074198240292865", {
