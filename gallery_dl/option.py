@@ -321,11 +321,24 @@ def build_parser():
     )
     postprocessor.add_argument(
         "--ugoira-conv",
-        dest="postprocessors",
-        action="append_const", const={"name": "ugoira", "ffmpeg-args": (
-            "-c:v", "libvpx", "-crf", "4", "-b:v", "5000k", "-an"),
-            "whitelist": ("pixiv", "danbooru")},
+        dest="postprocessors", action="append_const", const={
+            "name"          : "ugoira",
+            "ffmpeg-args"   : ("-c:v", "libvpx", "-crf", "4", "-b:v", "5000k"),
+            "ffmpeg-twopass": True,
+            "whitelist"     : ("pixiv", "danbooru"),
+        },
         help="Convert Pixiv Ugoira to WebM (requires FFmpeg)",
+    )
+    postprocessor.add_argument(
+        "--ugoira-conv-lossless",
+        dest="postprocessors", action="append_const", const={
+            "name"          : "ugoira",
+            "ffmpeg-args"   : ("-c:v", "libvpx-vp9", "-lossless", "1",
+                               "-pix_fmt", "yuv420p"),
+            "ffmpeg-twopass": False,
+            "whitelist"     : ("pixiv", "danbooru"),
+        },
+        help="Convert Pixiv Ugoira to WebM in VP9 lossless mode",
     )
     postprocessor.add_argument(
         "--write-metadata",
