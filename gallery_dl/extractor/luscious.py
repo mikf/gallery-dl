@@ -20,10 +20,10 @@ class LusciousExtractor(Extractor):
 
     def _graphql(self, op, variables, query):
         data = {
-            "id": 1,
+            "id"           : 1,
             "operationName": op,
-            "query": query,
-            "variables": variables,
+            "query"        : query,
+            "variables"    : variables,
         }
         response = self.request(
             "{}/graphql/nobatch/?operationName={}".format(self.root, op),
@@ -51,7 +51,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
             #  "keyword": "07c0b915f2ab1cc3bbf28b76e7950fccee1213f3",
-            "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
+            #  "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
@@ -80,6 +80,12 @@ class LusciousAlbumExtractor(LusciousExtractor):
         for num, image in enumerate(self.images(), 1):
             image["num"] = num
             image["album"] = album
+
+            image["thumbnail"] = image.pop("thumbnails")[0]["url"]
+            image["tags"] = [item["text"] for item in image["tags"]]
+            image["date"] = text.parse_timestamp(image["created"])
+            image["id"] = text.parse_int(image["id"])
+
             url = image["url_to_video"] or image["url_to_original"]
             yield Message.Url, url, text.nameext_from_url(url, image)
 
@@ -102,10 +108,23 @@ class LusciousAlbumExtractor(LusciousExtractor):
             "rl } }"
         )
 
-        data = self._graphql("AlbumGet", variables, query)["album"]["get"]
-        if "errors" in data:
+        album = self._graphql("AlbumGet", variables, query)["album"]["get"]
+        if "errors" in album:
             raise exception.NotFoundError("album")
-        return data
+
+        album["audiences"] = [item["title"] for item in album["audiences"]]
+        album["genres"] = [item["title"] for item in album["genres"]]
+        album["tags"] = [item["text"] for item in album["tags"]]
+
+        album["cover"] = album["cover"]["url"]
+        album["content"] = album["content"]["title"]
+        album["language"] = album["language"]["title"].partition(" ")[0]
+        album["created_by"] = album["created_by"]["display_name"]
+
+        album["id"] = text.parse_int(album["id"])
+        album["date"] = text.parse_timestamp(album["created"])
+
+        return album
 
     def images(self):
         variables = {
