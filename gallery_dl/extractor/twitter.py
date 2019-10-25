@@ -265,7 +265,11 @@ class TwitterTweetExtractor(TwitterExtractor):
                           "Trident/7.0; rv:11.0) like Gecko",
         }
 
-        page = self.request(url, cookies=cookies, headers=headers).text
+        response = self.request(url, cookies=cookies, headers=headers)
+        if response.history and response.url == self.root + "/":
+            raise exception.AuthorizationError()
+        page = response.text
+
         end = page.index('class="js-tweet-stats-container')
         beg = page.rindex('<div class="tweet ', 0, end)
         return (page[beg:end],)
