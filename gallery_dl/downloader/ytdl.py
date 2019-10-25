@@ -58,6 +58,11 @@ class YoutubeDLDownloader(DownloaderBase):
                 return self._download_playlist(pathfmt, info_dict)
             else:
                 info_dict = info_dict["entries"][index]
+
+        extra = pathfmt.kwdict.get("_ytdl_extra")
+        if extra:
+            info_dict.update(extra)
+
         return self._download_video(pathfmt, info_dict)
 
     def _download_video(self, pathfmt, info_dict):
