@@ -20,6 +20,7 @@ modules = [
     "adultempire",
     "artstation",
     "behance",
+    "blogger",
     "bobx",
     "danbooru",
     "deviantart",

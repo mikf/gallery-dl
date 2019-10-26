@@ -19,6 +19,7 @@ Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |artstation-C|
 Behance              https://www.behance.net/            Collections, Galleries, User Profiles
+Blogger              https://www.blogger.com/            Blogs, Posts
 BobX                 http://www.bobx.com/dark/           Galleries, Idols
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag-Searches         Optional
 Desuarchive          https://desuarchive.org/            Threads
