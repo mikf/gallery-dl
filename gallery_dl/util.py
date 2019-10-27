@@ -528,7 +528,7 @@ class PathFormat():
             self.filename_formatter = Formatter(
                 filename_fmt, kwdefault).format_map
         except Exception as exc:
-            raise exception.FormatError(exc, "filename")
+            raise exception.FilenameFormatError(exc)
 
         try:
             self.directory_formatters = [
@@ -536,7 +536,7 @@ class PathFormat():
                 for dirfmt in directory_fmt
             ]
         except Exception as exc:
-            raise exception.FormatError(exc, "directory")
+            raise exception.DirectoryFormatError(exc)
 
         self.directory = self.realdirectory = ""
         self.filename = ""
@@ -616,7 +616,7 @@ class PathFormat():
                 if segment:
                     append(self.clean_segment(segment))
         except Exception as exc:
-            raise exception.FormatError(exc, "directory")
+            raise exception.DirectoryFormatError(exc)
 
         # Join path segements
         sep = os.sep
@@ -673,7 +673,7 @@ class PathFormat():
             self.filename = filename = self.clean_path(self.clean_segment(
                 self.filename_formatter(self.kwdict)))
         except Exception as exc:
-            raise exception.FormatError(exc, "filename")
+            raise exception.FilenameFormatError(exc)
 
         # Combine directory and filename to full paths
         self.path = self.directory + filename
