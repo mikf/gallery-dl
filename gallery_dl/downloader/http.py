@@ -107,7 +107,7 @@ class HttpDownloader(DownloaderBase):
             elif code == 416 and filesize:  # Requested Range Not Satisfiable
                 break
             else:
-                msg = "{}: {} for url: {}".format(code, response.reason, url)
+                msg = "'{} {}' for '{}'".format(code, response.reason, url)
                 if code == 429 or 500 <= code < 600:  # Server Error
                     continue
                 self.log.warning("%s", msg)
