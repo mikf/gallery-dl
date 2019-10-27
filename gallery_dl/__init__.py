@@ -234,6 +234,7 @@ def main():
             if pformat and len(urls) > 1 and args.loglevel < logging.ERROR:
                 urls = progress(urls, pformat)
 
+            retval = 0
             for url in urls:
                 try:
                     log.debug("Starting %s for '%s'", jobtype.__name__, url)
@@ -241,17 +242,20 @@ def main():
                         for key, value in url.gconfig:
                             config.set(key, value)
                         with config.apply(url.lconfig):
-                            jobtype(url.value).run()
+                            retval |= jobtype(url.value).run()
                     else:
-                        jobtype(url).run()
+                        retval |= jobtype(url).run()
                 except exception.NoExtractorError:
                     log.error("No suitable extractor found for '%s'", url)
+                    retval |= 128
+            return retval
 
     except KeyboardInterrupt:
         sys.exit("\nKeyboardInterrupt")
     except BrokenPipeError:
         pass
-    except IOError as exc:
+    except OSError as exc:
         import errno
         if exc.errno != errno.EPIPE:
             raise
+    return 1
