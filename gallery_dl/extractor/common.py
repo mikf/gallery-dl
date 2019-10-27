@@ -111,7 +111,7 @@ class Extractor():
                         msg = ""
                     self.log.warning("Cloudflare CAPTCHA" + msg)
 
-                msg = "{}: {} for url: {}".format(code, response.reason, url)
+                msg = "'{} {}' for '{}'".format(code, response.reason, url)
                 if code < 500 and code != 429 and code != 430:
                     break
 
@@ -142,7 +142,7 @@ class Extractor():
         return username, password
 
     def _init_headers(self):
-        """Set additional headers for the 'session' object"""
+        """Initialize HTTP headers for the 'session' object"""
         headers = self.session.headers
         headers.clear()
 
