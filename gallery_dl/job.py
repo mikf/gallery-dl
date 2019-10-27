@@ -46,34 +46,18 @@ class Job():
             log = self.extractor.log
             for msg in self.extractor:
                 self.dispatch(msg)
-        except exception.AuthenticationError as exc:
-            msg = str(exc) or "Please provide a valid username/password pair."
-            log.error("Authentication failed: %s", msg)
-        except exception.AuthorizationError:
-            log.error("You do not have permission to access the resource "
-                      "at '%s'", self.extractor.url)
-        except exception.NotFoundError as exc:
-            res = str(exc) or "resource (gallery/image/user)"
-            log.error("The %s at '%s' does not exist", res, self.extractor.url)
-        except exception.HttpError as exc:
-            err = exc.args[0]
-            if isinstance(err, Exception):
-                err = "{}: {}".format(err.__class__.__name__, err)
-            log.error("HTTP request failed:  %s", err)
-        except exception.FormatError as exc:
-            err, obj = exc.args
-            log.error("Applying %s format string failed:  %s: %s",
-                      obj, err.__class__.__name__, err)
-        except exception.FilterError as exc:
-            err = exc.args[0]
-            log.error("Evaluating filter expression failed:  %s: %s",
-                      err.__class__.__name__, err)
-        except exception.StopExtraction:
-            pass
+        except exception.StopExtraction as exc:
+            if exc.message:
+                log.error("%s", exc.message)
+            return exc.code
+        except exception.GalleryDLException as exc:
+            log.error("%s: %s", exc.__class__.__name__, exc)
+            return exc.code
         except OSError as exc:
             log.error("Unable to download data:  %s: %s",
                       exc.__class__.__name__, exc)
             log.debug("", exc_info=True)
+            return 128
         except Exception as exc:
             log.error(("An unexpected error occurred: %s - %s. "
                        "Please run gallery-dl again with the --verbose flag, "
@@ -81,6 +65,9 @@ class Job():
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
             log.debug("", exc_info=True)
+            return 1
+        else:
+            return 0
         finally:
             self.handle_finalize()
 
@@ -504,6 +491,7 @@ class DataJob(Job):
 
         # dump to 'file'
         util.dump_json(self.data, self.file, self.ascii, 2)
+        return 0
 
     def handle_url(self, url, kwdict):
         self.data.append((Message.Url, url, self._filter(kwdict)))
