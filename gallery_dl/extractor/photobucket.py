@@ -149,10 +149,9 @@ class PhotobucketImageExtractor(Extractor):
             if "message" not in image:
                 break  # success
             tries += 1
-            self.log.debug("'%s'", image["message"])
+            self.log.debug(image["message"])
         else:
-            self.log.error("%s", image["message"])
-            raise exception.StopExtraction()
+            raise exception.StopExtraction(image["message"])
 
         # adjust metadata entries to be at least somewhat similar
         # to what the 'album' extractor provides

@@ -201,9 +201,8 @@ class SankakuTagExtractor(SankakuExtractor):
 
         tags = self.tags.split()
         if not self.logged_in and len(tags) > 4:
-            self.log.error("Unauthenticated users cannot use "
-                           "more than 4 tags at once.")
-            raise exception.StopExtraction()
+            raise exception.StopExtraction(
+                "Unauthenticated users cannot use more than 4 tags at once.")
         return {"search_tags": " ".join(tags)}
 
     def get_posts(self):

@@ -296,8 +296,8 @@ class OAuthMastodon(OAuthBase):
         data = self.session.post(url, data=data).json()
 
         if "client_id" not in data or "client_secret" not in data:
-            self.log.error("Failed to register new application: '%s'", data)
-            raise exception.StopExtraction()
+            raise exception.StopExtraction(
+                "Failed to register new application: '%s'", data)
 
         data["client-id"] = data.pop("client_id")
         data["client-secret"] = data.pop("client_secret")

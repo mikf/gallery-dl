@@ -29,8 +29,7 @@ class HbrowseBase():
 
         if not data["manga"] and "<b>Warning</b>" in page:
             msg = page.rpartition(">")[2].strip()
-            self.log.error("Site is not accessible: '%s'", msg)
-            raise exception.StopExtraction()
+            raise exception.StopExtraction("Site is not accessible: '%s'", msg)
 
         tags = text.extract(page, 'class="listTable"', '</table>', pos)[0]
 

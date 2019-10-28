@@ -100,7 +100,7 @@ class NoExtractorError(GalleryDLException):
 class StopExtraction(GalleryDLException):
     """Stop data extraction"""
 
-    def __init__(self, message=None):
+    def __init__(self, message=None, *args):
         GalleryDLException.__init__(self)
-        self.message = message
+        self.message = message % args if args else message
         self.code = 1 if message else 0

@@ -52,7 +52,7 @@ class SexcomExtractor(Extractor):
     def _parse_pin(self, url):
         response = self.request(url, fatal=False)
         if response.status_code >= 400:
-            self.log.warning('Unable to fetch %s ("%s: %s")',
+            self.log.warning('Unable to fetch %s ("%s %s")',
                              url, response.status_code, response.reason)
             return None
         extr = text.extract_from(response.text)

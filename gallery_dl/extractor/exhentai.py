@@ -69,8 +69,7 @@ class ExhentaiExtractor(Extractor):
     def login(self):
         """Login and set necessary cookies"""
         if self.LIMIT:
-            self.log.error("Image limit reached!")
-            raise exception.StopExtraction()
+            raise exception.StopExtraction("Image limit reached!")
         if self._check_cookies(self.cookienames):
             return
         username, password = self._get_auth_info()
@@ -235,9 +234,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 url = iurl
                 data = self._parse_image_info(url)
         except IndexError:
-            self.log.error("Unable to parse image info for '%s'", url)
             self.log.debug("Page content:\n%s", page)
-            raise exception.StopExtraction()
+            raise exception.StopExtraction(
+                "Unable to parse image info for '%s'", url)
 
         data["num"] = self.image_num
         data["image_token"] = self.key["start"] = extr('var startkey="', '";')
@@ -272,9 +271,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                     url = imgurl
                     data = self._parse_image_info(url)
             except IndexError:
-                self.log.error("Unable to parse image info for '%s'", url)
                 self.log.debug("Page content:\n%s", page)
-                raise exception.StopExtraction()
+                raise exception.StopExtraction(
+                    "Unable to parse image info for '%s'", url)
 
             data["num"] = request["page"]
             data["image_token"] = imgkey
@@ -311,12 +310,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self._remaining -= data["cost"]
 
         if self._remaining <= 0:
+            ExhentaiExtractor.LIMIT = True
             url = "{}/s/{}/{}-{}".format(
                 self.root, data["image_token"], self.gallery_id, data["num"])
-            self.log.error("Image limit reached! Continue with "
-                           "'%s' as URL after resetting it.", url)
-            ExhentaiExtractor.LIMIT = True
-            raise exception.StopExtraction()
+            raise exception.StopExtraction(
+                "Image limit reached! Continue with '%s' "
+                "as URL after resetting it.", url)
 
     def _update_limits(self):
         url = "https://e-hentai.org/home.php"

@@ -48,7 +48,7 @@ class Job():
                 self.dispatch(msg)
         except exception.StopExtraction as exc:
             if exc.message:
-                log.error("%s", exc.message)
+                log.error(exc.message)
             return exc.code
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
