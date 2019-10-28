@@ -67,7 +67,10 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         headers = {"Accept": "application/json"}
         images = self.request(url, headers=headers).json()
         return [
-            (urls["full"], {"image_id": text.parse_int(image_id)})
+            (
+                urls["full"].replace("/giant_thumb_", "/"),
+                {"image_id": text.parse_int(image_id)},
+            )
             for image_id, urls in sorted(images.items())
         ]
 
