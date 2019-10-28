@@ -407,26 +407,22 @@ class TumblrAPI(oauth.OAuth1API):
             # daily rate limit
             if response.headers.get("x-ratelimit-perday-remaining") == "0":
                 reset = response.headers.get("x-ratelimit-perday-reset")
-                self.log.error(
+                raise exception.StopExtraction(
                     "Daily API rate limit exceeded: aborting; "
-                    "rate limit will reset at %s",
-                    self._to_time(reset),
+                    "rate limit will reset at %s", self._to_time(reset),
                 )
-                raise exception.StopExtraction()
 
             # hourly rate limit
             reset = response.headers.get("x-ratelimit-perhour-reset")
             if reset:
                 self.log.info(
-                    "Hourly API rate limit exceeded; "
-                    "waiting until %s for rate limit reset",
-                    self._to_time(reset),
+                    "Hourly API rate limit exceeded; waiting until "
+                    "%s for rate limit reset", self._to_time(reset),
                 )
                 time.sleep(int(reset) + 1)
                 return self._call(blog, endpoint, params)
 
-        self.log.error(data)
-        raise exception.StopExtraction()
+        raise exception.StopExtraction(data)
 
     @staticmethod
     def _to_time(reset):

@@ -335,11 +335,9 @@ class PixivSearchExtractor(PixivExtractor):
     def get_metadata(self, user=None):
         query = text.parse_query(self.query)
 
-        if "word" in query:
-            self.word = text.unescape(query["word"])
-        else:
-            self.log.error("missing search term")
-            raise exception.StopExtraction()
+        if "word" not in query:
+            raise exception.StopExtraction("Missing search term")
+        self.word = query["word"]
 
         sort = query.get("order", "date_d")
         sort_map = {
@@ -504,8 +502,7 @@ class PixivAppAPI():
             return response.json()
         if response.status_code == 404:
             raise exception.NotFoundError()
-        self.log.error("API request failed: %s", response.text)
-        raise exception.StopExtraction()
+        raise exception.StopExtraction("API request failed: %s", response.text)
 
     def _pagination(self, endpoint, params):
         while True:

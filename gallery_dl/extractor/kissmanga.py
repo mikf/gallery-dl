@@ -33,10 +33,9 @@ class RedirectMixin():
                 except (EOFError, OSError):
                     pass
             else:
-                self.log.error(
+                raise exception.StopExtraction(
                     "Redirect to \n%s\nVisit this URL in your browser and "
                     "solve the CAPTCHA to continue", response.url)
-                raise exception.StopExtraction()
 
 
 class KissmangaBase(RedirectMixin):

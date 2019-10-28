@@ -31,10 +31,10 @@ class LusciousExtractor(Extractor):
         )
 
         if response.status_code >= 400:
-            self.log.error("GraphQL query failed ('%s %s')",
-                           response.status_code, response.reason)
             self.log.debug("Server response: %s", response.text)
-            raise exception.StopExtraction()
+            raise exception.StopExtraction(
+                "GraphQL query failed ('%s %s')",
+                response.status_code, response.reason)
 
         return response.json()["data"]
 

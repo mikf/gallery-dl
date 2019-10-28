@@ -113,10 +113,9 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
         response = self.request(url, headers=headers, fatal=False)
 
         if "/Auth/" in response.url:
-            self.log.error(
+            raise exception.StopExtraction(
                 "Failed to get gallery JSON data. Visit '%s' in a browser "
                 "and solve the CAPTCHA to continue.", response.url)
-            raise exception.StopExtraction()
 
         page = response.text
         tpl, pos = text.extract(page, 'data-cdn="', '"')
@@ -195,8 +194,8 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
                 return self._parse_simple(query)
             return self._parse_jsurl(query)
         except Exception as exc:
-            self.log.error("Invalid search query: '%s' (%s)", query, exc)
-            raise exception.StopExtraction()
+            raise exception.StopExtraction(
+                "Invalid search query '%s' (%s)", query, exc)
 
     @staticmethod
     def _parse_simple(query):

@@ -241,9 +241,8 @@ class PinterestAPI():
         if response.status_code == 404 or response.history:
             resource = self.extractor.subcategory.rpartition("-")[2]
             raise exception.NotFoundError(resource)
-        self.extractor.log.error("API request failed")
         self.extractor.log.debug("%s", response.text)
-        raise exception.StopExtraction()
+        raise exception.StopExtraction("API request failed")
 
     def _pagination(self, resource, options):
         while True:
