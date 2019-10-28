@@ -52,10 +52,10 @@ def advance(iterable, num):
     return iterator
 
 
-def raises(obj):
-    """Returns a function that raises 'obj' as exception"""
-    def wrap():
-        raise obj
+def raises(cls):
+    """Returns a function that raises 'cls' as exception"""
+    def wrap(*args):
+        raise cls(*args)
     return wrap
 
 
@@ -287,21 +287,21 @@ class UniquePredicate():
 
 class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
-    globalsdict = {
-        "parse_int": text.parse_int,
-        "urlsplit": urllib.parse.urlsplit,
-        "datetime": datetime.datetime,
-        "abort": raises(exception.StopExtraction()),
-        "re": re,
-    }
 
     def __init__(self, filterexpr, target="image"):
         name = "<{} filter>".format(target)
         self.codeobj = compile(filterexpr, name, "eval")
+        self.globals = {
+            "parse_int": text.parse_int,
+            "urlsplit" : urllib.parse.urlsplit,
+            "datetime" : datetime.datetime,
+            "abort"    : raises(exception.StopExtraction),
+            "re"       : re,
+        }
 
     def __call__(self, url, kwds):
         try:
-            return eval(self.codeobj, self.globalsdict, kwds)
+            return eval(self.codeobj, self.globals, kwds)
         except exception.GalleryDLException:
             raise
         except Exception as exc:
