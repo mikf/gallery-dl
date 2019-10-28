@@ -94,7 +94,8 @@ class BobxIdolExtractor(BobxExtractor):
     subcategory = "idol"
     pattern = r"(?:https?://)?(?:www\.)?bobx\.com/([^/]+/[^/?&#]+)/?$"
     test = ("http://www.bobx.com/idol/rin-okabe/", {
-        "url": "74d80bfcd53b738b31909bb42e5cc97c41b475b8",
+        "pattern": BobxGalleryExtractor.pattern,
+        "count": ">= 6",
     })
 
     def items(self):
@@ -107,6 +108,5 @@ class BobxIdolExtractor(BobxExtractor):
         for part in text.extract_iter(page, '="photoset/', '"'):
             # skip every other entry
             skip = not skip
-            if skip:
-                continue
-            yield Message.Queue, "{}photoset/{}".format(url, part), data
+            if not skip:
+                yield Message.Queue, "{}photoset/{}".format(url, part), data
