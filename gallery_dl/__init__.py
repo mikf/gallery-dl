@@ -247,7 +247,7 @@ def main():
                         retval |= jobtype(url).run()
                 except exception.NoExtractorError:
                     log.error("No suitable extractor found for '%s'", url)
-                    retval |= 128
+                    retval |= 64
             return retval
 
     except KeyboardInterrupt:

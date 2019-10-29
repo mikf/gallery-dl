@@ -29,6 +29,7 @@ class Job():
         extr.log.job = self
         extr.log.debug("Using %s for '%s'", extr.__class__.__name__, extr.url)
 
+        self.status = 0
         self.pred_url = self._prepare_predicates("image", True)
         self.pred_queue = self._prepare_predicates("chapter", False)
 
@@ -49,15 +50,15 @@ class Job():
         except exception.StopExtraction as exc:
             if exc.message:
                 log.error(exc.message)
-            return exc.code
+            self.status |= exc.code
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
-            return exc.code
+            self.status |= exc.code
         except OSError as exc:
             log.error("Unable to download data:  %s: %s",
                       exc.__class__.__name__, exc)
             log.debug("", exc_info=True)
-            return 128
+            self.status |= 128
         except Exception as exc:
             log.error(("An unexpected error occurred: %s - %s. "
                        "Please run gallery-dl again with the --verbose flag, "
@@ -65,11 +66,10 @@ class Job():
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
             log.debug("", exc_info=True)
-            return 1
-        else:
-            return 0
+            self.status |= 1
         finally:
             self.handle_finalize()
+        return self.status
 
     def dispatch(self, msg):
         """Call the appropriate message handler"""
@@ -207,6 +207,7 @@ class DownloadJob(Job):
                     break
             else:
                 # download failed
+                self.status |= 4
                 self.log.error("Failed to download %s",
                                pathfmt.filename or url)
                 return
@@ -249,7 +250,7 @@ class DownloadJob(Job):
         else:
             extr = extractor.find(url)
         if extr:
-            self.__class__(extr, self).run()
+            self.status |= self.__class__(extr, self).run()
         else:
             self._write_unsupported(url)
 
