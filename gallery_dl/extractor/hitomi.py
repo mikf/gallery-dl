@@ -11,6 +11,7 @@
 from .common import GalleryExtractor
 from .. import text, util
 import string
+import json
 
 
 class HitomiGalleryExtractor(GalleryExtractor):
@@ -86,25 +87,19 @@ class HitomiGalleryExtractor(GalleryExtractor):
         # see https://ltn.hitomi.la/common.js
         offset = text.parse_int(self.gallery_id[-1]) % 3
         subdomain = chr(97 + offset) + "a"
-        base = "https://" + subdomain + ".hitomi.la/galleries/"
+        base = "https://{}.hitomi.la/galleries/{}/".format(
+            subdomain, self.gallery_id)
 
         # set Referer header before image downloads (#239)
         self.session.headers["Referer"] = self.gallery_url
 
-        # handle Game CG galleries with scenes (#321)
-        scenes = text.extract(page, "var scene_indexes = [", "]")[0]
-        if scenes and scenes.strip():
-            url = "{}/reader/{}.html".format(self.root, self.gallery_id)
-            page = self.request(url).text
-            begin, end = ">//g.hitomi.la/galleries/", "</div>"
-        elif self.fallback:
-            begin, end = ">//g.hitomi.la/galleries/", "</div>"
-        else:
-            begin, end = "'//tn.hitomi.la/smalltn/", ".jpg',"
+        # get 'galleryinfo'
+        url = "https://ltn.hitomi.la/galleries/{}.js".format(self.gallery_id)
+        page = self.request(url).text
 
         return [
-            (base + urlpart, None)
-            for urlpart in text.extract_iter(page, begin, end)
+            (base + image["name"], None)
+            for image in json.loads(page.partition("=")[2])
         ]
 
     @staticmethod
