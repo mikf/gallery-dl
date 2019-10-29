@@ -101,17 +101,17 @@ class Job():
                 )
             # TODO: support for multiple message versions
 
-    def handle_url(self, url, keywords):
+    def handle_url(self, url, kwdict):
         """Handle Message.Url"""
 
-    def handle_urllist(self, urls, keywords):
+    def handle_urllist(self, urls, kwdict):
         """Handle Message.Urllist"""
-        self.handle_url(urls[0], keywords)
+        self.handle_url(urls[0], kwdict)
 
-    def handle_directory(self, keywords):
+    def handle_directory(self, kwdict):
         """Handle Message.Directory"""
 
-    def handle_queue(self, url, keywords):
+    def handle_queue(self, url, kwdict):
         """Handle Message.Queue"""
 
     def handle_finalize(self):
@@ -119,8 +119,9 @@ class Job():
 
     def update_kwdict(self, kwdict):
         """Update 'kwdict' with additional metadata"""
-        kwdict["category"] = self.extractor.category
-        kwdict["subcategory"] = self.extractor.subcategory
+        extr = self.extractor
+        kwdict["category"] = extr.category
+        kwdict["subcategory"] = extr.subcategory
         if self.userkwds:
             kwdict.update(self.userkwds)
 
@@ -176,14 +177,14 @@ class DownloadJob(Job):
         self.postprocessors = None
         self.out = output.select()
 
-    def handle_url(self, url, keywords, fallback=None):
+    def handle_url(self, url, kwdict, fallback=None):
         """Download the resource specified in 'url'"""
         postprocessors = self.postprocessors
         pathfmt = self.pathfmt
         archive = self.archive
 
         # prepare download
-        pathfmt.set_filename(keywords)
+        pathfmt.set_filename(kwdict)
 
         if postprocessors:
             for pp in postprocessors:
@@ -223,28 +224,28 @@ class DownloadJob(Job):
         pathfmt.finalize()
         self.out.success(pathfmt.path, 0)
         if archive:
-            archive.add(keywords)
+            archive.add(kwdict)
         if postprocessors:
             for pp in postprocessors:
                 pp.run_after(pathfmt)
         self._skipcnt = 0
 
-    def handle_urllist(self, urls, keywords):
+    def handle_urllist(self, urls, kwdict):
         """Download the resource specified in 'url'"""
         fallback = iter(urls)
         url = next(fallback)
-        self.handle_url(url, keywords, fallback)
+        self.handle_url(url, kwdict, fallback)
 
-    def handle_directory(self, keywords):
+    def handle_directory(self, kwdict):
         """Set and create the target directory for downloads"""
         if not self.pathfmt:
-            self.initialize(keywords)
+            self.initialize(kwdict)
         else:
-            self.pathfmt.set_directory(keywords)
+            self.pathfmt.set_directory(kwdict)
 
-    def handle_queue(self, url, keywords):
-        if "_extractor" in keywords:
-            extr = keywords["_extractor"].from_url(url)
+    def handle_queue(self, url, kwdict):
+        if "_extractor" in kwdict:
+            extr = kwdict["_extractor"].from_url(url)
         else:
             extr = extractor.find(url)
         if extr:
@@ -297,11 +298,11 @@ class DownloadJob(Job):
             self.downloaders[scheme] = instance
         return instance
 
-    def initialize(self, keywords=None):
+    def initialize(self, kwdict=None):
         """Delayed initialization of PathFormat, etc."""
         self.pathfmt = util.PathFormat(self.extractor)
-        if keywords:
-            self.pathfmt.set_directory(keywords)
+        if kwdict:
+            self.pathfmt.set_directory(kwdict)
 
         self.sleep = self.extractor.config("sleep")
         if not self.extractor.config("download", True):
@@ -368,15 +369,15 @@ class DownloadJob(Job):
 class SimulationJob(DownloadJob):
     """Simulate the extraction process without downloading anything"""
 
-    def handle_url(self, url, keywords, fallback=None):
-        self.pathfmt.set_filename(keywords)
+    def handle_url(self, url, kwdict, fallback=None):
+        self.pathfmt.set_filename(kwdict)
         self.out.skip(self.pathfmt.path)
         if self.sleep:
             time.sleep(self.sleep)
         if self.archive:
-            self.archive.add(keywords)
+            self.archive.add(kwdict)
 
-    def handle_directory(self, keywords):
+    def handle_directory(self, kwdict):
         if not self.pathfmt:
             self.initialize()
 
@@ -384,19 +385,19 @@ class SimulationJob(DownloadJob):
 class KeywordJob(Job):
     """Print available keywords"""
 
-    def handle_url(self, url, keywords):
+    def handle_url(self, url, kwdict):
         print("\nKeywords for filenames and --filter:")
         print("------------------------------------")
-        self.print_keywords(keywords)
+        self.print_kwdict(kwdict)
         raise exception.StopExtraction()
 
-    def handle_directory(self, keywords):
+    def handle_directory(self, kwdict):
         print("Keywords for directory names:")
         print("-----------------------------")
-        self.print_keywords(keywords)
+        self.print_kwdict(kwdict)
 
-    def handle_queue(self, url, keywords):
-        if not keywords:
+    def handle_queue(self, url, kwdict):
+        if not kwdict:
             self.extractor.log.info(
                 "This extractor delegates work to other extractors "
                 "and does not provide any keywords on its own. Try "
@@ -404,27 +405,27 @@ class KeywordJob(Job):
         else:
             print("Keywords for --chapter-filter:")
             print("------------------------------")
-            self.print_keywords(keywords)
+            self.print_kwdict(kwdict)
             if self.extractor.categorytransfer:
                 print()
                 KeywordJob(url, self).run()
         raise exception.StopExtraction()
 
     @staticmethod
-    def print_keywords(keywords, prefix=""):
-        """Print key-value pairs with formatting"""
+    def print_kwdict(kwdict, prefix=""):
+        """Print key-value pairs in 'kwdict' with formatting"""
         suffix = "]" if prefix else ""
-        for key, value in sorted(keywords.items()):
+        for key, value in sorted(kwdict.items()):
             if key[0] == "_":
                 continue
             key = prefix + key + suffix
 
             if isinstance(value, dict):
-                KeywordJob.print_keywords(value, key + "[")
+                KeywordJob.print_kwdict(value, key + "[")
 
             elif isinstance(value, list):
                 if value and isinstance(value[0], dict):
-                    KeywordJob.print_keywords(value[0], key + "[][")
+                    KeywordJob.print_kwdict(value[0], key + "[][")
                 else:
                     print(key, "[]", sep="")
                     for val in value:
