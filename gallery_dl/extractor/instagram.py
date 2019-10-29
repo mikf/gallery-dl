@@ -101,8 +101,16 @@ class InstagramExtractor(Extractor):
 
     def _extract_shared_data(self, url):
         page = self.request(url).text
-        data = text.extract(page, 'window._sharedData = ', ';</script>')[0]
-        return json.loads(data)
+        shared_data, pos = text.extract(
+            page, 'window._sharedData =', ';</script>')
+        additional_data, pos = text.extract(
+            page, 'window.__additionalDataLoaded(', ');</script>', pos)
+
+        data = json.loads(shared_data)
+        if additional_data:
+            next(iter(data['entry_data'].values()))[0] = \
+                json.loads(additional_data.partition(',')[2])
+        return data
 
     def _extract_postpage(self, url):
         shared_data = self._extract_shared_data(url)
