@@ -50,6 +50,7 @@ modules = [
     "imgth",
     "imgur",
     "instagram",
+    "issuu",
     "keenspot",
     "khinsider",
     "kissmanga",
