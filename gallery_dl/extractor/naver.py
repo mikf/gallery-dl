@@ -22,19 +22,20 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
     """Extractor for blog posts on blog.naver.com"""
     subcategory = "post"
     filename_fmt = "{num:>03}.{extension}"
-    directory_fmt = ("{category}", "{blog_id} {user}", "{post_num} {title}")
-    archive_fmt = "{blog_id}_{post_num}_{num}"
+    directory_fmt = ("{category}", "{blog[user]} {blog[id]}",
+                     "{post[date]:%Y-%m-%d} {post[title]}")
+    archive_fmt = "{blog[id]}_{post[num]}_{num}"
     pattern = (r"(?:https?://)?blog\.naver\.com/"
                r"(?:PostView\.nhn\?blogId=(\w+)&logNo=(\d+)|(\w+)/(\d+)/?$)")
     test = (
         ("https://blog.naver.com/rlfqjxm0/221430673006", {
             "url": "6c694f3aced075ed5e9511f1e796d14cb26619cc",
-            "keyword": "f0cc292cb29da5692217fae75aa6384763ebe72c",
+            "keyword": "a6e23d19afbee86b37d6e7ad934650c379d2cb1e",
         }),
         (("https://blog.naver.com/PostView.nhn"
           "?blogId=rlfqjxm0&logNo=221430673006"), {
             "url": "6c694f3aced075ed5e9511f1e796d14cb26619cc",
-            "keyword": "f0cc292cb29da5692217fae75aa6384763ebe72c",
+            "keyword": "a6e23d19afbee86b37d6e7ad934650c379d2cb1e",
         }),
     )
 
@@ -53,17 +54,22 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        return {
-            "title"      : extr('"og:title" content="', '"'),
-            "description": extr('"og:description" content="', '"'),
-            "post_num"   : text.parse_int(self.post_id),
-            "blog_num"   : text.parse_int(extr("var blogNo = '", "'")),
-            "blog_id"    : self.blog_id,
-            "user"       : extr("var nickName = '", "'"),
-            "date"       : text.parse_datetime(
-                extr('se_publishDate pcol2">', '<') or
-                extr('_postAddDate">', '<'), "%Y. %m. %d. %H:%M"),
+        data = {
+            "post": {
+                "title"      : extr('"og:title" content="', '"'),
+                "description": extr('"og:description" content="', '"'),
+                "num"        : text.parse_int(self.post_id),
+            },
+            "blog": {
+                "id"         : self.blog_id,
+                "num"        : text.parse_int(extr("var blogNo = '", "'")),
+                "user"       : extr("var nickName = '", "'"),
+            },
         }
+        data["post"]["date"] = text.parse_datetime(
+            extr('se_publishDate pcol2">', '<') or
+            extr('_postAddDate">', '<'), "%Y. %m. %d. %H:%M")
+        return data
 
     def images(self, page):
         return [
