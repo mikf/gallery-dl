@@ -18,7 +18,9 @@ class HitomiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
     root = "https://hitomi.la"
-    pattern = r"(?:https?://)?hitomi\.la/(?:galleries|reader)/(\d+)"
+    pattern = (r"(?:https?://)?hitomi\.la"
+               r"/(?:manga|doujinshi|cg|gamecg|galleries|reader)"
+               r"/(?:[^/?&#]+-)?(\d+)")
     test = (
         ("https://hitomi.la/galleries/867789.html", {
             "pattern": r"https://aa.hitomi.la/galleries/867789/\d+.jpg",
@@ -40,6 +42,11 @@ class HitomiGalleryExtractor(GalleryExtractor):
             "url": "055c898a36389719799d6bce76889cc4ea4421fc",
             "count": 1413,
         }),
+        ("https://hitomi.la/manga/amazon-no-hiyaku-867789.html"),
+        ("https://hitomi.la/manga/867789.html"),
+        ("https://hitomi.la/doujinshi/867789.html"),
+        ("https://hitomi.la/cg/867789.html"),
+        ("https://hitomi.la/gamecg/867789.html"),
         ("https://hitomi.la/reader/867789.html"),
     )
 
@@ -55,6 +62,11 @@ class HitomiGalleryExtractor(GalleryExtractor):
             self.fallback = True
             url = url.replace("/galleries/", "/reader/")
             response = GalleryExtractor.request(self, url, **kwargs)
+        elif b"<title>Redirect</title>" in response.content:
+            url = text.extract(response.text, "href='", "'")[0]
+            if not url.startswith("http"):
+                url = text.urljoin(self.root, url)
+            response = self.request(url, **kwargs)
         return response
 
     def metadata(self, page):
