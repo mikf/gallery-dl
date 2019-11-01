@@ -113,8 +113,8 @@ class InstagramExtractor(Extractor):
         return data
 
     def _extract_postpage(self, url):
-        shared_data = self._extract_shared_data(url)
-        media = shared_data['entry_data']['PostPage'][0]['graphql']['shortcode_media']
+        data = self.request(url + "?__a=1").json()
+        media = data['graphql']['shortcode_media']
 
         common = {
             'date': text.parse_timestamp(media['taken_at_timestamp']),
