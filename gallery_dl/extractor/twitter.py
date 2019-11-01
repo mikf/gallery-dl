@@ -54,17 +54,20 @@ class TwitterExtractor(Extractor):
                 yield Message.Urllist, urls, data
 
             if self.videos and "-videoContainer" in tweet:
-                url = self._video_from_tweet(data["tweet_id"])
-                ext = text.ext_from_url(url)
-
-                if ext == "m3u8":
-                    url = "ytdl:" + url
-                    data["extension"] = "mp4"
-                    data["_ytdl_extra"] = {"protocol": "m3u8_native"}
+                if self.videos == "ytdl":
+                    data["extension"] = None
+                    url = "ytdl:{}/{}/status/{}".format(
+                        self.root, data["user"], data["tweet_id"])
                 else:
-                    data["extension"] = ext
+                    url = self._video_from_tweet(data["tweet_id"])
+                    ext = text.ext_from_url(url)
+                    if ext == "m3u8":
+                        url = "ytdl:" + url
+                        data["extension"] = "mp4"
+                        data["_ytdl_extra"] = {"protocol": "m3u8_native"}
+                    else:
+                        data["extension"] = ext
                 data["num"] = 1
-
                 yield Message.Url, url, data
 
     def metadata(self):
@@ -279,8 +282,8 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         # Reply to another tweet (#403)
         ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
-            "options": (("videos", True),),
-            "pattern": r"ytdl:https://video.twimg.com/ext_tw_video/.*.m3u8",
+            "options": (("videos", "ytdl"),),
+            "pattern": r"ytdl:https://twitter.com/.+/1103767554424598528",
         }),
         # /i/web/ URL
         ("https://twitter.com/i/web/status/1155074198240292865", {

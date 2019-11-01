@@ -1029,9 +1029,15 @@ Description Extract images from retweets.
 extractor.twitter.videos
 ------------------------
 =========== =====
-Type        ``bool``
+Type        ``bool`` or ``string``
 Default     ``false``
-Description Use `youtube-dl`_ to download from video tweets.
+Description Control video download behavior.
+
+            * ``true``: Download videos and use `youtube-dl`_ to handle
+              HLS ``.m3u8`` manifests
+            * ``"ytdl"``: Download videos and let `youtube-dl`_ handle all of
+              video extraction and download
+            * ``false``: Skip video Tweets
 =========== =====
 
 
