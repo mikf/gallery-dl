@@ -22,11 +22,11 @@ class PhotobucketAlbumExtractor(Extractor):
     filename_fmt = "{offset:>03}{pictureId:?_//}_{titleOrFilename}.{extension}"
     archive_fmt = "{id}"
     pattern = (r"(?:https?://)?((?:[^.]+\.)?photobucket\.com)"
-               r"/user/[^/?&#]+/library/[^?&#]*")
+               r"/user/[^/?&#]+/library(?:/[^?&#]*)?")
     test = (
-        ("https://s258.photobucket.com/user/focolandia/library/", {
-            "pattern": r"https?://[oi]+\d+.photobucket.com/albums/hh280/",
-            "count": ">= 39"
+        ("https://s369.photobucket.com/user/CrpyLrkr/library", {
+            "pattern": r"https?://[oi]+\d+.photobucket.com/albums/oo139/",
+            "count": ">= 50"
         }),
         # subalbums of main "directory"
         ("https://s271.photobucket.com/user/lakerfanryan/library/", {
