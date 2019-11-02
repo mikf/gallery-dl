@@ -10,7 +10,6 @@ Site                 URL                                 Capabilities           
 4chan                https://www.4chan.org/              Threads
 4plebs               https://archive.4plebs.org/         Threads
 500px                https://500px.com/                  Galleries, individual Images, User Profiles
-8chan                https://8ch.net/                    Threads
 8muses               https://www.8muses.com/             Albums
 Adobe Portfolio      https://www.myportfolio.com/        Galleries
 Adult Empire         https://www.adultempire.com/        Galleries
