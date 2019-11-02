@@ -78,7 +78,7 @@ class FoolfuukaThreadExtractor(SharedConfigMixin, Extractor):
 
 EXTRACTORS = {
     "4plebs": {
-        "name": "fourplebs",
+        "name": "_4plebs",
         "root": "https://archive.4plebs.org",
         "pattern": r"(?:archive\.)?4plebs\.org",
         "test-thread": ("https://archive.4plebs.org/tg/thread/54059290", {

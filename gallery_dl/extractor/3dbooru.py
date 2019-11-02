@@ -11,7 +11,7 @@
 from . import booru
 
 
-class ThreedeebooruExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
+class _3dbooruExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
     """Base class for 3dbooru extractors"""
     category = "3dbooru"
     api_url = "http://behoimi.org/post/index.json"
@@ -26,8 +26,7 @@ class ThreedeebooruExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
         })
 
 
-class ThreedeebooruTagExtractor(booru.TagMixin,
-                                ThreedeebooruExtractor):
+class _3dbooruTagExtractor(booru.TagMixin, _3dbooruExtractor):
     """Extractor for images from behoimi.org based on search-tags"""
     pattern = (r"(?:https?://)?(?:www\.)?behoimi\.org/post"
                r"(?:/(?:index)?)?\?tags=(?P<tags>[^&#]+)")
@@ -37,8 +36,7 @@ class ThreedeebooruTagExtractor(booru.TagMixin,
     })
 
 
-class ThreedeebooruPoolExtractor(booru.PoolMixin,
-                                 ThreedeebooruExtractor):
+class _3dbooruPoolExtractor(booru.PoolMixin, _3dbooruExtractor):
     """Extractor for image-pools from behoimi.org"""
     pattern = r"(?:https?://)?(?:www\.)?behoimi\.org/pool/show/(?P<pool>\d+)"
     test = ("http://behoimi.org/pool/show/27", {
@@ -47,8 +45,7 @@ class ThreedeebooruPoolExtractor(booru.PoolMixin,
     })
 
 
-class ThreedeebooruPostExtractor(booru.PostMixin,
-                                 ThreedeebooruExtractor):
+class _3dbooruPostExtractor(booru.PostMixin, _3dbooruExtractor):
     """Extractor for single images from behoimi.org"""
     pattern = r"(?:https?://)?(?:www\.)?behoimi\.org/post/show/(?P<post>\d+)"
     test = ("http://behoimi.org/post/show/140852", {
@@ -64,8 +61,7 @@ class ThreedeebooruPostExtractor(booru.PostMixin,
     })
 
 
-class ThreedeebooruPopularExtractor(booru.MoebooruPopularMixin,
-                                    ThreedeebooruExtractor):
+class _3dbooruPopularExtractor(booru.MoebooruPopularMixin, _3dbooruExtractor):
     """Extractor for popular images from behoimi.org"""
     pattern = (r"(?:https?://)?(?:www\.)?behoimi\.org"
                r"/post/popular_(?P<scale>by_(?:day|week|month)|recent)"

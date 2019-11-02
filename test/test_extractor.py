@@ -157,22 +157,12 @@ class TestExtractor(unittest.TestCase):
         def capitalize(c):
             if "-" in c:
                 return string.capwords(c.replace("-", " ")).replace(" ", "")
-            if "." in c:
-                c = c.replace(".", "")
             return c.capitalize()
 
-        mapping = {
-            "2chan"  : "futaba",
-            "3dbooru": "threedeebooru",
-            "4plebs" : "fourplebs",
-            "oauth"  : None,
-        }
-
         for extr in extractor.extractors():
-            category = mapping.get(extr.category, extr.category)
-            if category:
+            if extr.category not in ("", "oauth"):
                 expected = "{}{}Extractor".format(
-                    capitalize(category),
+                    capitalize(extr.category),
                     capitalize(extr.subcategory),
                 )
                 if expected[0].isdigit():

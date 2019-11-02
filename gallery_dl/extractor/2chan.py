@@ -6,13 +6,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.2chan.net/"""
+"""Extractors for https://www.2chan.net/"""
 
 from .common import Extractor, Message
 from .. import text
 
 
-class FutabaThreadExtractor(Extractor):
+class _2chanThreadExtractor(Extractor):
     """Extractor for images from threads on www.2chan.net"""
     category = "2chan"
     subcategory = "thread"
