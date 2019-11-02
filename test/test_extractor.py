@@ -164,9 +164,7 @@ class TestExtractor(unittest.TestCase):
         mapping = {
             "2chan"  : "futaba",
             "3dbooru": "threedeebooru",
-            "4chan"  : "fourchan",
             "4plebs" : "fourplebs",
-            "8chan"  : "infinitychan",
             "oauth"  : None,
         }
 
