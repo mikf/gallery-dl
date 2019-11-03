@@ -49,6 +49,11 @@ Be sure the Python interpreter used for pip_ is version 3.4 or higher.
 You might have to use :code:`pip3` or :code:`python3 -m pip`
 depending on your system's defaults.
 
+Please note that for optimal operation using the latest version of pip_ is advised,
+including the essential packages :code:`setuptools` and :code:`wheel`.
+To ensure that these packages are up-to-date (this applies to all platforms), please run
+:code:`python -m pip install --upgrade pip setuptools wheel`
+
 
 From Source
 -----------
