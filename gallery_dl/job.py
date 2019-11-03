@@ -67,6 +67,9 @@ class Job():
                       exc.__class__.__name__, exc)
             log.debug("", exc_info=True)
             self.status |= 1
+        except BaseException:
+            self.status |= 1
+            raise
         finally:
             self.handle_finalize()
         return self.status
@@ -255,13 +258,15 @@ class DownloadJob(Job):
             self._write_unsupported(url)
 
     def handle_finalize(self):
-        if self.postprocessors:
-            for pp in self.postprocessors:
-                pp.finalize()
+        pathfmt = self.pathfmt
         if self.archive:
             self.archive.close()
-        if self.pathfmt:
+        if pathfmt:
             self.extractor._store_cookies()
+            if self.postprocessors:
+                status = self.status
+                for pp in self.postprocessors:
+                    pp.run_final(pathfmt, status)
 
     def handle_skip(self):
         self.out.skip(self.pathfmt.path)

@@ -31,8 +31,8 @@ class PostProcessor():
         """Execute postprocessor after moving a file to its target location"""
 
     @staticmethod
-    def finalize():
-        """Cleanup"""
+    def run_final(pathfmt, status):
+        """Postprocessor finalization after all files have been downloaded"""
 
     def __repr__(self):
         return self.__class__.__name__

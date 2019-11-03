@@ -59,7 +59,7 @@ class ZipPP(PostProcessor):
         with zipfile.ZipFile(*self.args) as zfile:
             self._write(pathfmt, zfile)
 
-    def finalize(self):
+    def run_final(self, pathfmt, status):
         if self.zfile:
             self.zfile.close()
 

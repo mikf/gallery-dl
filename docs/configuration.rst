@@ -1388,12 +1388,31 @@ Description Controls whether to wait for a subprocess to finish
 exec.command
 ------------
 =========== =====
-Type        ``list`` of ``strings``
-Example     ``["echo", "{user[account]}", "{id}"]``
+Type        ``string`` or ``list`` of ``strings``
+Example     * ``"convert {} {}.png && rm {}"``
+            * ``["echo", "{user[account]}", "{id}"]``
 Description The command to run.
 
-            Each element of this list is treated as a `format string`_ using
-            the files' metadata.
+            * If this is a ``string``, it will be executed using the system's
+              shell, e.g. ``/bin/sh``. Any ``{}`` will be replaced
+              with the full path of a file or target directory, depending on
+              `exec.final`_
+
+            * If this is a ``list``, the first element specifies the program
+              name and any further elements its arguments.
+              Each element of this list is treated as a `format string`_ using
+              the files' metadata as well as ``{_path}``, ``{_directory}``,
+              and ``{_filename}``.
+=========== =====
+
+exec.final
+----------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Controls whether to execute `exec.command`_ for each
+            downloaded file or only once after all files
+            have been downloaded successfully.
 =========== =====
 
 
