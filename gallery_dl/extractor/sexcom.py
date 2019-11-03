@@ -21,6 +21,7 @@ class SexcomExtractor(Extractor):
     root = "https://www.sex.com"
 
     def items(self):
+        self.session.headers["Referer"] = self.root
         yield Message.Version, 1
         yield Message.Directory, self.metadata()
         for pin in map(self._parse_pin, self.pins()):
@@ -102,6 +103,7 @@ class SexcomPinExtractor(SexcomExtractor):
         # picture
         ("https://www.sex.com/pin/56714360/", {
             "url": "599190d6e3d79f9f49dda194a0a58cb0ffa3ab86",
+            "content": "963ed681cf53904173c7581b713c7f9471f04db0",
             "keyword": {
                 "comments": int,
                 "date": "2018-10-02T21:18:17-04:00",
