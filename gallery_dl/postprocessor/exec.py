@@ -26,17 +26,26 @@ class ExecPP(PostProcessor):
     def __init__(self, pathfmt, options):
         PostProcessor.__init__(self)
         args = options["command"]
+        final = options.get("final", False)
 
         if isinstance(args, str):
+            if final:
+                self._format = self._format_args_directory
+            else:
+                self._format = self._format_args_path
             if "{}" not in args:
                 args += " {}"
             self.args = args
             self.shell = True
-            self._format = self._format_args_string
         else:
+            self._format = self._format_args_list
             self.args = [util.Formatter(arg) for arg in args]
             self.shell = False
-            self._format = self._format_args_list
+
+        if final:
+            self.run_after = PostProcessor.run_after
+        else:
+            self.run_final = PostProcessor.run_final
 
         if options.get("async", False):
             self._exec = self._exec_async
@@ -44,8 +53,15 @@ class ExecPP(PostProcessor):
     def run_after(self, pathfmt):
         self._exec(self._format(pathfmt))
 
-    def _format_args_string(self, pathfmt):
+    def run_final(self, pathfmt, status):
+        if status == 0:
+            self._exec(self._format(pathfmt))
+
+    def _format_args_path(self, pathfmt):
         return self.args.replace("{}", quote(pathfmt.realpath))
+
+    def _format_args_directory(self, pathfmt):
+        return self.args.replace("{}", quote(pathfmt.realdirectory))
 
     def _format_args_list(self, pathfmt):
         kwdict = pathfmt.kwdict

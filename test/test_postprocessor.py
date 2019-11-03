@@ -327,7 +327,7 @@ class ZipTest(BasePostprocessorTest):
             self.assertEqual(len(pp.zfile.NameToInfo), 3)
 
         # close file
-        pp.finalize()
+        pp.run_final(self.pathfmt, 0)
 
         # reopen to check persistence
         with zipfile.ZipFile(pp.zfile.filename) as file:
@@ -360,7 +360,7 @@ class ZipTest(BasePostprocessorTest):
         pp.prepare(self.pathfmt)
         pp.run(self.pathfmt)
 
-        pp.finalize()
+        pp.run_final(self.pathfmt, 0)
 
         self.assertEqual(pp.zfile.write.call_count, 3)
         for call in pp.zfile.write.call_args_list:
