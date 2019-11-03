@@ -36,17 +36,13 @@ class InstagramExtractor(Extractor):
             data.update(metadata)
             yield Message.Directory, data
 
-            if data['typename'] in ('GraphImage', 'GraphStoryImage', 'GraphStoryVideo'):
-                yield Message.Url, data['display_url'], \
-                    text.nameext_from_url(data['display_url'], data)
-            elif data['typename'] == 'GraphVideo':
-                data["extension"] = None
-                yield Message.Url, \
-                    'ytdl:{}/p/{}/'.format(self.root, data['shortcode']), data
-            elif data['typename'] == 'GraphHighlightReel':
+            if data['typename'] == 'GraphHighlightReel':
                 url = '{}/stories/highlights/{}/'.format(self.root, data['id'])
                 data['_extractor'] = InstagramStoriesExtractor
                 yield Message.Queue, url, data
+            else:
+                url = data['video_url'] or data['display_url']
+                yield Message.Url, url, text.nameext_from_url(url, data)
 
     def login(self):
         if self._check_cookies(self.cookienames):
@@ -130,7 +126,6 @@ class InstagramExtractor(Extractor):
 
         medias = []
         if media['__typename'] == 'GraphSidecar':
-            yi = 0
             for n in media['edge_sidecar_to_children']['edges']:
                 children = n['node']
                 media_data = {
@@ -138,14 +133,12 @@ class InstagramExtractor(Extractor):
                     'shortcode': children['shortcode'],
                     'typename': children['__typename'],
                     'display_url': children['display_url'],
+                    'video_url': children.get('video_url'),
                     'height': text.parse_int(children['dimensions']['height']),
                     'width': text.parse_int(children['dimensions']['width']),
                     'sidecar_media_id': media['id'],
                     'sidecar_shortcode': media['shortcode'],
                 }
-                if children['__typename'] == 'GraphVideo':
-                    media_data['_ytdl_index'] = yi
-                    yi += 1
                 media_data.update(common)
                 medias.append(media_data)
 
@@ -155,6 +148,7 @@ class InstagramExtractor(Extractor):
                 'shortcode': media['shortcode'],
                 'typename': media['__typename'],
                 'display_url': media['display_url'],
+                'video_url': media.get('video_url'),
                 'height': text.parse_int(media['dimensions']['height']),
                 'width': text.parse_int(media['dimensions']['width']),
             }
@@ -326,7 +320,7 @@ class InstagramImageExtractor(InstagramExtractor):
 
         # GraphVideo
         ("https://www.instagram.com/p/Bqxp0VSBgJg/", {
-            "url": "8f38c1cf460c9804842f7306c487410f33f82e7e",
+            "pattern": r"/47129943_191645575115739_8539303288426725376_n\.mp4",
             "keyword": {
                 "date": "type:datetime",
                 "description": str,
@@ -342,7 +336,7 @@ class InstagramImageExtractor(InstagramExtractor):
 
         # GraphVideo (IGTV)
         ("https://www.instagram.com/tv/BkQjCfsBIzi/", {
-            "url": "64208f408e11cbbca86c2df4488e90262ae9d9ec",
+            "pattern": r"/10000000_1760663964018792_716207142595461120_n\.mp4",
             "keyword": {
                 "date": "type:datetime",
                 "description": str,
@@ -359,11 +353,10 @@ class InstagramImageExtractor(InstagramExtractor):
         # GraphSidecar with 2 embedded GraphVideo objects
         ("https://www.instagram.com/p/BtOvDOfhvRr/", {
             "count": 2,
-            "url": "e290d4180a58ae50c910d51d3b04d5f5c4622cd7",
             "keyword": {
                 "sidecar_media_id": "1967717017113261163",
                 "sidecar_shortcode": "BtOvDOfhvRr",
-                "_ytdl_index": int,
+                "video_url": str,
             }
         })
     )
