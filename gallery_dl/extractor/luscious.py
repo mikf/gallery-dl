@@ -50,12 +50,59 @@ class LusciousAlbumExtractor(LusciousExtractor):
     test = (
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
-            #  "keyword": "07c0b915f2ab1cc3bbf28b76e7950fccee1213f3",
             #  "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
+            "keyword": {
+                "album": {
+                    "__typename"  : "Album",
+                    "audiences"   : list,
+                    "content"     : "Hentai",
+                    "cover"       : "re:https://cdnio.luscious.net/.+/277031/",
+                    "created"     : 1479625853,
+                    "created_by"  : "NTRshouldbeillegal",
+                    "date"        : "type:datetime",
+                    "description" : "Enjoy.",
+                    "download_url": "/download/824778/277031/",
+                    "genres"      : list,
+                    "id"          : 277031,
+                    "is_manga"    : True,
+                    "labels"      : list,
+                    "language"    : "English",
+                    "like_status" : "none",
+                    "modified"    : int,
+                    "permissions" : list,
+                    "rating"      : float,
+                    "slug"        : "okinami-no-koigokoro",
+                    "status"      : "not_moderated",
+                    "tags"        : list,
+                    "title"       : "Okinami no Koigokoro",
+                    "url"         : "/albums/okinami-no-koigokoro_277031/",
+                    "marked_for_deletion": False,
+                    "marked_for_processing": False,
+                    "number_of_animated_pictures": 0,
+                    "number_of_favorites": int,
+                    "number_of_pictures": 18,
+                },
+                "aspect_ratio": r"re:\d+:\d+",
+                "category"    : "luscious",
+                "created"     : int,
+                "date"        : "type:datetime",
+                "height"      : int,
+                "id"          : int,
+                "is_animated" : False,
+                "like_status" : "none",
+                "position"    : int,
+                "resolution"  : r"re:\d+x\d+",
+                "status"      : "not_moderated",
+                "tags"        : list,
+                "thumbnail"   : str,
+                "title"       : str,
+                "width"       : int,
+                "number_of_comments": int,
+                "number_of_favorites": int,
+            },
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
             "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
-            #  "keyword": "e1202078b504adeccd521aa932f456a5a85479a0",
         }),
         ("https://luscious.net/albums/not-found_277035/", {
             "exception": exception.NotFoundError,
@@ -93,21 +140,98 @@ class LusciousAlbumExtractor(LusciousExtractor):
         variables = {
             "id": self.album_id,
         }
-        query = (
-            "query AlbumGet($id: ID!) { album { get(id: $id) { ... on Album { "
-            "...AlbumStandard } ... on MutationError { errors { code message }"
-            " } } } } fragment AlbumStandard on Album { __typename id title la"
-            "bels description created modified like_status number_of_favorites"
-            " rating status marked_for_deletion marked_for_processing number_o"
-            "f_pictures number_of_animated_pictures slug is_manga url download"
-            "_url permissions cover { width height size url } created_by { id "
-            "name display_name user_title name display_name avatar { url size "
-            "} url } content { id title url } language { id title url } tags {"
-            " id category slug text url count } genres { id title slug url } a"
-            "udiences { id title url url } last_viewed_picture { id position u"
-            "rl } }"
-        )
 
+        query = """
+query AlbumGet($id: ID!) {
+    album {
+        get(id: $id) {
+            ... on Album {
+                ...AlbumStandard
+            }
+            ... on MutationError {
+                errors {
+                    code
+                    message
+                }
+            }
+        }
+    }
+}
+
+fragment AlbumStandard on Album {
+    __typename
+    id
+    title
+    labels
+    description
+    created
+    modified
+    like_status
+    number_of_favorites
+    rating
+    status
+    marked_for_deletion
+    marked_for_processing
+    number_of_pictures
+    number_of_animated_pictures
+    slug
+    is_manga
+    url
+    download_url
+    permissions
+    cover {
+        width
+        height
+        size
+        url
+    }
+    created_by {
+        id
+        name
+        display_name
+        user_title
+        avatar {
+            url
+            size
+        }
+        url
+    }
+    content {
+        id
+        title
+        url
+    }
+    language {
+        id
+        title
+        url
+    }
+    tags {
+        id
+        category
+        text
+        url
+        count
+    }
+    genres {
+        id
+        title
+        slug
+        url
+    }
+    audiences {
+        id
+        title
+        url
+        url
+    }
+    last_viewed_picture {
+        id
+        position
+        url
+    }
+}
+"""
         album = self._graphql("AlbumGet", variables, query)["album"]["get"]
         if "errors" in album:
             raise exception.NotFoundError("album")
@@ -137,19 +261,65 @@ class LusciousAlbumExtractor(LusciousExtractor):
                 "page"   : 1,
             },
         }
-        query = (
-            "query AlbumListOwnPictures($input: PictureListInput!) { picture {"
-            " list(input: $input) { info { ...FacetCollectionInfo } items { .."
-            ".PictureStandardWithoutAlbum } } } } fragment FacetCollectionInfo"
-            " on FacetCollectionInfo { page has_next_page has_previous_page to"
-            "tal_items total_pages items_per_page url_complete url_filters_onl"
-            "y } fragment PictureStandardWithoutAlbum on Picture { __typename "
-            "id title created like_status number_of_comments number_of_favorit"
-            "es status width height resolution aspect_ratio url_to_original ur"
-            "l_to_video is_animated position tags { id category slug text url "
-            "} permissions url thumbnails { width height size url } }"
-        )
 
+        query = """
+query AlbumListOwnPictures($input: PictureListInput!) {
+    picture {
+        list(input: $input) {
+            info {
+                ...FacetCollectionInfo
+            }
+            items {
+                ...PictureStandardWithoutAlbum
+            }
+        }
+    }
+}
+
+fragment FacetCollectionInfo on FacetCollectionInfo {
+    page
+    has_next_page
+    has_previous_page
+    total_items
+    total_pages
+    items_per_page
+    url_complete
+    url_filters_only
+}
+
+fragment PictureStandardWithoutAlbum on Picture {
+    __typename
+    id
+    title
+    created
+    like_status
+    number_of_comments
+    number_of_favorites
+    status
+    width
+    height
+    resolution
+    aspect_ratio
+    url_to_original
+    url_to_video
+    is_animated
+    position
+    tags {
+        id
+        category
+        text
+        url
+    }
+    permissions
+    url
+    thumbnails {
+        width
+        height
+        size
+        url
+    }
+}
+"""
         while True:
             data = self._graphql("AlbumListOwnPictures", variables, query)
             yield from data["picture"]["list"]["items"]
@@ -190,20 +360,88 @@ class LusciousSearchExtractor(LusciousExtractor):
                 "page": text.parse_int(page, 1),
             },
         }
-        query = (
-            "query AlbumListWithPeek($input: AlbumListInput!) { album { list(i"
-            "nput: $input) { info { ...FacetCollectionInfo } items { ...AlbumM"
-            "inimal peek_thumbnails { width height size url } } } } } fragment"
-            " FacetCollectionInfo on FacetCollectionInfo { page has_next_page "
-            "has_previous_page total_items total_pages items_per_page url_comp"
-            "lete url_filters_only } fragment AlbumMinimal on Album { __typena"
-            "me id title labels description created modified number_of_favorit"
-            "es number_of_pictures slug is_manga url download_url cover { widt"
-            "h height size url } content { id title url } language { id title "
-            "url } tags { id category slug text url count } genres { id title "
-            "slug url } audiences { id title url } }"
-        )
 
+        query = """
+query AlbumListWithPeek($input: AlbumListInput!) {
+    album {
+        list(input: $input) {
+            info {
+                ...FacetCollectionInfo
+            }
+            items {
+                ...AlbumMinimal
+                peek_thumbnails {
+                    width
+                    height
+                    size
+                    url
+                }
+            }
+        }
+    }
+}
+
+fragment FacetCollectionInfo on FacetCollectionInfo {
+    page
+    has_next_page
+    has_previous_page
+    total_items
+    total_pages
+    items_per_page
+    url_complete
+    url_filters_only
+}
+
+fragment AlbumMinimal on Album {
+    __typename
+    id
+    title
+    labels
+    description
+    created
+    modified
+    number_of_favorites
+    number_of_pictures
+    slug
+    is_manga
+    url
+    download_url
+    cover {
+        width
+        height
+        size
+        url
+    }
+    content {
+        id
+        title
+        url
+    }
+    language {
+        id
+        title
+        url
+    }
+    tags {
+        id
+        category
+        text
+        url
+        count
+    }
+    genres {
+        id
+        title
+        slug
+        url
+    }
+    audiences {
+        id
+        title
+        url
+    }
+}
+"""
         yield Message.Version, 1
         while True:
             data = self._graphql("AlbumListWithPeek", variables, query)
