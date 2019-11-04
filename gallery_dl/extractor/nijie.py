@@ -20,7 +20,7 @@ class NijieExtractor(AsynchronousMixin, Extractor):
     """Base class for nijie extractors"""
     category = "nijie"
     directory_fmt = ("{category}", "{user_id}")
-    filename_fmt = "{category}_{artist_id}_{image_id}_p{num:>02}.{extension}"
+    filename_fmt = "{image_id}_p{num}.{extension}"
     archive_fmt = "{image_id}_{num}"
     cookiedomain = "nijie.info"
     cookienames = ("nemail", "nlogin")
