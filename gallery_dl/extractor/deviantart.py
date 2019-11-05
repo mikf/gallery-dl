@@ -801,6 +801,14 @@ class DeviantartScrapsExtractor(DeviantartExtractorV2):
     )
 
     def deviations(self):
+        # copy self.session
+        session = self.session.__class__()
+        for attr in session.__attrs__:
+            setattr(session, attr, getattr(self.session, attr, None))
+
+        # reset cookies in the original session object
+        self.session.cookies = session.cookies.__class__()
+
         url = self.root + "/_napi/da-user-profile/api/gallery/contents"
         params = {
             "username"     : self.user,
@@ -813,7 +821,8 @@ class DeviantartScrapsExtractor(DeviantartExtractorV2):
         }
 
         while True:
-            data = self.request(url, params=params, headers=headers).json()
+            data = self.request(
+                url, session=session, params=params, headers=headers).json()
 
             for obj in data["results"]:
                 yield obj["deviation"]
