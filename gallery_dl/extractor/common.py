@@ -37,16 +37,19 @@ class Extractor():
         self.session = requests.Session()
         self.log = logging.getLogger(self.category)
         self.url = match.string
-        self._init_headers()
-        self._init_cookies()
-        self._init_proxies()
+
+        self._cookiefile = None
+        self._cookiejar = self.session.cookies
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
-        self._cookiefile = None
 
         if self._retries < 0:
             self._retries = float("inf")
+
+        self._init_headers()
+        self._init_cookies()
+        self._init_proxies()
 
     @classmethod
     def from_url(cls, url):
@@ -183,7 +186,7 @@ class Extractor():
                 except OSError as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
-                    self.session.cookies.update(cookiejar)
+                    self._cookiejar.update(cookiejar)
                     self._cookiefile = cookiefile
             else:
                 self.log.warning(
@@ -199,10 +202,10 @@ class Extractor():
         """Store the session's cookiejar in a cookies.txt file"""
         if self._cookiefile and self.config("cookies-update", False):
             cookiejar = http.cookiejar.MozillaCookieJar()
-            for cookie in self.session.cookies:
+            for cookie in self._cookiejar:
                 cookiejar.set_cookie(cookie)
             try:
-                cookiejar.save(self.cookiefile)
+                cookiejar.save(self._cookiefile)
             except OSError as exc:
                 self.log.warning("cookies: %s", exc)
 
@@ -211,7 +214,7 @@ class Extractor():
         if isinstance(cookies, dict):
             self._update_cookies_dict(cookies, domain or self.cookiedomain)
         else:
-            setcookie = self.session.cookies.set_cookie
+            setcookie = self._cookiejar.set_cookie
             try:
                 cookies = iter(cookies)
             except TypeError:
@@ -222,17 +225,17 @@ class Extractor():
 
     def _update_cookies_dict(self, cookiedict, domain):
         """Update cookiejar with name-value pairs from a dict"""
-        setcookie = self.session.cookies.set
+        setcookie = self._cookiejar.set
         for name, value in cookiedict.items():
             setcookie(name, value, domain=domain)
 
-    def _check_cookies(self, cookienames, *, domain=""):
+    def _check_cookies(self, cookienames, *, domain=None):
         """Check if all 'cookienames' are in the session's cookiejar"""
-        if not domain:
+        if domain is None:
             domain = self.cookiedomain
         try:
             for name in cookienames:
-                self.session.cookies._find(name, domain)
+                self._cookiejar._find(name, domain)
         except KeyError:
             return False
         return True
