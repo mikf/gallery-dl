@@ -29,6 +29,7 @@ class YoutubeDLDownloader(DownloaderBase):
             "nocheckcertificate": not self.config("verify", extractor._verify),
             "nopart": not self.part,
             "updatetime": self.config("mtime", True),
+            "proxy": extractor.session.proxies.get("http"),
         }
         options.update(self.config("raw-options") or {})
 
