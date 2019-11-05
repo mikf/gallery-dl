@@ -68,7 +68,7 @@ class Extractor():
         return config.interpolate(
             ("extractor", self.category, self.subcategory, key), default)
 
-    def request(self, url, method="GET", *, session=None, retries=None,
+    def request(self, url, *, method="GET", session=None, retries=None,
                 encoding=None, fatal=True, notfound=None, **kwargs):
         tries = 1
         retries = self._retries if retries is None else retries

@@ -49,7 +49,7 @@ class PlurkExtractor(Extractor):
         data = {"plurk_id": plurk["id"], "count": "200"}
 
         while True:
-            info = self.request(url, "POST", data=data).json()
+            info = self.request(url, method="POST", data=data).json()
             yield from info["responses"]
             if not info["has_newer"]:
                 return
@@ -91,7 +91,8 @@ class PlurkTimelineExtractor(PlurkExtractor):
             offset = datetime.datetime.strptime(
                 plurks[-1]["posted"], "%a, %d %b %Y %H:%M:%S %Z")
             data["offset"] = offset.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            response = self.request(url, "POST", headers=headers, data=data)
+            response = self.request(
+                url, method="POST", headers=headers, data=data)
             plurks = response.json()["plurks"]
 
 

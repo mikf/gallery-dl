@@ -90,7 +90,7 @@ class ImgbbExtractor(Extractor):
                     return
                 params["seek"] = data["seekEnd"]
                 params["page"] += 1
-            data = self.request(endpoint, "POST", data=params).json()
+            data = self.request(endpoint, method="POST", data=params).json()
             page = data["html"]
 
 
