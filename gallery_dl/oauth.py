@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -126,7 +126,7 @@ class OAuth1API():
             self.session = extractor.session
             self.api_key = api_key
 
-    def request(self, url, method="GET", **kwargs):
+    def request(self, url, **kwargs):
         kwargs["fatal"] = None
         kwargs["session"] = self.session
-        return self.extractor.request(url, method, **kwargs)
+        return self.extractor.request(url, **kwargs)
