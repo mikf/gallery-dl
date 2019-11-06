@@ -263,11 +263,53 @@ class DeviantartExtractor(Extractor):
             content.update(download)
 
 
+class DeviantartUserExtractor(Extractor):
+    """Extractor for an artist's user profile"""
+    category = "deviantart"
+    subcategory = "user"
+    pattern = BASE_PATTERN + r"/?$"
+    test = (
+        ("https://www.deviantart.com/shimoda7", {
+            "options": (("include", "gsjf"),),
+            "pattern": r"/shimoda7/(gallery(/scraps)?|posts|favourites)",
+            "count": 4,
+        }),
+        ("https://shimoda7.deviantart.com/"),
+    )
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.user = match.group(1) or match.group(2)
+
+        incl = self.config("include") or "g"
+        if isinstance(incl, list):
+            incl = "".join(item[0] for item in incl if item)
+        self.include = incl.lower()
+
+    def items(self):
+        base = "https://www.deviantart.com/{}/".format(self.user)
+        incl = self.include
+        data = {}
+
+        if "g" in incl:
+            data["_extractor"] = DeviantartGalleryExtractor
+            yield Message.Queue, base + "gallery", data
+        if "s" in incl:
+            data["_extractor"] = DeviantartScrapsExtractor
+            yield Message.Queue, base + "gallery/scraps", data
+        if "j" in incl:
+            data["_extractor"] = DeviantartJournalExtractor
+            yield Message.Queue, base + "posts", data
+        if "f" in incl:
+            data["_extractor"] = DeviantartFavoriteExtractor
+            yield Message.Queue, base + "favourites", data
+
+
 class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
     archive_fmt = "g_{username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"(?:/(?:gallery(?:/all|/?\?catpath=)?/?)?)?$"
+    pattern = BASE_PATTERN + r"/gallery(?:/all|/?\?catpath=)?/?$"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery/", {
             "pattern": r"https://(www.deviantart.com/download/\d+/"
@@ -318,12 +360,12 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
             },
         }),
         # group
-        ("https://www.deviantart.com/yakuzafc", {
+        ("https://www.deviantart.com/yakuzafc/gallery", {
             "pattern": r"https://www.deviantart.com/yakuzafc/gallery/0/",
             "count": ">= 15",
         }),
         # 'folders' option (#276)
-        ("https://www.deviantart.com/justatest235723", {
+        ("https://www.deviantart.com/justatest235723/gallery", {
             "count": 3,
             "options": (("metadata", 1), ("folders", 1), ("original", 0)),
             "keyword": {
@@ -338,11 +380,9 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
             "exception": exception.NotFoundError,
         }),
 
-        ("https://www.deviantart.com/shimoda7"),
         ("https://www.deviantart.com/shimoda7/gallery"),
         ("https://www.deviantart.com/shimoda7/gallery/all"),
         ("https://www.deviantart.com/shimoda7/gallery/?catpath=/"),
-        ("https://shimoda7.deviantart.com/"),
         ("https://shimoda7.deviantart.com/gallery/"),
         ("https://shimoda7.deviantart.com/gallery/all/"),
         ("https://shimoda7.deviantart.com/gallery/?catpath=/"),

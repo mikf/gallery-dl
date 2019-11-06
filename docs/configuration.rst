@@ -548,6 +548,22 @@ Description Provide a ``folders`` metadata field that contains the names of all
 =========== =====
 
 
+extractor.deviantart.include
+----------------------------
+=========== =====
+Type        ``list`` of ``strings`` or ``string``
+Default     ``["gallery"]``
+Description Selects the subcategories to include when processing a user profile.
+
+            Possible values are ``"gallery"``, ``"scraps"``, ``"journal"``,
+            ``"favorite"``.
+
+            It is also possible to use a string with the initial character of
+            each subcategory, i.e. ``"gsj"`` for
+            ``["gallery", "scraps", "journal"]``
+=========== =====
+
+
 extractor.deviantart.journals
 -----------------------------
 =========== =====
