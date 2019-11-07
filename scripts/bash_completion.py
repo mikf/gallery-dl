@@ -47,7 +47,7 @@ for action in option.build_parser()._actions:
         if opt.startswith("--"):
             opts.append(opt)
 
-PATH = util.path("gallery-dl.bash_completion")
+PATH = util.path("build/completion/gallery-dl")
 with open(PATH, "w", encoding="utf-8") as file:
     file.write(TEMPLATE % {
         "opts"    : " ".join(opts),
