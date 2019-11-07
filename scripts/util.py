@@ -8,4 +8,6 @@ sys.path.insert(0, os.path.realpath(ROOTDIR))
 
 
 def path(*segments, join=os.path.join):
-    return join(ROOTDIR, *segments)
+    result = join(ROOTDIR, *segments)
+    os.makedirs(os.path.dirname(result), exist_ok=True)
+    return result

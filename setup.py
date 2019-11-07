@@ -36,9 +36,9 @@ VERSION = re.search(
 FILES = [
     (path, [f for f in files if check_file(f)])
     for (path, files) in [
-        ('etc/bash_completion.d', ['gallery-dl.bash_completion']),
-        ('share/man/man1'       , ['gallery-dl.1']),
-        ('share/man/man5'       , ['gallery-dl.conf.5']),
+        ("share/bash-completion/completions", ["build/completion/gallery-dl"]),
+        ("share/man/man1"                   , ["build/man/gallery-dl.1"]),
+        ("share/man/man5"                   , ["build/man/gallery-dl.conf.5"]),
     ]
 ]
 

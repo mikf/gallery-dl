@@ -99,7 +99,7 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
         ))
 
     if not path:
-        path = util.path("gallery-dl.1")
+        path = util.path("build/man/gallery-dl.1")
     with open(path, "w", encoding="utf-8") as file:
         file.write(TEMPLATE.lstrip() % {
             "options": "\n".join(options),
@@ -217,7 +217,7 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
                     content.append(strip_rst(text, field != "Example"))
 
     if not path:
-        path = util.path("gallery-dl.conf.5")
+        path = util.path("build/man/gallery-dl.conf.5")
     with open(path, "w", encoding="utf-8") as file:
         file.write(TEMPLATE.lstrip() % {
             "options": "\n".join(content),
