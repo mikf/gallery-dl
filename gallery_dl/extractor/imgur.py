@@ -94,6 +94,9 @@ class ImgurImageExtractor(ImgurExtractor):
             "url": "a2220eb265a55b0c95e0d3d721ec7665460e3fd7",
             "content": "a3c080e43f58f55243ab830569ba02309d59abfc",
         }),
+        ("https://imgur.com/XFfsmuC", {  # missing title in API response (#467)
+            "keyword": {"title": "Tears are a natural response to irritants"},
+        }),
         ("https://imgur.com/HjoXJAd", {  # url ends with '.jpg?1'
             "url": "ec2cf11a2bfb4939feff374781a6e6f3e9af8e8e",
         }),
@@ -111,6 +114,10 @@ class ImgurImageExtractor(ImgurExtractor):
 
     def items(self):
         image = self.api.image(self.key)
+        if not image["title"]:
+            page = self.request(self.root + "/" + self.key, fatal=False).text
+            title = text.extract(page, "<title>", "<")[0]
+            image["title"] = (title or "").rpartition(" - ")[0].strip()
         url = self._prepare(image)
         yield Message.Version, 1
         yield Message.Directory, image
