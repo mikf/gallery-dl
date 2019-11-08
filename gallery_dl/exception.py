@@ -67,7 +67,7 @@ class AuthenticationError(ExtractionError):
 
 class AuthorizationError(ExtractionError):
     """Insufficient privileges to access a resource"""
-    default = "Insufficient privileges to access a resource"
+    default = "Insufficient privileges to access the specified resource"
     code = 16
 
 
