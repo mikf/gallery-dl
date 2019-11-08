@@ -101,7 +101,7 @@ apps:
     command-chain:
     - bin/gallery-dl-launch
     command: bin/gallery-dl
-    completer: etc/bash_completion.d/gallery-dl.bash_completion
+    completer: share/bash-completion/completions/gallery-dl
     environment:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
