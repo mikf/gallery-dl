@@ -137,7 +137,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 ==================== =================================== ================================================== ================
 
 .. |artstation-C| replace:: Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results, User Profiles
-.. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh
+.. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, User Profiles
 .. |flickr-C| replace:: Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles
 .. |hentaifoundry-C| replace:: Favorites, individual Images, Popular Images, Recent Images, Scraps, User Profiles
 .. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, User Profiles
