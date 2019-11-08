@@ -1,6 +1,32 @@
 # Changelog
 
-## Unreleased
+## 1.11.0 - 2019-11-08
+### Additions
+- Support for
+  - `blogger` - https://www.blogger.com/ ([#364](https://github.com/mikf/gallery-dl/issues/364))
+  - `nozomi`  - https://nozomi.la/       ([#388](https://github.com/mikf/gallery-dl/issues/388))
+  - `issuu`   - https://issuu.com/       ([#413](https://github.com/mikf/gallery-dl/issues/413))
+  - `naver`   - https://blog.naver.com/  ([#447](https://github.com/mikf/gallery-dl/issues/447))
+- Extractor for `twitter` search results ([#448](https://github.com/mikf/gallery-dl/issues/448))
+- Extractor for `deviantart` user profiles with configurable targets ([#377](https://github.com/mikf/gallery-dl/issues/377), [#419](https://github.com/mikf/gallery-dl/issues/419))
+- `--ugoira-conv-lossless` ([#432](https://github.com/mikf/gallery-dl/issues/432))
+- `cookies-update` option to allow updating cookies.txt files ([#445](https://github.com/mikf/gallery-dl/issues/445))
+- Optional `cloudflare` and `video` installation targets ([#460](https://github.com/mikf/gallery-dl/issues/460))
+- Allow executing commands with the `exec` post-processor after all files are downloaded ([#413](https://github.com/mikf/gallery-dl/issues/413), [#421](https://github.com/mikf/gallery-dl/issues/421))
+### Changes
+- Rewrite `imgur` using its public API ([#446](https://github.com/mikf/gallery-dl/issues/446))
+- Rewrite `luscious` using GraphQL queries ([#457](https://github.com/mikf/gallery-dl/issues/457))
+- Adjust default `nijie` filenames to match `pixiv`
+- Change enumeration index for gallery extractors from `page` to `num`
+- Return non-zero exit status when errors occurred
+- Forward proxy settings to youtube-dl downloader
+- Install bash completion script into `share/bash-completion/completions`
+### Fixes
+- Adapt to new `instagram` page layout when logged in ([#391](https://github.com/mikf/gallery-dl/issues/391))
+- Support protected `twitter` videos ([#452](https://github.com/mikf/gallery-dl/issues/452))
+- Extend `hitomi` URL pattern and fix gallery extraction
+- Restore OAuth2 authentication error messages
+- Miscellaneous fixes for `patreon` ([#444](https://github.com/mikf/gallery-dl/issues/444)), `deviantart` ([#455](https://github.com/mikf/gallery-dl/issues/455)), `sexcom` ([#464](https://github.com/mikf/gallery-dl/issues/464)), `imgur` ([#467](https://github.com/mikf/gallery-dl/issues/467)), `simplyhentai`
 
 ## 1.10.6 - 2019-10-11
 ### Additions

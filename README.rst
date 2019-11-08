@@ -47,9 +47,9 @@ pip_ as well:
 
 Note: Windows users should use :code:`py -3` instead of :code:`python3`.
 
-It is advised to use the latest version of pip_,
-including the essential packages :code:`setuptools` and :code:`wheel`.
-To ensure that these packages are up-to-date, run
+| It is advised to use the latest version of pip_,
+  including the essential packages :code:`setuptools` and :code:`wheel`.
+| To ensure that these packages are up-to-date, run
 
 .. code:: bash
 
