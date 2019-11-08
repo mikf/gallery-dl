@@ -36,23 +36,24 @@ easily installed or upgraded using pip_:
 
 .. code:: bash
 
-    $ pip install --upgrade gallery-dl
+    $ python3 -m pip install --upgrade gallery-dl
 
 Installing the latest dev-version directly from GitHub can be done with
 pip_ as well:
 
 .. code:: bash
 
-    $ pip install --upgrade https://github.com/mikf/gallery-dl/archive/master.zip
+    $ python3 -m pip install --upgrade https://github.com/mikf/gallery-dl/archive/master.tar.gz
 
-Be sure the Python interpreter used for pip_ is version 3.4 or higher.
-You might have to use :code:`pip3` or :code:`python3 -m pip`
-depending on your system's defaults.
+Note: Windows users should use :code:`py -3` instead of :code:`python3`.
 
-Please note that for optimal operation using the latest version of pip_ is advised,
+It is advised to use the latest version of pip_,
 including the essential packages :code:`setuptools` and :code:`wheel`.
-To ensure that these packages are up-to-date (this applies to all platforms), please run
-:code:`python -m pip install --upgrade pip setuptools wheel`
+To ensure that these packages are up-to-date, run
+
+.. code:: bash
+
+    $ python3 -m pip install --upgrade pip setuptools wheel
 
 
 From Source
@@ -67,13 +68,13 @@ Navigate into the respective directory and run the :code:`setup.py` file.
 
 .. code:: bash
 
-    $ wget https://github.com/mikf/gallery-dl/archive/master.zip
-    $ unzip master.zip
+    $ wget https://github.com/mikf/gallery-dl/archive/master.tar.gz
+    $ tar -xf master.tar.gz
     # or
     $ git clone https://github.com/mikf/gallery-dl.git
 
-    $ cd gallery-dl
-    $ python setup.py install
+    $ cd gallery-dl*
+    $ python3 setup.py install
 
 
 Standalone Executable
