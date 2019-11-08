@@ -10,6 +10,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+data/
 build/
 develop-eggs/
 dist/
@@ -57,13 +58,6 @@ docs/_build/
 
 # PyBuilder
 target/
-
-# Manpages
-gallery-dl.1
-gallery-dl.conf.5
-
-# Bash completion
-gallery-dl.bash_completion
 
 # Snap packaging specific
 /snap/.snapcraft/

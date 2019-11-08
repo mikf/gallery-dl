@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixes
+- Fix inclusion of bash completion and man pages in source distributions
+
 ## 1.11.0 - 2019-11-08
 ### Additions
 - Support for

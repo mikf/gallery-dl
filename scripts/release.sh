@@ -27,6 +27,7 @@ update() {
 
     sed -i "s#\"${PYVERSION}\"#\"${NEWVERSION}\"#" "gallery_dl/version.py"
     sed -i "s#v${OLDVERSION}#v${NEWVERSION}#" "${README}"
+    make man
 }
 
 update-dev() {
