@@ -89,6 +89,7 @@ class LivedoorBlogExtractor(LivedoorExtractor):
         ("http://blog.livedoor.jp/zatsu_ke/", {
             "range": "1-50",
             "count": 50,
+            "archive": False,
             "pattern": r"https?://livedoor.blogimg.jp/\w+/imgs/\w/\w/\w+\.\w+",
             "keyword": {
                 "post": {
