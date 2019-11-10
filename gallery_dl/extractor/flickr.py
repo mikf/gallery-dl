@@ -280,18 +280,22 @@ class FlickrAPI(oauth.OAuth1API):
     API_KEY = "ac4fd7aa98585b9eee1ba761c209de68"
     API_SECRET = "3adb0f568dc68393"
     FORMATS = [
-        ("o", "Original"    , None),
-        ("k", "Large 2048"  , 2048),
-        ("h", "Large 1600"  , 1600),
-        ("l", "Large"       , 1024),
-        ("c", "Medium 800"  , 800),
-        ("z", "Medium 640"  , 640),
-        ("m", "Medium"      , 500),
-        ("n", "Small 320"   , 320),
-        ("s", "Small"       , 240),
-        ("q", "Large Square", 150),
-        ("t", "Thumbnail"   , 100),
-        ("s", "Square"      , 75),
+        ("o" , "Original"    , None),
+        ("6k", "X-Large 6K"  , 6144),
+        ("5k", "X-Large 5K"  , 5120),
+        ("4k", "X-Large 4K"  , 4096),
+        ("3k", "X-Large 3K"  , 3072),
+        ("k" , "Large 2048"  , 2048),
+        ("h" , "Large 1600"  , 1600),
+        ("l" , "Large"       , 1024),
+        ("c" , "Medium 800"  , 800),
+        ("z" , "Medium 640"  , 640),
+        ("m" , "Medium"      , 500),
+        ("n" , "Small 320"   , 320),
+        ("s" , "Small"       , 240),
+        ("q" , "Large Square", 150),
+        ("t" , "Thumbnail"   , 100),
+        ("s" , "Square"      , 75),
     ]
     VIDEO_FORMATS = {
         "orig"       : 9,
@@ -325,7 +329,7 @@ class FlickrAPI(oauth.OAuth1API):
                             if not fmt[2] or fmt[2] <= self.maxsize]
         else:
             self.formats = self.FORMATS
-        self.formats = self.formats[:4]
+        self.formats = self.formats[:8]
 
     def favorites_getList(self, user_id):
         """Returns a list of the user's favorite photos."""

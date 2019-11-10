@@ -28,6 +28,7 @@ TRAVIS_SKIP = {
 BROKEN = {
     "hentaifox",
     "mangapark",
+    "pixhost",
     "yaplog",
 }
 
