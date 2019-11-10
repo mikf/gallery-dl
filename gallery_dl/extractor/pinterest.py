@@ -119,8 +119,9 @@ class PinterestRelatedPinExtractor(PinterestPinExtractor):
     directory_fmt = ("{category}", "related {original_pin[id]}")
     pattern = BASE_PATTERN + r"/pin/([^/?#&]+).*#related$"
     test = ("https://www.pinterest.com/pin/858146903966145189/#related", {
-        "range": "31-50",
-        "count": 20,
+        "range": "31-70",
+        "count": 40,
+        "archive": False,
     })
 
     def metadata(self):
@@ -138,8 +139,9 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
                      "{board[name]}", "related")
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+).*#related$"
     test = ("https://www.pinterest.com/g1952849/test-/#related", {
-        "range": "31-50",
-        "count": 20,
+        "range": "31-70",
+        "count": 40,
+        "archive": False,
     })
 
     def pins(self):

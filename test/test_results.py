@@ -27,7 +27,6 @@ TRAVIS_SKIP = {
 # temporary issues, etc.
 BROKEN = {
     "hentaifox",
-    "livedoor",
     "mangapark",
     "yaplog",
 }
@@ -85,8 +84,12 @@ class TestExtractorResults(unittest.TestCase):
                 self.skipTest(exc)
             raise
 
-        # test archive-id uniqueness
-        self.assertEqual(len(set(tjob.archive_list)), len(tjob.archive_list))
+        if result.get("archive", True):
+            self.assertEqual(
+                len(set(tjob.archive_list)),
+                len(tjob.archive_list),
+                "archive-id uniqueness",
+            )
 
         if tjob.queue:
             # test '_extractor' entries
