@@ -79,8 +79,15 @@ class ImgbbExtractor(Extractor):
         return self.session.cookies
 
     def _pagination(self, page, endpoint, params):
-        params["page"] = 2
         data = None
+        seek, pos = text.extract(page, 'data-seek="', '"')
+        tokn, pos = text.extract(page, 'PF.obj.config.auth_token="', '"', pos)
+        params["action"] = "list"
+        params["list"] = "images"
+        params["sort"] = self.sort
+        params["seek"] = seek
+        params["page"] = 2
+        params["auth_token"] = tokn
 
         while True:
             for img in text.extract_iter(page, "data-object='", "'"):
@@ -90,6 +97,8 @@ class ImgbbExtractor(Extractor):
                     return
                 params["seek"] = data["seekEnd"]
                 params["page"] += 1
+            elif not seek or 'class="pagination-next"' not in page:
+                return
             data = self.request(endpoint, method="POST", data=params).json()
             page = data["html"]
 
@@ -137,17 +146,9 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
         }
 
     def images(self, page):
-        seek, pos = text.extract(page, 'data-seek="', '"')
-        tokn, pos = text.extract(page, 'PF.obj.config.auth_token="', '"', pos)
-
         return self._pagination(page, "https://ibb.co/json", {
-            "action"    : "list",
-            "list"      : "images",
             "from"      : "album",
-            "sort"      : self.sort,
             "albumid"   : self.album_id,
-            "seek"      : seek,
-            "auth_token": tokn,
             "params_hidden[list]"   : "images",
             "params_hidden[from]"   : "album",
             "params_hidden[albumid]": self.album_id,
@@ -173,18 +174,10 @@ class ImgbbUserExtractor(ImgbbExtractor):
         return {"user": self.user}
 
     def images(self, page):
-        seek, pos = text.extract(page, 'data-seek="', '"')
-        tokn, pos = text.extract(page, 'PF.obj.config.auth_token="', '"', pos)
-        user, pos = text.extract(page, '.obj.resource={"id":"', '"', pos)
-
+        user = text.extract(page, '.obj.resource={"id":"', '"')[0]
         return self._pagination(page, self.page_url + "json", {
-            "action"    : "list",
-            "list"      : "images",
             "from"      : "user",
-            "sort"      : self.sort,
-            "seek"      : seek,
             "userid"    : user,
-            "auth_token": tokn,
             "params_hidden[userid]": user,
             "params_hidden[from]"  : "user",
         })
