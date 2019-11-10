@@ -39,7 +39,7 @@ class ImgbbExtractor(Extractor):
         for img in self.images(page):
             image = {
                 "id"       : img["url_viewer"].rpartition("/")[2],
-                "user"     : img["user"]["username"],
+                "user"     : img["user"]["username"] if "user" in img else "",
                 "title"    : text.unescape(img["title"]),
                 "url"      : img["image"]["url"],
                 "extension": img["image"]["extension"],
@@ -119,6 +119,11 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
             "url": "e2e387b8fdb3690bd75d804d0af2833112e385cd",
             "keyword": "a307fc9d2085bdc0eb7c538c8d866c59198d460c",
         }),
+        # no user data (#471)
+        ("https://ibb.co/album/kYKpwF", {
+            "url": "ac0abcfcb89f4df6adc2f7e4ff872f3b03ef1bc7",
+            "keyword": {"user": ""},
+        }),
         # deleted
         ("https://ibb.co/album/fDArrF", {
             "exception": exception.NotFoundError,
@@ -142,7 +147,7 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
         return {
             "album_id"  : self.album_id,
             "album_name": text.unescape(album),
-            "user"      : user.lower(),
+            "user"      : user.lower() if user else "",
         }
 
     def images(self, page):
