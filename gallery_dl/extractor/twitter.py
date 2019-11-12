@@ -278,7 +278,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # content with emoji, newlines, hashtags (#338)
         ("https://twitter.com/yumi_san0112/status/1151144618936823808", {
             "options": (("content", True),),
-            "keyword": "b133464b73aec33871521ab021a3166204194285",
+            "keyword": "4d85faca51841b563aef613171e5efa9490219d8",
         }),
         # Reply to another tweet (#403)
         ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
