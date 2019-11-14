@@ -26,26 +26,26 @@ class NewgroundsExtractor(Extractor):
         self.root = "https://{}.newgrounds.com".format(self.user)
 
     def items(self):
-        data = self.get_metadata()
+        data = self.metadata()
         yield Message.Version, 1
-        yield Message.Directory, data
 
-        for page_url in self.get_page_urls():
-            image = self.parse_page_data(page_url)
-            image.update(data)
-            url = image["url"]
-            yield Message.Url, url, text.nameext_from_url(url, image)
+        for post_url in self.posts():
+            file = self.extract_post_data(post_url)
+            file.update(data)
+            url = file["url"]
+            yield Message.Directory, file
+            yield Message.Url, url, text.nameext_from_url(url, file)
 
-    def get_metadata(self):
+    def metadata(self):
         """Collect metadata for extractor-job"""
         return {"user": self.user}
 
-    def get_page_urls(self):
+    def posts(self):
         """Return urls of all relevant image pages"""
 
-    def parse_page_data(self, page_url):
-        """Collect url and metadata from an image page"""
-        extr = text.extract_from(self.request(page_url).text)
+    def extract_post_data(self, post_url):
+        """Collect url and metadata from an image post"""
+        extr = text.extract_from(self.request(post_url).text)
         full = text.extract_from(json.loads(extr('"full_image_text":', '});')))
         data = {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
@@ -93,12 +93,12 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
     test = (
         ("https://blitzwuff.newgrounds.com/art", {
             "url": "24b19c4a135a09889fac7b46a74e427e4308d02b",
-            "keyword": "62981f7bdd66e1f1c72ab1d9b932423c156bc9a1",
+            "keyword": "8330e1e563c8a5464938feaceac88aa9870aefe4",
         }),
         ("https://blitzwuff.newgrounds.com/"),
     )
 
-    def get_page_urls(self):
+    def posts(self):
         return self._pagination(self.root + "/art/page/1")
 
 
@@ -111,12 +111,12 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
     test = (
         ("https://www.newgrounds.com/art/view/blitzwuff/ffx", {
             "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
-            "keyword": "cbe90f8f32da4341938f59b08d70f76137028a7e",
+            "keyword": "3ffcdc8f54a46b8ee1c9b433627f66b750edff51",
             "content": "cb067d6593598710292cdd340d350d14a26fe075",
         }),
         ("https://art.ngfiles.com/images/587000/587551_blitzwuff_ffx.png", {
             "url": "e7778c4597a2fb74b46e5f04bb7fa1d80ca02818",
-            "keyword": "cbe90f8f32da4341938f59b08d70f76137028a7e",
+            "keyword": "3ffcdc8f54a46b8ee1c9b433627f66b750edff51",
         }),
     )
 
@@ -124,13 +124,13 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
         NewgroundsExtractor.__init__(self, match)
         if match.group(2):
             self.user = match.group(2)
-            self.page_url = "https://www.newgrounds.com/art/view/{}/{}".format(
+            self.post_url = "https://www.newgrounds.com/art/view/{}/{}".format(
                 self.user, match.group(3))
         else:
-            self.page_url = match.group(0)
+            self.post_url = match.group(0)
 
-    def get_page_urls(self):
-        return (self.page_url,)
+    def posts(self):
+        return (self.post_url,)
 
 
 class NewgroundsVideoExtractor(NewgroundsExtractor):
@@ -143,10 +143,10 @@ class NewgroundsVideoExtractor(NewgroundsExtractor):
         "count": ">= 32",
     })
 
-    def get_page_urls(self):
+    def posts(self):
         return self._pagination(self.root + "/movies/page/1")
 
-    def parse_page_data(self, page_url):
+    def extract_post_data(self, page_url):
         return {
             "url"  : "ytdl:" + page_url,
             "index": text.parse_int(page_url.rpartition("/")[2]),
