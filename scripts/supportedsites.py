@@ -119,6 +119,7 @@ AUTH_MAP = {
     "imgbb"      : "Optional",
     "instagram"  : "Optional",
     "mangoxo"    : "Optional",
+    "newgrounds" : "Optional",
     "nijie"      : "Required",
     "pixiv"      : "Required",
     "reddit"     : "Optional (OAuth)",

@@ -294,10 +294,11 @@ def setup_test_config():
     config.set(("extractor", "nijie"    , "username"), email)
     config.set(("extractor", "seiga"    , "username"), email)
 
-    config.set(("extractor", "danbooru" , "username"), None)
-    config.set(("extractor", "instagram", "username"), None)
-    config.set(("extractor", "imgur"    , "username"), None)
-    config.set(("extractor", "twitter"  , "username"), None)
+    config.set(("extractor", "danbooru"  , "username"), None)
+    config.set(("extractor", "instagram" , "username"), None)
+    config.set(("extractor", "imgur"     , "username"), None)
+    config.set(("extractor", "newgrounds", "username"), None)
+    config.set(("extractor", "twitter"   , "username"), None)
 
     config.set(("extractor", "mangoxo"  , "username"), "LiQiang3")
     config.set(("extractor", "mangoxo"  , "password"), "5zbQF10_5u25259Ma")
