@@ -75,7 +75,7 @@ MangaPark            https://mangapark.me/               Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
 Naver                https://blog.naver.com/             Blogs, Posts
-Newgrounds           https://www.newgrounds.com/         individual Images, User Profiles, Videos
+Newgrounds           https://www.newgrounds.com/         individual Images, User Profiles, Videos           Optional
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       https://seiga.nicovideo.jp/         individual Images, User Profiles                   Required

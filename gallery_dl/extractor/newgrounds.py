@@ -9,7 +9,8 @@
 """Extractors for https://www.newgrounds.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 import json
 
 
@@ -19,13 +20,17 @@ class NewgroundsExtractor(Extractor):
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
     archive_fmt = "{index}"
+    root = "https://www.newgrounds.com"
+    cookiedomain = ".newgrounds.com"
+    cookienames = ("NG_GG_username", "vmk1du5I8m")
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
-        self.root = "https://{}.newgrounds.com".format(self.user)
+        self.user_root = "https://{}.newgrounds.com".format(self.user)
 
     def items(self):
+        self.login()
         data = self.metadata()
         yield Message.Version, 1
 
@@ -65,6 +70,37 @@ class NewgroundsExtractor(Extractor):
         data["index"] = text.parse_int(
             data["url"].rpartition("/")[2].partition("_")[0])
         return data
+
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=360*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/passport/"
+        page = self.request(url).text
+        headers = {"Origin": self.root, "Referer": url}
+
+        url = text.urljoin(self.root, text.extract(page, 'action="', '"')[0])
+        data = {
+            "username": username,
+            "password": password,
+            "remember": "1",
+            "login"   : "1",
+        }
+
+        response = self.request(url, method="POST", headers=headers, data=data)
+        if not response.history:
+            raise exception.AuthenticationError()
+
+        return {
+            cookie.name: cookie.value
+            for cookie in response.history[0].cookies
+            if cookie.expires and cookie.domain == self.cookiedomain
+        }
 
     def _pagination(self, url):
         headers = {
