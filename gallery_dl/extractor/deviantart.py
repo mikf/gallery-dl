@@ -29,7 +29,7 @@ BASE_PATTERN = (
 class DeviantartExtractor(Extractor):
     """Base class for deviantart extractors using the OAuth API"""
     category = "deviantart"
-    directory_fmt = ("{category}", "{author[username]!l}")
+    directory_fmt = ("{category}", "{username}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
     root = "https://www.deviantart.com"
 
@@ -62,6 +62,7 @@ class DeviantartExtractor(Extractor):
             self.group = not profile
             if self.group:
                 self.subcategory = "group-" + self.subcategory
+                self.user = self.user.lower()
             else:
                 self.user = profile["user"]["username"]
 
@@ -398,7 +399,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
 class DeviantartFolderExtractor(DeviantartExtractor):
     """Extractor for deviations inside an artist's gallery folder"""
     subcategory = "folder"
-    directory_fmt = ("{category}", "{folder[owner]}", "{folder[title]}")
+    directory_fmt = ("{category}", "{username}", "{folder[title]}")
     archive_fmt = "F_{folder[uuid]}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/gallery/(\d+)/([^/?&#]+)"
     test = (
@@ -418,14 +419,19 @@ class DeviantartFolderExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.fname = match.group(4)
-        self.folder = {"owner": self.user, "index": match.group(3)}
+        self.folder = None
+        self.folder_id = match.group(3)
+        self.folder_name = match.group(4)
 
     def deviations(self):
         folders = self.api.gallery_folders(self.user)
-        folder = self._find_folder(folders, self.fname)
-        self.folder["title"] = folder["name"]
-        self.folder["uuid"] = folder["folderid"]
+        folder = self._find_folder(folders, self.folder_name)
+        self.folder = {
+            "title": folder["name"],
+            "uuid" : folder["folderid"],
+            "index": self.folder_id,
+            "owner": self.user,
+        }
         return self.api.gallery(self.user, folder["folderid"], self.offset)
 
     def prepare(self, deviation):
@@ -472,6 +478,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
 
         if deviation_id:
             deviation = self.api.deviation(deviation_id)
+            deviation["username"] = deviation["author"]["username"]
             pos = page.find("dev-page-download", pos)
             if pos >= 0:
                 deviation["_download"] = {
@@ -530,8 +537,8 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
 class DeviantartCollectionExtractor(DeviantartExtractor):
     """Extractor for a single favorite collection"""
     subcategory = "collection"
-    directory_fmt = ("{category}", "{collection[owner]}",
-                     "Favourites", "{collection[title]}")
+    directory_fmt = ("{category}", "{username}", "Favourites",
+                     "{collection[title]}")
     archive_fmt = "C_{collection[uuid]}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/favourites/(\d+)/([^/?&#]+)"
     test = (
@@ -546,14 +553,19 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        _, _, cid, self.cname = match.groups()
-        self.collection = {"owner": self.user, "index": cid}
+        self.collection = None
+        self.collection_id = match.group(3)
+        self.collection_name = match.group(4)
 
     def deviations(self):
         folders = self.api.collections_folders(self.user)
-        folder = self._find_folder(folders, self.cname)
-        self.collection["title"] = folder["name"]
-        self.collection["uuid"] = folder["folderid"]
+        folder = self._find_folder(folders, self.collection_name)
+        self.collection = {
+            "title": folder["name"],
+            "uuid" : folder["folderid"],
+            "index": self.collection_id,
+            "owner": self.user,
+        }
         return self.api.collections(self.user, folder["folderid"], self.offset)
 
     def prepare(self, deviation):
@@ -668,7 +680,7 @@ class DeviantartExtractorV2(DeviantartExtractor):
 
         # prepare deviation metadata
         deviation["description"] = extended.get("description", "")
-        deviation["username"] = self.user.lower()
+        deviation["username"] = deviation["author"]["username"]
         deviation["stats"] = extended["stats"]
         deviation["stats"]["comments"] = data["comments"]["total"]
         deviation["index"] = deviation["deviationId"]
