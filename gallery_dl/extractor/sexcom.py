@@ -21,7 +21,6 @@ class SexcomExtractor(Extractor):
     root = "https://www.sex.com"
 
     def items(self):
-        self.session.headers["Referer"] = self.root
         yield Message.Version, 1
         yield Message.Directory, self.metadata()
         for pin in map(self._parse_pin, self.pins()):
@@ -59,6 +58,7 @@ class SexcomExtractor(Extractor):
         extr = text.extract_from(response.text)
         data = {}
 
+        data["_http_headers"] = {"Referer": url}
         data["thumbnail"] = extr('itemprop="thumbnail" content="', '"')
         data["type"] = extr('<h1>' , '<').rstrip(" -").strip().lower()
         data["title"] = text.unescape(extr('itemprop="name">' , '<'))
@@ -123,10 +123,12 @@ class SexcomPinExtractor(SexcomExtractor):
         # gif
         ("https://www.sex.com/pin/11465040-big-titted-hentai-gif/", {
             "url": "98a82c5ae7a65c8228e1405ac740f80d4d556de1",
+            "content": "a54b37eb39d565094c54ad7d21244fe8f978fb14",
         }),
         # video
-        ("https://www.sex.com/pin/55748381/", {
-            "pattern": "https://www.sex.com/video/stream/776238/hd",
+        ("https://www.sex.com/pin/55748341/", {
+            "pattern": "https://www.sex.com/video/stream/776229/hd",
+            "content": "e1a5834869163e2c4d1ca2677f5b7b367cf8cfff",
         }),
         # pornhub embed
         ("https://www.sex.com/pin/55847384-very-nicely-animated/", {
