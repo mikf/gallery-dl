@@ -189,7 +189,7 @@ class ResultJob(job.DownloadJob):
         self._update_url(url)
         self._update_kwdict(kwdict)
         self._update_archive(kwdict)
-        self._update_content(url)
+        self._update_content(url, kwdict)
         self.format_filename(kwdict)
 
     def handle_directory(self, kwdict):
@@ -217,9 +217,10 @@ class ResultJob(job.DownloadJob):
         self.archive_list.append(archive_id)
         self.archive_hash.update(archive_id.encode())
 
-    def _update_content(self, url):
+    def _update_content(self, url, kwdict):
         if self.content:
             scheme = url.partition(":")[0]
+            self.fileobj.kwdict = kwdict
             self.get_downloader(scheme).download(url, self.fileobj)
 
 
