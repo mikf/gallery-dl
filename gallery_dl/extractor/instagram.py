@@ -41,7 +41,7 @@ class InstagramExtractor(Extractor):
                 data['_extractor'] = InstagramStoriesExtractor
                 yield Message.Queue, url, data
             else:
-                url = data['video_url'] or data['display_url']
+                url = data.get('video_url') or data['display_url']
                 yield Message.Url, url, text.nameext_from_url(url, data)
 
     def login(self):
@@ -199,10 +199,10 @@ class InstagramExtractor(Extractor):
                 'expires': text.parse_timestamp(media['expiring_at_timestamp']),
                 'media_id': media['id'],
                 'typename': media['__typename'],
+                'display_url': media['display_url'],
             }
             if media['__typename'] == 'GraphStoryImage':
                 media_data.update({
-                    'display_url': media['display_url'],
                     'height': text.parse_int(media['dimensions']['height']),
                     'width': text.parse_int(media['dimensions']['width']),
                 })
@@ -210,7 +210,7 @@ class InstagramExtractor(Extractor):
                 vr = media['video_resources'][0]
                 media_data.update({
                     'duration': text.parse_float(media['video_duration']),
-                    'display_url': vr['src'],
+                    'video_url': vr['src'],
                     'height': text.parse_int(vr['config_height']),
                     'width': text.parse_int(vr['config_width']),
                 })
