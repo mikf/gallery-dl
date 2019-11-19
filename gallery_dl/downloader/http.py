@@ -77,12 +77,15 @@ class HttpDownloader(DownloaderBase):
                 time.sleep(min(2 ** (tries-1), 1800))
             tries += 1
 
+            headers = {}
             # check for .part file
             filesize = pathfmt.part_size()
             if filesize:
-                headers = {"Range": "bytes={}-".format(filesize)}
-            else:
-                headers = None
+                headers["Range"] = "bytes={}-".format(filesize)
+            # file-specific headers
+            extra = pathfmt.kwdict.get("_http_headers")
+            if extra:
+                headers.update(extra)
 
             # connect to (remote) source
             try:
