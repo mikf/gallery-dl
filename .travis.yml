@@ -3,19 +3,16 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
+  - "3.8"
   - "pypy3"
 env:
   - GALLERYDL_TESTS=core
 matrix:
   include:
-    - python: "3.7"
-      dist: xenial
-    - python: "3.8-dev"
-      dist: xenial
-    - python: "3.6"
+    - python: "3.8"
       env: GALLERYDL_TESTS=results
     - language: minimal
-      dist: xenial
       env: GALLERYDL_TESTS=snap
       addons:
         snaps:
