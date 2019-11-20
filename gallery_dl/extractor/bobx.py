@@ -34,14 +34,14 @@ class BobxGalleryExtractor(BobxExtractor):
     test = (
         (("http://www.bobx.com/idol/mikoto-hibi"
           "/photoset/wpb-2018-_11-0-2-8.html"), {
-            "url": "93972d6a661f6627e963d62c9d15531e6b36a389",
-            "keyword": "6c620862db494ed05e69356ba30e604b167b0670",
-            "content": "3f176b7fe752524cec21a763aa55567e41181e07",
+            "url": "a44ee0c06ccacb80f6967c48a88a45016a8d44aa",
+            "keyword": "0250c81980913abb794ce3eb59446feee467b82f",
+            "content": "ed5d8413b9b2720d84590cba86b4ca047360bed0",
         }),
         (("http://www.bobx.com/idol/nashiko-momotsuki"
           "/photoset/wpb-net-_221---2018-08---magic-of-summer-0-10-10.html"), {
-            "url": "f5d6c0cd0881ae6f504c21a90d86e3464dc54e8e",
-            "keyword": "f4819c75f494044348889ecd27771508464c0f5f",
+            "url": "862ad9d53f6a822927575c8f9113d927988a75dc",
+            "keyword": "94a59a8c5d8d63025f25aeb6141062139050d447",
         }),
     )
 
@@ -58,7 +58,7 @@ class BobxGalleryExtractor(BobxExtractor):
                 data["num"] = 0
 
             for url in self.images(page):
-                url = text.urljoin(self.root, url.replace("-preview-", "-"))
+                url = text.urljoin(self.root, url.replace("-preview-", "--"))
                 data = text.nameext_from_url(url, data)
                 data["image_id"] = text.parse_int(
                     data["filename"].rpartition("-")[2])
