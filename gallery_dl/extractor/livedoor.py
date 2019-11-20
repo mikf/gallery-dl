@@ -89,7 +89,6 @@ class LivedoorBlogExtractor(LivedoorExtractor):
         ("http://blog.livedoor.jp/zatsu_ke/", {
             "range": "1-50",
             "count": 50,
-            "archive": False,
             "pattern": r"https?://livedoor.blogimg.jp/\w+/imgs/\w/\w/\w+\.\w+",
             "keyword": {
                 "post": {
@@ -132,16 +131,16 @@ class LivedoorPostExtractor(LivedoorExtractor):
     pattern = r"(?:https?://)?blog\.livedoor\.jp/(\w+)/archives/(\d+)"
     test = (
         ("http://blog.livedoor.jp/zatsu_ke/archives/51493859.html", {
-            "url": "8826fe623f19dc868e7538e8519bf8491e92a0a2",
-            "keyword": "83993111d5d0c08d021196802dd36b73f04c7057",
+            "url": "9ca3bbba62722c8155be79ad7fc47be409e4a7a2",
+            "keyword": "1f5b558492e0734f638b760f70bfc0b65c5a97b9",
         }),
         ("http://blog.livedoor.jp/amaumauma/archives/7835811.html", {
-            "url": "fc1d6a9557245b5a27d3a10bf0fa9922ef377215",
-            "keyword": "fd700760c98897c3125328e157972f905fd34aaa",
+            "url": "204bbd6a9db4969c50e0923855aeede04f2e4a62",
+            "keyword": "05821c7141360e6057ef2d382b046f28326a799d",
         }),
         ("http://blog.livedoor.jp/uotapo/archives/1050616939.html", {
-            "url": "3f3581807ec4776e6a67ed7985a22494d4bc4904",
-            "keyword": "9e319413a42e08d32f0dcbe8aa3b452ad41aa906",
+            "url": "4b5ab144b7309eb870d9c08f8853d1abee9946d2",
+            "keyword": "84fbf6e4eef16675013d6333039a7cfcb22c2d50",
         }),
     )
 

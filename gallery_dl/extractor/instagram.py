@@ -292,7 +292,7 @@ class InstagramImageExtractor(InstagramExtractor):
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
             "pattern": r"https://[^/]+\.(cdninstagram\.com|fbcdn\.net)"
-                       r"/vp/[0-9a-f]+/[0-9A-F]+/t51.2885-15/e35"
+                       r"/v(p/[0-9a-f]+/[0-9A-F]+)?/t51.2885-15/e35"
                        r"/44877605_725955034447492_3123079845831750529_n.jpg",
             "keyword": {
                 "date": "type:datetime",

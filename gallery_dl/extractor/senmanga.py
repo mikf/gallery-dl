@@ -24,7 +24,7 @@ class SenmangaChapterExtractor(Extractor):
         ("http://raw.senmanga.com/Bokura-wa-Minna-Kawaisou/37A/1", {
             "url": "5f95140ff511d8497e2ec08fa7267c6bb231faec",
             "keyword": "705d941a150765edb33cd2707074bd703a93788c",
-            "content": "0e37b1995708ffc175f2e175d91a518e6948c379",
+            "content": "556a16d5ca3441d7a5807b6b5ac06ec458a3e4ba",
         }),
         ("http://raw.senmanga.com/Love-Lab/2016-03/1", {
             "url": "8347b9f00c14b864dd3c19a1f5ae52adb2ef00de",

@@ -29,7 +29,6 @@ BROKEN = {
     "hentaifox",
     "mangapark",
     "pixhost",
-    "yaplog",
 }
 
 
@@ -79,7 +78,7 @@ class TestExtractorResults(unittest.TestCase):
             pass
         except exception.HttpError as exc:
             exc = str(exc)
-            if re.match(r"5\d\d: ", exc) or \
+            if re.match(r"'5\d\d ", exc) or \
                     re.search(r"\bRead timed out\b", exc):
                 self._skipped.append((url, exc))
                 self.skipTest(exc)
