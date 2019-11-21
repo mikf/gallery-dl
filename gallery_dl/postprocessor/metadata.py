@@ -58,7 +58,7 @@ class MetadataPP(PostProcessor):
         file.write("\n")
 
     def _write_json(self, file, kwdict):
-        util.dump_json(kwdict, file, self.ascii, self.indent)
+        util.dump_json(util.filter_dict(kwdict), file, self.ascii, self.indent)
 
 
 __postprocessor__ = MetadataPP
