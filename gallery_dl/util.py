@@ -78,6 +78,11 @@ def transform_dict(a, func):
             a[key] = func(value)
 
 
+def filter_dict(a):
+    """Return a copy of 'a' without "private" entries"""
+    return {k: v for k, v in a.items() if k[0] != "_"}
+
+
 def number_to_string(value, numbers=(int, float)):
     """Convert numbers (int, float) to string; Return everything else as is."""
     return str(value) if value.__class__ in numbers else value

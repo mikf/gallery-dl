@@ -151,6 +151,9 @@ class MetadataTest(BasePostprocessorTest):
             "ascii"    : True,
             "indent"   : 2,
             "extension": "JSON",
+        }, {
+            "public"   : "hello",
+            "_private" : "world",
         })
 
         self.assertEqual(pp.write    , pp._write_json)
@@ -167,7 +170,8 @@ class MetadataTest(BasePostprocessorTest):
         self.assertEqual(self._output(m), """{
   "category": "test",
   "extension": "ext",
-  "filename": "file"
+  "filename": "file",
+  "public": "hello"
 }
 """)
 

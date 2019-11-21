@@ -161,11 +161,6 @@ class Job():
         if self.ulog:
             self.ulog.info(url)
 
-    @staticmethod
-    def _filter(kwdict):
-        """Return a copy of 'kwdict' without "private" entries"""
-        return {k: v for k, v in kwdict.items() if k[0] != "_"}
-
 
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
@@ -479,6 +474,9 @@ class DataJob(Job):
         self.data = []
         self.ascii = config.get(("output", "ascii"), ensure_ascii)
 
+        private = config.get(("output", "private"))
+        self.filter = (lambda x: x) if private else util.filter_dict
+
     def run(self):
         # collect data
         try:
@@ -501,16 +499,16 @@ class DataJob(Job):
         return 0
 
     def handle_url(self, url, kwdict):
-        self.data.append((Message.Url, url, self._filter(kwdict)))
+        self.data.append((Message.Url, url, self.filter(kwdict)))
 
     def handle_urllist(self, urls, kwdict):
-        self.data.append((Message.Urllist, list(urls), self._filter(kwdict)))
+        self.data.append((Message.Urllist, list(urls), self.filter(kwdict)))
 
     def handle_directory(self, kwdict):
-        self.data.append((Message.Directory, self._filter(kwdict)))
+        self.data.append((Message.Directory, self.filter(kwdict)))
 
     def handle_queue(self, url, kwdict):
-        self.data.append((Message.Queue, url, self._filter(kwdict)))
+        self.data.append((Message.Queue, url, self.filter(kwdict)))
 
     def handle_finalize(self):
         self.file.close()

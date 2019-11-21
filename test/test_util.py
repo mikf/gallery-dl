@@ -358,6 +358,21 @@ class TestOther(unittest.TestCase):
         self.assertEqual(
             d, {1: 123, 2: 123, 3: 0, 4: {11: 321, 12: 321, 13: 0}})
 
+    def test_filter_dict(self):
+        d = {}
+        r = util.filter_dict(d)
+        self.assertEqual(r, d)
+        self.assertIsNot(r, d)
+
+        d = {"foo": 123, "bar": [], "baz": None}
+        r = util.filter_dict(d)
+        self.assertEqual(r, d)
+        self.assertIsNot(r, d)
+
+        d = {"foo": 123, "_bar": [], "__baz__": None}
+        r = util.filter_dict(d)
+        self.assertEqual(r, {"foo": 123})
+
     def test_number_to_string(self, f=util.number_to_string):
         self.assertEqual(f(1)     , "1")
         self.assertEqual(f(1.0)   , "1.0")

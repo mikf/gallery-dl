@@ -207,7 +207,7 @@ class ResultJob(job.DownloadJob):
     def _update_kwdict(self, kwdict, to_list=True):
         if to_list:
             self.kwdict_list.append(kwdict.copy())
-        kwdict = self._filter(kwdict)
+        kwdict = util.filter_dict(kwdict)
         self.kwdict_hash.update(
             json.dumps(kwdict, sort_keys=True, default=str).encode())
 
