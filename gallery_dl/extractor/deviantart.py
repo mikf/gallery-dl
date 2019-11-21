@@ -130,6 +130,7 @@ class DeviantartExtractor(Extractor):
             deviation["index"] = 0
         if self.user:
             deviation["username"] = self.user
+            deviation["_username"] = self.user.lower()
         deviation["da_category"] = deviation["category"]
         deviation["published_time"] = text.parse_int(
             deviation["published_time"])
@@ -309,7 +310,7 @@ class DeviantartUserExtractor(Extractor):
 class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
-    archive_fmt = "g_{username}_{index}.{extension}"
+    archive_fmt = "g_{_username}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/gallery(?:/all|/?\?catpath=)?/?$"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery/", {
@@ -509,7 +510,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     """Extractor for an artist's favorites"""
     subcategory = "favorite"
     directory_fmt = ("{category}", "{username}", "Favourites")
-    archive_fmt = "f_{username}_{index}.{extension}"
+    archive_fmt = "f_{_username}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/favourites/?(?:\?catpath=/)?$"
     test = (
         ("https://www.deviantart.com/h3813067/favourites/", {
@@ -577,7 +578,7 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     """Extractor for an artist's journals"""
     subcategory = "journal"
     directory_fmt = ("{category}", "{username}", "Journal")
-    archive_fmt = "j_{username}_{index}.{extension}"
+    archive_fmt = "j_{_username}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/(?:posts(?:/journals)?|journal)/?(?:\?.*)?$"
     test = (
         ("https://www.deviantart.com/angrywhitewanker/posts/journals/", {
@@ -681,6 +682,7 @@ class DeviantartExtractorV2(DeviantartExtractor):
         # prepare deviation metadata
         deviation["description"] = extended.get("description", "")
         deviation["username"] = deviation["author"]["username"]
+        deviation["_username"] = deviation["username"].lower()
         deviation["stats"] = extended["stats"]
         deviation["stats"]["comments"] = data["comments"]["total"]
         deviation["index"] = deviation["deviationId"]
@@ -842,7 +844,7 @@ class DeviantartScrapsExtractor(DeviantartExtractorV2):
     """Extractor for an artist's scraps"""
     subcategory = "scraps"
     directory_fmt = ("{category}", "{username}", "Scraps")
-    archive_fmt = "s_{username}_{index}.{extension}"
+    archive_fmt = "s_{_username}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/gallery/(?:\?catpath=)?scraps\b"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery/scraps", {
