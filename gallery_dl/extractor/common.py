@@ -254,6 +254,26 @@ class Extractor():
         fmt = self.config("date-format", "%Y-%m-%dT%H:%M:%S")
         return get("date-min", dmin), get("date-max", dmax)
 
+    def _dispatch_extractors(self, extractor_data, default=()):
+        """ """
+        extractors = {
+            data[0].subcategory: data
+            for data in extractor_data
+        }
+
+        include = self.config("include", default) or ()
+        if include == "all":
+            include = extractors
+        elif isinstance(include, str):
+            include = include.split(",")
+
+        result = [(Message.Version, 1)]
+        for category in include:
+            if category in extractors:
+                extr, url = extractors[category]
+                result.append((Message.Queue, url, {"_extractor": extr}))
+        return iter(result)
+
     @classmethod
     def _get_tests(cls):
         """Yield an extractor's test cases as (URL, RESULTS) tuples"""
