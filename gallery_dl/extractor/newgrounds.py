@@ -319,7 +319,6 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
     test = (
         ("https://tomfulp.newgrounds.com", {
             "pattern": "https://tomfulp.newgrounds.com/art$",
-            "count": 1,
         }),
         ("https://tomfulp.newgrounds.com", {
             "options": (("include", "all"),),
@@ -329,22 +328,9 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
     )
 
     def items(self):
-        data = {}
-        extr_map = {
-            "art": NewgroundsArtExtractor,
-            "audio": NewgroundsAudioExtractor,
-            "movies": NewgroundsMoviesExtractor,
-        }
-
-        include = self.config("include", ("art",)) or ()
-        if include == "all":
-            include = extr_map.keys()
-        elif isinstance(include, str):
-            include = include.split(",")
-
-        yield Message.Version, 1
-        for category in include:
-            if category in extr_map:
-                url = self.user_root + "/" + category
-                data["_extractor"] = extr_map[category]
-                yield Message.Queue, url, data
+        base = self.user_root + "/"
+        return self._dispatch_extractors((
+            (NewgroundsArtExtractor   , base + "art"),
+            (NewgroundsAudioExtractor , base + "audio"),
+            (NewgroundsMoviesExtractor, base + "movies"),
+        ), ("art",))

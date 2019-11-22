@@ -265,46 +265,30 @@ class DeviantartExtractor(Extractor):
             content.update(download)
 
 
-class DeviantartUserExtractor(Extractor):
+class DeviantartUserExtractor(DeviantartExtractor):
     """Extractor for an artist's user profile"""
-    category = "deviantart"
     subcategory = "user"
     pattern = BASE_PATTERN + r"/?$"
     test = (
         ("https://www.deviantart.com/shimoda7", {
-            "options": (("include", "gsjf"),),
-            "pattern": r"/shimoda7/(gallery(/scraps)?|posts|favourites)",
+            "pattern": r"/shimoda7/gallery$",
+        }),
+        ("https://www.deviantart.com/shimoda7", {
+            "options": (("include", "all"),),
+            "pattern": r"/shimoda7/(gallery(/scraps)?|posts|favourites)$",
             "count": 4,
         }),
         ("https://shimoda7.deviantart.com/"),
     )
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user = match.group(1) or match.group(2)
-
-        incl = self.config("include") or "g"
-        if isinstance(incl, list):
-            incl = "".join(item[0] for item in incl if item)
-        self.include = incl.lower()
-
     def items(self):
-        base = "https://www.deviantart.com/{}/".format(self.user)
-        incl = self.include
-        data = {}
-
-        if "g" in incl:
-            data["_extractor"] = DeviantartGalleryExtractor
-            yield Message.Queue, base + "gallery", data
-        if "s" in incl:
-            data["_extractor"] = DeviantartScrapsExtractor
-            yield Message.Queue, base + "gallery/scraps", data
-        if "j" in incl:
-            data["_extractor"] = DeviantartJournalExtractor
-            yield Message.Queue, base + "posts", data
-        if "f" in incl:
-            data["_extractor"] = DeviantartFavoriteExtractor
-            yield Message.Queue, base + "favourites", data
+        base = "{}/{}/".format(self.root, self.user)
+        return self._dispatch_extractors((
+            (DeviantartGalleryExtractor , base + "gallery"),
+            (DeviantartScrapsExtractor  , base + "gallery/scraps"),
+            (DeviantartJournalExtractor , base + "posts"),
+            (DeviantartFavoriteExtractor, base + "favourites"),
+        ), ("gallery",))
 
 
 class DeviantartGalleryExtractor(DeviantartExtractor):

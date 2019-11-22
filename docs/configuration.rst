@@ -133,7 +133,7 @@ extractor.*.path-remove
 -----------------------
 =========== =====
 Type        ``string``
-Default     ``"\\u0000-\\u001f\\u007f"`` (ASCII control characters)
+Default     ``"\u0000-\u001f\u007f"`` (ASCII control characters)
 Description Set of characters to remove from generated path names.
 
             Note: In a set with 2 or more characters, ``[]^-\`` need to be
@@ -551,16 +551,17 @@ Description Provide a ``folders`` metadata field that contains the names of all
 extractor.deviantart.include
 ----------------------------
 =========== =====
-Type        ``list`` of ``strings`` or ``string``
-Default     ``["gallery"]``
-Description Selects the subcategories to include when processing a user profile.
+Type        ``string`` or ``list`` of ``strings``
+Default     ``"gallery"``
+Example     * ``"favorite,journal,scraps"``
+            * ``["favorite", "journal", "scraps"]``
+Description A (comma-separated) list of subcategories to include
+            when processing a user profile.
 
-            Possible values are ``"gallery"``, ``"scraps"``, ``"journal"``,
-            ``"favorite"``.
+            Possible values are
+            ``"gallery"``, ``"scraps"``, ``"journal"``, ``"favorite"``.
 
-            It is also possible to use a string with the initial character of
-            each subcategory, i.e. ``"gsj"`` for
-            ``["gallery", "scraps", "journal"]``
+            You can use ``"all"`` instead of listing all values separately.
 =========== =====
 
 
@@ -779,6 +780,23 @@ Description Controls how to handle redirects to CAPTCHA pages.
 
             * ``"stop``: Stop the current extractor run.
             * ``"wait``: Ask the user to solve the CAPTCHA and wait.
+=========== =====
+
+
+extractor.newgrounds.include
+----------------------------
+=========== =====
+Type        ``string`` or ``list`` of ``strings``
+Default     ``"art"``
+Example     * ``"movies,audio"``
+            * ``["movies", "audio", "scraps"]``
+Description A (comma-separated) list of subcategories to include
+            when processing a user profile.
+
+            Possible values are
+            ``"art"``, ``"audio"``, ``"movies"``.
+
+            You can use ``"all"`` instead of listing all values separately.
 =========== =====
 
 
