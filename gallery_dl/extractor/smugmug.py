@@ -154,13 +154,14 @@ class SmugmugPathExtractor(SmugmugExtractor):
             "pattern": "smugmug:album:6VRT8G$",
         }),
         # custom domain
-        ("smugmug:www.creativedogportraits.com/PortfolioGallery/", {
-            "pattern": "smugmug:album:txWXzs$",
+        ("smugmug:www.sitkapics.com/TREES-and-TRAILS/", {
+            "pattern": "smugmug:album:ct8Nds$",
         }),
-        ("smugmug:www.creativedogportraits.com/", {
-            "pattern": "smugmug:album:txWXzs$",
+        ("smugmug:www.sitkapics.com/", {
+            "pattern": r"smugmug:album:\w{6}$",
+            "count": ">= 14",
         }),
-        ("smugmug:https://www.creativedogportraits.com/"),
+        ("smugmug:https://www.sitkapics.com/"),
     )
 
     def __init__(self, match):
