@@ -31,8 +31,8 @@ class MastodonExtractor(Extractor):
         if value is not sentinel:
             return value
         return config.interpolate(
-            ("extractor", "mastodon", self.instance, self.subcategory, key),
-            default,
+            ("extractor", "mastodon", self.instance, self.subcategory),
+            key, default,
         )
 
     def items(self):
@@ -145,10 +145,10 @@ def generate_extractors():
     """Dynamically generate Extractor classes for Mastodon instances"""
 
     symtable = globals()
-    extractors = config.get(("extractor", "mastodon"))
+    extractors = config.get(("extractor",), "mastodon")
     if extractors:
         EXTRACTORS.update(extractors)
-    config.set(("extractor", "mastodon"), EXTRACTORS)
+    config.set(("extractor",), "mastodon", EXTRACTORS)
 
     for instance, info in EXTRACTORS.items():
 

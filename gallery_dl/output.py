@@ -83,7 +83,7 @@ def initialize_logging(loglevel):
 
 def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
     """Setup a new logging handler"""
-    opts = config.interpolate(("output", key))
+    opts = config.interpolate(("output",), key)
     if not opts:
         return None
     if not isinstance(opts, dict):
@@ -114,7 +114,7 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
 
 def configure_logging_handler(key, handler):
     """Configure a logging handler"""
-    opts = config.interpolate(("output", key))
+    opts = config.interpolate(("output",), key)
     if not opts:
         return
     if isinstance(opts, str):
@@ -156,7 +156,7 @@ def select():
         "color": ColorOutput,
         "null": NullOutput,
     }
-    omode = config.get(("output", "mode"), "auto").lower()
+    omode = config.get(("output",), "mode", "auto").lower()
     if omode in pdict:
         return pdict[omode]()
     elif omode == "auto":
@@ -192,7 +192,7 @@ class PipeOutput(NullOutput):
 class TerminalOutput(NullOutput):
 
     def __init__(self):
-        self.short = config.get(("output", "shorten"), True)
+        self.short = config.get(("output",), "shorten", True)
         if self.short:
             self.width = shutil.get_terminal_size().columns - OFFSET
 

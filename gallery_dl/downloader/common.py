@@ -30,7 +30,7 @@ class DownloaderBase():
 
     def config(self, key, default=None):
         """Interpolate downloader config value for 'key'"""
-        return config.interpolate(("downloader", self.scheme, key), default)
+        return config.interpolate(("downloader", self.scheme), key, default)
 
     def download(self, url, pathfmt):
         """Write data from 'url' into the file specified by 'pathfmt'"""

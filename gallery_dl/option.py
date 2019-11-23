@@ -18,13 +18,13 @@ from . import job, version
 class ConfigAction(argparse.Action):
     """Set argparse results as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
-        namespace.options.append(((self.dest,), values))
+        namespace.options.append(((), self.dest, values))
 
 
 class ConfigConstAction(argparse.Action):
     """Set argparse const values as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
-        namespace.options.append(((self.dest,), self.const))
+        namespace.options.append(((), self.dest, self.const))
 
 
 class AppendCommandAction(argparse.Action):
@@ -41,7 +41,7 @@ class DeprecatedConfigConstAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         print("warning: {} is deprecated. Use {} instead.".format(
             "/".join(self.option_strings), self.choices), file=sys.stderr)
-        namespace.options.append(((self.dest,), self.const))
+        namespace.options.append(((), self.dest, self.const))
 
 
 class ParseAction(argparse.Action):
@@ -52,8 +52,8 @@ class ParseAction(argparse.Action):
             value = json.loads(value)
         except ValueError:
             pass
-        key = key.split(".")
-        namespace.options.append((key, value))
+        key = key.split(".")  # splitting an empty string becomes [""]
+        namespace.options.append((key[:-1], key[-1], value))
 
 
 class Formatter(argparse.HelpFormatter):

@@ -93,7 +93,8 @@ def parse_inputfile(file, log):
                 log.warning("input file: unable to parse '%s': %s", value, exc)
                 continue
 
-            conf.append((key.strip().split("."), value))
+            key = key.strip().split(".")
+            conf.append((key[:-1], key[-1], value))
 
         else:
             # url
@@ -122,11 +123,11 @@ def main():
         if args.yamlfiles:
             config.load(args.yamlfiles, strict=True, fmt="yaml")
         if args.postprocessors:
-            config.set(("postprocessors",), args.postprocessors)
+            config.set((), "postprocessors", args.postprocessors)
         if args.abort:
-            config.set(("skip",), "abort:" + str(args.abort))
-        for key, value in args.options:
-            config.set(key, value)
+            config.set((), "skip", "abort:" + str(args.abort))
+        for opts in args.options:
+            config.set(*opts)
 
         # stream logging handler
         output.configure_logging_handler(
@@ -140,7 +141,7 @@ def main():
 
         # loglevels
         if args.loglevel >= logging.ERROR:
-            config.set(("output", "mode"), "null")
+            config.set(("output",), "mode", "null")
         elif args.loglevel <= logging.DEBUG:
             import platform
             import subprocess
@@ -230,7 +231,7 @@ def main():
                 ulog.propagate = False
                 job.Job.ulog = ulog
 
-            pformat = config.get(("output", "progress"), True)
+            pformat = config.get(("output",), "progress", True)
             if pformat and len(urls) > 1 and args.loglevel < logging.ERROR:
                 urls = progress(urls, pformat)
 
@@ -239,8 +240,8 @@ def main():
                 try:
                     log.debug("Starting %s for '%s'", jobtype.__name__, url)
                     if isinstance(url, util.ExtendedUrl):
-                        for key, value in url.gconfig:
-                            config.set(key, value)
+                        for opts in url.gconfig:
+                            config.set(*opts)
                         with config.apply(url.lconfig):
                             retval |= jobtype(url.value).run()
                     else:

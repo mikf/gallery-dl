@@ -188,7 +188,7 @@ def clear():
 
 
 def _path():
-    path = config.get(("cache", "file"), -1)
+    path = config.get(("cache",), "file", -1)
     if path != -1:
         return util.expand_path(path)
 

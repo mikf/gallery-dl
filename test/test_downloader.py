@@ -100,7 +100,7 @@ class TestDownloaderBase(unittest.TestCase):
         cls.extractor = extractor.find("test:")
         cls.dir = tempfile.TemporaryDirectory()
         cls.fnum = 0
-        config.set(("base-directory",), cls.dir.name)
+        config.set((), "base-directory", cls.dir.name)
 
     @classmethod
     def tearDownClass(cls):

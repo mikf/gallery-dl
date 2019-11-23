@@ -286,14 +286,14 @@ class DownloadJob(Job):
         except KeyError:
             pass
 
-        klass = downloader.find(scheme)
-        if klass and config.get(("downloader", klass.scheme, "enabled"), True):
-            instance = klass(self.extractor, self.out)
+        cls = downloader.find(scheme)
+        if cls and config.get(("downloader", cls.scheme), "enabled", True):
+            instance = cls(self.extractor, self.out)
         else:
             instance = None
             self.log.error("'%s:' URLs are not supported/enabled", scheme)
 
-        if klass and klass.scheme == "http":
+        if cls and cls.scheme == "http":
             self.downloaders["http"] = self.downloaders["https"] = instance
         else:
             self.downloaders[scheme] = instance
@@ -472,9 +472,9 @@ class DataJob(Job):
         Job.__init__(self, url, parent)
         self.file = file
         self.data = []
-        self.ascii = config.get(("output", "ascii"), ensure_ascii)
+        self.ascii = config.get(("output",), "ascii", ensure_ascii)
 
-        private = config.get(("output", "private"))
+        private = config.get(("output",), "private")
         self.filter = (lambda x: x) if private else util.filter_dict
 
     def run(self):
@@ -490,7 +490,7 @@ class DataJob(Job):
             pass
 
         # convert numbers to string
-        if config.get(("output", "num-to-str"), False):
+        if config.get(("output",), "num-to-str", False):
             for msg in self.data:
                 util.transform_dict(msg[-1], util.number_to_string)
 
