@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2017 Mike Fährmann
+# Copyright 2017-2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,8 +17,6 @@ from os.path import join
 
 import gallery_dl.config as config
 import gallery_dl.extractor as extractor
-
-CKEY = ("cookies",)
 
 
 class TestCookiejar(unittest.TestCase):
@@ -45,7 +43,7 @@ class TestCookiejar(unittest.TestCase):
         config.clear()
 
     def test_cookiefile(self):
-        config.set(CKEY, self.cookiefile)
+        config.set((), "cookies", self.cookiefile)
 
         cookies = extractor.find("test:").session.cookies
         self.assertEqual(len(cookies), 1)
@@ -63,7 +61,7 @@ class TestCookiejar(unittest.TestCase):
         self._test_warning(join(self.path.name, "nothing"), FileNotFoundError)
 
     def _test_warning(self, filename, exc):
-        config.set(CKEY, filename)
+        config.set((), "cookies", filename)
         log = logging.getLogger("test")
         with mock.patch.object(log, "warning") as mock_warning:
             cookies = extractor.find("test:").session.cookies
@@ -77,7 +75,7 @@ class TestCookiedict(unittest.TestCase):
 
     def setUp(self):
         self.cdict = {"NAME1": "VALUE1", "NAME2": "VALUE2"}
-        config.set(CKEY, self.cdict)
+        config.set((), "cookies", self.cdict)
 
     def tearDown(self):
         config.clear()
@@ -112,7 +110,7 @@ class TestCookieLogin(unittest.TestCase):
         }
         for category, cookienames in extr_cookies.items():
             cookies = {name: "value" for name in cookienames}
-            config.set(CKEY, cookies)
+            config.set((), "cookies", cookies)
             extr = _get_extractor(category)
             with mock.patch.object(extr, "_login_impl") as mock_login:
                 extr.login()

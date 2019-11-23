@@ -58,7 +58,7 @@ class BasePostprocessorTest(unittest.TestCase):
     def setUpClass(cls):
         cls.extractor = extractor.find("test:")
         cls.dir = tempfile.TemporaryDirectory()
-        config.set(("base-directory",), cls.dir.name)
+        config.set((), "base-directory", cls.dir.name)
 
     @classmethod
     def tearDownClass(cls):

@@ -75,62 +75,57 @@ def clear():
     _config.clear()
 
 
-def get(keys, default=None, conf=_config):
+def get(path, key, default=None, *, conf=_config):
     """Get the value of property 'key' or a default value"""
     try:
-        for k in keys:
-            conf = conf[k]
-        return conf
-    except (KeyError, AttributeError):
+        for p in path:
+            conf = conf[p]
+        return conf[key]
+    except KeyError:
         return default
 
 
-def interpolate(keys, default=None, conf=_config):
+def interpolate(path, key, default=None, *, conf=_config):
     """Interpolate the value of 'key'"""
+    if key in conf:
+        return conf[key]
     try:
-        lkey = keys[-1]
-        if lkey in conf:
-            return conf[lkey]
-        for k in keys:
-            if lkey in conf:
-                default = conf[lkey]
-            conf = conf[k]
-        return conf
-    except (KeyError, AttributeError):
-        return default
+        for p in path:
+            conf = conf[p]
+            if key in conf:
+                default = conf[key]
+    except KeyError:
+        pass
+    return default
 
 
-def set(keys, value, conf=_config):
+def set(path, key, value, *, conf=_config):
     """Set the value of property 'key' for this session"""
-    for k in keys[:-1]:
+    for p in path:
         try:
-            conf = conf[k]
+            conf = conf[p]
         except KeyError:
-            temp = {}
-            conf[k] = temp
-            conf = temp
-    conf[keys[-1]] = value
+            conf[p] = conf = {}
+    conf[key] = value
 
 
-def setdefault(keys, value, conf=_config):
+def setdefault(path, key, value, *, conf=_config):
     """Set the value of property 'key' if it doesn't exist"""
-    for k in keys[:-1]:
+    for p in path:
         try:
-            conf = conf[k]
+            conf = conf[p]
         except KeyError:
-            temp = {}
-            conf[k] = temp
-            conf = temp
-    return conf.setdefault(keys[-1], value)
+            conf[p] = conf = {}
+    return conf.setdefault(key, value)
 
 
-def unset(keys, conf=_config):
+def unset(path, key, *, conf=_config):
     """Unset the value of property 'key'"""
     try:
-        for k in keys[:-1]:
-            conf = conf[k]
-        del conf[keys[-1]]
-    except (KeyError, AttributeError):
+        for p in path:
+            conf = conf[p]
+        del conf[key]
+    except KeyError:
         pass
 
 
@@ -143,13 +138,13 @@ class apply():
         self.kvlist = kvlist
 
     def __enter__(self):
-        for key, value in self.kvlist:
-            self.original.append((key, get(key, self._sentinel)))
-            set(key, value)
+        for path, key, value in self.kvlist:
+            self.original.append((path, key, get(path, key, self._sentinel)))
+            set(path, key, value)
 
     def __exit__(self, etype, value, traceback):
-        for key, value in self.original:
+        for path, key, value in self.original:
             if value is self._sentinel:
-                unset(key)
+                unset(path, key)
             else:
-                set(key, value)
+                set(path, key, value)

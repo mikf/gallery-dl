@@ -55,10 +55,11 @@ class TestExtractorResults(unittest.TestCase):
         if result:
             if "options" in result:
                 for key, value in result["options"]:
-                    config.set(key.split("."), value)
+                    key = key.split(".")
+                    config.set(key[:-1], key[-1], value)
             if "range" in result:
-                config.set(("image-range",), result["range"])
-                config.set(("chapter-range",), result["range"])
+                config.set((), "image-range"  , result["range"])
+                config.set((), "chapter-range", result["range"])
             content = "content" in result
         else:
             content = False
@@ -285,35 +286,36 @@ def setup_test_config():
     email = "gallerydl@openaliasbox.org"
 
     config.clear()
-    config.set(("cache", "file"), ":memory:")
-    config.set(("downloader", "part"), False)
-    config.set(("downloader", "adjust-extensions"), False)
-    config.set(("extractor", "timeout"), 60)
-    config.set(("extractor", "username"), name)
-    config.set(("extractor", "password"), name)
-    config.set(("extractor", "nijie"    , "username"), email)
-    config.set(("extractor", "seiga"    , "username"), email)
+    config.set(("cache",), "file", None)
+    config.set(("downloader",), "part", False)
+    config.set(("downloader",), "adjust-extensions", False)
+    config.set(("extractor" ,), "timeout" , 60)
+    config.set(("extractor" ,), "username", name)
+    config.set(("extractor" ,), "password", name)
 
-    config.set(("extractor", "danbooru"  , "username"), None)
-    config.set(("extractor", "instagram" , "username"), None)
-    config.set(("extractor", "imgur"     , "username"), None)
-    config.set(("extractor", "newgrounds", "username"), None)
-    config.set(("extractor", "twitter"   , "username"), None)
+    config.set(("extractor", "nijie")     , "username", email)
+    config.set(("extractor", "seiga")     , "username", email)
+    config.set(("extractor", "danbooru")  , "username", None)
+    config.set(("extractor", "instagram") , "username", None)
+    config.set(("extractor", "twitter")   , "username", None)
 
-    config.set(("extractor", "mangoxo"  , "username"), "LiQiang3")
-    config.set(("extractor", "mangoxo"  , "password"), "5zbQF10_5u25259Ma")
+    config.set(("extractor", "newgrounds"), "username", "d1618111")
+    config.set(("extractor", "newgrounds"), "password", "d1618111")
 
-    config.set(("extractor", "deviantart", "client-id"), "7777")
-    config.set(("extractor", "deviantart", "client-secret"),
+    config.set(("extractor", "mangoxo")   , "username", "LiQiang3")
+    config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
+
+    config.set(("extractor", "deviantart"), "client-id", "7777")
+    config.set(("extractor", "deviantart"), "client-secret",
                "ff14994c744d9208e5caeec7aab4a026")
 
-    config.set(("extractor", "tumblr", "api-key"),
+    config.set(("extractor", "tumblr"), "api-key",
                "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
-    config.set(("extractor", "tumblr", "api-secret"),
+    config.set(("extractor", "tumblr"), "api-secret",
                "6wxAK2HwrXdedn7VIoZWxGqVhZ8JdYKDLjiQjL46MLqGuEtyVj")
-    config.set(("extractor", "tumblr", "access-token"),
+    config.set(("extractor", "tumblr"), "access-token",
                "N613fPV6tOZQnyn0ERTuoEZn0mEqG8m2K8M3ClSJdEHZJuqFdG")
-    config.set(("extractor", "tumblr", "access-token-secret"),
+    config.set(("extractor", "tumblr"), "access-token-secret",
                "sgOA7ZTT4FBXdOGGVV331sSp0jHYp4yMDRslbhaQf7CaS71i4O")
 
 

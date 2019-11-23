@@ -27,7 +27,7 @@ class OAuthBase(Extractor):
 
     def oauth_config(self, key, default=None):
         return config.interpolate(
-            ("extractor", self.subcategory, key), default)
+            ("extractor", self.subcategory), key, default)
 
     def recv(self):
         """Open local HTTP server and recv callback parameters"""

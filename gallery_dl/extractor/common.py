@@ -69,7 +69,7 @@ class Extractor():
 
     def config(self, key, default=None):
         return config.interpolate(
-            ("extractor", self.category, self.subcategory, key), default)
+            ("extractor", self.category, self.subcategory), key, default)
 
     def request(self, url, *, method="GET", session=None, retries=None,
                 encoding=None, fatal=True, notfound=None, **kwargs):
@@ -431,7 +431,7 @@ class SharedConfigMixin():
 
 def generate_extractors(extractor_data, symtable, classes):
     """Dynamically generate Extractor classes"""
-    extractors = config.get(("extractor", classes[0].basecategory))
+    extractors = config.get(("extractor",), classes[0].basecategory)
     ckey = extractor_data.get("_ckey")
     prev = None
 
@@ -477,7 +477,7 @@ http.cookiejar.MozillaCookieJar.magic_re = re.compile(
     "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
 
 # Replace default cipher list of urllib3 to avoid Cloudflare CAPTCHAs
-ciphers = config.get(("ciphers",), True)
+ciphers = config.get((), "ciphers", True)
 if ciphers:
     logging.getLogger("gallery-dl").debug("Updating urllib3 ciphers")
 
