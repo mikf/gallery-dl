@@ -10,17 +10,37 @@
 
 from .common import Extractor, Message
 from .. import text
+from ..cache import memcache
+import random
+import time
 
 
 class BobxExtractor(Extractor):
     """Base class for bobx extractors"""
     category = "bobx"
     root = "http://www.bobx.com"
+    cookiedomain = ".bobx.com"
     per_page = 80
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.path = match.group(1)
+
+    def login(self):
+        if not self._check_cookies(("BobXUser",)):
+            self._update_cookies(self._login_impl())
+
+    @memcache()
+    def _login_impl(self):
+        """Generate a randomized 'BobXUser' cookie"""
+        rand = random.randrange
+        tnow = time.time() - rand(60, 3600)
+
+        return {"BobXUser": "{}.{}.{}.{}.{}.{}".format(
+            int(tnow),
+            rand(128, 192), rand(0, 256), rand(0, 256), rand(0, 256),
+            tnow + 622080000,  # timestamp in 7200 days
+        )}
 
 
 class BobxGalleryExtractor(BobxExtractor):
@@ -34,18 +54,20 @@ class BobxGalleryExtractor(BobxExtractor):
     test = (
         (("http://www.bobx.com/idol/mikoto-hibi"
           "/photoset/wpb-2018-_11-0-2-8.html"), {
-            "url": "a44ee0c06ccacb80f6967c48a88a45016a8d44aa",
-            "keyword": "0250c81980913abb794ce3eb59446feee467b82f",
-            "content": "ed5d8413b9b2720d84590cba86b4ca047360bed0",
+            "url": "93972d6a661f6627e963d62c9d15531e6b36a389",
+            "keyword": "6c620862db494ed05e69356ba30e604b167b0670",
+            "content": "3f176b7fe752524cec21a763aa55567e41181e07",
         }),
         (("http://www.bobx.com/idol/nashiko-momotsuki"
           "/photoset/wpb-net-_221---2018-08---magic-of-summer-0-10-10.html"), {
-            "url": "862ad9d53f6a822927575c8f9113d927988a75dc",
-            "keyword": "94a59a8c5d8d63025f25aeb6141062139050d447",
+            "url": "f5d6c0cd0881ae6f504c21a90d86e3464dc54e8e",
+            "keyword": "f4819c75f494044348889ecd27771508464c0f5f",
         }),
     )
 
     def items(self):
+        self.login()
+
         num = 0
         while True:
             url = "{}/{}-{}-10-8.html".format(self.root, self.path, num)
@@ -58,7 +80,7 @@ class BobxGalleryExtractor(BobxExtractor):
                 data["num"] = 0
 
             for url in self.images(page):
-                url = text.urljoin(self.root, url.replace("-preview-", "--"))
+                url = text.urljoin(self.root, url.replace("-preview-", "-"))
                 data = text.nameext_from_url(url, data)
                 data["image_id"] = text.parse_int(
                     data["filename"].rpartition("-")[2])
@@ -99,6 +121,7 @@ class BobxIdolExtractor(BobxExtractor):
     })
 
     def items(self):
+        self.login()
         url = "{}/{}/".format(self.root, self.path)
         data = {"_extractor": BobxGalleryExtractor}
         page = self.request(url).text
