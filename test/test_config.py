@@ -16,49 +16,80 @@ import tempfile
 class TestConfig(unittest.TestCase):
 
     def setUp(self):
-        config.set((), "a", "1")
-        config.set((), "b", {
-            "a": 2,
-            "c": "text",
-        })
+        config.set(()        , "a", 1)
+        config.set(("b",)    , "a", 2)
+        config.set(("b", "b"), "a", 3)
+        config.set(("b",)    , "c", "text")
+        config.set(("b", "b"), "c", [8, 9])
 
     def tearDown(self):
         config.clear()
 
     def test_get(self):
-        self.assertEqual(config.get(()        , "a")     , "1")
-        self.assertEqual(config.get(("b",)    , "c")     , "text")
-        self.assertEqual(config.get(()        , "d")     , None)
-        self.assertEqual(config.get(("e", "f"), "g", 123), 123)
+        self.assertEqual(config.get(()        , "a")   , 1)
+        self.assertEqual(config.get(("b",)    , "a")   , 2)
+        self.assertEqual(config.get(("b", "b"), "a")   , 3)
+
+        self.assertEqual(config.get(()        , "c")   , None)
+        self.assertEqual(config.get(("b",)    , "c")   , "text")
+        self.assertEqual(config.get(("b", "b"), "c")   , [8, 9])
+
+        self.assertEqual(config.get(("a",)    , "g")   , None)
+        self.assertEqual(config.get(("a", "a"), "g")   , None)
+        self.assertEqual(config.get(("e", "f"), "g")   , None)
+        self.assertEqual(config.get(("e", "f"), "g", 4), 4)
 
     def test_interpolate(self):
-        self.assertEqual(config.interpolate(()    , "a")     , "1")
-        self.assertEqual(config.interpolate(("b",), "a")     , "1")
-        self.assertEqual(config.interpolate(("b",), "c", "2"), "text")
-        self.assertEqual(config.interpolate(("b",), "d", "2"), "2")
-        config.set((), "d", 123)
-        self.assertEqual(config.interpolate(("b",), "d", "2"), 123)
-        self.assertEqual(config.interpolate(("d",), "d", "2"), 123)
+        self.assertEqual(config.interpolate(()        , "a"), 1)
+        self.assertEqual(config.interpolate(("b",)    , "a"), 1)
+        self.assertEqual(config.interpolate(("b", "b"), "a"), 1)
+
+        self.assertEqual(config.interpolate(()        , "c"), None)
+        self.assertEqual(config.interpolate(("b",)    , "c"), "text")
+        self.assertEqual(config.interpolate(("b", "b"), "c"), [8, 9])
+
+        self.assertEqual(config.interpolate(("a",)    , "g")   , None)
+        self.assertEqual(config.interpolate(("a", "a"), "g")   , None)
+        self.assertEqual(config.interpolate(("e", "f"), "g")   , None)
+        self.assertEqual(config.interpolate(("e", "f"), "g", 4), 4)
+
+        self.assertEqual(config.interpolate(("b",), "d", 1) , 1)
+        self.assertEqual(config.interpolate(("d",), "d", 1) , 1)
+        config.set(()    , "d", 2)
+        self.assertEqual(config.interpolate(("b",), "d", 1) , 2)
+        self.assertEqual(config.interpolate(("d",), "d", 1) , 2)
+        config.set(("b",), "d", 3)
+        self.assertEqual(config.interpolate(("b",), "d", 1) , 2)
+        self.assertEqual(config.interpolate(("d",), "d", 1) , 2)
 
     def test_set(self):
+        config.set(()        , "c", [1, 2, 3])
         config.set(("b",)    , "c", [1, 2, 3])
         config.set(("e", "f"), "g", value=234)
+        self.assertEqual(config.get(()        , "c"), [1, 2, 3])
         self.assertEqual(config.get(("b",)    , "c"), [1, 2, 3])
         self.assertEqual(config.get(("e", "f"), "g"), 234)
 
     def test_setdefault(self):
+        config.setdefault(()        , "c", [1, 2, 3])
         config.setdefault(("b",)    , "c", [1, 2, 3])
         config.setdefault(("e", "f"), "g", value=234)
+        self.assertEqual(config.get(()        , "c"), [1, 2, 3])
         self.assertEqual(config.get(("b",)    , "c"), "text")
         self.assertEqual(config.get(("e", "f"), "g"), 234)
 
     def test_unset(self):
         config.unset(()    , "a")
         config.unset(("b",), "c")
+        config.unset(("a",), "d")
+        config.unset(("b",), "d")
         config.unset(("c",), "d")
         self.assertEqual(config.get(()    , "a"), None)
         self.assertEqual(config.get(("b",), "a"), 2)
         self.assertEqual(config.get(("b",), "c"), None)
+        self.assertEqual(config.get(("a",), "d"), None)
+        self.assertEqual(config.get(("b",), "d"), None)
+        self.assertEqual(config.get(("c",), "d"), None)
 
     def test_apply(self):
         options = (
@@ -80,26 +111,27 @@ class TestConfig(unittest.TestCase):
         with tempfile.TemporaryDirectory() as base:
             path1 = os.path.join(base, "cfg1")
             with open(path1, "w") as file:
-                file.write('{"a": "1", "b": {"a": 2, "c": "text"}}')
+                file.write('{"a": 1, "b": {"a": 2, "c": "text"}}')
 
             path2 = os.path.join(base, "cfg2")
             with open(path2, "w") as file:
-                file.write('{"a": "7", "b": {"a": 8, "e": "foo"}}')
+                file.write('{"a": 7, "b": {"a": 8, "e": "foo"}}')
 
+            config.clear()
             config.load((path1,))
-            self.assertEqual(config.get(()    , "a"), "1")
+            self.assertEqual(config.get(()    , "a"), 1)
             self.assertEqual(config.get(("b",), "a"), 2)
             self.assertEqual(config.get(("b",), "c"), "text")
 
             config.load((path2,))
-            self.assertEqual(config.get(()    , "a"), "7")
+            self.assertEqual(config.get(()    , "a"), 7)
             self.assertEqual(config.get(("b",), "a"), 8)
             self.assertEqual(config.get(("b",), "c"), "text")
             self.assertEqual(config.get(("b",), "e"), "foo")
 
             config.clear()
             config.load((path1, path2))
-            self.assertEqual(config.get(()    , "a"), "7")
+            self.assertEqual(config.get(()    , "a"), 7)
             self.assertEqual(config.get(("b",), "a"), 8)
             self.assertEqual(config.get(("b",), "c"), "text")
             self.assertEqual(config.get(("b",), "e"), "foo")
