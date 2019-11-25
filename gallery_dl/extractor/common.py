@@ -422,11 +422,8 @@ class SharedConfigMixin():
 
     def config(self, key, default=None, *, sentinel=object()):
         value = Extractor.config(self, key, sentinel)
-        if value is sentinel:
-            cat, self.category = self.category, self.basecategory
-            value = Extractor.config(self, key, default)
-            self.category = cat
-        return value
+        return value if value is not sentinel else config.interpolate(
+            ("extractor", self.basecategory, self.subcategory), key, default)
 
 
 def generate_extractors(extractor_data, symtable, classes):
