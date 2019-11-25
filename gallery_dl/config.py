@@ -81,7 +81,7 @@ def get(path, key, default=None, *, conf=_config):
         for p in path:
             conf = conf[p]
         return conf[key]
-    except KeyError:
+    except Exception:
         return default
 
 
@@ -94,7 +94,7 @@ def interpolate(path, key, default=None, *, conf=_config):
             conf = conf[p]
             if key in conf:
                 default = conf[key]
-    except KeyError:
+    except Exception:
         pass
     return default
 
@@ -125,7 +125,7 @@ def unset(path, key, *, conf=_config):
         for p in path:
             conf = conf[p]
         del conf[key]
-    except KeyError:
+    except Exception:
         pass
 
 
