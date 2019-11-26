@@ -47,6 +47,12 @@ class DeviantartExtractor(Extractor):
         if self.quality:
             self.quality = "q_{}".format(self.quality)
 
+        if self.original != "image":
+            self._update_content = self._update_content_default
+        else:
+            self._update_content = self._update_content_image
+            self.original = True
+
         self.commit_journal = {
             "html": self._commit_journal_html,
             "text": self._commit_journal_text,
@@ -96,8 +102,7 @@ class DeviantartExtractor(Extractor):
                 yield self.commit(deviation, content)
 
             elif deviation["is_downloadable"]:
-                content = {}
-                self._update_content(deviation, content)
+                content = self.api.deviation_download(deviation["deviationid"])
                 yield self.commit(deviation, content)
 
             if "videos" in deviation:
@@ -128,9 +133,14 @@ class DeviantartExtractor(Extractor):
                 deviation["url"].rpartition("-")[2])
         except KeyError:
             deviation["index"] = 0
+
         if self.user:
             deviation["username"] = self.user
             deviation["_username"] = self.user.lower()
+        else:
+            deviation["username"] = deviation["author"]["username"]
+            deviation["_username"] = deviation["username"].lower()
+
         deviation["da_category"] = deviation["category"]
         deviation["published_time"] = text.parse_int(
             deviation["published_time"])
@@ -240,29 +250,15 @@ class DeviantartExtractor(Extractor):
         url = "{}/{}/{}/0/".format(self.root, self.user, category)
         return [(url + folder["name"], folder) for folder in folders]
 
-    def _update_content(self, deviation, content):
-        try:
-            data = self.api.deviation_extended_fetch(
-                deviation["index"],
-                deviation["author"]["username"],
-                "journal" if "excerpt" in deviation else "art",
-            )
-            download = data["deviation"]["extended"]["download"]
-            download["src"] = download["url"]
-        except Exception as e:
-            self.log.warning(
-                "Unable to fetch original download URL for ID %s ('%s: %s')",
-                deviation["index"], e.__class__.__name__, e,
-            )
-            self.log.debug("Server response: %s", data)
-        else:
-            if self.original == "image":
-                url = data["src"].partition("?")[0]
-                mtype = mimetypes.guess_type(url, False)[0]
-                if not mtype or not mtype.startswith("image/"):
-                    return
-            del download["url"]
-            content.update(download)
+    def _update_content_default(self, deviation, content):
+        content.update(self.api.deviation_download(deviation["deviationid"]))
+
+    def _update_content_image(self, deviation, content):
+        data = self.api.deviation_download(deviation["deviationid"])
+        url = data["src"].partition("?")[0]
+        mtype = mimetypes.guess_type(url, False)[0]
+        if mtype and mtype.startswith("image/"):
+            content.update(data)
 
 
 class DeviantartUserExtractor(DeviantartExtractor):
@@ -298,7 +294,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     pattern = BASE_PATTERN + r"/gallery(?:/all|/?\?catpath=)?/?$"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery/", {
-            "pattern": r"https://(www.deviantart.com/download/\d+/"
+            "pattern": r"https://(api-da\.wixmp\.com/_api/download/file"
                        r"|images-wixmp-[^.]+.wixmp.com/f/.+/.+.jpg\?token=.+)",
             "count": ">= 30",
             "keyword": {
@@ -431,7 +427,8 @@ class DeviantartStashExtractor(DeviantartExtractor):
     pattern = r"(?:https?://)?sta\.sh/([a-z0-9]+)"
     test = (
         ("https://sta.sh/022c83odnaxc", {
-            "pattern": r"https://sta.sh/download/7549925030122512/.+\?token=",
+            "pattern": r"https://api-da\.wixmp\.com/_api/download/file",
+            "content": "057eb2f2861f6c8a96876b13cca1a4b7a408c11f",
             "count": 1,
         }),
         # multiple stash items
@@ -441,7 +438,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
         }),
         # downloadable, but no "content" field (#307)
         ("https://sta.sh/024t4coz16mi", {
-            "pattern": r"https://sta.sh/download/7800709982190282/.+\?token=",
+            "pattern": r"https://api-da\.wixmp\.com/_api/download/file",
             "count": 1,
         }),
         ("https://sta.sh/abcdefghijkl", {
@@ -459,35 +456,18 @@ class DeviantartStashExtractor(DeviantartExtractor):
     def deviations(self):
         url = "https://sta.sh/" + self.stash_id
         page = self.request(url).text
-        deviation_id, pos = text.extract(page, '//deviation/', '"')
+        deviation_id = text.extract(page, '//deviation/', '"')[0]
 
         if deviation_id:
-            deviation = self.api.deviation(deviation_id)
-            deviation["username"] = deviation["author"]["username"]
-            pos = page.find("dev-page-download", pos)
-            if pos >= 0:
-                deviation["_download"] = {
-                    "width" : text.parse_int(text.extract(
-                        page, 'data-download_width="' , '"', pos)[0]),
-                    "height": text.parse_int(text.extract(
-                        page, 'data-download_height="', '"', pos)[0]),
-                    "src"   : text.unescape(text.extract(
-                        page, 'data-download_url="'   , '"', pos)[0]),
-                }
-            return (deviation,)
+            return (self.api.deviation(deviation_id),)
+
         else:
             data = {"_extractor": DeviantartStashExtractor}
-            page = text.extract(
-                page, 'id="stash-body"', 'class="footer"', pos)[0]
+            page = text.extract(page, 'id="stash-body"', 'class="footer"')[0]
             return [
                 (url, data)
                 for url in text.extract_iter(page, '<a href="', '"')
             ]
-
-    def _update_content(self, deviation, content):
-        if "_download" in deviation:
-            content.update(deviation["_download"])
-            del deviation["_download"]
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
@@ -643,7 +623,8 @@ class DeviantartExtractorV2(DeviantartExtractor):
             )
 
             if "deviation" not in data:
-                self.log.warning("Skipping ID %s", deviation["deviationId"])
+                self.log.warning("Unable to fetch deviation ID %s",
+                                 deviation["deviationId"])
                 self.log.debug("Server response: %s", data)
                 continue
             deviation = self._extract(data)
@@ -738,7 +719,7 @@ class DeviantartDeviationExtractor(DeviantartExtractorV2):
     test = (
         (("https://www.deviantart.com/shimoda7/art/For-the-sake-10073852"), {
             "options": (("original", 0),),
-            "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
+            #  "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
         ("https://www.deviantart.com/zzz/art/zzz-1234567890", {
             "count": 0,
@@ -839,14 +820,6 @@ class DeviantartScrapsExtractor(DeviantartExtractorV2):
     )
 
     def deviations(self):
-        # copy self.session
-        session = self.session.__class__()
-        for attr in session.__attrs__:
-            setattr(session, attr, getattr(self.session, attr, None))
-
-        # reset cookies in the original session object
-        self.session.cookies = session.cookies.__class__()
-
         url = self.root + "/_napi/da-user-profile/api/gallery/contents"
         params = {
             "username"     : self.user,
@@ -859,8 +832,7 @@ class DeviantartScrapsExtractor(DeviantartExtractorV2):
         }
 
         while True:
-            data = self.request(
-                url, session=session, params=params, headers=headers).json()
+            data = self.request(url, params=params, headers=headers).json()
 
             for obj in data["results"]:
                 yield obj["deviation"]
