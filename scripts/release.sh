@@ -26,7 +26,7 @@ update() {
     echo Updating version to ${NEWVERSION}
 
     sed -i "s#\"${PYVERSION}\"#\"${NEWVERSION}\"#" "gallery_dl/version.py"
-    sed -i "s#v${OLDVERSION}#v${NEWVERSION}#" "${README}"
+    sed -i "s#v[0-9]\.[0-9]\+\.[0-9]\+#v${NEWVERSION}#" "${README}"
     make man
 }
 
