@@ -261,7 +261,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
                 "comment"    : "re:RECORDED 12-09-2014\n\nFrom The ZJ \"Late ",
                 "date"       : "type:datetime",
                 "description": "From The ZJ Report Show!",
-                "favorites"  : 18,
+                "favorites"  : int,
                 "index"      : 609768,
                 "rating"     : "",
                 "score"      : float,

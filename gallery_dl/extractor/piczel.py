@@ -65,7 +65,7 @@ class PiczelUserExtractor(PiczelExtractor):
     subcategory = "user"
     pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/([^/?&#]+)/?$"
     test = ("https://piczel.tv/gallery/Maximumwarp", {
-        "count": ">= 50",
+        "count": ">= 45",
     })
 
     def __init__(self, match):
