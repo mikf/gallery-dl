@@ -307,13 +307,6 @@ def build_parser():
         help="Store downloaded files in a ZIP archive",
     )
     postprocessor.add_argument(
-        "--exec",
-        dest="postprocessors", metavar="CMD",
-        action=AppendCommandAction, const={"name": "exec"},
-        help=("Execute CMD for each downloaded file. "
-              "Example: --exec 'magick convert {} {}.png && rm {}'"),
-    )
-    postprocessor.add_argument(
         "--ugoira-conv",
         dest="postprocessors", action="append_const", const={
             "name"          : "ugoira",
@@ -351,6 +344,20 @@ def build_parser():
         dest="postprocessors",
         action="append_const", const={"name": "mtime"},
         help="Set file modification times according to 'date' metadata",
+    )
+    postprocessor.add_argument(
+        "--exec",
+        dest="postprocessors", metavar="CMD",
+        action=AppendCommandAction, const={"name": "exec"},
+        help=("Execute CMD for each downloaded file. "
+              "Example: --exec 'convert {} {}.png && rm {}'"),
+    )
+    postprocessor.add_argument(
+        "--exec-after",
+        dest="postprocessors", metavar="CMD",
+        action=AppendCommandAction, const={"name": "exec", "final": True},
+        help=("Execute CMD after all files were downloaded successfully. "
+              "Example: --exec-after 'cd {} && convert * ../doc.pdf'"),
     )
 
     parser.add_argument(
