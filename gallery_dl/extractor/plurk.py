@@ -53,7 +53,9 @@ class PlurkExtractor(Extractor):
             yield from info["responses"]
             if not info["has_newer"]:
                 return
-            data["from_response_id"] = info["responses"][-1]["id"]
+            elif info["has_newer"] < 200:
+                del data["count"]
+            data["from_response_id"] = info["responses"][-1]["id"] + 1
 
     @staticmethod
     def _load(data):
