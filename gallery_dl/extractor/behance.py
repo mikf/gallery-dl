@@ -72,6 +72,11 @@ class BehanceGalleryExtractor(BehanceExtractor):
             "url": "0258fe194fe7d828d6f2c7f6086a9a0a4140db1d",
             "keyword": {"owners": ["Alex Strohl"]},
         }),
+        # 'media_collection' modules
+        ("https://www.behance.net/gallery/88276087/Audi-R8-RWD", {
+            "count": 20,
+            "url": "6bebff0d37f85349f9ad28bd8b76fd66627c1e2f",
+        }),
     )
 
     def __init__(self, match):
@@ -112,20 +117,28 @@ class BehanceGalleryExtractor(BehanceExtractor):
     @staticmethod
     def get_images(data):
         """Extract image results from an API response"""
-        results = []
+        result = []
+        append = result.append
 
         for module in data["modules"]:
+            mtype = module["type"]
 
-            if module["type"] == "image":
+            if mtype == "image":
                 url = module["sizes"]["original"]
-                results.append((url, module))
+                append((url, module))
 
-            elif module["type"] == "embed":
+            elif mtype == "media_collection":
+                for component in module["components"]:
+                    url = component["sizes"]["source"]
+                    append((url, module))
+
+            elif mtype == "embed":
                 embed = module.get("original_embed") or module.get("embed")
-                url = "ytdl:" + text.extract(embed, 'src="', '"')[0]
-                results.append((url, module))
+                if embed:
+                    url = "ytdl:" + text.extract(embed, 'src="', '"')[0]
+                    append((url, module))
 
-        return results
+        return result
 
 
 class BehanceUserExtractor(BehanceExtractor):
