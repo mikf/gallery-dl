@@ -224,12 +224,6 @@ def build_parser():
         dest="verify", nargs=0, action=ConfigConstAction, const=False,
         help="Disable HTTPS certificate validation",
     )
-    downloader.add_argument(
-        "--abort-on-skip",
-        action=DeprecatedConfigConstAction,
-        dest="skip", nargs=0, const="abort", choices="-A/--abort",
-        help=argparse.SUPPRESS,
-    )
 
     configuration = parser.add_argument_group("Configuration Options")
     configuration.add_argument(
