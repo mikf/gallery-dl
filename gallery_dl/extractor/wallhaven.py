@@ -33,8 +33,8 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         ("https://wallhaven.cc/search?q=touhou"),
         (("https://wallhaven.cc/search?q=id%3A87"
           "&categories=111&purity=100&sorting=date_added&order=asc&page=3"), {
-            "count": 5,
-            "url": "d477b68a534c3416d506ae1f159b25debab64678",
+            "pattern": r"https://w.wallhaven.cc/full/\w\w/wallhaven-\w+\.\w+",
+            "count": "<= 10",
         }),
     )
 
