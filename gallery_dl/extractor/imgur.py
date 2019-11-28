@@ -116,8 +116,8 @@ class ImgurImageExtractor(ImgurExtractor):
         image = self.api.image(self.key)
         if not image["title"]:
             page = self.request(self.root + "/" + self.key, fatal=False).text
-            title = text.extract(page, "<title>", "<")[0]
-            image["title"] = (title or "").rpartition(" - ")[0].strip()
+            title = text.extract(page, "<title>", "<")[0] or ""
+            image["title"] = text.unescape(title.rpartition(" - ")[0].strip())
         url = self._prepare(image)
         yield Message.Version, 1
         yield Message.Directory, image
