@@ -20,7 +20,6 @@ class FoolfuukaThreadExtractor(SharedConfigMixin, Extractor):
     subcategory = "thread"
     directory_fmt = ("{category}", "{board[shortname]}",
                      "{thread_num}{title:? - //}")
-    filename_fmt = "{media[media]}"
     archive_fmt = "{board[shortname]}_{num}_{timestamp}"
     pattern_fmt = r"/([^/]+)/thread/(\d+)"
     external = "default"
@@ -50,7 +49,8 @@ class FoolfuukaThreadExtractor(SharedConfigMixin, Extractor):
             if url.startswith("/"):
                 url = self.root + url
 
-            post["extension"] = url.rpartition(".")[2]
+            post["filename"], _, post["extension"] = \
+                media["media"].rpartition(".")
             yield Message.Url, url, post
 
     def posts(self):
