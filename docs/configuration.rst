@@ -1474,7 +1474,20 @@ metadata.extension
 =========== =====
 Type        ``string``
 Default     ``"json"`` or ``"txt"``
-Description Filename extension for metadata files.
+Description Filename extension for metadata files that will be appended to the
+            original file names.
+=========== =====
+
+metadata.extension-format
+-------------------------
+=========== =====
+Type        ``string``
+Example     * ``"{extension}.json"``
+            * ``"json"``
+Description Custom format string to build filename extensions for metadata
+            files with, which will replace the original filename extensions.
+
+            Note: `metadata.extension`_ is ignored if this option is set.
 =========== =====
 
 metadata.format
@@ -1482,7 +1495,7 @@ metadata.format
 =========== =====
 Type        ``string``
 Example     ``"tags:\n\n{tags:J\n}\n"``
-Description Custom format string to build content of metadata files.
+Description Custom format string to build the content of metadata files with.
 
             Note: Only applies for ``"mode": "custom"``.
 =========== =====

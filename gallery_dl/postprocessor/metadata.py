@@ -18,29 +18,45 @@ class MetadataPP(PostProcessor):
         PostProcessor.__init__(self)
 
         mode = options.get("mode", "json")
-        ext = "txt"
-
         if mode == "custom":
             self.write = self._write_custom
-            self.formatter = util.Formatter(options.get("format"))
+            self.contentfmt = util.Formatter(options.get("format")).format_map
+            ext = "txt"
         elif mode == "tags":
             self.write = self._write_tags
+            ext = "txt"
         else:
             self.write = self._write_json
             self.indent = options.get("indent", 4)
             self.ascii = options.get("ascii", False)
             ext = "json"
 
-        self.extension = options.get("extension", ext)
+        extfmt = options.get("extension-format")
+        if extfmt:
+            self.path = self._path_format
+            self.extfmt = util.Formatter(extfmt).format_map
+        else:
+            self.path = self._path_append
+            self.extension = options.get("extension", ext)
 
     def run(self, pathfmt):
-        path = "{}.{}".format(pathfmt.realpath, self.extension)
-        with open(path, "w", encoding="utf-8") as file:
+        with open(self.path(pathfmt), "w", encoding="utf-8") as file:
             self.write(file, pathfmt.kwdict)
 
+    def _path_append(self, pathfmt):
+        return "{}.{}".format(pathfmt.realpath, self.extension)
+
+    def _path_format(self, pathfmt):
+        kwdict = pathfmt.kwdict
+        ext = kwdict["extension"]
+        kwdict["extension"] = pathfmt.extension
+        kwdict["extension"] = pathfmt.prefix + self.extfmt(kwdict)
+        path = pathfmt.realdirectory + pathfmt.build_filename()
+        kwdict["extension"] = ext
+        return path
+
     def _write_custom(self, file, kwdict):
-        output = self.formatter.format_map(kwdict)
-        file.write(output)
+        file.write(self.contentfmt(kwdict))
 
     def _write_tags(self, file, kwdict):
         tags = kwdict.get("tags") or kwdict.get("tag_string")
