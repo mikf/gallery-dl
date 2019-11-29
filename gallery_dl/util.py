@@ -670,17 +670,17 @@ class PathFormat():
                 self.temppath = self.realpath = self.realpath[:-1]
         return True
 
-    def build_path(self):
-        """Use filename metadata and directory to build a full path"""
-
-        # Apply 'kwdict' to filename format string
+    def build_filename(self):
+        """Apply 'kwdict' to filename format string"""
         try:
-            self.filename = filename = self.clean_path(self.clean_segment(
+            return self.clean_path(self.clean_segment(
                 self.filename_formatter(self.kwdict)))
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
-        # Combine directory and filename to full paths
+    def build_path(self):
+        """Combine directory and filename to full paths"""
+        self.filename = filename = self.build_filename()
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
         if not self.temppath:
