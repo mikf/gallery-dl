@@ -156,6 +156,7 @@ class MetadataTest(BasePostprocessorTest):
             "_private" : "world",
         })
 
+        self.assertEqual(pp.path     , pp._path_append)
         self.assertEqual(pp.write    , pp._write_json)
         self.assertEqual(pp.ascii    , True)
         self.assertEqual(pp.indent   , 2)
@@ -228,12 +229,40 @@ class MetadataTest(BasePostprocessorTest):
         )
         self.assertEqual(pp.write, pp._write_custom)
         self.assertEqual(pp.extension, "txt")
-        self.assertTrue(pp.formatter)
+        self.assertTrue(pp.contentfmt)
 
         with patch("builtins.open", mock_open()) as m:
             pp.prepare(self.pathfmt)
             pp.run(self.pathfmt)
         self.assertEqual(self._output(m), "bar\nNone\n")
+
+    def test_metadata_extfmt(self):
+        pp = self._create({
+            "extension"       : "ignored",
+            "extension-format": "json",
+        })
+
+        self.assertEqual(pp.path, pp._path_format)
+
+        with patch("builtins.open", mock_open()) as m:
+            pp.prepare(self.pathfmt)
+            pp.run(self.pathfmt)
+
+        path = self.pathfmt.realdirectory + "file.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_extfmt_2(self):
+        pp = self._create({
+            "extension-format": "{extension!u}-data:{category:Res/ES/}",
+        })
+
+        self.pathfmt.prefix = "2."
+        with patch("builtins.open", mock_open()) as m:
+            pp.prepare(self.pathfmt)
+            pp.run(self.pathfmt)
+
+        path = self.pathfmt.realdirectory + "file.2.EXT-data:tESt"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
 
     @staticmethod
     def _output(mock):
