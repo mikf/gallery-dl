@@ -11,13 +11,14 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache, memcache
+import json
 import re
 
 
 class TwitterExtractor(Extractor):
     """Base class for twitter extractors"""
     category = "twitter"
-    directory_fmt = ("{category}", "{user}")
+    directory_fmt = ("{category}", "{user[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     root = "https://twitter.com"
@@ -26,6 +27,7 @@ class TwitterExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
+        self._user_dict = None
         self.logged_in = False
         self.retweets = self.config("retweets", True)
         self.content = self.config("content", False)
@@ -37,23 +39,18 @@ class TwitterExtractor(Extractor):
 
     def items(self):
         self.login()
+        metadata = self.metadata()
         yield Message.Version, 1
-        yield Message.Directory, self.metadata()
 
         for tweet in self.tweets():
             data = self._data_from_tweet(tweet)
-
-            if not self.retweets and data["retweet_id"]:
+            if not data or not self.retweets and data["retweet_id"]:
                 continue
-
-            images = text.extract_iter(
-                tweet, 'data-image-url="', '"')
-            for data["num"], url in enumerate(images, 1):
-                text.nameext_from_url(url, data)
-                urls = [url + size for size in self.sizes]
-                yield Message.Urllist, urls, data
+            data.update(metadata)
 
             if self.videos and "-videoContainer" in tweet:
+                yield Message.Directory, data
+
                 if self.videos == "ytdl":
                     data["extension"] = None
                     url = "ytdl:{}/{}/status/{}".format(
@@ -70,9 +67,19 @@ class TwitterExtractor(Extractor):
                 data["num"] = 1
                 yield Message.Url, url, data
 
+            elif "data-image-url=" in tweet:
+                yield Message.Directory, data
+
+                images = text.extract_iter(
+                    tweet, 'data-image-url="', '"')
+                for data["num"], url in enumerate(images, 1):
+                    text.nameext_from_url(url, data)
+                    urls = [url + size for size in self.sizes]
+                    yield Message.Urllist, urls, data
+
     def metadata(self):
         """Return general metadata"""
-        return {"user": self.user}
+        return {}
 
     def tweets(self):
         """Yield HTML content of all relevant tweets"""
@@ -113,11 +120,33 @@ class TwitterExtractor(Extractor):
             "tweet_id"  : text.parse_int(extr('data-tweet-id="'  , '"')),
             "retweet_id": text.parse_int(extr('data-retweet-id="', '"')),
             "retweeter" : extr('data-retweeter="'  , '"'),
-            "user"      : extr('data-screen-name="', '"'),
-            "username"  : extr('data-name="'       , '"'),
-            "user_id"   : text.parse_int(extr('data-user-id="'   , '"')),
-            "date"      : text.parse_timestamp(extr('data-time="', '"')),
+            "author"    : {
+                "name"  : extr('data-screen-name="', '"'),
+                "nick"  : text.unescape(extr('data-name="'       , '"')),
+                "id"    : text.parse_int(extr('data-user-id="'   , '"')),
+            },
         }
+
+        if not self._user_dict:
+            if data["retweet_id"]:
+                for user in json.loads(text.unescape(extr(
+                        'data-reply-to-users-json="', '"'))):
+                    if user["screen_name"] == data["retweeter"]:
+                        break
+                else:
+                    self.log.warning("Unable to extract user info")
+                    return None
+                self._user_dict = {
+                    "name": user["screen_name"],
+                    "nick": text.unescape(user["name"]),
+                    "id"  : text.parse_int(user["id_str"]),
+                }
+            else:
+                self._user_dict = data["author"]
+
+        data["user"] = self._user_dict
+        data["date"] = text.parse_timestamp(extr('data-time="', '"'))
+
         if self.content:
             content = extr('<div class="js-tweet-text-container">', '\n</div>')
             if '<img class="Emoji ' in content:
@@ -125,6 +154,7 @@ class TwitterExtractor(Extractor):
             content = text.unescape(text.remove_html(content, "", ""))
             cl, _, cr = content.rpartition("pic.twitter.com/")
             data["content"] = cl if cl and len(cr) < 16 else content
+
         return data
 
     def _video_from_tweet(self, tweet_id):
@@ -204,7 +234,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
             "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
-            "keyword": "7210d679606240405e0cf62cbc67596e81a7a250",
+            "keyword": "37f4d35affd733d458d3b235b4a55f619a86f794",
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
     )
@@ -262,13 +292,13 @@ class TwitterTweetExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics/status/604341487988576256", {
             "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",
-            "keyword": "1b8afb93cc04a9f44d89173f8facc61c3a6caf91",
+            "keyword": "3fa3623e8d9a204597238e2f1f6433da19c63b4a",
             "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
         }),
         # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "43d98ab448193f0d4f30aa571a4b6bda9b6a5692",
+            "keyword": "49165725116ac52193a3861e8f5534e47a706b62",
         }),
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {
@@ -278,7 +308,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # content with emoji, newlines, hashtags (#338)
         ("https://twitter.com/yumi_san0112/status/1151144618936823808", {
             "options": (("content", True),),
-            "keyword": "4d85faca51841b563aef613171e5efa9490219d8",
+            "keyword": "0b7a3d05607b480c1412dfd85f8606478313e7bf",
         }),
         # Reply to another tweet (#403)
         ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
@@ -294,9 +324,6 @@ class TwitterTweetExtractor(TwitterExtractor):
     def __init__(self, match):
         TwitterExtractor.__init__(self, match)
         self.tweet_id = match.group(2)
-
-    def metadata(self):
-        return {"user": self.user, "tweet_id": self.tweet_id}
 
     def tweets(self):
         url = "{}/i/web/status/{}".format(self.root, self.tweet_id)
