@@ -33,13 +33,13 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
                r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")
     test = (
         ("https://www.imagefap.com/pictures/7102714", {
-            "url": "268995eac5d01ddecd0fe58cfa9828390dc85a84",
-            "keyword": "b5bd65ab2ff574ed1639db9a43c7b1b8583c85ef",
+            "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
+            "keyword": "2ba96e84c2952c4750e9fa94a3f2b1f965cec2f3",
             "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
         ("https://www.imagefap.com/gallery/5486966", {
-            "url": "14906b4f0b8053d1d69bc730a325acb793cbc898",
-            "keyword": "ab90972f3527a2011478fabc621a2c99a541f752",
+            "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
+            "keyword": "3e24eace5b09639b881ebd393165862feb46adde",
         }),
         ("https://www.imagefap.com/gallery.php?gid=7102714"),
     )
@@ -89,9 +89,10 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
                 if not imgurl:
                     return
                 num += 1
-                _, imgid, name = imgurl.rsplit("/", 2)
-                data = {"image_id": text.parse_int(imgid), "num": num}
-                yield imgurl, text.nameext_from_url(name, data)
+                data = text.nameext_from_url(imgurl)
+                data["num"] = num
+                data["image_id"] = text.parse_int(data["filename"])
+                yield imgurl, data
             params["idx"] += 24
 
 
@@ -100,8 +101,8 @@ class ImagefapImageExtractor(ImagefapExtractor):
     subcategory = "image"
     pattern = r"(?:https?://)?(?:www\.)?imagefap\.com/photo/(\d+)"
     test = ("https://www.imagefap.com/photo/1369341772/", {
-        "url": "b31ee405b61ff0450020a1bf11c0581ca9adb471",
-        "keyword": "eadaa8f8012298384996efd21cf1f9e9e0dddb9b",
+        "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
+        "keyword": "8894e45f7262020d8d66ce59917315def1fc475b",
     })
 
     def __init__(self, match):
@@ -109,27 +110,32 @@ class ImagefapImageExtractor(ImagefapExtractor):
         self.image_id = match.group(1)
 
     def items(self):
-        data = self.get_job_metadata()
+        url, data = self.get_image()
         yield Message.Version, 1
         yield Message.Directory, data
-        yield Message.Url, data["url"], data
+        yield Message.Url, url, data
 
-    def get_job_metadata(self):
-        """Collect metadata for extractor-job"""
+    def get_image(self):
         url = "{}/photo/{}/".format(self.root, self.image_id)
         page = self.request(url).text
-        info = json.loads(text.extract(
-            page, '<script type="application/ld+json">', '</script>')[0])
-        parts = info["contentUrl"].rsplit("/", 3)
-        return text.nameext_from_url(parts[3], {
-            "url": info["contentUrl"],
+
+        info, pos = text.extract(
+            page, '<script type="application/ld+json">', '</script>')
+        image_id, pos = text.extract(
+            page, 'id="imageid_input" value="', '"', pos)
+        gallery_id, pos = text.extract(
+            page, 'id="galleryid_input" value="', '"', pos)
+        info = json.loads(info)
+        url = info["contentUrl"]
+
+        return url, text.nameext_from_url(url, {
             "title": text.unescape(info["name"]),
             "uploader": info["author"],
             "date": info["datePublished"],
             "width": text.parse_int(info["width"]),
             "height": text.parse_int(info["height"]),
-            "gallery_id": text.parse_int(parts[1]),
-            "image_id": text.parse_int(parts[2]),
+            "gallery_id": text.parse_int(gallery_id),
+            "image_id": text.parse_int(image_id),
         })
 
 
