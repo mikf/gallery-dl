@@ -69,8 +69,8 @@ class NijieExtractor(AsynchronousMixin, Extractor):
             "description": text.unescape(extr(
                 '"description": "', '"').replace("&amp;", "&")),
             "date"       : text.parse_datetime(extr(
-                '"datePublished": "', '"')[:-4] + "+0900",
-                "%a %d %b %Y %I:%M:%S %p%z"),
+                '"datePublished": "', '"') + "+0900",
+                "%a %b %d %H:%M:%S %Y%z"),
             "artist_id"  : text.parse_int(extr(
                 '"sameAs": "https://nijie.info/members.php?id=', '"')),
             "artist_name": keywords[1],
