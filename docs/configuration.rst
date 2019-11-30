@@ -1465,8 +1465,8 @@ Description Select how to write metadata.
             * ``"json"``: all metadata using `json.dump()
               <https://docs.python.org/3/library/json.html#json.dump>`_
             * ``"tags"``: ``tags`` separated by newlines
-            * ``"custom"``: result of applying `metadata.format`_ to a file's
-              metadata dictionary
+            * ``"custom"``: result of applying `metadata.content-format`_
+              to a file's metadata dictionary
 =========== =====
 
 metadata.extension
@@ -1490,8 +1490,8 @@ Description Custom format string to build filename extensions for metadata
             Note: `metadata.extension`_ is ignored if this option is set.
 =========== =====
 
-metadata.format
----------------
+metadata.content-format
+-----------------------
 =========== =====
 Type        ``string``
 Example     ``"tags:\n\n{tags:J\n}\n"``

@@ -20,7 +20,8 @@ class MetadataPP(PostProcessor):
         mode = options.get("mode", "json")
         if mode == "custom":
             self.write = self._write_custom
-            self.contentfmt = util.Formatter(options.get("format")).format_map
+            cfmt = options.get("content-format") or options.get("format")
+            self.contentfmt = util.Formatter(cfmt).format_map
             ext = "txt"
         elif mode == "tags":
             self.write = self._write_tags
