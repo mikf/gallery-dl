@@ -72,8 +72,8 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
         "url": "ad921fe62663b06e7d73997f7d00646cab7bdd0d",
         "keyword": {
             "channel": {
-                "id": "QeYKRkO0",
-                "name": "美女图社",
+                "id": "Jpw9ywQ4",
+                "name": "绘画艺术赏析",
                 "cover": str,
             },
             "album": {

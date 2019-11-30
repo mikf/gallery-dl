@@ -117,7 +117,7 @@ class PhotobucketImageExtractor(Extractor):
         (("https://s271.photobucket.com/user/lakerfanryan"
           "/media/Untitled-3-1.jpg.html"), {
             "url": "3b647deeaffc184cc48c89945f67574559c9051f",
-            "keyword": "a2de4e60d584912537b8025c01bdd1d20bdea735",
+            "keyword": "69732741b2b351db7ecaa77ace2fdb39f08ca5a3",
         }),
         (("https://s271.photobucket.com/user/lakerfanryan"
           "/media/IsotopeswBros.jpg.html?sort=3&o=2"), {
