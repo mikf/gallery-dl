@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, extractor, exception
 import datetime
+import time
 import json
 import re
 
@@ -47,14 +48,21 @@ class PlurkExtractor(Extractor):
         """Return an iterable with a 'plurk's comments"""
         url = "https://www.plurk.com/Responses/get"
         data = {"plurk_id": plurk["id"], "count": "200"}
+        headers = {
+            "Origin": self.root,
+            "Referer": self.root,
+            "X-Requested-With": "XMLHttpRequest",
+        }
 
         while True:
-            info = self.request(url, method="POST", data=data).json()
+            info = self.request(
+                url, method="POST", headers=headers, data=data).json()
             yield from info["responses"]
             if not info["has_newer"]:
                 return
             elif info["has_newer"] < 200:
                 del data["count"]
+            time.sleep(1)
             data["from_response_id"] = info["responses"][-1]["id"] + 1
 
     @staticmethod
@@ -83,9 +91,9 @@ class PlurkTimelineExtractor(PlurkExtractor):
         user_id, pos = text.extract(page, '"user_id":', ',')
         plurks = self._load(text.extract(page, "_PLURKS = ", ";\n", pos)[0])
 
-        url = "https://www.plurk.com/TimeLine/getPlurks"
-        data = {"user_id": user_id.strip()}
         headers = {"Referer": url, "X-Requested-With": "XMLHttpRequest"}
+        data = {"user_id": user_id.strip()}
+        url = "https://www.plurk.com/TimeLine/getPlurks"
 
         while plurks:
             yield from plurks
