@@ -101,10 +101,12 @@ class Extractor():
                     raise exception.NotFoundError(notfound)
                 if cloudflare.is_challenge(response):
                     self.log.info("Solving Cloudflare challenge")
-                    url, domain, cookies = cloudflare.solve_challenge(
+                    response, domain, cookies = cloudflare.solve_challenge(
                         session, response, kwargs)
+                    if response.status_code >= 400:
+                        continue
                     cloudflare.cookies.update(self.category, (domain, cookies))
-                    continue
+                    return response
                 if cloudflare.is_captcha(response):
                     try:
                         import OpenSSL  # noqa

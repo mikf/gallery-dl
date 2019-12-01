@@ -35,10 +35,11 @@ def solve_challenge(session, response, kwargs):
 
     cf_kwargs = {}
     headers = cf_kwargs["headers"] = collections.OrderedDict()
-    params = cf_kwargs["params"] = collections.OrderedDict()
+    params = cf_kwargs["data"] = collections.OrderedDict()
 
     page = response.text
-    params["s"] = text.extract(page, 'name="s" value="', '"')[0]
+    url = root + text.extract(page, 'action="', '"')[0]
+    params["r"] = text.extract(page, 'name="r" value="', '"')[0]
     params["jschl_vc"] = text.extract(page, 'name="jschl_vc" value="', '"')[0]
     params["pass"] = text.extract(page, 'name="pass" value="', '"')[0]
     params["jschl_answer"] = solve_js_challenge(page, parsed.netloc)
@@ -46,12 +47,14 @@ def solve_challenge(session, response, kwargs):
 
     time.sleep(4)
 
-    url = root + "/cdn-cgi/l/chk_jschl"
     cf_kwargs["allow_redirects"] = False
-    cf_response = session.request("GET", url, **cf_kwargs)
+    cf_response = session.request("POST", url, **cf_kwargs)
 
-    location = cf_response.headers.get("Location")
-    if not location:
+    cookies = {
+        cookie.name: cookie.value
+        for cookie in cf_response.cookies
+    }
+    if not cookies:
         import logging
         log = logging.getLogger("cloudflare")
         rtype = "CAPTCHA" if is_captcha(cf_response) else "Unexpected"
@@ -60,18 +63,9 @@ def solve_challenge(session, response, kwargs):
         log.debug("Content:\n%s", cf_response.text)
         raise exception.StopExtraction()
 
-    if location[0] == "/":
-        location = root + location
-    else:
-        location = re.sub(r"(https?):/(?!/)", r"\1://", location)
-
-    for cookie in cf_response.cookies:
-        if cookie.name == "cf_clearance":
-            return location, cookie.domain, {
-                cookie.name: cookie.value,
-                "__cfduid" : response.cookies.get("__cfduid", ""),
-            }
-    return location, "", {}
+    domain = next(iter(cf_response.cookies)).domain
+    cookies["__cfduid"] = response.cookies.get("__cfduid", "")
+    return cf_response, domain, cookies
 
 
 def solve_js_challenge(page, netloc):
