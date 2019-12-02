@@ -280,6 +280,20 @@ class ImgurFavoriteExtractor(ImgurExtractor):
         return self._items_queue(self.api.account_favorites(self.key))
 
 
+class ImgurSubredditExtractor(ImgurExtractor):
+    """Extractor for a subreddits's imgur links"""
+    subcategory = "subreddit"
+    pattern = BASE_PATTERN + r"/r/([^/?&#]+)"
+    test = ("https://imgur.com/r/pics", {
+        "range": "1-100",
+        "count": 100,
+        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+    })
+
+    def items(self):
+        return self._items_queue(self.api.gallery_subreddit(self.key))
+
+
 class ImgurAPI():
 
     def __init__(self, extractor):
@@ -295,6 +309,10 @@ class ImgurAPI():
 
     def account_submissions(self, account):
         endpoint = "account/{}/submissions".format(account)
+        return self._pagination(endpoint)
+
+    def gallery_subreddit(self, subreddit):
+        endpoint = "gallery/r/{}".format(subreddit)
         return self._pagination(endpoint)
 
     def album(self, album_hash):
