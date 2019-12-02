@@ -15,11 +15,14 @@ from ..cache import cache
 import os
 import urllib.parse
 
+REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
+REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
+
 
 class OAuthBase(Extractor):
     """Base class for OAuth Helpers"""
     category = "oauth"
-    redirect_uri = "http://localhost:6414/"
+    redirect_uri = REDIRECT_URI_LOCALHOST
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -163,7 +166,7 @@ class OAuthBase(Extractor):
 class OAuthDeviantart(OAuthBase):
     subcategory = "deviantart"
     pattern = "oauth:deviantart$"
-    redirect_uri = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
+    redirect_uri = REDIRECT_URI_HTTPS
 
     def items(self):
         yield Message.Version, 1
@@ -182,6 +185,7 @@ class OAuthDeviantart(OAuthBase):
 class OAuthFlickr(OAuthBase):
     subcategory = "flickr"
     pattern = "oauth:flickr$"
+    redirect_uri = REDIRECT_URI_HTTPS
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
