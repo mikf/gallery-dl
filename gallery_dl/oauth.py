@@ -115,14 +115,15 @@ class OAuth1API():
         api_secret = extractor.config("api-secret", self.API_SECRET)
         token = extractor.config("access-token")
         token_secret = extractor.config("access-token-secret")
+        key_type = "default" if api_key == self.API_KEY else "custom"
 
         if api_key and api_secret and token and token_secret:
-            self.log.debug("Using OAuth1.0 authentication")
+            self.log.debug("Using %s OAuth1.0 authentication", key_type)
             self.session = OAuth1Session(
                 api_key, api_secret, token, token_secret)
             self.api_key = None
         else:
-            self.log.debug("Using api_key authentication")
+            self.log.debug("Using %s api_key authentication", key_type)
             self.session = extractor.session
             self.api_key = api_key
 
