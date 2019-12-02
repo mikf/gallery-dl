@@ -23,8 +23,8 @@ class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
     pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com(/gallery/(\d+))"
     test = ("https://hentaifox.com/gallery/56622/", {
         "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
+        "keyword": "b7ff141331d0c7fc711ab28d45dfbb013a83d8e9",
         "count": 24,
-        "keyword": "903ebe227d85e484460382fc6cbab42be7a244d5",
     })
 
     def __init__(self, match):
@@ -37,19 +37,43 @@ class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
         return {
             "gallery_id": text.parse_int(self.gallery_id),
             "title"     : text.unescape(extr("<h1>", "</h1>")),
-            "parody"    : split(extr(">Parodies:"  , "</a></span>"))[::2],
-            "characters": split(extr(">Characters:", "</a></span>"))[::2],
-            "tags"      : split(extr(">Tags:"      , "</a></span>"))[::2],
-            "artist"    : split(extr(">Artists:"   , "</a></span>"))[::2],
-            "group"     : split(extr(">Groups:"    , "</a></span>"))[::2],
-            "type"      : text.remove_html(extr(">Category:", "</a></span>")),
+            "parody"    : split(extr(">Parodies:"  , "</ul>"))[::2],
+            "characters": split(extr(">Characters:", "</ul>"))[::2],
+            "tags"      : split(extr(">Tags:"      , "</ul>"))[::2],
+            "artist"    : split(extr(">Artists:"   , "</ul>"))[::2],
+            "group"     : split(extr(">Groups:"    , "</ul>"))[::2],
+            "type"      : text.remove_html(extr(">Category:", "<span")),
             "language"  : "English",
             "lang"      : "en",
         }
 
     def images(self, page):
+        pos = page.find('id="load_all"')
+        if pos >= 0:
+            extr = text.extract
+            load_id = extr(page, 'id="load_id" value="', '"', pos)[0]
+            load_dir = extr(page, 'id="load_dir" value="', '"', pos)[0]
+            load_pages = extr(page, 'id="load_pages" value="', '"', pos)[0]
+
+            url = self.root + "/includes/thumbs_loader.php"
+            data = {
+                "u_id"         : self.gallery_id,
+                "g_id"         : load_id,
+                "img_dir"      : load_dir,
+                "visible_pages": "0",
+                "total_pages"  : load_pages,
+                "type"         : "2",
+            }
+            headers = {
+                "Origin": self.root,
+                "Referer": self.gallery_url,
+                "X-Requested-With": "XMLHttpRequest",
+            }
+            page = self.request(
+                url, method="POST", headers=headers, data=data).text
+
         return [
-            (text.urljoin(self.root, url.replace("t.", ".")), None)
+            (url.replace("t.", "."), None)
             for url in text.extract_iter(page, 'data-src="', '"')
         ]
 
@@ -64,15 +88,13 @@ class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
         ("https://hentaifox.com/character/reimu-hakurei/"),
         ("https://hentaifox.com/artist/distance/"),
         ("https://hentaifox.com/search/touhou/"),
-        ("https://hentaifox.com/tag/full-colour/", {
+        ("https://hentaifox.com/tag/heterochromia/", {
             "pattern": HentaifoxGalleryExtractor.pattern,
-            "count": ">= 40",
+            "count": ">= 60",
             "keyword": {
-                "url": str,
+                "url"       : str,
                 "gallery_id": int,
-                "thumbnail": r"re:https://i\d*.hentaifox.com/\d+/\d+/thumb\.",
-                "title": str,
-                "tags": list,
+                "title"     : str,
             },
         }),
     )
@@ -87,31 +109,26 @@ class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
             yield Message.Queue, gallery["url"], gallery
 
     def galleries(self):
-        url = "{}/{}/".format(self.root, self.path)
+        num = 1
 
         while True:
+            url = "{}{}/pag/{}/".format(self.root, self.path, num)
             page = self.request(url).text
-            info, gpos = text.extract(
-                page, 'class="galleries_overview">', 'class="clear">')
 
-            for ginfo in text.extract_iter(info, '<div class="item', '</a>'):
-                tags , pos = text.extract(ginfo, '', '"')
-                url  , pos = text.extract(ginfo, 'href="', '"', pos)
-                title, pos = text.extract(ginfo, 'alt="', '"', pos)
-                thumb, pos = text.extract(ginfo, 'src="', '"', pos)
+            for info in text.extract_iter(
+                    page, 'class="g_title"><a href="', '</a>'):
+                url, _, title = info.partition('">')
 
                 yield {
-                    "url": text.urljoin(self.root, url),
+                    "url"       : text.urljoin(self.root, url),
                     "gallery_id": text.parse_int(
                         url.strip("/").rpartition("/")[2]),
-                    "thumbnail": text.urljoin(self.root, thumb),
-                    "title": text.unescape(title),
-                    "tags": tags.split(),
+                    "title"     : text.unescape(title),
                     "_extractor": HentaifoxGalleryExtractor,
                 }
 
-            pos = page.find('class="current"', gpos)
-            url = text.extract(page, 'href="', '"', pos)[0]
+            pos = page.find(">Next<")
+            url = text.rextract(page, "href=", ">", pos)[0]
             if pos == -1 or "/pag" not in url:
                 return
-            url = text.urljoin(self.root, url)
+            num += 1
