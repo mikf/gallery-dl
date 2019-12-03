@@ -68,6 +68,8 @@ class _2chanThreadExtractor(Extractor):
     def parse(self, post):
         """Build post-object by extracting data from an HTML post"""
         data = self._extract_post(post)
+        if data["name"]:
+            data["name"] = data["name"].strip()
         if '<a href="/' in post:
             self._extract_image(post, data)
             data["tim"], _, data["extension"] = data["filename"].partition(".")
@@ -78,10 +80,10 @@ class _2chanThreadExtractor(Extractor):
     @staticmethod
     def _extract_post(post):
         return text.extract_all(post, (
-            ("no"  , 'name="', '"'),
-            ("post", '<b>', '</b>'),
-            ("name", '<b>', ' </b>'),
-            ("now" , '</font> ', ' '),
+            ("post", 'class="csb">'   , '<'),
+            ("name", 'class="cnm">'   , '<'),
+            ("now" , 'class="cnw">'   , '<'),
+            ("no"  , 'class="cno">No.', '<'),
             (None  , '<blockquote', ''),
             ("com" , '>', '</blockquote>'),
         ))[0]
