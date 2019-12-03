@@ -215,7 +215,7 @@ class TwitterExtractor(Extractor):
 
             if "min_position" in data:
                 position = data["min_position"]
-                if position == max_position:
+                if position == max_position or position is None:
                     return
             else:
                 position = text.parse_int(text.extract(
