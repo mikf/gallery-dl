@@ -64,7 +64,7 @@ class LivedoorExtractor(Extractor):
             if not src:
                 continue
             if "://livedoor.blogimg.jp/" in src:
-                url = src.replace("-s.", ".")
+                url = src.replace("http:", "https:", 1).replace("-s.", ".")
             else:
                 url = text.urljoin(self.root, src)
             name, _, ext = url.rpartition("/")[2].rpartition(".")
