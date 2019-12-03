@@ -43,10 +43,11 @@ for idx, extr, url, result in tests:
 
     if "options" in result:
         for key, value in result["options"]:
-            config.set(key.split("."), value)
+            key = key.split(".")
+            config.set(key[:-1], key[-1], value)
     if "range" in result:
-        config.set(("image-range",), result["range"])
-        config.set(("chapter-range",), result["range"])
+        config.set((), "image-range"  , result["range"])
+        config.set((), "chapter-range", result["range"])
 
     # write test data
     try:
