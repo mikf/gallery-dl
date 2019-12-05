@@ -202,7 +202,7 @@ class Extractor():
 
     def _store_cookies(self):
         """Store the session's cookiejar in a cookies.txt file"""
-        if self._cookiefile and self.config("cookies-update", False):
+        if self._cookiefile and self.config("cookies-update", True):
             cookiejar = http.cookiejar.MozillaCookieJar()
             for cookie in self._cookiejar:
                 cookiejar.set_cookie(cookie)

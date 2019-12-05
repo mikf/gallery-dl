@@ -227,7 +227,7 @@ extractor.*.cookies-update
 --------------------------
 =========== =====
 Type        ``bool``
-Default     ``false``
+Default     ``true``
 Description If `extractor.*.cookies`_ specifies a cookies.txt file, update its
             contents with cookies received during data extraction.
 =========== =====
