@@ -150,8 +150,6 @@ Description Controls the behavior when downloading files that have been
             downloaded before, i.e. a file with the same filename already
             exists or its ID is in a `download archive`__.
 
-            __ `extractor.*.archive`_
-
             * ``true``: Skip downloads
             * ``false``: Overwrite already existing files
 
@@ -163,9 +161,11 @@ Description Controls the behavior when downloading files that have been
             * ``"exit:N"``: Skip downloads and exit the program
               after ``N`` consecutive skips
 
-            * ``"enumerate"``: Append a numeric suffix to the end of the
-              original filename (``file.ext.1``, ``file.ext.2``, etc)
+            * ``"enumerate"``: Add an enumeration index to the beginning of the
+              filename extension (``file.1.ext``, ``file.2.ext``, etc.)
 =========== =====
+
+__ `extractor.*.archive`_
 
 
 extractor.*.sleep
@@ -553,8 +553,7 @@ extractor.deviantart.include
 =========== =====
 Type        ``string`` or ``list`` of ``strings``
 Default     ``"gallery"``
-Example     * ``"favorite,journal,scraps"``
-            * ``["favorite", "journal", "scraps"]``
+Example     ``"favorite,journal,scraps"`` or ``["favorite", "journal", "scraps"]``
 Description A (comma-separated) list of subcategories to include
             when processing a user profile.
 
@@ -788,8 +787,7 @@ extractor.newgrounds.include
 =========== =====
 Type        ``string`` or ``list`` of ``strings``
 Default     ``"art"``
-Example     * ``"movies,audio"``
-            * ``["movies", "audio", "scraps"]``
+Example     ``"movies,audio"`` or ``["movies", "audio"]``
 Description A (comma-separated) list of subcategories to include
             when processing a user profile.
 
@@ -1168,7 +1166,7 @@ downloader.*.rate
 =========== =====
 Type        ``string``
 Default     ``null``
-Examples    ``"32000"``, ``"500k"``, ``"2.5M"``
+Example     ``"32000"``, ``"500k"``, ``"2.5M"``
 Description Maximum download rate in bytes per second.
 
             Possible values are valid integer or floating-point numbers
@@ -1423,8 +1421,8 @@ exec.command
 ------------
 =========== =====
 Type        ``string`` or ``list`` of ``strings``
-Example     * ``"convert {} {}.png && rm {}"``
-            * ``["echo", "{user[account]}", "{id}"]``
+Example     | ``"convert {} {}.png && rm {}"``,
+            | ``["echo", "{user[account]}", "{id}"]``
 Description The command to run.
 
             * If this is a ``string``, it will be executed using the system's
@@ -1482,8 +1480,8 @@ metadata.extension-format
 -------------------------
 =========== =====
 Type        ``string``
-Example     * ``"{extension}.json"``
-            * ``"json"``
+Example     | ``"{extension}.json"``,
+            | ``"json"``
 Description Custom format string to build filename extensions for metadata
             files with, which will replace the original filename extensions.
 
@@ -1798,12 +1796,12 @@ Date
 ----
 =========== =====
 Type        ``string`` or ``integer``
-Examples    * ``"2019-01-01T00:00:00"``
-            * ``"2019"`` with ``"%Y"`` as date-format_
-            * ``1546297200``
+Example     | ``"2019-01-01T00:00:00"``,
+            | ``"2019"`` with ``"%Y"`` as `date-format`_,
+            | ``1546297200``
 Description A |Date|_ value represents a specific point in time.
 
-            * If given as ``string``, it is parsed according to date-format_.
+            * If given as ``string``, it is parsed according to `date-format`_.
             * If given as ``integer``, it is interpreted as UTC timestamp.
 =========== =====
 
@@ -1812,10 +1810,10 @@ Path
 ----
 =========== =====
 Type        ``string`` or ``list`` of ``strings``
-Examples    * ``"file.ext"``
-            * ``"~/path/to/file.ext"``
-            * ``"$HOME/path/to/file.ext"``
-            * ``["$HOME", "path", "to", "file.ext"]``
+Example     | ``"file.ext"``,
+            | ``"~/path/to/file.ext"``,
+            | ``"$HOME/path/to/file.ext"``,
+            | ``["$HOME", "path", "to", "file.ext"]``
 Description A |Path|_ is a ``string`` representing the location of a file
             or directory.
 
@@ -1837,7 +1835,7 @@ Logging Configuration
 =========== =====
 Type        ``object``
 
-Examples    .. code::
+Example     .. code::
 
                 {
                     "format": "{asctime} {name}: {message}",
