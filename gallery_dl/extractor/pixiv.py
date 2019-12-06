@@ -318,16 +318,22 @@ class PixivSearchExtractor(PixivExtractor):
     archive_fmt = "s_{search[word]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "search", "{search[word]}")
     pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/search\.php\?([^#]+)")
+               r"/(?:(?:en/)?tags/([^/?&#]+)(?:/[^/?&#]+)?/?"
+               r"|search\.php)(?:\?([^#]+))?")
     test = (
+        ("https://www.pixiv.net/en/tags/Original", {
+            "range": "1-10",
+            "count": 10,
+        }),
+        ("https://www.pixiv.net/en/tags/foo/artworks?order=date&s_mode=s_tag"),
         ("https://www.pixiv.net/search.php?s_mode=s_tag&word=Original"),
         ("https://touch.pixiv.net/search.php?word=Original"),
     )
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
-        self.query = match.group(1)
-        self.word = self.sort = self.target = None
+        self.word, self.query = match.groups()
+        self.sort = self.target = None
 
     def works(self):
         return self.api.search_illust(self.word, self.sort, self.target)
@@ -335,9 +341,12 @@ class PixivSearchExtractor(PixivExtractor):
     def get_metadata(self, user=None):
         query = text.parse_query(self.query)
 
-        if "word" not in query:
-            raise exception.StopExtraction("Missing search term")
-        self.word = query["word"]
+        if self.word:
+            self.word = text.unquote(self.word)
+        else:
+            if "word" not in query:
+                raise exception.StopExtraction("Missing search term")
+            self.word = query["word"]
 
         sort = query.get("order", "date_d")
         sort_map = {
