@@ -34,8 +34,5 @@ branches:
   - master
   - /^v\d+\.\d+\.\d+(-\S*)?$/
   - /^test(-\w+)+$/
-
-install:
-  - pip install -r requirements.txt pyOpenSSL
 script:
   - ./scripts/run_tests.sh
