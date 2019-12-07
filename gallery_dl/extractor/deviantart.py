@@ -708,7 +708,8 @@ class DeviantartExtractorV2(DeviantartExtractor):
 
         else:
             src = media["baseUri"]
-            token = media["token"][0]
+            if "token" in media:
+                token = media["token"][0]
 
             if "c" in target:
                 src += "/" + target["c"].replace(
@@ -753,8 +754,10 @@ class DeviantartDeviationExtractor(DeviantartExtractorV2):
             "count": 0,
         }),
         (("https://www.deviantart.com/myria-moon/art/Aime-Moi-261986576"), {
-            "pattern": (r"https://www.deviantart.com/download/261986576"
-                        r"/[\w-]+\.jpg\?token=\w+&ts=\d+"),
+            #  "pattern": (r"https://www.deviantart.com/download/261986576"
+            #              r"/[\w-]+\.jpg\?token=\w+&ts=\d+"),
+            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
+                        r"/intermediary/f/[^/]+/[^.]+\.jpg")
         }),
         # wixmp URL rewrite
         (("https://www.deviantart.com/citizenfresh/art/Hverarond-789295466"), {
@@ -794,7 +797,8 @@ class DeviantartDeviationExtractor(DeviantartExtractorV2):
         }),
         # archive
         ("https://www.deviantart.com/itsvenue/art/-brush-pngs-14-763300948", {
-            "pattern": r"https://.+deviantart.com/download/763300948/.*\.rar",
+            #  "pattern": r"https://.+deviantart.com/download/763300948/.*rar",
+            "pattern": r"https://images-wixmp-\w+\.wixmp\.com/i/.*\.png"
         }),
         # swf
         ("https://www.deviantart.com/ikatxfruti/art/Bang-Bang-528130222", {
