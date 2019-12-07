@@ -612,8 +612,18 @@ class DeviantartPopularExtractor(DeviantartExtractor):
 
 class DeviantartExtractorV2(DeviantartExtractor):
     """Base class for deviantart extractors using the NAPI"""
+    cookiedomain = ".deviantart.com"
+    cookienames = ("auth", "auth_secure", "userinfo")
+    _warning = True
 
     def items(self):
+        if not self._check_cookies(self.cookienames):
+            self.original = False
+            if self._warning:
+                DeviantartExtractorV2._warning = False
+                self.log.warning("No session cookies set: "
+                                 "Disabling original file downloads.")
+
         yield Message.Version, 1
         for deviation in self.deviations():
             data = self.api.deviation_extended_fetch(
