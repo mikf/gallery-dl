@@ -627,7 +627,10 @@ class DeviantartExtractorV2(DeviantartExtractor):
                                  deviation["deviationId"])
                 self.log.debug("Server response: %s", data)
                 continue
+
             deviation = self._extract(data)
+            if not deviation:
+                continue
 
             yield Message.Directory, deviation
             yield Message.Url, deviation["target"]["src"], deviation
@@ -640,9 +643,9 @@ class DeviantartExtractorV2(DeviantartExtractor):
     def _extract(self, data):
         deviation = data["deviation"]
         extended = deviation["extended"]
-        files = deviation["files"]
+        media = deviation["media"]
         del deviation["extended"]
-        del deviation["files"]
+        del deviation["media"]
 
         # prepare deviation metadata
         deviation["description"] = extended.get("description", "")
@@ -661,53 +664,68 @@ class DeviantartExtractorV2(DeviantartExtractor):
         )
 
         # extract download target
-        target = files[-1]
+        target = media["types"][-1]
+        src = token = None
 
-        if "textContent" in deviation and self.commit_journal:
+        if "textContent" in deviation:
+            if not self.commit_journal:
+                return None
             journal = deviation["textContent"]
             journal["html"] = journal["html"]["markup"]
-            target["src"] = self.commit_journal(deviation, journal)[1]
-        elif target["type"] == "gif":
-            pass
-        elif target["type"] == "video":
-            # select largest video
-            target = max(
-                files, key=lambda x: text.parse_int(x.get("quality", "")[:-1]))
-        elif target["type"] == "flash":
-            if target["src"].startswith("https://sandbox.deviantart.com"):
-                # extract SWF file from "sandbox"
-                target["src"] = text.extract(
-                    self.request(target["src"]).text,
-                    'id="sandboxembed" src="', '"',
-                )[0]
-        elif "download" in extended:
+            src = self.commit_journal(deviation, journal)[1]
+
+        elif target["t"] == "gif":
+            src = target["b"]
+            token = media["token"][0]
+
+        elif "download" in extended and self.original:
             target = extended["download"]
-            target["src"] = target["url"]
+            src = target["url"]
             del target["url"]
-        elif target["src"].startswith("https://images-wixmp-"):
-            if deviation["index"] <= 790677560:
-                # https://github.com/r888888888/danbooru/issues/4069
-                target["src"] = re.sub(
-                    r"(/f/[^/]+/[^/]+)/v\d+/.*",
-                    r"/intermediary\1", target["src"])
-            if self.quality:
-                target["src"] = re.sub(
-                    r"q_\d+", self.quality, target["src"])
+
+        elif target["t"] == "video":
+            # select largest video
+            target = max(media["types"],
+                         key=lambda x: text.parse_int(x.get("q", "")[:-1]))
+            src = target["s"]
+
+        elif target["t"] == "flash":
+            src = target["s"]
+            if src.startswith("https://sandbox.deviantart.com"):
+                # extract SWF file from "sandbox"
+                src = text.extract(
+                    self.request(src).text, 'id="sandboxembed" src="', '"')[0]
+
+        else:
+            src = media["baseUri"]
+            token = media["token"][0]
+
+            if "c" in target:
+                src += "/" + target["c"].replace(
+                    "<prettyName>", media["prettyName"])
+            if src.startswith("https://images-wixmp-"):
+                if deviation["index"] <= 790677560:
+                    # https://github.com/r888888888/danbooru/issues/4069
+                    src = re.sub(
+                        r"(/f/[^/]+/[^/]+)/v\d+/.*", r"/intermediary\1", src)
+                if self.quality:
+                    src = re.sub(r"q_\d+", self.quality, src)
 
         # filename and extension metadata
         alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
         sub = re.compile(r"\W").sub
-        deviation["filename"] = target["filename"] = "".join((
+        deviation["filename"] = "".join((
             sub("_", deviation["title"].lower()), "_by_",
             sub("_", deviation["author"]["username"].lower()), "-d",
             util.bencode(deviation["index"], alphabet),
         ))
         if "extension" not in deviation:
-            deviation["extension"] = target["extension"] = (
-                text.ext_from_url(target["src"])
-            )
-        deviation["target"] = target
+            deviation["extension"] = text.ext_from_url(src)
 
+        if token:
+            src = src + "?token=" + token
+        target["src"] = src
+        deviation["target"] = target
         return deviation
 
 
@@ -731,7 +749,7 @@ class DeviantartDeviationExtractor(DeviantartExtractorV2):
         # wixmp URL rewrite
         (("https://www.deviantart.com/citizenfresh/art/Hverarond-789295466"), {
             "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
-                        r"/intermediary/f/[^/]+/[^.]+\.jpg$")
+                        r"/intermediary/f/[^/]+/[^.]+\.jpg")
         }),
         # wixmp URL rewrite v2 (#369)
         (("https://www.deviantart.com/josephbiwald/art/Destiny-2-804940104"), {
@@ -753,14 +771,14 @@ class DeviantartDeviationExtractor(DeviantartExtractorV2):
         ("https://www.deviantart.com/chi-u/art/-VIDEO-Brushes-330774593", {
             "url": "3b6e6e761d2d393fa61a4dc3ed6e7db51b14d07b",
             "keyword": {
+                "filename": r"re:_video____brushes_\w+_by_chi_u-d5gxnb5",
+                "extension": "mp4",
                 "target": {
-                    "duration": 306,
-                    "extension": "mp4",
-                    "filename": r"re:_video____brushes_\w+_by_chi_u-d5gxnb5",
-                    "filesize": 9963639,
-                    "quality": "1080p",
+                    "d": 306,
+                    "f": 9963639,
+                    "q": "1080p",
+                    "t": "video",
                     "src": str,
-                    "type": "video",
                 },
             }
         }),
