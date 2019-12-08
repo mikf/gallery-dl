@@ -1,6 +1,39 @@
 # Changelog
 
-## Unreleased
+## 1.12.0 - 2019-12-08
+### Additions
+- [flickr] support 3k, 4k, 5k, and 6k photo sizes ([#472](https://github.com/mikf/gallery-dl/issues/472))
+- [imgur] add extractor for subreddit links ([#500](https://github.com/mikf/gallery-dl/issues/500))
+- [newgrounds] add extractors for `audio` listings and general `media` files ([#394](https://github.com/mikf/gallery-dl/issues/394))
+- [newgrounds] implement login support ([#394](https://github.com/mikf/gallery-dl/issues/394))
+- [postprocessor:metadata] implement a `extension-format` option ([#477](https://github.com/mikf/gallery-dl/issues/477))
+- `--exec-after`
+### Changes
+- [deviantart] ensure consistent username capitalization ([#455](https://github.com/mikf/gallery-dl/issues/455))
+- [directlink] split `{path}` into `{path}/{filename}.{extension}`
+- [twitter] update metadata fields with user/author information
+- [postprocessor:metadata] filter private entries & rename 'format' to 'content-format'
+- Enable `cookies-update` by default
+### Fixes
+- [2chan] fix metadata extraction
+- [behance] get images from 'media_collection' modules
+- [bobx] fix image downloads by randomly generating session cookies ([#482](https://github.com/mikf/gallery-dl/issues/482))
+- [deviantart] revert to getting download URLs from OAuth API calls ([#488](https://github.com/mikf/gallery-dl/issues/488))
+- [deviantart] fix URL generation from '/extended_fetch' results ([#505](https://github.com/mikf/gallery-dl/issues/505))
+- [flickr] adjust OAuth redirect URI ([#503](https://github.com/mikf/gallery-dl/issues/503))
+- [hentaifox] fix extraction
+- [imagefap] adapt to new image URL format
+- [imgbb] fix error in galleries without user info ([#471](https://github.com/mikf/gallery-dl/issues/471))
+- [instagram] prevent errors with missing 'video_url' fields ([#479](https://github.com/mikf/gallery-dl/issues/479))
+- [nijie] fix `date` parsing
+- [pixiv] match new search URLs ([#507](https://github.com/mikf/gallery-dl/issues/507))
+- [plurk] fix comment pagination
+- [sexcom] send specific Referer headers when downloading videos
+- [twitter] fix infinite loops ([#499](https://github.com/mikf/gallery-dl/issues/499))
+- [vsco] fix user profile and collection extraction ([#480](https://github.com/mikf/gallery-dl/issues/480))
+- Fix Cloudflare DDoS protection bypass
+### Removals
+- `--abort-on-skip`
 
 ## 1.11.1 - 2019-11-09
 ### Fixes
