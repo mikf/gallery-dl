@@ -108,13 +108,7 @@ class Extractor():
                     cloudflare.cookies.update(self.category, (domain, cookies))
                     return response
                 if cloudflare.is_captcha(response):
-                    try:
-                        import OpenSSL  # noqa
-                    except ImportError:
-                        msg = " - Install 'pyOpenSSL' and try again"
-                    else:
-                        msg = ""
-                    self.log.warning("Cloudflare CAPTCHA" + msg)
+                    self.log.warning("Cloudflare CAPTCHA")
 
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
                 if code < 500 and code != 429 and code != 430:
@@ -475,10 +469,21 @@ def generate_extractors(extractor_data, symtable, classes):
 http.cookiejar.MozillaCookieJar.magic_re = re.compile(
     "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
 
-# Replace default cipher list of urllib3 to avoid Cloudflare CAPTCHAs
+
+# Undo automatic pyOpenSSL injection by requests
+pyopenssl = config.get((), "pyopenssl", False)
+if not pyopenssl:
+    try:
+        from requests.packages.urllib3.contrib import pyopenssl  # noqa
+        pyopenssl.extract_from_urllib3()
+    except ImportError:
+        pass
+del pyopenssl
+
+
+# Replace urllib3's default cipher list to avoid Cloudflare CAPTCHAs
 ciphers = config.get((), "ciphers", True)
 if ciphers:
-    logging.getLogger("gallery-dl").debug("Updating urllib3 ciphers")
 
     if ciphers is True:
         ciphers = (
@@ -508,3 +513,4 @@ if ciphers:
     from requests.packages.urllib3.util import ssl_  # noqa
     ssl_.DEFAULT_CIPHERS = ciphers
     del ssl_
+del ciphers

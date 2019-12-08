@@ -1683,6 +1683,16 @@ Description * ``true``: Update urllib3's default cipher list
 =========== =====
 
 
+pyopenssl
+---------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Use `pyOpenSSL <https://www.pyopenssl.org/en/stable/>`__-backed
+            SSL-support.
+=========== =====
+
+
 
 API Tokens & IDs
 ================
