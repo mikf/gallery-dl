@@ -40,11 +40,13 @@ class HttpDownloader(DownloaderBase):
             self.retries = float("inf")
         if self.rate:
             rate = text.parse_bytes(self.rate)
-            if not rate:
+            if rate:
+                if rate < self.chunk_size:
+                    self.chunk_size = rate
+                self.rate = rate
+                self.receive = self._receive_rate
+            else:
                 self.log.warning("Invalid rate limit (%r)", self.rate)
-            elif rate < self.chunk_size:
-                self.chunk_size = rate
-            self.rate = rate
 
     def download(self, url, pathfmt):
         try:
@@ -170,20 +172,26 @@ class HttpDownloader(DownloaderBase):
         return True
 
     def receive(self, response, file):
-        if self.rate:
-            total = 0            # total amount of bytes received
-            start = time.time()  # start time
+        for data in response.iter_content(self.chunk_size):
+            file.write(data)
+
+    def _receive_rate(self, response, file):
+        t1 = time.time()
+        rt = self.rate
 
         for data in response.iter_content(self.chunk_size):
             file.write(data)
 
-            if self.rate:
-                total += len(data)
-                expected = total / self.rate  # expected elapsed time
-                delta = time.time() - start   # actual elapsed time since start
-                if delta < expected:
-                    # sleep if less time passed than expected
-                    time.sleep(expected - delta)
+            t2 = time.time()           # current time
+            actual = t2 - t1           # actual elapsed time
+            expected = len(data) / rt  # expected elapsed time
+
+            if actual < expected:
+                # sleep if less time elapsed than expected
+                time.sleep(expected - actual)
+                t1 = time.time()
+            else:
+                t1 = t2
 
     def get_extension(self, response):
         mtype = response.headers.get("Content-Type", "image/jpeg")
