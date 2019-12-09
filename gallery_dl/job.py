@@ -97,6 +97,12 @@ class Job():
                 self.update_kwdict(kwds)
                 self.handle_urllist(urls, kwds)
 
+        elif msg[0] == Message.Metadata:
+            _, url, kwds = msg
+            if self.pred_url(url, kwds):
+                self.update_kwdict(kwds)
+                self.handle_url(url, kwds)
+
         elif msg[0] == Message.Version:
             if msg[1] != 1:
                 raise "unsupported message-version ({}, {})".format(
@@ -187,6 +193,10 @@ class DownloadJob(Job):
         if postprocessors:
             for pp in postprocessors:
                 pp.prepare(pathfmt)
+
+        if kwdict.get("metadata_only"):
+            self.handle_skip()
+            return
 
         if pathfmt.exists(archive):
             self.handle_skip()
