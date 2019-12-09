@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.12.0 - 2019-12-08
 ### Additions
 - [flickr] support 3k, 4k, 5k, and 6k photo sizes ([#472](https://github.com/mikf/gallery-dl/issues/472))
@@ -12,7 +14,7 @@
 - [deviantart] ensure consistent username capitalization ([#455](https://github.com/mikf/gallery-dl/issues/455))
 - [directlink] split `{path}` into `{path}/{filename}.{extension}`
 - [twitter] update metadata fields with user/author information
-- [postprocessor:metadata] filter private entries & rename 'format' to 'content-format'
+- [postprocessor:metadata] filter private entries & rename `format` to `content-format`
 - Enable `cookies-update` by default
 ### Fixes
 - [2chan] fix metadata extraction
