@@ -97,8 +97,8 @@ class PatreonExtractor(Extractor):
         attr["attachments"] = self._files(post, included, "attachments")
         attr["date"] = text.parse_datetime(
             attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-        attr["creator"] = self._user(
-            post["relationships"]["user"]["links"]["related"])
+        uid = post["relationships"]["user"]["data"]["id"]
+        attr["creator"] = included["user"][uid]
         return attr
 
     @staticmethod
