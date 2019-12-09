@@ -195,7 +195,6 @@ class DownloadJob(Job):
                 pp.prepare(pathfmt)
 
         if kwdict.get("metadata_only"):
-            self.handle_skip()
             return
 
         if pathfmt.exists(archive):
