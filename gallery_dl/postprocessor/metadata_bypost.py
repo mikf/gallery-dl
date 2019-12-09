@@ -17,6 +17,7 @@ class Metadata_bypostPP(MetadataPP):
         MetadataPP.__init__(self, pathfmt, options)
 
     def prepare(self, pathfmt):
+        # Only run this processor on metadata messages, not individual images.
         if pathfmt.kwdict.get("metadata_only"):
             MetadataPP.run(self, pathfmt)
 

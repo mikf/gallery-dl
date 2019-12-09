@@ -99,9 +99,8 @@ class Job():
 
         elif msg[0] == Message.Metadata:
             _, url, kwds = msg
-            if self.pred_url(url, kwds):
-                self.update_kwdict(kwds)
-                self.handle_url(url, kwds)
+            self.update_kwdict(kwds)
+            self.handle_metadata(url, kwds)
 
         elif msg[0] == Message.Version:
             if msg[1] != 1:
@@ -194,9 +193,6 @@ class DownloadJob(Job):
             for pp in postprocessors:
                 pp.prepare(pathfmt)
 
-        if kwdict.get("metadata_only"):
-            return
-
         if pathfmt.exists(archive):
             self.handle_skip()
             return
@@ -237,6 +233,19 @@ class DownloadJob(Job):
             for pp in postprocessors:
                 pp.run_after(pathfmt)
         self._skipcnt = 0
+
+    def handle_metadata(self, url, kwdict, fallback=None):
+        """Download the resource specified in 'url'"""
+        postprocessors = self.postprocessors
+        pathfmt = self.pathfmt
+
+        # prepare download
+        pathfmt.set_filename(kwdict)
+
+        if postprocessors:
+            for pp in postprocessors:
+                pp.prepare(pathfmt)
+        return
 
     def handle_urllist(self, urls, kwdict):
         """Download the resource specified in 'url'"""
@@ -508,6 +517,9 @@ class DataJob(Job):
         return 0
 
     def handle_url(self, url, kwdict):
+        self.data.append((Message.Url, url, self.filter(kwdict)))
+
+    def handle_metadata(self, url, kwdict):
         self.data.append((Message.Url, url, self.filter(kwdict)))
 
     def handle_urllist(self, urls, kwdict):

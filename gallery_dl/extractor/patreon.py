@@ -69,6 +69,7 @@ class PatreonExtractor(Extractor):
                     post["type"] = "content"
                     yield Message.Url, url, text.nameext_from_url(url, post)
 
+            # Metadata for post using dummy url for formatting
             post.update({"metadata_only": True})
             url = post.get("creator").get("image_url")
             yield Message.Metadata, url, text.nameext_from_url(url, post)
