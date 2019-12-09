@@ -11,7 +11,7 @@
 from .metadata import __postprocessor__ as MetadataPP
 
 
-class Metadata_BypostPP(MetadataPP):
+class Metadata_bypostPP(MetadataPP):
 
     def __init__(self, pathfmt, options):
         MetadataPP.__init__(self, pathfmt, options)
@@ -23,4 +23,4 @@ class Metadata_BypostPP(MetadataPP):
     def run(self, pathfmt):
          return
 
-__postprocessor__ = Metadata_BypostPP
+__postprocessor__ = Metadata_bypostPP
