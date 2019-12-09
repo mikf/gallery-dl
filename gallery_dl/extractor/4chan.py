@@ -59,3 +59,30 @@ class _4chanThreadExtractor(Extractor):
                 url = "https://i.4cdn.org/{}/{}{}".format(
                     post["board"], post["tim"], post["ext"])
                 yield Message.Url, url, post
+
+
+class _4chanBoardExtractor(Extractor):
+    """Extractor for 4chan boards"""
+    category = "4chan"
+    subcategory = "board"
+    pattern = r"(?:https?://)?boards\.4chan(?:nel)?\.org/([^/?&#]+)/\d*$"
+    test = ("https://boards.4channel.org/po/", {
+        "pattern": _4chanThreadExtractor.pattern,
+        "count": ">= 100",
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.board = match.group(1)
+
+    def items(self):
+        url = "https://a.4cdn.org/{}/threads.json".format(self.board)
+        threads = self.request(url).json()
+
+        for page in threads:
+            for thread in page["threads"]:
+                url = "https://boards.4chan.org/{}/thread/{}/".format(
+                    self.board, thread["no"])
+                thread["page"] = page["page"]
+                thread["_extractor"] = _4chanThreadExtractor
+                yield Message.Queue, url, thread
