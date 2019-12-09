@@ -15,10 +15,11 @@ from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text
 
+from ssl import SSLError
 try:
-    from OpenSSL.SSL import Error as SSLError
+    from OpenSSL.SSL import Error as OpenSSLError
 except ImportError:
-    from ssl import SSLError
+    OpenSSLError = SSLError
 
 
 class HttpDownloader(DownloaderBase):
@@ -143,7 +144,7 @@ class HttpDownloader(DownloaderBase):
                 # download content
                 try:
                     self.receive(response, file)
-                except (RequestException, SSLError) as exc:
+                except (RequestException, SSLError, OpenSSLError) as exc:
                     msg = str(exc)
                     print()
                     continue
