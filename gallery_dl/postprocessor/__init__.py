@@ -18,6 +18,7 @@ modules = [
     "mtime",
     "ugoira",
     "zip",
+    "metadata_bypost",
 ]
 
 log = logging.getLogger("postprocessor")
