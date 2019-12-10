@@ -57,7 +57,7 @@ def load(files=None, strict=False, fmt="json"):
                 confdict = parsefunc(file)
         except OSError as exc:
             if strict:
-                log.error("%s", exc)
+                log.error(exc)
                 sys.exit(1)
         except Exception as exc:
             log.warning("Could not parse '%s': %s", path, exc)

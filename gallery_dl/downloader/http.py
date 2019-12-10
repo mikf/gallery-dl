@@ -99,7 +99,7 @@ class HttpDownloader(DownloaderBase):
                 msg = str(exc)
                 continue
             except Exception as exc:
-                self.log.warning("%s", exc)
+                self.log.warning(exc)
                 return False
 
             # check response
@@ -116,7 +116,7 @@ class HttpDownloader(DownloaderBase):
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
                 if code == 429 or 500 <= code < 600:  # Server Error
                     continue
-                self.log.warning("%s", msg)
+                self.log.warning(msg)
                 return False
             size = text.parse_int(size)
 
