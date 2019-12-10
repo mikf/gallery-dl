@@ -156,8 +156,8 @@ class TumblrExtractor(Extractor):
             invalid = types - POST_TYPES
             if invalid:
                 types = types & POST_TYPES
-                self.log.warning('invalid post types: "%s"',
-                                 '", "'.join(sorted(invalid)))
+                self.log.warning("Invalid post types: '%s'",
+                                 "', '".join(sorted(invalid)))
             return types
 
     @staticmethod
