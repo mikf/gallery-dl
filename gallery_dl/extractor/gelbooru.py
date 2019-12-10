@@ -52,7 +52,7 @@ class GelbooruExtractor(booru.XmlParserMixin,
         page = self.request(self.post_url.format(post_id)).text
         data = text.extract_all(page, (
             (None        , '<meta name="keywords"', ''),
-            ("tags"      , ' imageboard, ', '"'),
+            ("tags"      , ' imageboard- ', '"'),
             ("id"        , '<li>Id: ', '<'),
             ("created_at", '<li>Posted: ', '<'),
             ("width"     , '<li>Size: ', 'x'),
