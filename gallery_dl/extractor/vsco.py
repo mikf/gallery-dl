@@ -66,10 +66,20 @@ class VscoExtractor(Extractor):
 
         while True:
             data = self.request(url, params=params, headers=headers).json()
-            if not data.get(key):
+            medias = data.get(key)
+            if not medias:
                 return
-            yield from data[key]
-            params["page"] += 1
+
+            if "cursor" in params:
+                for media in medias:
+                    yield media[media["type"]]
+                cursor = data.get("next_cursor")
+                if not cursor:
+                    return
+                params["cursor"] = cursor
+            else:
+                yield from medias
+                params["page"] += 1
 
     @staticmethod
     def _transform_media(media):
@@ -102,13 +112,19 @@ class VscoUserExtractor(VscoExtractor):
 
         tkn = data["users"]["currentUser"]["tkn"]
         sid = str(data["sites"]["siteByUsername"][self.user]["site"]["id"])
+        site = data["medias"]["bySiteId"][sid]
 
-        url = "{}/api/2.0/medias".format(self.root)
-        params = {"page": 2, "size": "30", "site_id": sid}
+        url = "{}/api/3.0/medias/profile".format(self.root)
+        params = {
+            "site_id"  : sid,
+            "limit"    : "14",
+            "show_only": "0",
+            "cursor"   : site["nextCursor"],
+        }
+
         return self._pagination(url, params, tkn, "media", (
-            data["medias"]["byId"][mid]["media"]
-            for mid in data
-            ["medias"]["bySiteId"][sid]["byPage"]["1"]["mediaIds"]
+            data["medias"]["byId"][media[media["type"]]]["media"]
+            for media in site["medias"]
         ))
 
 
