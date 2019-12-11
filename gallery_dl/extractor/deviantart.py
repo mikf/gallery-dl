@@ -617,7 +617,7 @@ class DeviantartExtractorV2(DeviantartExtractor):
     _warning = True
 
     def items(self):
-        if not self._check_cookies(self.cookienames):
+        if self.original and not self._check_cookies(self.cookienames):
             self.original = False
             if self._warning:
                 DeviantartExtractorV2._warning = False
