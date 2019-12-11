@@ -21,7 +21,7 @@ TRAVIS_SKIP = {
     "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie", "bobx",
     "archivedmoe", "archiveofsins", "thebarchive", "fireden", "4plebs",
     "sankaku", "idolcomplex", "mangahere", "readcomiconline", "mangadex",
-    "sankakucomplex", "warosu", "fuskator", "patreon",
+    "sankakucomplex", "warosu", "fuskator",
 }
 
 # temporary issues, etc.

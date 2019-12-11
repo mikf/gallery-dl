@@ -97,8 +97,10 @@ class PatreonExtractor(Extractor):
         attr["attachments"] = self._files(post, included, "attachments")
         attr["date"] = text.parse_datetime(
             attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-        uid = post["relationships"]["user"]["data"]["id"]
-        attr["creator"] = included["user"][uid]
+        user = post["relationships"]["user"]
+        attr["creator"] = (
+            self._user(user["links"]["related"]) or
+            included["user"][user["data"]["id"]])
         return attr
 
     @staticmethod
@@ -123,7 +125,10 @@ class PatreonExtractor(Extractor):
     @memcache(keyarg=1)
     def _user(self, url):
         """Fetch user information"""
-        user = self.request(url).json()["data"]
+        response = self.request(url, fatal=False)
+        if response.status_code >= 400:
+            return None
+        user = response.json()["data"]
         attr = user["attributes"]
         attr["id"] = user["id"]
         attr["date"] = text.parse_datetime(
