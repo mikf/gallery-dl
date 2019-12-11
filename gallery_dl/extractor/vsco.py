@@ -32,7 +32,19 @@ class VscoExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, {"user": self.user}
         for img in self.images():
-            url = "https://" + (img.get("video_url") or img["responsive_url"])
+
+            if img["is_video"]:
+                url = "https://" + img["video_url"]
+            else:
+                base = img["responsive_url"].partition("/")[2]
+                cdn, _, path = base.partition("/")
+                if cdn.startswith("aws"):
+                    url = "https://image-{}.vsco.co/{}".format(cdn, path)
+                elif cdn.isdecimal():
+                    url = "https://image.vsco.co/" + base
+                else:
+                    url = "https://" + img["responsive_url"]
+
             data = text.nameext_from_url(url, {
                 "id"    : img["_id"],
                 "user"  : self.user,
@@ -99,9 +111,9 @@ class VscoUserExtractor(VscoExtractor):
     pattern = BASE_PATTERN + r"(?:/images(?:/\d+)?)?/?(?:$|[?#])"
     test = (
         ("https://vsco.co/missuri/images/1", {
+            "pattern": r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/vsco\w+",
             "range": "1-80",
             "count": 80,
-            "pattern": r"https://im\.vsco\.co/[^/]+/[0-9a-f/]+/vsco\w+\.\w+",
         }),
         ("https://vsco.co/missuri"),
     )
@@ -135,9 +147,9 @@ class VscoCollectionExtractor(VscoExtractor):
     archive_fmt = "c_{user}_{id}"
     pattern = BASE_PATTERN + r"/collection/"
     test = ("https://vsco.co/vsco/collection/1", {
+        "pattern": r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/vsco\w+\.\w+",
         "range": "1-80",
         "count": 80,
-        "pattern": r"https://im\.vsco\.co/[^/]+/[0-9a-f/]+/vsco\w+\.\w+",
     })
 
     def images(self):
@@ -163,7 +175,7 @@ class VscoImageExtractor(VscoExtractor):
     pattern = BASE_PATTERN + r"/media/([0-9a-fA-F]+)"
     test = (
         ("https://vsco.co/erenyildiz/media/5d34b93ef632433030707ce2", {
-            "url": "faa214d10f859f374ad91da3f7547d2439f5af08",
+            "url": "a45f9712325b42742324b330c348b72477996031",
             "content": "1394d070828d82078035f19a92f404557b56b83f",
             "keyword": {
                 "id"    : "5d34b93ef632433030707ce2",
