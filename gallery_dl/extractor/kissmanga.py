@@ -19,9 +19,9 @@ import re
 class RedirectMixin():
     """Detect and handle redirects to CAPTCHA pages"""
 
-    def request(self, url):
+    def request(self, url, **kwargs):
         while True:
-            response = Extractor.request(self, url)
+            response = Extractor.request(self, url, **kwargs)
             if not response.history or "/AreYouHuman" not in response.url:
                 return response
             if self.config("captcha", "stop") == "wait":

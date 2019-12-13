@@ -302,7 +302,7 @@ class GalleryExtractor(Extractor):
 
     def items(self):
         self.login()
-        page = self.request(self.gallery_url).text
+        page = self.request(self.gallery_url, notfound=self.subcategory).text
         data = self.metadata(page)
         imgs = self.images(page)
 
