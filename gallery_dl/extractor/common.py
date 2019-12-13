@@ -229,12 +229,14 @@ class Extractor():
         """Check if all 'cookienames' are in the session's cookiejar"""
         if domain is None:
             domain = self.cookiedomain
-        try:
-            for name in cookienames:
-                self._cookiejar._find(name, domain)
-        except KeyError:
-            return False
-        return True
+
+        names = set(cookienames)
+        for cookie in self._cookiejar:
+            if cookie.domain == domain:
+                names.discard(cookie.name)
+                if not names:
+                    return True
+        return False
 
     def _get_date_min_max(self, dmin=None, dmax=None):
         """Retrieve and parse 'date-min' and 'date-max' config values"""
