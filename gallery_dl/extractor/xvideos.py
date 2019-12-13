@@ -6,86 +6,91 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.xvideos.com/"""
+"""Extractors for https://www.xvideos.com/"""
 
-from .common import Extractor, Message
-from .. import text, exception
+from .common import GalleryExtractor, Extractor, Message
+from .. import text
 import json
 
 
-class XvideosExtractor(Extractor):
+class XvideosBase():
     """Base class for xvideos extractors"""
     category = "xvideos"
     root = "https://www.xvideos.com"
 
 
-class XvideosGalleryExtractor(XvideosExtractor):
-    """Extractor for user profile galleries from xvideos.com"""
+class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
+    """Extractor for user profile galleries on xvideos.com"""
     subcategory = "gallery"
-    directory_fmt = ("{category}", "{user[name]}", "{title}")
-    filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
-    archive_fmt = "{gallery_id}_{num}"
+    directory_fmt = ("{category}", "{user[name]}",
+                     "{gallery[id]} {gallery[title]}")
+    filename_fmt = "{category}_{gallery[id]}_{num:>03}.{extension}"
+    archive_fmt = "{gallery[id]}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
-               r"/profiles/([^/?&#]+)/photos/(\d+)")
+               r"/(?:profiles|amateur-channels|model-channels)"
+               r"/([^/?&#]+)/photos/(\d+)")
     test = (
-        (("https://www.xvideos.com/profiles"
-          "/pervertedcouple/photos/751031/random_stuff"), {
+        ("https://www.xvideos.com/profiles/pervertedcouple/photos/751031", {
             "url": "4f0d992e5dc39def2c3ac8e099d17bf09e76e3c7",
-            "keyword": "65979d63a69576cf692b41d5fbbd995cc40a51b9",
+            "keyword": {
+                "gallery": {
+                    "id"   : 751031,
+                    "title": "Random Stuff",
+                    "tags" : list,
+                },
+                "user": {
+                    "id"         : 20245371,
+                    "name"       : "pervertedcouple",
+                    "display"    : "Pervertedcouple",
+                    "sex"        : "Woman",
+                    "description": str,
+                },
+            },
         }),
-        ("https://www.xvideos.com/profiles/pervertedcouple/photos/751032/", {
-            "exception": exception.NotFoundError,
-        }),
+        ("https://www.xvideos.com/amateur-channels/pervertedcouple/photos/12"),
+        ("https://www.xvideos.com/model-channels/pervertedcouple/photos/12"),
     )
 
     def __init__(self, match):
-        XvideosExtractor.__init__(self, match)
-        self.user, self.gid = match.groups()
+        self.user, self.gallery_id = match.groups()
+        url = "{}/profiles/{}/photos/{}".format(
+            self.root, self.user, self.gallery_id)
+        GalleryExtractor.__init__(self, match, url)
 
-    def items(self):
-        url = "{}/profiles/{}/photos/{}".format(self.root, self.user, self.gid)
-        page = self.request(url, notfound=self.subcategory).text
-        data = self.get_metadata(page)
-        imgs = self.get_images(page)
-        data["count"] = len(imgs)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for url in imgs:
-            data["num"] = text.parse_int(url.rsplit("_", 2)[1])
-            data["extension"] = url.rpartition(".")[2]
-            yield Message.Url, url, data
-
-    def get_metadata(self, page):
-        """Collect metadata for extractor-job"""
-        data = text.extract_all(page, (
-            ("userid" , '"id_user":', ','),
-            ("display", '"display":"', '"'),
-            ("title"  , '"title":"', '"'),
-            ("descr"  , '<small class="mobile-hide">', '</small>'),
-            ("tags"   , '<em>Tagged:</em>', '<'),
-        ))[0]
+    def metadata(self, page):
+        extr = text.extract_from(page)
+        user = {
+            "id"     : text.parse_int(extr('"id_user":', ',')),
+            "display": extr('"display":"', '"'),
+            "sex"    : extr('"sex":"', '"'),
+            "name"   : self.user,
+        }
+        title = extr('"title":"', '"')
+        user["description"] = extr(
+            '<small class="mobile-hide">', '</small>').strip()
+        tags = extr('<em>Tagged:</em>', '<').strip()
 
         return {
-            "user": {
-                "id": text.parse_int(data["userid"]),
-                "name": self.user,
-                "display": data["display"],
-                "description": data["descr"].strip(),
+            "user": user,
+            "gallery": {
+                "id"   : text.parse_int(self.gallery_id),
+                "title": text.unescape(title),
+                "tags" : text.unescape(tags).split(", ") if tags else [],
             },
-            "tags": text.unescape(data["tags"] or "").strip().split(", "),
-            "title": text.unescape(data["title"]),
-            "gallery_id": text.parse_int(self.gid),
         }
 
     @staticmethod
-    def get_images(page):
+    def images(page):
         """Return a list of all image urls for this gallery"""
-        return list(text.extract_iter(
-            page, '<a class="embed-responsive-item" href="', '"'))
+        return [
+            (url, None)
+            for url in text.extract_iter(
+                page, '<a class="embed-responsive-item" href="', '"')
+        ]
 
 
-class XvideosUserExtractor(XvideosExtractor):
-    """Extractor for user profiles from xvideos.com"""
+class XvideosUserExtractor(XvideosBase, Extractor):
+    """Extractor for user profiles on xvideos.com"""
     subcategory = "user"
     categorytransfer = True
     pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
@@ -93,16 +98,13 @@ class XvideosUserExtractor(XvideosExtractor):
     test = (
         ("https://www.xvideos.com/profiles/pervertedcouple", {
             "url": "a413f3e60d6d3a2de79bd44fa3b7a9c03db4336e",
-            "keyword": "a796760d34732adc7ec52a8feb057515209a2ca6",
-        }),
-        ("https://www.xvideos.com/profiles/niwehrwhernvh", {
-            "exception": exception.NotFoundError,
+            "keyword": "335a3304941ff2e666c0201e9122819b61b34adb",
         }),
         ("https://www.xvideos.com/profiles/pervertedcouple#_tabPhotos"),
     )
 
     def __init__(self, match):
-        XvideosExtractor.__init__(self, match)
+        Extractor.__init__(self, match)
         self.user = match.group(1)
 
     def items(self):
@@ -118,17 +120,17 @@ class XvideosUserExtractor(XvideosExtractor):
 
         galleries = [
             {
-                "gallery_id": text.parse_int(gid),
+                "id"   : text.parse_int(gid),
                 "title": text.unescape(gdata["title"]),
                 "count": gdata["nb_pics"],
                 "_extractor": XvideosGalleryExtractor,
             }
             for gid, gdata in data["galleries"].items()
         ]
-        galleries.sort(key=lambda x: x["gallery_id"])
+        galleries.sort(key=lambda x: x["id"])
 
         yield Message.Version, 1
         for gallery in galleries:
             url = "https://www.xvideos.com/profiles/{}/photos/{}".format(
-                self.user, gallery["gallery_id"])
+                self.user, gallery["id"])
             yield Message.Queue, url, gallery
