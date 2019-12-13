@@ -96,6 +96,7 @@ Pornreactor          http://pornreactor.cc/              Posts, Search Results, 
 PowerManga           https://read.powermanga.org/        Chapters, Manga
 Pururin              https://pururin.io/                 Galleries
 Read Comic Online    https://readcomiconline.to/         Comic-Issues, Comics
+Realbooru            https://realbooru.com/              Pools, Posts, Tag-Searches
 RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://www.reddit.com/             |reddit-C|                                         Optional (OAuth)
 rule #34             https://rule34.paheal.net/          Posts, Tag-Searches
