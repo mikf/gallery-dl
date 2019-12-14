@@ -9,7 +9,7 @@
 """Extractors for https://www.weibo.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 import json
 
 
@@ -124,7 +124,7 @@ class WeiboStatusExtractor(WeiboExtractor):
         }),
         # unavailable video (#427)
         ("https://m.weibo.cn/status/4268682979207023", {
-            "count": 0,
+            "exception": exception.NotFoundError,
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
@@ -136,7 +136,8 @@ class WeiboStatusExtractor(WeiboExtractor):
 
     def statuses(self):
         url = "{}/detail/{}".format(self.root, self.status_id)
-        page = self.request(url).text
-        data = json.loads(text.extract(
-            page, " var $render_data = [", "][0] || {};")[0])
-        return (data["status"],)
+        page = self.request(url, notfound="status").text
+        data = text.extract(page, "var $render_data = [", "][0] || {};")[0]
+        if not data:
+            raise exception.NotFoundError("status")
+        return (json.loads(data)["status"],)
