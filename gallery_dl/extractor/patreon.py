@@ -234,11 +234,13 @@ class PatreonUserExtractor(PatreonExtractor):
 class PatreonPostExtractor(PatreonExtractor):
     """Extractor for media from a single post"""
     subcategory = "post"
-    pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
-               r"/posts/[^/?&#]*?(\d+)")
+    pattern = r"(?:https?://)?(?:www\.)?patreon\.com/posts/([^/?&#]+)"
     test = (
         ("https://www.patreon.com/posts/precious-metal-23563293", {
             "count": 4,
+        }),
+        ("https://www.patreon.com/posts/er1-28201153", {
+            "count": 1,
         }),
         ("https://www.patreon.com/posts/not-found-123", {
             "exception": exception.NotFoundError,
@@ -247,10 +249,10 @@ class PatreonPostExtractor(PatreonExtractor):
 
     def __init__(self, match):
         PatreonExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.slug = match.group(1)
 
     def posts(self):
-        url = "{}/posts/{}".format(self.root, self.post_id)
+        url = "{}/posts/{}".format(self.root, self.slug)
         page = self.request(url, notfound="post").text
         data = text.extract(page, "window.patreon.bootstrap,", "\n});")[0]
         post = json.loads(data + "}")["post"]
