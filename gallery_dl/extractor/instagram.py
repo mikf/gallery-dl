@@ -109,8 +109,14 @@ class InstagramExtractor(Extractor):
         return data
 
     def _extract_postpage(self, url):
-        data = self.request(url + "?__a=1").json()
-        media = data['graphql']['shortcode_media']
+        try:
+            with self.request(url + '?__a=1', fatal=False) as response:
+                media = response.json()['graphql']['shortcode_media']
+        except (KeyError, ValueError) as exc:
+            self.log.warning("Unable to fetch data from '%s':  %s: %s",
+                             url, exc.__class__.__name__, exc)
+            self.log.debug("Server response: %s", response.text)
+            return ()
 
         common = {
             'date': text.parse_timestamp(media['taken_at_timestamp']),
