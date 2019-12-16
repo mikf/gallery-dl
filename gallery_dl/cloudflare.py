@@ -104,8 +104,7 @@ def solve_js_challenge(page, netloc):
                 solution += len(netloc)
             if ".toFixed(" in expr:
                 # trim solution to 10 decimal places
-                # and strip trailing zeros
-                solution = "{:.10f}".format(solution).rstrip("0")
+                solution = "{:.10f}".format(solution)
             return solution
 
 
