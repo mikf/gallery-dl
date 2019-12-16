@@ -86,6 +86,7 @@ modules = [
     "pururin",
     "reactor",
     "readcomiconline",
+    "realbooru",
     "reddit",
     "rule34",
     "safebooru",
