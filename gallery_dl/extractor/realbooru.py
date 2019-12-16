@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2019 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://realbooru.com/"""
+"""Extractors for https://realbooru.com/"""
 
 from . import booru
-from .common import Message
-from .. import text, util
 
 
 class RealbooruExtractor(booru.XmlParserMixin,
-                        booru.GelbooruPageMixin,
-                        booru.BooruExtractor):
+                         booru.GelbooruPageMixin,
+                         booru.BooruExtractor):
     """Base class for realbooru extractors"""
     category = "realbooru"
     api_url = "https://realbooru.com/index.php"
@@ -24,108 +22,38 @@ class RealbooruExtractor(booru.XmlParserMixin,
 
     def __init__(self, match):
         super().__init__(match)
-
-        self.use_api = self.config("api", True)
-        if self.use_api:
-            self.params.update({"page": "dapi", "s": "post", "q": "index"})
-        else:
-            self.items = self.items_noapi
-            self.session.cookies["fringeBenefits"] = "yup"
-
-    def items_noapi(self):
-        yield Message.Version, 1
-        data = self.get_metadata()
-
-        for post in self.get_posts():
-            post = self.get_post_data(post)
-            url = post["file_url"]
-            post.update(data)
-            text.nameext_from_url(url, post)
-            yield Message.Directory, post
-            yield Message.Url, url, post
-
-    def get_posts(self):
-        """Return an iterable containing all relevant post objects"""
-
-    def get_post_data(self, post_id):
-        """Extract metadata of a single post"""
-        page = self.request(self.post_url.format(post_id)).text
-        data = text.extract_all(page, (
-            (None        , '<meta name="keywords"', ''),
-            ("tags"      , ' imageboard, ', '"'),
-            ("id"        , '<li>Id: ', '<'),
-            ("created_at", '<li>Posted: ', '<'),
-            ("width"     , '<li>Size: ', 'x'),
-            ("height"    , '', '<'),
-            ("source"    , '<li>Source: <a href="', '"'),
-            ("rating"    , '<li>Rating: ', '<'),
-            (None        , '<li>Score: ', ''),
-            ("score"     , '>', '<'),
-            ("file_url"  , '<li><a href="http', '"'),
-            ("change"    , ' id="lupdated" value="', '"'),
-        ))[0]
-        data["file_url"] = "http" + data["file_url"].replace("m//", "m/", 1)
-        data["md5"] = data["file_url"].rpartition("/")[2].partition(".")[0]
-        data["rating"] = (data["rating"] or "?")[0].lower()
-        data["tags"] = " ".join(
-            [tag.replace(" ", "_") for tag in data["tags"].split(", ")])
-        if self.extags:
-            self.extended_tags(data, page)
-        return data
+        self.params.update({"page": "dapi", "s": "post", "q": "index"})
 
 
 class RealbooruTagExtractor(booru.TagMixin, RealbooruExtractor):
     """Extractor for images from realbooru.com based on search-tags"""
     pattern = (r"(?:https?://)?(?:www\.)?realbooru\.com/(?:index\.php)?"
                r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")
-    test = (
-        ("https://realbooru.com/index.php?page=post&s=list&tags=bonocho", {
-            "count": 5,
-        }),
-        ("https://realbooru.com/index.php?page=post&s=list&tags=bonocho", {
-            "options": (("api", False),),
-            "count": 5,
-        }),
-    )
-
-    def __init__(self, match):
-        super().__init__(match)
-        if not self.use_api:
-            self.per_page = 42
-
-    def get_posts(self):
-        url = "https://realbooru.com/index.php?page=post&s=list"
-        params = {"tags": self.tags, "pid": self.page_start * self.per_page}
-
-        while True:
-            page = self.request(url, params=params).text
-            ids = list(text.extract_iter(page, '<a id="p', '"'))
-            yield from ids
-            if len(ids) < self.per_page:
-                return
-            params["pid"] += self.per_page
+    test = ("https://realbooru.com/index.php?page=post&s=list&tags=wine", {
+        "count": 64,
+    })
 
 
 class RealbooruPoolExtractor(booru.GelbooruPoolMixin, RealbooruExtractor):
     """Extractor for image-pools from realbooru.com"""
     pattern = (r"(?:https?://)?(?:www\.)?realbooru\.com/(?:index\.php)?"
                r"\?page=pool&s=show&id=(?P<pool>\d+)")
-    test = ("https://realbooru.com/index.php?page=pool&s=show&id=761", {
-        "count": 6,
+    test = ("https://realbooru.com/index.php?page=pool&s=show&id=1", {
+        "count": 3,
     })
-
-    def get_posts(self):
-        return util.advance(self.posts, self.page_start)
 
 
 class RealbooruPostExtractor(booru.PostMixin, RealbooruExtractor):
     """Extractor for single images from realbooru.com"""
     pattern = (r"(?:https?://)?(?:www\.)?realbooru\.com/(?:index\.php)?"
                r"\?page=post&s=view&id=(?P<post>\d+)")
-    test = ("https://realbooru.com/index.php?page=post&s=view&id=313638", {
-        "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
-        "count": 1,
+    test = ("https://realbooru.com/index.php?page=post&s=view&id=668483", {
+        "url": "2421b5b0e15d5e20f9067090a8b0fd4114d3e7d9",
+        "content": "7f5873ce3b6cd295ea2e81fcb49583098ea9c8da",
+        "options": (("tags", True),),
+        "keyword": {
+            "tags_general" : str,
+            "tags_metadata": "tagme",
+            "tags_model"   : "jennifer_lawrence",
+        },
     })
-
-    def get_posts(self):
-        return (self.post,)
