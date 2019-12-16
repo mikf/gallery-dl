@@ -27,6 +27,10 @@ class PostProcessor():
         """Execute the postprocessor for a file"""
 
     @staticmethod
+    def run_metadata(pathfmt):
+        """Execute the postprocessor for a file"""
+
+    @staticmethod
     def run_after(pathfmt):
         """Execute postprocessor after moving a file to its target location"""
 

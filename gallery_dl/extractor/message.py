@@ -52,3 +52,4 @@ class Message():
     #  Cookies = 5
     Queue = 6
     Urllist = 7
+    Metadata = 8
