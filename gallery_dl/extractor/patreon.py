@@ -33,12 +33,14 @@ class PatreonExtractor(Extractor):
             PatreonExtractor._warning = False
 
         for post in self.posts():
-            yield Message.Directory, post
-
             ids = set()
             post["num"] = 0
             content = post.get("content")
             postfile = post.get("post_file")
+
+            yield Message.Directory, post
+            yield Message.Metadata, text.nameext_from_url(
+                post["creator"].get("image_url", ""), post)
 
             for image in post["images"]:
                 url = image.get("download_url")

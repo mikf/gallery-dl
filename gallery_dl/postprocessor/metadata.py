@@ -40,6 +40,9 @@ class MetadataPP(PostProcessor):
             self.path = self._path_append
             self.extension = options.get("extension", ext)
 
+        if options.get("bypost"):
+            self.run_metadata, self.run = self.run, self.run_metadata
+
     def run(self, pathfmt):
         with open(self.path(pathfmt), "w", encoding="utf-8") as file:
             self.write(file, pathfmt.kwdict)

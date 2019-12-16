@@ -97,6 +97,10 @@ class Job():
                 self.update_kwdict(kwds)
                 self.handle_urllist(urls, kwds)
 
+        elif msg[0] == Message.Metadata:
+            self.update_kwdict(msg[1])
+            self.handle_metadata(msg[1])
+
         elif msg[0] == Message.Version:
             if msg[1] != 1:
                 raise "unsupported message-version ({}, {})".format(
@@ -113,6 +117,9 @@ class Job():
 
     def handle_directory(self, kwdict):
         """Handle Message.Directory"""
+
+    def handle_metadata(self, kwdict):
+        """Handle Message.Metadata"""
 
     def handle_queue(self, url, kwdict):
         """Handle Message.Queue"""
@@ -241,6 +248,16 @@ class DownloadJob(Job):
             self.initialize(kwdict)
         else:
             self.pathfmt.set_directory(kwdict)
+
+    def handle_metadata(self, kwdict):
+        """Run postprocessors with metadata from 'kwdict'"""
+        postprocessors = self.postprocessors
+
+        if postprocessors:
+            pathfmt = self.pathfmt
+            pathfmt.set_filename(kwdict)
+            for pp in postprocessors:
+                pp.run_metadata(pathfmt)
 
     def handle_queue(self, url, kwdict):
         if "_extractor" in kwdict:
@@ -506,6 +523,9 @@ class DataJob(Job):
 
     def handle_directory(self, kwdict):
         self.data.append((Message.Directory, self.filter(kwdict)))
+
+    def handle_metadata(self, kwdict):
+        self.data.append((Message.Metadata, self.filter(kwdict)))
 
     def handle_queue(self, url, kwdict):
         self.data.append((Message.Queue, url, self.filter(kwdict)))
