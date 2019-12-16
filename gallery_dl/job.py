@@ -98,9 +98,8 @@ class Job():
                 self.handle_urllist(urls, kwds)
 
         elif msg[0] == Message.Metadata:
-            _, url, kwds = msg
-            self.update_kwdict(kwds)
-            self.handle_metadata(url, kwds)
+            self.update_kwdict(msg[1])
+            self.handle_metadata(msg[1])
 
         elif msg[0] == Message.Version:
             if msg[1] != 1:
@@ -118,6 +117,9 @@ class Job():
 
     def handle_directory(self, kwdict):
         """Handle Message.Directory"""
+
+    def handle_metadata(self, kwdict):
+        """Handle Message.Metadata"""
 
     def handle_queue(self, url, kwdict):
         """Handle Message.Queue"""
@@ -234,19 +236,6 @@ class DownloadJob(Job):
                 pp.run_after(pathfmt)
         self._skipcnt = 0
 
-    def handle_metadata(self, url, kwdict, fallback=None):
-        """Download the resource specified in 'url'"""
-        postprocessors = self.postprocessors
-        pathfmt = self.pathfmt
-
-        # prepare download
-        pathfmt.set_filename(kwdict)
-
-        if postprocessors:
-            for pp in postprocessors:
-                pp.prepare(pathfmt)
-        return
-
     def handle_urllist(self, urls, kwdict):
         """Download the resource specified in 'url'"""
         fallback = iter(urls)
@@ -259,6 +248,16 @@ class DownloadJob(Job):
             self.initialize(kwdict)
         else:
             self.pathfmt.set_directory(kwdict)
+
+    def handle_metadata(self, kwdict):
+        """Run postprocessors with metadata from 'kwdict'"""
+        postprocessors = self.postprocessors
+
+        if postprocessors:
+            pathfmt = self.pathfmt
+            pathfmt.set_filename(kwdict)
+            for pp in postprocessors:
+                pp.run_metadata(pathfmt)
 
     def handle_queue(self, url, kwdict):
         if "_extractor" in kwdict:
@@ -519,14 +518,14 @@ class DataJob(Job):
     def handle_url(self, url, kwdict):
         self.data.append((Message.Url, url, self.filter(kwdict)))
 
-    def handle_metadata(self, url, kwdict):
-        self.data.append((Message.Url, url, self.filter(kwdict)))
-
     def handle_urllist(self, urls, kwdict):
         self.data.append((Message.Urllist, list(urls), self.filter(kwdict)))
 
     def handle_directory(self, kwdict):
         self.data.append((Message.Directory, self.filter(kwdict)))
+
+    def handle_metadata(self, kwdict):
+        self.data.append((Message.Metadata, self.filter(kwdict)))
 
     def handle_queue(self, url, kwdict):
         self.data.append((Message.Queue, url, self.filter(kwdict)))
