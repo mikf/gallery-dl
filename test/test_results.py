@@ -26,10 +26,9 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "erolord",
     "mangapark",
     "photobucket",
-    "pixhost",
-    "simplyhentai",
 }
 
 
