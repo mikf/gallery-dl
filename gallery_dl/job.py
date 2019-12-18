@@ -8,6 +8,7 @@
 
 import sys
 import time
+import errno
 import logging
 from . import extractor, downloader, postprocessor
 from . import config, text, util, output, exception
@@ -292,7 +293,13 @@ class DownloadJob(Job):
         scheme = url.partition(":")[0]
         downloader = self.get_downloader(scheme)
         if downloader:
-            return downloader.download(url, self.pathfmt)
+            try:
+                return downloader.download(url, self.pathfmt)
+            except OSError as exc:
+                if exc.errno == errno.ENOSPC:
+                    raise
+                self.log.warning("%s: %s", exc.__class__.__name__, exc)
+                return False
         self._write_unsupported(url)
         return False
 
