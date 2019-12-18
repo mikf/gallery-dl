@@ -199,9 +199,9 @@ class PixhostImageExtractor(ImagehostImageExtractor):
     category = "pixhost"
     pattern = (r"(?:https?://)?((?:www\.)?pixhost\.(?:to|org)"
                r"/show/\d+/(\d+)_[^/?&#]+)")
-    test = ("https://pixhost.to/show/224/96246707_test-.png", {
-        "url": "8f3d41fdd2dbec4c844e5ee45bf49961fbd79c67",
-        "keyword": "ecefe2d5814286f9d1dff3d88d9bdc78dd456c5d",
+    test = ("http://pixhost.to/show/190/130327671_test-.png", {
+        "url": "4e5470dcf6513944773044d40d883221bbc46cff",
+        "keyword": "3bad6d59db42a5ebbd7842c2307e1c3ebd35e6b0",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
     https = True
