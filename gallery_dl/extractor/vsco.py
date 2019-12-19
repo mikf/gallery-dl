@@ -29,11 +29,14 @@ class VscoExtractor(Extractor):
         self.user = match.group(1).lower()
 
     def items(self):
+        videos = self.config("videos", True)
         yield Message.Version, 1
         yield Message.Directory, {"user": self.user}
         for img in self.images():
 
             if img["is_video"]:
+                if not videos:
+                    continue
                 url = "https://" + img["video_url"]
             else:
                 base = img["responsive_url"].partition("/")[2]

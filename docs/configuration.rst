@@ -1082,6 +1082,15 @@ Description Control video download behavior.
 =========== =====
 
 
+extractor.vsco.videos
+---------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Download video files.
+=========== =====
+
+
 extractor.wallhaven.api-key
 ---------------------------
 =========== =====
