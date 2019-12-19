@@ -31,6 +31,7 @@ class InstagramExtractor(Extractor):
         self.login()
         yield Message.Version, 1
 
+        videos = self.config("videos", True)
         metadata = self.get_metadata()
         for data in self.instagrams():
             data.update(metadata)
@@ -41,7 +42,11 @@ class InstagramExtractor(Extractor):
                 data['_extractor'] = InstagramStoriesExtractor
                 yield Message.Queue, url, data
             else:
-                url = data.get('video_url') or data['display_url']
+                url = data.get('video_url')
+                if not url:
+                    url = data['display_url']
+                elif not videos:
+                    continue
                 yield Message.Url, url, text.nameext_from_url(url, data)
 
     def login(self):

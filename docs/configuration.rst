@@ -770,6 +770,15 @@ Description Include *Story Highlights* when downloading a user profile.
 =========== =====
 
 
+extractor.instagram.videos
+--------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Download video files.
+=========== =====
+
+
 extractor.kissmanga.captcha
 ---------------------------
 =========== =====
