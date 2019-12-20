@@ -60,14 +60,16 @@ class RedditExtractor(Extractor):
 
     def _urls(self, submissions):
         for submission, comments in submissions:
-            self._visited.add(submission["id"])
 
-            if not submission["is_self"]:
-                yield submission["url"], submission
+            if submission:
+                self._visited.add(submission["id"])
 
-            for url in text.extract_iter(
-                    submission["selftext_html"] or "", ' href="', '"'):
-                yield url, submission
+                if not submission["is_self"]:
+                    yield submission["url"], submission
+
+                for url in text.extract_iter(
+                        submission["selftext_html"] or "", ' href="', '"'):
+                    yield url, submission
 
             if comments:
                 for comment in comments:
@@ -298,17 +300,24 @@ class RedditAPI():
         while True:
             data = self._call(endpoint, params)["data"]
 
-            for submission in data["children"]:
-                submission = submission["data"]
-                if (date_min <= submission["created_utc"] <= date_max and
-                        id_min <= self._decode(submission["id"]) <= id_max):
-                    if submission["num_comments"] and self.comments:
-                        try:
-                            yield self.submission(submission["id"])
-                        except exception.AuthorizationError:
-                            pass
-                    else:
-                        yield submission, None
+            for child in data["children"]:
+                kind = child["kind"]
+                post = child["data"]
+
+                if (date_min <= post["created_utc"] <= date_max and
+                        id_min <= self._decode(post["id"]) <= id_max):
+
+                    if kind == "t3":
+                        if post["num_comments"] and self.comments:
+                            try:
+                                yield self.submission(post["id"])
+                            except exception.AuthorizationError:
+                                pass
+                        else:
+                            yield post, None
+
+                    elif kind == "t1" and self.comments:
+                        yield None, (post,)
 
             if not data["after"]:
                 return
