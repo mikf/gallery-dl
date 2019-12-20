@@ -132,14 +132,13 @@ class RedditSubmissionExtractor(RedditExtractor):
                r")/([a-z0-9]+)")
     test = (
         ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
-            "pattern": r"https://",
-            "count": 3,
-        }),
-        # ignore submission comments (#429)
-        ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
-            "options": (("comments", 0),),
             "pattern": r"https://c2.staticflickr.com/8/7272/\w+_k.jpg",
             "count": 1,
+        }),
+        ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
+            "options": (("comments", 500),),
+            "pattern": r"https://",
+            "count": 3,
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
@@ -188,7 +187,7 @@ class RedditAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.comments = text.parse_int(extractor.config("comments", 500))
+        self.comments = text.parse_int(extractor.config("comments", 0))
         self.morecomments = extractor.config("morecomments", False)
         self.refresh_token = extractor.config("refresh-token")
         self.log = extractor.log

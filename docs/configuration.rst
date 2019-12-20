@@ -886,7 +886,7 @@ extractor.reddit.comments
 -------------------------
 =========== =====
 Type        ``integer``
-Default     ``500``
+Default     ``0``
 Description The value of the ``limit`` parameter when loading
             a submission and its comments.
             This number (roughly) specifies the total amount of comments
