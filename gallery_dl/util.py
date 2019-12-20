@@ -748,13 +748,13 @@ class DownloadArchive():
 
     def __contains__(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""
-        key = self.keygen(kwdict)
+        key = kwdict["_archive_key"] = self.keygen(kwdict)
         self.cursor.execute(
             "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
         return self.cursor.fetchone()
 
     def add(self, kwdict):
         """Add item described by 'kwdict' to archive"""
-        key = self.keygen(kwdict)
+        key = kwdict.get("_archive_key") or self.keygen(kwdict)
         self.cursor.execute(
             "INSERT OR IGNORE INTO archive VALUES (?)", (key,))
