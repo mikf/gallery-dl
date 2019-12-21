@@ -121,14 +121,14 @@ Download images; in this case from danbooru via tag search for 'bonocho':
 
 .. code:: bash
 
-    $ gallery-dl http://danbooru.donmai.us/posts?tags=bonocho
+    $ gallery-dl "https://danbooru.donmai.us/posts?tags=bonocho"
 
 
 Get the direct URL of an image from a site that requires authentication:
 
 .. code:: bash
 
-    $ gallery-dl -g -u <username> -p <password> http://seiga.nicovideo.jp/seiga/im3211703
+    $ gallery-dl -g -u "<username>" -p "<password>" "https://seiga.nicovideo.jp/seiga/im3211703"
 
 
 | Search a remote resource for URLs and download images from them:
@@ -136,7 +136,7 @@ Get the direct URL of an image from a site that requires authentication:
 
 .. code:: bash
 
-    $ gallery-dl r:https://pastebin.com/raw/FLwrCYsT
+    $ gallery-dl "r:https://pastebin.com/raw/FLwrCYsT"
 
 
 Configuration
