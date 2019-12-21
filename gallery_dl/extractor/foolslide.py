@@ -82,13 +82,18 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
         })
 
     def images(self, page):
+        data = None
+
         if self.decode == "base64":
-            base64_data = text.extract(page, 'atob("', '"')[0].encode()
-            data = base64.b64decode(base64_data).decode()
+            base64_data = text.extract(page, 'atob("', '"')[0]
+            if base64_data:
+                data = base64.b64decode(base64_data.encode()).decode()
         elif self.decode == "double":
             pos = page.find("[{")
-            data = text.extract(page, " = ", ";", pos)[0]
-        else:
+            if pos >= 0:
+                data = text.extract(page, " = ", ";", pos)[0]
+
+        if not data:
             data = text.extract(page, "var pages = ", ";")[0]
         return json.loads(data)
 
@@ -138,8 +143,8 @@ EXTRACTORS = {
             ("https://jaiminisbox.com/reader/read/uratarou/en/0/1/", {
                 "keyword": "6009af77cc9c05528ab1fdda47b1ad9d4811c673",
             }),
-            ("https://jaiminisbox.com/reader/read/dr-stone/en/0/16/", {
-                "keyword": "8607375c24b1d0db7f52d059ef5baff793aa458e",
+            ("https://jaiminisbox.com/reader/read/red-storm/en/0/336/", {
+                "keyword": "53c6dddf3e5a61b6002a886ccd7e3354e973299a",
             }),
         ),
         "test-manga":
