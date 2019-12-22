@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## 1.12.1 - 2019-12-22
+### Additions
+- [4chan] add extractor for entire boards ([#510](https://github.com/mikf/gallery-dl/issues/510))
+- [realbooru] add extractors for pools, posts, and tag searches ([#514](https://github.com/mikf/gallery-dl/issues/514))
+- [instagram] implement a `videos` option ([#521](https://github.com/mikf/gallery-dl/issues/521))
+- [vsco] implement a `videos` option
+- [postprocessor:metadata] implement a `bypost` option for downloading the metadata of an entire post ([#511](https://github.com/mikf/gallery-dl/issues/511))
+### Changes
+- [reddit] change the default value for `comments` to `0`
+- [vsco] improve image resolutions
+- make filesystem-related errors during file downloads non-fatal ([#512](https://github.com/mikf/gallery-dl/issues/512))
+### Fixes
+- [foolslide] add fallback for chapter data extraction
+- [instagram] ignore errors during post-page extraction
+- [patreon] avoid errors when fetching user info ([#508](https://github.com/mikf/gallery-dl/issues/508))
+- [patreon] improve URL pattern for single posts
+- [reddit] fix errors with `t1` submissions
+- [vsco] fix user profile extraction … again
+- [weibo] handle unavailable/deleted statuses
+- [downloader:http] improve rate limit handling
+- retain trailing zeroes in Cloudflare challenge answers
 
 ## 1.12.0 - 2019-12-08
 ### Additions
