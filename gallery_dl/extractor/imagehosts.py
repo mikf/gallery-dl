@@ -154,10 +154,10 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
     category = "imagetwist"
     pattern = r"(?:https?://)?((?:www\.)?imagetwist\.com/([a-z0-9]{12}))"
-    test = ("https://imagetwist.com/4e46hv31tu0q/test.jpg", {
-        "url": "c999dc1a5dec0525ac9eb8c092f173dfe6dba0b0",
-        "keyword": "a9f2e01757ec96d4ee4752cbd8446ede80f7935e",
-        "content": "96b1fd099b06faad5879fce23a7e4eb8290d8810",
+    test = ("https://imagetwist.com/f1i2s4vhvbrq/test.png", {
+        "url": "8d5e168c0bee30211f821c6f3b2116e419d42671",
+        "keyword": "d1060a4c2e3b73b83044e20681712c0ffdd6cfef",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
     https = True
     params = None
