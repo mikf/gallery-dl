@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.12.1 - 2019-12-22
 ### Additions
 - [4chan] add extractor for entire boards ([#510](https://github.com/mikf/gallery-dl/issues/510))

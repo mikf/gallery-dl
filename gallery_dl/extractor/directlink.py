@@ -55,9 +55,11 @@ class DirectlinkExtractor(Extractor):
         for key, value in data.items():
             if value:
                 data[key] = text.unquote(value)
+
         data["path"], _, name = data["path"].rpartition("/")
         data["filename"], _, ext = name.rpartition(".")
         data["extension"] = ext.lower()
+        data["_http_headers"] = {"Referer": self.url}
 
         yield Message.Version, 1
         yield Message.Directory, data
