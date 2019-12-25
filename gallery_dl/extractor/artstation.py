@@ -83,14 +83,20 @@ class ArtstationExtractor(Extractor):
         response = self.request(url, notfound="user")
         return response.json()
 
-    def _pagination(self, url, params=None):
-        if not params:
-            params = {}
+    def _pagination(self, url, params=None, json=None):
+        if json:
+            params = json
+            kwargs = {"json": json}
+        else:
+            if not params:
+                params = {}
+            kwargs = {"params": params}
+
         params["page"] = 1
         total = 0
 
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request(url, **kwargs).json()
             yield from data["data"]
 
             total += len(data["data"])
@@ -268,34 +274,38 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
 class ArtstationSearchExtractor(ArtstationExtractor):
     """Extractor for artstation search results"""
     subcategory = "search"
-    directory_fmt = ("{category}", "Searches", "{search[searchterm]}")
-    archive_fmt = "s_{search[searchterm]}_{asset[id]}"
+    directory_fmt = ("{category}", "Searches", "{search[query]}")
+    archive_fmt = "s_{search[query]}_{asset[id]}"
     pattern = (r"(?:https?://)?(?:\w+\.)?artstation\.com"
                r"/search/?\?([^#]+)")
-    test = ("https://www.artstation.com/search?sorting=recent&q=ancient",)
+    test = ("https://www.artstation.com/search?q=ancient&sort_by=rank", {
+        "range": "1-20",
+        "count": 20,
+    })
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
         query = text.parse_query(match.group(1))
-        self.searchterm = query.get("q", "")
-        self.order = query.get("sorting", "recent").lower()
+        self.query = query.get("q", "")
+        self.sorting = query.get("sort_by", "rank").lower()
 
     def metadata(self):
         return {"search": {
-            "searchterm": self.searchterm,
-            "order": self.order,
+            "query"  : self.query,
+            "sorting": self.sorting,
         }}
 
     def projects(self):
-        order = "likes_count" if self.order == "likes" else "published_at"
-        url = "{}/search/projects.json".format(self.root)
-        params = {
-            "direction": "desc",
-            "order": order,
-            "q": self.searchterm,
-            #  "show_pro_first": "true",
-        }
-        return self._pagination(url, params)
+        url = "{}/api/v2/search/projects.json".format(self.root)
+        return self._pagination(url, json={
+            "additional_fields": "[]",
+            "filters"          : "[]",
+            "page"             : None,
+            "per_page"         : "50",
+            "pro_first"        : "1",
+            "query"            : self.query,
+            "sorting"          : self.sorting,
+        })
 
 
 class ArtstationArtworkExtractor(ArtstationExtractor):
@@ -305,7 +315,10 @@ class ArtstationArtworkExtractor(ArtstationExtractor):
     archive_fmt = "A_{asset[id]}"
     pattern = (r"(?:https?://)?(?:\w+\.)?artstation\.com"
                r"/artwork/?\?([^#]+)")
-    test = ("https://www.artstation.com/artwork?sorting=latest",)
+    test = ("https://www.artstation.com/artwork?sorting=latest", {
+        "range": "1-20",
+        "count": 20,
+    })
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
@@ -316,9 +329,7 @@ class ArtstationArtworkExtractor(ArtstationExtractor):
 
     def projects(self):
         url = "{}/projects.json".format(self.root)
-        params = self.query.copy()
-        params["page"] = 1
-        return self._pagination(url, params)
+        return self._pagination(url, self.query.copy())
 
 
 class ArtstationImageExtractor(ArtstationExtractor):
