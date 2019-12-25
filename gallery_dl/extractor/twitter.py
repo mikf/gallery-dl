@@ -53,8 +53,8 @@ class TwitterExtractor(Extractor):
 
                 if self.videos == "ytdl":
                     data["extension"] = None
-                    url = "ytdl:{}/{}/status/{}".format(
-                        self.root, data["user"], data["tweet_id"])
+                    url = "ytdl:{}/i/web/status/{}".format(
+                        self.root, data["tweet_id"])
                 else:
                     url = self._video_from_tweet(data["tweet_id"])
                     ext = text.ext_from_url(url)
@@ -313,7 +313,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # Reply to another tweet (#403)
         ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
             "options": (("videos", "ytdl"),),
-            "pattern": r"ytdl:https://twitter.com/.+/1103767554424598528",
+            "pattern": r"ytdl:https://twitter.com/i/web.+/1103767554424598528",
         }),
         # /i/web/ URL
         ("https://twitter.com/i/web/status/1155074198240292865", {
