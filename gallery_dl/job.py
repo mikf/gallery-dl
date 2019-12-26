@@ -182,6 +182,7 @@ class DownloadJob(Job):
         self.downloaders = {}
         self.postprocessors = None
         self.out = output.select()
+        self.visited = parent.visited if parent else set()
 
     def handle_url(self, url, kwdict, fallback=None):
         """Download the resource specified in 'url'"""
@@ -261,6 +262,10 @@ class DownloadJob(Job):
                 pp.run_metadata(pathfmt)
 
     def handle_queue(self, url, kwdict):
+        if url in self.visited:
+            return
+        self.visited.add(url)
+
         if "_extractor" in kwdict:
             extr = kwdict["_extractor"].from_url(url)
         else:
