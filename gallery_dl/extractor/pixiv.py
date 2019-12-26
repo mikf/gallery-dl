@@ -217,6 +217,11 @@ class PixivFavoriteExtractor(PixivExtractor):
         ("https://www.pixiv.net/bookmark.php", {
             "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
         }),
+        # followed users (#515)
+        ("https://www.pixiv.net/bookmark.php?id=173530&type=user", {
+            "pattern": PixivUserExtractor.pattern,
+            "count": ">= 12",
+        }),
         # touch URLs
         ("https://touch.pixiv.net/bookmark.php?id=173530"),
         ("https://touch.pixiv.net/bookmark.php"),
@@ -227,6 +232,9 @@ class PixivFavoriteExtractor(PixivExtractor):
         self.query = text.parse_query(match.group(1))
         if "id" not in self.query:
             self.subcategory = "bookmark"
+        elif self.query.get("type") == "user":
+            self.subcategory = "following"
+            self.items = self._items_following
 
     def works(self):
         tag = None
@@ -248,6 +256,15 @@ class PixivFavoriteExtractor(PixivExtractor):
 
         self.user_id = user["id"]
         return {"user_bookmark": user}
+
+    def _items_following(self):
+        yield Message.Version, 1
+
+        for preview in self.api.user_following(self.query["id"]):
+            user = preview["user"]
+            user["_extractor"] = PixivUserExtractor
+            url = "https://www.pixiv.net/member.php?id={}".format(user["id"])
+            yield Message.Queue, url, user
 
 
 class PixivRankingExtractor(PixivExtractor):
@@ -493,6 +510,10 @@ class PixivAppAPI():
         params = {"user_id": user_id}
         return self._call("v1/user/detail", params)["user"]
 
+    def user_following(self, user_id):
+        params = {"user_id": user_id}
+        return self._pagination("v1/user/following", params, "user_previews")
+
     def user_illusts(self, user_id):
         params = {"user_id": user_id}
         return self._pagination("v1/user/illusts", params)
@@ -513,10 +534,10 @@ class PixivAppAPI():
             raise exception.NotFoundError()
         raise exception.StopExtraction("API request failed: %s", response.text)
 
-    def _pagination(self, endpoint, params):
+    def _pagination(self, endpoint, params, key="illusts"):
         while True:
             data = self._call(endpoint, params)
-            yield from data["illusts"]
+            yield from data[key]
 
             if not data["next_url"]:
                 return
