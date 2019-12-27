@@ -739,6 +739,15 @@ class DeviantartExtractorV2(DeviantartExtractor):
         deviation["target"] = target
         return deviation
 
+    def _pagination(self, url, params, headers=None):
+        while True:
+            data = self.request(url, params=params, headers=headers).json()
+            yield from data["results"]
+
+            if not data["hasMore"]:
+                return
+            params["offset"] = data["nextOffset"]
+
 
 class DeviantartDeviationExtractor(DeviantartExtractorV2):
     """Extractor for single deviations"""
@@ -863,15 +872,40 @@ class DeviantartScrapsExtractor(DeviantartExtractorV2):
             "Referer": "{}/{}/gallery/scraps".format(self.root, self.user),
         }
 
-        while True:
-            data = self.request(url, params=params, headers=headers).json()
+        for obj in self._pagination(url, params, headers):
+            yield obj["deviation"]
 
-            for obj in data["results"]:
-                yield obj["deviation"]
 
-            if not data["hasMore"]:
-                return
-            params["offset"] = data["nextOffset"]
+class DeviantartFollowingExtractor(DeviantartExtractorV2):
+    subcategory = "following"
+    pattern = BASE_PATTERN + "/about#watching$"
+    test = ("https://www.deviantart.com/shimoda7/about#watching", {
+        "pattern": DeviantartUserExtractor.pattern,
+        "range": "1-50",
+        "count": 50,
+    })
+
+    def items(self):
+        url = "{}/_napi/da-user-profile/api/module/watching".format(self.root)
+        params = {
+            "username": self.user,
+            "moduleid": self._module_id(self.user),
+            "offset"  : "0",
+            "limit"   : "24",
+        }
+
+        yield Message.Version, 1
+        for user in self._pagination(url, params):
+            url = "{}/{}".format(self.root, user["username"])
+            yield Message.Queue, url, user
+
+    def _module_id(self, username):
+        url = "{}/{}/about".format(self.root, username)
+        page = self.request(url).text
+        pos = page.find('\\"type\\":\\"watching\\"')
+        if pos < 0:
+            raise exception.NotFoundError("module")
+        return text.rextract(page, '\\"id\\":', ',', pos)[0].strip('" ')
 
 
 class DeviantartAPI():
