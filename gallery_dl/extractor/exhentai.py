@@ -23,7 +23,7 @@ BASE_PATTERN = r"(?:https?://)?(e[x-]|g\.e-)hentai\.org"
 class ExhentaiExtractor(Extractor):
     """Base class for exhentai extractors"""
     category = "exhentai"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
+    directory_fmt = ("{category}", "{gallery_id} {title[:247]}")
     filename_fmt = (
         "{gallery_id}_{num:>04}_{image_token}_{filename}.{extension}")
     archive_fmt = "{gallery_id}_{num}"
