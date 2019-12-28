@@ -427,11 +427,19 @@ class KeywordJob(Job):
         self.print_kwdict(kwdict)
 
     def handle_queue(self, url, kwdict):
-        if not kwdict:
+        if not util.filter_dict(kwdict):
             self.extractor.log.info(
-                "This extractor delegates work to other extractors "
-                "and does not provide any keywords on its own. Try "
-                "'gallery-dl -K \"%s\"' instead.", url)
+                "This extractor only spawns other extractors "
+                "and does not provide any metadata on its own.")
+
+            if "_extractor" in kwdict:
+                self.extractor.log.info(
+                    "Showing results for '%s' instead:\n", url)
+                extr = kwdict["_extractor"].from_url(url)
+                KeywordJob(extr, self).run()
+            else:
+                self.extractor.log.info(
+                    "Try 'gallery-dl -K \"%s\"' instead.", url)
         else:
             print("Keywords for --chapter-filter:")
             print("------------------------------")
