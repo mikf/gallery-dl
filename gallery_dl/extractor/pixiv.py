@@ -13,6 +13,7 @@ from .. import text, exception
 from ..cache import cache
 from datetime import datetime, timedelta
 import hashlib
+import time
 
 
 class PixivExtractor(Extractor):
@@ -527,12 +528,20 @@ class PixivAppAPI():
 
         self.login()
         response = self.extractor.request(url, params=params, fatal=False)
+        data = response.json()
 
-        if response.status_code < 400:
-            return response.json()
-        if response.status_code == 404:
-            raise exception.NotFoundError()
-        raise exception.StopExtraction("API request failed: %s", response.text)
+        if "error" in data:
+            if response.status_code == 404:
+                raise exception.NotFoundError()
+
+            error = data["error"]
+            if "rate limit" in (error.get("message") or "").lower():
+                self.log.info("Waiting two minutes for API rate limit reset.")
+                time.sleep(120)
+                return self._call(endpoint, params)
+            raise exception.StopExtraction("API request failed: %s", error)
+
+        return data
 
     def _pagination(self, endpoint, params, key="illusts"):
         while True:
