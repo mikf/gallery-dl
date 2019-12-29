@@ -142,10 +142,11 @@ class PixivMeExtractor(PixivExtractor):
 
     def items(self):
         url = "https://pixiv.me/" + self.account
+        data = {"_extractor": PixivUserExtractor}
         response = self.request(
             url, method="HEAD", allow_redirects=False, notfound="user")
         yield Message.Version, 1
-        yield Message.Queue, response.headers["Location"], {}
+        yield Message.Queue, response.headers["Location"], data
 
 
 class PixivWorkExtractor(PixivExtractor):

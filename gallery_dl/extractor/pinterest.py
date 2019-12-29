@@ -175,7 +175,7 @@ class PinterestPinitExtractor(PinterestExtractor):
                                         "https://pin.it/None",
                                         "https://www.pinterest.com"):
             raise exception.NotFoundError("pin")
-        yield Message.Queue, location, {}
+        yield Message.Queue, location, {"_extractor": PinterestPinExtractor}
 
 
 class PinterestAPI():
