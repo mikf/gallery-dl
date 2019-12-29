@@ -69,8 +69,8 @@ class WikiartArtistExtractor(WikiartExtractor):
     directory_fmt = ("{category}", "{artist[artistName]}")
     pattern = BASE_PATTERN + r"/(?!\w+-by-)([\w-]+)"
     test = ("https://www.wikiart.org/en/thomas-cole", {
-        "url": "f1eee8158f5b8b7380382ab730a8f53884715c8b",
-        "keyword": "c61f5a4774b977106000e9554d19cfb9438a7032",
+        "url": "9049e52e897b9ae6586df4c2c4f827d0a19dafa3",
+        "keyword": "c3168b21a993707c41efb7674e8c90d53a79d483",
     })
 
     def __init__(self, match):

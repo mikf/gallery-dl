@@ -153,7 +153,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
                     "is_album"    : True,
                     "layout"      : "blog",
                     "link"        : "https://imgur.com/a/TcBmP",
-                    "nsfw"        : False,
+                    "nsfw"        : True,
                     "privacy"     : "hidden",
                     "section"     : None,
                     "title"       : "138",
