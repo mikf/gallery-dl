@@ -56,7 +56,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
                     "__typename"  : "Album",
                     "audiences"   : list,
                     "content"     : "Hentai",
-                    "cover"       : "re:https://cdnio.luscious.net/.+/277031/",
+                    "cover"       : "re:https://\\w+.luscious.net/.+/277031/",
                     "created"     : 1479625853,
                     "created_by"  : "NTRshouldbeillegal",
                     "date"        : "type:datetime",
@@ -102,7 +102,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
             },
         }),
         ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
-            "url": "21cc68a7548f4d71dfd67d8caf96349dde7e791c",
+            "url": "0be0cc279be1de99f727764819e03435e2a79915",
         }),
         ("https://luscious.net/albums/not-found_277035/", {
             "exception": exception.NotFoundError,
