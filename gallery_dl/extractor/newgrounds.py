@@ -98,7 +98,7 @@ class NewgroundsExtractor(Extractor):
             'id="faves_load">', '<').replace(",", ""))
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
         data["tags"] = text.split_html(extr(
-            '<dd class="tags momag">', '</dd>'))
+            '<dd class="tags">', '</dd>'))
         data["artist"] = [
             text.extract(user, '//', '.')[0]
             for user in text.extract_iter(page, '<div class="item-user">', '>')
