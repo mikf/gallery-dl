@@ -120,8 +120,8 @@ EXTRACTORS = {
     },
     "fireden": {
         "root": "https://boards.fireden.net",
-        "test-thread": ("https://boards.fireden.net/a/thread/159803223/", {
-            "url": "01b7baacfb0656a68e566368290e3072b27f86c9",
+        "test-thread": ("https://boards.fireden.net/sci/thread/11264294/", {
+            "url": "3adfe181ee86a8c23021c705f623b3657a9b0a43",
         }),
     },
     "nyafuu": {
