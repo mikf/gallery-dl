@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -31,6 +31,7 @@ class DeviantartExtractor(Extractor):
     category = "deviantart"
     directory_fmt = ("{category}", "{username}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
+    cookiedomain = None
     root = "https://www.deviantart.com"
 
     def __init__(self, match=None):

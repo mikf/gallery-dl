@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2014-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -170,6 +170,9 @@ class Extractor():
 
     def _init_cookies(self):
         """Populate the session's cookiejar"""
+        if self.cookiedomain is None:
+            return
+
         cookies = self.config("cookies")
         if cookies:
             if isinstance(cookies, dict):
