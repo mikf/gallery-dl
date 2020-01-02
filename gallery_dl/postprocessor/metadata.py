@@ -10,6 +10,7 @@
 
 from .common import PostProcessor
 from .. import util
+import os
 
 
 class MetadataPP(PostProcessor):
@@ -32,32 +33,46 @@ class MetadataPP(PostProcessor):
             self.ascii = options.get("ascii", False)
             ext = "json"
 
+        directory = options.get("directory")
+        if directory:
+            self._directory = self._directory_custom
+            sep = os.sep + (os.altsep or "")
+            self.metadir = directory.rstrip(sep) + os.sep
+
         extfmt = options.get("extension-format")
         if extfmt:
-            self.path = self._path_format
+            self._filename = self._filename_custom
             self.extfmt = util.Formatter(extfmt).format_map
         else:
-            self.path = self._path_append
             self.extension = options.get("extension", ext)
 
         if options.get("bypost"):
             self.run_metadata, self.run = self.run, self.run_metadata
 
     def run(self, pathfmt):
-        with open(self.path(pathfmt), "w", encoding="utf-8") as file:
+        path = self._directory(pathfmt) + self._filename(pathfmt)
+        with open(path, "w", encoding="utf-8") as file:
             self.write(file, pathfmt.kwdict)
 
-    def _path_append(self, pathfmt):
-        return "{}.{}".format(pathfmt.realpath, self.extension)
+    def _directory(self, pathfmt):
+        return pathfmt.realdirectory
 
-    def _path_format(self, pathfmt):
+    def _directory_custom(self, pathfmt):
+        directory = os.path.join(pathfmt.realdirectory, self.metadir)
+        os.makedirs(directory, exist_ok=True)
+        return directory
+
+    def _filename(self, pathfmt):
+        return pathfmt.filename + "." + self.extension
+
+    def _filename_custom(self, pathfmt):
         kwdict = pathfmt.kwdict
         ext = kwdict["extension"]
         kwdict["extension"] = pathfmt.extension
         kwdict["extension"] = pathfmt.prefix + self.extfmt(kwdict)
-        path = pathfmt.realdirectory + pathfmt.build_filename()
+        filename = pathfmt.build_filename()
         kwdict["extension"] = ext
-        return path
+        return filename
 
     def _write_custom(self, file, kwdict):
         file.write(self.contentfmt(kwdict))

@@ -7,6 +7,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
 import os.path
 import zipfile
 import tempfile
@@ -156,7 +157,6 @@ class MetadataTest(BasePostprocessorTest):
             "_private" : "world",
         })
 
-        self.assertEqual(pp.path     , pp._path_append)
         self.assertEqual(pp.write    , pp._write_json)
         self.assertEqual(pp.ascii    , True)
         self.assertEqual(pp.indent   , 2)
@@ -242,7 +242,7 @@ class MetadataTest(BasePostprocessorTest):
             "extension-format": "json",
         })
 
-        self.assertEqual(pp.path, pp._path_format)
+        self.assertEqual(pp._filename, pp._filename_custom)
 
         with patch("builtins.open", mock_open()) as m:
             pp.prepare(self.pathfmt)
@@ -262,6 +262,31 @@ class MetadataTest(BasePostprocessorTest):
             pp.run(self.pathfmt)
 
         path = self.pathfmt.realdirectory + "file.2.EXT-data:tESt"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_directory(self):
+        pp = self._create({
+            "directory": "metadata",
+        })
+
+        with patch("builtins.open", mock_open()) as m:
+            pp.prepare(self.pathfmt)
+            pp.run(self.pathfmt)
+
+        path = self.pathfmt.realdirectory + "metadata/file.ext.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_directory_2(self):
+        pp = self._create({
+            "directory"       : "metadata////",
+            "extension-format": "json",
+        })
+
+        with patch("builtins.open", mock_open()) as m:
+            pp.prepare(self.pathfmt)
+            pp.run(self.pathfmt)
+
+        path = self.pathfmt.realdirectory + "metadata/file.json"
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
     @staticmethod
