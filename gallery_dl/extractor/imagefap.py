@@ -29,8 +29,9 @@ class ImagefapExtractor(Extractor):
 class ImagefapGalleryExtractor(ImagefapExtractor):
     """Extractor for image galleries from imagefap.com"""
     subcategory = "gallery"
-    pattern = (r"(?:https?://)?(?:www\.)?imagefap\.com/"
+    pattern = (r"(?:https?://)?(?:www\.|beta\.)?imagefap\.com/"
                r"(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)")
+
     test = (
         ("https://www.imagefap.com/pictures/7102714", {
             "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
