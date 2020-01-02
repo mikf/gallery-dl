@@ -1485,6 +1485,16 @@ Description Select how to write metadata.
               to a file's metadata dictionary
 =========== =====
 
+metadata.directory
+------------------
+=========== =====
+Type        ``string``
+Default     ``"."``
+Example     ``"metadata"``
+Description Directory where metadata files are stored in relative to the
+            current target location for file downloads.
+=========== =====
+
 metadata.extension
 ------------------
 =========== =====
