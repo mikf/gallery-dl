@@ -740,8 +740,15 @@ class DownloadArchive():
         con.isolation_level = None
         self.close = con.close
         self.cursor = con.cursor()
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                            "(entry PRIMARY KEY) WITHOUT ROWID")
+
+        try:
+            self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+                                "(entry PRIMARY KEY) WITHOUT ROWID")
+        except sqlite3.OperationalError:
+            # fallback for missing WITHOUT ROWID support (#553)
+            self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+                                "(entry PRIMARY KEY)")
+
         self.keygen = (extractor.category + extractor.config(
             "archive-format", extractor.archive_fmt)
         ).format_map
