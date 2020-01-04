@@ -57,6 +57,8 @@ class TwitterExtractor(Extractor):
                         self.root, data["tweet_id"])
                 else:
                     url = self._video_from_tweet(data["tweet_id"])
+                    if not url:
+                        continue
                     ext = text.ext_from_url(url)
                     if ext == "m3u8":
                         url = "ytdl:" + url
@@ -183,19 +185,28 @@ class TwitterExtractor(Extractor):
         if self.logged_in:
             headers["x-twitter-auth-type"] = "OAuth2Session"
         else:
-            token = self._guest_token(headers)
+            token = _guest_token(self, headers)
             cookies = {"gt": token}
             headers["x-guest-token"] = token
 
-        data = self.request(url, cookies=cookies, headers=headers).json()
-        return data["track"]["playbackUrl"]
+        response = self.request(
+            url, cookies=cookies, headers=headers, fatal=None)
 
-    @memcache()
-    def _guest_token(self, headers):
-        return self.request(
-            "https://api.twitter.com/1.1/guest/activate.json",
-            method="POST", headers=headers,
-        ).json().get("guest_token")
+        if response.status_code == 429 or \
+                response.headers.get("x-rate-limit-remaining") == "0":
+            if self.logged_in:
+                reset = response.headers.get("x-rate-limit-reset")
+                self.wait(until=reset, reason="rate limit reset")
+            else:
+                _guest_token.invalidate()
+            return self._video_from_tweet(tweet_id)
+
+        elif response.status_code >= 400:
+            self.log.warning("Unable to fetch video data for %s ('%s %s')",
+                             tweet_id, response.status_code, response.reason)
+            return None
+
+        return response.json()["track"]["playbackUrl"]
 
     def _tweets_from_api(self, url, max_position=None):
         params = {
@@ -357,3 +368,11 @@ class TwitterTweetExtractor(TwitterExtractor):
         end = page.index('class="js-tweet-stats-container')
         beg = page.rindex('<div class="tweet ', 0, end)
         return (page[beg:end],)
+
+
+@memcache()
+def _guest_token(extr, headers):
+    return extr.request(
+        "https://api.twitter.com/1.1/guest/activate.json",
+        method="POST", headers=headers,
+    ).json().get("guest_token")

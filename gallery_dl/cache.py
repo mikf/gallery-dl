@@ -37,7 +37,7 @@ class CacheDecorator():
     def update(self, key, value):
         self.cache[key] = value
 
-    def invalidate(self, key):
+    def invalidate(self, key=""):
         try:
             del self.cache[key]
         except KeyError:
