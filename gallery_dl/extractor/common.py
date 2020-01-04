@@ -135,7 +135,8 @@ class Extractor():
             raise ValueError("Either 'seconds' or 'until' is required")
 
         if reason:
-            isotime = until.time().isoformat("seconds")
+            t = until.time()
+            isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
             self.log.info("Waiting until %s for %s.", isotime, reason)
         time.sleep(seconds + adjust)
 
