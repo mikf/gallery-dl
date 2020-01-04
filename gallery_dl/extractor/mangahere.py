@@ -97,9 +97,18 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
             "url": "654850570aa03825cd57e2ae2904af489602c523",
             "keyword": "c8084d89a9ea6cf40353093669f9601a39bf5ca2",
         }),
+        # adult filter (#556)
+        ("http://www.mangahere.cc/manga/gunnm_mars_chronicle/", {
+            "pattern": MangahereChapterExtractor.pattern,
+            "count": ">= 50",
+        }),
         ("https://www.mangahere.co/manga/aria/"),
         ("https://m.mangahere.co/manga/aria/"),
     )
+
+    def __init__(self, match):
+        MangaExtractor.__init__(self, match)
+        self.session.cookies.set("isAdult", "1", domain="www.mangahere.cc")
 
     def chapters(self, page):
         results = []
