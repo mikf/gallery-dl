@@ -155,6 +155,16 @@ class TwitterExtractor(Extractor):
             cl, _, cr = content.rpartition("pic.twitter.com/")
             data["content"] = cl if cl and len(cr) < 16 else content
 
+        if extr('<div class="QuoteTweet', '>'):
+            data["retweet_id"] = text.parse_int(extr('data-item-id="', '"'))
+            data["retweeter"] = data["user"]["name"]
+            data["author"] = {
+                "name"  : extr('data-screen-name="', '"'),
+                "id"    : text.parse_int(extr('data-user-id="'   , '"')),
+                "nick"  : text.unescape(extr(
+                    'QuoteTweet-fullname', '<').partition('>')[2]),
+            }
+
         return data
 
     def _video_from_tweet(self, tweet_id):
@@ -318,6 +328,11 @@ class TwitterTweetExtractor(TwitterExtractor):
         # /i/web/ URL
         ("https://twitter.com/i/web/status/1155074198240292865", {
             "pattern": r"https://pbs.twimg.com/media/EAel0vUUYAAZ4Bq.jpg:orig",
+        }),
+        # quoted tweet (#526)
+        ("https://twitter.com/Meiyu_miu/status/1070693241413021696", {
+            "count": 4,
+            "keyword": "0c627af2b8cdccc7e0da8fd221155c4a4a3141a8",
         }),
     )
 
