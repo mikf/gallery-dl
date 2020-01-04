@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, extractor, exception
 from ..cache import cache
-import time
 
 
 class RedditExtractor(Extractor):
@@ -278,11 +277,13 @@ class RedditAPI():
         params["raw_json"] = 1
         self.authenticate()
         response = self.extractor.request(url, params=params, fatal=None)
+
         remaining = response.headers.get("x-ratelimit-remaining")
         if remaining and float(remaining) < 2:
-            wait = int(response.headers["x-ratelimit-reset"])
-            self.log.info("Waiting %d seconds for ratelimit reset", wait)
-            time.sleep(wait)
+            reset = response.headers["x-ratelimit-reset"]
+            self.extractor.wait(seconds=reset, reason="rate limit reset")
+            return self._call(endpoint, params)
+
         data = response.json()
         if "error" in data:
             if data["error"] == 403:

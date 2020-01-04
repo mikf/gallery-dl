@@ -122,6 +122,23 @@ class Extractor():
 
         raise exception.HttpError(msg)
 
+    def wait(self, *, seconds=None, until=None, reason=None, adjust=1):
+        now = datetime.datetime.now()
+
+        if seconds:
+            seconds = float(seconds)
+            until = now + datetime.timedelta(seconds=seconds)
+        elif until:
+            until = datetime.datetime.fromtimestamp(float(until))
+            seconds = (until - now).total_seconds()
+        else:
+            raise ValueError("Either 'seconds' or 'until' is required")
+
+        if reason:
+            isotime = until.time().isoformat("seconds")
+            self.log.info("Waiting until %s for %s.", isotime, reason)
+        time.sleep(seconds + adjust)
+
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
         username = self.config("username")

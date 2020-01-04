@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text, oauth, extractor, exception
 from datetime import datetime, timedelta
 import re
-import time
 
 
 def _original_inline_image(url):
@@ -408,27 +407,17 @@ class TumblrAPI(oauth.OAuth1API):
             # daily rate limit
             if response.headers.get("x-ratelimit-perday-remaining") == "0":
                 reset = response.headers.get("x-ratelimit-perday-reset")
+                until = datetime.now() + timedelta(seconds=float(reset))
+                self.log.error("Daily API rate limit exceeded")
                 raise exception.StopExtraction(
-                    "Daily API rate limit exceeded: aborting; "
-                    "rate limit will reset at %s", self._to_time(reset),
-                )
+                    "Aborting - Rate limit will reset at %s",
+                    until.time().isoformat("seconds"))
 
             # hourly rate limit
             reset = response.headers.get("x-ratelimit-perhour-reset")
             if reset:
-                self.log.info(
-                    "Hourly API rate limit exceeded; waiting until "
-                    "%s for rate limit reset", self._to_time(reset),
-                )
-                time.sleep(int(reset) + 1)
+                self.log.info("Hourly API rate limit exceeded")
+                self.extractor.wait(seconds=reset, reason="rate limit reset")
                 return self._call(blog, endpoint, params)
 
         raise exception.StopExtraction(data)
-
-    @staticmethod
-    def _to_time(reset):
-        try:
-            reset_time = datetime.now() + timedelta(seconds=int(reset))
-        except (ValueError, TypeError):
-            return "?"
-        return reset_time.strftime("%H:%M:%S")
