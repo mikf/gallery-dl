@@ -1,6 +1,27 @@
 # Changelog
 
-## Unreleased
+## 1.12.2 - 2020-01-05
+### Additions
+- [deviantart] match new search/popular URLs ([#538](https://github.com/mikf/gallery-dl/issues/538))
+- [deviantart] match `/favourites/all` URLs ([#555](https://github.com/mikf/gallery-dl/issues/555))
+- [deviantart] add extractor for followed users ([#515](https://github.com/mikf/gallery-dl/issues/515))
+- [pixiv] support listing followed users ([#515](https://github.com/mikf/gallery-dl/issues/515))
+- [imagefap] handle beta.imagefap.com URLs ([#552](https://github.com/mikf/gallery-dl/issues/552))
+- [postprocessor:metadata] add `directory` option ([#520](https://github.com/mikf/gallery-dl/issues/520))
+### Fixes
+- [artstation] fix search result pagination ([#537](https://github.com/mikf/gallery-dl/issues/537))
+- [directlink] send Referer headers ([#536](https://github.com/mikf/gallery-dl/issues/536))
+- [exhentai] restrict default directory name length ([#545](https://github.com/mikf/gallery-dl/issues/545))
+- [mangadex] change domain to mangadex.cc ([#559](https://github.com/mikf/gallery-dl/issues/559))
+- [mangahere] send `isAdult` cookies ([#556](https://github.com/mikf/gallery-dl/issues/556))
+- [newgrounds] fix tags metadata extraction
+- [pixiv] retry after rate limit errors ([#535](https://github.com/mikf/gallery-dl/issues/535))
+- [twitter] handle quoted tweets ([#526](https://github.com/mikf/gallery-dl/issues/526))
+- [twitter] handle API rate limits ([#526](https://github.com/mikf/gallery-dl/issues/526))
+- [twitter] fix URLs forwarded to youtube-dl ([#540](https://github.com/mikf/gallery-dl/issues/540))
+- prevent infinite recursion when spawning new extractors ([#489](https://github.com/mikf/gallery-dl/issues/489))
+- improve output of `--list-keywords` for "parent" extractors ([#548](https://github.com/mikf/gallery-dl/issues/548))
+- provide fallback for SQLite versions with missing `WITHOUT ROWID` support ([#553](https://github.com/mikf/gallery-dl/issues/553))
 
 ## 1.12.1 - 2019-12-22
 ### Additions
