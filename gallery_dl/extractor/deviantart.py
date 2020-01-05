@@ -476,7 +476,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{username}", "Favourites")
     archive_fmt = "f_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/favourites/?(?:\?catpath=/)?$"
+    pattern = BASE_PATTERN + r"/favourites(?:/all|/?\?catpath=)?/?$"
     test = (
         ("https://www.deviantart.com/h3813067/favourites/", {
             "options": (("metadata", True), ("flat", False)),  # issue #271
@@ -485,8 +485,10 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/h3813067/favourites/", {
             "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
         }),
+        ("https://www.deviantart.com/h3813067/favourites/all"),
         ("https://www.deviantart.com/h3813067/favourites/?catpath=/"),
         ("https://h3813067.deviantart.com/favourites/"),
+        ("https://h3813067.deviantart.com/favourites/all"),
         ("https://h3813067.deviantart.com/favourites/?catpath=/"),
     )
 
