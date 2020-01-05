@@ -1130,7 +1130,7 @@ class DeviantartAPI():
                 return data
 
     def _pagination(self, endpoint, params, extend=True):
-        public = True
+        public = warn = True
         while True:
             data = self._call(endpoint, params, public=public)
             if "results" not in data:
@@ -1143,7 +1143,8 @@ class DeviantartAPI():
                         self.log.debug("Switching to private access token")
                         public = False
                         continue
-                    elif data["has_more"]:
+                    elif data["has_more"] and warn:
+                        warn = False
                         self.log.warning(
                             "Private deviations detected! Run 'gallery-dl "
                             "oauth:deviantart' and follow the instructions to "
