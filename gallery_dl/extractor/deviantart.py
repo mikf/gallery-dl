@@ -576,12 +576,22 @@ class DeviantartPopularExtractor(DeviantartExtractor):
     directory_fmt = ("{category}", "Popular",
                      "{popular[range]}", "{popular[search]}")
     archive_fmt = "P_{popular[range]}_{popular[search]}_{index}.{extension}"
-    pattern = (r"(?:https?://)?www\.deviantart\.com"
-               r"((?:/\w+)*)/(?:popular-([^/?&#]+))/?(?:\?([^#]*))?")
+    pattern = (r"(?:https?://)?www\.deviantart\.com/(?:"
+               r"search(?:/deviations)?"
+               r"|(?:deviations/?)?\?order=(popular-[^/?&#]+)"
+               r"|((?:[\w-]+/)*)(popular-[^/?&#]+)"
+               r")/?(?:\?([^#]*))?")
     test = (
+        ("https://www.deviantart.com/?order=popular-all-time", {
+            "options": (("original", False),),
+            "range": "1-30",
+            "count": 30,
+        }),
         ("https://www.deviantart.com/popular-24-hours/?q=tree+house", {
             "options": (("original", False),),
         }),
+        ("https://www.deviantart.com/search?q=tree"),
+        ("https://www.deviantart.com/search/deviations?order=popular-1-week"),
         ("https://www.deviantart.com/artisan/popular-all-time/?q=tree"),
     )
 
@@ -590,13 +600,20 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         self.search_term = self.time_range = self.category_path = None
         self.user = ""
 
-        path, trange, query = match.groups()
+        trange1, path, trange2, query = match.groups()
+        trange = trange1 or trange2
+        query = text.parse_query(query)
+
+        if not trange:
+            trange = query.get("order")
+
         if path:
-            self.category_path = path.lstrip("/")
+            self.category_path = path.strip("/")
         if trange:
+            trange = trange[8:] if trange.startswith("popular-") else ""
             self.time_range = trange.replace("-", "").replace("hours", "hr")
         if query:
-            self.search_term = text.parse_query(query).get("q")
+            self.search_term = query.get("q")
 
         self.popular = {
             "search": self.search_term or "",
