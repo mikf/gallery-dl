@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.12.2 - 2020-01-05
 ### Additions
 - [deviantart] match new search/popular URLs ([#538](https://github.com/mikf/gallery-dl/issues/538))
