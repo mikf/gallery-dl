@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2014-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,9 +20,12 @@ class DownloaderBase():
     def __init__(self, extractor, output):
         self.session = extractor.session
         self.out = output
-        self.log = logging.getLogger("downloader." + self.scheme)
         self.part = self.config("part", True)
         self.partdir = self.config("part-directory")
+
+        self.log = logging.getLogger("downloader." + self.scheme)
+        self.log.job = extractor.log.job
+        self.log.extractor = extractor
 
         if self.partdir:
             self.partdir = util.expand_path(self.partdir)
