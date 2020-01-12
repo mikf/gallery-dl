@@ -87,7 +87,7 @@ and run it inside a command prompt (like ``cmd.exe``).
 - `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.12.2/gallery-dl.exe>`__
 - `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.12.2/gallery-dl.bin>`__
 
-These executables include a Python 3.7 interpreter
+These executables include a Python 3.8 interpreter
 and all required Python packages.
 
 
