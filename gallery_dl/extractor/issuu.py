@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,23 +32,23 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
         "count"  : 36,
         "keyword": {
             "document": {
-                "access"       : "public",
-                "contentRating": dict,
-                "date"         : "type:datetime",
-                "description"  : "re:Motions, the brand new publication by Is",
-                "documentId"   : r"re:\d+-d99ec95935f15091b040cb8060f05510",
-                "documentName" : "motions-1-2019",
-                "downloadState": "NOT_AVAILABLE",
-                "id"           : r"re:\d+-d99ec95935f15091b040cb8060f05510",
-                "isConverting" : False,
-                "isQuarantined": False,
-                "lang"         : "en",
-                "language"     : "English",
-                "pageCount"    : 36,
-                "publicationId": "d99ec95935f15091b040cb8060f05510",
-                "sections"     : list,
-                "title"        : "Motions by Issuu - Issue 1",
-                "userName"     : "issuu",
+                "access"        : "public",
+                "articleStories": list,
+                "contentRating" : dict,
+                "date"          : "type:datetime",
+                "description"   : "re:Motions, the brand new publication by I",
+                "documentId"    : r"re:\d+-d99ec95935f15091b040cb8060f05510",
+                "documentName"  : "motions-1-2019",
+                "downloadState" : "NOT_AVAILABLE",
+                "id"            : r"re:\d+-d99ec95935f15091b040cb8060f05510",
+                "isConverting"  : False,
+                "isQuarantined" : False,
+                "lang"          : "en",
+                "language"      : "English",
+                "pageCount"     : 36,
+                "publicationId" : "d99ec95935f15091b040cb8060f05510",
+                "title"         : "Motions by Issuu - Issue 1",
+                "userName"      : "issuu",
             },
             "extension": "jpg",
             "filename" : r"re:page_\d+",

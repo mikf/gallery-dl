@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -89,6 +89,7 @@ class LivedoorBlogExtractor(LivedoorExtractor):
         ("http://blog.livedoor.jp/zatsu_ke/", {
             "range": "1-50",
             "count": 50,
+            "archive": False,
             "pattern": r"https?://livedoor.blogimg.jp/\w+/imgs/\w/\w/\w+\.\w+",
             "keyword": {
                 "post": {

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -116,6 +116,7 @@ EXTRACTORS = {
             ("https://www.fashionnova.com/collections/mini-dresses", {
                 "range": "1-20",
                 "count": 20,
+                "archive": False,
             }),
             ("https://www.fashionnova.com/collections/mini-dresses/?page=1"),
             ("https://www.fashionnova.com/collections/mini-dresses#1"),
