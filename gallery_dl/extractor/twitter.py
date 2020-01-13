@@ -230,9 +230,12 @@ class TwitterExtractor(Extractor):
             for tweet in text.extract_iter(
                     data["items_html"], '<div class="tweet ', '\n</li>'):
                 yield tweet
-
-            if not data["has_more_items"] and data["min_position"] == None:
-                return
+                
+            if data.get("min_position") is None:
+                if data["has_more_items"] and "min_position" not in data:
+                    pass
+                else:
+                    return
 
             if "min_position" in data:
                 position = data["min_position"]
