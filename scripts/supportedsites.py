@@ -85,27 +85,48 @@ CATEGORY_MAP = {
 }
 
 SUBCATEGORY_MAP = {
-    "artwork": "Artwork Listings",
-    "artists": "",
     "doujin" : "Doujin",
     "gallery": "Galleries",
     "image"  : "individual Images",
     "issue"  : "Comic-Issues",
     "manga"  : "Manga",
-    "me"     : "pixiv.me Links",
-    "media"  : "Media Timelines",
-    "path"   : "Images from Users and Folders",
-    "pinit"  : "pin.it Links",
     "popular": "Popular Images",
     "recent" : "Recent Images",
     "search" : "Search Results",
-    "stash"  : "Sta.sh",
     "status" : "Images from Statuses",
     "tag"    : "Tag-Searches",
     "user"   : "User Profiles",
-    "work"   : "Individual Images",
+    "following"    : "",
     "related-pin"  : "related Pins",
     "related-board": "",
+
+    "artstation": {
+        "artwork": "Artwork Listings",
+    },
+    "deviantart": {
+        "stash": "Sta.sh",
+    },
+    "newgrounds": {
+        "art"  : "Art",
+        "audio": "Audio",
+        "media": "Media Files",
+    },
+    "pinterest": {
+        "pinit": "pin.it Links",
+    },
+    "pixiv": {
+        "me"  : "pixiv.me Links",
+        "work": "individual Images",
+    },
+    "smugmug": {
+        "path": "Images from Users and Folders",
+    },
+    "twitter": {
+        "media": "Media Timelines",
+    },
+    "wikiart": {
+        "artists": "Artist Listings",
+    },
 }
 
 AUTH_MAP = {
@@ -170,9 +191,16 @@ def category_text(cls):
 
 def subcategory_text(cls):
     """Return a human-readable representation of a subcategory"""
-    sc = cls.subcategory
+    c, sc = cls.category, cls.subcategory
+
+    if c in SUBCATEGORY_MAP:
+        scm = SUBCATEGORY_MAP[c]
+        if sc in scm:
+            return scm[sc]
+
     if sc in SUBCATEGORY_MAP:
         return SUBCATEGORY_MAP[sc]
+
     sc = sc.capitalize()
     return sc if sc.endswith("s") else sc + "s"
 

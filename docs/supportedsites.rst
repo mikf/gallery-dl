@@ -7,7 +7,7 @@ Site                 URL                                 Capabilities           
 ==================== =================================== ================================================== ================
 35PHOTO              https://35photo.pro/                Genres, individual Images, User Profiles
 3dbooru              http://behoimi.org/                 Pools, Popular Images, Posts, Tag-Searches
-4chan                https://www.4chan.org/              Threads
+4chan                https://www.4chan.org/              Boards, Threads
 4plebs               https://archive.4plebs.org/         Threads
 500px                https://500px.com/                  Galleries, individual Images, User Profiles
 8muses               https://www.8muses.com/             Albums
@@ -74,7 +74,7 @@ MangaPark            https://mangapark.me/               Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
 Naver                https://blog.naver.com/             Blogs, Posts
-Newgrounds           https://www.newgrounds.com/         individual Images, User Profiles, Videos           Optional
+Newgrounds           https://www.newgrounds.com/         |newgrounds-C|                                     Optional
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       https://seiga.nicovideo.jp/         individual Images, User Profiles                   Required
@@ -118,7 +118,7 @@ VSCO                 https://vsco.co/                    Collections, individual
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  |wallhaven-A|
 Warosu               https://warosu.org/                 Threads
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
-WikiArt.org          https://www.wikiart.org/            Artists, Artworks
+WikiArt.org          https://www.wikiart.org/            Artists, Artist Listings, Artworks
 World Three          http://www.slide.world-three.org/   Chapters, Manga
 xHamster             https://xhamster.com/               Galleries, User Profiles
 XVideos              https://www.xvideos.com/            Galleries, User Profiles
@@ -140,10 +140,11 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, User Profiles
 .. |flickr-C| replace:: Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles
 .. |hentaifoundry-C| replace:: Favorites, individual Images, Popular Images, Recent Images, Scraps, User Profiles
-.. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, User Profiles
+.. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Subreddits, User Profiles
 .. |instagram-C| replace:: Channels, individual Images, Stories, Tag-Searches, User Profiles
+.. |newgrounds-C| replace:: Art, Audio, individual Images, Media Files, Movies, User Profiles
 .. |nijie-C| replace:: Doujin, Favorites, individual Images, User Profiles
-.. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, Individual Images
+.. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |wallhaven-A| replace:: Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
