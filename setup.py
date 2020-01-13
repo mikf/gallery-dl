@@ -61,10 +61,6 @@ setup(
         "requests>=2.11.0",
     ],
     extras_require={
-        "cloudflare": [
-            "pyOpenSSL>=19.0.0",
-            "cryptography>=2.8.0",
-        ],
         "video": [
             "youtube-dl",
         ],
