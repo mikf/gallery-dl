@@ -22,7 +22,6 @@ Optional
 
 - FFmpeg_: Pixiv Ugoira to WebM conversion
 - youtube-dl_: Video downloads
-- pyOpenSSL_: Access Cloudflare protected sites
 
 
 Installation
