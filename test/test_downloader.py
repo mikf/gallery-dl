@@ -98,6 +98,7 @@ class TestDownloaderBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.extractor = extractor.find("test:")
+        cls.extractor.log.job = None
         cls.dir = tempfile.TemporaryDirectory()
         cls.fnum = 0
         config.set((), "base-directory", cls.dir.name)
