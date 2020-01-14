@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from https://mangadex.cc/"""
+"""Extractors for https://mangadex.org/"""
 
 from .common import Extractor, Message
 from .. import text, util
@@ -16,7 +16,7 @@ from ..cache import memcache
 class MangadexExtractor(Extractor):
     """Base class for mangadex extractors"""
     category = "mangadex"
-    root = "https://mangadex.cc"
+    root = "https://mangadex.org"
 
     # mangadex-to-iso639-1 codes
     iso639_map = {
@@ -39,7 +39,7 @@ class MangadexExtractor(Extractor):
 
 
 class MangadexChapterExtractor(MangadexExtractor):
-    """Extractor for manga-chapters from mangadex.cc"""
+    """Extractor for manga-chapters from mangadex.org"""
     subcategory = "chapter"
     directory_fmt = (
         "{category}", "{manga}",
@@ -47,11 +47,11 @@ class MangadexChapterExtractor(MangadexExtractor):
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     archive_fmt = "{chapter_id}_{page}"
-    pattern = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc|com)/chapter/(\d+)"
+    pattern = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)/chapter/(\d+)"
     test = (
-        ("https://mangadex.cc/chapter/122094", {
+        ("https://mangadex.org/chapter/122094", {
             "keyword": "1c834dca33025f521e1874aee1f71c51e28ebf99",
-            #  "content": "7ab3bef5caccb62b881f8e6e70359d3c7be8137f",
+            "content": "7ab3bef5caccb62b881f8e6e70359d3c7be8137f",
         }),
         # oneshot
         ("https://mangadex.cc/chapter/138086", {
@@ -107,14 +107,14 @@ class MangadexChapterExtractor(MangadexExtractor):
 
 
 class MangadexMangaExtractor(MangadexExtractor):
-    """Extractor for manga from mangadex.cc"""
+    """Extractor for manga from mangadex.org"""
     subcategory = "manga"
     categorytransfer = True
-    pattern = (r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc|com)"
+    pattern = (r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
                r"/(?:title|manga)/(\d+)")
     test = (
-        ("https://mangadex.cc/manga/2946/souten-no-koumori", {
-            "pattern": r"https://mangadex.cc/chapter/\d+",
+        ("https://mangadex.org/manga/2946/souten-no-koumori", {
+            "pattern": r"https://mangadex.org/chapter/\d+",
             "keywords": {
                 "manga": "Souten no Koumori",
                 "manga_id": 2946,
@@ -129,13 +129,12 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "language": str,
             },
         }),
-        ("https://mangadex.org/manga/13318/dagashi-kashi/chapters/2/", {
+        ("https://mangadex.cc/manga/13318/dagashi-kashi/chapters/2/", {
             "count": ">= 100",
         }),
         ("https://mangadex.org/title/13004/yorumori-no-kuni-no-sora-ni", {
             "count": 0,
         }),
-        ("https://mangadex.org/title/2946/souten-no-koumori"),
     )
 
     def __init__(self, match):
