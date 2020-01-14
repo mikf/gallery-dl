@@ -344,7 +344,11 @@ class GalleryExtractor(Extractor):
         for data[self.enum], (url, imgdata) in images:
             if imgdata:
                 data.update(imgdata)
-            yield Message.Url, url, text.nameext_from_url(url, data)
+                if "extension" not in imgdata:
+                    text.nameext_from_url(url, data)
+            else:
+                text.nameext_from_url(url, data)
+            yield Message.Url, url, data
 
     def login(self):
         """Login and set necessary cookies"""
