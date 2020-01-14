@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
                r"/(?:[^/?&#]+-)?(\d+)")
     test = (
         ("https://hitomi.la/galleries/867789.html", {
-            "pattern": r"https://aa.hitomi.la/galleries/867789/\d+.jpg",
+            "pattern": r"https://[a-c]a.hitomi.la/images/./../[0-9a-f]+.jpg",
             "keyword": "6701f8f588f119ef84cd29bdf99a399417b0a6a2",
             "count": 16,
         }),
@@ -34,12 +34,12 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }),
         ("https://hitomi.la/galleries/733697.html", {
             # Game CG with scenes (#321)
-            "url": "c2a84185f467450b8b9b72fbe40c0649029ce007",
+            "url": "21064f9e3c244aca87f1a91967a3fbe79032c4ce",
             "count": 210,
         }),
         ("https://hitomi.la/galleries/1045954.html", {
             # fallback for galleries only available through /reader/ URLs
-            "url": "055c898a36389719799d6bce76889cc4ea4421fc",
+            "url": "0a67f5e6c3c6a384b578e328f4817fa6ccdf856a",
             "count": 1413,
         }),
         ("https://hitomi.la/manga/amazon-no-hiyaku-867789.html"),
@@ -96,12 +96,6 @@ class HitomiGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, page):
-        # see https://ltn.hitomi.la/common.js
-        offset = text.parse_int(self.gallery_id[-1]) % 3
-        subdomain = chr(97 + offset) + "a"
-        base = "https://{}.hitomi.la/galleries/{}/".format(
-            subdomain, self.gallery_id)
-
         # set Referer header before image downloads (#239)
         self.session.headers["Referer"] = self.gallery_url
 
@@ -109,10 +103,20 @@ class HitomiGalleryExtractor(GalleryExtractor):
         url = "https://ltn.hitomi.la/galleries/{}.js".format(self.gallery_id)
         page = self.request(url).text
 
-        return [
-            (base + image["name"], None)
-            for image in json.loads(page.partition("=")[2])
-        ]
+        result = []
+        for image in json.loads(page.partition("=")[2]):
+            ihash = image["hash"]
+            idata = text.nameext_from_url(image["name"])
+
+            # see https://ltn.hitomi.la/common.js
+            offset = int(ihash[-3:-1], 16) % 3
+            url = "https://{}a.hitomi.la/images/{}/{}/{}.{}".format(
+                chr(97 + offset),
+                ihash[-1], ihash[-3:-1], ihash,
+                idata["extension"],
+            )
+            result.append((url, idata))
+        return result
 
     @staticmethod
     def _prep(value):
