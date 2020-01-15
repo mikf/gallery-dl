@@ -109,7 +109,12 @@ class TestExtractorResults(unittest.TestCase):
             self.assertEqual(result["url"], tjob.url_hash.hexdigest())
 
         if "content" in result:
-            self.assertEqual(result["content"], tjob.content_hash.hexdigest())
+            expected = result["content"]
+            digest = tjob.content_hash.hexdigest()
+            if isinstance(expected, str):
+                self.assertEqual(digest, expected, "content")
+            else:  # assume iterable
+                self.assertIn(digest, expected, "content")
 
         if "keyword" in result:
             expected = result["keyword"]

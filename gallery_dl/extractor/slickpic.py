@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -41,7 +41,8 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
         }),
         ("https://mattcrandall.slickpic.com/albums/LamborghiniMurcielago/", {
             "range": "34",
-            "content": "cec6630e659dc72db1ee1a9a6f3b525189261988",
+            "content": ("cec6630e659dc72db1ee1a9a6f3b525189261988",
+                        "6f81e1e74c6cd6db36844e7211eef8e7cd30055d"),
         }),
     )
 
