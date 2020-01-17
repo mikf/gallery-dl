@@ -121,6 +121,20 @@ def expand_path(path):
     return os.path.expandvars(os.path.expanduser(path))
 
 
+def remove_file(path):
+    try:
+        os.unlink(path)
+    except OSError:
+        pass
+
+
+def remove_directory(path):
+    try:
+        os.rmdir(path)
+    except OSError:
+        pass
+
+
 def code_to_language(code, default=None):
     """Map an ISO 639-1 language code to its actual name"""
     return CODES.get((code or "").lower(), default)
