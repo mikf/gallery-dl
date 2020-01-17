@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2014-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,12 +8,11 @@
 
 """Downloader module for http:// and https:// URLs"""
 
-import os
 import time
 import mimetypes
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
-from .. import text
+from .. import text, util
 
 from ssl import SSLError
 try:
@@ -57,10 +56,7 @@ class HttpDownloader(DownloaderBase):
         finally:
             # remove file from incomplete downloads
             if self.downloading and not self.part:
-                try:
-                    os.unlink(pathfmt.temppath)
-                except (OSError, AttributeError):
-                    pass
+                util.remove_file(pathfmt.temppath)
 
     def _download_impl(self, url, pathfmt):
         response = None
