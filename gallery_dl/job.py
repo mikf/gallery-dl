@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -209,6 +209,7 @@ class DownloadJob(Job):
 
             # use fallback URLs if available
             for num, url in enumerate(fallback or (), 1):
+                util.remove_file(self.temppath)
                 self.log.info("Trying fallback URL #%d", num)
                 if self.download(url):
                     break
