@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -602,12 +602,15 @@ class PathFormat():
 
     def _enum_file(self):
         num = 1
-        while True:
-            self.prefix = str(num) + "."
-            self.set_extension(self.extension, False)
-            if not os.path.exists(self.realpath):
-                return False
-            num += 1
+        try:
+            while True:
+                self.prefix = str(num) + "."
+                self.set_extension(self.extension, False)
+                os.stat(self.realpath)  # raises OSError if file doesn't exist
+                num += 1
+        except OSError:
+            pass
+        return False
 
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
@@ -623,7 +626,7 @@ class PathFormat():
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)
 
-        # Join path segements
+        # Join path segments
         sep = os.sep
         directory = self.clean_path(self.basedirectory + sep.join(segments))
 
