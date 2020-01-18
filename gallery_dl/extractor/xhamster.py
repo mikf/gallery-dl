@@ -152,7 +152,7 @@ class XhamsterUserExtractor(XhamsterExtractor):
     subcategory = "user"
     pattern = BASE_PATTERN + r"/users/([^/?&#]+)(?:/photos)?/?(?:$|[?#])"
     test = (
-        ("https://xhamster.com/users/nickname68/photos", {
+        ("https://xhamster.com/users/goldenpalomino/photos", {
             "pattern": XhamsterGalleryExtractor.pattern,
             "count": 50,
             "range": "1-50",
