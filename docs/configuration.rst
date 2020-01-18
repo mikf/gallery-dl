@@ -1067,6 +1067,15 @@ Description Extract images from retweets.
 =========== =====
 
 
+extractor.twitter.twitpic
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Extract `TwitPic <https://twitpic.com/>`__ embeds.
+=========== =====
+
+
 extractor.twitter.videos
 ------------------------
 =========== =====
