@@ -209,7 +209,7 @@ class DownloadJob(Job):
 
             # use fallback URLs if available
             for num, url in enumerate(fallback or (), 1):
-                util.remove_file(self.temppath)
+                util.remove_file(self.pathfmt.temppath)
                 self.log.info("Trying fallback URL #%d", num)
                 if self.download(url):
                     break
