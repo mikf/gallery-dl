@@ -30,6 +30,7 @@ class TwitterExtractor(Extractor):
         self._user_dict = None
         self.logged_in = False
         self.retweets = self.config("retweets", True)
+        self.twitpic = self.config("twitpic", False)
         self.content = self.config("content", False)
         self.videos = self.config("videos", False)
 
@@ -78,6 +79,26 @@ class TwitterExtractor(Extractor):
                     text.nameext_from_url(url, data)
                     urls = [url + size for size in self.sizes]
                     yield Message.Urllist, urls, data
+
+            if self.twitpic and "//twitpic.com/" in tweet:
+                urls = [
+                    url for url in text.extract_iter(
+                        tweet, 'data-expanded-url="', '"')
+                    if "//twitpic.com/" in url
+                ]
+
+                if "num" not in data:
+                    if urls:
+                        yield Message.Directory, data
+                    data["num"] = 0
+
+                for data["num"], url in enumerate(urls, data["num"]+1):
+                    response = self.request(url, fatal=False)
+                    if response.status_code >= 400:
+                        continue
+                    url = text.extract(
+                        response.text, 'name="twitter:image" value="', '"')[0]
+                    yield Message.Url, url, text.nameext_from_url(url, data)
 
     def metadata(self):
         """Return general metadata"""
@@ -230,7 +251,7 @@ class TwitterExtractor(Extractor):
             for tweet in text.extract_iter(
                     data["items_html"], '<div class="tweet ', '\n</li>'):
                 yield tweet
-                
+
             if data.get("min_position") is None:
                 if data["has_more_items"] and "min_position" not in data:
                     pass
@@ -347,6 +368,12 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/Meiyu_miu/status/1070693241413021696", {
             "count": 4,
             "keyword": "0c627af2b8cdccc7e0da8fd221155c4a4a3141a8",
+        }),
+        # TwitPic embeds (#579)
+        ("https://twitter.com/i/web/status/112900228289540096", {
+            "options": (("twitpic", True),),
+            "pattern": r"https://\w+.cloudfront.net/photos/large/\d+.jpg",
+            "count": 3,
         }),
     )
 
