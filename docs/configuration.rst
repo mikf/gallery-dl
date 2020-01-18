@@ -1421,6 +1421,33 @@ Description A mapping from directory names to filename extensions that should
 =========== =====
 
 
+compare
+-------
+
+| Compare versions of the same file and replace/enumerate them on mismatch
+| (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = `false`)
+
+compare.action
+--------------
+=========== =====
+Type        ``string``
+Default     ``"replace"``
+Description The action to take when files do not compare as equal.
+
+            * ``"replace"``: Replace/Overwrite the old version with the new one
+            * ``"enumerate"``: Add an enumeration index to the filename of the new
+              version like `skip = "enumerate" <extractor.*.skip_>`__
+=========== =====
+
+compare.shallow
+---------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Only compare file sizes. Do not read and compare their content.
+=========== =====
+
+
 exec
 ----
 
