@@ -1434,7 +1434,7 @@ compare
 -------
 
 | Compare versions of the same file and replace/enumerate them on mismatch
-| (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = `false`)
+| (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = ``false``)
 
 compare.action
 --------------
