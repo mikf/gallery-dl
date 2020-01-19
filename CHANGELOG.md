@@ -1,6 +1,19 @@
 # Changelog
 
-## Unreleased
+## 1.12.3 - 2020-01-19
+### Additions
+- [hentaifoundry] extract more metadata ([#565](https://github.com/mikf/gallery-dl/issues/565))
+- [twitter] add option to extract TwitPic embeds ([#579](https://github.com/mikf/gallery-dl/issues/579))
+- implement a post-processor module to compare file versions ([#530](https://github.com/mikf/gallery-dl/issues/530))
+### Fixes
+- [hitomi] update image URL generation
+- [mangadex] revert domain to `mangadex.org`
+- [pinterest] improve detection of invalid pin.it links
+- [pixiv] update URL patterns for user profiles and bookmarks ([#568](https://github.com/mikf/gallery-dl/issues/568))
+- [twitter] Fix stop before real end ([#573](https://github.com/mikf/gallery-dl/issues/573))
+- remove temp files before downloading from fallback URLs
+### Removals
+- [erolord] remove extractor
 
 ## 1.12.2 - 2020-01-05
 ### Additions
