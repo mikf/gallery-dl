@@ -199,7 +199,10 @@ class Extractor():
                 cookiefile = util.expand_path(cookies)
                 cookiejar = http.cookiejar.MozillaCookieJar()
                 try:
-                    cookiejar.load(cookiefile)
+                    cookiejar.load(cookiefile, ignore_expires=True)
+                    for cookie in cookiejar:
+                        if cookie.is_expired() and not cookie.is_expired(0):
+                            cookiejar.clear(cookie.domain, cookie.path, cookie.name)
                 except OSError as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
@@ -222,7 +225,7 @@ class Extractor():
             for cookie in self._cookiejar:
                 cookiejar.set_cookie(cookie)
             try:
-                cookiejar.save(self._cookiefile)
+                cookiejar.save(self._cookiefile, ignore_expires=True)
             except OSError as exc:
                 self.log.warning("cookies: %s", exc)
 
