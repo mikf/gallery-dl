@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.12.3 - 2020-01-19
 ### Additions
 - [hentaifoundry] extract more metadata ([#565](https://github.com/mikf/gallery-dl/issues/565))
