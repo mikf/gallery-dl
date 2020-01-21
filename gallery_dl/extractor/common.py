@@ -16,7 +16,6 @@ import logging
 import datetime
 import requests
 import threading
-import http.cookiejar
 from .message import Message
 from .. import config, text, util, exception, cloudflare
 
@@ -197,13 +196,12 @@ class Extractor():
                 self._update_cookies_dict(cookies, self.cookiedomain)
             elif isinstance(cookies, str):
                 cookiefile = util.expand_path(cookies)
-                cookiejar = http.cookiejar.MozillaCookieJar()
                 try:
-                    cookiejar.load(cookiefile)
-                except OSError as exc:
+                    cookies = util.load_cookiestxt(cookiefile)
+                except Exception as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
-                    self._cookiejar.update(cookiejar)
+                    self._update_cookies(cookies)
                     self._cookiefile = cookiefile
             else:
                 self.log.warning(
@@ -218,11 +216,8 @@ class Extractor():
     def _store_cookies(self):
         """Store the session's cookiejar in a cookies.txt file"""
         if self._cookiefile and self.config("cookies-update", True):
-            cookiejar = http.cookiejar.MozillaCookieJar()
-            for cookie in self._cookiejar:
-                cookiejar.set_cookie(cookie)
             try:
-                cookiejar.save(self._cookiefile)
+                util.save_cookiestxt(self._cookiefile, self._cookiejar)
             except OSError as exc:
                 self.log.warning("cookies: %s", exc)
 
@@ -489,12 +484,6 @@ def generate_extractors(extractor_data, symtable, classes):
                 setattr(Extr, ckey, prev)
 
             symtable[Extr.__name__] = prev = Extr
-
-
-# Reduce strictness of the expected magic string in cookiejar files.
-# (This allows the use of Wget-generated cookiejars without modification)
-http.cookiejar.MozillaCookieJar.magic_re = re.compile(
-    "#( Netscape)? HTTP Cookie File", re.IGNORECASE)
 
 
 # Undo automatic pyOpenSSL injection by requests
