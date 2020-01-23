@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import json
 import re
 
 BASE_PATTERN = (
@@ -28,6 +29,7 @@ class BloggerExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.videos = self.config("videos", True)
         self.blog = match.group(1) or match.group(2)
         self.api = BloggerAPI(self)
 
@@ -41,24 +43,41 @@ class BloggerExtractor(Extractor):
         del blog["selfLink"]
 
         sub = re.compile(r"/s\d+/").sub
-        findall = re.compile(
-            r'src="(https?://\d+\.bp\.blogspot\.com/[^"]+)"').findall
+        findall_image = re.compile(
+            r'src="(https?://\d+\.bp\.blogspot\.com/[^"]+)').findall
+        findall_video = re.compile(
+            r'src="(https?://www\.blogger\.com/video\.g\?token=[^"]+)').findall
 
         for post in self.posts(blog):
-            images = findall(post["content"])
-            if not images:
+            content = post["content"]
+
+            files = findall_image(content)
+            for idx, url in enumerate(files):
+                files[idx] = sub("/s0/", url).replace("http:", "https:", 1)
+
+            if self.videos and 'id="BLOG_video-' in content:
+                page = self.request(post["url"]).text
+                for url in findall_video(page):
+                    page = self.request(url).text
+                    video_config = json.loads(text.extract(
+                        page, 'var VIDEO_CONFIG =', '\n')[0])
+                    files.append(max(
+                        video_config["streams"],
+                        key=lambda x: x["format_id"],
+                    )["play_url"])
+
+            if not files:
                 continue
 
             post["author"] = post["author"]["displayName"]
             post["replies"] = post["replies"]["totalItems"]
-            post["content"] = text.remove_html(post["content"])
+            post["content"] = text.remove_html(content)
             post["date"] = text.parse_datetime(post["published"])
             del post["selfLink"]
             del post["blog"]
 
             yield Message.Directory, {"blog": blog, "post": post}
-            for num, url in enumerate(images, 1):
-                url = sub("/s0/", url).replace("http:", "https:", 1)
+            for num, url in enumerate(files, 1):
                 yield Message.Url, url, text.nameext_from_url(url, {
                     "blog": blog,
                     "post": post,
@@ -111,6 +130,11 @@ class BloggerPostExtractor(BloggerExtractor):
         }),
         ("blogger:http://www.julianbunker.com/2010/12/moon-rise.html", {
             "url": "9928429fb62f712eb4de80f53625eccecc614aae",
+        }),
+        # video (#587)
+        (("http://cfnmscenesinmovies.blogspot.com/2011/11/"
+          "cfnm-scene-jenna-fischer-in-office.html"), {
+            "pattern": r"https://.+\.googlevideo\.com/videoplayback",
         }),
     )
 
@@ -171,8 +195,8 @@ class BloggerAPI():
     def _pagination(self, endpoint, params):
         while True:
             data = self._call(endpoint, params)
-            yield from data["items"]
-
+            if "items" in data:
+                yield from data["items"]
             if "nextPageToken" not in data:
                 return
             params["pageToken"] = data["nextPageToken"]
