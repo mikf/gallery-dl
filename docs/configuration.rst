@@ -496,6 +496,15 @@ Description Try to follow external URLs of embedded players.
 =========== =====
 
 
+extractor.blogger.videos
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Download embedded videos hosted on https://www.blogger.com/
+=========== =====
+
+
 extractor.danbooru.ugoira
 -------------------------
 =========== =====
