@@ -56,7 +56,7 @@ class WeiboExtractor(Extractor):
                     info = obj["page_info"]["media_info"]
                     url = info.get("stream_url_hd") or info.get("stream_url")
 
-                    if url and not info.get("goto"):
+                    if url:
                         data = text.nameext_from_url(url, {
                             "num"   : num,
                             "pid"   : 0,
@@ -65,6 +65,10 @@ class WeiboExtractor(Extractor):
                             "height": 0,
                             "status": status,
                         })
+                        if data["extension"] == "m3u8":
+                            url = "ytdl:" + url
+                            data["extension"] = "mp4"
+                            data["_ytdl_extra"] = {"protocol": "m3u8_native"}
                         yield Message.Url, url, data
 
                 if self.retweets and "retweeted_status" in obj:
