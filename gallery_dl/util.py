@@ -136,66 +136,65 @@ def remove_directory(path):
         pass
 
 
-def load_cookiestxt(path):
+def load_cookiestxt(fp):
     """Parse a Netscape cookies.txt file and return a list of its Cookies"""
     cookies = []
 
-    with open(path) as fp:
-        for line in fp:
+    for line in fp:
 
-            # strip '#HttpOnly_' and trailing '\n'
-            if line.startswith("#HttpOnly_"):
-                line = line[10:]
-            if line[-1] == "\n":
-                line = line[:-1]
+        line = line.lstrip()
+        # strip '#HttpOnly_'
+        if line.startswith("#HttpOnly_"):
+            line = line[10:]
+        # ignore empty lines and comments
+        if not line or line[0] in ("#", "$"):
+            continue
+        # strip trailing '\n'
+        if line[-1] == "\n":
+            line = line[:-1]
 
-            # ignore empty lines and comments
-            if not line or line[0] in ("#", "$"):
-                continue
+        domain, domain_specified, path, secure, expires, name, value = \
+            line.split("\t")
+        if not name:
+            name = value
+            value = None
 
-            domain, domain_specified, path, secure, expires, name, value = \
-                line.split("\t")
-            if not name:
-                name = value
-                value = None
-
-            cookies.append(Cookie(
-                0, name, value,
-                None, False,
-                domain,
-                domain_specified == "TRUE",
-                domain.startswith("."),
-                path, False,
-                secure == "TRUE",
-                expires or None,
-                False, None, None, {},
-            ))
+        cookies.append(Cookie(
+            0, name, value,
+            None, False,
+            domain,
+            domain_specified == "TRUE",
+            domain.startswith("."),
+            path, False,
+            secure == "TRUE",
+            None if expires == "0" or not expires else expires,
+            False, None, None, {},
+        ))
 
     return cookies
 
 
-def save_cookiestxt(path, cookies):
-    """Store 'cookies' in Netscape cookies.txt format"""
-    with open(path, "w") as fp:
-        fp.write("# Netscape HTTP Cookie File\n\n")
+def save_cookiestxt(fp, cookies):
+    """Write 'cookies' in Netscape cookies.txt format to 'fp'"""
+    fp.write("# Netscape HTTP Cookie File\n\n")
 
-        for cookie in cookies:
-            if cookie.value is None:
-                name = ""
-                value = cookie.name
-            else:
-                name = cookie.name
-                value = cookie.value
+    for cookie in cookies:
+        if cookie.value is None:
+            name = ""
+            value = cookie.name
+        else:
+            name = cookie.name
+            value = cookie.value
 
-            fp.write("\t".join((
-                cookie.domain,
-                "TRUE" if cookie.domain.startswith(".") else "FALSE",
-                cookie.path,
-                "TRUE" if cookie.secure else "FALSE",
-                "0" if cookie.expires is None else str(cookie.expires),
-                name,
-                value,
-            )) + "\n")
+        fp.write("\t".join((
+            cookie.domain,
+            "TRUE" if cookie.domain.startswith(".") else "FALSE",
+            cookie.path,
+            "TRUE" if cookie.secure else "FALSE",
+            "0" if cookie.expires is None else str(cookie.expires),
+            name,
+            value,
+        )) + "\n")
 
 
 def code_to_language(code, default=None):
