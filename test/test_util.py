@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,10 @@
 
 import unittest
 import sys
+import io
 import random
 import string
+import http.cookiejar
 
 from gallery_dl import util, text, exception
 
@@ -156,6 +158,100 @@ class TestISO639_1(unittest.TestCase):
     def _run_test(self, func, tests):
         for args, result in tests.items():
             self.assertEqual(func(*args), result)
+
+
+class TestCookiesTxt(unittest.TestCase):
+
+    def test_load_cookiestxt(self):
+
+        def _assert(content, expected):
+            cookies = util.load_cookiestxt(io.StringIO(content, None))
+            for c, e in zip(cookies, expected):
+                self.assertEqual(c.__dict__, e.__dict__)
+
+        _assert("", [])
+        _assert("\n\n\n", [])
+        _assert("$ Comment", [])
+        _assert("# Comment", [])
+        _assert(" # Comment \n\n $ Comment ", [])
+        _assert(
+            ".example.org\tTRUE\t/\tTRUE\t0\tname\tvalue",
+            [self._cookie("name", "value", ".example.org")],
+        )
+        _assert(
+            ".example.org\tTRUE\t/\tTRUE\t\tname\t",
+            [self._cookie("name", "", ".example.org")],
+        )
+        _assert(
+            "# Netscape HTTP Cookie File\n"
+            "\n"
+            "# default\n"
+            ".example.org	TRUE	/	FALSE	0	n1	v1\n"
+            ".example.org	TRUE	/	TRUE	2145945600	n2	v2\n"
+            ".example.org	TRUE	/path	FALSE	0		n3\n"
+            "\n"
+            "  # # extra # #  \n"
+            "www.example.org	FALSE	/	FALSE		n4	\n"
+            "www.example.org	FALSE	/path	FALSE	100	n5	v5\n",
+            [
+                self._cookie(
+                    "n1", "v1", ".example.org", True, "/", False),
+                self._cookie(
+                    "n2", "v2", ".example.org", True, "/", True, 2145945600),
+                self._cookie(
+                    "n3", None, ".example.org", True, "/path", False),
+                self._cookie(
+                    "n4", ""  , "www.example.org", False, "/", False),
+                self._cookie(
+                    "n5", "v5", "www.example.org", False, "/path", False, 100),
+            ],
+        )
+
+        with self.assertRaises(ValueError):
+            util.load_cookiestxt("example.org\tTRUE\t/\tTRUE\t0\tname")
+
+    def test_save_cookiestxt(self):
+
+        def _assert(cookies, expected):
+            fp = io.StringIO(newline=None)
+            util.save_cookiestxt(fp, cookies)
+            self.assertMultiLineEqual(fp.getvalue(), expected)
+
+        _assert([], "# Netscape HTTP Cookie File\n\n")
+        _assert(
+            [self._cookie("name", "value", ".example.org")],
+            "# Netscape HTTP Cookie File\n\n"
+            ".example.org\tTRUE\t/\tTRUE\t0\tname\tvalue\n",
+        )
+        _assert(
+            [
+                self._cookie(
+                    "n1", "v1", ".example.org", True, "/", False),
+                self._cookie(
+                    "n2", "v2", ".example.org", True, "/", True, 2145945600),
+                self._cookie(
+                    "n3", None, ".example.org", True, "/path", False),
+                self._cookie(
+                    "n4", ""  , "www.example.org", False, "/", False),
+                self._cookie(
+                    "n5", "v5", "www.example.org", False, "/path", False, 100),
+            ],
+            "# Netscape HTTP Cookie File\n"
+            "\n"
+            ".example.org	TRUE	/	FALSE	0	n1	v1\n"
+            ".example.org	TRUE	/	TRUE	2145945600	n2	v2\n"
+            ".example.org	TRUE	/path	FALSE	0		n3\n"
+            "www.example.org	FALSE	/	FALSE	0	n4	\n"
+            "www.example.org	FALSE	/path	FALSE	100	n5	v5\n",
+        )
+
+    def _cookie(self, name, value, domain, domain_specified=True,
+                path="/", secure=True, expires=None):
+        return http.cookiejar.Cookie(
+            0, name, value, None, False,
+            domain, domain_specified, domain.startswith("."),
+            path, False, secure, expires, False, None, None, {},
+        )
 
 
 class TestFormatter(unittest.TestCase):
