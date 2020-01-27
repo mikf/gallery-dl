@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -45,7 +45,7 @@ class PahealTagExtractor(PahealExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/list/([^/?&#]+)")
-    test = ("https://rule34.paheal.net/post/list/k-on/1", {
+    test = ("https://rule34.paheal.net/post/list/Ayane_Suzuki/1", {
         "pattern": r"https://[^.]+\.paheal\.net/_images/\w+/\d+%20-%20",
         "count": ">= 15"
     })
