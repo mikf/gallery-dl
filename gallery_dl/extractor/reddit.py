@@ -31,6 +31,7 @@ class RedditExtractor(Extractor):
         match_subreddit = RedditSubredditExtractor.pattern.match
         match_user = RedditUserExtractor.pattern.match
 
+        parentdir = self.config("parent-directory")
         submissions = self.submissions()
         visited = set()
         depth = 0
@@ -56,6 +57,8 @@ class RedditExtractor(Extractor):
                         yield Message.Url, "ytdl:" + url, submission
                     elif not submission["is_self"]:
                         urls.append((url, submission))
+                elif parentdir:
+                    yield Message.Directory, comments[0]
 
                 if self.api.comments:
                     if submission:

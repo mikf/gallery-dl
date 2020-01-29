@@ -108,6 +108,17 @@ Description Directory path used as the base for all download destinations.
 =========== =====
 
 
+extractor.*.parent-directory
+----------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Use an extractor's current target directory as
+            `base-directory <extractor.*.base-directory_>`__
+            for any spawned child extractors.
+=========== =====
+
+
 extractor.*.path-restrict
 -------------------------
 =========== =====
