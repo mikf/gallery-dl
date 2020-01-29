@@ -301,7 +301,7 @@ class PixivFavoriteExtractor(PixivExtractor):
         for preview in self.api.user_following(self.user_id):
             user = preview["user"]
             user["_extractor"] = PixivUserExtractor
-            url = "https://www.pixiv.net/member.php?id={}".format(user["id"])
+            url = "https://www.pixiv.net/users/{}".format(user["id"])
             yield Message.Queue, url, user
 
 
