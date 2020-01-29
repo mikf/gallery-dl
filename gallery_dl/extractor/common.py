@@ -39,6 +39,7 @@ class Extractor():
 
         self._cookiefile = None
         self._cookiejar = self.session.cookies
+        self._parentdir = ""
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)

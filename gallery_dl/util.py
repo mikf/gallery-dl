@@ -627,12 +627,14 @@ class PathFormat():
         self.delete = False
         self.path = self.realpath = self.temppath = ""
 
-        basedir = expand_path(
-            extractor.config("base-directory", (".", "gallery-dl")))
-        if os.altsep and os.altsep in basedir:
-            basedir = basedir.replace(os.altsep, os.sep)
-        if basedir[-1] != os.sep:
-            basedir += os.sep
+        basedir = extractor._parentdir
+        if not basedir:
+            basedir = expand_path(
+                extractor.config("base-directory", (".", "gallery-dl")))
+            if os.altsep and os.altsep in basedir:
+                basedir = basedir.replace(os.altsep, os.sep)
+            if basedir[-1] != os.sep:
+                basedir += os.sep
         self.basedirectory = basedir
 
         restrict = extractor.config("path-restrict", "auto")

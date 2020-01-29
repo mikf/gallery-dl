@@ -182,7 +182,14 @@ class DownloadJob(Job):
         self.downloaders = {}
         self.postprocessors = None
         self.out = output.select()
-        self.visited = parent.visited if parent else set()
+
+        if parent:
+            self.visited = parent.visited
+            pfmt = parent.pathfmt
+            if pfmt and parent.extractor.config("parent-directory"):
+                self.extractor._parentdir = pfmt.directory
+        else:
+            self.visited = set()
 
     def handle_url(self, url, kwdict, fallback=None):
         """Download the resource specified in 'url'"""
