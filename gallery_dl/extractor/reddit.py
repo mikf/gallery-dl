@@ -18,7 +18,7 @@ class RedditExtractor(Extractor):
     category = "reddit"
     directory_fmt = ("{category}", "{subreddit}")
     filename_fmt = "{id} {title[:242]}.{extension}"
-    archive_fmt = "{url}"
+    archive_fmt = "{filename}"
     cookiedomain = None
 
     def __init__(self, match):
@@ -53,7 +53,7 @@ class RedditExtractor(Extractor):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
                     elif submission["is_video"]:
-                        submission["extension"] = None
+                        text.nameext_from_url(url, submission)
                         yield Message.Url, "ytdl:" + url, submission
                     elif not submission["is_self"]:
                         urls.append((url, submission))
