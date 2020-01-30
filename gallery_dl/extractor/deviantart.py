@@ -717,7 +717,7 @@ class DeviantartExtractorV2(DeviantartExtractor):
             # select largest video
             target = max(media["types"],
                          key=lambda x: text.parse_int(x.get("q", "")[:-1]))
-            src = target["s"]
+            src = target["b"]
 
         elif target["t"] == "flash":
             src = target["s"]
@@ -811,15 +811,17 @@ class DeviantartDeviationExtractor(DeviantartExtractorV2):
         }),
         # video
         ("https://www.deviantart.com/chi-u/art/-VIDEO-Brushes-330774593", {
-            "url": "3b6e6e761d2d393fa61a4dc3ed6e7db51b14d07b",
+            "pattern": r"https://wixmp-.+wixmp.com/v/mp4/.+\.720p\.\w+.mp4",
             "keyword": {
                 "filename": r"re:_video____brushes_\w+_by_chi_u-d5gxnb5",
                 "extension": "mp4",
                 "target": {
                     "d": 306,
-                    "f": 9963639,
-                    "q": "1080p",
+                    "f": 19367585,
+                    "h": 720,
+                    "q": "720p",
                     "t": "video",
+                    "w": 1364,
                     "src": str,
                 },
             }
