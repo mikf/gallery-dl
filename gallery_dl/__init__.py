@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2014-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -129,17 +129,8 @@ def main():
         for opts in args.options:
             config.set(*opts)
 
-        # stream logging handler
-        output.configure_logging_handler(
-            "log", logging.getLogger().handlers[0])
-
-        # file logging handler
-        handler = output.setup_logging_handler(
-            "logfile", lvl=args.loglevel)
-        if handler:
-            logging.getLogger().addHandler(handler)
-
         # loglevels
+        output.configure_logging(args.loglevel)
         if args.loglevel >= logging.ERROR:
             config.set(("output",), "mode", "null")
         elif args.loglevel <= logging.DEBUG:

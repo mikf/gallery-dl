@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -81,6 +81,36 @@ def initialize_logging(loglevel):
     return logging.getLogger("gallery-dl")
 
 
+def configure_logging(loglevel):
+    root = logging.getLogger()
+    minlevel = LOG_LEVEL
+
+    # stream logging handler
+    handler = root.handlers[0]
+    opts = config.interpolate(("output",), "log")
+    if opts:
+        if isinstance(opts, str):
+            opts = {"format": opts}
+        if handler.level == LOG_LEVEL and "level" in opts:
+            handler.setLevel(opts["level"])
+        if "format" in opts or "format-date" in opts:
+            handler.setFormatter(Formatter(
+                opts.get("format", LOG_FORMAT),
+                opts.get("format-date", LOG_FORMAT_DATE),
+            ))
+        if minlevel > handler.level:
+            minlevel = handler.level
+
+    # file logging handler
+    handler = setup_logging_handler("logfile", lvl=loglevel)
+    if handler:
+        root.addHandler(handler)
+        if minlevel > handler.level:
+            minlevel = handler.level
+
+    root.setLevel(minlevel)
+
+
 def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
     """Setup a new logging handler"""
     opts = config.interpolate(("output",), key)
@@ -110,22 +140,6 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
         opts.get("format-date", LOG_FORMAT_DATE),
     ))
     return handler
-
-
-def configure_logging_handler(key, handler):
-    """Configure a logging handler"""
-    opts = config.interpolate(("output",), key)
-    if not opts:
-        return
-    if isinstance(opts, str):
-        opts = {"format": opts}
-    if handler.level == LOG_LEVEL and "level" in opts:
-        handler.setLevel(opts["level"])
-    if "format" in opts or "format-date" in opts:
-        handler.setFormatter(Formatter(
-            opts.get("format", LOG_FORMAT),
-            opts.get("format-date", LOG_FORMAT_DATE),
-        ))
 
 
 # --------------------------------------------------------------------
