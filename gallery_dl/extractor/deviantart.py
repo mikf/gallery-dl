@@ -1026,8 +1026,12 @@ class DeviantartAPI():
             "type"           : kind,
             "include_session": "false",
         }
-        return self.extractor.request(
-            url, headers=headers, params=params, fatal=None).json()
+        response = self.extractor.request(
+            url, headers=headers, params=params, fatal=None)
+        if response.status_code == 404:
+            raise exception.StopExtraction(
+                "Your account must use the Eclipse interface.")
+        return response.json()
 
     def deviation_metadata(self, deviations):
         """ Fetch deviation metadata for a set of deviations"""
