@@ -110,7 +110,6 @@ modules = [
     "xhamster",
     "xvideos",
     "yandere",
-    "yaplog",
     "yuki",
     "foolfuuka",
     "foolslide",

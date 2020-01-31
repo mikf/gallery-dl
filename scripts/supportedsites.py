@@ -80,7 +80,6 @@ CATEGORY_MAP = {
     "worldthree"     : "World Three",
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
-    "yaplog"         : "yaplog!",
     "yuki"           : "yuki.la 4chan archive",
 }
 
