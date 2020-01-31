@@ -32,6 +32,8 @@ class RedditExtractor(Extractor):
         match_user = RedditUserExtractor.pattern.match
 
         parentdir = self.config("parent-directory")
+        videos = self.config("videos", True)
+
         submissions = self.submissions()
         visited = set()
         depth = 0
@@ -52,11 +54,22 @@ class RedditExtractor(Extractor):
                     if url.startswith("https://i.redd.it/"):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
+
                     elif submission["is_video"]:
-                        text.nameext_from_url(url, submission)
-                        yield Message.Url, "ytdl:" + url, submission
+                        if videos:
+                            text.nameext_from_url(url, submission)
+                            if videos == "ytdl":
+                                url = "https://www.reddit.com" + \
+                                    submission["permalink"]
+                            else:
+                                submission["_ytdl_extra"] = {
+                                    "title": submission["title"],
+                                }
+                            yield Message.Url, "ytdl:" + url, submission
+
                     elif not submission["is_self"]:
                         urls.append((url, submission))
+
                 elif parentdir:
                     yield Message.Directory, comments[0]
 
