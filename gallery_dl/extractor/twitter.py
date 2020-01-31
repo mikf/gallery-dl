@@ -365,9 +365,12 @@ class TwitterTweetExtractor(TwitterExtractor):
             "pattern": r"https://pbs.twimg.com/media/EAel0vUUYAAZ4Bq.jpg:orig",
         }),
         # quoted tweet (#526)
-        ("https://twitter.com/Meiyu_miu/status/1070693241413021696", {
-            "count": 4,
-            "keyword": "0c627af2b8cdccc7e0da8fd221155c4a4a3141a8",
+        ("https://twitter.com/Pistachio/status/1222690391817932803", {
+            "pattern": r"https://pbs\.twimg\.com/media/EPfMfDUU8AAnByO\.jpg",
+            "keyword": {
+                "author": {"name": "Afro_Herper", "id": 786047748508221440},
+                "user"  : {"name": "Pistachio"  , "id": 3533231},
+            },
         }),
         # TwitPic embeds (#579)
         ("https://twitter.com/i/web/status/112900228289540096", {
