@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ class PiczelExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
         for image in self.unpack(self.images()):
-            url = self.root + "/static" + image["image"]["image"]["url"]
+            url = image["image"]["url"]
             yield Message.Directory, image
             yield Message.Url, url, text.nameext_from_url(url, image)
 
@@ -35,7 +35,7 @@ class PiczelExtractor(Extractor):
                 multi = image["images"]
                 del image["images"]
                 for image["num"], img in enumerate(multi):
-                    image["image"] = img
+                    image.update(img)
                     yield image
             else:
                 image["num"] = 0
