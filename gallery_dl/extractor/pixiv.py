@@ -31,6 +31,7 @@ class PixivExtractor(Extractor):
         self.load_ugoira = self.config("ugoira", True)
 
     def items(self):
+        ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         metadata = self.get_metadata()
         yield Message.Version, 1
 
@@ -46,6 +47,7 @@ class PixivExtractor(Extractor):
             work["num"] = 0
             work["tags"] = [tag["name"] for tag in work["tags"]]
             work["date"] = text.parse_datetime(work["create_date"])
+            work["rating"] = ratings.get(work["x_restrict"])
             work["suffix"] = ""
             work.update(metadata)
 
