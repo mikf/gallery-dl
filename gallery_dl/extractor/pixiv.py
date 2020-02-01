@@ -27,7 +27,7 @@ class PixivExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.api = PixivAppAPI(self)
-        self.user_id = -1
+        self.user_id = None
         self.load_ugoira = self.config("ugoira", True)
 
     def items(self):
@@ -241,6 +241,10 @@ class PixivFavoriteExtractor(PixivExtractor):
         ("https://www.pixiv.net/bookmark.php", {
             "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
         }),
+        # own bookmarks with tag (#596)
+        ("https://www.pixiv.net/bookmark.php?tag=foobar", {
+            "count": 0,
+        }),
         # followed users (#515)
         ("https://www.pixiv.net/en/users/173530/following", {
             "pattern": PixivUserExtractor.pattern,
@@ -261,7 +265,7 @@ class PixivFavoriteExtractor(PixivExtractor):
 
         if query:
             self.query = text.parse_query(query)
-            uid = self.query.get("id", -1)
+            uid = self.query.get("id")
             if not uid:
                 self.subcategory = "bookmark"
             elif self.query.get("type") == "user":
