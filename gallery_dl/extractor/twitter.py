@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://twitter.com/"""
+"""Extractors for https://twitter.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
@@ -23,6 +23,8 @@ class TwitterExtractor(Extractor):
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     root = "https://twitter.com"
     sizes = (":orig", ":large", ":medium", ":small")
+    user_agent = ("Mozilla/5.0 (Windows NT 6.1; WOW64; "
+                  "Trident/7.0; rv:11.0) like Gecko")
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -117,7 +119,8 @@ class TwitterExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        page = self.request(self.root + "/login").text
+        headers = {"User-Agent": self.user_agent}
+        page = self.request(self.root + "/login", headers=headers).text
         pos = page.index('name="authenticity_token"')
         token = text.extract(page, 'value="', '"', pos-80)[0]
 
@@ -131,7 +134,7 @@ class TwitterExtractor(Extractor):
             "redirect_after_login"      : "",
             "remember_me"               : "1",
         }
-        response = self.request(url, method="POST", data=data)
+        response = self.request(url, method="POST", headers=headers, data=data)
 
         if "/error" in response.url:
             raise exception.AuthenticationError()
@@ -387,11 +390,7 @@ class TwitterTweetExtractor(TwitterExtractor):
     def tweets(self):
         url = "{}/i/web/status/{}".format(self.root, self.tweet_id)
         cookies = {"app_shell_visited": "1"}
-        headers = {
-            "Referer"   : url,
-            "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; "
-                          "Trident/7.0; rv:11.0) like Gecko",
-        }
+        headers = {"User-Agent": self.user_agent, "Referer": url}
 
         response = self.request(url, cookies=cookies, headers=headers)
         if response.history and response.url == self.root + "/":
