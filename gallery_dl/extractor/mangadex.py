@@ -140,6 +140,7 @@ class MangadexMangaExtractor(MangadexExtractor):
     def __init__(self, match):
         MangadexExtractor.__init__(self, match)
         self.manga_id = text.parse_int(match.group(1))
+        self.language = self.config("language", None)
 
     def items(self):
         yield Message.Version, 1
@@ -158,6 +159,7 @@ class MangadexMangaExtractor(MangadexExtractor):
         for chid, info in data["chapter"].items():
             chapter, sep, minor = info["chapter"].partition(".")
             lang = self.iso639_map.get(info["lang_code"], info["lang_code"])
+
             results.append({
                 "manga": manga["title"],
                 "manga_id": self.manga_id,
@@ -175,5 +177,6 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "_extractor": MangadexChapterExtractor,
             })
 
+        results = [r for r in results if not self.language or r["lang"] == self.language]
         results.sort(key=lambda x: (x["chapter"], x["chapter_minor"]))
         return results
