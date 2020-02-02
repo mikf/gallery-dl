@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://hitomi.la/"""
+"""Extractors for https://hitomi.la/"""
 
 from .common import GalleryExtractor
 from .. import text, util
@@ -27,20 +27,24 @@ class HitomiGalleryExtractor(GalleryExtractor):
             "keyword": "6701f8f588f119ef84cd29bdf99a399417b0a6a2",
             "count": 16,
         }),
+        # download test
         ("https://hitomi.la/galleries/1401410.html", {
-            # download test
             "range": "1",
             "content": "b3ca8c6c8cc5826cf8b4ceb7252943abad7b8b4c",
         }),
+        # Game CG with scenes (#321)
         ("https://hitomi.la/galleries/733697.html", {
-            # Game CG with scenes (#321)
             "url": "21064f9e3c244aca87f1a91967a3fbe79032c4ce",
             "count": 210,
         }),
+        # fallback for galleries only available through /reader/ URLs
         ("https://hitomi.la/galleries/1045954.html", {
-            # fallback for galleries only available through /reader/ URLs
             "url": "0a67f5e6c3c6a384b578e328f4817fa6ccdf856a",
             "count": 1413,
+        }),
+        # gallery with "broken" redirect
+        ("https://hitomi.la/cg/scathacha-sama-okuchi-ecchi-1291900.html", {
+            "count": 10,
         }),
         ("https://hitomi.la/manga/amazon-no-hiyaku-867789.html"),
         ("https://hitomi.la/manga/867789.html"),
@@ -52,31 +56,34 @@ class HitomiGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.gallery_id = match.group(1)
-        self.fallback = False
-        url = "{}/galleries/{}.html".format(self.root, self.gallery_id)
+        url = "https://ltn.hitomi.la/galleries/{}.js".format(self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
+        self.session.headers["Referer"] = "{}/reader/{}.html".format(
+            self.root, self.gallery_id)
 
-    def request(self, url, **kwargs):
-        response = GalleryExtractor.request(self, url, fatal=False, **kwargs)
-        if response.status_code == 404:
-            self.fallback = True
-            url = url.replace("/galleries/", "/reader/")
-            response = GalleryExtractor.request(self, url, **kwargs)
-        elif b"<title>Redirect</title>" in response.content:
+    def metadata(self, _):
+        # try galleries page first
+        url = "{}/galleries/{}.html".format(self.root, self.gallery_id)
+        response = self.request(url, fatal=False)
+
+        # follow redirects
+        if b"<title>Redirect</title>" in response.content:
             url = text.extract(response.text, "href='", "'")[0]
             if not url.startswith("http"):
                 url = text.urljoin(self.root, url)
-            response = self.request(url, **kwargs)
-        return response
+            response = self.request(url, fatal=False)
 
-    def metadata(self, page):
-        if self.fallback:
+        # fallback to reader page
+        if response.status_code >= 400:
+            url = "{}/reader/{}.html".format(self.root, self.gallery_id)
+            page = self.request(url).text
             return {
                 "gallery_id": text.parse_int(self.gallery_id),
                 "title": text.unescape(text.extract(
                     page, "<title>", "<")[0].rpartition(" | ")[0]),
             }
 
+        page = response.text
         extr = text.extract_from(page, page.index('<h1><a href="/reader/'))
         data = {
             "gallery_id": text.parse_int(self.gallery_id),
@@ -96,13 +103,6 @@ class HitomiGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, page):
-        # set Referer header before image downloads (#239)
-        self.session.headers["Referer"] = self.gallery_url
-
-        # get 'galleryinfo'
-        url = "https://ltn.hitomi.la/galleries/{}.js".format(self.gallery_id)
-        page = self.request(url).text
-
         result = []
         for image in json.loads(page.partition("=")[2]):
             ihash = image["hash"]
