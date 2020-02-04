@@ -15,6 +15,7 @@ modules = [
     "3dbooru",
     "4chan",
     "500px",
+    "8kun",
     "8muses",
     "adultempire",
     "artstation",
