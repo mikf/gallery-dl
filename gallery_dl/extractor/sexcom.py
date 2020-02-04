@@ -83,11 +83,11 @@ class SexcomExtractor(Extractor):
                 data["url"] = "ytdl:" + text.extract(
                     extr('<iframe', '>'), ' src="', '"')[0]
         else:
-            data["url"] = extr(' src="', '"')
+            data["url"] = text.unescape(extr(' src="', '"').partition("?")[0])
             text.nameext_from_url(data["url"], data)
 
         data["uploader"] = extr('itemprop="author">', '<')
-        data["date"] = extr('datetime="', '"')
+        data["date"] = text.parse_datetime(extr('datetime="', '"'))
         data["tags"] = text.split_html(extr('class="tags"> Tags', '</div>'))
         data["comments"] = text.parse_int(extr('Comments (', ')'))
 
@@ -102,28 +102,28 @@ class SexcomPinExtractor(SexcomExtractor):
     test = (
         # picture
         ("https://www.sex.com/pin/56714360/", {
-            "url": "599190d6e3d79f9f49dda194a0a58cb0ffa3ab86",
-            "content": "963ed681cf53904173c7581b713c7f9471f04db0",
+            "pattern": "https://cdn.sex.com/images/.+/2018/10/02/20037816.jpg",
+            "content": "e579e3283fea812d0545a3f79734b79bc3c51acb",
             "keyword": {
-                "comments": int,
-                "date": "2018-10-02T21:18:17-04:00",
+                "comments" : int,
+                "date"     : "type:datetime",
                 "extension": "jpg",
-                "filename": "20037816",
-                "likes": int,
-                "pin_id": 56714360,
-                "repins": int,
-                "tags": list,
+                "filename" : "20037816",
+                "likes"    : int,
+                "pin_id"   : 56714360,
+                "repins"   : int,
+                "tags"     : list,
                 "thumbnail": str,
-                "title": "Pin #56714360",
-                "type": "picture",
-                "uploader": "alguem",
-                "url": str,
+                "title"    : "Pin #56714360",
+                "type"     : "picture",
+                "uploader" : "alguem",
+                "url"      : str,
             },
         }),
         # gif
         ("https://www.sex.com/pin/11465040-big-titted-hentai-gif/", {
-            "url": "98a82c5ae7a65c8228e1405ac740f80d4d556de1",
-            "content": "a54b37eb39d565094c54ad7d21244fe8f978fb14",
+            "pattern": "https://cdn.sex.com/images/.+/2014/01/26/4829951.gif",
+            "content": "af6726d74d11d819e1c885fe5303f711862eae96",
         }),
         # video
         ("https://www.sex.com/pin/55748341/", {
@@ -133,10 +133,6 @@ class SexcomPinExtractor(SexcomExtractor):
         # pornhub embed
         ("https://www.sex.com/pin/55847384-very-nicely-animated/", {
             "pattern": "ytdl:https://www.pornhub.com/embed/ph56ef24b6750f2",
-        }),
-        # 404
-        ("https://www.sex.com/pin/55847385/", {
-            "count": 0,
         }),
     )
 
