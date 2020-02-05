@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 from ..cache import memcache
 import collections
+import itertools
 import json
 
 
@@ -33,43 +34,60 @@ class PatreonExtractor(Extractor):
             PatreonExtractor._warning = False
 
         for post in self.posts():
-            ids = set()
             post["num"] = 0
-            content = post.get("content")
-            postfile = post.get("post_file")
+            hashes = set()
 
             yield Message.Directory, post
             yield Message.Metadata, text.nameext_from_url(
                 post["creator"].get("image_url", ""), post)
 
-            for image in post["images"]:
-                url = image.get("download_url")
-                if not url:
-                    continue
-                ids.add(url.split("/")[-2])
-                name = image.get("file_name") or self._filename(url) or url
-
-                post["num"] += 1
-                post["type"] = "image"
-                yield Message.Url, url, text.nameext_from_url(name, post)
-
-            if postfile and postfile["url"].split("/")[-2] not in ids:
-                post["num"] += 1
-                post["type"] = "postfile"
-                text.nameext_from_url(postfile["name"], post)
-                yield Message.Url, postfile["url"], post
-
-            for attachment in post["attachments"]:
-                post["num"] += 1
-                post["type"] = "attachment"
-                text.nameext_from_url(attachment["name"], post)
-                yield Message.Url, attachment["url"], post
-
-            if content:
-                for url in text.extract_iter(content, 'src="', '"'):
+            for kind, url, name in itertools.chain(
+                self._postfile(post),
+                self._images(post),
+                self._attachments(post),
+                self._content(post),
+            ):
+                fhash = url.rsplit("/", 2)[1]
+                if fhash not in hashes:
+                    hashes.add(fhash)
+                    post["hash"] = fhash
+                    post["type"] = kind
                     post["num"] += 1
-                    post["type"] = "content"
-                    yield Message.Url, url, text.nameext_from_url(url, post)
+                    yield Message.Url, url, text.nameext_from_url(name, post)
+
+    @staticmethod
+    def _postfile(post):
+        postfile = post.get("post_file")
+        if postfile:
+            return (("postfile", postfile["url"], postfile["name"]),)
+        return ()
+
+    def _images(self, post):
+        for image in post["images"]:
+            url = image.get("download_url")
+            if url:
+                name = image.get("file_name") or self._filename(url) or url
+                yield "image", url, name
+
+    def _attachments(self, post):
+        for attachment in post["attachments"]:
+            url = self.request(
+                attachment["url"], method="HEAD",
+                allow_redirects=False, fatal=False,
+            ).headers.get("Location")
+
+            if url:
+                yield "attachment", url, attachment["name"]
+
+    @staticmethod
+    def _content(post):
+        content = post.get("content")
+        if content:
+            for img in text.extract_iter(
+                    content, '<img data-media-id="', '>'):
+                url = text.extract(img, 'src="', '"')[0]
+                if url:
+                    yield "content", url, url
 
     def posts(self):
         """Return all relevant post objects"""
@@ -238,11 +256,13 @@ class PatreonPostExtractor(PatreonExtractor):
     subcategory = "post"
     pattern = r"(?:https?://)?(?:www\.)?patreon\.com/posts/([^/?&#]+)"
     test = (
+        # postfile + attachments
         ("https://www.patreon.com/posts/precious-metal-23563293", {
             "count": 4,
         }),
-        ("https://www.patreon.com/posts/er1-28201153", {
-            "count": 1,
+        # postfile + content
+        ("https://www.patreon.com/posts/19987002", {
+            "count": 4,
         }),
         ("https://www.patreon.com/posts/not-found-123", {
             "exception": exception.NotFoundError,
