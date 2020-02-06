@@ -222,8 +222,8 @@ class PixivFavoriteExtractor(PixivExtractor):
     directory_fmt = ("{category}", "bookmarks",
                      "{user_bookmark[id]} {user_bookmark[account]}")
     archive_fmt = "f_{user_bookmark[id]}_{id}{num}.{extension}"
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/"
-               r"(?:(?:en/)?users/(\d+)/(bookmarks/artworks|following)"
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:(?:en/)?"
+               r"users/(\d+)/(bookmarks/artworks(?:/([^/?&#]+))?|following)"
                r"|bookmark\.php(?:\?([^#]*))?)")
     test = (
         ("https://www.pixiv.net/en/users/173530/bookmarks/artworks", {
@@ -233,9 +233,14 @@ class PixivFavoriteExtractor(PixivExtractor):
             "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
         }),
         # bookmarks with specific tag
+        (("https://www.pixiv.net/en/users/3137110"
+          "/bookmarks/artworks/%E3%81%AF%E3%82%93%E3%82%82%E3%82%93"), {
+            "url": "379b28275f786d946e01f721e54afe346c148a8c",
+        }),
+        # bookmarks with specific tag (legacy url)
         (("https://www.pixiv.net/bookmark.php?id=3137110"
           "&tag=%E3%81%AF%E3%82%93%E3%82%82%E3%82%93&p=1"), {
-            "count": 2,
+            "url": "379b28275f786d946e01f721e54afe346c148a8c",
         }),
         # own bookmarks
         ("https://www.pixiv.net/bookmark.php", {
@@ -250,7 +255,7 @@ class PixivFavoriteExtractor(PixivExtractor):
             "pattern": PixivUserExtractor.pattern,
             "count": ">= 12",
         }),
-        # followed users (#515)
+        # followed users (legacy url) (#515)
         ("https://www.pixiv.net/bookmark.php?id=173530&type=user", {
             "pattern": PixivUserExtractor.pattern,
             "count": ">= 12",
@@ -261,7 +266,7 @@ class PixivFavoriteExtractor(PixivExtractor):
     )
 
     def __init__(self, match):
-        uid, kind, query = match.groups()
+        uid, kind, self.tag, query = match.groups()
 
         if query:
             self.query = text.parse_query(query)
@@ -286,6 +291,9 @@ class PixivFavoriteExtractor(PixivExtractor):
 
         if "tag" in self.query:
             tag = text.unquote(self.query["tag"])
+        elif self.tag:
+            tag = text.unquote(self.tag)
+
         if "rest" in self.query and self.query["rest"] == "hide":
             restrict = "private"
 
