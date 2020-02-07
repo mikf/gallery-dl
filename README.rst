@@ -130,6 +130,13 @@ Get the direct URL of an image from a site that requires authentication:
     $ gallery-dl -g -u "<username>" -p "<password>" "https://seiga.nicovideo.jp/seiga/im3211703"
 
 
+Filter manga chapters by language and chapter number:
+
+.. code:: bash
+
+    $ gallery-dl --chapter-filter "lang == 'fr' and 10 <= chapter < 20" "https://mangadex.org/title/2354/"
+
+
 | Search a remote resource for URLs and download images from them:
 | (URLs for which no extractor can be found will be silently ignored)
 
