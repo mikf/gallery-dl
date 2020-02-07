@@ -42,7 +42,7 @@ class UgoiraPP(PostProcessor):
                 if arg == "-vcodec" or arg in ("-c", "-codec") and (
                         not stream or stream.partition(":")[0] in ("v", "V")):
                     vcodec = self.args[index + 1]
-            # use filter if libx264/5 is explicitly or implicitly used
+            # use filter when using libx264/5
             self.prevent_odd = (
                 vcodec in ("libx264", "libx265") or
                 not vcodec and self.extension.lower() in ("mp4", "mkv"))
@@ -91,12 +91,12 @@ class UgoiraPP(PostProcessor):
             # collect command-line arguments
             args = [self.ffmpeg]
             if rate_in:
-                args += ["-r", str(rate_in)]
-            args += ["-i", ffconcat]
+                args += ("-r", str(rate_in))
+            args += ("-i", ffconcat)
             if rate_out:
-                args += ["-r", str(rate_out)]
+                args += ("-r", str(rate_out))
             if self.prevent_odd:
-                args += ["-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)"]
+                args += ("-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)")
             if self.args:
                 args += self.args
             self.log.debug("ffmpeg args: %s", args)
@@ -106,8 +106,8 @@ class UgoiraPP(PostProcessor):
             try:
                 if self.twopass:
                     if "-f" not in args:
-                        args += ["-f", self.extension]
-                    args += ["-passlogfile", tempdir + "/ffmpeg2pass", "-pass"]
+                        args += ("-f", self.extension)
+                    args += ("-passlogfile", tempdir + "/ffmpeg2pass", "-pass")
                     self._exec(args + ["1", "-y", os.devnull])
                     self._exec(args + ["2", pathfmt.realpath])
                 else:
