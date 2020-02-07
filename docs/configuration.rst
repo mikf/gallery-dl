@@ -427,11 +427,9 @@ extractor.*.chapter-range
 -------------------------
 =========== =====
 Type        ``string``
-Description Like `image-range`__, but applies to delegated URLs
-            like manga-chapters, etc.
+Description Like `image-range <extractor.*.image-range_>`__,
+            but applies to delegated URLs like manga-chapters, etc.
 =========== =====
-
-__ `extractor.*.image-range`_
 
 
 extractor.*.image-filter
@@ -452,11 +450,11 @@ extractor.*.chapter-filter
 --------------------------
 =========== =====
 Type        ``string``
-Description Like `image-filter`__, but applies to delegated URLs
-            like manga-chapters, etc.
+Example     | ``"lang == 'en'"``
+            | ``"language == 'French' and 10 <= chapter < 20"``
+Description Like `image-filter <extractor.*.image-filter_>`__,
+            but applies to delegated URLs like manga-chapters, etc.
 =========== =====
-
-__ `extractor.*.image-filter`_
 
 
 extractor.*.image-unique
