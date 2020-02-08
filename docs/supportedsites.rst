@@ -134,6 +134,7 @@ Pixhost              https://pixhost.to/                 individual Images
 Postimg              https://postimages.org/             individual Images
 Turboimagehost       https://www.turboimagehost.com/     individual Images
 もえぴりあ                https://vanilla-rock.com/           Posts, Tag-Searches
+半次元                  https://bcy.net/                    Posts, User Profiles
 ==================== =================================== ================================================== ================
 
 .. |artstation-C| replace:: Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results, User Profiles
