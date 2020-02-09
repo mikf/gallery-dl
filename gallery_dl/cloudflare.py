@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -38,7 +38,7 @@ def solve_challenge(session, response, kwargs):
     params = cf_kwargs["data"] = collections.OrderedDict()
 
     page = response.text
-    url = root + text.extract(page, 'action="', '"')[0]
+    url = root + text.unescape(text.extract(page, 'action="', '"')[0])
     params["r"] = text.extract(page, 'name="r" value="', '"')[0]
     params["jschl_vc"] = text.extract(page, 'name="jschl_vc" value="', '"')[0]
     params["pass"] = text.extract(page, 'name="pass" value="', '"')[0]
