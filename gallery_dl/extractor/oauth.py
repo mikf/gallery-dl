@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Utility classes to setup OAuth and link a users account to gallery-dl"""
+"""Utility classes to setup OAuth and link accounts to gallery-dl"""
 
 from .common import Extractor, Message
 from . import deviantart, flickr, reddit, smugmug, tumblr
@@ -38,7 +38,7 @@ class OAuthBase(Extractor):
         print("Waiting for response. (Cancel with Ctrl+c)")
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server.bind(("localhost", 6414))
+        server.bind(("localhost", self.config("port", 6414)))
         server.listen(1)
 
         # workaround for ctrl+c not working during server.accept on Windows

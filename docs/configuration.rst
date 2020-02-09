@@ -838,6 +838,20 @@ Description Controls how a user is directed to an OAuth authorization site.
 =========== =====
 
 
+extractor.oauth.port
+--------------------
+=========== =====
+Type        ``integer``
+Default     ``6414``
+Description Port number to listen on during OAuth authorization.
+
+            Note: All redirects will go to http://localhost:6414/, regardless
+            of the port specified here. You'll have to manually adjust the
+            port number in your browser's address bar when using a different
+            port than the default.
+=========== =====
+
+
 extractor.photobucket.subalbums
 -------------------------------
 =========== =====
