@@ -27,12 +27,11 @@ class PixivExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.api = PixivAppAPI(self)
-        self.user_id = None
         self.load_ugoira = self.config("ugoira", True)
 
     def items(self):
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
-        metadata = self.get_metadata()
+        metadata = self.metadata()
         yield Message.Version, 1
 
         for work in self.works():
@@ -76,11 +75,9 @@ class PixivExtractor(Extractor):
     def works(self):
         """Return an iterable containing all relevant 'work'-objects"""
 
-    def get_metadata(self, user=None):
+    def metadata(self):
         """Collect metadata for extractor-job"""
-        if not user:
-            user = self.api.user_detail(self.user_id)
-        return {"user": user}
+        return {}
 
 
 class PixivUserExtractor(PixivExtractor):
@@ -105,7 +102,7 @@ class PixivUserExtractor(PixivExtractor):
             "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
         }),
         ("http://www.pixiv.net/member_illust.php?id=173531", {
-            "exception": exception.NotFoundError,
+            "count": 0,
         }),
         ("https://www.pixiv.net/en/users/173530"),
         ("https://www.pixiv.net/en/users/173530/manga"),
@@ -205,15 +202,9 @@ class PixivWorkExtractor(PixivExtractor):
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
         self.illust_id = match.group(1) or match.group(2)
-        self.load_ugoira = True
-        self.work = None
 
     def works(self):
-        return (self.work,)
-
-    def get_metadata(self, user=None):
-        self.work = self.api.illust_detail(self.illust_id)
-        return PixivExtractor.get_metadata(self, self.work["user"])
+        return (self.api.illust_detail(self.illust_id),)
 
 
 class PixivFavoriteExtractor(PixivExtractor):
@@ -299,7 +290,7 @@ class PixivFavoriteExtractor(PixivExtractor):
 
         return self.api.user_bookmarks_illust(self.user_id, tag, restrict)
 
-    def get_metadata(self, user=None):
+    def metadata(self):
         if self.user_id:
             user = self.api.user_detail(self.user_id)
         else:
@@ -341,7 +332,7 @@ class PixivRankingExtractor(PixivExtractor):
     def works(self):
         return self.api.illust_ranking(self.mode, self.date)
 
-    def get_metadata(self, user=None):
+    def metadata(self):
         query = text.parse_query(self.query)
 
         mode = query.get("mode", "daily").lower()
@@ -407,7 +398,7 @@ class PixivSearchExtractor(PixivExtractor):
     def works(self):
         return self.api.search_illust(self.word, self.sort, self.target)
 
-    def get_metadata(self, user=None):
+    def metadata(self):
         query = text.parse_query(self.query)
 
         if self.word:
@@ -460,7 +451,7 @@ class PixivFollowExtractor(PixivExtractor):
     def works(self):
         return self.api.illust_follow()
 
-    def get_metadata(self, user=None):
+    def metadata(self):
         self.api.login()
         return {"user_follow": self.api.user}
 
