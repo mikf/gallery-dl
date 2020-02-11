@@ -54,6 +54,8 @@ class PatreonExtractor(Extractor):
                     post["type"] = kind
                     post["num"] += 1
                     yield Message.Url, url, text.nameext_from_url(name, post)
+                else:
+                    self.log.debug("skipping %s (%s %s)", url, fhash, kind)
 
     @staticmethod
     def _postfile(post):
