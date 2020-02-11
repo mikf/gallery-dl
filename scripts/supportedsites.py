@@ -28,6 +28,7 @@ CATEGORY_MAP = {
     "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
     "fashionnova"    : "Fashion Nova",
+    "furaffinity"    : "Fur Affinity",
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
     "hentaicafe"     : "Hentai Cafe",
