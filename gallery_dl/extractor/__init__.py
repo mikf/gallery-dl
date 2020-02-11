@@ -30,6 +30,7 @@ modules = [
     "exhentai",
     "fallenangels",
     "flickr",
+    "furaffinity",
     "fuskator",
     "gelbooru",
     "gfycat",
