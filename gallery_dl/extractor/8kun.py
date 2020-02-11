@@ -64,13 +64,14 @@ class _8kunBoardExtractor(Extractor):
     """Extractor for 8kun boards"""
     category = "8kun"
     subcategory = "board"
-    pattern = r"(?:https?://)?8kun\.top/([^/?&#]+)/(?:index|\d+)\.html$"
+    pattern = r"(?:https?://)?8kun\.top/([^/?&#]+)/(?:index|\d+)\.html"
     test = (
         ("https://8kun.top/v/index.html", {
             "pattern": _8kunThreadExtractor.pattern,
             "count": ">= 100",
         }),
         ("https://8kun.top/v/2.html"),
+        ("https://8kun.top/v/index.html?PageSpeed=noscript"),
     )
 
     def __init__(self, match):
