@@ -738,6 +738,22 @@ Description Sets the maximum allowed size for downloaded images.
 =========== =====
 
 
+extractor.furaffinity.include
+-----------------------------
+=========== =====
+Type        ``string`` or ``list`` of ``strings``
+Default     ``"gallery"``
+Example     ``"scraps,favorite"`` or ``["scraps", "favorite"]``
+Description A (comma-separated) list of subcategories to include
+            when processing a user profile.
+
+            Possible values are
+            ``"gallery"``, ``"scraps"``, ``"favorite"``.
+
+            You can use ``"all"`` instead of listing all values separately.
+=========== =====
+
+
 extractor.gelbooru.api
 ----------------------
 =========== =====
