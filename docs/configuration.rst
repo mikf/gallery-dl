@@ -894,9 +894,14 @@ Type        ``bool``
 Default     ``true``
 Description Download Pixiv's Ugoira animations or ignore them.
 
-            These animations come as a ``.zip`` file containing all the single
+            These animations come as a ``.zip`` file containing all
             animation frames in JPEG format.
+
+            Use an `ugoira`_ post processor to convert them
+            to watchable videos. (Example__)
 =========== =====
+
+__ https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
 
 
 extractor.plurk.comments
