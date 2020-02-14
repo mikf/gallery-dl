@@ -34,7 +34,7 @@ class TwitterExtractor(Extractor):
         self.retweets = self.config("retweets", True)
         self.twitpic = self.config("twitpic", False)
         self.content = self.config("content", False)
-        self.videos = self.config("videos", False)
+        self.videos = self.config("videos", True)
 
         if self.content:
             self._emoji_sub = re.compile(

@@ -1153,7 +1153,7 @@ extractor.twitter.videos
 ------------------------
 =========== =====
 Type        ``bool`` or ``string``
-Default     ``false``
+Default     ``true``
 Description Control video download behavior.
 
             * ``true``: Download videos and use `youtube-dl`_ to handle
