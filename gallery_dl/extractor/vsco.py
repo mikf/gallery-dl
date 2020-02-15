@@ -34,6 +34,9 @@ class VscoExtractor(Extractor):
         yield Message.Directory, {"user": self.user}
         for img in self.images():
 
+            if not img or "responsive_url" not in img:
+                continue
+
             if img["is_video"]:
                 if not videos:
                     continue
@@ -98,6 +101,8 @@ class VscoExtractor(Extractor):
 
     @staticmethod
     def _transform_media(media):
+        if "responsiveUrl" not in media:
+            return None
         media["_id"] = media["id"]
         media["is_video"] = media["isVideo"]
         media["grid_name"] = media["gridName"]
