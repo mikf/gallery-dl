@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text, util
 
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?furaffinity\.net"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|sfw\.)?furaffinity\.net"
 
 
 class FuraffinityExtractor(Extractor):
@@ -164,6 +164,8 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
                 "user"       : "mirlinthloth",
             },
         }),
+        ("https://furaffinity.net/view/21835115/"),
+        ("https://sfw.furaffinity.net/view/21835115/"),
         ("https://www.furaffinity.net/full/21835115/"),
     )
 
