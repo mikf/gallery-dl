@@ -481,30 +481,54 @@ class Formatter():
                 self.format_map = self.fields[0][1]
             else:
                 self.format_map = lambda _: format_string
-            del self.result
-            del self.fields
+            del self.result, self.fields
 
-    def format_map(self, kwargs):
-        """Apply 'kwargs' to the initial format_string and return its result"""
+    def format_map(self, kwdict):
+        """Apply 'kwdict' to the initial format_string and return its result"""
+        result = self.result
         for index, func in self.fields:
-            self.result[index] = func(kwargs)
-        return "".join(self.result)
+            result[index] = func(kwdict)
+        return "".join(result)
 
     def _field_access(self, field_name, format_spec, conversion):
-        first, rest = _string.formatter_field_name_split(field_name)
+        fmt = self._build_format_func(format_spec, conversion)
 
+        if "|" in field_name:
+            return self._apply_list([
+                self._parse_field_name(fn)
+                for fn in field_name.split("|")
+            ], fmt)
+        else:
+            key, funcs = self._parse_field_name(field_name)
+            if funcs:
+                return self._apply(key, funcs, fmt)
+            return self._apply_simple(key, fmt)
+
+    @staticmethod
+    def _parse_field_name(field_name):
+        first, rest = _string.formatter_field_name_split(field_name)
         funcs = []
+
         for is_attr, key in rest:
             if is_attr:
                 func = operator.attrgetter
             elif ":" in key:
-                func = self._slicegetter
+                func = operator.itemgetter
+                start, _, stop = key.partition(":")
+                stop, _, step = stop.partition(":")
+                start = int(start) if start else None
+                stop = int(stop) if stop else None
+                step = int(step) if step else None
+                key = slice(start, stop, step)
             else:
                 func = operator.itemgetter
             funcs.append(func(key))
 
+        return first, funcs
+
+    def _build_format_func(self, format_spec, conversion):
         if conversion:
-            funcs.append(self.CONVERSIONS[conversion])
+            conversion = self.CONVERSIONS[conversion]
 
         if format_spec:
             if format_spec[0] == "?":
@@ -518,26 +542,20 @@ class Formatter():
             else:
                 func = self._format_default
             fmt = func(format_spec)
+
+            if conversion:
+                def wrap(obj):
+                    return fmt(conversion(obj))
+                return wrap
+            return fmt
+
         else:
-            fmt = str
-
-        if funcs:
-            return self._apply(first, funcs, fmt)
-        return self._apply_simple(first, fmt)
-
-    def _apply_simple(self, key, fmt):
-        def wrap(obj):
-            if key in obj:
-                obj = obj[key]
-            else:
-                obj = self.default
-            return fmt(obj)
-        return wrap
+            return conversion or str
 
     def _apply(self, key, funcs, fmt):
-        def wrap(obj):
+        def wrap(kwdict):
             try:
-                obj = obj[key]
+                obj = kwdict[key]
                 for func in funcs:
                     obj = func(obj)
             except Exception:
@@ -545,14 +563,26 @@ class Formatter():
             return fmt(obj)
         return wrap
 
-    @staticmethod
-    def _slicegetter(key):
-        start, _, stop = key.partition(":")
-        stop, _, step = stop.partition(":")
-        start = int(start) if start else None
-        stop = int(stop) if stop else None
-        step = int(step) if step else None
-        return operator.itemgetter(slice(start, stop, step))
+    def _apply_simple(self, key, fmt):
+        def wrap(kwdict):
+            return fmt(kwdict[key] if key in kwdict else self.default)
+        return wrap
+
+    def _apply_list(self, lst, fmt):
+        def wrap(kwdict):
+            for key, funcs in lst:
+                try:
+                    obj = kwdict[key]
+                    for func in funcs:
+                        obj = func(obj)
+                    if obj is not None:
+                        break
+                except Exception:
+                    pass
+            else:
+                obj = self.default
+            return fmt(obj)
+        return wrap
 
     @staticmethod
     def _format_optional(format_spec):
