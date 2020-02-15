@@ -340,6 +340,10 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{d[a]|d[b]|d[c]}", "foo")
         self._run_test("{d[z]|d[y]|d[x]}", "None")
 
+    def test_indexing(self):
+        self._run_test("{l[0]}" , "a")
+        self._run_test("{a[6]}" , "w")
+
     def test_slicing(self):
         v = self.kwdict["a"]
         self._run_test("{a[1:10]}"  , v[1:10])

@@ -512,16 +512,19 @@ class Formatter():
         for is_attr, key in rest:
             if is_attr:
                 func = operator.attrgetter
-            elif ":" in key:
-                func = operator.itemgetter
-                start, _, stop = key.partition(":")
-                stop, _, step = stop.partition(":")
-                start = int(start) if start else None
-                stop = int(stop) if stop else None
-                step = int(step) if step else None
-                key = slice(start, stop, step)
             else:
                 func = operator.itemgetter
+                try:
+                    if ":" in key:
+                        start, _, stop = key.partition(":")
+                        stop, _, step = stop.partition(":")
+                        start = int(start) if start else None
+                        stop = int(stop) if stop else None
+                        step = int(step) if step else None
+                        key = slice(start, stop, step)
+                except TypeError:
+                    pass  # key is an integer
+
             funcs.append(func(key))
 
         return first, funcs
