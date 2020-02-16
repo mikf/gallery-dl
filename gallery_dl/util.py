@@ -491,7 +491,7 @@ class Formatter():
         return "".join(result)
 
     def _field_access(self, field_name, format_spec, conversion):
-        fmt = self._build_format_func(format_spec, conversion)
+        fmt = self._parse_format_spec(format_spec, conversion)
 
         if "|" in field_name:
             return self._apply_list([
@@ -529,31 +529,32 @@ class Formatter():
 
         return first, funcs
 
-    def _build_format_func(self, format_spec, conversion):
-        if conversion:
-            conversion = self.CONVERSIONS[conversion]
-
-        if format_spec:
-            if format_spec[0] == "?":
-                func = self._format_optional
-            elif format_spec[0] == "L":
-                func = self._format_maxlen
-            elif format_spec[0] == "J":
-                func = self._format_join
-            elif format_spec[0] == "R":
-                func = self._format_replace
-            else:
-                func = self._format_default
-            fmt = func(format_spec)
-
-            if conversion:
-                def wrap(obj):
-                    return fmt(conversion(obj))
-                return wrap
+    def _parse_format_spec(self, format_spec, conversion):
+        fmt = self._build_format_func(format_spec)
+        if not conversion:
             return fmt
 
+        conversion = self.CONVERSIONS[conversion]
+        if fmt is format:
+            return conversion
         else:
-            return conversion or str
+            def chain(obj):
+                return fmt(conversion(obj))
+            return chain
+
+    def _build_format_func(self, format_spec):
+        if format_spec:
+            fmt = format_spec[0]
+            if fmt == "?":
+                return self._parse_optional(format_spec)
+            if fmt == "L":
+                return self._parse_maxlen(format_spec)
+            if fmt == "J":
+                return self._parse_join(format_spec)
+            if fmt == "R":
+                return self._parse_replace(format_spec)
+            return self._default_format(format_spec)
+        return format
 
     def _apply(self, key, funcs, fmt):
         def wrap(kwdict):
@@ -587,45 +588,45 @@ class Formatter():
             return fmt(obj)
         return wrap
 
-    @staticmethod
-    def _format_optional(format_spec):
-        def wrap(obj):
-            if not obj:
-                return ""
-            return before + format(obj, format_spec) + after
+    def _parse_optional(self, format_spec):
         before, after, format_spec = format_spec.split("/", 2)
         before = before[1:]
-        return wrap
+        fmt = self._build_format_func(format_spec)
 
-    @staticmethod
-    def _format_maxlen(format_spec):
-        def wrap(obj):
-            obj = format(obj, format_spec)
-            return obj if len(obj) <= maxlen else replacement
+        def optional(obj):
+            return before + fmt(obj) + after if obj else ""
+        return optional
+
+    def _parse_maxlen(self, format_spec):
         maxlen, replacement, format_spec = format_spec.split("/", 2)
         maxlen = text.parse_int(maxlen[1:])
-        return wrap
+        fmt = self._build_format_func(format_spec)
 
-    @staticmethod
-    def _format_join(format_spec):
-        def wrap(obj):
-            obj = separator.join(obj)
-            return format(obj, format_spec)
+        def mlen(obj):
+            obj = fmt(obj)
+            return obj if len(obj) <= maxlen else replacement
+        return mlen
+
+    def _parse_join(self, format_spec):
         separator, _, format_spec = format_spec.partition("/")
         separator = separator[1:]
-        return wrap
+        fmt = self._build_format_func(format_spec)
 
-    @staticmethod
-    def _format_replace(format_spec):
-        def wrap(obj):
-            obj = obj.replace(old, new)
-            return format(obj, format_spec)
+        def join(obj):
+            return fmt(separator.join(obj))
+        return join
+
+    def _parse_replace(self, format_spec):
         old, new, format_spec = format_spec.split("/", 2)
         old = old[1:]
-        return wrap
+        fmt = self._build_format_func(format_spec)
+
+        def replace(obj):
+            return fmt(obj.replace(old, new))
+        return replace
 
     @staticmethod
-    def _format_default(format_spec):
+    def _default_format(format_spec):
         def wrap(obj):
             return format(obj, format_spec)
         return wrap
