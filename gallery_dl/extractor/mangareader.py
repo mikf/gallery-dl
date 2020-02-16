@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -38,7 +38,7 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
     pattern = r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/?&#]+)/(\d+))"
     test = (("https://www.mangareader.net"
              "/karate-shoukoushi-kohinata-minoru/11"), {
-        "url": "061cc92a07edf17bb991ce0821fa4c77a147a860",
+        "url": "3d8a5b900856d59b8d8e83908d0df392be92c0f4",
         "keyword": "133e3e2f7c0529a35bbb16149e34c40546f8dfd6",
     })
 
