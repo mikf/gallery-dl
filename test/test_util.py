@@ -390,6 +390,18 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!l:Rl//}" , "heo word")
         self._run_test("{name:Rame/othing/}", "Nothing")
 
+    def test_chain_special(self):
+        # multiple replacements
+        self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
+        self._run_test("{d[b]!s:R1/Q/R2/A/R0/Y/}", "Y")
+
+        # join-and-replace
+        self._run_test("{l:J-/Rb/E/}", "a-E-c")
+
+        # optional-and-maxlen
+        self._run_test("{d[a]:?</>/L1/too long/}", "<too long>")
+        self._run_test("{d[c]:?</>/L5/too long/}", "")
+
     def _run_test(self, format_string, result, default=None):
         formatter = util.Formatter(format_string, default)
         output = formatter.format_map(self.kwdict)
