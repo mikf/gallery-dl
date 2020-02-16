@@ -1,6 +1,39 @@
 # Changelog
 
-## Unreleased
+## 1.13.0 - 2020-02-16
+### Additions
+- Support for
+  - `furaffinity` - https://www.furaffinity.net/ ([#284](https://github.com/mikf/gallery-dl/issues/284))
+  - `8kun`        - https://8kun.top/            ([#582](https://github.com/mikf/gallery-dl/issues/582))
+  - `bcy`         - https://bcy.net/             ([#592](https://github.com/mikf/gallery-dl/issues/592))
+- [blogger] implement video extraction ([#587](https://github.com/mikf/gallery-dl/issues/587))
+- [oauth] add option to specify port number used by local server ([#604](https://github.com/mikf/gallery-dl/issues/604))
+- [pixiv] add `rating` metadata field ([#595](https://github.com/mikf/gallery-dl/issues/595))
+- [pixiv] recognize tags at the end of new bookmark URLs
+- [reddit] add `videos` option
+- [weibo] use youtube-dl to download from m3u8 manifests
+- implement `parent-directory` option ([#551](https://github.com/mikf/gallery-dl/issues/551))
+- extend filename formatting capabilities:
+  - implement field name alternatives ([#525](https://github.com/mikf/gallery-dl/issues/525))
+  - allow multiple "special" format specifiers per replacement field ([#595](https://github.com/mikf/gallery-dl/issues/595))
+  - allow for numeric list and string indices
+### Changes
+- [reddit] handle reddit-hosted images and videos natively ([#551](https://github.com/mikf/gallery-dl/issues/551))
+- [twitter] change default value for `videos` to `true`
+### Fixes
+- [cloudflare] unescape challenge URLs
+- [deviantart] fix video extraction from `extended_fetch` results
+- [hitomi] implement workaround for "broken" redirects
+- [khinsider] fix and improve metadata extraction
+- [patreon] filter duplicate files per post ([#590](https://github.com/mikf/gallery-dl/issues/590))
+- [piczel] fix extraction
+- [pixiv] fix user IDs for bookmarks API calls ([#596](https://github.com/mikf/gallery-dl/issues/596))
+- [sexcom] fix image URLs
+- [twitter] force old login page layout ([#584](https://github.com/mikf/gallery-dl/issues/584), [#598](https://github.com/mikf/gallery-dl/issues/598))
+- [vsco] skip "invalid" entities
+- improve functions to load/save cookies.txt files ([#586](https://github.com/mikf/gallery-dl/issues/586))
+### Removals
+- [yaplog] remove module
 
 ## 1.12.3 - 2020-01-19
 ### Additions
