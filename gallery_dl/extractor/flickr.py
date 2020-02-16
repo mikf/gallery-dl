@@ -61,7 +61,8 @@ class FlickrImageExtractor(FlickrExtractor):
     test = (
         ("https://www.flickr.com/photos/departingyyz/16089302239", {
             "pattern": pattern,
-            "content": "0821a28ee46386e85b02b67cf2720063440a228c",
+            "content": ("3133006c6d657fe54cf7d4c46b82abbcb0efaf9f",
+                        "0821a28ee46386e85b02b67cf2720063440a228c"),
             "keyword": {
                 "comments": int,
                 "description": str,
