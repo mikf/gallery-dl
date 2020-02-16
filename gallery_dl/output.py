@@ -83,7 +83,7 @@ def initialize_logging(loglevel):
 
 def configure_logging(loglevel):
     root = logging.getLogger()
-    minlevel = LOG_LEVEL
+    minlevel = loglevel
 
     # stream logging handler
     handler = root.handlers[0]
