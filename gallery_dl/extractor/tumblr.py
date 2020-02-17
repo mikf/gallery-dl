@@ -310,7 +310,7 @@ class TumblrTagExtractor(TumblrExtractor):
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        self.tag = text.unquote(match.group(3))
+        self.tag = text.unquote(match.group(3).replace("-", " "))
 
     def posts(self):
         return self.api.posts(self.blog, {"tag": self.tag})
