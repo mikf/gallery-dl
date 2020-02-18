@@ -39,6 +39,7 @@ modules = [
     "hentaicafe",
     "hentaifoundry",
     "hentaifox",
+    "hentaihand",
     "hentaihere",
     "hentainexus",
     "hitomi",
