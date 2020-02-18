@@ -34,6 +34,7 @@ CATEGORY_MAP = {
     "hentaicafe"     : "Hentai Cafe",
     "hentaifoundry"  : "Hentai Foundry",
     "hentaifox"      : "HentaiFox",
+    "hentaihand"     : "HentaiHand",
     "hentaihere"     : "HentaiHere",
     "hitomi"         : "Hitomi.la",
     "idolcomplex"    : "Idol Complex",
