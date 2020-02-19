@@ -663,9 +663,9 @@ Description The ``refresh-token`` value you get from
             Using a ``refresh-token`` allows you to access private or otherwise
             not publicly available deviations.
 
-            Note: Authenticating with a ``refresh-token`` requires persistent
-            storage in a `cache file <cache.file_>`__.
-            Otherwise the token will become invalid after its first use.
+            Note: The ``refresh-token`` becomes invalid
+            `after 3 months <https://www.deviantart.com/developers/authentication#refresh>`__
+            or whenever your `cache file <cache.file_>`__ is deleted or cleared.
 =========== =====
 
 
