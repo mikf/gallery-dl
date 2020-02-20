@@ -93,9 +93,11 @@ class DeviantartExtractor(Extractor):
                 if content["src"].startswith("https://images-wixmp-"):
                     if deviation["index"] <= 790677560:
                         # https://github.com/r888888888/danbooru/issues/4069
-                        content["src"] = re.sub(
+                        intermediary, count = re.subn(
                             r"(/f/[^/]+/[^/]+)/v\d+/.*",
                             r"/intermediary\1", content["src"])
+                        if count and self._check_url(intermediary):
+                            content["src"] = intermediary
                     if self.quality:
                         content["src"] = re.sub(
                             r"q_\d+", self.quality, content["src"])
@@ -260,6 +262,9 @@ class DeviantartExtractor(Extractor):
         mtype = mimetypes.guess_type(url, False)[0]
         if mtype and mtype.startswith("image/"):
             content.update(data)
+
+    def _check_url(self, url):
+        return self.request(url, method="HEAD", fatal=False).status_code < 400
 
 
 class DeviantartUserExtractor(DeviantartExtractor):
@@ -737,8 +742,10 @@ class DeviantartExtractorV2(DeviantartExtractor):
             if src.startswith("https://images-wixmp-"):
                 if deviation["index"] <= 790677560:
                     # https://github.com/r888888888/danbooru/issues/4069
-                    src = re.sub(
+                    intermediary, count = re.subn(
                         r"(/f/[^/]+/[^/]+)/v\d+/.*", r"/intermediary\1", src)
+                    if count and self._check_url(intermediary):
+                        src = intermediary
                 if self.quality:
                     src = re.sub(r"q_\d+", self.quality, src)
 
