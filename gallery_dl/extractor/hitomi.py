@@ -67,7 +67,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
         response = self.request(url, fatal=False)
 
         # follow redirects
-        if b"<title>Redirect</title>" in response.content:
+        while b"<title>Redirect</title>" in response.content:
             url = text.extract(response.text, "href='", "'")[0]
             if not url.startswith("http"):
                 url = text.urljoin(self.root, url)
