@@ -23,9 +23,9 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
     root = "https://downloads.khinsider.com"
     test = (("https://downloads.khinsider.com"
              "/game-soundtracks/album/horizon-riders-wii"), {
-        "pattern": r"https?://\d+\.\d+\.\d+\.\d+/ost/horizon-riders-wii/[^/]+"
-                   r"/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack\.mp3",
-        "keyword": "b6bf8444ad77307c03212e91e73b1563338bd079",
+        "pattern": r"https?://vgmdownloads.com/soundtracks/horizon-riders-wii/"
+                   r"[^/]+/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack.mp3",
+        "keyword": "5b2c35cce638c326cab2a4f7a79f245d008d62ff",
     })
 
     def __init__(self, match):

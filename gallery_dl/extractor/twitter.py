@@ -356,7 +356,11 @@ class TwitterTweetExtractor(TwitterExtractor):
         # content with emoji, newlines, hashtags (#338)
         ("https://twitter.com/yumi_san0112/status/1151144618936823808", {
             "options": (("content", True),),
-            "keyword": "0b7a3d05607b480c1412dfd85f8606478313e7bf",
+            "keyword": {"content": (
+                "re:晴、お誕生日おめでとう🎉！\n実は下の名前が同じなので結構親近感ある"
+                "アイドルです✨\n今年の晴ちゃんめちゃくちゃ可愛い路線攻めてるから、そろ"
+                "そろまたかっこいい晴が見たいですねw\n#結城晴生誕祭2019\n#結城晴生誕祭"
+            )},
         }),
         # Reply to another tweet (#403)
         ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
