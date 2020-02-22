@@ -116,18 +116,19 @@ class VscoExtractor(Extractor):
 class VscoUserExtractor(VscoExtractor):
     """Extractor for images from a user on vsco.co"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"(?:/images(?:/\d+)?)?/?(?:$|[?#])"
+    pattern = BASE_PATTERN + r"(?:/gallery|/images(?:/\d+)?)?/?(?:$|[?#])"
     test = (
-        ("https://vsco.co/missuri/images/1", {
+        ("https://vsco.co/missuri/gallery", {
             "pattern": r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/vsco\w+",
             "range": "1-80",
             "count": 80,
         }),
+        ("https://vsco.co/missuri/images/1"),
         ("https://vsco.co/missuri"),
     )
 
     def images(self):
-        url = "{}/{}/images/1".format(self.root, self.user)
+        url = "{}/{}/gallery".format(self.root, self.user)
         data = self._extract_preload_state(url)
 
         tkn = data["users"]["currentUser"]["tkn"]
