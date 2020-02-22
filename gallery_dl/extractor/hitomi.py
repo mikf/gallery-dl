@@ -34,12 +34,12 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }),
         # Game CG with scenes (#321)
         ("https://hitomi.la/galleries/733697.html", {
-            "url": "21064f9e3c244aca87f1a91967a3fbe79032c4ce",
+            "url": "b4cbc76032852db4a655bf6a2c4d58eae8153c8e",
             "count": 210,
         }),
         # fallback for galleries only available through /reader/ URLs
         ("https://hitomi.la/galleries/1045954.html", {
-            "url": "0a67f5e6c3c6a384b578e328f4817fa6ccdf856a",
+            "url": "f3aa914ad148437f72d307268fa0d250eabe8dab",
             "count": 1413,
         }),
         # gallery with "broken" redirect
@@ -104,14 +104,17 @@ class HitomiGalleryExtractor(GalleryExtractor):
 
     def images(self, page):
         result = []
-        for image in json.loads(page.partition("=")[2]):
+        for image in json.loads(page.partition("=")[2])["files"]:
             ihash = image["hash"]
             idata = text.nameext_from_url(image["name"])
 
             # see https://ltn.hitomi.la/common.js
-            offset = int(ihash[-3:-1], 16) % 3
+            inum = int(ihash[-3:-1], 16)
+            frontends = 2 if inum < 0x30 else 3
+            inum = 1 if inum < 0x09 else inum
+
             url = "https://{}a.hitomi.la/images/{}/{}/{}.{}".format(
-                chr(97 + offset),
+                chr(97 + (inum % frontends)),
                 ihash[-1], ihash[-3:-1], ihash,
                 idata["extension"],
             )
