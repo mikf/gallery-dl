@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://imgur.com/"""
+"""Extractors for https://imgur.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
@@ -65,7 +65,7 @@ class ImgurImageExtractor(ImgurExtractor):
                 "account_url"  : None,
                 "animated"     : False,
                 "bandwidth"    : int,
-                "date"         : "type:datetime",
+                "date"         : "dt:2016-11-10 14:24:35",
                 "datetime"     : 1478787875,
                 "description"  : None,
                 "edited"       : "0",
@@ -142,7 +142,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
                     "cover_edited": None,
                     "cover_height": 1400,
                     "cover_width" : 951,
-                    "date"        : "type:datetime",
+                    "date"        : "dt:2015-10-09 10:37:50",
                     "datetime"    : 1444387070,
                     "description" : None,
                     "favorite"    : False,

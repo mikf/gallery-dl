@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -52,7 +52,7 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
                 "title_en"  : r"re:Shikoshiko Daisuki Nightingale \+ Kaijou",
                 "title_jp"  : "シコシコ大好きナイチンゲール + 会場限定おまけ本",
                 "gallery_id": 40996,
-                "date"      : "type:datetime",
+                "date"      : "dt:2018-06-29 00:00:00",
                 "count"     : 42,
                 "collection": "",
                 "artist"    : ["Itou Life"],

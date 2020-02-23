@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -86,7 +86,7 @@ class NozomiPostExtractor(NozomiExtractor):
             "character": ["patchouli knowledge"],
             "copyright": ["touhou"],
             "dataid"   : "re:aaa9f7c632cde1e1a5baaff3fb6a6d857ec73df7fdc5cf5a",
-            "date"     : "type:datetime",
+            "date"     : "dt:2016-07-26 02:32:03",
             "extension": "jpg",
             "favorites": int,
             "filename" : str,
