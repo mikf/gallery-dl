@@ -98,7 +98,7 @@ class OAuthBase(Extractor):
     def _oauth2_authorization_code_grant(
             self, client_id, client_secret, auth_url, token_url,
             scope="read", key="refresh_token", auth=True,
-            message_template=None):
+            message_template=None, cache=None):
         """Perform an OAuth2 authorization code grant"""
 
         state = "gallery-dl_{}_{}".format(
@@ -162,6 +162,11 @@ class OAuthBase(Extractor):
             client_secret=client_secret,
         ))
 
+        # write to cache
+        if cache and config.get(("extractor", self.category), "cache"):
+            cache.update("#" + str(client_id), data[key])
+            self.log.info("Writing 'refresh-token' to cache")
+
 
 class OAuthDeviantart(OAuthBase):
     subcategory = "deviantart"
@@ -179,6 +184,7 @@ class OAuthDeviantart(OAuthBase):
             "https://www.deviantart.com/oauth2/authorize",
             "https://www.deviantart.com/oauth2/token",
             scope="browse",
+            cache=deviantart._refresh_token_cache,
         )
 
 

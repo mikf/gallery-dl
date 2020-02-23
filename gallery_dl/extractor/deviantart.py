@@ -961,10 +961,14 @@ class DeviantartAPI():
         self.folders = extractor.config("folders", False)
         self.metadata = extractor.extra or extractor.config("metadata", False)
 
-        self.refresh_token = extractor.config("refresh-token")
-        self.client_id = extractor.config("client-id", self.CLIENT_ID)
+        self.client_id = extractor.config(
+            "client-id", self.CLIENT_ID)
         self.client_secret = extractor.config(
             "client-secret", self.CLIENT_SECRET)
+
+        self.refresh_token = extractor.config("refresh-token")
+        if self.refresh_token == "cache":
+            self.refresh_token = "#" + str(self.client_id)
 
         self.log.debug(
             "Using %s API credentials (client-id %s)",
