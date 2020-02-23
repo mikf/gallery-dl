@@ -231,6 +231,8 @@ MIMETYPE_MAP = {
     "image/png": "png",
     "image/gif": "gif",
     "image/bmp": "bmp",
+    "image/x-bmp": "bmp",
+    "image/x-ms-bmp": "bmp",
     "image/webp": "webp",
     "image/svg+xml": "svg",
 
