@@ -126,20 +126,26 @@ class DatabaseCacheDecorator():
     def update(self, key, value):
         expires = int(time.time()) + self.maxage
         self.cache[key] = value, expires
-        self.cursor().execute(
-            "INSERT OR REPLACE INTO data VALUES (?,?,?)",
-            ("%s-%s" % (self.key, key), pickle.dumps(value), expires),
-        )
+        try:
+            self.cursor().execute(
+                "INSERT OR REPLACE INTO data VALUES (?,?,?)",
+                ("%s-%s" % (self.key, key), pickle.dumps(value), expires),
+            )
+        finally:
+            self.db.commit()
 
     def invalidate(self, key):
         try:
             del self.cache[key]
         except KeyError:
             pass
-        self.cursor().execute(
-            "DELETE FROM data WHERE key=? LIMIT 1",
-            ("%s-%s" % (self.key, key),),
-        )
+        try:
+            self.cursor().execute(
+                "DELETE FROM data WHERE key=?",
+                ("%s-%s" % (self.key, key),),
+            )
+        finally:
+            self.db.commit()
 
     def cursor(self):
         if self._init:
