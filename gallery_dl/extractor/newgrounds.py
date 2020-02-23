@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -194,7 +194,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
             "keyword": {
                 "artist"     : ["tomfulp"],
                 "comment"    : "re:Consider this the bottom threshold for ",
-                "date"       : "type:datetime",
+                "date"       : "dt:2009-06-04 14:44:05",
                 "description": "re:Consider this the bottom threshold for ",
                 "favorites"  : int,
                 "filename"   : "94_tomfulp_ryu-is-hawt",
@@ -241,7 +241,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
             "keyword": {
                 "artist"     : ["psychogoldfish", "tomfulp"],
                 "comment"    : "re:People have been asking me how I like the ",
-                "date"       : "type:datetime",
+                "date"       : "dt:2012-02-08 21:40:56",
                 "description": "re:People have been asking how I like the ",
                 "favorites"  : int,
                 "filename"   : "527818_alternate_1896",
@@ -259,7 +259,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
             "keyword": {
                 "artist"     : ["zj", "tomfulp"],
                 "comment"    : "re:RECORDED 12-09-2014\n\nFrom The ZJ \"Late ",
-                "date"       : "type:datetime",
+                "date"       : "dt:2015-02-23 19:31:59",
                 "description": "From The ZJ Report Show!",
                 "favorites"  : int,
                 "index"      : 609768,

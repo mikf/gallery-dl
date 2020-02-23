@@ -247,7 +247,7 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
             "content": "91bf01497c39254b6dfb234a18e8f01629c77fd1",
             "keyword": {
                 "artist" : "Tenpura",
-                "date"   : "type:datetime",
+                "date"   : "dt:2016-02-22 14:41:19",
                 "description": "Thank you!",
                 "height" : 700,
                 "index"  : 407501,

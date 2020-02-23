@@ -12,6 +12,7 @@ import sys
 import re
 import json
 import hashlib
+import datetime
 import unittest
 from gallery_dl import extractor, util, job, config, exception
 
@@ -154,6 +155,9 @@ class TestExtractorResults(unittest.TestCase):
             elif isinstance(test, str):
                 if test.startswith("re:"):
                     self.assertRegex(value, test[3:], msg=key)
+                elif test.startswith("dt:"):
+                    self.assertIsInstance(value, datetime.datetime, msg=key)
+                    self.assertEqual(str(value), test[3:], msg=key)
                 elif test.startswith("type:"):
                     self.assertEqual(type(value).__name__, test[5:], msg=key)
                 else:

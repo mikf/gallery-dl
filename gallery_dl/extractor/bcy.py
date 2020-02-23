@@ -111,7 +111,7 @@ class BcyPostExtractor(BcyExtractor):
             "post": {
                 "id"     : 6355835481002893070,
                 "tags"   : list,
-                "date"   : "type:datetime",
+                "date"   : "dt:2016-11-22 08:47:46",
                 "parody" : "东方PROJECT",
                 "content": "re:根据微博的建议稍微做了点修改",
                 "likes"  : int,

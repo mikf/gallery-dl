@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -99,7 +99,7 @@ class BloggerPostExtractor(BloggerExtractor):
             "pattern": r"https://3.bp.blogspot.com/.*/s0/Icy-Moonrise-.*.jpg",
             "keyword": {
                 "blog": {
-                    "date"       : "type:datetime",
+                    "date"       : "dt:2010-11-21 18:19:42",
                     "description": "",
                     "id"         : "5623928067739466034",
                     "kind"       : "blogger#blog",
@@ -114,7 +114,7 @@ class BloggerPostExtractor(BloggerExtractor):
                 "post": {
                     "author"     : "Julian Bunker",
                     "content"    : str,
-                    "date"       : "type:datetime",
+                    "date"       : "dt:2010-12-26 01:08:00",
                     "etag"       : str,
                     "id"         : "6955139236418998998",
                     "kind"       : "blogger#post",

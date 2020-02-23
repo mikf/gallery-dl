@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Leonardo Taccari, Mike Fährmann
+# Copyright 2018-2019 Leonardo Taccari
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.instagram.com/"""
+"""Extractors for https://www.instagram.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
@@ -306,7 +307,7 @@ class InstagramImageExtractor(InstagramExtractor):
                        r"/v(p/[0-9a-f]+/[0-9A-F]+)?/t51.2885-15/e35"
                        r"/44877605_725955034447492_3123079845831750529_n.jpg",
             "keyword": {
-                "date": "type:datetime",
+                "date": "dt:2018-11-29 01:04:04",
                 "description": str,
                 "height": int,
                 "likes": int,
@@ -333,7 +334,7 @@ class InstagramImageExtractor(InstagramExtractor):
         ("https://www.instagram.com/p/Bqxp0VSBgJg/", {
             "pattern": r"/47129943_191645575115739_8539303288426725376_n\.mp4",
             "keyword": {
-                "date": "type:datetime",
+                "date": "dt:2018-11-29 19:23:58",
                 "description": str,
                 "height": int,
                 "likes": int,
@@ -349,7 +350,7 @@ class InstagramImageExtractor(InstagramExtractor):
         ("https://www.instagram.com/tv/BkQjCfsBIzi/", {
             "pattern": r"/10000000_1760663964018792_716207142595461120_n\.mp4",
             "keyword": {
-                "date": "type:datetime",
+                "date": "dt:2018-06-20 19:51:32",
                 "description": str,
                 "height": int,
                 "likes": int,

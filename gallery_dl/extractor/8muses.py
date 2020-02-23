@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -40,7 +40,7 @@ class _8musesAlbumExtractor(Extractor):
                     "parent" : 10454,
                     "views"  : int,
                     "likes"  : int,
-                    "date"   : "type:datetime",
+                    "date"   : "dt:2018-07-10 00:00:00",
                 },
             },
         }),

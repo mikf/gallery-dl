@@ -153,7 +153,7 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
             "url": "eae4ef93d99365c69b31a37561bd800c03d336ad",
             "keyword": {
                 "artist"     : "mirlinthloth",
-                "date"       : "type:datetime",
+                "date"       : "dt:2016-11-27 17:24:06",
                 "description": "A Song made playing the game Cosmic DJ.",
                 "extension"  : "mp3",
                 "filename"   : r"re:\d+\.\w+_dj_fennmink_-_bude_s_4_ever",

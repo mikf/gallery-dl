@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -59,7 +59,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
                     "cover"       : "re:https://\\w+.luscious.net/.+/277031/",
                     "created"     : 1479625853,
                     "created_by"  : "NTRshouldbeillegal",
-                    "date"        : "type:datetime",
+                    "date"        : "dt:2016-11-20 07:10:53",
                     "description" : "Enjoy.",
                     "download_url": "/download/824778/277031/",
                     "genres"      : list,

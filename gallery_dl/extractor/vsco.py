@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -192,7 +192,7 @@ class VscoImageExtractor(VscoExtractor):
                 "grid"  : "erenyildiz",
                 "meta"  : dict,
                 "tags"  : list,
-                "date"  : "type:datetime",
+                "date"  : "dt:2019-07-21 19:12:11",
                 "video" : False,
                 "width" : 1537,
                 "height": 1537,

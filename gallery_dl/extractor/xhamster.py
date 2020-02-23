@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -49,7 +49,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
                 "pageURL": str,
                 "thumbURL": str,
                 "gallery": {
-                    "date": "type:datetime",
+                    "date": "dt:2019-04-16 00:07:31",
                     "description": "",
                     "dislikes": int,
                     "id": 11748968,
