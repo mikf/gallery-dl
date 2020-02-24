@@ -246,15 +246,22 @@ class Extractor():
 
     def _check_cookies(self, cookienames, *, domain=None):
         """Check if all 'cookienames' are in the session's cookiejar"""
+        if not self._cookiejar:
+            return False
+
         if domain is None:
             domain = self.cookiedomain
-
         names = set(cookienames)
+        now = time.time()
+
         for cookie in self._cookiejar:
-            if cookie.domain == domain:
-                names.discard(cookie.name)
-                if not names:
-                    return True
+            if cookie.name in names and cookie.domain == domain:
+                if cookie.expires and cookie.expires < now:
+                    self.log.warning("Cookie '%s' has expired", cookie.name)
+                else:
+                    names.discard(cookie.name)
+                    if not names:
+                        return True
         return False
 
     def _get_date_min_max(self, dmin=None, dmax=None):
