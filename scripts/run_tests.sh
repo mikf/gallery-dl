@@ -2,7 +2,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-TESTS_CORE=(config cookies downloader extractor oauth postprocessor text util)
+TESTS_CORE=(cache config cookies downloader extractor oauth postprocessor text util)
 TESTS_RESULTS=(results)
 
 
