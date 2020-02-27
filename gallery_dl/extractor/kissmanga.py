@@ -94,7 +94,7 @@ class KissmangaChapterExtractor(KissmangaBase, ChapterExtractor):
         }),
         ("https://kissmanga.com/Manga/Houseki-no-Kuni/Oneshot?id=404189", {
             "count": 49,
-            "keyword": "d44d1b21d08e4dbf888b0c450a3f1bc919588b4f",
+            "keyword": "cea131c9fe9c71309b3270cd86718d4d1198c31c",
         }),
         ("https://kissmanga.com/mAnGa/mOnStEr/Monster-79?id=7608"),
     )
