@@ -30,7 +30,7 @@ class RealbooruTagExtractor(booru.TagMixin, RealbooruExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?realbooru\.com/(?:index\.php)?"
                r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")
     test = ("https://realbooru.com/index.php?page=post&s=list&tags=wine", {
-        "count": 64,
+        "count": ">= 64",
     })
 
 

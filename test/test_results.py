@@ -28,6 +28,7 @@ TRAVIS_SKIP = {
 # temporary issues, etc.
 BROKEN = {
     "35photo",
+    "furaffinity",
     "mangapark",
     "photobucket",
 }

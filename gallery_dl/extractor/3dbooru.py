@@ -67,7 +67,7 @@ class _3dbooruPopularExtractor(booru.MoebooruPopularMixin, _3dbooruExtractor):
                r"/post/popular_(?P<scale>by_(?:day|week|month)|recent)"
                r"(?:\?(?P<query>[^#]*))?")
     test = ("http://behoimi.org/post/popular_by_month?month=2&year=2013", {
-        "url": "8b1a5c5b7a10f8f5d3d6124d1aabfee0277078cb",
+        "pattern": r"http://behoimi\.org/data/../../[0-9a-f]{32}\.jpg",
         "count": 20,
     })
 

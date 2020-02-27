@@ -61,7 +61,6 @@ class HiperdexBase():
 
 class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     """Extractor for manga chapters from hiperdex.com"""
-    archive_fmt = "{manga}_{chapter}_{page}"
     pattern = (r"(?:https?://)?(?:www\.)?hiperdex\.com"
                r"(/manga/([^/?&#]+)/([^/?&#]+))")
     test = ("https://hiperdex.com/manga/domestic-na-kanojo/154-5/", {
