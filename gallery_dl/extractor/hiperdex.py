@@ -53,7 +53,7 @@ class HiperdexBase():
         chapter, _, minor = chapter.partition("-")
         data = {
             "chapter"      : text.parse_int(chapter),
-            "chapter-minor": "." + minor if minor and minor != "end" else "",
+            "chapter_minor": "." + minor if minor and minor != "end" else "",
         }
         data.update(self.manga_data(self.manga.lower()))
         return data
@@ -69,7 +69,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
             "artist" : "Sasuga Kei",
             "author" : "Sasuga Kei",
             "chapter": 154,
-            "chapter-minor": ".5",
+            "chapter_minor": ".5",
             "description": "re:Natsuo Fujii is in love with his teacher, Hina",
             "genre"  : list,
             "manga"  : "Domestic na Kanojo",
@@ -104,7 +104,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
             "artist" : "Bolp",
             "author" : "Abyo4",
             "chapter": int,
-            "chapter-minor": "",
+            "chapter_minor": "",
             "description": "re:I didn’t think much of the creepy girl in ",
             "genre"  : list,
             "manga"  : "You're Not That Special!",
