@@ -29,41 +29,72 @@ class BcyExtractor(Extractor):
     def items(self):
         sub = re.compile(r"^https?://p\d+-bcy\.byteimg\.com/img/banciyuan").sub
         iroot = "https://img-bcy-qn.pstatp.com"
+        noop = self.config("noop")
 
-        for post in self.posts():
-            if not post["image_list"]:
+        for post_id in self.posts():
+            post = self._parse_post(post_id)
+            if not post:
                 continue
 
-            data = {
-                "user": {
-                    "id"     : post["uid"],
-                    "name"   : post["uname"],
-                    "avatar" : sub(iroot, post["avatar"].partition("~")[0]),
-                },
-                "post": {
-                    "id"     : text.parse_int(post["item_id"]),
-                    "tags"   : [t["tag_name"] for t in post["post_tags"]],
-                    "date"   : text.parse_timestamp(post["ctime"]),
-                    "parody" : post["work"],
-                    "content": post["plain"],
-                    "likes"  : post["like_count"],
-                    "shares" : post["share_count"],
-                    "replies": post["reply_count"],
-                },
-            }
+            yield Message.Directory, post
+            for post["num"], image in enumerate(post["_multi"], 1):
+                post["id"] = image["mid"]
+                post["width"] = image["w"]
+                post["height"] = image["h"]
 
-            yield Message.Directory, data
-            for data["num"], image in enumerate(post["image_list"], 1):
-                data["id"] = image["mid"]
-                data["width"] = image["w"]
-                data["height"] = image["h"]
+                url = image["path"].partition("~")[0]
+                text.nameext_from_url(url, post)
 
-                url = image["path"]
-                if not url.startswith(iroot):
-                    url = sub(iroot, url.partition("~")[0])
-                data["url"] = url
+                if post["extension"]:
+                    if not url.startswith(iroot):
+                        url = sub(iroot, url)
+                    post["filter"] = ""
+                    yield Message.Url, url, post
 
-                yield Message.Url, url, text.nameext_from_url(url, data)
+                else:
+                    post["filter"] = "watermark"
+                    yield Message.Url, image["origin"], post
+
+                    if noop:
+                        post["extension"] = ""
+                        post["filter"] = "noop"
+                        yield Message.Url, image["original_path"], post
+
+    def _parse_post(self, post_id):
+        url = "{}/item/detail/{}".format(self.root, post_id)
+        response = self.request(url)
+        if response.status_code >= 400:
+            return None
+
+        data = json.loads(
+            text.extract(response.text, 'JSON.parse("', '");')[0]
+            .replace('\\\\u002F', '/')
+            .replace('\\"', '"')
+        )["detail"]
+
+        post = data["post_data"]
+        if not post["multi"]:
+            return None
+        user = data["detail_user"]
+
+        return {
+            "user": {
+                "id"     : user["uid"],
+                "name"   : user["uname"],
+                "avatar" : user["avatar"],
+            },
+            "post": {
+                "id"     : text.parse_int(post["item_id"]),
+                "tags"   : [t["tag_name"] for t in post["post_tags"]],
+                "date"   : text.parse_timestamp(post["ctime"]),
+                "parody" : text.parse_unicode_escapes(post["work"]),
+                "content": post["plain"],
+                "likes"  : post["like_count"],
+                "shares" : post["share_count"],
+                "replies": post["reply_count"],
+            },
+            "_multi": post["multi"],
+        }
 
 
 class BcyUserExtractor(BcyExtractor):
@@ -88,7 +119,8 @@ class BcyUserExtractor(BcyExtractor):
 
             item = None
             for item in data["data"]["items"]:
-                yield item["item_detail"]
+                if item["item_detail"]["multi"]:
+                    yield item["item_detail"]["item_id"]
 
             if not item:
                 return
@@ -106,7 +138,7 @@ class BcyPostExtractor(BcyExtractor):
             "user": {
                 "id"     : 1933712,
                 "name"   : "wukloo",
-                "avatar" : "re:https://img-bcy-qn.pstatp.com/Public/Upload/",
+                "avatar" : str,
             },
             "post": {
                 "id"     : 6355835481002893070,
@@ -128,17 +160,4 @@ class BcyPostExtractor(BcyExtractor):
     })
 
     def posts(self):
-        url = self.root + "/item/detail/" + self.item_id
-        page = self.request(url).text
-
-        data = json.loads(
-            text.extract(page, 'JSON.parse("', '");')[0]
-            .replace('\\\\u002F', '/')
-            .replace('\\"', '"')
-        )["detail"]
-
-        post = data["post_data"]
-        post["image_list"] = post["multi"]
-        post["plain"] = text.parse_unicode_escapes(post["plain"])
-        post.update(data["detail_user"])
-        return (post,)
+        return (self.item_id,)
