@@ -203,8 +203,8 @@ class PostMixin():
         self.params["tags"] = "id:" + self.post
 
 
-class PopularMixin():
-    """Extraction and metadata handling for Danbooru v2"""
+class MoebooruPopularMixin():
+    """Extraction and metadata handling for Moebooru and Danbooru v1"""
     subcategory = "popular"
     directory_fmt = ("{category}", "popular", "{scale}", "{date}")
     archive_fmt = "P_{scale[0]}_{date}_{id}"
@@ -214,36 +214,19 @@ class PopularMixin():
     def __init__(self, match):
         super().__init__(match)
         self.params.update(text.parse_query(match.group("query")))
+        self.scale = match.group("scale")
 
     def get_metadata(self, fmt="%Y-%m-%d"):
-        date = self.get_date() or datetime.datetime.utcnow().strftime(fmt)
+        date = self.get_date() or datetime.date.today().isoformat()
         scale = self.get_scale() or "day"
 
         if scale == "week":
-            dt = datetime.datetime.strptime(date, fmt)
-            dt -= datetime.timedelta(days=dt.weekday())
-            date = dt.strftime(fmt)
+            date = datetime.date.fromisoformat(date)
+            date = (date - datetime.timedelta(days=date.weekday())).isoformat()
         elif scale == "month":
             date = date[:-3]
 
         return {"date": date, "scale": scale}
-
-    def get_scale(self):
-        if "scale" in self.params:
-            return self.params["scale"]
-        return None
-
-    def get_date(self):
-        if "date" in self.params:
-            return self.params["date"][:10]
-        return None
-
-
-class MoebooruPopularMixin(PopularMixin):
-    """Extraction and metadata handling for Moebooru and Danbooru v1"""
-    def __init__(self, match):
-        super().__init__(match)
-        self.scale = match.group("scale")
 
     def get_date(self):
         if "year" in self.params:
