@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message, SharedConfigMixin
 from .. import text
+import datetime
 
 
 BASE_PATTERN = (
@@ -31,7 +32,6 @@ class DanbooruExtractor(SharedConfigMixin, Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.root = "https://{}.donmai.us".format(match.group(1))
-        self.api_url = self.root + "/posts.json"
         self.ugoira = self.config("ugoira", True)
         self.params = {}
 
@@ -74,17 +74,24 @@ class DanbooruExtractor(SharedConfigMixin, Extractor):
         return {}
 
     def posts(self):
+        return self._pagination(self.root + "/posts.json")
+
+    def _pagination(self, url, pagenum=False):
         params = self.params.copy()
         params["limit"] = self.per_page
         params["page"] = self.page_start
 
         while True:
-            posts = self.request(self.api_url, params=params).json()
+            posts = self.request(url, params=params).json()
             yield from posts
 
             if len(posts) < self.per_page:
                 return
-            params["page"] = "b{}".format(posts[-1]["id"])
+
+            if pagenum:
+                params["page"] += 1
+            else:
+                params["page"] = "b{}".format(posts[-1]["id"])
 
 
 class DanbooruTagExtractor(DanbooruExtractor):
@@ -92,14 +99,14 @@ class DanbooruTagExtractor(DanbooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/posts\?(?:[^&#]*&)*tags=(?P<tags>[^&#]+)"
+    pattern = BASE_PATTERN + r"/posts\?(?:[^&#]*&)*tags=([^&#]+)"
     test = (
         ("https://danbooru.donmai.us/posts?tags=bonocho", {
             "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
         }),
         # test page transitions
-        ("https://danbooru.donmai.us/posts?tags=canvas_%28cocktail_soft%29", {
-            "count": ">= 50",
+        ("https://danbooru.donmai.us/posts?tags=mushishi", {
+            "count": ">= 300",
         }),
         ("https://hijiribe.donmai.us/posts?tags=bonocho"),
         ("https://sonohara.donmai.us/posts?tags=bonocho"),
@@ -132,6 +139,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     def metadata(self):
         url = "{}/pools/{}.json".format(self.root, self.pool_id)
         pool = self.request(url).json()
+        pool["name"] = pool["name"].replace("_", " ")
         del pool["post_ids"]
         return {"pool": pool}
 
@@ -160,21 +168,38 @@ class DanbooruPostExtractor(DanbooruExtractor):
         return (self.request(url).json(),)
 
 
-r'''
-class DanbooruPopularExtractor(booru.PopularMixin, DanbooruExtractor):
+class DanbooruPopularExtractor(DanbooruExtractor):
     """Extractor for popular images from danbooru"""
-    pattern = BASE_PATTERN + r"/explore/posts/popular(?:\?(?P<query>[^#]*))?"
+    subcategory = "popular"
+    directory_fmt = ("{category}", "popular", "{scale}", "{date}")
+    archive_fmt = "P_{scale[0]}_{date}_{id}"
+    pattern = BASE_PATTERN + r"/explore/posts/popular(?:\?([^#]*))?"
     test = (
         ("https://danbooru.donmai.us/explore/posts/popular"),
         (("https://danbooru.donmai.us/explore/posts/popular"
-          "?date=2013-06-06+03%3A34%3A22+-0400&scale=week"), {
-            "count": ">= 1",
+          "?date=2013-06-06&scale=week"), {
+            "range": "1-120",
+            "count": 120,
         }),
     )
 
     def __init__(self, match):
-        super().__init__(match)
-        urlfmt = "{scheme}://{subdomain}.donmai.us/explore/posts/popular.json"
-        self.api_url = urlfmt.format(
-            scheme=self.scheme, subdomain=self.subdomain)
-'''
+        DanbooruExtractor.__init__(self, match)
+        self.params.update(text.parse_query(match.group(2)))
+
+    def metadata(self):
+        self.page_start = self.page_start or 1
+        scale = self.params.get("scale", "day")
+        date = self.params.get("date") or datetime.date.today().isoformat()
+
+        if scale == "week":
+            date = datetime.date.fromisoformat(date)
+            date = (date - datetime.timedelta(days=date.weekday())).isoformat()
+        elif scale == "month":
+            date = date[:-3]
+
+        return {"date": date, "scale": scale}
+
+    def posts(self):
+        url = self.root + "/explore/posts/popular.json"
+        return self._pagination(url, True)
