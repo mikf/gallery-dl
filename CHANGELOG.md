@@ -1,6 +1,21 @@
 # Changelog
 
-## Unreleased
+## 1.13.1 - 2020-03-01
+### Additions
+- [hentaihand] add extractors ([#605](https://github.com/mikf/gallery-dl/issues/605))
+- [hiperdex] add chapter and manga extractors ([#606](https://github.com/mikf/gallery-dl/issues/606))
+- [oauth] implement option to write DeviantArt refresh-tokens to cache ([#616](https://github.com/mikf/gallery-dl/issues/616))
+- [downloader:http] add more MIME types for `.bmp` and `.rar` files ([#621](https://github.com/mikf/gallery-dl/issues/621), [#628](https://github.com/mikf/gallery-dl/issues/628))
+- warn about expired cookies
+### Fixes
+- [bcy] fix partial image URLs ([#613](https://github.com/mikf/gallery-dl/issues/613))
+- [danbooru] fix Ugoira downloads and metadata
+- [deviantart] check availability of `/intermediary/` URLs ([#609](https://github.com/mikf/gallery-dl/issues/609))
+- [hitomi] follow multiple redirects & fix image URLs
+- [piczel] improve and update
+- [tumblr] replace `-` with ` ` in tag searches ([#611](https://github.com/mikf/gallery-dl/issues/611))
+- [vsco] update gallery URL pattern
+- fix `--verbose` and `--quiet` command-line options
 
 ## 1.13.0 - 2020-02-16
 ### Additions
