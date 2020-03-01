@@ -30,6 +30,7 @@ BROKEN = {
     "35photo",
     "furaffinity",
     "mangapark",
+    "mangoxo",
     "photobucket",
 }
 

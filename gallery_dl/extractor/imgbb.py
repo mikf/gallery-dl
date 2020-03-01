@@ -111,13 +111,13 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
     test = (
         ("https://ibb.co/album/i5PggF", {
             "range": "1-80",
-            "url": "570872b6eb3e11cf10b618922b780fed204c3f09",
-            "keyword": "0f2fc956728c36540c577578bd168d2459d6ae4b",
+            "url": "70afec9fcc3a6de62a6b644b487d892d8d47cf1a",
+            "keyword": "569e1d88ebdd27655387559cdf1cd526a3e1ab69",
         }),
         ("https://ibb.co/album/i5PggF?sort=title_asc", {
             "range": "1-80",
-            "url": "e2e387b8fdb3690bd75d804d0af2833112e385cd",
-            "keyword": "a307fc9d2085bdc0eb7c538c8d866c59198d460c",
+            "url": "a2dfc58fe3348fa37e242082bd5a85eaa490d0a5",
+            "keyword": "5bb79c82411c3770d673fac64a0a98fa28111c3b",
         }),
         # no user data (#471)
         ("https://ibb.co/album/kYKpwF", {
@@ -192,12 +192,12 @@ class ImgbbImageExtractor(ImgbbExtractor):
     subcategory = "image"
     pattern = r"(?:https?://)?ibb\.co/(?!album/)([^/?&#]+)"
     test = ("https://ibb.co/fUqh5b", {
-        "pattern": "https://image.ibb.co/dY5FQb/Arundel-Ireeman-5.jpg",
+        "pattern": r"https://i\.ibb\.co/g3kvx80/Arundel-Ireeman-5\.jpg",
         "content": "c5a0965178a8b357acd8aa39660092918c63795e",
         "keyword": {
             "id"    : "fUqh5b",
             "title" : "Arundel Ireeman 5",
-            "url"   : "https://image.ibb.co/dY5FQb/Arundel-Ireeman-5.jpg",
+            "url"   : "https://i.ibb.co/g3kvx80/Arundel-Ireeman-5.jpg",
             "width" : 960,
             "height": 719,
             "user"  : "folkie",
