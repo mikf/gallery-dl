@@ -249,6 +249,7 @@ MIMETYPE_MAP = {
     "application/zip": "zip",
     "application/x-zip": "zip",
     "application/x-zip-compressed": "zip",
+    "application/rar": "rar",
     "application/x-rar": "rar",
     "application/x-rar-compressed": "rar",
     "application/x-7z-compressed": "7z",
