@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.13.1 - 2020-03-01
 ### Additions
 - [hentaihand] add extractors ([#605](https://github.com/mikf/gallery-dl/issues/605))
