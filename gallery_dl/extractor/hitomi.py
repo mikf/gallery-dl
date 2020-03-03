@@ -10,7 +10,6 @@
 
 from .common import GalleryExtractor
 from .. import text, util
-import string
 import json
 
 
@@ -24,7 +23,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
     test = (
         ("https://hitomi.la/galleries/867789.html", {
             "pattern": r"https://[a-c]a.hitomi.la/images/./../[0-9a-f]+.jpg",
-            "keyword": "6701f8f588f119ef84cd29bdf99a399417b0a6a2",
+            "keyword": "3314105a0b344ea1461c43257b14b0de415b88bb",
             "count": 16,
         }),
         # download test
@@ -55,56 +54,43 @@ class HitomiGalleryExtractor(GalleryExtractor):
     )
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
-        url = "https://ltn.hitomi.la/galleries/{}.js".format(self.gallery_id)
+        gid = match.group(1)
+        url = "https://ltn.hitomi.la/galleries/{}.js".format(gid)
         GalleryExtractor.__init__(self, match, url)
+        self.data = None
         self.session.headers["Referer"] = "{}/reader/{}.html".format(
-            self.root, self.gallery_id)
+            self.root, gid)
 
-    def metadata(self, _):
-        # try galleries page first
-        url = "{}/galleries/{}.html".format(self.root, self.gallery_id)
-        response = self.request(url, fatal=False)
+    def metadata(self, page):
+        self.data = data = json.loads(page.partition("=")[2])
 
-        # follow redirects
-        while b"<title>Redirect</title>" in response.content:
-            url = text.extract(response.text, "href='", "'")[0]
-            if not url.startswith("http"):
-                url = text.urljoin(self.root, url)
-            response = self.request(url, fatal=False)
+        language = data.get("language")
+        if language:
+            language = language.capitalize()
 
-        # fallback to reader page
-        if response.status_code >= 400:
-            url = "{}/reader/{}.html".format(self.root, self.gallery_id)
-            page = self.request(url).text
-            return {
-                "gallery_id": text.parse_int(self.gallery_id),
-                "title": text.unescape(text.extract(
-                    page, "<title>", "<")[0].rpartition(" | ")[0]),
-            }
+        tags = []
+        for tinfo in data["tags"]:
+            tag = tinfo["tag"]
+            if tinfo.get("female"):
+                tag = "female:" + tag
+            elif tinfo.get("male"):
+                tag = "male:" + tag
+            tags.append(tag)
 
-        page = response.text
-        extr = text.extract_from(page, page.index('<h1><a href="/reader/'))
-        data = {
-            "gallery_id": text.parse_int(self.gallery_id),
-            "title"     : text.unescape(extr('.html">', '<').strip()),
-            "artist"    : self._prep(extr('<h2>', '</h2>')),
-            "group"     : self._prep(extr('<td>Group</td><td>', '</td>')),
-            "type"      : self._prep_1(extr('<td>Type</td><td>', '</td>')),
-            "language"  : self._prep_1(extr('<td>Language</td><td>', '</td>')),
-            "parody"    : self._prep(extr('<td>Series</td><td>', '</td>')),
-            "characters": self._prep(extr('<td>Characters</td><td>', '</td>')),
-            "tags"      : self._prep(extr('<td>Tags</td><td>', '</td>')),
-            "date"      : self._date(extr('<span class="date">', '</span>')),
+        return {
+            "gallery_id": text.parse_int(data["id"]),
+            "title"     : data["title"],
+            "type"      : data["type"],
+            "language"  : language,
+            "lang"      : util.language_to_code(language),
+            "tags"      : tags,
+            "date"      : text.parse_datetime(
+                data["date"] + ":00", "%Y-%m-%d %H:%M:%S%z"),
         }
-        if data["language"] == "N/a":
-            data["language"] = None
-        data["lang"] = util.language_to_code(data["language"])
-        return data
 
-    def images(self, page):
+    def images(self, _):
         result = []
-        for image in json.loads(page.partition("=")[2])["files"]:
+        for image in self.data["files"]:
             ihash = image["hash"]
             idata = text.nameext_from_url(image["name"])
 
@@ -120,18 +106,3 @@ class HitomiGalleryExtractor(GalleryExtractor):
             )
             result.append((url, idata))
         return result
-
-    @staticmethod
-    def _prep(value):
-        return [
-            text.unescape(string.capwords(v))
-            for v in text.extract_iter(value or "", '.html">', '<')
-        ]
-
-    @staticmethod
-    def _prep_1(value):
-        return text.remove_html(value).capitalize()
-
-    @staticmethod
-    def _date(value):
-        return text.parse_datetime(value + ":00", "%Y-%m-%d %H:%M:%S%z")
