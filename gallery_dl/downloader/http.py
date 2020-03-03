@@ -193,6 +193,9 @@ class HttpDownloader(DownloaderBase):
         mtype = response.headers.get("Content-Type", "image/jpeg")
         mtype = mtype.partition(";")[0]
 
+        if "/" not in mtype:
+            mtype = "image/" + mtype
+
         if mtype in MIMETYPE_MAP:
             return MIMETYPE_MAP[mtype]
 
