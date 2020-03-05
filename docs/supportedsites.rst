@@ -117,7 +117,7 @@ SmugMug              https://www.smugmug.com/            |smugmug-C|            
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag-Searches, User Profiles          Optional (OAuth)
-Twitter              https://twitter.com/                Media Timelines, Search Results, Timelines, Tweets Optional
+Twitter              https://twitter.com/                |twitter-C|                                        Optional
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  |wallhaven-A|
 Warosu               https://warosu.org/                 Threads
@@ -151,5 +151,6 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
+.. |twitter-C| replace:: Bookmarks, Media Timelines, Search Results, Timelines, Tweets
 .. |wallhaven-A| replace:: Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 .. |yuki-S| replace:: yuki.la 4chan archive
