@@ -406,6 +406,81 @@ class TwitterTweetExtractor(TwitterExtractor):
         return (page[beg:end],)
 
 
+class TwitterBookmarkExtractor(TwitterExtractor):
+    """Extractor for bookmarked tweets"""
+    subcategory = "bookmark"
+    pattern = r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/i/bookmarks()"
+    test = ("https://twitter.com/i/bookmarks",)
+
+    def items(self):
+        self.login()
+        if not self.logged_in:
+            raise exception.AuthorizationError("Login required")
+        for cookie in self.session.cookies:
+            cookie.expires = None
+
+        url = "https://api.twitter.com/2/timeline/bookmark.json"
+        params = {
+            "include_profile_interstitial_type": "1",
+            "include_blocking": "1",
+            "include_blocked_by": "1",
+            "include_followed_by": "1",
+            "include_want_retweets": "1",
+            "include_mute_edge": "1",
+            "include_can_dm": "1",
+            "include_can_media_tag": "1",
+            "skip_status": "1",
+            "cards_platform": "Web-12",
+            "include_cards": "1",
+            "include_composer_source": "true",
+            "include_ext_alt_text": "true",
+            "include_reply_count": "1",
+            "tweet_mode": "extended",
+            "include_entities": "true",
+            "include_user_entities": "true",
+            "include_ext_media_color": "true",
+            "include_ext_media_availability": "true",
+            "send_error_codes": "true",
+            "simple_quoted_tweets": "true",
+            "count": "100",
+            "cursor": None,
+            "ext": "mediaStats%2CcameraMoment",
+        }
+        headers = {
+            "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejR"
+                             "COuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu"
+                             "4FA33AGWWjCpTnA",
+            "Origin": self.root,
+            "Referer": self.root + "/i/bookmarks",
+            "x-csrf-token": self.session.cookies.get("ct0"),
+            "x-twitter-active-user": "yes",
+            "x-twitter-auth-type": "Auth2Session",
+            "x-twitter-client-language": "en",
+        }
+
+        while True:
+            response = self.request(
+                url, params=params, headers=headers, fatal=False)
+            if response.status_code >= 400:
+                raise exception.StopExtraction(response.text)
+            data = response.json()
+            tweets = data["globalObjects"]["tweets"]
+
+            if not tweets:
+                return
+            for tweet_id, tweet_data in tweets.items():
+                tweet_url = "{}/i/web/status/{}".format(self.root, tweet_id)
+                tweet_data["_extractor"] = TwitterTweetExtractor
+                yield Message.Queue, tweet_url, tweet_data
+
+            inst = data["timeline"]["instructions"][0]
+            for entry in inst["addEntries"]["entries"]:
+                if entry["entryId"].startswith("cursor-bottom-"):
+                    params["cursor"] = \
+                        entry["content"]["operation"]["cursor"]["value"]
+                    break
+
+
 @memcache()
 def _guest_token(extr, headers):
     return extr.request(
