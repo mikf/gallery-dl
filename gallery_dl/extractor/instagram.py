@@ -130,6 +130,7 @@ class InstagramExtractor(Extractor):
             'owner_id': media['owner']['id'],
             'username': media['owner']['username'],
             'fullname': media['owner']['full_name'],
+            "post_shortcode": media['shortcode'],
             'description': text.parse_unicode_escapes('\n'.join(
                 edge['node']['text']
                 for edge in media['edge_media_to_caption']['edges']
@@ -313,6 +314,7 @@ class InstagramImageExtractor(InstagramExtractor):
                 "likes": int,
                 "media_id": "1922949326347663701",
                 "shortcode": "BqvsDleB3lV",
+                "post_shortcode": "BqvsDleB3lV",
                 "typename": "GraphImage",
                 "username": "instagram",
                 "width": int,
@@ -325,6 +327,7 @@ class InstagramImageExtractor(InstagramExtractor):
             "keyword": {
                 "sidecar_media_id": "1875629777499953996",
                 "sidecar_shortcode": "BoHk1haB5tM",
+                "post_shortcode": "BoHk1haB5tM",
                 "likes": int,
                 "username": "instagram",
             }
