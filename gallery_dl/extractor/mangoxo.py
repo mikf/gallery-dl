@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
 import hashlib
+import time
 
 
 class MangoxoExtractor(Extractor):
@@ -35,26 +36,32 @@ class MangoxoExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        page = self.request(self.root + "/login/").text
-        token = text.extract(page, 'id="loginToken" value="', '"')[0]
-        if not token:
-            self.log.debug("failed to extract 'loginToken'")
-
-        url = self.root + "/login/loginxmm"
+        url = self.root + "/api/login"
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "Referer": self.root + "/login",
         }
-        data = {
-            "name": username,
-            "password": hashlib.md5(password.encode()).hexdigest(),
-            "loginToken": token,
-        }
+        data = self._sign_by_md5(username, password)
         response = self.request(url, method="POST", headers=headers, data=data)
 
-        if response.json().get("result") != "1":
-            raise exception.AuthenticationError()
+        data = response.json()
+        if str(data.get("result")) != "1":
+            raise exception.AuthenticationError(data.get("msg"))
         return {"SESSION": self.session.cookies.get("SESSION")}
+
+    @staticmethod
+    def _sign_by_md5(username, password):
+        # https://dns.mangoxo.com/libs/plugins/phoenix-ui/js/phoenix-ui.js
+        params = [
+            ("username" , username),
+            ("password" , password),
+            ("timestamp", str(int(time.time()))),
+        ]
+        query = "&".join("=".join(item) for item in sorted(params))
+        query += "&secretKey=996293536"
+        sign = hashlib.md5(query.encode()).hexdigest()
+        params.append(("sign", sign.upper()))
+        return params
 
     @staticmethod
     def _total_pages(page):
