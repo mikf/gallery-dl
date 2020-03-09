@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
 from datetime import datetime, timedelta
+import itertools
 import hashlib
 import time
 
@@ -101,6 +102,13 @@ class PixivUserExtractor(PixivExtractor):
           "&tag=%E6%89%8B%E3%81%B6%E3%82%8D"), {
             "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
         }),
+        # avatar (#595, 623)
+        ("https://www.pixiv.net/en/users/173530", {
+            "options": (("avatar", True),),
+            "content": "22af450d4dbaf4973d370f164f66f48c7382a6de",
+            "range": "1",
+        }),
+        # deleted account
         ("http://www.pixiv.net/member_illust.php?id=173531", {
             "count": 0,
         }),
@@ -134,6 +142,27 @@ class PixivUserExtractor(PixivExtractor):
                 work for work in works
                 if tag in [t["name"].lower() for t in work["tags"]]
             )
+
+        if self.config("avatar"):
+            user = self.api.user_detail(self.user_id)
+            url = user["profile_image_urls"]["medium"].replace("_170.", ".")
+            avatar = {
+                "create_date"     : None,
+                "height"          : 0,
+                "id"              : "avatar",
+                "image_urls"      : None,
+                "meta_pages"      : (),
+                "meta_single_page": {"original_image_url": url},
+                "page_count"      : 1,
+                "sanity_level"    : 0,
+                "tags"            : (),
+                "title"           : "avatar",
+                "type"            : "avatar",
+                "user"            : user,
+                "width"           : 0,
+                "x_restrict"      : 0,
+            }
+            works = itertools.chain((avatar,), works)
 
         return works
 
