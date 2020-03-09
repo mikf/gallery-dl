@@ -887,6 +887,15 @@ Description Download subalbums.
 =========== =====
 
 
+extractor.pixiv.user.avatar
+---------------------------
+=========== =====
+Type        ``bool``
+Default     ``false``
+Description Download user avatars.
+=========== =====
+
+
 extractor.pixiv.ugoira
 ----------------------
 =========== =====
