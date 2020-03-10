@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import itertools
 import json
 
 
@@ -334,3 +335,53 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
             (NewgroundsAudioExtractor , base + "audio"),
             (NewgroundsMoviesExtractor, base + "movies"),
         ), ("art",))
+
+
+class NewgroundsFavoriteExtractor(NewgroundsExtractor):
+    """Extractor for posts favorited by a newgrounds user"""
+    subcategory = "favorite"
+    directory_fmt = ("{category}", "{user}", "Favorites")
+    pattern = (r"(?:https?://)?([^.]+)\.newgrounds\.com"
+               r"/favorites(?:/(art|audio|movies))?/?")
+    test = (
+        ("https://tomfulp.newgrounds.com/favorites/art", {
+            "range": "1-10",
+            "count": ">= 10",
+        }),
+        ("https://tomfulp.newgrounds.com/favorites/audio"),
+        ("https://tomfulp.newgrounds.com/favorites/movies"),
+        ("https://tomfulp.newgrounds.com/favorites/"),
+    )
+
+    def __init__(self, match):
+        NewgroundsExtractor.__init__(self, match)
+        self.kind = match.group(2)
+
+    def posts(self):
+        if self.kind:
+            return self._pagination(self.kind)
+        return itertools.chain.from_iterable(
+            self._pagination(k) for k in ("art", "audio", "movies")
+        )
+
+    def _pagination(self, kind):
+        num = 1
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": self.user_root,
+        }
+
+        while True:
+            url = "{}/favorites/{}/{}".format(self.user_root, kind, num)
+            response = self.request(url, headers=headers)
+            if response.history:
+                return
+
+            favs = list(text.extract_iter(
+                response.text, 'href="//www.newgrounds.com', '"'))
+            for path in favs:
+                yield self.root + path
+            if len(favs) < 24:
+                return
+            num += 1
