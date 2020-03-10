@@ -338,19 +338,20 @@ class DownloadJob(Job):
 
     def initialize(self, kwdict=None):
         """Delayed initialization of PathFormat, etc."""
-        self.pathfmt = util.PathFormat(self.extractor)
+        config = self.extractor.config
+        pathfmt = self.pathfmt = util.PathFormat(self.extractor)
         if kwdict:
-            self.pathfmt.set_directory(kwdict)
+            pathfmt.set_directory(kwdict)
 
-        self.sleep = self.extractor.config("sleep")
-        if not self.extractor.config("download", True):
-            self.download = self.pathfmt.fix_extension
+        self.sleep = config("sleep")
+        if not config("download", True):
+            self.download = pathfmt.fix_extension
 
-        skip = self.extractor.config("skip", True)
+        skip = config("skip", True)
         if skip:
             self._skipexc = None
             if skip == "enumerate":
-                self.pathfmt.check_file = self.pathfmt._enum_file
+                pathfmt.check_file = pathfmt._enum_file
             elif isinstance(skip, str):
                 skip, _, smax = skip.partition(":")
                 if skip == "abort":
@@ -360,9 +361,9 @@ class DownloadJob(Job):
                 self._skipcnt = 0
                 self._skipmax = text.parse_int(smax)
         else:
-            self.pathfmt.exists = lambda x=None: False
+            pathfmt.exists = lambda x=None: False
 
-        archive = self.extractor.config("archive")
+        archive = config("archive")
         if archive:
             path = util.expand_path(archive)
             try:
@@ -374,15 +375,16 @@ class DownloadJob(Job):
             else:
                 self.extractor.log.debug("Using download archive '%s'", path)
 
-        postprocessors = self.extractor.config("postprocessors")
+        postprocessors = config("postprocessors")
         if postprocessors:
             pp_list = []
+            category = self.extractor.category
 
             for pp_dict in postprocessors:
                 whitelist = pp_dict.get("whitelist")
                 blacklist = pp_dict.get("blacklist")
-                if (whitelist and self.extractor.category not in whitelist or
-                        blacklist and self.extractor.category in blacklist):
+                if (whitelist and category not in whitelist or
+                        blacklist and category in blacklist):
                     continue
                 name = pp_dict.get("name")
                 pp_cls = postprocessor.find(name)
@@ -390,7 +392,7 @@ class DownloadJob(Job):
                     postprocessor.log.warning("module '%s' not found", name)
                     continue
                 try:
-                    pp_obj = pp_cls(self.pathfmt, pp_dict)
+                    pp_obj = pp_cls(pathfmt, pp_dict)
                 except Exception as exc:
                     postprocessor.log.error(
                         "'%s' initialization failed:  %s: %s",
