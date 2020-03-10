@@ -36,16 +36,17 @@ class NewgroundsExtractor(Extractor):
 
         for post_url in self.posts():
             try:
-                file = self.extract_post(post_url)
-                url = file["url"]
-            #  except Exception:
+                post = self.extract_post(post_url)
+                url = post.get("url")
             except OSError:
                 url = None
-            if not url:
-                self.log.warning("Unable to get download URL for %s", post_url)
-                continue
-            yield Message.Directory, file
-            yield Message.Url, url, text.nameext_from_url(url, file)
+
+            if url:
+                yield Message.Directory, post
+                yield Message.Url, url, text.nameext_from_url(url, post)
+            else:
+                self.log.warning(
+                    "Unable to get download URL for '%s'", post_url)
 
     def posts(self):
         """Return urls of all relevant image pages"""
@@ -83,7 +84,10 @@ class NewgroundsExtractor(Extractor):
         }
 
     def extract_post(self, post_url):
-        page = self.request(post_url).text
+        response = self.request(post_url, fatal=False)
+        if response.status_code >= 400:
+            return {}
+        page = response.text
         extr = text.extract_from(page)
 
         if "/art/view/" in post_url:
@@ -98,8 +102,7 @@ class NewgroundsExtractor(Extractor):
         data["favorites"] = text.parse_int(extr(
             'id="faves_load">', '<').replace(",", ""))
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
-        data["tags"] = text.split_html(extr(
-            '<dd class="tags">', '</dd>'))
+        data["tags"] = text.split_html(extr('<dd class="tags">', '</dd>'))
         data["artist"] = [
             text.extract(user, '//', '.')[0]
             for user in text.extract_iter(page, '<div class="item-user">', '>')
