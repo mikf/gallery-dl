@@ -21,6 +21,7 @@ class TwitterExtractor(Extractor):
     directory_fmt = ("{category}", "{user[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
+    cookiedomain = ".twitter.com"
     root = "https://twitter.com"
     sizes = (":orig", ":large", ":medium", ":small")
     user_agent = ("Mozilla/5.0 (Windows NT 6.1; WOW64; "
@@ -135,10 +136,14 @@ class TwitterExtractor(Extractor):
             "remember_me"               : "1",
         }
         response = self.request(url, method="POST", headers=headers, data=data)
-
         if "/error" in response.url:
             raise exception.AuthenticationError()
-        return self.session.cookies
+
+        return {
+            cookie.name: cookie.value
+            for cookie in self.session.cookies
+            if cookie.domain and "twitter.com" in cookie.domain
+        }
 
     def _data_from_tweet(self, tweet):
         extr = text.extract_from(tweet)
