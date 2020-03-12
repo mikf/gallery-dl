@@ -10,6 +10,7 @@
 
 from .common import GalleryExtractor
 from .. import text, util
+import string
 import json
 
 
@@ -23,7 +24,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
     test = (
         ("https://hitomi.la/galleries/867789.html", {
             "pattern": r"https://[a-c]a.hitomi.la/images/./../[0-9a-f]+.jpg",
-            "keyword": "3314105a0b344ea1461c43257b14b0de415b88bb",
+            "keyword": "6701f8f588f119ef84cd29bdf99a399417b0a6a2",
             "count": 16,
         }),
         # download test
@@ -57,40 +58,75 @@ class HitomiGalleryExtractor(GalleryExtractor):
         gid = match.group(1)
         url = "https://ltn.hitomi.la/galleries/{}.js".format(gid)
         GalleryExtractor.__init__(self, match, url)
-        self.data = None
+        self.info = None
         self.session.headers["Referer"] = "{}/reader/{}.html".format(
             self.root, gid)
 
     def metadata(self, page):
-        self.data = data = json.loads(page.partition("=")[2])
+        self.info = info = json.loads(page.partition("=")[2])
 
-        language = data.get("language")
+        data = self._data_from_gallery_info(info)
+        if self.config("metadata", True):
+            data.update(self._data_from_gallery_page(info))
+        return data
+
+    def _data_from_gallery_info(self, info):
+        language = info.get("language")
         if language:
             language = language.capitalize()
 
         tags = []
-        for tinfo in data["tags"]:
+        for tinfo in info["tags"]:
             tag = tinfo["tag"]
             if tinfo.get("female"):
-                tag = "female:" + tag
+                tag += " ♀"
             elif tinfo.get("male"):
-                tag = "male:" + tag
-            tags.append(tag)
+                tag += " ♂"
+            tags.append(string.capwords(tag))
 
         return {
-            "gallery_id": text.parse_int(data["id"]),
-            "title"     : data["title"],
-            "type"      : data["type"],
+            "gallery_id": text.parse_int(info["id"]),
+            "title"     : info["title"],
+            "type"      : info["type"].capitalize(),
             "language"  : language,
             "lang"      : util.language_to_code(language),
             "tags"      : tags,
             "date"      : text.parse_datetime(
-                data["date"] + ":00", "%Y-%m-%d %H:%M:%S%z"),
+                info["date"] + ":00", "%Y-%m-%d %H:%M:%S%z"),
+        }
+
+    def _data_from_gallery_page(self, info):
+        url = "{}/galleries/{}.html".format(self.root, info["id"])
+
+        # follow redirects
+        while True:
+            response = self.request(url, fatal=False)
+            if b"<title>Redirect</title>" not in response.content:
+                break
+            url = text.extract(response.text, "href='", "'")[0]
+            if not url.startswith("http"):
+                url = text.urljoin(self.root, url)
+
+        if response.status_code >= 400:
+            return {}
+
+        def prep(value):
+            return [
+                text.unescape(string.capwords(v))
+                for v in text.extract_iter(value or "", '.html">', '<')
+            ]
+
+        extr = text.extract_from(response.text)
+        return {
+            "artist"    : prep(extr('<h2>', '</h2>')),
+            "group"     : prep(extr('<td>Group</td><td>', '</td>')),
+            "parody"    : prep(extr('<td>Series</td><td>', '</td>')),
+            "characters": prep(extr('<td>Characters</td><td>', '</td>')),
         }
 
     def images(self, _):
         result = []
-        for image in self.data["files"]:
+        for image in self.info["files"]:
             ihash = image["hash"]
             idata = text.nameext_from_url(image["name"])
 
