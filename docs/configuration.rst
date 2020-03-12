@@ -790,6 +790,17 @@ Description The name of the preferred animation format, which can be one of
 =========== =====
 
 
+extractor.hitomi.metadata
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Try to extract
+            ``artist``, ``group``, ``parody``,  and ``characters``
+            metadata.
+=========== =====
+
+
 extractor.imgur.mp4
 -------------------
 =========== =====
