@@ -54,6 +54,7 @@ modules = [
     "imgur",
     "instagram",
     "issuu",
+    "kabeuchi",
     "keenspot",
     "khinsider",
     "kissmanga",
