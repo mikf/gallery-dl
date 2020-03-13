@@ -60,8 +60,11 @@ class FuraffinityExtractor(Extractor):
             )
             return None
 
+        pi = text.parse_int
+        rh = text.remove_html
+
         data = text.nameext_from_url(path, {
-            "id"    : text.parse_int(post_id),
+            "id"    : pi(post_id),
             "title" : title,
             "artist": artist,
             "user"  : self.user or artist,
@@ -70,12 +73,34 @@ class FuraffinityExtractor(Extractor):
 
         tags = extr('class="tags-row">', '</section>')
         if tags:
+            # new site layout
             data["tags"] = text.split_html(tags)
-            data["description"] = text.unescape(text.remove_html(extr(
+            data["description"] = text.unescape(rh(extr(
                 'class="section-body">', '</div>'), "", ""))
+            data["views"] = pi(rh(extr('class="views">', '</span>')))
+            data["favorites"] = pi(rh(extr('class="favorites">', '</span>')))
+            data["comments"] = pi(rh(extr('class="comments">', '</span>')))
+            data["rating"] = rh(extr('class="rating">', '</span>'))
+            data["fa_category"] = rh(extr('>Category</strong>', '</span>'))
+            data["theme"] = rh(extr('>', '<'))
+            data["species"] = rh(extr('>Species</strong>', '</div>'))
+            data["gender"] = rh(extr('>Gender</strong>', '</div>'))
+            data["width"] = pi(extr("<span>", "x"))
+            data["height"] = pi(extr("", "p"))
         else:
+            # old site layout
+            data["fa_category"] = extr("<b>Category:</b>", "<").strip()
+            data["theme"] = extr("<b>Theme:</b>", "<").strip()
+            data["species"] = extr("<b>Species:</b>", "<").strip()
+            data["gender"] = extr("<b>Gender:</b>", "<").strip()
+            data["favorites"] = pi(extr("<b>Favorites:</b>", "<"))
+            data["comments"] = pi(extr("<b>Comments:</b>", "<"))
+            data["views"] = pi(extr("<b>Views:</b>", "<"))
+            data["width"] = pi(extr("<b>Resolution:</b>", "x"))
+            data["height"] = pi(extr("", "<"))
             data["tags"] = text.split_html(extr(
                 'id="keywords">', '</div>'))[::2]
+            data["rating"] = extr('<img alt="', ' ')
             data["description"] = text.unescape(text.remove_html(extr(
                 "</table>", "</table>"), "", ""))
         data["date"] = text.parse_timestamp(data["filename"].partition(".")[0])
@@ -162,6 +187,16 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
                 "title"      : "Bude's 4 Ever",
                 "url"        : "re:https://d.facdn.net/art/mirlinthloth/music",
                 "user"       : "mirlinthloth",
+                "views"      : int,
+                "favorites"  : int,
+                "comments"   : int,
+                "rating"     : "General",
+                "fa_category": "Music",
+                "theme"      : "All",
+                "species"    : "Unspecified / Any",
+                "gender"     : "Any",
+                "width"      : 120,
+                "height"     : 120,
             },
         }),
         ("https://furaffinity.net/view/21835115/"),
