@@ -1,6 +1,20 @@
 # Changelog
 
-## Unreleased
+## 1.13.2 - 2020-03-14
+### Additions
+- [furaffinity] extract more metadata
+- [instagram] add `post_shortcode` metadata field ([#525](https://github.com/mikf/gallery-dl/issues/525))
+- [kabeuchi] add extractor ([#561](https://github.com/mikf/gallery-dl/issues/561))
+- [newgrounds] add extractor for favorited posts ([#394](https://github.com/mikf/gallery-dl/issues/394))
+- [pixiv] implement `avatar` option ([#595](https://github.com/mikf/gallery-dl/issues/595), [#623](https://github.com/mikf/gallery-dl/issues/623))
+- [twitter] add extractor for bookmarked Tweets ([#625](https://github.com/mikf/gallery-dl/issues/625))
+### Fixes
+- [bcy] reduce number of HTTP requests during data extraction
+- [e621] update to new interface ([#635](https://github.com/mikf/gallery-dl/issues/635))
+- [exhentai] handle incomplete MIME types ([#632](https://github.com/mikf/gallery-dl/issues/632))
+- [hitomi] improve metadata extraction
+- [mangoxo] fix login
+- [newgrounds] improve error handling when extracting post data
 
 ## 1.13.1 - 2020-03-01
 ### Additions
