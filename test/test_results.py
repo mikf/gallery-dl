@@ -30,6 +30,9 @@ BROKEN = {
     "35photo",
     "mangapark",
     "photobucket",
+    "sexcom",
+    "hentaicafe",
+    "worldthree",
 }
 
 
