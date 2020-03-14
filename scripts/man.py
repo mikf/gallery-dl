@@ -266,7 +266,7 @@ def parse_docs_configuration():
                 opt_desc[name] = ""
             line = line.strip()
             if line.startswith(("* ", "- ")):
-                line = "\n" + line
+                line = ".br\n" + line
             elif line.startswith("| "):
                 line = line[2:] + "\n.br"
             opt_desc[name] += line + "\n"
