@@ -135,6 +135,7 @@ SUBCATEGORY_MAP = {
 AUTH_MAP = {
     "danbooru"   : "Optional",
     "deviantart" : "Optional (OAuth)",
+    "e621"       : "Optional",
     "e-hentai"   : "Optional",
     "exhentai"   : "Optional",
     "flickr"     : "Optional (OAuth)",
