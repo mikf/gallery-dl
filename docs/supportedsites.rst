@@ -27,7 +27,7 @@ DeviantArt           https://www.deviantart.com/         |deviantart-C|         
 Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Images, Search Results
 E-Hentai             https://e-hentai.org/               Favorites, Galleries, Search Results               Optional
-e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches
+e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag-Searches         Optional
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
