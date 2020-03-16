@@ -24,7 +24,7 @@ class E621Extractor(SharedConfigMixin, Extractor):
     filename_fmt = "{category}_{id}_{file[md5]}.{extension}"
     page_limit = 750
     page_start = None
-    per_page = 200
+    per_page = 320
     _last_request = 0
 
     def __init__(self, match):

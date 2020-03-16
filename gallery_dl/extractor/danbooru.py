@@ -27,7 +27,7 @@ class DanbooruExtractor(SharedConfigMixin, Extractor):
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     page_limit = 1000
     page_start = None
-    per_page = 100
+    per_page = 200
 
     def __init__(self, match):
         Extractor.__init__(self, match)
