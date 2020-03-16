@@ -12,6 +12,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import itertools
 import json
 
 
@@ -413,6 +414,7 @@ class InstagramSavedExtractor(InstagramExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
                r"([^/?&#]+)/saved")
+    test = ("https://www.instagram.com/instagram/saved/",)
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
@@ -459,10 +461,7 @@ class InstagramUserExtractor(InstagramExtractor):
         url = '{}/{}/'.format(self.root, self.username)
         shared_data = self._extract_shared_data(url)
 
-        if self.config('highlights'):
-            yield from self._extract_story_highlights(shared_data)
-
-        yield from self._extract_page(shared_data, {
+        instagrams = self._extract_page(shared_data, {
             'page': 'ProfilePage',
             'node': 'user',
             'node_id': 'id',
@@ -470,6 +469,14 @@ class InstagramUserExtractor(InstagramExtractor):
             'edge_to_medias': 'edge_owner_to_timeline_media',
             'query_hash': 'f2405b236d85e8296cf30347c9f08c2a',
         })
+
+        if self.config('highlights'):
+            instagrams = itertools.chain(
+                self._extract_story_highlights(shared_data),
+                instagrams,
+            )
+
+        return instagrams
 
 
 class InstagramChannelExtractor(InstagramExtractor):
