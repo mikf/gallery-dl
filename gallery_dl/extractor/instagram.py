@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Leonardo Taccari
+# Copyright 2018-2020 Leonardo Taccari
 # Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
