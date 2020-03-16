@@ -268,6 +268,9 @@ class InstagramExtractor(Extractor):
             # Deal with different structure of pages: the first page
             # has interesting data in `entry_data', next pages in `data'.
             if 'entry_data' in shared_data:
+                if 'HttpErrorPage' in shared_data['entry_data']:
+                    return
+
                 base_shared_data = shared_data['entry_data'][psdf['page']][0]['graphql']
 
                 # variables_id is available only in the first page
