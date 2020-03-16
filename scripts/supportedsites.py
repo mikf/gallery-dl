@@ -109,6 +109,9 @@ SUBCATEGORY_MAP = {
     "deviantart": {
         "stash": "Sta.sh",
     },
+    "instagram": {
+        "saved": "Saved Posts",
+    },
     "newgrounds": {
         "art"  : "Art",
         "audio": "Audio",

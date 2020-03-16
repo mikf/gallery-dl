@@ -146,7 +146,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |flickr-C| replace:: Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles
 .. |hentaifoundry-C| replace:: Favorites, individual Images, Popular Images, Recent Images, Scraps, User Profiles
 .. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Subreddits, User Profiles
-.. |instagram-C| replace:: Channels, individual Images, Stories, Tag-Searches, User Profiles
+.. |instagram-C| replace:: Channels, individual Images, Saved Posts, Stories, Tag-Searches, User Profiles
 .. |newgrounds-C| replace:: Art, Audio, Favorites, individual Images, Media Files, Movies, User Profiles
 .. |nijie-C| replace:: Doujin, Favorites, individual Images, User Profiles
 .. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images

@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.13.2 - 2020-03-14
 ### Additions
 - [furaffinity] extract more metadata
