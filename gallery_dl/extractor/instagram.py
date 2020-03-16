@@ -407,6 +407,31 @@ class InstagramStoriesExtractor(InstagramExtractor):
         return self._extract_stories(url)
 
 
+class InstagramSavedExtractor(InstagramExtractor):
+    """Extractor for ProfilePage saved media"""
+    subcategory = "saved"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
+               r"([^/?&#]+)/saved")
+
+    def __init__(self, match):
+        InstagramExtractor.__init__(self, match)
+        self.username = match.group(1)
+
+    def instagrams(self):
+        url = '{}/{}/saved/'.format(self.root, self.username)
+        shared_data = self._extract_shared_data(url)
+
+        return self._extract_page(shared_data, {
+            'page': 'ProfilePage',
+            'node': 'user',
+            'node_id': 'id',
+            'variables_id': 'id',
+            'edge_to_medias': 'edge_saved_media',
+            'query_hash': '8c86fed24fa03a8a2eea2a70a80c7b6b',
+        })
+
+
 class InstagramUserExtractor(InstagramExtractor):
     """Extractor for ProfilePage"""
     subcategory = "user"
