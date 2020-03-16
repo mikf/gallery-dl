@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Leonardo Taccari
+# Copyright 2018-2020 Leonardo Taccari
 # Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -268,6 +268,9 @@ class InstagramExtractor(Extractor):
             # Deal with different structure of pages: the first page
             # has interesting data in `entry_data', next pages in `data'.
             if 'entry_data' in shared_data:
+                if 'HttpErrorPage' in shared_data['entry_data']:
+                    return
+
                 base_shared_data = shared_data['entry_data'][psdf['page']][0]['graphql']
 
                 # variables_id is available only in the first page
@@ -402,6 +405,31 @@ class InstagramStoriesExtractor(InstagramExtractor):
     def instagrams(self):
         url = '{}/stories/{}/'.format(self.root, self.username)
         return self._extract_stories(url)
+
+
+class InstagramSavedExtractor(InstagramExtractor):
+    """Extractor for ProfilePage saved media"""
+    subcategory = "saved"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
+               r"([^/?&#]+)/saved")
+
+    def __init__(self, match):
+        InstagramExtractor.__init__(self, match)
+        self.username = match.group(1)
+
+    def instagrams(self):
+        url = '{}/{}/saved/'.format(self.root, self.username)
+        shared_data = self._extract_shared_data(url)
+
+        return self._extract_page(shared_data, {
+            'page': 'ProfilePage',
+            'node': 'user',
+            'node_id': 'id',
+            'variables_id': 'id',
+            'edge_to_medias': 'edge_saved_media',
+            'query_hash': '8c86fed24fa03a8a2eea2a70a80c7b6b',
+        })
 
 
 class InstagramUserExtractor(InstagramExtractor):
