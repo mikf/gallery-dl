@@ -118,8 +118,8 @@ class NozomiTagExtractor(NozomiExtractor):
     pattern = r"(?:https?://)?nozomi\.la/tag/([^/?&#]+)-\d+\."
     test = ("https://nozomi.la/tag/3:1_aspect_ratio-1.html", {
         "pattern": r"^https://i.nozomi.la/\w/\w\w/\w+\.\w+$",
-        "count": ">= 75",
-        "range": "1-75",
+        "count": ">= 25",
+        "range": "1-25",
     })
 
     def __init__(self, match):
@@ -182,4 +182,4 @@ class NozomiSearchExtractor(NozomiExtractor):
             else:
                 result.update(items)
 
-        return result
+        return sorted(result, reverse=True)
