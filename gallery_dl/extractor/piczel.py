@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import json
 
 
 class PiczelExtractor(Extractor):
@@ -49,7 +50,6 @@ class PiczelExtractor(Extractor):
 
     def _pagination(self, url, folder_id=None):
         params = {
-            "hideNsfw" : "false",
             "from_id"  : None,
             "folder_id": folder_id,
         }
@@ -59,7 +59,10 @@ class PiczelExtractor(Extractor):
             if not data:
                 return
             params["from_id"] = data[-1]["id"]
-            yield from data
+
+            for post in data:
+                if not folder_id or folder_id == post["folder_id"]:
+                    yield post
 
 
 class PiczelUserExtractor(PiczelExtractor):
@@ -97,7 +100,7 @@ class PiczelFolderExtractor(PiczelExtractor):
 
     def posts(self):
         url = "{}/api/users/{}/gallery".format(self.root, self.user)
-        return self._pagination(url, self.folder_id)
+        return self._pagination(url, int(self.folder_id))
 
 
 class PiczelImageExtractor(PiczelExtractor):
@@ -134,5 +137,8 @@ class PiczelImageExtractor(PiczelExtractor):
         self.image_id = match.group(1)
 
     def posts(self):
-        url = "{}/api/gallery/image/{}".format(self.root, self.image_id)
-        return (self.request(url).json(),)
+        url = "{}/gallery/image/{}".format(self.root, self.image_id)
+        page = self.request(url).text
+        data = json.loads(text.extract(
+            page, 'window.__PRELOADED_STATE__ =', '</script>')[0])
+        return (data["gallery"]["images"]["byId"][self.image_id],)
