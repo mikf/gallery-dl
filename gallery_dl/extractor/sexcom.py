@@ -101,22 +101,22 @@ class SexcomPinExtractor(SexcomExtractor):
     pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+)(?!.*#related$)"
     test = (
         # picture
-        ("https://www.sex.com/pin/56714360/", {
-            "pattern": "https://cdn.sex.com/images/.+/2018/10/02/20037816.jpg",
-            "content": "e579e3283fea812d0545a3f79734b79bc3c51acb",
+        ("https://www.sex.com/pin/21241874-sexy-ecchi-girls-166/", {
+            "pattern": "https://cdn.sex.com/images/.+/2014/08/26/7637609.jpg",
+            "content": "ebe1814dadfebf15d11c6af4f6afb1a50d6c2a1c",
             "keyword": {
                 "comments" : int,
-                "date"     : "dt:2018-10-02 21:18:17",
+                "date"     : "dt:2014-10-19 15:45:44",
                 "extension": "jpg",
-                "filename" : "20037816",
+                "filename" : "7637609",
                 "likes"    : int,
-                "pin_id"   : 56714360,
+                "pin_id"   : 21241874,
                 "repins"   : int,
                 "tags"     : list,
                 "thumbnail": str,
-                "title"    : "Pin #56714360",
+                "title"    : "Sexy Ecchi Girls 166",
                 "type"     : "picture",
-                "uploader" : "alguem",
+                "uploader" : "mangazeta",
                 "url"      : str,
             },
         }),
@@ -149,8 +149,8 @@ class SexcomRelatedPinExtractor(SexcomPinExtractor):
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[pin_id]}")
     pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+).*#related$"
-    test = ("https://www.sex.com/pin/56714360/#related", {
-        "count": ">= 22",
+    test = ("https://www.sex.com/pin/21241874/#related", {
+        "count": ">= 20",
     })
 
     def metadata(self):
