@@ -38,7 +38,7 @@ class NewgroundsExtractor(Extractor):
             try:
                 post = self.extract_post(post_url)
                 url = post.get("url")
-            except OSError:
+            except Exception:
                 url = None
 
             if url:
