@@ -39,17 +39,27 @@ class Formatter(logging.Formatter):
     """Custom formatter that supports different formats per loglevel"""
 
     def __init__(self, fmt, datefmt):
-        if not isinstance(fmt, dict):
+        if isinstance(fmt, dict):
+            for key in ("debug", "info", "warning", "error"):
+                value = fmt[key] if key in fmt else LOG_FORMAT
+                fmt[key] = (util.Formatter(value).format_map,
+                            "{asctime" in value)
+        else:
+            if fmt == LOG_FORMAT:
+                fmt = (fmt.format_map, False)
+            else:
+                fmt = (util.Formatter(fmt).format_map, "{asctime" in fmt)
             fmt = {"debug": fmt, "info": fmt, "warning": fmt, "error": fmt}
+
         self.formats = fmt
         self.datefmt = datefmt
 
     def format(self, record):
         record.message = record.getMessage()
-        fmt = self.formats[record.levelname]
-        if "{asctime" in fmt:
+        fmt, asctime = self.formats[record.levelname]
+        if asctime:
             record.asctime = self.formatTime(record, self.datefmt)
-        msg = fmt.format_map(record.__dict__)
+        msg = fmt(record.__dict__)
         if record.exc_info and not record.exc_text:
             record.exc_text = self.formatException(record.exc_info)
         if record.exc_text:
