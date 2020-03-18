@@ -439,7 +439,7 @@ class InstagramUserExtractor(InstagramExtractor):
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
-               r"([^/?&#]+)/?$")
+               r"([^/?&#]+)/?(?:$|[?#])")
     test = (
         ("https://www.instagram.com/instagram/", {
             "range": "1-16",
@@ -451,6 +451,7 @@ class InstagramUserExtractor(InstagramExtractor):
             "range": "1-2",
             "count": 2,
         }),
+        ("https://www.instagram.com/instagram/?hl=en"),
     )
 
     def __init__(self, match):
