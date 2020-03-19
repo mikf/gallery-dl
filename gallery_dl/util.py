@@ -726,6 +726,7 @@ class PathFormat():
 
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
+        windows = os.name == "nt"
 
         # Build path segments by applying 'kwdict' to directory format strings
         segments = []
@@ -733,6 +734,9 @@ class PathFormat():
         try:
             for formatter in self.directory_formatters:
                 segment = formatter(kwdict).strip()
+                if windows:
+                    # remove trailing dots and spaces (#647)
+                    segment = segment.rstrip(". ")
                 if segment:
                     append(self.clean_segment(segment))
         except Exception as exc:
@@ -747,7 +751,7 @@ class PathFormat():
             directory += sep
         self.directory = directory
 
-        if os.name == "nt":
+        if windows:
             # Enable longer-than-260-character paths on Windows
             directory = "\\\\?\\" + os.path.abspath(directory)
 
