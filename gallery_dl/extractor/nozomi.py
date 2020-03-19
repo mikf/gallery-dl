@@ -16,8 +16,8 @@ class NozomiExtractor(Extractor):
     """Base class for nozomi extractors"""
     category = "nozomi"
     root = "https://nozomi.la"
-    filename_fmt = "{postid}.{extension}"
-    archive_fmt = "{postid}"
+    filename_fmt = "{postid} {dataid}.{extension}"
+    archive_fmt = "{dataid}"
 
     def items(self):
         yield Message.Version, 1
@@ -37,24 +37,27 @@ class NozomiExtractor(Extractor):
                     post_id, response.status_code, response.reason)
                 continue
 
-            image = response.json()
-            image["tags"] = self._list(image.get("general"))
-            image["artist"] = self._list(image.get("artist"))
-            image["copyright"] = self._list(image.get("copyright"))
-            image["character"] = self._list(image.get("character"))
-            image["is_video"] = bool(image.get("is_video"))
-            image["date"] = text.parse_datetime(
-                image["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
-            image["url"] = text.urljoin(self.root, image["imageurl"])
-            text.nameext_from_url(image["url"], image)
-            image.update(data)
+            post = response.json()
+            post["tags"] = self._list(post.get("general"))
+            post["artist"] = self._list(post.get("artist"))
+            post["copyright"] = self._list(post.get("copyright"))
+            post["character"] = self._list(post.get("character"))
+            post["date"] = text.parse_datetime(
+                post["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
+            post.update(data)
 
+            images = post["imageurls"]
             for key in ("general", "imageurl", "imageurls"):
-                if key in image:
-                    del image[key]
+                if key in post:
+                    del post[key]
 
-            yield Message.Directory, image
-            yield Message.Url, image["url"], image
+            yield Message.Directory, post
+            for image in images:
+                post["url"] = url = text.urljoin(self.root, image["imageurl"])
+                text.nameext_from_url(url, post)
+                post["is_video"] = bool(image.get("is_video"))
+                post["dataid"] = post["filename"]
+                yield Message.Url, url, post
 
     def metadata(self):
         return {}
@@ -64,9 +67,7 @@ class NozomiExtractor(Extractor):
 
     @staticmethod
     def _list(src):
-        if not src:
-            return []
-        return [x["tagname_display"] for x in src]
+        return [x["tagname_display"] for x in src] if src else ()
 
     @staticmethod
     def _unpack(b):
@@ -78,29 +79,37 @@ class NozomiPostExtractor(NozomiExtractor):
     """Extractor for individual posts on nozomi.la"""
     subcategory = "post"
     pattern = r"(?:https?://)?nozomi\.la/post/(\d+)"
-    test = ("https://nozomi.la/post/3649262.html", {
-        "url": "f4522adfc8159355fd0476de28761b5be0f02068",
-        "content": "cd20d2c5149871a0b80a1b0ce356526278964999",
-        "keyword": {
-            "artist"   : ["hammer (sunset beach)"],
-            "character": ["patchouli knowledge"],
-            "copyright": ["touhou"],
-            "dataid"   : "re:aaa9f7c632cde1e1a5baaff3fb6a6d857ec73df7fdc5cf5a",
-            "date"     : "dt:2016-07-26 02:32:03",
-            "extension": "jpg",
-            "favorites": int,
-            "filename" : str,
-            "height"   : 768,
-            "is_video" : False,
-            "postid"   : 3649262,
-            "source"   : "danbooru",
-            "sourceid" : 2434215,
-            "tags"     : list,
-            "type"     : "jpg",
-            "url"      : str,
-            "width"    : 1024,
-        },
-    })
+    test = (
+        ("https://nozomi.la/post/3649262.html", {
+            "url": "f4522adfc8159355fd0476de28761b5be0f02068",
+            "content": "cd20d2c5149871a0b80a1b0ce356526278964999",
+            "keyword": {
+                "artist"   : ["hammer (sunset beach)"],
+                "character": ["patchouli knowledge"],
+                "copyright": ["touhou"],
+                "dataid"   : "re:aaa9f7c632cde1e1a5baaff3fb6a6d857ec73df7fdc5",
+                "date"     : "dt:2016-07-26 02:32:03",
+                "extension": "jpg",
+                "favorites": int,
+                "filename" : str,
+                "height"   : 768,
+                "is_video" : False,
+                "postid"   : 3649262,
+                "source"   : "danbooru",
+                "sourceid" : 2434215,
+                "tags"     : list,
+                "type"     : "jpg",
+                "url"      : str,
+                "width"    : 1024,
+            },
+        }),
+        #  multiple images per post
+        ("https://nozomi.la/post/25588032.html", {
+            "url": "6aa3b7db385abcc9d374bdffd19187bccbf8f228",
+            "keyword": "0aa99cbaaeada2984a1fbf912274409c6ba106d4",
+            "count": 7,
+        }),
+    )
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
