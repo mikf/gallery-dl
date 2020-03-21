@@ -459,7 +459,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
             "Referer": self.root + "/i/bookmarks",
             "x-csrf-token": self.session.cookies.get("ct0"),
             "x-twitter-active-user": "yes",
-            "x-twitter-auth-type": "Auth2Session",
+            "x-twitter-auth-type": "OAuth2Session",
             "x-twitter-client-language": "en",
         }
 
