@@ -40,8 +40,9 @@ class E621Extractor(SharedConfigMixin, Extractor):
     def request(self, url, **kwargs):
         diff = time.time() - E621Extractor._last_request
         if diff < 1.0:
-            self.log.debug("Sleeping for %s seconds", diff)
-            time.sleep(diff)
+            delay = 1.0 - diff
+            self.log.debug("Sleeping for %s seconds", delay)
+            time.sleep(delay)
         kwargs["headers"] = {"User-Agent": "gallery-dl/1.13.0 (by mikf)"}
         response = Extractor.request(self, url, **kwargs)
         E621Extractor._last_request = time.time()
