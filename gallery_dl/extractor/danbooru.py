@@ -30,7 +30,7 @@ class DanbooruExtractor(SharedConfigMixin, Extractor):
     per_page = 200
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
+        super().__init__(match)
         self.root = "https://{}.donmai.us".format(match.group(1))
         self.ugoira = self.config("ugoira", True)
         self.params = {}
@@ -83,6 +83,8 @@ class DanbooruExtractor(SharedConfigMixin, Extractor):
 
         while True:
             posts = self.request(url, params=params).json()
+            if "posts" in posts:
+                posts = posts["posts"]
             yield from posts
 
             if len(posts) < self.per_page:
@@ -114,7 +116,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
     )
 
     def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
+        super().__init__(match)
         self.params["tags"] = text.unquote(match.group(2).replace("+", " "))
 
     def metadata(self):
@@ -132,7 +134,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     })
 
     def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
+        super().__init__(match)
         self.pool_id = match.group(2)
         self.params["tags"] = "pool:" + self.pool_id
 
@@ -160,12 +162,13 @@ class DanbooruPostExtractor(DanbooruExtractor):
     )
 
     def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
+        super().__init__(match)
         self.post_id = match.group(2)
 
     def posts(self):
         url = "{}/posts/{}.json".format(self.root, self.post_id)
-        return (self.request(url).json(),)
+        post = self.request(url).json()
+        return (post["post"] if "post" in post else post,)
 
 
 class DanbooruPopularExtractor(DanbooruExtractor):
@@ -184,7 +187,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     )
 
     def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
+        super().__init__(match)
         self.params.update(text.parse_query(match.group(2)))
 
     def metadata(self):
