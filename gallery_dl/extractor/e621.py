@@ -8,18 +8,16 @@
 
 """Extractors for https://e621.net/"""
 
-from .common import Extractor, Message, SharedConfigMixin
-from .. import text
-import datetime
+from .common import Extractor, Message
+from . import danbooru
 import time
 
 
 BASE_PATTERN = r"(?:https?://)?e(621|926)\.net"
 
 
-class E621Extractor(SharedConfigMixin, Extractor):
+class E621Extractor(danbooru.DanbooruExtractor):
     """Base class for e621 extractors"""
-    basecategory = "booru"
     category = "e621"
     filename_fmt = "{category}_{id}_{file[md5]}.{extension}"
     page_limit = 750
@@ -28,14 +26,8 @@ class E621Extractor(SharedConfigMixin, Extractor):
     _last_request = 0
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
+        super().__init__(match)
         self.root = "https://e{}.net".format(match.group(1))
-        self.params = {}
-
-        username, api_key = self._get_auth_info()
-        if username:
-            self.log.debug("Using HTTP Basic Auth for user '%s'", username)
-            self.session.auth = (username, api_key)
 
     def request(self, url, **kwargs):
         diff = time.time() - E621Extractor._last_request
@@ -43,7 +35,7 @@ class E621Extractor(SharedConfigMixin, Extractor):
             delay = 1.0 - diff
             self.log.debug("Sleeping for %s seconds", delay)
             time.sleep(delay)
-        kwargs["headers"] = {"User-Agent": "gallery-dl/1.13.0 (by mikf)"}
+        kwargs["headers"] = {"User-Agent": "gallery-dl/1.14.0 (by mikf)"}
         response = Extractor.request(self, url, **kwargs)
         E621Extractor._last_request = time.time()
         return response
@@ -64,31 +56,9 @@ class E621Extractor(SharedConfigMixin, Extractor):
             yield Message.Directory, post
             yield Message.Url, file["url"], post
 
-    def metadata(self):
-        return {}
 
-    def posts(self):
-        return self._pagination(self.root + "/posts.json")
-
-    def _pagination(self, url):
-        params = self.params.copy()
-        params["limit"] = self.per_page
-        tags = params.get("tags", "")
-
-        while True:
-            posts = self.request(url, params=params).json()["posts"]
-            yield from posts
-
-            if len(posts) < self.per_page:
-                return
-            params["tags"] = "id:<{} {}".format(posts[-1]["id"], tags)
-
-
-class E621TagExtractor(E621Extractor):
+class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
     """Extractor for e621 posts from tag searches"""
-    subcategory = "tag"
-    directory_fmt = ("{category}", "{search_tags}")
-    archive_fmt = "t_{search_tags}_{id}"
     pattern = BASE_PATTERN + r"/posts?(?:\?.*?tags=|/index/\d+/)([^&#]+)"
     test = (
         ("https://e621.net/posts?tags=anry", {
@@ -100,19 +70,9 @@ class E621TagExtractor(E621Extractor):
         ("https://e621.net/post?tags=anry"),
     )
 
-    def __init__(self, match):
-        E621Extractor.__init__(self, match)
-        self.params["tags"] = text.unquote(match.group(2).replace("+", " "))
 
-    def metadata(self):
-        return {"search_tags": self.params["tags"]}
-
-
-class E621PoolExtractor(E621Extractor):
+class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
     """Extractor for e621 pools"""
-    subcategory = "pool"
-    directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name]}")
-    archive_fmt = "p_{pool[id]}_{id}"
     pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
     test = (
         ("https://e621.net/pools/73", {
@@ -122,23 +82,9 @@ class E621PoolExtractor(E621Extractor):
         ("https://e621.net/pool/show/73"),
     )
 
-    def __init__(self, match):
-        E621Extractor.__init__(self, match)
-        self.pool_id = match.group(2)
-        self.params["tags"] = "pool:" + self.pool_id
 
-    def metadata(self):
-        url = "{}/pools/{}.json".format(self.root, self.pool_id)
-        pool = self.request(url).json()
-        pool["name"] = pool["name"].replace("_", " ")
-        del pool["post_ids"]
-        return {"pool": pool}
-
-
-class E621PostExtractor(E621Extractor):
+class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
     """Extractor for single e621 posts"""
-    subcategory = "post"
-    archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/post(?:s|/show)/(\d+)"
     test = (
         ("https://e621.net/posts/535", {
@@ -148,20 +94,9 @@ class E621PostExtractor(E621Extractor):
         ("https://e621.net/post/show/535"),
     )
 
-    def __init__(self, match):
-        E621Extractor.__init__(self, match)
-        self.post_id = match.group(2)
 
-    def posts(self):
-        url = "{}/posts/{}.json".format(self.root, self.post_id)
-        return (self.request(url).json()["post"],)
-
-
-class E621PopularExtractor(E621Extractor):
+class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):
     """Extractor for popular images from e621"""
-    subcategory = "popular"
-    directory_fmt = ("{category}", "popular", "{scale}", "{date}")
-    archive_fmt = "P_{scale[0]}_{date}_{id}"
     pattern = BASE_PATTERN + r"/explore/posts/popular(?:\?([^#]*))?"
     test = (
         ("https://e621.net/explore/posts/popular"),
@@ -171,24 +106,3 @@ class E621PopularExtractor(E621Extractor):
             "count": ">= 70",
         })
     )
-
-    def __init__(self, match):
-        E621Extractor.__init__(self, match)
-        self.params.update(text.parse_query(match.group(2)))
-
-    def metadata(self):
-        scale = self.params.get("scale", "day")
-        date = self.params.get("date") or datetime.date.today().isoformat()
-        date = date[:10]
-
-        if scale == "week":
-            date = datetime.date.fromisoformat(date)
-            date = (date - datetime.timedelta(days=date.weekday())).isoformat()
-        elif scale == "month":
-            date = date[:-3]
-
-        return {"date": date, "scale": scale}
-
-    def posts(self):
-        url = self.root + "/explore/posts/popular.json"
-        return self._pagination(url)
