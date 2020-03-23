@@ -209,8 +209,10 @@ class InstagramExtractor(Extractor):
             media_data = {
                 'owner_id': media['owner']['id'],
                 'username': media['owner']['username'],
-                'date': text.parse_timestamp(media['taken_at_timestamp']),
-                'expires': text.parse_timestamp(media['expiring_at_timestamp']),
+                'date'    : text.parse_timestamp(
+                    media['taken_at_timestamp']),
+                'expires' : text.parse_timestamp(
+                    media['expiring_at_timestamp']),
                 'media_id': media['id'],
                 'typename': media['__typename'],
                 'display_url': media['display_url'],
@@ -269,10 +271,10 @@ class InstagramExtractor(Extractor):
             # Deal with different structure of pages: the first page
             # has interesting data in `entry_data', next pages in `data'.
             if 'entry_data' in shared_data:
-                if 'HttpErrorPage' in shared_data['entry_data']:
+                entry_data = shared_data['entry_data']
+                if 'HttpErrorPage' in entry_data:
                     return
-
-                base_shared_data = shared_data['entry_data'][psdf['page']][0]['graphql']
+                base_shared_data = entry_data[psdf['page']][0]['graphql']
 
                 # variables_id is available only in the first page
                 variables_id = base_shared_data[psdf['node']][psdf['node_id']]
