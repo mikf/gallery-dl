@@ -149,12 +149,13 @@ def replace_std_streams(errors="replace"):
     """Replace standard streams and set their error handlers to 'errors'"""
     for name in ("stdout", "stdin", "stderr"):
         stream = getattr(sys, name)
-        setattr(sys, name, stream.__class__(
-            stream.buffer,
-            errors=errors,
-            newline=stream.newlines,
-            line_buffering=stream.line_buffering,
-        ))
+        if stream:
+            setattr(sys, name, stream.__class__(
+                stream.buffer,
+                errors=errors,
+                newline=stream.newlines,
+                line_buffering=stream.line_buffering,
+            ))
 
 
 # --------------------------------------------------------------------

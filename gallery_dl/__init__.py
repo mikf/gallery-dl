@@ -108,7 +108,7 @@ def parse_inputfile(file, log):
 
 def main():
     try:
-        if sys.stdout.encoding.lower() != "utf-8":
+        if sys.stdout and sys.stdout.encoding.lower() != "utf-8":
             output.replace_std_streams()
 
         parser = option.build_parser()
