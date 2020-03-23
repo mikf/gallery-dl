@@ -12,6 +12,10 @@ matrix:
   include:
     - python: "3.8"
       env: GALLERYDL_TESTS=results
+    - python: "3.8"
+      env: GALLERYDL_TESTS=flake8
+      install: pip install flake8
+      script: flake8 .
     - language: minimal
       env: GALLERYDL_TESTS=snap
       addons:
