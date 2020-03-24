@@ -1044,7 +1044,10 @@ class DeviantartAPI():
         if response.status_code == 404:
             raise exception.StopExtraction(
                 "Your account must use the Eclipse interface.")
-        return response.json()
+        try:
+            return response.json()
+        except Exception:
+            return {"error": response.text}
 
     def deviation_metadata(self, deviations):
         """ Fetch deviation metadata for a set of deviations"""
