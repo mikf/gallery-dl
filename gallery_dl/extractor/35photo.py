@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -143,19 +143,7 @@ class _35photoGenreExtractor(_35photoExtractor):
     directory_fmt = ("{category}", "Genre", "{genre}")
     archive_fmt = "g{genre_id}_{id}_{num}"
     pattern = r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro/genre_(\d+)(/new/)?"
-    test = (
-        ("https://35photo.pro/genre_109/", {
-            "range": "1-30",
-        }),
-        ("https://35photo.pro/genre_103/", {
-            "range": "1-30",
-            "count": 30,
-        }),
-        ("https://35photo.pro/genre_103/new/", {
-            "range": "1-30",
-            "count": 30,
-        }),
-    )
+    test = ("https://35photo.pro/genre_109/",)
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
