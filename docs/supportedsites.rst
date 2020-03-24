@@ -5,7 +5,7 @@ Unless otherwise known, assume all sites to be NSFW
 ==================== =================================== ================================================== ================
 Site                 URL                                 Capabilities                                       Authentication
 ==================== =================================== ================================================== ================
-35PHOTO              https://35photo.pro/                Genres, individual Images, User Profiles
+35PHOTO              https://35photo.pro/                |35photo-C|
 3dbooru              http://behoimi.org/                 Pools, Popular Images, Posts, Tag-Searches
 4chan                https://www.4chan.org/              Boards, Threads
 4plebs               https://archive.4plebs.org/         Threads
@@ -141,6 +141,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 半次元                  https://bcy.net/                    Posts, User Profiles
 ==================== =================================== ================================================== ================
 
+.. |35photo-C| replace:: Genres, individual Images, Tag-Searches, User Profiles
 .. |artstation-C| replace:: Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results, User Profiles
 .. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, User Profiles
 .. |flickr-C| replace:: Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles

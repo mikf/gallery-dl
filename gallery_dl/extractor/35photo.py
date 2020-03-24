@@ -101,7 +101,7 @@ class _35photoUserExtractor(_35photoExtractor):
     """Extractor for all images of a user on 35photo.pro"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro"
-               r"/(?!photo_|genre_|rating/)([^/?&#]+)")
+               r"/(?!photo_|genre_|tags/|rating/)([^/?&#]+)")
     test = (
         ("https://35photo.pro/liya", {
             "pattern": r"https://m\d+.35photo.pro/photos_(main|series)/.*.jpg",
@@ -135,6 +135,42 @@ class _35photoUserExtractor(_35photoExtractor):
             "page": "photoUser",
             "user_id": self.user_id,
         })
+
+
+class _35photoTagExtractor(_35photoExtractor):
+    """Extractor for all photos from a tag listing"""
+    subcategory = "tag"
+    directory_fmt = ("{category}", "Tags", "{search_tag}")
+    archive_fmt = "t{search_tag}_{id}_{num}"
+    pattern = r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro/tags/([^/?&#]+)"
+    test = ("https://35photo.pro/tags/landscape/", {
+        "range": "1-25",
+        "count": 25,
+    })
+
+    def __init__(self, match):
+        _35photoExtractor.__init__(self, match)
+        self.tag = match.group(1)
+
+    def metadata(self):
+        return {"search_tag": text.unquote(self.tag).lower()}
+
+    def photos(self):
+        num = 1
+
+        while True:
+            url = "{}/tags/{}/list_{}/".format(self.root, self.tag, num)
+            page = self.request(url).text
+            prev = None
+
+            for photo_id in text.extract_iter(page, "35photo.pro/photo_", "/"):
+                if photo_id != prev:
+                    prev = photo_id
+                    yield photo_id
+
+            if not prev:
+                return
+            num += 1
 
 
 class _35photoGenreExtractor(_35photoExtractor):
