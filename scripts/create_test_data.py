@@ -58,9 +58,9 @@ def main():
             data = (exc.__class__.__name__,)
         else:
             fmt = TESTDATA_FMT
-            data = (tjob.hash_url.hexdigest(),
-                    tjob.hash_keyword.hexdigest(),
-                    tjob.hash_content.hexdigest())
+            data = (tjob.url_hash.hexdigest(),
+                    tjob.kwdict_hash.hexdigest(),
+                    tjob.content_hash.hexdigest())
         print(tjob.extractor.__class__.__name__)
         print(fmt.format(url, *data))
 
