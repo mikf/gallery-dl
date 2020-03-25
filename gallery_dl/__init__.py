@@ -205,11 +205,13 @@ def main():
             if args.inputfile:
                 try:
                     if args.inputfile == "-":
-                        file = sys.stdin
+                        if sys.stdin:
+                            urls += parse_inputfile(sys.stdin, log)
+                        else:
+                            log.warning("input file: stdin is not readable")
                     else:
-                        file = open(args.inputfile, encoding="utf-8")
-                    urls += parse_inputfile(file, log)
-                    file.close()
+                        with open(args.inputfile, encoding="utf-8") as file:
+                            urls += parse_inputfile(file, log)
                 except OSError as exc:
                     log.warning("input file: %s", exc)
 
