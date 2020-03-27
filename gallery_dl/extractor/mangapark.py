@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from https://mangapark.me/"""
+"""Extractors for https://mangapark.net/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, exception
 import json
+import re
 
 
 class MangaparkBase():
@@ -37,26 +38,35 @@ class MangaparkBase():
             elif key == "e":
                 data["chapter_minor"] = "v" + value
 
+    @staticmethod
+    def parse_chapter_title(title, data):
+        match = re.search(r"(?i)(?:vol(?:ume)?[ .]*(\d+) )?"
+                          r"ch(?:apter)?[ .]*(\d+)(\.\w+)?", title)
+        if match:
+            vol, ch, data["chapter_minor"] = match.groups()
+            data["volume"] = text.parse_int(vol)
+            data["chapter"] = text.parse_int(ch)
+
 
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
-    """Extractor for manga-chapters from mangapark.me"""
+    """Extractor for manga-chapters from mangapark.net"""
     pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
                r"/manga/([^?&#]+/i\d+)")
     test = (
-        ("https://mangapark.me/manga/gosu/i811615/c55/1", {
+        ("https://mangapark.net/manga/gosu/i811615/c55/1", {
             "count": 50,
             "keyword": "373d678048d29492f9763743ccaa9b6d840f17cf",
         }),
-        (("https://mangapark.me/manga"
+        (("https://mangapark.net/manga"
           "/ad-astra-per-aspera-hata-kenjirou/i662054/c001.2/1"), {
             "count": 40,
             "keyword": "8e9cce4ed0e25d12a45e02f840d6f32ef838e257",
         }),
-        ("https://mangapark.me/manga/gekkan-shoujo-nozaki-kun/i655476/c70/1", {
+        ("https://mangapark.net/manga/gekkan-shoujo-nozaki-kun/i655476/c70", {
             "count": 15,
             "keyword": "19f730617074d65f91c0781f429de324890925bf",
         }),
-        ("https://mangapark.net/manga/gosu/i811615/c55/1"),
+        ("https://mangapark.me/manga/gosu/i811615/c55/1"),
         ("https://mangapark.com/manga/gosu/i811615/c55/1"),
     )
 
@@ -78,7 +88,10 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
 
         if not data["path"]:
             raise exception.NotFoundError("chapter")
+
         self.parse_chapter_path(data["path"], data)
+        if "chapter" not in data:
+            self.parse_chapter_title(data["title"], data)
 
         data["manga"], _, data["type"] = data["manga"].rpartition(" ")
         data["manga"] = text.unescape(data["manga"])
@@ -89,8 +102,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
         return data
 
     def images(self, page):
-        data = json.loads(text.extract(
-            page, "var _load_pages =", ";")[0] or "[]")
+        data = json.loads(text.extract(page, "var _load_pages =", ";")[0])
         return [
             (text.urljoin(self.root, item["u"]), {
                 "width": text.parse_int(item["w"]),
@@ -101,16 +113,16 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
 
 
 class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
-    """Extractor for manga from mangapark.me"""
+    """Extractor for manga from mangapark.net"""
     chapterclass = MangaparkChapterExtractor
     pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
                r"(/manga/[^/?&#]+)/?$")
     test = (
-        ("https://mangapark.me/manga/aria", {
-            "url": "a58be23ef3874fe9705b0b41dd462b67eaaafd9a",
-            "keyword": "b3b5a30aa2a326bc0ca8b74c65b5ecd4bf676ebf",
+        ("https://mangapark.net/manga/aria", {
+            "url": "9b0b31e4992260876f56d7bfc8ff0ae71295c4f4",
+            "keyword": "6e44744a28d01b889b1e8291847abd84b591590d",
         }),
-        ("https://mangapark.net/manga/aria"),
+        ("https://mangapark.me/manga/aria"),
         ("https://mangapark.com/manga/aria"),
     )
 
@@ -128,13 +140,22 @@ class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
             data["stream"] = text.parse_int(text.extract(stream, '', '"')[0])
 
             for chapter in text.extract_iter(stream, '<li ', '</li>'):
-                path , pos = text.extract(chapter, 'href="', '"')
-                title, pos = text.extract(chapter, '>: </span>', '<', pos)
-                count, pos = text.extract(chapter, '  of ', ' ', pos)
+                path  , pos = text.extract(chapter, 'href="', '"')
+                title1, pos = text.extract(chapter, '>', '<', pos)
+                title2, pos = text.extract(chapter, '>: </span>', '<', pos)
+                count , pos = text.extract(chapter, '  of ', ' ', pos)
 
                 self.parse_chapter_path(path[8:], data)
-                data["title"] = title.strip() if title else ""
+                if "chapter" not in data:
+                    self.parse_chapter_title(title1, data)
+
+                if title2:
+                    data["title"] = title2.strip()
+                else:
+                    data["title"] = title1.partition(":")[2].strip()
+
                 data["count"] = text.parse_int(count)
                 results.append((self.root + path, data.copy()))
+                data.pop("chapter", None)
 
         return results

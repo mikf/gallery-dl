@@ -74,7 +74,7 @@ Manga Here           https://www.mangahere.cc/           Chapters, Manga
 Manga Stream         https://readms.net/                 Chapters
 MangaDex             https://mangadex.org/               Chapters, Manga
 Mangapanda           https://www.mangapanda.com/         Chapters, Manga
-MangaPark            https://mangapark.me/               Chapters, Manga
+MangaPark            https://mangapark.net/              Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
 Naver                https://blog.naver.com/             Blogs, Posts
