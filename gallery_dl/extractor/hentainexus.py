@@ -41,7 +41,9 @@ class HentainexusGalleryExtractor(GalleryExtractor):
             "thumbnail"  : extr('"og:image" content="', '"'),
             "title"      : extr('<h1 class="title">', '</h1>'),
             "artist"     : rmve(extr('viewcolumn">Artist</td>'     , '</td>')),
+            "circle"     : rmve(extr('viewcolumn">Circle</td>'     , '</td>')),
             "book"       : rmve(extr('viewcolumn">Book</td>'       , '</td>')),
+            "event"      : rmve(extr('viewcolumn">Event</td>'      , '</td>')),
             "language"   : rmve(extr('viewcolumn">Language</td>'   , '</td>')),
             "magazine"   : rmve(extr('viewcolumn">Magazine</td>'   , '</td>')),
             "parody"     : rmve(extr('viewcolumn">Parody</td>'     , '</td>')),
@@ -49,7 +51,32 @@ class HentainexusGalleryExtractor(GalleryExtractor):
             "description": rmve(extr('viewcolumn">Description</td>', '</td>')),
         }
         data["lang"] = util.language_to_code(data["language"])
+        if 'doujin' in data["tags"]:
+            data["is_doujinshi"] = True
+        else:
+            data["is_doujinshi"] = False
+        data["conventional_title"] = self.join_title(
+            data["event"], data["circle"], data["artist"], data["title"], data["parody"], data["book"], data["magazine"]
+        )
         return data
+
+    @staticmethod
+    def join_title(event, circle, artist, title, parody, book, magazine):
+        jt = ''
+        if event:
+            jt += '({}) '.format(event)
+        if circle:
+            jt += '[{} ({})] '.format(circle, artist)
+        else:
+            jt += '[{}] '.format(artist)
+        jt += title
+        if parody.lower() != 'Original Work'.lower():
+            jt += ' ({})'.format(parody)
+        if book:
+            jt += ' ({})'.format(book)
+        if magazine:
+            jt += ' ({})'.format(magazine)
+        return jt
 
     def images(self, page):
         url = "{}/read/{}".format(self.root, self.gallery_id)
