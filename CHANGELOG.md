@@ -1,6 +1,22 @@
 # Changelog
 
-## Unreleased
+## 1.13.3 - 2020-03-28
+### Additions
+- [instagram] Add support for user's saved medias ([#644](https://github.com/mikf/gallery-dl/issues/644))
+- [nozomi] support multiple images per post ([#646](https://github.com/mikf/gallery-dl/issues/646))
+- [35photo] add `tag` extractor
+### Changes
+- [mangadex] transform timestamps from `date` fields to datetime objects
+### Fixes
+- [deviantart] handle decode errors for `extended_fetch` results ([#655](https://github.com/mikf/gallery-dl/issues/655))
+- [e621] fix bug in API rate limiting and improve pagination ([#651](https://github.com/mikf/gallery-dl/issues/651))
+- [instagram] update pattern for user profile URLs
+- [mangapark] fix metadata extraction
+- [nozomi] sort search results ([#646](https://github.com/mikf/gallery-dl/issues/646))
+- [piczel] fix extraction
+- [twitter] fix typo in `x-twitter-auth-type` header ([#625](https://github.com/mikf/gallery-dl/issues/625))
+- remove trailing dots from Windows directory names ([#647](https://github.com/mikf/gallery-dl/issues/647))
+- fix crash with missing `stdout`/`stderr`/`stdin` handles ([#653](https://github.com/mikf/gallery-dl/issues/653))
 
 ## 1.13.2 - 2020-03-14
 ### Additions
