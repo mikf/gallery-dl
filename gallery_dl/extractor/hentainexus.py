@@ -51,11 +51,8 @@ class HentainexusGalleryExtractor(GalleryExtractor):
             "description": rmve(extr('viewcolumn">Description</td>', '</td>')),
         }
         data["lang"] = util.language_to_code(data["language"])
-        if 'doujin' in data["tags"]:
-            data["is_doujinshi"] = True
-        else:
-            data["is_doujinshi"] = False
-        data["conventional_title"] = self.join_title(
+        data["type"] = "Doujinshi" if 'doujin' in data["tags"] else "Manga"
+        data["title_conventional"] = self.join_title(
             data["event"], data["circle"], data["artist"], data["title"], data["parody"], data["book"], data["magazine"]
         )
         return data
