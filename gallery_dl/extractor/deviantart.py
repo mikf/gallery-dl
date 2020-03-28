@@ -1041,9 +1041,14 @@ class DeviantartAPI():
         }
         response = self.extractor.request(
             url, headers=headers, params=params, fatal=None)
-        if response.status_code == 404:
+        code = response.status_code
+
+        if code == 404:
             raise exception.StopExtraction(
                 "Your account must use the Eclipse interface.")
+        elif code == 403 and b"Request blocked." in response.content:
+            raise exception.StopExtraction(
+                "Requests to deviantart.com blocked due to too much traffic.")
         try:
             return response.json()
         except Exception:
