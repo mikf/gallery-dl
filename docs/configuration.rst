@@ -125,7 +125,7 @@ extractor.*.path-restrict
 Type        ``string``
 Default     ``"auto"``
 Example     ``"/!? (){}"``
-Description Set of characters to replace with underscores (``_``)
+Description Set of characters replaced by ``path-restrict-replace``
             in generated path segment names.
 
             Special values:
@@ -137,6 +137,32 @@ Description Set of characters to replace with underscores (``_``)
 
             Note: In a set with 2 or more characters, ``[]^-\`` need to be
             escaped with backslashes, e.g. ``"\\[\\]"``
+=========== =====
+
+
+extractor.*.path-restrict-replace
+---------------------------------
+=========== =====
+Type        ``string``
+Default     ``"_"``
+Example     ``"map"``
+Description To replace characters in ``path-restrict``.
+
+            Special values:
+            * ``"map"``: Invalid characters in path will be mapped to
+                         their unicode alternatives, according to the
+                         following dict:
+                         PATH_INVALID_CHAR_REPLACEMENT = {
+                             '\\': '⧹',  # U+29F9 (big reverse solidus)
+                             '/': '⧸',  # U+29F8 (big solidus, permitted in Windows file and folder names）
+                             '|': '￨',  # U+FFE8 (halfwidth forms light vertical)
+                             ':': '꞉',  # U+A789 (modifier letter colon, sometimes used in Windows filenames)
+                             '*': '∗',  # U+2217 (asterisk operator)
+                             '?': '？',  # U+FF1F (full-width question mark)
+                             '"': '″',  # U+2033 (DOUBLE PRIME)
+                             '<': '﹤',  # U+FE64 (small less-than sign)
+                             '>': '﹥',  # U+FE65 (small greater-than sign)
+                         }
 =========== =====
 
 

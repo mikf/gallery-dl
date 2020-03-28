@@ -26,6 +26,23 @@ from email.utils import mktime_tz, parsedate_tz
 from . import text, exception
 
 
+PATH_INVALID_CHAR_REPLACEMENT = {
+    '\\': '⧹',  # U+29F9 (big reverse solidus)
+    '/': '⧸',  # U+29F8 (big solidus, permitted in Windows file and folder names）
+    '|': '￨',  # U+FFE8 (halfwidth forms light vertical)
+    ':': '꞉',  # U+A789 (modifier letter colon, sometimes used in Windows filenames)
+    '*': '∗',  # U+2217 (asterisk operator)
+    '?': '？',  # U+FF1F (full-width question mark)
+    '"': '″',  # U+2033 (DOUBLE PRIME)
+    '<': '﹤',  # U+FE64 (small less-than sign)
+    '>': '﹥',  # U+FE65 (small greater-than sign)
+}
+
+
+def string_map(s: str):
+    return ''.join([PATH_INVALID_CHAR_REPLACEMENT.get(c, c) for c in s])
+
+
 def bencode(num, alphabet="0123456789"):
     """Encode an integer into a base-N encoded string"""
     data = ""
@@ -672,6 +689,7 @@ class PathFormat():
         self.basedirectory = basedir
 
         restrict = extractor.config("path-restrict", "auto")
+        restrict_by = extractor.config('path-restrict-replace', '_')
         if restrict == "auto":
             restrict = "\\\\|/<>:\"?*" if os.name == "nt" else "/"
         elif restrict == "unix":
@@ -681,7 +699,10 @@ class PathFormat():
 
         remove = extractor.config("path-remove", "\x00-\x1f\x7f")
 
-        self.clean_segment = self._build_cleanfunc(restrict, "_")
+        if restrict_by == 'map':
+            self.clean_segment = string_map
+        else:
+            self.clean_segment = self._build_cleanfunc(restrict, restrict_by)
         self.clean_path = self._build_cleanfunc(remove, "")
 
     @staticmethod
