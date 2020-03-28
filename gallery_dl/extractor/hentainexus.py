@@ -67,7 +67,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         else:
             jt += '[{}] '.format(artist)
         jt += title
-        if parody.lower() != 'Original Work'.lower():
+        if parody.lower() != 'original work':
             jt += ' ({})'.format(parody)
         if book:
             jt += ' ({})'.format(book)
