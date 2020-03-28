@@ -143,6 +143,7 @@ class SimplyhentaiVideoExtractor(Extractor):
             "pattern": r"https://www\.googleapis\.com/drive/v3/files"
                        r"/0B1ecQ8ZVLm3JcHZzQzBnVy1ZUmc\?alt=media&key=[\w-]+",
             "keyword": "706790708b14773efc1e075ddd3b738a375348a5",
+            "options": (("verify", False),),
             "count": 1,
         }),
         (("https://videos.simply-hentai.com"
