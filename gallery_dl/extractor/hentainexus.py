@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,7 +22,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
     test = (
         ("https://hentainexus.com/view/5688", {
             "url": "746d0043e20030f1171aae5ea113176607302517",
-            "keyword": "77702b42f8f76ecfe5d8a14cfbbcbd855eb14d7f",
+            "keyword": "5e5bb4b1553b1c6e126b198f9ae017a1a5d0a5ad",
         }),
         ("https://hentainexus.com/read/5688"),
     )
@@ -53,7 +53,13 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         data["lang"] = util.language_to_code(data["language"])
         data["type"] = "Doujinshi" if 'doujin' in data["tags"] else "Manga"
         data["title_conventional"] = self.join_title(
-            data["event"], data["circle"], data["artist"], data["title"], data["parody"], data["book"], data["magazine"]
+            data["event"],
+            data["circle"],
+            data["artist"],
+            data["title"],
+            data["parody"],
+            data["book"],
+            data["magazine"],
         )
         return data
 

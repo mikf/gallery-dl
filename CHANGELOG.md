@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.13.3 - 2020-03-28
 ### Additions
 - [instagram] Add support for user's saved medias ([#644](https://github.com/mikf/gallery-dl/issues/644))
