@@ -447,6 +447,11 @@ class DeviantartStashExtractor(DeviantartExtractor):
             "pattern": r"https://api-da\.wixmp\.com/_api/download/file",
             "count": 1,
         }),
+        # mixed stash folders and images (#659)
+        ("https://sta.sh/21l84tbph3sr", {
+            "url": "7527fb11b9e895960a02a26342bec91fbe25f55c",
+            "count": 12,
+        }),
         ("https://sta.sh/abcdefghijkl", {
             "exception": exception.HttpError,
         }),
@@ -468,12 +473,21 @@ class DeviantartStashExtractor(DeviantartExtractor):
             return (self.api.deviation(deviation_id),)
 
         else:
+            results = []
             data = {"_extractor": DeviantartStashExtractor}
-            page = text.extract(page, 'id="stash-body"', 'class="footer"')[0]
-            return [
-                (url, data)
-                for url in text.extract_iter(page, '<a href="', '"')
-            ]
+
+            for item in text.extract_iter(
+                    page, 'class="stash-thumb-container', '</div>'):
+                url = text.extract(item, '<a href="', '"')[0]
+                if not url:
+                    sid = text.extract(item, 'gmi-stashid="', '"')[0]
+                    if not sid:
+                        continue
+                    url = "https://sta.sh/2" + util.bencode(text.parse_int(
+                        sid), "0123456789abcdefghijklmnopqrstuvwxyz")
+                results.append((url, data))
+
+            return results
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
