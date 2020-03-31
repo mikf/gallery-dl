@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text
-import json
 
 
 class PiczelExtractor(Extractor):
@@ -137,8 +136,5 @@ class PiczelImageExtractor(PiczelExtractor):
         self.image_id = match.group(1)
 
     def posts(self):
-        url = "{}/gallery/image/{}".format(self.root, self.image_id)
-        page = self.request(url).text
-        data = json.loads(text.extract(
-            page, 'window.__PRELOADED_STATE__ =', '</script>')[0])
-        return (data["gallery"]["images"]["byId"][self.image_id],)
+        url = "{}/api/gallery/{}".format(self.root, self.image_id)
+        return (self.request(url).json(),)
