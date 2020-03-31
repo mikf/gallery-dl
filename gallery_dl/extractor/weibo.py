@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -118,7 +118,7 @@ class WeiboStatusExtractor(WeiboExtractor):
     """Extractor for images from a status on weibo.cn"""
     subcategory = "status"
     pattern = (r"(?:https?://)?(?:www\.|m\.)?weibo\.c(?:om|n)"
-               r"/(?:detail|status|\d+)/(\d+)")
+               r"/(?:detail|status|\d+)/(\w+)")
     test = (
         ("https://m.weibo.cn/detail/4323047042991618", {
             "pattern": r"https?://wx\d+.sinaimg.cn/large/\w+.jpg",
@@ -129,6 +129,10 @@ class WeiboStatusExtractor(WeiboExtractor):
         # unavailable video (#427)
         ("https://m.weibo.cn/status/4268682979207023", {
             "exception": exception.NotFoundError,
+        }),
+        # non-numeric status ID (#664)
+        ("https://weibo.com/3314883543/Iy7fj4qVg", {
+            "pattern": r"https?://f.video.weibocdn.com/\w+\.mp4\?label=mp4_hd",
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
