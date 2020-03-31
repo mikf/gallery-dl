@@ -252,8 +252,8 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.org/project/gallery-dl/
 
-.. |build| image:: https://travis-ci.org/mikf/gallery-dl.svg?branch=master
-    :target: https://travis-ci.org/mikf/gallery-dl
+.. |build| image:: https://travis-ci.com/mikf/gallery-dl.svg?branch=master
+    :target: https://travis-ci.com/mikf/gallery-dl
 
 .. |gitter| image:: https://badges.gitter.im/gallery-dl/main.svg
     :target: https://gitter.im/gallery-dl/main
