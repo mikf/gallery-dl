@@ -439,7 +439,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
         }),
         # multiple stash items
         ("https://sta.sh/21jf51j7pzl2", {
-            "pattern": pattern,
+            "options": (("original", False),),
             "count": 4,
         }),
         # downloadable, but no "content" field (#307)
@@ -449,8 +449,8 @@ class DeviantartStashExtractor(DeviantartExtractor):
         }),
         # mixed stash folders and images (#659)
         ("https://sta.sh/21l84tbph3sr", {
-            "url": "7527fb11b9e895960a02a26342bec91fbe25f55c",
-            "count": 12,
+            "options": (("original", False),),
+            "count": 20,
         }),
         ("https://sta.sh/abcdefghijkl", {
             "exception": exception.HttpError,
@@ -464,30 +464,31 @@ class DeviantartStashExtractor(DeviantartExtractor):
         self.user = None
         self.stash_id = match.group(1)
 
-    def deviations(self):
-        url = "https://sta.sh/" + self.stash_id
+    def deviations(self, stash_id=None):
+        if stash_id is None:
+            stash_id = self.stash_id
+        url = "https://sta.sh/" + stash_id
         page = self.request(url).text
-        deviation_id = text.extract(page, '//deviation/', '"')[0]
 
-        if deviation_id:
-            return (self.api.deviation(deviation_id),)
+        if stash_id[0] == "0":
+            uuid = text.extract(page, '//deviation/', '"')[0]
+            if uuid:
+                yield self.api.deviation(uuid)
+                return
 
-        else:
-            results = []
-            data = {"_extractor": DeviantartStashExtractor}
+        for item in text.extract_iter(
+                page, 'class="stash-thumb-container', '</div>'):
+            url = text.extract(item, '<a href="', '"')[0]
 
-            for item in text.extract_iter(
-                    page, 'class="stash-thumb-container', '</div>'):
-                url = text.extract(item, '<a href="', '"')[0]
-                if not url:
-                    sid = text.extract(item, 'gmi-stashid="', '"')[0]
-                    if not sid:
-                        continue
-                    url = "https://sta.sh/2" + util.bencode(text.parse_int(
-                        sid), "0123456789abcdefghijklmnopqrstuvwxyz")
-                results.append((url, data))
+            if url:
+                stash_id = url.rpartition("/")[2]
+            else:
+                stash_id = text.extract(item, 'gmi-stashid="', '"')[0]
+                stash_id = "2" + util.bencode(text.parse_int(
+                    stash_id), "0123456789abcdefghijklmnopqrstuvwxyz")
 
-            return results
+            if len(stash_id) > 2:
+                yield from self.deviations(stash_id)
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
