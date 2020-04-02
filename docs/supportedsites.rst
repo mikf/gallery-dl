@@ -18,6 +18,7 @@ arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |artstation-C|
+baraag               https://baraag.net/                 Images from Statuses, User Profiles
 Behance              https://www.behance.net/            Collections, Galleries, User Profiles
 Blogger              https://www.blogger.com/            Blogs, Posts
 BobX                 http://www.bobx.com/dark/           Galleries, Idols
@@ -77,6 +78,7 @@ Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.net/              Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
+mastodon.social      https://mastodon.social/            Images from Statuses, User Profiles
 Naver                https://blog.naver.com/             Blogs, Posts
 Newgrounds           https://www.newgrounds.com/         |newgrounds-C|                                     Optional
 Ngomik               http://ngomik.in/                   Chapters

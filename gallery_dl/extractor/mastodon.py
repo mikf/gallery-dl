@@ -189,6 +189,12 @@ def generate_extractors():
 
 
 EXTRACTORS = {
+    "mastodon.social": {
+        "category"     : "mastodon.social",
+        "access-token" : "Y06R36SMvuXXN5_wiPKFAEFiQaMSQg0o_hGgc86Jj48",
+        "client-id"    : "dBSHdpsnOUZgxOnjKSQrWEPakO3ctM7HmsyoOd4FcRo",
+        "client-secret": "DdrODTHs_XoeOsNVXnILTMabtdpWrWOAtrmw91wU1zI",
+    },
     "pawoo.net": {
         "category"     : "pawoo",
         "access-token" : "286462927198d0cf3e24683e91c8259a"
@@ -197,6 +203,12 @@ EXTRACTORS = {
                          "cf9323cef81f13cb505415716dba7dac",
         "client-secret": "e45bef4bad45b38abf7d9ef88a646b73"
                          "75e7fb2532c31a026327a93549236481",
+    },
+    "baraag.net": {
+        "category"     : "baraag",
+        "access-token" : "53P1Mdigf4EJMH-RmeFOOSM9gdSDztmrAYFgabOKKE0",
+        "client-id"    : "czxx2qilLElYHQ_sm-lO8yXuGwOHxLX9RYYaD0-nq1o",
+        "client-secret": "haMaFdMBgK_-BIxufakmI2gFgkYjqmgXGEO2tB-R2xY",
     },
 }
 
