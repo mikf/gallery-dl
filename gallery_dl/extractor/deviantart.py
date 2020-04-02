@@ -1066,6 +1066,7 @@ class DeviantartOAuthAPI():
 
 class DeviantartEclipseAPI():
     """Interface to the DeviantArt Eclipse API"""
+    _last_request = 0
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -1102,6 +1103,10 @@ class DeviantartEclipseAPI():
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):
+        diff = time.time() - DeviantartEclipseAPI._last_request
+        if diff < 2.0:
+            time.sleep(2.0 - diff)
+
         url = "https://www.deviantart.com/_napi/" + endpoint
         headers = {"Referer": "https://www.deviantart.com/"}
 
@@ -1114,8 +1119,8 @@ class DeviantartEclipseAPI():
             raise exception.StopExtraction(
                 "Your account must use the Eclipse interface.")
         elif code == 403 and b"Request blocked." in response.content:
-            raise exception.StopExtraction(
-                "Requests to deviantart.com blocked due to too much traffic.")
+            self.extractor.wait(seconds=180, reason="rate limit reset")
+            return self._call(endpoint, params)
         try:
             return response.json()
         except Exception:
