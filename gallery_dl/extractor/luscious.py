@@ -61,7 +61,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
                     "created_by"  : "NTRshouldbeillegal",
                     "date"        : "dt:2016-11-20 07:10:53",
                     "description" : "Enjoy.",
-                    "download_url": "/download/824778/277031/",
+                    "download_url": "re:/download/(r/)?824778/277031/",
                     "genres"      : list,
                     "id"          : 277031,
                     "is_manga"    : True,

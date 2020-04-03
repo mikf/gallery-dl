@@ -64,7 +64,9 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?hiperdex\.com"
                r"(/manga/([^/?&#]+)/([^/?&#]+))")
     test = ("https://hiperdex.com/manga/domestic-na-kanojo/154-5/", {
-        "url": "111bc3ee14ce91d78c275770ef63b56c9ac15d8d",
+        "pattern": r"https://hiperdex.com/wp-content/uploads"
+                   r"/WP-manga/data/manga_\w+/[0-9a-f]{32}/\d+\.webp",
+        "count": 9,
         "keyword": {
             "artist" : "Sasuga Kei",
             "author" : "Sasuga Kei",
@@ -89,7 +91,8 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     def images(self, page):
         return [
             (url.strip(), None)
-            for url in re.findall(r'id="image-\d+"\s+src="([^"]+)', page)
+            for url in re.findall(
+                r'id="image-\d+"\s+(?:data-)?src="([^"]+)', page)
         ]
 
 
