@@ -33,6 +33,7 @@ class DeviantartExtractor(Extractor):
     filename_fmt = "{category}_{index}_{title}.{extension}"
     cookiedomain = None
     root = "https://www.deviantart.com"
+    _last_request = 0
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -268,6 +269,23 @@ class DeviantartExtractor(Extractor):
     def _check_url(self, url):
         return self.request(url, method="HEAD", fatal=False).status_code < 400
 
+    def _limited_request(self, url, **kwargs):
+        """Limits HTTP requests to one every 2 seconds"""
+        kwargs["fatal"] = None
+        diff = time.time() - DeviantartExtractor._last_request
+        if diff < 2.0:
+            delay = 2.0 - diff
+            self.log.debug("Sleeping %.2f seconds", delay)
+            time.sleep(delay)
+
+        while True:
+            response = self.request(url, **kwargs)
+            if response.status_code != 403 or \
+                    b"Request blocked." not in response.content:
+                DeviantartExtractor._last_request = time.time()
+                return response
+            self.wait(seconds=180, reason="rate limit reset")
+
 
 class DeviantartUserExtractor(DeviantartExtractor):
     """Extractor for an artist's user profile"""
@@ -452,13 +470,13 @@ class DeviantartStashExtractor(DeviantartExtractor):
             "pattern": r"https://api-da\.wixmp\.com/_api/download/file",
             "count": 1,
         }),
-        # mixed stash folders and images (#659)
-        ("https://sta.sh/21l84tbph3sr", {
+        # mixed folders and images (#659)
+        ("https://sta.sh/215twi387vfj", {
             "options": (("original", False),),
-            "count": 20,
+            "count": 4,
         }),
         ("https://sta.sh/abcdefghijkl", {
-            "exception": exception.HttpError,
+            "count": 0,
         }),
     )
 
@@ -473,7 +491,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
         if stash_id is None:
             stash_id = self.stash_id
         url = "https://sta.sh/" + stash_id
-        page = self.request(url).text
+        page = self._limited_request(url).text
 
         if stash_id[0] == "0":
             uuid = text.extract(page, '//deviation/', '"')[0]
@@ -1066,7 +1084,6 @@ class DeviantartOAuthAPI():
 
 class DeviantartEclipseAPI():
     """Interface to the DeviantArt Eclipse API"""
-    _last_request = 0
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -1103,24 +1120,15 @@ class DeviantartEclipseAPI():
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):
-        diff = time.time() - DeviantartEclipseAPI._last_request
-        if diff < 2.0:
-            time.sleep(2.0 - diff)
-
         url = "https://www.deviantart.com/_napi/" + endpoint
         headers = {"Referer": "https://www.deviantart.com/"}
 
-        response = self.extractor.request(
+        response = self.extractor._limited_request(
             url, params=params, headers=headers, fatal=None)
-        DeviantartEclipseAPI._last_request = time.time()
 
-        code = response.status_code
-        if code == 404:
+        if response.status_code == 404:
             raise exception.StopExtraction(
                 "Your account must use the Eclipse interface.")
-        elif code == 403 and b"Request blocked." in response.content:
-            self.extractor.wait(seconds=180, reason="rate limit reset")
-            return self._call(endpoint, params)
         try:
             return response.json()
         except Exception:
@@ -1137,7 +1145,7 @@ class DeviantartEclipseAPI():
 
     def _module_id_watching(self, user):
         url = "{}/{}/about".format(self.extractor.root, user)
-        page = self.extractor.request(url).text
+        page = self.extractor._limited_request(url).text
         pos = page.find('\\"type\\":\\"watching\\"')
         if pos < 0:
             raise exception.NotFoundError("module")
