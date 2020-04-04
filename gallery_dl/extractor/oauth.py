@@ -178,9 +178,9 @@ class OAuthDeviantart(OAuthBase):
 
         self._oauth2_authorization_code_grant(
             self.oauth_config(
-                "client-id", deviantart.DeviantartAPI.CLIENT_ID),
+                "client-id", deviantart.DeviantartOAuthAPI.CLIENT_ID),
             self.oauth_config(
-                "client-secret", deviantart.DeviantartAPI.CLIENT_SECRET),
+                "client-secret", deviantart.DeviantartOAuthAPI.CLIENT_SECRET),
             "https://www.deviantart.com/oauth2/authorize",
             "https://www.deviantart.com/oauth2/token",
             scope="browse",
