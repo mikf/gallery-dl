@@ -313,8 +313,7 @@ class RedditAPI():
 
         remaining = response.headers.get("x-ratelimit-remaining")
         if remaining and float(remaining) < 2:
-            reset = response.headers["x-ratelimit-reset"]
-            self.extractor.wait(seconds=reset, reason="rate limit reset")
+            self.extractor.wait(seconds=response.headers["x-ratelimit-reset"])
             return self._call(endpoint, params)
 
         data = response.json()

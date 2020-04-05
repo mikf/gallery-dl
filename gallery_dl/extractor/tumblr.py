@@ -418,7 +418,7 @@ class TumblrAPI(oauth.OAuth1API):
             reset = response.headers.get("x-ratelimit-perhour-reset")
             if reset:
                 self.log.info("Hourly API rate limit exceeded")
-                self.extractor.wait(seconds=reset, reason="rate limit reset")
+                self.extractor.wait(seconds=reset)
                 return self._call(blog, endpoint, params)
 
         raise exception.StopExtraction(data)
