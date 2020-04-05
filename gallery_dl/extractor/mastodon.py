@@ -108,7 +108,7 @@ class MastodonAPI():
     def account_search(self, query, limit=40):
         """Search for content"""
         params = {"q": query, "limit": limit}
-        return self._call("accounts/search", params)
+        return self._call("accounts/search", params).json()
 
     def account_statuses(self, account_id):
         """Get an account's statuses"""
@@ -118,28 +118,38 @@ class MastodonAPI():
 
     def status(self, status_id):
         """Fetch a Status"""
-        return self._call("statuses/" + status_id)
+        return self._call("statuses/" + status_id).json()
 
     def _call(self, endpoint, params=None):
         url = "{}/api/v1/{}".format(self.root, endpoint)
-        response = self.extractor.request(
-            url, params=params, headers=self.headers)
-        return self._parse(response)
+
+        while True:
+            response = self.extractor.request(
+                url, params=params, headers=self.headers, fatal=None)
+            code = response.status_code
+
+            if code < 400:
+                return response
+            if code == 404:
+                raise exception.NotFoundError()
+            if code == 429:
+                self.extractor.wait(until=text.parse_datetime(
+                    response.headers["x-ratelimit-reset"],
+                    "%Y-%m-%dT%H:%M:%S.%fZ",
+                ))
+                continue
+            raise exception.StopExtraction(response.json().get("error"))
 
     def _pagination(self, endpoint, params):
         url = "{}/api/v1/{}".format(self.root, endpoint)
         while url:
-            response = self.extractor.request(
-                url, params=params, headers=self.headers)
-            yield from self._parse(response)
-            url = response.links.get("next", {}).get("url")
+            response = self._call(endpoint, params)
+            yield from response.json()
 
-    @staticmethod
-    def _parse(response):
-        """Parse an API response"""
-        if response.status_code == 404:
-            raise exception.NotFoundError()
-        return response.json()
+            url = response.links.get("next")
+            if not url:
+                return
+            url = url["url"]
 
 
 def generate_extractors():
