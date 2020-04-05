@@ -207,12 +207,12 @@ EXTRACTORS = {
     },
     "pawoo.net": {
         "category"     : "pawoo",
-        "access-token" : "286462927198d0cf3e24683e91c8259a"
-                         "ac4367233064e0570ca18df2ac65b226",
-        "client-id"    : "97b142b6904abf97a1068d51a7bc2f2f"
-                         "cf9323cef81f13cb505415716dba7dac",
-        "client-secret": "e45bef4bad45b38abf7d9ef88a646b73"
-                         "75e7fb2532c31a026327a93549236481",
+        "access-token" : "c12c9d275050bce0dc92169a28db09d7"
+                         "0d62d0a75a8525953098c167eacd3668",
+        "client-id"    : "978a25f843ec01e53d09be2c290cd75c"
+                         "782bc3b7fdbd7ea4164b9f3c3780c8ff",
+        "client-secret": "9208e3d4a7997032cf4f1b0e12e5df38"
+                         "8428ef1fadb446dcfeb4f5ed6872d97b",
     },
     "baraag.net": {
         "category"     : "baraag",
