@@ -9,7 +9,7 @@
 """Extractors for mastodon instances"""
 
 from .common import Extractor, Message
-from .. import text, config, exception
+from .. import text, util, config, exception
 import re
 
 
@@ -158,7 +158,7 @@ def generate_extractors():
     symtable = globals()
     extractors = config.get(("extractor",), "mastodon")
     if extractors:
-        EXTRACTORS.update(extractors)
+        util.combine_dict(EXTRACTORS, extractors)
     config.set(("extractor",), "mastodon", EXTRACTORS)
 
     for instance, info in EXTRACTORS.items():
