@@ -284,7 +284,7 @@ class DeviantartExtractor(Extractor):
                     b"Request blocked." not in response.content:
                 DeviantartExtractor._last_request = time.time()
                 return response
-            self.wait(seconds=180, reason="rate limit reset")
+            self.wait(seconds=180)
 
 
 class DeviantartUserExtractor(DeviantartExtractor):

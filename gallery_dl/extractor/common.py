@@ -122,23 +122,33 @@ class Extractor():
 
         raise exception.HttpError(msg)
 
-    def wait(self, *, seconds=None, until=None, reason=None, adjust=1):
-        now = datetime.datetime.now()
+    def wait(self, *, seconds=None, until=None, adjust=1.0,
+             reason="rate limit reset"):
+        now = time.time()
 
         if seconds:
             seconds = float(seconds)
-            until = now + datetime.timedelta(seconds=seconds)
+            until = now + seconds
         elif until:
-            until = datetime.datetime.fromtimestamp(float(until))
-            seconds = (until - now).total_seconds()
+            if isinstance(until, datetime.datetime):
+                # convert to UTC timestamp
+                epoch = datetime.datetime(1970, 1, 1)
+                until = (until - epoch) / datetime.timedelta(0, 1)
+            else:
+                until = float(until)
+            seconds = until - now
         else:
             raise ValueError("Either 'seconds' or 'until' is required")
 
+        seconds += adjust
+        if seconds <= 0.0:
+            return
+
         if reason:
-            t = until.time()
+            t = datetime.datetime.fromtimestamp(until).time()
             isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
             self.log.info("Waiting until %s for %s.", isotime, reason)
-        time.sleep(seconds + adjust)
+        time.sleep(seconds)
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""

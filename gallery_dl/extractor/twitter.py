@@ -224,8 +224,7 @@ class TwitterExtractor(Extractor):
         if response.status_code == 429 or \
                 response.headers.get("x-rate-limit-remaining") == "0":
             if self.logged_in:
-                reset = response.headers.get("x-rate-limit-reset")
-                self.wait(until=reset, reason="rate limit reset")
+                self.wait(until=response.headers.get("x-rate-limit-reset"))
             else:
                 _guest_token.invalidate()
             return self._video_from_tweet(tweet_id)
