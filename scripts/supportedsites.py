@@ -17,6 +17,7 @@ CATEGORY_MAP = {
     "archivedmoe"    : "Archived.Moe",
     "archiveofsins"  : "Archive of Sins",
     "artstation"     : "ArtStation",
+    "aryion"         : "Eka's Portal",
     "b4k"            : "arch.b4k.co",
     "baraag"         : "baraag",
     "bcy"            : "半次元",
