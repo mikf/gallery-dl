@@ -16,6 +16,7 @@ import unittest
 from unittest.mock import patch
 
 from gallery_dl import extractor
+from gallery_dl.extractor import mastodon
 from gallery_dl.extractor.common import Extractor, Message
 from gallery_dl.extractor.directlink import DirectlinkExtractor as DLExtractor
 
@@ -235,6 +236,10 @@ class TestExtractorWait(unittest.TestCase):
 
 
 class TextExtractorOAuth(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        mastodon.generate_extractors()
 
     def test_oauth1(self):
         for category in ("flickr", "smugmug", "tumblr"):
