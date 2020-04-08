@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -33,6 +33,14 @@ else:
         "${HOME}/.config/gallery-dl/config.json",
         "${HOME}/.gallery-dl.conf",
     ]
+
+
+if getattr(sys, "frozen", False):
+    # look for config file in PyInstaller executable directory (#682)
+    _default_configs.append(os.path.join(
+        os.path.dirname(sys.executable),
+        "gallery-dl.conf",
+    ))
 
 
 # --------------------------------------------------------------------
