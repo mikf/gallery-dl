@@ -19,6 +19,7 @@ modules = [
     "8muses",
     "adultempire",
     "artstation",
+    "aryion",
     "bcy",
     "behance",
     "blogger",
