@@ -164,7 +164,11 @@ class HttpDownloader(DownloaderBase):
 
         self.downloading = False
         if self.mtime:
-            pathfmt.kwdict["_mtime"] = response.headers.get("Last-Modified")
+            pathfmt.kwdict.setdefault(
+                "_mtime", response.headers.get("Last-Modified"))
+        else:
+            pathfmt.kwdict["_mtime"] = None
+
         return True
 
     def receive(self, response, file):

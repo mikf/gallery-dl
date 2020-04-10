@@ -840,16 +840,15 @@ class PathFormat():
                 shutil.copyfile(self.temppath, self.realpath)
                 os.unlink(self.temppath)
 
-        if "_mtime" in self.kwdict:
+        mtime = self.kwdict.get("_mtime")
+        if mtime:
             # Set file modification time
-            mtime = self.kwdict["_mtime"]
-            if mtime:
-                try:
-                    if isinstance(mtime, str):
-                        mtime = mktime_tz(parsedate_tz(mtime))
-                    os.utime(self.realpath, (time.time(), mtime))
-                except Exception:
-                    pass
+            try:
+                if isinstance(mtime, str):
+                    mtime = mktime_tz(parsedate_tz(mtime))
+                os.utime(self.realpath, (time.time(), mtime))
+            except Exception:
+                pass
 
 
 class DownloadArchive():
