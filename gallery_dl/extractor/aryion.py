@@ -18,7 +18,7 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
 class AryionExtractor(Extractor):
     """Base class for aryion extractors"""
     category = "aryion"
-    directory_fmt = ("{category}", "{user!l}")
+    directory_fmt = ("{category}", "{user!l}", "{path:J - }")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
     root = "https://aryion.com"
