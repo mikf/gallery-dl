@@ -61,6 +61,11 @@ class AryionExtractor(Extractor):
             if not fname:
                 fname, ext = ext, fname
 
+            # fix 'last-modified' header
+            lmod = headers["last-modified"]
+            if lmod[22] != ":":
+                lmod = "{}:{} GMT".format(lmod[:22], lmod[22:24])
+
         post_url = "{}/g4/view/{}".format(self.root, post_id)
         extr = text.extract_from(self.request(post_url).text)
 
@@ -85,6 +90,7 @@ class AryionExtractor(Extractor):
                 "<p>", "</p>"), "", "")),
             "filename"   : fname,
             "extension"  : ext,
+            "_mtime"     : lmod,
         }
 
         d1, _, d2 = data["date"].partition(",")
@@ -144,6 +150,7 @@ class AryionPostExtractor(AryionExtractor):
             "views"    : int,
             "favorites": int,
             "comments" : int,
+            "_mtime"   : "Sat, 16 Feb 2019 19:30:34 GMT",
         },
     })
 
