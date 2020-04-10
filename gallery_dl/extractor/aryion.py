@@ -43,16 +43,30 @@ class AryionExtractor(Extractor):
         return num
 
     def _parse_post(self, post_id):
-        url = "{}/g4/view/{}".format(self.root, post_id)
-        extr = text.extract_from(self.request(url).text)
+        url = "{}/g4/data.php?id={}".format(self.root, post_id)
+        with self.request(url, method="HEAD", fatal=False) as response:
 
-        url = extr('property="og:image:secure_url" content="', '"')
-        if not url:
-            return None
+            if response.status_code >= 400:
+                return None
+            headers = response.headers
+
+            # ignore folders
+            if headers["content-type"] == "application/x-folder":
+                return None
+
+            # get filename from 'content-disposition' header
+            cdis = headers["content-disposition"]
+            fname, _, ext = text.extract(
+                cdis, 'filename="', '"')[0].rpartition(".")
+            if not fname:
+                fname, ext = ext, fname
+
+        post_url = "{}/g4/view/{}".format(self.root, post_id)
+        extr = text.extract_from(self.request(post_url).text)
 
         title, _, artist = text.unescape(extr(
-            'property="og:title" content="', '"')).rpartition(" by ")
-        data = text.nameext_from_url(url, {
+            "<title>g4 :: ", "<")).rpartition(" by ")
+        data = {
             "id"    : text.parse_int(post_id),
             "url"   : url,
             "user"  : self.user or artist,
@@ -66,9 +80,12 @@ class AryionExtractor(Extractor):
             "height": text.parse_int(extr("", "<")),
             "comments" : text.parse_int(extr("Comments</b>:", "<")),
             "favorites": text.parse_int(extr("Favorites</b>:", "<")),
-            "tags"  : text.split_html(extr("class='taglist'>", "</span>")),
-            "description": text.remove_html(extr("<p>", "</p>"), "", ""),
-        })
+            "tags"     : text.split_html(extr("class='taglist'>", "</span>")),
+            "description": text.unescape(text.remove_html(extr(
+                "<p>", "</p>"), "", "")),
+            "filename"   : fname,
+            "extension"  : ext,
+        }
 
         d1, _, d2 = data["date"].partition(",")
         data["date"] = text.parse_datetime(d1[:-2] + d2, "%b %d %Y %I:%M %p")
@@ -82,7 +99,7 @@ class AryionGalleryExtractor(AryionExtractor):
     pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?&#]+)"
     test = (
         ("https://aryion.com/g4/gallery/jameshoward", {
-            "pattern": r"https://aryion.com/g4/data/[^/]+/jameshoward-\d+-\w+",
+            "pattern": r"https://aryion\.com/g4/data\.php\?id=\d+$",
             "range": "48-52",
             "count": 5,
         }),
@@ -109,7 +126,7 @@ class AryionPostExtractor(AryionExtractor):
     subcategory = "post"
     pattern = BASE_PATTERN + r"/view/(\d+)"
     test = ("https://aryion.com/g4/view/510079", {
-        "url": "b551444173ec73d369d5dd3e5d74054b4a45baa5",
+        "url": "f233286fa5558c07ae500f7f2d5cb0799881450e",
         "keyword": {
             "artist"   : "jameshoward",
             "user"     : "jameshoward",
