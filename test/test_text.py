@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -373,6 +373,10 @@ class TestText(unittest.TestCase):
         )
         self.assertEqual(
             f("2019-05-07T21:25:02+0900"),
+            datetime.datetime(2019, 5, 7, 12, 25, 2),
+        )
+        self.assertEqual(
+            f("2019-05-07T21:25:02", "%Y-%m-%dT%H:%M:%S", utcoffset=9),
             datetime.datetime(2019, 5, 7, 12, 25, 2),
         )
         self.assertEqual(
