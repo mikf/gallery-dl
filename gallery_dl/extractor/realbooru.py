@@ -53,7 +53,7 @@ class RealbooruPostExtractor(booru.PostMixin, RealbooruExtractor):
         "options": (("tags", True),),
         "keyword": {
             "tags_general" : str,
-            "tags_metadata": "tagme",
+            "tags_metadata": "cute tagme",
             "tags_model"   : "jennifer_lawrence",
         },
     })
