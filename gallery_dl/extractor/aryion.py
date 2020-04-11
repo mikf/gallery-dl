@@ -94,7 +94,8 @@ class AryionExtractor(Extractor):
         }
 
         d1, _, d2 = data["date"].partition(",")
-        data["date"] = text.parse_datetime(d1[:-2] + d2, "%b %d %Y %I:%M %p")
+        data["date"] = text.parse_datetime(
+            d1[:-2] + d2, "%b %d %Y %I:%M %p", -5)
 
         return data
 
@@ -145,7 +146,7 @@ class AryionPostExtractor(AryionExtractor):
             "title"    : "I'm on subscribestar now too!",
             "description": r"re:Doesn't hurt to have a backup, right\?",
             "tags"     : ["Non-Vore", "subscribestar"],
-            "date"     : "dt:2019-02-16 14:30:00",
+            "date"     : "dt:2019-02-16 19:30:00",
             "path"     : [],
             "views"    : int,
             "favorites": int,
