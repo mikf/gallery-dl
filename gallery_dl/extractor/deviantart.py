@@ -47,7 +47,7 @@ class DeviantartExtractor(Extractor):
         self.api = None
 
         if self.quality:
-            self.quality = "q_{}".format(self.quality)
+            self.quality = ",q_{}".format(self.quality)
 
         if self.original != "image":
             self._update_content = self._update_content_default
@@ -98,12 +98,12 @@ class DeviantartExtractor(Extractor):
                         # https://github.com/r888888888/danbooru/issues/4069
                         intermediary, count = re.subn(
                             r"(/f/[^/]+/[^/]+)/v\d+/.*",
-                            r"/intermediary\1", content["src"])
+                            r"/intermediary\1", content["src"], 1)
                         if count and self._check_url(intermediary):
                             content["src"] = intermediary
                     if self.quality:
                         content["src"] = re.sub(
-                            r"q_\d+", self.quality, content["src"])
+                            r",q_\d+", self.quality, content["src"], 1)
 
                 yield self.commit(deviation, content)
 
