@@ -125,16 +125,17 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     def chapters(self, page):
         self.manga_data(self.manga, page)
         results = []
-        last = None
 
-        page = text.extract(page, 'class="page-content-listing', '</ul>')[0]
-        for match in HiperdexChapterExtractor.pattern.finditer(page):
-            path = match.group(1)
-            if last != path:
-                last = path
-                results.append((
-                    self.root + path,
-                    self.chapter_data(path.rpartition("/")[2]),
-                ))
+        shortlink = text.extract(page, "rel='shortlink' href='", "'")[0]
+        data = {
+            "action": "manga_get_chapters",
+            "manga" : shortlink.rpartition("=")[2],
+        }
+        url = self.root + "/wp-admin/admin-ajax.php"
+        page = self.request(url, method="POST", data=data).text
+
+        for url in text.extract_iter(page, 'href="', '"', 320):
+            chapter = url.rpartition("/")[2]
+            results.append((url, self.chapter_data(chapter)))
 
         return results
