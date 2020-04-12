@@ -1,6 +1,25 @@
 # Changelog
 
-## Unreleased
+## 1.13.4 - 2020-04-12
+### Additions
+- [aryion] add `gallery` and `post` extractors ([#390](https://github.com/mikf/gallery-dl/issues/390), [#673](https://github.com/mikf/gallery-dl/issues/673))
+- [deviantart] detect and handle folders in sta.sh listings ([#659](https://github.com/mikf/gallery-dl/issues/659))
+- [hentainexus] add `circle`, `event`, and `title_conventional` metadata fields ([#661](https://github.com/mikf/gallery-dl/issues/661))
+- [hiperdex] add `artist` extractor ([#606](https://github.com/mikf/gallery-dl/issues/606))
+- [mastodon] add access tokens for `mastodon.social` and `baraag.net` ([#665](https://github.com/mikf/gallery-dl/issues/665))
+### Changes
+- [deviantart] retrieve *all* download URLs through the OAuth API
+- automatically read config files in PyInstaller executable directories ([#682](https://github.com/mikf/gallery-dl/issues/682))
+### Fixes
+- [deviantart] handle "Request blocked" errors ([#655](https://github.com/mikf/gallery-dl/issues/655))
+- [deviantart] improve JPEG quality replacement pattern
+- [hiperdex] fix extraction
+- [mastodon] handle API rate limits ([#665](https://github.com/mikf/gallery-dl/issues/665))
+- [mastodon] update OAuth credentials for pawoo.net ([#665](https://github.com/mikf/gallery-dl/issues/665))
+- [myportfolio] fix extraction of galleries without title
+- [piczel] fix extraction of single images
+- [vsco] fix collection extraction
+- [weibo] accept status URLs with non-numeric IDs ([#664](https://github.com/mikf/gallery-dl/issues/664))
 
 ## 1.13.3 - 2020-03-28
 ### Additions
