@@ -139,3 +139,30 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
             results.append((url, self.chapter_data(chapter)))
 
         return results
+
+
+class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
+    """Extractor for an artists's manga on hiperdex.com"""
+    subcategory = "artist"
+    categorytransfer = False
+    chapterclass = HiperdexMangaExtractor
+    reverse = False
+    pattern = (r"(?:https?://)?(?:www\.)?hiperdex\.com"
+               r"(/manga-a(?:rtist|uthor)/([^/?&#]+))")
+    test = (
+        ("https://hiperdex.com/manga-artist/beck-ho-an/"),
+        ("https://hiperdex.com/manga-author/viagra/", {
+            "pattern": HiperdexMangaExtractor.pattern,
+            "count": ">= 6",
+        }),
+    )
+
+    def __init__(self, match):
+        MangaExtractor.__init__(self, match, self.root + match.group(1) + "/")
+
+    def chapters(self, page):
+        results = []
+        for info in text.extract_iter(page, 'id="manga-item-', '<img'):
+            url = text.extract(info, 'href="', '"')[0]
+            results.append((url, {}))
+        return results
