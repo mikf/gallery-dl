@@ -47,7 +47,7 @@ class PatreonExtractor(Extractor):
                 self._attachments(post),
                 self._content(post),
             ):
-                fhash = url.rsplit("/", 2)[1]
+                fhash = url.split("/")[9].partition("?")[0]
                 if fhash not in hashes:
                     hashes.add(fhash)
                     post["hash"] = fhash

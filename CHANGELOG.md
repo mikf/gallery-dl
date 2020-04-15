@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.13.4 - 2020-04-12
 ### Additions
 - [aryion] add `gallery` and `post` extractors ([#390](https://github.com/mikf/gallery-dl/issues/390), [#673](https://github.com/mikf/gallery-dl/issues/673))
