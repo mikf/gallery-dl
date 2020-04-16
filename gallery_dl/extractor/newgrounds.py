@@ -345,7 +345,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user}", "Favorites")
     pattern = (r"(?:https?://)?([^.]+)\.newgrounds\.com"
-               r"/favorites(?:/(art|audio|movies))?/?")
+               r"/favorites(?!/following)(?:/(art|audio|movies))?/?")
     test = (
         ("https://tomfulp.newgrounds.com/favorites/art", {
             "range": "1-10",
@@ -381,10 +381,39 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
             if response.history:
                 return
 
-            favs = list(text.extract_iter(
-                response.text, 'href="//www.newgrounds.com', '"'))
-            for path in favs:
-                yield self.root + path
+            favs = self._extract_favorites(response.text)
+            yield from favs
+
             if len(favs) < 24:
                 return
             num += 1
+
+    def _extract_favorites(self, page):
+        return [
+            self.root + path
+            for path in text.extract_iter(
+                page, 'href="//www.newgrounds.com', '"')
+        ]
+
+
+class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
+    """Extractor for a newgrounds user's favorited users"""
+    subcategory = "following"
+    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/favorites/(following)"
+    test = ("https://tomfulp.newgrounds.com/favorites/following", {
+        "pattern": NewgroundsUserExtractor.pattern,
+        "range": "76-125",
+        "count": 50,
+    })
+
+    def items(self):
+        data = {"_extractor": NewgroundsUserExtractor}
+        for url in self._pagination(self.kind):
+            yield Message.Queue, url, data
+
+    @staticmethod
+    def _extract_favorites(page):
+        return [
+            "https://" + user.rpartition('"')[2]
+            for user in text.extract_iter(page, 'class="item-user', '"><img')
+        ]
