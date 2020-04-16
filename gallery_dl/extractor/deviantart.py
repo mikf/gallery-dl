@@ -813,6 +813,7 @@ class DeviantartFollowingExtractor(DeviantartExtractor):
         yield Message.Version, 1
         for user in eclipse_api.user_watching(self.user, self.offset):
             url = "{}/{}".format(self.root, user["username"])
+            user["_extractor"] = DeviantartUserExtractor
             yield Message.Queue, url, user
 
 
