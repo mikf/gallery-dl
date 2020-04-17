@@ -28,21 +28,18 @@ class AryionExtractor(Extractor):
         self.user = match.group(1)
         self.offset = 0
 
-    def items(self):
-        for post_id in util.advance(self.posts(), self.offset):
-            post = self._parse_post(post_id)
-            if post:
-                yield Message.Directory, post
-                yield Message.Url, post["url"], post
+    def posts(self, url):
+        while True:
+            page = self.request(url).text
+            yield from text.extract_iter(
+                page, "class='thumb' href='/g4/view/", "'")
 
-    def posts(self):
-        return ()
+            pos = page.find("Next &gt;&gt;")
+            if pos < 0:
+                return
+            url = self.root + text.rextract(page, "href='", "'", pos)[0]
 
-    def skip(self, num):
-        self.offset += num
-        return num
-
-    def _parse_post(self, post_id):
+    def parse_post(self, post_id):
         url = "{}/g4/data.php?id={}".format(self.root, post_id)
         with self.request(url, method="HEAD", fatal=False) as response:
 
@@ -50,18 +47,24 @@ class AryionExtractor(Extractor):
                 return None
             headers = response.headers
 
-            # ignore folders
-            if headers["content-type"] == "application/x-folder":
-                return None
+            # folder
+            if headers["content-type"] in (
+                "application/x-folder",
+                "application/x-comic-folder-nomerge",
+            ):
+                return False
 
-            # get filename from 'content-disposition' header
+            # get filename from 'Content-Disposition' header
             cdis = headers["content-disposition"]
             fname, _, ext = text.extract(
                 cdis, 'filename="', '"')[0].rpartition(".")
             if not fname:
                 fname, ext = ext, fname
 
-            # fix 'last-modified' header
+            # get file size from 'Content-Length' header
+            clen = headers.get("content-length")
+
+            # fix 'Last-Modified' header
             lmod = headers["last-modified"]
             if lmod[22] != ":":
                 lmod = "{}:{} GMT".format(lmod[:22], lmod[22:24])
@@ -79,8 +82,8 @@ class AryionExtractor(Extractor):
             "artist": artist,
             "path"  : text.split_html(extr("cookiecrumb'>", '</span'))[4:-1:2],
             "date"  : extr("class='pretty-date' title='", "'"),
+            "size"  : text.parse_int(clen),
             "views" : text.parse_int(extr("Views</b>:", "<").replace(",", "")),
-            "size"  : text.parse_bytes(extr("File size</b>:", "<")[:-2]),
             "width" : text.parse_int(extr("Resolution</b>:", "x")),
             "height": text.parse_int(extr("", "<")),
             "comments" : text.parse_int(extr("Comments</b>:", "<")),
@@ -88,9 +91,9 @@ class AryionExtractor(Extractor):
             "tags"     : text.split_html(extr("class='taglist'>", "</span>")),
             "description": text.unescape(text.remove_html(extr(
                 "<p>", "</p>"), "", "")),
-            "filename"   : fname,
-            "extension"  : ext,
-            "_mtime"     : lmod,
+            "filename" : fname,
+            "extension": ext,
+            "_mtime"   : lmod,
         }
 
         d1, _, d2 = data["date"].partition(",")
@@ -114,48 +117,66 @@ class AryionGalleryExtractor(AryionExtractor):
         ("https://aryion.com/g4/latest.php?name=jameshoward"),
     )
 
-    def posts(self):
+    def skip(self, num):
+        self.offset += num
+        return num
+
+    def items(self):
         url = "{}/g4/latest.php?name={}".format(self.root, self.user)
-
-        while True:
-            page = self.request(url).text
-            yield from text.extract_iter(
-                page, "class='thumb' href='/g4/view/", "'")
-
-            pos = page.find("Next &gt;&gt;")
-            if pos < 0:
-                return
-            url = self.root + text.rextract(page, "href='", "'", pos)[0]
+        for post_id in util.advance(self.posts(url), self.offset):
+            post = self.parse_post(post_id)
+            if post:
+                yield Message.Directory, post
+                yield Message.Url, post["url"], post
 
 
 class AryionPostExtractor(AryionExtractor):
     """Extractor for individual posts on eka's portal"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/view/(\d+)"
-    test = ("https://aryion.com/g4/view/510079", {
-        "url": "f233286fa5558c07ae500f7f2d5cb0799881450e",
-        "keyword": {
-            "artist"   : "jameshoward",
-            "user"     : "jameshoward",
-            "filename" : "jameshoward-510079-subscribestar_150",
-            "extension": "jpg",
-            "id"       : 510079,
-            "width"    : 1665,
-            "height"   : 1619,
-            "size"     : 784241,
-            "title"    : "I'm on subscribestar now too!",
-            "description": r"re:Doesn't hurt to have a backup, right\?",
-            "tags"     : ["Non-Vore", "subscribestar"],
-            "date"     : "dt:2019-02-16 19:30:00",
-            "path"     : [],
-            "views"    : int,
-            "favorites": int,
-            "comments" : int,
-            "_mtime"   : "Sat, 16 Feb 2019 19:30:34 GMT",
-        },
-    })
+    test = (
+        ("https://aryion.com/g4/view/510079", {
+            "url": "f233286fa5558c07ae500f7f2d5cb0799881450e",
+            "keyword": {
+                "artist"   : "jameshoward",
+                "user"     : "jameshoward",
+                "filename" : "jameshoward-510079-subscribestar_150",
+                "extension": "jpg",
+                "id"       : 510079,
+                "width"    : 1665,
+                "height"   : 1619,
+                "size"     : 784239,
+                "title"    : "I'm on subscribestar now too!",
+                "description": r"re:Doesn't hurt to have a backup, right\?",
+                "tags"     : ["Non-Vore", "subscribestar"],
+                "date"     : "dt:2019-02-16 19:30:00",
+                "path"     : [],
+                "views"    : int,
+                "favorites": int,
+                "comments" : int,
+                "_mtime"   : "Sat, 16 Feb 2019 19:30:34 GMT",
+            },
+        }),
+        # folder (#694)
+        ("https://aryion.com/g4/view/588928", {
+            "pattern": pattern,
+            "count": ">= 8",
+        }),
+    )
 
-    def posts(self):
+    def items(self):
         post_id = self.user
         self.user = None
-        return (post_id,)
+        post = self.parse_post(post_id)
+
+        if post:
+            yield Message.Directory, post
+            yield Message.Url, post["url"], post
+
+        elif post is False:
+            folder_url = "{}/g4/view/{}".format(self.root, post_id)
+            data = {"_extractor": AryionPostExtractor}
+
+            for post_id in self.posts(folder_url):
+                url = "{}/g4/view/{}".format(self.root, post_id)
+                yield Message.Queue, url, data
