@@ -46,6 +46,10 @@ class HitomiGalleryExtractor(GalleryExtractor):
         ("https://hitomi.la/cg/scathacha-sama-okuchi-ecchi-1291900.html", {
             "count": 10,
         }),
+        # no tags
+        ("https://hitomi.la/cg/1615823.html", {
+            "count": 22,
+        }),
         ("https://hitomi.la/manga/amazon-no-hiyaku-867789.html"),
         ("https://hitomi.la/manga/867789.html"),
         ("https://hitomi.la/doujinshi/867789.html"),
@@ -75,14 +79,18 @@ class HitomiGalleryExtractor(GalleryExtractor):
         if language:
             language = language.capitalize()
 
+        date = info.get("date")
+        if date:
+            date += ":00"
+
         tags = []
-        for tinfo in info["tags"]:
-            tag = tinfo["tag"]
+        for tinfo in info.get("tags") or ():
+            tag = string.capwords(tinfo["tag"])
             if tinfo.get("female"):
                 tag += " ♀"
             elif tinfo.get("male"):
                 tag += " ♂"
-            tags.append(string.capwords(tag))
+            tags.append(tag)
 
         return {
             "gallery_id": text.parse_int(info["id"]),
@@ -90,9 +98,8 @@ class HitomiGalleryExtractor(GalleryExtractor):
             "type"      : info["type"].capitalize(),
             "language"  : language,
             "lang"      : util.language_to_code(language),
+            "date"      : text.parse_datetime(date, "%Y-%m-%d %H:%M:%S%z"),
             "tags"      : tags,
-            "date"      : text.parse_datetime(
-                info["date"] + ":00", "%Y-%m-%d %H:%M:%S%z"),
         }
 
     def _data_from_gallery_page(self, info):
