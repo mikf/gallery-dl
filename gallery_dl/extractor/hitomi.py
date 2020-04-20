@@ -8,7 +8,8 @@
 
 """Extractors for https://hitomi.la/"""
 
-from .common import GalleryExtractor
+from .common import GalleryExtractor, Extractor, Message
+from .nozomi import decode_nozomi
 from .. import text, util
 import string
 import json
@@ -149,3 +150,35 @@ class HitomiGalleryExtractor(GalleryExtractor):
             )
             result.append((url, idata))
         return result
+
+
+class HitomiTagExtractor(Extractor):
+    """Extractor for galleries from tag searches on hitomi.la"""
+    category = "hitomi"
+    subcategory = "tag"
+    pattern = (r"(?:https?://)?hitomi\.la/"
+               r"(tag|artist|group|series|type|character)/"
+               r"([^/?&#]+)-\d+\.html")
+    test = (
+        ("https://hitomi.la/tag/screenshots-japanese-1.html", {
+            "pattern": HitomiGalleryExtractor.pattern,
+            "count": ">= 35",
+        }),
+        ("https://hitomi.la/artist/a1-all-1.html"),
+        ("https://hitomi.la/group/initial%2Dg-all-1.html"),
+        ("https://hitomi.la/series/amnesia-all-1.html"),
+        ("https://hitomi.la/type/doujinshi-all-1.html"),
+        ("https://hitomi.la/character/a2-all-1.html"),
+    )
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.type, self.tag = match.groups()
+
+    def items(self):
+        url = "https://ltn.hitomi.la/{}/{}.nozomi".format(self.type, self.tag)
+        data = {"_extractor": HitomiGalleryExtractor}
+
+        for gallery_id in decode_nozomi(self.request(url).content):
+            url = "https://hitomi.la/galleries/{}.html".format(gallery_id)
+            yield Message.Queue, url, data
