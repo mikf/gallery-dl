@@ -12,6 +12,11 @@ from .common import Extractor, Message
 from .. import text
 
 
+def decode_nozomi(n):
+    for i in range(0, len(n), 4):
+        yield (n[i] << 24) + (n[i+1] << 16) + (n[i+2] << 8) + n[i+3]
+
+
 class NozomiExtractor(Extractor):
     """Base class for nozomi extractors"""
     category = "nozomi"
@@ -68,11 +73,6 @@ class NozomiExtractor(Extractor):
     @staticmethod
     def _list(src):
         return [x["tagname_display"] for x in src] if src else ()
-
-    @staticmethod
-    def _unpack(b):
-        for i in range(0, len(b), 4):
-            yield (b[i] << 24) + (b[i+1] << 16) + (b[i+2] << 8) + b[i+3]
 
 
 class NozomiPostExtractor(NozomiExtractor):
@@ -145,7 +145,7 @@ class NozomiTagExtractor(NozomiExtractor):
         while True:
             headers = {"Range": "bytes={}-{}".format(i, i+255)}
             response = self.request(url, headers=headers)
-            yield from self._unpack(response.content)
+            yield from decode_nozomi(response.content)
 
             i += 256
             cr = response.headers.get("Content-Range", "").rpartition("/")[2]
@@ -176,7 +176,7 @@ class NozomiSearchExtractor(NozomiExtractor):
 
         def nozomi(path):
             url = "https://j.nozomi.la/" + path + ".nozomi"
-            return self._unpack(self.request(url).content)
+            return decode_nozomi(self.request(url).content)
 
         for tag in self.tags:
             if tag[0] == "-":
