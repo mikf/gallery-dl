@@ -49,7 +49,7 @@ HentaiHand           https://hentaihand.com/             Galleries, Search Resul
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hentainexus          https://hentainexus.com/            Galleries, Search Results
 Hiperdex             https://hiperdex.net/               Artists, Chapters, Manga
-Hitomi.la            https://hitomi.la/                  Galleries
+Hitomi.la            https://hitomi.la/                  Galleries, Tag Searches
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
