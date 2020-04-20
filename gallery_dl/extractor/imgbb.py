@@ -28,9 +28,17 @@ class ImgbbExtractor(Extractor):
 
     def items(self):
         self.login()
-        response = self.request(self.page_url, params={"sort": self.sort})
-        if response.history and response.url.startswith(self.root):
-            raise exception.NotFoundError(self.subcategory)
+
+        url = self.page_url
+        params = {"sort": self.sort}
+        while True:
+            response = self.request(url, params=params, allow_redirects=False)
+            if response.status_code < 300:
+                break
+            url = response.headers["location"]
+            if url.startswith(self.root):
+                raise exception.NotFoundError(self.subcategory)
+
         page = response.text
         data = self.metadata(page)
         first = True
@@ -151,12 +159,15 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
         }
 
     def images(self, page):
+        url = text.extract(page, '"og:url" content="', '"')[0]
+        album_id = url.rpartition("/")[2].partition("?")[0]
+
         return self._pagination(page, "https://ibb.co/json", {
             "from"      : "album",
-            "albumid"   : self.album_id,
+            "albumid"   : album_id,
             "params_hidden[list]"   : "images",
             "params_hidden[from]"   : "album",
-            "params_hidden[albumid]": self.album_id,
+            "params_hidden[albumid]": album_id,
         })
 
 
