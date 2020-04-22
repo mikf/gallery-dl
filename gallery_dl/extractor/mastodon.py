@@ -184,6 +184,7 @@ def generate_extractors():
         Extr.instance = instance
         Extr.pattern = (r"(?:https?://)?" + pattern +
                         r"/@([^/?&#]+)(?:/media)?/?$")
+        Extr.test = info.get("test-user")
         Extr.root = root
         Extr.access_token = token
         symtable[Extr.__name__] = Extr
@@ -196,6 +197,7 @@ def generate_extractors():
         Extr.category = category
         Extr.instance = instance
         Extr.pattern = r"(?:https?://)?" + pattern + r"/@[^/?&#]+/(\d+)"
+        Extr.test = info.get("test-status")
         Extr.root = root
         Extr.access_token = token
         symtable[Extr.__name__] = Extr
@@ -207,6 +209,15 @@ EXTRACTORS = {
         "access-token" : "Y06R36SMvuXXN5_wiPKFAEFiQaMSQg0o_hGgc86Jj48",
         "client-id"    : "dBSHdpsnOUZgxOnjKSQrWEPakO3ctM7HmsyoOd4FcRo",
         "client-secret": "DdrODTHs_XoeOsNVXnILTMabtdpWrWOAtrmw91wU1zI",
+        "test-user"    : ("https://mastodon.social/@jk", {
+            "pattern": r"https://files.mastodon.social/media_attachments"
+                       r"/files/\d+/\d+/\d+/original/\w+",
+            "range": "1-60",
+            "count": 60,
+        }),
+        "test-status"  : ("https://mastodon.social/@jk/103794036899778366", {
+            "count": 4,
+        }),
     },
     "pawoo.net": {
         "category"     : "pawoo",
