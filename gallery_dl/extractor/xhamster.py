@@ -13,7 +13,8 @@ from .. import text
 import json
 
 
-BASE_PATTERN = r"(?:https?://)?((?:[^.]+\.)?xhamster\d?\.(?:com|one|desi))"
+BASE_PATTERN = (r"(?:https?://)?((?:[^.]+\.)?xhamster"
+                r"(?:\d?\.(?:com|one|desi)|\.porncache\.net))")
 
 
 class XhamsterExtractor(Extractor):
@@ -79,6 +80,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
         ("https://xhamster.desi/photos/gallery/11748968"),
         ("https://xhamster2.com/photos/gallery/11748968"),
         ("https://en.xhamster.com/photos/gallery/11748968"),
+        ("https://xhamster.porncache.net/photos/gallery/11748968"),
     )
 
     def __init__(self, match):
