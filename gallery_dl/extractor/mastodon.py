@@ -121,7 +121,10 @@ class MastodonAPI():
         return self._call("statuses/" + status_id).json()
 
     def _call(self, endpoint, params=None):
-        url = "{}/api/v1/{}".format(self.root, endpoint)
+        if endpoint.startswith("http"):
+            url = endpoint
+        else:
+            url = "{}/api/v1/{}".format(self.root, endpoint)
 
         while True:
             response = self.extractor.request(
@@ -143,7 +146,7 @@ class MastodonAPI():
     def _pagination(self, endpoint, params):
         url = "{}/api/v1/{}".format(self.root, endpoint)
         while url:
-            response = self._call(endpoint, params)
+            response = self._call(url, params)
             yield from response.json()
 
             url = response.links.get("next")
