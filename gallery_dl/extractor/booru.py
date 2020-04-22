@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -171,7 +171,8 @@ class GelbooruPoolMixin(PoolMixin):
             name, pos = text.extract(page, "<h4>Pool: ", "</h4>")
         if not name:
             raise exception.NotFoundError("pool")
-        self.posts = list(text.extract_iter(page, 'id="p', '"', pos))
+        self.posts = list(text.extract_iter(
+            page, 'class="thumb" id="p', '"', pos))
 
         return {
             "pool": text.parse_int(self.pool),
