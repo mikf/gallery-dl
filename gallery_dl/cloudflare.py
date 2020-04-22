@@ -39,11 +39,15 @@ def solve_challenge(session, response, kwargs):
 
     page = response.text
     url = root + text.unescape(text.extract(page, 'action="', '"')[0])
-    params["r"] = text.extract(page, 'name="r" value="', '"')[0]
-    params["jschl_vc"] = text.extract(page, 'name="jschl_vc" value="', '"')[0]
-    params["pass"] = text.extract(page, 'name="pass" value="', '"')[0]
-    params["jschl_answer"] = solve_js_challenge(page, parsed.netloc)
     headers["Referer"] = response.url
+
+    for inpt in text.extract_iter(page, "<input ", ">"):
+        name = text.extract(inpt, 'name="', '"')[0]
+        if name == "jschl_answer":
+            value = solve_js_challenge(page, parsed.netloc)
+        else:
+            value = text.unescape(text.extract(inpt, 'value="', '"')[0])
+        params[name] = value
 
     time.sleep(4)
 
