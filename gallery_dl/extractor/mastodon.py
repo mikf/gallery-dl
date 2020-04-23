@@ -68,8 +68,8 @@ class MastodonUserExtractor(MastodonExtractor):
         self.account_name = match.group(1)
 
     def statuses(self):
-        results = self.api.account_search("@" + self.account_name, 1)
-        for account in results:
+        handle = "@{}@{}".format(self.account_name, self.instance)
+        for account in self.api.account_search(handle, 1):
             if account["username"] == self.account_name:
                 break
         else:
