@@ -99,18 +99,20 @@ class Extractor():
                     return response
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
+
+                reason = response.reason
                 if cloudflare.is_challenge(response):
                     self.log.info("Solving Cloudflare challenge")
                     response, domain, cookies = cloudflare.solve_challenge(
                         session, response, kwargs)
-                    if response.status_code >= 400:
-                        continue
-                    cloudflare.cookies.update(self.category, (domain, cookies))
-                    return response
+                    if cookies:
+                        cloudflare.cookies.update(
+                            self.category, (domain, cookies))
+                        return response
                 if cloudflare.is_captcha(response):
                     self.log.warning("Cloudflare CAPTCHA")
 
-                msg = "'{} {}' for '{}'".format(code, response.reason, url)
+                msg = "'{} {}' for '{}'".format(code, reason, url)
                 if code < 500 and code != 429 and code != 430:
                     break
 

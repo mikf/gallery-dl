@@ -13,7 +13,7 @@ import time
 import operator
 import collections
 import urllib.parse
-from . import text, exception
+from . import text
 from .cache import memcache
 
 
@@ -58,14 +58,13 @@ def solve_challenge(session, response, kwargs):
         cookie.name: cookie.value
         for cookie in cf_response.cookies
     }
+
     if not cookies:
         import logging
         log = logging.getLogger("cloudflare")
-        rtype = "CAPTCHA" if is_captcha(cf_response) else "Unexpected"
-        log.error("%s response", rtype)
         log.debug("Headers:\n%s", cf_response.headers)
         log.debug("Content:\n%s", cf_response.text)
-        raise exception.StopExtraction()
+        return cf_response, None, None
 
     domain = next(iter(cf_response.cookies)).domain
     cookies["__cfduid"] = response.cookies.get("__cfduid", "")
