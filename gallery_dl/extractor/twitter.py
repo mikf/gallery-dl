@@ -63,13 +63,11 @@ class TwitterExtractor(Extractor):
                     url = self._video_from_tweet(data["tweet_id"])
                     if not url:
                         continue
-                    ext = text.ext_from_url(url)
-                    if ext == "m3u8":
+                    text.nameext_from_url(url, data)
+                    if data["extension"] == "m3u8":
                         url = "ytdl:" + url
                         data["extension"] = "mp4"
                         data["_ytdl_extra"] = {"protocol": "m3u8_native"}
-                    else:
-                        data["extension"] = ext
                 data["num"] = 1
                 yield Message.Url, url, data
 
