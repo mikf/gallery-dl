@@ -149,6 +149,7 @@ class TwitterExtractor(Extractor):
         extr = text.extract_from(tweet)
         data = {
             "tweet_id"  : text.parse_int(extr('data-tweet-id="'  , '"')),
+            "reply"     : bool(extr('data-is-reply-to="'  , '"')),
             "retweet_id": text.parse_int(extr('data-retweet-id="', '"')),
             "retweeter" : extr('data-retweeter="'  , '"'),
             "author"    : {
