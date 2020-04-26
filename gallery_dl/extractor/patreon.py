@@ -194,7 +194,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
                r"/(?!(?:home|join|posts|login|signup)(?:$|[/?&#]))"
-               r"([^/?&#]+)/?")
+               r"(?:user(?:/posts)?/?\?([^#]+)|([^/?&#]+)/?)")
     test = (
         ("https://www.patreon.com/koveliana", {
             "range": "1-25",
@@ -216,14 +216,21 @@ class PatreonCreatorExtractor(PatreonExtractor):
         ("https://www.patreon.com/kovelianot", {
             "exception": exception.NotFoundError,
         }),
+        ("https://www.patreon.com/user?u=2931440"),
+        ("https://www.patreon.com/user/posts/?u=2931440"),
     )
 
     def __init__(self, match):
         PatreonExtractor.__init__(self, match)
-        self.creator = match.group(1).lower()
+        self.query, self.creator = match.groups()
 
     def posts(self):
-        url = "{}/{}".format(self.root, self.creator)
+        if self.creator:
+            url = "{}/{}".format(self.root, self.creator.lower())
+        else:
+            query = text.parse_query(self.query)
+            url = "{}/user?u={}".format(self.root, query.get("u"))
+
         page = self.request(url, notfound="creator").text
         campaign_id = text.extract(page, "/campaign/", "/")[0]
 
