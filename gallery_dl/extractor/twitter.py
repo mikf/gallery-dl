@@ -285,7 +285,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
             "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
-            "keyword": "37f4d35affd733d458d3b235b4a55f619a86f794",
+            "keyword": "4a3d28cc9f7a39e27333d56f3fe19e6e07ee979e",
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
     )
@@ -343,13 +343,13 @@ class TwitterTweetExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics/status/604341487988576256", {
             "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",
-            "keyword": "3fa3623e8d9a204597238e2f1f6433da19c63b4a",
+            "keyword": "76e018cf3f4c8b82d3bdd425e01e28078c98373b",
             "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
         }),
         # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "49165725116ac52193a3861e8f5534e47a706b62",
+            "keyword": "c9251b1fd79d547b0c6b4577f06c937d0e9b63d2",
         }),
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {

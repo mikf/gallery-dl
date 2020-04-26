@@ -156,8 +156,8 @@ EXTRACTORS = {
         "pattern": r"(?:www\.)?jaiminisbox\.com/reader",
         "extra": {"decode": "base64"},
         "test-chapter": (
-            ("https://jaiminisbox.com/reader/read/uratarou/en/0/1/", {
-                "keyword": "6009af77cc9c05528ab1fdda47b1ad9d4811c673",
+            ("https://jaiminisbox.com/reader/read/fire-force/en/0/215/", {
+                "keyword": "6d2b5c0b34344156b0301ff2733389dfe36a7604",
             }),
             ("https://jaiminisbox.com/reader/read/red-storm/en/0/336/", {
                 "keyword": "53c6dddf3e5a61b6002a886ccd7e3354e973299a",
