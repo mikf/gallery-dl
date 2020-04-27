@@ -1,6 +1,24 @@
 # Changelog
 
-## Unreleased
+## 1.13.5 - 2020-04-27
+### Additions
+- [500px] recognize `web.500px.com` URLs
+- [aryion] support downloading from folders ([#694](https://github.com/mikf/gallery-dl/issues/694))
+- [furaffinity] add extractor for followed users ([#515](https://github.com/mikf/gallery-dl/issues/515))
+- [hitomi] add extractor for tag searches ([#697](https://github.com/mikf/gallery-dl/issues/697))
+- [instagram] add `post_id` and `num` metadata fields ([#698](https://github.com/mikf/gallery-dl/issues/698))
+- [newgrounds] add extractor for followed users ([#684](https://github.com/mikf/gallery-dl/issues/684))
+- [patreon] recognize URLs with creator IDs ([#711](https://github.com/mikf/gallery-dl/issues/711))
+- [twitter] add `reply` metadata field ([#705](https://github.com/mikf/gallery-dl/issues/705))
+- [xhamster] recognize `xhamster.porncache.net` URLs ([#700](https://github.com/mikf/gallery-dl/issues/700))
+### Fixes
+- [gelbooru] improve post ID extraction in pool listings
+- [hitomi] fix extraction of galleries without tags
+- [jaiminisbox] update metadata decoding procedure ([#702](https://github.com/mikf/gallery-dl/issues/702))
+- [mastodon] fix pagination ([#701](https://github.com/mikf/gallery-dl/issues/701))
+- [mastodon] improve account searches ([#704](https://github.com/mikf/gallery-dl/issues/704))
+- [patreon] fix hash extraction from download URLs ([#693](https://github.com/mikf/gallery-dl/issues/693))
+- improve parameter extraction when solving Cloudflare challenges
 
 ## 1.13.4 - 2020-04-12
 ### Additions
