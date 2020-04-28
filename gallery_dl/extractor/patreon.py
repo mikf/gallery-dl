@@ -47,8 +47,8 @@ class PatreonExtractor(Extractor):
                 self._attachments(post),
                 self._content(post),
             ):
-                fhash = url.split("/")[9].partition("?")[0]
-                if fhash not in hashes:
+                fhash = self._filehash(url)
+                if fhash not in hashes or not fhash:
                     hashes.add(fhash)
                     post["hash"] = fhash
                     post["type"] = kind
@@ -158,10 +158,21 @@ class PatreonExtractor(Extractor):
         return attr
 
     def _filename(self, url):
-        """Fetch filename from its Content-Disposition header"""
+        """Fetch filename from an URL's Content-Disposition header"""
         response = self.request(url, method="HEAD", fatal=False)
         cd = response.headers.get("Content-Disposition")
         return text.extract(cd, 'filename="', '"')[0]
+
+    @staticmethod
+    def _filehash(url):
+        """Extract MD5 hash from a download URL"""
+        parts = url.partition("?")[0].split("/")
+        parts.reverse()
+
+        for part in parts:
+            if len(part) == 32:
+                return part
+        return ""
 
     @staticmethod
     def _build_url(endpoint, query):
