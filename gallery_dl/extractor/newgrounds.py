@@ -288,7 +288,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
 class NewgroundsArtExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
     subcategory = "art"
-    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/art/?$"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/art/?$"
     test = ("https://tomfulp.newgrounds.com/art", {
         "pattern": NewgroundsImageExtractor.pattern,
         "count": ">= 3",
@@ -298,7 +298,7 @@ class NewgroundsArtExtractor(NewgroundsExtractor):
 class NewgroundsAudioExtractor(NewgroundsExtractor):
     """Extractor for all audio submissions of a newgrounds user"""
     subcategory = "audio"
-    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/audio/?$"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/audio/?$"
     test = ("https://tomfulp.newgrounds.com/audio", {
         "pattern": r"https://audio.ngfiles.com/\d+/\d+_.+\.mp3",
         "count": ">= 4",
@@ -308,7 +308,7 @@ class NewgroundsAudioExtractor(NewgroundsExtractor):
 class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
     subcategory = "movies"
-    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/movies/?$"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/movies/?$"
     test = ("https://tomfulp.newgrounds.com/movies", {
         "pattern": r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+_.+",
         "range": "1-10",
@@ -319,7 +319,7 @@ class NewgroundsMoviesExtractor(NewgroundsExtractor):
 class NewgroundsUserExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user profile"""
     subcategory = "user"
-    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/?$"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/?$"
     test = (
         ("https://tomfulp.newgrounds.com", {
             "pattern": "https://tomfulp.newgrounds.com/art$",
@@ -414,6 +414,6 @@ class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
     @staticmethod
     def _extract_favorites(page):
         return [
-            "https://" + user.rpartition('"')[2]
+            "https://" + user.rpartition('"')[2].lstrip("/:")
             for user in text.extract_iter(page, 'class="item-user', '"><img')
         ]
