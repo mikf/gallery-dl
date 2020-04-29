@@ -243,6 +243,10 @@ MIMETYPE_MAP = {
     "image/webp": "webp",
     "image/svg+xml": "svg",
 
+    "image/vnd.adobe.photoshop": "psd",
+    "image/x-photoshop": "psd",
+    "application/x-photoshop": "psd",
+
     "video/webm": "webm",
     "video/ogg": "ogg",
     "video/mp4": "mp4",
