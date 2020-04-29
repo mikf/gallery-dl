@@ -33,6 +33,7 @@ class TwitterExtractor(Extractor):
         self._user_dict = None
         self.logged_in = False
         self.retweets = self.config("retweets", True)
+        self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)
         self.content = self.config("content", False)
         self.videos = self.config("videos", True)
@@ -48,7 +49,9 @@ class TwitterExtractor(Extractor):
 
         for tweet in self.tweets():
             data = self._data_from_tweet(tweet)
-            if not data or not self.retweets and data["retweet_id"]:
+            if not data or \
+                    not self.retweets and data["retweet_id"] or \
+                    not self.replies and data["reply"]:
                 continue
             data.update(metadata)
 
@@ -369,6 +372,11 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
             "options": (("videos", "ytdl"),),
             "pattern": r"ytdl:https://twitter.com/i/web.+/1103767554424598528",
+        }),
+        # 'replies' option (#705)
+        ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
+            "options": (("replies", False),),
+            "count": 0,
         }),
         # /i/web/ URL
         ("https://twitter.com/i/web/status/1155074198240292865", {
