@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 import unittest
 import gallery_dl.config as config
 import os
+import json
 import tempfile
 
 
@@ -135,6 +136,26 @@ class TestConfig(unittest.TestCase):
             self.assertEqual(config.get(("b",), "a"), 8)
             self.assertEqual(config.get(("b",), "c"), "text")
             self.assertEqual(config.get(("b",), "e"), "foo")
+
+
+class TestConfigFiles(unittest.TestCase):
+
+    def test_default_config(self):
+        cfg = self._load("gallery-dl.conf")
+        self.assertIsInstance(cfg, dict)
+        self.assertTrue(cfg)
+
+    def test_example_config(self):
+        cfg = self._load("gallery-dl-example.conf")
+        self.assertIsInstance(cfg, dict)
+        self.assertTrue(cfg)
+
+    @staticmethod
+    def _load(name):
+        rootdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(rootdir, "docs", name)
+        with open(path) as fp:
+            return json.load(fp)
 
 
 if __name__ == '__main__':
