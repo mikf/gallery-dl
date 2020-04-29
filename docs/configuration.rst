@@ -1232,6 +1232,24 @@ Description Your  `API Key <https://wallhaven.cc/settings/account>`__ to use
 =========== =====
 
 
+extractor.weibo.retweets
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Extract media from retweeted posts.
+=========== =====
+
+
+extractor.weibo.videos
+----------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Download video files.
+=========== =====
+
+
 extractor.[booru].tags
 ----------------------
 =========== =====
