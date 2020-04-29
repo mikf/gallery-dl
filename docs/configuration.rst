@@ -1169,12 +1169,21 @@ Description Extract tweet text as ``content`` metadata.
 =========== =====
 
 
+extractor.twitter.replies
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Extract media from replies to other Tweets.
+=========== =====
+
+
 extractor.twitter.retweets
 --------------------------
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description Extract images from retweets.
+Description Extract media from Retweets.
 =========== =====
 
 
