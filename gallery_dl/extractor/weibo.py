@@ -23,6 +23,7 @@ class WeiboExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.retweets = self.config("retweets", True)
+        self.videos = self.config("videos", True)
 
     def items(self):
         yield Message.Version, 1
@@ -52,7 +53,7 @@ class WeiboExtractor(Extractor):
                         yield Message.Url, image["url"], data
                         num += 1
 
-                if "page_info" in obj and "media_info" in obj["page_info"]:
+                if self.videos and "media_info" in obj.get("page_info", ()):
                     info = obj["page_info"]["media_info"]
                     url = info.get("stream_url_hd") or info.get("stream_url")
 
@@ -70,6 +71,7 @@ class WeiboExtractor(Extractor):
                             data["extension"] = "mp4"
                             data["_ytdl_extra"] = {"protocol": "m3u8_native"}
                         yield Message.Url, url, data
+                        num += 1
 
                 if self.retweets and "retweeted_status" in obj:
                     obj = obj["retweeted_status"]
