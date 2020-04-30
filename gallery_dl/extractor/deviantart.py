@@ -1006,7 +1006,8 @@ class DeviantartOAuthAPI():
             msg = "API responded with {} {}".format(
                 status, response.reason)
             if status == 429:
-                self.delay += 1
+                if self.delay < 9:
+                    self.delay += 1
                 self.log.warning("%s. Using %ds delay.", msg, 2 ** self.delay)
             else:
                 self.log.error(msg)
