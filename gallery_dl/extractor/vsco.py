@@ -72,7 +72,7 @@ class VscoExtractor(Extractor):
         page = self.request(url, notfound=self.subcategory).text
         return json.loads(text.extract(page, "__PRELOADED_STATE__ = ", "<")[0])
 
-    def _pagination(self, url, params, token, key, extra):
+    def _pagination(self, url, params, token, key, extra=None):
         headers = {
             "Referer"          : "{}/{}".format(self.root, self.user),
             "Authorization"    : "Bearer " + token,
@@ -80,7 +80,8 @@ class VscoExtractor(Extractor):
             "X-Client-Build"   : "1",
         }
 
-        yield from map(self._transform_media, extra)
+        if extra:
+            yield from map(self._transform_media, extra)
 
         while True:
             data = self.request(url, params=params, headers=headers).json()
@@ -130,23 +131,17 @@ class VscoUserExtractor(VscoExtractor):
     def images(self):
         url = "{}/{}/gallery".format(self.root, self.user)
         data = self._extract_preload_state(url)
-
         tkn = data["users"]["currentUser"]["tkn"]
         sid = str(data["sites"]["siteByUsername"][self.user]["site"]["id"])
-        site = data["medias"]["bySiteId"][sid]
 
         url = "{}/api/3.0/medias/profile".format(self.root)
         params = {
             "site_id"  : sid,
             "limit"    : "14",
-            "show_only": "0",
-            "cursor"   : site["nextCursor"],
+            "cursor"   : None,
         }
 
-        return self._pagination(url, params, tkn, "media", (
-            data["medias"]["byId"][media[media["type"]]]["media"]
-            for media in site["medias"]
-        ))
+        return self._pagination(url, params, tkn, "media")
 
 
 class VscoCollectionExtractor(VscoExtractor):
