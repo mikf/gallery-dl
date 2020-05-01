@@ -105,6 +105,7 @@ modules = [
     "slickpic",
     "slideshare",
     "smugmug",
+    "speakerdeck",
     "tsumino",
     "tumblr",
     "twitter",
