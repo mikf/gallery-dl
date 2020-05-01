@@ -144,11 +144,15 @@ def evaluate_expression(expr, page, netloc, *,
     # evaluate them,
     # and accumulate their values in 'result'
     result = ""
-    for subexpr in split_re.findall(expr) or (expr,):
-        result += str(sum(
-            VALUES[part]
-            for part in subexpr.split("[]")
-        ))
+    for subexpr in expr.strip("+()").split(")+("):
+        value = 0
+        for part in subexpr.split("+"):
+            if "-" in part:
+                p1, _, p2 = part.partition("-")
+                value += VALUES[p1] - VALUES[p2]
+            else:
+                value += VALUES[part]
+        result += str(value)
     return int(result)
 
 
@@ -158,12 +162,14 @@ OPERATORS = {
     "*": operator.mul,
 }
 
+
 VALUES = {
     "": 0,
-    "+": 0,
-    "!+": 1,
-    "!!": 1,
-    "+!!": 1,
+    "!": 1,
+    "[]": 0,
+    "!![]": 1,
+    "(!![]": 1,
+    "(!![])": 1,
 }
 
 
