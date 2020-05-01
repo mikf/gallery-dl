@@ -80,6 +80,7 @@ CATEGORY_MAP = {
     "slickpic"       : "SlickPic",
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
+    "speakerdeck"    : "Speaker Deck",
     "thebarchive"    : "The /b/ Archive",
     "vanillarock"    : "もえぴりあ",
     "vsco"           : "VSCO",
