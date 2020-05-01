@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import re
+import os
 import sys
+import unittest
+from unittest.mock import Mock, MagicMock, patch
+
+import re
 import base64
 import os.path
 import tempfile
 import threading
 import http.server
 
-import unittest
-from unittest.mock import Mock, MagicMock, patch
-
-import gallery_dl.downloader as downloader
-import gallery_dl.extractor as extractor
-import gallery_dl.config as config
-from gallery_dl.downloader.common import DownloaderBase
-from gallery_dl.output import NullOutput
-from gallery_dl.util import PathFormat
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import downloader, extractor, config, util  # noqa E402
+from gallery_dl.downloader.common import DownloaderBase  # noqa E402
+from gallery_dl.output import NullOutput  # noqa E402
 
 
 class MockDownloaderModule(Mock):
@@ -119,7 +118,7 @@ class TestDownloaderBase(unittest.TestCase):
             "filename": name,
             "extension": extension,
         }
-        pathfmt = PathFormat(cls.extractor)
+        pathfmt = util.PathFormat(cls.extractor)
         pathfmt.set_directory(kwdict)
         pathfmt.set_filename(kwdict)
 

@@ -7,14 +7,17 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import unittest
+import os
 import sys
+import unittest
+
 import io
 import random
 import string
 import http.cookiejar
 
-from gallery_dl import util, text, exception
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import util, text, exception  # noqa E402
 
 
 class TestRange(unittest.TestCase):

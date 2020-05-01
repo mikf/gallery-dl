@@ -7,10 +7,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
+import sys
 import unittest
+
 import datetime
 
-from gallery_dl import text
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import text  # noqa E402
 
 
 INVALID = ((), [], {}, None, 1, 2.3)

@@ -9,12 +9,15 @@
 
 import os
 import sys
+import unittest
+
 import re
 import json
 import hashlib
 import datetime
-import unittest
-from gallery_dl import extractor, util, job, config, exception
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import extractor, util, job, config, exception  # noqa E402
 
 
 # these don't work on Travis CI

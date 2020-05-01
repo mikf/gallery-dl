@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
+import sys
 import unittest
 
-from gallery_dl import oauth, text
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import oauth, text  # noqa E402
 
 TESTSERVER = "http://term.ie/oauth/example"
 CONSUMER_KEY = "key"

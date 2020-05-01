@@ -7,18 +7,20 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
 import sys
+import unittest
+from unittest.mock import patch
+
 import time
 import string
 from datetime import datetime, timedelta
 
-import unittest
-from unittest.mock import patch
-
-from gallery_dl import extractor
-from gallery_dl.extractor import mastodon
-from gallery_dl.extractor.common import Extractor, Message
-from gallery_dl.extractor.directlink import DirectlinkExtractor as DLExtractor
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import extractor  # noqa E402
+from gallery_dl.extractor import mastodon  # noqa E402
+from gallery_dl.extractor.common import Extractor, Message  # noqa E402
+from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
 
 
 class FakeExtractor(Extractor):
@@ -78,7 +80,7 @@ class TestExtractorModule(unittest.TestCase):
         test_uri = "test:"
         fake_uri = "fake:"
 
-        self.assertIsInstance(extractor.find(link_uri), DLExtractor)
+        self.assertIsInstance(extractor.find(link_uri), DirectlinkExtractor)
         self.assertIsInstance(extractor.find(test_uri), Extractor)
         self.assertIsNone(extractor.find(fake_uri))
 
@@ -87,12 +89,12 @@ class TestExtractorModule(unittest.TestCase):
             self.assertIsInstance(extractor.find(test_uri), Extractor)
             self.assertIsNone(extractor.find(fake_uri))
 
-        with extractor.blacklist([], [DLExtractor, FakeExtractor]):
+        with extractor.blacklist([], [DirectlinkExtractor, FakeExtractor]):
             self.assertIsNone(extractor.find(link_uri))
             self.assertIsInstance(extractor.find(test_uri), Extractor)
             self.assertIsNone(extractor.find(fake_uri))
 
-        with extractor.blacklist(["test"], [DLExtractor]):
+        with extractor.blacklist(["test"], [DirectlinkExtractor]):
             self.assertIsNone(extractor.find(link_uri))
             self.assertIsNone(extractor.find(test_uri))
             self.assertIsNone(extractor.find(fake_uri))
@@ -127,7 +129,8 @@ class TestExtractorModule(unittest.TestCase):
             for extr2 in extractor._cache:
 
                 # skip DirectlinkExtractor pattern if it isn't tested
-                if extr1 != DLExtractor and extr2 == DLExtractor:
+                if extr1 != DirectlinkExtractor and \
+                        extr2 == DirectlinkExtractor:
                     continue
 
                 match = extr2.pattern.match(url)

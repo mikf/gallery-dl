@@ -7,6 +7,8 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
+import sys
 import unittest
 from unittest import mock
 
@@ -14,8 +16,8 @@ import logging
 import tempfile
 from os.path import join
 
-import gallery_dl.config as config
-import gallery_dl.extractor as extractor
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import config, extractor  # noqa E402
 
 
 class TestCookiejar(unittest.TestCase):
