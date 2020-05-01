@@ -7,14 +7,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
+import sys
 import unittest
-import tempfile
-import time
 
-from gallery_dl import config, util
+import time
+import tempfile
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import config, util  # noqa E402
+
 dbpath = tempfile.mkstemp()[1]
 config.set(("cache",), "file", dbpath)
-from gallery_dl import cache  # noqa
+from gallery_dl import cache  # noqa E402
 
 
 def tearDownModule():

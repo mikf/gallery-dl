@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 import os
-import os.path
+import sys
+import unittest
+from unittest.mock import Mock, mock_open, patch
+
 import zipfile
 import tempfile
 from datetime import datetime, timezone as tz
 
-import unittest
-from unittest.mock import Mock, mock_open, patch
-
-from gallery_dl import postprocessor, extractor, util, config
-from gallery_dl.postprocessor.common import PostProcessor
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import postprocessor, extractor, util, config  # noqa E402
+from gallery_dl.postprocessor.common import PostProcessor  # noqa E402
 
 
 class MockPostprocessorModule(Mock):

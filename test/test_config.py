@@ -7,11 +7,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import unittest
-import gallery_dl.config as config
 import os
+import sys
+import unittest
+
 import json
 import tempfile
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import config  # noqa E402
 
 
 class TestConfig(unittest.TestCase):
