@@ -109,7 +109,7 @@ class BloggerPostExtractor(BloggerExtractor):
                     "posts"      : int,
                     "published"  : "2010-11-21T10:19:42-08:00",
                     "updated"    : str,
-                    "url"        : "http://www.julianbunker.com/",
+                    "url"        : "http://julianbphotography.blogspot.com/",
                 },
                 "post": {
                     "author"     : "Julian Bunker",
@@ -128,9 +128,7 @@ class BloggerPostExtractor(BloggerExtractor):
                 "url": str,
             },
         }),
-        ("blogger:http://www.julianbunker.com/2010/12/moon-rise.html", {
-            "url": "9928429fb62f712eb4de80f53625eccecc614aae",
-        }),
+        ("blogger:http://www.julianbunker.com/2010/12/moon-rise.html"),
         # video (#587)
         (("http://cfnmscenesinmovies.blogspot.com/2011/11/"
           "cfnm-scene-jenna-fischer-in-office.html"), {
@@ -156,7 +154,7 @@ class BloggerBlogExtractor(BloggerExtractor):
             "count": 25,
             "pattern": r"https://\d\.bp\.blogspot\.com/.*/s0/[^.]+\.jpg",
         }),
-        ("blogger:http://www.julianbunker.com/", {
+        ("blogger:https://www.kefblog.com.ng/", {
             "range": "1-25",
             "count": 25,
         }),
