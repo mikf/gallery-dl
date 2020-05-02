@@ -1,6 +1,19 @@
 # Changelog
 
-## Unreleased
+## 1.13.6 - 2020-05-02
+### Additions
+- [patreon] respect filters and sort order in query parameters ([#711](https://github.com/mikf/gallery-dl/issues/711))
+- [speakerdeck] add a new extractor for speakerdeck.com ([#726](https://github.com/mikf/gallery-dl/issues/726))
+- [twitter] add `replies` option ([#705](https://github.com/mikf/gallery-dl/issues/705))
+- [weibo] add `videos` option
+- [downloader:http] add MIME types for `.psd` files ([#714](https://github.com/mikf/gallery-dl/issues/714))
+### Fixes
+- [artstation] improve embed extraction ([#720](https://github.com/mikf/gallery-dl/issues/720))
+- [deviantart] limit API wait times ([#721](https://github.com/mikf/gallery-dl/issues/721))
+- [newgrounds] fix URLs produced by the `following` extractor ([#684](https://github.com/mikf/gallery-dl/issues/684))
+- [patreon] improve file hash extraction ([#713](https://github.com/mikf/gallery-dl/issues/713))
+- [vsco] fix user gallery extraction
+- fix/improve Cloudflare bypass code ([#728](https://github.com/mikf/gallery-dl/issues/728))
 
 ## 1.13.5 - 2020-04-27
 ### Additions
