@@ -117,6 +117,7 @@ Simply Hentai        https://www.simply-hentai.com/      Galleries, individual I
 SlickPic             https://www.slickpic.com/           Albums, User Profiles
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (OAuth)
+Speaker Deck         https://speakerdeck.com/            Presentations
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          Optional (OAuth)
