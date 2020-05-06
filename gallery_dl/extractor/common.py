@@ -98,8 +98,12 @@ class Extractor():
                         response.encoding = encoding
 
                     if config.get((), "write_pages", False):
-                        # Write response content to a dump file in the current directory
-                        outfilename = re.compile(r'[:/.?&=#]+').sub('_', response.url) + '.dump'
+                        # Write the response content to a .dump file
+                        # in the current directory.
+                        # The file name is derived from the response
+                        # url, replacing special characters with "_"
+                        r = re.compile(r'[:/.?&=#]+')
+                        outfilename = r.sub('_', response.url) + '.dump'
                         with open(outfilename, 'w') as outfile:
                             outfile.write(response.text)
 
