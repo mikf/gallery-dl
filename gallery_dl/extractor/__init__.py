@@ -128,6 +128,7 @@ modules = [
     "recursive",
     "oauth",
     "test",
+    "generic",
 ]
 
 
