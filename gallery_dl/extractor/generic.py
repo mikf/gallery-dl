@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Extractor for images in a generic web page"""
+"""Extractor for images in a generic web page."""
 
 from .common import Extractor, Message
 from .. import text
@@ -9,7 +9,8 @@ import os.path
 
 
 class GenericExtractor(Extractor):
-    """Extractor for images in a generic web page"""
+    """Extractor for images in a generic web page."""
+
     category = "generic"
     directory_fmt = ("generic_{pageurl}",)
     filename_fmt = "{filename}.{extension}"
@@ -27,12 +28,12 @@ class GenericExtractor(Extractor):
             (?:\#(?P<fragment>.*))?$        # optional fragment
             """
 
-
     def __init__(self, match):
-
+        """Init."""
         Extractor.__init__(self, match)
 
-        # Allow optional "g(eneric):" prefix and warn about "forced" or "fall-back" mode
+        # Allow optional "g(eneric):" prefix;
+        # warn about "forced" or "fall-back" mode
         if match.group(0).startswith('g'):
             self.url = match.group(0).partition(":")[2]
             self.log.warning("Forcing use of generic information extractor.")
@@ -43,14 +44,12 @@ class GenericExtractor(Extractor):
         # Used to resolve relative image urls
         self.root = match.group('scheme') + match.group('domain')
 
-
     def items(self):
-        """Get page, extract metadata & images, yield them in suitable messages
+        """Get page, extract metadata & images, yield them in suitable messages.
 
         Adapted from common.GalleryExtractor.items()
 
         """
-
         page = self.request(self.url).text
         data = self.metadata(page)
         imgs = self.images(page)
@@ -73,42 +72,48 @@ class GenericExtractor(Extractor):
                 text.nameext_from_url(url, data)
             yield Message.Url, url, data
 
-
     def metadata(self, page):
-        """Extract generic webpage metadata, return them in a dict"""
-
+        """Extract generic webpage metadata, return them in a dict."""
         data = {}
-
         data['pageurl'] = self.url
         data['title'] = text.extract(page, '<title>', "</title>")[0] or ""
-        data['descr'] = text.extract(page, '<meta name="description" content="', '"')[0] or ""
-        data['keywords'] = text.extract(page, '<meta name="keywords" content="', '"')[0] or ""
-        data['language'] = text.extract(page, '<meta name="language" content="', '"')[0] or ""
-        data['name'] = text.extract(page, '<meta itemprop="name" content="', '"')[0] or ""
-        data['copyright'] = text.extract(page, '<meta name="copyright" content="', '"')[0] or ""
-        data['og_site'] = text.extract(page, '<meta property="og:site" content="', '"')[0] or ""
-        data['og_site_name'] = text.extract(page, '<meta property="og:site_name" content="', '"')[0] or ""
-        data['og_title'] = text.extract(page, '<meta property="og:title" content="', '"')[0] or ""
-        data['og_descr'] = text.extract(page, '<meta property="og:description" content="', '"')[0] or ""
+        data['descr'] = text.extract(
+            page, '<meta name="description" content="', '"')[0] or ""
+        data['keywords'] = text.extract(
+            page, '<meta name="keywords" content="', '"')[0] or ""
+        data['language'] = text.extract(
+            page, '<meta name="language" content="', '"')[0] or ""
+        data['name'] = text.extract(
+            page, '<meta itemprop="name" content="', '"')[0] or ""
+        data['copyright'] = text.extract(
+            page, '<meta name="copyright" content="', '"')[0] or ""
+        data['og_site'] = text.extract(
+            page, '<meta property="og:site" content="', '"')[0] or ""
+        data['og_site_name'] = text.extract(
+            page, '<meta property="og:site_name" content="', '"')[0] or ""
+        data['og_title'] = text.extract(
+            page, '<meta property="og:title" content="', '"')[0] or ""
+        data['og_descr'] = text.extract(
+            page, '<meta property="og:description" content="', '"')[0] or ""
 
-        data = { k: text.unescape(data[k]) for k in data if data[k] != "" }
+        data = {k: text.unescape(data[k]) for k in data if data[k] != ""}
 
         return data
 
-
     def images(self, page):
-        """Extract image urls, return them in a list of (image url, metadata) tuples
+        """Extract image urls, return a list of (image url, metadata) tuples.
 
-        The extractor aims at finding as many _likely_ image urls as possible, using two
-        overlapping strategies (duplicate urls will be removed later in the process).
+        The extractor aims at finding as many _likely_ image urls as possible,
+        using two strategies (see below); since these often overlap, any
+        duplicate urls will be removed at the end of the process.
 
-        Note: since we are using re.findall() (see below), it's essential that the following
-        patterns contain 0 or at most 1 capturing group, so that re.findall() return a list
-        of urls (instead of a list of tuples of matching groups). All other groups used in
-        the pattern should be non-capturing (?:...).
-        """
+        Note: since we are using re.findall() (see below), it's essential that
+        the following patterns contain 0 or at most 1 capturing group, so that
+        re.findall() return a list of urls (instead of a list of tuples of
+        matching groups). All other groups used in the pattern should be
+        non-capturing (?:...).
 
-        """ Strategy 1: look for any urls in src/srcset attributes of img/video/source elements
+        1: Look in src/srcset attributes of img/video/source elements
 
         See:
         https://www.w3schools.com/tags/att_src.asp
@@ -116,37 +121,41 @@ class GenericExtractor(Extractor):
 
         We allow both absolute and relative urls here.
 
-        Note that srcset attributes often contain multiple space separated image urls;
-        this pattern matches only the first url; remaining urls will be matched by the
-        "Strategy 2" pattern below.
+        Note that srcset attributes often contain multiple space separated
+        image urls; this pattern matches only the first url; remaining urls
+        will be matched by the "imageurl_pattern_ext" pattern below.
         """
         imageurl_pattern_src = r"""(?ix)
-            <(?:img|video|source)\s.*?      # <img>, <video> or <source> elements
+            <(?:img|video|source)\s.*?      # <img>, <video> or <source>
             src(?:set)?=["']?               # src or srcset attributes
             (?P<URL>[^"'\s>]+)              # url
             """
 
+        """
+        2: Look anywhere for urls containing common image/video extensions
 
-        """ Strategy 2: look anywhere for urls containing common image/video extensions
+        The list of allowed extensions is borrowed from the directlink.py
+        extractor; other could be added, see
+        https://en.wikipedia.org/wiki/List_of_file_formats
 
-        The list of allowed extensions is borrowed from the directlink.py extractor;
-        other could be added, see https://en.wikipedia.org/wiki/List_of_file_formats
+        We don't allow relative urls here, i.e. generic strings containing an
+        image filename (such as in <... alt="image.jpg">) because they often
+        get resolved into non-existing absolute urls, leading to 404 errors
+        that might confuse the user.
 
-        We don't allow relative urls here, i.e. generic strings containing an image filename
-        (such as in <... alt="image.jpg">) because they often get resolved into non-existing
-        absolute urls, leading to 404 errors that might confuse the user.
+        Compared to the "pattern" class variable, here we must exclude also
+        other special characters (space, ", ', >), since we are looking for
+        urls in html tags.
 
-        Compared to the "pattern" class variable, here we must exclude also other
-        special characters (\s,",',>), since we are looking for urls in html tags.
-
-        Note that we use the x flag, so spaces and # must be backslash-quoted, unless they are
-        in a character class ([]).
+        Note that we use the x flag, so spaces and "#" must be
+        backslash-quoted, unless they are in a character class ([]).
         """
         imageurl_pattern_ext = r"""(?ix)
-            (?:https?://[^/?&#"'>\s]+)                              # scheme + domain
-            (?:[^?&#"'>\s]+)                                        # path until dot+ext
-            \.(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus)    # dot + image/video extensions
-            (?:\?[^"'>\s]*)?                                        # optional query and fragment
+            (?:https?://[^/?&#"'>\s]+)          # scheme + domain
+            (?:[^?&#"'>\s]+)                    # path until dot+ext
+            \.(?:jpe?g|jpe|png|gif
+                 |web[mp]|mp4|mkv|og[gmv]|opus) # dot + image/video extensions
+            (?:\?[^"'>\s]*)?                    # optional query and fragment
             """
 
         imageurls_src = re.findall(imageurl_pattern_src, page)
@@ -156,11 +165,13 @@ class GenericExtractor(Extractor):
         # Resolve relative urls
         #
         # Some of the urls may be relative, so we resolve them prefixing them
-        # either by the page root url (self.root) if the relative url starts with "/",
-        # or by a proper "base" url if the relative url doesn't start with "/"
+        # either by the page root url (self.root) if the relative url starts
+        # with "/", or by a proper "base" url if the relative url doesn't start
+        # with "/"
 
         # If the page contains a <base> element, use it as base url
-        basematch = re.search(r"(?i)(?:<base\s.*?href=[\"']?)(?P<url>[^\"' >]+)", page)
+        basematch = re.search(
+            r"(?i)(?:<base\s.*?href=[\"']?)(?P<url>[^\"' >]+)", page)
         if basematch:
             self.baseurl = basematch.group('url')
         else:
@@ -186,6 +197,6 @@ class GenericExtractor(Extractor):
 
         # Create the image metadata dict and add image url to it
         # (image filename and extension are added by items())
-        images = [ (u, {'imageurl': u}) for u in absimageurls ]
+        images = [(u, {'imageurl': u}) for u in absimageurls]
 
         return images
