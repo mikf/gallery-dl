@@ -11,7 +11,7 @@ import os.path
 class GenericExtractor(Extractor):
     """Extractor for images in a generic web page"""
     category = "generic"
-    directory_fmt = ("{pageurl}",)
+    directory_fmt = ("generic_{pageurl}",)
     filename_fmt = "{filename}.{extension}"
     archive_fmt = filename_fmt
 
