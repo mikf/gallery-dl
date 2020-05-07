@@ -21,7 +21,7 @@ class GenericExtractor(Extractor):
     # Based on: https://tools.ietf.org/html/rfc3986#appendix-B
     pattern = r"""(?ix)
             (?P<generic>g(?:eneric)?:)?     # optional "g(eneric):" prefix
-            (?P<scheme>https?://)           # required http or https scheme
+            (?P<scheme>https?://)?          # optional http or https scheme
             (?P<domain>[^/?&#]+)            # required domain
             (?P<path>/[^?&#]*)?             # optional path
             (?:\?(?P<query>[^/?#]*))?       # optional query
@@ -32,17 +32,22 @@ class GenericExtractor(Extractor):
         """Init."""
         Extractor.__init__(self, match)
 
-        # Allow optional "g(eneric):" prefix;
+        # Allow (and strip) optional "g(eneric):" prefix;
         # warn about "forced" or "fall-back" mode
-        if match.group(0).startswith('g'):
-            self.url = match.group(0).partition(":")[2]
+        if match.group('generic'):
             self.log.warning("Forcing use of generic information extractor.")
+            self.url = match.group(0).partition(":")[2]
         else:
-            self.url = match.group(0)
             self.log.warning("Falling back on generic information extractor.")
+            self.url = match.group(0)
+
+        # Make sure we have a scheme, or use https
+        if not match.group('scheme'):
+            self.url = 'https://' + self.url
 
         # Used to resolve relative image urls
-        self.root = match.group('scheme') + match.group('domain')
+        self.root = ((match.group('scheme') or 'https://') +
+                     match.group('domain'))
 
     def items(self):
         """Get page, extract metadata & images, yield them in suitable messages.
