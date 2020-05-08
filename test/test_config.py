@@ -14,7 +14,8 @@ import unittest
 import json
 import tempfile
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOTDIR)
 from gallery_dl import config  # noqa E402
 
 
@@ -156,10 +157,12 @@ class TestConfigFiles(unittest.TestCase):
 
     @staticmethod
     def _load(name):
-        rootdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        path = os.path.join(rootdir, "docs", name)
-        with open(path) as fp:
-            return json.load(fp)
+        path = os.path.join(ROOTDIR, "docs", name)
+        try:
+            with open(path) as fp:
+                return json.load(fp)
+        except FileNotFoundError:
+            raise unittest.SkipTest(path + " not available")
 
 
 if __name__ == '__main__':
