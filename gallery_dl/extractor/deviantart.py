@@ -904,7 +904,7 @@ class DeviantartOAuthAPI():
         """Get extended content of a single Deviation"""
         endpoint = "deviation/content"
         params = {"deviationid": deviation_id}
-        return self._call(endpoint, params)
+        return self._call(endpoint, params, public=False)
 
     def deviation_download(self, deviation_id):
         """Get the original file download (if allowed)"""
