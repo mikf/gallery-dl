@@ -229,13 +229,12 @@ class RedditAPI():
         user_agent = extractor.config("user-agent", self.USER_AGENT)
 
         if (client_id == self.CLIENT_ID) ^ (user_agent == self.USER_AGENT):
-            self.client_id = None
-            self.log.warning(
+            raise exception.StopExtraction(
                 "Conflicting values for 'client-id' and 'user-agent': "
                 "overwrite either both or none of them.")
-        else:
-            self.client_id = client_id
-            extractor.session.headers["User-Agent"] = user_agent
+
+        self.client_id = client_id
+        self.headers = {"User-Agent": user_agent}
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
@@ -277,13 +276,15 @@ class RedditAPI():
 
     def authenticate(self):
         """Authenticate the application by requesting an access token"""
-        access_token = self._authenticate_impl(self.refresh_token)
-        self.extractor.session.headers["Authorization"] = access_token
+        self.headers["Authorization"] = \
+            self._authenticate_impl(self.refresh_token)
 
     @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, refresh_token=None):
         """Actual authenticate implementation"""
         url = "https://www.reddit.com/api/v1/access_token"
+        self.headers["Authorization"] = None
+
         if refresh_token:
             self.log.info("Refreshing private access token")
             data = {"grant_type": "refresh_token",
@@ -294,9 +295,9 @@ class RedditAPI():
                                    "grants/installed_client"),
                     "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
 
-        auth = (self.client_id, "")
         response = self.extractor.request(
-            url, method="POST", data=data, auth=auth, fatal=False)
+            url, method="POST", headers=self.headers,
+            data=data, auth=(self.client_id, ""), fatal=False)
         data = response.json()
 
         if response.status_code != 200:
@@ -307,9 +308,10 @@ class RedditAPI():
 
     def _call(self, endpoint, params):
         url = "https://oauth.reddit.com" + endpoint
-        params["raw_json"] = 1
+        params["raw_json"] = "1"
         self.authenticate()
-        response = self.extractor.request(url, params=params, fatal=None)
+        response = self.extractor.request(
+            url, params=params, headers=self.headers, fatal=None)
 
         remaining = response.headers.get("x-ratelimit-remaining")
         if remaining and float(remaining) < 2:

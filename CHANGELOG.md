@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.13.6 - 2020-05-02
 ### Additions
 - [patreon] respect filters and sort order in query parameters ([#711](https://github.com/mikf/gallery-dl/issues/711))
