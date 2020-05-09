@@ -57,7 +57,7 @@ class MemoryCacheDecorator(CacheDecorator):
             value, expires = self.cache[key]
         except KeyError:
             expires = 0
-        if expires < timestamp:
+        if expires <= timestamp:
             value = self.func(*args, **kwargs)
             expires = timestamp + self.maxage
             self.cache[key] = value, expires
