@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import oauth, text  # noqa E402
 
 TESTSERVER = "http://term.ie/oauth/example"
+TESTSERVER = "http://term.ie/oauth/example"
 CONSUMER_KEY = "key"
 CONSUMER_SECRET = "secret"
 REQUEST_TOKEN = "requestkey"
@@ -99,8 +100,10 @@ class TestOAuthSession(unittest.TestCase):
             CONSUMER_KEY, CONSUMER_SECRET,
             oauth_token, oauth_token_secret,
         )
-        url = TESTSERVER + endpoint
-        return session.get(url, params=params).text
+        try:
+            return session.get(TESTSERVER + endpoint, params=params).text
+        except OSError:
+            raise unittest.SkipTest()
 
 
 if __name__ == "__main__":
