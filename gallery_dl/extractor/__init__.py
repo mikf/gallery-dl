@@ -94,6 +94,7 @@ modules = [
     "readcomiconline",
     "realbooru",
     "reddit",
+    "redgifs",
     "rule34",
     "safebooru",
     "sankaku",

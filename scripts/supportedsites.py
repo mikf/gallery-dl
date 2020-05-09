@@ -68,6 +68,7 @@ CATEGORY_MAP = {
     "powermanga"     : "PowerManga",
     "readcomiconline": "Read Comic Online",
     "rbt"            : "RebeccaBlackTech",
+    "redgifs"        : "RedGIFs",
     "rule34"         : "Rule 34",
     "sankaku"        : "Sankaku Channel",
     "sankakucomplex" : "Sankaku Complex",
