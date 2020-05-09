@@ -10,8 +10,8 @@
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
-import time
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -86,32 +86,50 @@ class TestCache(unittest.TestCase):
         self.assertEqual(ka(9, 9, 2), 6)
 
     def test_expires_mem(self):
-        @cache.memcache(maxage=1)
+        @cache.memcache(maxage=2)
         def ex(a, b, c):
             return a+b+c
 
-        self.assertEqual(ex(1, 1, 1), 3)
-        self.assertEqual(ex(2, 2, 2), 3)
-        self.assertEqual(ex(3, 3, 3), 3)
+        with patch("time.time") as tmock:
+            tmock.return_value = 0.001
+            self.assertEqual(ex(1, 1, 1), 3)
+            self.assertEqual(ex(2, 2, 2), 3)
+            self.assertEqual(ex(3, 3, 3), 3)
 
-        time.sleep(2)
-        self.assertEqual(ex(3, 3, 3), 9)
-        self.assertEqual(ex(2, 2, 2), 9)
-        self.assertEqual(ex(1, 1, 1), 9)
+            # value is still cached after 1 second
+            tmock.return_value += 1.0
+            self.assertEqual(ex(3, 3, 3), 3)
+            self.assertEqual(ex(2, 2, 2), 3)
+            self.assertEqual(ex(1, 1, 1), 3)
+
+            # new value after 'maxage' seconds
+            tmock.return_value += 1.0
+            self.assertEqual(ex(3, 3, 3), 9)
+            self.assertEqual(ex(2, 2, 2), 9)
+            self.assertEqual(ex(1, 1, 1), 9)
 
     def test_expires_db(self):
-        @cache.cache(maxage=1)
+        @cache.cache(maxage=2)
         def ex(a, b, c):
             return a+b+c
 
-        self.assertEqual(ex(1, 1, 1), 3)
-        self.assertEqual(ex(2, 2, 2), 3)
-        self.assertEqual(ex(3, 3, 3), 3)
+        with patch("time.time") as tmock:
+            tmock.return_value = 0.999
+            self.assertEqual(ex(1, 1, 1), 3)
+            self.assertEqual(ex(2, 2, 2), 3)
+            self.assertEqual(ex(3, 3, 3), 3)
 
-        time.sleep(2)
-        self.assertEqual(ex(3, 3, 3), 9)
-        self.assertEqual(ex(2, 2, 2), 9)
-        self.assertEqual(ex(1, 1, 1), 9)
+            # value is still cached after 1 second
+            tmock.return_value += 1.0
+            self.assertEqual(ex(3, 3, 3), 3)
+            self.assertEqual(ex(2, 2, 2), 3)
+            self.assertEqual(ex(1, 1, 1), 3)
+
+            # new value after 'maxage' seconds
+            tmock.return_value += 1.0
+            self.assertEqual(ex(3, 3, 3), 9)
+            self.assertEqual(ex(2, 2, 2), 9)
+            self.assertEqual(ex(1, 1, 1), 9)
 
     def test_update_mem_simple(self):
         @cache.memcache(keyarg=0)
