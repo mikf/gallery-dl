@@ -134,14 +134,13 @@ class InstagramExtractor(Extractor):
             'fullname': media['owner']['full_name'],
             'post_id': media['id'],
             'post_shortcode': media['shortcode'],
-            'post_pageurl': url,
+            'post_url': url,
             'description': text.parse_unicode_escapes('\n'.join(
                 edge['node']['text']
                 for edge in media['edge_media_to_caption']['edges']
             )),
         }
-        common['tags'] = (
-            re.compile(r'#[^#\n ]+').findall(common['description']))
+        common['tags'] = self._find_tags(common['description'])
 
         medias = []
         if media['__typename'] == 'GraphSidecar':
@@ -395,6 +394,7 @@ class InstagramImageExtractor(InstagramExtractor):
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
         self.shortcode = match.group(1)
+        self._find_tags = re.compile(r'#\w+').findall
 
     def instagrams(self):
         url = '{}/p/{}/'.format(self.root, self.shortcode)
