@@ -14,6 +14,7 @@ from .. import text, exception
 from ..cache import cache
 import itertools
 import json
+import re
 
 
 class InstagramExtractor(Extractor):
@@ -133,11 +134,14 @@ class InstagramExtractor(Extractor):
             'fullname': media['owner']['full_name'],
             'post_id': media['id'],
             'post_shortcode': media['shortcode'],
+            'post_pageurl': url,
             'description': text.parse_unicode_escapes('\n'.join(
                 edge['node']['text']
                 for edge in media['edge_media_to_caption']['edges']
             )),
         }
+        common['post_tags'] = (
+            re.compile(r'#[^#\n ]+').findall(common['description']))
 
         medias = []
         if media['__typename'] == 'GraphSidecar':
