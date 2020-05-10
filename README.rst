@@ -172,6 +172,11 @@ i.e. ``C:\Users\<username>\``)
 
 Values in later configuration files will override previous ones.
 
+Command line options will override all related settings in the configuration file(s),
+e.g. using ``--write-metadata`` will enable writing metadata using the default values
+for all ``postprocessors.metadata.*`` settings, overriding any specific settings in
+configuration files.
+
 
 Authentication
 ==============
