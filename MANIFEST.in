@@ -1,0 +1,2 @@
+include README.rst CHANGELOG.md LICENSE
+recursive-include docs *.conf
