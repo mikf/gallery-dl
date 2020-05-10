@@ -104,8 +104,8 @@ class Extractor():
                         # url, replacing special characters with "_"
                         r = re.compile(r'[:/.?&=#]+')
                         outfilename = r.sub('_', response.url) + '.dump'
-                        with open(outfilename, 'w') as outfile:
-                            outfile.write(response.text)
+                        with open(outfilename, 'wb') as outfile:
+                            outfile.write(response.content)
 
                     return response
                 if notfound and code == 404:
