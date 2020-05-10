@@ -1,11 +1,11 @@
 Configuration
 #############
 
-Configuration files for *gallery-dl* use a JSON-based file format.
-
-For a (more or less) complete example with options set to their default values, see gallery-dl.conf_.
-
-For a configuration file example with more involved settings and options, see gallery-dl-example.conf_.
+| Configuration files for *gallery-dl* use a JSON-based file format.
+| For a (more or less) complete example with options set to their default values,
+  see `gallery-dl.conf <gallery-dl.conf>`__.
+| For a configuration file example with more involved settings and options,
+  see `gallery-dl-example.conf <gallery-dl-example.conf>`__.
 
 This file lists all available configuration options and their descriptions.
 
@@ -2160,8 +2160,6 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: extractor.deviantart.metadata_
 
-.. _gallery-dl.conf:         https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
-.. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _.netrc:             https://stackoverflow.com/tags/.netrc/info
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
 .. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects
