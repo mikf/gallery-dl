@@ -140,7 +140,7 @@ class InstagramExtractor(Extractor):
                 for edge in media['edge_media_to_caption']['edges']
             )),
         }
-        common['post_tags'] = (
+        common['tags'] = (
             re.compile(r'#[^#\n ]+').findall(common['description']))
 
         medias = []
