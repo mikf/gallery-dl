@@ -13,7 +13,7 @@ from .. import text
 import time
 
 
-BASE_PATTERN = r"(?:https?://)?([^.]+)\.slickpic\.com"
+BASE_PATTERN = r"(?:https?://)?([\w-]+)\.slickpic\.com"
 
 
 class SlickpicExtractor(Extractor):

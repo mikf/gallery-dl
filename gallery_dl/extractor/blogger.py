@@ -15,7 +15,7 @@ import re
 
 BASE_PATTERN = (
     r"(?:blogger:(?:https?://)?([^/]+)|"
-    r"(?:https?://)?([^.]+\.blogspot\.com))")
+    r"(?:https?://)?([\w-]+\.blogspot\.com))")
 
 
 class BloggerExtractor(Extractor):

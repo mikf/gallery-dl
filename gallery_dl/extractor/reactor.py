@@ -16,7 +16,7 @@ import time
 import json
 
 
-BASE_PATTERN = r"(?:https?://)?([^/.]+\.reactor\.cc)"
+BASE_PATTERN = r"(?:https?://)?([\w-]+\.reactor\.cc)"
 
 
 class ReactorExtractor(SharedConfigMixin, Extractor):

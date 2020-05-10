@@ -21,7 +21,7 @@ class PhotobucketAlbumExtractor(Extractor):
     directory_fmt = ("{category}", "{username}", "{location}")
     filename_fmt = "{offset:>03}{pictureId:?_//}_{titleOrFilename}.{extension}"
     archive_fmt = "{id}"
-    pattern = (r"(?:https?://)?((?:[^.]+\.)?photobucket\.com)"
+    pattern = (r"(?:https?://)?((?:[\w-]+\.)?photobucket\.com)"
                r"/user/[^/?&#]+/library(?:/[^?&#]*)?")
     test = (
         ("https://s369.photobucket.com/user/CrpyLrkr/library", {
@@ -110,7 +110,7 @@ class PhotobucketImageExtractor(Extractor):
     directory_fmt = ("{category}", "{username}")
     filename_fmt = "{pictureId:?/_/}{titleOrFilename}.{extension}"
     archive_fmt = "{username}_{id}"
-    pattern = (r"(?:https?://)?(?:[^.]+\.)?photobucket\.com"
+    pattern = (r"(?:https?://)?(?:[\w-]+\.)?photobucket\.com"
                r"(?:/gallery/user/([^/?&#]+)/media/([^/?&#]+)"
                r"|/user/([^/?&#]+)/media/[^?&#]+\.html)")
     test = (

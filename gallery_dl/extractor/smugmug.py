@@ -13,7 +13,7 @@ from .. import text, oauth, exception
 
 BASE_PATTERN = (
     r"(?:smugmug:(?!album:)(?:https?://)?([^/]+)|"
-    r"(?:https?://)?([^.]+)\.smugmug\.com)")
+    r"(?:https?://)?([\w-]+)\.smugmug\.com)")
 
 
 class SmugmugExtractor(Extractor):

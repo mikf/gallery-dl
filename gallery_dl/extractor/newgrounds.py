@@ -344,7 +344,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     """Extractor for posts favorited by a newgrounds user"""
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user}", "Favorites")
-    pattern = (r"(?:https?://)?([^.]+)\.newgrounds\.com"
+    pattern = (r"(?:https?://)?([\w-]+)\.newgrounds\.com"
                r"/favorites(?!/following)(?:/(art|audio|movies))?/?")
     test = (
         ("https://tomfulp.newgrounds.com/favorites/art", {
@@ -399,7 +399,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
 class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
     """Extractor for a newgrounds user's favorited users"""
     subcategory = "following"
-    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/favorites/(following)"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/favorites/(following)"
     test = ("https://tomfulp.newgrounds.com/favorites/following", {
         "pattern": NewgroundsUserExtractor.pattern,
         "range": "76-125",
