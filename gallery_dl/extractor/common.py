@@ -102,7 +102,7 @@ class Extractor():
                         # in the current directory.
                         # The file name is derived from the response
                         # url, replacing special characters with "_"
-                        r = re.compile(r'[:/.?&=#]+')
+                        r = re.compile(r"[\\\\|/<>:\"?*&=#]+")
                         outfilename = r.sub('_', response.url) + '.dump'
                         with open(outfilename, 'wb') as outfile:
                             outfile.write(response.content)
