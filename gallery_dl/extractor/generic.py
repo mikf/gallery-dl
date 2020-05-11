@@ -143,11 +143,6 @@ class GenericExtractor(Extractor):
         extractor; other could be added, see
         https://en.wikipedia.org/wiki/List_of_file_formats
 
-        We don't allow relative urls here, i.e. generic strings containing an
-        image filename (such as in <... alt="image.jpg">) because they often
-        get resolved into non-existing absolute urls, leading to 404 errors
-        that might confuse the user.
-
         Compared to the "pattern" class variable, here we must exclude also
         other special characters (space, ", ', >), since we are looking for
         urls in html tags.
@@ -155,8 +150,8 @@ class GenericExtractor(Extractor):
         Note that we use the x flag, so spaces and "#" must be
         backslash-quoted, unless they are in a character class ([]).
         """
+
         imageurl_pattern_ext = r"""(?ix)
-            (?:https?://[^/?&#"'>\s]+)          # scheme + domain
             (?:[^?&#"'>\s]+)                    # path until dot+ext
             \.(?:jpe?g|jpe|png|gif
                  |web[mp]|mp4|mkv|og[gmv]|opus) # dot + image/video extensions
