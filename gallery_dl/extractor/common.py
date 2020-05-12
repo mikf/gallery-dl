@@ -96,6 +96,17 @@ class Extractor():
                         (400 <= code < 429 or 431 <= code < 500):
                     if encoding:
                         response.encoding = encoding
+
+                    if config.get((), "write_pages", False):
+                        # Write the response content to a .dump file
+                        # in the current directory.
+                        # The file name is derived from the response
+                        # url, replacing special characters with "_"
+                        r = re.compile(r"[\\\\|/<>:\"?*&=#]+")
+                        outfilename = r.sub('_', response.url) + '.dump'
+                        with open(outfilename, 'wb') as outfile:
+                            outfile.write(response.content)
+
                     return response
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
