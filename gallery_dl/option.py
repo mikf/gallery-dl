@@ -173,6 +173,12 @@ def build_parser():
         help=("Write URLs, which get emitted by other extractors but cannot "
               "be handled, to FILE"),
     )
+    output.add_argument(
+        "--write-pages",
+        dest="write_pages", nargs=0, action=ConfigConstAction, const=True,
+        help=("Write downloaded intermediary pages to files "
+              "in the current directory to debug problems"),
+    )
 
     downloader = parser.add_argument_group("Downloader Options")
     downloader.add_argument(
