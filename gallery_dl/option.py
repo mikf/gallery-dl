@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -175,7 +175,7 @@ def build_parser():
     )
     output.add_argument(
         "--write-pages",
-        dest="write_pages", nargs=0, action=ConfigConstAction, const=True,
+        dest="write-pages", nargs=0, action=ConfigConstAction, const=True,
         help=("Write downloaded intermediary pages to files "
               "in the current directory to debug problems"),
     )
