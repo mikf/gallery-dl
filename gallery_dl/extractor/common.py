@@ -40,6 +40,7 @@ class Extractor():
         self._cookiefile = None
         self._cookiejar = self.session.cookies
         self._parentdir = ""
+        self._write_pages = self.config("write-pages", False)
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
@@ -91,22 +92,13 @@ class Extractor():
                 raise exception.HttpError(exc)
             else:
                 code = response.status_code
+                if self._write_pages:
+                    self._dump_response(response)
                 if 200 <= code < 400 or fatal is None and \
                         (400 <= code < 500) or not fatal and \
                         (400 <= code < 429 or 431 <= code < 500):
                     if encoding:
                         response.encoding = encoding
-
-                    if config.get((), "write_pages", False):
-                        # Write the response content to a .dump file
-                        # in the current directory.
-                        # The file name is derived from the response
-                        # url, replacing special characters with "_"
-                        r = re.compile(r"[\\\\|/<>:\"?*&=#]+")
-                        outfilename = r.sub('_', response.url) + '.dump'
-                        with open(outfilename, 'wb') as outfile:
-                            outfile.write(response.content)
-
                     return response
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
@@ -320,6 +312,24 @@ class Extractor():
                 extr, url = extractors[category]
                 result.append((Message.Queue, url, {"_extractor": extr}))
         return iter(result)
+
+    @staticmethod
+    def _dump_response(response):
+        """Write the response content to a .dump file in the current directory.
+
+        The file name is derived from the response url,
+        replacing special characters with "_"
+        """
+        if hasattr(Extractor, "_dump_index"):
+            Extractor._dump_index += 1
+        else:
+            Extractor._dump_index = 1
+            Extractor._dump_sanitize = re.compile(r"[\\\\|/<>:\"?*&=#]+").sub
+
+        outfilename = "{:>03}_{}.dump".format(
+            Extractor._dump_index, Extractor._dump_sanitize('_', response.url))
+        with open(outfilename, 'wb') as outfile:
+            outfile.write(response.content)
 
     @classmethod
     def _get_tests(cls):
