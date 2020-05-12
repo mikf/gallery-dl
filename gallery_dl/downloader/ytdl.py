@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -35,7 +35,7 @@ class YoutubeDLDownloader(DownloaderBase):
 
         if self.config("logging", True):
             options["logger"] = self.log
-        self.forward_cookies = self.config("forward-cookies", True)
+        self.forward_cookies = self.config("forward-cookies", False)
 
         outtmpl = self.config("outtmpl")
         self.outtmpl = DEFAULT_OUTTMPL if outtmpl == "default" else outtmpl

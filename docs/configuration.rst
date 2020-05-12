@@ -1402,7 +1402,7 @@ downloader.ytdl.forward-cookies
 -------------------------------
 =========== =====
 Type        ``bool``
-Default     ``true``
+Default     ``false``
 Description Forward cookies to youtube-dl.
 =========== =====
 
