@@ -34,10 +34,16 @@ class Job():
         self.pred_url = self._prepare_predicates("image", True)
         self.pred_queue = self._prepare_predicates("chapter", False)
 
-        if parent and parent.extractor.config(
-                "category-transfer", parent.extractor.categorytransfer):
-            self.extractor.category = parent.extractor.category
-            self.extractor.subcategory = parent.extractor.subcategory
+        if parent:
+            pextr = parent.extractor
+
+            # transfer (sub)category
+            if pextr.config("category-transfer", pextr.categorytransfer):
+                extr.category = pextr.category
+                extr.subcategory = pextr.subcategory
+
+            # reuse connection adapters
+            extr.session.adapters = pextr.session.adapters
 
         # user-supplied metadata
         self.userkwds = self.extractor.config("keywords")

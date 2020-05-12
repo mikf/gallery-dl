@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -28,6 +28,7 @@ class RecursiveExtractor(Extractor):
 
         self.session.mount("file://", FileAdapter())
         page = self.request(self.url.partition(":")[2]).text
+        del self.session.adapters["file://"]
 
         yield Message.Version, 1
         with extractor.blacklist(blist):
