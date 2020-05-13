@@ -153,11 +153,11 @@ class InstagramExtractor(Extractor):
             common['location_id'] = media['location']['id']
             common['location_slug'] = media['location']['slug']
             common['location_url'] = (
-                'https://www.instagram.com/explore/locations/'
-                + media['location']['id']
-                + '/'
-                + media['location']['slug']
-                + '/'
+                'https://www.instagram.com/explore/locations/' +
+                media['location']['id'] +
+                '/' +
+                media['location']['slug'] +
+                '/'
             )
 
         medias = []
@@ -438,7 +438,7 @@ class InstagramImageExtractor(InstagramExtractor):
                 "tagged_users": [{
                     "full_name": "Call Me Kay",
                     "username": "kaaymbl"
-                    }]
+                }]
             }
         }),
     )
