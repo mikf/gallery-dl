@@ -140,7 +140,10 @@ class InstagramExtractor(Extractor):
                 for edge in media['edge_media_to_caption']['edges']
             )),
         }
-        common['tags'] = sorted(set(self._find_tags(common['description'])))
+
+        if self._find_tags(common['description']):
+            common['tags'] = sorted(
+                set(self._find_tags(common['description'])))
 
         medias = []
         if media['__typename'] == 'GraphSidecar':
