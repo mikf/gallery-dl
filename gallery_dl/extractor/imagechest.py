@@ -41,18 +41,23 @@ class ImagechestGalleryExtractor(GalleryExtractor):
         if "Sorry, but the page you requested could not be found." in page:
             raise exception.NotFoundError("gallery")
 
-        title = re.search(r'<meta property="og:title" content="([^"]+)"/>', page).group(1)
-        title = title.strip()
+        title_match = re.search(
+            r'<meta property="og:title" content="([^"]+)"/>',
+            page)
+
+        title = title_match.group(1).strip()
 
         return {
             "gallery_id": self.gallery_id,
             "title": text.unescape(title)
         }
-        
+
     def images(self, page):
         """Return a list of all (image-url, metadata)-tuples"""
 
-        image_keys = re.findall(r'<meta property="og:image" content="([^"]+)"/>', page)
+        image_keys = re.findall(
+            r'<meta property="og:image" content="([^"]+)"/>',
+            page)
 
         for imgurl in image_keys:
 
