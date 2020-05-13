@@ -27,6 +27,10 @@ class InstagramExtractor(Extractor):
     cookiedomain = ".instagram.com"
     cookienames = ("sessionid",)
 
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self._find_tags = re.compile(r'#\w+').findall
+
     def get_metadata(self):
         return {}
 
@@ -442,7 +446,6 @@ class InstagramImageExtractor(InstagramExtractor):
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
         self.shortcode = match.group(1)
-        self._find_tags = re.compile(r'#\w+').findall
 
     def instagrams(self):
         url = '{}/p/{}/'.format(self.root, self.shortcode)
