@@ -12,9 +12,8 @@ class GenericExtractor(Extractor):
     """Extractor for images in a generic web page."""
 
     category = "generic"
-    directory_fmt = ("generic_{pageurl}",)
-    filename_fmt = "{filename}.{extension}"
-    archive_fmt = filename_fmt
+    directory_fmt = ("{category}", "{pageurl}")
+    archive_fmt = "{imageurl}"
 
     # Allow any url, optionally prefixed by "g:" or "generic:"
     # in case we want to override other extractors.
@@ -35,10 +34,10 @@ class GenericExtractor(Extractor):
         # Allow (and strip) optional "g(eneric):" prefix;
         # warn about "forced" or "fall-back" mode
         if match.group('generic'):
-            self.log.warning("Forcing use of generic information extractor.")
+            self.log.info("Forcing use of generic information extractor.")
             self.url = match.group(0).partition(":")[2]
         else:
-            self.log.warning("Falling back on generic information extractor.")
+            self.log.info("Falling back on generic information extractor.")
             self.url = match.group(0)
 
         # Make sure we have a scheme, or use https
@@ -82,7 +81,7 @@ class GenericExtractor(Extractor):
         data = {}
         data['pageurl'] = self.url
         data['title'] = text.extract(page, '<title>', "</title>")[0] or ""
-        data['descr'] = text.extract(
+        data['description'] = text.extract(
             page, '<meta name="description" content="', '"')[0] or ""
         data['keywords'] = text.extract(
             page, '<meta name="keywords" content="', '"')[0] or ""
@@ -98,7 +97,7 @@ class GenericExtractor(Extractor):
             page, '<meta property="og:site_name" content="', '"')[0] or ""
         data['og_title'] = text.extract(
             page, '<meta property="og:title" content="', '"')[0] or ""
-        data['og_descr'] = text.extract(
+        data['og_description'] = text.extract(
             page, '<meta property="og:description" content="', '"')[0] or ""
 
         data = {k: text.unescape(data[k]) for k in data if data[k] != ""}
