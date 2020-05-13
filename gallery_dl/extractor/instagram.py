@@ -173,6 +173,7 @@ class InstagramExtractor(Extractor):
                     'sidecar_media_id': media['id'],
                     'sidecar_shortcode': media['shortcode'],
                 }
+                self._extract_tagged_users(children, media_data)
                 media_data.update(common)
                 medias.append(media_data)
 
@@ -186,6 +187,7 @@ class InstagramExtractor(Extractor):
                 'height': text.parse_int(media['dimensions']['height']),
                 'width': text.parse_int(media['dimensions']['width']),
             }
+            self._extract_tagged_users(media, media_data)
             media_data.update(common)
             medias.append(media_data)
 
@@ -322,6 +324,19 @@ class InstagramExtractor(Extractor):
                 variables, psdf['query_hash'], csrf,
             )
 
+    def _extract_tagged_users(self, src_media, dest_dict):
+        if src_media['edge_media_to_tagged_user']['edges']:
+            tagged_users = []
+            for num, edge in enumerate(
+                    src_media['edge_media_to_tagged_user']['edges'], 1):
+                tagged = edge['node']
+                tagged_data = {
+                    'username': tagged['user']['username'],
+                    'full_name': tagged['user']['full_name'],
+                }
+            tagged_users.append(tagged_data)
+            dest_dict['tagged_users'] = tagged_users
+
 
 class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
@@ -411,7 +426,17 @@ class InstagramImageExtractor(InstagramExtractor):
                 "sidecar_shortcode": "BtOvDOfhvRr",
                 "video_url": str,
             }
-        })
+        }),
+
+        # GraphImage with tagged user
+        ("https://www.instagram.com/p/B_2lf3qAd3y/", {
+            "keyword": {
+                "tagged_users": [{
+                    "full_name": "Call Me Kay",
+                    "username": "kaaymbl"
+                    }]
+            }
+        }),
     )
 
     def __init__(self, match):
