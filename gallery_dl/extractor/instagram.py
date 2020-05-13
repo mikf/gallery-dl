@@ -145,6 +145,17 @@ class InstagramExtractor(Extractor):
             common['tags'] = sorted(
                 set(self._find_tags(common['description'])))
 
+        if media['location']:
+            common['location_id'] = media['location']['id']
+            common['location_slug'] = media['location']['slug']
+            common['location_url'] = (
+                'https://www.instagram.com/explore/locations/'
+                + media['location']['id']
+                + '/'
+                + media['location']['slug']
+                + '/'
+            )
+
         medias = []
         if media['__typename'] == 'GraphSidecar':
             for num, edge in enumerate(
@@ -327,6 +338,8 @@ class InstagramImageExtractor(InstagramExtractor):
                 "description": str,
                 "height": int,
                 "likes": int,
+                "location_id": "214424288",
+                "location_slug": "hong-kong",
                 "media_id": "1922949326347663701",
                 "shortcode": "BqvsDleB3lV",
                 "post_id": "1922949326347663701",
