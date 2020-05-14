@@ -202,7 +202,7 @@ def build_parser():
     downloader.add_argument(
         "--http-timeout",
         dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
-        help="Timeout for HTTP connections (defaut: 30.0)",
+        help="Timeout for HTTP connections (default: 30.0)",
     )
     downloader.add_argument(
         "--sleep",
