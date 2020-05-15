@@ -41,12 +41,14 @@ class GenericExtractor(Extractor):
             self.url = match.group(0)
 
         # Make sure we have a scheme, or use https
-        if not match.group('scheme'):
-            self.url = 'https://' + self.url
+        if match.group('scheme'):
+            self.scheme = match.group('scheme')
+        else:
+            self.scheme = 'https://'
+            self.url = self.scheme + self.url
 
         # Used to resolve relative image urls
-        self.root = ((match.group('scheme') or 'https://') +
-                     match.group('domain'))
+        self.root = self.scheme + match.group('domain')
 
     def items(self):
         """Get page, extract metadata & images, yield them in suitable messages.
@@ -186,6 +188,8 @@ class GenericExtractor(Extractor):
         for u in imageurls:
             if u.startswith('http'):
                 absimageurls.append(u)
+            elif u.startswith('//'):
+                absimageurls.append(self.scheme + u.lstrip('/'))
             elif u.startswith('/'):
                 absimageurls.append(self.root + '/' + u)
             else:
