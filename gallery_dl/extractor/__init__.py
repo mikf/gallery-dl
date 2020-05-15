@@ -114,6 +114,7 @@ modules = [
     "vsco",
     "wallhaven",
     "warosu",
+    "webtoons",
     "weibo",
     "wikiart",
     "xhamster",

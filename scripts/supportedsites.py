@@ -85,6 +85,7 @@ CATEGORY_MAP = {
     "thebarchive"    : "The /b/ Archive",
     "vanillarock"    : "もえぴりあ",
     "vsco"           : "VSCO",
+    "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
     "worldthree"     : "World Three",
     "xhamster"       : "xHamster",
