@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2014-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,7 @@
 
 from . import booru
 from .common import Message
-from .. import text, util
+from .. import text
 
 
 class GelbooruExtractor(booru.XmlParserMixin,
@@ -31,6 +31,7 @@ class GelbooruExtractor(booru.XmlParserMixin,
         else:
             self.items = self.items_noapi
             self.session.cookies["fringeBenefits"] = "yup"
+            self.per_page = 42
 
     def items_noapi(self):
         yield Message.Version, 1
@@ -46,6 +47,19 @@ class GelbooruExtractor(booru.XmlParserMixin,
 
     def get_posts(self):
         """Return an iterable containing all relevant post objects"""
+        url = "https://gelbooru.com/index.php?page=post&s=list"
+        params = {
+            "tags": self.params["tags"],
+            "pid" : self.page_start * self.per_page
+        }
+
+        while True:
+            page = self.request(url, params=params).text
+            ids = list(text.extract_iter(page, '<a id="p', '"'))
+            yield from ids
+            if len(ids) < self.per_page:
+                return
+            params["pid"] += self.per_page
 
     def get_post_data(self, post_id):
         """Extract metadata of a single post"""
@@ -88,34 +102,20 @@ class GelbooruTagExtractor(booru.TagMixin, GelbooruExtractor):
         }),
     )
 
-    def __init__(self, match):
-        super().__init__(match)
-        if not self.use_api:
-            self.per_page = 42
 
-    def get_posts(self):
-        url = "https://gelbooru.com/index.php?page=post&s=list"
-        params = {"tags": self.tags, "pid": self.page_start * self.per_page}
-
-        while True:
-            page = self.request(url, params=params).text
-            ids = list(text.extract_iter(page, '<a id="p', '"'))
-            yield from ids
-            if len(ids) < self.per_page:
-                return
-            params["pid"] += self.per_page
-
-
-class GelbooruPoolExtractor(booru.GelbooruPoolMixin, GelbooruExtractor):
+class GelbooruPoolExtractor(booru.PoolMixin, GelbooruExtractor):
     """Extractor for image-pools from gelbooru.com"""
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=pool&s=show&id=(?P<pool>\d+)")
-    test = ("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
-        "count": 6,
-    })
-
-    def get_posts(self):
-        return util.advance(self.posts, self.page_start)
+    test = (
+        ("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
+            "count": 6,
+        }),
+        ("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
+            "options": (("api", False),),
+            "count": 6,
+        }),
+    )
 
 
 class GelbooruPostExtractor(booru.PostMixin, GelbooruExtractor):
