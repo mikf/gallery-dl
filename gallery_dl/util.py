@@ -772,6 +772,8 @@ class PathFormat():
 
         if self.extension:
             self.build_path()
+        else:
+            self.filename = ""
 
     def set_extension(self, extension, real=True):
         """Set filename extension"""
