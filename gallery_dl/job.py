@@ -24,10 +24,16 @@ class Job():
             extr = extractor.find(extr)
         if not extr:
             raise exception.NoExtractorError()
-
         self.extractor = extr
-        extr.log.extractor = extr
-        extr.log.job = self
+        self.pathfmt = None
+
+        self._logger_extra = {
+            "job"      : self,
+            "extractor": extr,
+            "path"     : output.PathfmtProxy(self),
+            "keywords" : output.KwdictProxy(self),
+        }
+        extr.log = self._wrap_logger(extr.log)
         extr.log.debug("Using %s for '%s'", extr.__class__.__name__, extr.url)
 
         self.status = 0
@@ -171,6 +177,12 @@ class Job():
 
         return util.build_predicate(predicates)
 
+    def get_logger(self, name):
+        return self._wrap_logger(logging.getLogger(name))
+
+    def _wrap_logger(self, logger):
+        return output.LoggerAdapter(logger, self._logger_extra)
+
     def _write_unsupported(self, url):
         if self.ulog:
             self.ulog.info(url)
@@ -181,8 +193,7 @@ class DownloadJob(Job):
 
     def __init__(self, url, parent=None):
         Job.__init__(self, url, parent)
-        self.log = logging.getLogger("download")
-        self.pathfmt = None
+        self.log = self.get_logger("download")
         self.archive = None
         self.sleep = None
         self.downloaders = {}
@@ -331,7 +342,7 @@ class DownloadJob(Job):
 
         cls = downloader.find(scheme)
         if cls and config.get(("downloader", cls.scheme), "enabled", True):
-            instance = cls(self.extractor, self.out)
+            instance = cls(self)
         else:
             instance = None
             self.log.error("'%s:' URLs are not supported/enabled", scheme)
@@ -383,6 +394,7 @@ class DownloadJob(Job):
 
         postprocessors = config("postprocessors")
         if postprocessors:
+            pp_log = self.get_logger("postprocessor")
             pp_list = []
             category = self.extractor.category
 
@@ -395,14 +407,13 @@ class DownloadJob(Job):
                 name = pp_dict.get("name")
                 pp_cls = postprocessor.find(name)
                 if not pp_cls:
-                    postprocessor.log.warning("module '%s' not found", name)
+                    pp_log.warning("module '%s' not found", name)
                     continue
                 try:
-                    pp_obj = pp_cls(pathfmt, pp_dict)
+                    pp_obj = pp_cls(self, pp_dict)
                 except Exception as exc:
-                    postprocessor.log.error(
-                        "'%s' initialization failed:  %s: %s",
-                        name, exc.__class__.__name__, exc)
+                    pp_log.error("'%s' initialization failed:  %s: %s",
+                                 name, exc.__class__.__name__, exc)
                 else:
                     pp_list.append(pp_obj)
 

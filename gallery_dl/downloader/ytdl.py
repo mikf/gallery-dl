@@ -17,8 +17,9 @@ import os
 class YoutubeDLDownloader(DownloaderBase):
     scheme = "ytdl"
 
-    def __init__(self, extractor, output):
-        DownloaderBase.__init__(self, extractor, output)
+    def __init__(self, job):
+        DownloaderBase.__init__(self, job)
+        extractor = job.extractor
 
         retries = self.config("retries", extractor._retries)
         options = {

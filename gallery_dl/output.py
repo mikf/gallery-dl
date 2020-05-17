@@ -22,17 +22,66 @@ LOG_LEVEL = logging.INFO
 
 
 class Logger(logging.Logger):
-    """Custom logger that includes extractor and job info in log records"""
-    extractor = util.NONE
-    job = util.NONE
+    """Custom logger that includes extra info in log records"""
 
     def makeRecord(self, name, level, fn, lno, msg, args, exc_info,
                    func=None, extra=None, sinfo=None,
                    factory=logging._logRecordFactory):
         rv = factory(name, level, fn, lno, msg, args, exc_info, func, sinfo)
-        rv.extractor = self.extractor
-        rv.job = self.job
+        if extra:
+            rv.__dict__.update(extra)
         return rv
+
+
+class LoggerAdapter():
+    """Trimmed-down version of logging.LoggingAdapter"""
+    __slots__ = ("logger", "extra")
+
+    def __init__(self, logger, extra):
+        self.logger = logger
+        self.extra = extra
+
+    def debug(self, msg, *args, **kwargs):
+        if self.logger.isEnabledFor(logging.DEBUG):
+            kwargs["extra"] = self.extra
+            self.logger._log(logging.DEBUG, msg, args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        if self.logger.isEnabledFor(logging.INFO):
+            kwargs["extra"] = self.extra
+            self.logger._log(logging.INFO, msg, args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        if self.logger.isEnabledFor(logging.WARNING):
+            kwargs["extra"] = self.extra
+            self.logger._log(logging.WARNING, msg, args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        if self.logger.isEnabledFor(logging.ERROR):
+            kwargs["extra"] = self.extra
+            self.logger._log(logging.ERROR, msg, args, **kwargs)
+
+
+class PathfmtProxy():
+    __slots__ = ("job",)
+
+    def __init__(self, job):
+        self.job = job
+
+    def __getattribute__(self, name):
+        pathfmt = object.__getattribute__(self, "job").pathfmt
+        return pathfmt.__dict__.get(name) if pathfmt else None
+
+
+class KwdictProxy():
+    __slots__ = ("job",)
+
+    def __init__(self, job):
+        self.job = job
+
+    def __getattribute__(self, name):
+        pathfmt = object.__getattribute__(self, "job").pathfmt
+        return pathfmt.kwdict.get(name) if pathfmt else None
 
 
 class Formatter(logging.Formatter):

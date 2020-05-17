@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,8 +22,8 @@ class ClassifyPP(PostProcessor):
         "Archives" : ("zip", "rar", "7z", "tar", "gz", "bz2"),
     }
 
-    def __init__(self, pathfmt, options):
-        PostProcessor.__init__(self)
+    def __init__(self, job, options):
+        PostProcessor.__init__(self, job)
         mapping = options.get("mapping", self.DEFAULT_MAPPING)
 
         self.mapping = {

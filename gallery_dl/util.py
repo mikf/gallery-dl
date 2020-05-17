@@ -726,6 +726,7 @@ class PathFormat():
 
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
+        self.kwdict = kwdict
         windows = os.name == "nt"
 
         # Build path segments by applying 'kwdict' to directory format strings

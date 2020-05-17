@@ -22,8 +22,8 @@ class ZipPP(PostProcessor):
         "lzma" : zipfile.ZIP_LZMA,
     }
 
-    def __init__(self, pathfmt, options):
-        PostProcessor.__init__(self)
+    def __init__(self, job, options):
+        PostProcessor.__init__(self, job)
         self.delete = not options.get("keep-files", False)
         ext = "." + options.get("extension", "zip")
         algorithm = options.get("compression", "store")
@@ -33,7 +33,7 @@ class ZipPP(PostProcessor):
                 algorithm)
             algorithm = "store"
 
-        self.path = pathfmt.realdirectory
+        self.path = job.pathfmt.realdirectory
         args = (self.path[:-1] + ext, "a",
                 self.COMPRESSION_ALGORITHMS[algorithm], True)
 
