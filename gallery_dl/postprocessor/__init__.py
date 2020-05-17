@@ -9,7 +9,6 @@
 """Post-processing modules"""
 
 import importlib
-import logging
 
 modules = [
     "classify",
@@ -20,8 +19,6 @@ modules = [
     "ugoira",
     "zip",
 ]
-
-log = logging.getLogger("postprocessor")
 
 
 def find(name):

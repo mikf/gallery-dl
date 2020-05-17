@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,8 +15,8 @@ import os
 
 class MetadataPP(PostProcessor):
 
-    def __init__(self, pathfmt, options):
-        PostProcessor.__init__(self)
+    def __init__(self, job, options):
+        PostProcessor.__init__(self, job)
 
         mode = options.get("mode", "json")
         if mode == "custom":
