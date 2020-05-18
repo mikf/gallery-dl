@@ -156,7 +156,7 @@ class GenericExtractor(Extractor):
             (?:[^?&#"'>\s]+)                    # path until dot+ext
             \.(?:jpe?g|jpe|png|gif
                  |web[mp]|mp4|mkv|og[gmv]|opus) # dot + image/video extensions
-            (?:\?[^"'>\s]*)?                    # optional query and fragment
+            (?:[^"'>\s]*)?                      # optional query and fragment
             """
 
         imageurls_src = re.findall(imageurl_pattern_src, page)
