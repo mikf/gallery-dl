@@ -99,6 +99,14 @@ Linux users that are using a distro that is supported by Snapd_ can install *gal
 
     $ snap install gallery-dl
 
+Chocolatey
+----
+
+Windows users that have Chocolatey_ installed can install *gallery-dl* from the Chocolatey Community Packages repository:
+
+.. code:: powershell
+
+    $ choco install gallery-dl
 
 Usage
 =====
@@ -253,6 +261,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _pyOpenSSL:  https://pyopenssl.org/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
+.. _Chocolatey:      https://chocolatey.org/install
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.org/project/gallery-dl/
