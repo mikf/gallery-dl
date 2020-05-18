@@ -174,11 +174,11 @@ class GenericExtractor(Extractor):
         basematch = re.search(
             r"(?i)(?:<base\s.*?href=[\"']?)(?P<url>[^\"' >]+)", page)
         if basematch:
-            self.baseurl = basematch.group('url')
+            self.baseurl = basematch.group('url').rstrip('/')
         else:
             # Use self.url if it doesn't end with an extension
             if os.path.splitext(self.url)[1] == "":
-                self.baseurl = self.url
+                self.baseurl = self.url.rstrip('/')
             # Otherwise, strip the last part
             else:
                 self.baseurl = os.path.dirname(self.url)
