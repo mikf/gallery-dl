@@ -9,20 +9,23 @@
 """Extract images from https://www.webtoons.com/"""
 
 from .common import Extractor, Message
-from .. import exception, text
+from .. import exception, text, util
 
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/(?:en|fr)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/((en|fr)"
 
 
 class WebtoonsExtractor(Extractor):
     category = "webtoons"
+    root = "https://www.webtoons.com"
     cookiedomain = "www.webtoons.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.session.cookies.set("ageGatePass", "true",
                                  domain=self.cookiedomain)
+        self.path, self.lang, self.genre , self.comic, self.query = \
+            match.groups()
 
 
 class WebtoonsEpisodeExtractor(WebtoonsExtractor):
@@ -31,7 +34,7 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{episode}-{num:>02}.{extension}"
     archive_fmt = "{episode}_{num}"
-    pattern = (BASE_PATTERN + r"/([^/?&#]+)/([^/?&#]+)/(?:[^/?&#]+)"
+    pattern = (BASE_PATTERN + r"/([^/?&#]+)/([^/?&#]+)/(?:[^/?&#]+))"
                r"/viewer(?:\?([^#]+))")
     test = (
         (("https://www.webtoons.com/en/comedy/safely-endangered"
@@ -44,21 +47,23 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
 
     def __init__(self, match):
         WebtoonsExtractor.__init__(self, match)
-        self.genre , self.comic, query = match.groups()
-        query = text.parse_query(query)
+        query = text.parse_query(self.query)
         self.title_no = query.get("title_no")
         if not self.title_no:
             raise exception.NotFoundError("title_no")
         self.episode = query.get("episode_no")
         if not self.episode:
             raise exception.NotFoundError("episode_no")
-        self.session.headers["Referer"] = self.url
 
     def items(self):
-        page = self.request(self.url).text
+        url = "{}/{}/viewer?{}".format(self.root, self.path, self.query)
+        self.session.headers["Referer"] = url
+
+        page = self.request(url).text
         data = self.get_job_metadata(page)
         imgs = self.get_image_urls(page)
         data["count"] = len(imgs)
+
         yield Message.Version, 1
         yield Message.Directory, data
         for data["num"], url in enumerate(imgs, 1):
@@ -78,6 +83,8 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
             "episode": self.episode,
             "title": text.unescape(title),
             "description": text.unescape(descr),
+            "lang": self.lang,
+            "language": util.code_to_language(self.lang),
         }
 
     @staticmethod
@@ -89,50 +96,53 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
 class WebtoonsComicExtractor(WebtoonsExtractor):
     """Extractor for an entire comic on webtoons.com"""
     subcategory = "comic"
-    pattern = (BASE_PATTERN + r"/([^/?&#]+)/([^/?&#]+)"
+    pattern = (BASE_PATTERN + r"/([^/?&#]+)/([^/?&#]+))"
                r"/list(?:\?([^#]+))")
     test = (
+        # english
         (("https://www.webtoons.com/en/comedy/live-with-yourself/"
           "list?title_no=919"), {
+            "pattern": WebtoonsEpisodeExtractor.pattern,
             "range": "1-15",
+            "count": ">= 15",
+        }),
+        # french
+        (("https://www.webtoons.com/fr/romance/subzero/"
+          "list?title_no=1845&page=3"), {
             "count": ">= 15",
         }),
     )
 
     def __init__(self, match):
         WebtoonsExtractor.__init__(self, match)
-        self.genre, self.comic, query = match.groups()
-        query = text.parse_query(query)
+        query = text.parse_query(self.query)
         self.title_no = query.get("title_no")
         if not self.title_no:
             raise exception.NotFoundError("title_no")
         self.page_no = int(query.get("page", 1))
 
     def items(self):
-        data = {}
-        data["_extractor"] = WebtoonsEpisodeExtractor
+        page = None
+        data = {"_extractor": WebtoonsEpisodeExtractor}
+
         while True:
-            page = self.request("https://www.webtoons.com/en/" +
-                                self.genre + "/" + self.comic + "/list?" +
-                                "title_no=" + self.title_no + "&"
-                                "page=" + str(self.page_no)).text
+            path = "/{}/list?title_no={}&page={}".format(
+                self.path, self.title_no, self.page_no)
+
+            if page and path not in page:
+                return
+
+            page = self.request(self.root + path).text
             data["page"] = self.page_no
 
             for url in self.get_episode_urls(page):
                 yield Message.Queue, url, data
 
-            if not self.has_next_page(page):
-                break
-
             self.page_no += 1
-
-    def has_next_page(self, page):
-        return "/en/" + self.genre + "/" + self.comic + "/list?" + \
-               "title_no=" + self.title_no + \
-               "&page=" + str(self.page_no + 1) in page
 
     @staticmethod
     def get_episode_urls(page):
-        """Extract and return a list of all episode urls"""
-        return list(text.extract_iter(page, '<a href="',
-                    '" class="NPI=a:list', page.find('id="_listUl"')))
+        """Extract and return all episode urls in 'page'"""
+        pos = page.find('id="_listUl"')
+        return text.extract_iter(
+            page, '<a href="', '" class="NPI=a:list', pos)
