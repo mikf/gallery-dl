@@ -44,6 +44,7 @@ CATEGORY_MAP = {
     "imagefap"       : "ImageFap",
     "imgbb"          : "ImgBB",
     "imgbox"         : "imgbox",
+    "imagechest"     : "ImageChest",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
     "jaiminisbox"    : "Jaimini's Box",

@@ -48,6 +48,7 @@ modules = [
     "hypnohub",
     "idolcomplex",
     "imagebam",
+    "imagechest",
     "imagefap",
     "imgbb",
     "imgbox",
