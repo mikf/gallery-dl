@@ -53,6 +53,7 @@ Hitomi.la            https://hitomi.la/                  Galleries, Tag Searches
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
+ImageChest           https://imgchest.com/               Galleries
 ImageFap             https://imagefap.com/               Galleries, individual Images, User Profiles
 ImgBB                https://imgbb.com/                  Albums, individual Images, User Profiles           Optional
 imgbox               https://imgbox.com/                 Galleries, individual Images
