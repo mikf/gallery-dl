@@ -60,6 +60,13 @@ def split_html(txt, sep=None):
         return []
 
 
+def ensure_http_scheme(url, scheme="https://"):
+    """Prepend 'scheme' to 'url' if it doesn't have one"""
+    if url and not url.startswith(("https://", "http://")):
+        return scheme + url.lstrip("/:")
+    return url
+
+
 def filename_from_url(url):
     """Extract the last part of an URL to use as a filename"""
     try:
