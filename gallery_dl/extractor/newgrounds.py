@@ -224,10 +224,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
             self.post_url = "https://www.newgrounds.com/art/view/{}/{}".format(
                 self.user, match.group(3))
         else:
-            url = match.group(0)
-            if not url.startswith("http"):
-                url = "https://" + url
-            self.post_url = url
+            self.post_url = text.ensure_http_scheme(match.group(0))
 
     def posts(self):
         return (self.post_url,)
@@ -414,6 +411,6 @@ class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
     @staticmethod
     def _extract_favorites(page):
         return [
-            "https://" + user.rpartition('"')[2].lstrip("/:")
+            text.ensure_http_scheme(user.rpartition('"')[2])
             for user in text.extract_iter(page, 'class="item-user', '"><img')
         ]

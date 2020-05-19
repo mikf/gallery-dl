@@ -126,8 +126,9 @@ class DeviantartExtractor(Extractor):
             if self.extra:
                 for match in DeviantartStashExtractor.pattern.finditer(
                         deviation.get("description", "")):
+                    url = text.ensure_http_scheme(match.group(0))
                     deviation["_extractor"] = DeviantartStashExtractor
-                    yield Message.Queue, match.group(0), deviation
+                    yield Message.Queue, url, deviation
 
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
