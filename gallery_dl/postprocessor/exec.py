@@ -11,10 +11,9 @@
 from .common import PostProcessor
 from .. import util
 import subprocess
-import os
 
 
-if os.name == "nt":
+if util.WINDOWS:
     def quote(s):
         return '"' + s.replace('"', '\\"') + '"'
 else:

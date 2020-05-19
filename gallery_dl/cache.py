@@ -193,7 +193,7 @@ def _path():
     if path != -1:
         return util.expand_path(path)
 
-    if os.name == "nt":
+    if util.WINDOWS:
         import tempfile
         return os.path.join(tempfile.gettempdir(), ".gallery-dl.cache")
 
@@ -205,7 +205,7 @@ def _path():
 
 try:
     dbfile = _path()
-    if os.name != "nt":
+    if not util.WINDOWS:
         # restrict access permissions for new db files
         os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
     DatabaseCacheDecorator.db = sqlite3.connect(

@@ -10,9 +10,8 @@
 
 from .common import Extractor, Message
 from . import deviantart, flickr, reddit, smugmug, tumblr
-from .. import text, oauth, config, exception
+from .. import text, oauth, util, config, exception
 from ..cache import cache
-import os
 import urllib.parse
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
@@ -42,7 +41,7 @@ class OAuthBase(Extractor):
         server.listen(1)
 
         # workaround for ctrl+c not working during server.accept on Windows
-        if os.name == "nt":
+        if util.WINDOWS:
             server.settimeout(1.0)
         while True:
             try:
