@@ -22,7 +22,7 @@ log = logging.getLogger("config")
 
 _config = {}
 
-if os.name == "nt":
+if util.WINDOWS:
     _default_configs = [
         r"%USERPROFILE%\gallery-dl\config.json",
         r"%USERPROFILE%\gallery-dl.conf",

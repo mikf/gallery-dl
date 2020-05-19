@@ -303,7 +303,7 @@ class ColorOutput(TerminalOutput):
         print("\r\033[1;32m", self.shorten(path), "\033[0m", sep="")
 
 
-if os.name == "nt":
+if util.WINDOWS:
     ANSI = os.environ.get("TERM") == "ANSI"
     OFFSET = 1
     CHAR_SKIP = "# "

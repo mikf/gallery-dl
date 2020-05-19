@@ -270,6 +270,7 @@ class UniversalNone():
 
 
 NONE = UniversalNone()
+WINDOWS = (os.name == "nt")
 
 
 def build_predicate(predicates):
@@ -673,7 +674,7 @@ class PathFormat():
 
         restrict = extractor.config("path-restrict", "auto")
         if restrict == "auto":
-            restrict = "\\\\|/<>:\"?*" if os.name == "nt" else "/"
+            restrict = "\\\\|/<>:\"?*" if WINDOWS else "/"
         elif restrict == "unix":
             restrict = "/"
         elif restrict == "windows":
@@ -727,7 +728,6 @@ class PathFormat():
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
         self.kwdict = kwdict
-        windows = os.name == "nt"
 
         # Build path segments by applying 'kwdict' to directory format strings
         segments = []
@@ -735,7 +735,7 @@ class PathFormat():
         try:
             for formatter in self.directory_formatters:
                 segment = formatter(kwdict).strip()
-                if windows:
+                if WINDOWS:
                     # remove trailing dots and spaces (#647)
                     segment = segment.rstrip(". ")
                 if segment:
@@ -752,7 +752,7 @@ class PathFormat():
             directory += sep
         self.directory = directory
 
-        if windows:
+        if WINDOWS:
             # Enable longer-than-260-character paths on Windows
             directory = "\\\\?\\" + os.path.abspath(directory)
 
