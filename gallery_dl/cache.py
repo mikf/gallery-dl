@@ -189,8 +189,8 @@ def clear():
 
 
 def _path():
-    path = config.get(("cache",), "file", -1)
-    if path != -1:
+    path = config.get(("cache",), "file", util.SENTINEL)
+    if path is not util.SENTINEL:
         return util.expand_path(path)
 
     if util.WINDOWS:

@@ -271,6 +271,7 @@ class UniversalNone():
 
 NONE = UniversalNone()
 WINDOWS = (os.name == "nt")
+SENTINEL = object()
 
 
 def build_predicate(predicates):
