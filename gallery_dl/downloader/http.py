@@ -27,7 +27,6 @@ class HttpDownloader(DownloaderBase):
     def __init__(self, job):
         DownloaderBase.__init__(self, job)
         extractor = job.extractor
-        self.session = extractor.session
         self.chunk_size = 16384
         self.downloading = False
 
