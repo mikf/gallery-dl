@@ -32,7 +32,7 @@ class DanbooruExtractor(SharedConfigMixin, Extractor):
     def __init__(self, match):
         super().__init__(match)
         self.root = "https://{}.donmai.us".format(match.group(1))
-        self.ugoira = self.config("ugoira", True)
+        self.ugoira = self.config("ugoira", False)
         self.params = {}
 
         username, api_key = self._get_auth_info()
@@ -156,8 +156,8 @@ class DanbooruPostExtractor(DanbooruExtractor):
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
         }),
         ("https://danbooru.donmai.us/posts/3613024", {
-            "pattern": r"https?://.+\.webm$",
-            "options": (("ugoira", False),)
+            "pattern": r"https?://.+\.zip$",
+            "options": (("ugoira", True),)
         })
     )
 
