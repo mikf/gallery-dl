@@ -18,6 +18,7 @@ class DownloaderBase():
 
     def __init__(self, job):
         self.out = job.out
+        self.session = job.extractor.session
         self.part = self.config("part", True)
         self.partdir = self.config("part-directory")
         self.log = job.get_logger("downloader." + self.scheme)
