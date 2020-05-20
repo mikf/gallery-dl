@@ -550,7 +550,7 @@ extractor.danbooru.ugoira
 -------------------------
 =========== =====
 Type        ``bool``
-Default     ``true``
+Default     ``false``
 Description Controls the download target for Ugoira posts.
 
             * ``true``: Original ZIP archives
