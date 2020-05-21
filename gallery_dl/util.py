@@ -690,6 +690,9 @@ class PathFormat():
     def _build_cleanfunc(chars, repl):
         if not chars:
             return lambda x: x
+        elif isinstance(chars, dict):
+            def func(x, table=str.maketrans(chars)):
+                return x.translate(table)
         elif len(chars) == 1:
             def func(x, c=chars, r=repl):
                 return x.replace(c, r)
