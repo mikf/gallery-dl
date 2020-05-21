@@ -131,11 +131,13 @@ Description Use an extractor's current target directory as
 extractor.*.path-restrict
 -------------------------
 =========== =====
-Type        ``string``
+Type        ``string`` or ``object``
 Default     ``"auto"``
-Example     ``"/!? (){}"``
-Description Set of characters to replace with underscores (``_``)
-            in generated path segment names.
+Example     | ``"/!? (){}"``
+            | ``{" ": "_", "/": "-", "|": "-", ":": "-", "*": "+"}``
+Description | String of characters to be replaced with underscores (``_``)
+            | or an object mapping specific characters to others
+            | in generated path segment names.
 
             Special values:
 
@@ -144,7 +146,7 @@ Description Set of characters to replace with underscores (``_``)
             * ``"unix"``: ``"/"``
             * ``"windows"``: ``"\\\\|/<>:\"?*"``
 
-            Note: In a set with 2 or more characters, ``[]^-\`` need to be
+            Note: In a string with 2 or more characters, ``[]^-\`` need to be
             escaped with backslashes, e.g. ``"\\[\\]"``
 =========== =====
 
@@ -156,7 +158,7 @@ Type        ``string``
 Default     ``"\u0000-\u001f\u007f"`` (ASCII control characters)
 Description Set of characters to remove from generated path names.
 
-            Note: In a set with 2 or more characters, ``[]^-\`` need to be
+            Note: In a string with 2 or more characters, ``[]^-\`` need to be
             escaped with backslashes, e.g. ``"\\[\\]"``
 =========== =====
 
