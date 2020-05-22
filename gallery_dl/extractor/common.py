@@ -313,24 +313,6 @@ class Extractor():
                 result.append((Message.Queue, url, {"_extractor": extr}))
         return iter(result)
 
-    @staticmethod
-    def _dump_response(response):
-        """Write the response content to a .dump file in the current directory.
-
-        The file name is derived from the response url,
-        replacing special characters with "_"
-        """
-        if hasattr(Extractor, "_dump_index"):
-            Extractor._dump_index += 1
-        else:
-            Extractor._dump_index = 1
-            Extractor._dump_sanitize = re.compile(r"[\\\\|/<>:\"?*&=#]+").sub
-
-        outfilename = "{:>03}_{}.dump".format(
-            Extractor._dump_index, Extractor._dump_sanitize('_', response.url))
-        with open(outfilename, 'wb') as outfile:
-            outfile.write(response.content)
-
     @classmethod
     def _get_tests(cls):
         """Yield an extractor's test cases as (URL, RESULTS) tuples"""
@@ -345,6 +327,62 @@ class Extractor():
             if isinstance(test, str):
                 test = (test, None)
             yield test
+
+    def _dump_response(self, response):
+        """Write the response content to a .dump file in the current directory.
+
+        The file name is derived from the response url,
+        replacing special characters with "_"
+        """
+        for resp in response.history:
+            self._dump_response(resp)
+
+        if hasattr(Extractor, "_dump_index"):
+            Extractor._dump_index += 1
+        else:
+            Extractor._dump_index = 1
+            Extractor._dump_sanitize = re.compile(r"[\\\\|/<>:\"?*&=#]+").sub
+
+        outfmt = """\
+{request.method} {request.url}
+Status: {response.status_code} {response.reason}
+
+Request Headers
+---------------
+{request_headers}
+
+Response Headers
+----------------
+{response_headers}
+
+Content
+-------
+"""
+        fname = "{:>02}_{}".format(
+            Extractor._dump_index,
+            Extractor._dump_sanitize('_', response.url)
+        )[:250]
+
+        headers = outfmt.format(
+            request=response.request,
+            response=response,
+            request_headers=("\n".join(
+                name + ": " + value
+                for name, value in response.request.headers.items()
+            )),
+            response_headers=("\n".join(
+                name + ": " + value
+                for name, value in response.headers.items()
+            )),
+        )
+
+        try:
+            with open(fname + ".dump", 'wb') as fp:
+                fp.write(headers.encode())
+                fp.write(response.content)
+        except Exception as e:
+            self.log.warning("Failed to dump HTTP request (%s: %s)",
+                             e.__class__.__name__, e)
 
 
 class GalleryExtractor(Extractor):
