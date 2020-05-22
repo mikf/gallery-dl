@@ -34,7 +34,11 @@ class ImgurExtractor(Extractor):
         except KeyError:
             pass
 
-        url = image["mp4"] if image["animated"] and self.mp4 else image["link"]
+        if image["animated"] and self.mp4 and "mp4" in image:
+            url = image["mp4"]
+        else:
+            url = image["link"]
+
         image["date"] = text.parse_timestamp(image["datetime"])
         text.nameext_from_url(url, image)
 
@@ -99,6 +103,9 @@ class ImgurImageExtractor(ImgurExtractor):
         }),
         ("https://imgur.com/HjoXJAd", {  # url ends with '.jpg?1'
             "url": "ec2cf11a2bfb4939feff374781a6e6f3e9af8e8e",
+        }),
+        ("https://imgur.com/1Nily2P", {  # animated png
+            "pattern": "https://i.imgur.com/1Nily2P.png",
         }),
         ("https://imgur.com/zzzzzzz", {  # not found
             "exception": exception.HttpError,
