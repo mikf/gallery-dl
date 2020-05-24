@@ -135,9 +135,10 @@ Type        ``string`` or ``object``
 Default     ``"auto"``
 Example     | ``"/!? (){}"``
             | ``{" ": "_", "/": "-", "|": "-", ":": "-", "*": "+"}``
-Description | String of characters to be replaced with underscores (``_``)
-            | or an object mapping specific characters to others
-            | in generated path segment names.
+Description | A string of characters to be replaced with the value of
+              `path-replace <extractor.*.path-replace>`__
+            | or an object mapping invalid/unwanted characters to their replacements
+            | for generated path segment names.
 
             Special values:
 
@@ -148,6 +149,16 @@ Description | String of characters to be replaced with underscores (``_``)
 
             Note: In a string with 2 or more characters, ``[]^-\`` need to be
             escaped with backslashes, e.g. ``"\\[\\]"``
+=========== =====
+
+
+extractor.*.path-replace
+------------------------
+=========== =====
+Type        ``string``
+Default     ``"_"``
+Description The replacement character(s) for
+            `path-restrict <extractor.*.path-restrict>`__
 =========== =====
 
 

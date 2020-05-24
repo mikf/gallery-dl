@@ -725,16 +725,17 @@ class PathFormat():
         self.basedirectory = basedir
 
         restrict = extractor.config("path-restrict", "auto")
+        replace = extractor.config("path-replace", "_")
+
         if restrict == "auto":
             restrict = "\\\\|/<>:\"?*" if WINDOWS else "/"
         elif restrict == "unix":
             restrict = "/"
         elif restrict == "windows":
             restrict = "\\\\|/<>:\"?*"
+        self.clean_segment = self._build_cleanfunc(restrict, replace)
 
         remove = extractor.config("path-remove", "\x00-\x1f\x7f")
-
-        self.clean_segment = self._build_cleanfunc(restrict, "_")
         self.clean_path = self._build_cleanfunc(remove, "")
 
     @staticmethod
