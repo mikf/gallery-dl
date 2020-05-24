@@ -343,43 +343,14 @@ class Extractor():
             Extractor._dump_index = 1
             Extractor._dump_sanitize = re.compile(r"[\\\\|/<>:\"?*&=#]+").sub
 
-        outfmt = """\
-{request.method} {request.url}
-Status: {response.status_code} {response.reason}
-
-Request Headers
----------------
-{request_headers}
-
-Response Headers
-----------------
-{response_headers}
-
-Content
--------
-"""
         fname = "{:>02}_{}".format(
             Extractor._dump_index,
             Extractor._dump_sanitize('_', response.url)
         )[:250]
 
-        headers = outfmt.format(
-            request=response.request,
-            response=response,
-            request_headers=("\n".join(
-                name + ": " + value
-                for name, value in response.request.headers.items()
-            )),
-            response_headers=("\n".join(
-                name + ": " + value
-                for name, value in response.headers.items()
-            )),
-        )
-
         try:
             with open(fname + ".dump", 'wb') as fp:
-                fp.write(headers.encode())
-                fp.write(response.content)
+                util.dump_response(response, fp)
         except Exception as e:
             self.log.warning("Failed to dump HTTP request (%s: %s)",
                              e.__class__.__name__, e)
