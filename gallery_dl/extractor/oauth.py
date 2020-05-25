@@ -26,6 +26,7 @@ class OAuthBase(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.client = None
+        self.cache = config.get(("extractor", self.category), "cache", True)
 
     def oauth_config(self, key, default=None):
         return config.interpolate(
@@ -93,6 +94,13 @@ class OAuthBase(Extractor):
             token=data["oauth_token"],
             token_secret=data["oauth_token_secret"],
         ))
+
+        # write to cache
+        if self.cache:
+            key = (self.subcategory, self.session.auth.consumer_key)
+            tokens = (data["oauth_token"], data["oauth_token_secret"])
+            oauth._token_cache.update(key, tokens)
+            self.log.info("Writing tokens to cache")
 
     def _oauth2_authorization_code_grant(
             self, client_id, client_secret, auth_url, token_url,
@@ -162,7 +170,7 @@ class OAuthBase(Extractor):
         ))
 
         # write to cache
-        if cache and config.get(("extractor", self.category), "cache"):
+        if self.cache and cache:
             cache.update("#" + str(client_id), data[key])
             self.log.info("Writing 'refresh-token' to cache")
 
@@ -223,6 +231,7 @@ class OAuthReddit(OAuthBase):
             "https://www.reddit.com/api/v1/authorize",
             "https://www.reddit.com/api/v1/access_token",
             scope="read history",
+            cache=reddit._refresh_token_cache,
         )
 
 

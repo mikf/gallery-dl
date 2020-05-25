@@ -850,9 +850,12 @@ class DeviantartOAuthAPI():
         self.client_secret = extractor.config(
             "client-secret", self.CLIENT_SECRET)
 
-        self.refresh_token = extractor.config("refresh-token")
-        if self.refresh_token == "cache":
-            self.refresh_token = "#" + str(self.client_id)
+        token = extractor.config("refresh-token")
+        if token is None or token == "cache":
+            token = "#" + str(self.client_id)
+            if not _refresh_token_cache(token):
+                token = None
+        self.refresh_token_key = token
 
         self.log.debug(
             "Using %s API credentials (client-id %s)",
@@ -952,18 +955,19 @@ class DeviantartOAuthAPI():
         endpoint = "user/profile/" + username
         return self._call(endpoint, fatal=False)
 
-    def authenticate(self, refresh_token):
+    def authenticate(self, refresh_token_key):
         """Authenticate the application by requesting an access token"""
-        self.headers["Authorization"] = self._authenticate_impl(refresh_token)
+        self.headers["Authorization"] = \
+            self._authenticate_impl(refresh_token_key)
 
     @cache(maxage=3600, keyarg=1)
-    def _authenticate_impl(self, refresh_token):
+    def _authenticate_impl(self, refresh_token_key):
         """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"
-        if refresh_token:
+        if refresh_token_key:
             self.log.info("Refreshing private access token")
             data = {"grant_type": "refresh_token",
-                    "refresh_token": _refresh_token_cache(refresh_token)}
+                    "refresh_token": _refresh_token_cache(refresh_token_key)}
         else:
             self.log.info("Requesting public access token")
             data = {"grant_type": "client_credentials"}
@@ -977,8 +981,9 @@ class DeviantartOAuthAPI():
             self.log.debug("Server response: %s", data)
             raise exception.AuthenticationError('"{}" ({})'.format(
                 data.get("error_description"), data.get("error")))
-        if refresh_token:
-            _refresh_token_cache.update(refresh_token, data["refresh_token"])
+        if refresh_token_key:
+            _refresh_token_cache.update(
+                refresh_token_key, data["refresh_token"])
         return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, params=None, fatal=True, public=True):
@@ -988,7 +993,7 @@ class DeviantartOAuthAPI():
             if self.delay >= 0:
                 time.sleep(2 ** self.delay)
 
-            self.authenticate(None if public else self.refresh_token)
+            self.authenticate(None if public else self.refresh_token_key)
             response = self.extractor.request(
                 url, headers=self.headers, params=params, fatal=None)
             data = response.json()
@@ -1024,7 +1029,7 @@ class DeviantartOAuthAPI():
 
             if extend:
                 if public and len(data["results"]) < params["limit"]:
-                    if self.refresh_token:
+                    if self.refresh_token_key:
                         self.log.debug("Switching to private access token")
                         public = False
                         continue
@@ -1155,9 +1160,11 @@ class DeviantartEclipseAPI():
         return text.rextract(page, '\\"id\\":', ',', pos)[0].strip('" ')
 
 
-@cache(maxage=10*365*24*3600, keyarg=0)
-def _refresh_token_cache(original_token, new_token=None):
-    return new_token or original_token
+@cache(maxage=100*365*24*3600, keyarg=0)
+def _refresh_token_cache(token):
+    if token and token[0] == "#":
+        return None
+    return token
 
 
 ###############################################################################

@@ -910,6 +910,16 @@ Description Controls how a user is directed to an OAuth authorization site.
 =========== =====
 
 
+extractor.oauth.cache
+---------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Store tokens received during OAuth authorizations
+            in `cache <cache.file_>`__.
+=========== =====
+
+
 extractor.oauth.port
 --------------------
 =========== =====

@@ -22,8 +22,8 @@ config.set(("cache",), "file", dbpath)
 from gallery_dl import cache  # noqa E402
 
 
-def tearDownModule():
-    util.remove_file(dbpath)
+#  def tearDownModule():
+#      util.remove_file(dbpath)
 
 
 class TestCache(unittest.TestCase):
