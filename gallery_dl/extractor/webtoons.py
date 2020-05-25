@@ -33,7 +33,7 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
     subcategory = "episode"
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{episode}-{num:>02}.{extension}"
-    archive_fmt = "{episode}_{num}"
+    archive_fmt = "{title_no}_{episode}_{num}"
     pattern = (BASE_PATTERN + r"/([^/?&#]+)/([^/?&#]+)/(?:[^/?&#]+))"
                r"/viewer(?:\?([^#]+))")
     test = (
