@@ -222,7 +222,6 @@ class RedditAPI():
         self.extractor = extractor
         self.comments = text.parse_int(extractor.config("comments", 0))
         self.morecomments = extractor.config("morecomments", False)
-        self.refresh_token = extractor.config("refresh-token")
         self.log = extractor.log
 
         client_id = extractor.config("client-id", self.CLIENT_ID)
@@ -235,6 +234,13 @@ class RedditAPI():
 
         self.client_id = client_id
         self.headers = {"User-Agent": user_agent}
+
+        token = extractor.config("refresh-token")
+        if token is None or token == "cache":
+            key = "#" + self.client_id
+            self.refresh_token = _refresh_token_cache(key)
+        else:
+            self.refresh_token = token
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
@@ -382,3 +388,10 @@ class RedditAPI():
     @staticmethod
     def _decode(sid):
         return util.bdecode(sid, "0123456789abcdefghijklmnopqrstuvwxyz")
+
+
+@cache(maxage=100*365*24*3600, keyarg=0)
+def _refresh_token_cache(token):
+    if token and token[0] == "#":
+        return None
+    return token
