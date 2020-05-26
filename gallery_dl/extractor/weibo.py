@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,6 +23,7 @@ class WeiboExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.retweets = self.config("retweets", True)
+        self.videos = self.config("videos", True)
 
     def items(self):
         yield Message.Version, 1
@@ -52,7 +53,7 @@ class WeiboExtractor(Extractor):
                         yield Message.Url, image["url"], data
                         num += 1
 
-                if "page_info" in obj and "media_info" in obj["page_info"]:
+                if self.videos and "media_info" in obj.get("page_info", ()):
                     info = obj["page_info"]["media_info"]
                     url = info.get("stream_url_hd") or info.get("stream_url")
 
@@ -70,6 +71,7 @@ class WeiboExtractor(Extractor):
                             data["extension"] = "mp4"
                             data["_ytdl_extra"] = {"protocol": "m3u8_native"}
                         yield Message.Url, url, data
+                        num += 1
 
                 if self.retweets and "retweeted_status" in obj:
                     obj = obj["retweeted_status"]
@@ -118,7 +120,7 @@ class WeiboStatusExtractor(WeiboExtractor):
     """Extractor for images from a status on weibo.cn"""
     subcategory = "status"
     pattern = (r"(?:https?://)?(?:www\.|m\.)?weibo\.c(?:om|n)"
-               r"/(?:detail|status|\d+)/(\d+)")
+               r"/(?:detail|status|\d+)/(\w+)")
     test = (
         ("https://m.weibo.cn/detail/4323047042991618", {
             "pattern": r"https?://wx\d+.sinaimg.cn/large/\w+.jpg",
@@ -129,6 +131,10 @@ class WeiboStatusExtractor(WeiboExtractor):
         # unavailable video (#427)
         ("https://m.weibo.cn/status/4268682979207023", {
             "exception": exception.NotFoundError,
+        }),
+        # non-numeric status ID (#664)
+        ("https://weibo.com/3314883543/Iy7fj4qVg", {
+            "pattern": r"https?://f.video.weibocdn.com/\w+\.mp4\?label=mp4_hd",
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),

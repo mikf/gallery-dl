@@ -8,12 +8,12 @@
 
 """Methods to access sites behind Cloudflare protection"""
 
-import re
 import time
 import operator
 import collections
 import urllib.parse
-from . import text, exception
+from xml.etree import ElementTree
+from . import text
 from .cache import memcache
 
 
@@ -39,11 +39,19 @@ def solve_challenge(session, response, kwargs):
 
     page = response.text
     url = root + text.unescape(text.extract(page, 'action="', '"')[0])
-    params["r"] = text.extract(page, 'name="r" value="', '"')[0]
-    params["jschl_vc"] = text.extract(page, 'name="jschl_vc" value="', '"')[0]
-    params["pass"] = text.extract(page, 'name="pass" value="', '"')[0]
-    params["jschl_answer"] = solve_js_challenge(page, parsed.netloc)
     headers["Referer"] = response.url
+
+    form = text.extract(page, 'id="challenge-form"', '</form>')[0]
+    for element in ElementTree.fromstring(
+            "<f>" + form + "</f>").findall("input"):
+        name = element.attrib.get("name")
+        if not name:
+            continue
+        if name == "jschl_answer":
+            value = solve_js_challenge(page, parsed.netloc)
+        else:
+            value = element.attrib.get("value")
+        params[name] = value
 
     time.sleep(4)
 
@@ -54,14 +62,13 @@ def solve_challenge(session, response, kwargs):
         cookie.name: cookie.value
         for cookie in cf_response.cookies
     }
+
     if not cookies:
         import logging
         log = logging.getLogger("cloudflare")
-        rtype = "CAPTCHA" if is_captcha(cf_response) else "Unexpected"
-        log.error("%s response", rtype)
         log.debug("Headers:\n%s", cf_response.headers)
         log.debug("Content:\n%s", cf_response.text)
-        raise exception.StopExtraction()
+        return cf_response, None, None
 
     domain = next(iter(cf_response.cookies)).domain
     cookies["__cfduid"] = response.cookies.get("__cfduid", "")
@@ -81,6 +88,8 @@ def solve_js_challenge(page, netloc):
     variable = "{}.{}".format(data["var"], data["key"])
     vlength = len(variable)
 
+    k = text.extract(page, "k = '", "'")[0]
+
     # evaluate the initial expression
     solution = evaluate_expression(data["expr"], page, netloc)
 
@@ -94,7 +103,7 @@ def solve_js_challenge(page, netloc):
             # select arithmetc function based on operator (+/-/*)
             func = OPERATORS[expr[vlength]]
             # evaluate the rest of the expression
-            value = evaluate_expression(expr[vlength+2:], page, netloc)
+            value = evaluate_expression(expr[vlength+2:], page, netloc, k)
             # combine expression value with our current solution
             solution = func(solution, value)
 
@@ -107,17 +116,18 @@ def solve_js_challenge(page, netloc):
                 solution = "{:.10f}".format(solution)
             return solution
 
+        elif expr.startswith("k+="):
+            k += str(evaluate_expression(expr[3:], page, netloc))
 
-def evaluate_expression(expr, page, netloc, *,
-                        split_re=re.compile(r"[(+]+([^)]*)\)")):
+
+def evaluate_expression(expr, page, netloc, k=""):
     """Evaluate a single Javascript expression for the challenge"""
 
     if expr.startswith("function(p)"):
         # get HTML element with ID k and evaluate the expression inside
         # 'eval(eval("document.getElementById(k).innerHTML"))'
-        k, pos = text.extract(page, "k = '", "'")
-        e, pos = text.extract(page, 'id="'+k+'"', '<')
-        return evaluate_expression(e.partition(">")[2], page, netloc)
+        expr = text.extract(page, 'id="'+k+'"', '<')[0]
+        return evaluate_expression(expr.partition(">")[2], page, netloc)
 
     if "/" in expr:
         # split the expression in numerator and denominator subexpressions,
@@ -141,11 +151,15 @@ def evaluate_expression(expr, page, netloc, *,
     # evaluate them,
     # and accumulate their values in 'result'
     result = ""
-    for subexpr in split_re.findall(expr) or (expr,):
-        result += str(sum(
-            VALUES[part]
-            for part in subexpr.split("[]")
-        ))
+    for subexpr in expr.strip("+()").split(")+("):
+        value = 0
+        for part in subexpr.split("+"):
+            if "-" in part:
+                p1, _, p2 = part.partition("-")
+                value += VALUES[p1] - VALUES[p2]
+            else:
+                value += VALUES[part]
+        result += str(value)
     return int(result)
 
 
@@ -155,12 +169,14 @@ OPERATORS = {
     "*": operator.mul,
 }
 
+
 VALUES = {
     "": 0,
-    "+": 0,
-    "!+": 1,
-    "!!": 1,
-    "+!!": 1,
+    "!": 1,
+    "[]": 0,
+    "!![]": 1,
+    "(!![]": 1,
+    "(!![])": 1,
 }
 
 

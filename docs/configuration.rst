@@ -1,6 +1,15 @@
 Configuration
 #############
 
+| Configuration files for *gallery-dl* use a JSON-based file format.
+| For a (more or less) complete example with options set to their default values,
+  see `gallery-dl.conf <gallery-dl.conf>`__.
+| For a configuration file example with more involved settings and options,
+  see `gallery-dl-example.conf <gallery-dl-example.conf>`__.
+
+This file lists all available configuration options and their descriptions.
+
+
 Contents
 ========
 
@@ -122,11 +131,14 @@ Description Use an extractor's current target directory as
 extractor.*.path-restrict
 -------------------------
 =========== =====
-Type        ``string``
+Type        ``string`` or ``object``
 Default     ``"auto"``
-Example     ``"/!? (){}"``
-Description Set of characters to replace with underscores (``_``)
-            in generated path segment names.
+Example     | ``"/!? (){}"``
+            | ``{" ": "_", "/": "-", "|": "-", ":": "-", "*": "+"}``
+Description | A string of characters to be replaced with the value of
+              `path-replace <extractor.*.path-replace>`__
+            | or an object mapping invalid/unwanted characters to their replacements
+            | for generated path segment names.
 
             Special values:
 
@@ -135,8 +147,18 @@ Description Set of characters to replace with underscores (``_``)
             * ``"unix"``: ``"/"``
             * ``"windows"``: ``"\\\\|/<>:\"?*"``
 
-            Note: In a set with 2 or more characters, ``[]^-\`` need to be
+            Note: In a string with 2 or more characters, ``[]^-\`` need to be
             escaped with backslashes, e.g. ``"\\[\\]"``
+=========== =====
+
+
+extractor.*.path-replace
+------------------------
+=========== =====
+Type        ``string``
+Default     ``"_"``
+Description The replacement character(s) for
+            `path-restrict <extractor.*.path-restrict>`__
 =========== =====
 
 
@@ -147,7 +169,7 @@ Type        ``string``
 Default     ``"\u0000-\u001f\u007f"`` (ASCII control characters)
 Description Set of characters to remove from generated path names.
 
-            Note: In a set with 2 or more characters, ``[]^-\`` need to be
+            Note: In a string with 2 or more characters, ``[]^-\`` need to be
             escaped with backslashes, e.g. ``"\\[\\]"``
 =========== =====
 
@@ -541,7 +563,7 @@ extractor.danbooru.ugoira
 -------------------------
 =========== =====
 Type        ``bool``
-Default     ``true``
+Default     ``false``
 Description Controls the download target for Ugoira posts.
 
             * ``true``: Original ZIP archives
@@ -888,6 +910,16 @@ Description Controls how a user is directed to an OAuth authorization site.
 =========== =====
 
 
+extractor.oauth.cache
+---------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Store tokens received during OAuth authorizations
+            in `cache <cache.file_>`__.
+=========== =====
+
+
 extractor.oauth.port
 --------------------
 =========== =====
@@ -1169,12 +1201,21 @@ Description Extract tweet text as ``content`` metadata.
 =========== =====
 
 
+extractor.twitter.replies
+-------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Extract media from replies to other Tweets.
+=========== =====
+
+
 extractor.twitter.retweets
 --------------------------
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description Extract images from retweets.
+Description Extract media from Retweets.
 =========== =====
 
 
@@ -1220,6 +1261,24 @@ Description Your  `API Key <https://wallhaven.cc/settings/account>`__ to use
             your account's browsing settings and default filters when searching.
 
             See https://wallhaven.cc/help/api for more information.
+=========== =====
+
+
+extractor.weibo.retweets
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Extract media from retweeted posts.
+=========== =====
+
+
+extractor.weibo.videos
+----------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Download video files.
 =========== =====
 
 
@@ -1366,7 +1425,7 @@ downloader.ytdl.forward-cookies
 -------------------------------
 =========== =====
 Type        ``bool``
-Default     ``true``
+Default     ``false``
 Description Forward cookies to youtube-dl.
 =========== =====
 

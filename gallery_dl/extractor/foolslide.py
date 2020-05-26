@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,6 +19,7 @@ from .common import (
 from .. import text, util
 import base64
 import json
+import re
 
 
 class FoolslideBase(SharedConfigMixin):
@@ -85,7 +86,12 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
         data = None
 
         if self.decode == "base64":
-            base64_data = text.extract(page, 'atob("', '"')[0]
+            pos = page.find("'fromCharCode'")
+            if pos >= 0:
+                blob = text.extract(page, "'", "'", pos+15)[0]
+                base64_data = re.sub(r"[a-zA-Z]", _decode_jaiminisbox, blob)
+            else:
+                base64_data = text.extract(page, 'atob("', '"')[0]
             if base64_data:
                 data = base64.b64decode(base64_data.encode()).decode()
         elif self.decode == "double":
@@ -120,6 +126,16 @@ class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
             })))
 
 
+def _decode_jaiminisbox(match):
+    c = match.group(0)
+
+    # ord("Z") == 90, ord("z") == 122
+    N = 90 if c <= "Z" else 122
+    C = ord(c) + 13
+
+    return chr(C if N >= C else (C - 26))
+
+
 EXTRACTORS = {
     "dokireader": {
         "root": "https://kobato.hologfx.com/reader",
@@ -140,8 +156,8 @@ EXTRACTORS = {
         "pattern": r"(?:www\.)?jaiminisbox\.com/reader",
         "extra": {"decode": "base64"},
         "test-chapter": (
-            ("https://jaiminisbox.com/reader/read/uratarou/en/0/1/", {
-                "keyword": "6009af77cc9c05528ab1fdda47b1ad9d4811c673",
+            ("https://jaiminisbox.com/reader/read/fire-force/en/0/215/", {
+                "keyword": "6d2b5c0b34344156b0301ff2733389dfe36a7604",
             }),
             ("https://jaiminisbox.com/reader/read/red-storm/en/0/336/", {
                 "keyword": "53c6dddf3e5a61b6002a886ccd7e3354e973299a",

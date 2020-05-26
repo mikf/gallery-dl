@@ -8,7 +8,8 @@
 
 """Extractors for https://hitomi.la/"""
 
-from .common import GalleryExtractor
+from .common import GalleryExtractor, Extractor, Message
+from .nozomi import decode_nozomi
 from .. import text, util
 import string
 import json
@@ -46,6 +47,10 @@ class HitomiGalleryExtractor(GalleryExtractor):
         ("https://hitomi.la/cg/scathacha-sama-okuchi-ecchi-1291900.html", {
             "count": 10,
         }),
+        # no tags
+        ("https://hitomi.la/cg/1615823.html", {
+            "count": 22,
+        }),
         ("https://hitomi.la/manga/amazon-no-hiyaku-867789.html"),
         ("https://hitomi.la/manga/867789.html"),
         ("https://hitomi.la/doujinshi/867789.html"),
@@ -75,14 +80,18 @@ class HitomiGalleryExtractor(GalleryExtractor):
         if language:
             language = language.capitalize()
 
+        date = info.get("date")
+        if date:
+            date += ":00"
+
         tags = []
-        for tinfo in info["tags"]:
-            tag = tinfo["tag"]
+        for tinfo in info.get("tags") or ():
+            tag = string.capwords(tinfo["tag"])
             if tinfo.get("female"):
                 tag += " ♀"
             elif tinfo.get("male"):
                 tag += " ♂"
-            tags.append(string.capwords(tag))
+            tags.append(tag)
 
         return {
             "gallery_id": text.parse_int(info["id"]),
@@ -90,9 +99,8 @@ class HitomiGalleryExtractor(GalleryExtractor):
             "type"      : info["type"].capitalize(),
             "language"  : language,
             "lang"      : util.language_to_code(language),
+            "date"      : text.parse_datetime(date, "%Y-%m-%d %H:%M:%S%z"),
             "tags"      : tags,
-            "date"      : text.parse_datetime(
-                info["date"] + ":00", "%Y-%m-%d %H:%M:%S%z"),
         }
 
     def _data_from_gallery_page(self, info):
@@ -142,3 +150,35 @@ class HitomiGalleryExtractor(GalleryExtractor):
             )
             result.append((url, idata))
         return result
+
+
+class HitomiTagExtractor(Extractor):
+    """Extractor for galleries from tag searches on hitomi.la"""
+    category = "hitomi"
+    subcategory = "tag"
+    pattern = (r"(?:https?://)?hitomi\.la/"
+               r"(tag|artist|group|series|type|character)/"
+               r"([^/?&#]+)-\d+\.html")
+    test = (
+        ("https://hitomi.la/tag/screenshots-japanese-1.html", {
+            "pattern": HitomiGalleryExtractor.pattern,
+            "count": ">= 35",
+        }),
+        ("https://hitomi.la/artist/a1-all-1.html"),
+        ("https://hitomi.la/group/initial%2Dg-all-1.html"),
+        ("https://hitomi.la/series/amnesia-all-1.html"),
+        ("https://hitomi.la/type/doujinshi-all-1.html"),
+        ("https://hitomi.la/character/a2-all-1.html"),
+    )
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.type, self.tag = match.groups()
+
+    def items(self):
+        url = "https://ltn.hitomi.la/{}/{}.nozomi".format(self.type, self.tag)
+        data = {"_extractor": HitomiGalleryExtractor}
+
+        for gallery_id in decode_nozomi(self.request(url).content):
+            url = "https://hitomi.la/galleries/{}.html".format(gallery_id)
+            yield Message.Queue, url, data

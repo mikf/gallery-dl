@@ -12,6 +12,9 @@ from .common import Extractor, Message
 from .. import text
 
 
+BASE_PATTERN = r"(?:https?://)?(?:web\.)?500px\.com"
+
+
 class _500pxExtractor(Extractor):
     """Base class for 500px extractors"""
     category = "500px"
@@ -86,13 +89,15 @@ class _500pxExtractor(Extractor):
 class _500pxUserExtractor(_500pxExtractor):
     """Extractor for photos from a user's photostream on 500px.com"""
     subcategory = "user"
-    pattern = (r"(?:https?://)?500px\.com"
-               r"/(?!photo/)([^/?&#]+)/?(?:$|\?|#)")
-    test = ("https://500px.com/light_expression_photography", {
-        "pattern": r"https?://drscdn.500px.org/photo/\d+/m%3D4096/v2",
-        "range": "1-99",
-        "count": 99,
-    })
+    pattern = BASE_PATTERN + r"/(?!photo/)([^/?&#]+)/?(?:$|\?|#)"
+    test = (
+        ("https://500px.com/light_expression_photography", {
+            "pattern": r"https?://drscdn.500px.org/photo/\d+/m%3D4096/v2",
+            "range": "1-99",
+            "count": 99,
+        }),
+        ("https://web.500px.com/light_expression_photography"),
+    )
 
     def __init__(self, match):
         _500pxExtractor.__init__(self, match)
@@ -120,8 +125,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
     """Extractor for photo galleries on 500px.com"""
     subcategory = "gallery"
     directory_fmt = ("{category}", "{user[username]}", "{gallery[name]}")
-    pattern = (r"(?:https?://)?500px\.com"
-               r"/(?!photo/)([^/?&#]+)/galleries/([^/?&#]+)")
+    pattern = BASE_PATTERN + r"/(?!photo/)([^/?&#]+)/galleries/([^/?&#]+)"
     test = ("https://500px.com/fashvamp/galleries/lera", {
         "url": "002dc81dee5b4a655f0e31ad8349e8903b296df6",
         "count": 3,
@@ -171,7 +175,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
 class _500pxImageExtractor(_500pxExtractor):
     """Extractor for individual images from 500px.com"""
     subcategory = "image"
-    pattern = r"(?:https?://)?500px\.com/photo/(\d+)"
+    pattern = BASE_PATTERN + r"/photo/(\d+)"
     test = ("https://500px.com/photo/222049255/queen-of-coasts", {
         "url": "fbdf7df39325cae02f5688e9f92935b0e7113315",
         "count": 1,

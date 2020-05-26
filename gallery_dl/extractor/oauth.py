@@ -10,9 +10,8 @@
 
 from .common import Extractor, Message
 from . import deviantart, flickr, reddit, smugmug, tumblr
-from .. import text, oauth, config, exception
+from .. import text, oauth, util, config, exception
 from ..cache import cache
-import os
 import urllib.parse
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
@@ -27,6 +26,7 @@ class OAuthBase(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.client = None
+        self.cache = config.get(("extractor", self.category), "cache", True)
 
     def oauth_config(self, key, default=None):
         return config.interpolate(
@@ -42,7 +42,7 @@ class OAuthBase(Extractor):
         server.listen(1)
 
         # workaround for ctrl+c not working during server.accept on Windows
-        if os.name == "nt":
+        if util.WINDOWS:
             server.settimeout(1.0)
         while True:
             try:
@@ -94,6 +94,13 @@ class OAuthBase(Extractor):
             token=data["oauth_token"],
             token_secret=data["oauth_token_secret"],
         ))
+
+        # write to cache
+        if self.cache:
+            key = (self.subcategory, self.session.auth.consumer_key)
+            tokens = (data["oauth_token"], data["oauth_token_secret"])
+            oauth._token_cache.update(key, tokens)
+            self.log.info("Writing tokens to cache")
 
     def _oauth2_authorization_code_grant(
             self, client_id, client_secret, auth_url, token_url,
@@ -163,7 +170,7 @@ class OAuthBase(Extractor):
         ))
 
         # write to cache
-        if cache and config.get(("extractor", self.category), "cache"):
+        if self.cache and cache:
             cache.update("#" + str(client_id), data[key])
             self.log.info("Writing 'refresh-token' to cache")
 
@@ -178,9 +185,9 @@ class OAuthDeviantart(OAuthBase):
 
         self._oauth2_authorization_code_grant(
             self.oauth_config(
-                "client-id", deviantart.DeviantartAPI.CLIENT_ID),
+                "client-id", deviantart.DeviantartOAuthAPI.CLIENT_ID),
             self.oauth_config(
-                "client-secret", deviantart.DeviantartAPI.CLIENT_SECRET),
+                "client-secret", deviantart.DeviantartOAuthAPI.CLIENT_SECRET),
             "https://www.deviantart.com/oauth2/authorize",
             "https://www.deviantart.com/oauth2/token",
             scope="browse",
@@ -224,6 +231,7 @@ class OAuthReddit(OAuthBase):
             "https://www.reddit.com/api/v1/authorize",
             "https://www.reddit.com/api/v1/access_token",
             scope="read history",
+            cache=reddit._refresh_token_cache,
         )
 
 

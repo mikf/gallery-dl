@@ -40,6 +40,7 @@ class Extractor():
         self._cookiefile = None
         self._cookiejar = self.session.cookies
         self._parentdir = ""
+        self._write_pages = self.config("write-pages", False)
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
@@ -91,6 +92,8 @@ class Extractor():
                 raise exception.HttpError(exc)
             else:
                 code = response.status_code
+                if self._write_pages:
+                    self._dump_response(response)
                 if 200 <= code < 400 or fatal is None and \
                         (400 <= code < 500) or not fatal and \
                         (400 <= code < 429 or 431 <= code < 500):
@@ -99,18 +102,20 @@ class Extractor():
                     return response
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
+
+                reason = response.reason
                 if cloudflare.is_challenge(response):
                     self.log.info("Solving Cloudflare challenge")
                     response, domain, cookies = cloudflare.solve_challenge(
                         session, response, kwargs)
-                    if response.status_code >= 400:
-                        continue
-                    cloudflare.cookies.update(self.category, (domain, cookies))
-                    return response
+                    if cookies:
+                        cloudflare.cookies.update(
+                            self.category, (domain, cookies))
+                        return response
                 if cloudflare.is_captcha(response):
                     self.log.warning("Cloudflare CAPTCHA")
 
-                msg = "'{} {}' for '{}'".format(code, response.reason, url)
+                msg = "'{} {}' for '{}'".format(code, reason, url)
                 if code < 500 and code != 429 and code != 430:
                     break
 
@@ -122,23 +127,33 @@ class Extractor():
 
         raise exception.HttpError(msg)
 
-    def wait(self, *, seconds=None, until=None, reason=None, adjust=1):
-        now = datetime.datetime.now()
+    def wait(self, *, seconds=None, until=None, adjust=1.0,
+             reason="rate limit reset"):
+        now = time.time()
 
         if seconds:
             seconds = float(seconds)
-            until = now + datetime.timedelta(seconds=seconds)
+            until = now + seconds
         elif until:
-            until = datetime.datetime.fromtimestamp(float(until))
-            seconds = (until - now).total_seconds()
+            if isinstance(until, datetime.datetime):
+                # convert to UTC timestamp
+                epoch = datetime.datetime(1970, 1, 1)
+                until = (until - epoch) / datetime.timedelta(0, 1)
+            else:
+                until = float(until)
+            seconds = until - now
         else:
             raise ValueError("Either 'seconds' or 'until' is required")
 
+        seconds += adjust
+        if seconds <= 0.0:
+            return
+
         if reason:
-            t = until.time()
+            t = datetime.datetime.fromtimestamp(until).time()
             isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
             self.log.info("Waiting until %s for %s.", isotime, reason)
-        time.sleep(seconds + adjust)
+        time.sleep(seconds)
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
@@ -313,6 +328,33 @@ class Extractor():
                 test = (test, None)
             yield test
 
+    def _dump_response(self, response):
+        """Write the response content to a .dump file in the current directory.
+
+        The file name is derived from the response url,
+        replacing special characters with "_"
+        """
+        for resp in response.history:
+            self._dump_response(resp)
+
+        if hasattr(Extractor, "_dump_index"):
+            Extractor._dump_index += 1
+        else:
+            Extractor._dump_index = 1
+            Extractor._dump_sanitize = re.compile(r"[\\\\|/<>:\"?*&=#]+").sub
+
+        fname = "{:>02}_{}".format(
+            Extractor._dump_index,
+            Extractor._dump_sanitize('_', response.url)
+        )[:250]
+
+        try:
+            with open(fname + ".dump", 'wb') as fp:
+                util.dump_response(response, fp)
+        except Exception as e:
+            self.log.warning("Failed to dump HTTP request (%s: %s)",
+                             e.__class__.__name__, e)
+
 
 class GalleryExtractor(Extractor):
 
@@ -448,7 +490,7 @@ class SharedConfigMixin():
     """Enable sharing of config settings based on 'basecategory'"""
     basecategory = ""
 
-    def config(self, key, default=None, *, sentinel=object()):
+    def config(self, key, default=None, *, sentinel=util.SENTINEL):
         value = Extractor.config(self, key, sentinel)
         return value if value is not sentinel else config.interpolate(
             ("extractor", self.basecategory, self.subcategory), key, default)

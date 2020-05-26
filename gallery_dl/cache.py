@@ -57,7 +57,7 @@ class MemoryCacheDecorator(CacheDecorator):
             value, expires = self.cache[key]
         except KeyError:
             expires = 0
-        if expires < timestamp:
+        if expires <= timestamp:
             value = self.func(*args, **kwargs)
             expires = timestamp + self.maxage
             self.cache[key] = value, expires
@@ -189,11 +189,11 @@ def clear():
 
 
 def _path():
-    path = config.get(("cache",), "file", -1)
-    if path != -1:
+    path = config.get(("cache",), "file", util.SENTINEL)
+    if path is not util.SENTINEL:
         return util.expand_path(path)
 
-    if os.name == "nt":
+    if util.WINDOWS:
         import tempfile
         return os.path.join(tempfile.gettempdir(), ".gallery-dl.cache")
 
@@ -205,7 +205,7 @@ def _path():
 
 try:
     dbfile = _path()
-    if os.name != "nt":
+    if not util.WINDOWS:
         # restrict access permissions for new db files
         os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
     DatabaseCacheDecorator.db = sqlite3.connect(

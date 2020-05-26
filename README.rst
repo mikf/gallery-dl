@@ -83,8 +83,8 @@ Download a standalone executable file,
 put it into your `PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__,
 and run it inside a command prompt (like ``cmd.exe``).
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.13.3/gallery-dl.exe>`__
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.13.3/gallery-dl.bin>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.13.6/gallery-dl.exe>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.13.6/gallery-dl.bin>`__
 
 These executables include a Python 3.8 interpreter
 and all required Python packages.
@@ -99,6 +99,14 @@ Linux users that are using a distro that is supported by Snapd_ can install *gal
 
     $ snap install gallery-dl
 
+Chocolatey
+----
+
+Windows users that have Chocolatey_ installed can install *gallery-dl* from the Chocolatey Community Packages repository:
+
+.. code:: powershell
+
+    $ choco install gallery-dl
 
 Usage
 =====
@@ -172,6 +180,11 @@ i.e. ``C:\Users\<username>\``)
 
 Values in later configuration files will override previous ones.
 
+Command line options will override all related settings in the configuration file(s),
+e.g. using ``--write-metadata`` will enable writing metadata using the default values
+for all ``postprocessors.metadata.*`` settings, overriding any specific settings in
+configuration files.
+
 
 Authentication
 ==============
@@ -236,7 +249,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
-.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.13.3.tar.gz
+.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.13.6.tar.gz
 .. _dev:                     https://github.com/mikf/gallery-dl/archive/master.tar.gz
 
 .. _Python:     https://www.python.org/downloads/
@@ -248,12 +261,13 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _pyOpenSSL:  https://pyopenssl.org/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
+.. _Chocolatey:      https://chocolatey.org/install
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.org/project/gallery-dl/
 
-.. |build| image:: https://travis-ci.org/mikf/gallery-dl.svg?branch=master
-    :target: https://travis-ci.org/mikf/gallery-dl
+.. |build| image:: https://travis-ci.com/mikf/gallery-dl.svg?branch=master
+    :target: https://travis-ci.com/mikf/gallery-dl
 
 .. |gitter| image:: https://badges.gitter.im/gallery-dl/main.svg
     :target: https://gitter.im/gallery-dl/main

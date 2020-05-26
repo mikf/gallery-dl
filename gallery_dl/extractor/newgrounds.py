@@ -224,10 +224,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
             self.post_url = "https://www.newgrounds.com/art/view/{}/{}".format(
                 self.user, match.group(3))
         else:
-            url = match.group(0)
-            if not url.startswith("http"):
-                url = "https://" + url
-            self.post_url = url
+            self.post_url = text.ensure_http_scheme(match.group(0))
 
     def posts(self):
         return (self.post_url,)
@@ -288,7 +285,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
 class NewgroundsArtExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
     subcategory = "art"
-    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/art/?$"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/art/?$"
     test = ("https://tomfulp.newgrounds.com/art", {
         "pattern": NewgroundsImageExtractor.pattern,
         "count": ">= 3",
@@ -298,7 +295,7 @@ class NewgroundsArtExtractor(NewgroundsExtractor):
 class NewgroundsAudioExtractor(NewgroundsExtractor):
     """Extractor for all audio submissions of a newgrounds user"""
     subcategory = "audio"
-    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/audio/?$"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/audio/?$"
     test = ("https://tomfulp.newgrounds.com/audio", {
         "pattern": r"https://audio.ngfiles.com/\d+/\d+_.+\.mp3",
         "count": ">= 4",
@@ -308,7 +305,7 @@ class NewgroundsAudioExtractor(NewgroundsExtractor):
 class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
     subcategory = "movies"
-    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/movies/?$"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/movies/?$"
     test = ("https://tomfulp.newgrounds.com/movies", {
         "pattern": r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+_.+",
         "range": "1-10",
@@ -319,7 +316,7 @@ class NewgroundsMoviesExtractor(NewgroundsExtractor):
 class NewgroundsUserExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user profile"""
     subcategory = "user"
-    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/?$"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/?$"
     test = (
         ("https://tomfulp.newgrounds.com", {
             "pattern": "https://tomfulp.newgrounds.com/art$",
@@ -345,7 +342,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user}", "Favorites")
     pattern = (r"(?:https?://)?([^.]+)\.newgrounds\.com"
-               r"/favorites(?:/(art|audio|movies))?/?")
+               r"/favorites(?!/following)(?:/(art|audio|movies))?/?")
     test = (
         ("https://tomfulp.newgrounds.com/favorites/art", {
             "range": "1-10",
@@ -381,10 +378,39 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
             if response.history:
                 return
 
-            favs = list(text.extract_iter(
-                response.text, 'href="//www.newgrounds.com', '"'))
-            for path in favs:
-                yield self.root + path
+            favs = self._extract_favorites(response.text)
+            yield from favs
+
             if len(favs) < 24:
                 return
             num += 1
+
+    def _extract_favorites(self, page):
+        return [
+            self.root + path
+            for path in text.extract_iter(
+                page, 'href="//www.newgrounds.com', '"')
+        ]
+
+
+class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
+    """Extractor for a newgrounds user's favorited users"""
+    subcategory = "following"
+    pattern = r"(?:https?://)?([^.]+)\.newgrounds\.com/favorites/(following)"
+    test = ("https://tomfulp.newgrounds.com/favorites/following", {
+        "pattern": NewgroundsUserExtractor.pattern,
+        "range": "76-125",
+        "count": 50,
+    })
+
+    def items(self):
+        data = {"_extractor": NewgroundsUserExtractor}
+        for url in self._pagination(self.kind):
+            yield Message.Queue, url, data
+
+    @staticmethod
+    def _extract_favorites(page):
+        return [
+            text.ensure_http_scheme(user.rpartition('"')[2])
+            for user in text.extract_iter(page, 'class="item-user', '"><img')
+        ]

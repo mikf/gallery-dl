@@ -33,6 +33,7 @@ class TwitterExtractor(Extractor):
         self._user_dict = None
         self.logged_in = False
         self.retweets = self.config("retweets", True)
+        self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)
         self.content = self.config("content", False)
         self.videos = self.config("videos", True)
@@ -48,7 +49,9 @@ class TwitterExtractor(Extractor):
 
         for tweet in self.tweets():
             data = self._data_from_tweet(tweet)
-            if not data or not self.retweets and data["retweet_id"]:
+            if not data or \
+                    not self.retweets and data["retweet_id"] or \
+                    not self.replies and data["reply"]:
                 continue
             data.update(metadata)
 
@@ -63,13 +66,11 @@ class TwitterExtractor(Extractor):
                     url = self._video_from_tweet(data["tweet_id"])
                     if not url:
                         continue
-                    ext = text.ext_from_url(url)
-                    if ext == "m3u8":
+                    text.nameext_from_url(url, data)
+                    if data["extension"] == "m3u8":
                         url = "ytdl:" + url
                         data["extension"] = "mp4"
                         data["_ytdl_extra"] = {"protocol": "m3u8_native"}
-                    else:
-                        data["extension"] = ext
                 data["num"] = 1
                 yield Message.Url, url, data
 
@@ -149,6 +150,7 @@ class TwitterExtractor(Extractor):
         extr = text.extract_from(tweet)
         data = {
             "tweet_id"  : text.parse_int(extr('data-tweet-id="'  , '"')),
+            "reply"     : bool(extr('data-is-reply-to="'  , '"')),
             "retweet_id": text.parse_int(extr('data-retweet-id="', '"')),
             "retweeter" : extr('data-retweeter="'  , '"'),
             "author"    : {
@@ -224,8 +226,7 @@ class TwitterExtractor(Extractor):
         if response.status_code == 429 or \
                 response.headers.get("x-rate-limit-remaining") == "0":
             if self.logged_in:
-                reset = response.headers.get("x-rate-limit-reset")
-                self.wait(until=reset, reason="rate limit reset")
+                self.wait(until=response.headers.get("x-rate-limit-reset"))
             else:
                 _guest_token.invalidate()
             return self._video_from_tweet(tweet_id)
@@ -287,7 +288,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
             "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
-            "keyword": "37f4d35affd733d458d3b235b4a55f619a86f794",
+            "keyword": "4a3d28cc9f7a39e27333d56f3fe19e6e07ee979e",
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
     )
@@ -345,13 +346,13 @@ class TwitterTweetExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics/status/604341487988576256", {
             "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",
-            "keyword": "3fa3623e8d9a204597238e2f1f6433da19c63b4a",
+            "keyword": "76e018cf3f4c8b82d3bdd425e01e28078c98373b",
             "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
         }),
         # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
             "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
-            "keyword": "49165725116ac52193a3861e8f5534e47a706b62",
+            "keyword": "c9251b1fd79d547b0c6b4577f06c937d0e9b63d2",
         }),
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {
@@ -371,6 +372,11 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
             "options": (("videos", "ytdl"),),
             "pattern": r"ytdl:https://twitter.com/i/web.+/1103767554424598528",
+        }),
+        # 'replies' option (#705)
+        ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
+            "options": (("replies", False),),
+            "count": 0,
         }),
         # /i/web/ URL
         ("https://twitter.com/i/web/status/1155074198240292865", {

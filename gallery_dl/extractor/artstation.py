@@ -39,8 +39,9 @@ class ArtstationExtractor(Extractor):
 
                 if adict["has_embedded_player"] and self.external:
                     player = adict["player_embedded"]
-                    url = text.extract(player, 'src="', '"')[0]
-                    if not url.startswith(self.root):
+                    url = text.extract(player, 'src="', '"')[0] or \
+                        text.extract(player, "src='", "'")[0]
+                    if url and not url.startswith(self.root):
                         asset["extension"] = None
                         yield Message.Url, "ytdl:" + url, asset
                         continue

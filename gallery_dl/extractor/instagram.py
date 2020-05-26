@@ -131,7 +131,8 @@ class InstagramExtractor(Extractor):
             'owner_id': media['owner']['id'],
             'username': media['owner']['username'],
             'fullname': media['owner']['full_name'],
-            "post_shortcode": media['shortcode'],
+            'post_id': media['id'],
+            'post_shortcode': media['shortcode'],
             'description': text.parse_unicode_escapes('\n'.join(
                 edge['node']['text']
                 for edge in media['edge_media_to_caption']['edges']
@@ -140,9 +141,11 @@ class InstagramExtractor(Extractor):
 
         medias = []
         if media['__typename'] == 'GraphSidecar':
-            for n in media['edge_sidecar_to_children']['edges']:
-                children = n['node']
+            for num, edge in enumerate(
+                    media['edge_sidecar_to_children']['edges'], 1):
+                children = edge['node']
                 media_data = {
+                    'num': num,
                     'media_id': children['id'],
                     'shortcode': children['shortcode'],
                     'typename': children['__typename'],
@@ -320,6 +323,7 @@ class InstagramImageExtractor(InstagramExtractor):
                 "likes": int,
                 "media_id": "1922949326347663701",
                 "shortcode": "BqvsDleB3lV",
+                "post_id": "1922949326347663701",
                 "post_shortcode": "BqvsDleB3lV",
                 "typename": "GraphImage",
                 "username": "instagram",
@@ -333,7 +337,9 @@ class InstagramImageExtractor(InstagramExtractor):
             "keyword": {
                 "sidecar_media_id": "1875629777499953996",
                 "sidecar_shortcode": "BoHk1haB5tM",
+                "post_id": "1875629777499953996",
                 "post_shortcode": "BoHk1haB5tM",
+                "num": int,
                 "likes": int,
                 "username": "instagram",
             }

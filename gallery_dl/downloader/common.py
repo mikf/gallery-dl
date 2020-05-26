@@ -9,7 +9,6 @@
 """Common classes and constants used by downloader modules."""
 
 import os
-import logging
 from .. import config, util
 
 
@@ -17,15 +16,12 @@ class DownloaderBase():
     """Base class for downloaders"""
     scheme = ""
 
-    def __init__(self, extractor, output):
-        self.session = extractor.session
-        self.out = output
+    def __init__(self, job):
+        self.out = job.out
+        self.session = job.extractor.session
         self.part = self.config("part", True)
         self.partdir = self.config("part-directory")
-
-        self.log = logging.getLogger("downloader." + self.scheme)
-        self.log.job = extractor.log.job
-        self.log.extractor = extractor
+        self.log = job.get_logger("downloader." + self.scheme)
 
         if self.partdir:
             self.partdir = util.expand_path(self.partdir)

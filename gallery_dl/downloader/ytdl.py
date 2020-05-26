@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,8 +17,9 @@ import os
 class YoutubeDLDownloader(DownloaderBase):
     scheme = "ytdl"
 
-    def __init__(self, extractor, output):
-        DownloaderBase.__init__(self, extractor, output)
+    def __init__(self, job):
+        DownloaderBase.__init__(self, job)
+        extractor = job.extractor
 
         retries = self.config("retries", extractor._retries)
         options = {
@@ -35,7 +36,7 @@ class YoutubeDLDownloader(DownloaderBase):
 
         if self.config("logging", True):
             options["logger"] = self.log
-        self.forward_cookies = self.config("forward-cookies", True)
+        self.forward_cookies = self.config("forward-cookies", False)
 
         outtmpl = self.config("outtmpl")
         self.outtmpl = DEFAULT_OUTTMPL if outtmpl == "default" else outtmpl
@@ -70,6 +71,10 @@ class YoutubeDLDownloader(DownloaderBase):
         if "url" in info_dict:
             text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
 
+        formats = info_dict.get("requested_formats")
+        if formats and not compatible_formats(formats):
+            info_dict["ext"] = "mkv"
+
         if self.outtmpl:
             self.ytdl.params["outtmpl"] = self.outtmpl
             pathfmt.filename = filename = self.ytdl.prepare_filename(info_dict)
@@ -103,6 +108,17 @@ class YoutubeDLDownloader(DownloaderBase):
         for entry in info_dict["entries"]:
             self.ytdl.process_info(entry)
         return True
+
+
+def compatible_formats(formats):
+    video_ext = formats[0].get("ext")
+    audio_ext = formats[1].get("ext")
+
+    if video_ext == "webm" and audio_ext == "webm":
+        return True
+
+    exts = ("mp3", "mp4", "m4a", "m4p", "m4b", "m4r", "m4v", "ismv", "isma")
+    return video_ext in exts and audio_ext in exts
 
 
 __downloader__ = YoutubeDLDownloader

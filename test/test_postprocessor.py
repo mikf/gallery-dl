@@ -1,27 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 import os
-import os.path
+import sys
+import unittest
+from unittest.mock import Mock, mock_open, patch
+
+import logging
 import zipfile
 import tempfile
 from datetime import datetime, timezone as tz
 
-import unittest
-from unittest.mock import Mock, mock_open, patch
-
-from gallery_dl import postprocessor, extractor, util, config
-from gallery_dl.postprocessor.common import PostProcessor
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import extractor, output, util  # noqa E402
+from gallery_dl import postprocessor, util, config  # noqa E402
+from gallery_dl.postprocessor.common import PostProcessor  # noqa E402
 
 
 class MockPostprocessorModule(Mock):
     __postprocessor__ = "mock"
+
+
+class FakeJob():
+
+    def __init__(self):
+        self.extractor = extractor.find("test:")
+        self.pathfmt = util.PathFormat(self.extractor)
+        self.out = output.NullOutput()
+        self.get_logger = logging.getLogger
 
 
 class TestPostprocessorModule(unittest.TestCase):
@@ -57,9 +69,9 @@ class BasePostprocessorTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.extractor = extractor.find("test:")
         cls.dir = tempfile.TemporaryDirectory()
         config.set((), "base-directory", cls.dir.name)
+        cls.job = FakeJob()
 
     @classmethod
     def tearDownClass(cls):
@@ -73,12 +85,12 @@ class BasePostprocessorTest(unittest.TestCase):
         if data is not None:
             kwdict.update(data)
 
-        self.pathfmt = util.PathFormat(self.extractor)
+        self.pathfmt = self.job.pathfmt
         self.pathfmt.set_directory(kwdict)
         self.pathfmt.set_filename(kwdict)
 
         pp = postprocessor.find(self.__class__.__name__[:-4].lower())
-        return pp(self.pathfmt, options)
+        return pp(self.job, options)
 
 
 class ClassifyTest(BasePostprocessorTest):

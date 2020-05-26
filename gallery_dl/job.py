@@ -24,20 +24,32 @@ class Job():
             extr = extractor.find(extr)
         if not extr:
             raise exception.NoExtractorError()
-
         self.extractor = extr
-        extr.log.extractor = extr
-        extr.log.job = self
+        self.pathfmt = None
+
+        self._logger_extra = {
+            "job"      : self,
+            "extractor": extr,
+            "path"     : output.PathfmtProxy(self),
+            "keywords" : output.KwdictProxy(self),
+        }
+        extr.log = self._wrap_logger(extr.log)
         extr.log.debug("Using %s for '%s'", extr.__class__.__name__, extr.url)
 
         self.status = 0
         self.pred_url = self._prepare_predicates("image", True)
         self.pred_queue = self._prepare_predicates("chapter", False)
 
-        if parent and parent.extractor.config(
-                "category-transfer", parent.extractor.categorytransfer):
-            self.extractor.category = parent.extractor.category
-            self.extractor.subcategory = parent.extractor.subcategory
+        if parent:
+            pextr = parent.extractor
+
+            # transfer (sub)category
+            if pextr.config("category-transfer", pextr.categorytransfer):
+                extr.category = pextr.category
+                extr.subcategory = pextr.subcategory
+
+            # reuse connection adapters
+            extr.session.adapters = pextr.session.adapters
 
         # user-supplied metadata
         self.userkwds = self.extractor.config("keywords")
@@ -165,6 +177,12 @@ class Job():
 
         return util.build_predicate(predicates)
 
+    def get_logger(self, name):
+        return self._wrap_logger(logging.getLogger(name))
+
+    def _wrap_logger(self, logger):
+        return output.LoggerAdapter(logger, self._logger_extra)
+
     def _write_unsupported(self, url):
         if self.ulog:
             self.ulog.info(url)
@@ -175,8 +193,7 @@ class DownloadJob(Job):
 
     def __init__(self, url, parent=None):
         Job.__init__(self, url, parent)
-        self.log = logging.getLogger("download")
-        self.pathfmt = None
+        self.log = self.get_logger("download")
         self.archive = None
         self.sleep = None
         self.downloaders = {}
@@ -325,7 +342,7 @@ class DownloadJob(Job):
 
         cls = downloader.find(scheme)
         if cls and config.get(("downloader", cls.scheme), "enabled", True):
-            instance = cls(self.extractor, self.out)
+            instance = cls(self)
         else:
             instance = None
             self.log.error("'%s:' URLs are not supported/enabled", scheme)
@@ -338,19 +355,20 @@ class DownloadJob(Job):
 
     def initialize(self, kwdict=None):
         """Delayed initialization of PathFormat, etc."""
-        self.pathfmt = util.PathFormat(self.extractor)
+        config = self.extractor.config
+        pathfmt = self.pathfmt = util.PathFormat(self.extractor)
         if kwdict:
-            self.pathfmt.set_directory(kwdict)
+            pathfmt.set_directory(kwdict)
 
-        self.sleep = self.extractor.config("sleep")
-        if not self.extractor.config("download", True):
-            self.download = self.pathfmt.fix_extension
+        self.sleep = config("sleep")
+        if not config("download", True):
+            self.download = pathfmt.fix_extension
 
-        skip = self.extractor.config("skip", True)
+        skip = config("skip", True)
         if skip:
             self._skipexc = None
             if skip == "enumerate":
-                self.pathfmt.check_file = self.pathfmt._enum_file
+                pathfmt.check_file = pathfmt._enum_file
             elif isinstance(skip, str):
                 skip, _, smax = skip.partition(":")
                 if skip == "abort":
@@ -360,9 +378,9 @@ class DownloadJob(Job):
                 self._skipcnt = 0
                 self._skipmax = text.parse_int(smax)
         else:
-            self.pathfmt.exists = lambda x=None: False
+            pathfmt.exists = lambda x=None: False
 
-        archive = self.extractor.config("archive")
+        archive = config("archive")
         if archive:
             path = util.expand_path(archive)
             try:
@@ -374,27 +392,28 @@ class DownloadJob(Job):
             else:
                 self.extractor.log.debug("Using download archive '%s'", path)
 
-        postprocessors = self.extractor.config("postprocessors")
+        postprocessors = config("postprocessors")
         if postprocessors:
+            pp_log = self.get_logger("postprocessor")
             pp_list = []
+            category = self.extractor.category
 
             for pp_dict in postprocessors:
                 whitelist = pp_dict.get("whitelist")
                 blacklist = pp_dict.get("blacklist")
-                if (whitelist and self.extractor.category not in whitelist or
-                        blacklist and self.extractor.category in blacklist):
+                if (whitelist and category not in whitelist or
+                        blacklist and category in blacklist):
                     continue
                 name = pp_dict.get("name")
                 pp_cls = postprocessor.find(name)
                 if not pp_cls:
-                    postprocessor.log.warning("module '%s' not found", name)
+                    pp_log.warning("module '%s' not found", name)
                     continue
                 try:
-                    pp_obj = pp_cls(self.pathfmt, pp_dict)
+                    pp_obj = pp_cls(self, pp_dict)
                 except Exception as exc:
-                    postprocessor.log.error(
-                        "'%s' initialization failed:  %s: %s",
-                        name, exc.__class__.__name__, exc)
+                    pp_log.error("'%s' initialization failed:  %s: %s",
+                                 name, exc.__class__.__name__, exc)
                 else:
                     pp_list.append(pp_obj)
 

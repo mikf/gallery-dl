@@ -24,16 +24,18 @@ except ImportError:
 class HttpDownloader(DownloaderBase):
     scheme = "http"
 
-    def __init__(self, extractor, output):
-        DownloaderBase.__init__(self, extractor, output)
+    def __init__(self, job):
+        DownloaderBase.__init__(self, job)
+        extractor = job.extractor
+        self.chunk_size = 16384
+        self.downloading = False
+
         self.adjust_extension = self.config("adjust-extensions", True)
         self.retries = self.config("retries", extractor._retries)
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
-        self.downloading = False
-        self.chunk_size = 16384
 
         if self.retries < 0:
             self.retries = float("inf")
@@ -164,7 +166,11 @@ class HttpDownloader(DownloaderBase):
 
         self.downloading = False
         if self.mtime:
-            pathfmt.kwdict["_mtime"] = response.headers.get("Last-Modified")
+            pathfmt.kwdict.setdefault(
+                "_mtime", response.headers.get("Last-Modified"))
+        else:
+            pathfmt.kwdict["_mtime"] = None
+
         return True
 
     def receive(self, response, file):
@@ -238,6 +244,10 @@ MIMETYPE_MAP = {
     "image/x-ms-bmp": "bmp",
     "image/webp": "webp",
     "image/svg+xml": "svg",
+
+    "image/vnd.adobe.photoshop": "psd",
+    "image/x-photoshop": "psd",
+    "application/x-photoshop": "psd",
 
     "video/webm": "webm",
     "video/ogg": "ogg",

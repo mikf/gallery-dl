@@ -121,9 +121,9 @@ class SexcomPinExtractor(SexcomExtractor):
             },
         }),
         # gif
-        ("https://www.sex.com/pin/11465040-big-titted-hentai-gif/", {
-            "pattern": "https://cdn.sex.com/images/.+/2014/01/26/4829951.gif",
-            "content": "af6726d74d11d819e1c885fe5303f711862eae96",
+        ("https://www.sex.com/pin/55435122-ecchi/", {
+            "pattern": "https://cdn.sex.com/images/.+/2017/12/07/18760842.gif",
+            "content": "176cc63fa05182cb0438c648230c0f324a5965fe",
         }),
         # video
         ("https://www.sex.com/pin/55748341/", {

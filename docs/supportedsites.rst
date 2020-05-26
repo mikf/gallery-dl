@@ -18,6 +18,7 @@ arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |artstation-C|
+baraag               https://baraag.net/                 Images from Statuses, User Profiles
 Behance              https://www.behance.net/            Collections, Galleries, User Profiles
 Blogger              https://www.blogger.com/            Blogs, Posts
 BobX                 http://www.bobx.com/dark/           Galleries, Idols
@@ -28,6 +29,7 @@ Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Images, Search Results
 E-Hentai             https://e-hentai.org/               Favorites, Galleries, Search Results               Optional
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag Searches         Optional
+Eka's Portal         https://aryion.com/                 Galleries, Posts
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
@@ -46,11 +48,12 @@ HentaiFox            https://hentaifox.com/              Galleries, Search Resul
 HentaiHand           https://hentaihand.com/             Galleries, Search Results, Tag Searches
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hentainexus          https://hentainexus.com/            Galleries, Search Results
-Hiperdex             https://hiperdex.com/               Chapters, Manga
-Hitomi.la            https://hitomi.la/                  Galleries
+Hiperdex             https://hiperdex.info/              Artists, Chapters, Manga
+Hitomi.la            https://hitomi.la/                  Galleries, Tag Searches
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
+ImageChest           https://imgchest.com/               Galleries
 ImageFap             https://imagefap.com/               Galleries, individual Images, User Profiles
 ImgBB                https://imgbb.com/                  Albums, individual Images, User Profiles           Optional
 imgbox               https://imgbox.com/                 Galleries, individual Images
@@ -77,6 +80,7 @@ Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.net/              Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
+mastodon.social      https://mastodon.social/            Images from Statuses, User Profiles
 Naver                https://blog.naver.com/             Blogs, Posts
 Newgrounds           https://www.newgrounds.com/         |newgrounds-C|                                     Optional
 Ngomik               http://ngomik.in/                   Chapters
@@ -102,6 +106,7 @@ Read Comic Online    https://readcomiconline.to/         Comic Issues, Comics
 Realbooru            https://realbooru.com/              Pools, Posts, Tag Searches
 RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://www.reddit.com/             |reddit-C|                                         Optional (OAuth)
+RedGIFs              https://redgifs.com/                individual Images
 rule #34             https://rule34.paheal.net/          Posts, Tag Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag Searches
@@ -114,6 +119,7 @@ Simply Hentai        https://www.simply-hentai.com/      Galleries, individual I
 SlickPic             https://www.slickpic.com/           Albums, User Profiles
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (OAuth)
+Speaker Deck         https://speakerdeck.com/            Presentations
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          Optional (OAuth)
@@ -121,6 +127,7 @@ Twitter              https://twitter.com/                |twitter-C|            
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  |wallhaven-A|
 Warosu               https://warosu.org/                 Threads
+Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
 WikiArt.org          https://www.wikiart.org/            Artists, Artist Listings, Artworks
 World Three          http://www.slide.world-three.org/   Chapters, Manga

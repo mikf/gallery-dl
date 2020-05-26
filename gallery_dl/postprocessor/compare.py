@@ -14,8 +14,8 @@ import os
 
 class ComparePP(PostProcessor):
 
-    def __init__(self, pathfmt, options):
-        PostProcessor.__init__(self)
+    def __init__(self, job, options):
+        PostProcessor.__init__(self, job)
         if options.get("action") == "enumerate":
             self.run = self._run_enumerate
         if options.get("shallow"):

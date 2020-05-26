@@ -1,5 +1,63 @@
 # Changelog
 
+## Unreleased
+
+## 1.13.6 - 2020-05-02
+### Additions
+- [patreon] respect filters and sort order in query parameters ([#711](https://github.com/mikf/gallery-dl/issues/711))
+- [speakerdeck] add a new extractor for speakerdeck.com ([#726](https://github.com/mikf/gallery-dl/issues/726))
+- [twitter] add `replies` option ([#705](https://github.com/mikf/gallery-dl/issues/705))
+- [weibo] add `videos` option
+- [downloader:http] add MIME types for `.psd` files ([#714](https://github.com/mikf/gallery-dl/issues/714))
+### Fixes
+- [artstation] improve embed extraction ([#720](https://github.com/mikf/gallery-dl/issues/720))
+- [deviantart] limit API wait times ([#721](https://github.com/mikf/gallery-dl/issues/721))
+- [newgrounds] fix URLs produced by the `following` extractor ([#684](https://github.com/mikf/gallery-dl/issues/684))
+- [patreon] improve file hash extraction ([#713](https://github.com/mikf/gallery-dl/issues/713))
+- [vsco] fix user gallery extraction
+- fix/improve Cloudflare bypass code ([#728](https://github.com/mikf/gallery-dl/issues/728))
+
+## 1.13.5 - 2020-04-27
+### Additions
+- [500px] recognize `web.500px.com` URLs
+- [aryion] support downloading from folders ([#694](https://github.com/mikf/gallery-dl/issues/694))
+- [furaffinity] add extractor for followed users ([#515](https://github.com/mikf/gallery-dl/issues/515))
+- [hitomi] add extractor for tag searches ([#697](https://github.com/mikf/gallery-dl/issues/697))
+- [instagram] add `post_id` and `num` metadata fields ([#698](https://github.com/mikf/gallery-dl/issues/698))
+- [newgrounds] add extractor for followed users ([#684](https://github.com/mikf/gallery-dl/issues/684))
+- [patreon] recognize URLs with creator IDs ([#711](https://github.com/mikf/gallery-dl/issues/711))
+- [twitter] add `reply` metadata field ([#705](https://github.com/mikf/gallery-dl/issues/705))
+- [xhamster] recognize `xhamster.porncache.net` URLs ([#700](https://github.com/mikf/gallery-dl/issues/700))
+### Fixes
+- [gelbooru] improve post ID extraction in pool listings
+- [hitomi] fix extraction of galleries without tags
+- [jaiminisbox] update metadata decoding procedure ([#702](https://github.com/mikf/gallery-dl/issues/702))
+- [mastodon] fix pagination ([#701](https://github.com/mikf/gallery-dl/issues/701))
+- [mastodon] improve account searches ([#704](https://github.com/mikf/gallery-dl/issues/704))
+- [patreon] fix hash extraction from download URLs ([#693](https://github.com/mikf/gallery-dl/issues/693))
+- improve parameter extraction when solving Cloudflare challenges
+
+## 1.13.4 - 2020-04-12
+### Additions
+- [aryion] add `gallery` and `post` extractors ([#390](https://github.com/mikf/gallery-dl/issues/390), [#673](https://github.com/mikf/gallery-dl/issues/673))
+- [deviantart] detect and handle folders in sta.sh listings ([#659](https://github.com/mikf/gallery-dl/issues/659))
+- [hentainexus] add `circle`, `event`, and `title_conventional` metadata fields ([#661](https://github.com/mikf/gallery-dl/issues/661))
+- [hiperdex] add `artist` extractor ([#606](https://github.com/mikf/gallery-dl/issues/606))
+- [mastodon] add access tokens for `mastodon.social` and `baraag.net` ([#665](https://github.com/mikf/gallery-dl/issues/665))
+### Changes
+- [deviantart] retrieve *all* download URLs through the OAuth API
+- automatically read config files in PyInstaller executable directories ([#682](https://github.com/mikf/gallery-dl/issues/682))
+### Fixes
+- [deviantart] handle "Request blocked" errors ([#655](https://github.com/mikf/gallery-dl/issues/655))
+- [deviantart] improve JPEG quality replacement pattern
+- [hiperdex] fix extraction
+- [mastodon] handle API rate limits ([#665](https://github.com/mikf/gallery-dl/issues/665))
+- [mastodon] update OAuth credentials for pawoo.net ([#665](https://github.com/mikf/gallery-dl/issues/665))
+- [myportfolio] fix extraction of galleries without title
+- [piczel] fix extraction of single images
+- [vsco] fix collection extraction
+- [weibo] accept status URLs with non-numeric IDs ([#664](https://github.com/mikf/gallery-dl/issues/664))
+
 ## 1.13.3 - 2020-03-28
 ### Additions
 - [instagram] Add support for user's saved medias ([#644](https://github.com/mikf/gallery-dl/issues/644))

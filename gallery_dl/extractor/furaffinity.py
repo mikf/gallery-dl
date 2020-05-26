@@ -233,3 +233,29 @@ class FuraffinityUserExtractor(FuraffinityExtractor):
             (FuraffinityScrapsExtractor  , base.format("scraps")),
             (FuraffinityFavoriteExtractor, base.format("favorites")),
         ), ("gallery",))
+
+
+class FuraffinityFollowingExtractor(FuraffinityExtractor):
+    """Extractor for a furaffinity user's watched users"""
+    subcategory = "following"
+    pattern = BASE_PATTERN + "/watchlist/by/([^/?&#]+)"
+    test = ("https://www.furaffinity.net/watchlist/by/mirlinthloth/", {
+        "pattern": FuraffinityUserExtractor.pattern,
+        "range": "176-225",
+        "count": 50,
+    })
+
+    def items(self):
+        url = "{}/watchlist/by/{}/".format(self.root, self.user)
+        data = {"_extractor": FuraffinityUserExtractor}
+
+        while True:
+            page = self.request(url).text
+
+            for path in text.extract_iter(page, '<a href="', '"'):
+                yield Message.Queue, self.root + path, data
+
+            path = text.rextract(page, 'action="', '"')[0]
+            if url.endswith(path):
+                return
+            url = self.root + path

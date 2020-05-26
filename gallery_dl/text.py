@@ -60,6 +60,13 @@ def split_html(txt, sep=None):
         return []
 
 
+def ensure_http_scheme(url, scheme="https://"):
+    """Prepend 'scheme' to 'url' if it doesn't have one"""
+    if url and not url.startswith(("https://", "http://")):
+        return scheme + url.lstrip("/:")
+    return url
+
+
 def filename_from_url(url):
     """Extract the last part of an URL to use as a filename"""
     try:
@@ -233,7 +240,7 @@ def parse_timestamp(ts, default=None):
         return default
 
 
-def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z"):
+def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z", utcoffset=0):
     """Create a datetime object by parsing 'date_string'"""
     try:
         if format.endswith("%z") and date_string[-3] == ":":
@@ -244,7 +251,11 @@ def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z"):
         d = datetime.datetime.strptime(ds, format)
         o = d.utcoffset()
         if o is not None:
-            d = d.replace(tzinfo=None) - o  # convert to naive UTC
+            # convert to naive UTC
+            d = d.replace(tzinfo=None) - o
+        elif utcoffset:
+            # apply manual UTC offset
+            d += datetime.timedelta(0, utcoffset * -3600)
         return d
     except (TypeError, IndexError, KeyError):
         return None

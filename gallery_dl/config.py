@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,7 +22,7 @@ log = logging.getLogger("config")
 
 _config = {}
 
-if os.name == "nt":
+if util.WINDOWS:
     _default_configs = [
         r"%USERPROFILE%\gallery-dl\config.json",
         r"%USERPROFILE%\gallery-dl.conf",
@@ -33,6 +33,14 @@ else:
         "${HOME}/.config/gallery-dl/config.json",
         "${HOME}/.gallery-dl.conf",
     ]
+
+
+if getattr(sys, "frozen", False):
+    # look for config file in PyInstaller executable directory (#682)
+    _default_configs.append(os.path.join(
+        os.path.dirname(sys.executable),
+        "gallery-dl.conf",
+    ))
 
 
 # --------------------------------------------------------------------
@@ -131,7 +139,6 @@ def unset(path, key, *, conf=_config):
 
 class apply():
     """Context Manager: apply a collection of key-value pairs"""
-    _sentinel = object()
 
     def __init__(self, kvlist):
         self.original = []
@@ -139,12 +146,12 @@ class apply():
 
     def __enter__(self):
         for path, key, value in self.kvlist:
-            self.original.append((path, key, get(path, key, self._sentinel)))
+            self.original.append((path, key, get(path, key, util.SENTINEL)))
             set(path, key, value)
 
     def __exit__(self, etype, value, traceback):
         for path, key, value in self.original:
-            if value is self._sentinel:
+            if value is util.SENTINEL:
                 unset(path, key)
             else:
                 set(path, key, value)

@@ -9,12 +9,15 @@
 
 import os
 import sys
+import unittest
+
 import re
 import json
 import hashlib
 import datetime
-import unittest
-from gallery_dl import extractor, util, job, config, exception
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import extractor, util, job, config, exception  # noqa E402
 
 
 # these don't work on Travis CI
@@ -27,7 +30,6 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "myportfolio",
     "photobucket",
     "worldthree",
 }
@@ -314,6 +316,9 @@ def setup_test_config():
 
     config.set(("extractor", "mangoxo")   , "username", "LiQiang3")
     config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
+
+    config.set(("extractor", "mastodon.social"), "access-token",
+               "Blf9gVqG7GytDTfVMiyYQjwVMQaNACgf3Ds3IxxVDUQ")
 
     config.set(("extractor", "deviantart"), "client-id", "7777")
     config.set(("extractor", "deviantart"), "client-secret",

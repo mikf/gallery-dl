@@ -108,11 +108,11 @@ class TumblrExtractor(Extractor):
                     del photo["alt_sizes"]
                     yield self._prepare_image(photo["url"], post)
 
-            url = post.get("audio_url")  # type: "audio"
+            url = post.get("audio_url")  # type "audio"
             if url and url.startswith("https://a.tumblr.com/"):
                 yield self._prepare(url, post)
 
-            url = post.get("video_url")  # type: "video"
+            url = post.get("video_url")  # type "video"
             if url:
                 yield self._prepare(_original_video(url), post)
 
@@ -418,7 +418,7 @@ class TumblrAPI(oauth.OAuth1API):
             reset = response.headers.get("x-ratelimit-perhour-reset")
             if reset:
                 self.log.info("Hourly API rate limit exceeded")
-                self.extractor.wait(seconds=reset, reason="rate limit reset")
+                self.extractor.wait(seconds=reset)
                 return self._call(blog, endpoint, params)
 
         raise exception.StopExtraction(data)

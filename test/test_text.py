@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2018 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
+import sys
 import unittest
+
 import datetime
 
-from gallery_dl import text
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gallery_dl import text  # noqa E402
 
 
 INVALID = ((), [], {}, None, 1, 2.3)
@@ -89,6 +93,33 @@ class TestText(unittest.TestCase):
         # invalid arguments
         for value in INVALID:
             self.assertEqual(f(value), empty)
+
+    def test_ensure_http_scheme(self, f=text.ensure_http_scheme):
+        result = "https://example.org/filename.ext"
+
+        # standard usage
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("example.org/filename.ext"), result)
+        self.assertEqual(f("/example.org/filename.ext"), result)
+        self.assertEqual(f("//example.org/filename.ext"), result)
+        self.assertEqual(f("://example.org/filename.ext"), result)
+
+        # no change
+        self.assertEqual(f(result), result)
+        self.assertEqual(
+            f("http://example.org/filename.ext"),
+            "http://example.org/filename.ext",
+        )
+
+        # ...
+        self.assertEqual(
+            f("htp://example.org/filename.ext"),
+            "https://htp://example.org/filename.ext",
+        )
+
+        # invalid arguments
+        for value in INVALID_ALT:
+            self.assertEqual(f(value), value)
 
     def test_filename_from_url(self, f=text.filename_from_url):
         result = "filename.ext"
@@ -373,6 +404,10 @@ class TestText(unittest.TestCase):
         )
         self.assertEqual(
             f("2019-05-07T21:25:02+0900"),
+            datetime.datetime(2019, 5, 7, 12, 25, 2),
+        )
+        self.assertEqual(
+            f("2019-05-07T21:25:02", "%Y-%m-%dT%H:%M:%S", utcoffset=9),
             datetime.datetime(2019, 5, 7, 12, 25, 2),
         )
         self.assertEqual(
