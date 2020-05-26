@@ -57,18 +57,18 @@ class HentainexusGalleryExtractor(GalleryExtractor):
             data['type'] = 'Illustration'
         else:
             data['type'] = 'Manga'
-        data["title_conventional"] = self.join_title()
-        self.data = data
+        data["title_conventional"] = self.join_title(data)
         return data
 
-    def join_title(self):
-        event    = self.data['event']
-        circle   = self.data['circle']
-        artist   = self.data['artist']
-        title    = self.data['title']
-        parody   = self.data['parody']
-        book     = self.data['book']
-        magazine = self.data['magazine']
+    @staticmethod
+    def join_title(data):
+        event    = data['event']
+        circle   = data['circle']
+        artist   = data['artist']
+        title    = data['title']
+        parody   = data['parody']
+        book     = data['book']
+        magazine = data['magazine']
         # a very few galleries have large number of artists or parodies, replaced with "Various" in the title string
         if len(artist.split(',')) > 3:
             artist = 'Various'
