@@ -58,6 +58,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         else:
             data['type'] = 'Manga'
         data["title_conventional"] = self.join_title()
+        self.data = data
         return data
 
     def join_title(self):
