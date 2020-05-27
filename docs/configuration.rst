@@ -136,7 +136,7 @@ Default     ``"auto"``
 Example     | ``"/!? (){}"``
             | ``{" ": "_", "/": "-", "|": "-", ":": "-", "*": "+"}``
 Description | A string of characters to be replaced with the value of
-              `path-replace <extractor.*.path-replace>`__
+              `path-replace <extractor.*.path-replace_>`__
             | or an object mapping invalid/unwanted characters to their replacements
             | for generated path segment names.
 
@@ -158,7 +158,7 @@ extractor.*.path-replace
 Type        ``string``
 Default     ``"_"``
 Description The replacement character(s) for
-            `path-restrict <extractor.*.path-restrict>`__
+            `path-restrict <extractor.*.path-restrict_>`__
 =========== =====
 
 
