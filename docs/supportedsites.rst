@@ -48,7 +48,7 @@ HentaiFox            https://hentaifox.com/              Galleries, Search Resul
 HentaiHand           https://hentaihand.com/             Galleries, Search Results, Tag Searches
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hentainexus          https://hentainexus.com/            Galleries, Search Results
-Hiperdex             https://hiperdex.info/              Artists, Chapters, Manga
+Hiperdex             https://hiperdex.com/               Artists, Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries, Tag Searches
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional

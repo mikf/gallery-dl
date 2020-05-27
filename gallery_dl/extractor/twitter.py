@@ -360,12 +360,13 @@ class TwitterTweetExtractor(TwitterExtractor):
             "pattern": r"ytdl:https://video.twimg.com/ext_tw_video/.*.m3u8",
         }),
         # content with emoji, newlines, hashtags (#338)
-        ("https://twitter.com/yumi_san0112/status/1151144618936823808", {
+        ("https://twitter.com/playpokemon/status/1263832915173048321", {
             "options": (("content", True),),
             "keyword": {"content": (
-                "re:晴、お誕生日おめでとう🎉！\n実は下の名前が同じなので結構親近感ある"
-                "アイドルです✨\n今年の晴ちゃんめちゃくちゃ可愛い路線攻めてるから、そろ"
-                "そろまたかっこいい晴が見たいですねw\n#結城晴生誕祭2019\n#結城晴生誕祭"
+                r"re:Gear up for #PokemonSwordShieldEX with special Mystery "
+                "Gifts! \n\nYou’ll be able to receive four Galarian form "
+                "Pokémon with Hidden Abilities, plus some very useful items. "
+                "It’s our \\(Mystery\\) Gift to you, Trainers! \n\n❓🎁➡️ "
             )},
         }),
         # Reply to another tweet (#403)
