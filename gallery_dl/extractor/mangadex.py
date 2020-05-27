@@ -51,7 +51,8 @@ class MangadexChapterExtractor(MangadexExtractor):
     test = (
         ("https://mangadex.org/chapter/122094", {
             "keyword": "ef1084c2845825979e150512fed8fdc209baf05a",
-            "content": "7ab3bef5caccb62b881f8e6e70359d3c7be8137f",
+            "content": ("a5f6b7b1434b555ed5fe1347994cda5360509658",
+                        "7ab3bef5caccb62b881f8e6e70359d3c7be8137f"),
         }),
         # oneshot
         ("https://mangadex.cc/chapter/138086", {
