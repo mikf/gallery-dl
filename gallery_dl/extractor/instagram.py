@@ -145,20 +145,16 @@ class InstagramExtractor(Extractor):
             )),
         }
 
-        if self._find_tags(common['description']):
-            common['tags'] = sorted(
-                set(self._find_tags(common['description'])))
+        tags = self._find_tags(common['description'])
+        if tags:
+            common['tags'] = sorted(set(tags))
 
-        if media['location']:
-            common['location_id'] = media['location']['id']
-            common['location_slug'] = media['location']['slug']
-            common['location_url'] = (
-                'https://www.instagram.com/explore/locations/' +
-                media['location']['id'] +
-                '/' +
-                media['location']['slug'] +
-                '/'
-            )
+        location = media['location']
+        if location:
+            common['location_id'] = location['id']
+            common['location_slug'] = location['slug']
+            common['location_url'] = "{}/explore/locations/{}/{}/".format(
+                self.root, location['id'], location['slug'])
 
         medias = []
         if media['__typename'] == 'GraphSidecar':
@@ -329,17 +325,16 @@ class InstagramExtractor(Extractor):
             )
 
     def _extract_tagged_users(self, src_media, dest_dict):
-        if src_media['edge_media_to_tagged_user']['edges']:
-            tagged_users = []
-            for num, edge in enumerate(
-                    src_media['edge_media_to_tagged_user']['edges'], 1):
-                tagged = edge['node']
-                tagged_data = {
-                    'username': tagged['user']['username'],
-                    'full_name': tagged['user']['full_name'],
-                }
-            tagged_users.append(tagged_data)
-            dest_dict['tagged_users'] = tagged_users
+        edges = src_media['edge_media_to_tagged_user']['edges']
+        if edges:
+            dest_dict['tagged_users'] = tagged_users = []
+            for edge in edges:
+                user = edge['node']['user']
+                tagged_users.append({
+                    'id'       : user['id'],
+                    'username' : user['username'],
+                    'full_name': user['full_name'],
+                })
 
 
 class InstagramImageExtractor(InstagramExtractor):
@@ -359,6 +354,7 @@ class InstagramImageExtractor(InstagramExtractor):
                 "likes": int,
                 "location_id": "214424288",
                 "location_slug": "hong-kong",
+                "location_url": "re:/explore/locations/214424288/hong-kong/",
                 "media_id": "1922949326347663701",
                 "shortcode": "BqvsDleB3lV",
                 "post_id": "1922949326347663701",
@@ -436,8 +432,9 @@ class InstagramImageExtractor(InstagramExtractor):
         ("https://www.instagram.com/p/B_2lf3qAd3y/", {
             "keyword": {
                 "tagged_users": [{
+                    "id": "1246468638",
+                    "username": "kaaymbl",
                     "full_name": "Call Me Kay",
-                    "username": "kaaymbl"
                 }]
             }
         }),
