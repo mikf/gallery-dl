@@ -24,6 +24,7 @@ _config = {}
 
 if util.WINDOWS:
     _default_configs = [
+        r"%APPDATA%\gallery-dl\config.json",
         r"%USERPROFILE%\gallery-dl\config.json",
         r"%USERPROFILE%\gallery-dl.conf",
     ]
