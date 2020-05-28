@@ -14,6 +14,7 @@ from .. import text, exception
 from ..cache import cache
 import itertools
 import json
+import re
 
 
 class InstagramExtractor(Extractor):
@@ -25,6 +26,10 @@ class InstagramExtractor(Extractor):
     root = "https://www.instagram.com"
     cookiedomain = ".instagram.com"
     cookienames = ("sessionid",)
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self._find_tags = re.compile(r'#\w+').findall
 
     def get_metadata(self):
         return {}
@@ -133,11 +138,27 @@ class InstagramExtractor(Extractor):
             'fullname': media['owner']['full_name'],
             'post_id': media['id'],
             'post_shortcode': media['shortcode'],
+            'post_url': url,
             'description': text.parse_unicode_escapes('\n'.join(
                 edge['node']['text']
                 for edge in media['edge_media_to_caption']['edges']
             )),
         }
+
+        if self._find_tags(common['description']):
+            common['tags'] = sorted(
+                set(self._find_tags(common['description'])))
+
+        if media['location']:
+            common['location_id'] = media['location']['id']
+            common['location_slug'] = media['location']['slug']
+            common['location_url'] = (
+                'https://www.instagram.com/explore/locations/' +
+                media['location']['id'] +
+                '/' +
+                media['location']['slug'] +
+                '/'
+            )
 
         medias = []
         if media['__typename'] == 'GraphSidecar':
@@ -156,6 +177,7 @@ class InstagramExtractor(Extractor):
                     'sidecar_media_id': media['id'],
                     'sidecar_shortcode': media['shortcode'],
                 }
+                self._extract_tagged_users(children, media_data)
                 media_data.update(common)
                 medias.append(media_data)
 
@@ -169,6 +191,7 @@ class InstagramExtractor(Extractor):
                 'height': text.parse_int(media['dimensions']['height']),
                 'width': text.parse_int(media['dimensions']['width']),
             }
+            self._extract_tagged_users(media, media_data)
             media_data.update(common)
             medias.append(media_data)
 
@@ -305,6 +328,19 @@ class InstagramExtractor(Extractor):
                 variables, psdf['query_hash'], csrf,
             )
 
+    def _extract_tagged_users(self, src_media, dest_dict):
+        if src_media['edge_media_to_tagged_user']['edges']:
+            tagged_users = []
+            for num, edge in enumerate(
+                    src_media['edge_media_to_tagged_user']['edges'], 1):
+                tagged = edge['node']
+                tagged_data = {
+                    'username': tagged['user']['username'],
+                    'full_name': tagged['user']['full_name'],
+                }
+            tagged_users.append(tagged_data)
+            dest_dict['tagged_users'] = tagged_users
+
 
 class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
@@ -321,10 +357,14 @@ class InstagramImageExtractor(InstagramExtractor):
                 "description": str,
                 "height": int,
                 "likes": int,
+                "location_id": "214424288",
+                "location_slug": "hong-kong",
                 "media_id": "1922949326347663701",
                 "shortcode": "BqvsDleB3lV",
                 "post_id": "1922949326347663701",
                 "post_shortcode": "BqvsDleB3lV",
+                "post_url": "https://www.instagram.com/p/BqvsDleB3lV/",
+                "tags": ["#WHPsquares"],
                 "typename": "GraphImage",
                 "username": "instagram",
                 "width": int,
@@ -339,6 +379,7 @@ class InstagramImageExtractor(InstagramExtractor):
                 "sidecar_shortcode": "BoHk1haB5tM",
                 "post_id": "1875629777499953996",
                 "post_shortcode": "BoHk1haB5tM",
+                "post_url": "https://www.instagram.com/p/BoHk1haB5tM/",
                 "num": int,
                 "likes": int,
                 "username": "instagram",
@@ -354,7 +395,9 @@ class InstagramImageExtractor(InstagramExtractor):
                 "height": int,
                 "likes": int,
                 "media_id": "1923502432034620000",
+                "post_url": "https://www.instagram.com/p/Bqxp0VSBgJg/",
                 "shortcode": "Bqxp0VSBgJg",
+                "tags": ["#ASMR"],
                 "typename": "GraphVideo",
                 "username": "instagram",
                 "width": int,
@@ -370,6 +413,7 @@ class InstagramImageExtractor(InstagramExtractor):
                 "height": int,
                 "likes": int,
                 "media_id": "1806097553666903266",
+                "post_url": "https://www.instagram.com/p/BkQjCfsBIzi/",
                 "shortcode": "BkQjCfsBIzi",
                 "typename": "GraphVideo",
                 "username": "instagram",
@@ -381,11 +425,22 @@ class InstagramImageExtractor(InstagramExtractor):
         ("https://www.instagram.com/p/BtOvDOfhvRr/", {
             "count": 2,
             "keyword": {
+                "post_url": "https://www.instagram.com/p/BtOvDOfhvRr/",
                 "sidecar_media_id": "1967717017113261163",
                 "sidecar_shortcode": "BtOvDOfhvRr",
                 "video_url": str,
             }
-        })
+        }),
+
+        # GraphImage with tagged user
+        ("https://www.instagram.com/p/B_2lf3qAd3y/", {
+            "keyword": {
+                "tagged_users": [{
+                    "full_name": "Call Me Kay",
+                    "username": "kaaymbl"
+                }]
+            }
+        }),
     )
 
     def __init__(self, match):
