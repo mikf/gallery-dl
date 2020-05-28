@@ -194,20 +194,21 @@ def _path():
         return util.expand_path(path)
 
     if util.WINDOWS:
-        import tempfile
-        return os.path.join(tempfile.gettempdir(), ".gallery-dl.cache")
+        cachedir = os.environ.get("APPDATA", "~")
+    else:
+        cachedir = os.environ.get("XDG_CACHE_HOME", "~/.cache")
 
-    cachedir = util.expand_path(os.path.join(
-        os.environ.get("XDG_CACHE_HOME", "~/.cache"), "gallery-dl"))
+    cachedir = util.expand_path(os.path.join(cachedir, "gallery-dl"))
     os.makedirs(cachedir, exist_ok=True)
     return os.path.join(cachedir, "cache.sqlite3")
 
 
 try:
     dbfile = _path()
-    if not util.WINDOWS:
-        # restrict access permissions for new db files
-        os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
+
+    # restrict access permissions for new db files
+    os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
+
     DatabaseCacheDecorator.db = sqlite3.connect(
         dbfile, timeout=30, check_same_thread=False)
 except (OSError, TypeError, sqlite3.OperationalError):

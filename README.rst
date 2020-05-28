@@ -170,7 +170,7 @@ Configuration files for *gallery-dl* use a JSON-based file format.
 +--------------------------------------------+------------------------------------------+
 | Linux                                      | Windows                                  |
 +--------------------------------------------+------------------------------------------+
-|* ``/etc/gallery-dl.conf``                  |*                                         |
+|* ``/etc/gallery-dl.conf``                  |* ``%APPDATA%\gallery-dl\config.json``    |
 |* ``${HOME}/.config/gallery-dl/config.json``|* ``%USERPROFILE%\gallery-dl\config.json``|
 |* ``${HOME}/.gallery-dl.conf``              |* ``%USERPROFILE%\gallery-dl.conf``       |
 +--------------------------------------------+------------------------------------------+
