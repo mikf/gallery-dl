@@ -51,20 +51,29 @@ class HentainexusGalleryExtractor(GalleryExtractor):
             "description": rmve(extr('viewcolumn">Description</td>', '</td>')),
         }
         data["lang"] = util.language_to_code(data["language"])
-        data["type"] = "Doujinshi" if 'doujin' in data["tags"] else "Manga"
-        data["title_conventional"] = self.join_title(
-            data["event"],
-            data["circle"],
-            data["artist"],
-            data["title"],
-            data["parody"],
-            data["book"],
-            data["magazine"],
-        )
+        if 'doujin' in data['tags']:
+            data['type'] = 'Doujinshi'
+        elif 'illustration' in data['tags']:
+            data['type'] = 'Illustration'
+        else:
+            data['type'] = 'Manga'
+        data["title_conventional"] = self.join_title(data)
         return data
 
     @staticmethod
-    def join_title(event, circle, artist, title, parody, book, magazine):
+    def join_title(data):
+        event    = data['event']
+        circle   = data['circle']
+        artist   = data['artist']
+        title    = data['title']
+        parody   = data['parody']
+        book     = data['book']
+        magazine = data['magazine']
+        # a very few galleries have large number of artists or parodies, replaced with "Various" in the title string
+        if len(artist.split(',')) > 3:
+            artist = 'Various'
+        if len(parody.split(',')) > 3:
+            parody = 'Various'
         jt = ''
         if event:
             jt += '({}) '.format(event)
