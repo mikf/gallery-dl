@@ -57,23 +57,32 @@ class HentainexusGalleryExtractor(GalleryExtractor):
             data['type'] = 'Illustration'
         else:
             data['type'] = 'Manga'
-        data["title_conventional"] = self.join_title(data)
+        data["title_conventional"] = self._join_title(data)
         return data
 
+    def images(self, page):
+        url = "{}/read/{}".format(self.root, self.gallery_id)
+        extr = text.extract_from(self.request(url).text)
+        urls = extr("initReader(", "]") + "]"
+        return [(url, None) for url in json.loads(urls)]
+
     @staticmethod
-    def join_title(data):
-        event    = data['event']
-        circle   = data['circle']
-        artist   = data['artist']
-        title    = data['title']
-        parody   = data['parody']
-        book     = data['book']
+    def _join_title(data):
+        event = data['event']
+        artist = data['artist']
+        circle = data['circle']
+        title = data['title']
+        parody = data['parody']
+        book = data['book']
         magazine = data['magazine']
-        # a very few galleries have large number of artists or parodies, replaced with "Various" in the title string
-        if len(artist.split(',')) > 3:
+
+        # a few galleries have a large number of artists or parodies,
+        # which get replaced with "Various" in the title string
+        if artist.count(',') >= 3:
             artist = 'Various'
-        if len(parody.split(',')) > 3:
+        if parody.count(',') >= 3:
             parody = 'Various'
+
         jt = ''
         if event:
             jt += '({}) '.format(event)
@@ -89,12 +98,6 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         if magazine:
             jt += ' ({})'.format(magazine)
         return jt
-
-    def images(self, page):
-        url = "{}/read/{}".format(self.root, self.gallery_id)
-        extr = text.extract_from(self.request(url).text)
-        urls = extr("initReader(", "]") + "]"
-        return [(url, None) for url in json.loads(urls)]
 
 
 class HentainexusSearchExtractor(Extractor):
