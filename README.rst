@@ -100,13 +100,14 @@ Linux users that are using a distro that is supported by Snapd_ can install *gal
     $ snap install gallery-dl
 
 Chocolatey
-----
+----------
 
 Windows users that have Chocolatey_ installed can install *gallery-dl* from the Chocolatey Community Packages repository:
 
 .. code:: powershell
 
     $ choco install gallery-dl
+
 
 Usage
 =====
@@ -192,26 +193,24 @@ Authentication
 Username & Password
 -------------------
 
-Some extractors require you to provide valid login-credentials in the form of
+Some extractors require you to provide valid login credentials in the form of
 a username & password pair. This is necessary for
 ``pixiv``, ``nijie``, and ``seiga``
 and optional for
-``danbooru``, ``e621``, ``exhentai``, ``idolcomplex``,
+``danbooru``, ``e621``, ``exhentai``, ``idolcomplex``, ``instagram``,
 ``luscious``, ``sankaku``, ``tsumino``, and ``twitter``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
 
-.. code::
+.. code:: json
 
     {
         "extractor": {
-            ...
             "pixiv": {
                 "username": "<username>",
                 "password": "<password>"
             }
-            ...
         }
     }
 
@@ -224,6 +223,49 @@ or you can provide them directly via the
     $ gallery-dl -u <username> -p <password> URL
     $ gallery-dl -o username=<username> -o password=<password> URL
 
+Cookies
+-------
+
+For sites where login with username & password is not possible due to
+CAPTCHA or similar, or has not been implemented yet, you can use the
+cookies from a browser login session and input them into *gallery-dl*.
+
+This can be done via the
+`cookies <https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractorcookies>`__
+option in your configuration file by specifying
+
+- | the path to a Mozilla/Netscape format cookies.txt file exported by a browser addon
+  | (e.g. `cookies.txt <https://chrome.google.com/webstore/detail/cookiestxt/njabckikapfpffapmjgojcnbfjonfjfg>`__ for Chrome,
+    `Export Cookies <https://addons.mozilla.org/en-US/firefox/addon/export-cookies-txt/?src=search>`__ for Firefox)
+
+- | a list of name-value pairs gathered from your browser's web developer tools
+  | (in `Chrome <https://developers.google.com/web/tools/chrome-devtools/storage/cookies>`__,
+     in `Firefox <https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector>`__)
+
+For example:
+
+.. code:: json
+
+    {
+        "extractor": {
+            "instagram": {
+                "cookies": "$HOME/path/to/cookies.txt"
+            },
+            "patreon": {
+                "cookies": {
+                    "session_id": "K1T57EKu19TR49C51CDjOJoXNQLF7VbdVOiBrC9ye0a"
+                }
+            }
+        }
+    }
+
+You can also specify a cookies.txt file with
+the :code:`--cookies` command-line option:
+
+.. code:: bash
+
+    $ gallery-dl --cookies "$HOME/path/to/cookies.txt" URL
+
 OAuth
 -----
 
@@ -234,7 +276,7 @@ to issue requests on your account's behalf and enables it to access resources
 which would otherwise be unavailable to a public user.
 
 To link your account to *gallery-dl*, start by invoking it with
-``oauth:<site-name>`` as an argument. For example:
+``oauth:<sitename>`` as an argument. For example:
 
 .. code:: bash
 
@@ -261,7 +303,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _pyOpenSSL:  https://pyopenssl.org/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
-.. _Chocolatey:      https://chocolatey.org/install
+.. _Chocolatey: https://chocolatey.org/install
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.org/project/gallery-dl/
