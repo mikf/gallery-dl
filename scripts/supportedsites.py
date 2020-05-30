@@ -151,6 +151,7 @@ AUTH_MAP = {
     "flickr"     : "Optional (OAuth)",
     "idolcomplex": "Optional",
     "imgbb"      : "Optional",
+    "instagram"  : "Optional",
     "mangoxo"    : "Optional",
     "newgrounds" : "Optional",
     "nijie"      : "Required",

@@ -10,10 +10,11 @@
 """Extractors for https://www.instagram.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 from ..cache import cache
 import itertools
 import json
+import time
 import re
 
 
@@ -66,10 +67,36 @@ class InstagramExtractor(Extractor):
 
     @cache(maxage=360*24*3600, keyarg=1)
     def _login_impl(self, username, password):
-        self.log.warning(
-            'Logging in with username and password is currently not possible. '
-            'Use cookies from your browser session instead.')
-        return {}
+        self.log.info("Logging in as %s", username)
+
+        page = self.request(self.root + "/accounts/login/").text
+        headers = {
+            "Referer"         : self.root + "/accounts/login/",
+            "X-IG-App-ID"     : "936619743392459",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+
+        response = self.request(self.root + "/web/__mid/", headers=headers)
+        headers["X-CSRFToken"] = response.cookies["csrftoken"]
+        headers["X-Instagram-AJAX"] = text.extract(
+            page, '"rollout_hash":"', '"')[0]
+
+        url = self.root + "/accounts/login/ajax/"
+        data = {
+            "username"     : username,
+            "enc_password" : "#PWD_INSTAGRAM_BROWSER:0:{}:{}".format(
+                int(time.time()), password),
+            "queryParams"  : "{}",
+            "optIntoOneTap": "false",
+        }
+        response = self.request(url, method="POST", headers=headers, data=data)
+
+        if not response.json().get("authenticated"):
+            raise exception.AuthenticationError()
+        return {
+            key: self.session.cookies.get(key)
+            for key in ("sessionid", "mid", "csrftoken")
+        }
 
     def _request_graphql(self, variables, query_hash, csrf=None):
         headers = {
