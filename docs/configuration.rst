@@ -230,6 +230,7 @@ Description The username and password to use when attempting to log in to
             * ``e621``
             * ``exhentai``
             * ``idolcomplex``
+            * ``instagram``
             * ``luscious``
             * ``sankaku``
             * ``tsumino``
