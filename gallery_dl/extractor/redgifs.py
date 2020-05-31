@@ -17,7 +17,7 @@ class RedgifsImageExtractor(GfycatImageExtractor):
     category = "redgifs"
     pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/watch/([A-Za-z]+)"
     test = ("https://redgifs.com/watch/foolishforkedabyssiniancat", {
-        "pattern": "https://giant.gfycat.com/FoolishForkedAbyssiniancat.mp4",
+        "pattern": r"https://\w+.redgifs.com/FoolishForkedAbyssiniancat.mp4",
         "content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
     })
 
