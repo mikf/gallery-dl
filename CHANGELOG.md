@@ -1,6 +1,32 @@
 # Changelog
 
-## Unreleased
+## 1.14.0 - 2020-05-31
+### Additions
+- [imagechest] add new extractor for imgchest.com ([#750](https://github.com/mikf/gallery-dl/issues/750))
+- [instagram] add `post_url`, `tags`, `location`, `tagged_users` metadata ([#743](https://github.com/mikf/gallery-dl/issues/743))
+- [redgifs] add image extractor ([#724](https://github.com/mikf/gallery-dl/issues/724))
+- [webtoons] add new extractor for webtoons.com ([#761](https://github.com/mikf/gallery-dl/issues/761))
+- implement `--write-pages` option ([#736](https://github.com/mikf/gallery-dl/issues/736))
+- extend `path-restrict` option ([#662](https://github.com/mikf/gallery-dl/issues/662))
+- implement `path-replace` option ([#662](https://github.com/mikf/gallery-dl/issues/662), [#755](https://github.com/mikf/gallery-dl/issues/755))
+- make `path` and `keywords` available in logging messages ([#574](https://github.com/mikf/gallery-dl/issues/574), [#575](https://github.com/mikf/gallery-dl/issues/575))
+### Changes
+- [danbooru] change default value of `ugoira` to `false`
+- [downloader:ytdl] change default value of `forward-cookies` to `false`
+- [downloader:ytdl] fix file extensions when merging into `.mkv` ([#720](https://github.com/mikf/gallery-dl/issues/720))
+- write OAuth tokens to cache ([#616](https://github.com/mikf/gallery-dl/issues/616))
+- use `%APPDATA%\gallery-dl` for config files and cache on Windows
+- use `util.Formatter` for formatting logging messages
+- reuse HTTP connections from parent extractors
+### Fixes
+- [deviantart] use private access tokens for Journals ([#738](https://github.com/mikf/gallery-dl/issues/738))
+- [gelbooru] simplify and fix pool extraction
+- [imgur] fix extraction of animated images without `mp4` entry
+- [imgur] treat `/t/unmuted/` URLs as galleries
+- [instagram] fix login with username & password ([#756](https://github.com/mikf/gallery-dl/issues/756), [#771](https://github.com/mikf/gallery-dl/issues/771), [#797](https://github.com/mikf/gallery-dl/issues/797), [#803](https://github.com/mikf/gallery-dl/issues/803))
+- [reddit] don't send OAuth headers for file downloads ([#729](https://github.com/mikf/gallery-dl/issues/729))
+- fix/improve Cloudflare bypass code ([#728](https://github.com/mikf/gallery-dl/issues/728), [#757](https://github.com/mikf/gallery-dl/issues/757))
+- reset filenames on empty file extensions ([#733](https://github.com/mikf/gallery-dl/issues/733))
 
 ## 1.13.6 - 2020-05-02
 ### Additions
