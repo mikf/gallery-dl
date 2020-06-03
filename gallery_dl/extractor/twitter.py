@@ -91,43 +91,40 @@ class TwitterExtractor(Extractor):
         username, password = self._get_auth_info()
         if username:
             self._update_cookies(self._login_impl(username, password))
-            #  self.logged_in = True
 
     @cache(maxage=360*24*3600, keyarg=1)
     def _login_impl(self, username, password):
-        self.log.warning(
-            'Logging in with username and password is currently not possible. '
-            'Use cookies from your browser session instead.')
-        return {}
-
-        """
         self.log.info("Logging in as %s", username)
 
-        headers = {"User-Agent": self.user_agent}
-        page = self.request(self.root + "/login", headers=headers).text
-        pos = page.index('name="authenticity_token"')
-        token = text.extract(page, 'value="', '"', pos-80)[0]
+        url = "https://mobile.twitter.com/i/nojs_router"
+        params = {"path": "/login"}
+        headers = {"Referer": self.root + "/", "Origin": self.root}
+        page = self.request(
+            url, method="POST", params=params, headers=headers, data={}).text
 
-        url = self.root + "/sessions"
+        pos = page.index('name="authenticity_token"')
+        token = text.extract(page, 'value="', '"', pos)[0]
+
+        url = "https://mobile.twitter.com/sessions"
         data = {
+            "authenticity_token"        : token,
             "session[username_or_email]": username,
             "session[password]"         : password,
-            #  "authenticity_token"        : token,
-            "ui_metrics"                : '{"rf":{},"s":""}',
-            "scribe_log"                : "",
-            "redirect_after_login"      : "",
             "remember_me"               : "1",
+            "wfa"                       : "1",
+            "commit"                    : "+Log+in+",
+            "ui_metrics"                : "",
         }
-        response = self.request(url, method="POST", headers=headers, data=data)
-        if "/error" in response.url:
-            raise exception.AuthenticationError()
-
-        return {
+        response = self.request(url, method="POST", data=data)
+        cookies = {
             cookie.name: cookie.value
             for cookie in self.session.cookies
-            if cookie.domain and "twitter.com" in cookie.domain
+            if cookie.domain == self.cookiedomain
         }
-        """
+
+        if "/error" in response.url or "auth_token" not in cookies:
+            raise exception.AuthenticationError()
+        return cookies
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
