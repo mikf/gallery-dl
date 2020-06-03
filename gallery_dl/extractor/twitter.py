@@ -39,10 +39,13 @@ class TwitterExtractor(Extractor):
         yield Message.Version, 1
 
         for tweet in self.tweets():
+
             if not self.retweets and "retweeted_status_id_str" in tweet or \
                     not self.replies and "in_reply_to_user_id_str" in tweet:
                 continue
 
+            if self.twitpic:
+                self._extract_twitpic(tweet)
             if "extended_entities" not in tweet:
                 continue
 
@@ -74,11 +77,36 @@ class TwitterExtractor(Extractor):
                         text.nameext_from_url(url, tweet)
                         yield Message.Url, url, tweet
 
-                else:
+                elif "media_url_https" in media:
                     url = media["media_url_https"]
                     urls = [url + size for size in self.sizes]
                     text.nameext_from_url(url, tweet)
                     yield Message.Urllist, urls, tweet
+
+                else:
+                    url = media["media_url"]
+                    text.nameext_from_url(url, tweet)
+                    yield Message.Url, url, tweet
+
+    def _extract_twitpic(self, tweet):
+        twitpics = []
+        for url in tweet["entities"].get("urls", ()):
+            url = url["expanded_url"]
+            if "//twitpic.com/" in url:
+                response = self.request(url, fatal=False)
+                if response.status_code >= 400:
+                    continue
+                url = text.extract(
+                    response.text, 'name="twitter:image" value="', '"')[0]
+                twitpics.append({
+                    "original_info": {},
+                    "media_url"    : url,
+                })
+        if twitpics:
+            if "extended_entities" in tweet:
+                tweet["extended_entities"]["media"].extend(twitpics)
+            else:
+                tweet["extended_entities"] = {"media": twitpics}
 
     def metadata(self):
         """Return general metadata"""
