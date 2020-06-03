@@ -1192,15 +1192,6 @@ Description A (comma-separated) list of post types to extract images, etc. from.
 =========== =====
 
 
-extractor.twitter.content
--------------------------
-=========== =====
-Type        ``bool``
-Default     ``false``
-Description Extract tweet text as ``content`` metadata.
-=========== =====
-
-
 extractor.twitter.replies
 -------------------------
 =========== =====
