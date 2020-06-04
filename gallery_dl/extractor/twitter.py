@@ -403,6 +403,10 @@ class TwitterAPI():
 
                 if entry["entryId"].startswith(entry_tweet):
                     tid = entry["content"]["item"]["content"]["tweet"]["id"]
+                    if tid not in tweets:
+                        self.extractor.log.debug(
+                            "Skipping unavailable Tweet %s", tid)
+                        continue
                     tweet = tweets[tid]
                     tweet["user"] = users[tweet["user_id_str"]]
 
