@@ -50,10 +50,17 @@ class TwitterExtractor(Extractor):
                 continue
 
             tweet.update(metadata)
+            tweet["date"] = text.parse_datetime(
+                tweet["created_at"], "%a %b %d %H:%M:%S %z %Y")
+            entities = tweet["extended_entities"]
+            del tweet["extended_entities"]
+            del tweet["entities"]
+
             yield Message.Directory, tweet
-            for tweet["num"], media in enumerate(
-                    tweet["extended_entities"]["media"], 1):
-                tweet.update(media["original_info"])
+            for tweet["num"], media in enumerate(entities["media"], 1):
+
+                tweet["width"] = media["original_info"].get("width", 0)
+                tweet["height"] = media["original_info"].get("height", 0)
 
                 if "video_info" in media and self.videos:
 
