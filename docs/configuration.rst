@@ -576,7 +576,8 @@ extractor.deviantart.extra
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Download extra Sta.sh resources from description texts.
+Description Download extra Sta.sh resources from
+            description texts and journals.
 
             Note: Enabling this option also enables deviantart.metadata_.
 =========== =====
