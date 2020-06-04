@@ -123,6 +123,10 @@ class DeviantartExtractor(Extractor):
                 journal = self.api.deviation_content(deviation["deviationid"])
                 yield self.commit_journal(deviation, journal)
 
+                if self.extra:
+                    deviation["description"] = \
+                        deviation.get("description", "") + journal["html"]
+
             if self.extra:
                 for match in DeviantartStashExtractor.pattern.finditer(
                         deviation.get("description", "")):
