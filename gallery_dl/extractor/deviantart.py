@@ -121,15 +121,14 @@ class DeviantartExtractor(Extractor):
 
             if "excerpt" in deviation and self.commit_journal:
                 journal = self.api.deviation_content(deviation["deviationid"])
+                if self.extra:
+                    deviation["_journal"] = journal["html"]
                 yield self.commit_journal(deviation, journal)
 
-                if self.extra:
-                    deviation["description"] = \
-                        deviation.get("description", "") + journal["html"]
-
             if self.extra:
-                for match in DeviantartStashExtractor.pattern.finditer(
-                        deviation.get("description", "")):
+                txt = (deviation.get("description", "") +
+                       deviation.get("_journal", ""))
+                for match in DeviantartStashExtractor.pattern.finditer(txt):
                     url = text.ensure_http_scheme(match.group(0))
                     deviation["_extractor"] = DeviantartStashExtractor
                     yield Message.Queue, url, deviation
