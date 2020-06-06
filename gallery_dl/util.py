@@ -84,6 +84,13 @@ def filter_dict(a):
     return {k: v for k, v in a.items() if k[0] != "_"}
 
 
+def delete_items(obj, keys):
+    """Remove all 'keys' from 'obj'"""
+    for key in keys:
+        if key in obj:
+            del obj[key]
+
+
 def number_to_string(value, numbers=(int, float)):
     """Convert numbers (int, float) to string; Return everything else as is."""
     return str(value) if value.__class__ in numbers else value
