@@ -273,7 +273,7 @@ class TwitterSearchExtractor(TwitterExtractor):
     })
 
     def metadata(self):
-        return {"search": self.user}
+        return {"search": text.unquote(self.user)}
 
     def tweets(self):
         return TwitterAPI(self).search(self.user)
@@ -391,7 +391,7 @@ class TwitterAPI():
             #  "count": "20",
             "count": "100",
             "cursor": None,
-            "ext": "mediaStats%2ChighlightedLabel%2CcameraMoment",
+            "ext": "mediaStats,highlightedLabel,cameraMoment",
             "include_quote_count": "true",
         }
 
@@ -430,7 +430,7 @@ class TwitterAPI():
     def search(self, query):
         endpoint = "2/search/adaptive.json"
         params = self.params.copy()
-        params["q"] = query
+        params["q"] = text.unquote(query)
         return self._pagination(
             endpoint, params, "sq-I-t-", "sq-cursor-bottom")
 
@@ -465,13 +465,16 @@ class TwitterAPI():
             params = self.params.copy()
 
         while True:
-            cursor = None
+            cursor = tweet = None
             data = self._call(endpoint, params)
+
+            instr = data["timeline"]["instructions"]
+            if not instr:
+                return
             tweets = data["globalObjects"]["tweets"]
             users = data["globalObjects"]["users"]
-            instr = data["timeline"]["instructions"][0]
 
-            for entry in instr["addEntries"]["entries"]:
+            for entry in instr[0]["addEntries"]["entries"]:
 
                 if entry["entryId"].startswith(entry_tweet):
                     tid = entry["content"]["item"]["content"]["tweet"]["id"]
@@ -497,9 +500,17 @@ class TwitterAPI():
                     yield tweet
 
                 elif entry["entryId"].startswith(entry_cursor):
-                    cursor = entry["content"]["operation"]["cursor"]["value"]
+                    cursor = entry["content"]["operation"]["cursor"]
+                    if not cursor.get("stopOnEmptyResponse"):
+                        # keep going even if there are no tweets
+                        tweet = True
+                    cursor = cursor["value"]
 
-            if not cursor or params["cursor"] == cursor:
+            if "replaceEntry" in instr[-1] :
+                cursor = (instr[-1]["replaceEntry"]["entry"]
+                          ["content"]["operation"]["cursor"]["value"])
+
+            if not cursor or not tweet:
                 return
             params["cursor"] = cursor
 
