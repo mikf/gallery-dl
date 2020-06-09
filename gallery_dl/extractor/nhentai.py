@@ -54,8 +54,8 @@ class NhentaiGalleryExtractor(NhentaiBase, GalleryExtractor):
         self.data = None
 
     def metadata(self, page):
-        data = json.loads(text.extract(page, "N.gallery(", ");")[0])
-        self.data = data
+        self.data = data = json.loads(text.parse_unicode_escapes(text.extract(
+            page, 'JSON.parse("', '");')[0]))
 
         title_en = data["title"].get("english", "")
         title_ja = data["title"].get("japanese", "")
