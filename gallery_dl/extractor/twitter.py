@@ -146,6 +146,9 @@ class TwitterExtractor(Extractor):
                 "nick": u["name"],
             } for u in mentions]
 
+        if "in_reply_to_screen_name" in tweet:
+            tdata["reply_to"] = tweet["in_reply_to_screen_name"]
+
         if "full_text_quoted" in tweet:
             tdata["content_quoted"] = tweet["full_text_quoted"]
 
