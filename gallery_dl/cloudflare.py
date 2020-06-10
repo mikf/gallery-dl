@@ -33,11 +33,21 @@ def solve_challenge(session, response, kwargs):
     parsed = urllib.parse.urlsplit(response.url)
     root = parsed.scheme + "://" + parsed.netloc
 
+    page = response.text
+    try:
+        params = {"ray": text.extract(page, '?ray=', '"')[0]}
+
+        url = root + "/cdn-cgi/images/trace/jschal/nojs/transparent.gif"
+        session.request("GET", url, params=params)
+
+        url = root + "/cdn-cgi/images/trace/jschal/js/nocookie/transparent.gif"
+        session.request("GET", url, params=params)
+    except Exception:
+        pass
+
     cf_kwargs = {}
     headers = cf_kwargs["headers"] = collections.OrderedDict()
     params = cf_kwargs["data"] = collections.OrderedDict()
-
-    page = response.text
     url = root + text.unescape(text.extract(page, 'action="', '"')[0])
     headers["Referer"] = response.url
 
