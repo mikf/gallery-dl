@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache, memcache
+from ..cache import cache
 import hashlib
 import time
 
@@ -441,7 +441,6 @@ class TwitterAPI():
         endpoint = "2/timeline/bookmark.json"
         return self._pagination(endpoint)
 
-    @memcache()
     def user_by_screen_name(self, screen_name):
         endpoint = "graphql/-xfUfZsnR_zqjFd-IfrN5A/UserByScreenName"
         params = {
