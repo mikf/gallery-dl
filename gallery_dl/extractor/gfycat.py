@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,7 +20,16 @@ class GfycatExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.key = match.group(1)
         self.formats = (self.config("format", "mp4"), "mp4", "webm", "gif")
+
+    def items(self):
+        metadata = self.metadata()
+        for gfycat in self.gfycats():
+            url = self._select_format(gfycat)
+            gfycat.update(metadata)
+            yield Message.Directory, gfycat
+            yield Message.Url, url, gfycat
 
     def _select_format(self, gfyitem):
         for fmt in self.formats:
@@ -31,9 +40,11 @@ class GfycatExtractor(Extractor):
                 return url
         return ""
 
-    def _get_info(self, gfycat_id):
-        url = "https://api.gfycat.com/v1/gfycats/" + gfycat_id
-        return self.request(url).json()["gfyItem"]
+    def metadata(self):
+        return {}
+
+    def gfycats(self):
+        return ()
 
 
 class GfycatImageExtractor(GfycatExtractor):
@@ -72,12 +83,6 @@ class GfycatImageExtractor(GfycatExtractor):
         ("https://gfycat.com/ru/UnequaledHastyAnkole"),
     )
 
-    def __init__(self, match):
-        GfycatExtractor.__init__(self, match)
-        self.gfycat_id = match.group(1)
-
-    def items(self):
-        gfyitem = self._get_info(self.gfycat_id)
-        yield Message.Version, 1
-        yield Message.Directory, gfyitem
-        yield Message.Url, self._select_format(gfyitem), gfyitem
+    def gfycats(self):
+        url = "https://api.gfycat.com/v1/gfycats/" + self.key
+        return (self.request(url).json()["gfyItem"],)
