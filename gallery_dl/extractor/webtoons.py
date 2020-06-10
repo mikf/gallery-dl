@@ -35,7 +35,7 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
     filename_fmt = "{episode}-{num:>02}.{extension}"
     archive_fmt = "{title_no}_{episode}_{num}"
     pattern = (BASE_PATTERN + r"/([^/?&#]+)/([^/?&#]+)/(?:[^/?&#]+))"
-               r"/viewer(?:\?([^#]+))")
+               r"/viewer(?:\?([^#'\"]+))")
     test = (
         (("https://www.webtoons.com/en/comedy/safely-endangered"
           "/ep-572-earth/viewer?title_no=352&episode_no=572"), {
@@ -111,6 +111,11 @@ class WebtoonsComicExtractor(WebtoonsExtractor):
           "list?title_no=1845&page=3"), {
             "count": ">= 15",
         }),
+        # (#820)
+        (("https://www.webtoons.com/en/challenge/scoob-and-shag/"
+          "list?title_no=210827&page=9"), {
+            "count": ">= 18",
+        }),
     )
 
     def __init__(self, match):
@@ -143,6 +148,8 @@ class WebtoonsComicExtractor(WebtoonsExtractor):
     @staticmethod
     def get_episode_urls(page):
         """Extract and return all episode urls in 'page'"""
-        pos = page.find('id="_listUl"')
-        return text.extract_iter(
-            page, '<a href="', '" class="NPI=a:list', pos)
+        page = text.extract(page, 'id="_listUl"', '</ul>')[0]
+        return [
+            match.group(0)
+            for match in WebtoonsEpisodeExtractor.pattern.finditer(page)
+        ]
