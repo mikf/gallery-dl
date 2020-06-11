@@ -9,9 +9,10 @@
 """Extract manga-chapters and entire manga from https://kissmanga.com/"""
 
 from .common import ChapterExtractor, MangaExtractor, Extractor
-from .. import text, aes, exception
+from .. import text, aes
 from ..cache import cache
 import hashlib
+import time
 import ast
 import re
 
@@ -24,18 +25,7 @@ class RedirectMixin():
             response = Extractor.request(self, url, **kwargs)
             if not response.history or "/AreYouHuman" not in response.url:
                 return response
-            if self.config("captcha", "stop") == "wait":
-                self.log.warning(
-                    "Redirect to \n%s\nVisit this URL in your browser, solve "
-                    "the CAPTCHA, and press ENTER to continue", response.url)
-                try:
-                    input()
-                except (EOFError, OSError):
-                    pass
-            else:
-                raise exception.StopExtraction(
-                    "Redirect to \n%s\nVisit this URL in your browser and "
-                    "solve the CAPTCHA to continue", response.url)
+            time.sleep(2)
 
 
 class KissmangaBase(RedirectMixin):
