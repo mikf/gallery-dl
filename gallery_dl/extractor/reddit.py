@@ -324,7 +324,11 @@ class RedditAPI():
             self.extractor.wait(seconds=response.headers["x-ratelimit-reset"])
             return self._call(endpoint, params)
 
-        data = response.json()
+        try:
+            data = response.json()
+        except ValueError:
+            raise exception.StopExtraction(text.remove_html(response.text))
+
         if "error" in data:
             if data["error"] == 403:
                 raise exception.AuthorizationError()
