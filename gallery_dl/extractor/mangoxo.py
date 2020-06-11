@@ -85,7 +85,7 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
             },
             "album": {
                 "id": "lzVOv1Q9",
-                "name": "池永康晟 Ikenaga Yasunari 透出古朴气息的日本美女人像画作",
+                "name": "re:池永康晟 Ikenaga Yasunari 透出古朴",
                 "date": "2019.3.22 14:42",
                 "description": str,
             },
