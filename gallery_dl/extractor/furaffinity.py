@@ -48,6 +48,7 @@ class FuraffinityExtractor(Extractor):
         extr = text.extract_from(self.request(url).text)
         title, _, artist = text.unescape(extr(
             'property="og:title" content="', '"')).rpartition(" by ")
+        artist_url = artist.replace("_", "").lower()
         path = extr('href="//d.facdn.net/', '"')
 
         if not path:
@@ -64,11 +65,12 @@ class FuraffinityExtractor(Extractor):
         rh = text.remove_html
 
         data = text.nameext_from_url(path, {
-            "id"    : pi(post_id),
-            "title" : title,
-            "artist": artist,
-            "user"  : self.user or artist,
-            "url"   : "https://d.facdn.net/" + path
+            "id"        : pi(post_id),
+            "title"     : title,
+            "artist"    : artist,
+            "artist_url": artist_url,
+            "user"      : self.user or artist_url,
+            "url"       : "https://d.facdn.net/" + path
         })
 
         tags = extr('class="tags-row">', '</section>')
@@ -178,6 +180,7 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
             "url": "eae4ef93d99365c69b31a37561bd800c03d336ad",
             "keyword": {
                 "artist"     : "mirlinthloth",
+                "artist_url" : "mirlinthloth",
                 "date"       : "dt:2016-11-27 17:24:06",
                 "description": "A Song made playing the game Cosmic DJ.",
                 "extension"  : "mp3",
