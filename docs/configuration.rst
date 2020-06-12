@@ -181,7 +181,7 @@ Type        ``bool`` or ``string``
 Default     ``true``
 Description Controls the behavior when downloading files that have been
             downloaded before, i.e. a file with the same filename already
-            exists or its ID is in a `download archive`__.
+            exists or its ID is in a `download archive <extractor.*.archive_>`__.
 
             * ``true``: Skip downloads
             * ``false``: Overwrite already existing files
@@ -197,8 +197,6 @@ Description Controls the behavior when downloading files that have been
             * ``"enumerate"``: Add an enumeration index to the beginning of the
               filename extension (``file.1.ext``, ``file.2.ext``, etc.)
 =========== =====
-
-__ `extractor.*.archive`_
 
 
 extractor.*.sleep
@@ -517,11 +515,9 @@ extractor.*.chapter-unique
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Like `image-unique`__, but applies to delegated URLs
-            like manga-chapters, etc.
+Description Like `image-unique <extractor.*.image-unique_>`__,
+            but applies to delegated URLs like manga-chapters, etc.
 =========== =====
-
-__ `extractor.*.image-unique`_
 
 
 extractor.*.date-format
@@ -967,7 +963,7 @@ Description Download Pixiv's Ugoira animations or ignore them.
             to watchable videos. (Example__)
 =========== =====
 
-__ https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
+.. __: https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
 
 
 extractor.plurk.comments
@@ -1107,6 +1103,21 @@ Description Control video download behavior.
 =========== =====
 
 
+extractor.redgifs.format
+------------------------
+=========== =====
+Type        ``string``
+Default     ``"mp4"``
+Description The name of the preferred format, which can be one of
+            ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"``, ``"mobile"``,
+            or ``"mini"``.
+
+            If the selected format is not available, ``"mp4"``, ``"webm"``
+            and ``"gif"`` (in that order) will be tried instead, until an
+            available format is found.
+=========== =====
+
+
 extractor.sankaku.wait-min & .wait-max
 --------------------------------------
 =========== =====
@@ -1227,10 +1238,8 @@ Type        ``bool`` or ``string``
 Default     ``true``
 Description Control video download behavior.
 
-            * ``true``: Download videos and use `youtube-dl`_ to handle
-              HLS ``.m3u8`` manifests
-            * ``"ytdl"``: Download videos and let `youtube-dl`_ handle all of
-              video extraction and download
+            * ``true``: Download videos
+            * ``"ytdl"``: Download videos using `youtube-dl`_
             * ``false``: Skip video Tweets
 =========== =====
 
@@ -1893,8 +1902,6 @@ Description Path of the SQLite3 database used to cache login sessions,
             this cache.
 =========== =====
 
-__ gettempdir_
-
 
 ciphers
 -------
@@ -2155,7 +2162,6 @@ Description An object with the ``name`` of a post-processor and its options.
 
 
 .. |.netrc| replace:: ``.netrc``
-.. |tempfile.gettempdir()| replace:: ``tempfile.gettempdir()``
 .. |requests.request()| replace:: ``requests.request()``
 .. |timeout| replace:: ``timeout``
 .. |verify| replace:: ``verify``
@@ -2181,7 +2187,6 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _format string:      https://docs.python.org/3/library/string.html#formatstrings
 .. _format strings:     https://docs.python.org/3/library/string.html#formatstrings
-.. _gettempdir:         https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
 .. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _webbrowser.open():  https://docs.python.org/3/library/webbrowser.html
 .. _mature_content:     https://www.deviantart.com/developers/http/v1/20160316/object/deviation
