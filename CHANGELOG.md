@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.14.1 - 2020-06-12
+### Additions
+- [furaffinity] add `artist_url` metadata field ([#821](https://github.com/mikf/gallery-dl/issues/821))
+- [redgifs] add `user` and `search` extractors ([#724](https://github.com/mikf/gallery-dl/issues/724))
+### Changes
+- [deviantart] extend `extra` option; also search journals for sta.sh links ([#712](https://github.com/mikf/gallery-dl/issues/712))
+- [twitter] rewrite; use new interface ([#806](https://github.com/mikf/gallery-dl/issues/806), [#740](https://github.com/mikf/gallery-dl/issues/740))
+### Fixes
+- [kissmanga] work around CAPTCHAs ([#818](https://github.com/mikf/gallery-dl/issues/818))
+- [nhentai] fix extraction ([#819](https://github.com/mikf/gallery-dl/issues/819))
+- [webtoons] generalize comic extraction code ([#820](https://github.com/mikf/gallery-dl/issues/820))
+
 ## 1.14.0 - 2020-05-31
 ### Additions
 - [imagechest] add new extractor for imgchest.com ([#750](https://github.com/mikf/gallery-dl/issues/750))
