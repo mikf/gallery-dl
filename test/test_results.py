@@ -312,6 +312,7 @@ def setup_test_config():
     config.set(("extractor", "e621")      , "username", None)
     config.set(("extractor", "instagram") , "username", None)
     config.set(("extractor", "twitter")   , "username", None)
+    config.set(("extractor", "twitter")   , "retries" , 10)
 
     config.set(("extractor", "newgrounds"), "username", "d1618111")
     config.set(("extractor", "newgrounds"), "password", "d1618111")
