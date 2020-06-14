@@ -81,6 +81,7 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
 class NaverBlogExtractor(NaverBase, Extractor):
     """Extractor for a user's blog on blog.naver.com"""
     subcategory = "blog"
+    categorytransfer = True
     pattern = (r"(?:https?://)?blog\.naver\.com/"
                r"(?:PostList.nhn\?(?:[^&#]+&)*blogId=([^&#]+)|(\w+)/?$)")
     test = (
