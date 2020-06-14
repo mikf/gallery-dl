@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.14.1 - 2020-06-12
 ### Additions
 - [furaffinity] add `artist_url` metadata field ([#821](https://github.com/mikf/gallery-dl/issues/821))

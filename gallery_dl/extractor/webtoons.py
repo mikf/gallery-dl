@@ -96,6 +96,7 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
 class WebtoonsComicExtractor(WebtoonsExtractor):
     """Extractor for an entire comic on webtoons.com"""
     subcategory = "comic"
+    categorytransfer = True
     pattern = (BASE_PATTERN + r"/([^/?&#]+)/([^/?&#]+))"
                r"/list(?:\?([^#]+))")
     test = (
