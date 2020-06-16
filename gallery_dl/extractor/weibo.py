@@ -32,6 +32,8 @@ class WeiboExtractor(Extractor):
 
             yield Message.Directory, status
             obj = status
+            obj["date"] = text.parse_datetime(
+                obj["created_at"], "%a %b %d %H:%M:%S %z %Y")
             num = 1
 
             while True:
@@ -124,6 +126,7 @@ class WeiboStatusExtractor(WeiboExtractor):
     test = (
         ("https://m.weibo.cn/detail/4323047042991618", {
             "pattern": r"https?://wx\d+.sinaimg.cn/large/\w+.jpg",
+            "keyword": {"status": {"date": "dt:2018-12-30 13:56:36"}},
         }),
         ("https://m.weibo.cn/detail/4339748116375525", {
             "pattern": r"https?://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_hd",
