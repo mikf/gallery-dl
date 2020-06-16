@@ -60,7 +60,7 @@ class TwitterExtractor(Extractor):
                 tdata["width"] = media["original_info"].get("width", 0)
                 tdata["height"] = media["original_info"].get("height", 0)
 
-                if "video_info" in media and self.videos:
+                if "video_info" in media:
 
                     if self.videos == "ytdl":
                         url = "ytdl:{}/i/web/status/{}".format(
@@ -68,7 +68,7 @@ class TwitterExtractor(Extractor):
                         tdata["extension"] = None
                         yield Message.Url, url, tdata
 
-                    else:
+                    elif self.videos:
                         video_info = media["video_info"]
                         variant = max(
                             video_info["variants"],
