@@ -160,6 +160,6 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
-.. |twitter-C| replace:: Bookmarks, Media Timelines, Search Results, Timelines, Tweets
+.. |twitter-C| replace:: Bookmarks, Likes, Media Timelines, Search Results, Timelines, Tweets
 .. |wallhaven-A| replace:: Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 .. |yuki-S| replace:: yuki.la 4chan archive

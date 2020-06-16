@@ -264,6 +264,27 @@ class TwitterMediaExtractor(TwitterExtractor):
         return TwitterAPI(self).timeline_media(self.user)
 
 
+class TwitterLikesExtractor(TwitterExtractor):
+    """Extractor for liked tweets"""
+    subcategory = "likes"
+    pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
+               r"/(?!search)([^/?&#]+)/likes(?!\w)")
+    test = ("https://twitter.com/supernaturepics/likes",)
+
+    def tweets(self):
+        return TwitterAPI(self).timeline_favorites(self.user)
+
+
+class TwitterBookmarkExtractor(TwitterExtractor):
+    """Extractor for bookmarked tweets"""
+    subcategory = "bookmark"
+    pattern = r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/i/bookmarks()"
+    test = ("https://twitter.com/i/bookmarks",)
+
+    def tweets(self):
+        return TwitterAPI(self).timeline_bookmark()
+
+
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for all images from a search timeline"""
     subcategory = "search"
@@ -344,16 +365,6 @@ class TwitterTweetExtractor(TwitterExtractor):
         return TwitterAPI(self).tweet(self.tweet_id)
 
 
-class TwitterBookmarkExtractor(TwitterExtractor):
-    """Extractor for bookmarked tweets"""
-    subcategory = "bookmark"
-    pattern = r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/i/bookmarks()"
-    test = ("https://twitter.com/i/bookmarks",)
-
-    def tweets(self):
-        return TwitterAPI(self).bookmarks()
-
-
 class TwitterAPI():
 
     def __init__(self, extractor):
@@ -430,16 +441,21 @@ class TwitterAPI():
         endpoint = "2/timeline/media/{}.json".format(user["rest_id"])
         return self._pagination(endpoint)
 
+    def timeline_favorites(self, screen_name):
+        user = self.user_by_screen_name(screen_name)
+        endpoint = "2/timeline/favorites/{}.json".format(user["rest_id"])
+        return self._pagination(endpoint)
+
+    def timeline_bookmark(self):
+        endpoint = "2/timeline/bookmark.json"
+        return self._pagination(endpoint)
+
     def search(self, query):
         endpoint = "2/search/adaptive.json"
         params = self.params.copy()
         params["q"] = text.unquote(query)
         return self._pagination(
             endpoint, params, "sq-I-t-", "sq-cursor-bottom")
-
-    def bookmarks(self):
-        endpoint = "2/timeline/bookmark.json"
-        return self._pagination(endpoint)
 
     def user_by_screen_name(self, screen_name):
         endpoint = "graphql/-xfUfZsnR_zqjFd-IfrN5A/UserByScreenName"
