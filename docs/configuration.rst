@@ -940,6 +940,15 @@ Description Download subalbums.
 =========== =====
 
 
+extractor.pinterest.sections
+----------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Include pins from board sections.
+=========== =====
+
+
 extractor.pixiv.user.avatar
 ---------------------------
 =========== =====
