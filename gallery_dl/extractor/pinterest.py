@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.pinterest.com/"""
+"""Extractors for https://www.pinterest.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
+import itertools
 import json
 
 
@@ -92,6 +93,11 @@ class PinterestBoardExtractor(PinterestExtractor):
             "pattern": r"https://i\.pinimg\.com/originals/",
             "count": 2,
         }),
+        # board with sections (#835)
+        ("https://www.pinterest.de/g1952849/stuff/", {
+            "options": (("sections", True),),
+            "count": 5,
+        }),
         ("https://www.pinterest.com/g1952848/test/", {
             "exception": exception.GalleryDLException,
         }),
@@ -100,16 +106,23 @@ class PinterestBoardExtractor(PinterestExtractor):
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
         self.user = text.unquote(match.group(1))
-        self.board = text.unquote(match.group(2))
-        self.board_id = 0
+        self.board_name = text.unquote(match.group(2))
+        self.board = None
 
     def metadata(self):
-        board = self.api.board(self.user, self.board)
-        self.board_id = board["id"]
-        return {"board": board}
+        self.board = self.api.board(self.user, self.board_name)
+        return {"board": self.board}
 
     def pins(self):
-        return self.api.board_pins(self.board_id)
+        board = self.board
+
+        if board["section_count"] and self.config("sections", True):
+            pins = [self.api.board_pins(board["id"])]
+            for section in self.api.board_sections(board["id"]):
+                pins.append(self.api.board_section_pins(section["id"]))
+            return itertools.chain.from_iterable(pins)
+        else:
+            return self.api.board_pins(board["id"])
 
 
 class PinterestRelatedPinExtractor(PinterestPinExtractor):
@@ -144,7 +157,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     })
 
     def pins(self):
-        return self.api.board_related(self.board_id)
+        return self.api.board_related(self.board["id"])
 
 
 class PinterestPinitExtractor(PinterestExtractor):
@@ -188,9 +201,10 @@ class PinterestAPI():
                                 "*/*, q=0.01",
         "Accept-Language"     : "en-US,en;q=0.5",
         "X-Pinterest-AppState": "active",
-        "X-APP-VERSION"       : "cb1c7f9",
+        "X-APP-VERSION"       : "b00dd49",
         "X-Requested-With"    : "XMLHttpRequest",
-        "Origin"              : BASE_URL + "/",
+        "Origin"              : BASE_URL,
+        "Referer"             : BASE_URL + "/",
     }
 
     def __init__(self, extractor):
@@ -206,9 +220,9 @@ class PinterestAPI():
         options = {"pin": pin_id, "add_vase": True, "pins_only": True}
         return self._pagination("RelatedPinFeed", options)
 
-    def board(self, user, board):
+    def board(self, user, board_name):
         """Query information about a board"""
-        options = {"slug": board, "username": user,
+        options = {"slug": board_name, "username": user,
                    "field_set_key": "detailed"}
         return self._call("Board", options)["resource_response"]["data"]
 
@@ -216,6 +230,16 @@ class PinterestAPI():
         """Yield all pins of a specific board"""
         options = {"board_id": board_id}
         return self._pagination("BoardFeed", options)
+
+    def board_sections(self, board_id):
+        """Yield all sections of a specific board"""
+        options = {"board_id": board_id}
+        return self._pagination("BoardSections", options)
+
+    def board_section_pins(self, section_id):
+        """Yield all pins from a board section"""
+        options = {"section_id": section_id}
+        return self._pagination("BoardSectionPins", options)
 
     def board_related(self, board_id):
         """Yield related pins of a specific board"""
