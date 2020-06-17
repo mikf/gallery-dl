@@ -407,6 +407,10 @@ class TestText(unittest.TestCase):
             datetime.datetime(2019, 5, 7, 12, 25, 2),
         )
         self.assertEqual(
+            f("2019-05-07T21:25:02.753+0900", "%Y-%m-%dT%H:%M:%S.%f%z"),
+            datetime.datetime(2019, 5, 7, 12, 25, 2),
+        )
+        self.assertEqual(
             f("2019-05-07T21:25:02", "%Y-%m-%dT%H:%M:%S", utcoffset=9),
             datetime.datetime(2019, 5, 7, 12, 25, 2),
         )
