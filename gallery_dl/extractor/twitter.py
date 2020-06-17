@@ -422,7 +422,7 @@ class TwitterAPI():
             self.headers["x-twitter-auth-type"] = "OAuth2Session"
         else:
             # guest token
-            guest_token = _guest_token(self.extractor, self.headers)
+            guest_token = self._guest_token()
             self.headers["x-guest-token"] = guest_token
             cookies.set("gt", guest_token, domain=".twitter.com")
 
@@ -467,10 +467,16 @@ class TwitterAPI():
         }
         return self._call(endpoint, params)["data"]["user"]
 
-    def _call(self, endpoint, params):
+    @cache(maxage=3600)
+    def _guest_token(self):
+        endpoint = "1.1/guest/activate.json"
+        return self._call(endpoint, None, "POST")["guest_token"]
+
+    def _call(self, endpoint, params, method="GET"):
         url = "https://api.twitter.com/" + endpoint
         response = self.extractor.request(
-            url, params=params, headers=self.headers, fatal=None)
+            url, method=method, params=params, headers=self.headers,
+            fatal=None)
         if response.status_code < 400:
             return response.json()
         if response.status_code == 429:
@@ -533,11 +539,3 @@ class TwitterAPI():
             if not cursor or not tweet:
                 return
             params["cursor"] = cursor
-
-
-@cache(maxage=3600)
-def _guest_token(extr, headers):
-    return extr.request(
-        "https://api.twitter.com/1.1/guest/activate.json",
-        method="POST", headers=headers,
-    ).json().get("guest_token")
