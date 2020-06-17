@@ -154,6 +154,8 @@ class TwitterExtractor(Extractor):
 
         if "author" in tweet:
             tdata["author"] = self._transform_user(tweet["author"])
+        else:
+            tdata["author"] = tdata["user"]
 
         return tdata
 
