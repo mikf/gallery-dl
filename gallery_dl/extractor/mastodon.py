@@ -52,6 +52,8 @@ class MastodonExtractor(Extractor):
         """Prepare a status object"""
         status["instance"] = self.instance
         status["tags"] = [tag["name"] for tag in status["tags"]]
+        status["date"] = text.parse_datetime(
+            status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
         attachments = status["media_attachments"]
         del status["media_attachments"]
         return attachments
