@@ -37,12 +37,14 @@ class MastodonExtractor(Extractor):
     def items(self):
         yield Message.Version, 1
         for status in self.statuses():
-            attachments = self.prepare(status)
-            yield Message.Directory, status
-            for media in attachments:
-                status["media"] = media
-                url = media["url"]
-                yield Message.Url, url, text.nameext_from_url(url, status)
+            attachments = status["media_attachments"]
+            if attachments:
+                self.prepare(status)
+                yield Message.Directory, status
+                for media in attachments:
+                    status["media"] = media
+                    url = media["url"]
+                    yield Message.Url, url, text.nameext_from_url(url, status)
 
     def statuses(self):
         """Return an iterable containing all relevant Status-objects"""
@@ -50,13 +52,11 @@ class MastodonExtractor(Extractor):
 
     def prepare(self, status):
         """Prepare a status object"""
+        del status["media_attachments"]
         status["instance"] = self.instance
         status["tags"] = [tag["name"] for tag in status["tags"]]
         status["date"] = text.parse_datetime(
             status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
-        attachments = status["media_attachments"]
-        del status["media_attachments"]
-        return attachments
 
 
 class MastodonUserExtractor(MastodonExtractor):
