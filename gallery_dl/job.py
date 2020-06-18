@@ -454,15 +454,18 @@ class KeywordJob(Job):
         self.print_kwdict(kwdict)
 
     def handle_queue(self, url, kwdict):
+        extr = None
+        if "_extractor" in kwdict:
+            extr = kwdict["_extractor"].from_url(url)
+
         if not util.filter_dict(kwdict):
             self.extractor.log.info(
                 "This extractor only spawns other extractors "
                 "and does not provide any metadata on its own.")
 
-            if "_extractor" in kwdict:
+            if extr:
                 self.extractor.log.info(
                     "Showing results for '%s' instead:\n", url)
-                extr = kwdict["_extractor"].from_url(url)
                 KeywordJob(extr, self).run()
             else:
                 self.extractor.log.info(
@@ -471,9 +474,9 @@ class KeywordJob(Job):
             print("Keywords for --chapter-filter:")
             print("------------------------------")
             self.print_kwdict(kwdict)
-            if self.extractor.categorytransfer:
+            if extr or self.extractor.categorytransfer:
                 print()
-                KeywordJob(url, self).run()
+                KeywordJob(extr or url, self).run()
         raise exception.StopExtraction()
 
     @staticmethod
