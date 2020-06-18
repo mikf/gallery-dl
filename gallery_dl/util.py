@@ -120,13 +120,14 @@ def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
     fp.write("\n")
 
 
-def dump_response(response, fp=sys.stdout,
-                  headers=True, content=True, hide_auth=True):
+def dump_response(response, fp, *,
+                  headers=False, content=True, hide_auth=True):
     """Write the contents of 'response' into a file-like object"""
 
     if headers:
         request = response.request
         req_headers = request.headers.copy()
+        res_headers = response.headers.copy()
         outfmt = """\
 {request.method} {request.url}
 Status: {response.status_code} {response.reason}
@@ -145,11 +146,17 @@ Response Headers
                 atype, sep, _ = authorization.partition(" ")
                 req_headers["Authorization"] = atype + " ***" if sep else "***"
 
-            cookies = req_headers.get("Cookie")
-            if cookies:
+            cookie = req_headers.get("Cookie")
+            if cookie:
                 req_headers["Cookie"] = ";".join(
-                    cookie.partition("=")[0] + "=***"
-                    for cookie in cookies.split(";")
+                    c.partition("=")[0] + "=***"
+                    for c in cookie.split(";")
+                )
+
+            set_cookie = res_headers.get("Set-Cookie")
+            if set_cookie:
+                res_headers["Set-Cookie"] = re.sub(
+                    r"(^|, )([^ =]+)=[^,;]*", r"\1\2=***", set_cookie,
                 )
 
         fp.write(outfmt.format(
@@ -161,7 +168,7 @@ Response Headers
             ),
             response_headers="\n".join(
                 name + ": " + value
-                for name, value in response.headers.items()
+                for name, value in res_headers.items()
             ),
         ).encode())
 
