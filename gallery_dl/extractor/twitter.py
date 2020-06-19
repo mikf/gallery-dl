@@ -321,7 +321,6 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {
-            "options": (("videos", True),),
             "pattern": r"https://video.twimg.com/ext_tw_video/.+\.mp4\?tag=5",
         }),
         # content with emoji, newlines, hashtags (#338)
@@ -333,19 +332,14 @@ class TwitterTweetExtractor(TwitterExtractor):
                 "It’s our \\(Mystery\\) Gift to you, Trainers! \n\n❓🎁➡️ "
             )},
         }),
-        # Reply to another tweet (#403)
-        ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
-            "options": (("videos", "ytdl"),),
-            "pattern": r"ytdl:https://twitter.com/i/web.+/1103767554424598528",
+        # Reply to deleted tweet (#403, #838)
+        ("https://twitter.com/i/web/status/1170041925560258560", {
+            "pattern": r"https://pbs.twimg.com/media/EDzS7VrU0AAFL4_.jpg:orig",
         }),
         # 'replies' option (#705)
-        ("https://twitter.com/tyson_hesse/status/1103767554424598528", {
+        ("https://twitter.com/i/web/status/1170041925560258560", {
             "options": (("replies", False),),
             "count": 0,
-        }),
-        # /i/web/ URL
-        ("https://twitter.com/i/web/status/1155074198240292865", {
-            "pattern": r"https://pbs.twimg.com/media/EAel0vUUYAAZ4Bq.jpg:orig",
         }),
         # quoted tweet (#526)
         ("https://twitter.com/Pistachio/status/1222690391817932803", {
