@@ -562,7 +562,12 @@ class DataJob(Job):
                 util.transform_dict(msg[-1], util.number_to_string)
 
         # dump to 'file'
-        util.dump_json(self.data, self.file, self.ascii, 2)
+        try:
+            util.dump_json(self.data, self.file, self.ascii, 2)
+            self.file.flush()
+        except Exception:
+            pass
+
         return 0
 
     def handle_url(self, url, kwdict):
@@ -579,6 +584,3 @@ class DataJob(Job):
 
     def handle_queue(self, url, kwdict):
         self.data.append((Message.Queue, url, self.filter(kwdict)))
-
-    def handle_finalize(self):
-        self.file.close()
