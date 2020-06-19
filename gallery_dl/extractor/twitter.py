@@ -503,12 +503,14 @@ class TwitterAPI():
             for entry in instr[0]["addEntries"]["entries"]:
 
                 if entry["entryId"].startswith(entry_tweet):
-                    tid = entry["content"]["item"]["content"]["tweet"]["id"]
-                    if tid not in tweets:
+                    try:
+                        tweet = tweets[
+                            entry["content"]["item"]["content"]["tweet"]["id"]]
+                    except KeyError:
                         self.extractor.log.debug(
-                            "Skipping unavailable Tweet %s", tid)
+                            "Skipping unavailable Tweet %s",
+                            entry["entryId"][6:])
                         continue
-                    tweet = tweets[tid]
                     tweet["user"] = users[tweet["user_id_str"]]
 
                     if "quoted_status_id_str" in tweet:
