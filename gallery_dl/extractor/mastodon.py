@@ -27,11 +27,12 @@ class MastodonExtractor(Extractor):
         Extractor.__init__(self, match)
         self.api = MastodonAPI(self)
 
-    def config(self, key, default=None, *, sentinel=util.SENTINEL):
-        value = Extractor.config(self, key, sentinel)
-        return value if value is not sentinel else config.interpolate(
-            ("extractor", "mastodon", self.instance, self.subcategory),
-            key, default,
+    def config(self, key, default=None):
+        return config.interpolate_common(
+            ("extractor",), (
+                (self.category, self.subcategory),
+                (self.basecategory, self.instance, self.subcategory),
+            ), key, default,
         )
 
     def items(self):
