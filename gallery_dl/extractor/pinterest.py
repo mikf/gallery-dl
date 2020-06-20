@@ -87,14 +87,14 @@ class PinterestBoardExtractor(PinterestExtractor):
     subcategory = "board"
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)(?!.*#related$)"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/?$"
     test = (
         ("https://www.pinterest.com/g1952849/test-/", {
             "pattern": r"https://i\.pinimg\.com/originals/",
             "count": 2,
         }),
         # board with sections (#835)
-        ("https://www.pinterest.de/g1952849/stuff/", {
+        ("https://www.pinterest.com/g1952849/stuff/", {
             "options": (("sections", True),),
             "count": 5,
         }),
@@ -125,6 +125,34 @@ class PinterestBoardExtractor(PinterestExtractor):
             return self.api.board_pins(board["id"])
 
 
+class PinterestSectionExtractor(PinterestExtractor):
+    """Extractor for board sections on pinterest.com"""
+    subcategory = "section"
+    directory_fmt = ("{category}", "{board[owner][username]}",
+                     "{board[name]}", "{section[title]}")
+    archive_fmt = "{board[id]}_{id}"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/([^/?#&]+)"
+    test = ("https://www.pinterest.com/g1952849/stuff/section", {
+        "count": 2,
+    })
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self, match)
+        self.user = text.unquote(match.group(1))
+        self.board_slug = text.unquote(match.group(2))
+        self.section_slug = text.unquote(match.group(3))
+        self.section = None
+
+    def metadata(self):
+        section = self.section = self.api.board_section(
+            self.user, self.board_slug, self.section_slug)
+        section.pop("preview_pins", None)
+        return {"board": section.pop("board"), "section": section}
+
+    def pins(self):
+        return self.api.board_section_pins(self.section["id"])
+
+
 class PinterestRelatedPinExtractor(PinterestPinExtractor):
     """Extractor for related pins of another pin from pinterest.com"""
     subcategory = "related-pin"
@@ -149,7 +177,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     subcategory = "related-board"
     directory_fmt = ("{category}", "{board[owner][username]}",
                      "{board[name]}", "related")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+).*#related$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/?#related$"
     test = ("https://www.pinterest.com/g1952849/test-/#related", {
         "range": "31-70",
         "count": 40,
@@ -230,6 +258,12 @@ class PinterestAPI():
         """Yield all pins of a specific board"""
         options = {"board_id": board_id}
         return self._pagination("BoardFeed", options)
+
+    def board_section(self, user, board_slug, section_slug):
+        """Yield a specific board section"""
+        options = {"board_slug": board_slug, "section_slug": section_slug,
+                   "username": user}
+        return self._call("BoardSection", options)["resource_response"]["data"]
 
     def board_sections(self, board_id):
         """Yield all sections of a specific board"""
