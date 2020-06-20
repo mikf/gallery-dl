@@ -492,10 +492,13 @@ class SharedConfigMixin():
     """Enable sharing of config settings based on 'basecategory'"""
     basecategory = ""
 
-    def config(self, key, default=None, *, sentinel=util.SENTINEL):
-        value = Extractor.config(self, key, sentinel)
-        return value if value is not sentinel else config.interpolate(
-            ("extractor", self.basecategory, self.subcategory), key, default)
+    def config(self, key, default=None):
+        return config.interpolate_common(
+            ("extractor",), (
+                (self.category, self.subcategory),
+                (self.basecategory, self.subcategory),
+            ), key, default,
+        )
 
 
 def generate_extractors(extractor_data, symtable, classes):

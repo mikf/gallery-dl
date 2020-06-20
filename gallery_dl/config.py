@@ -108,6 +108,38 @@ def interpolate(path, key, default=None, *, conf=_config):
     return default
 
 
+def interpolate_common(common, paths, key, default=None, *, conf=_config):
+    """Interpolate the value of 'key'
+    using multiple 'paths' along a 'common' ancestor
+    """
+    if key in conf:
+        return conf[key]
+
+    # follow the common path
+    try:
+        for p in common:
+            conf = conf[p]
+            if key in conf:
+                default = conf[key]
+    except Exception:
+        return default
+
+    # try all paths until a value is found
+    value = util.SENTINEL
+    for path in paths:
+        c = conf
+        try:
+            for p in path:
+                c = c[p]
+                if key in c:
+                    value = c[key]
+        except Exception:
+            pass
+        if value is not util.SENTINEL:
+            return value
+    return default
+
+
 def set(path, key, value, *, conf=_config):
     """Set the value of property 'key' for this session"""
     for p in path:

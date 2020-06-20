@@ -68,6 +68,34 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(config.interpolate(("b",), "d", 1) , 2)
         self.assertEqual(config.interpolate(("d",), "d", 1) , 2)
 
+    def test_interpolate_common(self):
+
+        def lookup():
+            return config.interpolate_common(
+                ("Z1", "Z2"), (
+                    ("A1", "A2"),
+                    ("B1",),
+                    ("C1", "C2", "C3"),
+                ), "KEY", "DEFAULT",
+            )
+
+        def test(path, value, expected=None):
+            config.set(path, "KEY", value)
+            self.assertEqual(lookup(), expected or value)
+
+        self.assertEqual(lookup(), "DEFAULT")
+        test(("Z1",), 1)
+        test(("Z1", "Z2"), 2)
+        test(("Z1", "Z2", "C1"), 3)
+        test(("Z1", "Z2", "C1", "C2"), 4)
+        test(("Z1", "Z2", "C1", "C2", "C3"), 5)
+        test(("Z1", "Z2", "B1"), 6)
+        test(("Z1", "Z2", "A1"), 7)
+        test(("Z1", "Z2", "A1", "A2"), 8)
+        test(("Z1", "A1", "A2"), 999, 8)
+        test(("Z1", "Z2", "A1", "A2", "A3"), 999, 8)
+        test((), 9)
+
     def test_set(self):
         config.set(()        , "c", [1, 2, 3])
         config.set(("b",)    , "c", [1, 2, 3])
