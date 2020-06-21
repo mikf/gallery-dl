@@ -210,6 +210,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
         album = self.api.album(self.key)
         album["date"] = text.parse_timestamp(album["datetime"])
         images = album["images"]
+        count = len(images)
 
         try:
             del album["images"]
@@ -218,11 +219,12 @@ class ImgurAlbumExtractor(ImgurExtractor):
             pass
 
         yield Message.Version, 1
-        yield Message.Directory, {"album": album, "count": len(images)}
         for num, image in enumerate(images, 1):
             url = self._prepare(image)
             image["num"] = num
+            image["count"] = count
             image["album"] = album
+            yield Message.Directory, image
             yield Message.Url, url, image
 
 
