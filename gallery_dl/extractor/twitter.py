@@ -41,7 +41,9 @@ class TwitterExtractor(Extractor):
 
         for tweet in self.tweets():
 
-            if not self.retweets and "retweeted_status_id_str" in tweet or \
+            if not self.retweets and (
+                    "retweeted_status_id_str" in tweet or
+                    "quoted_status_id_str" in tweet) or \
                     not self.replies and "in_reply_to_user_id_str" in tweet:
                 continue
 
@@ -514,6 +516,7 @@ class TwitterAPI():
                     if "quoted_status_id_str" in tweet:
                         quoted = tweets.get(tweet["quoted_status_id_str"])
                         if quoted:
+                            tweet["author"] = users[quoted["user_id_str"]]
                             tweet["full_text_quoted"] = quoted["full_text"]
                             if "extended_entities" in quoted:
                                 tweet["extended_entities"] = \
