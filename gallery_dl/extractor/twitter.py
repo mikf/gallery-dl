@@ -302,7 +302,7 @@ class TwitterSearchExtractor(TwitterExtractor):
         return {"search": text.unquote(self.user)}
 
     def tweets(self):
-        return TwitterAPI(self).search(self.user)
+        return TwitterAPI(self).search(text.unquote(self.user))
 
 
 class TwitterTweetExtractor(TwitterExtractor):
@@ -449,7 +449,11 @@ class TwitterAPI():
     def search(self, query):
         endpoint = "2/search/adaptive.json"
         params = self.params.copy()
-        params["q"] = text.unquote(query)
+        params["q"] = query
+        params["tweet_search_mode"] = "live"
+        params["query_source"] = "typed_query"
+        params["pc"] = "1"
+        params["spelling_corrections"] = "1"
         return self._pagination(
             endpoint, params, "sq-I-t-", "sq-cursor-bottom")
 
