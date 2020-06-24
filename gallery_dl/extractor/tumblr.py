@@ -194,7 +194,7 @@ class TumblrExtractor(Extractor):
         return not self.reblogs
 
     def _skip_reblog_same_blog(self, post):
-        return self.blog != post["reblogged_root_uuid"]
+        return self.blog != post.get("reblogged_root_uuid")
 
 
 class TumblrUserExtractor(TumblrExtractor):
