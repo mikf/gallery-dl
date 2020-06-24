@@ -1213,12 +1213,21 @@ Description A (comma-separated) list of post types to extract images, etc. from.
 =========== =====
 
 
+extractor.twitter.quoted
+------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Fetch media from quoted Tweets.
+=========== =====
+
+
 extractor.twitter.replies
 -------------------------
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description Extract media from replies to other Tweets.
+Description Fetch media from replies to other Tweets.
 =========== =====
 
 
@@ -1227,7 +1236,7 @@ extractor.twitter.retweets
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description Extract media from Retweets.
+Description Fetch media from Retweets.
 =========== =====
 
 
