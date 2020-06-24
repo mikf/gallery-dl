@@ -151,9 +151,6 @@ class TwitterExtractor(Extractor):
         if "in_reply_to_screen_name" in tweet:
             tdata["reply_to"] = tweet["in_reply_to_screen_name"]
 
-        if "full_text_quoted" in tweet:
-            tdata["content_quoted"] = tweet["full_text_quoted"]
-
         if "author" in tweet:
             tdata["author"] = self._transform_user(tweet["author"])
         else:
@@ -424,10 +421,15 @@ class TwitterAPI():
 
     def tweet(self, tweet_id):
         endpoint = "2/timeline/conversation/{}.json".format(tweet_id)
+        tweets = []
         for tweet in self._pagination(endpoint):
             if tweet["id_str"] == tweet_id:
-                return (tweet,)
-        return ()
+                tweets.append(tweet)
+                if "quoted_status_id_str" in tweet:
+                    tweet_id = tweet["quoted_status_id_str"]
+                else:
+                    break
+        return tweets
 
     def timeline_profile(self, screen_name):
         user = self.user_by_screen_name(screen_name)
@@ -513,20 +515,18 @@ class TwitterAPI():
                         continue
                     tweet["user"] = users[tweet["user_id_str"]]
 
-                    if "quoted_status_id_str" in tweet:
-                        quoted = tweets.get(tweet["quoted_status_id_str"])
-                        if quoted:
-                            tweet["author"] = users[quoted["user_id_str"]]
-                            tweet["full_text_quoted"] = quoted["full_text"]
-                            if "extended_entities" in quoted:
-                                tweet["extended_entities"] = \
-                                    quoted["extended_entities"]
-                    elif "retweeted_status_id_str" in tweet:
+                    if "retweeted_status_id_str" in tweet:
                         retweet = tweets.get(tweet["retweeted_status_id_str"])
                         if retweet:
                             tweet["author"] = users[retweet["user_id_str"]]
-
                     yield tweet
+
+                    if "quoted_status_id_str" in tweet:
+                        quoted = tweets.get(tweet["quoted_status_id_str"])
+                        if quoted:
+                            quoted["author"] = users[quoted["user_id_str"]]
+                            quoted["user"] = tweet["user"]
+                            yield quoted
 
                 elif entry["entryId"].startswith(entry_cursor):
                     cursor = entry["content"]["operation"]["cursor"]
