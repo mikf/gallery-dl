@@ -31,6 +31,7 @@ class TwitterExtractor(Extractor):
         self.retweets = self.config("retweets", True)
         self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)
+        self.quoted = self.config("quoted", True)
         self.videos = self.config("videos", True)
         self._user_cache = {}
 
@@ -41,10 +42,9 @@ class TwitterExtractor(Extractor):
 
         for tweet in self.tweets():
 
-            if not self.retweets and (
-                    "retweeted_status_id_str" in tweet or
-                    "quoted_status_id_str" in tweet) or \
-                    not self.replies and "in_reply_to_user_id_str" in tweet:
+            if (not self.retweets and "retweeted_status_id_str" in tweet or
+                    not self.replies and "in_reply_to_user_id_str" in tweet or
+                    not self.quoted and "quoted" in tweet):
                 continue
 
             if self.twitpic:
@@ -340,9 +340,16 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("replies", False),),
             "count": 0,
         }),
-        # quoted tweet (#526)
-        ("https://twitter.com/Pistachio/status/1222690391817932803", {
-            "pattern": r"https://pbs\.twimg\.com/media/EPfMfDUU8AAnByO\.jpg",
+        # quoted tweet (#526, #854)
+        ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
+            "pattern": r"https://pbs\.twimg\.com/media/Ea[KG].+\.jpg",
+            "count": 8,
+        }),
+        # "quoted" option (#854)
+        ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
+            "options": (("quoted", False),),
+            "pattern": r"https://pbs\.twimg\.com/media/EaK.+\.jpg",
+            "count": 4,
         }),
         # TwitPic embeds (#579)
         ("https://twitter.com/i/web/status/112900228289540096", {
@@ -526,6 +533,7 @@ class TwitterAPI():
                         if quoted:
                             quoted["author"] = users[quoted["user_id_str"]]
                             quoted["user"] = tweet["user"]
+                            quoted["quoted"] = True
                             yield quoted
 
                 elif entry["entryId"].startswith(entry_cursor):
