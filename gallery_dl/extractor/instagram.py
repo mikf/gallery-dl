@@ -386,7 +386,7 @@ class InstagramImageExtractor(InstagramExtractor):
 
         # GraphVideo
         ("https://www.instagram.com/p/Bqxp0VSBgJg/", {
-            "pattern": r"/47129943_191645575115739_8539303288426725376_n\.mp4",
+            "pattern": r"/46840863_726311431074534_7805566102611403091_n\.mp4",
             "keyword": {
                 "date": "dt:2018-11-29 19:23:58",
                 "description": str,
@@ -404,7 +404,7 @@ class InstagramImageExtractor(InstagramExtractor):
 
         # GraphVideo (IGTV)
         ("https://www.instagram.com/tv/BkQjCfsBIzi/", {
-            "pattern": r"/10000000_1760663964018792_716207142595461120_n\.mp4",
+            "pattern": r"/10000000_597132547321814_702169244961988209_n\.mp4",
             "keyword": {
                 "date": "dt:2018-06-20 19:51:32",
                 "description": str,
