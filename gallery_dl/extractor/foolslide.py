@@ -225,9 +225,9 @@ EXTRACTORS = {
             }),
         ),
         "test-manga":
-            ("https://sensescans.com/reader/series/hakkenden/", {
-                "url": "3e0559029c21ca5af8a2082dd6de1567fcec4d83",
-                "keyword": "4919f2bfed38e3a34dc984ec8d1dbd7a03044e23",
+            ("https://sensescans.com/reader/series/yotsubato/", {
+                "url": "ee4dca7c421bf15ac039200f8c0bcb0858153640",
+                "keyword": "f94961bd731bd878bbd4d48555bc3ace1d937364",
             }),
     },
     "worldthree": {
