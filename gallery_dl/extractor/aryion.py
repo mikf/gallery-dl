@@ -26,9 +26,24 @@ class AryionExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
-        self.offset = 0
+        self.recursive = True
 
-    def posts(self, url):
+    def items(self):
+        for post_id in self.posts():
+            post = self._parse_post(post_id)
+            if post:
+                yield Message.Directory, post
+                yield Message.Url, post["url"], post
+            elif post is False and self.recursive:
+                base = self.root + "/g4/view/"
+                data = {"_extractor": AryionPostExtractor}
+                for post_id in self._pagination(base + post_id):
+                    yield Message.Queue, base + post_id, data
+
+    def posts(self):
+        """Yield relevant post IDs"""
+
+    def _pagination(self, url):
         while True:
             page = self.request(url).text
             yield from text.extract_iter(
@@ -39,11 +54,14 @@ class AryionExtractor(Extractor):
                 return
             url = self.root + text.rextract(page, "href='", "'", pos)[0]
 
-    def parse_post(self, post_id):
+    def _parse_post(self, post_id):
         url = "{}/g4/data.php?id={}".format(self.root, post_id)
         with self.request(url, method="HEAD", fatal=False) as response:
 
             if response.status_code >= 400:
+                self.log.warning(
+                    "Unable to fetch post %s ('%s %s')",
+                    post_id, response.status_code, response.reason)
                 return None
             headers = response.headers
 
@@ -106,9 +124,11 @@ class AryionExtractor(Extractor):
 class AryionGalleryExtractor(AryionExtractor):
     """Extractor for a user's gallery on eka's portal"""
     subcategory = "gallery"
+    categorytransfer = True
     pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?&#]+)"
     test = (
         ("https://aryion.com/g4/gallery/jameshoward", {
+            "options": (("recursive", False),),
             "pattern": r"https://aryion\.com/g4/data\.php\?id=\d+$",
             "range": "48-52",
             "count": 5,
@@ -117,17 +137,24 @@ class AryionGalleryExtractor(AryionExtractor):
         ("https://aryion.com/g4/latest.php?name=jameshoward"),
     )
 
+    def __init__(self, match):
+        AryionExtractor.__init__(self, match)
+        self.recursive = self.config("recursive", True)
+        self.offset = 0
+
     def skip(self, num):
+        if self.recursive:
+            num = 0
         self.offset += num
         return num
 
-    def items(self):
-        url = "{}/g4/latest.php?name={}".format(self.root, self.user)
-        for post_id in util.advance(self.posts(url), self.offset):
-            post = self.parse_post(post_id)
-            if post:
-                yield Message.Directory, post
-                yield Message.Url, post["url"], post
+    def posts(self):
+        if self.recursive:
+            url = "{}/g4/gallery/{}".format(self.root, self.user)
+            return self._pagination(url)
+        else:
+            url = "{}/g4/latest.php?name={}".format(self.root, self.user)
+            return util.advance(self._pagination(url), self.offset)
 
 
 class AryionPostExtractor(AryionExtractor):
@@ -164,19 +191,6 @@ class AryionPostExtractor(AryionExtractor):
         }),
     )
 
-    def items(self):
-        post_id = self.user
-        self.user = None
-        post = self.parse_post(post_id)
-
-        if post:
-            yield Message.Directory, post
-            yield Message.Url, post["url"], post
-
-        elif post is False:
-            folder_url = "{}/g4/view/{}".format(self.root, post_id)
-            data = {"_extractor": AryionPostExtractor}
-
-            for post_id in self.posts(folder_url):
-                url = "{}/g4/view/{}".format(self.root, post_id)
-                yield Message.Queue, url, data
+    def posts(self):
+        post_id, self.user = self.user, None
+        return (post_id,)
