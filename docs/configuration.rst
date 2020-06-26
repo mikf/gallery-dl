@@ -546,6 +546,19 @@ Description Try to follow external URLs of embedded players.
 =========== =====
 
 
+extractor.aryion.recursive
+--------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Controls the post extraction strategy.
+
+            * ``true``: Start on users' main gallery pages and recursively
+              descend into subfolders
+            * ``false``: Get posts from "Latest Updates" pages
+=========== =====
+
+
 extractor.blogger.videos
 ------------------------
 =========== =====
