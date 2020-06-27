@@ -124,8 +124,8 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
         }),
         ("https://ibb.co/album/i5PggF?sort=title_asc", {
             "range": "1-80",
-            "url": "a2dfc58fe3348fa37e242082bd5a85eaa490d0a5",
-            "keyword": "5bb79c82411c3770d673fac64a0a98fa28111c3b",
+            "url": "afdf5fc95d8e09d77e8f44312f3e9b843987bb5a",
+            "keyword": "f090e14d0e5f7868595082b2c95da1309c84872d",
         }),
         # no user data (#471)
         ("https://ibb.co/album/kYKpwF", {
