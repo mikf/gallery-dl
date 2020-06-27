@@ -42,7 +42,8 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
         ("https://mattcrandall.slickpic.com/albums/LamborghiniMurcielago/", {
             "range": "34",
             "content": ("cec6630e659dc72db1ee1a9a6f3b525189261988",
-                        "6f81e1e74c6cd6db36844e7211eef8e7cd30055d"),
+                        "6f81e1e74c6cd6db36844e7211eef8e7cd30055d",
+                        "22e83645fc242bc3584eca7ec982c8a53a4d8a44"),
         }),
     )
 

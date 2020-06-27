@@ -33,9 +33,7 @@ TRAVIS_SKIP = {
 BROKEN = {
     "bobx",
     "imagevenue",
-    "kissmanga",
     "photobucket",
-    "seiga",
     "worldthree",
 }
 
