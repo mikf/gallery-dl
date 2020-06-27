@@ -1,6 +1,25 @@
 # Changelog
 
-## Unreleased
+## 1.14.2 - 2020-06-27
+### Additions
+- [artstation] add `date` metadata field ([#839](https://github.com/mikf/gallery-dl/issues/839))
+- [mastodon] add `date` metadata field ([#839](https://github.com/mikf/gallery-dl/issues/839))
+- [pinterest] add support for board sections ([#835](https://github.com/mikf/gallery-dl/issues/835))
+- [twitter] add extractor for liked tweets ([#837](https://github.com/mikf/gallery-dl/issues/837))
+- [twitter] add option to filter media from quoted tweets ([#854](https://github.com/mikf/gallery-dl/issues/854))
+- [weibo] add `date` metadata field to `status` objects ([#829](https://github.com/mikf/gallery-dl/issues/829))
+### Fixes
+- [aryion] fix user gallery extraction ([#832](https://github.com/mikf/gallery-dl/issues/832))
+- [imgur] build directory paths for each file ([#842](https://github.com/mikf/gallery-dl/issues/842))
+- [tumblr] prevent errors when using `reblogs=same-blog` ([#851](https://github.com/mikf/gallery-dl/issues/851))
+- [twitter] always provide an `author` metadata field ([#831](https://github.com/mikf/gallery-dl/issues/831), [#833](https://github.com/mikf/gallery-dl/issues/833))
+- [twitter] don't download video previews ([#833](https://github.com/mikf/gallery-dl/issues/833))
+- [twitter] improve handling of deleted tweets ([#838](https://github.com/mikf/gallery-dl/issues/838))
+- [twitter] fix search results ([#847](https://github.com/mikf/gallery-dl/issues/847))
+- [twitter] improve handling of quoted tweets ([#854](https://github.com/mikf/gallery-dl/issues/854))
+- fix config lookups when multiple locations are involved ([#843](https://github.com/mikf/gallery-dl/issues/843))
+- improve output of `-K/--list-keywords` for parent extractors ([#825](https://github.com/mikf/gallery-dl/issues/825))
+- call `flush()` after writing JSON in `DataJob()` ([#727](https://github.com/mikf/gallery-dl/issues/727))
 
 ## 1.14.1 - 2020-06-12
 ### Additions
