@@ -108,6 +108,7 @@ modules = [
     "slideshare",
     "smugmug",
     "speakerdeck",
+    "subscribestar",
     "tsumino",
     "tumblr",
     "twitter",
