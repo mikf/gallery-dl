@@ -64,7 +64,7 @@ class MetadataPP(PostProcessor):
         return directory
 
     def _filename(self, pathfmt):
-        return pathfmt.filename + self.extension
+        return pathfmt.filename + "." + self.extension
 
     def _filename_custom(self, pathfmt):
         kwdict = pathfmt.kwdict
