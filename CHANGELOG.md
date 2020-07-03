@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.14.2 - 2020-06-27
 ### Additions
 - [artstation] add `date` metadata field ([#839](https://github.com/mikf/gallery-dl/issues/839))
