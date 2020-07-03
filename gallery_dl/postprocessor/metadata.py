@@ -51,6 +51,7 @@ class MetadataPP(PostProcessor):
 
     def run(self, pathfmt):
         path = self._directory(pathfmt) + self._filename(pathfmt)
+        self.log.debug("Writing metadata to file '%s'", path)
         with open(path, "w", encoding="utf-8") as file:
             self.write(file, pathfmt.kwdict)
 
@@ -63,7 +64,7 @@ class MetadataPP(PostProcessor):
         return directory
 
     def _filename(self, pathfmt):
-        return pathfmt.filename + "." + self.extension
+        return pathfmt.filename + self.extension
 
     def _filename_custom(self, pathfmt):
         kwdict = pathfmt.kwdict

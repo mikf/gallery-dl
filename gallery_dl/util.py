@@ -841,7 +841,7 @@ class PathFormat():
         self.temppath = self.prefix = ""
         self.extension = kwdict["extension"]
 
-        if self.extension:
+        if self.extension or kwdict.get("is_metadata"):
             self.build_path()
         else:
             self.filename = ""
