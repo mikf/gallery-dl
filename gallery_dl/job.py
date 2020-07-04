@@ -281,6 +281,7 @@ class DownloadJob(Job):
         postprocessors = self.postprocessors
 
         if postprocessors:
+            kwdict["extension"] = "metadata"
             pathfmt = self.pathfmt
             pathfmt.set_filename(kwdict)
             for pp in postprocessors:
