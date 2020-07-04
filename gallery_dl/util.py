@@ -721,12 +721,10 @@ class PathFormat():
             raise exception.DirectoryFormatError(exc)
 
         self.directory = self.realdirectory = ""
-        self.filename = ""
-        self.extension = ""
-        self.prefix = ""
-        self.kwdict = {}
-        self.delete = False
+        self.filename = self.extension = self.prefix = ""
         self.path = self.realpath = self.temppath = ""
+        self.kwdict = {}
+        self.delete = self._create_directory = False
 
         basedir = extractor._parentdir
         if not basedir:
@@ -831,9 +829,7 @@ class PathFormat():
                 directory += sep
 
         self.realdirectory = directory
-
-        # Create directory tree
-        os.makedirs(self.realdirectory, exist_ok=True)
+        self._create_directory = True
 
     def set_filename(self, kwdict):
         """Set general filename data"""
@@ -872,6 +868,9 @@ class PathFormat():
 
     def build_path(self):
         """Combine directory and filename to full paths"""
+        if self._create_directory:
+            os.makedirs(self.realdirectory, exist_ok=True)
+            self._create_directory = False
         self.filename = filename = self.build_filename()
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
