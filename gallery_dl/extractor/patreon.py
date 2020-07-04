@@ -38,8 +38,7 @@ class PatreonExtractor(Extractor):
             hashes = set()
 
             yield Message.Directory, post
-            yield Message.Metadata, text.nameext_from_url(
-                post["creator"].get("image_url", ""), post)
+            yield Message.Metadata, post
 
             for kind, url, name in itertools.chain(
                 self._postfile(post),
