@@ -7,7 +7,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Generate bash completion script from gallery-dl's argument parser"""
+"""Generate zsh completion script from gallery-dl's argument parser"""
 
 import util
 from gallery_dl import option
@@ -20,8 +20,7 @@ typeset -A opt_args
 
 local rc=1
 _arguments -C -S \\
-%(opts)s \\
-'*:URL:_urls' && rc=0
+%(opts)s && rc=0
 
 return rc
 """
