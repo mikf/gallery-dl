@@ -491,8 +491,16 @@ class TwitterAPI():
         if response.status_code == 429:
             self.extractor.wait(until=response.headers["x-rate-limit-reset"])
             return self._call(endpoint, params)
+
+        try:
+            msg = ", ".join(
+                '"' + error["message"] + '"'
+                for error in response.json()["errors"]
+            )
+        except Exception:
+            msg = response.text
         raise exception.StopExtraction(
-            "%s %s (%s)", response.status_code, response.reason, response.text)
+            "%s %s (%s)", response.status_code, response.reason, msg)
 
     def _pagination(self, endpoint, params=None,
                     entry_tweet="tweet-", entry_cursor="cursor-bottom-"):
