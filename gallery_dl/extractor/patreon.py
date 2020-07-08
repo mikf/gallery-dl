@@ -41,9 +41,9 @@ class PatreonExtractor(Extractor):
             yield Message.Metadata, post
 
             for kind, url, name in itertools.chain(
-                self._postfile(post),
                 self._images(post),
                 self._attachments(post),
+                self._postfile(post),
                 self._content(post),
             ):
                 fhash = self._filehash(url)
