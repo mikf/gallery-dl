@@ -32,8 +32,28 @@ def solve_challenge(session, response, kwargs):
     """Solve Cloudflare challenge and get cfclearance cookie"""
     parsed = urllib.parse.urlsplit(response.url)
     root = parsed.scheme + "://" + parsed.netloc
-
     page = response.text
+
+    cf_kwargs = {}
+    headers = cf_kwargs["headers"] = collections.OrderedDict()
+    params = cf_kwargs["data"] = collections.OrderedDict()
+    headers["Referer"] = response.url
+
+    form = text.extract(page, 'id="challenge-form"', '</form>')[0]
+    for element in ElementTree.fromstring(
+            "<f>" + form + "</f>").findall("input"):
+        name = element.attrib.get("name")
+        if not name:
+            continue
+        if name == "jschl_answer":
+            try:
+                value = solve_js_challenge(page, parsed.netloc)
+            except Exception:
+                return response, None, None
+        else:
+            value = element.attrib.get("value")
+        params[name] = value
+
     try:
         params = {"ray": text.extract(page, '?ray=', '"')[0]}
 
@@ -45,25 +65,8 @@ def solve_challenge(session, response, kwargs):
     except Exception:
         pass
 
-    cf_kwargs = {}
-    headers = cf_kwargs["headers"] = collections.OrderedDict()
-    params = cf_kwargs["data"] = collections.OrderedDict()
-    url = root + text.unescape(text.extract(page, 'action="', '"')[0])
-    headers["Referer"] = response.url
-
-    form = text.extract(page, 'id="challenge-form"', '</form>')[0]
-    for element in ElementTree.fromstring(
-            "<f>" + form + "</f>").findall("input"):
-        name = element.attrib.get("name")
-        if not name:
-            continue
-        if name == "jschl_answer":
-            value = solve_js_challenge(page, parsed.netloc)
-        else:
-            value = element.attrib.get("value")
-        params[name] = value
-
     time.sleep(4)
+    url = root + text.unescape(text.extract(page, 'action="', '"')[0])
     cf_response = session.request("POST", url, **cf_kwargs)
 
     if cf_response.history:
