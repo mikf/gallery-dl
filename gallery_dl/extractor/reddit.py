@@ -17,7 +17,7 @@ class RedditExtractor(Extractor):
     """Base class for reddit extractors"""
     category = "reddit"
     directory_fmt = ("{category}", "{subreddit}")
-    filename_fmt = "{id} {title[:242]}.{extension}"
+    filename_fmt = "{id} {title[:220]}.{extension}"
     archive_fmt = "{filename}"
     cookiedomain = None
 
