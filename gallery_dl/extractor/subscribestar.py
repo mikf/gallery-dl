@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import datetime
 import json
 
 
@@ -31,6 +32,7 @@ class SubscribestarExtractor(Extractor):
             self.subcategory += "-adult"
         Extractor.__init__(self, match)
         self.metadata = self.config("metadata", False)
+        self._year = " " + str(datetime.date.today().year)
 
     def items(self):
         for post_html in self.posts():
@@ -77,11 +79,10 @@ class SubscribestarExtractor(Extractor):
 
         return data
 
-    @staticmethod
-    def _parse_datetime(dt):
+    def _parse_datetime(self, dt):
         date = text.parse_datetime(dt, "%B %d, %Y %H:%M")
         if date is dt:
-            date = text.parse_datetime(dt + " 2020", "%d %b %H:%M %Y")
+            date = text.parse_datetime(dt + self._year, "%d %b %H:%M %Y")
         return date
 
 
