@@ -101,7 +101,7 @@ class RedditExtractor(Extractor):
             depth += 1
             submissions = (
                 self.api.submission(sid) for sid in extra
-                if sid not in self._visited
+                if sid not in visited
             )
 
     def submissions(self):
