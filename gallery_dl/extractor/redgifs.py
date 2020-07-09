@@ -54,11 +54,15 @@ class RedgifsSearchExtractor(RedgifsExtractor):
 class RedgifsImageExtractor(RedgifsExtractor):
     """Extractor for individual gifs from redgifs.com"""
     subcategory = "image"
-    pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/watch/([A-Za-z]+)"
-    test = ("https://redgifs.com/watch/foolishforkedabyssiniancat", {
-        "pattern": r"https://\w+.redgifs.com/FoolishForkedAbyssiniancat.mp4",
-        "content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
-    })
+    pattern = (r"(?:https?://)?(?:www\.)?(?:redgifs\.com/watch"
+               r"|gifdeliverynetwork.com)/([A-Za-z]+)")
+    test = (
+        ("https://redgifs.com/watch/foolishforkedabyssiniancat", {
+            "pattern": r"https://\w+.redgifs.com/FoolishForkedAbyss.+.mp4",
+            "content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
+        }),
+        ("https://www.gifdeliverynetwork.com/foolishforkedabyssiniancat"),
+    )
 
     def gfycats(self):
         return (RedgifsAPI(self).gfycat(self.key),)
