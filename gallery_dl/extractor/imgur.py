@@ -231,7 +231,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
 class ImgurGalleryExtractor(ImgurExtractor):
     """Extractor for imgur galleries"""
     subcategory = "gallery"
-    pattern = BASE_PATTERN + r"/(?:gallery|t/unmuted)/(\w{7}|\w{5})"
+    pattern = BASE_PATTERN + r"/(?:gallery|t/\w+)/(\w{7}|\w{5})"
     test = (
         ("https://imgur.com/gallery/zf2fIms", {  # non-album gallery (#380)
             "pattern": "https://imgur.com/zf2fIms",
@@ -242,6 +242,7 @@ class ImgurGalleryExtractor(ImgurExtractor):
         ("https://imgur.com/t/unmuted/26sEhNr", {  # unmuted URL
             "pattern": "https://imgur.com/26sEhNr",
         }),
+        ("https://imgur.com/t/cat/qSB8NbN"),
     )
 
     def items(self):
