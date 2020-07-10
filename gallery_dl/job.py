@@ -282,9 +282,8 @@ class DownloadJob(Job):
 
         if postprocessors:
             pathfmt = self.pathfmt
-            pseudo_kwdict = kwdict.copy()
-            pseudo_kwdict["is_metadata"] = True
-            pathfmt.set_filename(pseudo_kwdict)
+            kwdict["is_metadata"] = True
+            pathfmt.set_filename(kwdict)
             for pp in postprocessors:
                 pp.run_metadata(pathfmt)
 
