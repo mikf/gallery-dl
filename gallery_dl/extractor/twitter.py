@@ -42,9 +42,14 @@ class TwitterExtractor(Extractor):
 
         for tweet in self.tweets():
 
-            if (not self.retweets and "retweeted_status_id_str" in tweet or
-                    not self.replies and "in_reply_to_user_id_str" in tweet or
-                    not self.quoted and "quoted" in tweet):
+            if not self.retweets and "retweeted_status_id_str" in tweet:
+                self.log.debug("Skipping %s (retweet)", tweet["id_str"])
+                continue
+            if not self.replies and "in_reply_to_user_id_str" in tweet:
+                self.log.debug("Skipping %s (reply)", tweet["id_str"])
+                continue
+            if not self.quoted and "quoted" in tweet:
+                self.log.debug("Skipping %s (quoted tweet)", tweet["id_str"])
                 continue
 
             if self.twitpic:
@@ -525,8 +530,8 @@ class TwitterAPI():
                             entry["content"]["item"]["content"]["tweet"]["id"]]
                     except KeyError:
                         self.extractor.log.debug(
-                            "Skipping unavailable Tweet %s",
-                            entry["entryId"][6:])
+                            "Skipping %s (deleted)",
+                            entry["entryId"][len(entry_tweet):])
                         continue
                     tweet["user"] = users[tweet["user_id_str"]]
 
