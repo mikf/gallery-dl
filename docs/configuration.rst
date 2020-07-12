@@ -879,6 +879,21 @@ Description Download video files.
 =========== =====
 
 
+extractor.khinsider.format
+--------------------------
+=========== =====
+Type        ``string``
+Default     ``"mp3"``
+Description The name of the preferred file format to download.
+
+            Use ``"all"`` to download all available formats,
+            or a (comma-separated) list to select multiple formats.
+
+            If the selected format is not available,
+            the first in the list gets chosen (usually `mp3`).
+=========== =====
+
+
 extractor.kissmanga.captcha
 ---------------------------
 =========== =====
