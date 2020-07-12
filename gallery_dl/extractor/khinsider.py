@@ -56,12 +56,27 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
         }}
 
     def tracks(self, page):
-        page = text.extract(page, '<table id="songlist">', '</table>')[0]
+        fmt = self.config("format", ("mp3",))
+        if fmt and isinstance(fmt, str):
+            if fmt == "all":
+                fmt = None
+            else:
+                fmt = fmt.lower().split(",")
 
+        page = text.extract(page, '<table id="songlist">', '</table>')[0]
         for num, url in enumerate(text.extract_iter(
                 page, '<td class="clickable-row"><a href="', '"'), 1):
             url = text.urljoin(self.root, url)
             page = self.request(url, encoding="utf-8").text
+            track = first = None
 
-            url = text.extract(page, 'style="color: #21363f;" href="', '"')[0]
-            yield text.nameext_from_url(url, {"num": num, "url": url})
+            for url in text.extract_iter(
+                    page, 'style="color: #21363f;" href="', '"'):
+                track = text.nameext_from_url(url, {"num": num, "url": url})
+                if first is None:
+                    first = track
+                if not fmt or track["extension"] in fmt:
+                    first = False
+                    yield track
+            if first:
+                yield first
