@@ -389,7 +389,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
         return [
             self.root + path
             for path in text.extract_iter(
-                page, 'href="//www.newgrounds.com', '"')
+                page, 'href="https://www.newgrounds.com', '"')
         ]
 
 
