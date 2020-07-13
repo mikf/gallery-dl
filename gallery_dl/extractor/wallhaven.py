@@ -34,7 +34,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         (("https://wallhaven.cc/search?q=id%3A87"
           "&categories=111&purity=100&sorting=date_added&order=asc&page=3"), {
             "pattern": r"https://w.wallhaven.cc/full/\w\w/wallhaven-\w+\.\w+",
-            "count": "<= 10",
+            "count": "<= 20",
         }),
     )
 

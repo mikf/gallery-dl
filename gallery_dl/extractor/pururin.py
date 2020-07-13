@@ -36,7 +36,7 @@ class PururinGalleryExtractor(GalleryExtractor):
                 "convention": "C92",
                 "rating"    : float,
                 "uploader"  : "demo",
-                "scanlator" : "",
+                "scanlator" : "mrwayne",
                 "lang"      : "en",
                 "language"  : "English",
             }
