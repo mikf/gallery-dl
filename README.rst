@@ -154,6 +154,14 @@ Filter manga chapters by language and chapter number:
     $ gallery-dl "r:https://pastebin.com/raw/FLwrCYsT"
 
 
+If a sites address is nonstandard for its extractor you can prefix the URL with the 
+extractor's name to force the use of a specific extractor:
+
+.. code:: bash
+
+    $ gallery-dl "tumblr:https://sometumblrblog.example"
+
+
 Configuration
 =============
 
