@@ -30,8 +30,13 @@ class MangakakalotBase():
 
 class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
     """Extractor for manga-chapters from mangakakalot.com"""
-    archive_fmt = "{manga}_{chapter}_{page}"
-    pattern = r"(?:https?://)?mangakakalot\.com(/chapter/([a-z]+\d+)/chapter_([0-9.]+))"
+    pattern = (r"(?:https?://)?(?:www\.)?mangakakalot\.com"
+               r"(/chapter/(\w+)/chapter_([^/?&#]+))")
+    test = (
+        ("https://mangakakalot.com/chapter/rx922077/chapter_6"),
+        ("https://mangakakalot.com/chapter"
+         "/hatarakanai_futari_the_jobless_siblings/chapter_20.1"),
+    )
 
     def __init__(self, match):
         self.path, self.url_title, self.chapter = match.groups()
@@ -51,9 +56,11 @@ class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
         })
         pos = page.index('href="' + churl + '"')
         data["title"] , pos = text.extract(page, '>', '<', pos)
-        x = chpage.index('\n', chpage.index('<img', chpage.index('<div class="vung-doc"')))
+        x = chpage.index('\n', chpage.index(
+            '<img', chpage.index('<div class="vung-doc"')))
         y = chpage.rfind('<img', 0, x)
-        data["count"] = text.parse_int(text.extract(chpage[y:x], 'page ', ' - Mangakakalot.com"')[0])
+        data["count"] = text.parse_int(text.extract(
+            chpage[y:x], 'page ', ' - Mangakakalot.com"')[0])
         data["date"] , pos = text.extract(page, 'title="', '">', pos)
         return data
 
@@ -74,8 +81,12 @@ class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
 class MangakakalotMangaExtractor(MangakakalotBase, MangaExtractor):
     """Extractor for manga from mangakakalot.com"""
     chapterclass = MangakakalotChapterExtractor
-    reverse = False
-    pattern = r"(?:https?://)?mangakakalot\.com(/manga/([a-z]+\d+))"
+    pattern = (r"(?:https?://)?(?:www\.)?mangakakalot\.com"
+               r"(/(?:manga/|read-)\w+)")
+    test = (
+        ("https://mangakakalot.com/manga/rx922077"),
+        ("https://mangakakalot.com/read-ry3sw158504884246"),
+    )
 
     def chapters(self, page):
         results = []
