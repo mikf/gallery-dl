@@ -212,7 +212,7 @@ EXTRACTORS = {
         "client-secret": "DdrODTHs_XoeOsNVXnILTMabtdpWrWOAtrmw91wU1zI",
         "test-user"    : ("https://mastodon.social/@jk", {
             "pattern": r"https://files.mastodon.social/media_attachments"
-                       r"/files/\d+/\d+/\d+/original/\w+",
+                       r"/files/(\d+/){3,}original/\w+",
             "range": "1-60",
             "count": 60,
         }),

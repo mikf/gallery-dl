@@ -135,9 +135,7 @@ class WeiboStatusExtractor(WeiboExtractor):
             "exception": exception.NotFoundError,
         }),
         # non-numeric status ID (#664)
-        ("https://weibo.com/3314883543/Iy7fj4qVg", {
-            "pattern": r"https?://f.video.weibocdn.com/\w+\.mp4\?label=mp4_hd",
-        }),
+        ("https://weibo.com/3314883543/Iy7fj4qVg"),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
     )
