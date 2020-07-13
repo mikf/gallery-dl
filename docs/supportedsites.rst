@@ -76,6 +76,7 @@ Manga Fox            https://fanfox.net/                 Chapters
 Manga Here           https://www.mangahere.cc/           Chapters, Manga
 Manga Stream         https://readms.net/                 Chapters
 MangaDex             https://mangadex.org/               Chapters, Manga
+MangaKakalot         https://mangakakalot.com/           Chapters, Manga
 Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.net/              Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
