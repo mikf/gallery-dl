@@ -68,6 +68,7 @@ modules = [
     "mangadex",
     "mangafox",
     "mangahere",
+    "mangakakalot",
     "mangapanda",
     "mangapark",
     "mangareader",
