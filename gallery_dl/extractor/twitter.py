@@ -15,6 +15,12 @@ import hashlib
 import time
 
 
+BASE_PATTERN = (
+    r"(?:https?://)?(?:www\.|mobile\.)?"
+    r"(?:twitter\.com|nitter\.net)"
+)
+
+
 class TwitterExtractor(Extractor):
     """Base class for twitter extractors"""
     category = "twitter"
@@ -239,8 +245,7 @@ class TwitterExtractor(Extractor):
 class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for all images from a user's timeline"""
     subcategory = "timeline"
-    pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/(?!search)([^/?&#]+)/?(?:$|[?#])")
+    pattern = BASE_PATTERN + r"/(?!search)([^/?&#]+)/?(?:$|[?#])"
     test = (
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
@@ -256,8 +261,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
 class TwitterMediaExtractor(TwitterExtractor):
     """Extractor for all images from a user's Media Tweets"""
     subcategory = "media"
-    pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/(?!search)([^/?&#]+)/media(?!\w)")
+    pattern = BASE_PATTERN + r"/(?!search)([^/?&#]+)/media(?!\w)"
     test = (
         ("https://twitter.com/supernaturepics/media", {
             "range": "1-40",
@@ -273,8 +277,7 @@ class TwitterMediaExtractor(TwitterExtractor):
 class TwitterLikesExtractor(TwitterExtractor):
     """Extractor for liked tweets"""
     subcategory = "likes"
-    pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/(?!search)([^/?&#]+)/likes(?!\w)")
+    pattern = BASE_PATTERN + r"/(?!search)([^/?&#]+)/likes(?!\w)"
     test = ("https://twitter.com/supernaturepics/likes",)
 
     def tweets(self):
@@ -284,7 +287,7 @@ class TwitterLikesExtractor(TwitterExtractor):
 class TwitterBookmarkExtractor(TwitterExtractor):
     """Extractor for bookmarked tweets"""
     subcategory = "bookmark"
-    pattern = r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com/i/bookmarks()"
+    pattern = BASE_PATTERN + r"/i/bookmarks()"
     test = ("https://twitter.com/i/bookmarks",)
 
     def tweets(self):
@@ -295,8 +298,7 @@ class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for all images from a search timeline"""
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
-    pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/search/?\?(?:[^&#]+&)*q=([^&#]+)")
+    pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
     test = ("https://twitter.com/search?q=nature", {
         "range": "1-40",
         "count": 40,
@@ -312,8 +314,7 @@ class TwitterSearchExtractor(TwitterExtractor):
 class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for images from individual tweets"""
     subcategory = "tweet"
-    pattern = (r"(?:https?://)?(?:www\.|mobile\.)?twitter\.com"
-               r"/([^/?&#]+|i/web)/status/(\d+)")
+    pattern = BASE_PATTERN + r"/([^/?&#]+|i/web)/status/(\d+)"
     test = (
         ("https://twitter.com/supernaturepics/status/604341487988576256", {
             "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",
@@ -361,6 +362,11 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("twitpic", True),),
             "pattern": r"https://\w+.cloudfront.net/photos/large/\d+.jpg",
             "count": 3,
+        }),
+        # Nitter tweet
+        ("https://nitter.net/ed1conf/status/1163841619336007680", {
+            "url": "0f6a841e23948e4320af7ae41125e0c5b3cadc98",
+            "content": "f29501e44d88437fe460f5c927b7543fda0f6e34",
         }),
     )
 
