@@ -18,24 +18,24 @@ arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |artstation-C|
-baraag               https://baraag.net/                 Images from Statuses, User Profiles
+baraag               https://baraag.net/                 Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Behance              https://www.behance.net/            Collections, Galleries, User Profiles
 Blogger              https://www.blogger.com/            Blogs, Posts
 BobX                 http://www.bobx.com/dark/           Galleries, Idols
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag Searches         Optional
 Desuarchive          https://desuarchive.org/            Threads
-DeviantArt           https://www.deviantart.com/         |deviantart-C|                                     Optional (OAuth)
+DeviantArt           https://www.deviantart.com/         |deviantart-C|                                     Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Images, Search Results
 E-Hentai             https://e-hentai.org/               Favorites, Galleries, Search Results               Optional
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag Searches         Optional
-Eka's Portal         https://aryion.com/                 Galleries, Posts
+Eka's Portal         https://aryion.com/                 Galleries, Posts                                   Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
 Fireden              https://boards.fireden.net/         Threads
-Flickr               https://www.flickr.com/             |flickr-C|                                         Optional (OAuth)
-Fur Affinity         https://www.furaffinity.net/        Favorites, Galleries, Posts, Scraps, User Profiles Optional (Cookies)
+Flickr               https://www.flickr.com/             |flickr-C|                                         Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
+Fur Affinity         https://www.furaffinity.net/        Favorites, Galleries, Posts, Scraps, User Profiles Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
 Fuskator             https://fuskator.com/               Galleries, Search Results
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag Searches
@@ -81,7 +81,7 @@ Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.net/              Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
-mastodon.social      https://mastodon.social/            Images from Statuses, User Profiles
+mastodon.social      https://mastodon.social/            Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Naver                https://blog.naver.com/             Blogs, Posts
 Newgrounds           https://www.newgrounds.com/         |newgrounds-C|                                     Optional
 Ngomik               http://ngomik.in/                   Chapters
@@ -91,8 +91,8 @@ nijie                https://nijie.info/                 |nijie-C|              
 Nozomi.la            https://nozomi.la/                  Posts, Search Results, Tag Searches
 NSFWalbum.com        https://nsfwalbum.com/              Albums
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
-Patreon              https://www.patreon.com/            Creators, Posts, User Profiles
-Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles
+Patreon              https://www.patreon.com/            Creators, Posts, User Profiles                     Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
+Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Photobucket          https://photobucket.com/            Albums, individual Images
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
 Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins, Sections
@@ -106,7 +106,7 @@ Pururin              https://pururin.io/                 Galleries
 Read Comic Online    https://readcomiconline.to/         Comic Issues, Comics
 Realbooru            https://realbooru.com/              Pools, Posts, Tag Searches
 RebeccaBlackTech     https://rbt.asia/                   Threads
-Reddit               https://www.reddit.com/             |reddit-C|                                         Optional (OAuth)
+Reddit               https://www.reddit.com/             |reddit-C|                                         Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 RedGIFs              https://redgifs.com/                individual Images, Search Results, User Profiles
 rule #34             https://rule34.paheal.net/          Posts, Tag Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag Searches
@@ -119,15 +119,15 @@ Sex.com              https://www.sex.com/                Boards, Pins, related P
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
 SlickPic             https://www.slickpic.com/           Albums, User Profiles
 SlideShare           https://www.slideshare.net/         Presentations
-SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (OAuth)
+SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Speaker Deck         https://speakerdeck.com/            Presentations
-Subscribestar        https://www.subscribestar.com/      Posts, User Profiles
+SubscribeStar        https://www.subscribestar.com/      Posts, User Profiles                               Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
-Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          Optional (OAuth)
+Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Twitter              https://twitter.com/                |twitter-C|                                        Optional
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
-Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  |wallhaven-A|
+Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 Warosu               https://warosu.org/                 Threads
 Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
@@ -163,5 +163,4 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |twitter-C| replace:: Bookmarks, Likes, Media Timelines, Search Results, Timelines, Tweets
-.. |wallhaven-A| replace:: Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 .. |yuki-S| replace:: yuki.la 4chan archive

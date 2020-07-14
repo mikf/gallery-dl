@@ -84,6 +84,7 @@ CATEGORY_MAP = {
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
     "speakerdeck"    : "Speaker Deck",
+    "subscribestar"  : "SubscribeStar",
     "thebarchive"    : "The /b/ Archive",
     "vanillarock"    : "もえぴりあ",
     "vsco"           : "VSCO",
@@ -143,29 +144,39 @@ SUBCATEGORY_MAP = {
     },
 }
 
+_OAUTH = " (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)"
+_COOKIES = " (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)"
+_APIKEY_WH = " (`API Key <configuration.rst#extractorwallhavenapi-key>`__)"
+
 AUTH_MAP = {
-    "danbooru"   : "Optional",
-    "deviantart" : "Optional (OAuth)",
-    "e621"       : "Optional",
-    "e-hentai"   : "Optional",
-    "exhentai"   : "Optional",
-    "flickr"     : "Optional (OAuth)",
-    "idolcomplex": "Optional",
-    "imgbb"      : "Optional",
-    "instagram"  : "Optional",
-    "mangoxo"    : "Optional",
-    "newgrounds" : "Optional",
-    "nijie"      : "Required",
-    "pixiv"      : "Required",
-    "reddit"     : "Optional (OAuth)",
-    "sankaku"    : "Optional",
-    "seiga"      : "Required",
-    "smugmug"    : "Optional (OAuth)",
-    "tsumino"    : "Optional",
-    "tumblr"     : "Optional (OAuth)",
-    "twitter"    : "Optional",
-    "wallhaven"  : ("Optional (`API Key "
-                    "<configuration.rst#extractorwallhavenapi-key>`__)"),
+    "aryion"         : "Optional" + _COOKIES,
+    "baraag"         : "Optional" + _OAUTH,
+    "danbooru"       : "Optional",
+    "deviantart"     : "Optional" + _OAUTH,
+    "e621"           : "Optional",
+    "e-hentai"       : "Optional",
+    "exhentai"       : "Optional",
+    "flickr"         : "Optional" + _OAUTH,
+    "furaffinity"    : "Optional" + _COOKIES,
+    "idolcomplex"    : "Optional",
+    "imgbb"          : "Optional",
+    "instagram"      : "Optional",
+    "mangoxo"        : "Optional",
+    "mastodon.social": "Optional" + _OAUTH,
+    "newgrounds"     : "Optional",
+    "nijie"          : "Required",
+    "patreon"        : "Optional" + _COOKIES,
+    "pawoo"          : "Optional" + _OAUTH,
+    "pixiv"          : "Required",
+    "reddit"         : "Optional" + _OAUTH,
+    "sankaku"        : "Optional",
+    "seiga"          : "Required",
+    "smugmug"        : "Optional" + _OAUTH,
+    "subscribestar"  : "Optional" + _COOKIES,
+    "tsumino"        : "Optional",
+    "tumblr"         : "Optional" + _OAUTH,
+    "twitter"        : "Optional",
+    "wallhaven"      : "Optional" + _APIKEY_WH,
 }
 
 IGNORE_LIST = (
@@ -285,7 +296,7 @@ def write_output(fobj, columns, extractors):
         size = col[1]
         output = output if isinstance(output, str) else col[2](output)
 
-        if len(output) > size:
+        if len(output) > size and col[0][0] != "A":
             sub = "|{}-{}|".format(category, col[0][0])
             subs.append((sub, output))
             output = sub
