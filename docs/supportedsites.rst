@@ -35,7 +35,7 @@ Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
 Fireden              https://boards.fireden.net/         Threads
 Flickr               https://www.flickr.com/             |flickr-C|                                         Optional (OAuth)
-Fur Affinity         https://www.furaffinity.net/        Favorites, Galleries, Posts, Scraps, User Profiles
+Fur Affinity         https://www.furaffinity.net/        Favorites, Galleries, Posts, Scraps, User Profiles Optional (Cookies)
 Fuskator             https://fuskator.com/               Galleries, Search Results
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag Searches
