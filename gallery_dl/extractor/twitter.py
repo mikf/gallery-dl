@@ -485,7 +485,10 @@ class TwitterAPI():
             "variables": '{"screen_name":"' + screen_name + '"'
                          ',"withHighlightedLabel":true}'
         }
-        return self._call(endpoint, params)["data"]["user"]
+        try:
+            return self._call(endpoint, params)["data"]["user"]
+        except KeyError:
+            raise exception.NotFoundError("user")
 
     @cache(maxage=3600)
     def _guest_token(self):
