@@ -10,6 +10,7 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
+import re
 
 
 class MangakakalotBase():
@@ -31,51 +32,57 @@ class MangakakalotBase():
 class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
     """Extractor for manga-chapters from mangakakalot.com"""
     pattern = (r"(?:https?://)?(?:www\.)?mangakakalot\.com"
-               r"(/chapter/(\w+)/chapter_([^/?&#]+))")
+               r"(/chapter/\w+/chapter_[^/?&#]+)")
     test = (
-        ("https://mangakakalot.com/chapter/rx922077/chapter_6"),
-        ("https://mangakakalot.com/chapter"
-         "/hatarakanai_futari_the_jobless_siblings/chapter_20.1"),
+        ("https://mangakakalot.com/chapter/rx922077/chapter_6", {
+            "pattern": r"https://s\d+\.\w+\.com/mangakakalot/r\d+/rx922077/"
+                       r"chapter_6_master_help_me_out/\d+\.jpg",
+            "keyword": "80fde46d2210a6c17f0b2f7c1c89f0f56b65e157",
+            "count": 14,
+        }),
+        (("https://mangakakalot.com/chapter"
+          "/hatarakanai_futari_the_jobless_siblings/chapter_20.1"), {
+            "keyword": "6b24349bb16f41ef1c4350200c1ccda5f09ae136",
+            "content": "7196aed8bb1536806bf55033ed1f2ed172c86f9a",
+            "count": 2,
+        }),
     )
 
     def __init__(self, match):
-        self.path, self.url_title, self.chapter = match.groups()
+        self.path = match.group(1)
         ChapterExtractor.__init__(self, match, self.root + self.path)
         self.session.headers['Referer'] = self.root
 
-    def metadata(self, chapter_page):
-        page = self.request(self.root + "/manga/" + self.url_title).text
-        churl = self.root + self.path
-        chpage = self.request(churl).text
-        chapter, sep, minor = self.chapter.partition(".")
-        data = self.parse_page(page, {
-            "chapter": text.parse_int(chapter),
+    def metadata(self, page):
+        _     , pos = text.extract(page, '<span itemprop="name">', '<')
+        manga , pos = text.extract(page, '<span itemprop="name">', '<', pos)
+        info  , pos = text.extract(page, '<span itemprop="name">', '<', pos)
+        author, pos = text.extract(page, '. Author: ', ' already has ', pos)
+
+        match = re.match(
+            r"(?:[Vv]ol\. *(\d+) )?"
+            r"[Cc]hapter *([^:]*)"
+            r"(?:: *(.+))?", info)
+        volume, chapter, title = match.groups() if match else ("", "", info)
+        chapter, sep, minor = chapter.partition(".")
+
+        return {
+            "manga"        : text.unescape(manga),
+            "title"        : text.unescape(title) if title else "",
+            "author"       : text.unescape(author) if author else "",
+            "volume"       : text.parse_int(volume),
+            "chapter"      : text.parse_int(chapter),
             "chapter_minor": sep + minor,
-            "lang": "en",
-            "language": "English",
-        })
-        pos = page.index('href="' + churl + '"')
-        data["title"] , pos = text.extract(page, '>', '<', pos)
-        x = chpage.index('\n', chpage.index(
-            '<img', chpage.index('<div class="vung-doc"')))
-        y = chpage.rfind('<img', 0, x)
-        data["count"] = text.parse_int(text.extract(
-            chpage[y:x], 'page ', ' - Mangakakalot.com"')[0])
-        data["date"] , pos = text.extract(page, 'title="', '">', pos)
-        return data
+            "lang"         : "en",
+            "language"     : "English",
+        }
 
     def images(self, page):
-        x = page.index('<div class="vung-doc"')
-        y = page.index('\n', page.index('\n', x) + 1)
-        page = page[x:y]
-        pos = 0
-        while True:
-            image_url, pos = text.extract(page, 'src="', '"', pos)
-            if not image_url:
-                return
-            if image_url.startswith('/ads/'):
-                continue
-            yield image_url, {}
+        page = text.extract(page, 'id="vungdoc"', '\n</div>')[0]
+        return [
+            (url, None)
+            for url in text.extract_iter(page, '<img src="', '"')
+        ]
 
 
 class MangakakalotMangaExtractor(MangakakalotBase, MangaExtractor):
@@ -84,8 +91,13 @@ class MangakakalotMangaExtractor(MangakakalotBase, MangaExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?mangakakalot\.com"
                r"(/(?:manga/|read-)\w+)")
     test = (
-        ("https://mangakakalot.com/manga/rx922077"),
-        ("https://mangakakalot.com/read-ry3sw158504884246"),
+        ("https://mangakakalot.com/manga/lk921810", {
+            "url": "d262134b65993b031406f7b9d9442c9afd321a27",
+        }),
+        ("https://mangakakalot.com/read-ry3sw158504884246", {
+            "pattern": MangakakalotChapterExtractor.pattern,
+            "count": ">= 40"
+        }),
     )
 
     def chapters(self, page):
