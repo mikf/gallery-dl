@@ -9,7 +9,7 @@
 """Extractors for https://gfycat.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 from ..cache import cache
 
 
@@ -114,14 +114,27 @@ class GfycatImageExtractor(GfycatExtractor):
         ("https://gfycat.com/detail/UnequaledHastyAnkole?tagname=aww", {
             "url": "e24c9f69897fd223343782425a429c5cab6a768e",
         }),
+        # retry 404'ed videos on redgifs (#874)
+        ("https://www.gfycat.com/foolishforkedabyssiniancat", {
+            "pattern": "https://redgifs.com/watch/foolishforkedabyssiniancat",
+        }),
         ("https://gfycat.com/gifs/detail/UnequaledHastyAnkole"),
         ("https://gfycat.com/ifr/UnequaledHastyAnkole"),
         ("https://gfycat.com/ru/UnequaledHastyAnkole"),
     )
 
-    def gfycats(self):
-        url = "https://api.gfycat.com/v1/gfycats/" + self.key
-        return (self.request(url).json()["gfyItem"],)
+    def items(self):
+        try:
+            gfycat = GfycatAPI(self).gfycat(self.key)
+        except exception.HttpError:
+            from .redgifs import RedgifsImageExtractor
+            url = "https://redgifs.com/watch/" + self.key
+            data = {"_extractor": RedgifsImageExtractor}
+            yield Message.Queue, url, data
+        else:
+            url = self._select_format(gfycat)
+            yield Message.Directory, gfycat
+            yield Message.Url, url, gfycat
 
 
 class GfycatAPI():
