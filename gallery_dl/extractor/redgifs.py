@@ -8,8 +8,8 @@
 
 """Extractors for https://redgifs.com/"""
 
-from .gfycat import GfycatExtractor
-from ..cache import cache
+from .gfycat import GfycatExtractor, GfycatAPI
+from .. import text
 
 
 class RedgifsExtractor(GfycatExtractor):
@@ -44,7 +44,7 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     })
 
     def metadata(self):
-        self.key = self.key.replace("-", " ")
+        self.key = text.unquote(self.key).replace("-", " ")
         return {"search": self.key}
 
     def gfycats(self):
@@ -68,55 +68,7 @@ class RedgifsImageExtractor(RedgifsExtractor):
         return (RedgifsAPI(self).gfycat(self.key),)
 
 
-class RedgifsAPI():
-
-    def __init__(self, extractor):
-        self.extractor = extractor
-        self.headers = {}
-
-    def gfycat(self, gfycat_id):
-        endpoint = "v1/gfycats/" + gfycat_id
-        return self._call(endpoint)["gfyItem"]
-
-    def user(self, user):
-        endpoint = "v1/users/{}/gfycats".format(user.lower())
-        params = {"count": 100}
-        return self._pagination(endpoint, params)
-
-    def search(self, query):
-        endpoint = "v1/gfycats/search"
-        params = {"search_text": query, "count": 150}
-        return self._pagination(endpoint, params)
-
-    @cache(maxage=3600)
-    def _authenticate_impl(self):
-        url = "https://weblogin.redgifs.com/oauth/webtoken"
-        headers = {
-            "Referer": "https://www.redgifs.com/",
-            "Origin" : "https://www.redgifs.com",
-        }
-        data = {
-            "access_key": "dBLwVuGn9eq4dtXLs8WSfpjcYFY7bPQe"
-                          "AqGPSFgqeW5B9uzj2cMVhF63pTFF4Rg9",
-        }
-
-        response = self.extractor.request(
-            url, method="POST", headers=headers, json=data)
-        return "Bearer " + response.json()["access_token"]
-
-    def _call(self, endpoint, params=None):
-        self.headers["Authorization"] = self._authenticate_impl()
-        url = "https://napi.redgifs.com/" + endpoint
-        return self.extractor.request(
-            url, params=params, headers=self.headers).json()
-
-    def _pagination(self, endpoint, params):
-        while True:
-            data = self._call(endpoint, params)
-            gfycats = data["gfycats"]
-            yield from gfycats
-
-            if "found" not in data and len(gfycats) < params["count"] or \
-                    not data["gfycats"]:
-                return
-            params["cursor"] = data["cursor"]
+class RedgifsAPI(GfycatAPI):
+    API_ROOT = "https://napi.redgifs.com/"
+    ACCESS_KEY = ("dBLwVuGn9eq4dtXLs8WSfpjcYFY7bPQe"
+                  "AqGPSFgqeW5B9uzj2cMVhF63pTFF4Rg9")
