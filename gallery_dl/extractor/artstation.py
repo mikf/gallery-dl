@@ -66,6 +66,8 @@ class ArtstationExtractor(Extractor):
         data["title"] = text.unescape(data["title"])
         data["description"] = text.unescape(text.remove_html(
             data["description"]))
+        data["date"] = text.parse_datetime(
+            data["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
         assets = data["assets"]
         del data["assets"]
@@ -378,3 +380,21 @@ class ArtstationImageExtractor(ArtstationExtractor):
 
     def get_project_assets(self, project_id):
         return self.assets
+
+
+class ArtstationFollowingExtractor(ArtstationExtractor):
+    """Extractor for a user's followed users"""
+    subcategory = "following"
+    pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
+               r"/(?!artwork|projects|search)([^/?&#]+)/following")
+    test = ("https://www.artstation.com/gaerikim/following", {
+        "pattern": ArtstationUserExtractor.pattern,
+        "count": ">= 50",
+    })
+
+    def items(self):
+        url = "{}/users/{}/following.json".format(self.root, self.user)
+        for user in self._pagination(url):
+            url = "{}/{}".format(self.root, user["username"])
+            user["_extractor"] = ArtstationUserExtractor
+            yield Message.Queue, url, user

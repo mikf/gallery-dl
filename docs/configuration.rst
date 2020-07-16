@@ -136,7 +136,7 @@ Default     ``"auto"``
 Example     | ``"/!? (){}"``
             | ``{" ": "_", "/": "-", "|": "-", ":": "-", "*": "+"}``
 Description | A string of characters to be replaced with the value of
-              `path-replace <extractor.*.path-replace>`__
+              `path-replace <extractor.*.path-replace_>`__
             | or an object mapping invalid/unwanted characters to their replacements
             | for generated path segment names.
 
@@ -158,7 +158,7 @@ extractor.*.path-replace
 Type        ``string``
 Default     ``"_"``
 Description The replacement character(s) for
-            `path-restrict <extractor.*.path-restrict>`__
+            `path-restrict <extractor.*.path-restrict_>`__
 =========== =====
 
 
@@ -181,7 +181,7 @@ Type        ``bool`` or ``string``
 Default     ``true``
 Description Controls the behavior when downloading files that have been
             downloaded before, i.e. a file with the same filename already
-            exists or its ID is in a `download archive`__.
+            exists or its ID is in a `download archive <extractor.*.archive_>`__.
 
             * ``true``: Skip downloads
             * ``false``: Overwrite already existing files
@@ -197,8 +197,6 @@ Description Controls the behavior when downloading files that have been
             * ``"enumerate"``: Add an enumeration index to the beginning of the
               filename extension (``file.1.ext``, ``file.2.ext``, etc.)
 =========== =====
-
-__ `extractor.*.archive`_
 
 
 extractor.*.sleep
@@ -517,11 +515,9 @@ extractor.*.chapter-unique
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Like `image-unique`__, but applies to delegated URLs
-            like manga-chapters, etc.
+Description Like `image-unique <extractor.*.image-unique_>`__,
+            but applies to delegated URLs like manga-chapters, etc.
 =========== =====
-
-__ `extractor.*.image-unique`_
 
 
 extractor.*.date-format
@@ -547,6 +543,19 @@ extractor.artstation.external
 Type        ``bool``
 Default     ``false``
 Description Try to follow external URLs of embedded players.
+=========== =====
+
+
+extractor.aryion.recursive
+--------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Controls the post extraction strategy.
+
+            * ``true``: Start on users' main gallery pages and recursively
+              descend into subfolders
+            * ``false``: Get posts from "Latest Updates" pages
 =========== =====
 
 
@@ -576,7 +585,8 @@ extractor.deviantart.extra
 =========== =====
 Type        ``bool``
 Default     ``false``
-Description Download extra Sta.sh resources from description texts.
+Description Download extra Sta.sh resources from
+            description texts and journals.
 
             Note: Enabling this option also enables deviantart.metadata_.
 =========== =====
@@ -869,6 +879,21 @@ Description Download video files.
 =========== =====
 
 
+extractor.khinsider.format
+--------------------------
+=========== =====
+Type        ``string``
+Default     ``"mp3"``
+Description The name of the preferred file format to download.
+
+            Use ``"all"`` to download all available formats,
+            or a (comma-separated) list to select multiple formats.
+
+            If the selected format is not available,
+            the first in the list gets chosen (usually `mp3`).
+=========== =====
+
+
 extractor.kissmanga.captcha
 ---------------------------
 =========== =====
@@ -943,6 +968,15 @@ Description Download subalbums.
 =========== =====
 
 
+extractor.pinterest.sections
+----------------------------
+=========== =====
+Type        ``bool``
+Default     ``true``
+Description Include pins from board sections.
+=========== =====
+
+
 extractor.pixiv.user.avatar
 ---------------------------
 =========== =====
@@ -966,7 +1000,7 @@ Description Download Pixiv's Ugoira animations or ignore them.
             to watchable videos. (Example__)
 =========== =====
 
-__ https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
+.. __: https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
 
 
 extractor.plurk.comments
@@ -1106,6 +1140,21 @@ Description Control video download behavior.
 =========== =====
 
 
+extractor.redgifs.format
+------------------------
+=========== =====
+Type        ``string``
+Default     ``"mp4"``
+Description The name of the preferred format, which can be one of
+            ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"``, ``"mobile"``,
+            or ``"mini"``.
+
+            If the selected format is not available, ``"mp4"``, ``"webm"``
+            and ``"gif"`` (in that order) will be tried instead, until an
+            available format is found.
+=========== =====
+
+
 extractor.sankaku.wait-min & .wait-max
 --------------------------------------
 =========== =====
@@ -1192,12 +1241,12 @@ Description A (comma-separated) list of post types to extract images, etc. from.
 =========== =====
 
 
-extractor.twitter.content
--------------------------
+extractor.twitter.quoted
+------------------------
 =========== =====
 Type        ``bool``
-Default     ``false``
-Description Extract tweet text as ``content`` metadata.
+Default     ``true``
+Description Fetch media from quoted Tweets.
 =========== =====
 
 
@@ -1206,7 +1255,7 @@ extractor.twitter.replies
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description Extract media from replies to other Tweets.
+Description Fetch media from replies to other Tweets.
 =========== =====
 
 
@@ -1215,7 +1264,7 @@ extractor.twitter.retweets
 =========== =====
 Type        ``bool``
 Default     ``true``
-Description Extract media from Retweets.
+Description Fetch media from Retweets.
 =========== =====
 
 
@@ -1235,10 +1284,8 @@ Type        ``bool`` or ``string``
 Default     ``true``
 Description Control video download behavior.
 
-            * ``true``: Download videos and use `youtube-dl`_ to handle
-              HLS ``.m3u8`` manifests
-            * ``"ytdl"``: Download videos and let `youtube-dl`_ handle all of
-              video extraction and download
+            * ``true``: Download videos
+            * ``"ytdl"``: Download videos using `youtube-dl`_
             * ``false``: Skip video Tweets
 =========== =====
 
@@ -1892,7 +1939,7 @@ cache.file
 ----------
 =========== =====
 Type        |Path|_
-Default     * |tempfile.gettempdir()|__ + ``".gallery-dl.cache"`` on Windows
+Default     * (``%APPDATA%`` or ``"~"``) + ``"/gallery-dl/cache.sqlite3"`` on Windows
             * (``$XDG_CACHE_HOME`` or ``"~/.cache"``) + ``"/gallery-dl/cache.sqlite3"`` on all other platforms
 Description Path of the SQLite3 database used to cache login sessions,
             cookies and API tokens across `gallery-dl` invocations.
@@ -1900,8 +1947,6 @@ Description Path of the SQLite3 database used to cache login sessions,
             Set this option to ``null`` or an invalid path to disable
             this cache.
 =========== =====
-
-__ gettempdir_
 
 
 ciphers
@@ -2163,7 +2208,6 @@ Description An object with the ``name`` of a post-processor and its options.
 
 
 .. |.netrc| replace:: ``.netrc``
-.. |tempfile.gettempdir()| replace:: ``tempfile.gettempdir()``
 .. |requests.request()| replace:: ``requests.request()``
 .. |timeout| replace:: ``timeout``
 .. |verify| replace:: ``verify``
@@ -2189,7 +2233,6 @@ Description An object with the ``name`` of a post-processor and its options.
 .. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _format string:      https://docs.python.org/3/library/string.html#formatstrings
 .. _format strings:     https://docs.python.org/3/library/string.html#formatstrings
-.. _gettempdir:         https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir
 .. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _webbrowser.open():  https://docs.python.org/3/library/webbrowser.html
 .. _mature_content:     https://www.deviantart.com/developers/http/v1/20160316/object/deviation

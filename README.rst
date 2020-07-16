@@ -83,8 +83,8 @@ Download a standalone executable file,
 put it into your `PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__,
 and run it inside a command prompt (like ``cmd.exe``).
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.13.6/gallery-dl.exe>`__
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.13.6/gallery-dl.bin>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.14.2/gallery-dl.exe>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.14.2/gallery-dl.bin>`__
 
 These executables include a Python 3.8 interpreter
 and all required Python packages.
@@ -100,13 +100,14 @@ Linux users that are using a distro that is supported by Snapd_ can install *gal
     $ snap install gallery-dl
 
 Chocolatey
-----
+----------
 
 Windows users that have Chocolatey_ installed can install *gallery-dl* from the Chocolatey Community Packages repository:
 
 .. code:: powershell
 
     $ choco install gallery-dl
+
 
 Usage
 =====
@@ -153,6 +154,14 @@ Filter manga chapters by language and chapter number:
     $ gallery-dl "r:https://pastebin.com/raw/FLwrCYsT"
 
 
+If a site's address is nonstandard for its extractor, you can prefix the URL with the 
+extractor's name to force the use of a specific extractor:
+
+.. code:: bash
+
+    $ gallery-dl "tumblr:https://sometumblrblog.example"
+
+
 Configuration
 =============
 
@@ -170,7 +179,7 @@ Configuration files for *gallery-dl* use a JSON-based file format.
 +--------------------------------------------+------------------------------------------+
 | Linux                                      | Windows                                  |
 +--------------------------------------------+------------------------------------------+
-|* ``/etc/gallery-dl.conf``                  |*                                         |
+|* ``/etc/gallery-dl.conf``                  |* ``%APPDATA%\gallery-dl\config.json``    |
 |* ``${HOME}/.config/gallery-dl/config.json``|* ``%USERPROFILE%\gallery-dl\config.json``|
 |* ``${HOME}/.gallery-dl.conf``              |* ``%USERPROFILE%\gallery-dl.conf``       |
 +--------------------------------------------+------------------------------------------+
@@ -192,7 +201,7 @@ Authentication
 Username & Password
 -------------------
 
-Some extractors require you to provide valid login-credentials in the form of
+Some extractors require you to provide valid login credentials in the form of
 a username & password pair. This is necessary for
 ``pixiv``, ``nijie``, and ``seiga``
 and optional for
@@ -202,16 +211,14 @@ and optional for
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
 
-.. code::
+.. code:: json
 
     {
         "extractor": {
-            ...
             "pixiv": {
                 "username": "<username>",
                 "password": "<password>"
             }
-            ...
         }
     }
 
@@ -224,6 +231,49 @@ or you can provide them directly via the
     $ gallery-dl -u <username> -p <password> URL
     $ gallery-dl -o username=<username> -o password=<password> URL
 
+Cookies
+-------
+
+For sites where login with username & password is not possible due to
+CAPTCHA or similar, or has not been implemented yet, you can use the
+cookies from a browser login session and input them into *gallery-dl*.
+
+This can be done via the
+`cookies <https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractorcookies>`__
+option in your configuration file by specifying
+
+- | the path to a Mozilla/Netscape format cookies.txt file exported by a browser addon
+  | (e.g. `cookies.txt <https://chrome.google.com/webstore/detail/cookiestxt/njabckikapfpffapmjgojcnbfjonfjfg>`__ for Chrome,
+    `Export Cookies <https://addons.mozilla.org/en-US/firefox/addon/export-cookies-txt/?src=search>`__ for Firefox)
+
+- | a list of name-value pairs gathered from your browser's web developer tools
+  | (in `Chrome <https://developers.google.com/web/tools/chrome-devtools/storage/cookies>`__,
+     in `Firefox <https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector>`__)
+
+For example:
+
+.. code:: json
+
+    {
+        "extractor": {
+            "instagram": {
+                "cookies": "$HOME/path/to/cookies.txt"
+            },
+            "patreon": {
+                "cookies": {
+                    "session_id": "K1T57EKu19TR49C51CDjOJoXNQLF7VbdVOiBrC9ye0a"
+                }
+            }
+        }
+    }
+
+You can also specify a cookies.txt file with
+the :code:`--cookies` command-line option:
+
+.. code:: bash
+
+    $ gallery-dl --cookies "$HOME/path/to/cookies.txt" URL
+
 OAuth
 -----
 
@@ -234,7 +284,7 @@ to issue requests on your account's behalf and enables it to access resources
 which would otherwise be unavailable to a public user.
 
 To link your account to *gallery-dl*, start by invoking it with
-``oauth:<site-name>`` as an argument. For example:
+``oauth:<sitename>`` as an argument. For example:
 
 .. code:: bash
 
@@ -249,7 +299,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
-.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.13.6.tar.gz
+.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.14.2.tar.gz
 .. _dev:                     https://github.com/mikf/gallery-dl/archive/master.tar.gz
 
 .. _Python:     https://www.python.org/downloads/
@@ -261,7 +311,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _pyOpenSSL:  https://pyopenssl.org/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
-.. _Chocolatey:      https://chocolatey.org/install
+.. _Chocolatey: https://chocolatey.org/install
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.org/project/gallery-dl/

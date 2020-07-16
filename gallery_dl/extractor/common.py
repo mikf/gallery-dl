@@ -328,14 +328,15 @@ class Extractor():
                 test = (test, None)
             yield test
 
-    def _dump_response(self, response):
+    def _dump_response(self, response, history=True):
         """Write the response content to a .dump file in the current directory.
 
         The file name is derived from the response url,
         replacing special characters with "_"
         """
-        for resp in response.history:
-            self._dump_response(resp)
+        if history:
+            for resp in response.history:
+                self._dump_response(resp, False)
 
         if hasattr(Extractor, "_dump_index"):
             Extractor._dump_index += 1
@@ -350,7 +351,8 @@ class Extractor():
 
         try:
             with open(fname + ".dump", 'wb') as fp:
-                util.dump_response(response, fp)
+                util.dump_response(
+                    response, fp, headers=(self._write_pages == "all"))
         except Exception as e:
             self.log.warning("Failed to dump HTTP request (%s: %s)",
                              e.__class__.__name__, e)
@@ -490,10 +492,13 @@ class SharedConfigMixin():
     """Enable sharing of config settings based on 'basecategory'"""
     basecategory = ""
 
-    def config(self, key, default=None, *, sentinel=util.SENTINEL):
-        value = Extractor.config(self, key, sentinel)
-        return value if value is not sentinel else config.interpolate(
-            ("extractor", self.basecategory, self.subcategory), key, default)
+    def config(self, key, default=None):
+        return config.interpolate_common(
+            ("extractor",), (
+                (self.category, self.subcategory),
+                (self.basecategory, self.subcategory),
+            ), key, default,
+        )
 
 
 def generate_extractors(extractor_data, symtable, classes):

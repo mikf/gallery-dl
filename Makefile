@@ -24,7 +24,7 @@ test:
 executable:
 	scripts/pyinstaller.py
 
-completion: data/completion/gallery-dl
+completion: data/completion/gallery-dl data/completion/_gallery-dl
 
 man: data/man/gallery-dl.1 data/man/gallery-dl.conf.5
 
@@ -39,5 +39,8 @@ data/man/gallery-dl.1: gallery_dl/option.py gallery_dl/version.py scripts/man.py
 data/man/gallery-dl.conf.5: docs/configuration.rst gallery_dl/version.py scripts/man.py
 	$(PYTHON) scripts/man.py
 
-data/completion/gallery-dl: gallery_dl/option.py scripts/bash_completion.py
-	$(PYTHON) scripts/bash_completion.py
+data/completion/gallery-dl: gallery_dl/option.py scripts/completion_bash.py
+	$(PYTHON) scripts/completion_bash.py
+
+data/completion/_gallery-dl: gallery_dl/option.py scripts/completion_zsh.py
+	$(PYTHON) scripts/completion_zsh.py

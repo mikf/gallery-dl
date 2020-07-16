@@ -84,6 +84,13 @@ def filter_dict(a):
     return {k: v for k, v in a.items() if k[0] != "_"}
 
 
+def delete_items(obj, keys):
+    """Remove all 'keys' from 'obj'"""
+    for key in keys:
+        if key in obj:
+            del obj[key]
+
+
 def number_to_string(value, numbers=(int, float)):
     """Convert numbers (int, float) to string; Return everything else as is."""
     return str(value) if value.__class__ in numbers else value
@@ -113,13 +120,14 @@ def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
     fp.write("\n")
 
 
-def dump_response(response, fp=sys.stdout,
-                  headers=True, content=True, hide_auth=True):
+def dump_response(response, fp, *,
+                  headers=False, content=True, hide_auth=True):
     """Write the contents of 'response' into a file-like object"""
 
     if headers:
         request = response.request
         req_headers = request.headers.copy()
+        res_headers = response.headers.copy()
         outfmt = """\
 {request.method} {request.url}
 Status: {response.status_code} {response.reason}
@@ -138,11 +146,17 @@ Response Headers
                 atype, sep, _ = authorization.partition(" ")
                 req_headers["Authorization"] = atype + " ***" if sep else "***"
 
-            cookies = req_headers.get("Cookie")
-            if cookies:
+            cookie = req_headers.get("Cookie")
+            if cookie:
                 req_headers["Cookie"] = ";".join(
-                    cookie.partition("=")[0] + "=***"
-                    for cookie in cookies.split(";")
+                    c.partition("=")[0] + "=***"
+                    for c in cookie.split(";")
+                )
+
+            set_cookie = res_headers.get("Set-Cookie")
+            if set_cookie:
+                res_headers["Set-Cookie"] = re.sub(
+                    r"(^|, )([^ =]+)=[^,;]*", r"\1\2=***", set_cookie,
                 )
 
         fp.write(outfmt.format(
@@ -154,7 +168,7 @@ Response Headers
             ),
             response_headers="\n".join(
                 name + ": " + value
-                for name, value in response.headers.items()
+                for name, value in res_headers.items()
             ),
         ).encode())
 
@@ -707,12 +721,10 @@ class PathFormat():
             raise exception.DirectoryFormatError(exc)
 
         self.directory = self.realdirectory = ""
-        self.filename = ""
-        self.extension = ""
-        self.prefix = ""
-        self.kwdict = {}
-        self.delete = False
+        self.filename = self.extension = self.prefix = ""
         self.path = self.realpath = self.temppath = ""
+        self.kwdict = {}
+        self.delete = self._create_directory = False
 
         basedir = extractor._parentdir
         if not basedir:
@@ -817,9 +829,7 @@ class PathFormat():
                 directory += sep
 
         self.realdirectory = directory
-
-        # Create directory tree
-        os.makedirs(self.realdirectory, exist_ok=True)
+        self._create_directory = True
 
     def set_filename(self, kwdict):
         """Set general filename data"""
@@ -858,6 +868,9 @@ class PathFormat():
 
     def build_path(self):
         """Combine directory and filename to full paths"""
+        if self._create_directory:
+            os.makedirs(self.realdirectory, exist_ok=True)
+            self._create_directory = False
         self.filename = filename = self.build_filename()
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename

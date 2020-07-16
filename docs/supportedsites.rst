@@ -11,7 +11,7 @@ Site                 URL                                 Capabilities           
 4plebs               https://archive.4plebs.org/         Threads
 500px                https://500px.com/                  Galleries, individual Images, User Profiles
 8kun                 https://8kun.top/                   Boards, Threads
-8muses               https://www.8muses.com/             Albums
+8muses               https://comics.8muses.com/          Albums
 Adobe Portfolio      https://www.myportfolio.com/        Galleries
 Adult Empire         https://www.adultempire.com/        Galleries
 arch.b4k.co          https://arch.b4k.co/                Threads
@@ -35,7 +35,7 @@ Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
 Fireden              https://boards.fireden.net/         Threads
 Flickr               https://www.flickr.com/             |flickr-C|                                         Optional (OAuth)
-Fur Affinity         https://www.furaffinity.net/        Favorites, Galleries, Posts, Scraps, User Profiles
+Fur Affinity         https://www.furaffinity.net/        Favorites, Galleries, Posts, Scraps, User Profiles Optional (Cookies)
 Fuskator             https://fuskator.com/               Galleries, Search Results
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag Searches
@@ -48,7 +48,7 @@ HentaiFox            https://hentaifox.com/              Galleries, Search Resul
 HentaiHand           https://hentaihand.com/             Galleries, Search Results, Tag Searches
 HentaiHere           https://hentaihere.com/             Chapters, Manga
 Hentainexus          https://hentainexus.com/            Galleries, Search Results
-Hiperdex             https://hiperdex.info/              Artists, Chapters, Manga
+Hiperdex             https://hiperdex.com/               Artists, Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries, Tag Searches
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional
@@ -76,6 +76,7 @@ Manga Fox            https://fanfox.net/                 Chapters
 Manga Here           https://www.mangahere.cc/           Chapters, Manga
 Manga Stream         https://readms.net/                 Chapters
 MangaDex             https://mangadex.org/               Chapters, Manga
+MangaKakalot         https://mangakakalot.com/           Chapters, Manga
 Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.net/              Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
@@ -94,7 +95,7 @@ Patreon              https://www.patreon.com/            Creators, Posts, User P
 Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles
 Photobucket          https://photobucket.com/            Albums, individual Images
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
-Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins
+Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins, Sections
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
 Pixnet               https://www.pixnet.net/             Folders, individual Images, Sets, User Profiles
 Plurk                https://www.plurk.com/              Posts, Timelines
@@ -106,20 +107,21 @@ Read Comic Online    https://readcomiconline.to/         Comic Issues, Comics
 Realbooru            https://realbooru.com/              Pools, Posts, Tag Searches
 RebeccaBlackTech     https://rbt.asia/                   Threads
 Reddit               https://www.reddit.com/             |reddit-C|                                         Optional (OAuth)
-RedGIFs              https://redgifs.com/                individual Images
+RedGIFs              https://redgifs.com/                individual Images, Search Results, User Profiles
 rule #34             https://rule34.paheal.net/          Posts, Tag Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag Searches
 Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional
 Sankaku Complex      https://www.sankakucomplex.com/     Articles, Tag Searches
 Sen Manga            https://raw.senmanga.com/           Chapters
-Sense-Scans          http://sensescans.com/reader/       Chapters, Manga
+Sense-Scans          https://sensescans.com/reader/      Chapters, Manga
 Sex.com              https://www.sex.com/                Boards, Pins, related Pins, Search Results
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
 SlickPic             https://www.slickpic.com/           Albums, User Profiles
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (OAuth)
 Speaker Deck         https://speakerdeck.com/            Presentations
+Subscribestar        https://www.subscribestar.com/      Posts, User Profiles
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          Optional (OAuth)
@@ -160,6 +162,6 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
-.. |twitter-C| replace:: Bookmarks, Media Timelines, Search Results, Timelines, Tweets
+.. |twitter-C| replace:: Bookmarks, Likes, Media Timelines, Search Results, Timelines, Tweets
 .. |wallhaven-A| replace:: Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 .. |yuki-S| replace:: yuki.la 4chan archive

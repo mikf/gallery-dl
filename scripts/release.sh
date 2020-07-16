@@ -151,11 +151,11 @@ prompt
 supportedsites
 cleanup
 update
+changelog
 build-python
 build-linux
 build-windows
 sign
-changelog
 git-upload
 pypi-upload
 update-dev

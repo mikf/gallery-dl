@@ -28,7 +28,7 @@ matrix:
         - sudo apt update
         - snapcraft --destructive-mode
         - sudo snap try
-        - snap run gallery-dl --verbose https://twitter.com/ubuntu/status/1121001597092364288
+        - snap run gallery-dl --verbose https://en.wikipedia.org/static/images/project-logos/enwiki.png
   allow_failures:
     - env: GALLERYDL_TESTS=results
     - env: GALLERYDL_TESTS=snap

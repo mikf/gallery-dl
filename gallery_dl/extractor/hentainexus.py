@@ -51,20 +51,38 @@ class HentainexusGalleryExtractor(GalleryExtractor):
             "description": rmve(extr('viewcolumn">Description</td>', '</td>')),
         }
         data["lang"] = util.language_to_code(data["language"])
-        data["type"] = "Doujinshi" if 'doujin' in data["tags"] else "Manga"
-        data["title_conventional"] = self.join_title(
-            data["event"],
-            data["circle"],
-            data["artist"],
-            data["title"],
-            data["parody"],
-            data["book"],
-            data["magazine"],
-        )
+        if 'doujin' in data['tags']:
+            data['type'] = 'Doujinshi'
+        elif 'illustration' in data['tags']:
+            data['type'] = 'Illustration'
+        else:
+            data['type'] = 'Manga'
+        data["title_conventional"] = self._join_title(data)
         return data
 
+    def images(self, page):
+        url = "{}/read/{}".format(self.root, self.gallery_id)
+        extr = text.extract_from(self.request(url).text)
+        urls = extr("initReader(", "]") + "]"
+        return [(url, None) for url in json.loads(urls)]
+
     @staticmethod
-    def join_title(event, circle, artist, title, parody, book, magazine):
+    def _join_title(data):
+        event = data['event']
+        artist = data['artist']
+        circle = data['circle']
+        title = data['title']
+        parody = data['parody']
+        book = data['book']
+        magazine = data['magazine']
+
+        # a few galleries have a large number of artists or parodies,
+        # which get replaced with "Various" in the title string
+        if artist.count(',') >= 3:
+            artist = 'Various'
+        if parody.count(',') >= 3:
+            parody = 'Various'
+
         jt = ''
         if event:
             jt += '({}) '.format(event)
@@ -80,12 +98,6 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         if magazine:
             jt += ' ({})'.format(magazine)
         return jt
-
-    def images(self, page):
-        url = "{}/read/{}".format(self.root, self.gallery_id)
-        extr = text.extract_from(self.request(url).text)
-        urls = extr("initReader(", "]") + "]"
-        return [(url, None) for url in json.loads(urls)]
 
 
 class HentainexusSearchExtractor(Extractor):

@@ -281,6 +281,7 @@ class DownloadJob(Job):
         postprocessors = self.postprocessors
 
         if postprocessors:
+            kwdict["extension"] = "metadata"
             pathfmt = self.pathfmt
             pathfmt.set_filename(kwdict)
             for pp in postprocessors:
@@ -454,15 +455,18 @@ class KeywordJob(Job):
         self.print_kwdict(kwdict)
 
     def handle_queue(self, url, kwdict):
+        extr = None
+        if "_extractor" in kwdict:
+            extr = kwdict["_extractor"].from_url(url)
+
         if not util.filter_dict(kwdict):
             self.extractor.log.info(
                 "This extractor only spawns other extractors "
                 "and does not provide any metadata on its own.")
 
-            if "_extractor" in kwdict:
+            if extr:
                 self.extractor.log.info(
                     "Showing results for '%s' instead:\n", url)
-                extr = kwdict["_extractor"].from_url(url)
                 KeywordJob(extr, self).run()
             else:
                 self.extractor.log.info(
@@ -471,9 +475,9 @@ class KeywordJob(Job):
             print("Keywords for --chapter-filter:")
             print("------------------------------")
             self.print_kwdict(kwdict)
-            if self.extractor.categorytransfer:
+            if extr or self.extractor.categorytransfer:
                 print()
-                KeywordJob(url, self).run()
+                KeywordJob(extr or url, self).run()
         raise exception.StopExtraction()
 
     @staticmethod
@@ -559,7 +563,12 @@ class DataJob(Job):
                 util.transform_dict(msg[-1], util.number_to_string)
 
         # dump to 'file'
-        util.dump_json(self.data, self.file, self.ascii, 2)
+        try:
+            util.dump_json(self.data, self.file, self.ascii, 2)
+            self.file.flush()
+        except Exception:
+            pass
+
         return 0
 
     def handle_url(self, url, kwdict):
@@ -576,6 +585,3 @@ class DataJob(Job):
 
     def handle_queue(self, url, kwdict):
         self.data.append((Message.Queue, url, self.filter(kwdict)))
-
-    def handle_finalize(self):
-        self.file.close()

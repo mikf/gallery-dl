@@ -209,25 +209,25 @@ EXTRACTORS = {
             }),
     },
     "sensescans": {
-        "root": "http://sensescans.com/reader",
+        "root": "https://sensescans.com/reader",
         "pattern": r"(?:(?:www\.)?sensescans\.com/reader"
                    r"|reader\.sensescans\.com)",
         "test-chapter": (
-            (("http://sensescans.com/reader/read/"
+            (("https://sensescans.com/reader/read/"
               "magi__labyrinth_of_magic/en/37/369/"), {
-                  "url": "a399ef037cdfbc25b09d435cc2ea1e3e454a6812",
+                  "url": "8bbc59a995640bbb944c0b1be06a490909b58be1",
                   "keyword": "07acd84fb18a9f1fd6dff5befe711bcca0ff9988",
             }),
-            (("http://reader.sensescans.com/read/"
+            (("https://reader.sensescans.com/read/"
               "magi__labyrinth_of_magic/en/37/369/"), {
-                  "url": "a399ef037cdfbc25b09d435cc2ea1e3e454a6812",
+                  "url": "8bbc59a995640bbb944c0b1be06a490909b58be1",
                   "keyword": "07acd84fb18a9f1fd6dff5befe711bcca0ff9988",
             }),
         ),
         "test-manga":
-            ("http://sensescans.com/reader/series/hakkenden/", {
-                "url": "2360ccb0ead0ff2f5e27b7aef7eb17b9329de2f2",
-                "keyword": "4919f2bfed38e3a34dc984ec8d1dbd7a03044e23",
+            ("https://sensescans.com/reader/series/yotsubato/", {
+                "url": "ee4dca7c421bf15ac039200f8c0bcb0858153640",
+                "keyword": "f94961bd731bd878bbd4d48555bc3ace1d937364",
             }),
     },
     "worldthree": {

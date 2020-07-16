@@ -17,7 +17,7 @@ class RedditExtractor(Extractor):
     """Base class for reddit extractors"""
     category = "reddit"
     directory_fmt = ("{category}", "{subreddit}")
-    filename_fmt = "{id} {title[:242]}.{extension}"
+    filename_fmt = "{id} {title[:220]}.{extension}"
     archive_fmt = "{filename}"
     cookiedomain = None
 
@@ -101,7 +101,7 @@ class RedditExtractor(Extractor):
             depth += 1
             submissions = (
                 self.api.submission(sid) for sid in extra
-                if sid not in self._visited
+                if sid not in visited
             )
 
     def submissions(self):
@@ -324,7 +324,11 @@ class RedditAPI():
             self.extractor.wait(seconds=response.headers["x-ratelimit-reset"])
             return self._call(endpoint, params)
 
-        data = response.json()
+        try:
+            data = response.json()
+        except ValueError:
+            raise exception.StopExtraction(text.remove_html(response.text))
+
         if "error" in data:
             if data["error"] == 403:
                 raise exception.AuthorizationError()

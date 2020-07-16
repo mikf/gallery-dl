@@ -14,6 +14,8 @@ from .. import text, exception
 from ..cache import cache
 import itertools
 import json
+import time
+import re
 
 
 class InstagramExtractor(Extractor):
@@ -25,6 +27,10 @@ class InstagramExtractor(Extractor):
     root = "https://www.instagram.com"
     cookiedomain = ".instagram.com"
     cookienames = ("sessionid",)
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self._find_tags = re.compile(r'#\w+').findall
 
     def get_metadata(self):
         return {}
@@ -78,9 +84,10 @@ class InstagramExtractor(Extractor):
         url = self.root + "/accounts/login/ajax/"
         data = {
             "username"     : username,
-            "password"     : password,
+            "enc_password" : "#PWD_INSTAGRAM_BROWSER:0:{}:{}".format(
+                int(time.time()), password),
             "queryParams"  : "{}",
-            "optIntoOneTap": "true",
+            "optIntoOneTap": "false",
         }
         response = self.request(url, method="POST", headers=headers, data=data)
 
@@ -133,11 +140,23 @@ class InstagramExtractor(Extractor):
             'fullname': media['owner']['full_name'],
             'post_id': media['id'],
             'post_shortcode': media['shortcode'],
+            'post_url': url,
             'description': text.parse_unicode_escapes('\n'.join(
                 edge['node']['text']
                 for edge in media['edge_media_to_caption']['edges']
             )),
         }
+
+        tags = self._find_tags(common['description'])
+        if tags:
+            common['tags'] = sorted(set(tags))
+
+        location = media['location']
+        if location:
+            common['location_id'] = location['id']
+            common['location_slug'] = location['slug']
+            common['location_url'] = "{}/explore/locations/{}/{}/".format(
+                self.root, location['id'], location['slug'])
 
         medias = []
         if media['__typename'] == 'GraphSidecar':
@@ -156,6 +175,7 @@ class InstagramExtractor(Extractor):
                     'sidecar_media_id': media['id'],
                     'sidecar_shortcode': media['shortcode'],
                 }
+                self._extract_tagged_users(children, media_data)
                 media_data.update(common)
                 medias.append(media_data)
 
@@ -169,6 +189,7 @@ class InstagramExtractor(Extractor):
                 'height': text.parse_int(media['dimensions']['height']),
                 'width': text.parse_int(media['dimensions']['width']),
             }
+            self._extract_tagged_users(media, media_data)
             media_data.update(common)
             medias.append(media_data)
 
@@ -189,12 +210,12 @@ class InstagramExtractor(Extractor):
             user_id = '"{}"'.format(
                 shared_data['entry_data']['StoriesPage'][0]['user']['id'])
             highlight_id = ''
-            query_hash = 'cda12de4f7fd3719c0569ce03589f4c4'
+            query_hash = '0a85e6ea60a4c99edc58ab2f3d17cfdf'
 
         variables = (
             '{{'
             '"reel_ids":[{}],"tag_names":[],"location_ids":[],'
-            '"highlight_reel_ids":[{}],"precomposed_overlay":true,'
+            '"highlight_reel_ids":[{}],"precomposed_overlay":false,'
             '"show_story_viewer_list":true,'
             '"story_viewer_fetch_count":50,"story_viewer_cursor":"",'
             '"stories_video_dash_manifest":false'
@@ -250,7 +271,7 @@ class InstagramExtractor(Extractor):
 
         data = self._request_graphql(
             variables,
-            'aec5501414615eca36a9acf075655b1e',
+            'ad99dd9d3646cc3c0dda65debcd266a7',
             shared_data['config']['csrf_token'],
         )
 
@@ -305,6 +326,18 @@ class InstagramExtractor(Extractor):
                 variables, psdf['query_hash'], csrf,
             )
 
+    def _extract_tagged_users(self, src_media, dest_dict):
+        edges = src_media['edge_media_to_tagged_user']['edges']
+        if edges:
+            dest_dict['tagged_users'] = tagged_users = []
+            for edge in edges:
+                user = edge['node']['user']
+                tagged_users.append({
+                    'id'       : user['id'],
+                    'username' : user['username'],
+                    'full_name': user['full_name'],
+                })
+
 
 class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
@@ -321,10 +354,15 @@ class InstagramImageExtractor(InstagramExtractor):
                 "description": str,
                 "height": int,
                 "likes": int,
+                "location_id": "214424288",
+                "location_slug": "hong-kong",
+                "location_url": "re:/explore/locations/214424288/hong-kong/",
                 "media_id": "1922949326347663701",
                 "shortcode": "BqvsDleB3lV",
                 "post_id": "1922949326347663701",
                 "post_shortcode": "BqvsDleB3lV",
+                "post_url": "https://www.instagram.com/p/BqvsDleB3lV/",
+                "tags": ["#WHPsquares"],
                 "typename": "GraphImage",
                 "username": "instagram",
                 "width": int,
@@ -339,6 +377,7 @@ class InstagramImageExtractor(InstagramExtractor):
                 "sidecar_shortcode": "BoHk1haB5tM",
                 "post_id": "1875629777499953996",
                 "post_shortcode": "BoHk1haB5tM",
+                "post_url": "https://www.instagram.com/p/BoHk1haB5tM/",
                 "num": int,
                 "likes": int,
                 "username": "instagram",
@@ -347,14 +386,16 @@ class InstagramImageExtractor(InstagramExtractor):
 
         # GraphVideo
         ("https://www.instagram.com/p/Bqxp0VSBgJg/", {
-            "pattern": r"/47129943_191645575115739_8539303288426725376_n\.mp4",
+            "pattern": r"/46840863_726311431074534_7805566102611403091_n\.mp4",
             "keyword": {
                 "date": "dt:2018-11-29 19:23:58",
                 "description": str,
                 "height": int,
                 "likes": int,
                 "media_id": "1923502432034620000",
+                "post_url": "https://www.instagram.com/p/Bqxp0VSBgJg/",
                 "shortcode": "Bqxp0VSBgJg",
+                "tags": ["#ASMR"],
                 "typename": "GraphVideo",
                 "username": "instagram",
                 "width": int,
@@ -363,13 +404,14 @@ class InstagramImageExtractor(InstagramExtractor):
 
         # GraphVideo (IGTV)
         ("https://www.instagram.com/tv/BkQjCfsBIzi/", {
-            "pattern": r"/10000000_1760663964018792_716207142595461120_n\.mp4",
+            "pattern": r"/10000000_597132547321814_702169244961988209_n\.mp4",
             "keyword": {
                 "date": "dt:2018-06-20 19:51:32",
                 "description": str,
                 "height": int,
                 "likes": int,
                 "media_id": "1806097553666903266",
+                "post_url": "https://www.instagram.com/p/BkQjCfsBIzi/",
                 "shortcode": "BkQjCfsBIzi",
                 "typename": "GraphVideo",
                 "username": "instagram",
@@ -381,11 +423,23 @@ class InstagramImageExtractor(InstagramExtractor):
         ("https://www.instagram.com/p/BtOvDOfhvRr/", {
             "count": 2,
             "keyword": {
+                "post_url": "https://www.instagram.com/p/BtOvDOfhvRr/",
                 "sidecar_media_id": "1967717017113261163",
                 "sidecar_shortcode": "BtOvDOfhvRr",
                 "video_url": str,
             }
-        })
+        }),
+
+        # GraphImage with tagged user
+        ("https://www.instagram.com/p/B_2lf3qAd3y/", {
+            "keyword": {
+                "tagged_users": [{
+                    "id": "1246468638",
+                    "username": "kaaymbl",
+                    "full_name": "Call Me Kay",
+                }]
+            }
+        }),
     )
 
     def __init__(self, match):
@@ -476,7 +530,7 @@ class InstagramUserExtractor(InstagramExtractor):
             'node_id': 'id',
             'variables_id': 'id',
             'edge_to_medias': 'edge_owner_to_timeline_media',
-            'query_hash': 'f2405b236d85e8296cf30347c9f08c2a',
+            'query_hash': '44efc15d3c13342d02df0b5a9fa3d33f',
         })
 
         if self.config('highlights'):
@@ -545,5 +599,5 @@ class InstagramTagExtractor(InstagramExtractor):
             'node_id': 'name',
             'variables_id': 'tag_name',
             'edge_to_medias': 'edge_hashtag_to_media',
-            'query_hash': 'f12c9ec5e46a3173b2969c712ad84744',
+            'query_hash': '7dabc71d3e758b1ec19ffb85639e427b',
         })
