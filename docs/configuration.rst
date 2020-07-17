@@ -231,6 +231,7 @@ Description The username and password to use when attempting to log in to
             * ``instagram``
             * ``luscious``
             * ``sankaku``
+            * ``subscribestar``
             * ``tsumino``
             * ``twitter``
 

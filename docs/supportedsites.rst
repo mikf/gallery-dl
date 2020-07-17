@@ -121,7 +121,7 @@ SlickPic             https://www.slickpic.com/           Albums, User Profiles
 SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Speaker Deck         https://speakerdeck.com/            Presentations
-SubscribeStar        https://www.subscribestar.com/      Posts, User Profiles                               Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
+SubscribeStar        https://www.subscribestar.com/      Posts, User Profiles                               Optional
 The /b/ Archive      https://thebarchive.com/            Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
