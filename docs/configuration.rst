@@ -726,6 +726,18 @@ Description Minimum wait time in seconds before API requests.
 =========== =====
 
 
+extractor.exhentai.domain
+-------------------------
+=========== =====
+Type        ``string``
+Default     ``"auto"``
+Description * ``"auto"``: Use ``e-hentai.org`` or ``exhentai.org``
+              depending on the input URL
+            * ``"e-hentai.org"``: Use ``e-hentai.org`` for all URLs
+            * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
+=========== =====
+
+
 extractor.exhentai.limits
 -------------------------
 =========== =====
