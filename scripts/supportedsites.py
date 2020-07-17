@@ -172,7 +172,7 @@ AUTH_MAP = {
     "sankaku"        : "Optional",
     "seiga"          : "Required",
     "smugmug"        : "Optional" + _OAUTH,
-    "subscribestar"  : "Optional" + _COOKIES,
+    "subscribestar"  : "Optional",
     "tsumino"        : "Optional",
     "tumblr"         : "Optional" + _OAUTH,
     "twitter"        : "Optional",

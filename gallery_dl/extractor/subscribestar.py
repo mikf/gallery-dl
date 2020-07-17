@@ -9,7 +9,8 @@
 """Extractors for https://www.subscribestar.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 import datetime
 import json
 
@@ -24,17 +25,21 @@ class SubscribestarExtractor(Extractor):
     directory_fmt = ("{category}", "{author_name}")
     filename_fmt = "{post_id}_{id}.{extension}"
     archive_fmt = "{id}"
+    cookiedomain = "www.subscribestar.com"
+    cookienames = ("auth_token",)
 
     def __init__(self, match):
         tld, self.item = match.groups()
         if tld == "adult":
             self.root = "https://subscribestar.adult"
+            self.cookiedomain = "subscribestar.adult"
             self.subcategory += "-adult"
         Extractor.__init__(self, match)
         self.metadata = self.config("metadata", False)
         self._year = " " + str(datetime.date.today().year)
 
     def items(self):
+        self.login()
         for post_html in self.posts():
             media = self._media_from_post(post_html)
             if not media:
@@ -48,6 +53,42 @@ class SubscribestarExtractor(Extractor):
 
     def posts(self):
         """Yield HTML content of all relevant posts"""
+
+    def login(self):
+        if self._check_cookies(self.cookienames):
+            return
+        username, password = self._get_auth_info()
+        if username:
+            cookies = self._login_impl(username, password)
+            self._update_cookies(cookies)
+
+    @cache(maxage=28*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = "https://www.subscribestar.com/session.json"
+        headers = {
+            "Origin"          : "https://www.subscribestar.com",
+            "Referer"         : "https://www.subscribestar.com/login",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+        data = {
+            "utf8"    : "✓",
+            "email"   : username,
+            "password": password,
+        }
+
+        response = self.request(
+            url, method="POST", headers=headers, data=data, fatal=False)
+        if response.json().get("errors"):
+            self.log.debug(response.json()["errors"])
+            raise exception.AuthenticationError()
+
+        return {
+            cookie.name: cookie.value
+            for cookie in response.cookies
+            if cookie.name.startswith("auth")
+        }
 
     @staticmethod
     def _media_from_post(html):
