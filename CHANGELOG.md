@@ -1,6 +1,27 @@
 # Changelog
 
-## Unreleased
+## 1.14.3 - 2020-07-18
+### Additions
+- [8muses] support `comics.8muses.com` URLs
+- [artstation] add `following` extractor ([#888](https://github.com/mikf/gallery-dl/issues/888))
+- [exhentai] add `domain` option ([#897](https://github.com/mikf/gallery-dl/issues/897))
+- [gfycat] add `user` and `search` extractors
+- [imgur] support all `/t/...` URLs ([#880](https://github.com/mikf/gallery-dl/issues/880))
+- [khinsider] add `format` option ([#840](https://github.com/mikf/gallery-dl/issues/840))
+- [mangakakalot] add `manga` and `chapter` extractors ([#876](https://github.com/mikf/gallery-dl/issues/876))
+- [redgifs] support `gifsdeliverynetwork.com` URLs ([#874](https://github.com/mikf/gallery-dl/issues/874))
+- [subscribestar] add `user` and `post` extractors ([#852](https://github.com/mikf/gallery-dl/issues/852))
+- [twitter] add support for nitter.net URLs ([#890](https://github.com/mikf/gallery-dl/issues/890))
+- add Zsh completion script ([#150](https://github.com/mikf/gallery-dl/issues/150))
+### Fixes
+- [gfycat] retry 404'ed videos on redgifs.com ([#874](https://github.com/mikf/gallery-dl/issues/874))
+- [newgrounds] fix favorites extraction
+- [patreon] yield images and attachments before post files ([#871](https://github.com/mikf/gallery-dl/issues/871))
+- [reddit] fix AttributeError when using `recursion` ([#879](https://github.com/mikf/gallery-dl/issues/879))
+- [twitter] raise proper exception if a user doesn't exist ([#891](https://github.com/mikf/gallery-dl/issues/891))
+- defer directory creation ([#722](https://github.com/mikf/gallery-dl/issues/722))
+- set pseudo extension for Metadata messages ([#865](https://github.com/mikf/gallery-dl/issues/865))
+- prevent exception on Cloudflare challenges ([#868](https://github.com/mikf/gallery-dl/issues/868))
 
 ## 1.14.2 - 2020-06-27
 ### Additions
