@@ -276,9 +276,6 @@ class TumblrPostExtractor(TumblrExtractor):
         ("https://mikf123.tumblr.com/post/181022380064/chat-post", {
             "count": 0,
         }),
-        ("http://pinetre-3.tumblr.com/post/181904381470/via", {
-            "count": 0,  # audio post with "null" as URL (#165)
-        }),
         ("http://ziemniax.tumblr.com/post/109697912859/", {
             "exception": exception.NotFoundError,  # HTML response (#297)
         }),

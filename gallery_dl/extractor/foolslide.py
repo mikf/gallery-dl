@@ -155,18 +155,13 @@ EXTRACTORS = {
         "root": "https://jaiminisbox.com/reader",
         "pattern": r"(?:www\.)?jaiminisbox\.com/reader",
         "extra": {"decode": "base64"},
-        "test-chapter": (
-            ("https://jaiminisbox.com/reader/read/fire-force/en/0/215/", {
-                "keyword": "6d2b5c0b34344156b0301ff2733389dfe36a7604",
+        "test-chapter":
+            ("https://jaiminisbox.com/reader/read/oshi-no-ko/en/0/1/", {
+                "keyword": "d6435cfc1522293a42517a4aadda95a8631da0b3",
             }),
-            ("https://jaiminisbox.com/reader/read/red-storm/en/0/336/", {
-                "keyword": "53c6dddf3e5a61b6002a886ccd7e3354e973299a",
-            }),
-        ),
         "test-manga":
-            ("https://jaiminisbox.com/reader/series/sora_no_kian/", {
-                "url": "66612be177dc3b3fa1d1f537ef02f4f701b163ea",
-                "keyword": "0908a4145bb03acc4210f5d01169988969f5acd1",
+            ("https://jaiminisbox.com/reader/series/oshi-no-ko/", {
+                "count": ">= 10",
             }),
     },
     "kireicake": {

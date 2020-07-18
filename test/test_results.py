@@ -309,16 +309,16 @@ def setup_test_config():
 
     config.set(("extractor", "nijie")     , "username", email)
     config.set(("extractor", "seiga")     , "username", email)
-    config.set(("extractor", "danbooru")  , "username", None)
-    config.set(("extractor", "e621")      , "username", None)
-    config.set(("extractor", "instagram") , "username", None)
-    config.set(("extractor", "twitter")   , "username", None)
 
     config.set(("extractor", "newgrounds"), "username", "d1618111")
     config.set(("extractor", "newgrounds"), "password", "d1618111")
 
     config.set(("extractor", "mangoxo")   , "username", "LiQiang3")
     config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
+
+    for category in ("danbooru", "instagram", "twitter", "subscribestar",
+                     "e621"):
+        config.set(("extractor", category), "username", None)
 
     config.set(("extractor", "mastodon.social"), "access-token",
                "Blf9gVqG7GytDTfVMiyYQjwVMQaNACgf3Ds3IxxVDUQ")
