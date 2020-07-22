@@ -176,19 +176,20 @@ class BloggerAPI():
         self.api_key = extractor.config("api-key", self.API_KEY)
 
     def blog_by_url(self, url):
-        return self._call("blogs/byurl", {"url": url})
+        return self._call("blogs/byurl", {"url": url}, "blog")
 
     def blog_posts(self, blog_id):
         return self._pagination("blogs/{}/posts".format(blog_id), {})
 
     def post_by_path(self, blog_id, path):
         endpoint = "blogs/{}/posts/bypath".format(blog_id)
-        return self._call(endpoint, {"path": path})
+        return self._call(endpoint, {"path": path}, "post")
 
-    def _call(self, endpoint, params):
+    def _call(self, endpoint, params, notfound=None):
         url = "https://www.googleapis.com/blogger/v3/" + endpoint
         params["key"] = self.api_key
-        return self.extractor.request(url, params=params).json()
+        return self.extractor.request(
+            url, params=params, notfound=notfound).json()
 
     def _pagination(self, endpoint, params):
         while True:
