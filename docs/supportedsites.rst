@@ -59,6 +59,7 @@ ImgBB                https://imgbb.com/                  Albums, individual Imag
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  |imgur-C|
+Inkbunny             https://inkbunny.net/               Posts, User Profiles
 Instagram            https://www.instagram.com/          |instagram-C|                                      Optional
 Issuu                https://issuu.com/                  Publications, User Profiles
 Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga

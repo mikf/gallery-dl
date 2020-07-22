@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.14.3 - 2020-07-18
 ### Additions
 - [8muses] support `comics.8muses.com` URLs

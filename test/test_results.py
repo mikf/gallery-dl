@@ -317,7 +317,7 @@ def setup_test_config():
     config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
 
     for category in ("danbooru", "instagram", "twitter", "subscribestar",
-                     "e621"):
+                     "e621", "inkbunny"):
         config.set(("extractor", category), "username", None)
 
     config.set(("extractor", "mastodon.social"), "access-token",

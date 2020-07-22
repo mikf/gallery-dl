@@ -54,6 +54,7 @@ modules = [
     "imgbox",
     "imgth",
     "imgur",
+    "inkbunny",
     "instagram",
     "issuu",
     "kabeuchi",
