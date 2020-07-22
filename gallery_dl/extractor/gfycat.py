@@ -28,6 +28,9 @@ class GfycatExtractor(Extractor):
     def items(self):
         metadata = self.metadata()
         for gfycat in self.gfycats():
+            if "gfyName" not in gfycat:
+                self.log.warning("Skipping '%s' (malformed)", gfycat["gfyId"])
+                continue
             url = self._select_format(gfycat)
             gfycat.update(metadata)
             yield Message.Directory, gfycat
@@ -118,6 +121,10 @@ class GfycatImageExtractor(GfycatExtractor):
         ("https://www.gfycat.com/foolishforkedabyssiniancat", {
             "pattern": "https://redgifs.com/watch/foolishforkedabyssiniancat",
         }),
+        # malformed API response (#902)
+        ("https://gfycat.com/illexcitablehairstreak", {
+            "count": 0,
+        }),
         ("https://gfycat.com/gifs/detail/UnequaledHastyAnkole"),
         ("https://gfycat.com/ifr/UnequaledHastyAnkole"),
         ("https://gfycat.com/ru/UnequaledHastyAnkole"),
@@ -132,6 +139,9 @@ class GfycatImageExtractor(GfycatExtractor):
             data = {"_extractor": RedgifsImageExtractor}
             yield Message.Queue, url, data
         else:
+            if "gfyName" not in gfycat:
+                self.log.warning("Skipping '%s' (malformed)", gfycat["gfyId"])
+                return
             url = self._select_format(gfycat)
             yield Message.Directory, gfycat
             yield Message.Url, url, gfycat
