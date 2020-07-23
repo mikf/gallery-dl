@@ -158,26 +158,15 @@ class InkbunnyAPI():
         }
         self._call("userrating", params)
 
-    def authenticate(self):
+    def authenticate(self, invalidate=False):
         username, password = self.extractor._get_auth_info()
+        if invalidate:
+            _authenticate_impl.invalidate(username or "guest")
         if username:
-            self.session_id = self._authenticate_impl(username, password)
+            self.session_id = _authenticate_impl(self, username, password)
         else:
-            self.session_id = self._authenticate_impl("guest", "")
+            self.session_id = _authenticate_impl(self, "guest", "")
             self.set_allowed_ratings()
-
-    @cache(maxage=360*24*3600, keyarg=1)
-    def _authenticate_impl(self, username, password):
-        self.extractor.log.info("Logging in as %s", username)
-
-        url = "https://inkbunny.net/api_login.php"
-        data = {"username": username, "password": password}
-        response = self.extractor.request(url, method="POST", data=data)
-
-        data = response.json()
-        if "sid" not in data:
-            raise exception.AuthenticationError(data.get("error_message"))
-        return data["sid"]
 
     def _call(self, endpoint, params):
         if not self.session_id:
@@ -185,10 +174,15 @@ class InkbunnyAPI():
 
         url = "https://inkbunny.net/api_" + endpoint + ".php"
         params["sid"] = self.session_id
-        response = self.extractor.request(url, params=params)
+        data = self.extractor.request(url, params=params).json()
 
-        if response.status_code < 400:
-            return response.json()
+        if "error_code" in data:
+            if str(data["error_code"]) == "2":
+                self.authenticate(invalidate=True)
+                return self._call(endpoint, params)
+            raise exception.StopExtraction(data.get("error_message"))
+
+        return data
 
     def _pagination_search(self, params):
         params["get_rid"] = "yes"
@@ -207,3 +201,16 @@ class InkbunnyAPI():
                 params["page"] = 2
             else:
                 params["page"] += 1
+
+
+@cache(maxage=360*24*3600, keyarg=1)
+def _authenticate_impl(api, username, password):
+    api.extractor.log.info("Logging in as %s", username)
+
+    url = "https://inkbunny.net/api_login.php"
+    data = {"username": username, "password": password}
+    data = api.extractor.request(url, method="POST", data=data).json()
+
+    if "sid" not in data:
+        raise exception.AuthenticationError(data.get("error_message"))
+    return data["sid"]
