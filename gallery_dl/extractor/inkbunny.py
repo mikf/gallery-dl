@@ -60,7 +60,7 @@ class InkbunnyUserExtractor(InkbunnyExtractor):
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!s/)([^/?&#]+)"
     test = ("https://inkbunny.net/soina", {
-        #  "pattern": "",
+        "pattern": r"https://[\w.]+\.metapix\.net/files/full/\d+/\d+_soina_.+",
         "range": "20-50",
         "keyword": {
             "date": "type:datetime",
@@ -114,7 +114,8 @@ class InkbunnyPostExtractor(InkbunnyExtractor):
     pattern = BASE_PATTERN + r"/s/(\d+)"
     test = (
         ("https://inkbunny.net/s/1829715", {
-            "url": "5967eadf1fcfa7214744f5f814717ab73d14dfd3",
+            "pattern": r"https://[\w.]+\.metapix\.net/files/full"
+                       r"/2626/2626843_soina_dscn2296\.jpg",
             "content": "cf69d8dddf0822a12b4eef1f4b2258bd600b36c8",
         }),
         ("https://inkbunny.net/s/2044094", {
