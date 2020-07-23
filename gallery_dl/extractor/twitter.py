@@ -503,8 +503,9 @@ class TwitterAPI():
         if response.status_code < 400:
             return response.json()
         if response.status_code == 429:
-            self.extractor.wait(until=response.headers["x-rate-limit-reset"])
-            return self._call(endpoint, params)
+            until = response.headers.get("x-rate-limit-reset")
+            self.extractor.wait(until=until, seconds=(None if until else 60))
+            return self._call(endpoint, params, method)
 
         try:
             msg = ", ".join(
