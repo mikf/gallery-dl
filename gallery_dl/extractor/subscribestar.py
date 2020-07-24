@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
-import datetime
 import json
 
 
@@ -35,8 +34,6 @@ class SubscribestarExtractor(Extractor):
             self.cookiedomain = "subscribestar.adult"
             self.subcategory += "-adult"
         Extractor.__init__(self, match)
-        self.metadata = self.config("metadata", False)
-        self._year = " " + str(datetime.date.today().year)
 
     def items(self):
         self.login()
@@ -102,28 +99,22 @@ class SubscribestarExtractor(Extractor):
 
     def _data_from_post(self, html):
         extr = text.extract_from(html)
-        data = {
+        return {
             "post_id"    : text.parse_int(extr('data-id="', '"')),
             "author_id"  : text.parse_int(extr('data-user-id="', '"')),
             "author_name": text.unescape(extr('href="/', '"')),
             "author_nick": text.unescape(extr('>', '<')),
+            "date"       : self._parse_datetime(text.remove_html(extr(
+                'class="post-date">', '</'))),
             "content"    : (extr(
                 '<div class="post-content', '<div class="post-uploads')
                 .partition(">")[2]),
         }
 
-        if self.metadata:
-            url = "{}/posts/{}".format(self.root, data["post_id"])
-            page = self.request(url).text
-            data["date"] = self._parse_datetime(text.extract(
-                page, 'class="section-subtitle">', '<')[0])
-
-        return data
-
     def _parse_datetime(self, dt):
-        date = text.parse_datetime(dt, "%B %d, %Y %H:%M")
+        date = text.parse_datetime(dt, "%b %d, %Y %I:%M %p")
         if date is dt:
-            date = text.parse_datetime(dt + self._year, "%d %b %H:%M %Y")
+            date = text.parse_datetime(dt, "%B %d, %Y %I:%M %p")
         return date
 
 
@@ -141,6 +132,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
                 "author_name": "subscribestar",
                 "author_nick": "SubscribeStar",
                 "content": str,
+                "date"   : "type:datetime",
                 "height" : int,
                 "id"     : int,
                 "pinned" : bool,
@@ -209,8 +201,7 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
 
     def posts(self):
         url = "{}/posts/{}".format(self.root, self.item)
-        self._page = self.request(url).text
-        return (self._page,)
+        return (self.request(url).text,)
 
     def _data_from_post(self, html):
         extr = text.extract_from(html)
