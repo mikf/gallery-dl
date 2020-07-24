@@ -128,10 +128,14 @@ class InkbunnyUserExtractor(InkbunnyExtractor):
         InkbunnyExtractor.__init__(self, match)
 
     def posts(self):
+        orderby = self.config("orderby")
         params = {
             "username": self.user,
-            "scraps": self.scraps,
+            "scraps"  : self.scraps,
+            "orderby" : orderby,
         }
+        if orderby and orderby.startswith("unread_"):
+            params["unread_submissions"] = "yes"
         return self.api.search(params)
 
 

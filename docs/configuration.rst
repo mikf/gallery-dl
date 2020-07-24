@@ -89,7 +89,7 @@ Description A `format string`_ to build the resulting filename
                   image
 
             Note: Even if the value of the ``extension`` key is missing or
-            ``None``, it will filled in later when the file download is
+            ``None``, it will be filled in later when the file download is
             starting. This key is therefore always available to provide
             a valid filename extension.
 =========== =====
@@ -870,6 +870,18 @@ Description Controls whether to choose the GIF or MP4 version of an animation.
               ``prefer_video`` flag in an image's metadata is set.
             * ``false``: Always choose GIF.
             * ``"always"``: Always choose MP4.
+=========== =====
+
+
+extractor.inkbunny.orderby
+--------------------------
+=========== =====
+Type        ``string``
+Default     ``"create_datetime"``
+Description Value of the ``orderby`` parameter for submission searches.
+
+            (See `API#Search <https://wiki.inkbunny.net/wiki/API#Search>`__
+            for details)
 =========== =====
 
 
