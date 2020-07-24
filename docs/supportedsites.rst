@@ -21,7 +21,6 @@ ArtStation           https://www.artstation.com/         |artstation-C|
 baraag               https://baraag.net/                 Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Behance              https://www.behance.net/            Collections, Galleries, User Profiles
 Blogger              https://www.blogger.com/            Blogs, Posts
-BobX                 http://www.bobx.com/dark/           Galleries, Idols
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag Searches         Optional
 Desuarchive          https://desuarchive.org/            Threads
 DeviantArt           https://www.deviantart.com/         |deviantart-C|                                     Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
