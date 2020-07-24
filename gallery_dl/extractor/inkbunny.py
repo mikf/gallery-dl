@@ -26,9 +26,10 @@ class InkbunnyExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.item = match.group(1)
+        self.api = InkbunnyAPI(self)
 
     def items(self):
+        self.api.authenticate()
         to_bool = ("deleted", "digitalsales", "favorite", "forsale",
                    "friends_only", "guest_block", "hidden", "printsales",
                    "public", "scraps")
@@ -56,56 +57,82 @@ class InkbunnyExtractor(Extractor):
 
 
 class InkbunnyUserExtractor(InkbunnyExtractor):
-    """Extractor for inkbunny user profile"""
+    """Extractor for inkbunny user profiles"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!s/)([^/?&#]+)"
-    test = ("https://inkbunny.net/soina", {
-        "pattern": r"https://[\w.]+\.metapix\.net/files/full/\d+/\d+_soina_.+",
-        "range": "20-50",
-        "keyword": {
-            "date": "type:datetime",
-            "deleted": bool,
-            "file_id": "re:[0-9]+",
-            "filename": r"re:[0-9]+_soina_\w+",
-            "full_file_md5": "re:[0-9a-f]{32}",
-            "mimetype": str,
-            "submission_file_order": "re:[0-9]+",
-            "submission_id": "re:[0-9]+",
-            "user_id": "20969",
-            "post": {
-                "comments_count": "re:[0-9]+",
+    pattern = BASE_PATTERN + r"/(?!s/)(gallery/|scraps/)?([^/?&#]+)"
+    test = (
+        ("https://inkbunny.net/soina", {
+            "pattern": r"https://[\w.]+\.metapix\.net/files/full"
+                       r"/\d+/\d+_soina_.+",
+            "range": "20-50",
+            "keyword": {
                 "date": "type:datetime",
                 "deleted": bool,
-                "digitalsales": bool,
-                "favorite": bool,
-                "favorites_count": "re:[0-9]+",
-                "forsale": bool,
-                "friends_only": bool,
-                "guest_block": bool,
-                "hidden": bool,
-                "pagecount": "re:[0-9]+",
-                "pools": list,
-                "pools_count": int,
-                "printsales": bool,
-                "public": bool,
-                "rating_id": "re:[0-9]+",
-                "rating_name": str,
-                "ratings": list,
-                "scraps": bool,
+                "file_id": "re:[0-9]+",
+                "filename": r"re:[0-9]+_soina_\w+",
+                "full_file_md5": "re:[0-9a-f]{32}",
+                "mimetype": str,
+                "submission_file_order": "re:[0-9]+",
                 "submission_id": "re:[0-9]+",
-                "tags": list,
-                "title": str,
-                "type_name": str,
                 "user_id": "20969",
-                "username": "soina",
-                "views": str,
+                "post": {
+                    "comments_count" : "re:[0-9]+",
+                    "date"           : "type:datetime",
+                    "deleted"        : bool,
+                    "digitalsales"   : bool,
+                    "favorite"       : bool,
+                    "favorites_count": "re:[0-9]+",
+                    "forsale"        : bool,
+                    "friends_only"   : bool,
+                    "guest_block"    : bool,
+                    "hidden"         : bool,
+                    "pagecount"      : "re:[0-9]+",
+                    "pools"          : list,
+                    "pools_count"    : int,
+                    "printsales"     : bool,
+                    "public"         : bool,
+                    "rating_id"      : "re:[0-9]+",
+                    "rating_name"    : str,
+                    "ratings"        : list,
+                    "scraps"         : bool,
+                    "submission_id"  : "re:[0-9]+",
+                    "tags"           : list,
+                    "title"          : str,
+                    "type_name"      : str,
+                    "user_id"        : "20969",
+                    "username"       : "soina",
+                    "views"          : str,
+                },
             },
-        },
-    })
+        }),
+        ("https://inkbunny.net/gallery/soina", {
+            "range": "1-25",
+            "keyword": {"post": {"scraps": False}},
+        }),
+        ("https://inkbunny.net/scraps/soina", {
+            "range": "1-25",
+            "keyword": {"post": {"scraps": True}},
+        }),
+    )
+
+    def __init__(self, match):
+        kind, self.user = match.groups()
+        if not kind:
+            self.scraps = None
+        elif kind[0] == "g":
+            self.subcategory = "gallery"
+            self.scraps = "no"
+        else:
+            self.subcategory = "scraps"
+            self.scraps = "only"
+        InkbunnyExtractor.__init__(self, match)
 
     def posts(self):
-        api = InkbunnyAPI(self)
-        return api.search(username=self.item)
+        params = {
+            "username": self.user,
+            "scraps": self.scraps,
+        }
+        return self.api.search(params)
 
 
 class InkbunnyPostExtractor(InkbunnyExtractor):
@@ -123,9 +150,12 @@ class InkbunnyPostExtractor(InkbunnyExtractor):
         }),
     )
 
+    def __init__(self, match):
+        InkbunnyExtractor.__init__(self, match)
+        self.submission_id = match.group(1)
+
     def posts(self):
-        api = InkbunnyAPI(self)
-        return api.detail(self.item)
+        return self.api.detail(self.submission_id)
 
 
 class InkbunnyAPI():
@@ -143,9 +173,8 @@ class InkbunnyAPI():
         params = {"submission_ids": submission_ids}
         return self._call("submissions", params)["submissions"]
 
-    def search(self, username):
+    def search(self, params):
         """Perform a search"""
-        params = {"username": username}
         return self._pagination_search(params)
 
     def set_allowed_ratings(self, nudity=True, sexual=True,
@@ -170,9 +199,6 @@ class InkbunnyAPI():
             self.set_allowed_ratings()
 
     def _call(self, endpoint, params):
-        if not self.session_id:
-            self.authenticate()
-
         url = "https://inkbunny.net/api_" + endpoint + ".php"
         params["sid"] = self.session_id
         data = self.extractor.request(url, params=params).json()
