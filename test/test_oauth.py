@@ -101,7 +101,11 @@ class TestOAuthSession(unittest.TestCase):
             oauth_token, oauth_token_secret,
         )
         try:
-            return session.get(TESTSERVER + endpoint, params=params).text
+            connection = session.get(TESTSERVER + endpoint, params=params)
+            if connection.status_code == 200:
+                return connection.text
+            else:
+                raise unittest.SkipTest()
         except OSError:
             raise unittest.SkipTest()
 
