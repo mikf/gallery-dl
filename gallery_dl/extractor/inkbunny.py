@@ -171,10 +171,15 @@ class InkbunnyAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.session_id = None
+        self.metadata = extractor.config("metadata")
 
     def detail(self, submission_ids):
         """Get full details about submissions with the given IDs"""
         params = {"submission_ids": submission_ids}
+        if self.metadata:
+            params["show_description"] = "yes"
+            params["show_writing"] = "yes"
+            params["show_pools"] = "yes"
         return self._call("submissions", params)["submissions"]
 
     def search(self, params):
