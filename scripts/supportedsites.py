@@ -160,6 +160,7 @@ AUTH_MAP = {
     "furaffinity"    : "Optional" + _COOKIES,
     "idolcomplex"    : "Optional",
     "imgbb"          : "Optional",
+    "inkbunny"       : "Optional",
     "instagram"      : "Optional",
     "mangoxo"        : "Optional",
     "mastodon.social": "Optional" + _OAUTH,
