@@ -873,15 +873,6 @@ Description Controls whether to choose the GIF or MP4 version of an animation.
 =========== =====
 
 
-extractor.inkbunny.metadata
----------------------------
-=========== =====
-Type        ``bool``
-Default     ``false``
-Description Fetch ``description``, ``writing``, and ``pools`` metadata fields.
-=========== =====
-
-
 extractor.inkbunny.orderby
 --------------------------
 =========== =====

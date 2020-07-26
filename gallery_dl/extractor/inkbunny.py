@@ -159,7 +159,7 @@ class InkbunnyPostExtractor(InkbunnyExtractor):
         self.submission_id = match.group(1)
 
     def posts(self):
-        return self.api.detail(self.submission_id)
+        return self.api.detail(({"submission_id": self.submission_id},))
 
 
 class InkbunnyAPI():
@@ -171,16 +171,22 @@ class InkbunnyAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.session_id = None
-        self.metadata = extractor.config("metadata")
 
-    def detail(self, submission_ids):
+    def detail(self, submissions):
         """Get full details about submissions with the given IDs"""
-        params = {"submission_ids": submission_ids}
-        if self.metadata:
-            params["show_description"] = "yes"
-            params["show_writing"] = "yes"
-            params["show_pools"] = "yes"
-        return self._call("submissions", params)["submissions"]
+        ids = {
+            sub["submission_id"]: idx
+            for idx, sub in enumerate(submissions)
+        }
+        params = {
+            "submission_ids": ",".join(ids),
+            "show_description": "yes",
+        }
+
+        submissions = [None] * len(ids)
+        for sub in self._call("submissions", params)["submissions"]:
+            submissions[ids[sub["submission_id"]]] = sub
+        return submissions
 
     def search(self, params):
         """Perform a search"""
@@ -221,22 +227,20 @@ class InkbunnyAPI():
         return data
 
     def _pagination_search(self, params):
+        params["page"] = 1
         params["get_rid"] = "yes"
         params["submission_ids_only"] = "yes"
 
         while True:
             data = self._call("search", params)
-            yield from self.detail(
-                ",".join(s["submission_id"] for s in data["submissions"]))
+            yield from self.detail(data["submissions"])
 
             if data["page"] >= data["pages_count"]:
                 return
             if "get_rid" in params:
                 del params["get_rid"]
                 params["rid"] = data["rid"]
-                params["page"] = 2
-            else:
-                params["page"] += 1
+            params["page"] += 1
 
 
 @cache(maxage=360*24*3600, keyarg=1)
