@@ -14,7 +14,7 @@ import itertools
 import json
 
 
-BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.\w+"
+BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
 
 
 class PinterestExtractor(Extractor):
@@ -101,6 +101,8 @@ class PinterestBoardExtractor(PinterestExtractor):
         ("https://www.pinterest.com/g1952848/test/", {
             "exception": exception.GalleryDLException,
         }),
+        # .co.uk TLD (#914)
+        ("https://www.pinterest.co.uk/hextra7519/based-animals/"),
     )
 
     def __init__(self, match):
