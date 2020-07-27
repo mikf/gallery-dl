@@ -61,7 +61,7 @@ class VscoExtractor(Extractor):
                 "video" : img["is_video"],
                 "width" : img["width"],
                 "height": img["height"],
-                "description": img["description"],
+                "description": img.get("description") or "",
             })
             yield Message.Url, url, data
 
