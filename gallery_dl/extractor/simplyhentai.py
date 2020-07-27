@@ -45,11 +45,12 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
 
         self.gallery_url = extr('<link rel="canonical" href="', '"')
         title = extr('<meta property="og:title" content="', '"')
+        image = extr('<meta property="og:image" content="', '"')
         if not title:
             raise exception.NotFoundError("gallery")
         data = {
             "title"     : text.unescape(title),
-            "gallery_id": text.parse_int(extr('/Album/', '/')),
+            "gallery_id": text.parse_int(image.split("/")[-2]),
             "parody"    : split(extr('box-title">Series</div>', '</div>')),
             "language"  : text.remove_html(extr(
                 'box-title">Language</div>', '</div>')) or None,
