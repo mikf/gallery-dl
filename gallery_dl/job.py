@@ -48,6 +48,9 @@ class Job():
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
 
+            # transfer parent directory
+            extr._parentdir = pextr._parentdir
+
             # reuse connection adapters
             extr.session.adapters = pextr.session.adapters
 
