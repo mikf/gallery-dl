@@ -36,21 +36,17 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         rmve = text.remove_html
         extr = text.extract_from(page)
         data = {
-            "gallery_id" : text.parse_int(self.gallery_id),
-            "tags"       : extr('"og:description" content="', '"').split(", "),
-            "thumbnail"  : extr('"og:image" content="', '"'),
-            "title"      : extr('<h1 class="title">', '</h1>'),
-            "artist"     : rmve(extr('viewcolumn">Artist</td>'     , '</td>')),
-            "book"       : rmve(extr('viewcolumn">Book</td>'       , '</td>')),
-            "circle"     : rmve(extr('viewcolumn">Circle</td>'     , '</td>')),
-            "event"      : rmve(extr('viewcolumn">Event</td>'      , '</td>')),
-            "language"   : rmve(extr('viewcolumn">Language</td>'   , '</td>')),
-            "magazine"   : rmve(extr('viewcolumn">Magazine</td>'   , '</td>')),
-            "parody"     : rmve(extr('viewcolumn">Parody</td>'     , '</td>')),
-            "publisher"  : rmve(extr('viewcolumn">Publisher</td>'  , '</td>')),
-            "description": rmve(extr('viewcolumn">Description</td>', '</td>')),
+            "gallery_id": text.parse_int(self.gallery_id),
+            "tags"      : extr('"og:description" content="', '"').split(", "),
+            "thumbnail" : extr('"og:image" content="', '"'),
+            "title"     : extr('<h1 class="title">', '</h1>'),
         }
+        for key in ("Artist", "Book", "Circle", "Event", "Language",
+                    "Magazine", "Parody", "Publisher", "Description"):
+            data[key.lower()] = rmve(extr(
+                'viewcolumn">' + key + '</td>', '</td>'))
         data["lang"] = util.language_to_code(data["language"])
+
         if 'doujin' in data['tags']:
             data['type'] = 'Doujinshi'
         elif 'illustration' in data['tags']:
@@ -60,10 +56,10 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         data["title_conventional"] = self._join_title(data)
         return data
 
-    def images(self, page):
+    def images(self, _):
         url = "{}/read/{}".format(self.root, self.gallery_id)
-        extr = text.extract_from(self.request(url).text)
-        urls = extr("initReader(", "]") + "]"
+        page = self.request(url).text
+        urls = text.extract(page, "initReader(", "]")[0] + "]"
         return [(url, None) for url in json.loads(urls)]
 
     @staticmethod
@@ -120,14 +116,13 @@ class HentainexusSearchExtractor(Extractor):
         self.params = text.parse_query(match.group(1))
 
     def items(self):
-        yield Message.Version, 1
         params = self.params
         path = "/"
+        data = {"_extractor": HentainexusGalleryExtractor}
 
         while path:
             page = self.request(self.root + path, params=params).text
             extr = text.extract_from(page)
-            data = {"_extractor": HentainexusGalleryExtractor}
 
             while True:
                 gallery_id = extr('<a href="/view/', '"')
