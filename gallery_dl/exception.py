@@ -51,6 +51,11 @@ class HttpError(ExtractionError):
     default = "HTTP request failed"
     code = 4
 
+    def __init__(self, message, response=None):
+        ExtractionError.__init__(self, message)
+        self.response = response
+        self.status = response.status_code if response else 0
+
 
 class NotFoundError(ExtractionError):
     """Requested resource (gallery/image) could not be found"""
