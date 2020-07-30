@@ -125,7 +125,7 @@ class Extractor():
             time.sleep(min(2 ** (tries-1), 1800))
             tries += 1
 
-        raise exception.HttpError(msg)
+        raise exception.HttpError(msg, response)
 
     def wait(self, *, seconds=None, until=None, adjust=1.0,
              reason="rate limit reset"):
