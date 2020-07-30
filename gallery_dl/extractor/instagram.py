@@ -315,7 +315,7 @@ class InstagramExtractor(Extractor):
 
             if not has_next_page:
                 break
-
+            time.sleep(3)
             end_cursor = medias['page_info']['end_cursor']
             variables = '{{"{}":"{}","first":12,"after":"{}"}}'.format(
                 psdf['variables_id'],
@@ -530,7 +530,7 @@ class InstagramUserExtractor(InstagramExtractor):
             'node_id': 'id',
             'variables_id': 'id',
             'edge_to_medias': 'edge_owner_to_timeline_media',
-            'query_hash': '44efc15d3c13342d02df0b5a9fa3d33f',
+            'query_hash': '15bf78a4ad24e33cbd838fdb31353ac1',
         })
 
         if self.config('highlights'):
@@ -599,5 +599,5 @@ class InstagramTagExtractor(InstagramExtractor):
             'node_id': 'name',
             'variables_id': 'tag_name',
             'edge_to_medias': 'edge_hashtag_to_media',
-            'query_hash': '7dabc71d3e758b1ec19ffb85639e427b',
+            'query_hash': 'c769cb6c71b24c8a86590b22402fda50',
         })
