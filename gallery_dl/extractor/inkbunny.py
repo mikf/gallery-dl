@@ -48,7 +48,7 @@ class InkbunnyExtractor(Extractor):
             del post["files"]
 
             yield Message.Directory, post
-            for file in files:
+            for post["num"], file in enumerate(files, 1):
                 post.update(file)
                 post["deleted"] = (file["deleted"] == "t")
                 post["date"] = text.parse_datetime(
