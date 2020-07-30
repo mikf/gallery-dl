@@ -332,9 +332,15 @@ class ImgurAPI():
         return self._call("image/" + image_hash)
 
     def _call(self, endpoint):
-        return self.extractor.request(
-            "https://api.imgur.com/3/" + endpoint, headers=self.headers,
-        ).json()["data"]
+        try:
+            return self.extractor.request(
+                "https://api.imgur.com/3/" + endpoint, headers=self.headers,
+            ).json()["data"]
+        except exception.HttpError as exc:
+            if exc.status != 403 or b"capacity" not in exc.response.content:
+                raise
+        self.extractor.sleep(seconds=600)
+        return self._call(endpoint)
 
     def _pagination(self, endpoint):
         num = 0
