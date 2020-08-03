@@ -132,14 +132,10 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
             "url": "ac0abcfcb89f4df6adc2f7e4ff872f3b03ef1bc7",
             "keyword": {"user": ""},
         }),
-        # deleted
-        ("https://ibb.co/album/fDArrF", {
-            "exception": exception.NotFoundError,
-        }),
         # private
         ("https://ibb.co/album/hqgWrF", {
             "exception": exception.HttpError,
-        })
+        }),
     )
 
     def __init__(self, match):
