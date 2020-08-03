@@ -17,7 +17,7 @@ class RedditExtractor(Extractor):
     """Base class for reddit extractors"""
     category = "reddit"
     directory_fmt = ("{category}", "{subreddit}")
-    filename_fmt = "{id} {title[:220]}.{extension}"
+    filename_fmt = "{id}{num:? //>02} {title[:220]}.{extension}"
     archive_fmt = "{filename}"
     cookiedomain = None
 
@@ -50,10 +50,21 @@ class RedditExtractor(Extractor):
                     yield Message.Directory, submission
                     visited.add(submission["id"])
                     url = submission["url"]
+                    submission["num"] = 0
 
                     if url.startswith("https://i.redd.it/"):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
+
+                    elif "gallery_data" in submission:
+                        meta = submission["media_metadata"]
+                        items = submission["gallery_data"]["items"]
+                        for submission["num"], item in enumerate(items, 1):
+                            url = meta[item["media_id"]]["s"]["u"]
+                            url = url.partition("?")[0]
+                            url = url.replace("/preview.", "/i.", 1)
+                            text.nameext_from_url(url, submission)
+                            yield Message.Url, url, submission
 
                     elif submission["is_video"]:
                         if videos:
@@ -160,9 +171,8 @@ class RedditSubmissionExtractor(RedditExtractor):
     """Extractor for URLs from a submission on reddit.com"""
     subcategory = "submission"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:\w+\.)?reddit\.com/r/[^/?&#]+/comments|"
-               r"redd\.it"
-               r")/([a-z0-9]+)")
+               r"(?:\w+\.)?reddit\.com/(?:r/[^/?&#]+/comments|gallery)"
+               r"|redd\.it)/([a-z0-9]+)")
     test = (
         ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
             "pattern": r"https://c2.staticflickr.com/8/7272/\w+_k.jpg",
@@ -171,6 +181,11 @@ class RedditSubmissionExtractor(RedditExtractor):
         ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
             "options": (("comments", 500),),
             "pattern": r"https://",
+            "count": 3,
+        }),
+        ("https://www.reddit.com/gallery/hrrh23", {
+            "url": "25b91ede15459470274dd17291424b037ed8b0ae",
+            "content": "1e7dde4ee7d5f4c4b45749abfd15b2dbfa27df3f",
             "count": 3,
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
