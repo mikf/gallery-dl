@@ -89,13 +89,27 @@ class SubscribestarExtractor(Extractor):
 
     @staticmethod
     def _media_from_post(html):
+        media = []
+
         gallery = text.extract(html, 'data-gallery="', '"')[0]
         if gallery:
-            return [
+            media.extend(
                 item for item in json.loads(text.unescape(gallery))
                 if "/previews/" not in item["url"]
-            ]
-        return ()
+            )
+
+        attachments = text.extract(
+            html, 'class="uploads-docs"', 'data-role="post-edit_form"')[0]
+        if attachments:
+            for att in attachments.split('class="doc_preview"')[1:]:
+                media.append({
+                    "id"  : text.parse_int(text.extract(
+                        att, 'data-upload-id="', '"')[0]),
+                    "url" : text.extract(att, 'href="', '"')[0],
+                    "type": "attachment",
+                })
+
+        return media
 
     def _data_from_post(self, html):
         extr = text.extract_from(html)
