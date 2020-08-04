@@ -147,7 +147,7 @@ class BloggerPostExtractor(BloggerExtractor):
 class BloggerBlogExtractor(BloggerExtractor):
     """Extractor for an entire Blogger blog"""
     subcategory = "blog"
-    pattern = BASE_PATTERN + "/?$"
+    pattern = BASE_PATTERN + "(?:/search/label/([^/?&#]+))?/?$"
     test = (
         ("https://julianbphotography.blogspot.com/", {
             "range": "1-25",
@@ -160,8 +160,13 @@ class BloggerBlogExtractor(BloggerExtractor):
         }),
     )
 
+    def __init__(self, match):
+        BloggerExtractor.__init__(self, match)
+        label = match.group(3)
+        self.label = text.unquote(label) if label else None
+
     def posts(self, blog):
-        return self.api.blog_posts(blog["id"])
+        return self.api.blog_posts(blog["id"], self.label)
 
 
 class BloggerAPI():
@@ -178,8 +183,10 @@ class BloggerAPI():
     def blog_by_url(self, url):
         return self._call("blogs/byurl", {"url": url}, "blog")
 
-    def blog_posts(self, blog_id):
-        return self._pagination("blogs/{}/posts".format(blog_id), {})
+    def blog_posts(self, blog_id, label=None):
+        endpoint = "blogs/{}/posts".format(blog_id)
+        params = {"labels": label}
+        return self._pagination(endpoint, params)
 
     def post_by_path(self, blog_id, path):
         endpoint = "blogs/{}/posts/bypath".format(blog_id)
