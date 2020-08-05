@@ -79,6 +79,7 @@ class Extractor():
         session = self.session if session is None else session
         kwargs.setdefault("timeout", self._timeout)
         kwargs.setdefault("verify", self._verify)
+        response = None
 
         while True:
             try:
