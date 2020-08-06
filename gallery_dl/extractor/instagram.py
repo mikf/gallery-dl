@@ -342,7 +342,8 @@ class InstagramExtractor(Extractor):
 class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
     subcategory = "image"
-    pattern = r"(?:https?://)?(?:www\.)?instagram\.com/(?:p|tv)/([^/?&#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/(?:p|tv|reel)/([^/?&#]+)")
     test = (
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
@@ -440,6 +441,8 @@ class InstagramImageExtractor(InstagramExtractor):
                 }]
             }
         }),
+
+        ("https://www.instagram.com/reel/CDg_6Y1pxWu/"),
     )
 
     def __init__(self, match):
@@ -500,7 +503,7 @@ class InstagramUserExtractor(InstagramExtractor):
     """Extractor for ProfilePage"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
+               r"/(?!(?:p|explore|directory|accounts|stories|tv|reel)/)"
                r"([^/?&#]+)/?(?:$|[?#])")
     test = (
         ("https://www.instagram.com/instagram/", {
