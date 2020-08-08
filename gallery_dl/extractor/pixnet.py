@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extractors for https://www.pixnet.net/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 
 
 BASE_PATTERN = r"(?:https?://)?(?!www\.)([^.]+)\.pixnet.net"
@@ -53,6 +53,9 @@ class PixnetExtractor(Extractor):
             yield from text.extract_iter(page, '<li id="', '</li>')
 
             pnext = text.extract(page, 'class="nextBtn"', '>')[0]
+            if pnext is None and 'name="albumpass">' in page:
+                raise exception.StopExtraction(
+                    "Album %s is password-protected.", self.item_id)
             if "href" not in pnext:
                 return
             url = self.root + text.extract(pnext, 'href="', '"')[0]
@@ -106,6 +109,9 @@ class PixnetSetExtractor(PixnetExtractor):
         ("https://anrine910070.pixnet.net/album/set/5917493", {
             "url": "b3eb6431aea0bcf5003432a4a0f3a3232084fc13",
             "keyword": "bf7004faa1cea18cf9bd856f0955a69be51b1ec6",
+        }),
+        ("https://sky92100.pixnet.net/album/set/17492544", {
+            "count": 0,  # password-protected
         }),
     )
 
