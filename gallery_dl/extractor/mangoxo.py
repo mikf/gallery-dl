@@ -58,7 +58,7 @@ class MangoxoExtractor(Extractor):
             ("timestamp", str(int(time.time()))),
         ]
         query = "&".join("=".join(item) for item in sorted(params))
-        query += "&secretKey=996293536"
+        query += "&secretKey=340836904"
         sign = hashlib.md5(query.encode()).hexdigest()
         params.append(("sign", sign.upper()))
         return params
