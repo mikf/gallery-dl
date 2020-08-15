@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2014-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -123,7 +123,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
         ("https://exhentai.org/g/1200119/d55c44d3d0/", {
-            "keyword": "3eeae7bde70dd992402d4cc0230ea0f2c4af46c5",
+            "keyword": "199db053b4ccab94463b459e1cfe079df8cdcdd1",
             "content": "e9891a4c017ed0bb734cd1efba5cd03f594d31ff",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -353,7 +353,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "height": text.parse_int(parts[2]),
             "size": size,
             # 1 initial point + 1 per 0.1 MB
-            "cost": 1 + math.ceil(size / 104857.6)
+            "cost": 1 + math.ceil(size / 100000)
         }
 
 
