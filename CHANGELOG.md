@@ -1,6 +1,31 @@
 # Changelog
 
-## Unreleased
+## 1.14.4 - 2020-08-15
+### Additions
+- [blogger] add `search` extractor ([#925](https://github.com/mikf/gallery-dl/issues/925))
+- [blogger] support searching posts by labels ([#925](https://github.com/mikf/gallery-dl/issues/925))
+- [inkbunny] add `user` and `post` extractors ([#283](https://github.com/mikf/gallery-dl/issues/283))
+- [instagram] support `/reel/` URLs
+- [pinterest] support `pinterest.co.uk` URLs ([#914](https://github.com/mikf/gallery-dl/issues/914))
+- [reddit] support gallery posts ([#920](https://github.com/mikf/gallery-dl/issues/920))
+- [subscribestar] extract attached media files ([#852](https://github.com/mikf/gallery-dl/issues/852))
+### Fixes
+- [blogger] improve error messages for missing posts/blogs ([#903](https://github.com/mikf/gallery-dl/issues/903))
+- [exhentai] adjust image limit costs ([#940](https://github.com/mikf/gallery-dl/issues/940))
+- [gfycat] skip malformed gfycat responses ([#902](https://github.com/mikf/gallery-dl/issues/902))
+- [imgur] handle 403 overcapacity responses ([#910](https://github.com/mikf/gallery-dl/issues/910))
+- [instagram] wait before GraphQL requests ([#901](https://github.com/mikf/gallery-dl/issues/901))
+- [mangareader] fix extraction
+- [mangoxo] fix login
+- [pixnet] detect password-protected albums ([#177](https://github.com/mikf/gallery-dl/issues/177))
+- [simplyhentai] fix `gallery_id` extraction
+- [subscribestar] update `date` parsing
+- [vsco] handle missing `description` fields
+- [xhamster] fix extraction ([#917](https://github.com/mikf/gallery-dl/issues/917))
+- allow `parent-directory` to work recursively ([#905](https://github.com/mikf/gallery-dl/issues/905))
+- skip external OAuth tests ([#908](https://github.com/mikf/gallery-dl/issues/908))
+### Removals
+- [bobx] remove module
 
 ## 1.14.3 - 2020-07-18
 ### Additions
