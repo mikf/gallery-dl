@@ -68,6 +68,7 @@ class AryionExtractor(Extractor):
             # folder
             if headers["content-type"] in (
                 "application/x-folder",
+                "application/x-comic-folder",
                 "application/x-comic-folder-nomerge",
             ):
                 return False
@@ -184,10 +185,15 @@ class AryionPostExtractor(AryionExtractor):
                 "_mtime"   : "Sat, 16 Feb 2019 19:30:34 GMT",
             },
         }),
-        # folder (#694)
+        # x-folder (#694)
         ("https://aryion.com/g4/view/588928", {
             "pattern": pattern,
             "count": ">= 8",
+        }),
+        # x-comic-folder (#945)
+        ("https://aryion.com/g4/view/537379", {
+            "pattern": pattern,
+            "count": 2,
         }),
     )
 

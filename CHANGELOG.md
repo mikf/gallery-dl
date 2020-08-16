@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.14.4 - 2020-08-15
 ### Additions
 - [blogger] add `search` extractor ([#925](https://github.com/mikf/gallery-dl/issues/925))
