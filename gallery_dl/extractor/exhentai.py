@@ -47,6 +47,12 @@ class ExhentaiExtractor(Extractor):
         self.wait_min = self.config("wait-min", 3)
         self.wait_max = self.config("wait-max", 6)
 
+        if isinstance(self.limits, int):
+            self._limit_max = self.limits
+            self.limits = True
+        else:
+            self._limit_max = 0
+
         self._remaining = 0
         if self.wait_max < self.wait_min:
             self.wait_max = self.wait_min
@@ -331,6 +337,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         page = self.request(url, cookies=cookies).text
         current, pos = text.extract(page, "<strong>", "</strong>")
         maximum, pos = text.extract(page, "<strong>", "</strong>", pos)
+        if self._limit_max:
+            maximum = self._limit_max
         self.log.debug("Image Limits: %s/%s", current, maximum)
         self._remaining = text.parse_int(maximum) - text.parse_int(current)
 
