@@ -30,14 +30,20 @@ class FuraffinityExtractor(Extractor):
         self.offset = 0
 
     def items(self):
+        metadata = self.metadata()
         for post_id in util.advance(self.posts(), self.offset):
             post = self._parse_post(post_id)
             if post:
+                if metadata:
+                    post.update(metadata)
                 yield Message.Directory, post
                 yield Message.Url, post["url"], post
 
     def posts(self):
         return self._pagination()
+
+    def metadata(self):
+        return None
 
     def skip(self, num):
         self.offset += num
@@ -133,6 +139,40 @@ class FuraffinityExtractor(Extractor):
             yield from text.extract_iter(page, 'id="sid-', '"')
             path = text.extract(page, 'right" href="', '"')[0]
 
+    def _pagination_search(self, query):
+        url = self.root + "/search/"
+        data = {
+            "page"           : 0,
+            "next_page"      : "Next",
+            "order-by"       : "relevancy",
+            "order-direction": "desc",
+            "range"          : "all",
+            "rating-general" : "on",
+            "rating-mature"  : "on",
+            "rating-adult"   : "on",
+            "type-art"       : "on",
+            "type-music"     : "on",
+            "type-flash"     : "on",
+            "type-story"     : "on",
+            "type-photo"     : "on",
+            "type-poetry"    : "on",
+            "mode"           : "extended",
+        }
+        data.update(query)
+        if "page" in query:
+            data["page"] = text.parse_int(query["page"])
+
+        while True:
+            page = self.request(url, method="POST", data=data).text
+            post_id = None
+
+            for post_id in text.extract_iter(page, 'id="sid-', '"'):
+                yield post_id
+
+            if not post_id:
+                return
+            data["page"] += 1
+
 
 class FuraffinityGalleryExtractor(FuraffinityExtractor):
     """Extractor for a furaffinity user's gallery"""
@@ -169,6 +209,25 @@ class FuraffinityFavoriteExtractor(FuraffinityExtractor):
 
     def posts(self):
         return self._pagination_favorites()
+
+
+class FuraffinitySearchExtractor(FuraffinityExtractor):
+    """Extractor for furaffinity search results"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "Search", "{search}")
+    pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
+    test = ("https://www.furaffinity.net/search/?q=cute", {
+        "pattern": r"https://d.facdn.net/art/[^/]+/\d+/\d+.\w+\.\w+",
+        "range": "45-50",
+        "count": 6,
+    })
+
+    def metadata(self):
+        self.query = text.parse_query(self.user)
+        return {"search": self.query.get("q")}
+
+    def posts(self):
+        return self._pagination_search(self.query)
 
 
 class FuraffinityPostExtractor(FuraffinityExtractor):
