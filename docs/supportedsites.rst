@@ -34,7 +34,7 @@ Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
 Fireden              https://boards.fireden.net/         Threads
 Flickr               https://www.flickr.com/             |flickr-C|                                         Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
-Fur Affinity         https://www.furaffinity.net/        Favorites, Galleries, Posts, Scraps, User Profiles Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
+Fur Affinity         https://www.furaffinity.net/        |furaffinity-C|                                    Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
 Fuskator             https://fuskator.com/               Galleries, Search Results
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag Searches
@@ -154,6 +154,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |artstation-C| replace:: Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results, User Profiles
 .. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, User Profiles
 .. |flickr-C| replace:: Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles
+.. |furaffinity-C| replace:: Favorites, Galleries, Posts, Scraps, Search Results, User Profiles
 .. |hentaifoundry-C| replace:: Favorites, individual Images, Popular Images, Recent Images, Scraps, User Profiles
 .. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Subreddits, User Profiles
 .. |instagram-C| replace:: Channels, individual Images, Saved Posts, Stories, Tag Searches, User Profiles
