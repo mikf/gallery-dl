@@ -56,10 +56,14 @@ class RedditExtractor(Extractor):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
 
-                    elif "gallery_data" in submission:
+                    elif submission.get("is_gallery"):
+                        if not submission.get("gallery_data"):
+                            self.log.warning(
+                                "gallery '%s' was deleted", submission["id"])
+                            continue
                         meta = submission["media_metadata"]
-                        items = submission["gallery_data"]["items"]
-                        for submission["num"], item in enumerate(items, 1):
+                        for submission["num"], item in enumerate(
+                                submission["gallery_data"]["items"], 1):
                             url = meta[item["media_id"]]["s"]["u"]
                             url = url.partition("?")[0]
                             url = url.replace("/preview.", "/i.", 1)
@@ -187,6 +191,10 @@ class RedditSubmissionExtractor(RedditExtractor):
             "url": "25b91ede15459470274dd17291424b037ed8b0ae",
             "content": "1e7dde4ee7d5f4c4b45749abfd15b2dbfa27df3f",
             "count": 3,
+        }),
+        # deleted gallery (#953)
+        ("https://www.reddit.com/gallery/icfgzv", {
+            "count": 0,
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
