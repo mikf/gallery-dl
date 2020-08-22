@@ -111,9 +111,9 @@ class HitomiGalleryExtractor(GalleryExtractor):
             response = self.request(url, fatal=False)
             if b"<title>Redirect</title>" not in response.content:
                 break
-            url = text.extract(response.text, "href='", "'")[0]
-            if not url.startswith("http"):
-                url = text.urljoin(self.root, url)
+            url = text.extract(
+                response.text, 'http-equiv="refresh" content="', '"',
+            )[0].partition("=")[2]
 
         if response.status_code >= 400:
             return {}
