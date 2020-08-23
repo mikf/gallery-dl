@@ -56,17 +56,9 @@ class RedditExtractor(Extractor):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
 
-                    elif submission.get("is_gallery"):
-                        if not submission.get("gallery_data"):
-                            self.log.warning(
-                                "gallery '%s' was deleted", submission["id"])
-                            continue
-                        meta = submission["media_metadata"]
-                        for submission["num"], item in enumerate(
-                                submission["gallery_data"]["items"], 1):
-                            url = meta[item["media_id"]]["s"]["u"]
-                            url = url.partition("?")[0]
-                            url = url.replace("/preview.", "/i.", 1)
+                    elif "gallery_data" in submission:
+                        for submission["num"], url in enumerate(
+                                self._extract_gallery(submission), 1):
                             text.nameext_from_url(url, submission)
                             yield Message.Url, url, submission
 
@@ -121,6 +113,22 @@ class RedditExtractor(Extractor):
 
     def submissions(self):
         """Return an iterable containing all (submission, comments) tuples"""
+
+    def _extract_gallery(self, submission):
+        if submission["gallery_data"] is None:
+            self.log.warning("gallery '%s' was deleted", submission["id"])
+            return
+
+        meta = submission["media_metadata"]
+        for item in submission["gallery_data"]["items"]:
+            src = meta[item["media_id"]]["s"]
+            url = src.get("u") or src.get("gif") or src.get("mp4")
+            if url:
+                yield url.partition("?")[0].replace("/preview.", "/i.", 1)
+            else:
+                self.log.error("Unable to get download URL for item '%s'",
+                               item["media_id"])
+                self.log.debug(src)
 
 
 class RedditSubredditExtractor(RedditExtractor):
@@ -195,6 +203,11 @@ class RedditSubmissionExtractor(RedditExtractor):
         # deleted gallery (#953)
         ("https://www.reddit.com/gallery/icfgzv", {
             "count": 0,
+        }),
+        # animated gallery items (#955)
+        ("https://www.reddit.com/r/araragi/comments/ib32hm", {
+            "pattern": r"https://i\.redd\.it/\w+\.gif",
+            "count": 2,
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
