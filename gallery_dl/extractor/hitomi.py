@@ -158,9 +158,9 @@ class HitomiTagExtractor(Extractor):
     subcategory = "tag"
     pattern = (r"(?:https?://)?hitomi\.la/"
                r"(tag|artist|group|series|type|character)/"
-               r"([^/?&#]+)-\d+\.html")
+               r"([^/?&#]+)\.html")
     test = (
-        ("https://hitomi.la/tag/screenshots-japanese-1.html", {
+        ("https://hitomi.la/tag/screenshots-japanese.html", {
             "pattern": HitomiGalleryExtractor.pattern,
             "count": ">= 35",
         }),
@@ -174,6 +174,10 @@ class HitomiTagExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.type, self.tag = match.groups()
+
+        tag, _, num = self.tag.rpartition("-")
+        if num.isdecimal():
+            self.tag = tag
 
     def items(self):
         url = "https://ltn.hitomi.la/{}/{}.nozomi".format(self.type, self.tag)
