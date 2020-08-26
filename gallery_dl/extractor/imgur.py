@@ -59,7 +59,7 @@ class ImgurImageExtractor(ImgurExtractor):
     subcategory = "image"
     filename_fmt = "{category}_{id}{title:?_//}.{extension}"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/(?!gallery)(\w{7}|\w{5})[sbtmlh]?\.?"
+    pattern = BASE_PATTERN + r"/(?!gallery|search)(\w{7}|\w{5})[sbtmlh]?\.?"
     test = (
         ("https://imgur.com/21yMxCS", {
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
@@ -318,6 +318,21 @@ class ImgurTagExtractor(ImgurExtractor):
         return self._items_queue(self.api.gallery_tag(self.key))
 
 
+class ImgurSearchExtractor(ImgurExtractor):
+    """Extractor for imgur search results"""
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/search(?:/[^?&#]+)?/?\?q=([^&#]+)"
+    test = ("https://imgur.com/search?q=cute+cat", {
+        "range": "1-100",
+        "count": 100,
+        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+    })
+
+    def items(self):
+        key = text.unquote(self.key.replace("+", " "))
+        return self._items_queue(self.api.gallery_search(key))
+
+
 class ImgurAPI():
     """Interface for the Imgur API
 
@@ -333,6 +348,11 @@ class ImgurAPI():
     def account_favorites(self, account):
         endpoint = "account/{}/gallery_favorites".format(account)
         return self._pagination(endpoint)
+
+    def gallery_search(self, query):
+        endpoint = "gallery/search"
+        params = {"q": query}
+        return self._pagination(endpoint, params)
 
     def account_submissions(self, account):
         endpoint = "account/{}/submissions".format(account)
@@ -352,10 +372,11 @@ class ImgurAPI():
     def image(self, image_hash):
         return self._call("image/" + image_hash)
 
-    def _call(self, endpoint):
+    def _call(self, endpoint, params=None):
         try:
             return self.extractor.request(
-                "https://api.imgur.com/3/" + endpoint, headers=self.headers,
+                "https://api.imgur.com/3/" + endpoint,
+                params=params, headers=self.headers,
             ).json()["data"]
         except exception.HttpError as exc:
             if exc.status != 403 or b"capacity" not in exc.response.content:
@@ -363,11 +384,11 @@ class ImgurAPI():
         self.extractor.sleep(seconds=600)
         return self._call(endpoint)
 
-    def _pagination(self, endpoint, key=None):
+    def _pagination(self, endpoint, params=None, key=None):
         num = 0
 
         while True:
-            data = self._call("{}/{}".format(endpoint, num))
+            data = self._call("{}/{}".format(endpoint, num), params)
             if key:
                 data = data[key]
             if not data:
