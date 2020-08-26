@@ -9,7 +9,8 @@
 """Extractors for https://aryion.com/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
+from ..cache import cache
 
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
@@ -21,14 +22,39 @@ class AryionExtractor(Extractor):
     directory_fmt = ("{category}", "{user!l}", "{path:J - }")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
+    cookiedomain = ".aryion.com"
+    cookienames = ("phpbb3_rl7a3_sid",)
     root = "https://aryion.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.recursive = True
+        
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+    
+    @cache(maxage=14*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/forum/ucp.php?mode=login"
+        data = {
+            "username": username,
+            "password": password,
+            "login": "Login",
+        }
+
+        response = self.request(url, method="POST", data=data)
+        if b"You have been successfully logged in." not in response.content:
+            raise exception.AuthenticationError()
+        return { c: response.cookies[c] for c in self.cookienames }
 
     def items(self):
+        self.login()
+
         for post_id in self.posts():
             post = self._parse_post(post_id)
             if post:
