@@ -304,8 +304,25 @@ class ImgurSubredditExtractor(ImgurExtractor):
         return self._items_queue(self.api.gallery_subreddit(self.key))
 
 
-class ImgurAPI():
+class ImgurTagExtractor(ImgurExtractor):
+    """Extractor for imgur tag searches"""
+    subcategory = "tag"
+    pattern = BASE_PATTERN + r"/t/([^/?&#]+)$"
+    test = ("https://imgur.com/t/animals", {
+        "range": "1-100",
+        "count": 100,
+        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+    })
 
+    def items(self):
+        return self._items_queue(self.api.gallery_tag(self.key))
+
+
+class ImgurAPI():
+    """Interface for the Imgur API
+
+    Ref: https://apidocs.imgur.com/
+    """
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
@@ -325,6 +342,10 @@ class ImgurAPI():
         endpoint = "gallery/r/{}".format(subreddit)
         return self._pagination(endpoint)
 
+    def gallery_tag(self, tag):
+        endpoint = "gallery/t/{}".format(tag)
+        return self._pagination(endpoint, key="items")
+
     def album(self, album_hash):
         return self._call("album/" + album_hash)
 
@@ -342,11 +363,13 @@ class ImgurAPI():
         self.extractor.sleep(seconds=600)
         return self._call(endpoint)
 
-    def _pagination(self, endpoint):
+    def _pagination(self, endpoint, key=None):
         num = 0
 
         while True:
             data = self._call("{}/{}".format(endpoint, num))
+            if key:
+                data = data[key]
             if not data:
                 return
             yield from data
