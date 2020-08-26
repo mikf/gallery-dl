@@ -30,12 +30,12 @@ class AryionExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.recursive = True
-        
+
     def login(self):
         username, password = self._get_auth_info()
         if username:
             self._update_cookies(self._login_impl(username, password))
-    
+
     @cache(maxage=14*24*3600, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
@@ -50,7 +50,7 @@ class AryionExtractor(Extractor):
         response = self.request(url, method="POST", data=data)
         if b"You have been successfully logged in." not in response.content:
             raise exception.AuthenticationError()
-        return { c: response.cookies[c] for c in self.cookienames }
+        return {c: response.cookies[c] for c in self.cookienames}
 
     def items(self):
         self.login()
