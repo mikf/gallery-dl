@@ -149,7 +149,7 @@ _COOKIES = " (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)"
 _APIKEY_WH = " (`API Key <configuration.rst#extractorwallhavenapi-key>`__)"
 
 AUTH_MAP = {
-    "aryion"         : "Optional" + _COOKIES,
+    "aryion"         : "Optional",
     "baraag"         : "Optional" + _OAUTH,
     "danbooru"       : "Optional",
     "deviantart"     : "Optional" + _OAUTH,

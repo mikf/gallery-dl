@@ -224,6 +224,7 @@ Description The username and password to use when attempting to log in to
 
             and optional for
 
+            * ``aryion``
             * ``danbooru``
             * ``e621``
             * ``exhentai``
