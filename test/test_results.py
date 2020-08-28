@@ -26,15 +26,13 @@ TRAVIS_SKIP = {
     "archivedmoe", "archiveofsins", "thebarchive", "fireden", "4plebs",
     "sankaku", "idolcomplex", "mangahere", "readcomiconline", "mangadex",
     "sankakucomplex", "warosu", "fuskator", "patreon", "komikcast",
-    "instagram",
+    "instagram", "ngomik",
 }
 
 # temporary issues, etc.
 BROKEN = {
     "hentaihand",
     "imagevenue",
-    "mangapark",
-    "ngomik",
     "photobucket",
     "worldthree",
 }

@@ -53,18 +53,19 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
                r"/manga/([^?&#]+/i\d+)")
     test = (
-        ("https://mangapark.net/manga/gosu/i811615/c55/1", {
+        ("https://mangapark.net/manga/gosu/i811653/c055/1", {
             "count": 50,
-            "keyword": "2bb16a50dbac9577ead62b41db9a01a0419c0ae2",
+            "keyword": "8344bdda8cd8414e7729a4e148379f147e3437da",
         }),
         (("https://mangapark.net/manga"
-          "/ad-astra-per-aspera-hata-kenjirou/i662054/c001.2/1"), {
+          "/ad-astra-per-aspera-hata-kenjirou/i662051/c001.2/1"), {
             "count": 40,
-            "keyword": "8e9cce4ed0e25d12a45e02f840d6f32ef838e257",
+            "keyword": "2bb3a8f426383ea13f17ff5582f3070d096d30ac",
         }),
-        ("https://mangapark.net/manga/gekkan-shoujo-nozaki-kun/i655476/c70", {
+        (("https://mangapark.net/manga"
+          "/gekkan-shoujo-nozaki-kun/i2067426/v7/c70/1"), {
             "count": 15,
-            "keyword": "19f730617074d65f91c0781f429de324890925bf",
+            "keyword": "edc14993c4752cee3a76e09b2f024d40d854bfd1",
         }),
         ("https://mangapark.me/manga/gosu/i811615/c55/1"),
         ("https://mangapark.com/manga/gosu/i811615/c55/1"),
@@ -119,8 +120,8 @@ class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
                r"(/manga/[^/?&#]+)/?$")
     test = (
         ("https://mangapark.net/manga/aria", {
-            "url": "9b0b31e4992260876f56d7bfc8ff0ae71295c4f4",
-            "keyword": "6e44744a28d01b889b1e8291847abd84b591590d",
+            "url": "9b62883c25c8de471f8ab43651e1448536c4ce3f",
+            "keyword": "eb4a9b273c69acf31efa731eba713e1cfa14bab6",
         }),
         ("https://mangapark.me/manga/aria"),
         ("https://mangapark.com/manga/aria"),
