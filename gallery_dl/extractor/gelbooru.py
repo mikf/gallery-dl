@@ -55,7 +55,7 @@ class GelbooruExtractor(booru.XmlParserMixin,
 
         while True:
             page = self.request(url, params=params).text
-            ids = list(text.extract_iter(page, '<a id="p', '"'))
+            ids = list(text.extract_iter(page, '<span id="s', '"'))
             yield from ids
             if len(ids) < self.per_page:
                 return
