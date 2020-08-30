@@ -47,7 +47,7 @@ class ExhentaiExtractor(Extractor):
         self.wait_min = self.config("wait-min", 3)
         self.wait_max = self.config("wait-max", 6)
 
-        if isinstance(self.limits, int):
+        if type(self.limits) is int:
             self._limit_max = self.limits
             self.limits = True
         else:
