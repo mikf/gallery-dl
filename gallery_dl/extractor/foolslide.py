@@ -216,8 +216,8 @@ EXTRACTORS = {
         ),
         "test-manga":
             ("https://sensescans.com/reader/series/yotsubato/", {
-                "url": "ee4dca7c421bf15ac039200f8c0bcb0858153640",
-                "keyword": "f94961bd731bd878bbd4d48555bc3ace1d937364",
+                "url": "305e6eb6160e3bb90c3de39ff5fb7c971e052087",
+                "keyword": "562fb5a7362a4cb43d59d5c8a6ea8080fc65cf99",
             }),
     },
     "worldthree": {
