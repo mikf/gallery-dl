@@ -58,7 +58,8 @@ class RedgifsImageExtractor(RedgifsExtractor):
                r"|gifdeliverynetwork.com)/([A-Za-z]+)")
     test = (
         ("https://redgifs.com/watch/foolishforkedabyssiniancat", {
-            "pattern": r"https://\w+.redgifs.com/FoolishForkedAbyss.+.mp4",
+            "pattern": r"https://\w+\.(redgifs|gfycat)\.com"
+                       r"/FoolishForkedAbyssiniancat\.mp4",
             "content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
         }),
         ("https://www.gifdeliverynetwork.com/foolishforkedabyssiniancat"),
