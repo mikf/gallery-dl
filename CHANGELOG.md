@@ -1,6 +1,19 @@
 # Changelog
 
-## Unreleased
+## 1.14.5 - 2020-08-30
+### Additions
+- [aryion] add username/password support ([#960](https://github.com/mikf/gallery-dl/issues/960))
+- [exhentai] add ability to specify a custom image limit ([#940](https://github.com/mikf/gallery-dl/issues/940))
+- [furaffinity] add `search` extractor ([#915](https://github.com/mikf/gallery-dl/issues/915))
+- [imgur] add `search` and `tag` extractors ([#934](https://github.com/mikf/gallery-dl/issues/934))
+### Fixes
+- [500px] fix extraction and update URL patterns ([#956](https://github.com/mikf/gallery-dl/issues/956))
+- [aryion] update folder mime type list ([#945](https://github.com/mikf/gallery-dl/issues/945))
+- [gelbooru] fix extraction without API
+- [hentaihand] update to new site layout
+- [hitomi] fix redirect processing
+- [reddit] handle deleted galleries ([#953](https://github.com/mikf/gallery-dl/issues/953))
+- [reddit] improve gallery extraction ([#955](https://github.com/mikf/gallery-dl/issues/955))
 
 ## 1.14.4 - 2020-08-15
 ### Additions
