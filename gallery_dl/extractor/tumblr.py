@@ -41,7 +41,7 @@ BASE_PATTERN = (
 class TumblrExtractor(Extractor):
     """Base class for tumblr extractors"""
     category = "tumblr"
-    directory_fmt = ("{category}", "{name}")
+    directory_fmt = ("{category}", "{blog_name}")
     filename_fmt = "{category}_{blog_name}_{id}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     cookiedomain = None
@@ -69,7 +69,6 @@ class TumblrExtractor(Extractor):
 
     def items(self):
         blog = None
-        yield Message.Version, 1
 
         for post in self.posts():
             if self.date_min > post["timestamp"]:
@@ -79,10 +78,10 @@ class TumblrExtractor(Extractor):
             if not blog:
                 blog = self.api.info(self.blog)
                 blog["uuid"] = self.blog
-                yield Message.Directory, blog.copy()
 
                 if self.avatar:
                     url = self.api.avatar(self.blog)
+                    yield Message.Directory, {"blog": blog}
                     yield self._prepare_avatar(url, post.copy(), blog)
 
             reblog = "reblogged_from_id" in post
@@ -90,12 +89,12 @@ class TumblrExtractor(Extractor):
                 continue
             post["reblogged"] = reblog
 
-            post["blog"] = blog
-            post["date"] = text.parse_timestamp(post["timestamp"])
-            post["num"] = 0
-
             if "trail" in post:
                 del post["trail"]
+            post["blog"] = blog
+            post["date"] = text.parse_timestamp(post["timestamp"])
+            yield Message.Directory, post
+            post["num"] = 0
 
             if "photos" in post:  # type "photo" or "link"
                 photos = post["photos"]
@@ -316,7 +315,7 @@ class TumblrTagExtractor(TumblrExtractor):
 class TumblrLikesExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user's liked posts"""
     subcategory = "likes"
-    directory_fmt = ("{category}", "{name}", "likes")
+    directory_fmt = ("{category}", "{blog_name}", "likes")
     archive_fmt = "f_{blog[name]}_{id}_{num}"
     pattern = BASE_PATTERN + r"/likes"
     test = ("http://mikf123.tumblr.com/likes", {
