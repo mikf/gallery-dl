@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.14.5 - 2020-08-30
 ### Additions
 - [aryion] add username/password support ([#960](https://github.com/mikf/gallery-dl/issues/960))

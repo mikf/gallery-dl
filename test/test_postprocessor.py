@@ -342,9 +342,20 @@ class ZipTest(BasePostprocessorTest):
         self.assertEqual(pp.path, self.pathfmt.realdirectory)
         self.assertEqual(pp.run, pp._write)
         self.assertEqual(pp.delete, True)
-        self.assertFalse(hasattr(pp, "args"))
-        self.assertEqual(pp.zfile.compression, zipfile.ZIP_STORED)
-        self.assertTrue(pp.zfile.filename.endswith("/test.zip"))
+        self.assertEqual(pp.args, (
+            pp.path[:-1] + ".zip", "a", zipfile.ZIP_STORED, True,
+        ))
+        self.assertTrue(pp.args[0].endswith("/test.zip"))
+
+    def test_zip_safe(self):
+        pp = self._create({"mode": "safe"})
+        self.assertEqual(pp.path, self.pathfmt.realdirectory)
+        self.assertEqual(pp.run, pp._write_safe)
+        self.assertEqual(pp.delete, True)
+        self.assertEqual(pp.args, (
+            pp.path[:-1] + ".zip", "a", zipfile.ZIP_STORED, True,
+        ))
+        self.assertTrue(pp.args[0].endswith("/test.zip"))
 
     def test_zip_options(self):
         pp = self._create({
@@ -353,22 +364,13 @@ class ZipTest(BasePostprocessorTest):
             "extension": "cbz",
         })
         self.assertEqual(pp.delete, False)
-        self.assertEqual(pp.zfile.compression, zipfile.ZIP_DEFLATED)
-        self.assertTrue(pp.zfile.filename.endswith("/test.cbz"))
-
-    def test_zip_safe(self):
-        pp = self._create({"mode": "safe"})
-        self.assertEqual(pp.delete, True)
-        self.assertEqual(pp.path, self.pathfmt.realdirectory)
-        self.assertEqual(pp.run, pp._write_safe)
         self.assertEqual(pp.args, (
-            pp.path[:-1] + ".zip", "a", zipfile.ZIP_STORED, True,
+            pp.path[:-1] + ".cbz", "a", zipfile.ZIP_DEFLATED, True,
         ))
-        self.assertTrue(pp.args[0].endswith("/test.zip"))
+        self.assertTrue(pp.args[0].endswith("/test.cbz"))
 
     def test_zip_write(self):
         pp = self._create()
-        nti = pp.zfile.NameToInfo
 
         with tempfile.NamedTemporaryFile("w", dir=self.dir.name) as file:
             file.write("foobar\n")
@@ -382,6 +384,7 @@ class ZipTest(BasePostprocessorTest):
                 pp.prepare(self.pathfmt)
                 pp.run(self.pathfmt)
 
+                nti = pp.zfile.NameToInfo
                 self.assertEqual(len(nti), i+1)
                 self.assertIn(name, nti)
 

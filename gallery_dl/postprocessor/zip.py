@@ -33,23 +33,23 @@ class ZipPP(PostProcessor):
                 algorithm)
             algorithm = "store"
 
+        self.zfile = None
         self.path = job.pathfmt.realdirectory
-        args = (self.path[:-1] + ext, "a",
-                self.COMPRESSION_ALGORITHMS[algorithm], True)
+        self.args = (self.path[:-1] + ext, "a",
+                     self.COMPRESSION_ALGORITHMS[algorithm], True)
 
         if options.get("mode") == "safe":
             self.run = self._write_safe
-            self.zfile = None
-            self.args = args
         else:
             self.run = self._write
-            self.zfile = zipfile.ZipFile(*args)
 
     def _write(self, pathfmt, zfile=None):
         # 'NameToInfo' is not officially documented, but it's available
         # for all supported Python versions and using it directly is a lot
         # faster than calling getinfo()
         if zfile is None:
+            if self.zfile is None:
+                self.zfile = zipfile.ZipFile(*self.args)
             zfile = self.zfile
         if pathfmt.filename not in zfile.NameToInfo:
             zfile.write(pathfmt.temppath, pathfmt.filename)
