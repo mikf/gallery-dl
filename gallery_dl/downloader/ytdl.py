@@ -31,6 +31,10 @@ class YoutubeDLDownloader(DownloaderBase):
             "nopart": not self.part,
             "updatetime": self.config("mtime", True),
             "proxy": extractor.session.proxies.get("http"),
+            "min_filesize": text.parse_bytes(
+                self.config("filesize-min"), None),
+            "max_filesize": text.parse_bytes(
+                self.config("filesize-max"), None),
         }
         options.update(self.config("raw-options") or {})
 

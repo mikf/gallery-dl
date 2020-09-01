@@ -179,6 +179,9 @@ class TestHTTPDownloader(TestDownloaderBase):
         server = http.server.HTTPServer(("", port), HttpRequestHandler)
         threading.Thread(target=server.serve_forever, daemon=True).start()
 
+    def tearDown(self):
+        self.downloader.minsize = self.downloader.maxsize = None
+
     def test_http_download(self):
         self._run_test(self._jpg, None, DATA_JPG, "jpg", "jpg")
         self._run_test(self._png, None, DATA_PNG, "png", "png")
@@ -198,6 +201,20 @@ class TestHTTPDownloader(TestDownloaderBase):
         self._run_test(self._jpg, None, DATA_JPG, "png", "jpg")
         self._run_test(self._png, None, DATA_PNG, "gif", "png")
         self._run_test(self._gif, None, DATA_GIF, "jpg", "gif")
+
+    def test_http_filesize_min(self):
+        pathfmt = self._prepare_destination(None, extension=None)
+        self.downloader.minsize = 100
+        with self.assertLogs(self.downloader.log, "WARNING"):
+            success = self.downloader.download(self._gif, pathfmt)
+        self.assertFalse(success)
+
+    def test_http_filesize_max(self):
+        pathfmt = self._prepare_destination(None, extension=None)
+        self.downloader.maxsize = 100
+        with self.assertLogs(self.downloader.log, "WARNING"):
+            success = self.downloader.download(self._jpg, pathfmt)
+        self.assertFalse(success)
 
 
 class TestTextDownloader(TestDownloaderBase):

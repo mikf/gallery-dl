@@ -1397,6 +1397,21 @@ Description Enable/Disable this downloader module.
 =========== =====
 
 
+downloader.*.filesize-min & .filesize-max
+-----------------------------------------
+=========== =====
+Type        ``string``
+Default     ``null``
+Example     ``"32000"``, ``"500k"``, ``"2.5M"``
+Description Minimum/Maximum allowed file size in bytes.
+            Any file smaller/larger than this limit will not be downloaded.
+
+            Possible values are valid integer or floating-point numbers
+            optionally followed by one of ``k``, ``m``. ``g``, ``t`` or ``p``.
+            These suffixes are case-insensitive.
+=========== =====
+
+
 downloader.*.mtime
 ------------------
 =========== =====

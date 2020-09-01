@@ -31,6 +31,8 @@ class HttpDownloader(DownloaderBase):
         self.downloading = False
 
         self.adjust_extension = self.config("adjust-extensions", True)
+        self.minsize = self.config("filesize-min")
+        self.maxsize = self.config("filesize-max")
         self.retries = self.config("retries", extractor._retries)
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
@@ -39,6 +41,16 @@ class HttpDownloader(DownloaderBase):
 
         if self.retries < 0:
             self.retries = float("inf")
+        if self.minsize:
+            minsize = text.parse_bytes(self.minsize)
+            if not minsize:
+                self.log.warning("Invalid minimum filesize (%r)", self.minsize)
+            self.minsize = minsize
+        if self.maxsize:
+            maxsize = text.parse_bytes(self.maxsize)
+            if not maxsize:
+                self.log.warning("Invalid maximum filesize (%r)", self.maxsize)
+            self.maxsize = maxsize
         if self.rate:
             rate = text.parse_bytes(self.rate)
             if rate:
@@ -116,7 +128,20 @@ class HttpDownloader(DownloaderBase):
                     continue
                 self.log.warning(msg)
                 return False
-            size = text.parse_int(size)
+
+            # check filesize
+            size = text.parse_int(size, None)
+            if size is not None:
+                if self.minsize and size < self.minsize:
+                    self.log.warning(
+                        "File size smaller than allowed minimum (%s < %s)",
+                        size, self.minsize)
+                    return False
+                if self.maxsize and size > self.maxsize:
+                    self.log.warning(
+                        "File size larger than allowed maximum (%s > %s)",
+                        size, self.maxsize)
+                    return False
 
             # set missing filename extension
             if not pathfmt.extension:
