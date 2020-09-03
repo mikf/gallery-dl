@@ -769,10 +769,8 @@ class PathFormat():
         """Open file and return a corresponding file object"""
         return open(self.temppath, mode)
 
-    def exists(self, archive=None):
-        """Return True if the file exists on disk or in 'archive'"""
-        if archive and self.kwdict in archive:
-            return self.fix_extension()
+    def exists(self):
+        """Return True if the file exists on disk"""
         if self.extension and os.path.exists(self.realpath):
             return self.check_file()
         return False
