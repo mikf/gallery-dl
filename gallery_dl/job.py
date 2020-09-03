@@ -224,7 +224,14 @@ class DownloadJob(Job):
             for pp in postprocessors:
                 pp.prepare(pathfmt)
 
-        if pathfmt.exists(archive):
+        if archive and kwdict in archive:
+            pathfmt.fix_extension()
+            self.handle_skip()
+            return
+
+        if pathfmt.exists():
+            if archive:
+                archive.add(kwdict)
             self.handle_skip()
             return
 
@@ -248,6 +255,8 @@ class DownloadJob(Job):
                 return
 
         if not pathfmt.temppath:
+            if archive:
+                archive.add(kwdict)
             self.handle_skip()
             return
 
