@@ -118,6 +118,7 @@ modules = [
     "vsco",
     "wallhaven",
     "warosu",
+    "weasyl",
     "webtoons",
     "weibo",
     "wikiart",
