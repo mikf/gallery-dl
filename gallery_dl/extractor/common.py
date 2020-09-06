@@ -123,7 +123,7 @@ class Extractor():
             self.log.debug("%s (%s/%s)", msg, tries, retries+1)
             if tries > retries:
                 break
-            time.sleep(min(2 ** (tries-1), 1800))
+            time.sleep(tries)
             tries += 1
 
         raise exception.HttpError(msg, response)

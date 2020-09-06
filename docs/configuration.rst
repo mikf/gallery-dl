@@ -723,9 +723,6 @@ extractor.deviantart.wait-min
 Type        ``integer``
 Default     ``0``
 Description Minimum wait time in seconds before API requests.
-
-            Note: This value will internally be rounded up
-            to the next power of 2.
 =========== =====
 
 
