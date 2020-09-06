@@ -30,6 +30,7 @@ class AryionExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.recursive = True
+        self._needle = "class='gallery-item' id='"
 
     def login(self):
         username, password = self._get_auth_info()
@@ -73,7 +74,7 @@ class AryionExtractor(Extractor):
         while True:
             page = self.request(url).text
             yield from text.extract_iter(
-                page, "class='thumb' href='/g4/view/", "'")
+                page, self._needle, "'")
 
             pos = page.find("Next &gt;&gt;")
             if pos < 0:
@@ -180,6 +181,7 @@ class AryionGalleryExtractor(AryionExtractor):
             url = "{}/g4/gallery/{}".format(self.root, self.user)
             return self._pagination(url)
         else:
+            self._needle = "class='thumb' href='/g4/view/"
             url = "{}/g4/latest.php?name={}".format(self.root, self.user)
             return util.advance(self._pagination(url), self.offset)
 
