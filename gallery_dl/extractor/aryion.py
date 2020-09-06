@@ -73,7 +73,7 @@ class AryionExtractor(Extractor):
         while True:
             page = self.request(url).text
             yield from text.extract_iter(
-                page, "class='thumb' href='/g4/view/", "'")
+                page, "class='gallery-item' id='", "'")
 
             pos = page.find("Next &gt;&gt;")
             if pos < 0:
