@@ -14,7 +14,6 @@ from ..cache import cache, memcache
 import collections
 import itertools
 import mimetypes
-import math
 import time
 import re
 
@@ -837,8 +836,7 @@ class DeviantartOAuthAPI():
         self.log = extractor.log
         self.headers = {}
 
-        delay = extractor.config("wait-min", 0)
-        self.delay = math.ceil(math.log2(delay)) if delay >= 1 else -1
+        self.delay = extractor.config("wait-min", 0)
         self.delay_min = max(2, self.delay)
 
         self.mature = extractor.config("mature", "true")
@@ -993,8 +991,8 @@ class DeviantartOAuthAPI():
         """Call an API endpoint"""
         url = "https://www.deviantart.com/api/v1/oauth2/" + endpoint
         while True:
-            if self.delay >= 0:
-                time.sleep(2 ** self.delay)
+            if self.delay:
+                time.sleep(self.delay)
 
             self.authenticate(None if public else self.refresh_token_key)
             response = self.extractor.request(
@@ -1015,9 +1013,9 @@ class DeviantartOAuthAPI():
             msg = "API responded with {} {}".format(
                 status, response.reason)
             if status == 429:
-                if self.delay < 9:
+                if self.delay < 30:
                     self.delay += 1
-                self.log.warning("%s. Using %ds delay.", msg, 2 ** self.delay)
+                self.log.warning("%s. Using %ds delay.", msg, self.delay)
             else:
                 self.log.error(msg)
                 return data

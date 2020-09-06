@@ -87,7 +87,7 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
                 if tries > self.retries:
                     return False
-                time.sleep(min(2 ** (tries-1), 1800))
+                time.sleep(tries)
             tries += 1
 
             headers = {}
