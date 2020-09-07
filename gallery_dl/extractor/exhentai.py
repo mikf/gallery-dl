@@ -193,7 +193,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 self._check_limits(data)
             if "/fullimg.php" in url:
                 data["extension"] = ""
-                self.wait(1.5)
+                self.wait(self.wait_max / 4)
             yield Message.Url, url, data
 
     def get_metadata(self, page):
