@@ -245,7 +245,8 @@ class TwitterExtractor(Extractor):
 class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for all images from a user's timeline"""
     subcategory = "timeline"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?&#]+)/?(?:$|[?#])"
+    pattern = BASE_PATTERN + \
+        r"/(?!search)(?:([^/?&#]+)/?(?:$|[?#])|intent/user\?user_id=(\d+))"
     test = (
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
@@ -253,7 +254,14 @@ class TwitterTimelineExtractor(TwitterExtractor):
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
         ("https://www.twitter.com/id:2976459548"),
+        ("https://twitter.com/intent/user?user_id=2976459548"),
     )
+
+    def __init__(self, match):
+        TwitterExtractor.__init__(self, match)
+        uid = match.group(2)
+        if uid:
+            self.user = "id:" + uid
 
     def tweets(self):
         return TwitterAPI(self).timeline_profile(self.user)
