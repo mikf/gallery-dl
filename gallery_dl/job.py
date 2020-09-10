@@ -197,6 +197,7 @@ class DownloadJob(Job):
     def __init__(self, url, parent=None):
         Job.__init__(self, url, parent)
         self.log = self.get_logger("download")
+        self.blacklist = None
         self.archive = None
         self.sleep = None
         self.downloaders = {}
@@ -308,6 +309,12 @@ class DownloadJob(Job):
             extr = kwdict["_extractor"].from_url(url)
         else:
             extr = extractor.find(url)
+            if extr:
+                if self.blacklist is None:
+                    self.blacklist = self._build_blacklist()
+                if extr.category in self.blacklist:
+                    extr = None
+
         if extr:
             self.status |= self.__class__(extr, self).run()
         else:
@@ -436,6 +443,25 @@ class DownloadJob(Job):
                 self.postprocessors = pp_list
                 self.extractor.log.debug(
                     "Active postprocessor modules: %s", pp_list)
+
+    def _build_blacklist(self):
+        wlist = self.extractor.config("whitelist")
+        if wlist:
+            if isinstance(wlist, str):
+                wlist = wlist.split(",")
+            blist = {e.category for e in extractor._list_classes()}
+            blist.difference_update(wlist)
+            return blist
+
+        blist = self.extractor.config("blacklist")
+        if blist:
+            if isinstance(blist, str):
+                blist = blist.split(",")
+            blist = set(blist)
+        else:
+            blist = {self.extractor.category}
+        blist |= util.SPECIAL_EXTRACTORS
+        return blist
 
 
 class SimulationJob(DownloadJob):
