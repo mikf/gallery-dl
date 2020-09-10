@@ -397,6 +397,8 @@ class DownloadJob(Job):
         if archive:
             path = util.expand_path(archive)
             try:
+                if "{" in path:
+                    path = util.Formatter(path).format_map(kwdict)
                 self.archive = util.DownloadArchive(path, self.extractor)
             except Exception as exc:
                 self.extractor.log.warning(
