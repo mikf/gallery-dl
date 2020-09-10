@@ -368,13 +368,19 @@ extractor.*.archive
 =========== =====
 Type        |Path|_
 Default     ``null``
+Example     ``"$HOME/.archives/{category}.sqlite3"``
 Description File to store IDs of downloaded files in. Downloads of files
-            already recorded in this archive file will be skipped_.
+            already recorded in this archive file will be
+            `skipped <extractor.*.skip_>`__.
 
             The resulting archive file is not a plain text file but an SQLite3
             database, as either lookup operations are significantly faster or
             memory requirements are significantly lower when the
             amount of stored IDs gets reasonably large.
+
+            Note: archive paths support regular `format string`_ replacements,
+            but be aware that using external inputs for building local paths
+            may pose a security risk.
 =========== =====
 
 
@@ -2265,7 +2271,6 @@ Description An object with the ``name`` of a post-processor and its options.
 .. |strptime| replace:: strftime() and strptime() Behavior
 
 .. _base-directory: `extractor.*.base-directory`_
-.. _skipped: `extractor.*.skip`_
 .. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: extractor.deviantart.metadata_
 
