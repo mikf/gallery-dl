@@ -363,6 +363,20 @@ Description Transfer an extractor's (sub)category values to all child
 =========== =====
 
 
+extractor.*.blacklist & .whitelist
+----------------------------------
+=========== =====
+Type        ``list`` of ``strings``
+Default     ``["oauth", "recursive", "test"]`` + current extractor category
+Description A list of extractor categories to ignore (or allow)
+            when spawning child extractors for unknown URLs,
+            e.g. from ``reddit`` or ``plurk``.
+
+            Note: Any ``blacklist`` setting will automatically include
+            ``"oauth"``, ``"recursive"``, and ``"test"``.
+=========== =====
+
+
 extractor.*.archive
 -------------------
 =========== =====
