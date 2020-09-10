@@ -225,6 +225,11 @@ def build_parser():
         help="Do not use .part files",
     )
     downloader.add_argument(
+        "--no-skip",
+        dest="skip", nargs=0, action=ConfigConstAction, const=False,
+        help="Do not skip downloads; overwrite existing files",
+    )
+    downloader.add_argument(
         "--no-mtime",
         dest="mtime", nargs=0, action=ConfigConstAction, const=False,
         help=("Do not set file modification times according to "
