@@ -17,9 +17,7 @@ from .common import (
     generate_extractors,
 )
 from .. import text, util
-import base64
 import json
-import re
 
 
 class FoolslideBase(SharedConfigMixin):
@@ -83,25 +81,7 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
         })
 
     def images(self, page):
-        data = None
-
-        if self.decode == "base64":
-            pos = page.find("'fromCharCode'")
-            if pos >= 0:
-                blob = text.extract(page, "'", "'", pos+15)[0]
-                base64_data = re.sub(r"[a-zA-Z]", _decode_jaiminisbox, blob)
-            else:
-                base64_data = text.extract(page, 'atob("', '"')[0]
-            if base64_data:
-                data = base64.b64decode(base64_data.encode()).decode()
-        elif self.decode == "double":
-            pos = page.find("[{")
-            if pos >= 0:
-                data = text.extract(page, " = ", ";", pos)[0]
-
-        if not data:
-            data = text.extract(page, "var pages = ", ";")[0]
-        return json.loads(data)
+        return json.loads(text.extract(page, "var pages = ", ";")[0])
 
 
 class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
@@ -126,16 +106,6 @@ class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
             })))
 
 
-def _decode_jaiminisbox(match):
-    c = match.group(0)
-
-    # ord("Z") == 90, ord("z") == 122
-    N = 90 if c <= "Z" else 122
-    C = ord(c) + 13
-
-    return chr(C if N >= C else (C - 26))
-
-
 EXTRACTORS = {
     "dokireader": {
         "root": "https://kobato.hologfx.com/reader",
@@ -149,19 +119,6 @@ EXTRACTORS = {
               "boku_ha_ohimesama_ni_narenai/"), {
                 "url": "1c1f5a7258ce4f631f5fc32be548d78a6a57990d",
                 "keyword": "614d89a6045b85c822cbd3e67578ea7577dfc995",
-            }),
-    },
-    "jaiminisbox": {
-        "root": "https://jaiminisbox.com/reader",
-        "pattern": r"(?:www\.)?jaiminisbox\.com/reader",
-        "extra": {"decode": "base64"},
-        "test-chapter":
-            ("https://jaiminisbox.com/reader/read/oshi-no-ko/en/0/1/", {
-                "keyword": "d6435cfc1522293a42517a4aadda95a8631da0b3",
-            }),
-        "test-manga":
-            ("https://jaiminisbox.com/reader/series/oshi-no-ko/", {
-                "count": ">= 10",
             }),
     },
     "kireicake": {
