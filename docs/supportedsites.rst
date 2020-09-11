@@ -61,7 +61,6 @@ imgur                https://imgur.com/                  |imgur-C|
 Inkbunny             https://inkbunny.net/               Posts, User Profiles                               Optional
 Instagram            https://www.instagram.com/          |instagram-C|                                      Optional
 Issuu                https://issuu.com/                  Publications, User Profiles
-Jaimini's Box        https://jaiminisbox.com/reader/     Chapters, Manga
 Joyreactor           http://joyreactor.com/              Posts, Search Results, Tag Searches, User Profiles
 Keenspot             http://www.keenspot.com/            Comics
 Khinsider            https://downloads.khinsider.com/    Soundtracks
