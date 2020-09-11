@@ -131,7 +131,6 @@ Warosu               https://warosu.org/                 Threads
 Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
 WikiArt.org          https://www.wikiart.org/            Artists, Artist Listings, Artworks
-World Three          http://www.slide.world-three.org/   Chapters, Manga
 xHamster             https://xhamster.com/               Galleries, User Profiles
 XVideos              https://www.xvideos.com/            Galleries, User Profiles
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag Searches

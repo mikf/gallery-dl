@@ -177,27 +177,6 @@ EXTRACTORS = {
                 "keyword": "562fb5a7362a4cb43d59d5c8a6ea8080fc65cf99",
             }),
     },
-    "worldthree": {
-        "root": "http://www.slide.world-three.org",
-        "pattern": r"(?:www\.)?slide\.world-three\.org",
-        "test-chapter": (
-            (("http://www.slide.world-three.org"
-              "/read/black_bullet/en/2/7/page/1"), {
-                "url": "be2f04f6e2d311b35188094cfd3e768583271584",
-                "keyword": "967d536a65de4d52478d5b666a1760b181eddb6e",
-            }),
-            (("http://www.slide.world-three.org"
-              "/read/idolmster_cg_shuffle/en/0/4/2/"), {
-                "url": "6028ea5ca282744f925dfad92eeb98509f9cc78c",
-                "keyword": "f3cfe2ad3388991f1d045c85d0fa94795a7694dc",
-            }),
-        ),
-        "test-manga":
-            ("http://www.slide.world-three.org/series/black_bullet/", {
-                "url": "5743b93512d26e6b540d90a7a5d69208b6d4a738",
-                "keyword": "3a24f1088b4d7f3b798a96163f21ca251293a120",
-            }),
-    },
     "_ckey": "chapterclass",
 }
 

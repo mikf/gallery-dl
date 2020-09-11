@@ -34,7 +34,6 @@ BROKEN = {
     "dokireader",
     "imagevenue",
     "photobucket",
-    "worldthree",
 }
 
 
