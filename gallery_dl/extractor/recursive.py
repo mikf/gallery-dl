@@ -9,7 +9,6 @@
 """Recursive extractor"""
 
 from .common import Extractor, Message
-from .. import extractor, util
 import requests
 import re
 
@@ -23,17 +22,12 @@ class RecursiveExtractor(Extractor):
     })
 
     def items(self):
-        blist = self.config(
-            "blacklist", {"directlink"} | util.SPECIAL_EXTRACTORS)
-
         self.session.mount("file://", FileAdapter())
         page = self.request(self.url.partition(":")[2]).text
         del self.session.adapters["file://"]
 
-        yield Message.Version, 1
-        with extractor.blacklist(blist):
-            for match in re.finditer(r"https?://[^\s\"']+", page):
-                yield Message.Queue, match.group(0), {}
+        for match in re.finditer(r"https?://[^\s\"']+", page):
+            yield Message.Queue, match.group(0), {}
 
 
 class FileAdapter(requests.adapters.BaseAdapter):
