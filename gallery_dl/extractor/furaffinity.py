@@ -55,7 +55,7 @@ class FuraffinityExtractor(Extractor):
         title, _, artist = text.unescape(extr(
             'property="og:title" content="', '"')).rpartition(" by ")
         artist_url = artist.replace("_", "").lower()
-        path = extr('href="//d.facdn.net/', '"')
+        path = extr('href="//d', '"')
 
         if not path:
             self.log.warning(
@@ -76,7 +76,7 @@ class FuraffinityExtractor(Extractor):
             "artist"    : artist,
             "artist_url": artist_url,
             "user"      : self.user or artist_url,
-            "url"       : "https://d.facdn.net/" + path
+            "url"       : "https://d" + path
         })
 
         tags = extr('class="tags-row">', '</section>')
@@ -179,7 +179,7 @@ class FuraffinityGalleryExtractor(FuraffinityExtractor):
     subcategory = "gallery"
     pattern = BASE_PATTERN + r"/gallery/([^/?&#]+)"
     test = ("https://www.furaffinity.net/gallery/mirlinthloth/", {
-        "pattern": r"https://d.facdn.net/art/mirlinthloth/\d+/\d+.\w+\.\w+",
+        "pattern": r"https://d\d?.facdn.net/art/mirlinthloth/\d+/\d+.\w+\.\w+",
         "range": "45-50",
         "count": 6,
     })
@@ -191,7 +191,7 @@ class FuraffinityScrapsExtractor(FuraffinityExtractor):
     directory_fmt = ("{category}", "{user!l}", "Scraps")
     pattern = BASE_PATTERN + r"/scraps/([^/?&#]+)"
     test = ("https://www.furaffinity.net/scraps/mirlinthloth/", {
-        "pattern": r"https://d.facdn.net/art/[^/]+(/stories)?/\d+/\d+.\w+.\w+",
+        "pattern": r"https://d\d?.facdn.net/art/[^/]+(/stories)?/\d+/\d+.\w+.",
         "count": ">= 3",
     })
 
@@ -202,7 +202,7 @@ class FuraffinityFavoriteExtractor(FuraffinityExtractor):
     directory_fmt = ("{category}", "{user!l}", "Favorites")
     pattern = BASE_PATTERN + r"/favorites/([^/?&#]+)"
     test = ("https://www.furaffinity.net/favorites/mirlinthloth/", {
-        "pattern": r"https://d.facdn.net/art/[^/]+/\d+/\d+.\w+\.\w+",
+        "pattern": r"https://d\d?.facdn.net/art/[^/]+/\d+/\d+.\w+\.\w+",
         "range": "45-50",
         "count": 6,
     })
@@ -217,7 +217,7 @@ class FuraffinitySearchExtractor(FuraffinityExtractor):
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
     test = ("https://www.furaffinity.net/search/?q=cute", {
-        "pattern": r"https://d.facdn.net/art/[^/]+/\d+/\d+.\w+\.\w+",
+        "pattern": r"https://d\d?.facdn.net/art/[^/]+/\d+/\d+.\w+\.\w+",
         "range": "45-50",
         "count": 6,
     })
@@ -236,7 +236,7 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
     pattern = BASE_PATTERN + r"/(?:view|full)/(\d+)"
     test = (
         ("https://www.furaffinity.net/view/21835115/", {
-            "url": "eae4ef93d99365c69b31a37561bd800c03d336ad",
+            "url": "d80254eb4fba654597b4df8320d55916e11ba375",
             "keyword": {
                 "artist"     : "mirlinthloth",
                 "artist_url" : "mirlinthloth",
@@ -247,7 +247,7 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
                 "id"         : 21835115,
                 "tags"       : list,
                 "title"      : "Bude's 4 Ever",
-                "url"        : "re:https://d.facdn.net/art/mirlinthloth/music",
+                "url"        : r"re:https://d\d?.facdn.net/art/mirlinthloth/m",
                 "user"       : "mirlinthloth",
                 "views"      : int,
                 "favorites"  : int,
