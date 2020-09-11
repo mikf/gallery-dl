@@ -1081,16 +1081,6 @@ Description Controls how to handle redirects to CAPTCHA pages.
 =========== =====
 
 
-extractor.recursive.blacklist
------------------------------
-=========== =====
-Type        ``list`` of ``strings``
-Default     ``["directlink", "oauth", "recursive", "test"]``
-Description A list of extractor categories which should be ignored when using
-            the ``recursive`` extractor.
-=========== =====
-
-
 extractor.reddit.comments
 -------------------------
 =========== =====
