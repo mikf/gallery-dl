@@ -208,6 +208,16 @@ Description Number of seconds to sleep before each download.
 =========== =====
 
 
+extractor.*.sleep-extractor
+---------------------------
+=========== =====
+Type        ``float``
+Default     ``0``
+Description Number of seconds to sleep before handling an input URL,
+            i.e. before starting a new extractor.
+=========== =====
+
+
 extractor.*.username & .password
 --------------------------------
 =========== =====
