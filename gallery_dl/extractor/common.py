@@ -40,6 +40,8 @@ class Extractor():
         self._cookiefile = None
         self._cookiejar = self.session.cookies
         self._parentdir = ""
+
+        self._cfgpath = ("extractor", self.category, self.subcategory)
         self._write_pages = self.config("write-pages", False)
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
@@ -69,12 +71,10 @@ class Extractor():
         return 0
 
     def config(self, key, default=None):
-        return config.interpolate(
-            ("extractor", self.category, self.subcategory), key, default)
+        return config.interpolate(self._cfgpath, key, default)
 
     def config_accumulate(self, key):
-        return config.accumulate(
-            ("extractor", self.category, self.subcategory), key)
+        return config.accumulate(self._cfgpath, key)
 
     def request(self, url, *, method="GET", session=None, retries=None,
                 encoding=None, fatal=True, notfound=None, **kwargs):
