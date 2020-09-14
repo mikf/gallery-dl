@@ -417,7 +417,7 @@ class DownloadJob(Job):
             else:
                 self.extractor.log.debug("Using download archive '%s'", path)
 
-        postprocessors = config("postprocessors")
+        postprocessors = self.extractor.config_accumulate("postprocessors")
         if postprocessors:
             pp_log = self.get_logger("postprocessor")
             pp_list = []
