@@ -140,6 +140,25 @@ def interpolate_common(common, paths, key, default=None, *, conf=_config):
     return default
 
 
+def accumulate(path, key, *, conf=_config):
+    """Accumulate the values of 'key' along 'path'"""
+    result = []
+    try:
+        if key in conf:
+            value = conf[key]
+            if value:
+                result.extend(value)
+        for p in path:
+            conf = conf[p]
+            if key in conf:
+                value = conf[key]
+                if value:
+                    result[:0] = value
+    except Exception:
+        pass
+    return result
+
+
 def set(path, key, value, *, conf=_config):
     """Set the value of property 'key' for this session"""
     for p in path:
