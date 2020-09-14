@@ -72,6 +72,10 @@ class Extractor():
         return config.interpolate(
             ("extractor", self.category, self.subcategory), key, default)
 
+    def config_accumulate(self, key):
+        return config.accumulate(
+            ("extractor", self.category, self.subcategory), key)
+
     def request(self, url, *, method="GET", session=None, retries=None,
                 encoding=None, fatal=True, notfound=None, **kwargs):
         tries = 1
