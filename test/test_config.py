@@ -96,6 +96,28 @@ class TestConfig(unittest.TestCase):
         test(("Z1", "Z2", "A1", "A2", "A3"), 999, 8)
         test((), 9)
 
+    def test_accumulate(self):
+        self.assertEqual(config.accumulate((), "l"), [])
+
+        config.set(()        , "l", [5, 6])
+        config.set(("c",)    , "l", [3, 4])
+        config.set(("c", "c"), "l", [1, 2])
+        self.assertEqual(
+            config.accumulate((), "l")        , [5, 6])
+        self.assertEqual(
+            config.accumulate(("c",), "l")    , [3, 4, 5, 6])
+        self.assertEqual(
+            config.accumulate(("c", "c"), "l"), [1, 2, 3, 4, 5, 6])
+
+        config.set(("c",), "l", None)
+        config.unset(("c", "c"), "l")
+        self.assertEqual(
+            config.accumulate((), "l")        , [5, 6])
+        self.assertEqual(
+            config.accumulate(("c",), "l")    , [5, 6])
+        self.assertEqual(
+            config.accumulate(("c", "c"), "l"), [5, 6])
+
     def test_set(self):
         config.set(()        , "c", [1, 2, 3])
         config.set(("b",)    , "c", [1, 2, 3])
