@@ -2061,6 +2061,8 @@ How To      * login and visit DeviantArt's
             * copy ``client_id`` and ``client_secret`` of your new
               application and put them in your configuration file
               as ``"client-id"`` and ``"client-secret"``
+            * clear your `cache <cache.file_>`__ (``--clear-cache``) to delete
+              the ``access-token`` from the previous ``client-id``
             * get a new `refresh-token <extractor.deviantart.refresh-token_>`__
               if necessary
 =========== =====
