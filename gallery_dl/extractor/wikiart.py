@@ -93,7 +93,7 @@ class WikiartArtworksExtractor(WikiartExtractor):
     directory_fmt = ("{category}", "Artworks by {group!c}", "{type}")
     pattern = BASE_PATTERN + r"/paintings-by-([\w-]+)/([\w-]+)"
     test = ("https://www.wikiart.org/en/paintings-by-media/grisaille", {
-        "url": "228426a9d32b5bba9d659944c6b0ba73883af33f",
+        "url": "36e054fcb3363b7f085c81f4778e6db3994e56a3",
     })
 
     def __init__(self, match):
