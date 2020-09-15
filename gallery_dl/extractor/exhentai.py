@@ -34,6 +34,9 @@ class ExhentaiExtractor(Extractor):
     LIMIT = False
 
     def __init__(self, match):
+        # allow calling 'self.config()' before 'Extractor.__init__()'
+        self._cfgpath = ("extractor", self.category, self.subcategory)
+
         version = match.group(1)
         domain = self.config("domain", "auto")
         if domain == "auto":
