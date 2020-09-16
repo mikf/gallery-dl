@@ -8,11 +8,11 @@
 
 """Extract hentai-gallery from https://myhentaigallery.com/"""
 
-from .common import GalleryExtractor, Extractor, Message
-from .. import text, util, exception
+from .common import GalleryExtractor
+from .. import text, exception
 
 
-class MyHentaiGalleryExtractor(GalleryExtractor):
+class MyhentaigalleryGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from myhentaigallery.com"""
     category = "myhentaigallery"
     directory_fmt = ("{category}", "{gallery_id} [{artist}] {title}")
