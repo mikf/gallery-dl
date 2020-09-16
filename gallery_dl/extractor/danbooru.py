@@ -93,7 +93,12 @@ class DanbooruExtractor(SharedConfigMixin, Extractor):
             if pagenum:
                 params["page"] += 1
             else:
-                params["page"] = "b{}".format(posts[-1]["id"])
+                for post in reversed(posts):
+                    if "id" in post:
+                        params["page"] = "b{}".format(post["id"])
+                        break
+                else:
+                    return
 
 
 class DanbooruTagExtractor(DanbooruExtractor):
