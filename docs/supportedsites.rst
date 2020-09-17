@@ -81,6 +81,7 @@ MangaPark            https://mangapark.net/              Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
 mastodon.social      https://mastodon.social/            Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
+My Hentai Gallery    https://myhentaigallery.com/        Galleries
 Naver                https://blog.naver.com/             Blogs, Posts
 Newgrounds           https://www.newgrounds.com/         |newgrounds-C|                                     Optional
 Ngomik               http://ngomik.in/                   Chapters
