@@ -74,6 +74,7 @@ modules = [
     "mangareader",
     "mangastream",
     "mangoxo",
+    "myhentaigallery",
     "myportfolio",
     "naver",
     "newgrounds",
