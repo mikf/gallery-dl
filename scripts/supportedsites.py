@@ -60,6 +60,7 @@ CATEGORY_MAP = {
     "mangapark"      : "MangaPark",
     "mangastream"    : "Manga Stream",
     "mastodon.social": "mastodon.social",
+    "myhentaigallery": "My Hentai Gallery"
     "myportfolio"    : "Adobe Portfolio",
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
