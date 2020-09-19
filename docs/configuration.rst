@@ -218,6 +218,16 @@ Description Number of seconds to sleep before handling an input URL,
 =========== =====
 
 
+extractor.*.sleep-request
+-------------------------
+=========== =====
+Type        ``float``
+Default     ``0``
+Description Minimal time interval in seconds between each HTTP request
+            during data extraction.
+=========== =====
+
+
 extractor.*.username & .password
 --------------------------------
 =========== =====
