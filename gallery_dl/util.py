@@ -646,7 +646,7 @@ class Formatter():
                     obj = kwdict[key]
                     for func in funcs:
                         obj = func(obj)
-                    if obj is not None:
+                    if obj:
                         break
                 except Exception:
                     pass

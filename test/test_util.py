@@ -339,7 +339,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{z|a!C:RH/C/}", "Cello World")
         self._run_test("{z|y|x:?</>/}", "")
 
-        self._run_test("{d[c]|d[b]|d[a]}", "0")
+        self._run_test("{d[c]|d[b]|d[a]}", "foo")
         self._run_test("{d[a]|d[b]|d[c]}", "foo")
         self._run_test("{d[z]|d[y]|d[x]}", "None")
 
