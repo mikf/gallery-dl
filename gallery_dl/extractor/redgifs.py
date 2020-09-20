@@ -24,7 +24,7 @@ class RedgifsUserExtractor(RedgifsExtractor):
     directory_fmt = ("{category}", "{userName}")
     pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/users/([^/?&#]+)"
     test = ("https://www.redgifs.com/users/Natalifiction", {
-        "pattern": r"https://thcf\d+\.redgifs\.com/[A-Za-z]+\.mp4",
+        "pattern": r"https://\w+\.(redgifs|gfycat)\.com/[A-Za-z]+\.mp4",
         "count": ">= 100",
     })
 
@@ -38,7 +38,7 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/gifs/browse/([^/?&#]+)"
     test = ("https://www.redgifs.com/gifs/browse/jav", {
-        "pattern": r"https://thcf\d+\.redgifs\.com/[A-Za-z]+\.mp4",
+        "pattern": r"https://\w+\.(redgifs|gfycat)\.com/[A-Za-z]+\.mp4",
         "range": "100-300",
         "count": "> 200",
     })
