@@ -25,7 +25,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
     test = (
         ("https://hitomi.la/galleries/867789.html", {
             "pattern": r"https://[a-c]a.hitomi.la/images/./../[0-9a-f]+.jpg",
-            "keyword": "6701f8f588f119ef84cd29bdf99a399417b0a6a2",
+            "keyword": "4873ef9a523621fc857b114e0b2820ba4066e9ae",
             "count": 16,
         }),
         # download test
