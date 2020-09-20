@@ -1,6 +1,32 @@
 # Changelog
 
-## Unreleased
+## 1.15.0 - 2020-09-20
+### Additions
+- [deviantart] support watchers-only/paid deviations ([#995](https://github.com/mikf/gallery-dl/issues/995))
+- [myhentaigallery] add gallery extractor ([#1001](https://github.com/mikf/gallery-dl/issues/1001))
+- [twitter] support specifying users by ID ([#980](https://github.com/mikf/gallery-dl/issues/980))
+- [twitter] support `/intent/user?user_id=…` URLs ([#980](https://github.com/mikf/gallery-dl/issues/980))
+- add `--no-skip` command-line option ([#986](https://github.com/mikf/gallery-dl/issues/986))
+- add `blacklist` and `whitelist` options ([#492](https://github.com/mikf/gallery-dl/issues/492), [#844](https://github.com/mikf/gallery-dl/issues/844))
+- add `filesize-min` and `filesize-max` options ([#780](https://github.com/mikf/gallery-dl/issues/780))
+- add `sleep-extractor` and `sleep-request` options ([#788](https://github.com/mikf/gallery-dl/issues/788))
+- write skipped files to archive ([#550](https://github.com/mikf/gallery-dl/issues/550))
+### Changes
+- [exhentai] update wait time before original image downloads ([#978](https://github.com/mikf/gallery-dl/issues/978))
+- [imgur] use new API endpoints for image/album data
+- [tumblr] create directories for each post ([#965](https://github.com/mikf/gallery-dl/issues/965))
+- support format string replacement fields in download archive paths ([#985](https://github.com/mikf/gallery-dl/issues/985))
+- reduce wait time growth rate for HTTP retries from exponential to linear
+### Fixes
+- [500px] update query hash
+- [aryion] improve post ID extraction ([#981](https://github.com/mikf/gallery-dl/issues/981), [#982](https://github.com/mikf/gallery-dl/issues/982))
+- [danbooru] handle posts without `id` ([#1004](https://github.com/mikf/gallery-dl/issues/1004))
+- [furaffinity] update download URL extraction ([#988](https://github.com/mikf/gallery-dl/issues/988))
+- [imgur] fix image/album detection for galleries
+- [postprocessor:zip] defer zip file creation ([#968](https://github.com/mikf/gallery-dl/issues/968))
+### Removals
+- [jaiminisbox] remove extractors
+- [worldthree] remove extractors
 
 ## 1.14.5 - 2020-08-30
 ### Additions
