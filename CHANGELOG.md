@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.15.0 - 2020-09-20
 ### Additions
 - [deviantart] support watchers-only/paid deviations ([#995](https://github.com/mikf/gallery-dl/issues/995))
