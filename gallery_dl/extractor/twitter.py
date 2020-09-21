@@ -110,16 +110,17 @@ class TwitterExtractor(Extractor):
         twitpics = []
         for url in tweet["entities"].get("urls", ()):
             url = url["expanded_url"]
-            if "//twitpic.com/" in url:
+            if "//twitpic.com/" in url and "/photos/" not in url:
                 response = self.request(url, fatal=False)
                 if response.status_code >= 400:
                     continue
                 url = text.extract(
                     response.text, 'name="twitter:image" value="', '"')[0]
-                twitpics.append({
-                    "original_info": {},
-                    "media_url"    : url,
-                })
+                if url:
+                    twitpics.append({
+                        "original_info": {},
+                        "media_url"    : url,
+                    })
         if twitpics:
             if "extended_entities" in tweet:
                 tweet["extended_entities"]["media"].extend(twitpics)
