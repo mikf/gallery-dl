@@ -890,6 +890,22 @@ Description The name of the preferred animation format, which can be one of
 =========== =====
 
 
+extractor.hentaifoundry.include
+-------------------------------
+=========== =====
+Type        ``string`` or ``list`` of ``strings``
+Default     ``"gallery"``
+Example     ``"scraps,favorite"`` or ``["scraps", "favorite"]``
+Description A (comma-separated) list of subcategories to include
+            when processing a user profile.
+
+            Possible values are
+            ``"gallery"``, ``"scraps"``, ``"favorite"``.
+
+            You can use ``"all"`` instead of listing all values separately.
+=========== =====
+
+
 extractor.hitomi.metadata
 -------------------------
 =========== =====
