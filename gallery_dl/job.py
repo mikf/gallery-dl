@@ -228,7 +228,7 @@ class DownloadJob(Job):
             for pp in postprocessors:
                 pp.prepare(pathfmt)
 
-        if archive and kwdict in archive:
+        if archive and archive.check(kwdict):
             pathfmt.fix_extension()
             self.handle_skip()
             return
@@ -385,7 +385,22 @@ class DownloadJob(Job):
 
         self.sleep = config("sleep")
         if not config("download", True):
+            # monkey-patch method to do nothing and always return True
             self.download = pathfmt.fix_extension
+
+        archive = config("archive")
+        if archive:
+            path = util.expand_path(archive)
+            try:
+                if "{" in path:
+                    path = util.Formatter(path).format_map(kwdict)
+                self.archive = util.DownloadArchive(path, self.extractor)
+            except Exception as exc:
+                self.extractor.log.warning(
+                    "Failed to open download archive at '%s' ('%s: %s')",
+                    path, exc.__class__.__name__, exc)
+            else:
+                self.extractor.log.debug("Using download archive '%s'", path)
 
         skip = config("skip", True)
         if skip:
@@ -401,21 +416,10 @@ class DownloadJob(Job):
                 self._skipcnt = 0
                 self._skipmax = text.parse_int(smax)
         else:
+            # monkey-patch methods to always return False
             pathfmt.exists = lambda x=None: False
-
-        archive = config("archive")
-        if archive:
-            path = util.expand_path(archive)
-            try:
-                if "{" in path:
-                    path = util.Formatter(path).format_map(kwdict)
-                self.archive = util.DownloadArchive(path, self.extractor)
-            except Exception as exc:
-                self.extractor.log.warning(
-                    "Failed to open download archive at '%s' ('%s: %s')",
-                    path, exc.__class__.__name__, exc)
-            else:
-                self.extractor.log.debug("Using download archive '%s'", path)
+            if self.archive:
+                self.archive.check = pathfmt.exists
 
         postprocessors = self.extractor.config_accumulate("postprocessors")
         if postprocessors:
