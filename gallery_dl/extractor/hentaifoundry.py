@@ -127,19 +127,38 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
     """Extractor for all images of a hentai-foundry-user"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
-               r"/(?:pictures/user/([^/]+)(?:/page/(\d+))?/?$"
-               r"|user/([^/]+)/profile)")
+               r"/user/([^/]+)/profile")
+    test = ("https://www.hentai-foundry.com/user/Tenpura/profile",)
+
+    def __init__(self, match):
+        HentaifoundryExtractor.__init__(self, match, match.group(1))
+
+    def items(self):
+        user = "/user/" + self.user + "/"
+        return self._dispatch_extractors((
+            (HentaifoundryGalleryExtractor ,
+                self.root + "/pictures" + user),
+            (HentaifoundryScrapsExtractor  ,
+                self.root + "/pictures" + user + "scraps"),
+            (HentaifoundryFavoriteExtractor,
+                self.root + user + "faves/pictures"),
+        ), ("gallery",))
+
+
+class HentaifoundryGalleryExtractor(HentaifoundryExtractor):
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/pictures/user/([^/]+)(?:/page/(\d+))?/?$")
     test = (
         ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
             "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
         }),
         ("https://www.hentai-foundry.com/pictures/user/Tenpura/page/3"),
-        ("https://www.hentai-foundry.com/user/Tenpura/profile"),
     )
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(
-            self, match, match.group(1) or match.group(3), match.group(2))
+            self, match, match.group(1), match.group(2))
         self.page_url = "{}/pictures/user/{}".format(self.root, self.user)
 
     def get_job_metadata(self):
