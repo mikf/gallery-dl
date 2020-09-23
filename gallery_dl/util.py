@@ -941,7 +941,7 @@ class DownloadArchive():
             "archive-format", extractor.archive_fmt)
         ).format_map
 
-    def __contains__(self, kwdict):
+    def check(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""
         key = kwdict["_archive_key"] = self.keygen(kwdict)
         self.cursor.execute(
