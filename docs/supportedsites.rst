@@ -129,7 +129,7 @@ Twitter              https://twitter.com/                |twitter-C|            
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 Warosu               https://warosu.org/                 Threads
-Weasyl               https://weasyl.com/                 Submissions, Folders, Journals
+Weasyl               https://www.weasyl.com/             |weasyl-C|
 Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
 WikiArt.org          https://www.wikiart.org/            Artists, Artist Listings, Artworks
@@ -164,4 +164,5 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |twitter-C| replace:: Bookmarks, Likes, Media Timelines, Search Results, Timelines, Tweets
+.. |weasyl-C| replace:: Folders, Journals, Journals, Submissions, Submissions
 .. |yuki-S| replace:: yuki.la 4chan archive

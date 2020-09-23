@@ -16,7 +16,7 @@ BASE_PATTERN = r"(?:https://)?(?:www\.)?weasyl.com/"
 class WeasylExtractor(Extractor):
     category = "weasyl"
     directory_fmt = ("{category}", "{owner_login}")
-    filename_fmt = "{date}_{filename}.{extension}"
+    filename_fmt = "{category}_{filename}_{date}.{extension}"
     archive_fmt = "{submitid}"
     root = "https://www.weasyl.com"
 
@@ -143,7 +143,7 @@ class WeasylFolderExtractor(WeasylExtractor):
 
 class WeasylJournalExtractor(WeasylExtractor):
     subcategory = "journal"
-    filename_fmt = "{date}_{owner_login}_{title}.{extension}"
+    filename_fmt = "{category}_{owner_login}_{title}_{date}.{extension}"
     archive_fmt = "{journalid}"
     pattern = BASE_PATTERN + r"journal/(\d+)/?([\w\d-]+)?"
     test = (
@@ -184,7 +184,7 @@ class WeasylJournalExtractor(WeasylExtractor):
 
 class WeasylJournalsExtractor(WeasylExtractor):
     subcategory = "journals"
-    filename_fmt = "{date}_{owner_login}_{title}.{extension}"
+    filename_fmt = "{category}_{owner_login}_{title}_{date}.{extension}"
     archive_fmt = "{journalid}"
     pattern = BASE_PATTERN + r"journals/([\w\d]+)"
     test = (
