@@ -16,7 +16,7 @@ BASE_PATTERN = r"(?:https://)?(?:www\.)?weasyl.com/"
 class WeasylExtractor(Extractor):
     category = "weasyl"
     directory_fmt = ("{category}", "{owner_login}")
-    filename_fmt = "{category}_{filename}_{date}.{extension}"
+    filename_fmt = "{submitid}_{title}.{extension}"
     archive_fmt = "{submitid}"
     root = "https://www.weasyl.com"
 
@@ -24,23 +24,21 @@ class WeasylExtractor(Extractor):
         Extractor.__init__(self, match)
 
     @staticmethod
-    def date(isodt):
-        return isodt.split('T')[0]
-
-    @staticmethod
     def populate_submission(data):
-        data["url"] = data["media"]["submission"][0]["url"]
-        data["date"] = WeasylExtractor.date(data["posted_at"])
-        return text.nameext_from_url(data["url"], data)
+        # Some submissions don't have content and can be skipped
+        if "submission" in data["media"]:
+            data["url"] = data["media"]["submission"][0]["url"]
+            data["extension"] = text.ext_from_url(data["url"])
+            return True
+        return False
 
     def request_submission(self, submitid):
         return self.request(
             "{}/api/submissions/{}/view".format(self.root, submitid)).json()
 
-    def retrieve_journal(self):
+    def retrieve_journal(self, id):
         data = self.request(
-            "{}/api/journals/{}/view".format(self.root, self.journalid)).json()
-        data["date"] = self.date(data["posted_at"])
+            "{}/api/journals/{}/view".format(self.root, id)).json()
         data["extension"] = "html"
         data["html"] = "text:" + data["content"]
         return data
@@ -56,25 +54,24 @@ class WeasylExtractor(Extractor):
                 url += "&folderid={}".format(self.folderid)
             json = self.request(url).json()
             for data in json["submissions"]:
-                self.populate_submission(data)
-                data["folderid"] = folderid
-                # Do any submissions have more than one url? If so
-                # a urllist of the submission array urls would work.
-                yield Message.Url, data["url"], data
+                if self.populate_submission(data):
+                    data["folderid"] = folderid
+                    # Do any submissions have more than one url? If so
+                    # a urllist of the submission array urls would work.
+                    yield Message.Url, data["url"], data
             nextid = json["nextid"]
 
 
 class WeasylSubmissionExtractor(WeasylExtractor):
     subcategory = "submission"
     pattern = (BASE_PATTERN +
-               r"(?:~[\w\d]+/submissions|submission)/(\d+)/?([\w\d-]+)?")
+               r"(?:~[\w-]+/submissions|submission)/(\d+)/?([\w-]+)?")
     test = (
         "https://www.weasyl.com/submission/2031/a-wesley", {
             "keyword": {
                 "url": "https://cdn.weasyl.com/~fiz/submissions/2031/41ebc1c29"
                        "40be928532785dfbf35c37622664d2fbb8114c3b063df969562fc5"
                        "1/fiz-a-wesley.png",
-                "date": "2012-04-20",
             }
         }
     )
@@ -89,13 +86,13 @@ class WeasylSubmissionExtractor(WeasylExtractor):
         yield Message.Version, 1
         data = self.request_submission(self.submitid)
         yield Message.Directory, data
-        self.populate_submission(data)
-        yield Message.Url, data["url"], data
+        if self.populate_submission(data):
+            yield Message.Url, data["url"], data
 
 
 class WeasylSubmissionsExtractor(WeasylExtractor):
     subcategory = "submissions"
-    pattern = BASE_PATTERN + r"(?:~([\w\d]+)/?|submissions/([\w\d]+))$"
+    pattern = BASE_PATTERN + r"(?:~([\w-]+)/?|submissions/([\w-]+))$"
     test = (
         ("https://www.weasyl.com/~tanidareal", {
             "count": ">= 200"
@@ -118,7 +115,7 @@ class WeasylSubmissionsExtractor(WeasylExtractor):
 class WeasylFolderExtractor(WeasylExtractor):
     subcategory = "folder"
     directory_fmt = ("{category}", "{owner_login}", "{folder_name}")
-    pattern = BASE_PATTERN + r"submissions/([\w\d]+)\?folderid=(\d+)"
+    pattern = BASE_PATTERN + r"submissions/([\w-]+)\?folderid=(\d+)"
     test = (
         "https://www.weasyl.com/submissions/tanidareal?folderid=7403", {
             "count": ">= 12"
@@ -143,16 +140,15 @@ class WeasylFolderExtractor(WeasylExtractor):
 
 class WeasylJournalExtractor(WeasylExtractor):
     subcategory = "journal"
-    filename_fmt = "{category}_{owner_login}_{title}_{date}.{extension}"
+    filename_fmt = "{journalid}_{title}.{extension}"
     archive_fmt = "{journalid}"
-    pattern = BASE_PATTERN + r"journal/(\d+)/?([\w\d-]+)?"
+    pattern = BASE_PATTERN + r"journal/(\d+)/?([\w-]+)?"
     test = (
         ("https://www.weasyl.com/journal/17647", {
             "keyword": {
                 "content":
                 "<p><a>javascript:alert(42);</a></p><p>No more of that!</p>",
                 "title": "bbcode",
-                "date": "2013-09-19",
             }
         }),
         ("https://www.weasyl.com/journal/17647/bbcode", {
@@ -160,7 +156,6 @@ class WeasylJournalExtractor(WeasylExtractor):
                 "content":
                 "<p><a>javascript:alert(42);</a></p><p>No more of that!</p>",
                 "title": "bbcode",
-                "date": "2013-09-19",
             }
         })
     )
@@ -173,7 +168,7 @@ class WeasylJournalExtractor(WeasylExtractor):
 
     def items(self):
         yield Message.Version, 1
-        data = self.retrieve_journal()
+        data = self.retrieve_journal(self.journalid)
         if hasattr(self, "title"):
             data["title"] = self.title
         else:
@@ -184,9 +179,9 @@ class WeasylJournalExtractor(WeasylExtractor):
 
 class WeasylJournalsExtractor(WeasylExtractor):
     subcategory = "journals"
-    filename_fmt = "{category}_{owner_login}_{title}_{date}.{extension}"
+    filename_fmt = "{journalid}_{title}.{extension}"
     archive_fmt = "{journalid}"
-    pattern = BASE_PATTERN + r"journals/([\w\d]+)"
+    pattern = BASE_PATTERN + r"journals/([\w-]+)"
     test = (
         "https://www.weasyl.com/journals/charmander", {
             "count": ">= 2",
@@ -204,9 +199,8 @@ class WeasylJournalsExtractor(WeasylExtractor):
             self.root, self.owner_login
         ))
 
-        for journal in re.finditer(r'"/journal/(\d+)/([\w\d-]+)"',
+        for journal in re.finditer(r'"/journal/(\d+)/([\w-]+)"',
                                    response.text):
-            self.journalid = int(journal.group(1))
-            data = self.retrieve_journal()
+            data = self.retrieve_journal(int(journal.group(1)))
             data["title"] = journal.group(2)
             yield Message.Url, data["html"], data
