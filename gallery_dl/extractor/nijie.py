@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -127,9 +127,25 @@ class NijieExtractor(AsynchronousMixin, Extractor):
 
 
 class NijieUserExtractor(NijieExtractor):
-    """Extractor for works of a nijie-user"""
+    """Extractor for nijie user profiles"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/members(?:_illust)?\.php\?id=(\d+)"
+    cookiedomain = None
+    pattern = BASE_PATTERN + r"/members\.php\?id=(\d+)"
+    test = ("https://nijie.info/members.php?id=44",)
+
+    def items(self):
+        base = "{}/{{}}.php?id={}".format(self.root, self.user_id)
+        return self._dispatch_extractors((
+            (NijieIllustrationExtractor, base.format("members_illust")),
+            (NijieDoujinExtractor      , base.format("members_dojin")),
+            (NijieFavoriteExtractor    , base.format("user_like_illust_view")),
+        ), ("illustration", "doujin"))
+
+
+class NijieIllustrationExtractor(NijieExtractor):
+    """Extractor for all illustrations of a nijie-user"""
+    subcategory = "illustration"
+    pattern = BASE_PATTERN + r"/members_illust\.php\?id=(\d+)"
     test = (
         ("https://nijie.info/members_illust.php?id=44", {
             "url": "66c4ff94c6e77c0765dd88f2d8c663055fda573e",
@@ -152,7 +168,6 @@ class NijieUserExtractor(NijieExtractor):
         ("https://nijie.info/members_illust.php?id=43", {
             "exception": exception.NotFoundError,
         }),
-        ("https://nijie.info/members.php?id=44"),
     )
 
     def image_ids(self):
