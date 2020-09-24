@@ -1005,6 +1005,21 @@ Description A (comma-separated) list of subcategories to include
 =========== =====
 
 
+extractor.nijie.include
+----------------------------
+=========== =====
+Type        ``string`` or ``list`` of ``strings``
+Default     ``"illustration,doujin"``
+Description A (comma-separated) list of subcategories to include
+            when processing a user profile.
+
+            Possible values are
+            ``"illustration"``, ``"doujin"``, ``"favorite"``.
+
+            You can use ``"all"`` instead of listing all values separately.
+=========== =====
+
+
 extractor.oauth.browser
 -----------------------
 =========== =====
