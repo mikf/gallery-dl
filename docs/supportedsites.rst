@@ -129,7 +129,7 @@ Twitter              https://twitter.com/                |twitter-C|            
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
 Warosu               https://warosu.org/                 Threads
-Weasyl               https://www.weasyl.com/             |weasyl-C|
+Weasyl               https://www.weasyl.com/             Folders, Journals, Submissions
 Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
 WikiArt.org          https://www.wikiart.org/            Artists, Artist Listings, Artworks
@@ -155,14 +155,13 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |deviantart-C| replace:: Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, User Profiles
 .. |flickr-C| replace:: Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles
 .. |furaffinity-C| replace:: Favorites, Galleries, Posts, Scraps, Search Results, User Profiles
-.. |hentaifoundry-C| replace:: Favorites, individual Images, Popular Images, Recent Images, Scraps, User Profiles
+.. |hentaifoundry-C| replace:: Favorites, Galleries, individual Images, Popular Images, Recent Images, Scraps, User Profiles
 .. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Search Results, Subreddits, Tag Searches, User Profiles
 .. |instagram-C| replace:: Channels, individual Images, Saved Posts, Stories, Tag Searches, User Profiles
 .. |newgrounds-C| replace:: Art, Audio, Favorites, individual Images, Media Files, Movies, User Profiles
-.. |nijie-C| replace:: Doujin, Favorites, individual Images, User Profiles
+.. |nijie-C| replace:: Doujin, Favorites, Illustrations, individual Images, User Profiles
 .. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |twitter-C| replace:: Bookmarks, Likes, Media Timelines, Search Results, Timelines, Tweets
-.. |weasyl-C| replace:: Folders, Journals, Journals, Submissions, Submissions
 .. |yuki-S| replace:: yuki.la 4chan archive
