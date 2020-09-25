@@ -143,6 +143,10 @@ SUBCATEGORY_MAP = {
     "wikiart": {
         "artists": "Artist Listings",
     },
+    "weasyl": {
+        "journals"   : "",
+        "submissions": "",
+    },
 }
 
 _OAUTH = " (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)"
