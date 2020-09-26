@@ -89,6 +89,7 @@ CATEGORY_MAP = {
     "thebarchive"    : "The /b/ Archive",
     "vanillarock"    : "もえぴりあ",
     "vsco"           : "VSCO",
+    "weasyl"         : "Weasyl",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
     "worldthree"     : "World Three",
@@ -139,6 +140,11 @@ SUBCATEGORY_MAP = {
     },
     "twitter": {
         "media": "Media Timelines",
+    },
+    "weasyl": {
+        "submission": "Individual Submissions",
+        "journal"   : "Individual Journals",
+        "character" : "Individual Characters",
     },
     "wikiart": {
         "artists": "Artist Listings",
@@ -282,7 +288,7 @@ def build_extractor_list():
 COLUMNS = (
     ("Site", 20,
      lambda x: category_text(x[0])),
-    ("URL" , 35,
+    ("URL", 35,
      lambda x: domain(x[0])),
     ("Capabilities", 50,
      lambda x: ", ".join(subcategory_text(extr) for extr in x

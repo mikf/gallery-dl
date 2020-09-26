@@ -164,5 +164,5 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |twitter-C| replace:: Bookmarks, Likes, Media Timelines, Search Results, Timelines, Tweets
-.. |weasyl-C| replace:: Folders, Journals, Journals, Submissions, Submissions
+.. |weasyl-C| replace:: Individual Characters, Characters, Favorites, Folders, Individual Journals, Journals, Individual Submissions, Submissions, User Profiles
 .. |yuki-S| replace:: yuki.la 4chan archive
