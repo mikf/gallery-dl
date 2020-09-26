@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -238,40 +238,45 @@ def parse_docs_configuration():
     opt_name = None
     opt_desc = None
     name = None
-    last = last2 = None
+    last = None
     for line in doc_lines:
 
+        if line[0] == ".":
+            continue
+
         # start of new section
-        if re.match(r"^=+$", line):
+        elif re.match(r"^=+$", line):
             if sec_name and options:
                 sections[sec_name] = options
             sec_name = last.strip()
             options = {}
 
-        elif re.match(r"^=+ =+$", line):
-            # start of option table
-            if re.match(r"^-+$", last):
-                opt_name = last2.strip()
-                opt_desc = {}
-            # end of option table
-            elif opt_desc:
-                options[opt_name] = opt_desc
-                opt_name = None
-                name = None
+        # start of new option block
+        elif re.match(r"^-+$", line):
+            opt_name = last.strip()
+            opt_desc = {}
 
-        # inside option table
+        # end of option block
+        elif opt_name and opt_desc and line == "\n" and not last:
+            options[opt_name] = opt_desc
+            opt_name = None
+            name = None
+
+        # inside option block
         elif opt_name:
             if line[0].isalpha():
-                name, _, line = line.partition(" ")
+                name = line.strip()
                 opt_desc[name] = ""
-            line = line.strip()
-            if line.startswith(("* ", "- ")):
-                line = ".br\n" + line
-            elif line.startswith("| "):
-                line = line[2:] + "\n.br"
-            opt_desc[name] += line + "\n"
+            else:
+                line = line.strip()
+                if line.startswith(("* ", "- ")):
+                    # list item
+                    line = ".br\n" + line
+                elif line.startswith("| "):
+                    # line block
+                    line = line[2:] + "\n.br"
+                opt_desc[name] += line + "\n"
 
-        last2 = last
         last = line
     sections[sec_name] = options
 
@@ -287,6 +292,8 @@ def strip_rst(text, extended=True, *, ITALIC=r"\\f[I]\1\\f[]", REGULAR=r"\1"):
     text = re.sub(r"``([^`]+)``", repl, text)
     # |foo|_
     text = re.sub(r"\|([^|]+)\|_*", ITALIC, text)
+    # `foo <bar>`__
+    text = re.sub(r"`([^`<]+) <[^>`]+>`_+", ITALIC, text)
     # `foo`_
     text = re.sub(r"`([^`]+)`_+", ITALIC, text)
     # `foo`
