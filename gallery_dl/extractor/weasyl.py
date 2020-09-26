@@ -193,3 +193,44 @@ class WeasylJournalsExtractor(WeasylExtractor):
         for journalid in text.extract_iter(page, 'href="/journal/', '/'):
             data = self.retrieve_journal(journalid)
             yield Message.Url, data["html"], data
+
+
+class WeasylFavoriteExtractor(WeasylExtractor):
+    subcategory = "favorite"
+    directory_fmt = ("{category}", "{owner_login}", "Favorites")
+    pattern = BASE_PATTERN + r"favorites\?userid=(\d+)&feature=submit"
+    test = ("https://www.weasyl.com/favorites?userid=184616&feature=submit", {
+        "count": ">= 5",
+    })
+
+    def __init__(self, match):
+        WeasylExtractor.__init__(self, match)
+        self.userid = match.group(1)
+
+    def items(self):
+        owner_login = lastid = None
+        url = self.root + "/favorites"
+        params = {
+            "userid" : self.userid,
+            "feature": "submit",
+        }
+
+        while True:
+            page = self.request(url, params=params).text
+            pos = page.index('id="favorites-content"')
+
+            if not owner_login:
+                owner_login = text.extract(page, '<a href="/~', '"')[0]
+                yield Message.Directory, {"owner_login": owner_login}
+
+            for submitid in text.extract_iter(page, "/submissions/", "/", pos):
+                if submitid == lastid:
+                    continue
+                lastid = submitid
+                submission = self.request_submission(submitid)
+                if self.populate_submission(submission):
+                    yield Message.Url, submission["url"], submission
+
+            if "&amp;nextid=" not in page:
+                return
+            params["nextid"] = submitid
