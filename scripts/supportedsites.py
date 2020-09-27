@@ -119,6 +119,9 @@ SUBCATEGORY_MAP = {
     "deviantart": {
         "stash": "Sta.sh",
     },
+    "hentaifoundry": {
+        "story": "",
+    },
     "instagram": {
         "saved": "Saved Posts",
     },

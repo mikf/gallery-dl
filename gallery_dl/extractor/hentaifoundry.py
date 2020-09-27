@@ -34,7 +34,7 @@ class HentaifoundryExtractor(Extractor):
         yield Message.Directory, data
 
         self.set_filters()
-        for page_url in util.advance(self.get_image_pages(), self.start_post):
+        for page_url in util.advance(self._pagination(), self.start_post):
             image = self.get_image_metadata(page_url)
             image.update(data)
             yield Message.Url, image["src"], image
@@ -50,13 +50,12 @@ class HentaifoundryExtractor(Extractor):
         self.request(self.root + "/?enterAgree=1")
         return {"user": self.user}
 
-    def get_image_pages(self):
-        """Yield urls of all relevant image pages"""
+    def _pagination(self, begin='thumbTitle"><a href="', end='"'):
         num = self.start_page
 
         while True:
             page = self.request("{}/page/{}".format(self.page_url, num)).text
-            yield from text.extract_iter(page, 'thumbTitle"><a href="', '"')
+            yield from text.extract_iter(page, begin, end)
 
             if 'class="pager"' not in page or 'class="last hidden"' in page:
                 return
@@ -87,6 +86,33 @@ class HentaifoundryExtractor(Extractor):
                 "<td><b>Keywords</b></td>", "</tr>"))[::2],
             "score"      : text.parse_int(extr('Score</b></td>\t\t<td>', '<')),
         }
+
+        return text.nameext_from_url(data["src"], data)
+
+    def get_story_metadata(self, html):
+        """Collect url and metadata for a story"""
+        extr = text.extract_from(html)
+        data = {
+            "user"    : self.user,
+            "title"   : text.unescape(extr(
+                "<div class='titlebar'>", "</a>").rpartition(">")[2]),
+            "author"  : text.unescape(extr('alt="', '"')),
+            "date"    : text.parse_datetime(extr(
+                ">Updated<", "</span>").rpartition(">")[2], "%B %d, %Y"),
+            "status"  : extr("class='indent'>", "<"),
+        }
+
+        for c in ("Chapters", "Words", "Comments", "Views", "Rating"):
+            data[c.lower()] = text.parse_int(extr(
+                ">" + c + ":</span>", "<").replace(",", ""))
+
+        data["description"] = text.unescape(extr(
+            "class='storyDescript'>", "<div"))
+        path = extr('href="', '"')
+        data["src"] = self.root + path
+        data["index"] = text.parse_int(path.rsplit("/", 2)[1])
+        data["ratings"] = [text.unescape(r) for r in text.extract_iter(extr(
+            "class='ratings_box'", "</div>"), "title='", "'")]
 
         return text.nameext_from_url(data["src"], data)
 
@@ -134,14 +160,16 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
         HentaifoundryExtractor.__init__(self, match, match.group(1))
 
     def items(self):
-        user = "/user/" + self.user + "/"
+        user = "/user/" + self.user
         return self._dispatch_extractors((
             (HentaifoundryGalleryExtractor ,
                 self.root + "/pictures" + user),
-            (HentaifoundryScrapsExtractor  ,
-                self.root + "/pictures" + user + "scraps"),
+            (HentaifoundryScrapsExtractor,
+                self.root + "/pictures" + user + "/scraps"),
+            (HentaifoundryStoriesExtractor,
+                self.root + "/stories" + user),
             (HentaifoundryFavoriteExtractor,
-                self.root + user + "faves/pictures"),
+                self.root + user + "/faves/pictures"),
         ), ("gallery",))
 
 
@@ -300,6 +328,71 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
         yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, data["src"], data
+
+    def skip(self, _):
+        return 0
+
+
+class HentaifoundryStoriesExtractor(HentaifoundryExtractor):
+    """Extractor for stories of a hentai-foundry user"""
+    subcategory = "stories"
+    pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/stories/user/([^/]+)(?:/page/(\d+))?/?$")
+    test = ("https://www.hentai-foundry.com/stories/user/SnowWolf35", {
+        "count": ">= 35",
+        "keyword": {
+            "author"     : "SnowWolf35",
+            "chapters"   : int,
+            "comments"   : int,
+            "date"       : "type:datetime",
+            "description": str,
+            "index"      : int,
+            "rating"     : int,
+            "ratings"    : list,
+            "status"     : "re:(Inc|C)omplete",
+            "title"      : str,
+            "user"       : "SnowWolf35",
+            "views"      : int,
+            "words"      : int,
+        },
+    })
+
+    def __init__(self, match):
+        HentaifoundryExtractor.__init__(self, match, match.group(1))
+        self.page_url = "{}/stories/user/{}".format(self.root, self.user)
+
+    def items(self):
+        self.get_job_metadata()
+        self.set_filters()
+        stories = self._pagination('<div class="storyRow">', '</tr></table>')
+        for story_html in util.advance(stories, self.start_post):
+            story = self.get_story_metadata(story_html)
+            yield Message.Directory, story
+            yield Message.Url, story["src"], story
+
+
+class HentaifoundryStoryExtractor(HentaifoundryExtractor):
+    """Extractor for a hentaifoundry story"""
+    subcategory = "story"
+    pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
+               r"/stories/user/([^/]+)/(\d+)")
+    test = (("https://www.hentai-foundry.com/stories/user/SnowWolf35"
+             "/26416/Overwatch-High-Chapter-Voting-Location"), {
+        "url": "5a67cfa8c3bf7634c8af8485dd07c1ea74ee0ae8",
+        "keyword": {"title": "Overwatch High Chapter Voting Location"},
+    })
+
+    def __init__(self, match):
+        HentaifoundryExtractor.__init__(self, match, match.group(1))
+        self.index = match.group(2)
+
+    def items(self):
+        story_url = "{}/stories/user/{}/{}/x?enterAgree=1".format(
+            self.root, self.user, self.index)
+        page = self.request(story_url).text
+        story = self.get_story_metadata(page)
+        yield Message.Directory, story
+        yield Message.Url, story["src"], story
 
     def skip(self, _):
         return 0
