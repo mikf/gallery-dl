@@ -1459,6 +1459,9 @@ Default
 Description
     Fetch media from Retweets.
 
+    If this value is ``"original"``, metadata for these files
+    will be taken from the original Tweets, not the Retweets.
+
 
 extractor.twitter.twitpic
 -------------------------
