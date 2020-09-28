@@ -379,6 +379,15 @@ class TwitterTweetExtractor(TwitterExtractor):
             "url": "0f6a841e23948e4320af7ae41125e0c5b3cadc98",
             "content": "f29501e44d88437fe460f5c927b7543fda0f6e34",
         }),
+        # original retweets (#1026)
+        ("https://twitter.com/jessica_3978/status/1296304589591810048", {
+            "options": (("retweets", "original"),),
+            "count": 2,
+            "keyword": {
+                "tweet_id": 1296296016002547713,
+                "date"    : "dt:2020-08-20 04:00:28",
+            },
+        }),
     )
 
     def __init__(self, match):
@@ -452,7 +461,8 @@ class TwitterAPI():
         endpoint = "2/timeline/conversation/{}.json".format(tweet_id)
         tweets = []
         for tweet in self._pagination(endpoint):
-            if tweet["id_str"] == tweet_id:
+            if tweet["id_str"] == tweet_id or \
+                    tweet.get("_retweet_id_str") == tweet_id:
                 tweets.append(tweet)
                 if "quoted_status_id_str" in tweet:
                     tweet_id = tweet["quoted_status_id_str"]
@@ -537,6 +547,7 @@ class TwitterAPI():
                     entry_tweet="tweet-", entry_cursor="cursor-bottom-"):
         if params is None:
             params = self.params.copy()
+        original_retweets = (self.extractor.retweets == "original")
 
         while True:
             cursor = tweet = None
@@ -559,12 +570,17 @@ class TwitterAPI():
                             "Skipping %s (deleted)",
                             entry["entryId"][len(entry_tweet):])
                         continue
-                    tweet["user"] = users[tweet["user_id_str"]]
 
                     if "retweeted_status_id_str" in tweet:
                         retweet = tweets.get(tweet["retweeted_status_id_str"])
-                        if retweet:
+                        if original_retweets:
+                            if not retweet:
+                                continue
+                            retweet["_retweet_id_str"] = tweet["id_str"]
+                            tweet = retweet
+                        elif retweet:
                             tweet["author"] = users[retweet["user_id_str"]]
+                    tweet["user"] = users[tweet["user_id_str"]]
                     yield tweet
 
                     if "quoted_status_id_str" in tweet:
