@@ -108,6 +108,15 @@ Windows users that have Chocolatey_ installed can install *gallery-dl* from the 
 
     $ choco install gallery-dl
 
+Scoop
+----------
+
+Apart from Chocolatey, *gallery-dl* is also available in Scoop_ "extras" bucket for Windows users.
+
+.. code:: powershell
+
+    $ scoop install 7zip git; scoop bucket add extras # This adds the scoop extras bucket, offering more softwares
+    $ scoop install gallery-dl
 
 Usage
 =====
@@ -313,6 +322,7 @@ access to *gallery-dl*. Authorize it and you will be shown one or more
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 .. _Chocolatey: https://chocolatey.org/install
+.. _Scoop:      https://scoop.sh
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.org/project/gallery-dl/
