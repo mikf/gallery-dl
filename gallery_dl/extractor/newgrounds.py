@@ -98,7 +98,7 @@ class NewgroundsExtractor(Extractor):
             data = self._extract_media_data(extr, post_url)
 
         data["comment"] = text.unescape(text.remove_html(extr(
-            'id="author_comments">', '</div>'), "", ""))
+            'id="author_comments"', '</div>').partition(">")[2], "", ""))
         data["favorites"] = text.parse_int(extr(
             'id="faves_load">', '<').replace(",", ""))
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
@@ -141,17 +141,35 @@ class NewgroundsExtractor(Extractor):
             "rating"     : "",
         }
 
-    @staticmethod
-    def _extract_media_data(extr, url):
+    def _extract_media_data(self, extr, url):
+        index = url.split("/")[5]
+        title = extr('"og:title" content="', '"')
+        src = extr('{"url":"', '"')
+
+        if src:
+            src = src.replace("\\/", "/")
+            date = text.parse_datetime(extr(
+                'itemprop="datePublished" content="', '"'))
+        else:
+            url = self.root + "/portal/video/" + index
+            headers = {
+                "Accept": "application/json, text/javascript, */*; q=0.01",
+                "X-Requested-With": "XMLHttpRequest",
+                "Referer": self.root,
+            }
+            data = self.request(url, headers=headers).json()
+            key = max(data["sources"], key=lambda x: text.parse_int(x[:-1]))
+            src = data["sources"][key][0]["src"]
+            date = text.parse_timestamp(src.rpartition("?")[2])
+
         return {
-            "title"      : text.unescape(extr('"og:title" content="', '"')),
-            "url"        : extr('{"url":"', '"').replace("\\/", "/"),
-            "date"       : text.parse_datetime(extr(
-                'itemprop="datePublished" content="', '"')),
+            "title"      : text.unescape(title),
+            "url"        : src,
+            "date"       : date,
             "description": text.unescape(extr(
                 'itemprop="description" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
-            "index"      : text.parse_int(url.split("/")[5]),
+            "index"      : text.parse_int(index),
         }
 
     def _pagination(self, kind):
@@ -236,23 +254,20 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?newgrounds\.com"
                r"(/(?:portal/view|audio/listen)/\d+)")
     test = (
-        ("https://www.newgrounds.com/portal/view/589549", {
-            "url": "48d916d819c99139e6a3acbbf659a78a867d363e",
-            "content": "ceb865426727ec887177d99e0d20bb021e8606ae",
+        ("https://www.newgrounds.com/portal/view/595355", {
+            "url": "7a0f653a0d5e6f427ea7bde1b8d5cbe287e5840e",
             "keyword": {
-                "artist"     : ["psychogoldfish", "tomfulp"],
-                "comment"    : "re:People have been asking me how I like the ",
-                "date"       : "dt:2012-02-08 21:40:56",
-                "description": "re:People have been asking how I like the ",
+                "artist"     : ["kickinthehead", "danpaladin", "tomfulp"],
+                "comment"    : "re:My fan trailer for Alien Hominid HD!",
+                "date"       : "dt:2013-02-01 09:50:49",
                 "favorites"  : int,
-                "filename"   : "527818_alternate_1896",
-                "index"      : 589549,
-                "rating"     : "t",
+                "filename"   : "564957_alternate_31.720p",
+                "index"      : 595355,
+                "rating"     : "e",
                 "score"      : float,
-                "tags"       : ["newgrounds", "psychogoldfish",
-                                "rage", "redesign-2012"],
-                "title"      : "Redesign Rage",
-                "user"       : "psychogoldfish",
+                "tags"       : ["alienhominid", "trailer"],
+                "title"      : "Alien Hominid Fan Trailer",
+                "user"       : "kickinthehead",
             },
         }),
         ("https://www.newgrounds.com/audio/listen/609768", {
