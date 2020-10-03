@@ -247,10 +247,10 @@ class PixivFavoriteExtractor(PixivExtractor):
                r"|bookmark\.php(?:\?([^#]*))?)")
     test = (
         ("https://www.pixiv.net/en/users/173530/bookmarks/artworks", {
-            "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
+            "url": "a4f574e0a84e3dbafc576cf2c2a0f645c6c4b779",
         }),
         ("https://www.pixiv.net/bookmark.php?id=173530", {
-            "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
+            "url": "a4f574e0a84e3dbafc576cf2c2a0f645c6c4b779",
         }),
         # bookmarks with specific tag
         (("https://www.pixiv.net/en/users/3137110"
