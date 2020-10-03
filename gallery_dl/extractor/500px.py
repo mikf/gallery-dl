@@ -166,7 +166,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
         }
         gallery = self._request_graphql(
             "GalleriesDetailQueryRendererQuery", variables,
-            "1afc7dede86ff73456b4defbc5aeb593e330b990943d114cbef7da5be0d7ce2f",
+            "fd367cacf9bebcdc0620bd749dbd8fc9b0ccbeb54fc76b8b4b95e66a8c0cba49",
         )["gallery"]
 
         self._photos = gallery["photos"]
@@ -194,8 +194,8 @@ class _500pxGalleryExtractor(_500pxExtractor):
             variables["cursor"] = photos["pageInfo"]["endCursor"]
             photos = self._request_graphql(
                 "GalleriesDetailPaginationContainerQuery", variables,
-                "3fcbc9ea1589f31c86fc43a0a02c2163"
-                "cab070f9d376651f270de9f30f031539",
+                "457c66d976f56863c81795f03e98cb54"
+                "3c7c6cdae7abeab8fe9e8e8a67479fa9",
             )["galleryByOwnerIdAndSlugOrToken"]["photos"]
 
 
