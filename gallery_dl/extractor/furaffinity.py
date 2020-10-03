@@ -236,7 +236,9 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
     pattern = BASE_PATTERN + r"/(?:view|full)/(\d+)"
     test = (
         ("https://www.furaffinity.net/view/21835115/", {
-            "url": "d80254eb4fba654597b4df8320d55916e11ba375",
+            "pattern": r"https://d\d*\.facdn\.net/(download/)?art/mirlinthloth"
+                       r"/music/1488278723/1480267446.mirlinthloth_dj_fennmink"
+                       r"_-_bude_s_4_ever\.mp3",
             "keyword": {
                 "artist"     : "mirlinthloth",
                 "artist_url" : "mirlinthloth",

@@ -66,9 +66,9 @@ class FallenangelsMangaExtractor(MangaExtractor):
     category = "fallenangels"
     pattern = r"(?:https?://)?((manga|truyen)\.fascans\.com/manga/[^/]+)/?$"
     test = (
-        ("http://manga.fascans.com/manga/trinity-seven", {
-            "url": "293057f264de6c438b979bd1c3de4719568db452",
-            "keyword": "50e0374dba60734230e4284b5ffdadef5104ae62",
+        ("https://manga.fascans.com/manga/chronos-ruler", {
+            "url": "eea07dd50f5bc4903aa09e2cc3e45c7241c9a9c2",
+            "keyword": "c414249525d4c74ad83498b3c59a813557e59d7e",
         }),
         ("https://truyen.fascans.com/manga/rakudai-kishi-no-eiyuutan", {
             "url": "51a731a6b82d5eb7a335fbae6b02d06aeb2ab07b",

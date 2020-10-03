@@ -313,6 +313,7 @@ class TwitterSearchExtractor(TwitterExtractor):
     test = ("https://twitter.com/search?q=nature", {
         "range": "1-40",
         "count": 40,
+        "archive": False,
     })
 
     def metadata(self):
