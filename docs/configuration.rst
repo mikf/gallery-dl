@@ -1049,19 +1049,6 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
-extractor.kissmanga.captcha
----------------------------
-Type
-    ``string``
-Default
-    ``"stop"``
-Description
-    Controls how to handle redirects to CAPTCHA pages.
-
-    * ``"stop``: Stop the current extractor run.
-    * ``"wait``: Ask the user to solve the CAPTCHA and wait.
-
-
 extractor.newgrounds.include
 ----------------------------
 Type

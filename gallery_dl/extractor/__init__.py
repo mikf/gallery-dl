@@ -59,7 +59,6 @@ modules = [
     "kabeuchi",
     "keenspot",
     "khinsider",
-    "kissmanga",
     "komikcast",
     "konachan",
     "lineblog",

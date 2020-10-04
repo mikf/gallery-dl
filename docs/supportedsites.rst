@@ -65,7 +65,6 @@ Joyreactor           http://joyreactor.com/              Posts, Search Results, 
 Keenspot             http://www.keenspot.com/            Comics
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
-KissManga            https://kissmanga.com/              Chapters, Manga
 Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag Searches
 LINE BLOG            https://www.lineblog.me/            Blogs, Posts

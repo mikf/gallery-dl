@@ -22,11 +22,10 @@ from gallery_dl import extractor, util, job, config, exception  # noqa E402
 
 # these don't work on Travis CI
 TRAVIS_SKIP = {
-    "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie", "bobx",
+    "exhentai", "mangafox", "dynastyscans", "nijie", "instagram", "ngomik",
     "archivedmoe", "archiveofsins", "thebarchive", "fireden", "4plebs",
-    "sankaku", "idolcomplex", "mangahere", "readcomiconline", "mangadex",
-    "sankakucomplex", "warosu", "fuskator", "patreon", "komikcast",
-    "instagram", "ngomik",
+    "sankaku", "idolcomplex", "mangahere", "mangadex", "sankakucomplex",
+    "warosu", "fuskator", "patreon", "komikcast",
 }
 
 # temporary issues, etc.
