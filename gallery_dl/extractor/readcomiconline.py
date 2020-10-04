@@ -1,26 +1,44 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract comic-issues and entire comics from https://readcomiconline.to/"""
+"""Extractors for https://readcomiconline.to/"""
 
-from .common import ChapterExtractor, MangaExtractor
-from .kissmanga import RedirectMixin
-from .. import text
+from .common import Extractor, ChapterExtractor, MangaExtractor
+from .. import text, exception
 import re
 
 
-class ReadcomiconlineBase(RedirectMixin):
+class ReadcomiconlineBase():
     """Base class for readcomiconline extractors"""
     category = "readcomiconline"
     directory_fmt = ("{category}", "{comic}", "{issue:>03}")
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     archive_fmt = "{issue_id}_{page}"
     root = "https://readcomiconline.to"
+
+    def request(self, url, **kwargs):
+        """Detect and handle redirects to CAPTCHA pages"""
+        while True:
+            response = Extractor.request(self, url, **kwargs)
+            if not response.history or "/AreYouHuman" not in response.url:
+                return response
+            if self.config("captcha", "stop") == "wait":
+                self.log.warning(
+                    "Redirect to \n%s\nVisit this URL in your browser, solve "
+                    "the CAPTCHA, and press ENTER to continue", response.url)
+                try:
+                    input()
+                except (EOFError, OSError):
+                    pass
+            else:
+                raise exception.StopExtraction(
+                    "Redirect to \n%s\nVisit this URL in your browser and "
+                    "solve the CAPTCHA to continue", response.url)
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
