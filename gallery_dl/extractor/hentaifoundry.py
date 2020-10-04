@@ -162,7 +162,7 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
     def items(self):
         user = "/user/" + self.user
         return self._dispatch_extractors((
-            (HentaifoundryGalleryExtractor ,
+            (HentaifoundryPicturesExtractor ,
                 self.root + "/pictures" + user),
             (HentaifoundryScrapsExtractor,
                 self.root + "/pictures" + user + "/scraps"),
@@ -170,11 +170,12 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
                 self.root + "/stories" + user),
             (HentaifoundryFavoriteExtractor,
                 self.root + user + "/faves/pictures"),
-        ), ("gallery",))
+        ), ("pictures",))
 
 
-class HentaifoundryGalleryExtractor(HentaifoundryExtractor):
-    subcategory = "gallery"
+class HentaifoundryPicturesExtractor(HentaifoundryExtractor):
+    """Extractor for all pictures of a hentaifoundry user"""
+    subcategory = "pictures"
     pattern = (r"(?:https?://)?(?:www\.)?hentai-foundry\.com"
                r"/pictures/user/([^/]+)(?:/page/(\d+))?/?$")
     test = (
