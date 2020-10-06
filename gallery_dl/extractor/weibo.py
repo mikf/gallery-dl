@@ -47,21 +47,31 @@ class WeiboExtractor(Extractor):
                 file["num"] = num
                 yield Message.Url, file["url"], file
 
-    def _files_from_status(self, status):
-        images = status.pop("pics", ())
-        page_info = status.pop("page_info", ())
+    def statuses(self):
+        """Returns an iterable containing all relevant 'status' objects"""
 
-        for image in images:
-            pid = image["pid"]
-            if "large" in image:
-                image = image["large"]
-            geo = image.get("geo") or {}
-            yield text.nameext_from_url(image["url"], {
-                "url"   : image["url"],
-                "pid"   : pid,
-                "width" : text.parse_int(geo.get("width")),
-                "height": text.parse_int(geo.get("height")),
-            })
+    def _status_by_id(self, status_id):
+        url = "{}/detail/{}".format(self.root, status_id)
+        page = self.request(url, fatal=False).text
+        data = text.extract(page, "var $render_data = [", "][0] || {};")[0]
+        return json.loads(data)["status"] if data else None
+
+    def _files_from_status(self, status):
+        page_info = status.pop("page_info", ())
+        if "pics" in status:
+            if len(status["pics"]) < status["pic_num"]:
+                status = self._status_by_id(status["id"]) or status
+            for image in status.pop("pics"):
+                pid = image["pid"]
+                if "large" in image:
+                    image = image["large"]
+                geo = image.get("geo") or {}
+                yield text.nameext_from_url(image["url"], {
+                    "url"   : image["url"],
+                    "pid"   : pid,
+                    "width" : text.parse_int(geo.get("width")),
+                    "height": text.parse_int(geo.get("height")),
+                })
 
         if self.videos and "media_info" in page_info:
             info = page_info["media_info"]
@@ -78,9 +88,6 @@ class WeiboExtractor(Extractor):
                     data["url"] = "ytdl:" + url
                     data["_ytdl_extra"] = {"protocol": "m3u8_native"}
                 yield data
-
-    def statuses(self):
-        """Returns an iterable containing all relevant 'status' objects"""
 
 
 class WeiboUserExtractor(WeiboExtractor):
@@ -107,13 +114,13 @@ class WeiboUserExtractor(WeiboExtractor):
 
         while True:
             data = self.request(url, params=params).json()
+            cards = data["data"]["cards"]
 
-            for card in data["data"]["cards"]:
+            if not cards:
+                return
+            for card in cards:
                 if "mblog" in card:
                     yield card["mblog"]
-
-            if not data["data"]["cards"]:
-                return
             params["page"] += 1
 
 
@@ -145,9 +152,7 @@ class WeiboStatusExtractor(WeiboExtractor):
         self.status_id = match.group(1)
 
     def statuses(self):
-        url = "{}/detail/{}".format(self.root, self.status_id)
-        page = self.request(url, notfound="status").text
-        data = text.extract(page, "var $render_data = [", "][0] || {};")[0]
-        if not data:
+        status = self._status_by_id(self.status_id)
+        if not status:
             raise exception.NotFoundError("status")
-        return (json.loads(data)["status"],)
+        return (status,)
