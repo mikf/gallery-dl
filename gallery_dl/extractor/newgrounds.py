@@ -158,8 +158,7 @@ class NewgroundsExtractor(Extractor):
                 "Referer": self.root,
             }
             data = self.request(url, headers=headers).json()
-            key = max(data["sources"], key=lambda x: text.parse_int(x[:-1]))
-            src = data["sources"][key][0]["src"]
+            src = data["sources"]["360p"][0]["src"].replace(".360p.", ".")
             date = text.parse_timestamp(src.rpartition("?")[2])
 
         return {
@@ -255,13 +254,14 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
                r"(/(?:portal/view|audio/listen)/\d+)")
     test = (
         ("https://www.newgrounds.com/portal/view/595355", {
-            "url": "7a0f653a0d5e6f427ea7bde1b8d5cbe287e5840e",
+            "pattern": r"https://uploads\.ungrounded\.net/alternate/564000"
+                       r"/564957_alternate_31\.mp4\?1359712249",
             "keyword": {
                 "artist"     : ["kickinthehead", "danpaladin", "tomfulp"],
                 "comment"    : "re:My fan trailer for Alien Hominid HD!",
                 "date"       : "dt:2013-02-01 09:50:49",
                 "favorites"  : int,
-                "filename"   : "564957_alternate_31.720p",
+                "filename"   : "564957_alternate_31",
                 "index"      : 595355,
                 "rating"     : "e",
                 "score"      : float,
