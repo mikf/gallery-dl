@@ -392,6 +392,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
     def items(self):
         self.login()
         yield Message.Version, 1
+        data = {"_extractor": ExhentaiGalleryExtractor}
 
         while True:
             last = None
@@ -402,7 +403,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
                 if url == last:
                     continue
                 last = url
-                yield Message.Queue, url, {}
+                yield Message.Queue, url, data
 
             if 'class="ptdd">&gt;<' in page or ">No hits found</p>" in page:
                 return

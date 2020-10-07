@@ -167,6 +167,8 @@ class MangoxoChannelExtractor(MangoxoExtractor):
         self.login()
         num = total = 1
         url = "{}/channel/{}/album/".format(self.root, self.channel_id)
+        data = {"_extractor": MangoxoAlbumExtractor}
+
         yield Message.Version, 1
 
         while True:
@@ -174,7 +176,7 @@ class MangoxoChannelExtractor(MangoxoExtractor):
 
             for album in text.extract_iter(
                     page, '<a class="link black" href="', '"'):
-                yield Message.Queue, album, {}
+                yield Message.Queue, album, data
 
             if num == 1:
                 total = self._total_pages(page)
