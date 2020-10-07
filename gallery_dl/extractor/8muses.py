@@ -94,12 +94,12 @@ class _8musesAlbumExtractor(Extractor):
             if albums:
                 for album in albums:
                     url = self.root + "/comics/album/" + album["permalink"]
-                    album = {
-                        "url"    : url,
-                        "name"   : album["name"],
-                        "private": album["isPrivate"],
+                    yield Message.Queue, url, {
+                        "url"       : url,
+                        "name"      : album["name"],
+                        "private"   : album["isPrivate"],
+                        "_extractor": _8musesAlbumExtractor,
                     }
-                    yield Message.Queue, url, album
 
             if data["page"] >= data["pages"]:
                 return

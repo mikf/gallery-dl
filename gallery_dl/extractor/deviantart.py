@@ -262,9 +262,11 @@ class DeviantartExtractor(Extractor):
                 return folder
         raise exception.NotFoundError("folder")
 
-    def _folder_urls(self, folders, category):
-        url = "{}/{}/{}/0/".format(self.root, self.user, category)
-        return [(url + folder["name"], folder) for folder in folders]
+    def _folder_urls(self, folders, category, extractor):
+        base = "{}/{}/{}/0/".format(self.root, self.user, category)
+        for folder in folders:
+            folder["_extractor"] = extractor
+            yield base + folder["name"], folder
 
     def _update_content_default(self, deviation, content):
         public = "premium_folder_data" not in deviation
@@ -450,7 +452,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
         if self.flat and not self.group:
             return self.api.gallery_all(self.user, self.offset)
         folders = self.api.gallery_folders(self.user)
-        return self._folder_urls(folders, "gallery")
+        return self._folder_urls(folders, "gallery", DeviantartFolderExtractor)
 
 
 class DeviantartFolderExtractor(DeviantartExtractor):
@@ -589,7 +591,8 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
                 self.api.collections(self.user, folder["folderid"])
                 for folder in folders
             )
-        return self._folder_urls(folders, "favourites")
+        return self._folder_urls(
+            folders, "favourites", DeviantartCollectionExtractor)
 
 
 class DeviantartCollectionExtractor(DeviantartExtractor):
