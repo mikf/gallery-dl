@@ -19,8 +19,8 @@ class NewgroundsExtractor(Extractor):
     """Base class for newgrounds extractors"""
     category = "newgrounds"
     directory_fmt = ("{category}", "{artist[:10]:J, }")
-    filename_fmt = "{category}_{index}_{title}.{extension}"
-    archive_fmt = "{index}"
+    filename_fmt = "{category}_{_index}_{title}.{extension}"
+    archive_fmt = "{_index}"
     root = "https://www.newgrounds.com"
     cookiedomain = ".newgrounds.com"
     cookienames = ("NG_GG_username", "vmk1du5I8m")
@@ -44,6 +44,13 @@ class NewgroundsExtractor(Extractor):
             if url:
                 yield Message.Directory, post
                 yield Message.Url, url, text.nameext_from_url(url, post)
+
+                for num, url in enumerate(text.extract_iter(
+                        post["_comment"], 'data-smartload-src="', '"'), 1):
+                    post["num"] = num
+                    post["_index"] = "{}_{:>02}".format(post["index"], num)
+                    text.nameext_from_url(url, post)
+                    yield Message.Url, url, post
             else:
                 self.log.warning(
                     "Unable to get download URL for '%s'", post_url)
@@ -97,8 +104,9 @@ class NewgroundsExtractor(Extractor):
         else:
             data = self._extract_media_data(extr, post_url)
 
-        data["comment"] = text.unescape(text.remove_html(extr(
-            'id="author_comments"', '</div>').partition(">")[2], "", ""))
+        data["_comment"] = extr('id="author_comments"', '</div>')
+        data["comment"] = text.unescape(text.remove_html(
+            data["_comment"].partition(">")[2], "", ""))
         data["favorites"] = text.parse_int(extr(
             'id="faves_load">', '<').replace(",", ""))
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
@@ -125,19 +133,22 @@ class NewgroundsExtractor(Extractor):
             "width"      : text.parse_int(full('width="', '"')),
             "height"     : text.parse_int(full('height="', '"')),
         }
-        data["index"] = text.parse_int(
-            data["url"].rpartition("/")[2].partition("_")[0])
+        index = data["url"].rpartition("/")[2].partition("_")[0]
+        data["index"] = text.parse_int(index)
+        data["_index"] = index
         return data
 
     @staticmethod
     def _extract_audio_data(extr, url):
+        index = url.split("/")[5]
         return {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
             "url"        : extr('{"url":"', '"').replace("\\/", "/"),
-            "index"      : text.parse_int(url.split("/")[5]),
+            "index"      : text.parse_int(index),
+            "_index"     : index,
             "rating"     : "",
         }
 
@@ -169,6 +180,7 @@ class NewgroundsExtractor(Extractor):
                 'itemprop="description" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
             "index"      : text.parse_int(index),
+            "_index"     : index,
         }
 
     def _pagination(self, kind):
@@ -232,6 +244,10 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
         ("https://art.ngfiles.com/images/0/94_tomfulp_ryu-is-hawt.gif", {
             "url": "57f182bcbbf2612690c3a54f16ffa1da5105245e",
         }),
+        ("https://www.newgrounds.com/art/view/sailoryon/yon-dream-buster", {
+            "url": "84eec95e663041a80630df72719f231e157e5f5d",
+            "count": 2,
+        })
     )
 
     def __init__(self, match):
