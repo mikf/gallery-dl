@@ -111,11 +111,10 @@ Windows users that have Chocolatey_ installed can install *gallery-dl* from the 
 Scoop
 ----------
 
-Apart from Chocolatey, *gallery-dl* is also available in Scoop_ "extras" bucket for Windows users.
+Apart from Chocolatey, *gallery-dl* is also available in Scoop_ "main" bucket for Windows users.
 
 .. code:: powershell
 
-    $ scoop install 7zip git; scoop bucket add extras # This adds the scoop extras bucket, offering more softwares
     $ scoop install gallery-dl
 
 Usage
