@@ -453,7 +453,7 @@ class DownloadJob(Job):
 
     def _build_blacklist(self):
         wlist = self.extractor.config("whitelist")
-        if wlist:
+        if wlist is not None:
             if isinstance(wlist, str):
                 wlist = wlist.split(",")
             blist = {e.category for e in extractor._list_classes()}
@@ -461,7 +461,7 @@ class DownloadJob(Job):
             return blist
 
         blist = self.extractor.config("blacklist")
-        if blist:
+        if blist is not None:
             if isinstance(blist, str):
                 blist = blist.split(",")
             blist = set(blist)
