@@ -59,14 +59,20 @@ parts:
     organize:
       '*': bin/
 
-  # Check out the tagged release revision if it isn’t promoted to the stable channel
+  # Check out the tagged release revision if it isn't promoted to the stable channel
   # https://forum.snapcraft.io/t/selective-checkout-check-out-the-tagged-release-revision-if-it-isnt-promoted-to-the-stable-channel/10617
   selective-checkout:
-    plugin: nil
+    source: https://github.com/Lin-Buo-Ren/selective-checkout.git
+    source-tag: v2.0.0
+    plugin: dump
     build-packages:
+    # Scriptlet dependencies
+    - curl
     - git
-    stage-snaps:
-    - selective-checkout
+    - jq
+    - sed
+    stage:
+    - scriptlets/selective-checkout
     prime:
     - -*
 
