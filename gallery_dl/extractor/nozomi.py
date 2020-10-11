@@ -106,7 +106,7 @@ class NozomiPostExtractor(NozomiExtractor):
         #  multiple images per post
         ("https://nozomi.la/post/25588032.html", {
             "url": "6aa3b7db385abcc9d374bdffd19187bccbf8f228",
-            "keyword": "0aa99cbaaeada2984a1fbf912274409c6ba106d4",
+            "keyword": "8c3a2561ccc9ad429be9850d1383a952d0b4a8ab",
             "count": 7,
         }),
     )

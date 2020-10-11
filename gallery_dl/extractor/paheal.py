@@ -95,8 +95,8 @@ class PahealPostExtractor(PahealExtractor):
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/view/(\d+)")
     test = ("https://rule34.paheal.net/post/view/481609", {
-        "url": "d3fd0f82762716fe3fb03c9c923e61c13ce22204",
-        "keyword": "35748081bfeaab48f909f4b097a4d79b2be12538",
+        "url": "a91d579be030753282f55b8cb4eeaa89c45a9116",
+        "keyword": "44154bdac3d6cf289d0d9739a566acd8b7839e50",
         "content": "7b924bcf150b352ac75c9d281d061e174c851a11",
     })
 

@@ -105,7 +105,7 @@ class PixivUserExtractor(PixivExtractor):
         # avatar (#595, 623)
         ("https://www.pixiv.net/en/users/173530", {
             "options": (("avatar", True),),
-            "content": "22af450d4dbaf4973d370f164f66f48c7382a6de",
+            "content": "4e57544480cc2036ea9608103e8f024fa737fe66",
             "range": "1",
         }),
         # deleted account
@@ -247,10 +247,10 @@ class PixivFavoriteExtractor(PixivExtractor):
                r"|bookmark\.php(?:\?([^#]*))?)")
     test = (
         ("https://www.pixiv.net/en/users/173530/bookmarks/artworks", {
-            "url": "a4f574e0a84e3dbafc576cf2c2a0f645c6c4b779",
+            "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
         }),
         ("https://www.pixiv.net/bookmark.php?id=173530", {
-            "url": "a4f574e0a84e3dbafc576cf2c2a0f645c6c4b779",
+            "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
         }),
         # bookmarks with specific tag
         (("https://www.pixiv.net/en/users/3137110"

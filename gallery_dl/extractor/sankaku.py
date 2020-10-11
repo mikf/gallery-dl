@@ -152,7 +152,7 @@ class SankakuTagExtractor(SankakuExtractor):
     test = (
         ("https://chan.sankakucomplex.com/?tags=bonocho", {
             "count": 5,
-            "pattern": r"https://cs\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
+            "pattern": r"https://c?s\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
                        r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+",
         }),
         # respect 'page' query parameter

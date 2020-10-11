@@ -33,7 +33,6 @@ BROKEN = {
     "imagevenue",
     "ngomik",
     "photobucket",
-    "pururin",
 }
 
 
