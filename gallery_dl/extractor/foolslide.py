@@ -173,8 +173,7 @@ EXTRACTORS = {
         ),
         "test-manga":
             ("https://sensescans.com/reader/series/yotsubato/", {
-                "url": "180d2d2b75008c733d642cdee62354c1a229184d",
-                "keyword": "2acd6ea5e70d691c5fe0d5d46c60255733cb7d1d",
+                "count": ">= 3",
             }),
     },
     "_ckey": "chapterclass",
