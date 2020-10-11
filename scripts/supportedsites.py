@@ -186,6 +186,7 @@ AUTH_MAP = {
     "tumblr"         : "Optional" + _OAUTH,
     "twitter"        : "Optional",
     "wallhaven"      : "Optional" + _APIKEY_WH,
+    "weasyl"         : "Optional",
 }
 
 IGNORE_LIST = (
