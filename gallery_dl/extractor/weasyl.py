@@ -30,6 +30,10 @@ class WeasylExtractor(Extractor):
             return True
         return False
 
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.session.headers['X-Weasyl-API-Key'] = self.config("api-key")
+
     def request_submission(self, submitid):
         return self.request(
             "{}/api/submissions/{}/view".format(self.root, submitid)).json()
