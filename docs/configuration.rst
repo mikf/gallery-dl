@@ -960,7 +960,7 @@ extractor.hentaifoundry.include
 Type
     ``string`` or ``list`` of ``strings``
 Default
-    ``"gallery"``
+    ``"pictures"``
 Example
     ``"scraps,stories"`` or ``["scraps", "stories"]``
 Description
@@ -968,7 +968,7 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"gallery"``, ``"scraps"``, ``"stories"``, ``"favorite"``.
+    ``"pictures"``, ``"scraps"``, ``"stories"``, ``"favorite"``.
 
     You can use ``"all"`` instead of listing all values separately.
 

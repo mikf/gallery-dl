@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## 1.15.1 - 2020-10-11
+### Additions
+- [hentaicafe] add `manga_id` metadata field ([#1036](https://github.com/mikf/gallery-dl/issues/1036))
+- [hentaifoundry] add support for stories ([#734](https://github.com/mikf/gallery-dl/issues/734))
+- [hentaifoundry] add `include` option
+- [newgrounds] extract image embeds ([#1033](https://github.com/mikf/gallery-dl/issues/1033))
+- [nijie] add `include` option ([#1018](https://github.com/mikf/gallery-dl/issues/1018))
+- [reactor] match URLs without subdomain ([#1053](https://github.com/mikf/gallery-dl/issues/1053))
+- [twitter] extend `retweets` option ([#1026](https://github.com/mikf/gallery-dl/issues/1026))
+- [weasyl] add extractors ([#977](https://github.com/mikf/gallery-dl/issues/977))
+### Fixes
+- [500px] update query hashes
+- [behance] fix `collection` extraction
+- [newgrounds] fix video extraction ([#1042](https://github.com/mikf/gallery-dl/issues/1042))
+- [twitter] improve twitpic extraction ([#1019](https://github.com/mikf/gallery-dl/issues/1019))
+- [weibo] handle posts with more than 9 images ([#926](https://github.com/mikf/gallery-dl/issues/926))
+- [xvideos] fix `title` extraction
+- fix crash when using `--download-archive` with `--no-skip` ([#1023](https://github.com/mikf/gallery-dl/issues/1023))
+- fix issues with `blacklist`/`whitelist` defaults ([#1051](https://github.com/mikf/gallery-dl/issues/1051), [#1056](https://github.com/mikf/gallery-dl/issues/1056))
+### Removals
+- [kissmanga] remove module
 
 ## 1.15.0 - 2020-09-20
 ### Additions
