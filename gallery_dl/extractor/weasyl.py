@@ -68,7 +68,7 @@ class WeasylExtractor(Extractor):
 
 class WeasylSubmissionExtractor(WeasylExtractor):
     subcategory = "submission"
-    pattern = BASE_PATTERN + r"(?:~[\w-]+/submissions|submission)/(\d+)"
+    pattern = BASE_PATTERN + r"(?:~[\w~-]+/submissions|submission)/(\d+)"
     test = (
         ("https://www.weasyl.com/~fiz/submissions/2031/a-wesley", {
             "pattern": "https://cdn.weasyl.com/~fiz/submissions/2031/41ebc1c29"
@@ -109,12 +109,13 @@ class WeasylSubmissionExtractor(WeasylExtractor):
 
 class WeasylSubmissionsExtractor(WeasylExtractor):
     subcategory = "submissions"
-    pattern = BASE_PATTERN + r"(?:~|submissions/)([\w-]+)/?$"
+    pattern = BASE_PATTERN + r"(?:~|submissions/)([\w~-]+)/?$"
     test = (
         ("https://www.weasyl.com/~tanidareal", {
             "count": ">= 200"
         }),
         ("https://www.weasyl.com/submissions/tanidareal"),
+        ("https://www.weasyl.com/~aro~so")
     )
 
     def __init__(self, match):
@@ -130,7 +131,7 @@ class WeasylSubmissionsExtractor(WeasylExtractor):
 class WeasylFolderExtractor(WeasylExtractor):
     subcategory = "folder"
     directory_fmt = ("{category}", "{owner_login}", "{folder_name}")
-    pattern = BASE_PATTERN + r"submissions/([\w-]+)\?folderid=(\d+)"
+    pattern = BASE_PATTERN + r"submissions/([\w~-]+)\?folderid=(\d+)"
     test = ("https://www.weasyl.com/submissions/tanidareal?folderid=7403", {
         "count": ">= 12"
     })
@@ -179,7 +180,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
     subcategory = "journals"
     filename_fmt = "{journalid} {title}.{extension}"
     archive_fmt = "{journalid}"
-    pattern = BASE_PATTERN + r"journals/([\w-]+)"
+    pattern = BASE_PATTERN + r"journals/([\w~-]+)"
     test = ("https://www.weasyl.com/journals/charmander", {
         "count": ">= 2",
     })
