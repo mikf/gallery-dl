@@ -49,8 +49,8 @@ class NewgroundsExtractor(Extractor):
                         post["_comment"], 'data-smartload-src="', '"'), 1):
                     post["num"] = num
                     post["_index"] = "{}_{:>02}".format(post["index"], num)
-                    text.nameext_from_url(url, post)
-                    yield Message.Url, url, post
+                    url = text.ensure_http_scheme(url)
+                    yield Message.Url, url, text.nameext_from_url(url, post)
             else:
                 self.log.warning(
                     "Unable to get download URL for '%s'", post_url)
