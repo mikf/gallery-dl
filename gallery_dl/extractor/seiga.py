@@ -196,4 +196,24 @@ class SeigaImageExtractor(SeigaExtractor):
         return num
 
     def get_images(self):
-        return ({}, {"image_id": text.parse_int(self.image_id)})
+        url = "{}/seiga/im{}".format(self.root, self.image_id)
+        page = self.request(url).text
+
+        data = text.extract_all(page, (
+            ("date",         '<li class="date"><span class="created">', '</span></li>'),
+            ("title",        '<h1 class="title">', '</h1>'),
+            ("description" , '<p class="discription">', '</p>'),
+        ))[0]
+
+        # Ugly,
+        data["user"] = text.extract_all(page, (
+            ("id",   '<li itemscope itemtype="http://data-vocabulary.org/Breadcrumb"><a href="/user/illust/', '" itemprop="url">'),
+            ("name", '<span itemprop="title">', '<span class="pankuzu_suffix">'),
+        ))[0]
+
+        data["description"] = text.remove_html(data["description"])
+        data["date"] = text.parse_datetime(data["date"] + ":00+0900", "%Y年%m月%d日 %H:%M:%S%z")
+        data["image_id"] = text.parse_int(self.image_id)
+
+        # VERY VERY UGLY!!!
+        return (data, data)
