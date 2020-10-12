@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.15.1 - 2020-10-11
 ### Additions
 - [hentaicafe] add `manga_id` metadata field ([#1036](https://github.com/mikf/gallery-dl/issues/1036))
