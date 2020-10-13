@@ -42,7 +42,7 @@ class BloggerExtractor(Extractor):
         blog["date"] = text.parse_datetime(blog["published"])
         del blog["selfLink"]
 
-        sub = re.compile(r"/s\d+/").sub
+        sub = re.compile(r"/(?:s\d+|w\d+-h\d+)/").sub
         findall_image = re.compile(
             r'src="(https?://\d+\.bp\.blogspot\.com/[^"]+)').findall
         findall_video = re.compile(
@@ -133,6 +133,10 @@ class BloggerPostExtractor(BloggerExtractor):
         (("http://cfnmscenesinmovies.blogspot.com/2011/11/"
           "cfnm-scene-jenna-fischer-in-office.html"), {
             "pattern": r"https://.+\.googlevideo\.com/videoplayback",
+        }),
+        # image URLs with width/height (#1061)
+        ("https://aaaninja.blogspot.com/2020/08/altera-boob-press-2.html", {
+            "pattern": r"https://1.bp.blogspot.com/.+/s0/altera_.+png",
         }),
     )
 
