@@ -16,6 +16,7 @@ import time
 import shutil
 import string
 import _string
+import hashlib
 import sqlite3
 import datetime
 import operator
@@ -58,6 +59,10 @@ def raises(cls):
     def wrap(*args):
         raise cls(*args)
     return wrap
+
+
+def generate_csrf_token():
+    return hashlib.md5(str(time.time()).encode()).hexdigest()
 
 
 def combine_dict(a, b):
