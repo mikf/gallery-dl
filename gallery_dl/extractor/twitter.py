@@ -9,10 +9,8 @@
 """Extractors for https://twitter.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
-import hashlib
-import time
 
 
 BASE_PATTERN = (
@@ -446,7 +444,7 @@ class TwitterAPI():
         cookies = self.extractor.session.cookies
 
         # CSRF
-        csrf = hashlib.md5(str(time.time()).encode()).hexdigest()
+        csrf = util.generate_csrf_token()
         self.headers["x-csrf-token"] = csrf
         cookies.set("ct0", csrf, domain=".twitter.com")
 
