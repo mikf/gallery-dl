@@ -48,7 +48,7 @@ class SeigaExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
-        if not self._check_cookies(("user_session",)):
+        if not self._check_cookies(("user_session")):
             username, password = self._get_auth_info()
             self._update_cookies(self._login_impl(username, password))
 
