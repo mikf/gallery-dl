@@ -296,6 +296,7 @@ class TestFormatter(util.Formatter):
 def setup_test_config():
     name = "gallerydl"
     email = "gallerydl@openaliasbox.org"
+    email2 = "gallerydl@protonmail.com"
 
     config.clear()
     config.set(("cache",), "file", None)
@@ -307,6 +308,7 @@ def setup_test_config():
 
     config.set(("extractor", "nijie")     , "username", email)
     config.set(("extractor", "seiga")     , "username", email)
+    config.set(("extractor", "pinterest") , "username", email2)
 
     config.set(("extractor", "newgrounds"), "username", "d1618111")
     config.set(("extractor", "newgrounds"), "password", "d1618111")

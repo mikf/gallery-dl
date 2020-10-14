@@ -94,7 +94,7 @@ Patreon              https://www.patreon.com/            Creators, Posts, User P
 Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
 Photobucket          https://photobucket.com/            Albums, individual Images
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
-Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins, Sections
+Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins, Sections Optional
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
 Pixnet               https://www.pixnet.net/             Folders, individual Images, Sets, User Profiles
 Plurk                https://www.plurk.com/              Posts, Timelines
