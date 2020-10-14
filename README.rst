@@ -214,8 +214,8 @@ a username & password pair. This is necessary for
 ``pixiv``, ``nijie``, and ``seiga``
 and optional for
 ``aryion``, ``danbooru``, ``e621``, ``exhentai``, ``idolcomplex``, ``inkbunny``,
-``instagram``, ``luscious``, ``sankaku``, ``subscribestar``, ``tsumino``,
-and ``twitter``.
+``instagram``, ``luscious``, ``pinterest``,  ``sankaku``, ``subscribestar``,
+``tsumino``, and ``twitter``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)

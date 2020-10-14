@@ -9,7 +9,8 @@
 """Extractors for https://www.pinterest.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
+from ..cache import cache
 import itertools
 import json
 
@@ -28,6 +29,7 @@ class PinterestExtractor(Extractor):
         self.api = PinterestAPI(self)
 
     def items(self):
+        self.api.login()
         data = self.metadata()
         yield Message.Version, 1
         yield Message.Directory, data
@@ -97,6 +99,10 @@ class PinterestBoardExtractor(PinterestExtractor):
         ("https://www.pinterest.com/g1952849/stuff/", {
             "options": (("sections", True),),
             "count": 5,
+        }),
+        # secret board (#1055)
+        ("https://www.pinterest.de/g1952849/secret/", {
+            "count": 2,
         }),
         ("https://www.pinterest.com/g1952848/test/", {
             "exception": exception.GalleryDLException,
@@ -230,15 +236,21 @@ class PinterestAPI():
         "Accept"              : "application/json, text/javascript, "
                                 "*/*, q=0.01",
         "Accept-Language"     : "en-US,en;q=0.5",
-        "X-Pinterest-AppState": "active",
-        "X-APP-VERSION"       : "b00dd49",
-        "X-Requested-With"    : "XMLHttpRequest",
-        "Origin"              : BASE_URL,
         "Referer"             : BASE_URL + "/",
+        "X-Requested-With"    : "XMLHttpRequest",
+        "X-APP-VERSION"       : "7a20185",
+        "X-CSRFToken"         : None,
+        "X-Pinterest-AppState": "active",
+        "Origin"              : BASE_URL,
     }
 
     def __init__(self, extractor):
         self.extractor = extractor
+
+        csrf_token = util.generate_csrf_token()
+        self.headers = self.HEADERS.copy()
+        self.headers["X-CSRFToken"] = csrf_token
+        self.cookies = {"csrftoken": csrf_token}
 
     def pin(self, pin_id):
         """Query information about a pin"""
@@ -282,12 +294,45 @@ class PinterestAPI():
         options = {"board_id": board_id, "add_vase": True}
         return self._pagination("BoardRelatedPixieFeed", options)
 
+    def login(self):
+        """Login and obtain session cookies"""
+        username, password = self.extractor._get_auth_info()
+        if username:
+            self.cookies.update(self._login_impl(username, password))
+
+    @cache(maxage=180*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.extractor.log.info("Logging in as %s", username)
+
+        url = self.BASE_URL + "/resource/UserSessionResource/create/"
+        options = {
+            "username_or_email": username,
+            "password"         : password,
+        }
+        data = {"data": json.dumps({"options": options}), "source_url": ""}
+
+        try:
+            response = self.extractor.request(
+                url, method="POST", headers=self.headers,
+                cookies=self.cookies, data=data)
+            resource = response.json()["resource_response"]
+        except (exception.HttpError, ValueError, KeyError):
+            raise exception.AuthenticationError()
+
+        if resource["status"] != "success":
+            raise exception.AuthenticationError()
+        return {
+            cookie.name: cookie.value
+            for cookie in response.cookies
+        }
+
     def _call(self, resource, options):
         url = "{}/resource/{}Resource/get/".format(self.BASE_URL, resource)
         params = {"data": json.dumps({"options": options}), "source_url": ""}
 
         response = self.extractor.request(
-            url, params=params, headers=self.HEADERS, fatal=False)
+            url, params=params, headers=self.headers,
+            cookies=self.cookies, fatal=False)
 
         try:
             data = response.json()
