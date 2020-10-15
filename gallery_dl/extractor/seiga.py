@@ -48,7 +48,7 @@ class SeigaExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
-        if not self._check_cookies(("user_session")):
+        if not self._check_cookies(("user_session",)):
             username, password = self._get_auth_info()
             self._update_cookies(self._login_impl(username, password))
 
@@ -197,23 +197,22 @@ class SeigaImageExtractor(SeigaExtractor):
 
     def get_images(self):
         url = "{}/seiga/im{}".format(self.root, self.image_id)
-        page = self.request(url).text
+        page = self.request(url, notfound="image").text
 
         data = text.extract_all(page, (
-            ("date",         '<li class="date"><span class="created">', '</span></li>'),
-            ("title",        '<h1 class="title">', '</h1>'),
+            ("date"        , '<li class="date"><span class="created">', '<'),
+            ("title"       , '<h1 class="title">', '</h1>'),
             ("description" , '<p class="discription">', '</p>'),
         ))[0]
 
-        # Ugly,
         data["user"] = text.extract_all(page, (
-            ("id",   '<li itemscope itemtype="http://data-vocabulary.org/Breadcrumb"><a href="/user/illust/', '" itemprop="url">'),
-            ("name", '<span itemprop="title">', '<span class="pankuzu_suffix">'),
+            ("id"  , '<a href="/user/illust/' , '"'),
+            ("name", '<span itemprop="title">', '<'),
         ))[0]
 
         data["description"] = text.remove_html(data["description"])
-        data["date"] = text.parse_datetime(data["date"] + ":00+0900", "%Y年%m月%d日 %H:%M:%S%z")
         data["image_id"] = text.parse_int(self.image_id)
+        data["date"] = text.parse_datetime(
+            data["date"] + ":00+0900", "%Y年%m月%d日 %H:%M:%S%z")
 
-        # VERY VERY UGLY!!!
         return (data, data)

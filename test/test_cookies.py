@@ -107,7 +107,7 @@ class TestCookieLogin(unittest.TestCase):
             "exhentai": ("ipb_member_id", "ipb_pass_hash"),
             "nijie"   : ("nemail", "nlogin"),
             "sankaku" : ("login", "pass_hash"),
-            "seiga"   : ("user_session"),
+            "seiga"   : ("user_session",),
         }
         for category, cookienames in extr_cookies.items():
             cookies = {name: "value" for name in cookienames}
