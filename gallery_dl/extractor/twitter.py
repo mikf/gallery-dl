@@ -27,7 +27,6 @@ class TwitterExtractor(Extractor):
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     cookiedomain = ".twitter.com"
     root = "https://twitter.com"
-    sizes = (":orig", ":large", ":medium", ":small")
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -95,9 +94,10 @@ class TwitterExtractor(Extractor):
 
                 elif "media_url_https" in media:
                     url = media["media_url_https"]
-                    urls = [url + size for size in self.sizes]
+                    tdata["_fallback"] = [
+                        url + size for size in (":large", ":medium", ":small")]
                     text.nameext_from_url(url, tdata)
-                    yield Message.Urllist, urls, tdata
+                    yield Message.Url, url + ":orig", tdata
 
                 else:
                     url = media["media_url"]
@@ -249,7 +249,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
-            "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
+            "url": "2b7814162028fcd238da4ff4072cf6390efe40b0",
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
         ("https://www.twitter.com/id:2976459548"),
@@ -273,7 +273,7 @@ class TwitterMediaExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics/media", {
             "range": "1-40",
-            "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
+            "url": "2b7814162028fcd238da4ff4072cf6390efe40b0",
         }),
         ("https://mobile.twitter.com/supernaturepics/media#t"),
         ("https://www.twitter.com/id:2976459548/media"),
