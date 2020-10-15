@@ -182,7 +182,7 @@ class Extractor():
             password = self.config("password")
         elif self.config("netrc", False):
             try:
-                info = netrc.netrc().authenticators(self.category)
+                info = netrc.netrc().authenticators(self.category or self.cookiedomain.lstrip("."))
                 username, _, password = info
             except (OSError, netrc.NetrcParseError) as exc:
                 self.log.error("netrc: %s", exc)
