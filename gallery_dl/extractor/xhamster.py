@@ -174,7 +174,7 @@ class XhamsterUserExtractor(XhamsterExtractor):
         while url:
             extr = text.extract_from(self.request(url).text)
             while True:
-                url = extr('thumb-image-container" href="', '"')
+                url = extr('thumb-image-container role-pop" href="', '"')
                 if not url:
                     break
                 yield Message.Queue, url, data
