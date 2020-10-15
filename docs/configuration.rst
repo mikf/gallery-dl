@@ -1499,13 +1499,14 @@ Description
 
 
 extractor.weasyl.api-key
+------------------------
 Type
     ``string``
 Default
     ``null``
 Description
-    Generate an API key at https://www.weasyl.com/control/apikeys
-    Set this field in your config to the value of that key.
+    Generate an API key at https://www.weasyl.com/control/apikeys and
+    set this field in your config to the value of that key.
 
 
 extractor.weibo.retweets
