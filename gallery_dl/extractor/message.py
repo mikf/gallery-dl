@@ -40,7 +40,7 @@ class Message():
       - 2nd element is the (external) URL as a string
       - 3rd element is a dictionary containing URL-specific metadata
 
-    - Message.Urllist:
+    - Message.Urllist:  # obsolete
       - Same as Message.Url, but its 2nd element is a list of multiple URLs
       - The additional URLs serve as a fallback if the primary one fails
     """
@@ -51,5 +51,5 @@ class Message():
     #  Headers = 4
     #  Cookies = 5
     Queue = 6
-    Urllist = 7
+    #  Urllist = 7
     Metadata = 8
