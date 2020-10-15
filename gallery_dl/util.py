@@ -495,6 +495,7 @@ class Formatter():
     - "u": calls str.upper
     - "c": calls str.capitalize
     - "C": calls string.capwords
+    - "t": calls str.strip
     - "U": calls urllib.parse.unquote
     - "S": calls util.to_string()
     - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
@@ -525,6 +526,7 @@ class Formatter():
         "u": str.upper,
         "c": str.capitalize,
         "C": string.capwords,
+        "t": str.strip,
         "U": urllib.parse.unquote,
         "S": to_string,
         "s": str,
