@@ -39,6 +39,7 @@ class NewgroundsExtractor(Extractor):
                 post = self.extract_post(post_url)
                 url = post.get("url")
             except Exception:
+                self.log.debug("", exc_info=True)
                 url = None
 
             if url:
@@ -159,6 +160,7 @@ class NewgroundsExtractor(Extractor):
 
         if src:
             src = src.replace("\\/", "/")
+            fallback = ()
             date = text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"'))
         else:
@@ -168,8 +170,13 @@ class NewgroundsExtractor(Extractor):
                 "X-Requested-With": "XMLHttpRequest",
                 "Referer": self.root,
             }
-            data = self.request(url, headers=headers).json()
-            src = data["sources"]["360p"][0]["src"].replace(".360p.", ".")
+            sources = self.request(url, headers=headers).json()["sources"]
+            src = sources["360p"][0]["src"].replace(".360p.", ".")
+            fallback = [v[1][0]["src"] for v in sorted(
+                sources.items(),
+                key=lambda x: text.parse_int(x[0][:-1]),
+                reverse=True,
+            )]
             date = text.parse_timestamp(src.rpartition("?")[2])
 
         return {
@@ -181,6 +188,7 @@ class NewgroundsExtractor(Extractor):
             "rating"     : extr('class="rated-', '"'),
             "index"      : text.parse_int(index),
             "_index"     : index,
+            "_fallback"  : fallback,
         }
 
     def _pagination(self, kind):
