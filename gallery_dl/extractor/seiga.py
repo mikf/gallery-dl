@@ -48,7 +48,7 @@ class SeigaExtractor(Extractor):
 
     def login(self):
         """Login and set necessary cookies"""
-        if not self._check_cookies(("user_session",)):
+        if not self._check_cookies(("user_session")):
             username, password = self._get_auth_info()
             self._update_cookies(self._login_impl(username, password))
 
@@ -172,7 +172,7 @@ class SeigaImageExtractor(SeigaExtractor):
                r"|lohas\.nicoseiga\.jp/(?:thumb|(?:priv|o)/[^/]+/\d+)/)(\d+)")
     test = (
         ("https://seiga.nicovideo.jp/seiga/im5977527", {
-            "keyword": "f66ba5de33d4ce2cb57f23bb37e1e847e0771c10",
+            "keyword": "c8339781da260f7fc44894ad9ada016f53e3b12a",
             "content": "d9202292012178374d57fb0126f6124387265297",
         }),
         ("https://seiga.nicovideo.jp/seiga/im123", {
@@ -196,4 +196,24 @@ class SeigaImageExtractor(SeigaExtractor):
         return num
 
     def get_images(self):
-        return ({}, {"image_id": text.parse_int(self.image_id)})
+        url = "{}/seiga/im{}".format(self.root, self.image_id)
+        page = self.request(url).text
+
+        data = text.extract_all(page, (
+            ("date",         '<li class="date"><span class="created">', '</span></li>'),
+            ("title",        '<h1 class="title">', '</h1>'),
+            ("description" , '<p class="discription">', '</p>'),
+        ))[0]
+
+        # Ugly,
+        data["user"] = text.extract_all(page, (
+            ("id",   '<li itemscope itemtype="http://data-vocabulary.org/Breadcrumb"><a href="/user/illust/', '" itemprop="url">'),
+            ("name", '<span itemprop="title">', '<span class="pankuzu_suffix">'),
+        ))[0]
+
+        data["description"] = text.remove_html(data["description"])
+        data["date"] = text.parse_datetime(data["date"] + ":00+0900", "%Y年%m月%d日 %H:%M:%S%z")
+        data["image_id"] = text.parse_int(self.image_id)
+
+        # VERY VERY UGLY!!!
+        return (data, data)
