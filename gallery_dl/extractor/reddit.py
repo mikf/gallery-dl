@@ -47,6 +47,8 @@ class RedditExtractor(Extractor):
                 urls = []
 
                 if submission:
+                    submission["date"] = text.parse_timestamp(
+                        submission["created_utc"])
                     yield Message.Directory, submission
                     visited.add(submission["id"])
                     url = submission["url"]
