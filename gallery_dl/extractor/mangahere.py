@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,6 +29,10 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
         ("https://www.mangahere.cc/manga/dongguo_xiaojie/c004.2/", {
             "keyword": "7c98d7b50a47e6757b089aa875a53aa970cac66f",
             "content": "708d475f06893b88549cbd30df1e3f9428f2c884",
+        }),
+        # URLs without HTTP scheme (#1070)
+        ("https://www.mangahere.cc/manga/beastars/c196/1.html", {
+            "pattern": "https://zjcdn.mangahere.org/.*",
         }),
         ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
         ("http://m.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
@@ -65,9 +69,9 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
 
         while True:
             url, pos = text.extract(page, '<img src="', '"')
-            yield url, None
+            yield text.ensure_http_scheme(url), None
             url, pos = text.extract(page, ' src="', '"', pos)
-            yield url, None
+            yield text.ensure_http_scheme(url), None
             pnum += 2
             page = self.request(self.url_fmt.format(self.part, pnum)).text
 
