@@ -18,23 +18,23 @@ arch.b4k.co          https://arch.b4k.co/                Threads
 Archive of Sins      https://archiveofsins.com/          Threads
 Archived.Moe         https://archived.moe/               Threads
 ArtStation           https://www.artstation.com/         |artstation-C|
-baraag               https://baraag.net/                 Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
+baraag               https://baraag.net/                 Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Behance              https://www.behance.net/            Collections, Galleries, User Profiles
 Blogger              https://www.blogger.com/            Blogs, Posts, Search Results
-Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag Searches         Optional
+Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag Searches         Supported
 Desuarchive          https://desuarchive.org/            Threads
-DeviantArt           https://www.deviantart.com/         |deviantart-C|                                     Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
+DeviantArt           https://www.deviantart.com/         |deviantart-C|                                     `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Images, Search Results
-E-Hentai             https://e-hentai.org/               Favorites, Galleries, Search Results               Optional
-e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag Searches         Optional
-Eka's Portal         https://aryion.com/                 Galleries, Posts                                   Optional
-ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Optional
+E-Hentai             https://e-hentai.org/               Favorites, Galleries, Search Results               Supported
+e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag Searches         Supported
+Eka's Portal         https://aryion.com/                 Galleries, Posts                                   Supported
+ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Supported
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
 Fireden              https://boards.fireden.net/         Threads
-Flickr               https://www.flickr.com/             |flickr-C|                                         Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
-Fur Affinity         https://www.furaffinity.net/        |furaffinity-C|                                    Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
+Flickr               https://www.flickr.com/             |flickr-C|                                         `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
+Fur Affinity         https://www.furaffinity.net/        |furaffinity-C|                                    `Cookies <https://github.com/mikf/gallery-dl#cookies>`__
 Fuskator             https://fuskator.com/               Galleries, Search Results
 Futaba Channel       https://www.2chan.net/              Threads
 Gelbooru             https://gelbooru.com/               Pools, Posts, Tag Searches
@@ -50,16 +50,16 @@ Hentainexus          https://hentainexus.com/            Galleries, Search Resul
 Hiperdex             https://hiperdex.com/               Artists, Chapters, Manga
 Hitomi.la            https://hitomi.la/                  Galleries, Tag Searches
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag Searches
-Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional
+Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Supported
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
 ImageChest           https://imgchest.com/               Galleries
 ImageFap             https://www.imagefap.com/           Galleries, individual Images, User Profiles
-ImgBB                https://imgbb.com/                  Albums, individual Images, User Profiles           Optional
+ImgBB                https://imgbb.com/                  Albums, individual Images, User Profiles           Supported
 imgbox               https://imgbox.com/                 Galleries, individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  |imgur-C|
-Inkbunny             https://inkbunny.net/               Posts, User Profiles                               Optional
-Instagram            https://www.instagram.com/          |instagram-C|                                      Optional
+Inkbunny             https://inkbunny.net/               Posts, User Profiles                               Supported
+Instagram            https://www.instagram.com/          |instagram-C|                                      Supported
 Issuu                https://issuu.com/                  Publications, User Profiles
 Joyreactor           http://joyreactor.com/              Posts, Search Results, Tag Searches, User Profiles
 Keenspot             http://www.keenspot.com/            Comics
@@ -69,6 +69,7 @@ Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag Searches
 LINE BLOG            https://www.lineblog.me/            Blogs, Posts
 livedoor Blog        http://blog.livedoor.jp/            Blogs, Posts
+Lolibooru            https://lolibooru.moe/              Pools, Popular Images, Posts, Tag Searches
 Luscious             https://members.luscious.net/       Albums, Search Results
 Manga Fox            https://fanfox.net/                 Chapters
 Manga Here           https://www.mangahere.cc/           Chapters, Manga
@@ -78,11 +79,11 @@ MangaKakalot         https://mangakakalot.com/           Chapters, Manga
 Mangapanda           https://www.mangapanda.com/         Chapters, Manga
 MangaPark            https://mangapark.net/              Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
-Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Optional
-mastodon.social      https://mastodon.social/            Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
+Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Supported
+mastodon.social      https://mastodon.social/            Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 My Hentai Gallery    https://myhentaigallery.com/        Galleries
 Naver                https://blog.naver.com/             Blogs, Posts
-Newgrounds           https://www.newgrounds.com/         |newgrounds-C|                                     Optional
+Newgrounds           https://www.newgrounds.com/         |newgrounds-C|                                     Supported
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       https://seiga.nicovideo.jp/         individual Images, User Profiles                   Required
@@ -90,11 +91,11 @@ nijie                https://nijie.info/                 |nijie-C|              
 Nozomi.la            https://nozomi.la/                  Posts, Search Results, Tag Searches
 NSFWalbum.com        https://nsfwalbum.com/              Albums
 Nyafuu Archive       https://archive.nyafuu.org/         Threads
-Patreon              https://www.patreon.com/            Creators, Posts, User Profiles                     Optional (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)
-Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles                Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
+Patreon              https://www.patreon.com/            Creators, Posts, User Profiles                     `Cookies <https://github.com/mikf/gallery-dl#cookies>`__
+Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Photobucket          https://photobucket.com/            Albums, individual Images
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
-Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins, Sections Optional
+Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins, Sections Supported
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
 Pixnet               https://www.pixnet.net/             Folders, individual Images, Sets, User Profiles
 Plurk                https://www.plurk.com/              Posts, Timelines
@@ -105,12 +106,12 @@ Pururin              https://pururin.io/                 Galleries
 Read Comic Online    https://readcomiconline.to/         Comic Issues, Comics
 Realbooru            https://realbooru.com/              Pools, Posts, Tag Searches
 RebeccaBlackTech     https://rbt.asia/                   Threads
-Reddit               https://www.reddit.com/             |reddit-C|                                         Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
+Reddit               https://www.reddit.com/             |reddit-C|                                         `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 RedGIFs              https://redgifs.com/                individual Images, Search Results, User Profiles
 rule #34             https://rule34.paheal.net/          Posts, Tag Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag Searches
-Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag Searches                         Optional
+Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag Searches                         Supported
 Sankaku Complex      https://www.sankakucomplex.com/     Articles, Tag Searches
 Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          https://sensescans.com/reader/      Chapters, Manga
@@ -118,17 +119,17 @@ Sex.com              https://www.sex.com/                Boards, Pins, related P
 Simply Hentai        https://www.simply-hentai.com/      Galleries, individual Images, Videos
 SlickPic             https://www.slickpic.com/           Albums, User Profiles
 SlideShare           https://www.slideshare.net/         Presentations
-SmugMug              https://www.smugmug.com/            |smugmug-C|                                        Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
+SmugMug              https://www.smugmug.com/            |smugmug-C|                                        `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Speaker Deck         https://speakerdeck.com/            Presentations
-SubscribeStar        https://www.subscribestar.com/      Posts, User Profiles                               Optional
+SubscribeStar        https://www.subscribestar.com/      Posts, User Profiles                               Supported
 The /b/ Archive      https://thebarchive.com/            Threads
-Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Optional
-Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          Optional (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)
-Twitter              https://twitter.com/                |twitter-C|                                        Optional
+Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Supported
+Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
+Twitter              https://twitter.com/                |twitter-C|                                        Supported
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
-Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  Optional (`API Key <configuration.rst#extractorwallhavenapi-key>`__)
+Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  `API Key <configuration.rst#extractorwallhavenapi-key>`__
 Warosu               https://warosu.org/                 Threads
-Weasyl               https://www.weasyl.com/             Favorites, Folders, Journals, Submissions          Optional
+Weasyl               https://www.weasyl.com/             Favorites, Folders, Journals, Submissions          `API Key <configuration.rst#extractorweasylapi-key>`__
 Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
 WikiArt.org          https://www.wikiart.org/            Artists, Artist Listings, Artworks

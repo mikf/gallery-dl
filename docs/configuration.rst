@@ -1492,7 +1492,7 @@ Type
 Default
     ``null``
 Description
-    Your  `API Key <https://wallhaven.cc/settings/account>`__ to use
+    Your `Wallhaven API Key <https://wallhaven.cc/settings/account>`__ to use
     your account's browsing settings and default filters when searching.
 
     See https://wallhaven.cc/help/api for more information.
@@ -1505,8 +1505,8 @@ Type
 Default
     ``null``
 Description
-    Generate an API key at https://www.weasyl.com/control/apikeys and
-    set this field in your config to the value of that key.
+    Your `Weasyl API Key <https://www.weasyl.com/control/apikeys>`__ to use
+    your account's browsing settings and filters.
 
 
 extractor.weibo.retweets
