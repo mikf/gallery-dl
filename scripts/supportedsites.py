@@ -152,41 +152,43 @@ SUBCATEGORY_MAP = {
     },
 }
 
-_OAUTH = " (`OAuth <https://github.com/mikf/gallery-dl#oauth>`__)"
-_COOKIES = " (`Cookies <https://github.com/mikf/gallery-dl#cookies>`__)"
-_APIKEY_WH = " (`API Key <configuration.rst#extractorwallhavenapi-key>`__)"
+_OAUTH = "`OAuth <https://github.com/mikf/gallery-dl#oauth>`__"
+_COOKIES = "`Cookies <https://github.com/mikf/gallery-dl#cookies>`__"
+_APIKEY_WH = "`API Key <configuration.rst#extractorwallhavenapi-key>`__"
+_APIKEY_WY = "`API Key <configuration.rst#extractorweasylapi-key>`__"
 
 AUTH_MAP = {
-    "aryion"         : "Optional",
-    "baraag"         : "Optional" + _OAUTH,
-    "danbooru"       : "Optional",
-    "deviantart"     : "Optional" + _OAUTH,
-    "e621"           : "Optional",
-    "e-hentai"       : "Optional",
-    "exhentai"       : "Optional",
-    "flickr"         : "Optional" + _OAUTH,
-    "furaffinity"    : "Optional" + _COOKIES,
-    "idolcomplex"    : "Optional",
-    "imgbb"          : "Optional",
-    "inkbunny"       : "Optional",
-    "instagram"      : "Optional",
-    "mangoxo"        : "Optional",
-    "mastodon.social": "Optional" + _OAUTH,
-    "newgrounds"     : "Optional",
+    "aryion"         : "Supported",
+    "baraag"         : _OAUTH,
+    "danbooru"       : "Supported",
+    "deviantart"     : _OAUTH,
+    "e621"           : "Supported",
+    "e-hentai"       : "Supported",
+    "exhentai"       : "Supported",
+    "flickr"         : _OAUTH,
+    "furaffinity"    : _COOKIES,
+    "idolcomplex"    : "Supported",
+    "imgbb"          : "Supported",
+    "inkbunny"       : "Supported",
+    "instagram"      : "Supported",
+    "mangoxo"        : "Supported",
+    "mastodon.social": _OAUTH,
+    "newgrounds"     : "Supported",
     "nijie"          : "Required",
-    "patreon"        : "Optional" + _COOKIES,
-    "pawoo"          : "Optional" + _OAUTH,
+    "patreon"        : _COOKIES,
+    "pawoo"          : _OAUTH,
+    "pinterest"      : "Supported",
     "pixiv"          : "Required",
-    "reddit"         : "Optional" + _OAUTH,
-    "sankaku"        : "Optional",
+    "reddit"         : _OAUTH,
+    "sankaku"        : "Supported",
     "seiga"          : "Required",
-    "smugmug"        : "Optional" + _OAUTH,
-    "subscribestar"  : "Optional",
-    "tsumino"        : "Optional",
-    "tumblr"         : "Optional" + _OAUTH,
-    "twitter"        : "Optional",
-    "wallhaven"      : "Optional" + _APIKEY_WH,
-    "weasyl"         : "Optional",
+    "smugmug"        : _OAUTH,
+    "subscribestar"  : "Supported",
+    "tsumino"        : "Supported",
+    "tumblr"         : _OAUTH,
+    "twitter"        : "Supported",
+    "wallhaven"      : _APIKEY_WH,
+    "weasyl"         : _APIKEY_WY,
 }
 
 IGNORE_LIST = (
