@@ -277,9 +277,8 @@ Description
     ``-u/--username`` and ``-p/--password`` command-line options or
     by using a |.netrc|_ file. (see Authentication_)
 
-    Note: The password values for ``danbooru`` and ``e621`` should be
-    the API keys found in your user profile, not the actual account
-    password.
+    Note: The password value for ``danbooru`` and ``e621`` should be
+    the API key found in your user profile, not the actual account password.
 
 
 extractor.*.netrc
@@ -306,7 +305,7 @@ Description
 
       Example:
 
-      .. code::
+      .. code:: json
 
         {
             "cookie-name": "cookie-value",
@@ -346,10 +345,10 @@ Description
 
       Example:
 
-      .. code::
+      .. code:: json
 
         {
-            "http": "http://10.10.1.10:3128",
+            "http" : "http://10.10.1.10:3128",
             "https": "http://10.10.1.10:1080",
             "http://10.20.1.128": "http://10.10.1.10:5323"
         }
@@ -457,18 +456,36 @@ extractor.*.postprocessors
 Type
     ``list`` of |Postprocessor Configuration|_ objects
 Example
-    .. code::
+    .. code:: json
 
         [
-            {"name": "zip", "compression": "zip"},
-            {"name": "exec",  "command": ["/home/foobar/script", "{category}", "{image_id}"]}
+            {
+                "name": "zip" ,
+                "compression": "store"
+            },
+            {
+                "name": "exec",
+                "command": ["/home/foobar/script", "{category}", "{image_id}"]
+            }
         ]
 
 Description
-    A list of `post-processors`__
+    A list of `post processors <Postprocessor Configuration_>`__
     to be applied to each downloaded file in the specified order.
 
-.. __: `Postprocessor Configuration`_
+    | Unlike other options, a |postprocessors|_ setting at a deeper level
+      does not override any |postprocessors|_ setting at a lower level.
+    | Instead, all post processors from all applicable |postprocessors|_
+      settings get combined into a single list.
+
+    For example
+
+    * an ``mtime`` post processor at ``extractor.postprocessors``,
+    * a ``zip`` post processor at ``extractor.pixiv.postprocessors``,
+    * and using ``--exec``
+
+    will run all three post processors - ``mtime``, ``zip``, ``exec`` -
+    for each downloaded ``pixiv`` file.
 
 
 extractor.*.retries
@@ -479,7 +496,7 @@ Default
     ``4``
 Description
     Maximum number of times a failed HTTP request is retried before
-    giving up or ``-1`` for infinite retries.
+    giving up, or ``-1`` for infinite retries.
 
 
 extractor.*.timeout
@@ -524,9 +541,6 @@ Description
     Setting this to ``false`` won't download any files, but all other
     functions (`postprocessors`_, `download archive`_, etc.)
     will be executed as normal.
-
-.. _postprocessors: `extractor.*.postprocessors`_
-.. _download archive: `extractor.*.archive`_
 
 
 extractor.*.image-range
@@ -1492,8 +1506,8 @@ Type
 Default
     ``null``
 Description
-    Your `Wallhaven API Key <https://wallhaven.cc/settings/account>`__ to use
-    your account's browsing settings and default filters when searching.
+    Your `Wallhaven API Key <https://wallhaven.cc/settings/account>`__,
+    to use your account's browsing settings and default filters when searching.
 
     See https://wallhaven.cc/help/api for more information.
 
@@ -1505,8 +1519,8 @@ Type
 Default
     ``null``
 Description
-    Your `Weasyl API Key <https://www.weasyl.com/control/apikeys>`__ to use
-    your account's browsing settings and filters.
+    Your `Weasyl API Key <https://www.weasyl.com/control/apikeys>`__,
+    to use your account's browsing settings and filters.
 
 
 extractor.weibo.retweets
@@ -1747,7 +1761,7 @@ downloader.ytdl.raw-options
 Type
     ``object``
 Example
-    .. code::
+    .. code:: json
 
         {
             "quiet": true,
@@ -1862,19 +1876,37 @@ Description
 Postprocessor Options
 =====================
 
+This section lists all options available inside
+`Postprocessor Configuration`_ objects.
+
+Each option is titled as ``<name>.<option>``, meaning a post procesor
+of type ``<name>`` will look for an ``<option>`` field inside its "body".
+For example an ``exec`` post processor will recognize
+an `async <exec.async_>`__,  `command <exec.command_>`__,
+and `final <exec.final_>`__ field:
+
+.. code:: json
+
+    {
+        "name"   : "exec",
+        "async"  : false,
+        "command": "...",
+        "final"  : false
+    }
+
 
 classify.mapping
 ----------------
 Type
     ``object``
 Default
-    .. code::
+    .. code:: json
 
         {
-            "Pictures" : ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"],
-            "Video"    : ["flv", "ogv", "avi", "mp4", "mpg", "mpeg", "3gp", "mkv", "webm", "vob", "wmv"],
-            "Music"    : ["mp3", "aac", "flac", "ogg", "wma", "m4a", "wav"],
-            "Archives" : ["zip", "rar", "7z", "tar", "gz", "bz2"]
+            "Pictures": ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"],
+            "Video"   : ["flv", "ogv", "avi", "mp4", "mpg", "mpeg", "3gp", "mkv", "webm", "vob", "wmv"],
+            "Music"   : ["mp3", "aac", "flac", "ogg", "wma", "m4a", "wav"],
+            "Archives": ["zip", "rar", "7z", "tar", "gz", "bz2"]
         }
 
 Description
@@ -2250,10 +2282,10 @@ How To
     * copy ``client_id`` and ``client_secret`` of your new
       application and put them in your configuration file
       as ``"client-id"`` and ``"client-secret"``
-    * clear your `cache <cache.file_>`__ (``--clear-cache``) to delete
-      the ``access-token`` from the previous ``client-id``
-    * get a new `refresh-token <extractor.deviantart.refresh-token_>`__
-      if necessary
+    * clear your `cache <cache.file_>`__ to delete any remaining
+      ``access-token`` entries. (``gallery-dl --clear-cache``)
+    * get a new `refresh-token <extractor.deviantart.refresh-token_>`__ for the
+      new ``client-id`` (``gallery-dl oauth:deviantart``)
 
 
 extractor.flickr.api-key & .api-secret
@@ -2370,19 +2402,19 @@ Logging Configuration
 Type
     ``object``
 Example
-    .. code::
+    .. code:: json
 
         {
-            "format": "{asctime} {name}: {message}",
+            "format"     : "{asctime} {name}: {message}",
             "format-date": "%H:%M:%S",
-            "path": "~/log.txt",
-            "encoding": "ascii"
+            "path"       : "~/log.txt",
+            "encoding"   : "ascii"
         }
 
-    .. code::
+    .. code:: json
 
         {
-            "level": "debug",
+            "level" : "debug",
             "format": {
                 "debug"  : "debug: {message}",
                 "info"   : "[{name}] {message}",
@@ -2426,7 +2458,7 @@ Description
         * File encoding
         * Default: ``"utf-8"``
 
-    Note: path, mode and encoding are only applied when configuring
+    Note: path, mode, and encoding are only applied when configuring
     logging output to a file.
 
 
@@ -2435,17 +2467,17 @@ Postprocessor Configuration
 Type
     ``object``
 Example
-    .. code::
+    .. code:: json
 
         { "name": "mtime" }
 
-    .. code::
+    .. code:: json
 
         {
-            "name": "zip",
+            "name"       : "zip",
             "compression": "store",
-            "extension": "cbz",
-            "whitelist": ["mangadex", "exhentai", "nhentai"]
+            "extension"  : "cbz",
+            "whitelist"  : ["mangadex", "exhentai", "nhentai"]
         }
 Description
     An ``object`` containing a ``"name"`` attribute specifying the
@@ -2488,10 +2520,13 @@ Description
 .. |Logging Configuration| replace:: ``Logging Configuration``
 .. |Postprocessor Configuration| replace:: ``Postprocessor Configuration``
 .. |strptime| replace:: strftime() and strptime() Behavior
+.. |postprocessors| replace:: ``postprocessors``
 
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_
-.. _deviantart.metadata: extractor.deviantart.metadata_
+.. _deviantart.metadata: `extractor.deviantart.metadata`_
+.. _postprocessors: `extractor.*.postprocessors`_
+.. _download archive: `extractor.*.archive`_
 
 .. _.netrc:             https://stackoverflow.com/tags/.netrc/info
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
