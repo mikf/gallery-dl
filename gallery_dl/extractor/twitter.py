@@ -36,6 +36,7 @@ class TwitterExtractor(Extractor):
         self.twitpic = self.config("twitpic", False)
         self.quoted = self.config("quoted", True)
         self.videos = self.config("videos", True)
+        self.cards = self.config("cards", False)
         self._user_cache = {}
 
     def items(self):
@@ -55,57 +56,82 @@ class TwitterExtractor(Extractor):
                 self.log.debug("Skipping %s (quoted tweet)", tweet["id_str"])
                 continue
 
+            files = []
+            if "extended_entities" in tweet:
+                self._extract_media(tweet, files)
+            if "card" in tweet and self.cards:
+                self._extract_card(tweet, files)
             if self.twitpic:
-                self._extract_twitpic(tweet)
-            if "extended_entities" not in tweet:
+                self._extract_twitpic(tweet, files)
+            if not files:
                 continue
 
             tdata = self._transform_tweet(tweet)
             tdata.update(metadata)
-
             yield Message.Directory, tdata
-            for tdata["num"], media in enumerate(
-                    tweet["extended_entities"]["media"], 1):
+            for tdata["num"], file in enumerate(files, 1):
+                file.update(tdata)
+                url = file.pop("url")
+                if "extension" not in file:
+                    text.nameext_from_url(url, file)
+                yield Message.Url, url, file
 
-                tdata["width"] = media["original_info"].get("width", 0)
-                tdata["height"] = media["original_info"].get("height", 0)
+    def _extract_media(self, tweet, files):
+        for media in tweet["extended_entities"]["media"]:
+            width = media["original_info"].get("width", 0),
+            height = media["original_info"].get("height", 0),
 
-                if "video_info" in media:
+            if "video_info" in media:
+                if self.videos == "ytdl":
+                    files.append({
+                        "url": "ytdl:{}/i/web/status/{}".format(
+                            self.root, tweet["id_str"]),
+                        "width"    : width,
+                        "height"   : height,
+                        "extension": None,
+                    })
+                elif self.videos:
+                    video_info = media["video_info"]
+                    variant = max(
+                        video_info["variants"],
+                        key=lambda v: v.get("bitrate", 0),
+                    )
+                    files.append({
+                        "url"     : variant["url"],
+                        "width"   : width,
+                        "height"  : height,
+                        "bitrate" : variant.get("bitrate", 0),
+                        "duration": video_info.get(
+                            "duration_millis", 0) / 1000,
+                    })
+            elif "media_url_https" in media:
+                url = media["media_url_https"]
+                files.append(text.nameext_from_url(url, {
+                    "url"      : url + ":orig",
+                    "_fallback": [url+":large", url+":medium", url+":small"],
+                    "width"    : width,
+                    "height"   : height,
+                }))
+            else:
+                files.append({"url": media["media_url"]})
 
-                    if self.videos == "ytdl":
-                        url = "ytdl:{}/i/web/status/{}".format(
-                            self.root, tweet["id_str"])
-                        tdata["extension"] = None
-                        yield Message.Url, url, tdata
+    def _extract_card(self, tweet, files):
+        card = tweet["card"]
+        if card["name"] in ("summary", "summary_large_image"):
+            bvals = card["binding_values"]
+            for prefix in ("photo_image_full_size_",
+                           "summary_photo_image_",
+                           "thumbnail_image_"):
+                for size in ("original", "x_large", "large", "small"):
+                    key = prefix + size
+                    if key in bvals:
+                        files.append(bvals[key]["image_value"])
+                        return
+        else:
+            url = "ytdl:{}/i/web/status/{}".format(self.root, tweet["id_str"])
+            files.append({"url": url})
 
-                    elif self.videos:
-                        video_info = media["video_info"]
-                        variant = max(
-                            video_info["variants"],
-                            key=lambda v: v.get("bitrate", 0),
-                        )
-                        tdata["duration"] = video_info.get(
-                            "duration_millis", 0) / 1000
-                        tdata["bitrate"] = variant.get("bitrate", 0)
-
-                        url = variant["url"]
-                        text.nameext_from_url(url, tdata)
-                        yield Message.Url, url, tdata
-
-                elif "media_url_https" in media:
-                    url = media["media_url_https"]
-                    tdata["_fallback"] = [
-                        url + size for size in (":large", ":medium", ":small")]
-                    text.nameext_from_url(url, tdata)
-                    yield Message.Url, url + ":orig", tdata
-
-                else:
-                    url = media["media_url"]
-                    text.nameext_from_url(url, tdata)
-                    yield Message.Url, url, tdata
-
-    def _extract_twitpic(self, tweet):
-        twitpics = []
+    def _extract_twitpic(self, tweet, files):
         for url in tweet["entities"].get("urls", ()):
             url = url["expanded_url"]
             if "//twitpic.com/" in url and "/photos/" not in url:
@@ -115,15 +141,7 @@ class TwitterExtractor(Extractor):
                 url = text.extract(
                     response.text, 'name="twitter:image" value="', '"')[0]
                 if url:
-                    twitpics.append({
-                        "original_info": {},
-                        "media_url"    : url,
-                    })
-        if twitpics:
-            if "extended_entities" in tweet:
-                tweet["extended_entities"]["media"].extend(twitpics)
-            else:
-                tweet["extended_entities"] = {"media": twitpics}
+                    files.append({"url": url})
 
     def _transform_tweet(self, tweet):
         entities = tweet["entities"]
@@ -249,7 +267,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
-            "url": "2b7814162028fcd238da4ff4072cf6390efe40b0",
+            "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
         ("https://www.twitter.com/id:2976459548"),
@@ -273,7 +291,7 @@ class TwitterMediaExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics/media", {
             "range": "1-40",
-            "url": "2b7814162028fcd238da4ff4072cf6390efe40b0",
+            "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
         }),
         ("https://mobile.twitter.com/supernaturepics/media#t"),
         ("https://www.twitter.com/id:2976459548/media"),
@@ -373,10 +391,15 @@ class TwitterTweetExtractor(TwitterExtractor):
             "pattern": r"https://\w+.cloudfront.net/photos/large/\d+.jpg",
             "count": 3,
         }),
-        # Nitter tweet
+        # Nitter tweet (#890)
         ("https://nitter.net/ed1conf/status/1163841619336007680", {
             "url": "0f6a841e23948e4320af7ae41125e0c5b3cadc98",
             "content": "f29501e44d88437fe460f5c927b7543fda0f6e34",
+        }),
+        # Twitter card (#1005)
+        ("https://twitter.com/billboard/status/1306599586602135555", {
+            "options": (("cards", True),),
+            "pattern": r"https://pbs.twimg.com/card_img/1317274761030856707/",
         }),
         # original retweets (#1026)
         ("https://twitter.com/jessica_3978/status/1296304589591810048", {
