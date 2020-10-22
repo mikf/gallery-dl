@@ -1432,6 +1432,16 @@ Description
     You can use ``"all"`` instead of listing all types separately.
 
 
+extractor.twitter.cards
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from `Cards <https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards>`__.
+
+
 extractor.twitter.quoted
 ------------------------
 Type
