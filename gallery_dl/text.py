@@ -70,7 +70,7 @@ def ensure_http_scheme(url, scheme="https://"):
 def filename_from_url(url):
     """Extract the last part of an URL to use as a filename"""
     try:
-        return urllib.parse.urlsplit(url).path.rpartition("/")[2]
+        return url.partition("?")[0].rpartition("/")[2]
     except (TypeError, AttributeError):
         return ""
 
