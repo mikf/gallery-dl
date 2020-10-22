@@ -172,11 +172,7 @@ class NewgroundsExtractor(Extractor):
             }
             sources = self.request(url, headers=headers).json()["sources"]
             src = sources["360p"][0]["src"].replace(".360p.", ".")
-            fallback = [v[1][0]["src"] for v in sorted(
-                sources.items(),
-                key=lambda x: text.parse_int(x[0][:-1]),
-                reverse=True,
-            )]
+            fallback = self._video_fallback(sources)
             date = text.parse_timestamp(src.rpartition("?")[2])
 
         return {
@@ -190,6 +186,13 @@ class NewgroundsExtractor(Extractor):
             "_index"     : index,
             "_fallback"  : fallback,
         }
+
+    @staticmethod
+    def _video_fallback(sources):
+        sources = list(sources.items())
+        sources.sort(key=lambda src: text.parse_int(src[0][:-1]), reverse=True)
+        for src in sources:
+            yield src[1][0]["src"]
 
     def _pagination(self, kind):
         root = self.user_root
