@@ -28,7 +28,7 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
     archive_fmt = "{gallery[id]}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
                r"/(?:profiles|amateur-channels|model-channels)"
-               r"/([^/?&#]+)/photos/(\d+)")
+               r"/([^/?#]+)/photos/(\d+)")
     test = (
         ("https://www.xvideos.com/profiles/pervertedcouple/photos/751031", {
             "url": "cb4657a37eea5ab6b1d333491cee7eeb529b0645",
@@ -94,7 +94,7 @@ class XvideosUserExtractor(XvideosBase, Extractor):
     subcategory = "user"
     categorytransfer = True
     pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
-               r"/profiles/([^/?&#]+)/?(?:#.*)?$")
+               r"/profiles/([^/?#]+)/?(?:#.*)?$")
     test = (
         ("https://www.xvideos.com/profiles/pervertedcouple", {
             "url": "a413f3e60d6d3a2de79bd44fa3b7a9c03db4336e",

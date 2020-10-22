@@ -17,7 +17,7 @@ class FallenangelsChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from fascans.com"""
     category = "fallenangels"
     pattern = (r"(?:https?://)?(manga|truyen)\.fascans\.com"
-               r"/manga/([^/]+)/(\d+)(\.[^/?&#]+)?")
+               r"/manga/([^/]+)/(\d+)(\.[^/?#]+)?")
     test = (
         ("https://manga.fascans.com/manga/chronos-ruler/20/1", {
             "url": "4604a7914566cc2da0ff789aa178e2d1c8c241e3",

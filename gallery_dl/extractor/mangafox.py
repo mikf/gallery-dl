@@ -16,7 +16,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from fanfox.net"""
     category = "mangafox"
     pattern = (r"(?:https?://)?(?:www\.|m\.)?(?:mangafox\.me|fanfox\.net)"
-               r"(/manga/[^/]+/((?:v(\d+)/)?c(\d+)([^/?&#]*)))")
+               r"(/manga/[^/]+/((?:v(\d+)/)?c(\d+)([^/?#]*)))")
     test = (
         ("http://fanfox.net/manga/kidou_keisatsu_patlabor/v05/c006.2/1.html", {
             "keyword": "5661dab258d42d09d98f194f7172fb9851a49766",

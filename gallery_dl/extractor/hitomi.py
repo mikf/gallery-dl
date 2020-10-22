@@ -158,7 +158,7 @@ class HitomiTagExtractor(Extractor):
     subcategory = "tag"
     pattern = (r"(?:https?://)?hitomi\.la/"
                r"(tag|artist|group|series|type|character)/"
-               r"([^/?&#]+)\.html")
+               r"([^/?#]+)\.html")
     test = (
         ("https://hitomi.la/tag/screenshots-japanese.html", {
             "pattern": HitomiGalleryExtractor.pattern,

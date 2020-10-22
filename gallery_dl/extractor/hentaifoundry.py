@@ -156,7 +156,7 @@ class HentaifoundryExtractor(Extractor):
 class HentaifoundryUserExtractor(HentaifoundryExtractor):
     """Extractor for a hentaifoundry user profile"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/user/([^/?&#]+)/profile"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/profile"
     test = ("https://www.hentai-foundry.com/user/Tenpura/profile",)
 
     def items(self):
@@ -177,7 +177,7 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
 class HentaifoundryPicturesExtractor(HentaifoundryExtractor):
     """Extractor for all pictures of a hentaifoundry user"""
     subcategory = "pictures"
-    pattern = BASE_PATTERN + r"/pictures/user/([^/?&#]+)(?:/page/(\d+))?/?$"
+    pattern = BASE_PATTERN + r"/pictures/user/([^/?#]+)(?:/page/(\d+))?/?$"
     test = (
         ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
             "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
@@ -194,7 +194,7 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
     """Extractor for scraps of a hentaifoundry user"""
     subcategory = "scraps"
     directory_fmt = ("{category}", "{user}", "Scraps")
-    pattern = BASE_PATTERN + r"/pictures/user/([^/?&#]+)/scraps"
+    pattern = BASE_PATTERN + r"/pictures/user/([^/?#]+)/scraps"
     test = (
         ("https://www.hentai-foundry.com/pictures/user/Evulchibi/scraps", {
             "url": "7cd9c6ec6258c4ab8c44991f7731be82337492a7",
@@ -214,7 +214,7 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user}", "Favorites")
     archive_fmt = "f_{user}_{index}"
-    pattern = BASE_PATTERN + r"/user/([^/?&#]+)/faves/pictures"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/faves/pictures"
     test = (
         ("https://www.hentai-foundry.com/user/Tenpura/faves/pictures", {
             "url": "56f9ae2e89fe855e9fe1da9b81e5ec6212b0320b",
@@ -236,7 +236,7 @@ class HentaifoundryRecentExtractor(HentaifoundryExtractor):
     archive_fmt = "r_{index}"
     pattern = BASE_PATTERN + r"/pictures/recent/(\d\d\d\d-\d\d-\d\d)"
     test = ("http://www.hentai-foundry.com/pictures/recent/2018-09-20", {
-        "pattern": r"https://pictures.hentai-foundry.com/[^/]/[^/?&#]+/\d+/",
+        "pattern": r"https://pictures.hentai-foundry.com/[^/]/[^/?#]+/\d+/",
         "range": "20-30",
     })
 
@@ -255,7 +255,7 @@ class HentaifoundryPopularExtractor(HentaifoundryExtractor):
     archive_fmt = "p_{index}"
     pattern = BASE_PATTERN + r"/pictures/popular()"
     test = ("http://www.hentai-foundry.com/pictures/popular", {
-        "pattern": r"https://pictures.hentai-foundry.com/[^/]/[^/?&#]+/\d+/",
+        "pattern": r"https://pictures.hentai-foundry.com/[^/]/[^/?#]+/\d+/",
         "range": "20-30",
     })
 
@@ -268,7 +268,7 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
     """Extractor for a single image from hentaifoundry.com"""
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:www\.|pictures\.)?hentai-foundry\.com"
-               r"/(?:pictures/user|[^/?&#])/([^/?&#]+)/(\d+)")
+               r"/(?:pictures/user|[^/?#])/([^/?#]+)/(\d+)")
     test = (
         (("https://www.hentai-foundry.com"
           "/pictures/user/Tenpura/407501/shimakaze"), {
@@ -313,7 +313,7 @@ class HentaifoundryStoriesExtractor(HentaifoundryExtractor):
     """Extractor for stories of a hentaifoundry user"""
     subcategory = "stories"
     archive_fmt = "s_{index}"
-    pattern = BASE_PATTERN + r"/stories/user/([^/?&#]+)(?:/page/(\d+))?/?$"
+    pattern = BASE_PATTERN + r"/stories/user/([^/?#]+)(?:/page/(\d+))?/?$"
     test = ("https://www.hentai-foundry.com/stories/user/SnowWolf35", {
         "count": ">= 35",
         "keyword": {
@@ -349,7 +349,7 @@ class HentaifoundryStoryExtractor(HentaifoundryExtractor):
     """Extractor for a hentaifoundry story"""
     subcategory = "story"
     archive_fmt = "s_{index}"
-    pattern = BASE_PATTERN + r"/stories/user/([^/?&#]+)/(\d+)"
+    pattern = BASE_PATTERN + r"/stories/user/([^/?#]+)/(\d+)"
     test = (("https://www.hentai-foundry.com/stories/user/SnowWolf35"
              "/26416/Overwatch-High-Chapter-Voting-Location"), {
         "url": "5a67cfa8c3bf7634c8af8485dd07c1ea74ee0ae8",

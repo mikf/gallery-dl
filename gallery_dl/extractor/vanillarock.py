@@ -29,7 +29,7 @@ class VanillarockPostExtractor(VanillarockExtractor):
     filename_fmt = "{num:>02}.{extension}"
     archive_fmt = "{filename}"
     pattern = (r"(?:https?://)?(?:www\.)?vanilla-rock\.com"
-               r"(/(?!category/|tag/)[^/?&#]+)/?$")
+               r"(/(?!category/|tag/)[^/?#]+)/?$")
     test = ("https://vanilla-rock.com/mizuhashi_parsee-5", {
         "url": "7fb9a4d18d9fa22d7295fee8d94ab5a7a52265dd",
         "keyword": "b91df99b714e1958d9636748b1c81a07c3ef52c9",
@@ -66,7 +66,7 @@ class VanillarockTagExtractor(VanillarockExtractor):
     """Extractor for vanillarock blog posts by tag or category"""
     subcategory = "tag"
     pattern = (r"(?:https?://)?(?:www\.)?vanilla-rock\.com"
-               r"(/(?:tag|category)/[^?&#]+)")
+               r"(/(?:tag|category)/[^?#]+)")
     test = (
         ("https://vanilla-rock.com/tag/%e5%b0%84%e5%91%bd%e4%b8%b8%e6%96%87", {
             "pattern": VanillarockPostExtractor.pattern,

@@ -150,7 +150,7 @@ class ReactorTagExtractor(ReactorExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "{search_tags}_{post_id}_{num}"
-    pattern = BASE_PATTERN + r"/tag/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/tag/([^/?#]+)"
     test = ("http://anime.reactor.cc/tag/Anime+Art",)
 
     def __init__(self, match):
@@ -166,7 +166,7 @@ class ReactorSearchExtractor(ReactorTagExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search_tags}")
     archive_fmt = "s_{search_tags}_{post_id}_{num}"
-    pattern = BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
     test = ("http://anime.reactor.cc/search?q=Art",)
 
 
@@ -174,7 +174,7 @@ class ReactorUserExtractor(ReactorExtractor):
     """Extractor for all posts of a user on *reactor.cc sites"""
     subcategory = "user"
     directory_fmt = ("{category}", "user", "{user}")
-    pattern = BASE_PATTERN + r"/user/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)"
     test = ("http://anime.reactor.cc/user/Shuster",)
 
     def __init__(self, match):
@@ -215,7 +215,7 @@ JR_BASE_PATTERN = r"(?:https?://)?(?:www\.)?(joyreactor\.c(?:c|om))"
 class JoyreactorTagExtractor(ReactorTagExtractor):
     """Extractor for tag searches on joyreactor.cc"""
     category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/tag/([^/?&#]+)"
+    pattern = JR_BASE_PATTERN + r"/tag/([^/?#]+)"
     test = (
         ("http://joyreactor.cc/tag/Advent+Cirno", {
             "count": ">= 17",
@@ -229,7 +229,7 @@ class JoyreactorTagExtractor(ReactorTagExtractor):
 class JoyreactorSearchExtractor(ReactorSearchExtractor):
     """Extractor for search results on joyreactor.cc"""
     category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"
+    pattern = JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
     test = (
         ("http://joyreactor.cc/search/Cirno+Gifs", {
             "range": "1-25",
@@ -244,7 +244,7 @@ class JoyreactorSearchExtractor(ReactorSearchExtractor):
 class JoyreactorUserExtractor(ReactorUserExtractor):
     """Extractor for all posts of a user on joyreactor.cc"""
     category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/user/([^/?&#]+)"
+    pattern = JR_BASE_PATTERN + r"/user/([^/?#]+)"
     test = (
         ("http://joyreactor.cc/user/hemantic"),
         ("http://joyreactor.com/user/Tacoman123", {
@@ -289,7 +289,7 @@ PR_BASE_PATTERN = r"(?:https?://)?(?:www\.)?(pornreactor\.cc|fapreactor.com)"
 class PornreactorTagExtractor(ReactorTagExtractor):
     """Extractor for tag searches on pornreactor.cc"""
     category = "pornreactor"
-    pattern = PR_BASE_PATTERN + r"/tag/([^/?&#]+)"
+    pattern = PR_BASE_PATTERN + r"/tag/([^/?#]+)"
     test = (
         ("http://pornreactor.cc/tag/RiceGnat", {
             "range": "1-25",
@@ -302,7 +302,7 @@ class PornreactorTagExtractor(ReactorTagExtractor):
 class PornreactorSearchExtractor(ReactorSearchExtractor):
     """Extractor for search results on pornreactor.cc"""
     category = "pornreactor"
-    pattern = PR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"
+    pattern = PR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
     test = (
         ("http://pornreactor.cc/search?q=ecchi+hentai", {
             "range": "1-25",
@@ -315,7 +315,7 @@ class PornreactorSearchExtractor(ReactorSearchExtractor):
 class PornreactorUserExtractor(ReactorUserExtractor):
     """Extractor for all posts of a user on pornreactor.cc"""
     category = "pornreactor"
-    pattern = PR_BASE_PATTERN + r"/user/([^/?&#]+)"
+    pattern = PR_BASE_PATTERN + r"/user/([^/?#]+)"
     test = (
         ("http://pornreactor.cc/user/Disillusion", {
             "range": "1-25",

@@ -18,7 +18,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
     archive_fmt = "{image_id}"
     pattern = (r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
                r"(?!/(?:album|gifs?|images?|series)(?:/|$))"
-               r"(?:/(?!(?:page|all-pages)(?:/|\.|$))[^/?&#]+)+)")
+               r"(?:/(?!(?:page|all-pages)(?:/|\.|$))[^/?#]+)+)")
     test = (
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
@@ -84,7 +84,7 @@ class SimplyhentaiImageExtractor(Extractor):
     filename_fmt = "{category}_{token}{title:?_//}.{extension}"
     archive_fmt = "{token}"
     pattern = (r"(?:https?://)?(?:www\.)?(simply-hentai\.com"
-               r"/(image|gif)/[^/?&#]+)")
+               r"/(image|gif)/[^/?#]+)")
     test = (
         (("https://www.simply-hentai.com/image"
           "/pheromomania-vol-1-kanzenban-isao-3949d8b3-400c-4b6"), {
@@ -138,7 +138,7 @@ class SimplyhentaiVideoExtractor(Extractor):
     directory_fmt = ("{category}", "{type}s")
     filename_fmt = "{title}{episode:?_//>02}.{extension}"
     archive_fmt = "{title}_{episode}"
-    pattern = r"(?:https?://)?(videos\.simply-hentai\.com/[^/?&#]+)"
+    pattern = r"(?:https?://)?(videos\.simply-hentai\.com/[^/?#]+)"
     test = (
         ("https://videos.simply-hentai.com/creamy-pie-episode-02", {
             "pattern": r"https://www\.googleapis\.com/drive/v3/files"

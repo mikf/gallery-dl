@@ -32,7 +32,7 @@ class MangakakalotBase():
 class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
     """Extractor for manga-chapters from mangakakalot.com"""
     pattern = (r"(?:https?://)?(?:www\.)?mangakakalot\.com"
-               r"(/chapter/\w+/chapter_[^/?&#]+)")
+               r"(/chapter/\w+/chapter_[^/?#]+)")
     test = (
         ("https://mangakakalot.com/chapter/rx922077/chapter_6", {
             "pattern": r"https://s\d+\.\w+\.com/mangakakalot/r\d+/rx922077/"

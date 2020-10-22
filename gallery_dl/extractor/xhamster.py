@@ -33,7 +33,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
                      "{gallery[id]} {gallery[title]}")
     filename_fmt = "{num:>03}_{id}.{extension}"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"(/photos/gallery/[^/?&#]+)"
+    pattern = BASE_PATTERN + r"(/photos/gallery/[^/?#]+)"
     test = (
         ("https://xhamster.com/photos/gallery/11748968", {
             "pattern": r"https://thumb-p\d+.xhcdn.com/./[\w/-]+_1000.jpg$",
@@ -152,7 +152,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
 class XhamsterUserExtractor(XhamsterExtractor):
     """Extractor for all galleries of an xhamster user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/users/([^/?&#]+)(?:/photos)?/?(?:$|[?#])"
+    pattern = BASE_PATTERN + r"/users/([^/?#]+)(?:/photos)?/?(?:$|[?#])"
     test = (
         ("https://xhamster.com/users/goldenpalomino/photos", {
             "pattern": XhamsterGalleryExtractor.pattern,

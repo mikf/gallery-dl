@@ -169,7 +169,7 @@ class PixnetUserExtractor(PixnetExtractor):
     """Extractor for all sets and folders of a pixnet user"""
     subcategory = "user"
     url_fmt = "{}{}/album/list"
-    pattern = BASE_PATTERN + r"()(?:/blog|/album(?:/list)?)?/?(?:$|[?&#])"
+    pattern = BASE_PATTERN + r"()(?:/blog|/album(?:/list)?)?/?(?:$|[?#])"
     test = (
         ("https://albertayu773.pixnet.net/"),
         ("https://albertayu773.pixnet.net/blog"),

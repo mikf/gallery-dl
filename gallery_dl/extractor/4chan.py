@@ -65,7 +65,7 @@ class _4chanBoardExtractor(Extractor):
     """Extractor for 4chan boards"""
     category = "4chan"
     subcategory = "board"
-    pattern = r"(?:https?://)?boards\.4chan(?:nel)?\.org/([^/?&#]+)/\d*$"
+    pattern = r"(?:https?://)?boards\.4chan(?:nel)?\.org/([^/?#]+)/\d*$"
     test = ("https://boards.4channel.org/po/", {
         "pattern": _4chanThreadExtractor.pattern,
         "count": ">= 100",

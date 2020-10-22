@@ -18,7 +18,7 @@ class NgomikChapterExtractor(ChapterExtractor):
     category = "ngomik"
     root = "http://ngomik.in"
     pattern = (r"(?:https?://)?(?:www\.)?ngomik\.in"
-               r"(/[^/?&#]+-chapter-[^/?&#]+)")
+               r"(/[^/?#]+-chapter-[^/?#]+)")
     test = (
         ("https://www.ngomik.in/14-sai-no-koi-chapter-1-6/", {
             "url": "8e67fdf751bbc79bc6f4dead7675008ddb8e32a4",

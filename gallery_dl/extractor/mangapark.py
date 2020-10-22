@@ -51,7 +51,7 @@ class MangaparkBase():
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.net"""
     pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
-               r"/manga/([^?&#]+/i\d+)")
+               r"/manga/([^?#]+/i\d+)")
     test = (
         ("https://mangapark.net/manga/gosu/i811653/c055/1", {
             "count": 50,
@@ -117,7 +117,7 @@ class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
     """Extractor for manga from mangapark.net"""
     chapterclass = MangaparkChapterExtractor
     pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
-               r"(/manga/[^/?&#]+)/?$")
+               r"(/manga/[^/?#]+)/?$")
     test = (
         ("https://mangapark.net/manga/aria", {
             "url": "9b62883c25c8de471f8ab43651e1448536c4ce3f",

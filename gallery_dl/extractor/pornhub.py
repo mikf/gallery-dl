@@ -118,7 +118,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
 class PornhubUserExtractor(PornhubExtractor):
     """Extractor for all galleries of a pornhub user"""
     subcategory = "user"
-    pattern = (BASE_PATTERN + r"/(users|model)/([^/?&#]+)"
+    pattern = (BASE_PATTERN + r"/(users|model)/([^/?#]+)"
                "(?:/photos(?:/(public|private|favorites))?)?/?$")
     test = (
         ("https://www.pornhub.com/users/flyings0l0/photos/public", {

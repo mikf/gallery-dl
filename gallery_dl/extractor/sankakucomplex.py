@@ -30,7 +30,7 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{date:%Y%m%d}_{filename}"
     pattern = (r"(?:https?://)?www\.sankakucomplex\.com"
-               r"/(\d{4}/\d\d/\d\d/[^/?&#]+)")
+               r"/(\d{4}/\d\d/\d\d/[^/?#]+)")
     test = (
         ("https://www.sankakucomplex.com/2019/05/11/twitter-cosplayers", {
             "url": "4a9ecc5ae917fbce469280da5b6a482510cae84d",

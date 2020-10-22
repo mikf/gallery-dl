@@ -259,7 +259,7 @@ class ImgurGalleryExtractor(ImgurExtractor):
 class ImgurUserExtractor(ImgurExtractor):
     """Extractor for all images posted by a user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/user/([^/?&#]+)(?:/posts|/submitted)?/?$"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)(?:/posts|/submitted)?/?$"
     test = (
         ("https://imgur.com/user/Miguenzo", {
             "range": "1-100",
@@ -277,7 +277,7 @@ class ImgurUserExtractor(ImgurExtractor):
 class ImgurFavoriteExtractor(ImgurExtractor):
     """Extractor for a user's favorites"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/user/([^/?&#]+)/favorites"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/favorites"
     test = ("https://imgur.com/user/Miguenzo/favorites", {
         "range": "1-100",
         "count": 100,
@@ -291,7 +291,7 @@ class ImgurFavoriteExtractor(ImgurExtractor):
 class ImgurSubredditExtractor(ImgurExtractor):
     """Extractor for a subreddits's imgur links"""
     subcategory = "subreddit"
-    pattern = BASE_PATTERN + r"/r/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/r/([^/?#]+)"
     test = ("https://imgur.com/r/pics", {
         "range": "1-100",
         "count": 100,
@@ -305,7 +305,7 @@ class ImgurSubredditExtractor(ImgurExtractor):
 class ImgurTagExtractor(ImgurExtractor):
     """Extractor for imgur tag searches"""
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/t/([^/?&#]+)$"
+    pattern = BASE_PATTERN + r"/t/([^/?#]+)$"
     test = ("https://imgur.com/t/animals", {
         "range": "1-100",
         "count": 100,
@@ -319,7 +319,7 @@ class ImgurTagExtractor(ImgurExtractor):
 class ImgurSearchExtractor(ImgurExtractor):
     """Extractor for imgur search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search(?:/[^?&#]+)?/?\?q=([^&#]+)"
+    pattern = BASE_PATTERN + r"/search(?:/[^?#]+)?/?\?q=([^&#]+)"
     test = ("https://imgur.com/search?q=cute+cat", {
         "range": "1-100",
         "count": 100,

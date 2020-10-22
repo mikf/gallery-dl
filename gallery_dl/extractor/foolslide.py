@@ -45,7 +45,7 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
     """Base class for chapter extractors for FoOlSlide based sites"""
     directory_fmt = ("{category}", "{manga}", "{chapter_string}")
     archive_fmt = "{id}"
-    pattern_fmt = r"(/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
+    pattern_fmt = r"(/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     decode = "default"
 
     def items(self):
@@ -86,7 +86,7 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
 
 class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
-    pattern_fmt = r"(/series/[^/?&#]+)"
+    pattern_fmt = r"(/series/[^/?#]+)"
 
     def chapters(self, page):
         extr = text.extract_from(page)

@@ -135,7 +135,7 @@ class SubscribestarExtractor(Extractor):
 class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
     test = (
         ("https://www.subscribestar.com/subscribestar", {
             "count": ">= 20",

@@ -115,7 +115,7 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
     """Extractor for albums on imgbb.com"""
     subcategory = "album"
     directory_fmt = ("{category}", "{user}", "{album_name} {album_id}")
-    pattern = r"(?:https?://)?ibb\.co/album/([^/?&#]+)/?(?:\?([^#]+))?"
+    pattern = r"(?:https?://)?ibb\.co/album/([^/?#]+)/?(?:\?([^#]+))?"
     test = (
         ("https://ibb.co/album/i5PggF", {
             "range": "1-80",
@@ -173,7 +173,7 @@ class ImgbbUserExtractor(ImgbbExtractor):
     pattern = r"(?:https?://)?([^.]+)\.imgbb\.com/?(?:\?([^#]+))?$"
     test = ("https://folkie.imgbb.com", {
         "range": "1-80",
-        "pattern": r"https?://i\.ibb\.co/\w+/[^/?&#]+",
+        "pattern": r"https?://i\.ibb\.co/\w+/[^/?#]+",
     })
 
     def __init__(self, match):
@@ -197,7 +197,7 @@ class ImgbbUserExtractor(ImgbbExtractor):
 
 class ImgbbImageExtractor(ImgbbExtractor):
     subcategory = "image"
-    pattern = r"(?:https?://)?ibb\.co/(?!album/)([^/?&#]+)"
+    pattern = r"(?:https?://)?ibb\.co/(?!album/)([^/?#]+)"
     test = ("https://ibb.co/fUqh5b", {
         "pattern": r"https://i\.ibb\.co/g3kvx80/Arundel-Ireeman-5\.jpg",
         "content": "c5a0965178a8b357acd8aa39660092918c63795e",

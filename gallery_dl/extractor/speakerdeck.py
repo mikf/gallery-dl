@@ -20,7 +20,7 @@ class SpeakerdeckPresentationExtractor(Extractor):
     filename_fmt = "{presentation}-{num:>02}.{extension}"
     archive_fmt = "{presentation}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?speakerdeck\.com"
-               r"/([^/?&#]+)/([^/?&#]+)")
+               r"/([^/?#]+)/([^/?#]+)")
     test = (
         (("https://speakerdeck.com/speakerdeck/introduction-to-speakerdeck"), {
             "pattern": r"https://files.speakerdeck.com/presentations/"

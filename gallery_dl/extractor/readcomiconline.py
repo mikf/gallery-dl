@@ -45,7 +45,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     """Extractor for comic-issues from readcomiconline.to"""
     subcategory = "issue"
     pattern = (r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
-               r"(/Comic/[^/?&#]+/[^/?&#]+\?id=(\d+))")
+               r"(/Comic/[^/?#]+/[^/?#]+\?id=(\d+))")
     test = ("https://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
         "url": "2bbab6ec4fbc05d269cca420a82a9b5acda28682",
         "keyword": "30fe110273e871305001f33c18634516a0a51421",
@@ -81,7 +81,7 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
     chapterclass = ReadcomiconlineIssueExtractor
     subcategory = "comic"
     pattern = (r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
-               r"(/Comic/[^/?&#]+/?)$")
+               r"(/Comic/[^/?#]+/?)$")
     test = (
         ("https://readcomiconline.to/Comic/W-i-t-c-h", {
             "url": "e231bc2a293edb465133c37a8e36a7e7d94cab14",

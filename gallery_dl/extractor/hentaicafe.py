@@ -20,7 +20,7 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
     category = "hentaicafe"
     directory_fmt = ("{category}", "{manga}")
     pattern = (r"(?:https?://)?(?:www\.)?hentai\.cafe"
-               r"(/manga/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)")
+               r"(/manga/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)")
     test = ("https://hentai.cafe/manga/read/saitom-box/en/0/1/", {
         "url": "8c6a8c56875ba3ed7ab0a74a64f9960077767fc2",
         "keyword": "6913608267d883c82b887303b9ced13821188329",
@@ -45,7 +45,7 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
     """Extractor for manga from hentai.cafe"""
     category = "hentaicafe"
     pattern = (r"(?:https?://)?" + r"(?:www\.)?hentai\.cafe"
-               r"(/hc\.fyi/\d+|(?:/manga/series)?/[^/?&#]+)/?$")
+               r"(/hc\.fyi/\d+|(?:/manga/series)?/[^/?#]+)/?$")
     test = (
         # single chapter
         ("https://hentai.cafe/hazuki-yuuto-summer-blues/", {

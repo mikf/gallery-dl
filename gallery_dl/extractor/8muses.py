@@ -22,7 +22,7 @@ class _8musesAlbumExtractor(Extractor):
     archive_fmt = "{hash}"
     root = "https://comics.8muses.com"
     pattern = (r"(?:https?://)?(?:comics\.|www\.)?8muses\.com"
-               r"(/comics/album/[^?&#]+)(\?[^#]+)?")
+               r"(/comics/album/[^?#]+)(\?[^#]+)?")
     test = (
         ("https://comics.8muses.com/comics/album/Fakku-Comics/mogg/Liar", {
             "url": "6286ac33087c236c5a7e51f8a9d4e4d5548212d4",

@@ -74,7 +74,7 @@ class HentaihandTagExtractor(Extractor):
     root = "https://hentaihand.com"
     pattern = (r"(?i)(?:https?://)?(?:www\.)?hentaihand\.com"
                r"/\w+/(parody|character|tag|artist|group|language"
-               r"|category|relationship)/([^/?&#]+)")
+               r"|category|relationship)/([^/?#]+)")
     test = (
         ("https://hentaihand.com/en/artist/himuro", {
             "pattern": HentaihandGalleryExtractor.pattern,

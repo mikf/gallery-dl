@@ -263,7 +263,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for all images from a user's timeline"""
     subcategory = "timeline"
     pattern = BASE_PATTERN + \
-        r"/(?!search)(?:([^/?&#]+)/?(?:$|[?#])|intent/user\?user_id=(\d+))"
+        r"/(?!search)(?:([^/?#]+)/?(?:$|[?#])|intent/user\?user_id=(\d+))"
     test = (
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
@@ -287,7 +287,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
 class TwitterMediaExtractor(TwitterExtractor):
     """Extractor for all images from a user's Media Tweets"""
     subcategory = "media"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?&#]+)/media(?!\w)"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/media(?!\w)"
     test = (
         ("https://twitter.com/supernaturepics/media", {
             "range": "1-40",
@@ -304,7 +304,7 @@ class TwitterMediaExtractor(TwitterExtractor):
 class TwitterLikesExtractor(TwitterExtractor):
     """Extractor for liked tweets"""
     subcategory = "likes"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?&#]+)/likes(?!\w)"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/likes(?!\w)"
     test = ("https://twitter.com/supernaturepics/likes",)
 
     def tweets(self):
@@ -342,7 +342,7 @@ class TwitterSearchExtractor(TwitterExtractor):
 class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for images from individual tweets"""
     subcategory = "tweet"
-    pattern = BASE_PATTERN + r"/([^/?&#]+|i/web)/status/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
     test = (
         ("https://twitter.com/supernaturepics/status/604341487988576256", {
             "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",

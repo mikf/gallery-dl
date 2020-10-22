@@ -226,7 +226,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
     """Extractor for a single image from newgrounds.com"""
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:www\.)?newgrounds\.com/art/view/([^/?&#]+)/[^/?&#]+"
+               r"(?:www\.)?newgrounds\.com/art/view/([^/?#]+)/[^/?#]+"
                r"|art\.ngfiles\.com/images/\d+/\d+_([^_]+)_([^.]+))")
     test = (
         ("https://www.newgrounds.com/art/view/tomfulp/ryu-is-hawt", {
