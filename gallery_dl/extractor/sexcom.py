@@ -168,7 +168,7 @@ class SexcomBoardExtractor(SexcomExtractor):
     subcategory = "board"
     directory_fmt = ("{category}", "{user}", "{board}")
     pattern = (r"(?:https?://)?(?:www\.)?sex\.com/user"
-               r"/([^/?&#]+)/(?!(?:following|pins|repins|likes)/)([^/?&#]+)")
+               r"/([^/?#]+)/(?!(?:following|pins|repins|likes)/)([^/?#]+)")
     test = ("https://www.sex.com/user/ronin17/exciting-hentai/", {
         "count": ">= 15",
     })
@@ -193,7 +193,7 @@ class SexcomSearchExtractor(SexcomExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search[query]}")
     pattern = (r"(?:https?://)?(?:www\.)?sex\.com/((?:"
-               r"(pic|gif|video)s/([^/?&#]+)|search/(pic|gif|video)s"
+               r"(pic|gif|video)s/([^/?#]+)|search/(pic|gif|video)s"
                r")/?(?:\?([^#]+))?)")
     test = (
         ("https://www.sex.com/search/pics?query=ecchi", {

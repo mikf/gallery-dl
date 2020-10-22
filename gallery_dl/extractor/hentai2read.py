@@ -23,7 +23,7 @@ class Hentai2readBase():
 class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
     """Extractor for a single manga chapter from hentai2read.com"""
     archive_fmt = "{chapter_id}_{page}"
-    pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?&#]+/(\d+))"
+    pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?#]+/(\d+))"
     test = ("https://hentai2read.com/amazon_elixir/1/", {
         "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
         "keyword": "ff84b8f751f0e4ee37717efc4332ff1db71951d9",
@@ -63,7 +63,7 @@ class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
 class Hentai2readMangaExtractor(Hentai2readBase, MangaExtractor):
     """Extractor for hmanga from hentai2read.com"""
     chapterclass = Hentai2readChapterExtractor
-    pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?&#]+)/?$"
+    pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?#]+)/?$"
     test = (
         ("https://hentai2read.com/amazon_elixir/", {
             "url": "273073752d418ec887d7f7211e42b832e8c403ba",

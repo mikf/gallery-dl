@@ -151,7 +151,7 @@ class ImagefapUserExtractor(ImagefapExtractor):
     subcategory = "user"
     categorytransfer = True
     pattern = (BASE_PATTERN +
-               r"/(?:profile(?:\.php\?user=|/)([^/?&#]+)"
+               r"/(?:profile(?:\.php\?user=|/)([^/?#]+)"
                r"|usergallery\.php\?userid=(\d+))")
     test = (
         ("https://www.imagefap.com/profile/LucyRae/galleries", {

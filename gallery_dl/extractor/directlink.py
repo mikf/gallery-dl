@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,7 +17,7 @@ class DirectlinkExtractor(Extractor):
     category = "directlink"
     filename_fmt = "{domain}/{path}/{filename}.{extension}"
     archive_fmt = filename_fmt
-    pattern = (r"(?i)https?://(?P<domain>[^/?&#]+)/(?P<path>[^?&#]+\."
+    pattern = (r"(?i)https?://(?P<domain>[^/?#]+)/(?P<path>[^?#]+\."
                r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus))"
                r"(?:\?(?P<query>[^/?#]*))?(?:#(?P<fragment>.*))?$")
     test = (

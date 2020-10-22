@@ -184,7 +184,7 @@ def generate_extractors():
         Extr.category = category
         Extr.instance = instance
         Extr.pattern = (r"(?:https?://)?" + pattern +
-                        r"/@([^/?&#]+)(?:/media)?/?$")
+                        r"/@([^/?#]+)(?:/media)?/?$")
         Extr.test = info.get("test-user")
         Extr.root = root
         Extr.access_token = token
@@ -197,7 +197,7 @@ def generate_extractors():
         Extr.__doc__ = "Extractor for images from a status on " + instance
         Extr.category = category
         Extr.instance = instance
-        Extr.pattern = r"(?:https?://)?" + pattern + r"/@[^/?&#]+/(\d+)"
+        Extr.pattern = r"(?:https?://)?" + pattern + r"/@[^/?#]+/(\d+)"
         Extr.test = info.get("test-status")
         Extr.root = root
         Extr.access_token = token

@@ -101,7 +101,7 @@ class _35photoUserExtractor(_35photoExtractor):
     """Extractor for all images of a user on 35photo.pro"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro"
-               r"/(?!photo_|genre_|tags/|rating/)([^/?&#]+)")
+               r"/(?!photo_|genre_|tags/|rating/)([^/?#]+)")
     test = (
         ("https://35photo.pro/liya", {
             "pattern": r"https://m\d+.35photo.pro/photos_(main|series)/.*.jpg",
@@ -142,7 +142,7 @@ class _35photoTagExtractor(_35photoExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "Tags", "{search_tag}")
     archive_fmt = "t{search_tag}_{id}_{num}"
-    pattern = r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro/tags/([^/?&#]+)"
+    pattern = r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro/tags/([^/?#]+)"
     test = ("https://35photo.pro/tags/landscape/", {
         "range": "1-25",
         "count": 25,

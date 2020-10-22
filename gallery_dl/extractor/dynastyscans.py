@@ -44,7 +44,7 @@ class DynastyscansBase():
 
 class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
     """Extractor for manga-chapters from dynasty-scans.com"""
-    pattern = BASE_PATTERN + r"(/chapters/[^/?&#]+)"
+    pattern = BASE_PATTERN + r"(/chapters/[^/?#]+)"
     test = (
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {

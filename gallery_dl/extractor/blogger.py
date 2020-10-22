@@ -92,7 +92,7 @@ class BloggerExtractor(Extractor):
 class BloggerPostExtractor(BloggerExtractor):
     """Extractor for a single blog post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"(/\d{4}/\d\d/[^/?&#]+\.html)"
+    pattern = BASE_PATTERN + r"(/\d{4}/\d\d/[^/?#]+\.html)"
     test = (
         ("https://julianbphotography.blogspot.com/2010/12/moon-rise.html", {
             "url": "9928429fb62f712eb4de80f53625eccecc614aae",
@@ -171,7 +171,7 @@ class BloggerBlogExtractor(BloggerExtractor):
 class BloggerSearchExtractor(BloggerExtractor):
     """Extractor for search resuls and labels"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search(?:/?\?q=([^/?&#]+)|/label/([^/?&#]+))"
+    pattern = BASE_PATTERN + r"/search(?:/?\?q=([^/?#]+)|/label/([^/?#]+))"
     test = (
         ("https://julianbphotography.blogspot.com/search?q=400mm", {
             "count": "< 10"

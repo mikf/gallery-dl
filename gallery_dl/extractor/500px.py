@@ -90,7 +90,7 @@ class _500pxExtractor(Extractor):
 class _500pxUserExtractor(_500pxExtractor):
     """Extractor for photos from a user's photostream on 500px.com"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!photo/)(?:p/)?([^/?&#]+)/?(?:$|\?|#)"
+    pattern = BASE_PATTERN + r"/(?!photo/)(?:p/)?([^/?#]+)/?(?:$|[?#])"
     test = (
         ("https://500px.com/p/light_expression_photography", {
             "pattern": r"https?://drscdn.500px.org/photo/\d+/m%3D4096/v2",
@@ -132,7 +132,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
     subcategory = "gallery"
     directory_fmt = ("{category}", "{user[username]}", "{gallery[name]}")
     pattern = (BASE_PATTERN + r"/(?!photo/)(?:p/)?"
-               r"([^/?&#]+)/galleries/([^/?&#]+)")
+               r"([^/?#]+)/galleries/([^/?#]+)")
     test = (
         ("https://500px.com/p/fashvamp/galleries/lera", {
             "url": "002dc81dee5b4a655f0e31ad8349e8903b296df6",

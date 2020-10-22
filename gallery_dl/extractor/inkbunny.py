@@ -60,7 +60,7 @@ class InkbunnyExtractor(Extractor):
 class InkbunnyUserExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user profiles"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!s/)(gallery/|scraps/)?([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/(?!s/)(gallery/|scraps/)?([^/?#]+)"
     test = (
         ("https://inkbunny.net/soina", {
             "pattern": r"https://[\w.]+\.metapix\.net/files/full"

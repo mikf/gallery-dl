@@ -45,7 +45,7 @@ class KomikcastBase():
 
 class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     """Extractor for manga-chapters from komikcast.com"""
-    pattern = r"(?:https?://)?(?:www\.)?komikcast\.com(/chapter/[^/?&#]+/)"
+    pattern = r"(?:https?://)?(?:www\.)?komikcast\.com(/chapter/[^/?#]+/)"
     test = (
         (("https://komikcast.com/chapter/"
           "apotheosis-chapter-02-2-bahasa-indonesia/"), {
@@ -81,7 +81,7 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     """Extractor for manga from komikcast.com"""
     chapterclass = KomikcastChapterExtractor
     pattern = (r"(?:https?://)?(?:www\.)?komikcast\.com"
-               r"(/(?:komik/)?[^/?&#]+)/?$")
+               r"(/(?:komik/)?[^/?#]+)/?$")
     test = (
         ("https://komikcast.com/komik/090-eko-to-issho/", {
             "url": "dc798d107697d1f2309b14ca24ca9dba30c6600f",

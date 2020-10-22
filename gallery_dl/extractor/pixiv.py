@@ -86,7 +86,7 @@ class PixivUserExtractor(PixivExtractor):
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:"
                r"(?:en/)?users/(\d+)(?:/(?:artworks|illustrations|manga)"
-               r"(?:/([^/?&#]+))?)?/?(?:$|[?#])"
+               r"(?:/([^/?#]+))?)?/?(?:$|[?#])"
                r"|member(?:_illust)?\.php\?id=(\d+)(?:&([^#]+))?"
                r"|(?:u(?:ser)?/|(?:mypage\.php)?#id=)(\d+))")
     test = (
@@ -170,7 +170,7 @@ class PixivUserExtractor(PixivExtractor):
 class PixivMeExtractor(PixivExtractor):
     """Extractor for pixiv.me URLs"""
     subcategory = "me"
-    pattern = r"(?:https?://)?pixiv\.me/([^/?&#]+)"
+    pattern = r"(?:https?://)?pixiv\.me/([^/?#]+)"
     test = (
         ("https://pixiv.me/del_shannon", {
             "url": "29c295ce75150177e6b0a09089a949804c708fbf",
@@ -243,7 +243,7 @@ class PixivFavoriteExtractor(PixivExtractor):
                      "{user_bookmark[id]} {user_bookmark[account]}")
     archive_fmt = "f_{user_bookmark[id]}_{id}{num}.{extension}"
     pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:(?:en/)?"
-               r"users/(\d+)/(bookmarks/artworks(?:/([^/?&#]+))?|following)"
+               r"users/(\d+)/(bookmarks/artworks(?:/([^/?#]+))?|following)"
                r"|bookmark\.php(?:\?([^#]*))?)")
     test = (
         ("https://www.pixiv.net/en/users/173530/bookmarks/artworks", {
@@ -407,7 +407,7 @@ class PixivSearchExtractor(PixivExtractor):
     archive_fmt = "s_{search[word]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "search", "{search[word]}")
     pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/(?:(?:en/)?tags/([^/?&#]+)(?:/[^/?&#]+)?/?"
+               r"/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?"
                r"|search\.php)(?:\?([^#]+))?")
     test = (
         ("https://www.pixiv.net/en/tags/Original", {

@@ -19,7 +19,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
     directory_fmt = ("{category}", "{album[name]}")
     archive_fmt = "{filename}.{extension}"
     pattern = (r"(?:https?://)?downloads\.khinsider\.com"
-               r"/game-soundtracks/album/([^/?&#]+)")
+               r"/game-soundtracks/album/([^/?#]+)")
     root = "https://downloads.khinsider.com"
     test = (("https://downloads.khinsider.com"
              "/game-soundtracks/album/horizon-riders-wii"), {

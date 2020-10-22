@@ -153,7 +153,7 @@ class AryionGalleryExtractor(AryionExtractor):
     """Extractor for a user's gallery on eka's portal"""
     subcategory = "gallery"
     categorytransfer = True
-    pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
     test = (
         ("https://aryion.com/g4/gallery/jameshoward", {
             "options": (("recursive", False),),

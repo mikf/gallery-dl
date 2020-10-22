@@ -24,7 +24,7 @@ class MangahereBase():
 class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
     """Extractor for manga-chapters from mangahere.cc"""
     pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
-               r"([^/]+(?:/v0*(\d+))?/c([^/?&#]+))")
+               r"([^/]+(?:/v0*(\d+))?/c([^/?#]+))")
     test = (
         ("https://www.mangahere.cc/manga/dongguo_xiaojie/c004.2/", {
             "keyword": "7c98d7b50a47e6757b089aa875a53aa970cac66f",

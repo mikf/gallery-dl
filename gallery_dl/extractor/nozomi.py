@@ -124,7 +124,7 @@ class NozomiTagExtractor(NozomiExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{postid}"
-    pattern = r"(?:https?://)?nozomi\.la/tag/([^/?&#]+)-\d+\."
+    pattern = r"(?:https?://)?nozomi\.la/tag/([^/?#]+)-\d+\."
     test = ("https://nozomi.la/tag/3:1_aspect_ratio-1.html", {
         "pattern": r"^https://i.nozomi.la/\w/\w\w/\w+\.\w+$",
         "count": ">= 25",

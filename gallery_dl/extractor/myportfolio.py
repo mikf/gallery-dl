@@ -21,14 +21,14 @@ class MyportfolioGalleryExtractor(Extractor):
     archive_fmt = "{user}_{filename}"
     pattern = (r"(?:myportfolio:(?:https?://)?([^/]+)|"
                r"(?:https?://)?([^.]+\.myportfolio\.com))"
-               r"(/[^/?&#]+)?")
+               r"(/[^/?#]+)?")
     test = (
         ("https://andrewling.myportfolio.com/volvo-xc-90-hybrid", {
             "url": "acea0690c76db0e5cf267648cefd86e921bc3499",
             "keyword": "6ac6befe2ee0af921d24cf1dd4a4ed71be06db6d",
         }),
         ("https://andrewling.myportfolio.com/", {
-            "pattern": r"https://andrewling\.myportfolio\.com/[^/?&#+]+$",
+            "pattern": r"https://andrewling\.myportfolio\.com/[^/?#+]+$",
             "count": ">= 6",
         }),
         ("https://stevenilousphotography.myportfolio.com/society", {

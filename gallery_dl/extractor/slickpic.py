@@ -33,7 +33,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
                      "{album[id]} {album[title]}")
     filename_fmt = "{num:>03}_{id}{title:?_//}.{extension}"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/albums/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/albums/([^/?#]+)"
     test = (
         ("https://mattcrandall.slickpic.com/albums/LamborghiniMurcielago/", {
             "url": "58bd94ebc80fd906e9879826970b408d54c6da07",

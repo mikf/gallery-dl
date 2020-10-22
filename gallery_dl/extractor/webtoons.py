@@ -34,7 +34,7 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{episode}-{num:>02}.{extension}"
     archive_fmt = "{title_no}_{episode}_{num}"
-    pattern = (BASE_PATTERN + r"/([^/?&#]+)/([^/?&#]+)/(?:[^/?&#]+))"
+    pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)/(?:[^/?#]+))"
                r"/viewer(?:\?([^#'\"]+))")
     test = (
         (("https://www.webtoons.com/en/comedy/safely-endangered"
@@ -97,7 +97,7 @@ class WebtoonsComicExtractor(WebtoonsExtractor):
     """Extractor for an entire comic on webtoons.com"""
     subcategory = "comic"
     categorytransfer = True
-    pattern = (BASE_PATTERN + r"/([^/?&#]+)/([^/?&#]+))"
+    pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+))"
                r"/list(?:\?([^#]+))")
     test = (
         # english

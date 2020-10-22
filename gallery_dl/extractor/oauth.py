@@ -315,7 +315,7 @@ class OAuthTumblr(OAuthBase):
 
 class OAuthMastodon(OAuthBase):
     subcategory = "mastodon"
-    pattern = "oauth:mastodon:(?:https?://)?([^/?&#]+)"
+    pattern = "oauth:mastodon:(?:https?://)?([^/?#]+)"
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)

@@ -84,7 +84,7 @@ class LivedoorExtractor(Extractor):
 class LivedoorBlogExtractor(LivedoorExtractor):
     """Extractor for a user's blog on blog.livedoor.jp"""
     subcategory = "blog"
-    pattern = r"(?:https?://)?blog\.livedoor\.jp/(\w+)/?(?:$|[?&#])"
+    pattern = r"(?:https?://)?blog\.livedoor\.jp/(\w+)/?(?:$|[?#])"
     test = (
         ("http://blog.livedoor.jp/zatsu_ke/", {
             "range": "1-50",

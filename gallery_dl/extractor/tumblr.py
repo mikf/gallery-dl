@@ -295,7 +295,7 @@ class TumblrPostExtractor(TumblrExtractor):
 class TumblrTagExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user by tag"""
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/tagged/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/tagged/([^/?#]+)"
     test = ("http://demo.tumblr.com/tagged/Times%20Square", {
         "pattern": (r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg"),
         "count": 1,

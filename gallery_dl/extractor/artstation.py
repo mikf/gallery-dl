@@ -131,7 +131,7 @@ class ArtstationUserExtractor(ArtstationExtractor):
     """Extractor for all projects of an artstation user"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects|search)([^/?&#]+)(?:/albums/all)?"
+               r"/(?!artwork|projects|search)([^/?#]+)(?:/albums/all)?"
                r"|((?!www)\w+)\.artstation\.com(?:/projects)?)/?$")
     test = (
         ("https://www.artstation.com/gaerikim/", {
@@ -156,7 +156,7 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
                      "{album[id]} - {album[title]}")
     archive_fmt = "a_{album[id]}_{asset[id]}"
     pattern = (r"(?:https?://)?(?:(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects|search)([^/?&#]+)"
+               r"/(?!artwork|projects|search)([^/?#]+)"
                r"|((?!www)\w+)\.artstation\.com)/albums/(\d+)")
     test = (
         ("https://www.artstation.com/huimeiye/albums/770899", {
@@ -199,7 +199,7 @@ class ArtstationLikesExtractor(ArtstationExtractor):
     directory_fmt = ("{category}", "{userinfo[username]}", "Likes")
     archive_fmt = "f_{userinfo[id]}_{asset[id]}"
     pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects|search)([^/?&#]+)/likes/?")
+               r"/(?!artwork|projects|search)([^/?#]+)/likes/?")
     test = (
         ("https://www.artstation.com/mikf/likes", {
             "pattern": r"https://\w+\.artstation\.com/p/assets"
@@ -225,7 +225,7 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
                      "{challenge[id]} - {challenge[title]}")
     archive_fmt = "c_{challenge[id]}_{asset_id}"
     pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/contests/[^/?&#]+/challenges/(\d+)"
+               r"/contests/[^/?#]+/challenges/(\d+)"
                r"/?(?:\?sorting=([a-z]+))?")
     test = (
         ("https://www.artstation.com/contests/thu-2017/challenges/20"),
@@ -386,7 +386,7 @@ class ArtstationFollowingExtractor(ArtstationExtractor):
     """Extractor for a user's followed users"""
     subcategory = "following"
     pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects|search)([^/?&#]+)/following")
+               r"/(?!artwork|projects|search)([^/?#]+)/following")
     test = ("https://www.artstation.com/gaerikim/following", {
         "pattern": ArtstationUserExtractor.pattern,
         "count": ">= 50",

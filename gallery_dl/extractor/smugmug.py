@@ -108,7 +108,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
     """Extractor for individual smugmug images"""
     subcategory = "image"
     archive_fmt = "{Image[ImageKey]}"
-    pattern = BASE_PATTERN + r"(?:/[^/?&#]+)+/i-([^/?&#-]+)"
+    pattern = BASE_PATTERN + r"(?:/[^/?#]+)+/i-([^/?#-]+)"
     test = (
         ("https://tdm.smugmug.com/Nature/Dove/i-kCsLJT6", {
             "url": "f624ad7293afd6412a7d34e3950a118596c36c85",
@@ -141,7 +141,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
 class SmugmugPathExtractor(SmugmugExtractor):
     """Extractor for smugmug albums from URL paths and users"""
     subcategory = "path"
-    pattern = BASE_PATTERN + r"((?:/[^/?&#a-fh-mo-z][^/?&#]*)*)/?$"
+    pattern = BASE_PATTERN + r"((?:/[^/?#a-fh-mo-z][^/?#]*)*)/?$"
     test = (
         ("https://tdm.smugmug.com/Nature/Dove", {
             "pattern": "smugmug:album:cr4C7f$",

@@ -46,7 +46,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
     directory_fmt = ("{category}", "{album[id]} {album[title]}")
     archive_fmt = "{album[id]}_{id}"
     pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
-               r"/(?:albums|pictures/c/[^/?&#]+/album)/[^/?&#]+_(\d+)")
+               r"/(?:albums|pictures/c/[^/?#]+/album)/[^/?#]+_(\d+)")
     test = (
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
             "url": "7e4984a271a1072ac6483e4228a045895aff86f3",

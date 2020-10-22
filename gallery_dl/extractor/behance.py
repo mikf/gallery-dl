@@ -151,7 +151,7 @@ class BehanceUserExtractor(BehanceExtractor):
     """Extractor for a user's galleries from www.behance.net"""
     subcategory = "user"
     categorytransfer = True
-    pattern = r"(?:https?://)?(?:www\.)?behance\.net/([^/?&#]+)/?$"
+    pattern = r"(?:https?://)?(?:www\.)?behance\.net/([^/?#]+)/?$"
     test = ("https://www.behance.net/alexstrohl", {
         "count": ">= 8",
         "pattern": BehanceGalleryExtractor.pattern,

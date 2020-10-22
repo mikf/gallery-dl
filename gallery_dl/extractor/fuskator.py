@@ -17,7 +17,7 @@ class FuskatorGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries on fuskator.com"""
     category = "fuskator"
     root = "https://fuskator.com"
-    pattern = r"(?:https?://)?fuskator\.com/(?:thumbs|expanded)/([^/?&#]+)"
+    pattern = r"(?:https?://)?fuskator\.com/(?:thumbs|expanded)/([^/?#]+)"
     test = (
         ("https://fuskator.com/thumbs/d0GnIzXrSKU/", {
             "pattern": r"https://i\d+.fuskator.com/large/d0GnIzXrSKU/.+\.jpg",

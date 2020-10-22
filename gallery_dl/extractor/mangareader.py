@@ -53,7 +53,7 @@ class MangareaderBase():
 class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
     """Extractor for manga-chapters from mangareader.net"""
     archive_fmt = "{manga}_{chapter}_{page}"
-    pattern = r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/?&#]+)/(\d+))"
+    pattern = r"(?:https?://)?(?:www\.)?mangareader\.net((/[^/?#]+)/(\d+))"
     test = (("https://www.mangareader.net"
              "/karate-shoukoushi-kohinata-minoru/11"), {
         "url": "45ece5668d1e9f65cf2225237d78de58660b54e4",
@@ -84,7 +84,7 @@ class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
     """Extractor for manga from mangareader.net"""
     chapterclass = MangareaderChapterExtractor
     reverse = False
-    pattern = r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/?&#]+)/?$"
+    pattern = r"(?:https?://)?(?:www\.)?mangareader\.net(/[^/?#]+)/?$"
     test = ("https://www.mangareader.net/mushishi", {
         "url": "bc203b858b4ad76e5d77e39118a7be0350e357da",
         "keyword": "031b3ea085921c552de017ecbb9b906e462229c9",

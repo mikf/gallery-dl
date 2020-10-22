@@ -460,7 +460,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     subcategory = "folder"
     directory_fmt = ("{category}", "{username}", "{folder[title]}")
     archive_fmt = "F_{folder[uuid]}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/gallery/(\d+)/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/gallery/(\d+)/([^/?#]+)"
     test = (
         # user
         ("https://www.deviantart.com/shimoda7/gallery/722019/Miscellaneous", {
@@ -601,7 +601,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     directory_fmt = ("{category}", "{username}", "Favourites",
                      "{collection[title]}")
     archive_fmt = "C_{collection[uuid]}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/favourites/(\d+)/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/favourites/(\d+)/([^/?#]+)"
     test = (
         (("https://www.deviantart.com/pencilshadings"
           "/favourites/70595441/3D-Favorites"), {
@@ -671,8 +671,8 @@ class DeviantartPopularExtractor(DeviantartExtractor):
     archive_fmt = "P_{popular[range]}_{popular[search]}_{index}.{extension}"
     pattern = (r"(?:https?://)?www\.deviantart\.com/(?:"
                r"search(?:/deviations)?"
-               r"|(?:deviations/?)?\?order=(popular-[^/?&#]+)"
-               r"|((?:[\w-]+/)*)(popular-[^/?&#]+)"
+               r"|(?:deviations/?)?\?order=(popular-[^/?#]+)"
+               r"|((?:[\w-]+/)*)(popular-[^/?#]+)"
                r")/?(?:\?([^#]*))?")
     test = (
         ("https://www.deviantart.com/?order=popular-all-time", {
@@ -730,7 +730,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
     archive_fmt = "{index}.{extension}"
-    pattern = BASE_PATTERN + r"/(art|journal)/(?:[^/?&#]+-)?(\d+)"
+    pattern = BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
     test = (
         (("https://www.deviantart.com/shimoda7/art/For-the-sake-10073852"), {
             "options": (("original", 0),),

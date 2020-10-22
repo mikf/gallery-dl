@@ -64,7 +64,7 @@ class HiperdexBase():
 
 class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     """Extractor for manga chapters from hiperdex.com"""
-    pattern = BASE_PATTERN + r"(/manga/([^/?&#]+)/([^/?&#]+))"
+    pattern = BASE_PATTERN + r"(/manga/([^/?#]+)/([^/?#]+))"
     test = (
         ("https://hiperdex.com/manga/domestic-na-kanojo/154-5/", {
             "pattern": r"https://hiperdex.(com|net|info)/wp-content/uploads"
@@ -105,7 +105,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
 class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     """Extractor for manga from hiperdex.com"""
     chapterclass = HiperdexChapterExtractor
-    pattern = BASE_PATTERN + r"(/manga/([^/?&#]+))/?$"
+    pattern = BASE_PATTERN + r"(/manga/([^/?#]+))/?$"
     test = (
         ("https://hiperdex.com/manga/youre-not-that-special/", {
             "count": 51,
@@ -157,7 +157,7 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     categorytransfer = False
     chapterclass = HiperdexMangaExtractor
     reverse = False
-    pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/([^/?&#]+))"
+    pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/([^/?#]+))"
     test = (
         ("https://hiperdex.com/manga-artist/beck-ho-an/"),
         ("https://hiperdex.net/manga-artist/beck-ho-an/"),

@@ -44,7 +44,7 @@ class PahealTagExtractor(PahealExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
-               r"/post/list/([^/?&#]+)")
+               r"/post/list/([^/?#]+)")
     test = ("https://rule34.paheal.net/post/list/Ayane_Suzuki/1", {
         "pattern": r"https://[^.]+\.paheal\.net/_images/\w+/\d+%20-%20",
         "count": ">= 15"

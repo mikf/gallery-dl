@@ -72,7 +72,7 @@ class PlurkExtractor(Extractor):
 class PlurkTimelineExtractor(PlurkExtractor):
     """Extractor for URLs from all posts in a Plurk timeline"""
     subcategory = "timeline"
-    pattern = r"(?:https?://)?(?:www\.)?plurk\.com/(?!p/)(\w+)/?(?:$|[?&#])"
+    pattern = r"(?:https?://)?(?:www\.)?plurk\.com/(?!p/)(\w+)/?(?:$|[?#])"
     test = ("https://www.plurk.com/plurkapi", {
         "pattern": r"https?://.+",
         "count": ">= 23"

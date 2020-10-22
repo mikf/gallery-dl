@@ -137,7 +137,7 @@ class RedditSubredditExtractor(RedditExtractor):
     """Extractor for URLs from subreddits on reddit.com"""
     subcategory = "subreddit"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/r/"
-               r"([^/?&#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?(?:$|#)")
+               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?(?:$|#)")
     test = (
         ("https://www.reddit.com/r/lavaporn/", {
             "range": "1-20",
@@ -162,7 +162,7 @@ class RedditUserExtractor(RedditExtractor):
     """Extractor for URLs from posts by a reddit user"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
-               r"([^/?&#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?")
+               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?")
     test = (
         ("https://www.reddit.com/user/username/", {
             "count": ">= 2",
@@ -185,7 +185,7 @@ class RedditSubmissionExtractor(RedditExtractor):
     """Extractor for URLs from a submission on reddit.com"""
     subcategory = "submission"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:\w+\.)?reddit\.com/(?:r/[^/?&#]+/comments|gallery)"
+               r"(?:\w+\.)?reddit\.com/(?:r/[^/?#]+/comments|gallery)"
                r"|redd\.it)/([a-z0-9]+)")
     test = (
         ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
@@ -231,7 +231,7 @@ class RedditImageExtractor(Extractor):
     subcategory = "image"
     archive_fmt = "{filename}"
     pattern = (r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
-               r"/[^/?&#]+(?:\?[^#]*)?")
+               r"/[^/?#]+(?:\?[^#]*)?")
     test = (
         ("https://i.redd.it/upjtjcx2npzz.jpg", {
             "url": "0de614900feef103e580b632190458c0b62b641a",

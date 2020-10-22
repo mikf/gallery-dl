@@ -343,7 +343,7 @@ class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?:p|tv|reel)/([^/?&#]+)")
+               r"/(?:p|tv|reel)/([^/?#]+)")
     test = (
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
@@ -458,7 +458,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
     """Extractor for StoriesPage"""
     subcategory = "stories"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/stories/([^/?&#]+)(?:/(\d+))?")
+               r"/stories/([^/?#]+)(?:/(\d+))?")
     test = (
         ("https://www.instagram.com/stories/instagram/"),
         ("https://www.instagram.com/stories/highlights/18042509488170095/"),
@@ -478,7 +478,7 @@ class InstagramSavedExtractor(InstagramExtractor):
     subcategory = "saved"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
-               r"([^/?&#]+)/saved")
+               r"([^/?#]+)/saved")
     test = ("https://www.instagram.com/instagram/saved/",)
 
     def __init__(self, match):
@@ -504,7 +504,7 @@ class InstagramUserExtractor(InstagramExtractor):
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?!(?:p|explore|directory|accounts|stories|tv|reel)/)"
-               r"([^/?&#]+)/?(?:$|[?#])")
+               r"([^/?#]+)/?(?:$|[?#])")
     test = (
         ("https://www.instagram.com/instagram/", {
             "range": "1-16",
@@ -550,7 +550,7 @@ class InstagramChannelExtractor(InstagramExtractor):
     subcategory = "channel"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
-               r"([^/?&#]+)/channel")
+               r"([^/?#]+)/channel")
     test = ("https://www.instagram.com/instagram/channel/", {
         "range": "1-16",
         "count": ">= 16",
@@ -579,7 +579,7 @@ class InstagramTagExtractor(InstagramExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{subcategory}", "{tag}")
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/explore/tags/([^/?&#]+)")
+               r"/explore/tags/([^/?#]+)")
     test = ("https://www.instagram.com/explore/tags/instagram/", {
         "range": "1-16",
         "count": ">= 16",

@@ -202,8 +202,8 @@ class PatreonCreatorExtractor(PatreonExtractor):
     """Extractor for a creator's works"""
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
-               r"/(?!(?:home|join|posts|login|signup)(?:$|[/?&#]))"
-               r"([^/?&#]+)(?:/posts)?/?(?:\?([^#]+))?")
+               r"/(?!(?:home|join|posts|login|signup)(?:$|[/?#]))"
+               r"([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
     test = (
         ("https://www.patreon.com/koveliana", {
             "range": "1-25",
@@ -283,7 +283,7 @@ class PatreonUserExtractor(PatreonExtractor):
 class PatreonPostExtractor(PatreonExtractor):
     """Extractor for media from a single post"""
     subcategory = "post"
-    pattern = r"(?:https?://)?(?:www\.)?patreon\.com/posts/([^/?&#]+)"
+    pattern = r"(?:https?://)?(?:www\.)?patreon\.com/posts/([^/?#]+)"
     test = (
         # postfile + attachments
         ("https://www.patreon.com/posts/precious-metal-23563293", {
