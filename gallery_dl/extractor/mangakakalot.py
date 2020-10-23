@@ -78,7 +78,7 @@ class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
         }
 
     def images(self, page):
-        page = text.extract(page, 'id="vungdoc"', '\n</div>')[0]
+        page = text.extract(page, 'id="vungdoc"', '\n<div')[0]
         return [
             (url, None)
             for url in text.extract_iter(page, '<img src="', '"')
