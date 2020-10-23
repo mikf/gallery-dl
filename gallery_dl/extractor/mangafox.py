@@ -53,9 +53,9 @@ class MangafoxChapterExtractor(ChapterExtractor):
         pnum = 1
         while True:
             url, pos = text.extract(page, '<img src="', '"')
-            yield url, None
+            yield text.ensure_http_scheme(url), None
             url, pos = text.extract(page, ' src="', '"', pos)
-            yield url, None
+            yield text.ensure_http_scheme(url), None
 
             pnum += 2
             page = self.request("{}/{}.html".format(self.urlbase, pnum)).text
