@@ -108,7 +108,7 @@ class BcyUserExtractor(BcyExtractor):
     test = (
         ("https://bcy.net/u/1933712", {
             "pattern": r"https://img-bcy-qn.pstatp.com/\w+/\d+/post/\w+/.+jpg",
-            "count": ">= 25",
+            "count": ">= 20",
         }),
         ("https://bcy.net/u/109282764041", {
             "pattern": r"https://p\d-bcy.byteimg.com/img/banciyuan/[0-9a-f]+"
