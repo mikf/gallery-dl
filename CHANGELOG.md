@@ -1,6 +1,24 @@
 # Changelog
 
-## Unreleased
+## 1.15.2 - 2020-10-24
+### Additions
+- [pinterest] implement login support ([#1055](https://github.com/mikf/gallery-dl/issues/1055))
+- [reddit] add `date` metadata field ([#1068](https://github.com/mikf/gallery-dl/issues/1068))
+- [seiga] add metadata for single image downloads ([#1063](https://github.com/mikf/gallery-dl/issues/1063))
+- [twitter] support media from Cards ([#937](https://github.com/mikf/gallery-dl/issues/937), [#1005](https://github.com/mikf/gallery-dl/issues/1005))
+- [weasyl] support api-key authentication ([#1057](https://github.com/mikf/gallery-dl/issues/1057))
+- add a `t` format string conversion for trimming whitespace ([#1065](https://github.com/mikf/gallery-dl/issues/1065))
+### Fixes
+- [blogger] handle URLs with specified width/height ([#1061](https://github.com/mikf/gallery-dl/issues/1061))
+- [fallenangels] fix extraction of `.5` chapters
+- [gelbooru] rewrite mp4 video URLs ([#1048](https://github.com/mikf/gallery-dl/issues/1048))
+- [hitomi] fix image URLs and gallery URL pattern
+- [mangadex] unescape more metadata fields ([#1066](https://github.com/mikf/gallery-dl/issues/1066))
+- [mangahere] ensure download URLs have a scheme ([#1070](https://github.com/mikf/gallery-dl/issues/1070))
+- [mangakakalot] ignore "Go Home" buttons in chapter pages
+- [newgrounds] handle embeds without scheme ([#1033](https://github.com/mikf/gallery-dl/issues/1033))
+- [newgrounds] provide fallback URLs for video downloads ([#1042](https://github.com/mikf/gallery-dl/issues/1042))
+- [xhamster] fix user profile extraction
 
 ## 1.15.1 - 2020-10-11
 ### Additions

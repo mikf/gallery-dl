@@ -25,13 +25,14 @@ TRAVIS_SKIP = {
     "exhentai", "mangafox", "dynastyscans", "nijie", "instagram", "ngomik",
     "archivedmoe", "archiveofsins", "thebarchive", "fireden", "4plebs",
     "sankaku", "idolcomplex", "mangahere", "mangadex", "sankakucomplex",
-    "warosu", "fuskator", "patreon", "komikcast",
+    "warosu", "fuskator", "patreon", "komikcast", "twitter",
 }
 
 # temporary issues, etc.
 BROKEN = {
+    "imgbox",
     "imagevenue",
-    "ngomik",
+    "mangapanda",
     "photobucket",
 }
 
