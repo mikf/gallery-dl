@@ -13,10 +13,10 @@ import os
 import sys
 import json
 import time
+import random
 import shutil
 import string
 import _string
-import hashlib
 import sqlite3
 import datetime
 import operator
@@ -62,7 +62,7 @@ def raises(cls):
 
 
 def generate_csrf_token():
-    return hashlib.md5(str(time.time()).encode()).hexdigest()
+    return random.getrandbits(128).to_bytes(16, "big").hex()
 
 
 def combine_dict(a, b):
