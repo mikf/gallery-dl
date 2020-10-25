@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.15.2 - 2020-10-24
 ### Additions
 - [pinterest] implement login support ([#1055](https://github.com/mikf/gallery-dl/issues/1055))

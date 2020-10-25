@@ -2225,6 +2225,20 @@ Miscellaneous Options
 =====================
 
 
+extractor.modules
+-----------------
+Type
+    ``list`` of ``strings``
+Default
+    The ``modules`` list in
+    `extractor/__init__.py <../gallery_dl/extractor/__init__.py#L12>`__
+Example
+    ``["reddit", "danbooru", "mangadex"]``
+Description
+    The list of modules to load when searching for a suitable
+    extractor class. Useful to reduce startup time and memory usage.
+
+
 cache.file
 ----------
 Type
