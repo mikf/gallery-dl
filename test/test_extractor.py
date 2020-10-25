@@ -22,6 +22,8 @@ from gallery_dl.extractor import mastodon  # noqa E402
 from gallery_dl.extractor.common import Extractor, Message  # noqa E402
 from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
 
+_list_classes = extractor._list_classes
+
 
 class FakeExtractor(Extractor):
     category = "fake"
@@ -45,6 +47,7 @@ class TestExtractorModule(unittest.TestCase):
     def setUp(self):
         extractor._cache.clear()
         extractor._module_iter = iter(extractor.modules)
+        extractor._list_classes = _list_classes
 
     def test_find(self):
         for uri in self.VALID_URIS:

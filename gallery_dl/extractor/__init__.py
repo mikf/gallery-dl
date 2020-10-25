@@ -185,6 +185,8 @@ def _list_classes():
         module = importlib.import_module("."+module_name, __package__)
         yield from add_module(module)
 
+    globals()["_list_classes"] = lambda : _cache
+
 
 def _get_classes(module):
     """Return a list of all extractor classes in a module"""
