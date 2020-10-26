@@ -518,6 +518,15 @@ class SharedConfigMixin():
             ), key, default,
         )
 
+    def config_accumulate(self, key):
+        values = config.accumulate(self._cfgpath, key)
+
+        conf = config.get(("extractor",), self.basecategory)
+        if conf:
+            values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
+
+        return values
+
 
 def generate_extractors(extractor_data, symtable, classes):
     """Dynamically generate Extractor classes"""
