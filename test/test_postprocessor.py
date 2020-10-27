@@ -235,18 +235,20 @@ class MetadataTest(BasePostprocessorTest):
         self.assertEqual(self._output(m), "foo\nbar\nbaz\n")
 
     def test_metadata_custom(self):
-        pp = self._create(
-            {"mode": "custom", "format": "{foo}\n{missing}\n"},
-            {"foo": "bar"},
-        )
-        self.assertEqual(pp.write, pp._write_custom)
-        self.assertEqual(pp.extension, "txt")
-        self.assertTrue(pp.contentfmt)
+        def test(pp_info):
+            pp = self._create(pp_info, {"foo": "bar"})
+            self.assertEqual(pp.write, pp._write_custom)
+            self.assertEqual(pp.extension, "txt")
+            self.assertTrue(pp.contentfmt)
 
-        with patch("builtins.open", mock_open()) as m:
-            pp.prepare(self.pathfmt)
-            pp.run(self.pathfmt)
-        self.assertEqual(self._output(m), "bar\nNone\n")
+            with patch("builtins.open", mock_open()) as m:
+                pp.prepare(self.pathfmt)
+                pp.run(self.pathfmt)
+            self.assertEqual(self._output(m), "bar\nNone\n")
+
+        test({"mode": "custom", "content-format": "{foo}\n{missing}\n"})
+        test({"mode": "custom", "content-format": ["{foo}", "{missing}"]})
+        test({"mode": "custom", "format": "{foo}\n{missing}\n"})
 
     def test_metadata_extfmt(self):
         pp = self._create({

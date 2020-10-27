@@ -2053,9 +2053,10 @@ Description
 metadata.content-format
 -----------------------
 Type
-    ``string``
+    ``string`` or ``list`` of ``strings``
 Example
-    ``"tags:\n\n{tags:J\n}\n"``
+    * ``"tags:\n\n{tags:J\n}\n"``
+    * ``["tags:", "", "{tags:J\n}"]``
 Description
     Custom format string to build the content of metadata files with.
 

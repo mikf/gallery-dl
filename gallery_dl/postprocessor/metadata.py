@@ -22,6 +22,8 @@ class MetadataPP(PostProcessor):
         if mode == "custom":
             self.write = self._write_custom
             cfmt = options.get("content-format") or options.get("format")
+            if isinstance(cfmt, list):
+                cfmt = "\n".join(cfmt) + "\n"
             self.contentfmt = util.Formatter(cfmt).format_map
             ext = "txt"
         elif mode == "tags":
