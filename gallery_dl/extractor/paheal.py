@@ -21,6 +21,9 @@ class PahealExtractor(SharedConfigMixin, Extractor):
     root = "https://rule34.paheal.net"
 
     def items(self):
+        self.session.cookies.set(
+            "ui-tnc-agreed", "true", domain="rule34.paheal.net")
+
         yield Message.Version, 1
         yield Message.Directory, self.get_metadata()
 
@@ -65,7 +68,7 @@ class PahealTagExtractor(PahealExtractor):
             page = self.request(url).text
 
             for post in text.extract_iter(
-                    page, '<img id="thumb_', '>Image Only<'):
+                    page, '<img id="thumb_', 'Only</a>'):
                 yield self._extract_data(post)
 
             if ">Next<" not in page:
@@ -79,7 +82,8 @@ class PahealTagExtractor(PahealExtractor):
         md5 , pos = text.extract(post, '/_thumbs/', '/', pos)
         url , pos = text.extract(post, '<a href="', '"', pos)
 
-        tags, dimensions, size, _ = data.split(" // ")
+        tags, data, date = data.split("\n")
+        dimensions, size, ext = data.split(" // ")
         width, _, height = dimensions.partition("x")
 
         return {
