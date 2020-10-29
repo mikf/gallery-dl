@@ -48,10 +48,20 @@ def bdecode(data, alphabet="0123456789"):
 
 
 def advance(iterable, num):
-    """"Advance the iterable by 'num' steps"""
+    """"Advance 'iterable' by 'num' steps"""
     iterator = iter(iterable)
     next(itertools.islice(iterator, num, num), None)
     return iterator
+
+
+def unique(iterable):
+    """Yield unique elements from 'iterable' while preserving order"""
+    seen = set()
+    add = seen.add
+    for element in iterable:
+        if element not in seen:
+            add(element)
+            yield element
 
 
 def raises(cls):
