@@ -446,6 +446,16 @@ class TestOther(unittest.TestCase):
         self.assertCountEqual(
             util.advance(util.advance(items, 1), 2), range(3, 5))
 
+    def test_unique(self):
+        self.assertSequenceEqual(
+            list(util.unique("")), "")
+        self.assertSequenceEqual(
+            list(util.unique("AABBCC")), "ABC")
+        self.assertSequenceEqual(
+            list(util.unique("ABABABCAABBCC")), "ABC")
+        self.assertSequenceEqual(
+            list(util.unique([1, 2, 1, 3, 2, 1])), [1, 2, 3])
+
     def test_raises(self):
         func = util.raises(Exception)
         with self.assertRaises(Exception):
