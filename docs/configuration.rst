@@ -1351,6 +1351,26 @@ Description
     Waiting a few seconds between each request tries to prevent that.
 
 
+extractor.sankakucomplex.embeds
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download video embeds from external sites.
+
+
+extractor.sankakucomplex.videos
+-------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download videos.
+
+
 extractor.smugmug.videos
 ------------------------
 Type
