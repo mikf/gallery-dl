@@ -183,6 +183,25 @@ Description
     escaped with backslashes, e.g. ``"\\[\\]"``
 
 
+extractor.*.extension-map
+-------------------------
+Type
+    ``object``
+Default
+    ``null``
+Example
+    .. code:: json
+        {
+            "jpeg": "jpg",
+            "jpe" : "jpg",
+            "jfif": "jpg",
+            "jif" : "jpg",
+            "jfi" : "jpg"
+        }
+Description
+    A JSON ``object`` mapping filename extensions to alternatives.
+
+
 extractor.*.skip
 ----------------
 Type
