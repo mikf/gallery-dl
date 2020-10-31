@@ -723,6 +723,12 @@ class PathFormat():
         directory_fmt = extractor.config("directory", extractor.directory_fmt)
         kwdefault = extractor.config("keywords-default")
 
+        extension_map = extractor.config("extension-map")
+        if extension_map is None:
+            # TODO: better default value in 1.16.0
+            extension_map = {}
+        self.extension_map = extension_map.get
+
         try:
             self.filename_formatter = Formatter(
                 filename_fmt, kwdefault).format_map
@@ -850,7 +856,9 @@ class PathFormat():
         """Set general filename data"""
         self.kwdict = kwdict
         self.temppath = self.prefix = ""
-        self.extension = kwdict["extension"]
+
+        ext = kwdict["extension"]
+        kwdict["extension"] = self.extension = self.extension_map(ext, ext)
 
         if self.extension:
             self.build_path()
@@ -859,6 +867,7 @@ class PathFormat():
 
     def set_extension(self, extension, real=True):
         """Set filename extension"""
+        extension = self.extension_map(extension, extension)
         if real:
             self.extension = extension
         self.kwdict["extension"] = self.prefix + extension
