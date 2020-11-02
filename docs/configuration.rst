@@ -191,6 +191,7 @@ Default
     ``null``
 Example
     .. code:: json
+
         {
             "jpeg": "jpg",
             "jpe" : "jpg",
