@@ -347,24 +347,33 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
     @staticmethod
     def _parse_image_info(url):
-        parts = url.split("/")[4].split("-")
+        for part in url.split("/")[4:]:
+            try:
+                _, size, width, height, _ = part.split("-")
+                break
+            except ValueError:
+                pass
+        else:
+            size = width = height = 0
+
         return {
-            "width": text.parse_int(parts[2]),
-            "height": text.parse_int(parts[3]),
-            "size": text.parse_int(parts[1]),
-            "cost": 1,
+            "cost"  : 1,
+            "size"  : text.parse_int(size),
+            "width" : text.parse_int(width),
+            "height": text.parse_int(height),
         }
 
     @staticmethod
     def _parse_original_info(info):
         parts = info.lstrip().split(" ")
         size = text.parse_bytes(parts[3] + parts[4][0])
+
         return {
-            "width": text.parse_int(parts[0]),
-            "height": text.parse_int(parts[2]),
-            "size": size,
             # 1 initial point + 1 per 0.1 MB
-            "cost": 1 + math.ceil(size / 100000)
+            "cost"  : 1 + math.ceil(size / 100000),
+            "size"  : size,
+            "width" : text.parse_int(parts[0]),
+            "height": text.parse_int(parts[2]),
         }
 
 
