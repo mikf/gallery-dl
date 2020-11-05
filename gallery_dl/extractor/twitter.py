@@ -321,6 +321,20 @@ class TwitterBookmarkExtractor(TwitterExtractor):
         return TwitterAPI(self).timeline_bookmark()
 
 
+class TwitterListExtractor(TwitterExtractor):
+    """Extractor for Twitter lists"""
+    subcategory = "list"
+    pattern = BASE_PATTERN + r"/i/lists/(\d+)"
+    test = ("https://twitter.com/i/lists/784214683683127296", {
+        "range": "1-40",
+        "count": 40,
+        "archive": False,
+    })
+
+    def tweets(self):
+        return TwitterAPI(self).timeline_list(self.user)
+
+
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for all images from a search timeline"""
     subcategory = "search"
@@ -511,6 +525,13 @@ class TwitterAPI():
         endpoint = "2/timeline/bookmark.json"
         return self._pagination(endpoint)
 
+    def timeline_list(self, list_id):
+        endpoint = "2/timeline/list.json"
+        params = self.params.copy()
+        params["list_id"] = list_id
+        params["ranking_mode"] = "reverse_chronological"
+        return self._pagination(endpoint, params)
+
     def search(self, query):
         endpoint = "2/search/adaptive.json"
         params = self.params.copy()
@@ -521,6 +542,15 @@ class TwitterAPI():
         params["spelling_corrections"] = "1"
         return self._pagination(
             endpoint, params, "sq-I-t-", "sq-cursor-bottom")
+
+    def list_by_rest_id(self, list_id):
+        endpoint = "graphql/LXXTUytSX1QY-2p8Xp9BFA/ListByRestId"
+        params = {"variables": '{"listId":"' + list_id + '"'
+                               ',"withUserResult":false}'}
+        try:
+            return self._call(endpoint, params)["data"]["list"]
+        except KeyError:
+            raise exception.NotFoundError("list")
 
     def user_by_screen_name(self, screen_name):
         endpoint = "graphql/jMaTS-_Ea8vh9rpKggJbCQ/UserByScreenName"
