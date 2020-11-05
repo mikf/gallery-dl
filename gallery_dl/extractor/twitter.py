@@ -78,8 +78,8 @@ class TwitterExtractor(Extractor):
 
     def _extract_media(self, tweet, files):
         for media in tweet["extended_entities"]["media"]:
-            width = media["original_info"].get("width", 0),
-            height = media["original_info"].get("height", 0),
+            width = media["original_info"].get("width", 0)
+            height = media["original_info"].get("height", 0)
 
             if "video_info" in media:
                 if self.videos == "ytdl":
@@ -399,7 +399,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # Twitter card (#1005)
         ("https://twitter.com/billboard/status/1306599586602135555", {
             "options": (("cards", True),),
-            "pattern": r"https://pbs.twimg.com/card_img/1317274761030856707/",
+            "pattern": r"https://pbs.twimg.com/card_img/\d+/",
         }),
         # original retweets (#1026)
         ("https://twitter.com/jessica_3978/status/1296304589591810048", {
@@ -523,11 +523,9 @@ class TwitterAPI():
             endpoint, params, "sq-I-t-", "sq-cursor-bottom")
 
     def user_by_screen_name(self, screen_name):
-        endpoint = "graphql/-xfUfZsnR_zqjFd-IfrN5A/UserByScreenName"
-        params = {
-            "variables": '{"screen_name":"' + screen_name + '"'
-                         ',"withHighlightedLabel":true}'
-        }
+        endpoint = "graphql/jMaTS-_Ea8vh9rpKggJbCQ/UserByScreenName"
+        params = {"variables": '{"screen_name":"' + screen_name + '"'
+                               ',"withHighlightedLabel":true}'}
         try:
             return self._call(endpoint, params)["data"]["user"]
         except KeyError:
