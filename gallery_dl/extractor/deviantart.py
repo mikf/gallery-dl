@@ -165,11 +165,12 @@ class DeviantartExtractor(Extractor):
 
         # filename metadata
         alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
+        deviation["index_base36"] = util.bencode(deviation["index"], alphabet)
         sub = re.compile(r"\W").sub
         deviation["filename"] = "".join((
             sub("_", deviation["title"].lower()), "_by_",
             sub("_", deviation["author"]["username"].lower()), "-d",
-            util.bencode(deviation["index"], alphabet),
+            deviation["index_base36"],
         ))
 
     @staticmethod
