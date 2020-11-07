@@ -86,7 +86,7 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
             "album": {
                 "id": "lzVOv1Q9",
                 "name": "re:池永康晟 Ikenaga Yasunari 透出古朴",
-                "date": "2019.3.22 14:42",
+                "date": "dt:2019-03-22 14:42:00",
                 "description": str,
             },
             "num": int,
@@ -113,23 +113,24 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
     def metadata(self, page):
         """Return general metadata"""
         title, pos = text.extract(page, '<title>', '</title>')
-        count, pos = text.extract(page, 'id="pic-count">', '<', pos)
-        cover, pos = text.extract(page, ' src="', '"', pos)
+        _    , pos = text.extract(page, 'class="desc"', '', pos)
         cid  , pos = text.extract(page, '//www.mangoxo.com/channel/', '"', pos)
         cname, pos = text.extract(page, '>', '<', pos)
+        count, pos = text.extract(page, 'id="pic-count">', '<', pos)
+        cover, pos = text.extract(page, ' src="', '"', pos)
         date , pos = text.extract(page, '</i>', '<', pos)
         descr, pos = text.extract(page, '<pre>', '</pre>', pos)
 
         return {
             "channel": {
                 "id": cid,
-                "name": text.unescape(cname),
+                "name": text.unescape(cname.strip()),
                 "cover": cover,
             },
             "album": {
                 "id": self.album_id,
                 "name": text.unescape(title),
-                "date": date.strip(),
+                "date": text.parse_datetime(date.strip(), "%Y.%m.%d %H:%M"),
                 "description": text.unescape(descr),
             },
             "count": text.parse_int(count),
