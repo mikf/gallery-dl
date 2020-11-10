@@ -32,7 +32,7 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
         manga, _, chapter_string = info.partition(" :: ")
 
         data = self._data(self.gallery_url.split("/")[5])
-        data["manga"] = manga
+        data.setdefault('manga', manga)  # set manga, which defaults to that from MangaExtractor
         data["chapter_string"] = chapter_string.rstrip(" :")
         return self.parse_chapter_url(self.gallery_url, data)
 
@@ -80,11 +80,14 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
             chapters.reverse()
             return chapters
 
-        url   , pos = text.extract(page, '<link rel="canonical" href="', '"')
+        manga_title: str
+        manga_title, pos = text.extract(page, '<title>', '</title>')
+        url, pos = text.extract(page, '<link rel="canonical" href="', '"', pos)
         tags  , pos = text.extract(page, "<p>Tags: ", "</br>", pos)
         artist, pos = text.extract(page, "\nArtists: ", "</br>", pos)
         manga , pos = text.extract(page, "/manga/read/", "/", pos)
         data = {
+            'manga'   : manga_title.partition(' | ')[0],
             "manga_id": text.parse_int(url.rpartition("/")[2]),
             "tags"    : text.split_html(tags)[::2],
             "artist"  : text.split_html(artist),
