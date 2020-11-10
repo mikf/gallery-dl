@@ -109,8 +109,8 @@ class _500pxUserExtractor(_500pxExtractor):
         variables = {"username": self.user, "pageSize": 20}
         photos = self._request_graphql(
             "OtherPhotosQuery", variables,
-            "54524abbdc809f8d4e10d37839e8ab2d"
-            "3035413688cad9c7fbece13b66637e9d",
+            "018a5e5117bd72bdf28066aad02c4f2d"
+            "8acdf7f6127215d231da60e24080eb1b",
         )["user"]["photos"]
 
         while True:
@@ -122,8 +122,8 @@ class _500pxUserExtractor(_500pxExtractor):
             variables["cursor"] = photos["pageInfo"]["endCursor"]
             photos = self._request_graphql(
                 "OtherPhotosPaginationContainerQuery", variables,
-                "6d31e01104456ce642a2c6fc2f936812"
-                "b0f2a65c442d03e1521d769c20efe507",
+                "b4af70d42c71a5e43f0be36ce60dc81e"
+                "9742ebc117cde197350f2b86b5977d98",
             )["userByUsername"]["photos"]
 
 
@@ -153,7 +153,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
     def metadata(self):
         user = self._request_graphql(
             "ProfileRendererQuery", {"username": self.user_name},
-            "4d02ff5c13927a3ac73b3eef306490508bc765956940c31051468cf30402a503",
+            "5a17a9af1830b58b94a912995b7947b24f27f1301c6ea8ab71a9eb1a6a86585b",
         )["profile"]
         self.user_id = str(user["legacyId"])
 
@@ -166,7 +166,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
         }
         gallery = self._request_graphql(
             "GalleriesDetailQueryRendererQuery", variables,
-            "fd367cacf9bebcdc0620bd749dbd8fc9b0ccbeb54fc76b8b4b95e66a8c0cba49",
+            "fb8bb66d31b58903e2f01ebe66bbe7937b982753be3211855b7bce4e286c1a49",
         )["gallery"]
 
         self._photos = gallery["photos"]
