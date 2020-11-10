@@ -315,7 +315,7 @@ class InstagramExtractor(Extractor):
 
             if not has_next_page:
                 break
-
+            time.sleep(3)
             end_cursor = medias['page_info']['end_cursor']
             variables = '{{"{}":"{}","first":12,"after":"{}"}}'.format(
                 psdf['variables_id'],
@@ -342,7 +342,8 @@ class InstagramExtractor(Extractor):
 class InstagramImageExtractor(InstagramExtractor):
     """Extractor for PostPage"""
     subcategory = "image"
-    pattern = r"(?:https?://)?(?:www\.)?instagram\.com/(?:p|tv)/([^/?&#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/(?:p|tv|reel)/([^/?#]+)")
     test = (
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
@@ -440,6 +441,8 @@ class InstagramImageExtractor(InstagramExtractor):
                 }]
             }
         }),
+
+        ("https://www.instagram.com/reel/CDg_6Y1pxWu/"),
     )
 
     def __init__(self, match):
@@ -455,7 +458,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
     """Extractor for StoriesPage"""
     subcategory = "stories"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/stories/([^/?&#]+)(?:/(\d+))?")
+               r"/stories/([^/?#]+)(?:/(\d+))?")
     test = (
         ("https://www.instagram.com/stories/instagram/"),
         ("https://www.instagram.com/stories/highlights/18042509488170095/"),
@@ -475,7 +478,7 @@ class InstagramSavedExtractor(InstagramExtractor):
     subcategory = "saved"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
-               r"([^/?&#]+)/saved")
+               r"([^/?#]+)/saved")
     test = ("https://www.instagram.com/instagram/saved/",)
 
     def __init__(self, match):
@@ -500,8 +503,8 @@ class InstagramUserExtractor(InstagramExtractor):
     """Extractor for ProfilePage"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
-               r"([^/?&#]+)/?(?:$|[?#])")
+               r"/(?!(?:p|explore|directory|accounts|stories|tv|reel)/)"
+               r"([^/?#]+)/?(?:$|[?#])")
     test = (
         ("https://www.instagram.com/instagram/", {
             "range": "1-16",
@@ -530,7 +533,7 @@ class InstagramUserExtractor(InstagramExtractor):
             'node_id': 'id',
             'variables_id': 'id',
             'edge_to_medias': 'edge_owner_to_timeline_media',
-            'query_hash': '44efc15d3c13342d02df0b5a9fa3d33f',
+            'query_hash': '15bf78a4ad24e33cbd838fdb31353ac1',
         })
 
         if self.config('highlights'):
@@ -547,7 +550,7 @@ class InstagramChannelExtractor(InstagramExtractor):
     subcategory = "channel"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
-               r"([^/?&#]+)/channel")
+               r"([^/?#]+)/channel")
     test = ("https://www.instagram.com/instagram/channel/", {
         "range": "1-16",
         "count": ">= 16",
@@ -576,7 +579,7 @@ class InstagramTagExtractor(InstagramExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{subcategory}", "{tag}")
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/explore/tags/([^/?&#]+)")
+               r"/explore/tags/([^/?#]+)")
     test = ("https://www.instagram.com/explore/tags/instagram/", {
         "range": "1-16",
         "count": ">= 16",
@@ -599,5 +602,5 @@ class InstagramTagExtractor(InstagramExtractor):
             'node_id': 'name',
             'variables_id': 'tag_name',
             'edge_to_medias': 'edge_hashtag_to_media',
-            'query_hash': '7dabc71d3e758b1ec19ffb85639e427b',
+            'query_hash': 'c769cb6c71b24c8a86590b22402fda50',
         })

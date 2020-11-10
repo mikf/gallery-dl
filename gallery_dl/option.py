@@ -210,9 +210,24 @@ def build_parser():
         help="Number of seconds to sleep before each download",
     )
     downloader.add_argument(
+        "--filesize-min",
+        dest="filesize-min", metavar="SIZE", action=ConfigAction,
+        help="Do not download files smaller than SIZE (e.g. 500k or 2.5M)",
+    )
+    downloader.add_argument(
+        "--filesize-max",
+        dest="filesize-max", metavar="SIZE", action=ConfigAction,
+        help="Do not download files larger than SIZE (e.g. 500k or 2.5M)",
+    )
+    downloader.add_argument(
         "--no-part",
         dest="part", nargs=0, action=ConfigConstAction, const=False,
         help="Do not use .part files",
+    )
+    downloader.add_argument(
+        "--no-skip",
+        dest="skip", nargs=0, action=ConfigConstAction, const=False,
+        help="Do not skip downloads; overwrite existing files",
     )
     downloader.add_argument(
         "--no-mtime",

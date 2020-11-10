@@ -106,7 +106,7 @@ class NozomiPostExtractor(NozomiExtractor):
         #  multiple images per post
         ("https://nozomi.la/post/25588032.html", {
             "url": "6aa3b7db385abcc9d374bdffd19187bccbf8f228",
-            "keyword": "0aa99cbaaeada2984a1fbf912274409c6ba106d4",
+            "keyword": "8c3a2561ccc9ad429be9850d1383a952d0b4a8ab",
             "count": 7,
         }),
     )
@@ -124,7 +124,7 @@ class NozomiTagExtractor(NozomiExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{postid}"
-    pattern = r"(?:https?://)?nozomi\.la/tag/([^/?&#]+)-\d+\."
+    pattern = r"(?:https?://)?nozomi\.la/tag/([^/?#]+)-\d+\."
     test = ("https://nozomi.la/tag/3:1_aspect_ratio-1.html", {
         "pattern": r"^https://i.nozomi.la/\w/\w\w/\w+\.\w+$",
         "count": ">= 25",

@@ -27,19 +27,17 @@ class ImgurExtractor(Extractor):
         self.mp4 = self.config("mp4", True)
 
     def _prepare(self, image):
-        try:
-            del image["ad_url"]
-            del image["ad_type"]
-            del image["ad_config"]
-        except KeyError:
-            pass
+        image.update(image["metadata"])
+        del image["metadata"]
 
-        if image["animated"] and self.mp4 and "mp4" in image:
-            url = image["mp4"]
-        else:
-            url = image["link"]
+        if image["ext"] == "jpeg":
+            image["ext"] = "jpg"
+        elif image["is_animated"] and self.mp4 and image["ext"] == "gif":
+            image["ext"] = "mp4"
 
-        image["date"] = text.parse_timestamp(image["datetime"])
+        image["url"] = url = "https://i.imgur.com/{}.{}".format(
+            image["id"], image["ext"])
+        image["date"] = text.parse_datetime(image["created_at"])
         text.nameext_from_url(url, image)
 
         return url
@@ -59,39 +57,44 @@ class ImgurImageExtractor(ImgurExtractor):
     subcategory = "image"
     filename_fmt = "{category}_{id}{title:?_//}.{extension}"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/(?!gallery)(\w{7}|\w{5})[sbtmlh]?\.?"
+    pattern = BASE_PATTERN + r"/(?!gallery|search)(\w{7}|\w{5})[sbtmlh]?\.?"
     test = (
         ("https://imgur.com/21yMxCS", {
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
             "keyword": {
-                "account_id"   : None,
-                "account_url"  : None,
-                "animated"     : False,
-                "bandwidth"    : int,
-                "date"         : "dt:2016-11-10 14:24:35",
-                "datetime"     : 1478787875,
-                "description"  : None,
-                "edited"       : "0",
-                "extension"    : "png",
-                "favorite"     : False,
-                "filename"     : "21yMxCS",
-                "has_sound"    : False,
-                "height"       : 32,
-                "id"           : "21yMxCS",
-                "in_gallery"   : False,
-                "in_most_viral": False,
-                "is_ad"        : False,
-                "link"         : "https://i.imgur.com/21yMxCS.png",
-                "nsfw"         : False,
-                "section"      : None,
-                "size"         : 182,
-                "tags"         : [],
-                "title"        : "Test",
-                "type"         : "image/png",
-                "views"        : int,
-                "vote"         : None,
-                "width"        : 64,
+                "account_id"    : 0,
+                "comment_count" : int,
+                "cover_id"      : "21yMxCS",
+                "date"          : "dt:2016-11-10 14:24:35",
+                "description"   : "",
+                "downvote_count": int,
+                "duration"      : 0,
+                "ext"           : "png",
+                "favorite"      : False,
+                "favorite_count": 0,
+                "has_sound"     : False,
+                "height"        : 32,
+                "id"            : "21yMxCS",
+                "image_count"   : 1,
+                "in_most_viral" : False,
+                "is_ad"         : False,
+                "is_album"      : False,
+                "is_animated"   : False,
+                "is_looping"    : False,
+                "is_mature"     : False,
+                "is_pending"    : False,
+                "mime_type"     : "image/png",
+                "name"          : "test-テスト",
+                "point_count"   : int,
+                "privacy"       : "",
+                "score"         : int,
+                "size"          : 182,
+                "title"         : "Test",
+                "upvote_count"  : int,
+                "url"           : "https://i.imgur.com/21yMxCS.png",
+                "view_count"    : int,
+                "width"         : 64,
             },
         }),
         ("http://imgur.com/0gybAXR", {  # gifv/mp4 video
@@ -101,30 +104,32 @@ class ImgurImageExtractor(ImgurExtractor):
         ("https://imgur.com/XFfsmuC", {  # missing title in API response (#467)
             "keyword": {"title": "Tears are a natural response to irritants"},
         }),
-        ("https://imgur.com/HjoXJAd", {  # url ends with '.jpg?1'
-            "url": "ec2cf11a2bfb4939feff374781a6e6f3e9af8e8e",
-        }),
         ("https://imgur.com/1Nily2P", {  # animated png
             "pattern": "https://i.imgur.com/1Nily2P.png",
         }),
         ("https://imgur.com/zzzzzzz", {  # not found
             "exception": exception.HttpError,
         }),
-        ("https://www.imgur.com/21yMxCS"),  # www
-        ("https://m.imgur.com/21yMxCS"),  # mobile
-        ("https://imgur.com/zxaY6"),  # 5 character key
-        ("https://i.imgur.com/21yMxCS.png"),  # direct link
+        ("https://www.imgur.com/21yMxCS"),     # www
+        ("https://m.imgur.com/21yMxCS"),       # mobile
+        ("https://imgur.com/zxaY6"),           # 5 character key
+        ("https://i.imgur.com/21yMxCS.png"),   # direct link
         ("https://i.imgur.com/21yMxCSh.png"),  # direct link thumbnail
-        ("https://i.imgur.com/zxaY6.gif"),  # direct link (short)
-        ("https://i.imgur.com/zxaY6s.gif"),  # direct link (short; thumb)
+        ("https://i.imgur.com/zxaY6.gif"),     # direct link (short)
+        ("https://i.imgur.com/zxaY6s.gif"),    # direct link (short; thumb)
     )
 
     def items(self):
         image = self.api.image(self.key)
-        if not image["title"]:
-            page = self.request(self.root + "/" + self.key, fatal=False).text
-            title = text.extract(page, "<title>", "<")[0] or ""
-            image["title"] = text.unescape(title.rpartition(" - ")[0].strip())
+
+        try:
+            del image["ad_url"]
+            del image["ad_type"]
+        except KeyError:
+            pass
+
+        image.update(image["media"][0])
+        del image["media"]
         url = self._prepare(image)
         yield Message.Version, 1
         yield Message.Directory, image
@@ -143,53 +148,49 @@ class ImgurAlbumExtractor(ImgurExtractor):
             "url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
             "keyword": {
                 "album": {
-                    "account_id"  : None,
-                    "account_url" : None,
-                    "cover"       : "693j2Kr",
-                    "cover_edited": None,
-                    "cover_height": 1400,
-                    "cover_width" : 951,
-                    "date"        : "dt:2015-10-09 10:37:50",
-                    "datetime"    : 1444387070,
-                    "description" : None,
-                    "favorite"    : False,
-                    "id"          : "TcBmP",
-                    "images_count": 19,
-                    "in_gallery"  : False,
-                    "is_ad"       : False,
-                    "is_album"    : True,
-                    "layout"      : "blog",
-                    "link"        : "https://imgur.com/a/TcBmP",
-                    "nsfw"        : bool,
-                    "privacy"     : "hidden",
-                    "section"     : None,
-                    "title"       : "138",
-                    "views"       : int,
+                    "account_id"    : 0,
+                    "comment_count" : int,
+                    "cover_id"      : "693j2Kr",
+                    "date"          : "dt:2015-10-09 10:37:50",
+                    "description"   : "",
+                    "downvote_count": 0,
+                    "favorite"      : False,
+                    "favorite_count": 0,
+                    "id"            : "TcBmP",
+                    "image_count"   : 19,
+                    "in_most_viral" : False,
+                    "is_ad"         : False,
+                    "is_album"      : True,
+                    "is_mature"     : False,
+                    "is_pending"    : False,
+                    "privacy"       : "private",
+                    "score"         : int,
+                    "title"         : "138",
+                    "topic"         : "",
+                    "topic_id"      : 0,
+                    "upvote_count"  : int,
+                    "url"           : "https://imgur.com/a/TcBmP",
+                    "view_count"    : int,
+                    "virality"      : int,
                 },
-                "account_id" : None,
-                "account_url": None,
-                "animated"   : bool,
-                "bandwidth"  : int,
+                "account_id" : 0,
+                "count"      : 19,
                 "date"       : "type:datetime",
-                "datetime"   : int,
-                "description": None,
-                "edited"     : "0",
-                "favorite"   : False,
+                "description": "",
+                "ext"        : "jpg",
                 "has_sound"  : False,
                 "height"     : int,
                 "id"         : str,
-                "in_gallery" : False,
-                "is_ad"      : False,
-                "link"       : r"re:https://i\.imgur\.com/\w+\.jpg",
-                "nsfw"       : None,
+                "is_animated": False,
+                "is_looping" : False,
+                "mime_type"  : "image/jpeg",
+                "name"       : str,
                 "num"        : int,
-                "section"    : None,
                 "size"       : int,
-                "tags"       : list,
-                "title"      : None,
-                "type"       : "image/jpeg",
-                "views"      : int,
-                "vote"       : None,
+                "title"      : str,
+                "type"       : "image",
+                "updated_at" : None,
+                "url"        : str,
                 "width"      : int,
             },
         }),
@@ -208,13 +209,15 @@ class ImgurAlbumExtractor(ImgurExtractor):
 
     def items(self):
         album = self.api.album(self.key)
-        album["date"] = text.parse_timestamp(album["datetime"])
-        images = album["images"]
+        album["date"] = text.parse_datetime(album["created_at"])
+
+        images = album["media"]
+        del album["media"]
         count = len(images)
 
         try:
-            del album["images"]
-            del album["ad_config"]
+            del album["ad_url"]
+            del album["ad_type"]
         except KeyError:
             pass
 
@@ -239,29 +242,24 @@ class ImgurGalleryExtractor(ImgurExtractor):
         ("https://imgur.com/gallery/eD9CT", {
             "pattern": "https://imgur.com/a/eD9CT",
         }),
-        ("https://imgur.com/t/unmuted/26sEhNr", {  # unmuted URL
-            "pattern": "https://imgur.com/26sEhNr",
-        }),
+        ("https://imgur.com/t/unmuted/26sEhNr"),
         ("https://imgur.com/t/cat/qSB8NbN"),
     )
 
     def items(self):
-        url = self.root + "/a/" + self.key
-        with self.request(url, method="HEAD", fatal=False) as response:
-            if response.status_code < 400:
-                extr = ImgurAlbumExtractor
-            else:
-                extr = ImgurImageExtractor
-                url = self.root + "/" + self.key
-
-        yield Message.Version, 1
+        if self.api.gallery(self.key)["is_album"]:
+            url = "{}/a/{}".format(self.root, self.key)
+            extr = ImgurAlbumExtractor
+        else:
+            url = "{}/{}".format(self.root, self.key)
+            extr = ImgurImageExtractor
         yield Message.Queue, url, {"_extractor": extr}
 
 
 class ImgurUserExtractor(ImgurExtractor):
     """Extractor for all images posted by a user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/user/([^/?&#]+)(?:/posts|/submitted)?/?$"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)(?:/posts|/submitted)?/?$"
     test = (
         ("https://imgur.com/user/Miguenzo", {
             "range": "1-100",
@@ -279,7 +277,7 @@ class ImgurUserExtractor(ImgurExtractor):
 class ImgurFavoriteExtractor(ImgurExtractor):
     """Extractor for a user's favorites"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/user/([^/?&#]+)/favorites"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/favorites"
     test = ("https://imgur.com/user/Miguenzo/favorites", {
         "range": "1-100",
         "count": 100,
@@ -293,7 +291,7 @@ class ImgurFavoriteExtractor(ImgurExtractor):
 class ImgurSubredditExtractor(ImgurExtractor):
     """Extractor for a subreddits's imgur links"""
     subcategory = "subreddit"
-    pattern = BASE_PATTERN + r"/r/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/r/([^/?#]+)"
     test = ("https://imgur.com/r/pics", {
         "range": "1-100",
         "count": 100,
@@ -304,8 +302,40 @@ class ImgurSubredditExtractor(ImgurExtractor):
         return self._items_queue(self.api.gallery_subreddit(self.key))
 
 
-class ImgurAPI():
+class ImgurTagExtractor(ImgurExtractor):
+    """Extractor for imgur tag searches"""
+    subcategory = "tag"
+    pattern = BASE_PATTERN + r"/t/([^/?#]+)$"
+    test = ("https://imgur.com/t/animals", {
+        "range": "1-100",
+        "count": 100,
+        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+    })
 
+    def items(self):
+        return self._items_queue(self.api.gallery_tag(self.key))
+
+
+class ImgurSearchExtractor(ImgurExtractor):
+    """Extractor for imgur search results"""
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/search(?:/[^?#]+)?/?\?q=([^&#]+)"
+    test = ("https://imgur.com/search?q=cute+cat", {
+        "range": "1-100",
+        "count": 100,
+        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+    })
+
+    def items(self):
+        key = text.unquote(self.key.replace("+", " "))
+        return self._items_queue(self.api.gallery_search(key))
+
+
+class ImgurAPI():
+    """Interface for the Imgur API
+
+    Ref: https://apidocs.imgur.com/
+    """
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
@@ -314,33 +344,59 @@ class ImgurAPI():
         }
 
     def account_favorites(self, account):
-        endpoint = "account/{}/gallery_favorites".format(account)
+        endpoint = "/3/account/{}/gallery_favorites".format(account)
         return self._pagination(endpoint)
 
+    def gallery_search(self, query):
+        endpoint = "/3/gallery/search"
+        params = {"q": query}
+        return self._pagination(endpoint, params)
+
     def account_submissions(self, account):
-        endpoint = "account/{}/submissions".format(account)
+        endpoint = "/3/account/{}/submissions".format(account)
         return self._pagination(endpoint)
 
     def gallery_subreddit(self, subreddit):
-        endpoint = "gallery/r/{}".format(subreddit)
+        endpoint = "/3/gallery/r/{}".format(subreddit)
         return self._pagination(endpoint)
 
-    def album(self, album_hash):
-        return self._call("album/" + album_hash)
+    def gallery_tag(self, tag):
+        endpoint = "/3/gallery/t/{}".format(tag)
+        return self._pagination(endpoint, key="items")
 
     def image(self, image_hash):
-        return self._call("image/" + image_hash)
+        endpoint = "/post/v1/media/" + image_hash
+        params = {"include": "media,tags,account"}
+        return self._call(endpoint, params)
 
-    def _call(self, endpoint):
-        return self.extractor.request(
-            "https://api.imgur.com/3/" + endpoint, headers=self.headers,
-        ).json()["data"]
+    def album(self, album_hash):
+        endpoint = "/post/v1/albums/" + album_hash
+        params = {"include": "media,tags,account"}
+        return self._call(endpoint, params)
 
-    def _pagination(self, endpoint):
+    def gallery(self, gallery_hash):
+        endpoint = "/post/v1/posts/" + gallery_hash
+        return self._call(endpoint)
+
+    def _call(self, endpoint, params=None):
+        try:
+            return self.extractor.request(
+                "https://api.imgur.com" + endpoint,
+                params=params, headers=self.headers,
+            ).json()
+        except exception.HttpError as exc:
+            if exc.status != 403 or b"capacity" not in exc.response.content:
+                raise
+        self.extractor.sleep(seconds=600)
+        return self._call(endpoint)
+
+    def _pagination(self, endpoint, params=None, key=None):
         num = 0
 
         while True:
-            data = self._call("{}/{}".format(endpoint, num))
+            data = self._call("{}/{}".format(endpoint, num), params)["data"]
+            if key:
+                data = data[key]
             if not data:
                 return
             yield from data

@@ -83,18 +83,19 @@ class MangadexChapterExtractor(MangadexExtractor):
 
         chapter, sep, minor = cdata["chapter"].partition(".")
         return {
-            "manga": mdata["manga"]["title"],
+            "manga"   : text.unescape(mdata["manga"]["title"]),
             "manga_id": cdata["manga_id"],
-            "artist": mdata["manga"]["artist"],
-            "author": mdata["manga"]["author"],
-            "title": text.unescape(cdata["title"]),
-            "volume": text.parse_int(cdata["volume"]),
-            "chapter": text.parse_int(chapter),
+            "artist"  : text.unescape(mdata["manga"]["artist"]),
+            "author"  : text.unescape(mdata["manga"]["author"]),
+            "title"   : text.unescape(cdata["title"]),
+            "volume"  : text.parse_int(cdata["volume"]),
+            "chapter" : text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "chapter_id": cdata["id"],
-            "group": mdata["chapter"][self.chapter_id]["group_name"],
-            "date": text.parse_timestamp(cdata["timestamp"]),
-            "lang": util.language_to_code(cdata["lang_name"]),
+            "group"   : text.unescape(
+                mdata["chapter"][self.chapter_id]["group_name"]),
+            "date"    : text.parse_timestamp(cdata["timestamp"]),
+            "lang"    : util.language_to_code(cdata["lang_name"]),
             "language": cdata["lang_name"],
         }
 
@@ -159,18 +160,18 @@ class MangadexMangaExtractor(MangadexExtractor):
             chapter, sep, minor = info["chapter"].partition(".")
             lang = self.iso639_map.get(info["lang_code"], info["lang_code"])
             results.append({
-                "manga": manga["title"],
+                "manga"   : text.unescape(manga["title"]),
                 "manga_id": self.manga_id,
-                "artist": manga["artist"],
-                "author": manga["author"],
-                "title": text.unescape(info["title"]),
-                "volume": text.parse_int(info["volume"]),
-                "chapter": text.parse_int(chapter),
+                "artist"  : text.unescape(manga["artist"]),
+                "author"  : text.unescape(manga["author"]),
+                "title"   : text.unescape(info["title"]),
+                "volume"  : text.parse_int(info["volume"]),
+                "chapter" : text.parse_int(chapter),
                 "chapter_minor": sep + minor,
                 "chapter_id": text.parse_int(chid),
-                "group": text.unescape(info["group_name"]),
-                "date": text.parse_timestamp(info["timestamp"]),
-                "lang": lang,
+                "group"   : text.unescape(info["group_name"]),
+                "date"    : text.parse_timestamp(info["timestamp"]),
+                "lang"    : lang,
                 "language": util.code_to_language(lang),
                 "_extractor": MangadexChapterExtractor,
             })

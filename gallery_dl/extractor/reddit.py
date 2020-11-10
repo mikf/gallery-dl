@@ -17,7 +17,7 @@ class RedditExtractor(Extractor):
     """Base class for reddit extractors"""
     category = "reddit"
     directory_fmt = ("{category}", "{subreddit}")
-    filename_fmt = "{id} {title[:220]}.{extension}"
+    filename_fmt = "{id}{num:? //>02} {title[:220]}.{extension}"
     archive_fmt = "{filename}"
     cookiedomain = None
 
@@ -47,13 +47,22 @@ class RedditExtractor(Extractor):
                 urls = []
 
                 if submission:
+                    submission["date"] = text.parse_timestamp(
+                        submission["created_utc"])
                     yield Message.Directory, submission
                     visited.add(submission["id"])
                     url = submission["url"]
+                    submission["num"] = 0
 
                     if url.startswith("https://i.redd.it/"):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
+
+                    elif "gallery_data" in submission:
+                        for submission["num"], url in enumerate(
+                                self._extract_gallery(submission), 1):
+                            text.nameext_from_url(url, submission)
+                            yield Message.Url, url, submission
 
                     elif submission["is_video"]:
                         if videos:
@@ -107,12 +116,28 @@ class RedditExtractor(Extractor):
     def submissions(self):
         """Return an iterable containing all (submission, comments) tuples"""
 
+    def _extract_gallery(self, submission):
+        if submission["gallery_data"] is None:
+            self.log.warning("gallery '%s' was deleted", submission["id"])
+            return
+
+        meta = submission["media_metadata"]
+        for item in submission["gallery_data"]["items"]:
+            src = meta[item["media_id"]]["s"]
+            url = src.get("u") or src.get("gif") or src.get("mp4")
+            if url:
+                yield url.partition("?")[0].replace("/preview.", "/i.", 1)
+            else:
+                self.log.error("Unable to get download URL for item '%s'",
+                               item["media_id"])
+                self.log.debug(src)
+
 
 class RedditSubredditExtractor(RedditExtractor):
     """Extractor for URLs from subreddits on reddit.com"""
     subcategory = "subreddit"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/r/"
-               r"([^/?&#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?(?:$|#)")
+               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?(?:$|#)")
     test = (
         ("https://www.reddit.com/r/lavaporn/", {
             "range": "1-20",
@@ -137,7 +162,7 @@ class RedditUserExtractor(RedditExtractor):
     """Extractor for URLs from posts by a reddit user"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
-               r"([^/?&#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?")
+               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?")
     test = (
         ("https://www.reddit.com/user/username/", {
             "count": ">= 2",
@@ -160,9 +185,8 @@ class RedditSubmissionExtractor(RedditExtractor):
     """Extractor for URLs from a submission on reddit.com"""
     subcategory = "submission"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:\w+\.)?reddit\.com/r/[^/?&#]+/comments|"
-               r"redd\.it"
-               r")/([a-z0-9]+)")
+               r"(?:\w+\.)?reddit\.com/(?:r/[^/?#]+/comments|gallery)"
+               r"|redd\.it)/([a-z0-9]+)")
     test = (
         ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
             "pattern": r"https://c2.staticflickr.com/8/7272/\w+_k.jpg",
@@ -172,6 +196,20 @@ class RedditSubmissionExtractor(RedditExtractor):
             "options": (("comments", 500),),
             "pattern": r"https://",
             "count": 3,
+        }),
+        ("https://www.reddit.com/gallery/hrrh23", {
+            "url": "25b91ede15459470274dd17291424b037ed8b0ae",
+            "content": "1e7dde4ee7d5f4c4b45749abfd15b2dbfa27df3f",
+            "count": 3,
+        }),
+        # deleted gallery (#953)
+        ("https://www.reddit.com/gallery/icfgzv", {
+            "count": 0,
+        }),
+        # animated gallery items (#955)
+        ("https://www.reddit.com/r/araragi/comments/ib32hm", {
+            "pattern": r"https://i\.redd\.it/\w+\.gif",
+            "count": 2,
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
@@ -193,7 +231,7 @@ class RedditImageExtractor(Extractor):
     subcategory = "image"
     archive_fmt = "{filename}"
     pattern = (r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
-               r"/[^/?&#]+(?:\?[^#]*)?")
+               r"/[^/?#]+(?:\?[^#]*)?")
     test = (
         ("https://i.redd.it/upjtjcx2npzz.jpg", {
             "url": "0de614900feef103e580b632190458c0b62b641a",

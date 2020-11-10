@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -42,7 +42,7 @@ class LineblogBase():
 
 class LineblogBlogExtractor(LineblogBase, LivedoorBlogExtractor):
     """Extractor for a user's blog on lineblog.me"""
-    pattern = r"(?:https?://)?lineblog\.me/(\w+)/?(?:$|[?&#])"
+    pattern = r"(?:https?://)?lineblog\.me/(\w+)/?(?:$|[?#])"
     test = ("https://lineblog.me/mamoru_miyano/", {
         "range": "1-20",
         "count": 20,

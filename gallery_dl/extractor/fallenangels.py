@@ -17,7 +17,7 @@ class FallenangelsChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from fascans.com"""
     category = "fallenangels"
     pattern = (r"(?:https?://)?(manga|truyen)\.fascans\.com"
-               r"/manga/([^/]+)/(\d+)(\.[^/?&#]+)?")
+               r"/manga/([^/?#]+)/([^/?#]+)")
     test = (
         ("https://manga.fascans.com/manga/chronos-ruler/20/1", {
             "url": "4604a7914566cc2da0ff789aa178e2d1c8c241e3",
@@ -28,12 +28,13 @@ class FallenangelsChapterExtractor(ChapterExtractor):
             "keyword": "2bdb7334c0e3eceb9946ffd3132df679b4a94f6a",
         }),
         ("http://manga.fascans.com/manga/rakudai-kishi-no-eiyuutan/19.5", {
-            "keyword": "9fcca4c1a90d11f00764f62477ebe10bd408021c",
+            "url": "273f6863966c83ea79ad5846a2866e08067d3f0e",
+            "keyword": "d1065685bfe0054c4ff2a0f20acb089de4cec253",
         }),
     )
 
     def __init__(self, match):
-        self.version, self.manga, self.chapter, self.minor = match.groups()
+        self.version, self.manga, self.chapter = match.groups()
         url = "https://{}.fascans.com/manga/{}/{}/1".format(
             self.version, self.manga, self.chapter)
         ChapterExtractor.__init__(self, match, url)
@@ -41,11 +42,12 @@ class FallenangelsChapterExtractor(ChapterExtractor):
     def metadata(self, page):
         extr = text.extract_from(page)
         lang = "vi" if self.version == "truyen" else "en"
+        chapter, sep, minor = self.chapter.partition(".")
         return {
             "manga"   : extr('name="description" content="', ' Chapter '),
             "title"   : extr(':  ', ' - Page 1'),
-            "chapter" : self.chapter,
-            "chapter_minor": self.minor or "",
+            "chapter" : chapter,
+            "chapter_minor": sep + minor,
             "lang"    : lang,
             "language": util.code_to_language(lang),
         }
@@ -66,9 +68,9 @@ class FallenangelsMangaExtractor(MangaExtractor):
     category = "fallenangels"
     pattern = r"(?:https?://)?((manga|truyen)\.fascans\.com/manga/[^/]+)/?$"
     test = (
-        ("http://manga.fascans.com/manga/trinity-seven", {
-            "url": "293057f264de6c438b979bd1c3de4719568db452",
-            "keyword": "50e0374dba60734230e4284b5ffdadef5104ae62",
+        ("https://manga.fascans.com/manga/chronos-ruler", {
+            "url": "eea07dd50f5bc4903aa09e2cc3e45c7241c9a9c2",
+            "keyword": "c414249525d4c74ad83498b3c59a813557e59d7e",
         }),
         ("https://truyen.fascans.com/manga/rakudai-kishi-no-eiyuutan", {
             "url": "51a731a6b82d5eb7a335fbae6b02d06aeb2ab07b",

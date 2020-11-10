@@ -17,9 +17,7 @@ from .common import (
     generate_extractors,
 )
 from .. import text, util
-import base64
 import json
-import re
 
 
 class FoolslideBase(SharedConfigMixin):
@@ -47,7 +45,7 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
     """Base class for chapter extractors for FoOlSlide based sites"""
     directory_fmt = ("{category}", "{manga}", "{chapter_string}")
     archive_fmt = "{id}"
-    pattern_fmt = r"(/read/[^/?&#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
+    pattern_fmt = r"(/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     decode = "default"
 
     def items(self):
@@ -83,30 +81,12 @@ class FoolslideChapterExtractor(FoolslideBase, ChapterExtractor):
         })
 
     def images(self, page):
-        data = None
-
-        if self.decode == "base64":
-            pos = page.find("'fromCharCode'")
-            if pos >= 0:
-                blob = text.extract(page, "'", "'", pos+15)[0]
-                base64_data = re.sub(r"[a-zA-Z]", _decode_jaiminisbox, blob)
-            else:
-                base64_data = text.extract(page, 'atob("', '"')[0]
-            if base64_data:
-                data = base64.b64decode(base64_data.encode()).decode()
-        elif self.decode == "double":
-            pos = page.find("[{")
-            if pos >= 0:
-                data = text.extract(page, " = ", ";", pos)[0]
-
-        if not data:
-            data = text.extract(page, "var pages = ", ";")[0]
-        return json.loads(data)
+        return json.loads(text.extract(page, "var pages = ", ";")[0])
 
 
 class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
-    pattern_fmt = r"(/series/[^/?&#]+)"
+    pattern_fmt = r"(/series/[^/?#]+)"
 
     def chapters(self, page):
         extr = text.extract_from(page)
@@ -126,16 +106,6 @@ class FoolslideMangaExtractor(FoolslideBase, MangaExtractor):
             })))
 
 
-def _decode_jaiminisbox(match):
-    c = match.group(0)
-
-    # ord("Z") == 90, ord("z") == 122
-    N = 90 if c <= "Z" else 122
-    C = ord(c) + 13
-
-    return chr(C if N >= C else (C - 26))
-
-
 EXTRACTORS = {
     "dokireader": {
         "root": "https://kobato.hologfx.com/reader",
@@ -149,24 +119,6 @@ EXTRACTORS = {
               "boku_ha_ohimesama_ni_narenai/"), {
                 "url": "1c1f5a7258ce4f631f5fc32be548d78a6a57990d",
                 "keyword": "614d89a6045b85c822cbd3e67578ea7577dfc995",
-            }),
-    },
-    "jaiminisbox": {
-        "root": "https://jaiminisbox.com/reader",
-        "pattern": r"(?:www\.)?jaiminisbox\.com/reader",
-        "extra": {"decode": "base64"},
-        "test-chapter": (
-            ("https://jaiminisbox.com/reader/read/fire-force/en/0/215/", {
-                "keyword": "6d2b5c0b34344156b0301ff2733389dfe36a7604",
-            }),
-            ("https://jaiminisbox.com/reader/read/red-storm/en/0/336/", {
-                "keyword": "53c6dddf3e5a61b6002a886ccd7e3354e973299a",
-            }),
-        ),
-        "test-manga":
-            ("https://jaiminisbox.com/reader/series/sora_no_kian/", {
-                "url": "66612be177dc3b3fa1d1f537ef02f4f701b163ea",
-                "keyword": "0908a4145bb03acc4210f5d01169988969f5acd1",
             }),
     },
     "kireicake": {
@@ -213,42 +165,15 @@ EXTRACTORS = {
         "pattern": r"(?:(?:www\.)?sensescans\.com/reader"
                    r"|reader\.sensescans\.com)",
         "test-chapter": (
-            (("https://sensescans.com/reader/read/"
-              "magi__labyrinth_of_magic/en/37/369/"), {
-                  "url": "8bbc59a995640bbb944c0b1be06a490909b58be1",
-                  "keyword": "07acd84fb18a9f1fd6dff5befe711bcca0ff9988",
+            ("https://sensescans.com/reader/read/ao_no_orchestra/en/0/26/", {
+                "url": "bbd428dc578f5055e9f86ad635b510386cd317cd",
+                "keyword": "083ef6f8831c84127fe4096fa340a249be9d1424",
             }),
-            (("https://reader.sensescans.com/read/"
-              "magi__labyrinth_of_magic/en/37/369/"), {
-                  "url": "8bbc59a995640bbb944c0b1be06a490909b58be1",
-                  "keyword": "07acd84fb18a9f1fd6dff5befe711bcca0ff9988",
-            }),
+            ("https://reader.sensescans.com/read/ao_no_orchestra/en/0/26/"),
         ),
         "test-manga":
             ("https://sensescans.com/reader/series/yotsubato/", {
-                "url": "ee4dca7c421bf15ac039200f8c0bcb0858153640",
-                "keyword": "f94961bd731bd878bbd4d48555bc3ace1d937364",
-            }),
-    },
-    "worldthree": {
-        "root": "http://www.slide.world-three.org",
-        "pattern": r"(?:www\.)?slide\.world-three\.org",
-        "test-chapter": (
-            (("http://www.slide.world-three.org"
-              "/read/black_bullet/en/2/7/page/1"), {
-                "url": "be2f04f6e2d311b35188094cfd3e768583271584",
-                "keyword": "967d536a65de4d52478d5b666a1760b181eddb6e",
-            }),
-            (("http://www.slide.world-three.org"
-              "/read/idolmster_cg_shuffle/en/0/4/2/"), {
-                "url": "6028ea5ca282744f925dfad92eeb98509f9cc78c",
-                "keyword": "f3cfe2ad3388991f1d045c85d0fa94795a7694dc",
-            }),
-        ),
-        "test-manga":
-            ("http://www.slide.world-three.org/series/black_bullet/", {
-                "url": "5743b93512d26e6b540d90a7a5d69208b6d4a738",
-                "keyword": "3a24f1088b4d7f3b798a96163f21ca251293a120",
+                "count": ">= 3",
             }),
     },
     "_ckey": "chapterclass",

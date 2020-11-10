@@ -19,8 +19,8 @@ class NewgroundsExtractor(Extractor):
     """Base class for newgrounds extractors"""
     category = "newgrounds"
     directory_fmt = ("{category}", "{artist[:10]:J, }")
-    filename_fmt = "{category}_{index}_{title}.{extension}"
-    archive_fmt = "{index}"
+    filename_fmt = "{category}_{_index}_{title}.{extension}"
+    archive_fmt = "{_index}"
     root = "https://www.newgrounds.com"
     cookiedomain = ".newgrounds.com"
     cookienames = ("NG_GG_username", "vmk1du5I8m")
@@ -39,11 +39,19 @@ class NewgroundsExtractor(Extractor):
                 post = self.extract_post(post_url)
                 url = post.get("url")
             except Exception:
+                self.log.debug("", exc_info=True)
                 url = None
 
             if url:
                 yield Message.Directory, post
                 yield Message.Url, url, text.nameext_from_url(url, post)
+
+                for num, url in enumerate(text.extract_iter(
+                        post["_comment"], 'data-smartload-src="', '"'), 1):
+                    post["num"] = num
+                    post["_index"] = "{}_{:>02}".format(post["index"], num)
+                    url = text.ensure_http_scheme(url)
+                    yield Message.Url, url, text.nameext_from_url(url, post)
             else:
                 self.log.warning(
                     "Unable to get download URL for '%s'", post_url)
@@ -97,8 +105,9 @@ class NewgroundsExtractor(Extractor):
         else:
             data = self._extract_media_data(extr, post_url)
 
-        data["comment"] = text.unescape(text.remove_html(extr(
-            'id="author_comments">', '</div>'), "", ""))
+        data["_comment"] = extr('id="author_comments"', '</div>')
+        data["comment"] = text.unescape(text.remove_html(
+            data["_comment"].partition(">")[2], "", ""))
         data["favorites"] = text.parse_int(extr(
             'id="faves_load">', '<').replace(",", ""))
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
@@ -125,34 +134,65 @@ class NewgroundsExtractor(Extractor):
             "width"      : text.parse_int(full('width="', '"')),
             "height"     : text.parse_int(full('height="', '"')),
         }
-        data["index"] = text.parse_int(
-            data["url"].rpartition("/")[2].partition("_")[0])
+        index = data["url"].rpartition("/")[2].partition("_")[0]
+        data["index"] = text.parse_int(index)
+        data["_index"] = index
         return data
 
     @staticmethod
     def _extract_audio_data(extr, url):
+        index = url.split("/")[5]
         return {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
             "url"        : extr('{"url":"', '"').replace("\\/", "/"),
-            "index"      : text.parse_int(url.split("/")[5]),
+            "index"      : text.parse_int(index),
+            "_index"     : index,
             "rating"     : "",
         }
 
-    @staticmethod
-    def _extract_media_data(extr, url):
+    def _extract_media_data(self, extr, url):
+        index = url.split("/")[5]
+        title = extr('"og:title" content="', '"')
+        src = extr('{"url":"', '"')
+
+        if src:
+            src = src.replace("\\/", "/")
+            fallback = ()
+            date = text.parse_datetime(extr(
+                'itemprop="datePublished" content="', '"'))
+        else:
+            url = self.root + "/portal/video/" + index
+            headers = {
+                "Accept": "application/json, text/javascript, */*; q=0.01",
+                "X-Requested-With": "XMLHttpRequest",
+                "Referer": self.root,
+            }
+            sources = self.request(url, headers=headers).json()["sources"]
+            src = sources["360p"][0]["src"].replace(".360p.", ".")
+            fallback = self._video_fallback(sources)
+            date = text.parse_timestamp(src.rpartition("?")[2])
+
         return {
-            "title"      : text.unescape(extr('"og:title" content="', '"')),
-            "url"        : extr('{"url":"', '"').replace("\\/", "/"),
-            "date"       : text.parse_datetime(extr(
-                'itemprop="datePublished" content="', '"')),
+            "title"      : text.unescape(title),
+            "url"        : src,
+            "date"       : date,
             "description": text.unescape(extr(
                 'itemprop="description" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
-            "index"      : text.parse_int(url.split("/")[5]),
+            "index"      : text.parse_int(index),
+            "_index"     : index,
+            "_fallback"  : fallback,
         }
+
+    @staticmethod
+    def _video_fallback(sources):
+        sources = list(sources.items())
+        sources.sort(key=lambda src: text.parse_int(src[0][:-1]), reverse=True)
+        for src in sources:
+            yield src[1][0]["src"]
 
     def _pagination(self, kind):
         root = self.user_root
@@ -189,7 +229,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
     """Extractor for a single image from newgrounds.com"""
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:www\.)?newgrounds\.com/art/view/([^/?&#]+)/[^/?&#]+"
+               r"(?:www\.)?newgrounds\.com/art/view/([^/?#]+)/[^/?#]+"
                r"|art\.ngfiles\.com/images/\d+/\d+_([^_]+)_([^.]+))")
     test = (
         ("https://www.newgrounds.com/art/view/tomfulp/ryu-is-hawt", {
@@ -215,6 +255,10 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
         ("https://art.ngfiles.com/images/0/94_tomfulp_ryu-is-hawt.gif", {
             "url": "57f182bcbbf2612690c3a54f16ffa1da5105245e",
         }),
+        ("https://www.newgrounds.com/art/view/sailoryon/yon-dream-buster", {
+            "url": "84eec95e663041a80630df72719f231e157e5f5d",
+            "count": 2,
+        })
     )
 
     def __init__(self, match):
@@ -236,23 +280,21 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?newgrounds\.com"
                r"(/(?:portal/view|audio/listen)/\d+)")
     test = (
-        ("https://www.newgrounds.com/portal/view/589549", {
-            "url": "48d916d819c99139e6a3acbbf659a78a867d363e",
-            "content": "ceb865426727ec887177d99e0d20bb021e8606ae",
+        ("https://www.newgrounds.com/portal/view/595355", {
+            "pattern": r"https://uploads\.ungrounded\.net/alternate/564000"
+                       r"/564957_alternate_31\.mp4\?1359712249",
             "keyword": {
-                "artist"     : ["psychogoldfish", "tomfulp"],
-                "comment"    : "re:People have been asking me how I like the ",
-                "date"       : "dt:2012-02-08 21:40:56",
-                "description": "re:People have been asking how I like the ",
+                "artist"     : ["kickinthehead", "danpaladin", "tomfulp"],
+                "comment"    : "re:My fan trailer for Alien Hominid HD!",
+                "date"       : "dt:2013-02-01 09:50:49",
                 "favorites"  : int,
-                "filename"   : "527818_alternate_1896",
-                "index"      : 589549,
-                "rating"     : "t",
+                "filename"   : "564957_alternate_31",
+                "index"      : 595355,
+                "rating"     : "e",
                 "score"      : float,
-                "tags"       : ["newgrounds", "psychogoldfish",
-                                "rage", "redesign-2012"],
-                "title"      : "Redesign Rage",
-                "user"       : "psychogoldfish",
+                "tags"       : ["alienhominid", "trailer"],
+                "title"      : "Alien Hominid Fan Trailer",
+                "user"       : "kickinthehead",
             },
         }),
         ("https://www.newgrounds.com/audio/listen/609768", {

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2014-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -34,15 +34,27 @@ class ExhentaiExtractor(Extractor):
     LIMIT = False
 
     def __init__(self, match):
+        # allow calling 'self.config()' before 'Extractor.__init__()'
+        self._cfgpath = ("extractor", self.category, self.subcategory)
+
         version = match.group(1)
-        if version != "ex":
-            self.root = "https://e-hentai.org"
-            self.cookiedomain = ".e-hentai.org"
+        domain = self.config("domain", "auto")
+        if domain == "auto":
+            domain = ("ex" if version == "ex" else "e-") + "hentai.org"
+        self.root = "https://" + domain
+        self.cookiedomain = "." + domain
+
         Extractor.__init__(self, match)
         self.limits = self.config("limits", True)
         self.original = self.config("original", True)
         self.wait_min = self.config("wait-min", 3)
         self.wait_max = self.config("wait-max", 6)
+
+        if type(self.limits) is int:
+            self._limit_max = self.limits
+            self.limits = True
+        else:
+            self._limit_max = 0
 
         self._remaining = 0
         if self.wait_max < self.wait_min:
@@ -120,7 +132,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
         ("https://exhentai.org/g/1200119/d55c44d3d0/", {
-            "keyword": "3eeae7bde70dd992402d4cc0230ea0f2c4af46c5",
+            "keyword": "199db053b4ccab94463b459e1cfe079df8cdcdd1",
             "content": "e9891a4c017ed0bb734cd1efba5cd03f594d31ff",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -184,7 +196,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 self._check_limits(data)
             if "/fullimg.php" in url:
                 data["extension"] = ""
-                self.wait(1.5)
+                self.wait(self.wait_max / 4)
             yield Message.Url, url, data
 
     def get_metadata(self, page):
@@ -328,29 +340,40 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         page = self.request(url, cookies=cookies).text
         current, pos = text.extract(page, "<strong>", "</strong>")
         maximum, pos = text.extract(page, "<strong>", "</strong>", pos)
+        if self._limit_max:
+            maximum = self._limit_max
         self.log.debug("Image Limits: %s/%s", current, maximum)
         self._remaining = text.parse_int(maximum) - text.parse_int(current)
 
     @staticmethod
     def _parse_image_info(url):
-        parts = url.split("/")[4].split("-")
+        for part in url.split("/")[4:]:
+            try:
+                _, size, width, height, _ = part.split("-")
+                break
+            except ValueError:
+                pass
+        else:
+            size = width = height = 0
+
         return {
-            "width": text.parse_int(parts[2]),
-            "height": text.parse_int(parts[3]),
-            "size": text.parse_int(parts[1]),
-            "cost": 1,
+            "cost"  : 1,
+            "size"  : text.parse_int(size),
+            "width" : text.parse_int(width),
+            "height": text.parse_int(height),
         }
 
     @staticmethod
     def _parse_original_info(info):
         parts = info.lstrip().split(" ")
         size = text.parse_bytes(parts[3] + parts[4][0])
+
         return {
-            "width": text.parse_int(parts[0]),
-            "height": text.parse_int(parts[2]),
-            "size": size,
             # 1 initial point + 1 per 0.1 MB
-            "cost": 1 + math.ceil(size / 104857.6)
+            "cost"  : 1 + math.ceil(size / 100000),
+            "size"  : size,
+            "width" : text.parse_int(parts[0]),
+            "height": text.parse_int(parts[2]),
         }
 
 
@@ -378,6 +401,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
     def items(self):
         self.login()
         yield Message.Version, 1
+        data = {"_extractor": ExhentaiGalleryExtractor}
 
         while True:
             last = None
@@ -388,7 +412,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
                 if url == last:
                     continue
                 last = url
-                yield Message.Queue, url, {}
+                yield Message.Queue, url, data
 
             if 'class="ptdd">&gt;<' in page or ">No hits found</p>" in page:
                 return

@@ -42,7 +42,7 @@ class BloggerExtractor(Extractor):
         blog["date"] = text.parse_datetime(blog["published"])
         del blog["selfLink"]
 
-        sub = re.compile(r"/s\d+/").sub
+        sub = re.compile(r"/(?:s\d+|w\d+-h\d+)/").sub
         findall_image = re.compile(
             r'src="(https?://\d+\.bp\.blogspot\.com/[^"]+)').findall
         findall_video = re.compile(
@@ -92,7 +92,7 @@ class BloggerExtractor(Extractor):
 class BloggerPostExtractor(BloggerExtractor):
     """Extractor for a single blog post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"(/\d{4}/\d\d/[^/?&#]+\.html)"
+    pattern = BASE_PATTERN + r"(/\d{4}/\d\d/[^/?#]+\.html)"
     test = (
         ("https://julianbphotography.blogspot.com/2010/12/moon-rise.html", {
             "url": "9928429fb62f712eb4de80f53625eccecc614aae",
@@ -134,6 +134,10 @@ class BloggerPostExtractor(BloggerExtractor):
           "cfnm-scene-jenna-fischer-in-office.html"), {
             "pattern": r"https://.+\.googlevideo\.com/videoplayback",
         }),
+        # image URLs with width/height (#1061)
+        ("https://aaaninja.blogspot.com/2020/08/altera-boob-press-2.html", {
+            "pattern": r"https://1.bp.blogspot.com/.+/s0/altera_.+png",
+        }),
     )
 
     def __init__(self, match):
@@ -147,7 +151,7 @@ class BloggerPostExtractor(BloggerExtractor):
 class BloggerBlogExtractor(BloggerExtractor):
     """Extractor for an entire Blogger blog"""
     subcategory = "blog"
-    pattern = BASE_PATTERN + "/?$"
+    pattern = BASE_PATTERN + r"/?$"
     test = (
         ("https://julianbphotography.blogspot.com/", {
             "range": "1-25",
@@ -164,6 +168,34 @@ class BloggerBlogExtractor(BloggerExtractor):
         return self.api.blog_posts(blog["id"])
 
 
+class BloggerSearchExtractor(BloggerExtractor):
+    """Extractor for search resuls and labels"""
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/search(?:/?\?q=([^/?#]+)|/label/([^/?#]+))"
+    test = (
+        ("https://julianbphotography.blogspot.com/search?q=400mm", {
+            "count": "< 10"
+        }),
+        ("https://dmmagazine.blogspot.com/search/label/D%26D", {
+            "range": "1-25",
+            "count": 25,
+        }),
+    )
+
+    def __init__(self, match):
+        BloggerExtractor.__init__(self, match)
+        query = match.group(3)
+        if query:
+            self.query, self.label = query, None
+        else:
+            self.query, self.label = None, match.group(4)
+
+    def posts(self, blog):
+        if self.query:
+            return self.api.blog_search(blog["id"], text.unquote(self.query))
+        return self.api.blog_posts(blog["id"], text.unquote(self.label))
+
+
 class BloggerAPI():
     """Minimal interface for the Blogger v3 API
 
@@ -176,19 +208,27 @@ class BloggerAPI():
         self.api_key = extractor.config("api-key", self.API_KEY)
 
     def blog_by_url(self, url):
-        return self._call("blogs/byurl", {"url": url})
+        return self._call("blogs/byurl", {"url": url}, "blog")
 
-    def blog_posts(self, blog_id):
-        return self._pagination("blogs/{}/posts".format(blog_id), {})
+    def blog_posts(self, blog_id, label=None):
+        endpoint = "blogs/{}/posts".format(blog_id)
+        params = {"labels": label}
+        return self._pagination(endpoint, params)
+
+    def blog_search(self, blog_id, query):
+        endpoint = "blogs/{}/posts/search".format(blog_id)
+        params = {"q": query}
+        return self._pagination(endpoint, params)
 
     def post_by_path(self, blog_id, path):
         endpoint = "blogs/{}/posts/bypath".format(blog_id)
-        return self._call(endpoint, {"path": path})
+        return self._call(endpoint, {"path": path}, "post")
 
-    def _call(self, endpoint, params):
+    def _call(self, endpoint, params, notfound=None):
         url = "https://www.googleapis.com/blogger/v3/" + endpoint
         params["key"] = self.api_key
-        return self.extractor.request(url, params=params).json()
+        return self.extractor.request(
+            url, params=params, notfound=notfound).json()
 
     def _pagination(self, endpoint, params):
         while True:

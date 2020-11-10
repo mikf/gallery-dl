@@ -26,7 +26,7 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
                      "{document[originalPublishDate]} {document[title]}")
     filename_fmt = "{num:>03}.{extension}"
     archive_fmt = "{document[id]}_{num}"
-    pattern = r"(?:https?://)?issuu\.com(/[^/?&#]+/docs/[^/?&#]+)"
+    pattern = r"(?:https?://)?issuu\.com(/[^/?#]+/docs/[^/?#]+)"
     test = ("https://issuu.com/issuu/docs/motions-1-2019/", {
         "pattern": r"https://image.isu.pub/190916155301-\w+/jpg/page_\d+.jpg",
         "count"  : 36,
@@ -80,7 +80,7 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
 class IssuuUserExtractor(IssuuBase, Extractor):
     """Extractor for all publications of a user/publisher"""
     subcategory = "user"
-    pattern = r"(?:https?://)?issuu\.com/([^/?&#]+)/?$"
+    pattern = r"(?:https?://)?issuu\.com/([^/?#]+)/?$"
     test = ("https://issuu.com/issuu", {
         "pattern": IssuuPublicationExtractor.pattern,
         "count"  : "> 25",

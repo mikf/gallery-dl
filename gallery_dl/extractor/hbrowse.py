@@ -50,7 +50,7 @@ class HbrowseChapterExtractor(HbrowseBase, ChapterExtractor):
     pattern = r"(?:https?://)?(?:www\.)?hbrowse\.com(/(\d+)/c(\d+))"
     test = ("https://www.hbrowse.com/10363/c00000", {
         "url": "6feefbc9f4b98e20d8425ddffa9dd111791dc3e6",
-        "keyword": "6c1136522a25de013a6579ffa34dadc1eb0d4d1b",
+        "keyword": "274996f6c809e5250b6ff3abbc5147e29f89d9a5",
         "content": "44578ebbe176c2c27434966aef22945787e2781e",
     })
 
@@ -78,7 +78,7 @@ class HbrowseMangaExtractor(HbrowseBase, MangaExtractor):
     pattern = r"(?:https?://)?(?:www\.)?hbrowse\.com(/\d+)/?$"
     test = ("https://www.hbrowse.com/10363", {
         "url": "b89682bfb86c11d2af0dc47463804ec3ac4aadd6",
-        "keyword": "08f5935a4411d2c19ac1786bd4ca552c3785fcae",
+        "keyword": "4b15fda1858a69de1fbf5afddfe47dd893397312",
     })
 
     def chapters(self, page):

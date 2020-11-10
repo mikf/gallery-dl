@@ -33,6 +33,15 @@ class GelbooruExtractor(booru.XmlParserMixin,
             self.session.cookies["fringeBenefits"] = "yup"
             self.per_page = 42
 
+    @staticmethod
+    def get_file_url(image):
+        url = image["file_url"]
+        if url.startswith("https://mp4.gelbooru.com/"):
+            ihash = image["md5"]
+            return "https://img2.gelbooru.com/images/{}/{}/{}.webm".format(
+                ihash[0:2], ihash[2:4], ihash)
+        return url
+
     def items_noapi(self):
         yield Message.Version, 1
         data = self.get_metadata()
@@ -55,7 +64,7 @@ class GelbooruExtractor(booru.XmlParserMixin,
 
         while True:
             page = self.request(url, params=params).text
-            ids = list(text.extract_iter(page, '<a id="p', '"'))
+            ids = list(text.extract_iter(page, '<span id="s', '"'))
             yield from ids
             if len(ids) < self.per_page:
                 return

@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://imagefap.com/"""
+"""Extractors for https://www.imagefap.com/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -151,7 +151,7 @@ class ImagefapUserExtractor(ImagefapExtractor):
     subcategory = "user"
     categorytransfer = True
     pattern = (BASE_PATTERN +
-               r"/(?:profile(?:\.php\?user=|/)([^/?&#]+)"
+               r"/(?:profile(?:\.php\?user=|/)([^/?#]+)"
                r"|usergallery\.php\?userid=(\d+))")
     test = (
         ("https://www.imagefap.com/profile/LucyRae/galleries", {

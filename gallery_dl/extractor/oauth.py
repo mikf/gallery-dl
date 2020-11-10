@@ -180,16 +180,11 @@ class OAuthBase(Extractor):
         self.send(msg)
 
     def _generate_message(self, names, values):
-        if len(names) == 1:
-            _vh = "This value has"
-            _is = "is"
-            _it = "it"
-            _va = "this value"
-        else:
-            _vh = "These values have"
-            _is = "are"
-            _it = "them"
-            _va = "these values"
+        _vh, _va, _is, _it = (
+            ("This value has", "this value", "is", "it")
+            if len(names) == 1 else
+            ("These values have", "these values", "are", "them")
+        )
 
         msg = "\nYour {} {}\n\n{}\n\n".format(
             " and ".join("'" + n + "'" for n in names),
@@ -197,23 +192,21 @@ class OAuthBase(Extractor):
             "\n".join(values),
         )
 
-        if self.cache:
-            opt = self.oauth_config(names[0])
-            if opt is None or opt == "cache":
-                msg += _vh + " been cached and will automatically be used."
-            else:
-                msg += (
-                    "Set 'extractor.{}.{}' to \"cache\" to use {}.".format(
-                        self.subcategory, names[0], _it,
-                    )
-                )
+        opt = self.oauth_config(names[0])
+        if self.cache and (opt is None or opt == "cache"):
+            msg += _vh + " been cached and will automatically be used."
         else:
             msg += "Put " + _va + " into your configuration file as \n"
             msg += " and\n".join(
                 "'extractor." + self.subcategory + "." + n + "'"
                 for n in names
             )
-            msg += "."
+            if self.cache:
+                msg += (
+                    "\nor set\n'extractor.{}.{}' to \"cache\""
+                    .format(self.subcategory, names[0])
+                )
+            msg += "\nto use {}.".format(_it)
 
         return msg
 
@@ -322,7 +315,7 @@ class OAuthTumblr(OAuthBase):
 
 class OAuthMastodon(OAuthBase):
     subcategory = "mastodon"
-    pattern = "oauth:mastodon:(?:https?://)?([^/?&#]+)"
+    pattern = "oauth:mastodon:(?:https?://)?([^/?#]+)"
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)

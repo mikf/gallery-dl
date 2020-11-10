@@ -60,6 +60,7 @@ CATEGORY_MAP = {
     "mangapark"      : "MangaPark",
     "mangastream"    : "Manga Stream",
     "mastodon.social": "mastodon.social",
+    "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
@@ -84,6 +85,7 @@ CATEGORY_MAP = {
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
     "speakerdeck"    : "Speaker Deck",
+    "subscribestar"  : "SubscribeStar",
     "thebarchive"    : "The /b/ Archive",
     "vanillarock"    : "もえぴりあ",
     "vsco"           : "VSCO",
@@ -117,6 +119,9 @@ SUBCATEGORY_MAP = {
     "deviantart": {
         "stash": "Sta.sh",
     },
+    "hentaifoundry": {
+        "story": "",
+    },
     "instagram": {
         "saved": "Saved Posts",
     },
@@ -141,31 +146,49 @@ SUBCATEGORY_MAP = {
     "wikiart": {
         "artists": "Artist Listings",
     },
+    "weasyl": {
+        "journals"   : "",
+        "submissions": "",
+    },
 }
 
+_OAUTH = "`OAuth <https://github.com/mikf/gallery-dl#oauth>`__"
+_COOKIES = "`Cookies <https://github.com/mikf/gallery-dl#cookies>`__"
+_APIKEY_WH = "`API Key <configuration.rst#extractorwallhavenapi-key>`__"
+_APIKEY_WY = "`API Key <configuration.rst#extractorweasylapi-key>`__"
+
 AUTH_MAP = {
-    "danbooru"   : "Optional",
-    "deviantart" : "Optional (OAuth)",
-    "e621"       : "Optional",
-    "e-hentai"   : "Optional",
-    "exhentai"   : "Optional",
-    "flickr"     : "Optional (OAuth)",
-    "idolcomplex": "Optional",
-    "imgbb"      : "Optional",
-    "instagram"  : "Optional",
-    "mangoxo"    : "Optional",
-    "newgrounds" : "Optional",
-    "nijie"      : "Required",
-    "pixiv"      : "Required",
-    "reddit"     : "Optional (OAuth)",
-    "sankaku"    : "Optional",
-    "seiga"      : "Required",
-    "smugmug"    : "Optional (OAuth)",
-    "tsumino"    : "Optional",
-    "tumblr"     : "Optional (OAuth)",
-    "twitter"    : "Optional",
-    "wallhaven"  : ("Optional (`API Key "
-                    "<configuration.rst#extractorwallhavenapi-key>`__)"),
+    "aryion"         : "Supported",
+    "baraag"         : _OAUTH,
+    "danbooru"       : "Supported",
+    "deviantart"     : _OAUTH,
+    "e621"           : "Supported",
+    "e-hentai"       : "Supported",
+    "exhentai"       : "Supported",
+    "flickr"         : _OAUTH,
+    "furaffinity"    : _COOKIES,
+    "idolcomplex"    : "Supported",
+    "imgbb"          : "Supported",
+    "inkbunny"       : "Supported",
+    "instagram"      : "Supported",
+    "mangoxo"        : "Supported",
+    "mastodon.social": _OAUTH,
+    "newgrounds"     : "Supported",
+    "nijie"          : "Required",
+    "patreon"        : _COOKIES,
+    "pawoo"          : _OAUTH,
+    "pinterest"      : "Supported",
+    "pixiv"          : "Required",
+    "reddit"         : _OAUTH,
+    "sankaku"        : "Supported",
+    "seiga"          : "Required",
+    "smugmug"        : _OAUTH,
+    "subscribestar"  : "Supported",
+    "tsumino"        : "Supported",
+    "tumblr"         : _OAUTH,
+    "twitter"        : "Supported",
+    "wallhaven"      : _APIKEY_WH,
+    "weasyl"         : _APIKEY_WY,
 }
 
 IGNORE_LIST = (
@@ -285,7 +308,7 @@ def write_output(fobj, columns, extractors):
         size = col[1]
         output = output if isinstance(output, str) else col[2](output)
 
-        if len(output) > size:
+        if len(output) > size and col[0][0] != "A":
             sub = "|{}-{}|".format(category, col[0][0])
             subs.append((sub, output))
             output = sub

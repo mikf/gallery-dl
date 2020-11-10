@@ -9,7 +9,8 @@
 """Extractors for https://aryion.com/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
+from ..cache import cache
 
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
@@ -21,14 +22,40 @@ class AryionExtractor(Extractor):
     directory_fmt = ("{category}", "{user!l}", "{path:J - }")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
+    cookiedomain = ".aryion.com"
+    cookienames = ("phpbb3_rl7a3_sid",)
     root = "https://aryion.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.recursive = True
+        self._needle = "class='gallery-item' id='"
+
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=14*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/forum/ucp.php?mode=login"
+        data = {
+            "username": username,
+            "password": password,
+            "login": "Login",
+        }
+
+        response = self.request(url, method="POST", data=data)
+        if b"You have been successfully logged in." not in response.content:
+            raise exception.AuthenticationError()
+        return {c: response.cookies[c] for c in self.cookienames}
 
     def items(self):
+        self.login()
+
         for post_id in self.posts():
             post = self._parse_post(post_id)
             if post:
@@ -47,7 +74,7 @@ class AryionExtractor(Extractor):
         while True:
             page = self.request(url).text
             yield from text.extract_iter(
-                page, "class='thumb' href='/g4/view/", "'")
+                page, self._needle, "'")
 
             pos = page.find("Next &gt;&gt;")
             if pos < 0:
@@ -68,6 +95,7 @@ class AryionExtractor(Extractor):
             # folder
             if headers["content-type"] in (
                 "application/x-folder",
+                "application/x-comic-folder",
                 "application/x-comic-folder-nomerge",
             ):
                 return False
@@ -125,7 +153,7 @@ class AryionGalleryExtractor(AryionExtractor):
     """Extractor for a user's gallery on eka's portal"""
     subcategory = "gallery"
     categorytransfer = True
-    pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
     test = (
         ("https://aryion.com/g4/gallery/jameshoward", {
             "options": (("recursive", False),),
@@ -153,6 +181,7 @@ class AryionGalleryExtractor(AryionExtractor):
             url = "{}/g4/gallery/{}".format(self.root, self.user)
             return self._pagination(url)
         else:
+            self._needle = "class='thumb' href='/g4/view/"
             url = "{}/g4/latest.php?name={}".format(self.root, self.user)
             return util.advance(self._pagination(url), self.offset)
 
@@ -184,10 +213,15 @@ class AryionPostExtractor(AryionExtractor):
                 "_mtime"   : "Sat, 16 Feb 2019 19:30:34 GMT",
             },
         }),
-        # folder (#694)
+        # x-folder (#694)
         ("https://aryion.com/g4/view/588928", {
             "pattern": pattern,
             "count": ">= 8",
+        }),
+        # x-comic-folder (#945)
+        ("https://aryion.com/g4/view/537379", {
+            "pattern": pattern,
+            "count": 2,
         }),
     )
 

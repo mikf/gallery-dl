@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extractors for https://www.plurk.com/"""
 
 from .common import Extractor, Message
-from .. import text, extractor, exception
+from .. import text, exception
 import datetime
 import time
 import json
@@ -23,12 +23,9 @@ class PlurkExtractor(Extractor):
 
     def items(self):
         urls = self._urls_ex if self.config("comments", False) else self._urls
-
-        yield Message.Version, 1
-        with extractor.blacklist(("plurk",)):
-            for plurk in self.plurks():
-                for url in urls(plurk):
-                    yield Message.Queue, url, plurk
+        for plurk in self.plurks():
+            for url in urls(plurk):
+                yield Message.Queue, url, plurk
 
     def plurks(self):
         """Return an iterable with all relevant 'plurk' objects"""
@@ -75,7 +72,7 @@ class PlurkExtractor(Extractor):
 class PlurkTimelineExtractor(PlurkExtractor):
     """Extractor for URLs from all posts in a Plurk timeline"""
     subcategory = "timeline"
-    pattern = r"(?:https?://)?(?:www\.)?plurk\.com/(?!p/)(\w+)/?(?:$|[?&#])"
+    pattern = r"(?:https?://)?(?:www\.)?plurk\.com/(?!p/)(\w+)/?(?:$|[?#])"
     test = ("https://www.plurk.com/plurkapi", {
         "pattern": r"https?://.+",
         "count": ">= 23"

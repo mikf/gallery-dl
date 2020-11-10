@@ -74,21 +74,33 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
     def products(self):
         params = text.parse_query(self.params)
         params["page"] = text.parse_int(params.get("page"), 1)
-        search_re = re.compile(r"/collections/[\w-]+/products/[\w-]+")
+        fetch = True
+        last = None
 
-        while True:
-            page = self.request(self.item_url, params=params).text
-            urls = search_re.findall(page)
-            last = None
+        for pattern in (
+            r"/collections/[\w-]+/products/[\w-]+",
+            r"href=[\"'](/products/[\w-]+)",
+        ):
+            search_re = re.compile(pattern)
 
-            if not urls:
-                return
-            for path in urls:
-                if last == path:
-                    continue
-                last = path
-                yield self.root + path
-            params["page"] += 1
+            while True:
+                if fetch:
+                    page = self.request(self.item_url, params=params).text
+                urls = search_re.findall(page)
+
+                if len(urls) < 3:
+                    if last:
+                        return
+                    fetch = False
+                    break
+                fetch = True
+
+                for path in urls:
+                    if last == path:
+                        continue
+                    last = path
+                    yield self.root + path
+                params["page"] += 1
 
 
 class ShopifyProductExtractor(ShopifyExtractor):
@@ -121,7 +133,6 @@ EXTRACTORS = {
             ("https://www.fashionnova.com/collections/mini-dresses/?page=1"),
             ("https://www.fashionnova.com/collections/mini-dresses#1"),
         ),
-
     },
 }
 

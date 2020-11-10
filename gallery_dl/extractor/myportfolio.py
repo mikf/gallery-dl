@@ -9,7 +9,7 @@
 """Extract images from https://www.myportfolio.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 
 
 class MyportfolioGalleryExtractor(Extractor):
@@ -21,19 +21,18 @@ class MyportfolioGalleryExtractor(Extractor):
     archive_fmt = "{user}_{filename}"
     pattern = (r"(?:myportfolio:(?:https?://)?([^/]+)|"
                r"(?:https?://)?([^.]+\.myportfolio\.com))"
-               r"(/[^/?&#]+)?")
+               r"(/[^/?#]+)?")
     test = (
         ("https://andrewling.myportfolio.com/volvo-xc-90-hybrid", {
             "url": "acea0690c76db0e5cf267648cefd86e921bc3499",
             "keyword": "6ac6befe2ee0af921d24cf1dd4a4ed71be06db6d",
         }),
         ("https://andrewling.myportfolio.com/", {
-            "pattern": r"https://andrewling\.myportfolio\.com/[^/?&#+]+$",
+            "pattern": r"https://andrewling\.myportfolio\.com/[^/?#+]+$",
             "count": ">= 6",
         }),
-        # no explicit title
         ("https://stevenilousphotography.myportfolio.com/society", {
-            "keyword": "49e7ff6322645c22b409280656202c2736a380c9",
+            "exception": exception.NotFoundError,
         }),
         # custom domain
         ("myportfolio:https://tooco.com.ar/6-of-diamonds-paradise-bird", {
@@ -89,8 +88,10 @@ class MyportfolioGalleryExtractor(Extractor):
         if title:
             title = title.partition(">")[2]
             user = user[:-len(title)-3]
-        else:
+        elif user:
             user, _, title = user.partition(" - ")
+        else:
+            raise exception.NotFoundError()
 
         return {
             "user": text.unescape(user),

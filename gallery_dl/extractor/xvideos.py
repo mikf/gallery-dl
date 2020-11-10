@@ -28,10 +28,10 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
     archive_fmt = "{gallery[id]}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
                r"/(?:profiles|amateur-channels|model-channels)"
-               r"/([^/?&#]+)/photos/(\d+)")
+               r"/([^/?#]+)/photos/(\d+)")
     test = (
         ("https://www.xvideos.com/profiles/pervertedcouple/photos/751031", {
-            "url": "4f0d992e5dc39def2c3ac8e099d17bf09e76e3c7",
+            "url": "cb4657a37eea5ab6b1d333491cee7eeb529b0645",
             "keyword": {
                 "gallery": {
                     "id"   : 751031,
@@ -59,13 +59,13 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
+        title = extr('"title":"', '"')
         user = {
             "id"     : text.parse_int(extr('"id_user":', ',')),
             "display": extr('"display":"', '"'),
             "sex"    : extr('"sex":"', '"'),
             "name"   : self.user,
         }
-        title = extr('"title":"', '"')
         user["description"] = extr(
             '<small class="mobile-hide">', '</small>').strip()
         tags = extr('<em>Tagged:</em>', '<').strip()
@@ -94,7 +94,7 @@ class XvideosUserExtractor(XvideosBase, Extractor):
     subcategory = "user"
     categorytransfer = True
     pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
-               r"/profiles/([^/?&#]+)/?(?:#.*)?$")
+               r"/profiles/([^/?#]+)/?(?:#.*)?$")
     test = (
         ("https://www.xvideos.com/profiles/pervertedcouple", {
             "url": "a413f3e60d6d3a2de79bd44fa3b7a9c03db4336e",

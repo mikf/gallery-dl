@@ -172,7 +172,7 @@ class SeigaImageExtractor(SeigaExtractor):
                r"|lohas\.nicoseiga\.jp/(?:thumb|(?:priv|o)/[^/]+/\d+)/)(\d+)")
     test = (
         ("https://seiga.nicovideo.jp/seiga/im5977527", {
-            "keyword": "f66ba5de33d4ce2cb57f23bb37e1e847e0771c10",
+            "keyword": "c8339781da260f7fc44894ad9ada016f53e3b12a",
             "content": "d9202292012178374d57fb0126f6124387265297",
         }),
         ("https://seiga.nicovideo.jp/seiga/im123", {
@@ -196,4 +196,23 @@ class SeigaImageExtractor(SeigaExtractor):
         return num
 
     def get_images(self):
-        return ({}, {"image_id": text.parse_int(self.image_id)})
+        url = "{}/seiga/im{}".format(self.root, self.image_id)
+        page = self.request(url, notfound="image").text
+
+        data = text.extract_all(page, (
+            ("date"        , '<li class="date"><span class="created">', '<'),
+            ("title"       , '<h1 class="title">', '</h1>'),
+            ("description" , '<p class="discription">', '</p>'),
+        ))[0]
+
+        data["user"] = text.extract_all(page, (
+            ("id"  , '<a href="/user/illust/' , '"'),
+            ("name", '<span itemprop="title">', '<'),
+        ))[0]
+
+        data["description"] = text.remove_html(data["description"])
+        data["image_id"] = text.parse_int(self.image_id)
+        data["date"] = text.parse_datetime(
+            data["date"] + ":00+0900", "%Y年%m月%d日 %H:%M:%S%z")
+
+        return (data, data)

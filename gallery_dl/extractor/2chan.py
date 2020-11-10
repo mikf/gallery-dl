@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,9 +21,9 @@ class _2chanThreadExtractor(Extractor):
     archive_fmt = "{board}_{thread}_{tim}"
     url_fmt = "https://{server}.2chan.net/{board}/src/{filename}"
     pattern = r"(?:https?://)?([^.]+)\.2chan\.net/([^/]+)/res/(\d+)"
-    test = ("http://dec.2chan.net/70/res/947.htm", {
-        "url": "c5c12b80b290e224b6758507b3bb952044f4595b",
-        "keyword": "4bd22e7a9c3636faecd6ea7082509e8655e10dd0",
+    test = ("http://dec.2chan.net/70/res/11048.htm", {
+        "url": "2ecf919139bd5d915930530b3576d67c388a2a49",
+        "keyword": "8def4ec98a89fd4fff8bbcbae603604dcb4a3bb9",
     })
 
     def __init__(self, match):
