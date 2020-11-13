@@ -162,5 +162,5 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
-.. |twitter-C| replace:: Bookmarks, Likes, Media Timelines, Search Results, Timelines, Tweets
+.. |twitter-C| replace:: Bookmarks, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets
 .. |yuki-S| replace:: yuki.la 4chan archive

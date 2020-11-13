@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
-
+import json
 
 BASE_PATTERN = (
     r"(?:https?://)?(?:www\.|mobile\.)?"
@@ -324,7 +324,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
 class TwitterListExtractor(TwitterExtractor):
     """Extractor for Twitter lists"""
     subcategory = "list"
-    pattern = BASE_PATTERN + r"/i/lists/(\d+)"
+    pattern = BASE_PATTERN + r"/i/lists/(\d+)/?$"
     test = ("https://twitter.com/i/lists/784214683683127296", {
         "range": "1-40",
         "count": 40,
@@ -333,6 +333,21 @@ class TwitterListExtractor(TwitterExtractor):
 
     def tweets(self):
         return TwitterAPI(self).timeline_list(self.user)
+
+
+class TwitterListMembersExtractor(TwitterExtractor):
+    """Extractor for members of a Twitter list"""
+    subcategory = "list-members"
+    pattern = BASE_PATTERN + r"/i/lists/(\d+)/members"
+    test = ("https://twitter.com/i/lists/784214683683127296/members",)
+
+    def items(self):
+        self.login()
+        for user in TwitterAPI(self).list_members(self.user):
+            user["_extractor"] = TwitterTimelineExtractor
+            url = "{}/intent/user?user_id={}".format(
+                self.root, user["rest_id"])
+            yield Message.Queue, url, user
 
 
 class TwitterSearchExtractor(TwitterExtractor):
@@ -543,6 +558,16 @@ class TwitterAPI():
         return self._pagination(
             endpoint, params, "sq-I-t-", "sq-cursor-bottom")
 
+    def list_members(self, list_id):
+        endpoint = "graphql/M74V2EwlxxVYGB4DbyAphQ/ListMembers"
+        variables = {
+            "listId": list_id,
+            "count" : 20,
+            "withTweetResult": False,
+            "withUserResult" : False,
+        }
+        return self._pagination_members(endpoint, variables)
+
     def list_by_rest_id(self, list_id):
         endpoint = "graphql/LXXTUytSX1QY-2p8Xp9BFA/ListByRestId"
         params = {"variables": '{"listId":"' + list_id + '"'
@@ -655,3 +680,30 @@ class TwitterAPI():
             if not cursor or not tweet:
                 return
             params["cursor"] = cursor
+
+    def _pagination_members(self, endpoint, variables):
+        while True:
+            cursor = entry = stop = None
+            params = {"variables": json.dumps(variables)}
+            data = self._call(endpoint, params)
+
+            try:
+                instructions = (data["data"]["list"]["members_timeline"]
+                                ["timeline"]["instructions"])
+            except KeyError:
+                raise exception.AuthorizationError()
+
+            for instr in instructions:
+                if instr["type"] == "TimelineAddEntries":
+                    for entry in instr["entries"]:
+                        if entry["entryId"].startswith("user-"):
+                            yield entry["content"]["itemContent"]["user"]
+                        elif entry["entryId"].startswith("cursor-bottom-"):
+                            cursor = entry["content"]["value"]
+                elif instr["type"] == "TimelineTerminateTimeline":
+                    if instr["direction"] == "Bottom":
+                        stop = True
+
+            if stop or not cursor or not entry:
+                return
+            variables["cursor"] = cursor
