@@ -55,7 +55,7 @@ class GfycatExtractor(Extractor):
 class GfycatUserExtractor(GfycatExtractor):
     """Extractor for gfycat user profiles"""
     subcategory = "user"
-    directory_fmt = ("{category}", "{userName}")
+    directory_fmt = ("{category}", "{username|userName}")
     pattern = r"(?:https?://)?gfycat\.com/@([^/?#]+)"
     test = ("https://gfycat.com/@gretta", {
         "pattern": r"https://giant\.gfycat\.com/[A-Za-z]+\.mp4",
