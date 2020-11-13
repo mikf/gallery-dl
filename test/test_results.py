@@ -30,6 +30,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
+    "4plebs",
     "imagevenue",
     "mangapanda",
     "photobucket",

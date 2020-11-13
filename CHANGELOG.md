@@ -1,6 +1,20 @@
 # Changelog
 
-## Unreleased
+## 1.15.3 - 2020-11-13
+### Additions
+- [sankakucomplex] extract videos and embeds ([#308](https://github.com/mikf/gallery-dl/issues/308))
+- [twitter] add support for lists ([#1096](https://github.com/mikf/gallery-dl/issues/1096))
+- [postprocessor:metadata] accept string-lists for `content-format` ([#1080](https://github.com/mikf/gallery-dl/issues/1080))
+- implement `modules` and `extension-map` options
+### Fixes
+- [500px] update query hashes
+- [8kun] fix file URLs of older posts ([#1101](https://github.com/mikf/gallery-dl/issues/1101))
+- [exhentai] update image URL parsing ([#1094](https://github.com/mikf/gallery-dl/issues/1094))
+- [hentaifoundry] update `YII_CSRF_TOKEN` cookie handling ([#1083](https://github.com/mikf/gallery-dl/issues/1083))
+- [hentaifoundry] use scheme from input URLs ([#1095](https://github.com/mikf/gallery-dl/issues/1095))
+- [mangoxo] fix metadata extraction
+- [paheal] fix extraction ([#1088](https://github.com/mikf/gallery-dl/issues/1088))
+- collect post processors from `basecategory` entries ([#1084](https://github.com/mikf/gallery-dl/issues/1084))
 
 ## 1.15.2 - 2020-10-24
 ### Additions
