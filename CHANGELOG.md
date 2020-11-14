@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.15.3 - 2020-11-13
 ### Additions
 - [sankakucomplex] extract videos and embeds ([#308](https://github.com/mikf/gallery-dl/issues/308))
