@@ -717,6 +717,13 @@ class Formatter():
 
 
 class PathFormat():
+    EXTENSION_MAP = {
+        "jpeg": "jpg",
+        "jpe" : "jpg",
+        "jfif": "jpg",
+        "jif" : "jpg",
+        "jfi" : "jpg",
+    }
 
     def __init__(self, extractor):
         filename_fmt = extractor.config("filename", extractor.filename_fmt)
@@ -725,8 +732,7 @@ class PathFormat():
 
         extension_map = extractor.config("extension-map")
         if extension_map is None:
-            # TODO: better default value in 1.16.0
-            extension_map = {}
+            extension_map = self.EXTENSION_MAP
         self.extension_map = extension_map.get
 
         try:

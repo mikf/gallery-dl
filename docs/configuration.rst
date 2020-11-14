@@ -188,8 +188,6 @@ extractor.*.extension-map
 Type
     ``object``
 Default
-    ``null``
-Example
     .. code:: json
 
         {
@@ -200,7 +198,7 @@ Example
             "jfi" : "jpg"
         }
 Description
-    A JSON ``object`` mapping filename extensions to alternatives.
+    A JSON ``object`` mapping filename extensions to their replacements.
 
 
 extractor.*.skip
