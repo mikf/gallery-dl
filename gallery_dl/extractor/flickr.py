@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.flickr.com/"""
+"""Extractors for https://www.flickr.com/"""
 
 from .common import Extractor, Message
 from .. import text, oauth, util, exception
@@ -16,6 +16,8 @@ class FlickrExtractor(Extractor):
     """Base class for flickr extractors"""
     category = "flickr"
     filename_fmt = "{category}_{id}.{extension}"
+    directory_fmt = ("{category}", "{user[username]}")
+    archive_fmt = "{id}"
     cookiedomain = None
 
     def __init__(self, match):
@@ -27,8 +29,6 @@ class FlickrExtractor(Extractor):
     def items(self):
         data = self.metadata()
         extract = self.api._extract_format
-        yield Message.Version, 1
-        yield Message.Directory, data
         for photo in self.photos():
             try:
                 photo = extract(photo)
@@ -39,6 +39,7 @@ class FlickrExtractor(Extractor):
             else:
                 photo.update(data)
                 url = photo["url"]
+                yield Message.Directory, photo
                 yield Message.Url, url, text.nameext_from_url(url, photo)
 
     def metadata(self):
@@ -53,7 +54,6 @@ class FlickrExtractor(Extractor):
 class FlickrImageExtractor(FlickrExtractor):
     """Extractor for individual images from flickr.com"""
     subcategory = "image"
-    archive_fmt = "{id}"
     pattern = (r"(?:https?://)?(?:"
                r"(?:(?:www\.|m\.)?flickr\.com/photos/[^/]+/"
                r"|[^.]+\.static\.?flickr\.com/(?:\d+/)+)(\d+)"
@@ -106,6 +106,7 @@ class FlickrImageExtractor(FlickrExtractor):
         else:
             self.api._extract_photo(photo)
 
+        photo["user"] = photo["owner"]
         photo["title"] = photo["title"]["_content"]
         photo["comments"] = text.parse_int(photo["comments"]["_content"])
         photo["description"] = photo["description"]["_content"]
@@ -121,7 +122,6 @@ class FlickrImageExtractor(FlickrExtractor):
                     location[key] = value["_content"]
 
         url = photo["url"]
-        yield Message.Version, 1
         yield Message.Directory, photo
         yield Message.Url, url, text.nameext_from_url(url, photo)
 
@@ -129,8 +129,8 @@ class FlickrImageExtractor(FlickrExtractor):
 class FlickrAlbumExtractor(FlickrExtractor):
     """Extractor for photo albums from flickr.com"""
     subcategory = "album"
-    directory_fmt = ("{category}", "{subcategory}s",
-                     "{album[id]} - {album[title]}")
+    directory_fmt = ("{category}", "{user[username]}",
+                     "Albums", "{album[id]} {album[title]}")
     archive_fmt = "a_{album[id]}_{id}"
     pattern = (r"(?:https?://)?(?:www\.)?flickr\.com/"
                r"photos/([^/]+)/(?:album|set)s(?:/(\d+))?")
@@ -178,8 +178,8 @@ class FlickrAlbumExtractor(FlickrExtractor):
 class FlickrGalleryExtractor(FlickrExtractor):
     """Extractor for photo galleries from flickr.com"""
     subcategory = "gallery"
-    directory_fmt = ("{category}", "galleries",
-                     "{user[username]} {gallery[id]}")
+    directory_fmt = ("{category}", "{user[username]}",
+                     "Galleries", "{gallery[gallery_id]} {gallery[title]}")
     archive_fmt = "g_{gallery[id]}_{id}"
     pattern = (r"(?:https?://)?(?:www\.)?flickr\.com/"
                r"photos/([^/]+)/galleries/(\d+)")
@@ -205,7 +205,7 @@ class FlickrGalleryExtractor(FlickrExtractor):
 class FlickrGroupExtractor(FlickrExtractor):
     """Extractor for group pools from flickr.com"""
     subcategory = "group"
-    directory_fmt = ("{category}", "{subcategory}s", "{group[groupname]}")
+    directory_fmt = ("{category}", "Groups", "{group[groupname]}")
     archive_fmt = "G_{group[nsid]}_{id}"
     pattern = r"(?:https?://)?(?:www\.)?flickr\.com/groups/([^/]+)"
     test = ("https://www.flickr.com/groups/bird_headshots/", {
@@ -224,7 +224,6 @@ class FlickrGroupExtractor(FlickrExtractor):
 class FlickrUserExtractor(FlickrExtractor):
     """Extractor for the photostream of a flickr user"""
     subcategory = "user"
-    directory_fmt = ("{category}", "{user[username]}")
     archive_fmt = "u_{user[nsid]}_{id}"
     pattern = r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/?$"
     test = ("https://www.flickr.com/photos/shona_s/", {
@@ -239,7 +238,7 @@ class FlickrUserExtractor(FlickrExtractor):
 class FlickrFavoriteExtractor(FlickrExtractor):
     """Extractor for favorite photos of a flickr user"""
     subcategory = "favorite"
-    directory_fmt = ("{category}", "{subcategory}s", "{user[username]}")
+    directory_fmt = ("{category}", "{user[username]}", "Favorites")
     archive_fmt = "f_{user[nsid]}_{id}"
     pattern = r"(?:https?://)?(?:www\.)?flickr\.com/photos/([^/]+)/favorites"
     test = ("https://www.flickr.com/photos/shona_s/favorites", {
@@ -254,7 +253,7 @@ class FlickrFavoriteExtractor(FlickrExtractor):
 class FlickrSearchExtractor(FlickrExtractor):
     """Extractor for flickr photos based on search results"""
     subcategory = "search"
-    directory_fmt = ("{category}", "{subcategory}", "{search[text]}")
+    directory_fmt = ("{category}", "Search", "{search[text]}")
     archive_fmt = "s_{search}_{id}"
     pattern = r"(?:https?://)?(?:www\.)?flickr\.com/search/?\?([^#]+)"
     test = (
@@ -408,9 +407,11 @@ class FlickrAPI(oauth.OAuth1API):
         """Returns a user NSID, given the url to a user's photos or profile."""
         params = {"url": "https://www.flickr.com/photos/" + username}
         user = self._call("urls.lookupUser", params)["user"]
-        return {"nsid": user["id"],
-                "path_alias": username,
-                "username": user["username"]["_content"]}
+        return {
+            "nsid"      : user["id"],
+            "username"  : user["username"]["_content"],
+            "path_alias": username,
+        }
 
     def video_getStreamInfo(self, video_id, secret=None):
         """Returns all available video streams"""
@@ -441,7 +442,8 @@ class FlickrAPI(oauth.OAuth1API):
         return data
 
     def _pagination(self, method, params, key="photos"):
-        params["extras"] = "description,date_upload,tags,views,media,"
+        params["extras"] = ("description,date_upload,tags,views,media,"
+                            "path_alias,owner_name,")
         params["extras"] += ",".join("url_" + fmt[0] for fmt in self.formats)
         params["page"] = 1
 
@@ -468,6 +470,17 @@ class FlickrAPI(oauth.OAuth1API):
         photo["date"] = text.parse_timestamp(photo["dateupload"])
         photo["tags"] = photo["tags"].split()
         photo["id"] = text.parse_int(photo["id"])
+
+        if "owner" in photo:
+            photo["owner"] = {
+                "nsid"      : photo["owner"],
+                "username"  : photo["ownername"],
+                "path_alias": photo["pathalias"],
+            }
+        else:
+            photo["owner"] = self.extractor.user
+        del photo["pathalias"]
+        del photo["ownername"]
 
         if photo["media"] == "video" and self.videos:
             return self._extract_video(photo)
