@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,13 +8,13 @@
 
 """Collection of extractors for various imagehosts"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text, exception
 from ..cache import memcache
 from os.path import splitext
 
 
-class ImagehostImageExtractor(SharedConfigMixin, Extractor):
+class ImagehostImageExtractor(Extractor):
     """Base class for single-image extractors for various imagehosts"""
     basecategory = "imagehost"
     subcategory = "image"

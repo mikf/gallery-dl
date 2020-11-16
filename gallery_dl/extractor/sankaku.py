@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2014-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://chan.sankakucomplex.com/"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
 import collections
@@ -17,7 +17,7 @@ import time
 import re
 
 
-class SankakuExtractor(SharedConfigMixin, Extractor):
+class SankakuExtractor(Extractor):
     """Base class for sankaku extractors"""
     basecategory = "booru"
     category = "sankaku"

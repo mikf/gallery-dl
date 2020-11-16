@@ -8,7 +8,7 @@
 
 """Extractors for https://danbooru.donmai.us/"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text
 import datetime
 
@@ -20,7 +20,7 @@ BASE_PATTERN = (
 )
 
 
-class DanbooruExtractor(SharedConfigMixin, Extractor):
+class DanbooruExtractor(Extractor):
     """Base class for danbooru extractors"""
     basecategory = "booru"
     category = "danbooru"

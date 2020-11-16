@@ -8,7 +8,7 @@
 
 """Base classes for extractors for danbooru and co"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text, exception
 from xml.etree import ElementTree
 import collections
@@ -17,7 +17,7 @@ import operator
 import re
 
 
-class BooruExtractor(SharedConfigMixin, Extractor):
+class BooruExtractor(Extractor):
     """Base class for all booru extractors"""
     basecategory = "booru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"

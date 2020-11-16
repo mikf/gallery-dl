@@ -24,6 +24,7 @@ class Extractor():
 
     category = ""
     subcategory = ""
+    basecategory = ""
     categorytransfer = False
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
@@ -54,6 +55,10 @@ class Extractor():
         if self._retries < 0:
             self._retries = float("inf")
 
+        if self.basecategory:
+            self.config = self._config_shared
+            self.config_accumulate = self._config_shared_accumulate
+
         self._init_headers()
         self._init_cookies()
         self._init_proxies()
@@ -79,6 +84,19 @@ class Extractor():
 
     def config_accumulate(self, key):
         return config.accumulate(self._cfgpath, key)
+
+    def _config_shared(self, key, default=None):
+        return config.interpolate_common(("extractor",), (
+            (self.category, self.subcategory),
+            (self.basecategory, self.subcategory),
+        ), key, default)
+
+    def _config_shared_accumulate(self, key):
+        values = config.accumulate(self._cfgpath, key)
+        conf = config.get(("extractor",), self.basecategory)
+        if conf:
+            values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
+        return values
 
     def request(self, url, *, method="GET", session=None, retries=None,
                 encoding=None, fatal=True, notfound=None, **kwargs):
@@ -504,28 +522,6 @@ class AsynchronousMixin():
         except Exception as exc:
             messages.put(exc)
         messages.put(None)
-
-
-class SharedConfigMixin():
-    """Enable sharing of config settings based on 'basecategory'"""
-    basecategory = ""
-
-    def config(self, key, default=None):
-        return config.interpolate_common(
-            ("extractor",), (
-                (self.category, self.subcategory),
-                (self.basecategory, self.subcategory),
-            ), key, default,
-        )
-
-    def config_accumulate(self, key):
-        values = config.accumulate(self._cfgpath, key)
-
-        conf = config.get(("extractor",), self.basecategory)
-        if conf:
-            values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
-
-        return values
 
 
 def generate_extractors(extractor_data, symtable, classes):

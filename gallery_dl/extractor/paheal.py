@@ -6,13 +6,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://rule34.paheal.net/"""
+"""Extractors for https://rule34.paheal.net/"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text
 
 
-class PahealExtractor(SharedConfigMixin, Extractor):
+class PahealExtractor(Extractor):
     """Base class for paheal extractors"""
     basecategory = "booru"
     category = "paheal"

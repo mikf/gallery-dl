@@ -368,7 +368,7 @@ def generate_tests():
     # filter available extractor classes
     extractors = [
         extr for extr in extractor.extractors()
-        if fltr(extr.category, getattr(extr, "basecategory", None))
+        if fltr(extr.category, extr.basecategory)
     ]
 
     # add 'test_...' methods
