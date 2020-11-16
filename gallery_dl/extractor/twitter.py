@@ -501,9 +501,12 @@ class TwitterAPI():
         cookies.set("ct0", csrf, domain=".twitter.com")
 
         if cookies.get("auth_token", domain=".twitter.com"):
+            # logged in
+            self.root = "https://twitter.com/i/api/"
             self.headers["x-twitter-auth-type"] = "OAuth2Session"
         else:
-            # guest token
+            # guest
+            self.root = "https://api.twitter.com/"
             guest_token = self._guest_token()
             self.headers["x-guest-token"] = guest_token
             cookies.set("gt", guest_token, domain=".twitter.com")
@@ -597,7 +600,7 @@ class TwitterAPI():
         return self._call(endpoint, None, "POST")["guest_token"]
 
     def _call(self, endpoint, params, method="GET"):
-        url = "https://api.twitter.com/" + endpoint
+        url = self.root + endpoint
         response = self.extractor.request(
             url, method=method, params=params, headers=self.headers,
             fatal=None)
