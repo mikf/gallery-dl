@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Generic extractors for *reactor sites"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text
 import urllib.parse
 import random
@@ -19,7 +19,7 @@ import json
 BASE_PATTERN = r"(?:https?://)?((?:[^/.]+\.)?reactor\.cc)"
 
 
-class ReactorExtractor(SharedConfigMixin, Extractor):
+class ReactorExtractor(Extractor):
     """Base class for *reactor.cc extractors"""
     basecategory = "reactor"
     filename_fmt = "{post_id}_{num:>02}{title[:100]:?_//}.{extension}"

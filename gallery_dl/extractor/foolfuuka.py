@@ -8,13 +8,13 @@
 
 """Extractors for 4chan archives based on FoolFuuka"""
 
-from .common import Extractor, Message, SharedConfigMixin, generate_extractors
+from .common import Extractor, Message, generate_extractors
 from .. import text
 import itertools
 import operator
 
 
-class FoolfuukaThreadExtractor(SharedConfigMixin, Extractor):
+class FoolfuukaThreadExtractor(Extractor):
     """Base extractor for FoolFuuka based boards/archives"""
     basecategory = "foolfuuka"
     subcategory = "thread"

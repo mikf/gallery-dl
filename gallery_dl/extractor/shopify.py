@@ -8,12 +8,12 @@
 
 """Extractors for Shopify instances"""
 
-from .common import Extractor, Message, SharedConfigMixin, generate_extractors
+from .common import Extractor, Message, generate_extractors
 from .. import text
 import re
 
 
-class ShopifyExtractor(SharedConfigMixin, Extractor):
+class ShopifyExtractor(Extractor):
     """Base class for Shopify extractors"""
     basecategory = "shopify"
     filename_fmt = "{product[title]}_{num:>02}_{id}.{extension}"

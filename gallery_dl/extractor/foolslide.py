@@ -12,7 +12,6 @@ from .common import (
     Extractor,
     ChapterExtractor,
     MangaExtractor,
-    SharedConfigMixin,
     Message,
     generate_extractors,
 )
@@ -20,7 +19,7 @@ from .. import text, util
 import json
 
 
-class FoolslideBase(SharedConfigMixin):
+class FoolslideBase():
     """Base class for FoOlSlide extractors"""
     basecategory = "foolslide"
 
