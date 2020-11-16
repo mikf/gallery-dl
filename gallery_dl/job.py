@@ -410,13 +410,20 @@ class DownloadJob(Job):
             pp_log = self.get_logger("postprocessor")
             pp_list = []
             category = self.extractor.category
+            basecategory = self.extractor.basecategory
 
             for pp_dict in postprocessors:
+
                 whitelist = pp_dict.get("whitelist")
-                blacklist = pp_dict.get("blacklist")
-                if (whitelist and category not in whitelist or
-                        blacklist and category in blacklist):
+                if whitelist and category not in whitelist and \
+                        basecategory not in whitelist:
                     continue
+
+                blacklist = pp_dict.get("blacklist")
+                if blacklist and (
+                        category in blacklist or basecategory in blacklist):
+                    continue
+
                 name = pp_dict.get("name")
                 pp_cls = postprocessor.find(name)
                 if not pp_cls:
