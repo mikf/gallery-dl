@@ -28,14 +28,30 @@ class MangadexExtractor(Extractor):
 
     def chapter_data(self, chapter_id):
         """Request API results for 'chapter_id'"""
-        url = "{}/api/chapter/{}".format(self.root, chapter_id)
-        return self.request(url).json()
+        url = "{}/api/v2/chapter/{}".format(self.root, chapter_id)
+        return self.request(url).json()["data"]
 
     @memcache(keyarg=1)
     def manga_data(self, manga_id):
         """Request API results for 'manga_id'"""
-        url = "{}/api/manga/{}".format(self.root, manga_id)
-        return self.request(url).json()
+        url = "{}/api/v2/manga/{}".format(self.root, manga_id)
+        return self.request(url).json()["data"]
+
+    def manga_chapters(self, manga_id):
+        """Request chapter list for 'manga_id'"""
+        url = "{}/api/v2/manga/{}/chapters".format(self.root, manga_id)
+        data = self.request(url).json()["data"]
+
+        groups = {
+            group["id"]: group["name"]
+            for group in data["groups"]
+        }
+
+        for chapter in data["chapters"]:
+            cgroups = chapter["groups"]
+            for idx, group_id in enumerate(cgroups):
+                cgroups[idx] = groups[group_id]
+            yield chapter
 
 
 class MangadexChapterExtractor(MangadexExtractor):
@@ -50,61 +66,58 @@ class MangadexChapterExtractor(MangadexExtractor):
     pattern = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)/chapter/(\d+)"
     test = (
         ("https://mangadex.org/chapter/122094", {
-            "keyword": "ef1084c2845825979e150512fed8fdc209baf05a",
+            "keyword": "89d1b24b4baa1fb737d32711d9f2ade6ea426987",
             #  "content": "50383a4c15124682057b197d40261641a98db514",
         }),
         # oneshot
         ("https://mangadex.cc/chapter/138086", {
             "count": 64,
-            "keyword": "f3da80e57b1acfe1bede7d6ebe82a4bae3f9101a",
+            "keyword": "c53a0e4c12250578a4e630281085875e59532c03",
         }),
     )
 
     def __init__(self, match):
         MangadexExtractor.__init__(self, match)
         self.chapter_id = match.group(1)
-        self.data = None
 
     def items(self):
-        data = self.metadata()
-        imgs = self.images()
-        data["count"] = len(imgs)
-
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["page"], url in enumerate(imgs, 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
-
-    def metadata(self):
-        """Return a dict with general metadata"""
         cdata = self.chapter_data(self.chapter_id)
-        mdata = self.manga_data(cdata["manga_id"])
-        self.data = cdata
+        mdata = self.manga_data(cdata["mangaId"])
 
         chapter, sep, minor = cdata["chapter"].partition(".")
-        return {
-            "manga"   : text.unescape(mdata["manga"]["title"]),
-            "manga_id": cdata["manga_id"],
-            "artist"  : text.unescape(mdata["manga"]["artist"]),
-            "author"  : text.unescape(mdata["manga"]["author"]),
+        lang = self.iso639_map.get(cdata["language"], cdata["language"])
+
+        base = cdata["server"] + cdata["hash"] + "/"
+        if base[0] == "/":
+            base = text.urljoin(self.root, base)
+
+        if "serverFallback" in cdata:
+            fallback = cdata["serverFallback"] + cdata["hash"] + "/"
+        else:
+            fallback = None
+
+        data = {
+            "manga"   : text.unescape(mdata["title"]),
+            "manga_id": mdata["id"],
+            "artist"  : mdata["artist"],
+            "author"  : mdata["author"],
             "title"   : text.unescape(cdata["title"]),
             "volume"  : text.parse_int(cdata["volume"]),
             "chapter" : text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "chapter_id": cdata["id"],
-            "group"   : text.unescape(
-                mdata["chapter"][self.chapter_id]["group_name"]),
+            "group"   : [group["name"] for group in cdata["groups"]],
             "date"    : text.parse_timestamp(cdata["timestamp"]),
-            "lang"    : util.language_to_code(cdata["lang_name"]),
-            "language": cdata["lang_name"],
+            "lang"    : lang,
+            "language": util.code_to_language(lang),
+            "count"   : len(cdata["pages"]),
         }
 
-    def images(self):
-        """Return a list of all image URLs"""
-        base = self.data["server"] + self.data["hash"] + "/"
-        if base.startswith("/"):
-            base = text.urljoin(self.root, base)
-        return [base + page for page in self.data["page_array"]]
+        yield Message.Directory, data
+        for data["page"], page in enumerate(cdata["pages"], 1):
+            if fallback:
+                data["_fallback"] = (fallback + page,)
+            yield Message.Url, base + page, text.nameext_from_url(page, data)
 
 
 class MangadexMangaExtractor(MangadexExtractor):
@@ -117,16 +130,16 @@ class MangadexMangaExtractor(MangadexExtractor):
         ("https://mangadex.org/manga/2946/souten-no-koumori", {
             "pattern": r"https://mangadex.org/chapter/\d+",
             "keyword": {
-                "manga": "Souten no Koumori",
+                "manga"   : "Souten no Koumori",
                 "manga_id": 2946,
-                "title": "re:One[Ss]hot",
-                "volume": 0,
-                "chapter": 0,
+                "title"   : "re:One[Ss]hot",
+                "volume"  : 0,
+                "chapter" : 0,
                 "chapter_minor": "",
                 "chapter_id": int,
-                "group": str,
-                "date": "type:datetime",
-                "lang": str,
+                "group"   : list,
+                "date"    : "type:datetime",
+                "lang"    : str,
                 "language": str,
             },
         }),
@@ -140,7 +153,7 @@ class MangadexMangaExtractor(MangadexExtractor):
 
     def __init__(self, match):
         MangadexExtractor.__init__(self, match)
-        self.manga_id = text.parse_int(match.group(1))
+        self.manga_id = match.group(1)
 
     def items(self):
         yield Message.Version, 1
@@ -150,27 +163,24 @@ class MangadexMangaExtractor(MangadexExtractor):
 
     def chapters(self):
         """Return a sorted list of chapter-metadata dicts"""
-        data = self.manga_data(self.manga_id)
-        if "chapter" not in data:
-            return ()
-        manga = data["manga"]
-
+        manga = self.manga_data(self.manga_id)
         results = []
-        for chid, info in data["chapter"].items():
-            chapter, sep, minor = info["chapter"].partition(".")
-            lang = self.iso639_map.get(info["lang_code"], info["lang_code"])
+
+        for cdata in self.manga_chapters(self.manga_id):
+            chapter, sep, minor = cdata["chapter"].partition(".")
+            lang = self.iso639_map.get(cdata["language"], cdata["language"])
             results.append({
                 "manga"   : text.unescape(manga["title"]),
-                "manga_id": self.manga_id,
-                "artist"  : text.unescape(manga["artist"]),
-                "author"  : text.unescape(manga["author"]),
-                "title"   : text.unescape(info["title"]),
-                "volume"  : text.parse_int(info["volume"]),
+                "manga_id": text.parse_int(self.manga_id),
+                "artist"  : manga["artist"],
+                "author"  : manga["author"],
+                "title"   : text.unescape(cdata["title"]),
+                "volume"  : text.parse_int(cdata["volume"]),
                 "chapter" : text.parse_int(chapter),
                 "chapter_minor": sep + minor,
-                "chapter_id": text.parse_int(chid),
-                "group"   : text.unescape(info["group_name"]),
-                "date"    : text.parse_timestamp(info["timestamp"]),
+                "chapter_id": text.parse_int(cdata["id"]),
+                "group"   : cdata["groups"],
+                "date"    : text.parse_timestamp(cdata["timestamp"]),
                 "lang"    : lang,
                 "language": util.code_to_language(lang),
                 "_extractor": MangadexChapterExtractor,
