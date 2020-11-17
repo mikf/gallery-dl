@@ -1,0 +1,44 @@
+name: tests
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.4, 3.5, 3.6, 3.7, 3.8, 3.9, pypy3]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 .
+
+    - name: Run tests
+      run: |
+        pip install nose
+        make test
+
+    - name: Generate man pages and bash/zsh completion
+      run: |
+        make man completion
