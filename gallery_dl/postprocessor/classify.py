@@ -32,13 +32,16 @@ class ClassifyPP(PostProcessor):
             for ext in exts
         }
 
+        job.hooks["prepare"].append(self.prepare)
+        job.hooks["file"].append(self.move)
+
     def prepare(self, pathfmt):
         ext = pathfmt.extension
         if ext in self.mapping:
             # set initial paths to enable download skips
             self._build_paths(pathfmt, self.mapping[ext])
 
-    def run(self, pathfmt):
+    def move(self, pathfmt):
         ext = pathfmt.extension
         if ext in self.mapping:
             # rebuild paths in case the filename extension changed
