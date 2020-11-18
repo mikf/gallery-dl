@@ -38,12 +38,11 @@ class ZipPP(PostProcessor):
         self.args = (self.path[:-1] + ext, "a",
                      self.COMPRESSION_ALGORITHMS[algorithm], True)
 
-        if options.get("mode") == "safe":
-            self.run = self._write_safe
-        else:
-            self.run = self._write
+        job.hooks["file"].append(
+            self.write_safe if options.get("mode") == "safe" else self.write)
+        job.hooks["finalize"].append(self.finalize)
 
-    def _write(self, pathfmt, zfile=None):
+    def write(self, pathfmt, zfile=None):
         # 'NameToInfo' is not officially documented, but it's available
         # for all supported Python versions and using it directly is a lot
         # faster than calling getinfo()
@@ -55,11 +54,11 @@ class ZipPP(PostProcessor):
             zfile.write(pathfmt.temppath, pathfmt.filename)
             pathfmt.delete = self.delete
 
-    def _write_safe(self, pathfmt):
+    def write_safe(self, pathfmt):
         with zipfile.ZipFile(*self.args) as zfile:
             self._write(pathfmt, zfile)
 
-    def run_final(self, pathfmt, status):
+    def finalize(self, pathfmt, status):
         if self.zfile:
             self.zfile.close()
 

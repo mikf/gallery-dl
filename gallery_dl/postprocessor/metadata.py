@@ -48,8 +48,8 @@ class MetadataPP(PostProcessor):
         else:
             self.extension = options.get("extension", ext)
 
-        if options.get("bypost"):
-            self.run_metadata, self.run = self.run, self.run_metadata
+        event = "metadata" if options.get("bypost") else "file"
+        job.hooks[event].append(self.run)
 
     def run(self, pathfmt):
         path = self._directory(pathfmt) + self._filename(pathfmt)

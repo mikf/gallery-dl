@@ -49,6 +49,9 @@ class UgoiraPP(PostProcessor):
         else:
             self.prevent_odd = False
 
+        job.hooks["prepare"].append(self.prepare)
+        job.hooks["file"].append(self.convert)
+
     def prepare(self, pathfmt):
         self._frames = None
 
@@ -65,7 +68,7 @@ class UgoiraPP(PostProcessor):
         if self.delete:
             pathfmt.set_extension(self.extension)
 
-    def run(self, pathfmt):
+    def convert(self, pathfmt):
         if not self._frames:
             return
 

@@ -17,6 +17,7 @@ class MtimePP(PostProcessor):
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
         self.key = options.get("key", "date")
+        job.hooks["file"].append(self.run)
 
     def run(self, pathfmt):
         mtime = pathfmt.kwdict.get(self.key)

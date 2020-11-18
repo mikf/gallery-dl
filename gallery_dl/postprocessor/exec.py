@@ -41,18 +41,13 @@ class ExecPP(PostProcessor):
             self.args = [util.Formatter(arg) for arg in args]
             self.shell = False
 
-        if final:
-            self.run_after = PostProcessor.run_after
-        else:
-            self.run_final = PostProcessor.run_final
-
         if options.get("async", False):
             self._exec = self._exec_async
 
-    def run_after(self, pathfmt):
-        self._exec(self._format(pathfmt))
+        event = "finalize" if final else "after"
+        job.hooks[event].append(self.run)
 
-    def run_final(self, pathfmt, status):
+    def run(self, pathfmt, status=0):
         if status == 0:
             self._exec(self._format(pathfmt))
 

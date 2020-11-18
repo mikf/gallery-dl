@@ -10,6 +10,7 @@ import sys
 import time
 import errno
 import logging
+import collections
 from . import extractor, downloader, postprocessor
 from . import config, text, util, output, exception
 from .extractor.message import Message
@@ -193,8 +194,8 @@ class DownloadJob(Job):
         self.blacklist = None
         self.archive = None
         self.sleep = None
+        self.hooks = None
         self.downloaders = {}
-        self.postprocessors = None
         self.out = output.select()
 
         if parent:
@@ -207,16 +208,16 @@ class DownloadJob(Job):
 
     def handle_url(self, url, kwdict):
         """Download the resource specified in 'url'"""
-        postprocessors = self.postprocessors
+        hooks = self.hooks
         pathfmt = self.pathfmt
         archive = self.archive
 
         # prepare download
         pathfmt.set_filename(kwdict)
 
-        if postprocessors:
-            for pp in postprocessors:
-                pp.prepare(pathfmt)
+        if "prepare" in hooks:
+            for callback in hooks["prepare"]:
+                callback(pathfmt)
 
         if archive and archive.check(kwdict):
             pathfmt.fix_extension()
@@ -255,19 +256,19 @@ class DownloadJob(Job):
             return
 
         # run post processors
-        if postprocessors:
-            for pp in postprocessors:
-                pp.run(pathfmt)
+        if "file" in hooks:
+            for callback in hooks["file"]:
+                callback(pathfmt)
 
         # download succeeded
         pathfmt.finalize()
         self.out.success(pathfmt.path, 0)
+        self._skipcnt = 0
         if archive:
             archive.add(kwdict)
-        if postprocessors:
-            for pp in postprocessors:
-                pp.run_after(pathfmt)
-        self._skipcnt = 0
+        if "after" in hooks:
+            for callback in hooks["after"]:
+                callback(pathfmt)
 
     def handle_directory(self, kwdict):
         """Set and create the target directory for downloads"""
@@ -275,17 +276,18 @@ class DownloadJob(Job):
             self.initialize(kwdict)
         else:
             self.pathfmt.set_directory(kwdict)
+        if "post" in self.hooks:
+            for callback in self.hooks["post"]:
+                callback(self.pathfmt)
 
     def handle_metadata(self, kwdict):
         """Run postprocessors with metadata from 'kwdict'"""
-        postprocessors = self.postprocessors
-
-        if postprocessors:
+        if "metadata" in self.hooks:
             kwdict["extension"] = "metadata"
             pathfmt = self.pathfmt
             pathfmt.set_filename(kwdict)
-            for pp in postprocessors:
-                pp.run_metadata(pathfmt)
+            for callback in self.hooks["metadata"]:
+                callback(pathfmt)
 
     def handle_queue(self, url, kwdict):
         if url in self.visited:
@@ -313,13 +315,17 @@ class DownloadJob(Job):
             self.archive.close()
         if pathfmt:
             self.extractor._store_cookies()
-            if self.postprocessors:
+            if "finalize" in self.hooks:
                 status = self.status
-                for pp in self.postprocessors:
-                    pp.run_final(pathfmt, status)
+                for callback in self.hooks["finalize"]:
+                    callback(pathfmt, status)
 
     def handle_skip(self):
-        self.out.skip(self.pathfmt.path)
+        pathfmt = self.pathfmt
+        self.out.skip(pathfmt.path)
+        if "skip" in self.hooks:
+            for callback in self.hooks["skip"]:
+                callback(pathfmt)
         if self._skipexc:
             self._skipcnt += 1
             if self._skipcnt >= self._skipmax:
@@ -407,6 +413,7 @@ class DownloadJob(Job):
 
         postprocessors = self.extractor.config_accumulate("postprocessors")
         if postprocessors:
+            self.hooks = collections.defaultdict(list)
             pp_log = self.get_logger("postprocessor")
             pp_list = []
             category = self.extractor.category
@@ -438,9 +445,11 @@ class DownloadJob(Job):
                     pp_list.append(pp_obj)
 
             if pp_list:
-                self.postprocessors = pp_list
                 self.extractor.log.debug(
                     "Active postprocessor modules: %s", pp_list)
+                if "init" in self.hooks:
+                    for callback in self.hooks["init"]:
+                        callback(pathfmt)
 
     def _build_blacklist(self):
         wlist = self.extractor.config("whitelist")
