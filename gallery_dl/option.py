@@ -376,7 +376,8 @@ def build_parser():
     postprocessor.add_argument(
         "--exec-after",
         dest="postprocessors", metavar="CMD",
-        action=AppendCommandAction, const={"name": "exec", "final": True},
+        action=AppendCommandAction, const={
+            "name": "exec", "event": "finalize"},
         help=("Execute CMD after all files were downloaded successfully. "
               "Example: --exec-after 'cd {} && convert * ../doc.pdf'"),
     )
