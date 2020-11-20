@@ -10,6 +10,7 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, util
+import binascii
 import json
 
 
@@ -57,10 +58,26 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        url = "{}/read/{}".format(self.root, self.gallery_id)
+        url = "{}/read/{}/001".format(self.root, self.gallery_id)
         page = self.request(url).text
-        urls = text.extract(page, "initReader(", "]")[0] + "]"
-        return [(url, None) for url in json.loads(urls)]
+
+        data = json.loads(self._decode(text.extract(
+            page, 'initReader("', '"')[0]))
+        base = data["b"] + data["r"]
+        gid = data["i"]
+
+        return [
+            ("{}{}/{}/{}".format(base, page["h"], gid, page["p"]), None)
+            for page in data["f"]
+        ]
+
+    @staticmethod
+    def _decode(data):
+        blob = binascii.a2b_base64(data)
+        return "".join(
+            chr(blob[i] ^ blob[i-64])
+            for i in range(64, len(blob))
+        )
 
     @staticmethod
     def _join_title(data):
