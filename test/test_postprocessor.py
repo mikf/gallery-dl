@@ -244,7 +244,7 @@ class MetadataTest(BasePostprocessorTest):
             pp = self._create(pp_info, {"foo": "bar"})
             self.assertEqual(pp.write, pp._write_custom)
             self.assertEqual(pp.extension, "txt")
-            self.assertTrue(pp.contentfmt)
+            self.assertTrue(pp._content_fmt)
 
             with patch("builtins.open", mock_open()) as m:
                 self._trigger()
@@ -261,7 +261,7 @@ class MetadataTest(BasePostprocessorTest):
             "extension-format": "json",
         })
 
-        self.assertEqual(pp._filename, pp._filename_custom)
+        self.assertEqual(pp._filename, pp._filename_extfmt)
 
         with patch("builtins.open", mock_open()) as m:
             self._trigger()
@@ -302,6 +302,18 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = self.pathfmt.realdirectory + "metadata/file.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_filename(self):
+        self._create({
+            "filename"        : "{category}_{filename}_meta.data",
+            "extension-format": "json",
+        })
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        path = self.pathfmt.realdirectory + "test_file_meta.data"
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
     @staticmethod
