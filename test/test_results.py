@@ -32,7 +32,6 @@ TRAVIS_SKIP = {
 BROKEN = {
     "4plebs",
     "imagevenue",
-    "mangapanda",
     "photobucket",
 }
 

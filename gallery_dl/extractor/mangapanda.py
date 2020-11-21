@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://www.mangapanda.com/"""
+"""Extractors for http://www.mangapanda.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
@@ -15,7 +15,7 @@ from .. import text
 class MangapandaBase():
     """Base class for mangapanda extractors"""
     category = "mangapanda"
-    root = "https://www.mangapanda.com"
+    root = "http://www.mangapanda.com"
 
     @staticmethod
     def parse_page(page, data):
@@ -36,7 +36,7 @@ class MangapandaChapterExtractor(MangapandaBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapanda.com"""
     archive_fmt = "{manga}_{chapter}_{page}"
     pattern = r"(?:https?://)?(?:www\.)?mangapanda\.com((/[^/?#]+)/(\d+))"
-    test = ("https://www.mangapanda.com/red-storm/2", {
+    test = ("http://www.mangapanda.com/red-storm/2", {
         "url": "1f633f776e950531ba9b1e81965316458e785261",
         "keyword": "b24df4b9cc36383fb6a44e06d32a3884a4dcb5fb",
     })
@@ -97,8 +97,8 @@ class MangapandaMangaExtractor(MangapandaBase, MangaExtractor):
     chapterclass = MangapandaChapterExtractor
     reverse = False
     pattern = r"(?:https?://)?(?:www\.)?mangapanda\.com(/[^/?#]+)/?$"
-    test = ("https://www.mangapanda.com/mushishi", {
-        "url": "357f965732371cac1990fee8b480f62e29141a42",
+    test = ("http://www.mangapanda.com/mushishi", {
+        "url": "50a1ba730b85426b904da256c80f68ba6a8a2566",
         "keyword": "031b3ea085921c552de017ecbb9b906e462229c9",
     })
 
