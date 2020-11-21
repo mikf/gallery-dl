@@ -118,18 +118,25 @@ class RedditExtractor(Extractor):
 
     def _extract_gallery(self, submission):
         if submission["gallery_data"] is None:
-            self.log.warning("gallery '%s' was deleted", submission["id"])
+            self.log.warning("gallery %s: deleted", submission["id"])
             return
 
         meta = submission["media_metadata"]
         for item in submission["gallery_data"]["items"]:
-            src = meta[item["media_id"]]["s"]
+            data = meta[item["media_id"]]
+            if data["status"] != "valid" or "s" not in data:
+                self.log.warning(
+                    "gallery %s: skipping item %s ('status: %s')",
+                    submission["id"], item["media_id"], data.get("status"))
+                continue
+            src = data["s"]
             url = src.get("u") or src.get("gif") or src.get("mp4")
             if url:
                 yield url.partition("?")[0].replace("/preview.", "/i.", 1)
             else:
-                self.log.error("Unable to get download URL for item '%s'",
-                               item["media_id"])
+                self.log.error(
+                    "gallery %s: unable to fetch download URL for item %s",
+                    submission["id"], item["media_id"])
                 self.log.debug(src)
 
 
@@ -210,6 +217,10 @@ class RedditSubmissionExtractor(RedditExtractor):
         ("https://www.reddit.com/r/araragi/comments/ib32hm", {
             "pattern": r"https://i\.redd\.it/\w+\.gif",
             "count": 2,
+        }),
+        # "failed" gallery item (#1127)
+        ("https://www.reddit.com/r/cosplay/comments/jvwaqr", {
+            "count": 1,
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
