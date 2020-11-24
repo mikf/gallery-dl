@@ -30,7 +30,7 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "4plebs",
+    "instagram",
     "imagevenue",
     "photobucket",
 }
@@ -207,6 +207,9 @@ class ResultJob(job.DownloadJob):
     def handle_directory(self, kwdict):
         self._update_kwdict(kwdict, False)
         self.format_directory(kwdict)
+
+    def handle_metadata(self, kwdict):
+        pass
 
     def handle_queue(self, url, kwdict):
         self.queue = True
