@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from . import danbooru
-import time
 
 
 BASE_PATTERN = r"(?:https?://)?e(621|926)\.net"
@@ -23,22 +22,16 @@ class E621Extractor(danbooru.DanbooruExtractor):
     page_limit = 750
     page_start = None
     per_page = 320
-    _last_request = 0
+    _request_interval_min = 1.0
 
     def __init__(self, match):
         super().__init__(match)
         self.root = "https://e{}.net".format(match.group(1))
+        self.headers = {"User-Agent": "gallery-dl/1.14.0 (by mikf)"}
 
     def request(self, url, **kwargs):
-        diff = time.time() - E621Extractor._last_request
-        if diff < 1.0:
-            delay = 1.0 - diff
-            self.log.debug("Sleeping for %s seconds", delay)
-            time.sleep(delay)
-        kwargs["headers"] = {"User-Agent": "gallery-dl/1.14.0 (by mikf)"}
-        response = Extractor.request(self, url, **kwargs)
-        E621Extractor._last_request = time.time()
-        return response
+        kwargs["headers"] = self.headers
+        return Extractor.request(self, url, **kwargs)
 
     def items(self):
         data = self.metadata()

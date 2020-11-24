@@ -34,6 +34,7 @@ class Extractor():
     test = None
     _request_last = 0
     _request_interval = 0
+    _request_interval_min = 0
 
     def __init__(self, match):
         self.session = requests.Session()
@@ -54,6 +55,8 @@ class Extractor():
 
         if self._retries < 0:
             self._retries = float("inf")
+        if self._request_interval < self._request_interval_min:
+            self._request_interval = self._request_interval_min
 
         if self.basecategory:
             self.config = self._config_shared
