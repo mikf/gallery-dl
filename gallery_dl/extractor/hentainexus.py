@@ -73,11 +73,25 @@ class HentainexusGalleryExtractor(GalleryExtractor):
 
     @staticmethod
     def _decode(data):
+        # https://hentainexus.com/static/js/reader.min.js?r=6
         blob = binascii.a2b_base64(data)
-        return "".join(
-            chr(blob[i] ^ blob[i-64])
-            for i in range(64, len(blob))
-        )
+        key = blob[0:64]
+        indices = list(range(256))
+        result = ""
+
+        x = 0
+        for i in range(256):
+            x = (x + indices[i] + key[i % len(key)]) % 256
+            indices[i], indices[x] = indices[x], indices[i]
+
+        x = i = 0
+        for n in range(64, len(blob)):
+            i = (i + 1) % 256
+            x = (x + indices[i]) % 256
+            indices[i], indices[x] = indices[x], indices[i]
+            result += chr(blob[n] ^ indices[(indices[i] + indices[x]) % 256])
+
+        return result
 
     @staticmethod
     def _join_title(data):
