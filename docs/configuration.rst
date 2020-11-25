@@ -1931,7 +1931,7 @@ Each option is titled as ``<name>.<option>``, meaning a post procesor
 of type ``<name>`` will look for an ``<option>`` field inside its "body".
 For example an ``exec`` post processor will recognize
 an `async <exec.async_>`__,  `command <exec.command_>`__,
-and `final <exec.final_>`__ field:
+and `event <exec.event_>`__ field:
 
 .. code:: json
 
@@ -1939,7 +1939,7 @@ and `final <exec.final_>`__ field:
         "name"   : "exec",
         "async"  : false,
         "command": "...",
-        "final"  : false
+        "event"  : "after"
     }
 
 
@@ -2013,7 +2013,7 @@ Description
     * If this is a ``string``, it will be executed using the system's
       shell, e.g. ``/bin/sh``. Any ``{}`` will be replaced
       with the full path of a file or target directory, depending on
-      `exec.final`_
+      `exec.event`_
 
     * If this is a ``list``, the first element specifies the program
       name and any further elements its arguments.
@@ -2022,16 +2022,16 @@ Description
       and ``{_filename}``.
 
 
-exec.final
+exec.event
 ----------
 Type
-    ``bool``
+    ``string``
 Default
-    ``false``
+    ``"after"``
 Description
-    Controls whether to execute `exec.command`_ for each
-    downloaded file or only once after all files
-    have been downloaded successfully.
+    The event for which `exec.command`_ is run.
+
+    See `metadata.event`_ for a list of available events.
 
 
 metadata.mode
@@ -2048,6 +2048,22 @@ Description
     * ``"tags"``: ``tags`` separated by newlines
     * ``"custom"``: result of applying `metadata.content-format`_
       to a file's metadata dictionary
+
+
+metadata.filename
+-----------------
+Type
+    ``string``
+Default
+    ``null``
+Example
+    ``"{id}.data.json"``
+Description
+    A `format string`_ to build the filenames for metadata files with.
+    (see `extractor.filename <extractor.*.filename_>`__)
+
+    If this option is set, `metadata.extension`_ and
+    `metadata.extension-format`_ will be ignored.
 
 
 metadata.directory
@@ -2086,6 +2102,36 @@ Description
     files with, which will replace the original filename extensions.
 
     Note: `metadata.extension`_ is ignored if this option is set.
+
+
+metadata.event
+--------------
+Type
+    ``string``
+Default
+    ``"file"``
+Description
+    The event for which metadata gets written to a file.
+
+    The available events are:
+
+    ``init``
+        After post procesor initialization
+        and before the first file download
+    ``finalize``
+        On extractor shutdown, e.g. after all files were downloaded
+    ``prepare``
+        Before a file download
+    ``file``
+        When completing a file download,
+        but before it gets moved to its target location
+    ``after``
+        After a file got moved to its target location
+    ``skip``
+        When skipping a file download
+    ``post``
+        When starting to download all files of a `post`,
+        e.g. a Tweet on Twitter or a post on Patreon.
 
 
 metadata.content-format
