@@ -76,7 +76,7 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
     archive_fmt = "{album[id]}_{num}"
     pattern = r"(?:https?://)?(?:www\.)?mangoxo\.com/album/(\w+)"
     test = ("https://www.mangoxo.com/album/lzVOv1Q9", {
-        "url": "f152babd7d6ce56d70e29920e5a8483d8348bbe6",
+        "url": "ad921fe62663b06e7d73997f7d00646cab7bdd0d",
         "keyword": {
             "channel": {
                 "id": "Jpw9ywQ4",
@@ -111,9 +111,9 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
 
         data["extension"] = None
         for data["num"], path in enumerate(imgs, 1):
-            data["id"] = text.parse_int(path.rpartition("=")[2])
-            url = self.root + path
-            yield Message.Url, url, data
+            data["id"] = text.parse_int(text.extract(path, "=", "&")[0])
+            url = self.root + "/external/" + path.rpartition("url=")[2]
+            yield Message.Url, url, text.nameext_from_url(url, data)
 
     def metadata(self, page):
         """Return general metadata"""
