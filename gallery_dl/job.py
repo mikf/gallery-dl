@@ -411,9 +411,9 @@ class DownloadJob(Job):
             if self.archive:
                 self.archive.check = pathfmt.exists
 
+        self.hooks = collections.defaultdict(list)
         postprocessors = self.extractor.config_accumulate("postprocessors")
         if postprocessors:
-            self.hooks = collections.defaultdict(list)
             pp_log = self.get_logger("postprocessor")
             pp_list = []
             category = self.extractor.category
