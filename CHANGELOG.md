@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.15.4 - 2020-11-27
+### Fixes
+- [2chan] skip external links
+- [hentainexus] fix extraction ([#1125](https://github.com/mikf/gallery-dl/issues/1125))
+- [mangadex] switch to API v2 ([#1129](https://github.com/mikf/gallery-dl/issues/1129))
+- [mangapanda] use http://
+- [mangoxo] fix extraction
+- [reddit] skip invalid gallery items ([#1127](https://github.com/mikf/gallery-dl/issues/1127))
+
 ## 1.15.3 - 2020-11-13
 ### Additions
 - [sankakucomplex] extract videos and embeds ([#308](https://github.com/mikf/gallery-dl/issues/308))
