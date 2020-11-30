@@ -155,11 +155,15 @@ class HttpDownloader(DownloaderBase):
                         size, self.maxsize)
                     return False
 
+            chunked = response.raw.chunked
+            content = response.iter_content(self.chunk_size)
+
             # check filename extension against file header
             if self.adjust_extension and not offset and \
                     pathfmt.extension in FILE_SIGNATURES:
                 try:
-                    file_header = next(response.iter_content(16), b"")
+                    file_header = next(
+                        content if chunked else response.iter_content(16), b"")
                 except (RequestException, SSLError, OpenSSLError) as exc:
                     msg = str(exc)
                     print()
@@ -191,7 +195,7 @@ class HttpDownloader(DownloaderBase):
 
                 self.out.start(pathfmt.path)
                 try:
-                    self.receive(fp, response.iter_content(self.chunk_size))
+                    self.receive(fp, content)
                 except (RequestException, SSLError, OpenSSLError) as exc:
                     msg = str(exc)
                     print()
