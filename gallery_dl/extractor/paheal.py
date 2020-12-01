@@ -23,16 +23,16 @@ class PahealExtractor(Extractor):
     def items(self):
         self.session.cookies.set(
             "ui-tnc-agreed", "true", domain="rule34.paheal.net")
+        data = self.get_metadata()
 
-        yield Message.Version, 1
-        yield Message.Directory, self.get_metadata()
-
-        for data in self.get_posts():
-            url = data["file_url"]
+        for post in self.get_posts():
+            url = post["file_url"]
             for key in ("id", "width", "height"):
-                data[key] = text.parse_int(data[key])
-            data["tags"] = text.unquote(data["tags"])
-            yield Message.Url, url, text.nameext_from_url(url, data)
+                post[key] = text.parse_int(post[key])
+            post["tags"] = text.unquote(post["tags"])
+            post.update(data)
+            yield Message.Directory, post
+            yield Message.Url, url, text.nameext_from_url(url, post)
 
     def get_metadata(self):
         """Return general metadata"""
@@ -100,7 +100,7 @@ class PahealPostExtractor(PahealExtractor):
                r"/post/view/(\d+)")
     test = ("https://rule34.paheal.net/post/view/481609", {
         "url": "a91d579be030753282f55b8cb4eeaa89c45a9116",
-        "keyword": "44154bdac3d6cf289d0d9739a566acd8b7839e50",
+        "keyword": "e02e4dcf8cdf4e9c206e695253c9024d79a2e20a",
         "content": "7b924bcf150b352ac75c9d281d061e174c851a11",
     })
 
