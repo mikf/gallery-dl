@@ -106,14 +106,25 @@ class TwitterExtractor(Extractor):
                     })
             elif "media_url_https" in media:
                 url = media["media_url_https"]
+                base, _, fmt = url.rpartition(".")
+                base += "?format=" + fmt + "&name="
                 files.append(text.nameext_from_url(url, {
-                    "url"      : url + ":orig",
-                    "_fallback": [url+":large", url+":medium", url+":small"],
+                    "url"      : base + "orig",
                     "width"    : width,
                     "height"   : height,
+                    "_fallback": self._image_fallback(base, url),
                 }))
             else:
                 files.append({"url": media["media_url"]})
+
+    @staticmethod
+    def _image_fallback(base, url):
+        url += ":"
+        yield url + "orig"
+
+        for size in ("large", "medium", "small"):
+            yield base + size
+            yield url + size
 
     def _extract_card(self, tweet, files):
         card = tweet["card"]
@@ -267,7 +278,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
-            "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
+            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
         ("https://www.twitter.com/id:2976459548"),
@@ -291,7 +302,7 @@ class TwitterMediaExtractor(TwitterExtractor):
     test = (
         ("https://twitter.com/supernaturepics/media", {
             "range": "1-40",
-            "url": "0106229d408f4111d9a52c8fd2ad687f64842aa4",
+            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
         }),
         ("https://mobile.twitter.com/supernaturepics/media#t"),
         ("https://www.twitter.com/id:2976459548/media"),
@@ -374,12 +385,12 @@ class TwitterTweetExtractor(TwitterExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
     test = (
         ("https://twitter.com/supernaturepics/status/604341487988576256", {
-            "url": "0e801d2f98142dd87c3630ded9e4be4a4d63b580",
+            "url": "88a40f7d25529c2501c46f2218f9e0de9aa634b4",
             "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
         }),
         # 4 images
         ("https://twitter.com/perrypumas/status/894001459754180609", {
-            "url": "c8a262a9698cb733fb27870f5a8f75faf77d79f6",
+            "url": "3a2a43dc5fb79dd5432c701d8e55e87c4e551f47",
         }),
         # video
         ("https://twitter.com/perrypumas/status/1065692031626829824", {
@@ -396,7 +407,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         # Reply to deleted tweet (#403, #838)
         ("https://twitter.com/i/web/status/1170041925560258560", {
-            "pattern": r"https://pbs.twimg.com/media/EDzS7VrU0AAFL4_.jpg:orig",
+            "pattern": r"https://pbs.twimg.com/media/EDzS7VrU0AAFL4_",
         }),
         # 'replies' option (#705)
         ("https://twitter.com/i/web/status/1170041925560258560", {
@@ -405,13 +416,13 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         # quoted tweet (#526, #854)
         ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
-            "pattern": r"https://pbs\.twimg\.com/media/Ea[KG].+\.jpg",
+            "pattern": r"https://pbs\.twimg\.com/media/Ea[KG].+=jpg",
             "count": 8,
         }),
         # "quoted" option (#854)
         ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
             "options": (("quoted", False),),
-            "pattern": r"https://pbs\.twimg\.com/media/EaK.+\.jpg",
+            "pattern": r"https://pbs\.twimg\.com/media/EaK.+=jpg",
             "count": 4,
         }),
         # TwitPic embeds (#579)
@@ -422,7 +433,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         # Nitter tweet (#890)
         ("https://nitter.net/ed1conf/status/1163841619336007680", {
-            "url": "0f6a841e23948e4320af7ae41125e0c5b3cadc98",
+            "url": "4a9ea898b14d3c112f98562d0df75c9785e239d9",
             "content": "f29501e44d88437fe460f5c927b7543fda0f6e34",
         }),
         # Twitter card (#1005)
