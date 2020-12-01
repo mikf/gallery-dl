@@ -69,13 +69,14 @@ Komikcast            https://komikcast.com/              Chapters, Manga
 Konachan             https://konachan.com/               Pools, Popular Images, Posts, Tag Searches
 LINE BLOG            https://www.lineblog.me/            Blogs, Posts
 livedoor Blog        http://blog.livedoor.jp/            Blogs, Posts
+Lolibooru            https://lolibooru.moe/              Pools, Popular Images, Posts, Tag Searches
 Luscious             https://members.luscious.net/       Albums, Search Results
 Manga Fox            https://fanfox.net/                 Chapters
 Manga Here           https://www.mangahere.cc/           Chapters, Manga
 Manga Stream         https://readms.net/                 Chapters
 MangaDex             https://mangadex.org/               Chapters, Manga
 MangaKakalot         https://mangakakalot.com/           Chapters, Manga
-Mangapanda           https://www.mangapanda.com/         Chapters, Manga
+Mangapanda           http://www.mangapanda.com/          Chapters, Manga
 MangaPark            https://mangapark.net/              Chapters, Manga
 Mangareader          https://www.mangareader.net/        Chapters, Manga
 Mangoxo              https://www.mangoxo.com/            Albums, Channels                                   Supported
@@ -110,6 +111,7 @@ RedGIFs              https://redgifs.com/                individual Images, Sear
 rule #34             https://rule34.paheal.net/          Posts, Tag Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag Searches
+Sakugabooru          https://www.sakugabooru.com/        Pools, Popular Images, Posts, Tag Searches
 Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag Searches                         Supported
 Sankaku Complex      https://www.sankakucomplex.com/     Articles, Tag Searches
 Sen Manga            https://raw.senmanga.com/           Chapters
