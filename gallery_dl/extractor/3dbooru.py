@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from http://behoimi.org/"""
+"""Extractors for http://behoimi.org/"""
 
-from . import booru
+from . import moebooru
 
 
-class _3dbooruExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
+class _3dbooruBase():
     """Base class for 3dbooru extractors"""
     category = "3dbooru"
-    api_url = "http://behoimi.org/post/index.json"
-    post_url = "http://behoimi.org/post/show/{}"
-    page_limit = 1000
+    basecategory = "booru"
+    root = "http://behoimi.org"
 
     def __init__(self, match):
         super().__init__(match)
@@ -26,7 +25,7 @@ class _3dbooruExtractor(booru.MoebooruPageMixin, booru.BooruExtractor):
         })
 
 
-class _3dbooruTagExtractor(booru.TagMixin, _3dbooruExtractor):
+class _3dbooruTagExtractor(_3dbooruBase, moebooru.MoebooruTagExtractor):
     """Extractor for images from behoimi.org based on search-tags"""
     pattern = (r"(?:https?://)?(?:www\.)?behoimi\.org/post"
                r"(?:/(?:index)?)?\?tags=(?P<tags>[^&#]+)")
@@ -35,8 +34,12 @@ class _3dbooruTagExtractor(booru.TagMixin, _3dbooruExtractor):
         "content": "11cbda40c287e026c1ce4ca430810f761f2d0b2a",
     })
 
+    def posts(self):
+        params = {"tags": self.tags}
+        return self._pagination(self.root + "/post/index.json", params)
 
-class _3dbooruPoolExtractor(booru.PoolMixin, _3dbooruExtractor):
+
+class _3dbooruPoolExtractor(_3dbooruBase, moebooru.MoebooruPoolExtractor):
     """Extractor for image-pools from behoimi.org"""
     pattern = r"(?:https?://)?(?:www\.)?behoimi\.org/pool/show/(?P<pool>\d+)"
     test = ("http://behoimi.org/pool/show/27", {
@@ -44,8 +47,12 @@ class _3dbooruPoolExtractor(booru.PoolMixin, _3dbooruExtractor):
         "content": "fd5b37c5c6c2de4b4d6f1facffdefa1e28176554",
     })
 
+    def posts(self):
+        params = {"tags": "pool:" + self.pool_id}
+        return self._pagination(self.root + "/post/index.json", params)
 
-class _3dbooruPostExtractor(booru.PostMixin, _3dbooruExtractor):
+
+class _3dbooruPostExtractor(_3dbooruBase, moebooru.MoebooruPostExtractor):
     """Extractor for single images from behoimi.org"""
     pattern = r"(?:https?://)?(?:www\.)?behoimi\.org/post/show/(?P<post>\d+)"
     test = ("http://behoimi.org/post/show/140852", {
@@ -60,8 +67,13 @@ class _3dbooruPostExtractor(booru.PostMixin, _3dbooruExtractor):
         },
     })
 
+    def posts(self):
+        params = {"tags": "id:" + self.post_id}
+        return self._pagination(self.root + "/post/index.json", params)
 
-class _3dbooruPopularExtractor(booru.MoebooruPopularMixin, _3dbooruExtractor):
+
+class _3dbooruPopularExtractor(
+        _3dbooruBase, moebooru.MoebooruPopularExtractor):
     """Extractor for popular images from behoimi.org"""
     pattern = (r"(?:https?://)?(?:www\.)?behoimi\.org"
                r"/post/popular_(?P<scale>by_(?:day|week|month)|recent)"
@@ -70,8 +82,3 @@ class _3dbooruPopularExtractor(booru.MoebooruPopularMixin, _3dbooruExtractor):
         "pattern": r"http://behoimi\.org/data/../../[0-9a-f]{32}\.jpg",
         "count": 20,
     })
-
-    def __init__(self, match):
-        super().__init__(match)
-        self.api_url = "http://behoimi.org/post/popular_{scale}.json".format(
-            scale=self.scale)
