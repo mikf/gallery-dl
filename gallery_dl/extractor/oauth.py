@@ -10,9 +10,8 @@
 
 from .common import Extractor, Message
 from . import deviantart, flickr, reddit, smugmug, tumblr
-from .. import text, oauth, config, exception
+from .. import text, oauth, util, config, exception
 from ..cache import cache
-import os
 import urllib.parse
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
@@ -27,6 +26,7 @@ class OAuthBase(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.client = None
+        self.cache = config.get(("extractor", self.category), "cache", True)
 
     def oauth_config(self, key, default=None):
         return config.interpolate(
@@ -42,7 +42,7 @@ class OAuthBase(Extractor):
         server.listen(1)
 
         # workaround for ctrl+c not working during server.accept on Windows
-        if os.name == "nt":
+        if util.WINDOWS:
             server.settimeout(1.0)
         while True:
             try:
@@ -87,12 +87,20 @@ class OAuthBase(Extractor):
 
         # exchange the request token for an access token
         data = self.session.get(access_token_url, params=data).text
-
         data = text.parse_query(data)
-        self.send(OAUTH1_MSG_TEMPLATE.format(
-            category=self.subcategory,
-            token=data["oauth_token"],
-            token_secret=data["oauth_token_secret"],
+        token = data["oauth_token"]
+        token_secret = data["oauth_token_secret"]
+
+        # write to cache
+        if self.cache:
+            key = (self.subcategory, self.session.auth.consumer_key)
+            oauth._token_cache.update(key, (token, token_secret))
+            self.log.info("Writing tokens to cache")
+
+        # display tokens
+        self.send(self._generate_message(
+            ("access-token", "access-token-secret"),
+            (token, token_secret),
         ))
 
     def _oauth2_authorization_code_grant(
@@ -149,23 +157,58 @@ class OAuthBase(Extractor):
             self.send(data["error"])
             return
 
-        # display token
-        part = key.partition("_")[0]
-        template = message_template or OAUTH2_MSG_TEMPLATE
-        self.send(template.format(
-            category=self.subcategory,
-            key=part,
-            Key=part.capitalize(),
-            token=data[key],
-            instance=getattr(self, "instance", ""),
-            client_id=client_id,
-            client_secret=client_secret,
-        ))
-
         # write to cache
-        if cache and config.get(("extractor", self.category), "cache"):
+        if self.cache and cache:
             cache.update("#" + str(client_id), data[key])
             self.log.info("Writing 'refresh-token' to cache")
+
+        # display token
+        if message_template:
+            msg = message_template.format(
+                category=self.subcategory,
+                key=key.partition("_")[0],
+                token=data[key],
+                instance=getattr(self, "instance", ""),
+                client_id=client_id,
+                client_secret=client_secret,
+            )
+        else:
+            msg = self._generate_message(
+                ("refresh-token",),
+                (data[key],),
+            )
+        self.send(msg)
+
+    def _generate_message(self, names, values):
+        _vh, _va, _is, _it = (
+            ("This value has", "this value", "is", "it")
+            if len(names) == 1 else
+            ("These values have", "these values", "are", "them")
+        )
+
+        msg = "\nYour {} {}\n\n{}\n\n".format(
+            " and ".join("'" + n + "'" for n in names),
+            _is,
+            "\n".join(values),
+        )
+
+        opt = self.oauth_config(names[0])
+        if self.cache and (opt is None or opt == "cache"):
+            msg += _vh + " been cached and will automatically be used."
+        else:
+            msg += "Put " + _va + " into your configuration file as \n"
+            msg += " and\n".join(
+                "'extractor." + self.subcategory + "." + n + "'"
+                for n in names
+            )
+            if self.cache:
+                msg += (
+                    "\nor set\n'extractor.{}.{}' to \"cache\""
+                    .format(self.subcategory, names[0])
+                )
+            msg += "\nto use {}.".format(_it)
+
+        return msg
 
 
 class OAuthDeviantart(OAuthBase):
@@ -224,6 +267,7 @@ class OAuthReddit(OAuthBase):
             "https://www.reddit.com/api/v1/authorize",
             "https://www.reddit.com/api/v1/access_token",
             scope="read history",
+            cache=reddit._refresh_token_cache,
         )
 
 
@@ -271,7 +315,7 @@ class OAuthTumblr(OAuthBase):
 
 class OAuthMastodon(OAuthBase):
     subcategory = "mastodon"
-    pattern = "oauth:mastodon:(?:https?://)?([^/?&#]+)"
+    pattern = "oauth:mastodon:(?:https?://)?([^/?#]+)"
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
@@ -318,49 +362,8 @@ class OAuthMastodon(OAuthBase):
         return data
 
 
-OAUTH1_MSG_TEMPLATE = """
-Your Access Token and Access Token Secret are
-
-{token}
-{token_secret}
-
-Put these values into your configuration file as
-'extractor.{category}.access-token' and
-'extractor.{category}.access-token-secret'.
-
-Example:
-{{
-    "extractor": {{
-        "{category}": {{
-            "access-token": "{token}",
-            "access-token-secret": "{token_secret}"
-        }}
-    }}
-}}
-"""
-
-
-OAUTH2_MSG_TEMPLATE = """
-Your {Key} Token is
-
-{token}
-
-Put this value into your configuration file as
-'extractor.{category}.{key}-token'.
-
-Example:
-{{
-    "extractor": {{
-        "{category}": {{
-            "{key}-token": "{token}"
-        }}
-    }}
-}}
-"""
-
-
 MASTODON_MSG_TEMPLATE = """
-Your {Key} Token is
+Your 'access-token' is
 
 {token}
 

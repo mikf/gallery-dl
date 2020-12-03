@@ -22,16 +22,17 @@ from gallery_dl import extractor, util, job, config, exception  # noqa E402
 
 # these don't work on Travis CI
 TRAVIS_SKIP = {
-    "exhentai", "kissmanga", "mangafox", "dynastyscans", "nijie", "bobx",
+    "exhentai", "mangafox", "dynastyscans", "nijie", "instagram", "ngomik",
     "archivedmoe", "archiveofsins", "thebarchive", "fireden", "4plebs",
-    "sankaku", "idolcomplex", "mangahere", "readcomiconline", "mangadex",
-    "sankakucomplex", "warosu", "fuskator", "patreon", "komikcast",
+    "sankaku", "idolcomplex", "mangahere", "mangadex", "sankakucomplex",
+    "warosu", "fuskator", "patreon", "komikcast", "twitter",
 }
 
 # temporary issues, etc.
 BROKEN = {
+    "instagram",
+    "imagevenue",
     "photobucket",
-    "worldthree",
 }
 
 
@@ -207,6 +208,9 @@ class ResultJob(job.DownloadJob):
         self._update_kwdict(kwdict, False)
         self.format_directory(kwdict)
 
+    def handle_metadata(self, kwdict):
+        pass
+
     def handle_queue(self, url, kwdict):
         self.queue = True
         self._update_url(url)
@@ -295,6 +299,7 @@ class TestFormatter(util.Formatter):
 def setup_test_config():
     name = "gallerydl"
     email = "gallerydl@openaliasbox.org"
+    email2 = "gallerydl@protonmail.com"
 
     config.clear()
     config.set(("cache",), "file", None)
@@ -306,16 +311,17 @@ def setup_test_config():
 
     config.set(("extractor", "nijie")     , "username", email)
     config.set(("extractor", "seiga")     , "username", email)
-    config.set(("extractor", "danbooru")  , "username", None)
-    config.set(("extractor", "e621")      , "username", None)
-    config.set(("extractor", "instagram") , "username", None)
-    config.set(("extractor", "twitter")   , "username", None)
+    config.set(("extractor", "pinterest") , "username", email2)
 
     config.set(("extractor", "newgrounds"), "username", "d1618111")
     config.set(("extractor", "newgrounds"), "password", "d1618111")
 
     config.set(("extractor", "mangoxo")   , "username", "LiQiang3")
     config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
+
+    for category in ("danbooru", "instagram", "twitter", "subscribestar",
+                     "e621", "inkbunny"):
+        config.set(("extractor", category), "username", None)
 
     config.set(("extractor", "mastodon.social"), "access-token",
                "Blf9gVqG7GytDTfVMiyYQjwVMQaNACgf3Ds3IxxVDUQ")
@@ -364,7 +370,7 @@ def generate_tests():
     # filter available extractor classes
     extractors = [
         extr for extr in extractor.extractors()
-        if fltr(extr.category, getattr(extr, "basecategory", None))
+        if fltr(extr.category, extr.basecategory)
     ]
 
     # add 'test_...' methods

@@ -57,7 +57,7 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
                 "collection": "",
                 "artist"    : ["Itou Life"],
                 "group"     : ["Itou Life"],
-                "parody"    : ["Fate/Grand Order"],
+                "parody"    : list,
                 "characters": list,
                 "tags"      : list,
                 "type"      : "Doujinshi",

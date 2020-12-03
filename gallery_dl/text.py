@@ -60,10 +60,17 @@ def split_html(txt, sep=None):
         return []
 
 
+def ensure_http_scheme(url, scheme="https://"):
+    """Prepend 'scheme' to 'url' if it doesn't have one"""
+    if url and not url.startswith(("https://", "http://")):
+        return scheme + url.lstrip("/:")
+    return url
+
+
 def filename_from_url(url):
     """Extract the last part of an URL to use as a filename"""
     try:
-        return urllib.parse.urlsplit(url).path.rpartition("/")[2]
+        return url.partition("?")[0].rpartition("/")[2]
     except (TypeError, AttributeError):
         return ""
 
@@ -245,10 +252,13 @@ def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z", utcoffset=0):
         o = d.utcoffset()
         if o is not None:
             # convert to naive UTC
-            d = d.replace(tzinfo=None) - o
-        elif utcoffset:
-            # apply manual UTC offset
-            d += datetime.timedelta(0, utcoffset * -3600)
+            d = d.replace(tzinfo=None, microsecond=0) - o
+        else:
+            if d.microsecond:
+                d = d.replace(microsecond=0)
+            if utcoffset:
+                # apply manual UTC offset
+                d += datetime.timedelta(0, utcoffset * -3600)
         return d
     except (TypeError, IndexError, KeyError):
         return None

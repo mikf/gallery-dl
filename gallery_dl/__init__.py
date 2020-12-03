@@ -9,7 +9,7 @@
 from __future__ import unicode_literals, print_function
 
 __author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2018 Mike Fährmann"
+__copyright__ = "Copyright 2014-2020 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
@@ -129,6 +129,12 @@ def main():
         for opts in args.options:
             config.set(*opts)
 
+        # extractor modules
+        modules = config.get(("extractor",), "modules")
+        if modules is not None:
+            extractor.modules = modules
+            extractor._module_iter = iter(modules)
+
         # loglevels
         output.configure_logging(args.loglevel)
         if args.loglevel >= logging.ERROR:
@@ -142,7 +148,7 @@ def main():
             head = ""
             try:
                 out, err = subprocess.Popen(
-                    ("git",  "rev-parse", "--short", "HEAD"),
+                    ("git", "rev-parse", "--short", "HEAD"),
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     cwd=os.path.dirname(os.path.abspath(__file__)),

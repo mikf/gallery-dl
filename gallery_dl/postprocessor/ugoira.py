@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Mike Fährmann
+# Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Convert pixiv ugoira to webm"""
+"""Convert Pixiv Ugoira to WebM"""
 
 from .common import PostProcessor
 from .. import util
@@ -19,8 +19,8 @@ import os
 
 class UgoiraPP(PostProcessor):
 
-    def __init__(self, pathfmt, options):
-        PostProcessor.__init__(self)
+    def __init__(self, job, options):
+        PostProcessor.__init__(self, job)
         self.extension = options.get("extension") or "webm"
         self.args = options.get("ffmpeg-args") or ()
         self.twopass = options.get("ffmpeg-twopass", False)
@@ -49,6 +49,9 @@ class UgoiraPP(PostProcessor):
         else:
             self.prevent_odd = False
 
+        job.hooks["prepare"].append(self.prepare)
+        job.hooks["file"].append(self.convert)
+
     def prepare(self, pathfmt):
         self._frames = None
 
@@ -65,7 +68,7 @@ class UgoiraPP(PostProcessor):
         if self.delete:
             pathfmt.set_extension(self.extension)
 
-    def run(self, pathfmt):
+    def convert(self, pathfmt):
         if not self._frames:
             return
 

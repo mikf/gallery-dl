@@ -14,24 +14,27 @@ import os
 
 class ComparePP(PostProcessor):
 
-    def __init__(self, pathfmt, options):
-        PostProcessor.__init__(self)
-        if options.get("action") == "enumerate":
-            self.run = self._run_enumerate
+    def __init__(self, job, options):
+        PostProcessor.__init__(self, job)
         if options.get("shallow"):
-            self.compare = self._compare_size
+            self._compare = self._compare_size
+        job.hooks["file"].append(
+            self.enumerate
+            if options.get("action") == "enumerate" else
+            self.compare
+        )
 
-    def run(self, pathfmt):
+    def compare(self, pathfmt):
         try:
-            if self.compare(pathfmt.realpath, pathfmt.temppath):
+            if self._compare(pathfmt.realpath, pathfmt.temppath):
                 pathfmt.delete = True
         except OSError:
             pass
 
-    def _run_enumerate(self, pathfmt):
+    def enumerate(self, pathfmt):
         num = 1
         try:
-            while not self.compare(pathfmt.realpath, pathfmt.temppath):
+            while not self._compare(pathfmt.realpath, pathfmt.temppath):
                 pathfmt.prefix = str(num) + "."
                 pathfmt.set_extension(pathfmt.extension, False)
                 num += 1
@@ -39,7 +42,7 @@ class ComparePP(PostProcessor):
         except OSError:
             pass
 
-    def compare(self, f1, f2):
+    def _compare(self, f1, f2):
         return self._compare_size(f1, f2) and self._compare_content(f1, f2)
 
     @staticmethod

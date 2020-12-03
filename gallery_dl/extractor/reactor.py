@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Generic extractors for *reactor sites"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text
 import urllib.parse
 import random
@@ -19,7 +19,7 @@ import json
 BASE_PATTERN = r"(?:https?://)?([\w-]+\.reactor\.cc)"
 
 
-class ReactorExtractor(SharedConfigMixin, Extractor):
+class ReactorExtractor(Extractor):
     """Base class for *reactor.cc extractors"""
     basecategory = "reactor"
     filename_fmt = "{post_id}_{num:>02}{title[:100]:?_//}.{extension}"
@@ -112,6 +112,7 @@ class ReactorExtractor(SharedConfigMixin, Extractor):
         if not tags:
             title, tags = tags, title
         tags = tags.split(" :: ")
+        tags.sort()
 
         for image in images:
             url = text.extract(image, ' src="', '"')[0]
@@ -149,7 +150,7 @@ class ReactorTagExtractor(ReactorExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "{search_tags}_{post_id}_{num}"
-    pattern = BASE_PATTERN + r"/tag/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/tag/([^/?#]+)"
     test = ("http://anime.reactor.cc/tag/Anime+Art",)
 
     def __init__(self, match):
@@ -165,7 +166,7 @@ class ReactorSearchExtractor(ReactorTagExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search_tags}")
     archive_fmt = "s_{search_tags}_{post_id}_{num}"
-    pattern = BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
     test = ("http://anime.reactor.cc/search?q=Art",)
 
 
@@ -173,7 +174,7 @@ class ReactorUserExtractor(ReactorExtractor):
     """Extractor for all posts of a user on *reactor.cc sites"""
     subcategory = "user"
     directory_fmt = ("{category}", "user", "{user}")
-    pattern = BASE_PATTERN + r"/user/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)"
     test = ("http://anime.reactor.cc/user/Shuster",)
 
     def __init__(self, match):
@@ -214,7 +215,7 @@ JR_BASE_PATTERN = r"(?:https?://)?(?:www\.)?(joyreactor\.c(?:c|om))"
 class JoyreactorTagExtractor(ReactorTagExtractor):
     """Extractor for tag searches on joyreactor.cc"""
     category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/tag/([^/?&#]+)"
+    pattern = JR_BASE_PATTERN + r"/tag/([^/?#]+)"
     test = (
         ("http://joyreactor.cc/tag/Advent+Cirno", {
             "count": ">= 17",
@@ -228,7 +229,7 @@ class JoyreactorTagExtractor(ReactorTagExtractor):
 class JoyreactorSearchExtractor(ReactorSearchExtractor):
     """Extractor for search results on joyreactor.cc"""
     category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"
+    pattern = JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
     test = (
         ("http://joyreactor.cc/search/Cirno+Gifs", {
             "range": "1-25",
@@ -243,7 +244,7 @@ class JoyreactorSearchExtractor(ReactorSearchExtractor):
 class JoyreactorUserExtractor(ReactorUserExtractor):
     """Extractor for all posts of a user on joyreactor.cc"""
     category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/user/([^/?&#]+)"
+    pattern = JR_BASE_PATTERN + r"/user/([^/?#]+)"
     test = (
         ("http://joyreactor.cc/user/hemantic"),
         ("http://joyreactor.com/user/Tacoman123", {
@@ -259,19 +260,19 @@ class JoyreactorPostExtractor(ReactorPostExtractor):
     test = (
         ("http://joyreactor.com/post/3721876", {  # single image
             "url": "6ce09f239d8b7fdf6dd1664c2afc39618cc87663",
-            "keyword": "966d2acd462732a9ed823a9db5ed19f95734fd10",
+            "keyword": "147ed5b9799ba43cbd16168450afcfae5ddedbf3",
         }),
         ("http://joyreactor.com/post/3713804", {  # 4 images
             "url": "f08ac8493ca0619a3e3c6bedb8d8374af3eec304",
-            "keyword": "84e34d402342607045a65fab6d4d593d146c238a",
+            "keyword": "f12c6f3c2f298fed9b12bd3e70fb823870aa9b93",
         }),
         ("http://joyreactor.com/post/3726210", {  # gif / video
             "url": "33a48e1eca6cb2d298fbbb6536b3283799d6515b",
-            "keyword": "dbe148d576f2fc9431020c557ddb78f449e48c47",
+            "keyword": "d173cc6e88f02a63904e475eacd7050304eb1967",
         }),
         ("http://joyreactor.com/post/3668724", {  # youtube embed
             "url": "bf1666eddcff10c9b58f6be63fa94e4e13074214",
-            "keyword": "989112c7888e9cc80fd35870180c6c98165d953b",
+            "keyword": "e18b1ffbd79d76f9a0e90b6d474cc2499e343f0b",
         }),
         ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
             "url": "ac900743ed7cf1baf3db3b531c3bc414bf1ffcde",
@@ -288,7 +289,7 @@ PR_BASE_PATTERN = r"(?:https?://)?(?:www\.)?(pornreactor\.cc|fapreactor.com)"
 class PornreactorTagExtractor(ReactorTagExtractor):
     """Extractor for tag searches on pornreactor.cc"""
     category = "pornreactor"
-    pattern = PR_BASE_PATTERN + r"/tag/([^/?&#]+)"
+    pattern = PR_BASE_PATTERN + r"/tag/([^/?#]+)"
     test = (
         ("http://pornreactor.cc/tag/RiceGnat", {
             "range": "1-25",
@@ -301,7 +302,7 @@ class PornreactorTagExtractor(ReactorTagExtractor):
 class PornreactorSearchExtractor(ReactorSearchExtractor):
     """Extractor for search results on pornreactor.cc"""
     category = "pornreactor"
-    pattern = PR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?&#]+)"
+    pattern = PR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
     test = (
         ("http://pornreactor.cc/search?q=ecchi+hentai", {
             "range": "1-25",
@@ -314,7 +315,7 @@ class PornreactorSearchExtractor(ReactorSearchExtractor):
 class PornreactorUserExtractor(ReactorUserExtractor):
     """Extractor for all posts of a user on pornreactor.cc"""
     category = "pornreactor"
-    pattern = PR_BASE_PATTERN + r"/user/([^/?&#]+)"
+    pattern = PR_BASE_PATTERN + r"/user/([^/?#]+)"
     test = (
         ("http://pornreactor.cc/user/Disillusion", {
             "range": "1-25",

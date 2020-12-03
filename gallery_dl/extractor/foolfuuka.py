@@ -8,13 +8,13 @@
 
 """Extractors for 4chan archives based on FoolFuuka"""
 
-from .common import Extractor, Message, SharedConfigMixin, generate_extractors
+from .common import Extractor, Message, generate_extractors
 from .. import text
 import itertools
 import operator
 
 
-class FoolfuukaThreadExtractor(SharedConfigMixin, Extractor):
+class FoolfuukaThreadExtractor(Extractor):
     """Base extractor for FoolFuuka based boards/archives"""
     basecategory = "foolfuuka"
     subcategory = "thread"
@@ -109,7 +109,7 @@ EXTRACTORS = {
         "root": "https://arch.b4k.co",
         "extra": {"external": "direct"},
         "test-thread": ("https://arch.b4k.co/meta/thread/196/", {
-            "url": "9b0ae01292133268fe9178b71332da1ee25b7704",
+            "url": "d309713d2f838797096b3e9cb44fe514a9c9d07a",
         }),
     },
     "desuarchive": {

@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import time
+import random
 import shutil
 import string
 import _string
@@ -47,10 +48,20 @@ def bdecode(data, alphabet="0123456789"):
 
 
 def advance(iterable, num):
-    """"Advance the iterable by 'num' steps"""
+    """"Advance 'iterable' by 'num' steps"""
     iterator = iter(iterable)
     next(itertools.islice(iterator, num, num), None)
     return iterator
+
+
+def unique(iterable):
+    """Yield unique elements from 'iterable' while preserving order"""
+    seen = set()
+    add = seen.add
+    for element in iterable:
+        if element not in seen:
+            add(element)
+            yield element
 
 
 def raises(cls):
@@ -58,6 +69,10 @@ def raises(cls):
     def wrap(*args):
         raise cls(*args)
     return wrap
+
+
+def generate_csrf_token():
+    return random.getrandbits(128).to_bytes(16, "big").hex()
 
 
 def combine_dict(a, b):
@@ -82,6 +97,13 @@ def transform_dict(a, func):
 def filter_dict(a):
     """Return a copy of 'a' without "private" entries"""
     return {k: v for k, v in a.items() if k[0] != "_"}
+
+
+def delete_items(obj, keys):
+    """Remove all 'keys' from 'obj'"""
+    for key in keys:
+        if key in obj:
+            del obj[key]
 
 
 def number_to_string(value, numbers=(int, float)):
@@ -111,6 +133,64 @@ def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
         sort_keys=True,
     )
     fp.write("\n")
+
+
+def dump_response(response, fp, *,
+                  headers=False, content=True, hide_auth=True):
+    """Write the contents of 'response' into a file-like object"""
+
+    if headers:
+        request = response.request
+        req_headers = request.headers.copy()
+        res_headers = response.headers.copy()
+        outfmt = """\
+{request.method} {request.url}
+Status: {response.status_code} {response.reason}
+
+Request Headers
+---------------
+{request_headers}
+
+Response Headers
+----------------
+{response_headers}
+"""
+        if hide_auth:
+            authorization = req_headers.get("Authorization")
+            if authorization:
+                atype, sep, _ = authorization.partition(" ")
+                req_headers["Authorization"] = atype + " ***" if sep else "***"
+
+            cookie = req_headers.get("Cookie")
+            if cookie:
+                req_headers["Cookie"] = ";".join(
+                    c.partition("=")[0] + "=***"
+                    for c in cookie.split(";")
+                )
+
+            set_cookie = res_headers.get("Set-Cookie")
+            if set_cookie:
+                res_headers["Set-Cookie"] = re.sub(
+                    r"(^|, )([^ =]+)=[^,;]*", r"\1\2=***", set_cookie,
+                )
+
+        fp.write(outfmt.format(
+            request=request,
+            response=response,
+            request_headers="\n".join(
+                name + ": " + value
+                for name, value in req_headers.items()
+            ),
+            response_headers="\n".join(
+                name + ": " + value
+                for name, value in res_headers.items()
+            ),
+        ).encode())
+
+    if content:
+        if headers:
+            fp.write(b"\nContent\n-------\n")
+        fp.write(response.content)
 
 
 def expand_path(path):
@@ -270,6 +350,8 @@ class UniversalNone():
 
 
 NONE = UniversalNone()
+WINDOWS = (os.name == "nt")
+SENTINEL = object()
 
 
 def build_predicate(predicates):
@@ -423,6 +505,7 @@ class Formatter():
     - "u": calls str.upper
     - "c": calls str.capitalize
     - "C": calls string.capwords
+    - "t": calls str.strip
     - "U": calls urllib.parse.unquote
     - "S": calls util.to_string()
     - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
@@ -453,6 +536,7 @@ class Formatter():
         "u": str.upper,
         "c": str.capitalize,
         "C": string.capwords,
+        "t": str.strip,
         "U": urllib.parse.unquote,
         "S": to_string,
         "s": str,
@@ -579,7 +663,7 @@ class Formatter():
                     obj = kwdict[key]
                     for func in funcs:
                         obj = func(obj)
-                    if obj is not None:
+                    if obj:
                         break
                 except Exception:
                     pass
@@ -633,11 +717,23 @@ class Formatter():
 
 
 class PathFormat():
+    EXTENSION_MAP = {
+        "jpeg": "jpg",
+        "jpe" : "jpg",
+        "jfif": "jpg",
+        "jif" : "jpg",
+        "jfi" : "jpg",
+    }
 
     def __init__(self, extractor):
         filename_fmt = extractor.config("filename", extractor.filename_fmt)
         directory_fmt = extractor.config("directory", extractor.directory_fmt)
         kwdefault = extractor.config("keywords-default")
+
+        extension_map = extractor.config("extension-map")
+        if extension_map is None:
+            extension_map = self.EXTENSION_MAP
+        self.extension_map = extension_map.get
 
         try:
             self.filename_formatter = Formatter(
@@ -654,12 +750,10 @@ class PathFormat():
             raise exception.DirectoryFormatError(exc)
 
         self.directory = self.realdirectory = ""
-        self.filename = ""
-        self.extension = ""
-        self.prefix = ""
-        self.kwdict = {}
-        self.delete = False
+        self.filename = self.extension = self.prefix = ""
         self.path = self.realpath = self.temppath = ""
+        self.kwdict = {}
+        self.delete = self._create_directory = False
 
         basedir = extractor._parentdir
         if not basedir:
@@ -672,22 +766,26 @@ class PathFormat():
         self.basedirectory = basedir
 
         restrict = extractor.config("path-restrict", "auto")
+        replace = extractor.config("path-replace", "_")
+
         if restrict == "auto":
-            restrict = "\\\\|/<>:\"?*" if os.name == "nt" else "/"
+            restrict = "\\\\|/<>:\"?*" if WINDOWS else "/"
         elif restrict == "unix":
             restrict = "/"
         elif restrict == "windows":
             restrict = "\\\\|/<>:\"?*"
+        self.clean_segment = self._build_cleanfunc(restrict, replace)
 
         remove = extractor.config("path-remove", "\x00-\x1f\x7f")
-
-        self.clean_segment = self._build_cleanfunc(restrict, "_")
         self.clean_path = self._build_cleanfunc(remove, "")
 
     @staticmethod
     def _build_cleanfunc(chars, repl):
         if not chars:
             return lambda x: x
+        elif isinstance(chars, dict):
+            def func(x, table=str.maketrans(chars)):
+                return x.translate(table)
         elif len(chars) == 1:
             def func(x, c=chars, r=repl):
                 return x.replace(c, r)
@@ -700,10 +798,8 @@ class PathFormat():
         """Open file and return a corresponding file object"""
         return open(self.temppath, mode)
 
-    def exists(self, archive=None):
-        """Return True if the file exists on disk or in 'archive'"""
-        if archive and self.kwdict in archive:
-            return self.fix_extension()
+    def exists(self):
+        """Return True if the file exists on disk"""
         if self.extension and os.path.exists(self.realpath):
             return self.check_file()
         return False
@@ -726,7 +822,7 @@ class PathFormat():
 
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
-        windows = os.name == "nt"
+        self.kwdict = kwdict
 
         # Build path segments by applying 'kwdict' to directory format strings
         segments = []
@@ -734,7 +830,7 @@ class PathFormat():
         try:
             for formatter in self.directory_formatters:
                 segment = formatter(kwdict).strip()
-                if windows:
+                if WINDOWS:
                     # remove trailing dots and spaces (#647)
                     segment = segment.rstrip(". ")
                 if segment:
@@ -751,7 +847,7 @@ class PathFormat():
             directory += sep
         self.directory = directory
 
-        if windows:
+        if WINDOWS:
             # Enable longer-than-260-character paths on Windows
             directory = "\\\\?\\" + os.path.abspath(directory)
 
@@ -760,21 +856,24 @@ class PathFormat():
                 directory += sep
 
         self.realdirectory = directory
-
-        # Create directory tree
-        os.makedirs(self.realdirectory, exist_ok=True)
+        self._create_directory = True
 
     def set_filename(self, kwdict):
         """Set general filename data"""
         self.kwdict = kwdict
         self.temppath = self.prefix = ""
-        self.extension = kwdict["extension"]
+
+        ext = kwdict["extension"]
+        kwdict["extension"] = self.extension = self.extension_map(ext, ext)
 
         if self.extension:
             self.build_path()
+        else:
+            self.filename = ""
 
     def set_extension(self, extension, real=True):
         """Set filename extension"""
+        extension = self.extension_map(extension, extension)
         if real:
             self.extension = extension
         self.kwdict["extension"] = self.prefix + extension
@@ -799,6 +898,9 @@ class PathFormat():
 
     def build_path(self):
         """Combine directory and filename to full paths"""
+        if self._create_directory:
+            os.makedirs(self.realdirectory, exist_ok=True)
+            self._create_directory = False
         self.filename = filename = self.build_filename()
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
@@ -871,7 +973,7 @@ class DownloadArchive():
             "archive-format", extractor.archive_fmt)
         ).format_map
 
-    def __contains__(self, kwdict):
+    def check(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""
         key = kwdict["_archive_key"] = self.keygen(kwdict)
         self.cursor.execute(

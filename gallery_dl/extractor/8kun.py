@@ -20,10 +20,17 @@ class _8kunThreadExtractor(Extractor):
     filename_fmt = "{time}{num:?-//} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     pattern = r"(?:https?://)?8kun\.top/([^/]+)/res/(\d+)"
-    test = ("https://8kun.top/test/res/65248.html", {
-        "pattern": r"https://media\.8kun\.top/file_store/\w{64}\.\w+",
-        "count": ">= 8",
-    })
+    test = (
+        ("https://8kun.top/test/res/65248.html", {
+            "pattern": r"https://media\.8kun\.top/file_store/\w{64}\.\w+",
+            "count": ">= 8",
+        }),
+        # old-style file URLs (#1101)
+        ("https://8kun.top/d/res/13258.html", {
+            "pattern": r"https://media\.8kun\.top/d/src/\d+(-\d)?\.\w+",
+            "range": "1-20",
+        }),
+    )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -56,7 +63,10 @@ class _8kunThreadExtractor(Extractor):
     def _process(post, data):
         post.update(data)
         post["extension"] = post["ext"][1:]
-        url = "https://media.8kun.top/file_store/" + post["tim"] + post["ext"]
+        tim = post["tim"]
+        url = ("https://media.8kun.top/" +
+               ("file_store/" if len(tim) > 16 else post["board"] + "/src/") +
+               tim + post["ext"])
         return Message.Url, url, post
 
 
@@ -64,7 +74,7 @@ class _8kunBoardExtractor(Extractor):
     """Extractor for 8kun boards"""
     category = "8kun"
     subcategory = "board"
-    pattern = r"(?:https?://)?8kun\.top/([^/?&#]+)/(?:index|\d+)\.html"
+    pattern = r"(?:https?://)?8kun\.top/([^/?#]+)/(?:index|\d+)\.html"
     test = (
         ("https://8kun.top/v/index.html", {
             "pattern": _8kunThreadExtractor.pattern,

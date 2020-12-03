@@ -17,7 +17,7 @@ class RedditExtractor(Extractor):
     """Base class for reddit extractors"""
     category = "reddit"
     directory_fmt = ("{category}", "{subreddit}")
-    filename_fmt = "{id} {title[:242]}.{extension}"
+    filename_fmt = "{id}{num:? //>02} {title[:220]}.{extension}"
     archive_fmt = "{filename}"
     cookiedomain = None
 
@@ -47,13 +47,22 @@ class RedditExtractor(Extractor):
                 urls = []
 
                 if submission:
+                    submission["date"] = text.parse_timestamp(
+                        submission["created_utc"])
                     yield Message.Directory, submission
                     visited.add(submission["id"])
                     url = submission["url"]
+                    submission["num"] = 0
 
                     if url.startswith("https://i.redd.it/"):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
+
+                    elif "gallery_data" in submission:
+                        for submission["num"], url in enumerate(
+                                self._extract_gallery(submission), 1):
+                            text.nameext_from_url(url, submission)
+                            yield Message.Url, url, submission
 
                     elif submission["is_video"]:
                         if videos:
@@ -101,18 +110,41 @@ class RedditExtractor(Extractor):
             depth += 1
             submissions = (
                 self.api.submission(sid) for sid in extra
-                if sid not in self._visited
+                if sid not in visited
             )
 
     def submissions(self):
         """Return an iterable containing all (submission, comments) tuples"""
+
+    def _extract_gallery(self, submission):
+        if submission["gallery_data"] is None:
+            self.log.warning("gallery %s: deleted", submission["id"])
+            return
+
+        meta = submission["media_metadata"]
+        for item in submission["gallery_data"]["items"]:
+            data = meta[item["media_id"]]
+            if data["status"] != "valid" or "s" not in data:
+                self.log.warning(
+                    "gallery %s: skipping item %s ('status: %s')",
+                    submission["id"], item["media_id"], data.get("status"))
+                continue
+            src = data["s"]
+            url = src.get("u") or src.get("gif") or src.get("mp4")
+            if url:
+                yield url.partition("?")[0].replace("/preview.", "/i.", 1)
+            else:
+                self.log.error(
+                    "gallery %s: unable to fetch download URL for item %s",
+                    submission["id"], item["media_id"])
+                self.log.debug(src)
 
 
 class RedditSubredditExtractor(RedditExtractor):
     """Extractor for URLs from subreddits on reddit.com"""
     subcategory = "subreddit"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/r/"
-               r"([^/?&#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?(?:$|#)")
+               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?(?:$|#)")
     test = (
         ("https://www.reddit.com/r/lavaporn/", {
             "range": "1-20",
@@ -137,7 +169,7 @@ class RedditUserExtractor(RedditExtractor):
     """Extractor for URLs from posts by a reddit user"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
-               r"([^/?&#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?")
+               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?")
     test = (
         ("https://www.reddit.com/user/username/", {
             "count": ">= 2",
@@ -160,9 +192,8 @@ class RedditSubmissionExtractor(RedditExtractor):
     """Extractor for URLs from a submission on reddit.com"""
     subcategory = "submission"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:\w+\.)?reddit\.com/r/[^/?&#]+/comments|"
-               r"redd\.it"
-               r")/([a-z0-9]+)")
+               r"(?:\w+\.)?reddit\.com/(?:r/[^/?#]+/comments|gallery)"
+               r"|redd\.it)/([a-z0-9]+)")
     test = (
         ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
             "pattern": r"https://c2.staticflickr.com/8/7272/\w+_k.jpg",
@@ -172,6 +203,24 @@ class RedditSubmissionExtractor(RedditExtractor):
             "options": (("comments", 500),),
             "pattern": r"https://",
             "count": 3,
+        }),
+        ("https://www.reddit.com/gallery/hrrh23", {
+            "url": "25b91ede15459470274dd17291424b037ed8b0ae",
+            "content": "1e7dde4ee7d5f4c4b45749abfd15b2dbfa27df3f",
+            "count": 3,
+        }),
+        # deleted gallery (#953)
+        ("https://www.reddit.com/gallery/icfgzv", {
+            "count": 0,
+        }),
+        # animated gallery items (#955)
+        ("https://www.reddit.com/r/araragi/comments/ib32hm", {
+            "pattern": r"https://i\.redd\.it/\w+\.gif",
+            "count": 2,
+        }),
+        # "failed" gallery item (#1127)
+        ("https://www.reddit.com/r/cosplay/comments/jvwaqr", {
+            "count": 1,
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
@@ -193,7 +242,7 @@ class RedditImageExtractor(Extractor):
     subcategory = "image"
     archive_fmt = "{filename}"
     pattern = (r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
-               r"/[^/?&#]+(?:\?[^#]*)?")
+               r"/[^/?#]+(?:\?[^#]*)?")
     test = (
         ("https://i.redd.it/upjtjcx2npzz.jpg", {
             "url": "0de614900feef103e580b632190458c0b62b641a",
@@ -222,20 +271,25 @@ class RedditAPI():
         self.extractor = extractor
         self.comments = text.parse_int(extractor.config("comments", 0))
         self.morecomments = extractor.config("morecomments", False)
-        self.refresh_token = extractor.config("refresh-token")
         self.log = extractor.log
 
         client_id = extractor.config("client-id", self.CLIENT_ID)
         user_agent = extractor.config("user-agent", self.USER_AGENT)
 
         if (client_id == self.CLIENT_ID) ^ (user_agent == self.USER_AGENT):
-            self.client_id = None
-            self.log.warning(
+            raise exception.StopExtraction(
                 "Conflicting values for 'client-id' and 'user-agent': "
                 "overwrite either both or none of them.")
+
+        self.client_id = client_id
+        self.headers = {"User-Agent": user_agent}
+
+        token = extractor.config("refresh-token")
+        if token is None or token == "cache":
+            key = "#" + self.client_id
+            self.refresh_token = _refresh_token_cache(key)
         else:
-            self.client_id = client_id
-            extractor.session.headers["User-Agent"] = user_agent
+            self.refresh_token = token
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
@@ -277,13 +331,15 @@ class RedditAPI():
 
     def authenticate(self):
         """Authenticate the application by requesting an access token"""
-        access_token = self._authenticate_impl(self.refresh_token)
-        self.extractor.session.headers["Authorization"] = access_token
+        self.headers["Authorization"] = \
+            self._authenticate_impl(self.refresh_token)
 
     @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, refresh_token=None):
         """Actual authenticate implementation"""
         url = "https://www.reddit.com/api/v1/access_token"
+        self.headers["Authorization"] = None
+
         if refresh_token:
             self.log.info("Refreshing private access token")
             data = {"grant_type": "refresh_token",
@@ -294,9 +350,9 @@ class RedditAPI():
                                    "grants/installed_client"),
                     "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
 
-        auth = (self.client_id, "")
         response = self.extractor.request(
-            url, method="POST", data=data, auth=auth, fatal=False)
+            url, method="POST", headers=self.headers,
+            data=data, auth=(self.client_id, ""), fatal=False)
         data = response.json()
 
         if response.status_code != 200:
@@ -307,16 +363,21 @@ class RedditAPI():
 
     def _call(self, endpoint, params):
         url = "https://oauth.reddit.com" + endpoint
-        params["raw_json"] = 1
+        params["raw_json"] = "1"
         self.authenticate()
-        response = self.extractor.request(url, params=params, fatal=None)
+        response = self.extractor.request(
+            url, params=params, headers=self.headers, fatal=None)
 
         remaining = response.headers.get("x-ratelimit-remaining")
         if remaining and float(remaining) < 2:
             self.extractor.wait(seconds=response.headers["x-ratelimit-reset"])
             return self._call(endpoint, params)
 
-        data = response.json()
+        try:
+            data = response.json()
+        except ValueError:
+            raise exception.StopExtraction(text.remove_html(response.text))
+
         if "error" in data:
             if data["error"] == 403:
                 raise exception.AuthorizationError()
@@ -380,3 +441,10 @@ class RedditAPI():
     @staticmethod
     def _decode(sid):
         return util.bdecode(sid, "0123456789abcdefghijklmnopqrstuvwxyz")
+
+
+@cache(maxage=100*365*24*3600, keyarg=0)
+def _refresh_token_cache(token):
+    if token and token[0] == "#":
+        return None
+    return token

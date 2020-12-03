@@ -121,9 +121,9 @@ class SexcomPinExtractor(SexcomExtractor):
             },
         }),
         # gif
-        ("https://www.sex.com/pin/11465040-big-titted-hentai-gif/", {
-            "pattern": "https://cdn.sex.com/images/.+/2014/01/26/4829951.gif",
-            "content": "af6726d74d11d819e1c885fe5303f711862eae96",
+        ("https://www.sex.com/pin/55435122-ecchi/", {
+            "pattern": "https://cdn.sex.com/images/.+/2017/12/07/18760842.gif",
+            "content": "176cc63fa05182cb0438c648230c0f324a5965fe",
         }),
         # video
         ("https://www.sex.com/pin/55748341/", {
@@ -168,7 +168,7 @@ class SexcomBoardExtractor(SexcomExtractor):
     subcategory = "board"
     directory_fmt = ("{category}", "{user}", "{board}")
     pattern = (r"(?:https?://)?(?:www\.)?sex\.com/user"
-               r"/([^/?&#]+)/(?!(?:following|pins|repins|likes)/)([^/?&#]+)")
+               r"/([^/?#]+)/(?!(?:following|pins|repins|likes)/)([^/?#]+)")
     test = ("https://www.sex.com/user/ronin17/exciting-hentai/", {
         "count": ">= 15",
     })
@@ -193,7 +193,7 @@ class SexcomSearchExtractor(SexcomExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search[query]}")
     pattern = (r"(?:https?://)?(?:www\.)?sex\.com/((?:"
-               r"(pic|gif|video)s/([^/?&#]+)|search/(pic|gif|video)s"
+               r"(pic|gif|video)s/([^/?#]+)|search/(pic|gif|video)s"
                r")/?(?:\?([^#]+))?)")
     test = (
         ("https://www.sex.com/search/pics?query=ecchi", {

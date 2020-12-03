@@ -6,13 +6,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://rule34.paheal.net/"""
+"""Extractors for https://rule34.paheal.net/"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text
 
 
-class PahealExtractor(SharedConfigMixin, Extractor):
+class PahealExtractor(Extractor):
     """Base class for paheal extractors"""
     basecategory = "booru"
     category = "paheal"
@@ -21,15 +21,18 @@ class PahealExtractor(SharedConfigMixin, Extractor):
     root = "https://rule34.paheal.net"
 
     def items(self):
-        yield Message.Version, 1
-        yield Message.Directory, self.get_metadata()
+        self.session.cookies.set(
+            "ui-tnc-agreed", "true", domain="rule34.paheal.net")
+        data = self.get_metadata()
 
-        for data in self.get_posts():
-            url = data["file_url"]
+        for post in self.get_posts():
+            url = post["file_url"]
             for key in ("id", "width", "height"):
-                data[key] = text.parse_int(data[key])
-            data["tags"] = text.unquote(data["tags"])
-            yield Message.Url, url, text.nameext_from_url(url, data)
+                post[key] = text.parse_int(post[key])
+            post["tags"] = text.unquote(post["tags"])
+            post.update(data)
+            yield Message.Directory, post
+            yield Message.Url, url, text.nameext_from_url(url, post)
 
     def get_metadata(self):
         """Return general metadata"""
@@ -44,7 +47,7 @@ class PahealTagExtractor(PahealExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
-               r"/post/list/([^/?&#]+)")
+               r"/post/list/([^/?#]+)")
     test = ("https://rule34.paheal.net/post/list/Ayane_Suzuki/1", {
         "pattern": r"https://[^.]+\.paheal\.net/_images/\w+/\d+%20-%20",
         "count": ">= 15"
@@ -65,7 +68,7 @@ class PahealTagExtractor(PahealExtractor):
             page = self.request(url).text
 
             for post in text.extract_iter(
-                    page, '<img id="thumb_', '>Image Only<'):
+                    page, '<img id="thumb_', 'Only</a>'):
                 yield self._extract_data(post)
 
             if ">Next<" not in page:
@@ -79,7 +82,8 @@ class PahealTagExtractor(PahealExtractor):
         md5 , pos = text.extract(post, '/_thumbs/', '/', pos)
         url , pos = text.extract(post, '<a href="', '"', pos)
 
-        tags, dimensions, size, _ = data.split(" // ")
+        tags, data, date = data.split("\n")
+        dimensions, size, ext = data.split(" // ")
         width, _, height = dimensions.partition("x")
 
         return {
@@ -95,8 +99,8 @@ class PahealPostExtractor(PahealExtractor):
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/view/(\d+)")
     test = ("https://rule34.paheal.net/post/view/481609", {
-        "url": "1142779378f655ec0497d4c301836aa667f788b1",
-        "keyword": "34e9e93d4fa6fa06fac1a56e78c9a52e8cd7b271",
+        "url": "a91d579be030753282f55b8cb4eeaa89c45a9116",
+        "keyword": "e02e4dcf8cdf4e9c206e695253c9024d79a2e20a",
         "content": "7b924bcf150b352ac75c9d281d061e174c851a11",
     })
 

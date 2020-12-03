@@ -22,8 +22,9 @@ log = logging.getLogger("config")
 
 _config = {}
 
-if os.name == "nt":
+if util.WINDOWS:
     _default_configs = [
+        r"%APPDATA%\gallery-dl\config.json",
         r"%USERPROFILE%\gallery-dl\config.json",
         r"%USERPROFILE%\gallery-dl.conf",
     ]
@@ -107,6 +108,57 @@ def interpolate(path, key, default=None, *, conf=_config):
     return default
 
 
+def interpolate_common(common, paths, key, default=None, *, conf=_config):
+    """Interpolate the value of 'key'
+    using multiple 'paths' along a 'common' ancestor
+    """
+    if key in conf:
+        return conf[key]
+
+    # follow the common path
+    try:
+        for p in common:
+            conf = conf[p]
+            if key in conf:
+                default = conf[key]
+    except Exception:
+        return default
+
+    # try all paths until a value is found
+    value = util.SENTINEL
+    for path in paths:
+        c = conf
+        try:
+            for p in path:
+                c = c[p]
+                if key in c:
+                    value = c[key]
+        except Exception:
+            pass
+        if value is not util.SENTINEL:
+            return value
+    return default
+
+
+def accumulate(path, key, *, conf=_config):
+    """Accumulate the values of 'key' along 'path'"""
+    result = []
+    try:
+        if key in conf:
+            value = conf[key]
+            if value:
+                result.extend(value)
+        for p in path:
+            conf = conf[p]
+            if key in conf:
+                value = conf[key]
+                if value:
+                    result[:0] = value
+    except Exception:
+        pass
+    return result
+
+
 def set(path, key, value, *, conf=_config):
     """Set the value of property 'key' for this session"""
     for p in path:
@@ -139,7 +191,6 @@ def unset(path, key, *, conf=_config):
 
 class apply():
     """Context Manager: apply a collection of key-value pairs"""
-    _sentinel = object()
 
     def __init__(self, kvlist):
         self.original = []
@@ -147,12 +198,12 @@ class apply():
 
     def __enter__(self):
         for path, key, value in self.kvlist:
-            self.original.append((path, key, get(path, key, self._sentinel)))
+            self.original.append((path, key, get(path, key, util.SENTINEL)))
             set(path, key, value)
 
     def __exit__(self, etype, value, traceback):
         for path, key, value in self.original:
-            if value is self._sentinel:
+            if value is util.SENTINEL:
                 unset(path, key)
             else:
                 set(path, key, value)

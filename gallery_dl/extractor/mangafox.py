@@ -16,7 +16,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from fanfox.net"""
     category = "mangafox"
     pattern = (r"(?:https?://)?(?:www\.|m\.)?(?:mangafox\.me|fanfox\.net)"
-               r"(/manga/[^/]+/((?:v(\d+)/)?c(\d+)([^/?&#]*)))")
+               r"(/manga/[^/]+/((?:v(\d+)/)?c(\d+)([^/?#]*)))")
     test = (
         ("http://fanfox.net/manga/kidou_keisatsu_patlabor/v05/c006.2/1.html", {
             "keyword": "5661dab258d42d09d98f194f7172fb9851a49766",
@@ -53,9 +53,9 @@ class MangafoxChapterExtractor(ChapterExtractor):
         pnum = 1
         while True:
             url, pos = text.extract(page, '<img src="', '"')
-            yield url, None
+            yield text.ensure_http_scheme(url), None
             url, pos = text.extract(page, ' src="', '"', pos)
-            yield url, None
+            yield text.ensure_http_scheme(url), None
 
             pnum += 2
             page = self.request("{}/{}.html".format(self.urlbase, pnum)).text

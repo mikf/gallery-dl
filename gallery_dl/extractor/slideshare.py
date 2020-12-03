@@ -20,7 +20,7 @@ class SlidesharePresentationExtractor(Extractor):
     filename_fmt = "{presentation}-{num:>02}.{extension}"
     archive_fmt = "{presentation}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?slideshare\.net"
-               r"/(?:mobile/)?([^/?&#]+)/([^/?&#]+)")
+               r"/(?:mobile/)?([^/?#]+)/([^/?#]+)")
     test = (
         (("https://www.slideshare.net"
           "/Slideshare/get-started-with-slide-share"), {

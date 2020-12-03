@@ -14,6 +14,9 @@ from ..cache import memcache
 import re
 
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?hiperdex\.(?:com|net|info)"
+
+
 class HiperdexBase():
     """Base class for hiperdex extractors"""
     category = "hiperdex"
@@ -61,11 +64,10 @@ class HiperdexBase():
 
 class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     """Extractor for manga chapters from hiperdex.com"""
-    pattern = (r"(?:https?://)?(?:www\.)?hiperdex\.(?:com|net)"
-               r"(/manga/([^/?&#]+)/([^/?&#]+))")
+    pattern = BASE_PATTERN + r"(/manga/([^/?#]+)/([^/?#]+))"
     test = (
         ("https://hiperdex.com/manga/domestic-na-kanojo/154-5/", {
-            "pattern": r"https://hiperdex.com/wp-content/uploads"
+            "pattern": r"https://hiperdex.(com|net|info)/wp-content/uploads"
                        r"/WP-manga/data/manga_\w+/[0-9a-f]{32}/\d+\.webp",
             "count": 9,
             "keyword": {
@@ -82,6 +84,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
             },
         }),
         ("https://hiperdex.net/manga/domestic-na-kanojo/154-5/"),
+        ("https://hiperdex.info/manga/domestic-na-kanojo/154-5/"),
     )
 
     def __init__(self, match):
@@ -102,8 +105,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
 class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     """Extractor for manga from hiperdex.com"""
     chapterclass = HiperdexChapterExtractor
-    pattern = (r"(?:https?://)?(?:www\.)?hiperdex\.(?:com|net)"
-               r"(/manga/([^/?&#]+))/?$")
+    pattern = BASE_PATTERN + r"(/manga/([^/?#]+))/?$"
     test = (
         ("https://hiperdex.com/manga/youre-not-that-special/", {
             "count": 51,
@@ -123,6 +125,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
             },
         }),
         ("https://hiperdex.net/manga/youre-not-that-special/"),
+        ("https://hiperdex.info/manga/youre-not-that-special/"),
     )
 
     def __init__(self, match):
@@ -154,11 +157,11 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     categorytransfer = False
     chapterclass = HiperdexMangaExtractor
     reverse = False
-    pattern = (r"(?:https?://)?(?:www\.)?hiperdex\.(?:com|net)"
-               r"(/manga-a(?:rtist|uthor)/([^/?&#]+))")
+    pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/([^/?#]+))"
     test = (
         ("https://hiperdex.com/manga-artist/beck-ho-an/"),
         ("https://hiperdex.net/manga-artist/beck-ho-an/"),
+        ("https://hiperdex.info/manga-artist/beck-ho-an/"),
         ("https://hiperdex.com/manga-author/viagra/", {
             "pattern": HiperdexMangaExtractor.pattern,
             "count": ">= 6",

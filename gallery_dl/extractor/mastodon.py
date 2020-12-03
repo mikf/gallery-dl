@@ -27,24 +27,25 @@ class MastodonExtractor(Extractor):
         Extractor.__init__(self, match)
         self.api = MastodonAPI(self)
 
-    def config(self, key, default=None, *, sentinel=object()):
-        value = Extractor.config(self, key, sentinel)
-        if value is not sentinel:
-            return value
-        return config.interpolate(
-            ("extractor", "mastodon", self.instance, self.subcategory),
-            key, default,
+    def config(self, key, default=None):
+        return config.interpolate_common(
+            ("extractor",), (
+                (self.category, self.subcategory),
+                (self.basecategory, self.instance, self.subcategory),
+            ), key, default,
         )
 
     def items(self):
         yield Message.Version, 1
         for status in self.statuses():
-            attachments = self.prepare(status)
-            yield Message.Directory, status
-            for media in attachments:
-                status["media"] = media
-                url = media["url"]
-                yield Message.Url, url, text.nameext_from_url(url, status)
+            attachments = status["media_attachments"]
+            if attachments:
+                self.prepare(status)
+                yield Message.Directory, status
+                for media in attachments:
+                    status["media"] = media
+                    url = media["url"]
+                    yield Message.Url, url, text.nameext_from_url(url, status)
 
     def statuses(self):
         """Return an iterable containing all relevant Status-objects"""
@@ -52,11 +53,11 @@ class MastodonExtractor(Extractor):
 
     def prepare(self, status):
         """Prepare a status object"""
+        del status["media_attachments"]
         status["instance"] = self.instance
         status["tags"] = [tag["name"] for tag in status["tags"]]
-        attachments = status["media_attachments"]
-        del status["media_attachments"]
-        return attachments
+        status["date"] = text.parse_datetime(
+            status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 
 
 class MastodonUserExtractor(MastodonExtractor):
@@ -183,7 +184,7 @@ def generate_extractors():
         Extr.category = category
         Extr.instance = instance
         Extr.pattern = (r"(?:https?://)?" + pattern +
-                        r"/@([^/?&#]+)(?:/media)?/?$")
+                        r"/@([^/?#]+)(?:/media)?/?$")
         Extr.test = info.get("test-user")
         Extr.root = root
         Extr.access_token = token
@@ -196,7 +197,7 @@ def generate_extractors():
         Extr.__doc__ = "Extractor for images from a status on " + instance
         Extr.category = category
         Extr.instance = instance
-        Extr.pattern = r"(?:https?://)?" + pattern + r"/@[^/?&#]+/(\d+)"
+        Extr.pattern = r"(?:https?://)?" + pattern + r"/@[^/?#]+/(\d+)"
         Extr.test = info.get("test-status")
         Extr.root = root
         Extr.access_token = token
@@ -211,7 +212,7 @@ EXTRACTORS = {
         "client-secret": "DdrODTHs_XoeOsNVXnILTMabtdpWrWOAtrmw91wU1zI",
         "test-user"    : ("https://mastodon.social/@jk", {
             "pattern": r"https://files.mastodon.social/media_attachments"
-                       r"/files/\d+/\d+/\d+/original/\w+",
+                       r"/files/(\d+/){3,}original/\w+",
             "range": "1-60",
             "count": 60,
         }),

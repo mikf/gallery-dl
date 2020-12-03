@@ -50,10 +50,10 @@ class RealbooruPostExtractor(booru.PostMixin, RealbooruExtractor):
     test = ("https://realbooru.com/index.php?page=post&s=view&id=668483", {
         "url": "2421b5b0e15d5e20f9067090a8b0fd4114d3e7d9",
         "content": "7f5873ce3b6cd295ea2e81fcb49583098ea9c8da",
-        "options": (("tags", True),),
-        "keyword": {
-            "tags_general" : str,
-            "tags_metadata": str,
-            "tags_model"   : "jennifer_lawrence",
-        },
+        #  "options": (("tags", True),),
+        #  "keyword": {
+        #      "tags_general" : str,
+        #      "tags_metadata": str,
+        #      "tags_model"   : "jennifer_lawrence",
+        #  },
     })

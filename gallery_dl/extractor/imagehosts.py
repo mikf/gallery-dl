@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,13 +8,13 @@
 
 """Collection of extractors for various imagehosts"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text, exception
 from ..cache import memcache
 from os.path import splitext
 
 
-class ImagehostImageExtractor(SharedConfigMixin, Extractor):
+class ImagehostImageExtractor(Extractor):
     """Base class for single-image extractors for various imagehosts"""
     basecategory = "imagehost"
     subcategory = "image"
@@ -176,7 +176,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
 class ImgspiceImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgspice.com"""
     category = "imgspice"
-    pattern = r"(?:https?://)?((?:www\.)?imgspice\.com/([^/?&#]+))"
+    pattern = r"(?:https?://)?((?:www\.)?imgspice\.com/([^/?#]+))"
     test = ("https://imgspice.com/nwfwtpyog50y/test.png.html", {
         "url": "b8c30a8f51ee1012959a4cfd46197fabf14de984",
         "keyword": "100e310a19a2fa22d87e1bbc427ecb9f6501e0c0",
@@ -198,7 +198,7 @@ class PixhostImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from pixhost.to"""
     category = "pixhost"
     pattern = (r"(?:https?://)?((?:www\.)?pixhost\.(?:to|org)"
-               r"/show/\d+/(\d+)_[^/?&#]+)")
+               r"/show/\d+/(\d+)_[^/?#]+)")
     test = ("http://pixhost.to/show/190/130327671_test-.png", {
         "url": "4e5470dcf6513944773044d40d883221bbc46cff",
         "keyword": "3bad6d59db42a5ebbd7842c2307e1c3ebd35e6b0",
@@ -218,7 +218,7 @@ class PostimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from postimages.org"""
     category = "postimg"
     pattern = (r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
-               r"/(?:image/)?([^/?&#]+)/?)")
+               r"/(?:image/)?([^/?#]+)/?)")
     test = ("https://postimg.cc/Wtn2b3hC", {
         "url": "0794cfda9b8951a8ac3aa692472484200254ab86",
         "keyword": "2d05808d04e4e83e33200db83521af06e3147a84",
@@ -237,7 +237,7 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from www.turboimagehost.com"""
     category = "turboimagehost"
     pattern = (r"(?:https?://)?((?:www\.)?turboimagehost\.com"
-               r"/p/(\d+)/[^/?&#]+\.html)")
+               r"/p/(\d+)/[^/?#]+\.html)")
     test = ("https://www.turboimagehost.com/p/39078423/test--.png.html", {
         "url": "b94de43612318771ced924cb5085976f13b3b90e",
         "keyword": "704757ca8825f51cec516ec44c1e627c1f2058ca",

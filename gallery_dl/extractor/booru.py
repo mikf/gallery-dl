@@ -8,7 +8,7 @@
 
 """Base classes for extractors for danbooru and co"""
 
-from .common import Extractor, Message, SharedConfigMixin
+from .common import Extractor, Message
 from .. import text, exception
 from xml.etree import ElementTree
 import collections
@@ -17,7 +17,7 @@ import operator
 import re
 
 
-class BooruExtractor(SharedConfigMixin, Extractor):
+class BooruExtractor(Extractor):
     """Base class for all booru extractors"""
     basecategory = "booru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
@@ -51,7 +51,7 @@ class BooruExtractor(SharedConfigMixin, Extractor):
 
             for image in images:
                 try:
-                    url = image["file_url"]
+                    url = self.get_file_url(image)
                 except KeyError:
                     continue
                 if url.startswith("/"):
@@ -85,6 +85,10 @@ class BooruExtractor(SharedConfigMixin, Extractor):
     def get_metadata(self):
         """Collect metadata for extractor-job"""
         return {}
+
+    @staticmethod
+    def get_file_url(image):
+        return image["file_url"]
 
     def extended_tags(self, image, page=None):
         """Retrieve extended tag information"""

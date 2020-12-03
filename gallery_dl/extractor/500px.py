@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extractors for https://500px.com/"""
 
 from .common import Extractor, Message
-from .. import text
+import json
 
 
 BASE_PATTERN = r"(?:https?://)?(?:web\.)?500px\.com"
@@ -48,7 +48,7 @@ class _500pxExtractor(Extractor):
     def photos(self):
         """Returns an iterable containing all relevant photo IDs"""
 
-    def _extend(self, photos):
+    def _extend(self, edges):
         """Extend photos with additional metadata and higher resolution URLs"""
         url = "https://api.500px.com/v1/photos"
         params = {
@@ -62,40 +62,42 @@ class _500pxExtractor(Extractor):
             "liked_by"              : "1",
             "following_sample"      : "100",
             "image_size"            : "4096",
-            "ids"                   : ",".join(str(p["id"]) for p in photos),
+            "ids"                   : ",".join(
+                str(edge["node"]["legacyId"]) for edge in edges),
         }
 
-        data = self._api_call(url, params)["photos"]
-        for photo in photos:
-            pid = str(photo["id"])
-            photo.update(data[pid])
-        return photos
+        data = self._request_api(url, params)["photos"]
+        return [
+            data[str(edge["node"]["legacyId"])]
+            for edge in edges
+        ]
 
-    def _api_call(self, url, params, csrf_token=None):
+    def _request_api(self, url, params, csrf_token=None):
         headers = {"Origin": self.root, "X-CSRF-Token": csrf_token}
         return self.request(url, headers=headers, params=params).json()
 
-    def _pagination(self, url, params, csrf):
-        params["page"] = 1
-        while True:
-            data = self._api_call(url, params, csrf)
-            yield from self._extend(data["photos"])
-
-            if params["page"] >= data["total_pages"]:
-                return
-            params["page"] += 1
+    def _request_graphql(self, opname, variables, query_hash):
+        url = "https://api.500px.com/graphql"
+        params = {
+            "operationName": opname,
+            "variables"    : json.dumps(variables),
+            "extensions"   : '{"persistedQuery":{"version":1'
+                             ',"sha256Hash":"' + query_hash + '"}}',
+        }
+        return self.request(url, params=params).json()["data"]
 
 
 class _500pxUserExtractor(_500pxExtractor):
     """Extractor for photos from a user's photostream on 500px.com"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!photo/)([^/?&#]+)/?(?:$|\?|#)"
+    pattern = BASE_PATTERN + r"/(?!photo/)(?:p/)?([^/?#]+)/?(?:$|[?#])"
     test = (
-        ("https://500px.com/light_expression_photography", {
+        ("https://500px.com/p/light_expression_photography", {
             "pattern": r"https?://drscdn.500px.org/photo/\d+/m%3D4096/v2",
             "range": "1-99",
             "count": 99,
         }),
+        ("https://500px.com/light_expression_photography"),
         ("https://web.500px.com/light_expression_photography"),
     )
 
@@ -104,72 +106,97 @@ class _500pxUserExtractor(_500pxExtractor):
         self.user = match.group(1)
 
     def photos(self):
-        # get csrf token and user id from webpage
-        url = "{}/{}".format(self.root, self.user)
-        page = self.request(url).text
-        csrf_token, pos = text.extract(page, 'csrf-token" content="', '"')
-        user_id   , pos = text.extract(page, '/user/', '"', pos)
+        variables = {"username": self.user, "pageSize": 20}
+        photos = self._request_graphql(
+            "OtherPhotosQuery", variables,
+            "018a5e5117bd72bdf28066aad02c4f2d"
+            "8acdf7f6127215d231da60e24080eb1b",
+        )["user"]["photos"]
 
-        # get user photos
-        url = "https://api.500px.com/v1/photos"
-        params = {
-            "feature"       : "user",
-            "stream"        : "photos",
-            "rpp"           : "50",
-            "user_id"       : user_id,
-        }
-        return self._pagination(url, params, csrf_token)
+        while True:
+            yield from self._extend(photos["edges"])
+
+            if not photos["pageInfo"]["hasNextPage"]:
+                return
+
+            variables["cursor"] = photos["pageInfo"]["endCursor"]
+            photos = self._request_graphql(
+                "OtherPhotosPaginationContainerQuery", variables,
+                "b4af70d42c71a5e43f0be36ce60dc81e"
+                "9742ebc117cde197350f2b86b5977d98",
+            )["userByUsername"]["photos"]
 
 
 class _500pxGalleryExtractor(_500pxExtractor):
     """Extractor for photo galleries on 500px.com"""
     subcategory = "gallery"
     directory_fmt = ("{category}", "{user[username]}", "{gallery[name]}")
-    pattern = BASE_PATTERN + r"/(?!photo/)([^/?&#]+)/galleries/([^/?&#]+)"
-    test = ("https://500px.com/fashvamp/galleries/lera", {
-        "url": "002dc81dee5b4a655f0e31ad8349e8903b296df6",
-        "count": 3,
-        "keyword": {
-            "gallery": dict,
-            "user": dict,
-        },
-    })
+    pattern = (BASE_PATTERN + r"/(?!photo/)(?:p/)?"
+               r"([^/?#]+)/galleries/([^/?#]+)")
+    test = (
+        ("https://500px.com/p/fashvamp/galleries/lera", {
+            "url": "002dc81dee5b4a655f0e31ad8349e8903b296df6",
+            "count": 3,
+            "keyword": {
+                "gallery": dict,
+                "user": dict,
+            },
+        }),
+        ("https://500px.com/fashvamp/galleries/lera"),
+    )
 
     def __init__(self, match):
         _500pxExtractor.__init__(self, match)
         self.user_name, self.gallery_name = match.groups()
-        self.user_id = self.gallery_id = self.csrf_token = None
+        self.user_id = self._photos = None
 
     def metadata(self):
-        # get csrf token and user id from webpage
-        url = "{}/{}/galleries/{}".format(
-            self.root, self.user_name, self.gallery_name)
-        page = self.request(url).text
-        self.csrf_token, pos = text.extract(page, 'csrf-token" content="', '"')
-        self.user_id   , pos = text.extract(page, 'App.CuratorId =', '\n', pos)
-        self.user_id = self.user_id.strip(" '\";")
+        user = self._request_graphql(
+            "ProfileRendererQuery", {"username": self.user_name},
+            "5a17a9af1830b58b94a912995b7947b24f27f1301c6ea8ab71a9eb1a6a86585b",
+        )["profile"]
+        self.user_id = str(user["legacyId"])
 
-        # get gallery metadata; transform gallery name into id
-        url = "https://api.500px.com/v1/users/{}/galleries/{}".format(
-            self.user_id, self.gallery_name)
-        params = {
-            #  "include_user": "true",
-            "include_cover": "1",
-            "cover_size": "2048",
+        variables = {
+            "galleryOwnerLegacyId": self.user_id,
+            "ownerLegacyId"       : self.user_id,
+            "slug"                : self.gallery_name,
+            "token"               : None,
+            "pageSize"            : 20,
         }
-        data = self._api_call(url, params, self.csrf_token)
-        self.gallery_id = data["gallery"]["id"]
-        return data
+        gallery = self._request_graphql(
+            "GalleriesDetailQueryRendererQuery", variables,
+            "fb8bb66d31b58903e2f01ebe66bbe7937b982753be3211855b7bce4e286c1a49",
+        )["gallery"]
+
+        self._photos = gallery["photos"]
+        del gallery["photos"]
+        return {
+            "gallery": gallery,
+            "user"   : user,
+        }
 
     def photos(self):
-        url = "https://api.500px.com/v1/users/{}/galleries/{}/items".format(
-            self.user_id, self.gallery_id)
-        params = {
-            "sort"             : "position",
-            "sort_direction"   : "asc",
-            "rpp"              : "50",
+        photos = self._photos
+        variables = {
+            "ownerLegacyId": self.user_id,
+            "slug"         : self.gallery_name,
+            "token"        : None,
+            "pageSize"     : 20,
         }
-        return self._pagination(url, params, self.csrf_token)
+
+        while True:
+            yield from self._extend(photos["edges"])
+
+            if not photos["pageInfo"]["hasNextPage"]:
+                return
+
+            variables["cursor"] = photos["pageInfo"]["endCursor"]
+            photos = self._request_graphql(
+                "GalleriesDetailPaginationContainerQuery", variables,
+                "457c66d976f56863c81795f03e98cb54"
+                "3c7c6cdae7abeab8fe9e8e8a67479fa9",
+            )["galleryByOwnerIdAndSlugOrToken"]["photos"]
 
 
 class _500pxImageExtractor(_500pxExtractor):
@@ -226,5 +253,5 @@ class _500pxImageExtractor(_500pxExtractor):
         self.photo_id = match.group(1)
 
     def photos(self):
-        photos = ({"id": self.photo_id},)
-        return self._extend(photos)
+        edges = ({"node": {"legacyId": self.photo_id}},)
+        return self._extend(edges)

@@ -14,7 +14,8 @@ import unittest
 import json
 import tempfile
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOTDIR)
 from gallery_dl import config  # noqa E402
 
 
@@ -66,6 +67,56 @@ class TestConfig(unittest.TestCase):
         config.set(("b",), "d", 3)
         self.assertEqual(config.interpolate(("b",), "d", 1) , 2)
         self.assertEqual(config.interpolate(("d",), "d", 1) , 2)
+
+    def test_interpolate_common(self):
+
+        def lookup():
+            return config.interpolate_common(
+                ("Z1", "Z2"), (
+                    ("A1", "A2"),
+                    ("B1",),
+                    ("C1", "C2", "C3"),
+                ), "KEY", "DEFAULT",
+            )
+
+        def test(path, value, expected=None):
+            config.set(path, "KEY", value)
+            self.assertEqual(lookup(), expected or value)
+
+        self.assertEqual(lookup(), "DEFAULT")
+        test(("Z1",), 1)
+        test(("Z1", "Z2"), 2)
+        test(("Z1", "Z2", "C1"), 3)
+        test(("Z1", "Z2", "C1", "C2"), 4)
+        test(("Z1", "Z2", "C1", "C2", "C3"), 5)
+        test(("Z1", "Z2", "B1"), 6)
+        test(("Z1", "Z2", "A1"), 7)
+        test(("Z1", "Z2", "A1", "A2"), 8)
+        test(("Z1", "A1", "A2"), 999, 8)
+        test(("Z1", "Z2", "A1", "A2", "A3"), 999, 8)
+        test((), 9)
+
+    def test_accumulate(self):
+        self.assertEqual(config.accumulate((), "l"), [])
+
+        config.set(()        , "l", [5, 6])
+        config.set(("c",)    , "l", [3, 4])
+        config.set(("c", "c"), "l", [1, 2])
+        self.assertEqual(
+            config.accumulate((), "l")        , [5, 6])
+        self.assertEqual(
+            config.accumulate(("c",), "l")    , [3, 4, 5, 6])
+        self.assertEqual(
+            config.accumulate(("c", "c"), "l"), [1, 2, 3, 4, 5, 6])
+
+        config.set(("c",), "l", None)
+        config.unset(("c", "c"), "l")
+        self.assertEqual(
+            config.accumulate((), "l")        , [5, 6])
+        self.assertEqual(
+            config.accumulate(("c",), "l")    , [5, 6])
+        self.assertEqual(
+            config.accumulate(("c", "c"), "l"), [5, 6])
 
     def test_set(self):
         config.set(()        , "c", [1, 2, 3])
@@ -156,10 +207,12 @@ class TestConfigFiles(unittest.TestCase):
 
     @staticmethod
     def _load(name):
-        rootdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        path = os.path.join(rootdir, "docs", name)
-        with open(path) as fp:
-            return json.load(fp)
+        path = os.path.join(ROOTDIR, "docs", name)
+        try:
+            with open(path) as fp:
+                return json.load(fp)
+        except FileNotFoundError:
+            raise unittest.SkipTest(path + " not available")
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -173,6 +173,12 @@ def build_parser():
         help=("Write URLs, which get emitted by other extractors but cannot "
               "be handled, to FILE"),
     )
+    output.add_argument(
+        "--write-pages",
+        dest="write-pages", nargs=0, action=ConfigConstAction, const=True,
+        help=("Write downloaded intermediary pages to files "
+              "in the current directory to debug problems"),
+    )
 
     downloader = parser.add_argument_group("Downloader Options")
     downloader.add_argument(
@@ -196,7 +202,7 @@ def build_parser():
     downloader.add_argument(
         "--http-timeout",
         dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
-        help="Timeout for HTTP connections (defaut: 30.0)",
+        help="Timeout for HTTP connections (default: 30.0)",
     )
     downloader.add_argument(
         "--sleep",
@@ -204,9 +210,24 @@ def build_parser():
         help="Number of seconds to sleep before each download",
     )
     downloader.add_argument(
+        "--filesize-min",
+        dest="filesize-min", metavar="SIZE", action=ConfigAction,
+        help="Do not download files smaller than SIZE (e.g. 500k or 2.5M)",
+    )
+    downloader.add_argument(
+        "--filesize-max",
+        dest="filesize-max", metavar="SIZE", action=ConfigAction,
+        help="Do not download files larger than SIZE (e.g. 500k or 2.5M)",
+    )
+    downloader.add_argument(
         "--no-part",
         dest="part", nargs=0, action=ConfigConstAction, const=False,
         help="Do not use .part files",
+    )
+    downloader.add_argument(
+        "--no-skip",
+        dest="skip", nargs=0, action=ConfigConstAction, const=False,
+        help="Do not skip downloads; overwrite existing files",
     )
     downloader.add_argument(
         "--no-mtime",
@@ -355,7 +376,8 @@ def build_parser():
     postprocessor.add_argument(
         "--exec-after",
         dest="postprocessors", metavar="CMD",
-        action=AppendCommandAction, const={"name": "exec", "final": True},
+        action=AppendCommandAction, const={
+            "name": "exec", "event": "finalize"},
         help=("Execute CMD after all files were downloaded successfully. "
               "Example: --exec-after 'cd {} && convert * ../doc.pdf'"),
     )

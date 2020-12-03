@@ -23,7 +23,6 @@ modules = [
     "bcy",
     "behance",
     "blogger",
-    "bobx",
     "danbooru",
     "deviantart",
     "dynastyscans",
@@ -45,33 +44,34 @@ modules = [
     "hentainexus",
     "hiperdex",
     "hitomi",
-    "hypnohub",
     "idolcomplex",
     "imagebam",
+    "imagechest",
     "imagefap",
     "imgbb",
     "imgbox",
     "imgth",
     "imgur",
+    "inkbunny",
     "instagram",
     "issuu",
     "kabeuchi",
     "keenspot",
     "khinsider",
-    "kissmanga",
     "komikcast",
-    "konachan",
     "lineblog",
     "livedoor",
     "luscious",
     "mangadex",
     "mangafox",
     "mangahere",
+    "mangakakalot",
     "mangapanda",
     "mangapark",
     "mangareader",
     "mangastream",
     "mangoxo",
+    "myhentaigallery",
     "myportfolio",
     "naver",
     "newgrounds",
@@ -94,6 +94,7 @@ modules = [
     "readcomiconline",
     "realbooru",
     "reddit",
+    "redgifs",
     "rule34",
     "safebooru",
     "sankaku",
@@ -106,6 +107,7 @@ modules = [
     "slideshare",
     "smugmug",
     "speakerdeck",
+    "subscribestar",
     "tsumino",
     "tumblr",
     "twitter",
@@ -113,12 +115,14 @@ modules = [
     "vsco",
     "wallhaven",
     "warosu",
+    "weasyl",
+    "webtoons",
     "weibo",
     "wikiart",
     "xhamster",
     "xvideos",
-    "yandere",
     "yuki",
+    "moebooru",
     "foolfuuka",
     "foolslide",
     "mastodon",
@@ -136,7 +140,7 @@ def find(url):
     """Find a suitable extractor for the given URL"""
     for cls in _list_classes():
         match = cls.pattern.match(url)
-        if match and cls not in _blacklist:
+        if match:
             return cls(match)
     return None
 
@@ -165,26 +169,10 @@ def extractors():
     )
 
 
-class blacklist():
-    """Context Manager to blacklist extractor modules"""
-    def __init__(self, categories, extractors=None):
-        self.extractors = extractors or []
-        for cls in _list_classes():
-            if cls.category in categories:
-                self.extractors.append(cls)
-
-    def __enter__(self):
-        _blacklist.update(self.extractors)
-
-    def __exit__(self, etype, value, traceback):
-        _blacklist.clear()
-
-
 # --------------------------------------------------------------------
 # internals
 
 _cache = []
-_blacklist = set()
 _module_iter = iter(modules)
 
 
@@ -195,6 +183,8 @@ def _list_classes():
     for module_name in _module_iter:
         module = importlib.import_module("."+module_name, __package__)
         yield from add_module(module)
+
+    globals()["_list_classes"] = lambda : _cache
 
 
 def _get_classes(module):

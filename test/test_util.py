@@ -265,6 +265,7 @@ class TestFormatter(unittest.TestCase):
         "d": {"a": "foo", "b": 0, "c": None},
         "l": ["a", "b", "c"],
         "n": None,
+        "s": " \n\r\tSPACE    ",
         "u": "%27%3C%20/%20%3E%27",
         "name": "Name",
         "title1": "Title",
@@ -278,6 +279,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!u}", "HELLO WORLD")
         self._run_test("{a!c}", "Hello world")
         self._run_test("{a!C}", "Hello World")
+        self._run_test("{s!t}", "SPACE")
         self._run_test("{a!U}", self.kwdict["a"])
         self._run_test("{u!U}", "'< / >'")
         self._run_test("{a!s}", self.kwdict["a"])
@@ -339,7 +341,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{z|a!C:RH/C/}", "Cello World")
         self._run_test("{z|y|x:?</>/}", "")
 
-        self._run_test("{d[c]|d[b]|d[a]}", "0")
+        self._run_test("{d[c]|d[b]|d[a]}", "foo")
         self._run_test("{d[a]|d[b]|d[c]}", "foo")
         self._run_test("{d[z]|d[y]|d[x]}", "None")
 
@@ -443,6 +445,16 @@ class TestOther(unittest.TestCase):
             util.advance(items, 9), [])
         self.assertCountEqual(
             util.advance(util.advance(items, 1), 2), range(3, 5))
+
+    def test_unique(self):
+        self.assertSequenceEqual(
+            list(util.unique("")), "")
+        self.assertSequenceEqual(
+            list(util.unique("AABBCC")), "ABC")
+        self.assertSequenceEqual(
+            list(util.unique("ABABABCAABBCC")), "ABC")
+        self.assertSequenceEqual(
+            list(util.unique([1, 2, 1, 3, 2, 1])), [1, 2, 3])
 
     def test_raises(self):
         func = util.raises(Exception)

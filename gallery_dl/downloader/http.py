@@ -24,19 +24,35 @@ except ImportError:
 class HttpDownloader(DownloaderBase):
     scheme = "http"
 
-    def __init__(self, extractor, output):
-        DownloaderBase.__init__(self, extractor, output)
+    def __init__(self, job):
+        DownloaderBase.__init__(self, job)
+        extractor = job.extractor
+        self.chunk_size = 16384
+        self.downloading = False
+
         self.adjust_extension = self.config("adjust-extensions", True)
+        self.minsize = self.config("filesize-min")
+        self.maxsize = self.config("filesize-max")
         self.retries = self.config("retries", extractor._retries)
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
-        self.downloading = False
-        self.chunk_size = 16384
 
         if self.retries < 0:
             self.retries = float("inf")
+        if self.minsize:
+            minsize = text.parse_bytes(self.minsize)
+            if not minsize:
+                self.log.warning(
+                    "Invalid minimum file size (%r)", self.minsize)
+            self.minsize = minsize
+        if self.maxsize:
+            maxsize = text.parse_bytes(self.maxsize)
+            if not maxsize:
+                self.log.warning(
+                    "Invalid maximum file size (%r)", self.maxsize)
+            self.maxsize = maxsize
         if self.rate:
             rate = text.parse_bytes(self.rate)
             if rate:
@@ -70,17 +86,20 @@ class HttpDownloader(DownloaderBase):
             if tries:
                 if response:
                     response.close()
+                    response = None
                 self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
                 if tries > self.retries:
                     return False
-                time.sleep(min(2 ** (tries-1), 1800))
-            tries += 1
+                time.sleep(tries)
 
+            tries += 1
             headers = {}
+            file_header = None
+
             # check for .part file
-            filesize = pathfmt.part_size()
-            if filesize:
-                headers["Range"] = "bytes={}-".format(filesize)
+            file_size = pathfmt.part_size()
+            if file_size:
+                headers["Range"] = "bytes={}-".format(file_size)
             # file-specific headers
             extra = pathfmt.kwdict.get("_http_headers")
             if extra:
@@ -104,9 +123,9 @@ class HttpDownloader(DownloaderBase):
                 offset = 0
                 size = response.headers.get("Content-Length")
             elif code == 206:  # Partial Content
-                offset = filesize
+                offset = file_size
                 size = response.headers["Content-Range"].rpartition("/")[2]
-            elif code == 416 and filesize:  # Requested Range Not Satisfiable
+            elif code == 416 and file_size:  # Requested Range Not Satisfiable
                 break
             else:
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
@@ -114,51 +133,80 @@ class HttpDownloader(DownloaderBase):
                     continue
                 self.log.warning(msg)
                 return False
-            size = text.parse_int(size)
 
-            # set missing filename extension
+            # set missing filename extension from MIME type
             if not pathfmt.extension:
-                pathfmt.set_extension(self.get_extension(response))
+                pathfmt.set_extension(self._find_extension(response))
                 if pathfmt.exists():
+                    pathfmt.temppath = ""
+                    return True
+
+            # check file size
+            size = text.parse_int(size, None)
+            if size is not None:
+                if self.minsize and size < self.minsize:
+                    self.log.warning(
+                        "File size smaller than allowed minimum (%s < %s)",
+                        size, self.minsize)
+                    return False
+                if self.maxsize and size > self.maxsize:
+                    self.log.warning(
+                        "File size larger than allowed maximum (%s > %s)",
+                        size, self.maxsize)
+                    return False
+
+            chunked = response.raw.chunked
+            content = response.iter_content(self.chunk_size)
+
+            # check filename extension against file header
+            if self.adjust_extension and not offset and \
+                    pathfmt.extension in FILE_SIGNATURES:
+                try:
+                    file_header = next(
+                        content if chunked else response.iter_content(16), b"")
+                except (RequestException, SSLError, OpenSSLError) as exc:
+                    msg = str(exc)
+                    print()
+                    continue
+                if self._adjust_extension(pathfmt, file_header) and \
+                        pathfmt.exists():
                     pathfmt.temppath = ""
                     return True
 
             # set open mode
             if not offset:
                 mode = "w+b"
-                if filesize:
+                if file_size:
                     self.log.debug("Unable to resume partial download")
             else:
                 mode = "r+b"
                 self.log.debug("Resuming download at byte %d", offset)
 
-            # start downloading
-            self.out.start(pathfmt.path)
+            # download content
             self.downloading = True
-            with pathfmt.open(mode) as file:
-                if offset:
-                    file.seek(offset)
+            with pathfmt.open(mode) as fp:
+                if file_header:
+                    fp.write(file_header)
+                elif offset:
+                    if self.adjust_extension and \
+                            pathfmt.extension in FILE_SIGNATURES:
+                        self._adjust_extension(pathfmt, fp.read(16))
+                    fp.seek(offset)
 
-                # download content
+                self.out.start(pathfmt.path)
                 try:
-                    self.receive(response, file)
+                    self.receive(fp, content)
                 except (RequestException, SSLError, OpenSSLError) as exc:
                     msg = str(exc)
                     print()
                     continue
 
-                # check filesize
-                if size and file.tell() < size:
-                    msg = "filesize mismatch ({} < {})".format(
-                        file.tell(), size)
+                # check file size
+                if size and fp.tell() < size:
+                    msg = "file size mismatch ({} < {})".format(
+                        fp.tell(), size)
                     print()
                     continue
-
-                # check filename extension
-                if self.adjust_extension:
-                    adj_ext = self.check_extension(file, pathfmt.extension)
-                    if adj_ext:
-                        pathfmt.set_extension(adj_ext)
 
             break
 
@@ -171,16 +219,18 @@ class HttpDownloader(DownloaderBase):
 
         return True
 
-    def receive(self, response, file):
-        for data in response.iter_content(self.chunk_size):
-            file.write(data)
+    @staticmethod
+    def receive(fp, content):
+        write = fp.write
+        for data in content:
+            write(data)
 
-    def _receive_rate(self, response, file):
+    def _receive_rate(self, fp, content):
         t1 = time.time()
         rt = self.rate
 
-        for data in response.iter_content(self.chunk_size):
-            file.write(data)
+        for data in content:
+            fp.write(data)
 
             t2 = time.time()           # current time
             actual = t2 - t1           # actual elapsed time
@@ -193,80 +243,90 @@ class HttpDownloader(DownloaderBase):
             else:
                 t1 = t2
 
-    def get_extension(self, response):
+    def _find_extension(self, response):
+        """Get filename extension from MIME type"""
         mtype = response.headers.get("Content-Type", "image/jpeg")
         mtype = mtype.partition(";")[0]
 
         if "/" not in mtype:
             mtype = "image/" + mtype
 
-        if mtype in MIMETYPE_MAP:
-            return MIMETYPE_MAP[mtype]
+        if mtype in MIME_TYPES:
+            return MIME_TYPES[mtype]
 
-        exts = mimetypes.guess_all_extensions(mtype, strict=False)
-        if exts:
-            exts.sort()
-            return exts[-1][1:]
-
-        self.log.warning(
-            "No filename extension found for MIME type '%s'", mtype)
-        return "txt"
+        ext = mimetypes.guess_extension(mtype, strict=False)
+        if ext:
+            return ext[1:]
+        self.log.warning("Unknown MIME type '%s'", mtype)
+        return "bin"
 
     @staticmethod
-    def check_extension(file, extension):
-        """Check filename extension against fileheader"""
-        if extension in FILETYPE_CHECK:
-            file.seek(0)
-            header = file.read(8)
-            if len(header) >= 8 and not FILETYPE_CHECK[extension](header):
-                for ext, check in FILETYPE_CHECK.items():
-                    if ext != extension and check(header):
-                        return ext
-        return None
+    def _adjust_extension(pathfmt, file_header):
+        """Check filename extension against file header"""
+        sig = FILE_SIGNATURES[pathfmt.extension]
+        if not file_header.startswith(sig):
+            for ext, sig in FILE_SIGNATURES.items():
+                if file_header.startswith(sig):
+                    pathfmt.set_extension(ext)
+                    return True
+        return False
 
 
-FILETYPE_CHECK = {
-    "jpg": lambda h: h[0:2] == b"\xff\xd8",
-    "png": lambda h: h[0:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a",
-    "gif": lambda h: h[0:4] == b"GIF8" and h[5] == 97,
-}
-
-
-MIMETYPE_MAP = {
-    "image/jpeg": "jpg",
-    "image/jpg": "jpg",
-    "image/png": "png",
-    "image/gif": "gif",
-    "image/bmp": "bmp",
-    "image/x-bmp": "bmp",
+MIME_TYPES = {
+    "image/jpeg"    : "jpg",
+    "image/jpg"     : "jpg",
+    "image/png"     : "png",
+    "image/gif"     : "gif",
+    "image/bmp"     : "bmp",
+    "image/x-bmp"   : "bmp",
     "image/x-ms-bmp": "bmp",
-    "image/webp": "webp",
-    "image/svg+xml": "svg",
+    "image/webp"    : "webp",
+    "image/svg+xml" : "svg",
 
+    "image/x-photoshop"        : "psd",
+    "application/x-photoshop"  : "psd",
     "image/vnd.adobe.photoshop": "psd",
-    "image/x-photoshop": "psd",
-    "application/x-photoshop": "psd",
 
     "video/webm": "webm",
-    "video/ogg": "ogg",
-    "video/mp4": "mp4",
+    "video/ogg" : "ogg",
+    "video/mp4" : "mp4",
 
-    "audio/wav": "wav",
+    "audio/wav"  : "wav",
     "audio/x-wav": "wav",
-    "audio/webm": "webm",
-    "audio/ogg": "ogg",
-    "audio/mpeg": "mp3",
+    "audio/webm" : "webm",
+    "audio/ogg"  : "ogg",
+    "audio/mpeg" : "mp3",
 
-    "application/zip": "zip",
+    "application/zip"  : "zip",
     "application/x-zip": "zip",
     "application/x-zip-compressed": "zip",
-    "application/rar": "rar",
+    "application/rar"  : "rar",
     "application/x-rar": "rar",
     "application/x-rar-compressed": "rar",
-    "application/x-7z-compressed": "7z",
+    "application/x-7z-compressed" : "7z",
 
     "application/ogg": "ogg",
     "application/octet-stream": "bin",
+}
+
+# taken from https://en.wikipedia.org/wiki/List_of_file_signatures
+FILE_SIGNATURES = {
+    "jpg" : b"\xFF\xD8\xFF",
+    "png" : b"\x89PNG\r\n\x1A\n",
+    "gif" : b"GIF8",
+    "bmp" : b"\x42\x4D",
+    "webp": b"RIFF",
+    "svg" : b"<?xml",
+    "psd" : b"8BPS",
+    "webm": b"\x1A\x45\xDF\xA3",
+    "ogg" : b"OggS",
+    "wav" : b"RIFF",
+    "mp3" : b"ID3",
+    "zip" : b"\x50\x4B",
+    "rar" : b"\x52\x61\x72\x21\x1A\x07",
+    "7z"  : b"\x37\x7A\xBC\xAF\x27\x1C",
+    # check 'bin' files against all other file signatures
+    "bin" : b"\x00\x00\x00\x00",
 }
 
 

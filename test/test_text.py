@@ -94,6 +94,33 @@ class TestText(unittest.TestCase):
         for value in INVALID:
             self.assertEqual(f(value), empty)
 
+    def test_ensure_http_scheme(self, f=text.ensure_http_scheme):
+        result = "https://example.org/filename.ext"
+
+        # standard usage
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("example.org/filename.ext"), result)
+        self.assertEqual(f("/example.org/filename.ext"), result)
+        self.assertEqual(f("//example.org/filename.ext"), result)
+        self.assertEqual(f("://example.org/filename.ext"), result)
+
+        # no change
+        self.assertEqual(f(result), result)
+        self.assertEqual(
+            f("http://example.org/filename.ext"),
+            "http://example.org/filename.ext",
+        )
+
+        # ...
+        self.assertEqual(
+            f("htp://example.org/filename.ext"),
+            "https://htp://example.org/filename.ext",
+        )
+
+        # invalid arguments
+        for value in INVALID_ALT:
+            self.assertEqual(f(value), value)
+
     def test_filename_from_url(self, f=text.filename_from_url):
         result = "filename.ext"
 
@@ -377,6 +404,10 @@ class TestText(unittest.TestCase):
         )
         self.assertEqual(
             f("2019-05-07T21:25:02+0900"),
+            datetime.datetime(2019, 5, 7, 12, 25, 2),
+        )
+        self.assertEqual(
+            f("2019-05-07T21:25:02.753+0900", "%Y-%m-%dT%H:%M:%S.%f%z"),
             datetime.datetime(2019, 5, 7, 12, 25, 2),
         )
         self.assertEqual(

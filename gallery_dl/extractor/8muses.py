@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://www.8muses.com/"""
+"""Extractors for https://comics.8muses.com/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -14,30 +14,31 @@ import json
 
 
 class _8musesAlbumExtractor(Extractor):
-    """Extractor for image albums on www.8muses.com"""
+    """Extractor for image albums on comics.8muses.com"""
     category = "8muses"
     subcategory = "album"
     directory_fmt = ("{category}", "{album[path]}")
     filename_fmt = "{page:>03}.{extension}"
     archive_fmt = "{hash}"
-    root = "https://www.8muses.com"
-    pattern = (r"(?:https?://)?(?:www\.)?8muses\.com"
-               r"(/comics/album/[^?&#]+)(\?[^#]+)?")
+    root = "https://comics.8muses.com"
+    pattern = (r"(?:https?://)?(?:comics\.|www\.)?8muses\.com"
+               r"(/comics/album/[^?#]+)(\?[^#]+)?")
     test = (
-        ("https://www.8muses.com/comics/album/Fakku-Comics/santa/Im-Sorry", {
-            "url": "82449d6a26a29204695cba5d52c3ec60170bc159",
+        ("https://comics.8muses.com/comics/album/Fakku-Comics/mogg/Liar", {
+            "url": "6286ac33087c236c5a7e51f8a9d4e4d5548212d4",
+            "pattern": r"https://comics.8muses.com/image/fl/[\w-]+",
             "keyword": {
                 "url"  : str,
                 "hash" : str,
                 "page" : int,
-                "count": 16,
+                "count": 6,
                 "album": {
-                    "id"     : 10457,
-                    "title"  : "Im Sorry",
-                    "path"   : "Fakku Comics/santa/Im Sorry",
+                    "id"     : 10467,
+                    "title"  : "Liar",
+                    "path"   : "Fakku Comics/mogg/Liar",
                     "private": False,
                     "url"    : str,
-                    "parent" : 10454,
+                    "parent" : 10464,
                     "views"  : int,
                     "likes"  : int,
                     "date"   : "dt:2018-07-10 00:00:00",
@@ -53,7 +54,7 @@ class _8musesAlbumExtractor(Extractor):
                 "private": False,
             },
         }),
-        ("https://www.8muses.com/comics/album/Fakku-Comics/7?sort=az", {
+        ("https://www.8muses.com/comics/album/Fakku-Comics/8?sort=az", {
             "count": ">= 70",
             "keyword": {"name": r"re:^[R-Zr-z]"},
         }),
@@ -93,12 +94,12 @@ class _8musesAlbumExtractor(Extractor):
             if albums:
                 for album in albums:
                     url = self.root + "/comics/album/" + album["permalink"]
-                    album = {
-                        "url"    : url,
-                        "name"   : album["name"],
-                        "private": album["isPrivate"],
+                    yield Message.Queue, url, {
+                        "url"       : url,
+                        "name"      : album["name"],
+                        "private"   : album["isPrivate"],
+                        "_extractor": _8musesAlbumExtractor,
                     }
-                    yield Message.Queue, url, album
 
             if data["page"] >= data["pages"]:
                 return

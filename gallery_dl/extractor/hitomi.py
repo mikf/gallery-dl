@@ -21,11 +21,11 @@ class HitomiGalleryExtractor(GalleryExtractor):
     root = "https://hitomi.la"
     pattern = (r"(?:https?://)?hitomi\.la"
                r"/(?:manga|doujinshi|cg|gamecg|galleries|reader)"
-               r"/(?:[^/?&#]+-)?(\d+)")
+               r"/(?:[^/?#]+-)?(\d+)")
     test = (
         ("https://hitomi.la/galleries/867789.html", {
-            "pattern": r"https://[a-c]a.hitomi.la/images/./../[0-9a-f]+.jpg",
-            "keyword": "6701f8f588f119ef84cd29bdf99a399417b0a6a2",
+            "pattern": r"https://[a-c]b.hitomi.la/images/./../[0-9a-f]+.jpg",
+            "keyword": "4873ef9a523621fc857b114e0b2820ba4066e9ae",
             "count": 16,
         }),
         # download test
@@ -35,12 +35,12 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }),
         # Game CG with scenes (#321)
         ("https://hitomi.la/galleries/733697.html", {
-            "url": "b4cbc76032852db4a655bf6a2c4d58eae8153c8e",
+            "url": "ec3fe9b708ee376ec579b90d053ad485c0777552",
             "count": 210,
         }),
         # fallback for galleries only available through /reader/ URLs
         ("https://hitomi.la/galleries/1045954.html", {
-            "url": "f3aa914ad148437f72d307268fa0d250eabe8dab",
+            "url": "bf4ed4e726204da5bc37a236ca476a2a96081388",
             "count": 1413,
         }),
         # gallery with "broken" redirect
@@ -111,9 +111,9 @@ class HitomiGalleryExtractor(GalleryExtractor):
             response = self.request(url, fatal=False)
             if b"<title>Redirect</title>" not in response.content:
                 break
-            url = text.extract(response.text, "href='", "'")[0]
-            if not url.startswith("http"):
-                url = text.urljoin(self.root, url)
+            url = text.extract(
+                response.text, 'http-equiv="refresh" content="', '"',
+            )[0].partition("=")[2]
 
         if response.status_code >= 400:
             return {}
@@ -143,7 +143,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
             frontends = 2 if inum < 0x30 else 3
             inum = 1 if inum < 0x09 else inum
 
-            url = "https://{}a.hitomi.la/images/{}/{}/{}.{}".format(
+            url = "https://{}b.hitomi.la/images/{}/{}/{}.{}".format(
                 chr(97 + (inum % frontends)),
                 ihash[-1], ihash[-3:-1], ihash,
                 idata["extension"],
@@ -158,9 +158,9 @@ class HitomiTagExtractor(Extractor):
     subcategory = "tag"
     pattern = (r"(?:https?://)?hitomi\.la/"
                r"(tag|artist|group|series|type|character)/"
-               r"([^/?&#]+)-\d+\.html")
+               r"([^/?#]+)\.html")
     test = (
-        ("https://hitomi.la/tag/screenshots-japanese-1.html", {
+        ("https://hitomi.la/tag/screenshots-japanese.html", {
             "pattern": HitomiGalleryExtractor.pattern,
             "count": ">= 35",
         }),
@@ -174,6 +174,10 @@ class HitomiTagExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.type, self.tag = match.groups()
+
+        tag, _, num = self.tag.rpartition("-")
+        if num.isdecimal():
+            self.tag = tag
 
     def items(self):
         url = "https://ltn.hitomi.la/{}/{}.nozomi".format(self.type, self.tag)

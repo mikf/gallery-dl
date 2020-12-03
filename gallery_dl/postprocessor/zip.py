@@ -22,8 +22,8 @@ class ZipPP(PostProcessor):
         "lzma" : zipfile.ZIP_LZMA,
     }
 
-    def __init__(self, pathfmt, options):
-        PostProcessor.__init__(self)
+    def __init__(self, job, options):
+        PostProcessor.__init__(self, job)
         self.delete = not options.get("keep-files", False)
         ext = "." + options.get("extension", "zip")
         algorithm = options.get("compression", "store")
@@ -33,33 +33,32 @@ class ZipPP(PostProcessor):
                 algorithm)
             algorithm = "store"
 
-        self.path = pathfmt.realdirectory
-        args = (self.path[:-1] + ext, "a",
-                self.COMPRESSION_ALGORITHMS[algorithm], True)
+        self.zfile = None
+        self.path = job.pathfmt.realdirectory
+        self.args = (self.path[:-1] + ext, "a",
+                     self.COMPRESSION_ALGORITHMS[algorithm], True)
 
-        if options.get("mode") == "safe":
-            self.run = self._write_safe
-            self.zfile = None
-            self.args = args
-        else:
-            self.run = self._write
-            self.zfile = zipfile.ZipFile(*args)
+        job.hooks["file"].append(
+            self.write_safe if options.get("mode") == "safe" else self.write)
+        job.hooks["finalize"].append(self.finalize)
 
-    def _write(self, pathfmt, zfile=None):
+    def write(self, pathfmt, zfile=None):
         # 'NameToInfo' is not officially documented, but it's available
         # for all supported Python versions and using it directly is a lot
         # faster than calling getinfo()
         if zfile is None:
+            if self.zfile is None:
+                self.zfile = zipfile.ZipFile(*self.args)
             zfile = self.zfile
         if pathfmt.filename not in zfile.NameToInfo:
             zfile.write(pathfmt.temppath, pathfmt.filename)
             pathfmt.delete = self.delete
 
-    def _write_safe(self, pathfmt):
+    def write_safe(self, pathfmt):
         with zipfile.ZipFile(*self.args) as zfile:
             self._write(pathfmt, zfile)
 
-    def run_final(self, pathfmt, status):
+    def finalize(self, pathfmt, status):
         if self.zfile:
             self.zfile.close()
 

@@ -22,6 +22,8 @@ from gallery_dl.extractor import mastodon  # noqa E402
 from gallery_dl.extractor.common import Extractor, Message  # noqa E402
 from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
 
+_list_classes = extractor._list_classes
+
 
 class FakeExtractor(Extractor):
     category = "fake"
@@ -45,6 +47,7 @@ class TestExtractorModule(unittest.TestCase):
     def setUp(self):
         extractor._cache.clear()
         extractor._module_iter = iter(extractor.modules)
+        extractor._list_classes = _list_classes
 
     def test_find(self):
         for uri in self.VALID_URIS:
@@ -74,30 +77,6 @@ class TestExtractorModule(unittest.TestCase):
         self.assertEqual(classes[0].pattern, FakeExtractor.pattern)
         self.assertEqual(classes[0], FakeExtractor)
         self.assertIsInstance(extractor.find(uri), FakeExtractor)
-
-    def test_blacklist(self):
-        link_uri = "https://example.org/file.jpg"
-        test_uri = "test:"
-        fake_uri = "fake:"
-
-        self.assertIsInstance(extractor.find(link_uri), DirectlinkExtractor)
-        self.assertIsInstance(extractor.find(test_uri), Extractor)
-        self.assertIsNone(extractor.find(fake_uri))
-
-        with extractor.blacklist(["directlink"]):
-            self.assertIsNone(extractor.find(link_uri))
-            self.assertIsInstance(extractor.find(test_uri), Extractor)
-            self.assertIsNone(extractor.find(fake_uri))
-
-        with extractor.blacklist([], [DirectlinkExtractor, FakeExtractor]):
-            self.assertIsNone(extractor.find(link_uri))
-            self.assertIsInstance(extractor.find(test_uri), Extractor)
-            self.assertIsNone(extractor.find(fake_uri))
-
-        with extractor.blacklist(["test"], [DirectlinkExtractor]):
-            self.assertIsNone(extractor.find(link_uri))
-            self.assertIsNone(extractor.find(test_uri))
-            self.assertIsNone(extractor.find(fake_uri))
 
     def test_from_url(self):
         for uri in self.VALID_URIS:

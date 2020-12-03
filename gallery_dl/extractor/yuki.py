@@ -19,7 +19,7 @@ class YukiThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board}", "{thread}{title:? - //}")
     filename_fmt = "{time}-{filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
-    pattern = r"(?:https?://)?yuki\.la/([^/?&#]+)/(\d+)"
+    pattern = r"(?:https?://)?yuki\.la/([^/?#]+)/(\d+)"
     test = (
         ("https://yuki.la/gd/309639", {
             "url": "289e86c5caf673a2515ec5f5f521ac0ae7e189e9",

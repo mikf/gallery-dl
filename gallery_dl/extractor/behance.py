@@ -31,8 +31,14 @@ class BehanceExtractor(Extractor):
     def _update(data):
         # compress data to simple lists
         if data["fields"] and isinstance(data["fields"][0], dict):
-            data["fields"] = [field["name"] for field in data["fields"]]
-        data["owners"] = [owner["display_name"] for owner in data["owners"]]
+            data["fields"] = [
+                field.get("name") or field.get("label")
+                for field in data["fields"]
+            ]
+        data["owners"] = [
+            owner.get("display_name") or owner.get("displayName")
+            for owner in data["owners"]
+        ]
 
         tags = data.get("tags") or ()
         if tags and isinstance(tags[0], dict):
@@ -101,7 +107,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
         cookies = {
             "_evidon_consent_cookie":
                 '{"consent_date":"2019-01-31T09:41:15.132Z"}',
-            "bcp": "815b5eee-8bdf-4898-ac79-33c2bcc0ed19",
+            "bcp": "4c34489d-914c-46cd-b44c-dfd0e661136d",
             "gk_suid": "66981391",
             "gki": '{"feature_project_view":false,'
                    '"feature_discover_login_prompt":false,'
@@ -145,7 +151,7 @@ class BehanceUserExtractor(BehanceExtractor):
     """Extractor for a user's galleries from www.behance.net"""
     subcategory = "user"
     categorytransfer = True
-    pattern = r"(?:https?://)?(?:www\.)?behance\.net/([^/?&#]+)/?$"
+    pattern = r"(?:https?://)?(?:www\.)?behance\.net/([^/?#]+)/?$"
     test = ("https://www.behance.net/alexstrohl", {
         "count": ">= 8",
         "pattern": BehanceGalleryExtractor.pattern,
@@ -184,14 +190,267 @@ class BehanceCollectionExtractor(BehanceExtractor):
         self.collection_id = match.group(1)
 
     def galleries(self):
-        url = "{}/collection/{}/a".format(self.root, self.collection_id)
-        params = {"offset": 0}
-        headers = {"X-Requested-With": "XMLHttpRequest"}
+        url = self.root + "/v3/graphql"
+        headers = {
+            "Origin" : self.root,
+            "Referer": self.root + "/collection/" + self.collection_id,
+            "X-BCP"           : "4c34489d-914c-46cd-b44c-dfd0e661136d",
+            "X-NewRelic-ID"   : "VgUFVldbGwsFU1BRDwUBVw==",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+        cookies = {
+            "bcp"    : "4c34489d-914c-46cd-b44c-dfd0e661136d",
+            "gk_suid": "66981391",
+            "ilo0"   : "true",
+        }
+
+        query = """
+query GetMoodboardItemsAndRecommendations(
+    $id: Int!
+    $firstItem: Int!
+    $afterItem: String
+    $shouldGetRecommendations: Boolean!
+    $shouldGetItems: Boolean!
+    $shouldGetMoodboardFields: Boolean!
+  ) {
+    viewer @include(if: $shouldGetMoodboardFields) {
+      isOptedOutOfRecommendations
+    }
+    moodboard(id: $id) {
+      ...moodboardFields @include(if: $shouldGetMoodboardFields)
+
+      items(first: $firstItem, after: $afterItem) @include(if: $shouldGetItems)
+      {
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        nodes {
+          ...nodesFields
+        }
+      }
+
+      recommendedItems(first: 80) @include(if: $shouldGetRecommendations) {
+        nodes {
+          ...nodesFields
+          fetchSource
+        }
+      }
+    }
+  }
+
+  fragment moodboardFields on Moodboard {
+    id
+    label
+    privacy
+    followerCount
+    isFollowing
+    projectCount
+    url
+    isOwner
+    owners {
+      id
+      displayName
+      url
+      firstName
+      location
+      locationUrl
+      images {
+        size_50 {
+          url
+        }
+        size_100 {
+          url
+        }
+        size_115 {
+          url
+        }
+        size_230 {
+          url
+        }
+        size_138 {
+          url
+        }
+        size_276 {
+          url
+        }
+      }
+    }
+  }
+
+  fragment projectFields on Project {
+    id
+    isOwner
+    publishedOn
+    matureAccess
+    hasMatureContent
+    modifiedOn
+    name
+    url
+    isPrivate
+    slug
+    fields {
+      label
+    }
+    colors {
+      r
+      g
+      b
+    }
+    owners {
+      url
+      displayName
+      id
+      location
+      locationUrl
+      isProfileOwner
+      images {
+        size_50 {
+          url
+        }
+        size_100 {
+          url
+        }
+        size_115 {
+          url
+        }
+        size_230 {
+          url
+        }
+        size_138 {
+          url
+        }
+        size_276 {
+          url
+        }
+      }
+    }
+    covers {
+      size_original {
+        url
+      }
+      size_max_808 {
+        url
+      }
+      size_808 {
+        url
+      }
+      size_404 {
+        url
+      }
+      size_202 {
+        url
+      }
+      size_230 {
+        url
+      }
+      size_115 {
+        url
+      }
+    }
+    stats {
+      views {
+        all
+      }
+      appreciations {
+        all
+      }
+      comments {
+        all
+      }
+    }
+  }
+
+  fragment exifDataValueFields on exifDataValue {
+    id
+    label
+    value
+    searchValue
+  }
+
+  fragment nodesFields on MoodboardItem {
+    id
+    entityType
+    width
+    height
+    flexWidth
+    flexHeight
+    images {
+      size
+      url
+    }
+
+    entity {
+      ... on Project {
+        ...projectFields
+      }
+
+      ... on ImageModule {
+        project {
+          ...projectFields
+        }
+
+        exifData {
+          lens {
+            ...exifDataValueFields
+          }
+          software {
+            ...exifDataValueFields
+          }
+          makeAndModel {
+            ...exifDataValueFields
+          }
+          focalLength {
+            ...exifDataValueFields
+          }
+          iso {
+            ...exifDataValueFields
+          }
+          location {
+            ...exifDataValueFields
+          }
+          flash {
+            ...exifDataValueFields
+          }
+          exposureMode {
+            ...exifDataValueFields
+          }
+          shutterSpeed {
+            ...exifDataValueFields
+          }
+          aperture {
+            ...exifDataValueFields
+          }
+        }
+      }
+
+      ... on MediaCollectionComponent {
+        project {
+          ...projectFields
+        }
+      }
+    }
+  }
+"""
+        variables = {
+            "afterItem": "MAo=",
+            "firstItem": 40,
+            "id"       : self.collection_id,
+            "shouldGetItems"          : True,
+            "shouldGetMoodboardFields": False,
+            "shouldGetRecommendations": False,
+        }
+        data = {"query": query, "variables": variables}
 
         while True:
-            data = self.request(url, params=params, headers=headers).json()
-            for item in data["items"]:
-                yield item["project"]
-            if len(data["items"]) < 40:
+            items = self.request(
+                url, method="POST", headers=headers,
+                cookies=cookies, json=data,
+            ).json()["data"]["moodboard"]["items"]
+
+            for node in items["nodes"]:
+                yield node["entity"]
+
+            if not items["pageInfo"]["hasNextPage"]:
                 return
-            params["offset"] += len(data["items"])
+            variables["afterItem"] = items["pageInfo"]["endCursor"]

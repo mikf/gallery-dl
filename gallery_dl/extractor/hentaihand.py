@@ -10,74 +10,61 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, util
-import collections
+import json
 
 
 class HentaihandGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries on hentaihand.com"""
     category = "hentaihand"
     root = "https://hentaihand.com"
-    pattern = (r"(?i)(?:https?://)?(?:www\.)?hentaihand\.com"
-               r"/(?:comi|view)c/(\d+)")
+    pattern = r"(?:https?://)?(?:www\.)?hentaihand\.com/\w+/comic/([\w-]+)"
     test = (
-        ("https://hentaihand.com/comic/272772/kouda-tomohiro-chiyomi-bl", {
-            "pattern": r"https://i.hentaihand.com/.*/images/full/\d+.jpg$",
+        (("https://hentaihand.com/en/comic/kouda-tomohiro-chiyomi-"
+          "blizzard-comic-aun-2016-12-english-nanda-sore-scans"), {
+            "pattern": r"https://cdn.hentaihand.com/.*/images/304546/\d+.jpg$",
             "count": 19,
             "keyword": {
-                "artists"   : ["kouda tomohiro"],
-                "categories": ["manga"],
-                "date"      : "Feb. 6, 2020, 3:19 p.m.",
-                "gallery_id": 272772,
+                "artists"   : ["Kouda Tomohiro"],
+                "date"      : "dt:2020-02-06 00:00:00",
+                "gallery_id": 304546,
                 "lang"      : "en",
                 "language"  : "English",
-                "relationships": ["family", "step family"],
+                "relationships": ["Family", "Step family"],
                 "tags"      : list,
                 "title"     : r"re:\[Kouda Tomohiro\] Chiyomi Blizzard",
-                "title_jp"  : r"re:\[幸田朋弘\] ちよみブリザード",
+                "title_alt" : r"re:\[幸田朋弘\] ちよみブリザード",
+                "type"      : "Manga",
             },
         }),
-        ("https://hentaihand.com/viewc/272772/kouda-tomohiro-chiyomi-bl"),
     )
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
-        url = "{}/comic/{}".format(self.root, self.gallery_id)
+        self.slug = match.group(1)
+        url = "{}/api/comics/{}".format(self.root, self.slug)
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        extr = text.extract_from(page)
-
-        title_en = text.unescape(extr("<h1>", "<"))
-        title_jp = text.unescape(extr("<h2>", "<"))
-        tags = extr('<section id="tags"', "</section>")
-
+        info = json.loads(page)
         data = {
-            "gallery_id" : text.parse_int(self.gallery_id),
-            "title"      : title_en or title_jp,
-            "title_en"   : title_en,
-            "title_jp"   : title_jp,
-
-            # impossible to parse with strptime()
-            "date"       : extr('datetime="', '"'),
+            "gallery_id" : text.parse_int(info["id"]),
+            "title"      : info["title"],
+            "title_alt"  : info["alternative_title"],
+            "slug"       : self.slug,
+            "type"       : info["category"]["name"],
+            "language"   : info["language"]["name"],
+            "lang"       : util.language_to_code(info["language"]["name"]),
+            "tags"       : [t["slug"] for t in info["tags"]],
+            "date"       : text.parse_datetime(
+                info["uploaded_at"], "%Y-%m-%d"),
         }
-
-        tdict = collections.defaultdict(list)
-        for path in text.extract_iter(tags, 'href="/', '"'):
-            kind, _, name = path.partition("/")
-            tdict[kind].append(name.replace("+", " "))
-        data.update(tdict)
-
-        if "languages" in data:
-            data["language"] = data["languages"][-1].capitalize()
-            data["lang"] = util.language_to_code(data["language"])
-            del data["languages"]
+        for key in ("artists", "authors", "groups", "characters",
+                    "relationships", "parodies"):
+            data[key] = [v["name"] for v in info[key]]
         return data
 
     def images(self, _):
-        url = "{}/viewc/{}/1".format(self.root, self.gallery_id)
-        page = self.request(url).text
-        images = text.extract(page, "var images", ";")[0]
-        return [(img, None) for img in text.extract_iter(images, "'", "'")]
+        info = self.request(self.gallery_url + "/images").json()
+        return [(img["source_url"], img) for img in info["images"]]
 
 
 class HentaihandTagExtractor(Extractor):
@@ -86,49 +73,49 @@ class HentaihandTagExtractor(Extractor):
     subcategory = "tag"
     root = "https://hentaihand.com"
     pattern = (r"(?i)(?:https?://)?(?:www\.)?hentaihand\.com"
-               r"(/(?:parody|characters|tags|artists|groups|languages"
-               r"|categories|relationships)/[^#]+)")
+               r"/\w+/(parody|character|tag|artist|group|language"
+               r"|category|relationship)/([^/?#]+)")
     test = (
-        ("https://hentaihand.com/artists/tony+taka", {
+        ("https://hentaihand.com/en/artist/himuro", {
             "pattern": HentaihandGalleryExtractor.pattern,
-            "count": ">= 50",
+            "count": ">= 18",
         }),
-        ("https://hentaihand.com/artists/tony+taka/popular?page=2"),
-        ("https://hentaihand.com/tags/full+color"),
-        ("https://hentaihand.com/languages/japanese"),
-        ("https://hentaihand.com/categories/manga"),
+        ("https://hentaihand.com/en/tag/full-color"),
+        ("https://hentaihand.com/fr/language/japanese"),
+        ("https://hentaihand.com/zh/category/manga"),
     )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.path, _, query = match.group(1).partition("?")
-        self.query = text.parse_query(query)
-        self.query["page"] = text.parse_int(self.query.get("page"), 1)
+        self.type, self.key = match.groups()
 
     def items(self):
-        yield Message.Version, 1
-        url = self.root + self.path
-        params = self.query.copy()
-        data = {"_extractor": HentaihandGalleryExtractor}
+        if self.type[-1] == "y":
+            tpl = self.type[:-1] + "ies"
+        else:
+            tpl = self.type + "s"
 
+        url = "{}/api/{}/{}".format(self.root, tpl, self.key)
+        tid = self.request(url, notfound=self.type).json()["id"]
+
+        url = self.root + "/api/comics"
+        params = {
+            "per_page": "18",
+            tpl       : tid,
+            "page"    : 1,
+            "q"       : "",
+            "sort"    : "uploaded_at",
+            "order"   : "desc",
+            "duration": "day",
+        }
         while True:
-            page = self.request(url, params=params).text
+            info = self.request(url, params=params).json()
 
-            for path in text.extract_iter(page, '<a href="/comic/', '"'):
-                yield Message.Queue, self.root + "/comic/" + path, data
+            for gallery in info["data"]:
+                gurl = "{}/en/comic/{}".format(self.root, gallery["slug"])
+                gallery["_extractor"] = HentaihandGalleryExtractor
+                yield Message.Queue, gurl, gallery
 
-            pos = page.find(">(current)<")
-            if pos < 0 or page.find('class="page-link" href="', pos) < 0:
-                break
+            if params["page"] >= info["last_page"]:
+                return
             params["page"] += 1
-
-
-class HentaihandSearchExtractor(HentaihandTagExtractor):
-    """Extractor for search results on hentaihand.com"""
-    subcategory = "search"
-    pattern = r"(?i)(?:https?://)?(?:www\.)?hentaihand\.com(/search/?[^#]+)"
-    test = ("https://hentaihand.com/search?q=color", {
-        "pattern": HentaihandGalleryExtractor.pattern,
-        "range": "1-50",
-        "count": 50,
-    })

@@ -95,12 +95,19 @@ class TestOAuthSession(unittest.TestCase):
 
     def _oauth_request(self, endpoint, params=None,
                        oauth_token=None, oauth_token_secret=None):
+        # the test server at 'term.ie' is unreachable
+        raise unittest.SkipTest()
+
         session = oauth.OAuth1Session(
             CONSUMER_KEY, CONSUMER_SECRET,
             oauth_token, oauth_token_secret,
         )
-        url = TESTSERVER + endpoint
-        return session.get(url, params=params).text
+        try:
+            response = session.get(TESTSERVER + endpoint, params=params)
+            response.raise_for_status()
+            return response.text
+        except OSError:
+            raise unittest.SkipTest()
 
 
 if __name__ == "__main__":

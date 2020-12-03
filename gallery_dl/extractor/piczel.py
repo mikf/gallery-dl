@@ -67,7 +67,7 @@ class PiczelExtractor(Extractor):
 class PiczelUserExtractor(PiczelExtractor):
     """Extractor for all images from a user's gallery"""
     subcategory = "user"
-    pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/([^/?&#]+)/?$"
+    pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/([^/?#]+)/?$"
     test = ("https://piczel.tv/gallery/Bikupan", {
         "range": "1-100",
         "count": ">= 100",
@@ -88,7 +88,7 @@ class PiczelFolderExtractor(PiczelExtractor):
     directory_fmt = ("{category}", "{user[username]}", "{folder[name]}")
     archive_fmt = "f{folder[id]}_{id}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?piczel\.tv"
-               r"/gallery/(?!image)([^/?&#]+)/(\d+)")
+               r"/gallery/(?!image)([^/?#]+)/(\d+)")
     test = ("https://piczel.tv/gallery/Lulena/1114", {
         "count": ">= 4",
     })

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,9 +21,9 @@ class _2chanThreadExtractor(Extractor):
     archive_fmt = "{board}_{thread}_{tim}"
     url_fmt = "https://{server}.2chan.net/{board}/src/{filename}"
     pattern = r"(?:https?://)?([\w-]+)\.2chan\.net/([^/]+)/res/(\d+)"
-    test = ("http://dec.2chan.net/70/res/947.htm", {
-        "url": "c5c12b80b290e224b6758507b3bb952044f4595b",
-        "keyword": "4bd22e7a9c3636faecd6ea7082509e8655e10dd0",
+    test = ("http://dec.2chan.net/70/res/4752.htm", {
+        "url": "1c2d2ce8aea0fc71d94735cfc30009d628f33548",
+        "keyword": "f508d6841ea2cb19ed799aac9dc580263ca50651",
     })
 
     def __init__(self, match):
@@ -70,7 +70,8 @@ class _2chanThreadExtractor(Extractor):
         data = self._extract_post(post)
         if data["name"]:
             data["name"] = data["name"].strip()
-        if '<a href="/' in post:
+        path = text.extract(post, '<a href="/', '"')[0]
+        if path and not path.startswith("bin/jump"):
             self._extract_image(post, data)
             data["tim"], _, data["extension"] = data["filename"].partition(".")
             data["time"] = data["tim"][:-3]

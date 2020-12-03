@@ -115,7 +115,7 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
     """Extractor for albums on imgbb.com"""
     subcategory = "album"
     directory_fmt = ("{category}", "{user}", "{album_name} {album_id}")
-    pattern = r"(?:https?://)?ibb\.co/album/([^/?&#]+)/?(?:\?([^#]+))?"
+    pattern = r"(?:https?://)?ibb\.co/album/([^/?#]+)/?(?:\?([^#]+))?"
     test = (
         ("https://ibb.co/album/i5PggF", {
             "range": "1-80",
@@ -124,22 +124,18 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
         }),
         ("https://ibb.co/album/i5PggF?sort=title_asc", {
             "range": "1-80",
-            "url": "a2dfc58fe3348fa37e242082bd5a85eaa490d0a5",
-            "keyword": "5bb79c82411c3770d673fac64a0a98fa28111c3b",
+            "url": "afdf5fc95d8e09d77e8f44312f3e9b843987bb5a",
+            "keyword": "f090e14d0e5f7868595082b2c95da1309c84872d",
         }),
         # no user data (#471)
         ("https://ibb.co/album/kYKpwF", {
             "url": "ac0abcfcb89f4df6adc2f7e4ff872f3b03ef1bc7",
             "keyword": {"user": ""},
         }),
-        # deleted
-        ("https://ibb.co/album/fDArrF", {
-            "exception": exception.NotFoundError,
-        }),
         # private
         ("https://ibb.co/album/hqgWrF", {
             "exception": exception.HttpError,
-        })
+        }),
     )
 
     def __init__(self, match):
@@ -177,7 +173,7 @@ class ImgbbUserExtractor(ImgbbExtractor):
     pattern = r"(?:https?://)?([\w-]+)\.imgbb\.com/?(?:\?([^#]+))?$"
     test = ("https://folkie.imgbb.com", {
         "range": "1-80",
-        "pattern": r"https?://i\.ibb\.co/\w+/[^/?&#]+",
+        "pattern": r"https?://i\.ibb\.co/\w+/[^/?#]+",
     })
 
     def __init__(self, match):
@@ -201,7 +197,7 @@ class ImgbbUserExtractor(ImgbbExtractor):
 
 class ImgbbImageExtractor(ImgbbExtractor):
     subcategory = "image"
-    pattern = r"(?:https?://)?ibb\.co/(?!album/)([^/?&#]+)"
+    pattern = r"(?:https?://)?ibb\.co/(?!album/)([^/?#]+)"
     test = ("https://ibb.co/fUqh5b", {
         "pattern": r"https://i\.ibb\.co/g3kvx80/Arundel-Ireeman-5\.jpg",
         "content": "c5a0965178a8b357acd8aa39660092918c63795e",

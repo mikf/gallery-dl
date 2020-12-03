@@ -24,6 +24,7 @@ class Extractor():
 
     category = ""
     subcategory = ""
+    basecategory = ""
     categorytransfer = False
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
@@ -31,6 +32,9 @@ class Extractor():
     cookiedomain = ""
     root = ""
     test = None
+    _request_last = 0
+    _request_interval = 0
+    _request_interval_min = 0
 
     def __init__(self, match):
         self.session = requests.Session()
@@ -40,12 +44,23 @@ class Extractor():
         self._cookiefile = None
         self._cookiejar = self.session.cookies
         self._parentdir = ""
+
+        self._cfgpath = ("extractor", self.category, self.subcategory)
+        self._write_pages = self.config("write-pages", False)
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
+        self._request_interval = self.config(
+            "sleep-request", self._request_interval)
 
         if self._retries < 0:
             self._retries = float("inf")
+        if self._request_interval < self._request_interval_min:
+            self._request_interval = self._request_interval_min
+
+        if self.basecategory:
+            self.config = self._config_shared
+            self.config_accumulate = self._config_shared_accumulate
 
         self._init_headers()
         self._init_cookies()
@@ -68,8 +83,23 @@ class Extractor():
         return 0
 
     def config(self, key, default=None):
-        return config.interpolate(
-            ("extractor", self.category, self.subcategory), key, default)
+        return config.interpolate(self._cfgpath, key, default)
+
+    def config_accumulate(self, key):
+        return config.accumulate(self._cfgpath, key)
+
+    def _config_shared(self, key, default=None):
+        return config.interpolate_common(("extractor",), (
+            (self.category, self.subcategory),
+            (self.basecategory, self.subcategory),
+        ), key, default)
+
+    def _config_shared_accumulate(self, key):
+        values = config.accumulate(self._cfgpath, key)
+        conf = config.get(("extractor",), self.basecategory)
+        if conf:
+            values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
+        return values
 
     def request(self, url, *, method="GET", session=None, retries=None,
                 encoding=None, fatal=True, notfound=None, **kwargs):
@@ -78,6 +108,14 @@ class Extractor():
         session = self.session if session is None else session
         kwargs.setdefault("timeout", self._timeout)
         kwargs.setdefault("verify", self._verify)
+        response = None
+
+        if self._request_interval:
+            seconds = (self._request_interval -
+                       (time.time() - Extractor._request_last))
+            if seconds > 0:
+                self.log.debug("Sleeping for %.5s seconds", seconds)
+                time.sleep(seconds)
 
         while True:
             try:
@@ -91,6 +129,8 @@ class Extractor():
                 raise exception.HttpError(exc)
             else:
                 code = response.status_code
+                if self._write_pages:
+                    self._dump_response(response)
                 if 200 <= code < 400 or fatal is None and \
                         (400 <= code < 500) or not fatal and \
                         (400 <= code < 429 or 431 <= code < 500):
@@ -115,14 +155,16 @@ class Extractor():
                 msg = "'{} {}' for '{}'".format(code, reason, url)
                 if code < 500 and code != 429 and code != 430:
                     break
+            finally:
+                Extractor._request_last = time.time()
 
             self.log.debug("%s (%s/%s)", msg, tries, retries+1)
             if tries > retries:
                 break
-            time.sleep(min(2 ** (tries-1), 1800))
+            time.sleep(tries)
             tries += 1
 
-        raise exception.HttpError(msg)
+        raise exception.HttpError(msg, response)
 
     def wait(self, *, seconds=None, until=None, adjust=1.0,
              reason="rate limit reset"):
@@ -325,6 +367,35 @@ class Extractor():
                 test = (test, None)
             yield test
 
+    def _dump_response(self, response, history=True):
+        """Write the response content to a .dump file in the current directory.
+
+        The file name is derived from the response url,
+        replacing special characters with "_"
+        """
+        if history:
+            for resp in response.history:
+                self._dump_response(resp, False)
+
+        if hasattr(Extractor, "_dump_index"):
+            Extractor._dump_index += 1
+        else:
+            Extractor._dump_index = 1
+            Extractor._dump_sanitize = re.compile(r"[\\\\|/<>:\"?*&=#]+").sub
+
+        fname = "{:>02}_{}".format(
+            Extractor._dump_index,
+            Extractor._dump_sanitize('_', response.url)
+        )[:250]
+
+        try:
+            with open(fname + ".dump", 'wb') as fp:
+                util.dump_response(
+                    response, fp, headers=(self._write_pages == "all"))
+        except Exception as e:
+            self.log.warning("Failed to dump HTTP request (%s: %s)",
+                             e.__class__.__name__, e)
+
 
 class GalleryExtractor(Extractor):
 
@@ -454,16 +525,6 @@ class AsynchronousMixin():
         except Exception as exc:
             messages.put(exc)
         messages.put(None)
-
-
-class SharedConfigMixin():
-    """Enable sharing of config settings based on 'basecategory'"""
-    basecategory = ""
-
-    def config(self, key, default=None, *, sentinel=object()):
-        value = Extractor.config(self, key, sentinel)
-        return value if value is not sentinel else config.interpolate(
-            ("extractor", self.basecategory, self.subcategory), key, default)
 
 
 def generate_extractors(extractor_data, symtable, classes):

@@ -22,34 +22,93 @@ LOG_LEVEL = logging.INFO
 
 
 class Logger(logging.Logger):
-    """Custom logger that includes extractor and job info in log records"""
-    extractor = util.NONE
-    job = util.NONE
+    """Custom logger that includes extra info in log records"""
 
     def makeRecord(self, name, level, fn, lno, msg, args, exc_info,
                    func=None, extra=None, sinfo=None,
                    factory=logging._logRecordFactory):
         rv = factory(name, level, fn, lno, msg, args, exc_info, func, sinfo)
-        rv.extractor = self.extractor
-        rv.job = self.job
+        if extra:
+            rv.__dict__.update(extra)
         return rv
+
+
+class LoggerAdapter():
+    """Trimmed-down version of logging.LoggingAdapter"""
+    __slots__ = ("logger", "extra")
+
+    def __init__(self, logger, extra):
+        self.logger = logger
+        self.extra = extra
+
+    def debug(self, msg, *args, **kwargs):
+        if self.logger.isEnabledFor(logging.DEBUG):
+            kwargs["extra"] = self.extra
+            self.logger._log(logging.DEBUG, msg, args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        if self.logger.isEnabledFor(logging.INFO):
+            kwargs["extra"] = self.extra
+            self.logger._log(logging.INFO, msg, args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        if self.logger.isEnabledFor(logging.WARNING):
+            kwargs["extra"] = self.extra
+            self.logger._log(logging.WARNING, msg, args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        if self.logger.isEnabledFor(logging.ERROR):
+            kwargs["extra"] = self.extra
+            self.logger._log(logging.ERROR, msg, args, **kwargs)
+
+
+class PathfmtProxy():
+    __slots__ = ("job",)
+
+    def __init__(self, job):
+        self.job = job
+
+    def __getattribute__(self, name):
+        pathfmt = object.__getattribute__(self, "job").pathfmt
+        return pathfmt.__dict__.get(name) if pathfmt else None
+
+
+class KwdictProxy():
+    __slots__ = ("job",)
+
+    def __init__(self, job):
+        self.job = job
+
+    def __getattribute__(self, name):
+        pathfmt = object.__getattribute__(self, "job").pathfmt
+        return pathfmt.kwdict.get(name) if pathfmt else None
 
 
 class Formatter(logging.Formatter):
     """Custom formatter that supports different formats per loglevel"""
 
     def __init__(self, fmt, datefmt):
-        if not isinstance(fmt, dict):
+        if isinstance(fmt, dict):
+            for key in ("debug", "info", "warning", "error"):
+                value = fmt[key] if key in fmt else LOG_FORMAT
+                fmt[key] = (util.Formatter(value).format_map,
+                            "{asctime" in value)
+        else:
+            if fmt == LOG_FORMAT:
+                fmt = (fmt.format_map, False)
+            else:
+                fmt = (util.Formatter(fmt).format_map, "{asctime" in fmt)
             fmt = {"debug": fmt, "info": fmt, "warning": fmt, "error": fmt}
+
         self.formats = fmt
         self.datefmt = datefmt
 
     def format(self, record):
         record.message = record.getMessage()
-        fmt = self.formats[record.levelname]
-        if "{asctime" in fmt:
+        fmt, asctime = self.formats[record.levelname]
+        if asctime:
             record.asctime = self.formatTime(record, self.datefmt)
-        msg = fmt.format_map(record.__dict__)
+        msg = fmt(record.__dict__)
         if record.exc_info and not record.exc_text:
             record.exc_text = self.formatException(record.exc_info)
         if record.exc_text:
@@ -244,7 +303,7 @@ class ColorOutput(TerminalOutput):
         print("\r\033[1;32m", self.shorten(path), "\033[0m", sep="")
 
 
-if os.name == "nt":
+if util.WINDOWS:
     ANSI = os.environ.get("TERM") == "ANSI"
     OFFSET = 1
     CHAR_SKIP = "# "

@@ -20,11 +20,13 @@ class SpeakerdeckPresentationExtractor(Extractor):
     filename_fmt = "{presentation}-{num:>02}.{extension}"
     archive_fmt = "{presentation}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?speakerdeck\.com"
-               r"/([^/?&#]+)/([^/?&#]+)")
+               r"/([^/?#]+)/([^/?#]+)")
     test = (
         (("https://speakerdeck.com/speakerdeck/introduction-to-speakerdeck"), {
-            "url": "e97d4a7d5c64267e921c13eb7946d7074794a0d2",
+            "pattern": r"https://files.speakerdeck.com/presentations/"
+                       r"50021f75cf1db900020005e7/slide_\d+.jpg",
             "content": "75c7abf0969b0bcab23e0da9712c95ee5113db3a",
+            "count": 6,
         }),
     )
 

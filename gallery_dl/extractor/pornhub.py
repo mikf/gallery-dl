@@ -29,9 +29,9 @@ class PornhubGalleryExtractor(PornhubExtractor):
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/album/(\d+)"
     test = (
-        ("https://www.pornhub.com/album/1708982", {
+        ("https://www.pornhub.com/album/17218841", {
             "pattern": r"https://\w+.phncdn.com/pics/albums/\d+/\d+/\d+/\d+/",
-            "count": 93,
+            "count": 81,
             "keyword": {
                 "id": int,
                 "num": int,
@@ -40,11 +40,11 @@ class PornhubGalleryExtractor(PornhubExtractor):
                 "caption": str,
                 "user": "Unknown",
                 "gallery": {
-                    "id"   : 1708982,
+                    "id"   : 17218841,
                     "score": int,
                     "views": int,
                     "tags" : list,
-                    "title": "Random Hentai",
+                    "title": "Hentai/Ecchi 41",
                 },
             },
         }),
@@ -118,7 +118,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
 class PornhubUserExtractor(PornhubExtractor):
     """Extractor for all galleries of a pornhub user"""
     subcategory = "user"
-    pattern = (BASE_PATTERN + r"/(users|model)/([^/?&#]+)"
+    pattern = (BASE_PATTERN + r"/(users|model)/([^/?#]+)"
                "(?:/photos(?:/(public|private|favorites))?)?/?$")
     test = (
         ("https://www.pornhub.com/users/flyings0l0/photos/public", {

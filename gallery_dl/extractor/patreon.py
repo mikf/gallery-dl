@@ -38,13 +38,12 @@ class PatreonExtractor(Extractor):
             hashes = set()
 
             yield Message.Directory, post
-            yield Message.Metadata, text.nameext_from_url(
-                post["creator"].get("image_url", ""), post)
+            yield Message.Metadata, post
 
             for kind, url, name in itertools.chain(
-                self._postfile(post),
                 self._images(post),
                 self._attachments(post),
+                self._postfile(post),
                 self._content(post),
             ):
                 fhash = self._filehash(url)
@@ -98,8 +97,7 @@ class PatreonExtractor(Extractor):
         headers = {"Referer": self.root}
 
         while url:
-            if not url.startswith("http"):
-                url = "https://" + url.lstrip("/:")
+            url = text.ensure_http_scheme(url)
             posts = self.request(url, headers=headers).json()
 
             if "included" in posts:
@@ -204,8 +202,8 @@ class PatreonCreatorExtractor(PatreonExtractor):
     """Extractor for a creator's works"""
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
-               r"/(?!(?:home|join|posts|login|signup)(?:$|[/?&#]))"
-               r"([^/?&#]+)(?:/posts)?/?(?:\?([^#]+))?")
+               r"/(?!(?:home|join|posts|login|signup)(?:$|[/?#]))"
+               r"([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
     test = (
         ("https://www.patreon.com/koveliana", {
             "range": "1-25",
@@ -285,7 +283,7 @@ class PatreonUserExtractor(PatreonExtractor):
 class PatreonPostExtractor(PatreonExtractor):
     """Extractor for media from a single post"""
     subcategory = "post"
-    pattern = r"(?:https?://)?(?:www\.)?patreon\.com/posts/([^/?&#]+)"
+    pattern = r"(?:https?://)?(?:www\.)?patreon\.com/posts/([^/?#]+)"
     test = (
         # postfile + attachments
         ("https://www.patreon.com/posts/precious-metal-23563293", {
