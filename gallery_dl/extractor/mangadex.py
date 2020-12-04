@@ -9,7 +9,7 @@
 """Extractors for https://mangadex.org/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
 from ..cache import memcache
 
 
@@ -74,6 +74,10 @@ class MangadexChapterExtractor(MangadexExtractor):
             "count": 64,
             "keyword": "c53a0e4c12250578a4e630281085875e59532c03",
         }),
+        # MANGA Plus (#1154)
+        ("https://mangadex.org/chapter/1122815", {
+            "excepion": exception.StopExtraction,
+        }),
     )
 
     def __init__(self, match):
@@ -82,6 +86,12 @@ class MangadexChapterExtractor(MangadexExtractor):
 
     def items(self):
         cdata = self.chapter_data(self.chapter_id)
+        if "server" not in cdata:
+            if cdata["status"] == "external":
+                raise exception.StopExtraction(
+                    "Chapter is not available on MangaDex and can be read on "
+                    "the official publisher's website at %s.", cdata["pages"])
+            raise exception.StopExtraction("No download server available.")
         mdata = self.manga_data(cdata["mangaId"])
 
         chapter, sep, minor = cdata["chapter"].partition(".")
