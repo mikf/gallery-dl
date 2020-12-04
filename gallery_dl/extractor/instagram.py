@@ -26,7 +26,7 @@ class InstagramExtractor(Extractor):
     root = "https://www.instagram.com"
     cookiedomain = ".instagram.com"
     cookienames = ("sessionid",)
-    _request_interval = 5
+    request_interval = 5.0
 
     def __init__(self, match):
         Extractor.__init__(self, match)

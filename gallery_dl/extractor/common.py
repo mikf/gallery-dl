@@ -32,9 +32,9 @@ class Extractor():
     cookiedomain = ""
     root = ""
     test = None
-    _request_last = 0
-    _request_interval = 0
-    _request_interval_min = 0
+    request_interval = 0.0
+    request_interval_min = 0.0
+    request_timestamp = 0.0
 
     def __init__(self, match):
         self.session = requests.Session()
@@ -50,13 +50,13 @@ class Extractor():
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
-        self._request_interval = self.config(
-            "sleep-request", self._request_interval)
+        self.request_interval = self.config(
+            "sleep-request", self.request_interval)
 
         if self._retries < 0:
             self._retries = float("inf")
-        if self._request_interval < self._request_interval_min:
-            self._request_interval = self._request_interval_min
+        if self.request_interval < self.request_interval_min:
+            self.request_interval = self.request_interval_min
 
         if self.basecategory:
             self.config = self._config_shared
@@ -110,10 +110,10 @@ class Extractor():
         kwargs.setdefault("verify", self._verify)
         response = None
 
-        if self._request_interval:
-            seconds = (self._request_interval -
-                       (time.time() - Extractor._request_last))
-            if seconds > 0:
+        if self.request_interval:
+            seconds = (self.request_interval -
+                       (time.time() - Extractor.request_timestamp))
+            if seconds > 0.0:
                 self.log.debug("Sleeping for %.5s seconds", seconds)
                 time.sleep(seconds)
 
@@ -156,12 +156,12 @@ class Extractor():
                 if code < 500 and code != 429 and code != 430:
                     break
             finally:
-                Extractor._request_last = time.time()
+                Extractor.request_timestamp = time.time()
 
             self.log.debug("%s (%s/%s)", msg, tries, retries+1)
             if tries > retries:
                 break
-            time.sleep(tries)
+            time.sleep(max(tries, self.request_interval))
             tries += 1
 
         raise exception.HttpError(msg, response)
