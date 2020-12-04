@@ -30,6 +30,7 @@ class InstagramExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.www_claim = "0"
         self.csrf_token = util.generate_csrf_token()
         self._find_tags = re.compile(r'#\w+').findall
 
@@ -64,6 +65,9 @@ class InstagramExtractor(Extractor):
         if response.history and "/accounts/login/" in response.request.url:
             raise exception.StopExtraction(
                 "Redirected to login page (%s)", response.request.url)
+        www_claim = response.headers.get("x-ig-set-www-claim")
+        if www_claim is not None:
+            self.www_claim = www_claim
         return response
 
     def _graphql_request(self, query_hash, variables):
@@ -75,7 +79,7 @@ class InstagramExtractor(Extractor):
         headers = {
             "X-CSRFToken"     : self.csrf_token,
             "X-IG-App-ID"     : "936619743392459",
-            "X-IG-WWW-Claim"  : "0",
+            "X-IG-WWW-Claim"  : self.www_claim,
             "X-Requested-With": "XMLHttpRequest",
         }
         cookies = {
