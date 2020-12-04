@@ -22,7 +22,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
     page_limit = 750
     page_start = None
     per_page = 320
-    _request_interval_min = 1.0
+    request_interval_min = 1.0
 
     def __init__(self, match):
         super().__init__(match)
