@@ -33,7 +33,7 @@ class InstagramExtractor(Extractor):
         Extractor.__init__(self, match)
         self.www_claim = "0"
         self.csrf_token = util.generate_csrf_token()
-        self._find_tags = re.compile(r'#\w+').findall
+        self._find_tags = re.compile(r"#\w+").findall
 
     def items(self):
         self.login()
@@ -51,9 +51,9 @@ class InstagramExtractor(Extractor):
 
             yield Message.Directory, post
             for file in files:
-                url = file.get('video_url')
+                url = file.get("video_url")
                 if not url:
-                    url = file['display_url']
+                    url = file["display_url"]
                 elif not videos:
                     continue
                 file.update(post)
@@ -113,7 +113,7 @@ class InstagramExtractor(Extractor):
             username, password = self._get_auth_info()
             if username:
                 self.session.cookies.set(
-                    'ig_cb', '2', domain='www.instagram.com')
+                    "ig_cb", "2", domain="www.instagram.com")
                 self._update_cookies(self._login_impl(username, password))
 
         self.session.cookies.set(
@@ -159,7 +159,7 @@ class InstagramExtractor(Extractor):
 
         owner = post["owner"]
         data = {
-            'typename'   : post['__typename'],
+            "typename"   : post["__typename"],
             "date"       : text.parse_timestamp(post["taken_at_timestamp"]),
             "likes"      : post["edge_media_preview_like"]["count"],
             "owner_id"   : owner["id"],
@@ -188,32 +188,32 @@ class InstagramExtractor(Extractor):
         data["_files"] = files = []
         if "edge_sidecar_to_children" in post:
             for num, edge in enumerate(
-                    post['edge_sidecar_to_children']['edges'], 1):
+                    post["edge_sidecar_to_children"]["edges"], 1):
                 node = edge["node"]
                 dimensions = node["dimensions"]
                 media = {
-                    'num': num,
-                    'media_id'   : node['id'],
-                    'shortcode'  : (node.get('shortcode') or
+                    "num": num,
+                    "media_id"   : node["id"],
+                    "shortcode"  : (node.get("shortcode") or
                                     self._shortcode_from_id(node["id"])),
-                    'display_url': node['display_url'],
-                    'video_url'  : node.get('video_url'),
-                    'width'      : dimensions['width'],
-                    'height'     : dimensions['height'],
-                    'sidecar_media_id' : post['id'],
-                    'sidecar_shortcode': post['shortcode'],
+                    "display_url": node["display_url"],
+                    "video_url"  : node.get("video_url"),
+                    "width"      : dimensions["width"],
+                    "height"     : dimensions["height"],
+                    "sidecar_media_id" : post["id"],
+                    "sidecar_shortcode": post["shortcode"],
                 }
                 self._extract_tagged_users(node, media)
                 files.append(media)
         else:
             dimensions = post["dimensions"]
             media = {
-                'media_id'   : post['id'],
-                'shortcode'  : post['shortcode'],
-                'display_url': post['display_url'],
-                'video_url'  : post.get('video_url'),
-                'width'      : dimensions['width'],
-                'height'     : dimensions['height'],
+                "media_id"   : post["id"],
+                "shortcode"  : post["shortcode"],
+                "display_url": post["display_url"],
+                "video_url"  : post.get("video_url"),
+                "width"      : dimensions["width"],
+                "height"     : dimensions["height"],
             }
             self._extract_tagged_users(post, media)
             files.append(media)
@@ -256,15 +256,15 @@ class InstagramExtractor(Extractor):
                 media = image
 
             files.append({
-                'num': num,
-                'media_id'   : item["pk"],
-                'shortcode'  : item["code"],
-                'display_url': image["url"],
-                'video_url'  : video["url"] if video else None,
-                'width'      : media["width"],
-                'height'     : media["height"],
-                'sidecar_media_id' : reel_id,
-                'sidecar_shortcode': data["post_shortcode"],
+                "num": num,
+                "media_id"   : item["pk"],
+                "shortcode"  : item["code"],
+                "display_url": image["url"],
+                "video_url"  : video["url"] if video else None,
+                "width"      : media["width"],
+                "height"     : media["height"],
+                "sidecar_media_id" : reel_id,
+                "sidecar_shortcode": data["post_shortcode"],
             })
 
         return data
@@ -280,28 +280,28 @@ class InstagramExtractor(Extractor):
     def _extract_tagged_users(self, src, dest):
         if "edge_media_to_tagged_user" not in src:
             return
-        edges = src['edge_media_to_tagged_user']['edges']
+        edges = src["edge_media_to_tagged_user"]["edges"]
         if edges:
-            dest['tagged_users'] = tagged_users = []
+            dest["tagged_users"] = tagged_users = []
             for edge in edges:
-                user = edge['node']['user']
+                user = edge["node"]["user"]
                 tagged_users.append({
-                    'id'       : user['id'],
-                    'username' : user['username'],
-                    'full_name': user['full_name'],
+                    "id"       : user["id"],
+                    "username" : user["username"],
+                    "full_name": user["full_name"],
                 })
 
     def _extract_shared_data(self, url):
         page = self.request(url).text
         shared_data, pos = text.extract(
-            page, 'window._sharedData =', ';</script>')
+            page, "window._sharedData =", ";</script>")
         additional_data, pos = text.extract(
-            page, 'window.__additionalDataLoaded(', ');</script>', pos)
+            page, "window.__additionalDataLoaded(", ");</script>", pos)
 
         data = json.loads(shared_data)
         if additional_data:
-            next(iter(data['entry_data'].values()))[0] = \
-                json.loads(additional_data.partition(',')[2])
+            next(iter(data["entry_data"].values()))[0] = \
+                json.loads(additional_data.partition(",")[2])
         return data
 
     def _extract_profile_page(self, url):
@@ -354,7 +354,7 @@ class InstagramUserExtractor(InstagramExtractor):
         self.user = match.group(1)
 
     def posts(self):
-        url = '{}/{}/'.format(self.root, self.user)
+        url = "{}/{}/".format(self.root, self.user)
         user = self._extract_profile_page(url)
         edge = user["edge_owner_to_timeline_media"]
 
@@ -400,7 +400,7 @@ class InstagramChannelExtractor(InstagramExtractor):
         self.user = match.group(1)
 
     def posts(self):
-        url = '{}/{}/channel/'.format(self.root, self.user)
+        url = "{}/{}/channel/".format(self.root, self.user)
         user = self._extract_profile_page(url)
         edge = user["edge_felix_video_timeline"]
 
@@ -422,7 +422,7 @@ class InstagramSavedExtractor(InstagramExtractor):
         self.user = match.group(1)
 
     def posts(self):
-        url = '{}/{}/saved/'.format(self.root, self.user)
+        url = "{}/{}/saved/".format(self.root, self.user)
         user = self._extract_profile_page(url)
         edge = user["edge_saved_media"]
 
@@ -450,7 +450,7 @@ class InstagramTagExtractor(InstagramExtractor):
         return {"tag": self.tag}
 
     def posts(self):
-        url = '{}/explore/tags/{}/'.format(self.root, self.tag)
+        url = "{}/explore/tags/{}/".format(self.root, self.tag)
         data = self._extract_shared_data(url)
         hashtag = data["entry_data"]["TagPage"][0]["graphql"]["hashtag"]
         edge = hashtag["edge_hashtag_to_media"]
