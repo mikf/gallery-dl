@@ -12,6 +12,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
+import itertools
 import json
 import time
 import re
@@ -40,7 +41,11 @@ class InstagramExtractor(Extractor):
         videos = self.config("videos", True)
 
         for post in self.posts():
-            post = self._parse_post(post)
+
+            if post["__typename"] == "GraphHighlightReel":
+                post = self._parse_reel("highlight:" + post["id"])
+            else:
+                post = self._parse_post(post)
             post.update(data)
             files = post.pop("_files")
 
@@ -69,6 +74,20 @@ class InstagramExtractor(Extractor):
         if www_claim is not None:
             self.www_claim = www_claim
         return response
+
+    def _api_request(self, endpoint, params):
+        url = "https://i.instagram.com/api/" + endpoint
+        headers = {
+            "X-CSRFToken"   : self.csrf_token,
+            "X-IG-App-ID"   : "936619743392459",
+            "X-IG-WWW-Claim": self.www_claim,
+        }
+        cookies = {
+            "csrftoken": self.csrf_token,
+        }
+        return self.request(
+            url, params=params, headers=headers, cookies=cookies,
+        ).json()
 
     def _graphql_request(self, query_hash, variables):
         url = self.root + "/graphql/query/"
@@ -201,6 +220,55 @@ class InstagramExtractor(Extractor):
 
         return data
 
+    def _parse_reel(self, reel_id):
+        params = {"reel_ids": reel_id}
+        data = self._api_request("v1/feed/reels_media/", params)
+        if not data["reels_media"]:
+            raise exception.NotFoundError("reel")
+        reel = data["reels_media"][0]
+
+        reel_id = reel_id.rpartition(":")[2]
+        owner = reel["user"]
+
+        data = {
+            "date"       : text.parse_timestamp(reel["created_at"]),
+            "owner_id"   : owner["pk"],
+            "username"   : owner.get("username"),
+            "fullname"   : owner.get("full_name"),
+            "post_id"    : reel_id,
+            "post_shortcode": self._shortcode_from_id(reel_id),
+            #  "post_url"   : "{}/p/{}/".format(self.root, post["shortcode"]),
+        }
+
+        data["_files"] = files = []
+        for num, item in enumerate(reel["items"], 1):
+
+            image = item["image_versions2"]["candidates"][0]
+
+            if "video_versions" in item:
+                video = max(
+                    item["video_versions"],
+                    key=lambda x: (x["width"], x["height"], x["type"]),
+                )
+                media = video
+            else:
+                video = None
+                media = image
+
+            files.append({
+                'num': num,
+                'media_id'   : item["pk"],
+                'shortcode'  : item["code"],
+                'display_url': image["url"],
+                'video_url'  : video["url"] if video else None,
+                'width'      : media["width"],
+                'height'     : media["height"],
+                'sidecar_media_id' : reel_id,
+                'sidecar_shortcode': data["post_shortcode"],
+            })
+
+        return data
+
     @staticmethod
     def _shortcode_from_id(post_id):
         return util.bencode(
@@ -290,9 +358,30 @@ class InstagramUserExtractor(InstagramExtractor):
         user = self._extract_profile_page(url)
         edge = user["edge_owner_to_timeline_media"]
 
+        if user.get("highlight_reel_count") and self.config("highlights"):
+            query_hash = "d4d88dc1500312af6f937f7b804c68c3"
+            variables = {
+                "user_id": user["id"],
+                "include_chaining": False,
+                "include_reel": True,
+                "include_suggested_users": False,
+                "include_logged_out_extras": False,
+                "include_highlight_reels": True,
+                "include_live_status": True,
+            }
+            data = self._graphql_request(query_hash, variables)
+            highlights = [
+                edge["node"]
+                for edge in data["user"]["edge_highlight_reels"]["edges"]
+            ]
+        else:
+            highlights = None
+
         query_hash = "003056d32c2554def87228bc3fd9668a"
         variables = {"id": user["id"], "first": 12}
-        return self._pagination(query_hash, variables, edge)
+        posts = self._pagination(query_hash, variables, edge)
+
+        return itertools.chain(highlights, posts) if highlights else posts
 
 
 class InstagramChannelExtractor(InstagramExtractor):
@@ -504,3 +593,21 @@ class InstagramPostExtractor(InstagramExtractor):
         }
         data = self._graphql_request(query_hash, variables)
         return (data["shortcode_media"],)
+
+
+class InstagramHighlightExtractor(InstagramExtractor):
+    """Extractor for Instagram story highlights"""
+    subcategory = "highlight"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/stories/highlights/(\d+)")
+    test = ("https://www.instagram.com/stories/highlights/18042509488170095/",)
+
+    def __init__(self, match):
+        InstagramExtractor.__init__(self, match)
+        self.highlight_id = match.group(1)
+
+    def posts(self):
+        return ({
+            "__typename": "GraphHighlightReel",
+            "id"        : self.highlight_id,
+        },)
