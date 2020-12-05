@@ -147,13 +147,10 @@ class GenericExtractor(Extractor):
         Compared to the "pattern" class variable, here we must exclude also
         other special characters (space, ", ', >), since we are looking for
         urls in html tags.
-
-        Note that we use the x flag, so spaces and "#" must be
-        backslash-quoted, unless they are in a character class ([]).
         """
 
         imageurl_pattern_ext = r"""(?ix)
-            (?:[^?&#"'>\s]+)                    # path until dot+ext
+            (?:[^?&#"'>\s]+)                    # anything until dot+extension
             \.(?:jpe?g|jpe|png|gif
                  |web[mp]|mp4|mkv|og[gmv]|opus) # dot + image/video extensions
             (?:[^"'>\s]*)?                      # optional query and fragment
@@ -165,40 +162,41 @@ class GenericExtractor(Extractor):
 
         # Resolve relative urls
         #
-        # Some of the urls may be relative, so we resolve them prefixing them
-        # either by the page root url (self.root) if the relative url starts
-        # with "/", or by a proper "base" url if the relative url doesn't start
-        # with "/"
-
+        # Image urls catched so far may be relative, so we must resolve them
+        # by prepending a suitable base url.
+        #
         # If the page contains a <base> element, use it as base url
         basematch = re.search(
             r"(?i)(?:<base\s.*?href=[\"']?)(?P<url>[^\"' >]+)", page)
         if basematch:
             self.baseurl = basematch.group('url').rstrip('/')
+        # Otherwise, extract the base url from self.url
         else:
-            # Use self.url if it doesn't end with an extension
-            if os.path.splitext(self.url)[1] == "":
+            if self.url.endswith("/"):
                 self.baseurl = self.url.rstrip('/')
-            # Otherwise, strip the last part
             else:
                 self.baseurl = os.path.dirname(self.url)
 
-        # Really resolve relative urls
+        # Build the list of absolute image urls
         absimageurls = []
         for u in imageurls:
+            # Absolute urls are taken as-is
             if u.startswith('http'):
                 absimageurls.append(u)
+            # // relative urls are prefixed with current scheme
             elif u.startswith('//'):
                 absimageurls.append(self.scheme + u.lstrip('/'))
+            # / relative urls are prefixed with current scheme+domain
             elif u.startswith('/'):
-                absimageurls.append(self.root + '/' + u)
+                absimageurls.append(self.root + u)
+            # other relative urls are prefixed with baseurl
             else:
                 absimageurls.append(self.baseurl + '/' + u)
 
         # Remove duplicates
         absimageurls = set(absimageurls)
 
-        # Create the image metadata dict and add image url to it
+        # Create the image metadata dict and add imageurl to it
         # (image filename and extension are added by items())
         images = [(u, {'imageurl': u}) for u in absimageurls]
 
