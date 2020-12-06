@@ -42,8 +42,8 @@ class InstagramExtractor(Extractor):
 
         for post in self.posts():
 
-            if post["__typename"] == "GraphHighlightReel":
-                post = self._parse_reel("highlight:" + post["id"])
+            if post["__typename"] == "GraphReel":
+                post = self._parse_reel(post["id"])
             else:
                 post = self._parse_post(post)
             post.update(data)
@@ -231,13 +231,12 @@ class InstagramExtractor(Extractor):
         owner = reel["user"]
 
         data = {
-            "date"       : text.parse_timestamp(reel["created_at"]),
+            "expires"    : text.parse_timestamp(reel.get("expiring_at")),
             "owner_id"   : owner["pk"],
             "username"   : owner.get("username"),
             "fullname"   : owner.get("full_name"),
             "post_id"    : reel_id,
             "post_shortcode": self._shortcode_from_id(reel_id),
-            #  "post_url"   : "{}/p/{}/".format(self.root, post["shortcode"]),
         }
 
         data["_files"] = files = []
@@ -256,15 +255,14 @@ class InstagramExtractor(Extractor):
                 media = image
 
             files.append({
-                "num": num,
+                "num"        : num,
+                "date"       : text.parse_timestamp(item["taken_at"]),
                 "media_id"   : item["pk"],
                 "shortcode"  : item["code"],
                 "display_url": image["url"],
                 "video_url"  : video["url"] if video else None,
                 "width"      : media["width"],
                 "height"     : media["height"],
-                "sidecar_media_id" : reel_id,
-                "sidecar_shortcode": data["post_shortcode"],
             })
 
         return data
@@ -371,7 +369,10 @@ class InstagramUserExtractor(InstagramExtractor):
             }
             data = self._graphql_request(query_hash, variables)
             highlights = [
-                edge["node"]
+                {
+                    "__typename": "GraphReel",
+                    "id"        : "highlight:" + edge["node"]["id"],
+                }
                 for edge in data["user"]["edge_highlight_reels"]["edges"]
             ]
         else:
@@ -595,19 +596,31 @@ class InstagramPostExtractor(InstagramExtractor):
         return (data["shortcode_media"],)
 
 
-class InstagramHighlightExtractor(InstagramExtractor):
-    """Extractor for Instagram story highlights"""
-    subcategory = "highlight"
+class InstagramStoriesExtractor(InstagramExtractor):
+    """Extractor for Instagram stories"""
+    subcategory = "stories"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/stories/highlights/(\d+)")
-    test = ("https://www.instagram.com/stories/highlights/18042509488170095/",)
+               r"/stories/(?:highlights/(\d+)|([^/?#]+))")
+    test = (
+        ("https://www.instagram.com/stories/instagram/"),
+        ("https://www.instagram.com/stories/highlights/18042509488170095/"),
+    )
+    request_interval = 1.0
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
-        self.highlight_id = match.group(1)
+        self.highlight_id, self.user = match.groups()
 
     def posts(self):
-        return ({
-            "__typename": "GraphHighlightReel",
-            "id"        : self.highlight_id,
-        },)
+        if self.highlight_id:
+            reel_id = "highlight:" + self.highlight_id
+        else:
+            url = "{}/stories/{}/".format(self.root, self.user)
+            try:
+                data = self._extract_shared_data(url)["entry_data"]
+                user = data["StoriesPage"][0]["user"]
+            except KeyError:
+                return ()
+            reel_id = user["id"]
+
+        return ({"__typename": "GraphReel", "id": reel_id},)
