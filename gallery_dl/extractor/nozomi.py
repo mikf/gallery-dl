@@ -47,8 +47,13 @@ class NozomiExtractor(Extractor):
             post["artist"] = self._list(post.get("artist"))
             post["copyright"] = self._list(post.get("copyright"))
             post["character"] = self._list(post.get("character"))
-            post["date"] = text.parse_datetime(
-                post["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
+
+            try:
+                post["date"] = text.parse_datetime(
+                    post["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
+            except Exception:
+                post["date"] = None
+
             post.update(data)
 
             images = post["imageurls"]
@@ -109,6 +114,10 @@ class NozomiPostExtractor(NozomiExtractor):
             "keyword": "8c3a2561ccc9ad429be9850d1383a952d0b4a8ab",
             "count": 7,
         }),
+        # empty 'date' (#1163)
+        ("https://nozomi.la/post/130309.html", {
+            "keyword": {"date": None},
+        })
     )
 
     def __init__(self, match):
