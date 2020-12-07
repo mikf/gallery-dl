@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import exception, text, util
 
-
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/((en|fr)"
 
 
@@ -22,10 +21,18 @@ class WebtoonsExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.session.cookies.set("ageGatePass", "true",
-                                 domain=self.cookiedomain)
         self.path, self.lang, self.genre , self.comic, self.query = \
             match.groups()
+        cookies = self.session.cookies
+        cookies.set("pagGDPR", "true", domain=self.cookiedomain)
+        cookies.set("ageGatePass", "true", domain=self.cookiedomain)
+
+    def request(self, url, **kwargs):
+        response = Extractor.request(self, url, **kwargs)
+        if response.history and "/ageGate" in response.request.url:
+            raise exception.StopExtraction(
+                "Redirected to age gate check ('%s')", response.request.url)
+        return response
 
 
 class WebtoonsEpisodeExtractor(WebtoonsExtractor):
