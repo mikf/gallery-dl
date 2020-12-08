@@ -8,44 +8,20 @@
 
 """Extractors for Moebooru based sites"""
 
-from .common import Extractor, Message, generate_extractors
+from .common import generate_extractors
+from .booru import BooruExtractor
 from .. import text
 
-import re
-import datetime
 import collections
+import datetime
+import re
 
 
-class MoebooruExtractor(Extractor):
+class MoebooruExtractor(BooruExtractor):
     """Base class for Moebooru extractors"""
     basecategory = "moebooru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     page_start = 1
-    per_page = 50
-
-    def items(self):
-        extended_tags = self.config("tags", False)
-        data = self.metadata()
-        for post in self.posts():
-            try:
-                url = self._prepare_post(post, extended_tags)
-            except KeyError:
-                continue
-            post.update(data)
-            text.nameext_from_url(url, post)
-            yield Message.Directory, post
-            yield Message.Url, url, post
-
-    def metadata(self):
-        return ()
-
-    def posts(self):
-        return ()
-
-    def skip(self, num):
-        pages = num // self.per_page
-        self.page_start += pages
-        return pages * self.per_page
 
     def _prepare_post(self, post, extended_tags=False):
         url = post["file_url"]
@@ -234,7 +210,7 @@ EXTRACTORS = {
     "hypnohub": {
         "root": "https://hypnohub.net",
         "test-tag": ("https://hypnohub.net/post?tags=gonoike_biwa", {
-            "url": "2848abe3e433ad39bfdf5be5874682faaccea5be",
+            "url": "072330c34a1e773d0cafd00e64b8060d34b078b6",
         }),
         "test-pool": ("https://hypnohub.net/pool/show/61", {
             "url": "fd74991c8729e77acd3c35eb6ddc4128ff445adf",
