@@ -10,6 +10,7 @@
 
 from .sankaku import SankakuExtractor
 from .common import Message
+from ..cache import cache
 from .. import text, util, exception
 import collections
 import random
@@ -20,9 +21,9 @@ import re
 class IdolcomplexExtractor(SankakuExtractor):
     """Base class for idolcomplex extractors"""
     category = "idolcomplex"
+    cookienames = ("login", "pass_hash")
     cookiedomain = "idol.sankakucomplex.com"
     root = "https://" + cookiedomain
-    subdomain = "idol"
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
@@ -54,6 +55,34 @@ class IdolcomplexExtractor(SankakuExtractor):
 
     def post_ids(self):
         """Return an iterable containing all relevant post ids"""
+
+    def login(self):
+        if self._check_cookies(self.cookienames):
+            return
+        username, password = self._get_auth_info()
+        if username:
+            cookies = self._login_impl(username, password)
+            self._update_cookies(cookies)
+        else:
+            self.logged_in = False
+
+    @cache(maxage=90*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/user/authenticate"
+        data = {
+            "url"           : "",
+            "user[name]"    : username,
+            "user[password]": password,
+            "commit"        : "Login",
+        }
+        response = self.request(url, method="POST", data=data)
+
+        if not response.history or response.url != self.root + "/user/home":
+            raise exception.AuthenticationError()
+        cookies = response.history[0].cookies
+        return {c: cookies[c] for c in self.cookienames}
 
     def _parse_post(self, post_id):
         """Extract metadata of a single post"""

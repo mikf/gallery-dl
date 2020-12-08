@@ -112,7 +112,7 @@ rule #34             https://rule34.paheal.net/          Posts, Tag Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag Searches
 Sakugabooru          https://www.sakugabooru.com/        Pools, Popular Images, Posts, Tag Searches
-Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag Searches                         Supported
+Sankaku Channel      https://chan.sankakucomplex.com/    Pools, Posts, Tag Searches
 Sankaku Complex      https://www.sankakucomplex.com/     Articles, Tag Searches
 Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          https://sensescans.com/reader/      Chapters, Manga
@@ -158,7 +158,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |furaffinity-C| replace:: Favorites, Galleries, Posts, Scraps, Search Results, User Profiles
 .. |hentaifoundry-C| replace:: Favorites, individual Images, Pictures, Popular Images, Recent Images, Scraps, Stories, User Profiles
 .. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Search Results, Subreddits, Tag Searches, User Profiles
-.. |instagram-C| replace:: Channels, individual Images, Saved Posts, Stories, Tag Searches, User Profiles
+.. |instagram-C| replace:: Channels, Posts, Saved Posts, Stories, Tag Searches, User Profiles
 .. |newgrounds-C| replace:: Art, Audio, Favorites, individual Images, Media Files, Movies, User Profiles
 .. |nijie-C| replace:: Doujin, Favorites, Illustrations, individual Images, User Profiles
 .. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images
