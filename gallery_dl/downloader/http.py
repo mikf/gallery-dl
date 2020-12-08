@@ -155,7 +155,6 @@ class HttpDownloader(DownloaderBase):
                         size, self.maxsize)
                     return False
 
-            chunked = response.raw.chunked
             content = response.iter_content(self.chunk_size)
 
             # check filename extension against file header
@@ -163,7 +162,8 @@ class HttpDownloader(DownloaderBase):
                     pathfmt.extension in FILE_SIGNATURES:
                 try:
                     file_header = next(
-                        content if chunked else response.iter_content(16), b"")
+                        content if response.raw.chunked
+                        else response.iter_content(16), b"")
                 except (RequestException, SSLError, OpenSSLError) as exc:
                     msg = str(exc)
                     print()
@@ -226,8 +226,8 @@ class HttpDownloader(DownloaderBase):
             write(data)
 
     def _receive_rate(self, fp, content):
-        t1 = time.time()
         rt = self.rate
+        t1 = time.time()
 
         for data in content:
             fp.write(data)
@@ -257,6 +257,7 @@ class HttpDownloader(DownloaderBase):
         ext = mimetypes.guess_extension(mtype, strict=False)
         if ext:
             return ext[1:]
+
         self.log.warning("Unknown MIME type '%s'", mtype)
         return "bin"
 
@@ -305,6 +306,9 @@ MIME_TYPES = {
     "application/x-rar-compressed": "rar",
     "application/x-7z-compressed" : "7z",
 
+    "application/pdf"  : "pdf",
+    "application/x-pdf": "pdf",
+
     "application/ogg": "ogg",
     "application/octet-stream": "bin",
 }
@@ -313,18 +317,19 @@ MIME_TYPES = {
 FILE_SIGNATURES = {
     "jpg" : b"\xFF\xD8\xFF",
     "png" : b"\x89PNG\r\n\x1A\n",
-    "gif" : b"GIF8",
-    "bmp" : b"\x42\x4D",
+    "gif" : (b"GIF87a", b"GIF89a"),
+    "bmp" : b"BM",
     "webp": b"RIFF",
     "svg" : b"<?xml",
     "psd" : b"8BPS",
     "webm": b"\x1A\x45\xDF\xA3",
     "ogg" : b"OggS",
     "wav" : b"RIFF",
-    "mp3" : b"ID3",
-    "zip" : b"\x50\x4B",
+    "mp3" : (b"\xFF\xFB", b"\xFF\xF3", b"\xFF\xF2", b"ID3"),
+    "zip" : (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"),
     "rar" : b"\x52\x61\x72\x21\x1A\x07",
     "7z"  : b"\x37\x7A\xBC\xAF\x27\x1C",
+    "pdf" : b"%PDF-",
     # check 'bin' files against all other file signatures
     "bin" : b"\x00\x00\x00\x00",
 }
