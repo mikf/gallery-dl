@@ -286,7 +286,6 @@ Description
     * ``instagram``
     * ``luscious``
     * ``pinterest``
-    * ``sankaku``
     * ``subscribestar``
     * ``tsumino``
     * ``twitter``
@@ -1353,20 +1352,6 @@ Description
     If the selected format is not available, ``"mp4"``, ``"webm"``
     and ``"gif"`` (in that order) will be tried instead, until an
     available format is found.
-
-
-extractor.sankaku.wait-min & .wait-max
---------------------------------------
-Type
-    ``float``
-Default
-    ``3.0`` and ``6.0``
-Description
-    Minimum and maximum wait time in seconds between each image
-
-    Sankaku Channel responds with ``429 Too Many Requests`` if it
-    receives too many HTTP requests in a certain amount of time.
-    Waiting a few seconds between each request tries to prevent that.
 
 
 extractor.sankakucomplex.embeds

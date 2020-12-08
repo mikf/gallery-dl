@@ -181,7 +181,6 @@ AUTH_MAP = {
     "pinterest"      : "Supported",
     "pixiv"          : "Required",
     "reddit"         : _OAUTH,
-    "sankaku"        : "Supported",
     "seiga"          : "Required",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",

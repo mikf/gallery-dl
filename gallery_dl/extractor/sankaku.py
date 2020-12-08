@@ -8,23 +8,19 @@
 
 """Extractors for https://chan.sankakucomplex.com/"""
 
-from .common import Extractor, Message
+from .booru import BooruExtractor
 from .. import text, exception
-from ..cache import cache
 import collections
 
 BASE_PATTERN = r"(?:https?://)?(?:beta|chan)\.sankakucomplex\.com"
 
 
-class SankakuExtractor(Extractor):
+class SankakuExtractor(BooruExtractor):
     """Base class for sankaku channel extractors"""
     basecategory = "booru"
     category = "sankaku"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    cookienames = ("login", "pass_hash")
-    cookiedomain = "chan.sankakucomplex.com"
     request_interval_min = 1.0
-    subdomain = "chan"
     per_page = 100
 
     TAG_TYPES = {
@@ -39,56 +35,6 @@ class SankakuExtractor(Extractor):
         8: "medium",
         9: "meta",
     }
-
-    def items(self):
-        extended_tags = self.config("tags", False)
-        self.login()
-        data = self.metadata()
-        for post in self.posts():
-            try:
-                url = self._prepare_post(post, extended_tags)
-            except KeyError:
-                continue
-            post.update(data)
-            text.nameext_from_url(url, post)
-            yield Message.Directory, post
-            yield Message.Url, url, post
-
-    def metadata(self):
-        return ()
-
-    def posts(self):
-        return ()
-
-    def login(self):
-        """Login and set necessary cookies"""
-        if self._check_cookies(self.cookienames):
-            return
-        username, password = self._get_auth_info()
-        if username:
-            cookies = self._login_impl((username, self.subdomain), password)
-            self._update_cookies(cookies)
-        else:
-            self.logged_in = False
-
-    @cache(maxage=90*24*3600, keyarg=1)
-    def _login_impl(self, usertuple, password):
-        username = usertuple[0]
-        self.log.info("Logging in as %s", username)
-
-        url = self.root + "/user/authenticate"
-        data = {
-            "url"           : "",
-            "user[name]"    : username,
-            "user[password]": password,
-            "commit"        : "Login",
-        }
-        response = self.request(url, method="POST", data=data)
-
-        if not response.history or response.url != self.root + "/user/home":
-            raise exception.AuthenticationError()
-        cookies = response.history[0].cookies
-        return {c: cookies[c] for c in self.cookienames}
 
     def _prepare_post(self, post, extended_tags=False):
         url = post["file_url"]
