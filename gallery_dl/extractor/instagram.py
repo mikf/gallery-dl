@@ -34,6 +34,7 @@ class InstagramExtractor(Extractor):
         self.www_claim = "0"
         self.csrf_token = util.generate_csrf_token()
         self._find_tags = re.compile(r"#\w+").findall
+        self._cursor = None
 
     def items(self):
         self.login()
@@ -68,6 +69,9 @@ class InstagramExtractor(Extractor):
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
         if response.history and "/accounts/login/" in response.request.url:
+            if self._cursor:
+                self.log.info("Use '-o cursor=%s' to continue downloading "
+                              "from the current position", self._cursor)
             raise exception.StopExtraction(
                 "Redirected to login page (%s)", response.request.url)
         www_claim = response.headers.get("x-ig-set-www-claim")
@@ -314,6 +318,18 @@ class InstagramExtractor(Extractor):
             raise exception.NotFoundError("post")
         return data["PostPage"][0]["graphql"]["shortcode_media"]
 
+    def _get_edge_data(self, user, key):
+        cursor = self.config("cursor")
+        if cursor:
+            return {
+                "edges": (),
+                "page_info": {
+                    "end_cursor": cursor,
+                    "has_next_page": True,
+                },
+            }
+        return user[key]
+
     def _pagination(self, query_hash, variables, data):
         while True:
             for edge in data["edges"]:
@@ -322,7 +338,9 @@ class InstagramExtractor(Extractor):
             info = data["page_info"]
             if not info["has_next_page"]:
                 return
-            variables["after"] = info["end_cursor"]
+
+            variables["after"] = self._cursor = info["end_cursor"]
+            self.log.debug("Cursor: %s", self._cursor)
             data = next(iter(self._graphql_request(
                 query_hash, variables)["user"].values()))
 
@@ -354,7 +372,6 @@ class InstagramUserExtractor(InstagramExtractor):
     def posts(self):
         url = "{}/{}/".format(self.root, self.user)
         user = self._extract_profile_page(url)
-        edge = user["edge_owner_to_timeline_media"]
 
         if user.get("highlight_reel_count") and self.config("highlights"):
             query_hash = "d4d88dc1500312af6f937f7b804c68c3"
@@ -379,7 +396,8 @@ class InstagramUserExtractor(InstagramExtractor):
             highlights = None
 
         query_hash = "003056d32c2554def87228bc3fd9668a"
-        variables = {"id": user["id"], "first": 12}
+        variables = {"id": user["id"], "first": 50}
+        edge = self._get_edge_data(user, "edge_owner_to_timeline_media")
         posts = self._pagination(query_hash, variables, edge)
 
         return itertools.chain(highlights, posts) if highlights else posts
@@ -403,10 +421,10 @@ class InstagramChannelExtractor(InstagramExtractor):
     def posts(self):
         url = "{}/{}/channel/".format(self.root, self.user)
         user = self._extract_profile_page(url)
-        edge = user["edge_felix_video_timeline"]
 
         query_hash = "bc78b344a68ed16dd5d7f264681c4c76"
-        variables = {"id": user["id"], "first": 12}
+        variables = {"id": user["id"], "first": 50}
+        edge = self._get_edge_data(user, "edge_felix_video_timeline")
         return self._pagination(query_hash, variables, edge)
 
 
@@ -425,10 +443,10 @@ class InstagramSavedExtractor(InstagramExtractor):
     def posts(self):
         url = "{}/{}/saved/".format(self.root, self.user)
         user = self._extract_profile_page(url)
-        edge = user["edge_saved_media"]
 
         query_hash = "2ce1d673055b99250e93b6f88f878fde"
-        variables = {"id": user["id"], "first": 12}
+        variables = {"id": user["id"], "first": 50}
+        edge = self._get_edge_data(user, "edge_saved_media")
         return self._pagination(query_hash, variables, edge)
 
 
@@ -454,10 +472,10 @@ class InstagramTagExtractor(InstagramExtractor):
         url = "{}/explore/tags/{}/".format(self.root, self.tag)
         data = self._extract_shared_data(url)
         hashtag = data["entry_data"]["TagPage"][0]["graphql"]["hashtag"]
-        edge = hashtag["edge_hashtag_to_media"]
 
         query_hash = "9b498c08113f1e09617a1703c22b2f32"
-        variables = {"tag_name": hashtag["name"], "first": 12}
+        variables = {"tag_name": hashtag["name"], "first": 50}
+        edge = self._get_edge_data(hashtag, "edge_hashtag_to_media")
         return self._pagination(query_hash, variables, edge)
 
     def _pagination(self, query_hash, variables, data):
@@ -468,7 +486,9 @@ class InstagramTagExtractor(InstagramExtractor):
             info = data["page_info"]
             if not info["has_next_page"]:
                 return
-            variables["after"] = info["end_cursor"]
+
+            variables["after"] = self._cursor = info["end_cursor"]
+            self.log.debug("Cursor: %s", self._cursor)
             data = self._graphql_request(
                 query_hash, variables)["hashtag"]["edge_hashtag_to_media"]
 
