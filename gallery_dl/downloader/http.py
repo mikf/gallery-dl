@@ -308,6 +308,7 @@ MIME_TYPES = {
 
     "application/pdf"  : "pdf",
     "application/x-pdf": "pdf",
+    "application/x-shockwave-flash": "swf",
 
     "application/ogg": "ogg",
     "application/octet-stream": "bin",
@@ -330,6 +331,7 @@ FILE_SIGNATURES = {
     "rar" : b"\x52\x61\x72\x21\x1A\x07",
     "7z"  : b"\x37\x7A\xBC\xAF\x27\x1C",
     "pdf" : b"%PDF-",
+    "swf" : (b"CWS", b"FWS"),
     # check 'bin' files against all other file signatures
     "bin" : b"\x00\x00\x00\x00",
 }
