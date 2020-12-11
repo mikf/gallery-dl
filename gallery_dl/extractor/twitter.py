@@ -505,13 +505,16 @@ class TwitterAPI():
         }
 
         cookies = self.extractor.session.cookies
+        cookiedomain = ".twitter.com"
 
         # CSRF
-        csrf = util.generate_csrf_token()
-        self.headers["x-csrf-token"] = csrf
-        cookies.set("ct0", csrf, domain=".twitter.com")
+        csrf_token = cookies.get("ct0", domain=cookiedomain)
+        if not csrf_token:
+            csrf_token = util.generate_csrf_token()
+            cookies.set("ct0", csrf_token, domain=cookiedomain)
+        self.headers["x-csrf-token"] = csrf_token
 
-        if cookies.get("auth_token", domain=".twitter.com"):
+        if cookies.get("auth_token", domain=cookiedomain):
             # logged in
             self.root = "https://twitter.com/i/api/"
             self.headers["x-twitter-auth-type"] = "OAuth2Session"
@@ -519,8 +522,8 @@ class TwitterAPI():
             # guest
             self.root = "https://api.twitter.com/"
             guest_token = self._guest_token()
+            cookies.set("gt", guest_token, domain=cookiedomain)
             self.headers["x-guest-token"] = guest_token
-            cookies.set("gt", guest_token, domain=".twitter.com")
 
     def tweet(self, tweet_id):
         endpoint = "2/timeline/conversation/{}.json".format(tweet_id)
@@ -615,6 +618,12 @@ class TwitterAPI():
         response = self.extractor.request(
             url, method=method, params=params, headers=self.headers,
             fatal=None)
+
+        # update 'x-csrf-token' header (#1170)
+        csrf_token = response.cookies.get("ct0")
+        if csrf_token:
+            self.headers["x-csrf-token"] = csrf_token
+
         if response.status_code < 400:
             return response.json()
         if response.status_code == 429:
