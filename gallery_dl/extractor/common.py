@@ -538,7 +538,7 @@ def generate_extractors(extractor_data, symtable, classes):
 
     for category, info in extractor_data.items():
 
-        if not isinstance(info, dict):
+        if not isinstance(info, dict) or "root" not in info:
             continue
 
         root = info["root"]
