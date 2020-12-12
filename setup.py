@@ -47,8 +47,8 @@ FILES = [
 setup(
     name="gallery_dl",
     version=VERSION,
-    description=("Command-line program to download image-galleries and "
-                 "-collections from several image hosting sites"),
+    description=("Command-line program to download image galleries and "
+                 "collections from several image hosting sites"),
     long_description=read("README.rst"),
     url="https://github.com/mikf/gallery-dl",
     download_url="https://github.com/mikf/gallery-dl/releases/latest",
@@ -92,6 +92,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Multimedia :: Graphics",
