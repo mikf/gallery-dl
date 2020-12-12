@@ -41,6 +41,10 @@ class ExecPP(PostProcessor):
         events = options.get("event")
         if events is None:
             events = ("after",)
+            if options.get("final"):
+                self.log.warning("'final' is deprecated, "
+                                 "use '\"event\": \"finalize\"' instead")
+                events = ("finalize",)
         elif isinstance(events, str):
             events = events.split(",")
         for event in events:
