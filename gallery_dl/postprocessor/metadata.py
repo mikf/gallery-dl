@@ -55,6 +55,10 @@ class MetadataPP(PostProcessor):
         events = options.get("event")
         if events is None:
             events = ("file",)
+            if options.get("bypost"):
+                self.log.warning("'bypost' is deprecated, use '\"event\": "
+                                 "\"post\"' and 'filename' instead")
+                events = ("metadata",)
         elif isinstance(events, str):
             events = events.split(",")
         for event in events:
