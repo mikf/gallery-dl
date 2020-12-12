@@ -1,6 +1,30 @@
 # Changelog
 
-## Unreleased
+## 1.16.0 - 2020-12-12
+### Additions
+- [booru] implement generalized extractors for `*booru` and `moebooru` sites
+  - add support for sakugabooru.com ([#1136](https://github.com/mikf/gallery-dl/issues/1136))
+  - add support for lolibooru.moe ([#1050](https://github.com/mikf/gallery-dl/issues/1050))
+  - provide formattable `date` metadata fields ([#1138](https://github.com/mikf/gallery-dl/issues/1138))
+- [postprocessor:metadata] add `event` and `filename` options ([#315](https://github.com/mikf/gallery-dl/issues/315), [#866](https://github.com/mikf/gallery-dl/issues/866), [#984](https://github.com/mikf/gallery-dl/issues/984))
+- [postprocessor:exec] add `event` option ([#992](https://github.com/mikf/gallery-dl/issues/992))
+### Changes
+- [flickr] update default directories and improve metadata consistency ([#828](https://github.com/mikf/gallery-dl/issues/828))
+- [sankaku] use API endpoints from `beta.sankakucomplex.com`
+- [downloader:http] improve filename extension handling ([#776](https://github.com/mikf/gallery-dl/issues/776))
+- replace all JPEG filename extensions with `jpg` by default
+### Fixes
+- [hentainexus] fix extraction ([#1166](https://github.com/mikf/gallery-dl/issues/1166))
+- [instagram] rewrite ([#1113](https://github.com/mikf/gallery-dl/issues/1113), [#1122](https://github.com/mikf/gallery-dl/issues/1122), [#1128](https://github.com/mikf/gallery-dl/issues/1128), [#1130](https://github.com/mikf/gallery-dl/issues/1130), [#1149](https://github.com/mikf/gallery-dl/issues/1149))
+- [mangadex] handle external chapters ([#1154](https://github.com/mikf/gallery-dl/issues/1154))
+- [nozomi] handle empty `date` fields  ([#1163](https://github.com/mikf/gallery-dl/issues/1163))
+- [paheal] create directory for each post ([#1147](https://github.com/mikf/gallery-dl/issues/1147))
+- [piczel] update API URLs
+- [twitter] update image URL format ([#1145](https://github.com/mikf/gallery-dl/issues/1145))
+- [twitter] improve `x-csrf-token` header handling ([#1170](https://github.com/mikf/gallery-dl/issues/1170))
+- [webtoons] update `ageGate` cookies
+### Removals
+- [sankaku] remove login support
 
 ## 1.15.4 - 2020-11-27
 ### Fixes
