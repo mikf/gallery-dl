@@ -58,7 +58,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        url = "{}/read/{}/001".format(self.root, self.gallery_id)
+        url = "{}/read/{}".format(self.root, self.gallery_id)
         page = self.request(url).text
 
         data = json.loads(self._decode(text.extract(
@@ -73,23 +73,37 @@ class HentainexusGalleryExtractor(GalleryExtractor):
 
     @staticmethod
     def _decode(data):
-        # https://hentainexus.com/static/js/reader.min.js?r=6
+        # https://hentainexus.com/static/js/reader.min.js?r=13
+        primes = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53)
         blob = binascii.a2b_base64(data)
         key = blob[0:64]
-        indices = list(range(256))
-        result = ""
+
+        C = 0
+        for k in key:
+            C = C ^ k
+            for _ in range(8):
+                if C & 1:
+                    C = C >> 1 ^ 0xc
+                else:
+                    C = C >> 1
+        k = primes[C & 0x7]
 
         x = 0
+        S = list(range(256))
         for i in range(256):
-            x = (x + indices[i] + key[i % len(key)]) % 256
-            indices[i], indices[x] = indices[x], indices[i]
+            x = (x + S[i] + key[i % len(key)]) % 256
+            S[i], S[x] = S[x], S[i]
 
-        x = i = 0
+        result = ""
+        a = c = m = x = 0
         for n in range(64, len(blob)):
-            i = (i + 1) % 256
-            x = (x + indices[i]) % 256
-            indices[i], indices[x] = indices[x], indices[i]
-            result += chr(blob[n] ^ indices[(indices[i] + indices[x]) % 256])
+            a = (a + k) % 256
+            x = (c + S[(x + S[a]) % 256]) % 256
+            c = (c + a + S[a]) % 256
+
+            S[a], S[x] = S[x], S[a]
+            m = S[(x + S[(a + S[(m + c) % 256]) % 256]) % 256]
+            result += chr(blob[n] ^ m)
 
         return result
 
