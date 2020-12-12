@@ -2,8 +2,8 @@
 gallery-dl
 ==========
 
-*gallery-dl* is a command-line program to download image-galleries and
--collections from several image hosting sites (see `Supported Sites`_).
+*gallery-dl* is a command-line program to download image galleries and
+collections from several image hosting sites (see `Supported Sites`_).
 It is a cross-platform tool with many configuration options
 and powerful filenaming capabilities.
 
@@ -37,7 +37,7 @@ easily installed or upgraded using pip_:
 
     $ python3 -m pip install -U gallery-dl
 
-Installing the latest dev-version directly from GitHub can be done with
+Installing the latest dev version directly from GitHub can be done with
 pip_ as well:
 
 .. code:: bash
@@ -86,7 +86,7 @@ and run it inside a command prompt (like ``cmd.exe``).
 - `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.15.4/gallery-dl.exe>`__
 - `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.15.4/gallery-dl.bin>`__
 
-These executables include a Python 3.8 interpreter
+These executables include a Python interpreter
 and all required Python packages.
 
 
@@ -181,19 +181,22 @@ Configuration files for *gallery-dl* use a JSON-based file format.
   see gallery-dl-example.conf_.
 | A list of all available configuration options and their
   descriptions can be found in configuration.rst_.
+|
 
 *gallery-dl* searches for configuration files in the following places:
 
-+--------------------------------------------+------------------------------------------+
-| Linux                                      | Windows                                  |
-+--------------------------------------------+------------------------------------------+
-|* ``/etc/gallery-dl.conf``                  |* ``%APPDATA%\gallery-dl\config.json``    |
-|* ``${HOME}/.config/gallery-dl/config.json``|* ``%USERPROFILE%\gallery-dl\config.json``|
-|* ``${HOME}/.gallery-dl.conf``              |* ``%USERPROFILE%\gallery-dl.conf``       |
-+--------------------------------------------+------------------------------------------+
+Windows:
+    * ``%APPDATA%\gallery-dl\config.json``
+    * ``%USERPROFILE%\gallery-dl\config.json``
+    * ``%USERPROFILE%\gallery-dl.conf``
 
-(``%USERPROFILE%`` usually refers to the user's home directory,
-i.e. ``C:\Users\<username>\``)
+    (``%USERPROFILE%`` usually refers to the user's home directory,
+    i.e. ``C:\Users\<username>\``)
+
+Linux, macOS, etc.:
+    * ``/etc/gallery-dl.conf``
+    * ``${HOME}/.config/gallery-dl/config.json``
+    * ``${HOME}/.gallery-dl.conf``
 
 Values in later configuration files will override previous ones.
 
