@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.16.0 - 2020-12-12
 ### Additions
 - [booru] implement generalized extractors for `*booru` and `moebooru` sites

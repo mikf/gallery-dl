@@ -25,8 +25,6 @@ class MoebooruExtractor(BooruExtractor):
 
     def _prepare_post(self, post, extended_tags=False):
         url = post["file_url"]
-        if url[0] == "/":
-            url = self.root + url
         if extended_tags:
             self._fetch_extended_tags(post)
         post["date"] = text.parse_timestamp(post["created_at"])
