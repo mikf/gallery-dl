@@ -286,6 +286,7 @@ Description
     * ``instagram``
     * ``luscious``
     * ``pinterest``
+    * ``sankaku``
     * ``subscribestar``
     * ``tsumino``
     * ``twitter``
