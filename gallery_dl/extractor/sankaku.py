@@ -6,10 +6,11 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://chan.sankakucomplex.com/"""
+"""Extractors for https://beta.sankakucomplex.com/"""
 
 from .booru import BooruExtractor
 from .. import text, exception
+from ..cache import cache
 import collections
 
 BASE_PATTERN = r"(?:https?://)?(?:beta|chan)\.sankakucomplex\.com"
@@ -20,8 +21,9 @@ class SankakuExtractor(BooruExtractor):
     basecategory = "booru"
     category = "sankaku"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    request_interval_min = 1.0
+    cookiedomain = None
     per_page = 100
+    _warning = True
 
     TAG_TYPES = {
         0: "general",
@@ -38,6 +40,10 @@ class SankakuExtractor(BooruExtractor):
 
     def _prepare_post(self, post, extended_tags=False):
         url = post["file_url"]
+        if not url and self._warning:
+            self.log.warning(
+                "Login required to download 'contentious_content' posts")
+            SankakuExtractor._warning = False
         if extended_tags:
             self._fetch_extended_tags(post)
         post["date"] = text.parse_timestamp(post["created_at"]["s"])
@@ -51,31 +57,6 @@ class SankakuExtractor(BooruExtractor):
             tags[types[tag["type"]]].append(tag["name"])
         for key, value in tags.items():
             post["tags_" + key] = value
-
-    def _api_request(self, endpoint, params=None):
-        url = "https://capi-v2.sankakucomplex.com" + endpoint
-        while True:
-            response = self.request(url, params=params, fatal=False)
-            if response.status_code == 429:
-                self.wait(until=response.headers.get("X-RateLimit-Reset"))
-                continue
-            return response.json()
-
-    def _pagination(self, params):
-        params["lang"] = "en"
-        params["limit"] = str(self.per_page)
-
-        while True:
-            data = self._api_request("/posts/keyset", params)
-            if not data.get("success", True):
-                raise exception.StopExtraction(data.get("code"))
-            yield from data["data"]
-
-            params["next"] = data["meta"]["next"]
-            if not params["next"]:
-                return
-            if "page" in params:
-                del params["page"]
 
 
 class SankakuTagExtractor(SankakuExtractor):
@@ -109,7 +90,7 @@ class SankakuTagExtractor(SankakuExtractor):
         return {"search_tags": self.tags}
 
     def posts(self):
-        return self._pagination({"tags": self.tags})
+        return SankakuAPI(self).posts_keyset({"tags": self.tags})
 
 
 class SankakuPoolExtractor(SankakuExtractor):
@@ -130,7 +111,7 @@ class SankakuPoolExtractor(SankakuExtractor):
         self.pool_id = match.group(1)
 
     def metadata(self):
-        pool = self._api_request("/pools/" + self.pool_id)
+        pool = SankakuAPI(self).pools(self.pool_id)
         self._posts = pool.pop("posts")
         return {"pool": pool}
 
@@ -156,6 +137,11 @@ class SankakuPostExtractor(SankakuExtractor):
                 "tags_general"  : list,
             },
         }),
+        # 'contentious_content'
+        ("https://beta.sankakucomplex.com/post/show/21418978", {
+            "pattern": r"https://s\.sankakucomplex\.com"
+                       r"/data/13/3c/133cda3bfde249c504284493903fb985\.jpg",
+        }),
         ("https://chan.sankakucomplex.com/post/show/360451"),
     )
 
@@ -164,4 +150,116 @@ class SankakuPostExtractor(SankakuExtractor):
         self.post_id = match.group(1)
 
     def posts(self):
-        return self._pagination({"tags": "id:" + self.post_id})
+        return SankakuAPI(self).posts_keyset({"tags": "id:" + self.post_id})
+
+
+class SankakuAPI():
+    """Interface for the beta.sankakucomplex.com API"""
+
+    def __init__(self, extractor):
+        self.extractor = extractor
+        self.headers = {"Accept": "application/vnd.sankaku.api+json;v=2"}
+
+        self.username, self.password = self.extractor._get_auth_info()
+        if not self.username:
+            self.authenticate = lambda: None
+
+    def pools(self, pool_id):
+        return self._call("/pools/" + pool_id)
+
+    def posts_keyset(self, params):
+        return self._pagination("/posts/keyset", params)
+
+    def authenticate(self):
+        self.headers["Authorization"] = \
+            _authenticate_impl(self.extractor, self.username, self.password)
+
+    def _call(self, endpoint, params=None):
+        url = "https://capi-v2.sankakucomplex.com" + endpoint
+        for _ in range(5):
+            self.authenticate()
+            response = self.extractor.request(
+                url, params=params, headers=self.headers, fatal=False)
+
+            if response.status_code == 429:
+                self.extractor.wait(
+                    until=response.headers.get("X-RateLimit-Reset"))
+                continue
+
+            data = response.json()
+            if not data.get("success", True):
+                code = data.get("code")
+                if code == "invalid_token":
+                    _authenticate_impl.invalidate(self.username)
+                    continue
+                raise exception.StopExtraction(code)
+            return data
+
+    def _pagination(self, endpoint, params):
+        params["lang"] = "en"
+        params["limit"] = str(self.extractor.per_page)
+
+        while True:
+            data = self._call(endpoint, params)
+            yield from data["data"]
+
+            params["next"] = data["meta"]["next"]
+            if not params["next"]:
+                return
+            if "page" in params:
+                del params["page"]
+
+
+@cache(maxage=365*24*3600, keyarg=2)
+def _authenticate_impl(extr, username, password):
+    extr.log.info("Logging in as %s", username)
+    headers = {"Accept": "application/vnd.sankaku.api+json;v=2"}
+
+    # get initial access_token
+    url = "https://login.sankakucomplex.com/auth/token"
+    data = {"login": username, "password": password}
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=False)
+    data = response.json()
+
+    if response.status_code >= 400 or not data.get("success"):
+        raise exception.AuthenticationError(data.get("error"))
+    access_token = data["access_token"]
+
+    # start openid auth
+    url = "https://login.sankakucomplex.com/oidc/auth"
+    params = {
+        "response_type": "code",
+        "scope"        : "openid",
+        "client_id"    : "sankaku-web-app",
+        "redirect_uri" : "https://beta.sankakucomplex.com/sso/callback",
+        "state"        : "return_uri=https://beta.sankakucomplex.com/",
+        "theme"        : "black",
+        "lang"         : "undefined",
+    }
+    page = extr.request(url, params=params).text
+    submit_url = text.extract(page, 'submitUrl = "', '"')[0]
+
+    # get code from initial access_token
+    url = "https://login.sankakucomplex.com" + submit_url
+    data = {
+        "accessToken": access_token,
+        "nonce"      : "undefined",
+    }
+    response = extr.request(url, method="POST", data=data)
+    query = text.parse_query(response.request.url.partition("?")[2])
+
+    # get final access_token from code
+    url = "https://capi-v2.sankakucomplex.com/sso/finalize?lang=en"
+    data = {
+        "code"        : query["code"],
+        "client_id"   : "sankaku-web-app",
+        "redirect_uri": "https://beta.sankakucomplex.com/sso/callback",
+    }
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=False)
+    data = response.json()
+
+    if response.status_code >= 400 or not data.get("success"):
+        raise exception.AuthenticationError(data.get("error"))
+    return "Bearer " + data["access_token"]

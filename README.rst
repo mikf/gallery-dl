@@ -225,6 +225,7 @@ and optional for
 ``instagram``,
 ``luscious``,
 ``pinterest``,
+``sankaku``,
 ``subscribestar``,
 ``tsumino``,
 and ``twitter``.
