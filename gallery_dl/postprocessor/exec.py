@@ -30,8 +30,6 @@ class ExecPP(PostProcessor):
 
         args = options["command"]
         if isinstance(args, str):
-            if "{}" not in args:
-                args += " {}"
             self.args = args
             execute = self.exec_string
         else:
