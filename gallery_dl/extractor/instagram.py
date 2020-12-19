@@ -322,10 +322,11 @@ class InstagramExtractor(Extractor):
         cursor = self.config("cursor")
         if cursor:
             return {
-                "edges": (),
+                "edges"    : (),
                 "page_info": {
-                    "end_cursor": cursor,
+                    "end_cursor"   : cursor,
                     "has_next_page": True,
+                    "_virtual"     : True,
                 },
             }
         return user[key]
@@ -338,6 +339,10 @@ class InstagramExtractor(Extractor):
             info = data["page_info"]
             if not info["has_next_page"]:
                 return
+            elif not data["edges"] and "_virtual" not in info:
+                s = "" if self.user.endswith("s") else "s"
+                raise exception.StopExtraction(
+                    "%s'%s posts are private", self.user, s)
 
             variables["after"] = self._cursor = info["end_cursor"]
             self.log.debug("Cursor: %s", self._cursor)
@@ -613,7 +618,10 @@ class InstagramPostExtractor(InstagramExtractor):
             "has_threaded_comments": True
         }
         data = self._graphql_request(query_hash, variables)
-        return (data["shortcode_media"],)
+        media = data.get("shortcode_media")
+        if not media:
+            raise exception.NotFoundError("post")
+        return (media,)
 
 
 class InstagramStoriesExtractor(InstagramExtractor):
