@@ -77,12 +77,12 @@ class ExecPP(PostProcessor):
         self.log.debug("Running '%s'", args)
         retcode = subprocess.Popen(args, shell=shell).wait()
         if retcode:
-            self.log.warning(
-                "Executing '%s' returned with non-zero exit status (%d)",
-                " ".join(args) if isinstance(args, list) else args, retcode)
+            self.log.warning("'%s' returned with non-zero exit status (%d)",
+                             args, retcode)
 
-    def _exec_async(self, args):
-        subprocess.Popen(args, shell=self.shell)
+    def _exec_async(self, args, shell):
+        self.log.debug("Running '%s'", args)
+        subprocess.Popen(args, shell=shell)
 
 
 __postprocessor__ = ExecPP
