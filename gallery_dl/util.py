@@ -956,7 +956,7 @@ class PathFormat():
 class DownloadArchive():
 
     def __init__(self, path, extractor):
-        con = sqlite3.connect(path)
+        con = sqlite3.connect(path, timeout=60, check_same_thread=False)
         con.isolation_level = None
         self.close = con.close
         self.cursor = con.cursor()
