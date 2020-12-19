@@ -210,6 +210,6 @@ try:
     os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
 
     DatabaseCacheDecorator.db = sqlite3.connect(
-        dbfile, timeout=30, check_same_thread=False)
+        dbfile, timeout=60, check_same_thread=False)
 except (OSError, TypeError, sqlite3.OperationalError):
     cache = memcache  # noqa: F811
