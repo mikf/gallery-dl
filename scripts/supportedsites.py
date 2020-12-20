@@ -123,6 +123,7 @@ SUBCATEGORY_MAP = {
         "story": "",
     },
     "instagram": {
+        "posts": "",
         "saved": "Saved Posts",
     },
     "newgrounds": {

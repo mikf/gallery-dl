@@ -12,10 +12,12 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
-import itertools
 import json
 import time
 import re
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?instagram\.com"
+USER_PATTERN = BASE_PATTERN + r"/(?!(?:p|tv|reel|explore|stories)/)([^/?#]+)"
 
 
 class InstagramExtractor(Extractor):
@@ -31,6 +33,7 @@ class InstagramExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.item = match.group(1)
         self.www_claim = "0"
         self.csrf_token = util.generate_csrf_token()
         self._find_tags = re.compile(r"#\w+").findall
@@ -68,15 +71,18 @@ class InstagramExtractor(Extractor):
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
+
         if response.history and "/accounts/login/" in response.request.url:
             if self._cursor:
                 self.log.info("Use '-o cursor=%s' to continue downloading "
                               "from the current position", self._cursor)
             raise exception.StopExtraction(
-                "Redirected to login page (%s)", response.request.url)
+                "HTTP redirect to login page (%s)", response.request.url)
+
         www_claim = response.headers.get("x-ig-set-www-claim")
         if www_claim is not None:
             self.www_claim = www_claim
+
         return response
 
     def _api_request(self, endpoint, params):
@@ -340,9 +346,9 @@ class InstagramExtractor(Extractor):
             if not info["has_next_page"]:
                 return
             elif not data["edges"] and "_virtual" not in info:
-                s = "" if self.user.endswith("s") else "s"
+                s = "" if self.item.endswith("s") else "s"
                 raise exception.StopExtraction(
-                    "%s'%s posts are private", self.user, s)
+                    "%s'%s posts are private", self.item, s)
 
             variables["after"] = self._cursor = info["end_cursor"]
             self.log.debug("Cursor: %s", self._cursor)
@@ -351,80 +357,62 @@ class InstagramExtractor(Extractor):
 
 
 class InstagramUserExtractor(InstagramExtractor):
-    """Extractor for ProfilePage"""
+    """Extractor for an Instagram user profile"""
     subcategory = "user"
-    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?!(?:p|explore|directory|accounts|stories|tv|reel)/)"
-               r"([^/?#]+)/?(?:$|[?#])")
+    pattern = USER_PATTERN + r"/?(?:$|[?#])"
     test = (
-        ("https://www.instagram.com/instagram/", {
-            "range": "1-16",
-            "count": ">= 16",
-        }),
-        #  ("https://www.instagram.com/instagram/", {
-        #  "options": (("highlights", True),),
-        #  "pattern": InstagramStoriesExtractor.pattern,
-        #  "range": "1-2",
-        #  "count": 2,
-        #  }),
+        ("https://www.instagram.com/instagram/"),
         ("https://www.instagram.com/instagram/?hl=en"),
     )
 
-    def __init__(self, match):
-        InstagramExtractor.__init__(self, match)
-        self.user = match.group(1)
+    def items(self):
+        if self.config("highlights"):
+            self.log.warning("'highlights' is deprecated, "
+                             "use '\"include\": \"…,highlights\"' instead")
+            default = ("highlights", "posts")
+        else:
+            default = ("posts",)
+
+        base = "{}/{}/".format(self.root, self.item)
+        stories = "{}/stories/{}/".format(self.root, self.item)
+        return self._dispatch_extractors((
+            (InstagramStoriesExtractor   , stories),
+            (InstagramHighlightsExtractor, base + "highlights/"),
+            (InstagramPostsExtractor     , base + "posts/"),
+            (InstagramChannelExtractor   , base + "channel/"),
+        ), default)
+
+
+class InstagramPostsExtractor(InstagramExtractor):
+    """Extractor for ProfilePage posts"""
+    subcategory = "posts"
+    pattern = USER_PATTERN + r"/posts"
+    test = ("https://www.instagram.com/instagram/posts/", {
+        "range": "1-16",
+        "count": ">= 16",
+    })
 
     def posts(self):
-        url = "{}/{}/".format(self.root, self.user)
+        url = "{}/{}/".format(self.root, self.item)
         user = self._extract_profile_page(url)
-
-        if user.get("highlight_reel_count") and self.config("highlights"):
-            query_hash = "d4d88dc1500312af6f937f7b804c68c3"
-            variables = {
-                "user_id": user["id"],
-                "include_chaining": False,
-                "include_reel": True,
-                "include_suggested_users": False,
-                "include_logged_out_extras": False,
-                "include_highlight_reels": True,
-                "include_live_status": True,
-            }
-            data = self._graphql_request(query_hash, variables)
-            highlights = [
-                {
-                    "__typename": "GraphReel",
-                    "id"        : "highlight:" + edge["node"]["id"],
-                }
-                for edge in data["user"]["edge_highlight_reels"]["edges"]
-            ]
-        else:
-            highlights = None
 
         query_hash = "003056d32c2554def87228bc3fd9668a"
         variables = {"id": user["id"], "first": 50}
         edge = self._get_edge_data(user, "edge_owner_to_timeline_media")
-        posts = self._pagination(query_hash, variables, edge)
-
-        return itertools.chain(highlights, posts) if highlights else posts
+        return self._pagination(query_hash, variables, edge)
 
 
 class InstagramChannelExtractor(InstagramExtractor):
     """Extractor for ProfilePage channel"""
     subcategory = "channel"
-    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
-               r"([^/?#]+)/channel")
+    pattern = USER_PATTERN + r"/channel"
     test = ("https://www.instagram.com/instagram/channel/", {
         "range": "1-16",
         "count": ">= 16",
     })
 
-    def __init__(self, match):
-        InstagramExtractor.__init__(self, match)
-        self.user = match.group(1)
-
     def posts(self):
-        url = "{}/{}/channel/".format(self.root, self.user)
+        url = "{}/{}/channel/".format(self.root, self.item)
         user = self._extract_profile_page(url)
 
         query_hash = "bc78b344a68ed16dd5d7f264681c4c76"
@@ -436,17 +424,11 @@ class InstagramChannelExtractor(InstagramExtractor):
 class InstagramSavedExtractor(InstagramExtractor):
     """Extractor for ProfilePage saved media"""
     subcategory = "saved"
-    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?!p/|explore/|directory/|accounts/|stories/|tv/)"
-               r"([^/?#]+)/saved")
+    pattern = USER_PATTERN + r"([^/?#]+)/saved"
     test = ("https://www.instagram.com/instagram/saved/",)
 
-    def __init__(self, match):
-        InstagramExtractor.__init__(self, match)
-        self.user = match.group(1)
-
     def posts(self):
-        url = "{}/{}/saved/".format(self.root, self.user)
+        url = "{}/{}/saved/".format(self.root, self.item)
         user = self._extract_profile_page(url)
 
         query_hash = "2ce1d673055b99250e93b6f88f878fde"
@@ -459,22 +441,17 @@ class InstagramTagExtractor(InstagramExtractor):
     """Extractor for TagPage"""
     subcategory = "tag"
     directory_fmt = ("{category}", "{subcategory}", "{tag}")
-    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/explore/tags/([^/?#]+)")
+    pattern = BASE_PATTERN + r"/explore/tags/([^/?#]+)"
     test = ("https://www.instagram.com/explore/tags/instagram/", {
         "range": "1-16",
         "count": ">= 16",
     })
 
-    def __init__(self, match):
-        InstagramExtractor.__init__(self, match)
-        self.tag = match.group(1)
-
     def metadata(self):
-        return {"tag": self.tag}
+        return {"tag": self.item}
 
     def posts(self):
-        url = "{}/explore/tags/{}/".format(self.root, self.tag)
+        url = "{}/explore/tags/{}/".format(self.root, self.item)
         data = self._extract_shared_data(url)
         hashtag = data["entry_data"]["TagPage"][0]["graphql"]["hashtag"]
 
@@ -604,14 +581,10 @@ class InstagramPostExtractor(InstagramExtractor):
         ("https://www.instagram.com/reel/CDg_6Y1pxWu/"),
     )
 
-    def __init__(self, match):
-        InstagramExtractor.__init__(self, match)
-        self.shortcode = match.group(1)
-
     def posts(self):
         query_hash = "a9441f24ac73000fa17fe6e6da11d59d"
         variables = {
-            "shortcode"            : self.shortcode,
+            "shortcode"            : self.item,
             "child_comment_count"  : 3,
             "fetch_comment_count"  : 40,
             "parent_comment_count" : 24,
@@ -652,3 +625,34 @@ class InstagramStoriesExtractor(InstagramExtractor):
             reel_id = user["id"]
 
         return ({"__typename": "GraphReel", "id": reel_id},)
+
+
+class InstagramHighlightsExtractor(InstagramExtractor):
+    """Extractor for all Instagram story highlights of a user"""
+    subcategory = "highlights"
+    pattern = USER_PATTERN + r"/highlights"
+    test = ("https://www.instagram.com/instagram/highlights",)
+
+    def posts(self):
+        url = "{}/{}/".format(self.root, self.item)
+        user = self._extract_profile_page(url)
+
+        query_hash = "d4d88dc1500312af6f937f7b804c68c3"
+        variables = {
+            "user_id": user["id"],
+            "include_chaining": False,
+            "include_reel": True,
+            "include_suggested_users": False,
+            "include_logged_out_extras": False,
+            "include_highlight_reels": True,
+            "include_live_status": True,
+        }
+        data = self._graphql_request(query_hash, variables)
+
+        return [
+            {
+                "__typename": "GraphReel",
+                "id"        : "highlight:" + edge["node"]["id"],
+            }
+            for edge in data["user"]["edge_highlight_reels"]["edges"]
+        ]
