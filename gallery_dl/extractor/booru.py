@@ -32,7 +32,7 @@ class BooruExtractor(Extractor):
                 url = self._prepare_post(post, extended_tags)
                 if url[0] == "/":
                     url = self.root + url
-            except Exception:
+            except (KeyError, TypeError):
                 self.log.debug("Unable to fetch download URL for post %s "
                                "(md5: %s)", post.get("id"), post.get("md5"))
                 continue
