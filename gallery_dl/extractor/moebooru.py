@@ -215,13 +215,6 @@ EXTRACTORS = {
         }),
         "test-post": ("https://hypnohub.net/post/show/73964", {
             "content": "02d5f5a8396b621a6efc04c5f8ef1b7225dfc6ee",
-            "options": (("tags", True),),
-            "keyword": {
-                "tags_artist": "gonoike_biwa icontrol_(manipper)",
-                "tags_character": "komaru_naegi",
-                "tags_copyright": "dangan_ronpa dangan_ronpa_another_episode",
-                "tags_general": str,
-            },
         }),
         "test-popular": (
             ("https://hypnohub.net/post/popular_by_month?month=6&year=2014", {
