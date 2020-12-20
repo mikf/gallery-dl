@@ -1045,15 +1045,22 @@ Description
     for details)
 
 
-extractor.instagram.highlights
-------------------------------
+extractor.instagram.include
+---------------------------
 Type
-    ``bool``
+    ``string`` or ``list`` of ``strings``
 Default
-    ``false``
+    ``"posts"``
+Example
+    ``"stories,highlights,posts"`` or ``["stories", "highlights", "posts"]``
 Description
-    Include *Story Highlights* when downloading a user profile.
-    (requires authentication)
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"posts"``, ``"stories"``, ``"highlights"``, ``"channel"``.
+
+    You can use ``"all"`` instead of listing all values separately.
 
 
 extractor.instagram.videos
