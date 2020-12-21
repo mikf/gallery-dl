@@ -29,26 +29,26 @@ class PornhubGalleryExtractor(PornhubExtractor):
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/album/(\d+)"
     test = (
-        ("https://www.pornhub.com/album/17218841", {
+        ("https://www.pornhub.com/album/19289801", {
             "pattern": r"https://\w+.phncdn.com/pics/albums/\d+/\d+/\d+/\d+/",
-            "count": 81,
+            "count": 308,
             "keyword": {
-                "id": int,
-                "num": int,
-                "score": int,
-                "views": int,
+                "id"     : int,
+                "num"    : int,
+                "score"  : int,
+                "views"  : int,
                 "caption": str,
-                "user": "Unknown",
+                "user"   : "Danika Mori",
                 "gallery": {
-                    "id"   : 17218841,
+                    "id"   : 19289801,
                     "score": int,
                     "views": int,
                     "tags" : list,
-                    "title": "Hentai/Ecchi 41",
+                    "title": "Danika Mori Best Moments",
                 },
             },
         }),
-        ("https://www.pornhub.com/album/37180171", {
+        ("https://www.pornhub.com/album/69040172", {
             "exception": exception.AuthorizationError,
         }),
     )
@@ -118,10 +118,10 @@ class PornhubGalleryExtractor(PornhubExtractor):
 class PornhubUserExtractor(PornhubExtractor):
     """Extractor for all galleries of a pornhub user"""
     subcategory = "user"
-    pattern = (BASE_PATTERN + r"/(users|model)/([^/?#]+)"
+    pattern = (BASE_PATTERN + r"/(users|model|pornstar)/([^/?#]+)"
                "(?:/photos(?:/(public|private|favorites))?)?/?$")
     test = (
-        ("https://www.pornhub.com/users/flyings0l0/photos/public", {
+        ("https://www.pornhub.com/pornstar/danika-mori/photos", {
             "pattern": PornhubGalleryExtractor.pattern,
             "count": ">= 6",
         }),
