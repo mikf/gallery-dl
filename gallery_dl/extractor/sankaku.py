@@ -46,7 +46,8 @@ class SankakuExtractor(BooruExtractor):
             SankakuExtractor._warning = False
         if extended_tags:
             self._fetch_extended_tags(post)
-        post["date"] = text.parse_timestamp(post["created_at"]["s"])
+        post["created_at"] = post["created_at"]["s"]
+        post["date"] = text.parse_timestamp(post["created_at"])
         post["tags"] = [tag["name"] for tag in post["tags"]]
         return url
 
