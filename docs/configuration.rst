@@ -1183,6 +1183,16 @@ Description
     Include pins from board sections.
 
 
+extractor.pinterest.videos
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download from video pins.
+
+
 extractor.pixiv.user.avatar
 ---------------------------
 Type

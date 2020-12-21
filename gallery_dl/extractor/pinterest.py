@@ -14,7 +14,6 @@ from ..cache import cache
 import itertools
 import json
 
-
 BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
 
 
@@ -31,29 +30,59 @@ class PinterestExtractor(Extractor):
     def items(self):
         self.api.login()
         data = self.metadata()
-        yield Message.Version, 1
-        yield Message.Directory, data
+        videos = self.config("videos", True)
 
+        yield Message.Directory, data
         for pin in self.pins():
-            if "images" in pin:
-                url, pin_data = self.data_from_pin(pin)
-                pin_data.update(data)
-                yield Message.Url, url, pin_data
+
+            try:
+                media = self._media_from_pin(pin)
+            except Exception:
+                self.log.debug("Unable to fetch download URL for pin %s",
+                               pin.get("id"))
+                continue
+
+            if not videos and media.get("duration") is not None:
+                continue
+
+            pin.update(data)
+            pin.update(media)
+            url = media["url"]
+            text.nameext_from_url(url, pin)
+
+            if pin["extension"] == "m3u8":
+                url = "ytdl:" + url
+                pin["extension"] = "mp4"
+                pin["_ytdl_extra"] = {"protocol": "m3u8_native"}
+
+            yield Message.Url, url, pin
 
     def metadata(self):
         """Return general metadata"""
 
     def pins(self):
-        """Return all relevant pin-objects"""
+        """Return all relevant pin objects"""
 
     @staticmethod
-    def data_from_pin(pin):
-        """Get image url and metadata from a pin-object"""
-        img = pin["images"]["orig"]
-        url = img["url"]
-        pin["width"] = img["width"]
-        pin["height"] = img["height"]
-        return url, text.nameext_from_url(url, pin)
+    def _media_from_pin(pin):
+        videos = pin.get("videos")
+        if videos:
+            video_formats = videos["video_list"]
+
+            for fmt in ("V_HLSV4", "V_HLSV3_WEB", "V_HLSV3_MOBILE"):
+                if fmt in video_formats:
+                    media = video_formats[fmt]
+                    break
+            else:
+                media = max(video_formats.values(),
+                            key=lambda x: x.get("width", 0))
+
+            if "V_720P" in video_formats:
+                media["_fallback"] = (video_formats["V_720P"]["url"],)
+
+            return media
+
+        return pin["images"]["orig"]
 
 
 class PinterestPinExtractor(PinterestExtractor):
@@ -65,6 +94,11 @@ class PinterestPinExtractor(PinterestExtractor):
             "url": "afb3c26719e3a530bb0e871c480882a801a4e8a5",
             "content": ("4c435a66f6bb82bb681db2ecc888f76cf6c5f9ca",
                         "d3e24bc9f7af585e8c23b9136956bd45a4d9b947"),
+        }),
+        # video pin (#1189)
+        ("https://www.pinterest.com/pin/422564377542934214/", {
+            "pattern": r"https://v\.pinimg\.com/videos/mc/hls/d7/22/ff"
+                       r"/d722ff00ab2352981b89974b37909de8.m3u8",
         }),
         ("https://www.pinterest.com/pin/858146903966145188/", {
             "exception": exception.NotFoundError,
@@ -78,7 +112,7 @@ class PinterestPinExtractor(PinterestExtractor):
 
     def metadata(self):
         self.pin = self.api.pin(self.pin_id)
-        return self.data_from_pin(self.pin)[1]
+        return self.pin
 
     def pins(self):
         return (self.pin,)
@@ -173,8 +207,7 @@ class PinterestRelatedPinExtractor(PinterestPinExtractor):
     })
 
     def metadata(self):
-        pin = self.api.pin(self.pin_id)
-        return {"original_pin": self.data_from_pin(pin)[1]}
+        return {"original_pin": self.api.pin(self.pin_id)}
 
     def pins(self):
         return self.api.pin_related(self.pin_id)
