@@ -554,6 +554,7 @@ class PixivAppAPI():
         response = self.extractor.request(
             url, method="POST", headers=headers, data=data, fatal=False)
         if response.status_code >= 400:
+            self.log.debug(response.text)
             raise exception.AuthenticationError()
 
         data = response.json()["response"]
