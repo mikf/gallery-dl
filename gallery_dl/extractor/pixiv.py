@@ -522,6 +522,10 @@ class PixivAppAPI():
 
     @cache(maxage=3600, keyarg=1)
     def _login_impl(self, username, password):
+        if not username or not password:
+            raise exception.AuthenticationError(
+                "Username and password required")
+
         url = "https://oauth.secure.pixiv.net/auth/token"
         data = {
             "client_id": self.client_id,
