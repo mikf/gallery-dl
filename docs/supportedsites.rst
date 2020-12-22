@@ -111,7 +111,7 @@ rule #34             https://rule34.paheal.net/          Posts, Tag Searches
 Rule 34              https://rule34.xxx/                 Pools, Posts, Tag Searches
 Safebooru            https://safebooru.org/              Pools, Posts, Tag Searches
 Sakugabooru          https://www.sakugabooru.com/        Pools, Popular Images, Posts, Tag Searches
-Sankaku Channel      https://beta.sankakucomplex.com/    Pools, Posts, Tag Searches                         Supported
+Sankaku Channel      https://sankaku.app/                Pools, Posts, Tag Searches                         Supported
 Sankaku Complex      https://www.sankakucomplex.com/     Articles, Tag Searches
 Sen Manga            https://raw.senmanga.com/           Chapters
 Sense-Scans          https://sensescans.com/reader/      Chapters, Manga
