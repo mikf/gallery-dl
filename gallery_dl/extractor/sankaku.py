@@ -23,7 +23,6 @@ class SankakuExtractor(BooruExtractor):
     category = "sankaku"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     cookiedomain = None
-    per_page = 100
     _warning = True
 
     TAG_TYPES = {
@@ -38,6 +37,9 @@ class SankakuExtractor(BooruExtractor):
         8: "medium",
         9: "meta",
     }
+
+    def skip(self, num):
+        return 0
 
     def _prepare_post(self, post, extended_tags=False):
         url = post["file_url"]
@@ -94,7 +96,8 @@ class SankakuTagExtractor(SankakuExtractor):
         return {"search_tags": self.tags}
 
     def posts(self):
-        return SankakuAPI(self).posts_keyset({"tags": self.tags})
+        params = {"tags": self.tags}
+        return SankakuAPI(self).posts_keyset(params)
 
 
 class SankakuPoolExtractor(SankakuExtractor):
@@ -156,7 +159,7 @@ class SankakuPostExtractor(SankakuExtractor):
         self.post_id = match.group(1)
 
     def posts(self):
-        return SankakuAPI(self).posts_keyset({"tags": "id:" + self.post_id})
+        return SankakuAPI(self).posts(self.post_id)
 
 
 class SankakuAPI():
@@ -171,7 +174,17 @@ class SankakuAPI():
             self.authenticate = lambda: None
 
     def pools(self, pool_id):
-        return self._call("/pools/" + pool_id)
+        params = {"lang": "en"}
+        return self._call("/pools/" + pool_id, params)
+
+    def posts(self, post_id):
+        params = {
+            "lang" : "en",
+            "page" : "1",
+            "limit": "1",
+            "tags" : "id_range:" + post_id,
+        }
+        return self._call("/posts", params, False)
 
     def posts_keyset(self, params):
         return self._pagination("/posts/keyset", params)
@@ -180,7 +193,7 @@ class SankakuAPI():
         self.headers["Authorization"] = \
             _authenticate_impl(self.extractor, self.username, self.password)
 
-    def _call(self, endpoint, params=None):
+    def _call(self, endpoint, params=None, check=True):
         url = "https://capi-v2.sankakucomplex.com" + endpoint
         for _ in range(5):
             self.authenticate()
@@ -193,7 +206,7 @@ class SankakuAPI():
                 continue
 
             data = response.json()
-            if not data.get("success", True):
+            if check and not data.get("success", True):
                 code = data.get("code")
                 if code == "invalid_token":
                     _authenticate_impl.invalidate(self.username)
@@ -212,8 +225,6 @@ class SankakuAPI():
             params["next"] = data["meta"]["next"]
             if not params["next"]:
                 return
-            if "page" in params:
-                del params["page"]
 
 
 @cache(maxage=365*24*3600, keyarg=2)
