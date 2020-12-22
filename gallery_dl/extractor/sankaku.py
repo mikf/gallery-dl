@@ -6,14 +6,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://beta.sankakucomplex.com/"""
+"""Extractors for https://sankaku.app/"""
 
 from .booru import BooruExtractor
 from .. import text, exception
 from ..cache import cache
 import collections
 
-BASE_PATTERN = r"(?:https?://)?(?:beta|chan)\.sankakucomplex\.com"
+BASE_PATTERN = r"(?:https?://)?" \
+    r"(?:sankaku\.app|(?:beta|chan)\.sankakucomplex\.com)"
 
 
 class SankakuExtractor(BooruExtractor):
@@ -61,17 +62,19 @@ class SankakuExtractor(BooruExtractor):
 
 
 class SankakuTagExtractor(SankakuExtractor):
-    """Extractor for images from chan.sankakucomplex.com by search-tags"""
+    """Extractor for images from sankaku.app by search-tags"""
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
     pattern = BASE_PATTERN + r"/\?([^#]*)"
     test = (
-        ("https://beta.sankakucomplex.com/?tags=bonocho", {
+        ("https://sankaku.app/?tags=bonocho", {
             "count": 5,
             "pattern": r"https://c?s\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
                        r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+",
         }),
+        ("https://beta.sankakucomplex.com/?tags=bonocho"),
+        ("https://chan.sankakucomplex.com/?tags=bonocho"),
         # error on five or more tags
         ("https://chan.sankakucomplex.com/?tags=bonocho+a+b+c+d", {
             "options": (("username", None),),
@@ -95,15 +98,16 @@ class SankakuTagExtractor(SankakuExtractor):
 
 
 class SankakuPoolExtractor(SankakuExtractor):
-    """Extractor for image pools or books from chan.sankakucomplex.com"""
+    """Extractor for image pools or books from sankaku.app"""
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
     pattern = BASE_PATTERN + r"/(?:books|pool/show)/(\d+)"
     test = (
-        ("https://beta.sankakucomplex.com/books/90", {
+        ("https://sankaku.app/books/90", {
             "count": 5,
         }),
+        ("https://beta.sankakucomplex.com/books/90"),
         ("https://chan.sankakucomplex.com/pool/show/90"),
     )
 
@@ -121,12 +125,12 @@ class SankakuPoolExtractor(SankakuExtractor):
 
 
 class SankakuPostExtractor(SankakuExtractor):
-    """Extractor for single images from chan.sankakucomplex.com"""
+    """Extractor for single posts from sankaku.app"""
     subcategory = "post"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/post/show/(\d+)"
     test = (
-        ("https://beta.sankakucomplex.com/post/show/360451", {
+        ("https://sankaku.app/post/show/360451", {
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
             "options": (("tags", True),),
             "keyword": {
@@ -139,10 +143,11 @@ class SankakuPostExtractor(SankakuExtractor):
             },
         }),
         # 'contentious_content'
-        ("https://beta.sankakucomplex.com/post/show/21418978", {
+        ("https://sankaku.app/post/show/21418978", {
             "pattern": r"https://s\.sankakucomplex\.com"
                        r"/data/13/3c/133cda3bfde249c504284493903fb985\.jpg",
         }),
+        ("https://beta.sankakucomplex.com/post/show/360451"),
         ("https://chan.sankakucomplex.com/post/show/360451"),
     )
 
@@ -155,7 +160,7 @@ class SankakuPostExtractor(SankakuExtractor):
 
 
 class SankakuAPI():
-    """Interface for the beta.sankakucomplex.com API"""
+    """Interface for the sankaku.app API"""
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -233,8 +238,8 @@ def _authenticate_impl(extr, username, password):
         "response_type": "code",
         "scope"        : "openid",
         "client_id"    : "sankaku-web-app",
-        "redirect_uri" : "https://beta.sankakucomplex.com/sso/callback",
-        "state"        : "return_uri=https://beta.sankakucomplex.com/",
+        "redirect_uri" : "https://sankaku.app/sso/callback",
+        "state"        : "return_uri=https://sankaku.app/",
         "theme"        : "black",
         "lang"         : "undefined",
     }
@@ -255,7 +260,7 @@ def _authenticate_impl(extr, username, password):
     data = {
         "code"        : query["code"],
         "client_id"   : "sankaku-web-app",
-        "redirect_uri": "https://beta.sankakucomplex.com/sso/callback",
+        "redirect_uri": "https://sankaku.app/sso/callback",
     }
     response = extr.request(
         url, method="POST", headers=headers, json=data, fatal=False)
