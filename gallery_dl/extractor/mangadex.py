@@ -196,5 +196,8 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "_extractor": MangadexChapterExtractor,
             })
 
-        results.sort(key=lambda x: (x["chapter"], x["chapter_minor"]))
+        results.sort(
+            key=lambda x: (x["chapter"], x["chapter_minor"]),
+            reverse=self.config("chapter-reverse", False),
+        )
         return results
