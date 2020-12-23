@@ -147,7 +147,6 @@ class DanbooruPoolExtractor(DanbooruExtractor):
         url = "{}/pools/{}.json".format(self.root, self.pool_id)
         pool = self.request(url).json()
         pool["name"] = pool["name"].replace("_", " ")
-        del pool["post_ids"]
         return {"pool": pool}
 
 

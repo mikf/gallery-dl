@@ -35,7 +35,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
 
     def items(self):
         data = self.metadata()
-        for post in self.posts():
+        for num, post in enumerate(self.posts(), start=1):
             file = post["file"]
 
             if not file["url"]:
@@ -43,12 +43,20 @@ class E621Extractor(danbooru.DanbooruExtractor):
                 file["url"] = "https://static1.{}/data/{}/{}/{}.{}".format(
                     self.root[8:], ihash[0:2], ihash[2:4], ihash, file["ext"])
 
+            post["num"] = num
             post["filename"] = file["md5"]
             post["extension"] = file["ext"]
             post.update(data)
             yield Message.Directory, post
             yield Message.Url, file["url"], post
 
+    def posts(self):
+        data = self.metadata()
+        if "pool" in data and "post_ids" in data["pool"]:
+            post_order = dict([(id, index) for index, id in enumerate(data["pool"]["post_ids"])])
+            return sorted(super().posts(), key=lambda post: post_order[post["id"]])
+        else:
+            return super().posts()
 
 class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
     """Extractor for e621 posts from tag searches"""
