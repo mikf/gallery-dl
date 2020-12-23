@@ -32,13 +32,14 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
         manga, _, chapter_string = info.partition(" :: ")
 
         data = self._data(self.gallery_url.split("/")[5])
-        data["manga"] = manga
+        if "manga" not in data:
+            data["manga"] = manga
         data["chapter_string"] = chapter_string.rstrip(" :")
         return self.parse_chapter_url(self.gallery_url, data)
 
     @memcache(keyarg=1)
     def _data(self, manga):
-        return {"artist": [], "tags": []}
+        return {"artist": (), "tags": ()}
 
 
 class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
@@ -50,17 +51,17 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
         # single chapter
         ("https://hentai.cafe/hazuki-yuuto-summer-blues/", {
             "url": "f8e24a07d6fbb7c6a6ec5ad8ad8faf2436f8751b",
-            "keyword": "5af1c570bb5f533a32b3375f9cdaa17a0152ba67",
+            "keyword": "ced644ff94ea22e1991a5e44bf37c38a7e2ac2b3",
         }),
         # multi-chapter
         ("https://hentai.cafe/saitom-saitom-box/", {
             "url": "ca3e8a91531fd6acd863d93ac3afbd8ead06a076",
-            "keyword": "3c28517d356cac6acbd9895c9eeefae505304078",
+            "keyword": "4c2262d680286a54357c334c1faca8f1b0e692e9",
         }),
         # new-style URL
         ("https://hentai.cafe/hc.fyi/2782", {
             "url": "ca3e8a91531fd6acd863d93ac3afbd8ead06a076",
-            "keyword": "3c28517d356cac6acbd9895c9eeefae505304078",
+            "keyword": "4c2262d680286a54357c334c1faca8f1b0e692e9",
         }),
         # foolslide URL
         ("https://hentai.cafe/manga/series/saitom-box/", {
@@ -80,16 +81,18 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
             chapters.reverse()
             return chapters
 
-        url   , pos = text.extract(page, '<link rel="canonical" href="', '"')
+        manga , pos = text.extract(page, '<title>', '<')
+        url   , pos = text.extract(page, 'rel="canonical" href="', '"', pos)
         tags  , pos = text.extract(page, "<p>Tags: ", "</br>", pos)
         artist, pos = text.extract(page, "\nArtists: ", "</br>", pos)
-        manga , pos = text.extract(page, "/manga/read/", "/", pos)
+        key   , pos = text.extract(page, "/manga/read/", "/", pos)
         data = {
+            "manga"   : text.unescape(manga.rpartition(" | ")[0]),
             "manga_id": text.parse_int(url.rpartition("/")[2]),
             "tags"    : text.split_html(tags)[::2],
             "artist"  : text.split_html(artist),
         }
-        HentaicafeChapterExtractor._data(manga).update(data)
+        HentaicafeChapterExtractor._data(key).update(data)
 
         return [
             (url, data)
