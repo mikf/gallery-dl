@@ -51,12 +51,16 @@ class E621Extractor(danbooru.DanbooruExtractor):
             yield Message.Url, file["url"], post
 
     def posts(self):
+        posts = super().posts()
         data = self.metadata()
+
         if "pool" in data and "post_ids" in data["pool"]:
-            post_order = dict([(id, index) for index, id in enumerate(data["pool"]["post_ids"])])
-            return sorted(super().posts(), key=lambda post: post_order[post["id"]])
+            post_ids = data["pool"]["post_ids"]
+            post_order = dict([(id, pos) for pos, id in enumerate(post_ids)])
+            return sorted(posts, key=lambda post: post_order[post["id"]])
         else:
-            return super().posts()
+            return posts
+
 
 class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
     """Extractor for e621 posts from tag searches"""
