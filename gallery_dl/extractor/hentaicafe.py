@@ -19,6 +19,7 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
     """Extractor for manga-chapters from hentai.cafe"""
     category = "hentaicafe"
     directory_fmt = ("{category}", "{manga}")
+    filename_fmt = "c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}"
     pattern = (r"(?:https?://)?(?:www\.)?hentai\.cafe"
                r"(/manga/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)")
     test = ("https://hentai.cafe/manga/read/saitom-box/en/0/1/", {
