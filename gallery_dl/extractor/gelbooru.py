@@ -17,11 +17,12 @@ class GelbooruBase():
     category = "gelbooru"
     root = "https://gelbooru.com"
 
-    def _prepare_post(self, post, extended_tags=False):
-        url = booru.BooruExtractor._prepare_post(self, post, extended_tags)
-        if url.startswith("https://mp4.gelbooru.com/"):
+    @staticmethod
+    def _file_url(post):
+        url = post["file_url"]
+        if url.startswith(("https://mp4.gelbooru.com/", "https://video-cdn")):
             md5 = post["md5"]
-            return "https://img2.gelbooru.com/images/{}/{}/{}.webm".format(
+            url = "https://img2.gelbooru.com/images/{}/{}/{}.webm".format(
                 md5[0:2], md5[2:4], md5)
         return url
 

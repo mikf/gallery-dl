@@ -23,14 +23,11 @@ class MoebooruExtractor(BooruExtractor):
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     page_start = 1
 
-    def _prepare_post(self, post, extended_tags=False):
-        url = post["file_url"]
-        if extended_tags:
-            self._fetch_extended_tags(post)
+    @staticmethod
+    def _prepare(post):
         post["date"] = text.parse_timestamp(post["created_at"])
-        return url
 
-    def _fetch_extended_tags(self, post):
+    def _extended_tags(self, post):
         url = "{}/post/show/{}".format(self.root, post["id"])
         page = self.request(url).text
         html = text.extract(page, '<ul id="tag-', '</ul>')[0]
