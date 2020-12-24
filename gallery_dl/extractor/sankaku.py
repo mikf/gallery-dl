@@ -41,20 +41,21 @@ class SankakuExtractor(BooruExtractor):
     def skip(self, num):
         return 0
 
-    def _prepare_post(self, post, extended_tags=False):
+    def _file_url(self, post):
         url = post["file_url"]
         if not url and self._warning:
             self.log.warning(
                 "Login required to download 'contentious_content' posts")
             SankakuExtractor._warning = False
-        if extended_tags:
-            self._fetch_extended_tags(post)
+        return url
+
+    @staticmethod
+    def _prepare(post):
         post["created_at"] = post["created_at"]["s"]
         post["date"] = text.parse_timestamp(post["created_at"])
         post["tags"] = [tag["name"] for tag in post["tags"]]
-        return url
 
-    def _fetch_extended_tags(self, post):
+    def _extended_tags(self, post):
         tags = collections.defaultdict(list)
         types = self.TAG_TYPES
         for tag in post["tags"]:

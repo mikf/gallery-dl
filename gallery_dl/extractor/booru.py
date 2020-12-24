@@ -13,6 +13,7 @@ from .. import text, util, exception
 
 from xml.etree import ElementTree
 import collections
+import operator
 import re
 
 
@@ -25,19 +26,25 @@ class BooruExtractor(Extractor):
 
     def items(self):
         self.login()
-        extended_tags = self.config("tags", False)
         data = self.metadata()
+        tags = self.config("tags", False)
+
         for post in self.posts():
             try:
-                url = self._prepare_post(post, extended_tags)
+                url = self._file_url(post)
                 if url[0] == "/":
                     url = self.root + url
             except (KeyError, TypeError):
                 self.log.debug("Unable to fetch download URL for post %s "
                                "(md5: %s)", post.get("id"), post.get("md5"))
                 continue
+
+            if tags:
+                self._extended_tags(post)
+            self._prepare(post)
             post.update(data)
             text.nameext_from_url(url, post)
+
             yield Message.Directory, post
             yield Message.Url, url, post
 
@@ -57,17 +64,14 @@ class BooruExtractor(Extractor):
         """Return an iterable with post objects"""
         return ()
 
-    def _prepare_post(self, post, extended_tags=False):
-        url = post["file_url"]
-        if url[0] == "/":
-            url = self.root + url
-        if extended_tags:
-            self._fetch_extended_tags(post)
+    _file_url = operator.itemgetter("file_url")
+
+    @staticmethod
+    def _prepare(post):
         post["date"] = text.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")
-        return url
 
-    def _fetch_extended_tags(self, post, page=None):
+    def _extended_tags(self, post, page=None):
         if not page:
             url = "{}/index.php?page=post&s=view&id={}".format(
                 self.root, post["id"])
