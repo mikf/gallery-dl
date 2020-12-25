@@ -146,12 +146,13 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     def __init__(self, match):
         super().__init__(match)
         self.pool_id = match.group(2)
+        self.post_ids = ()
 
     def metadata(self):
         url = "{}/pools/{}.json".format(self.root, self.pool_id)
         pool = self.request(url).json()
         pool["name"] = pool["name"].replace("_", " ")
-        del pool["post_ids"]
+        self.post_ids = pool.pop("post_ids")
         return {"pool": pool}
 
     def posts(self):
