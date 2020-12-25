@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text
 import datetime
 
-
 BASE_PATTERN = (
     r"(?:https?://)?"
     r"(danbooru|hijiribe|sonohara|safebooru)"
@@ -33,7 +32,6 @@ class DanbooruExtractor(Extractor):
         super().__init__(match)
         self.root = "https://{}.donmai.us".format(match.group(1))
         self.ugoira = self.config("ugoira", False)
-        self.params = {}
 
         username, api_key = self._get_auth_info()
         if username:
@@ -71,13 +69,16 @@ class DanbooruExtractor(Extractor):
             yield Message.Url, url, post
 
     def metadata(self):
-        return {}
+        return ()
 
     def posts(self):
-        return self._pagination(self.root + "/posts.json")
+        return ()
 
-    def _pagination(self, url, pagenum=False):
-        params = self.params.copy()
+    def _pagination(self, endpoint, params=None, pagenum=False):
+        url = self.root + endpoint
+
+        if params is None:
+            params = {}
         params["limit"] = self.per_page
         params["page"] = self.page_start
 
@@ -122,10 +123,14 @@ class DanbooruTagExtractor(DanbooruExtractor):
 
     def __init__(self, match):
         super().__init__(match)
-        self.params["tags"] = text.unquote(match.group(2).replace("+", " "))
+        self.tags = text.unquote(match.group(2).replace("+", " "))
 
     def metadata(self):
-        return {"search_tags": self.params["tags"]}
+        return {"search_tags": self.tags}
+
+    def posts(self):
+        params = {"tags": self.tags}
+        return self._pagination("/posts.json", params)
 
 
 class DanbooruPoolExtractor(DanbooruExtractor):
@@ -141,7 +146,6 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     def __init__(self, match):
         super().__init__(match)
         self.pool_id = match.group(2)
-        self.params["tags"] = "pool:" + self.pool_id
 
     def metadata(self):
         url = "{}/pools/{}.json".format(self.root, self.pool_id)
@@ -149,6 +153,10 @@ class DanbooruPoolExtractor(DanbooruExtractor):
         pool["name"] = pool["name"].replace("_", " ")
         del pool["post_ids"]
         return {"pool": pool}
+
+    def posts(self):
+        params = {"tags": "pool:" + self.pool_id}
+        return self._pagination("/posts.json", params)
 
 
 class DanbooruPostExtractor(DanbooruExtractor):
@@ -193,10 +201,9 @@ class DanbooruPopularExtractor(DanbooruExtractor):
 
     def __init__(self, match):
         super().__init__(match)
-        self.params.update(text.parse_query(match.group(2)))
+        self.params = text.parse_query(match.group(2))
 
     def metadata(self):
-        self.page_start = self.page_start or 1
         scale = self.params.get("scale", "day")
         date = self.params.get("date") or datetime.date.today().isoformat()
 
@@ -209,5 +216,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
         return {"date": date, "scale": scale}
 
     def posts(self):
-        url = self.root + "/explore/posts/popular.json"
-        return self._pagination(url, True)
+        if self.page_start is None:
+            self.page_start = 1
+        return self._pagination(
+            "/explore/posts/popular.json", self.params, True)
