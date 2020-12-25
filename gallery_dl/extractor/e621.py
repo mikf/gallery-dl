@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from . import danbooru
 
-
 BASE_PATTERN = r"(?:https?://)?e(621|926)\.net"
 
 
@@ -39,9 +38,9 @@ class E621Extractor(danbooru.DanbooruExtractor):
             file = post["file"]
 
             if not file["url"]:
-                ihash = file["md5"]
+                md5 = file["md5"]
                 file["url"] = "https://static1.{}/data/{}/{}/{}.{}".format(
-                    self.root[8:], ihash[0:2], ihash[2:4], ihash, file["ext"])
+                    self.root[8:], md5[0:2], md5[2:4], md5, file["ext"])
 
             post["filename"] = file["md5"]
             post["extension"] = file["ext"]
@@ -69,11 +68,32 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
     pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
     test = (
         ("https://e621.net/pools/73", {
-            "url": "842f2fb065c7c339486a9b1d689020b8569888ed",
-            "content": "c2c87b7a9150509496cddc75ccab08109922876a",
+            "url": "1bd09a72715286a79eea3b7f09f51b3493eb579a",
+            "content": "91abe5d5334425d9787811d7f06d34c77974cd22",
         }),
         ("https://e621.net/pool/show/73"),
     )
+
+    def posts(self):
+        self.log.info("Fetching posts of pool %s", self.pool_id)
+
+        id_to_post = {
+            post["id"]: post
+            for post in self._pagination(
+                "/posts.json", {"tags": "pool:" + self.pool_id})
+        }
+
+        posts = []
+        append = posts.append
+        for num, pid in enumerate(self.post_ids, 1):
+            if pid in id_to_post:
+                post = id_to_post[pid]
+                post["num"] = num
+                append(post)
+            else:
+                self.log.warning("Post %s is unavailable", pid)
+
+        return posts
 
 
 class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
