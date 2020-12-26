@@ -265,8 +265,8 @@ This can be done via the
 option in your configuration file by specifying
 
 - | the path to a Mozilla/Netscape format cookies.txt file exported by a browser addon
-  | (e.g. `cookies.txt <https://chrome.google.com/webstore/detail/cookiestxt/njabckikapfpffapmjgojcnbfjonfjfg>`__ for Chrome,
-    `Export Cookies <https://addons.mozilla.org/en-US/firefox/addon/export-cookies-txt/?src=search>`__ for Firefox)
+  | (e.g. `Get cookies.txt <https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid/>`__ for Chrome,
+    `Export Cookies <https://addons.mozilla.org/en-US/firefox/addon/export-cookies-txt/>`__ for Firefox)
 
 - | a list of name-value pairs gathered from your browser's web developer tools
   | (in `Chrome <https://developers.google.com/web/tools/chrome-devtools/storage/cookies>`__,
