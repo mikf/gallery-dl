@@ -39,7 +39,7 @@ class KeenspotComicExtractor(Extractor):
         }),
         ("http://twokinds.keenspot.com/comic/1066/", {  # "random" access
             "range": "1-3",
-            "url": "97e2a6ed8ba1709314f2449f84b6b1ce5db21c04",
+            "url": "6a784e11370abfb343dcad9adbb7718f9b7be350",
         })
     )
 
@@ -58,7 +58,14 @@ class KeenspotComicExtractor(Extractor):
         yield Message.Version, 1
         yield Message.Directory, data
 
-        url = self._first(self.request(self.root + "/").text)
+        with self.request(self.root + "/") as response:
+            if response.history:
+                url = response.request.url
+                self.root = url[:url.index("/", 8)]
+            page = response.text
+            del response
+
+        url = self._first(page)
         if self.path:
             url = self.root + self.path
 
