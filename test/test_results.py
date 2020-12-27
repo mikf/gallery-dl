@@ -30,7 +30,6 @@ TRAVIS_SKIP = {
 
 # temporary issues, etc.
 BROKEN = {
-    "dokireader",
     "imagevenue",
     "photobucket",
 }
@@ -312,6 +311,7 @@ def setup_test_config():
     config.set(("extractor", "nijie")     , "username", email)
     config.set(("extractor", "seiga")     , "username", email)
     config.set(("extractor", "pinterest") , "username", email2)
+    config.set(("extractor", "pinterest") , "username", None)  # login broken
 
     config.set(("extractor", "newgrounds"), "username", "d1618111")
     config.set(("extractor", "newgrounds"), "password", "d1618111")
