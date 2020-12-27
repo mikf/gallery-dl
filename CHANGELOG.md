@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## 1.16.1 - 2020-12-27
+### Additions
+- [instagram] add `include` option ([#1180](https://github.com/mikf/gallery-dl/issues/1180))
+- [pinterest] implement video support ([#1189](https://github.com/mikf/gallery-dl/issues/1189))
+- [sankaku] reimplement login support ([#1176](https://github.com/mikf/gallery-dl/issues/1176), [#1182](https://github.com/mikf/gallery-dl/issues/1182))
+- [sankaku] add support for sankaku.app URLs ([#1193](https://github.com/mikf/gallery-dl/issues/1193))
+### Changes
+- [e621] return pool posts in order ([#1195](https://github.com/mikf/gallery-dl/issues/1195))
+- [hentaicafe] prefer title of `/hc.fyi/` pages ([#1106](https://github.com/mikf/gallery-dl/issues/1106))
+- [hentaicafe] simplify default filenames
+- [sankaku] normalize `created_at` metadata ([#1190](https://github.com/mikf/gallery-dl/issues/1190))
+- [postprocessor:exec] do not add missing `{}` to command ([#1185](https://github.com/mikf/gallery-dl/issues/1185))
+### Fixes
+- [booru] improve error handling
+- [instagram] warn about private profiles ([#1187](https://github.com/mikf/gallery-dl/issues/1187))
+- [keenspot] improve redirect handling
+- [mangadex] respect `chapter-reverse` settings ([#1194](https://github.com/mikf/gallery-dl/issues/1194))
+- [pixiv] output debug message on failed login attempts ([#1192](https://github.com/mikf/gallery-dl/issues/1192))
+- increase SQLite connection timeouts ([#1173](https://github.com/mikf/gallery-dl/issues/1173))
+### Removals
+- [mangapanda] remove module
 
 ## 1.16.0 - 2020-12-12
 ### Additions
