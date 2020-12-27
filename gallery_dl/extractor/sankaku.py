@@ -185,7 +185,7 @@ class SankakuAPI():
             "limit": "1",
             "tags" : "id_range:" + post_id,
         }
-        return self._call("/posts", params, False)
+        return self._call("/posts", params)
 
     def posts_keyset(self, params):
         return self._pagination("/posts/keyset", params)
@@ -194,7 +194,7 @@ class SankakuAPI():
         self.headers["Authorization"] = \
             _authenticate_impl(self.extractor, self.username, self.password)
 
-    def _call(self, endpoint, params=None, check=True):
+    def _call(self, endpoint, params=None):
         url = "https://capi-v2.sankakucomplex.com" + endpoint
         for _ in range(5):
             self.authenticate()
@@ -207,7 +207,11 @@ class SankakuAPI():
                 continue
 
             data = response.json()
-            if check and not data.get("success", True):
+            try:
+                success = data.get("success", True)
+            except AttributeError:
+                success = True
+            if not success:
                 code = data.get("code")
                 if code == "invalid_token":
                     _authenticate_impl.invalidate(self.username)
@@ -228,7 +232,7 @@ class SankakuAPI():
                 return
 
 
-@cache(maxage=365*24*3600, keyarg=2)
+@cache(maxage=365*24*3600, keyarg=1)
 def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
     headers = {"Accept": "application/vnd.sankaku.api+json;v=2"}
