@@ -231,12 +231,13 @@ class JoyreactorSearchExtractor(ReactorSearchExtractor):
     category = "joyreactor"
     pattern = JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
     test = (
-        ("http://joyreactor.cc/search/Cirno+Gifs", {
+        ("http://joyreactor.cc/search/Cirno", {
             "range": "1-25",
             "count": ">= 20",
         }),
-        ("http://joyreactor.com/search?q=Cirno+Gifs", {
-            "count": 0,  # no search results on joyreactor.com
+        ("http://joyreactor.com/search?q=Cirno", {
+            "range": "1-25",
+            "count": ">= 20",
         }),
     )
 

@@ -116,7 +116,7 @@ class WikiartArtistsExtractor(WikiartExtractor):
     pattern = (BASE_PATTERN + r"/artists-by-([\w-]+)/([\w-]+)")
     test = ("https://www.wikiart.org/en/artists-by-century/12", {
         "pattern": WikiartArtistExtractor.pattern,
-        "count": 7,
+        "count": ">= 8",
     })
 
     def __init__(self, match):
