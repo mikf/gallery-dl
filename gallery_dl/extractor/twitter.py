@@ -573,8 +573,7 @@ class TwitterAPI():
         params["query_source"] = "typed_query"
         params["pc"] = "1"
         params["spelling_corrections"] = "1"
-        return self._pagination(
-            endpoint, params, "sq-I-t-", "sq-cursor-bottom")
+        return self._pagination(endpoint, params)
 
     def list_members(self, list_id):
         endpoint = "/graphql/3pV4YlpljXUTFAa1jVNWQw/ListMembers"
@@ -644,8 +643,7 @@ class TwitterAPI():
         raise exception.StopExtraction(
             "%s %s (%s)", response.status_code, response.reason, msg)
 
-    def _pagination(self, endpoint, params=None,
-                    entry_tweet="tweet-", entry_cursor="cursor-bottom-"):
+    def _pagination(self, endpoint, params=None):
         if params is None:
             params = self.params.copy()
         original_retweets = (self.extractor.retweets == "original")
@@ -657,48 +655,59 @@ class TwitterAPI():
             instr = data["timeline"]["instructions"]
             if not instr:
                 return
+            tweet_ids = []
             tweets = data["globalObjects"]["tweets"]
             users = data["globalObjects"]["users"]
 
+            # collect tweet IDs and cursor value
             for entry in instr[0]["addEntries"]["entries"]:
+                entry_startswith = entry["entryId"].startswith
 
-                if entry["entryId"].startswith(entry_tweet):
-                    try:
-                        tweet = tweets[
-                            entry["content"]["item"]["content"]["tweet"]["id"]]
-                    except KeyError:
-                        self.extractor.log.debug(
-                            "Skipping %s (deleted)",
-                            entry["entryId"][len(entry_tweet):])
-                        continue
+                if entry_startswith(("tweet-", "sq-I-t-")):
+                    tweet_ids.append(
+                        entry["content"]["item"]["content"]["tweet"]["id"])
 
-                    if "retweeted_status_id_str" in tweet:
-                        retweet = tweets.get(tweet["retweeted_status_id_str"])
-                        if original_retweets:
-                            if not retweet:
-                                continue
-                            retweet["_retweet_id_str"] = tweet["id_str"]
-                            tweet = retweet
-                        elif retweet:
-                            tweet["author"] = users[retweet["user_id_str"]]
-                    tweet["user"] = users[tweet["user_id_str"]]
-                    yield tweet
+                elif entry_startswith("homeConversation-"):
+                    tweet_ids.extend(
+                        entry["content"]["timelineModule"]["metadata"]
+                        ["conversationMetadata"]["allTweetIds"][::-1])
 
-                    if "quoted_status_id_str" in tweet:
-                        quoted = tweets.get(tweet["quoted_status_id_str"])
-                        if quoted:
-                            quoted["author"] = users[quoted["user_id_str"]]
-                            quoted["user"] = tweet["user"]
-                            quoted["quoted"] = True
-                            yield quoted
-
-                elif entry["entryId"].startswith(entry_cursor):
+                elif entry_startswith(("cursor-bottom-", "sq-cursor-bottom")):
                     cursor = entry["content"]["operation"]["cursor"]
                     if not cursor.get("stopOnEmptyResponse"):
                         # keep going even if there are no tweets
                         tweet = True
                     cursor = cursor["value"]
 
+            # process tweets
+            for tweet_id in tweet_ids:
+                try:
+                    tweet = tweets[tweet_id]
+                except KeyError:
+                    self.extractor.log.debug("Skipping %s (deleted)", tweet_id)
+                    continue
+
+                if "retweeted_status_id_str" in tweet:
+                    retweet = tweets.get(tweet["retweeted_status_id_str"])
+                    if original_retweets:
+                        if not retweet:
+                            continue
+                        retweet["_retweet_id_str"] = tweet["id_str"]
+                        tweet = retweet
+                    elif retweet:
+                        tweet["author"] = users[retweet["user_id_str"]]
+                tweet["user"] = users[tweet["user_id_str"]]
+                yield tweet
+
+                if "quoted_status_id_str" in tweet:
+                    quoted = tweets.get(tweet["quoted_status_id_str"])
+                    if quoted:
+                        quoted["author"] = users[quoted["user_id_str"]]
+                        quoted["user"] = tweet["user"]
+                        quoted["quoted"] = True
+                        yield quoted
+
+            # update cursor value
             if "replaceEntry" in instr[-1] :
                 cursor = (instr[-1]["replaceEntry"]["entry"]
                           ["content"]["operation"]["cursor"]["value"])
