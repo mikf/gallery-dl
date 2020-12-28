@@ -239,30 +239,29 @@ class TwitterExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = "https://mobile.twitter.com/i/nojs_router"
-        params = {"path": "/login"}
-        headers = {"Referer": self.root + "/", "Origin": self.root}
-        page = self.request(
-            url, method="POST", params=params, headers=headers, data={}).text
+        token = util.generate_csrf_token()
+        self.session.cookies.clear()
+        self.request(self.root + "/login")
 
-        pos = page.index('name="authenticity_token"')
-        token = text.extract(page, 'value="', '"', pos)[0]
-
-        url = "https://mobile.twitter.com/sessions"
+        url = self.root + "/sessions"
+        cookies = {
+            "_mb_tk": token,
+        }
         data = {
+            "redirect_after_login"      : "/",
+            "remember_me"               : "1",
             "authenticity_token"        : token,
+            "wfa"                       : "1",
+            "ui_metrics"                : "{}",
             "session[username_or_email]": username,
             "session[password]"         : password,
-            "remember_me"               : "1",
-            "wfa"                       : "1",
-            "commit"                    : "+Log+in+",
-            "ui_metrics"                : "",
         }
-        response = self.request(url, method="POST", data=data)
+        response = self.request(
+            url, method="POST", cookies=cookies, data=data)
+
         cookies = {
             cookie.name: cookie.value
             for cookie in self.session.cookies
-            if cookie.domain == self.cookiedomain
         }
 
         if "/error" in response.url or "auth_token" not in cookies:

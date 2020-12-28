@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.16.1 - 2020-12-27
 ### Additions
 - [instagram] add `include` option ([#1180](https://github.com/mikf/gallery-dl/issues/1180))
