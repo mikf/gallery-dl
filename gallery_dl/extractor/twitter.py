@@ -463,15 +463,17 @@ class TwitterAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
+
+        self.root = "https://twitter.com/i/api"
         self.headers = {
             "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejR"
                              "COuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu"
                              "4FA33AGWWjCpTnA",
             "x-guest-token": None,
+            "x-twitter-auth-type": None,
             "x-twitter-client-language": "en",
             "x-twitter-active-user": "yes",
             "x-csrf-token": None,
-            "Origin": "https://twitter.com",
             "Referer": "https://twitter.com/",
         }
         self.params = {
@@ -486,8 +488,8 @@ class TwitterAPI():
             "skip_status": "1",
             "cards_platform": "Web-12",
             "include_cards": "1",
-            "include_composer_source": "true",
             "include_ext_alt_text": "true",
+            "include_quote_count": "true",
             "include_reply_count": "1",
             "tweet_mode": "extended",
             "include_entities": "true",
@@ -496,11 +498,9 @@ class TwitterAPI():
             "include_ext_media_availability": "true",
             "send_error_codes": "true",
             "simple_quoted_tweet": "true",
-            #  "count": "20",
             "count": "100",
             "cursor": None,
-            "ext": "mediaStats,highlightedLabel,cameraMoment",
-            "include_quote_count": "true",
+            "ext": "mediaStats,highlightedLabel",
         }
 
         cookies = self.extractor.session.cookies
@@ -515,17 +515,15 @@ class TwitterAPI():
 
         if cookies.get("auth_token", domain=cookiedomain):
             # logged in
-            self.root = "https://twitter.com/i/api/"
             self.headers["x-twitter-auth-type"] = "OAuth2Session"
         else:
             # guest
-            self.root = "https://api.twitter.com/"
             guest_token = self._guest_token()
             cookies.set("gt", guest_token, domain=cookiedomain)
             self.headers["x-guest-token"] = guest_token
 
     def tweet(self, tweet_id):
-        endpoint = "2/timeline/conversation/{}.json".format(tweet_id)
+        endpoint = "/2/timeline/conversation/{}.json".format(tweet_id)
         tweets = []
         for tweet in self._pagination(endpoint):
             if tweet["id_str"] == tweet_id or \
@@ -539,32 +537,36 @@ class TwitterAPI():
 
     def timeline_profile(self, screen_name):
         user_id = self._user_id_by_screen_name(screen_name)
-        endpoint = "2/timeline/profile/{}.json".format(user_id)
-        return self._pagination(endpoint)
+        endpoint = "/2/timeline/profile/{}.json".format(user_id)
+        params = self.params.copy()
+        params["include_tweet_replies"] = "false"
+        return self._pagination(endpoint, params)
 
     def timeline_media(self, screen_name):
         user_id = self._user_id_by_screen_name(screen_name)
-        endpoint = "2/timeline/media/{}.json".format(user_id)
+        endpoint = "/2/timeline/media/{}.json".format(user_id)
         return self._pagination(endpoint)
 
     def timeline_favorites(self, screen_name):
         user_id = self._user_id_by_screen_name(screen_name)
-        endpoint = "2/timeline/favorites/{}.json".format(user_id)
+        endpoint = "/2/timeline/favorites/{}.json".format(user_id)
+        params = self.params.copy()
+        params["sorted_by_time"] = "true"
         return self._pagination(endpoint)
 
     def timeline_bookmark(self):
-        endpoint = "2/timeline/bookmark.json"
+        endpoint = "/2/timeline/bookmark.json"
         return self._pagination(endpoint)
 
     def timeline_list(self, list_id):
-        endpoint = "2/timeline/list.json"
+        endpoint = "/2/timeline/list.json"
         params = self.params.copy()
         params["list_id"] = list_id
         params["ranking_mode"] = "reverse_chronological"
         return self._pagination(endpoint, params)
 
     def search(self, query):
-        endpoint = "2/search/adaptive.json"
+        endpoint = "/2/search/adaptive.json"
         params = self.params.copy()
         params["q"] = query
         params["tweet_search_mode"] = "live"
@@ -575,7 +577,7 @@ class TwitterAPI():
             endpoint, params, "sq-I-t-", "sq-cursor-bottom")
 
     def list_members(self, list_id):
-        endpoint = "graphql/M74V2EwlxxVYGB4DbyAphQ/ListMembers"
+        endpoint = "/graphql/3pV4YlpljXUTFAa1jVNWQw/ListMembers"
         variables = {
             "listId": list_id,
             "count" : 20,
@@ -585,7 +587,7 @@ class TwitterAPI():
         return self._pagination_members(endpoint, variables)
 
     def list_by_rest_id(self, list_id):
-        endpoint = "graphql/LXXTUytSX1QY-2p8Xp9BFA/ListByRestId"
+        endpoint = "/graphql/EhaI2uiCBJI97e28GN8WjQ/ListByRestId"
         params = {"variables": '{"listId":"' + list_id + '"'
                                ',"withUserResult":false}'}
         try:
@@ -594,7 +596,7 @@ class TwitterAPI():
             raise exception.NotFoundError("list")
 
     def user_by_screen_name(self, screen_name):
-        endpoint = "graphql/jMaTS-_Ea8vh9rpKggJbCQ/UserByScreenName"
+        endpoint = "/graphql/ZRnOhhXPwue_JGILb9TNug/UserByScreenName"
         params = {"variables": '{"screen_name":"' + screen_name + '"'
                                ',"withHighlightedLabel":true}'}
         try:
@@ -609,14 +611,16 @@ class TwitterAPI():
 
     @cache(maxage=3600)
     def _guest_token(self):
-        endpoint = "1.1/guest/activate.json"
-        return self._call(endpoint, None, "POST")["guest_token"]
+        root = "https://api.twitter.com"
+        endpoint = "/1.1/guest/activate.json"
+        return self._call(endpoint, None, root, "POST")["guest_token"]
 
-    def _call(self, endpoint, params, method="GET"):
-        url = self.root + endpoint
+    def _call(self, endpoint, params, root=None, method="GET"):
+        if root is None:
+            root = self.root
         response = self.extractor.request(
-            url, method=method, params=params, headers=self.headers,
-            fatal=None)
+            root + endpoint, method=method, params=params,
+            headers=self.headers, fatal=None)
 
         # update 'x-csrf-token' header (#1170)
         csrf_token = response.cookies.get("ct0")
