@@ -647,6 +647,7 @@ class TwitterAPI():
         if params is None:
             params = self.params.copy()
         original_retweets = (self.extractor.retweets == "original")
+        pinned_tweet = True
 
         while True:
             cursor = tweet = None
@@ -658,6 +659,12 @@ class TwitterAPI():
             tweet_ids = []
             tweets = data["globalObjects"]["tweets"]
             users = data["globalObjects"]["users"]
+
+            if pinned_tweet:
+                if "pinEntry" in instr[-1]:
+                    tweet_ids.append(instr[-1]["pinEntry"]["entry"]["content"]
+                                     ["item"]["content"]["tweet"]["id"])
+                pinned_tweet = False
 
             # collect tweet IDs and cursor value
             for entry in instr[0]["addEntries"]["entries"]:
