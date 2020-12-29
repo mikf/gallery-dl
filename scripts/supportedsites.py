@@ -132,6 +132,7 @@ SUBCATEGORY_MAP = {
         "media": "Media Files",
     },
     "pinterest": {
+        "board": "",
         "pinit": "pin.it Links",
     },
     "pixiv": {

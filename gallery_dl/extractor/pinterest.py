@@ -22,6 +22,7 @@ class PinterestExtractor(Extractor):
     category = "pinterest"
     filename_fmt = "{category}_{id}.{extension}"
     archive_fmt = "{id}"
+    root = "https://www.pinterest.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -123,7 +124,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     subcategory = "board"
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/?$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/(?!_saved)([^/?#&]+)/?$"
     test = (
         ("https://www.pinterest.com/g1952849/test-/", {
             "pattern": r"https://i\.pinimg\.com/originals/",
@@ -165,6 +166,27 @@ class PinterestBoardExtractor(PinterestExtractor):
             return itertools.chain.from_iterable(pins)
         else:
             return self.api.board_pins(board["id"])
+
+
+class PinterestBoardsExtractor(PinterestExtractor):
+    """Extractor for a user's boards """
+    subcategory = "boards"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/_saved/?$"
+    test = ("https://www.pinterest.de/g1952849/_saved/", {
+        "pattern": PinterestBoardExtractor.pattern,
+        "count": ">= 2",
+    })
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self, match)
+        self.user = text.unquote(match.group(1))
+
+    def items(self):
+        for board in self.api.boards(self.user):
+            url = board.get("url")
+            if url:
+                board["_extractor"] = PinterestBoardExtractor
+                yield Message.Queue, self.root + url, board
 
 
 class PinterestSectionExtractor(PinterestExtractor):
@@ -300,6 +322,18 @@ class PinterestAPI():
         options = {"slug": board_name, "username": user,
                    "field_set_key": "detailed"}
         return self._call("Board", options)["resource_response"]["data"]
+
+    def boards(self, user):
+        """Yield all boards from 'user'"""
+        options = {
+            "sort"            : "last_pinned_to",
+            "field_set_key"   : "profile_grid_item",
+            "filter_stories"  : False,
+            "username"        : user,
+            "page_size"       : 25,
+            "include_archived": True,
+        }
+        return self._pagination("Boards", options)
 
     def board_pins(self, board_id):
         """Yield all pins of a specific board"""
