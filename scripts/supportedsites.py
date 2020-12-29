@@ -139,6 +139,9 @@ SUBCATEGORY_MAP = {
         "me"  : "pixiv.me Links",
         "work": "individual Images",
     },
+    "sankaku": {
+        "books": "Book Searches",
+    },
     "smugmug": {
         "path": "Images from Users and Folders",
     },

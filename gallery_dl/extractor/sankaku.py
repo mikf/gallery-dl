@@ -9,6 +9,7 @@
 """Extractors for https://sankaku.app/"""
 
 from .booru import BooruExtractor
+from .common import Message
 from .. import text, exception
 from ..cache import cache
 import collections
@@ -163,6 +164,31 @@ class SankakuPostExtractor(SankakuExtractor):
         return SankakuAPI(self).posts(self.post_id)
 
 
+class SankakuBooksExtractor(SankakuExtractor):
+    """Extractor for books by tag search on sankaku.app"""
+    subcategory = "books"
+    pattern = BASE_PATTERN + r"/books/?\?([^#]*)"
+    test = (
+        ("https://sankaku.app/books?tags=aiue_oka", {
+            "range": "1-20",
+            "count": 20,
+        }),
+        ("https://beta.sankakucomplex.com/books?tags=aiue_oka"),
+    )
+
+    def __init__(self, match):
+        SankakuExtractor.__init__(self, match)
+        query = text.parse_query(match.group(1))
+        self.tags = text.unquote(query.get("tags", "").replace("+", " "))
+
+    def items(self):
+        params = {"tags": self.tags, "pool_type": "0"}
+        for pool in SankakuAPI(self).pools_keyset(params):
+            pool["_extractor"] = SankakuPoolExtractor
+            url = "https://sankaku.app/books/{}".format(pool["id"])
+            yield Message.Queue, url, pool
+
+
 class SankakuAPI():
     """Interface for the sankaku.app API"""
 
@@ -177,6 +203,9 @@ class SankakuAPI():
     def pools(self, pool_id):
         params = {"lang": "en"}
         return self._call("/pools/" + pool_id, params)
+
+    def pools_keyset(self, params):
+        return self._pagination("/pools/keyset", params)
 
     def posts(self, post_id):
         params = {
