@@ -11,12 +11,12 @@
 from .common import Extractor, Message, generate_extractors
 from .. import text
 import itertools
-import operator
 
 
 class FoolfuukaExtractor(Extractor):
     """Base extractor for FoolFuuka based boards/archives"""
     basecategory = "foolfuuka"
+    archive_fmt = "{board[shortname]}_{num}_{timestamp}"
     external = "default"
 
     def __init__(self, match):
@@ -26,16 +26,11 @@ class FoolfuukaExtractor(Extractor):
             self.remote = self._remote_direct
 
     def items(self):
-        op = True
-        yield Message.Version, 1
+        yield Message.Directory, self.metadata()
         for post in self.posts():
-            if op:
-                yield Message.Directory, post
-                op = False
-            if not post["media"]:
-                continue
-
             media = post["media"]
+            if not media:
+                continue
             url = media["media_link"]
 
             if not url and "remote_media_link" in media:
@@ -46,6 +41,9 @@ class FoolfuukaExtractor(Extractor):
             post["filename"], _, post["extension"] = \
                 media["media"].rpartition(".")
             yield Message.Url, url, post
+
+    def metadata(self):
+        """ """
 
     def posts(self):
         """Return an iterable with all relevant posts"""
@@ -66,23 +64,27 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
     subcategory = "thread"
     directory_fmt = ("{category}", "{board[shortname]}",
                      "{thread_num}{title:? - //}")
-    archive_fmt = "{board[shortname]}_{num}_{timestamp}"
     pattern_fmt = r"/([^/?#]+)/thread/(\d+)"
 
     def __init__(self, match):
         FoolfuukaExtractor.__init__(self, match)
         self.board, self.thread = match.groups()
+        self.data = None
 
-    def posts(self):
+    def metadata(self):
         url = self.root + "/_/api/chan/thread/"
         params = {"board": self.board, "num": self.thread}
-        data = self.request(url, params=params).json()[self.thread]
+        self.data = self.request(url, params=params).json()[self.thread]
+        return self.data["op"]
 
-        # sort post objects by key
-        posts = sorted(data.get("posts", {}).items())
-        posts = map(operator.itemgetter(1), posts)
-
-        return itertools.chain((data["op"],), posts)
+    def posts(self):
+        posts = self.data.get("posts")
+        if posts:
+            posts = list(posts.values())
+            posts.sort(key=lambda p: p["timestamp"])
+        else:
+            posts = ()
+        return itertools.chain((self.data["op"],), posts)
 
 
 class FoolfuukaBoardExtractor(FoolfuukaExtractor):
@@ -115,6 +117,59 @@ class FoolfuukaBoardExtractor(FoolfuukaExtractor):
                 yield Message.Queue, thread["url"], thread
 
 
+class FoolfuukaSearchExtractor(FoolfuukaExtractor):
+    """Base extractor for search results on FoolFuuka based boards/archives"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "search", "{search}")
+    pattern_fmt = r"/([^/?#]+)/search((?:/[^/?#]+/[^/?#]+)+)"
+    request_interval = 1.0
+
+    def __init__(self, match):
+        FoolfuukaExtractor.__init__(self, match)
+        board, search = match.groups()
+
+        self.params = params = {}
+        args = search.split("/")
+        key = None
+
+        for arg in args:
+            if key:
+                params[key] = text.unescape(arg)
+                key = None
+            else:
+                key = arg
+        if board != "_":
+            params["boards"] = board
+
+    def metadata(self):
+        return {"search": self.params.get("text", "")}
+
+    def posts(self):
+        url = self.root + "/_/api/chan/search/"
+        params = self.params.copy()
+        params["page"] = text.parse_int(params.get("page"), 1)
+        if "filter" not in params:
+            params["filter"] = "text"
+
+        while True:
+            try:
+                data = self.request(url, params=params).json()
+            except ValueError:
+                return
+
+            if isinstance(data, dict):
+                if data.get("error"):
+                    return
+                posts = data["0"]["posts"]
+            elif isinstance(data, list):
+                posts = data[0]["posts"]
+            else:
+                return
+
+            yield from posts
+            params["page"] += 1
+
+
 EXTRACTORS = {
     "4plebs": {
         "name": "_4plebs",
@@ -124,6 +179,7 @@ EXTRACTORS = {
             "url": "07452944164b602502b02b24521f8cee5c484d2a",
         }),
         "test-board": ("https://archive.4plebs.org/tg/",),
+        "test-search": ("https://archive.4plebs.org/_/search/text/test/",),
     },
     "archivedmoe": {
         "root": "https://archived.moe",
@@ -137,6 +193,7 @@ EXTRACTORS = {
             }),
         ),
         "test-board": ("https://archived.moe/gd/",),
+        "test-search": ("https://archived.moe/_/search/text/test/",),
     },
     "archiveofsins": {
         "root": "https://archiveofsins.com",
@@ -146,6 +203,7 @@ EXTRACTORS = {
             "content": "0dd92d0d8a7bf6e2f7d1f5ac8954c1bcf18c22a4",
         }),
         "test-board": ("https://archiveofsins.com/h/",),
+        "test-search": ("https://archiveofsins.com/_/search/text/test/",),
     },
     "b4k": {
         "root": "https://arch.b4k.co",
@@ -154,6 +212,7 @@ EXTRACTORS = {
             "url": "d309713d2f838797096b3e9cb44fe514a9c9d07a",
         }),
         "test-board": ("https://arch.b4k.co/meta/",),
+        "test-search": ("https://arch.b4k.co/_/search/text/test/",),
     },
     "desuarchive": {
         "root": "https://desuarchive.org",
@@ -161,6 +220,7 @@ EXTRACTORS = {
             "url": "3ae1473f6916ac831efe5cc4d4e7d3298ce79406",
         }),
         "test-board": ("https://desuarchive.org/a/",),
+        "test-search": ("https://desuarchive.org/_/search/text/test/",),
     },
     "fireden": {
         "root": "https://boards.fireden.net",
@@ -168,6 +228,7 @@ EXTRACTORS = {
             "url": "3adfe181ee86a8c23021c705f623b3657a9b0a43",
         }),
         "test-board": ("https://boards.fireden.net/sci/",),
+        "test-search": ("https://boards.fireden.net/_/search/text/test/",),
     },
     "nyafuu": {
         "root": "https://archive.nyafuu.org",
@@ -176,6 +237,7 @@ EXTRACTORS = {
             "url": "bbe6f82944a45e359f5c8daf53f565913dc13e4f",
         }),
         "test-board": ("https://archive.nyafuu.org/c/",),
+        "test-search": ("https://archive.nyafuu.org/_/search/text/test/",),
     },
     "rbt": {
         "root": "https://rbt.asia",
@@ -189,6 +251,7 @@ EXTRACTORS = {
             }),
         ),
         "test-board": ("https://rbt.asia/g/",),
+        "test-search": ("https://rbt.asia/_/search/text/test/",),
     },
     "thebarchive": {
         "root": "https://thebarchive.com",
@@ -197,6 +260,7 @@ EXTRACTORS = {
             "url": "e8b18001307d130d67db31740ce57c8561b5d80c",
         }),
         "test-board": ("https://thebarchive.com/b/",),
+        "test-search": ("https://thebarchive.com/_/search/text/test/",),
     },
     "_ckey": "childclass",
 }
@@ -204,4 +268,5 @@ EXTRACTORS = {
 generate_extractors(EXTRACTORS, globals(), (
     FoolfuukaThreadExtractor,
     FoolfuukaBoardExtractor,
+    FoolfuukaSearchExtractor,
 ))
