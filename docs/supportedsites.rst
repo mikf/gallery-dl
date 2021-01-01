@@ -8,21 +8,21 @@ Site                 URL                                 Capabilities           
 35PHOTO              https://35photo.pro/                |35photo-C|
 3dbooru              http://behoimi.org/                 Pools, Popular Images, Posts, Tag Searches
 4chan                https://www.4chan.org/              Boards, Threads
-4plebs               https://archive.4plebs.org/         Threads
+4plebs               https://archive.4plebs.org/         Boards, Threads
 500px                https://500px.com/                  Galleries, individual Images, User Profiles
 8kun                 https://8kun.top/                   Boards, Threads
 8muses               https://comics.8muses.com/          Albums
 Adobe Portfolio      https://www.myportfolio.com/        Galleries
 Adult Empire         https://www.adultempire.com/        Galleries
-arch.b4k.co          https://arch.b4k.co/                Threads
-Archive of Sins      https://archiveofsins.com/          Threads
-Archived.Moe         https://archived.moe/               Threads
+arch.b4k.co          https://arch.b4k.co/                Boards, Threads
+Archive of Sins      https://archiveofsins.com/          Boards, Threads
+Archived.Moe         https://archived.moe/               Boards, Threads
 ArtStation           https://www.artstation.com/         |artstation-C|
 baraag               https://baraag.net/                 Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Behance              https://www.behance.net/            Collections, Galleries, User Profiles
 Blogger              https://www.blogger.com/            Blogs, Posts, Search Results
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag Searches         Supported
-Desuarchive          https://desuarchive.org/            Threads
+Desuarchive          https://desuarchive.org/            Boards, Threads
 DeviantArt           https://www.deviantart.com/         |deviantart-C|                                     `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
 Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Images, Search Results
@@ -32,7 +32,7 @@ Eka's Portal         https://aryion.com/                 Galleries, Posts       
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Supported
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products
-Fireden              https://boards.fireden.net/         Threads
+Fireden              https://boards.fireden.net/         Boards, Threads
 Flickr               https://www.flickr.com/             |flickr-C|                                         `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Fur Affinity         https://www.furaffinity.net/        |furaffinity-C|                                    `Cookies <https://github.com/mikf/gallery-dl#cookies>`__
 Fuskator             https://fuskator.com/               Galleries, Search Results
@@ -89,7 +89,7 @@ Niconico Seiga       https://seiga.nicovideo.jp/         individual Images, User
 nijie                https://nijie.info/                 |nijie-C|                                          Required
 Nozomi.la            https://nozomi.la/                  Posts, Search Results, Tag Searches
 NSFWalbum.com        https://nsfwalbum.com/              Albums
-Nyafuu Archive       https://archive.nyafuu.org/         Threads
+Nyafuu Archive       https://archive.nyafuu.org/         Boards, Threads
 Patreon              https://www.patreon.com/            Creators, Posts, User Profiles                     `Cookies <https://github.com/mikf/gallery-dl#cookies>`__
 Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Photobucket          https://photobucket.com/            Albums, individual Images
@@ -104,7 +104,7 @@ PowerManga           https://read.powermanga.org/        Chapters, Manga
 Pururin              https://pururin.io/                 Galleries
 Read Comic Online    https://readcomiconline.to/         Comic Issues, Comics
 Realbooru            https://realbooru.com/              Pools, Posts, Tag Searches
-RebeccaBlackTech     https://rbt.asia/                   Threads
+RebeccaBlackTech     https://rbt.asia/                   Boards, Threads
 Reddit               https://www.reddit.com/             |reddit-C|                                         `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 RedGIFs              https://redgifs.com/                individual Images, Search Results, User Profiles
 rule #34             https://rule34.paheal.net/          Posts, Tag Searches
@@ -122,7 +122,7 @@ SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Speaker Deck         https://speakerdeck.com/            Presentations
 SubscribeStar        https://www.subscribestar.com/      Posts, User Profiles                               Supported
-The /b/ Archive      https://thebarchive.com/            Threads
+The /b/ Archive      https://thebarchive.com/            Boards, Threads
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Supported
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Twitter              https://twitter.com/                |twitter-C|                                        Supported
