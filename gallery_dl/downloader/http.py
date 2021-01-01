@@ -283,7 +283,10 @@ MIME_TYPES = {
     "image/x-ms-bmp": "bmp",
     "image/webp"    : "webp",
     "image/svg+xml" : "svg",
-
+    "image/ico"     : "ico",
+    "image/icon"    : "ico",
+    "image/x-icon"  : "ico",
+    "image/vnd.microsoft.icon" : "ico",
     "image/x-photoshop"        : "psd",
     "application/x-photoshop"  : "psd",
     "image/vnd.adobe.photoshop": "psd",
@@ -314,7 +317,7 @@ MIME_TYPES = {
     "application/octet-stream": "bin",
 }
 
-# taken from https://en.wikipedia.org/wiki/List_of_file_signatures
+# https://en.wikipedia.org/wiki/List_of_file_signatures
 FILE_SIGNATURES = {
     "jpg" : b"\xFF\xD8\xFF",
     "png" : b"\x89PNG\r\n\x1A\n",
@@ -322,6 +325,8 @@ FILE_SIGNATURES = {
     "bmp" : b"BM",
     "webp": b"RIFF",
     "svg" : b"<?xml",
+    "ico" : b"\x00\x00\x01\x00",
+    "cur" : b"\x00\x00\x02\x00",
     "psd" : b"8BPS",
     "webm": b"\x1A\x45\xDF\xA3",
     "ogg" : b"OggS",
@@ -333,8 +338,7 @@ FILE_SIGNATURES = {
     "pdf" : b"%PDF-",
     "swf" : (b"CWS", b"FWS"),
     # check 'bin' files against all other file signatures
-    "bin" : b"\x00\x00\x00\x00",
+    "bin" : b"\x00\x00\x00\x00\x00\x00\x00\x00",
 }
-
 
 __downloader__ = HttpDownloader
