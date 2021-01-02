@@ -94,7 +94,7 @@ Patreon              https://www.patreon.com/            Creators, Posts, User P
 Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Photobucket          https://photobucket.com/            Albums, individual Images
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
-Pinterest            https://www.pinterest.com/          Boards, Pins, pin.it Links, related Pins, Sections Supported
+Pinterest            https://www.pinterest.com/          |pinterest-C|                                      Supported
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
 Pixnet               https://www.pixnet.net/             Folders, individual Images, Sets, User Profiles
 Plurk                https://www.plurk.com/              Posts, Timelines
@@ -160,6 +160,7 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |instagram-C| replace:: Channels, Highlights, Posts, Saved Posts, Stories, Tag Searches, User Profiles
 .. |newgrounds-C| replace:: Art, Audio, Favorites, individual Images, Media Files, Movies, User Profiles
 .. |nijie-C| replace:: Doujin, Favorites, Illustrations, individual Images, User Profiles
+.. |pinterest-C| replace:: Pins, pin.it Links, related Pins, Sections, User Profiles
 .. |pixiv-C| replace:: Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders

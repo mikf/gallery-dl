@@ -168,14 +168,17 @@ class PinterestBoardExtractor(PinterestExtractor):
             return self.api.board_pins(board["id"])
 
 
-class PinterestBoardsExtractor(PinterestExtractor):
-    """Extractor for a user's boards """
-    subcategory = "boards"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/_saved/?$"
-    test = ("https://www.pinterest.de/g1952849/_saved/", {
-        "pattern": PinterestBoardExtractor.pattern,
-        "count": ">= 2",
-    })
+class PinterestUserExtractor(PinterestExtractor):
+    """Extractor for a user's boards"""
+    subcategory = "user"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)(?:/_saved)?/?$"
+    test = (
+        ("https://www.pinterest.de/g1952849/", {
+            "pattern": PinterestBoardExtractor.pattern,
+            "count": ">= 2",
+        }),
+        ("https://www.pinterest.de/g1952849/_saved/"),
+    )
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
