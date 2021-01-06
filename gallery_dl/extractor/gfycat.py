@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -41,8 +41,11 @@ class GfycatExtractor(Extractor):
             key = fmt + "Url"
             if key in gfyitem:
                 url = gfyitem[key]
+                if url.startswith("http:"):
+                    url = "https" + url[4:]
                 gfyitem["extension"] = url.rpartition(".")[2]
                 return url
+        gfyitem["extension"] = ""
         return ""
 
     def metadata(self):
@@ -190,7 +193,11 @@ class GfycatAPI():
         while True:
             data = self._call(endpoint, params)
             gfycats = data["gfycats"]
-            yield from gfycats
+
+            for gfycat in gfycats:
+                if "gfyName" not in gfycat:
+                    gfycat.update(self.gfycat(gfycat["gfyId"]))
+                yield gfycat
 
             if "found" not in data and len(gfycats) < params["count"] or \
                     not data["gfycats"]:

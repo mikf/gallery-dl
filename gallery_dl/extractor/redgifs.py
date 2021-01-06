@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,7 +15,7 @@ from .. import text
 class RedgifsExtractor(GfycatExtractor):
     """Base class for redgifs extractors"""
     category = "redgifs"
-    root = "https://www.redgifs.com/"
+    root = "https://www.redgifs.com"
 
 
 class RedgifsUserExtractor(RedgifsExtractor):
@@ -39,8 +39,8 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/gifs/browse/([^/?#]+)"
     test = ("https://www.redgifs.com/gifs/browse/jav", {
         "pattern": r"https://\w+\.(redgifs|gfycat)\.com/[A-Za-z]+\.mp4",
-        "range": "100-300",
-        "count": "> 200",
+        "range": "1-10",
+        "count": 10,
     })
 
     def metadata(self):
@@ -70,6 +70,6 @@ class RedgifsImageExtractor(RedgifsExtractor):
 
 
 class RedgifsAPI(GfycatAPI):
-    API_ROOT = "https://napi.redgifs.com/"
+    API_ROOT = "https://napi.redgifs.com"
     ACCESS_KEY = ("dBLwVuGn9eq4dtXLs8WSfpjcYFY7bPQe"
                   "AqGPSFgqeW5B9uzj2cMVhF63pTFF4Rg9")
