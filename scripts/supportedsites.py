@@ -160,6 +160,7 @@ SUBCATEGORY_MAP = {
 
 _OAUTH = "`OAuth <https://github.com/mikf/gallery-dl#oauth>`__"
 _COOKIES = "`Cookies <https://github.com/mikf/gallery-dl#cookies>`__"
+_APIKEY_DB = "`API Key <configuration.rst#extractorderpibooruapi-key>`__"
 _APIKEY_WH = "`API Key <configuration.rst#extractorwallhavenapi-key>`__"
 _APIKEY_WY = "`API Key <configuration.rst#extractorweasylapi-key>`__"
 
@@ -167,6 +168,7 @@ AUTH_MAP = {
     "aryion"         : "Supported",
     "baraag"         : _OAUTH,
     "danbooru"       : "Supported",
+    "derpibooru"     : _APIKEY_DB,
     "deviantart"     : _OAUTH,
     "e621"           : "Supported",
     "e-hentai"       : "Supported",

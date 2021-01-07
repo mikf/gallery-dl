@@ -696,6 +696,34 @@ Description
     * ``false``: Converted video files
 
 
+extractor.derpibooru.api-key
+----------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Your `Derpibooru API Key <https://derpibooru.org/registrations/edit>`__,
+    to use your account's browsing settings and filters.
+
+
+extractor.derpibooru.filter
+---------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Example
+    ``56027`` (`Everything <https://derpibooru.org/filters/56027>`_ filter)
+Description
+    The content filter ID to use.
+
+    Setting an explicit filter ID overrides any default filters and can be used
+    to access 18+ content without `API Key <extractor.derpibooru.api-key_>`_.
+
+    See `Filters <https://derpibooru.org/filters>`_ for details.
+
+
 extractor.deviantart.extra
 --------------------------
 Type
