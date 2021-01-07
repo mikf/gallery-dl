@@ -136,6 +136,11 @@ def build_parser():
         help="Print URLs instead of downloading",
     )
     output.add_argument(
+        "-G",
+        dest="list_urls", action="store_const", const=128,
+        help=argparse.SUPPRESS,
+    )
+    output.add_argument(
         "-j", "--dump-json",
         dest="jobtype", action="store_const", const=job.DataJob,
         help="Print JSON information",
