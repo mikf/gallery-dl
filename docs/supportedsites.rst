@@ -22,6 +22,7 @@ baraag               https://baraag.net/                 Images from Statuses, U
 Behance              https://www.behance.net/            Collections, Galleries, User Profiles
 Blogger              https://www.blogger.com/            Blogs, Posts, Search Results
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag Searches         Supported
+Derpibooru           https://derpibooru.org/             Galleries, Posts, Search Results                   `API Key <configuration.rst#extractorderpibooruapi-key>`__
 Desuarchive          https://desuarchive.org/            Boards, Search Results, Threads
 DeviantArt           https://www.deviantart.com/         |deviantart-C|                                     `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga

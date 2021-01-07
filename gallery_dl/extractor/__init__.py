@@ -24,6 +24,7 @@ modules = [
     "behance",
     "blogger",
     "danbooru",
+    "derpibooru",
     "deviantart",
     "dynastyscans",
     "e621",
