@@ -54,7 +54,7 @@ class RedgifsSearchExtractor(RedgifsExtractor):
 class RedgifsImageExtractor(RedgifsExtractor):
     """Extractor for individual gifs from redgifs.com"""
     subcategory = "image"
-    pattern = (r"(?:https?://)?(?:www\.)?(?:redgifs\.com/watch"
+    pattern = (r"(?:https?://)?(?:www\.)?(?:redgifs\.com/(?:watch|ifr)"
                r"|gifdeliverynetwork.com)/([A-Za-z]+)")
     test = (
         ("https://redgifs.com/watch/foolishforkedabyssiniancat", {
@@ -62,6 +62,7 @@ class RedgifsImageExtractor(RedgifsExtractor):
                        r"/FoolishForkedAbyssiniancat\.mp4",
             "content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
         }),
+        ("https://redgifs.com/ifr/FoolishForkedAbyssiniancat"),
         ("https://www.gifdeliverynetwork.com/foolishforkedabyssiniancat"),
     )
 
