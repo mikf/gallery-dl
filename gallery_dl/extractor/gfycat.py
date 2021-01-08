@@ -22,7 +22,7 @@ class GfycatExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.key = match.group(1)
+        self.key = match.group(1).lower()
         self.formats = (self.config("format", "mp4"), "mp4", "webm", "gif")
 
     def items(self):
