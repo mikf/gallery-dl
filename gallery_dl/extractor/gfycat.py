@@ -33,6 +33,7 @@ class GfycatExtractor(Extractor):
                 continue
             url = self._select_format(gfycat)
             gfycat.update(metadata)
+            gfycat["date"] = text.parse_timestamp(gfycat.get("createDate"))
             yield Message.Directory, gfycat
             yield Message.Url, url, gfycat
 
@@ -105,6 +106,7 @@ class GfycatImageExtractor(GfycatExtractor):
                 "title": "Bottom's up",
                 "username": "jackson3oh3",
                 "createDate": 1495884169,
+                "date": "dt:2017-05-27 11:22:49",
                 "md5": "a4796e05b0db9ba9ce5140145cd318aa",
                 "width": 400,
                 "height": 224,
@@ -146,6 +148,7 @@ class GfycatImageExtractor(GfycatExtractor):
                 self.log.warning("Skipping '%s' (malformed)", gfycat["gfyId"])
                 return
             url = self._select_format(gfycat)
+            gfycat["date"] = text.parse_timestamp(gfycat.get("createDate"))
             yield Message.Directory, gfycat
             yield Message.Url, url, gfycat
 
