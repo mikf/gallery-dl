@@ -609,8 +609,10 @@ class InstagramStoriesExtractor(InstagramExtractor):
     request_interval = 1.0
 
     def __init__(self, match):
-        InstagramExtractor.__init__(self, match)
         self.highlight_id, self.user = match.groups()
+        if self.highlight_id:
+            self.subcategory = InstagramHighlightsExtractor.subcategory
+        InstagramExtractor.__init__(self, match)
 
     def posts(self):
         if self.highlight_id:
