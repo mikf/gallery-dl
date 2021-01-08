@@ -133,7 +133,7 @@ Warosu               https://warosu.org/                 Threads
 Weasyl               https://www.weasyl.com/             Favorites, Folders, Journals, Submissions          `API Key <configuration.rst#extractorweasylapi-key>`__
 Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
-WikiArt.org          https://www.wikiart.org/            Artists, Artist Listings, Artworks
+WikiArt.org          https://www.wikiart.org/            |wikiart-C|
 xHamster             https://xhamster.com/               Galleries, User Profiles
 XVideos              https://www.xvideos.com/            Galleries, User Profiles
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag Searches
@@ -166,4 +166,5 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |twitter-C| replace:: Bookmarks, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets
+.. |wikiart-C| replace:: Artists, Artist Listings, Artworks, individual Images
 .. |yuki-S| replace:: yuki.la 4chan archive
