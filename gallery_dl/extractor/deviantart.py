@@ -588,10 +588,13 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     def deviations(self):
         folders = self.api.collections_folders(self.user)
         if self.flat:
-            return itertools.chain.from_iterable(
+            deviations = itertools.chain.from_iterable(
                 self.api.collections(self.user, folder["folderid"])
                 for folder in folders
             )
+            if self.offset:
+                deviations = util.advance(deviations, self.offset)
+            return deviations
         return self._folder_urls(
             folders, "favourites", DeviantartCollectionExtractor)
 
