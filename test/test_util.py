@@ -14,6 +14,7 @@ import unittest
 import io
 import random
 import string
+import datetime
 import http.cookiejar
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -267,6 +268,7 @@ class TestFormatter(unittest.TestCase):
         "n": None,
         "s": " \n\r\tSPACE    ",
         "u": "%27%3C%20/%20%3E%27",
+        "t": 1262304000,
         "name": "Name",
         "title1": "Title",
         "title2": "",
@@ -289,6 +291,9 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!S}", self.kwdict["a"])
         self._run_test("{l!S}", "a, b, c")
         self._run_test("{n!S}", "")
+        self._run_test("{t!d}", datetime.datetime(2010, 1, 1))
+        self._run_test("{t!d:%Y-%m-%d}", "2010-01-01")
+
         with self.assertRaises(KeyError):
             self._run_test("{a!q}", "hello world")
 
