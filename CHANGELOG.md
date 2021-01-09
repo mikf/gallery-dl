@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.16.3 - 2021-01-10
+### Fixes
+- fix crash when using a `dict` for `path-restrict`
+- [postprocessor:metadata] sanitize custom filenames
 
 ## 1.16.2 - 2021-01-09
 ### Additions
