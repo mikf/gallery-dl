@@ -1,6 +1,23 @@
 # Changelog
 
-## Unreleased
+## 1.16.2 - 2021-01-09
+### Additions
+- [derpibooru] add `search` and `gallery` extractors ([#862](https://github.com/mikf/gallery-dl/issues/862))
+- [foolfuuka] add `board` and `search` extractors ([#1044](https://github.com/mikf/gallery-dl/issues/1044), [#1174](https://github.com/mikf/gallery-dl/issues/1174))
+- [gfycat] add `date` metadata field ([#1138](https://github.com/mikf/gallery-dl/issues/1138))
+- [pinterest] add support for getting all boards of a user ([#1205](https://github.com/mikf/gallery-dl/issues/1205))
+- [sankaku] add support for book searches ([#1204](https://github.com/mikf/gallery-dl/issues/1204))
+- [twitter] fetch media from pinned tweets ([#1203](https://github.com/mikf/gallery-dl/issues/1203))
+- [wikiart] add extractor for single paintings ([#1233](https://github.com/mikf/gallery-dl/issues/1233))
+- [downloader:http] add MIME type and signature for `.ico` files ([#1211](https://github.com/mikf/gallery-dl/issues/1211))
+- add a `d` format string conversion for timestamp values
+- add `"ascii"` as a special `path-restrict` value
+### Fixes
+- [hentainexus] fix extraction ([#1234](https://github.com/mikf/gallery-dl/issues/1234))
+- [instagram] categorize single highlight URLs as `highlights` ([#1222](https://github.com/mikf/gallery-dl/issues/1222))
+- [redgifs] fix search results
+- [twitter] fix login with username & password
+- [twitter] fetch tweets from `homeConversation` entries
 
 ## 1.16.1 - 2020-12-27
 ### Additions

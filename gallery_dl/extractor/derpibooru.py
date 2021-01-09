@@ -121,7 +121,7 @@ class DerpibooruPostExtractor(DerpibooruExtractor):
 class DerpibooruSearchExtractor(DerpibooruExtractor):
     """Extractor for search results on derpibooru.org"""
     subcategory = "search"
-    directory_fmt = ("{category}", "search", "{search_tags}")
+    directory_fmt = ("{category}", "{search_tags}")
     pattern = BASE_PATTERN + r"/(?:search/?\?([^#]+)|tags/([^/?#]+))"
     test = (
         ("https://derpibooru.org/search?q=cute", {
