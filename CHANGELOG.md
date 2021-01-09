@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.16.2 - 2021-01-09
 ### Additions
 - [derpibooru] add `search` and `gallery` extractors ([#862](https://github.com/mikf/gallery-dl/issues/862))
