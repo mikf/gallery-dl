@@ -306,14 +306,14 @@ class MetadataTest(BasePostprocessorTest):
 
     def test_metadata_filename(self):
         self._create({
-            "filename"        : "{category}_{filename}_meta.data",
+            "filename"        : "{category}_{filename}_/meta/\n\r.data",
             "extension-format": "json",
         })
 
         with patch("builtins.open", mock_open()) as m:
             self._trigger()
 
-        path = self.pathfmt.realdirectory + "test_file_meta.data"
+        path = self.pathfmt.realdirectory + "test_file__meta_.data"
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
     @staticmethod

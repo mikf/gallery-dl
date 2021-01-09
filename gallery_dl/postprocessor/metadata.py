@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -86,7 +86,8 @@ class MetadataPP(PostProcessor):
         return (pathfmt.filename or "metadata") + "." + self.extension
 
     def _filename_custom(self, pathfmt):
-        return self._filename_fmt(pathfmt.kwdict)
+        return pathfmt.clean_path(pathfmt.clean_segment(
+            self._filename_fmt(pathfmt.kwdict)))
 
     def _filename_extfmt(self, pathfmt):
         kwdict = pathfmt.kwdict
