@@ -154,6 +154,7 @@ Description
       depending on the local operating system
     * ``"unix"``: ``"/"``
     * ``"windows"``: ``"\\\\|/<>:\"?*"``
+    * ``"ascii"``: ``"^0-9A-Za-z_."``
 
     Note: In a string with 2 or more characters, ``[]^-\`` need to be
     escaped with backslashes, e.g. ``"\\[\\]"``

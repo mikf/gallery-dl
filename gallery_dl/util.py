@@ -730,6 +730,7 @@ class PathFormat():
         "auto"   : "\\\\|/<>:\"?*" if WINDOWS else "/",
         "unix"   : "/",
         "windows": "\\\\|/<>:\"?*",
+        "ascii"  : "^0-9A-Za-z_.",
     }
 
     def __init__(self, extractor):
