@@ -726,12 +726,6 @@ class PathFormat():
         "jif" : "jpg",
         "jfi" : "jpg",
     }
-    RESTRICT_MAP = {
-        "auto"   : "\\\\|/<>:\"?*" if WINDOWS else "/",
-        "unix"   : "/",
-        "windows": "\\\\|/<>:\"?*",
-        "ascii"  : "^0-9A-Za-z_.",
-    }
 
     def __init__(self, extractor):
         filename_fmt = extractor.config("filename", extractor.filename_fmt)
@@ -775,7 +769,14 @@ class PathFormat():
 
         restrict = extractor.config("path-restrict", "auto")
         replace = extractor.config("path-replace", "_")
-        restrict = self.RESTRICT_MAP.get(restrict, restrict)
+        if restrict == "auto":
+            restrict = "\\\\|/<>:\"?*" if WINDOWS else "/"
+        elif restrict == "unix":
+            restrict = "/"
+        elif restrict == "windows":
+            restrict = "\\\\|/<>:\"?*"
+        elif restrict == "ascii":
+            restrict = "^0-9A-Za-z_."
         self.clean_segment = self._build_cleanfunc(restrict, replace)
 
         remove = extractor.config("path-remove", "\x00-\x1f\x7f")
