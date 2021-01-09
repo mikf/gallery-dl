@@ -22,7 +22,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
                r"/(?:view|read)/(\d+)")
     test = (
         ("https://hentainexus.com/view/5688", {
-            "url": "746d0043e20030f1171aae5ea113176607302517",
+            "url": "f1761895fb7aca2f6ff9e09f839c0ee2fa7a5e54",
             "keyword": "5e5bb4b1553b1c6e126b198f9ae017a1a5d0a5ad",
         }),
         ("https://hentainexus.com/read/5688"),
@@ -60,12 +60,15 @@ class HentainexusGalleryExtractor(GalleryExtractor):
     def images(self, _):
         url = "{}/read/{}".format(self.root, self.gallery_id)
         page = self.request(url).text
-
         data = json.loads(self._decode(text.extract(
             page, 'initReader("', '"')[0]))
+
+        pages = data.get("pages")
+        if pages:
+            return [(page, None) for page in pages]
+
         base = data["b"] + data["r"]
         gid = data["i"]
-
         return [
             ("{}{}/{}/{}".format(base, page["h"], gid, page["p"]), None)
             for page in data["f"]
