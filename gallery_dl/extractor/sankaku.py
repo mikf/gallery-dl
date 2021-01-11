@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -264,49 +264,11 @@ class SankakuAPI():
 @cache(maxage=365*24*3600, keyarg=1)
 def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
+
+    url = "https://capi-v2.sankakucomplex.com/auth/token"
     headers = {"Accept": "application/vnd.sankaku.api+json;v=2"}
-
-    # get initial access_token
-    url = "https://login.sankakucomplex.com/auth/token"
     data = {"login": username, "password": password}
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=False)
-    data = response.json()
 
-    if response.status_code >= 400 or not data.get("success"):
-        raise exception.AuthenticationError(data.get("error"))
-    access_token = data["access_token"]
-
-    # start openid auth
-    url = "https://login.sankakucomplex.com/oidc/auth"
-    params = {
-        "response_type": "code",
-        "scope"        : "openid",
-        "client_id"    : "sankaku-web-app",
-        "redirect_uri" : "https://sankaku.app/sso/callback",
-        "state"        : "return_uri=https://sankaku.app/",
-        "theme"        : "black",
-        "lang"         : "undefined",
-    }
-    page = extr.request(url, params=params).text
-    submit_url = text.extract(page, 'submitUrl = "', '"')[0]
-
-    # get code from initial access_token
-    url = "https://login.sankakucomplex.com" + submit_url
-    data = {
-        "accessToken": access_token,
-        "nonce"      : "undefined",
-    }
-    response = extr.request(url, method="POST", data=data)
-    query = text.parse_query(response.request.url.partition("?")[2])
-
-    # get final access_token from code
-    url = "https://capi-v2.sankakucomplex.com/sso/finalize?lang=en"
-    data = {
-        "code"        : query["code"],
-        "client_id"   : "sankaku-web-app",
-        "redirect_uri": "https://sankaku.app/sso/callback",
-    }
     response = extr.request(
         url, method="POST", headers=headers, json=data, fatal=False)
     data = response.json()
