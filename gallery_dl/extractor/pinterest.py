@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -305,7 +305,7 @@ class PinterestAPI():
     def __init__(self, extractor):
         self.extractor = extractor
 
-        csrf_token = util.generate_csrf_token()
+        csrf_token = util.generate_token()
         self.headers = self.HEADERS.copy()
         self.headers["X-CSRFToken"] = csrf_token
         self.cookies = {"csrftoken": csrf_token}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2018-2020 Leonardo Taccari
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -35,7 +35,7 @@ class InstagramExtractor(Extractor):
         Extractor.__init__(self, match)
         self.item = match.group(1)
         self.www_claim = "0"
-        self.csrf_token = util.generate_csrf_token()
+        self.csrf_token = util.generate_token()
         self._find_tags = re.compile(r"#\w+").findall
         self._cursor = None
 

@@ -71,8 +71,9 @@ def raises(cls):
     return wrap
 
 
-def generate_csrf_token():
-    return random.getrandbits(128).to_bytes(16, "big").hex()
+def generate_token(size=16):
+    """Generate a random token with hexadecimal digits"""
+    return random.getrandbits(size * 8).to_bytes(size, "big").hex()
 
 
 def combine_dict(a, b):
