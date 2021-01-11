@@ -474,6 +474,20 @@ class TestOther(unittest.TestCase):
         with self.assertRaises(ValueError):
             func(3)
 
+    @unittest.skipIf(sys.hexversion < 0x3050000, "missing bytes.hex()")
+    def test_generate_token(self):
+        tokens = set()
+        for _ in range(100):
+            token = util.generate_token()
+            tokens.add(token)
+            self.assertEqual(len(token), 16 * 2)
+            self.assertRegex(token, r"^[0-9a-f]+$")
+        self.assertGreaterEqual(len(tokens), 99)
+
+        token = util.generate_token(80)
+        self.assertEqual(len(token), 80 * 2)
+        self.assertRegex(token, r"^[0-9a-f]+$")
+
     def test_combine_dict(self):
         self.assertEqual(
             util.combine_dict({}, {}),

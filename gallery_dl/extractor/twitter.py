@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -239,7 +239,7 @@ class TwitterExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        token = util.generate_csrf_token()
+        token = util.generate_token()
         self.session.cookies.clear()
         self.request(self.root + "/login")
 
@@ -509,7 +509,7 @@ class TwitterAPI():
         # CSRF
         csrf_token = cookies.get("ct0", domain=cookiedomain)
         if not csrf_token:
-            csrf_token = util.generate_csrf_token()
+            csrf_token = util.generate_token()
             cookies.set("ct0", csrf_token, domain=cookiedomain)
         self.headers["x-csrf-token"] = csrf_token
 

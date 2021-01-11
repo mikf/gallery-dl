@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.16.3 - 2021-01-10
 ### Fixes
 - fix crash when using a `dict` for `path-restrict`
@@ -15,7 +17,7 @@
 - [twitter] fetch media from pinned tweets ([#1203](https://github.com/mikf/gallery-dl/issues/1203))
 - [wikiart] add extractor for single paintings ([#1233](https://github.com/mikf/gallery-dl/issues/1233))
 - [downloader:http] add MIME type and signature for `.ico` files ([#1211](https://github.com/mikf/gallery-dl/issues/1211))
-- add a `d` format string conversion for timestamp values
+- add `d` format string conversion for timestamp values
 - add `"ascii"` as a special `path-restrict` value
 ### Fixes
 - [hentainexus] fix extraction ([#1234](https://github.com/mikf/gallery-dl/issues/1234))
