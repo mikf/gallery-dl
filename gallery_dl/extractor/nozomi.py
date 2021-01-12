@@ -62,7 +62,7 @@ class NozomiExtractor(Extractor):
                     del post[key]
 
             yield Message.Directory, post
-            for image in images:
+            for post["num"], image in enumerate(images, 1):
                 post["url"] = url = text.urljoin(self.root, image["imageurl"])
                 text.nameext_from_url(url, post)
                 post["is_video"] = bool(image.get("is_video"))
@@ -111,7 +111,7 @@ class NozomiPostExtractor(NozomiExtractor):
         #  multiple images per post
         ("https://nozomi.la/post/25588032.html", {
             "url": "6aa3b7db385abcc9d374bdffd19187bccbf8f228",
-            "keyword": "8c3a2561ccc9ad429be9850d1383a952d0b4a8ab",
+            "keyword": "f60e048df36308b6b25dfaac419b586895d360bc",
             "count": 7,
         }),
         # empty 'date' (#1163)
