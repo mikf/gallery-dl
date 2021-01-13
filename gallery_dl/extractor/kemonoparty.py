@@ -9,8 +9,7 @@
 """Extractors for https://kemono.party/"""
 
 from .common import Extractor, Message
-from .. import text
-import re
+from .. import text, util
 
 
 class KemonopartyExtractor(Extractor):
@@ -21,49 +20,32 @@ class KemonopartyExtractor(Extractor):
     filename_fmt = "{post_id}_{title}_{filename}.{extension}"
     archive_fmt = "{user_id}_{post_id}_{filename}.{extension}"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.file_re = re.compile(r'href="(/(?:file|attachment)s/[^"]+)')
-
     def items(self):
-        for post_url in self.posts():
-            try:
-                post = self._parse_post(post_url)
-            except Exception:
-                self.log.warning("Error while parsing %s", post_url)
-                self.log.debug("", exc_info=True)
-                continue
+        for post in self.posts():
 
-            files = post.pop("_files")
+            post["post_id"] = post["id"]
+            post["user_id"] = post["user"]
+            post["date"] = text.parse_datetime(
+                post["published"], "%a, %d %b %Y %H:%M:%S %Z")
+
+            files = []
+            if post["file"]:
+                files.append(post["file"])
+            if post["attachments"]:
+                files.extend(post["attachments"])
+
+            util.delete_items(post, ("id", "user", "file", "attachments"))
             yield Message.Directory, post
-            for num, file in enumerate(files, 1):
-                file.update(post)
-                file["num"] = num
-                url = file["url"]
-                yield Message.Url, url, text.nameext_from_url(url, file)
 
-    def _parse_post(self, url):
-        page = self.request(url).text
-        _, _, _, service, _, user_id, _, post_id = url.split("/")
-
-        published, pos = text.extract(page, 'name="published" content="', '"')
-        pos = page.index('id="page"', pos)
-        files = [
-            {"url": self.root + path}
-            for path in self.file_re.findall(page, pos)
-        ]
-        title  , pos = text.extract(page, "<h1>", "</h1>", pos)
-        content, pos = text.extract(page, "<p>", "</p>\n ", pos)
-
-        return {
-            "service": service,
-            "user_id": text.parse_int(user_id),
-            "post_id": text.parse_int(post_id),
-            "title"  : text.unescape(title),
-            "content": content,
-            "date"   : text.parse_datetime(published, "%Y-%m-%d %H:%M:%S"),
-            "_files" : files,
-        }
+            names = set()
+            post["num"] = 0
+            for file in files:
+                name = file["name"]
+                if name not in names:
+                    names.add(name)
+                    post["num"] += 1
+                    text.nameext_from_url(name, post)
+                    yield Message.Url, self.root + file["path"], post
 
 
 class KemonopartyUserExtractor(KemonopartyExtractor):
@@ -78,22 +60,17 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
         service, user_id = match.groups()
-        self.path = "/{}/user/{}".format(service, user_id)
+        self.api_url = "{}/api/{}/user/{}".format(self.root, service, user_id)
 
     def posts(self):
-        needle = 'href="' + self.path + "/post/"
-        url = self.root + self.path
+        url = self.api_url
         params = {"o": 0}
 
         while True:
-            page = self.request(url, params=params).text
+            posts = self.request(url, params=params).json()
+            yield from posts
 
-            cnt = 0
-            for post_id in text.extract_iter(page, needle, '"'):
-                cnt += 1
-                yield url + "/post/" + post_id
-
-            if cnt < 25:
+            if len(posts) < 25:
                 return
             params["o"] += 25
 
@@ -103,15 +80,33 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
     subcategory = "post"
     pattern = r"(?:https?://)?kemono\.party/([^/?#]+)/user/(\d+)/post/(\d+)"
     test = ("https://kemono.party/fanbox/user/6993449/post/506575", {
-        "url": "e8969211ba4382aa33ec68f72dd4aa00cfeefd1b",
-        "keyword": "54a4852eaad694a69dcd9e8dd4670de8b20d6f38",
+        "pattern": r"https://kemono\.party/files/fanbox"
+                   r"/6993449/506575/P058kDFYus7DbqAkGlfWTlOr\.jpeg",
+        "keyword": {
+            "added": "Wed, 06 May 2020 20:28:02 GMT",
+            "content": str,
+            "date": "dt:2019-08-11 02:09:04",
+            "edited": None,
+            "embed": dict,
+            "extension": "jpeg",
+            "filename": "P058kDFYus7DbqAkGlfWTlOr",
+            "num": 1,
+            "post_id": "506575",
+            "published": "Sun, 11 Aug 2019 02:09:04 GMT",
+            "service": "fanbox",
+            "shared_file": False,
+            "subcategory": "post",
+            "title": "c96取り置き",
+            "user_id": "6993449",
+        },
     })
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
         service, user_id, post_id = match.groups()
-        self.post_url = "{}/{}/user/{}/post/{}".format(
+        self.api_url = "{}/api/{}/user/{}/post/{}".format(
             self.root, service, user_id, post_id)
 
     def posts(self):
-        return (self.post_url,)
+        posts = self.request(self.api_url).json()
+        return (posts[0],) if len(posts) > 1 else posts
