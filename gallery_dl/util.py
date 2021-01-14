@@ -18,6 +18,7 @@ import shutil
 import string
 import _string
 import sqlite3
+import binascii
 import datetime
 import operator
 import itertools
@@ -73,7 +74,8 @@ def raises(cls):
 
 def generate_token(size=16):
     """Generate a random token with hexadecimal digits"""
-    return random.getrandbits(size * 8).to_bytes(size, "big").hex()
+    data = random.getrandbits(size * 8).to_bytes(size, "big")
+    return binascii.hexlify(data).decode()
 
 
 def combine_dict(a, b):
