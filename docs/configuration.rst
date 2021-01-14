@@ -713,8 +713,6 @@ extractor.derpibooru.filter
 Type
     ``integer``
 Default
-    ``null``
-Example
     ``56027`` (`Everything <https://derpibooru.org/filters/56027>`_ filter)
 Description
     The content filter ID to use.

@@ -46,6 +46,8 @@ class DerpibooruExtractor(BooruExtractor):
         filter_id = self.config("filter")
         if filter_id:
             params["filter_id"] = filter_id
+        elif not api_key:
+            params["filter_id"] = "56027"  # "Everything" filter
 
         while True:
             data = self.request(url, params=params).json()
