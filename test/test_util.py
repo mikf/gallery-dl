@@ -474,7 +474,6 @@ class TestOther(unittest.TestCase):
         with self.assertRaises(ValueError):
             func(3)
 
-    @unittest.skipIf(sys.hexversion < 0x3050000, "missing bytes.hex()")
     def test_generate_token(self):
         tokens = set()
         for _ in range(100):
