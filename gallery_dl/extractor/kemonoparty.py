@@ -9,43 +9,32 @@
 """Extractors for https://kemono.party/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 
 class KemonopartyExtractor(Extractor):
     """Base class for kemonoparty extractors"""
     category = "kemonoparty"
     root = "https://kemono.party"
-    directory_fmt = ("{category}", "{user_id}")
-    filename_fmt = "{post_id}_{title}_{filename}.{extension}"
-    archive_fmt = "{user_id}_{post_id}_{filename}.{extension}"
+    directory_fmt = ("{category}", "{user}")
+    filename_fmt = "{id}_{title}_{filename}.{extension}"
+    archive_fmt = "{user}_{id}_{filename}.{extension}"
 
     def items(self):
         for post in self.posts():
-
-            post["post_id"] = post["id"]
-            post["user_id"] = post["user"]
-            post["date"] = text.parse_datetime(
-                post["published"], "%a, %d %b %Y %H:%M:%S %Z")
 
             files = []
             if post["file"]:
                 files.append(post["file"])
             if post["attachments"]:
                 files.extend(post["attachments"])
-
-            util.delete_items(post, ("id", "user", "file", "attachments"))
+            post["date"] = text.parse_datetime(
+                post["published"], "%a, %d %b %Y %H:%M:%S %Z")
             yield Message.Directory, post
 
-            names = set()
-            post["num"] = 0
-            for file in files:
-                name = file["name"]
-                if name not in names:
-                    names.add(name)
-                    post["num"] += 1
-                    text.nameext_from_url(name, post)
-                    yield Message.Url, self.root + file["path"], post
+            for post["num"], file in enumerate(files, 1):
+                text.nameext_from_url(file["name"], post)
+                yield Message.Url, self.root + file["path"], post
 
 
 class KemonopartyUserExtractor(KemonopartyExtractor):
@@ -90,14 +79,14 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
             "embed": dict,
             "extension": "jpeg",
             "filename": "P058kDFYus7DbqAkGlfWTlOr",
+            "id": "506575",
             "num": 1,
-            "post_id": "506575",
             "published": "Sun, 11 Aug 2019 02:09:04 GMT",
             "service": "fanbox",
             "shared_file": False,
             "subcategory": "post",
             "title": "c96取り置き",
-            "user_id": "6993449",
+            "user": "6993449",
         },
     })
 
