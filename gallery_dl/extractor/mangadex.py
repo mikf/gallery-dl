@@ -17,6 +17,7 @@ class MangadexExtractor(Extractor):
     """Base class for mangadex extractors"""
     category = "mangadex"
     root = "https://mangadex.org"
+    api_root = "https://api.mangadex.org"
 
     # mangadex-to-iso639-1 codes
     iso639_map = {
@@ -28,18 +29,18 @@ class MangadexExtractor(Extractor):
 
     def chapter_data(self, chapter_id):
         """Request API results for 'chapter_id'"""
-        url = "{}/api/v2/chapter/{}".format(self.root, chapter_id)
+        url = "{}/v2/chapter/{}".format(self.api_root, chapter_id)
         return self.request(url).json()["data"]
 
     @memcache(keyarg=1)
     def manga_data(self, manga_id):
         """Request API results for 'manga_id'"""
-        url = "{}/api/v2/manga/{}".format(self.root, manga_id)
+        url = "{}/v2/manga/{}".format(self.api_root, manga_id)
         return self.request(url).json()["data"]
 
     def manga_chapters(self, manga_id):
         """Request chapter list for 'manga_id'"""
-        url = "{}/api/v2/manga/{}/chapters".format(self.root, manga_id)
+        url = "{}/v2/manga/{}/chapters".format(self.api_root, manga_id)
         data = self.request(url).json()["data"]
 
         groups = {
