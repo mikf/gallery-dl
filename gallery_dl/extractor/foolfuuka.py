@@ -167,6 +167,8 @@ class FoolfuukaSearchExtractor(FoolfuukaExtractor):
                 return
 
             yield from posts
+            if len(posts) <= 3:
+                return
             params["page"] += 1
 
 
