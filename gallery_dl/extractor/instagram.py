@@ -424,7 +424,7 @@ class InstagramChannelExtractor(InstagramExtractor):
 class InstagramSavedExtractor(InstagramExtractor):
     """Extractor for ProfilePage saved media"""
     subcategory = "saved"
-    pattern = USER_PATTERN + r"([^/?#]+)/saved"
+    pattern = USER_PATTERN + r"/saved"
     test = ("https://www.instagram.com/instagram/saved/",)
 
     def posts(self):
