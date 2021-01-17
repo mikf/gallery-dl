@@ -1230,6 +1230,16 @@ Description
     Download user avatars.
 
 
+extractor.pixiv.work.related
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Also download related artworks.
+
+
 extractor.pixiv.ugoira
 ----------------------
 Type

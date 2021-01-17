@@ -217,6 +217,11 @@ class PixivWorkExtractor(PixivExtractor):
             "url": "7267695a985c4db8759bebcf8d21dbdd2d2317ef",
             "keywords": {"frames": list},
         }),
+        # related works (#1237)
+        ("https://www.pixiv.net/artworks/966412", {
+            "options": (("related", True),),
+            "count": ">= 10",
+        }),
         ("https://www.pixiv.net/en/artworks/966412"),
         ("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=96641"),
         ("http://i1.pixiv.net/c/600x600/img-master"
@@ -233,7 +238,11 @@ class PixivWorkExtractor(PixivExtractor):
         self.illust_id = match.group(1) or match.group(2)
 
     def works(self):
-        return (self.api.illust_detail(self.illust_id),)
+        works = (self.api.illust_detail(self.illust_id),)
+        if self.config("related", False):
+            related = self.api.illust_related(self.illust_id)
+            works = itertools.chain(works, related)
+        return works
 
 
 class PixivFavoriteExtractor(PixivExtractor):
@@ -573,6 +582,10 @@ class PixivAppAPI():
     def illust_ranking(self, mode="day", date=None):
         params = {"mode": mode, "date": date}
         return self._pagination("v1/illust/ranking", params)
+
+    def illust_related(self, illust_id):
+        params = {"illust_id": illust_id}
+        return self._pagination("v2/illust/related", params)
 
     def search_illust(self, word, sort=None, target=None, duration=None):
         params = {"word": word, "search_target": target,
