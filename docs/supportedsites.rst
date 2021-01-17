@@ -94,6 +94,7 @@ Nyafuu Archive       https://archive.nyafuu.org/         Boards, Search Results,
 Patreon              https://www.patreon.com/            Creators, Posts, User Profiles                     `Cookies <https://github.com/mikf/gallery-dl#cookies>`__
 Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Photobucket          https://photobucket.com/            Albums, individual Images
+PhotoVogue           https://www.vogue.it/en/photovogue/ User profiles
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
 Pinterest            https://www.pinterest.com/          |pinterest-C|                                      Supported
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
