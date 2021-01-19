@@ -127,6 +127,7 @@ The /b/ Archive      https://thebarchive.com/            Boards, Search Results,
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Supported
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Twitter              https://twitter.com/                |twitter-C|                                        Supported
+Unsplash             https://unsplash.com/               |unsplash-C|
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  `API Key <configuration.rst#extractorwallhavenapi-key>`__
 Warosu               https://warosu.org/                 Threads
@@ -166,5 +167,6 @@ Turboimagehost       https://www.turboimagehost.com/     individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |twitter-C| replace:: Bookmarks, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets
+.. |unsplash-C| replace:: Favorites, individual Images, Search Results, User Profiles
 .. |wikiart-C| replace:: Artists, Artist Listings, Artworks, individual Images
 .. |yuki-S| replace:: yuki.la 4chan archive

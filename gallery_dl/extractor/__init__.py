@@ -109,6 +109,7 @@ modules = [
     "tsumino",
     "tumblr",
     "twitter",
+    "unsplash",
     "vanillarock",
     "vsco",
     "wallhaven",
