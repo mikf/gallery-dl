@@ -29,6 +29,7 @@ class NewgroundsExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.user_root = "https://{}.newgrounds.com".format(self.user)
+        self.flash = self.config("flash", True)
 
     def items(self):
         self.login()
@@ -92,18 +93,22 @@ class NewgroundsExtractor(Extractor):
         }
 
     def extract_post(self, post_url):
+
+        if "/art/view/" in post_url:
+            extract_data = self._extract_image_data
+        elif "/audio/listen/" in post_url:
+            extract_data = self._extract_audio_data
+        else:
+            extract_data = self._extract_media_data
+            if self.flash:
+                post_url += "/format/flash"
+
         response = self.request(post_url, fatal=False)
         if response.status_code >= 400:
             return {}
         page = response.text
         extr = text.extract_from(page)
-
-        if "/art/view/" in post_url:
-            data = self._extract_image_data(extr, post_url)
-        elif "/audio/listen/" in post_url:
-            data = self._extract_audio_data(extr, post_url)
-        else:
-            data = self._extract_media_data(extr, post_url)
+        data = extract_data(extr, post_url)
 
         data["_comment"] = extr('id="author_comments"', '</div>')
         data["comment"] = text.unescape(text.remove_html(
@@ -313,6 +318,11 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
                 "user"       : "zj",
             },
         }),
+        # flash animation (#1257)
+        ("https://www.newgrounds.com/portal/view/161181/format/flash", {
+            "pattern": r"https://uploads\.ungrounded\.net/161000"
+                       r"/161181_ddautta_mask__550x281_\.swf\?f1081628129",
+        })
     )
 
     def __init__(self, match):
