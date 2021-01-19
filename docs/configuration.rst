@@ -1116,6 +1116,16 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.newgrounds.flash
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download original Adobe Flash animations instead of pre-rendered videos.
+
+
 extractor.newgrounds.include
 ----------------------------
 Type
