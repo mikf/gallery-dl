@@ -29,6 +29,9 @@ class FuraffinityExtractor(Extractor):
         self.user = match.group(1)
         self.offset = 0
 
+        if self.config("descriptions") == "html":
+            self._process_description = lambda x: x.strip()
+
     def items(self):
         metadata = self.metadata()
         for post_id in util.advance(self.posts(), self.offset):
@@ -83,8 +86,8 @@ class FuraffinityExtractor(Extractor):
         if tags:
             # new site layout
             data["tags"] = text.split_html(tags)
-            data["description"] = text.unescape(rh(extr(
-                'class="section-body">', '</div>'), "", ""))
+            data["description"] = self._process_description(extr(
+                'class="section-body">', '</div>'))
             data["views"] = pi(rh(extr('class="views">', '</span>')))
             data["favorites"] = pi(rh(extr('class="favorites">', '</span>')))
             data["comments"] = pi(rh(extr('class="comments">', '</span>')))
@@ -109,11 +112,15 @@ class FuraffinityExtractor(Extractor):
             data["tags"] = text.split_html(extr(
                 'id="keywords">', '</div>'))[::2]
             data["rating"] = extr('<img alt="', ' ')
-            data["description"] = text.unescape(text.remove_html(extr(
-                "</table>", "</table>"), "", ""))
+            data["description"] = self._process_description(extr(
+                "</table>", "</table>"))
         data["date"] = text.parse_timestamp(data["filename"].partition(".")[0])
 
         return data
+
+    @staticmethod
+    def _process_description(description):
+        return text.unescape(text.remove_html(description, "", ""))
 
     def _pagination(self):
         num = 1
