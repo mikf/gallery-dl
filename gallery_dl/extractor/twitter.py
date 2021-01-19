@@ -617,31 +617,34 @@ class TwitterAPI():
     def _call(self, endpoint, params, root=None, method="GET"):
         if root is None:
             root = self.root
-        response = self.extractor.request(
-            root + endpoint, method=method, params=params,
-            headers=self.headers, fatal=None)
 
-        # update 'x-csrf-token' header (#1170)
-        csrf_token = response.cookies.get("ct0")
-        if csrf_token:
-            self.headers["x-csrf-token"] = csrf_token
+        while True:
+            response = self.extractor.request(
+                root + endpoint, method=method, params=params,
+                headers=self.headers, fatal=None)
 
-        if response.status_code < 400:
-            return response.json()
-        if response.status_code == 429:
-            until = response.headers.get("x-rate-limit-reset")
-            self.extractor.wait(until=until, seconds=(None if until else 60))
-            return self._call(endpoint, params, method)
+            # update 'x-csrf-token' header (#1170)
+            csrf_token = response.cookies.get("ct0")
+            if csrf_token:
+                self.headers["x-csrf-token"] = csrf_token
 
-        try:
-            msg = ", ".join(
-                '"' + error["message"] + '"'
-                for error in response.json()["errors"]
-            )
-        except Exception:
-            msg = response.text
-        raise exception.StopExtraction(
-            "%s %s (%s)", response.status_code, response.reason, msg)
+            if response.status_code < 400:
+                return response.json()
+            if response.status_code == 429:
+                until = response.headers.get("x-rate-limit-reset")
+                seconds = None if until else 60
+                self.extractor.wait(until=until, seconds=seconds)
+                continue
+
+            try:
+                msg = ", ".join(
+                    '"' + error["message"] + '"'
+                    for error in response.json()["errors"]
+                )
+            except Exception:
+                msg = response.text
+            raise exception.StopExtraction(
+                "%s %s (%s)", response.status_code, response.reason, msg)
 
     def _pagination(self, endpoint, params=None):
         if params is None:
