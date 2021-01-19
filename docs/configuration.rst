@@ -969,6 +969,19 @@ Description
       ``"l"``, ...) to use as an upper limit.
 
 
+extractor.furaffinity.descriptions
+----------------------------------
+Type
+    ``string``
+Default
+    ``"text"``
+Description
+    Controls the format of ``description`` metadata fields.
+
+    * ``"text"``: Plain text with HTML tags removed
+    * ``"html"``: Raw HTML content
+
+
 extractor.furaffinity.include
 -----------------------------
 Type
