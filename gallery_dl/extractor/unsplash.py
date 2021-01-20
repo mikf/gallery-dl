@@ -29,7 +29,7 @@ class UnsplashExtractor(Extractor):
     def items(self):
         for photo in self.photos():
             util.delete_items(
-                photo, ("", "related_collections"))
+                photo, ("current_user_collections", "related_collections"))
             url = photo["urls"]["raw"]
             text.nameext_from_url(url, photo)
 
