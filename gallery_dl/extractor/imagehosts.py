@@ -254,14 +254,14 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
 class ViprImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from vipr.im"""
     category = "vipr"
-    pattern = (r"(?:https?://)?(vipr\.im"
-               r"/[^/?#]+(\.html)?)")
+    pattern = r"(?:https?://)?(vipr\.im/(\w+))"
+    test = ("https://vipr.im/kcd5jcuhgs3v.html", {
+        "url": "88f6a3ecbf3356a11ae0868b518c60800e070202",
+        "keyword": "c432e8a1836b0d97045195b745731c2b1bb0e771",
+    })
     https = True
     params = None
 
     def get_info(self, page):
-        url, pos = text.extract(
-            page,
-            '<p style="display: block; text-align:center;"><img src="', '"'
-        )
+        url = text.extract(page, '<img src="', '"')[0]
         return url, url
