@@ -146,6 +146,7 @@ Imxto                https://imx.to/                     individual Images
 Pixhost              https://pixhost.to/                 individual Images
 Postimg              https://postimages.org/             individual Images
 Turboimagehost       https://www.turboimagehost.com/     individual Images
+Vipr                 https://vipr.im/                    individual Images
 かべうち                 https://kabe-uchiroom.com/          User Profiles
 もえぴりあ                https://vanilla-rock.com/           Posts, Tag Searches
 半次元                  https://bcy.net/                    Posts, User Profiles
