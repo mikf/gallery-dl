@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -686,6 +686,8 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         }),
         ("https://www.deviantart.com/popular-24-hours/?q=tree+house", {
             "options": (("original", False),),
+            "range": "1-30",
+            "count": 30,
         }),
         ("https://www.deviantart.com/search?q=tree"),
         ("https://www.deviantart.com/search/deviations?order=popular-1-week"),

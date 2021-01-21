@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -220,6 +220,7 @@ class PixivWorkExtractor(PixivExtractor):
         # related works (#1237)
         ("https://www.pixiv.net/artworks/966412", {
             "options": (("related", True),),
+            "range": "1-10",
             "count": ">= 10",
         }),
         ("https://www.pixiv.net/en/artworks/966412"),
