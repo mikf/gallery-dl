@@ -47,7 +47,8 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
         (("https://www.webtoons.com/en/comedy/safely-endangered"
           "/ep-572-earth/viewer?title_no=352&episode_no=572"), {
             "url": "11041d71a3f92728305c11a228e77cf0f7aa02ef",
-            "content": "1ce950324f14018b691c42b0ede57fa25618abeb",
+            "content": ("1748c7e82b6db910fa179f6dc7c4281b0f680fa7",
+                        "49e1f2def04c6f7a6a3dacf245a1cd9abe77a6a9"),
             "count": 5,
         }),
     )
