@@ -28,8 +28,7 @@ class DerpibooruExtractor(BooruExtractor):
 
     @staticmethod
     def _prepare(post):
-        post["date"] = text.parse_datetime(
-            post["created_at"], "%Y-%m-%dT%H:%M:%S")
+        post["date"] = text.parse_datetime(post["created_at"])
 
     @staticmethod
     def _extended_tags(post):
@@ -69,7 +68,7 @@ class DerpibooruPostExtractor(DerpibooruExtractor):
             "animated": False,
             "aspect_ratio": 1.0,
             "comment_count": int,
-            "created_at": "2012-01-02T03:12:33",
+            "created_at": "2012-01-02T03:12:33Z",
             "date": "dt:2012-01-02 03:12:33",
             "deletion_reason": None,
             "description": "",
@@ -78,7 +77,7 @@ class DerpibooruPostExtractor(DerpibooruExtractor):
             "duration": 0.04,
             "extension": "png",
             "faves": int,
-            "first_seen_at": "2012-01-02T03:12:33",
+            "first_seen_at": "2012-01-02T03:12:33Z",
             "format": "png",
             "height": 900,
             "hidden_from_users": False,
@@ -101,7 +100,7 @@ class DerpibooruPostExtractor(DerpibooruExtractor):
             "tag_ids": list,
             "tags": list,
             "thumbnails_generated": True,
-            "updated_at": "2020-05-28T13:14:07",
+            "updated_at": "2020-05-28T13:14:07Z",
             "uploader": "Clover the Clever",
             "uploader_id": 211188,
             "upvotes": int,
