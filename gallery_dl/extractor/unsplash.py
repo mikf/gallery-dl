@@ -59,7 +59,7 @@ class UnsplashExtractor(Extractor):
 class UnsplashImageExtractor(UnsplashExtractor):
     """Extractor for a single unsplash photo"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/photos/(\w+)"
+    pattern = BASE_PATTERN + r"/photos/([^/?#]+)"
     test = ("https://unsplash.com/photos/lsoogGC_5dg", {
         "url": "00accb0a64d5a0df0db911f8b425892718dce524",
         "keyword": {
@@ -156,6 +156,23 @@ class UnsplashFavoriteExtractor(UnsplashExtractor):
 
     def photos(self):
         url = "{}/napi/users/{}/likes".format(self.root, self.item)
+        params = {"order_by": "latest"}
+        return self._pagination(url, params)
+
+
+class UnsplashCollectionExtractor(UnsplashExtractor):
+    """Extractor for an unsplash collection"""
+    subcategory = "collection"
+    pattern = BASE_PATTERN + r"/collections/(\d+)"
+    test = ("https://unsplash.com/collections/3178572/winter", {
+        "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
+                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
+        "range": "1-30",
+        "count": 30,
+    })
+
+    def photos(self):
+        url = "{}/napi/collections/{}/photos".format(self.root, self.item)
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 
