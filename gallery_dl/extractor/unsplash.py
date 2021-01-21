@@ -27,10 +27,11 @@ class UnsplashExtractor(Extractor):
         self.item = match.group(1)
 
     def items(self):
+        fmt = self.config("format") or "raw"
         for photo in self.photos():
             util.delete_items(
                 photo, ("current_user_collections", "related_collections"))
-            url = photo["urls"]["raw"]
+            url = photo["urls"][fmt]
             text.nameext_from_url(url, photo)
 
             photo["extension"] = "jpg"

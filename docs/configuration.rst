@@ -1600,6 +1600,19 @@ Description
     * ``false``: Skip video Tweets
 
 
+extractor.unsplash.format
+-------------------------
+Type
+    ``string``
+Default
+    ``"raw"``
+Description
+    Name of the image format to download.
+
+    Available formats are
+        ``"raw"``, ``"full"``, ``"regular"``, ``"small"``, and ``"thumb"``.
+
+
 extractor.vsco.videos
 ---------------------
 Type
