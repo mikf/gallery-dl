@@ -64,6 +64,7 @@ Instagram            https://www.instagram.com/          |instagram-C|          
 Issuu                https://issuu.com/                  Publications, User Profiles
 Joyreactor           http://joyreactor.com/              Posts, Search Results, Tag Searches, User Profiles
 Keenspot             http://www.keenspot.com/            Comics
+Kemonoparty          https://kemono.party/               Posts, User Profiles
 Khinsider            https://downloads.khinsider.com/    Soundtracks
 Kirei Cake           https://reader.kireicake.com/       Chapters, Manga
 Komikcast            https://komikcast.com/              Chapters, Manga
@@ -94,7 +95,7 @@ Nyafuu Archive       https://archive.nyafuu.org/         Boards, Search Results,
 Patreon              https://www.patreon.com/            Creators, Posts, User Profiles                     `Cookies <https://github.com/mikf/gallery-dl#cookies>`__
 Pawoo                https://pawoo.net/                  Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Photobucket          https://photobucket.com/            Albums, individual Images
-PhotoVogue           https://www.vogue.it/en/photovogue/ User profiles
+PhotoVogue           https://www.vogue.it/en/photovogue/ User Profiles
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
 Pinterest            https://www.pinterest.com/          |pinterest-C|                                      Supported
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
@@ -169,6 +170,6 @@ Vipr                 https://vipr.im/                    individual Images
 .. |reddit-C| replace:: individual Images, Submissions, Subreddits, User Profiles
 .. |smugmug-C| replace:: Albums, individual Images, Images from Users and Folders
 .. |twitter-C| replace:: Bookmarks, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets
-.. |unsplash-C| replace:: Favorites, individual Images, Search Results, User Profiles
+.. |unsplash-C| replace:: Collections, Favorites, individual Images, Search Results, User Profiles
 .. |wikiart-C| replace:: Artists, Artist Listings, Artworks, individual Images
 .. |yuki-S| replace:: yuki.la 4chan archive
