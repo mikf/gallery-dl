@@ -68,6 +68,7 @@ CATEGORY_MAP = {
     "nsfwalbum"      : "NSFWalbum.com",
     "nyafuu"         : "Nyafuu Archive",
     "paheal"         : "rule #34",
+    "photovogue"     : "PhotoVogue",
     "powermanga"     : "PowerManga",
     "readcomiconline": "Read Comic Online",
     "rbt"            : "RebeccaBlackTech",
