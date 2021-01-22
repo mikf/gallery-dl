@@ -84,6 +84,7 @@ modules = [
     "paheal",
     "patreon",
     "photobucket",
+    "photovogue",
     "piczel",
     "pinterest",
     "pixiv",
