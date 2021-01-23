@@ -21,6 +21,8 @@ class UnsplashExtractor(Extractor):
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}"
     root = "https://unsplash.com"
+    page_start = 1
+    per_page = 20
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -42,9 +44,14 @@ class UnsplashExtractor(Extractor):
             yield Message.Directory, photo
             yield Message.Url, url, photo
 
+    def skip(self, num):
+        pages = num // self.per_page
+        self.page_start += pages
+        return pages * self.per_page
+
     def _pagination(self, url, params, results=False):
-        params["per_page"] = "20"
-        params["page"] = 1
+        params["per_page"] = self.per_page
+        params["page"] = self.page_start
 
         while True:
             photos = self.request(url, params=params).json()
@@ -52,7 +59,7 @@ class UnsplashExtractor(Extractor):
                 photos = photos["results"]
             yield from photos
 
-            if len(photos) < 20:
+            if len(photos) < self.per_page:
                 return
             params["page"] += 1
 
