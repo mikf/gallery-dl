@@ -1,6 +1,25 @@
 # Changelog
 
-## Unreleased
+## 1.16.4 - 2021-01-23
+### Additions
+- [furaffinity] add `descriptions` option ([#1231](https://github.com/mikf/gallery-dl/issues/1231))
+- [kemonoparty] add `user` and `post` extractors ([#1216](https://github.com/mikf/gallery-dl/issues/1216))
+- [nozomi] add `num` enumeration index ([#1239](https://github.com/mikf/gallery-dl/issues/1239))
+- [photovogue] added portfolio extractor ([#1253](https://github.com/mikf/gallery-dl/issues/1253))
+- [twitter] match `/i/user/ID` URLs
+- [unsplash] add extractors ([#1197](https://github.com/mikf/gallery-dl/issues/1197))
+- [vipr] add image extractor ([#1258](https://github.com/mikf/gallery-dl/issues/1258))
+### Changes
+- [derpibooru] use "Everything" filter by default ([#862](https://github.com/mikf/gallery-dl/issues/862))
+### Fixes
+- [derpibooru] update `date` parsing
+- [foolfuuka] stop search when results are exhausted ([#1174](https://github.com/mikf/gallery-dl/issues/1174))
+- [instagram] fix regex for `/saved` URLs ([#1251](https://github.com/mikf/gallery-dl/issues/1251))
+- [mangadex] update API URLs
+- [mangakakalot] fix extraction
+- [newgrounds] fix flash file extraction ([#1257](https://github.com/mikf/gallery-dl/issues/1257))
+- [sankaku] simplify login process
+- [twitter] fix retries after hitting rate limit
 
 ## 1.16.3 - 2021-01-10
 ### Fixes
