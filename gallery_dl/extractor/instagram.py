@@ -366,13 +366,6 @@ class InstagramUserExtractor(InstagramExtractor):
     )
 
     def items(self):
-        if self.config("highlights"):
-            self.log.warning("'highlights' is deprecated, "
-                             "use '\"include\": \"…,highlights\"' instead")
-            default = ("highlights", "posts")
-        else:
-            default = ("posts",)
-
         base = "{}/{}/".format(self.root, self.item)
         stories = "{}/stories/{}/".format(self.root, self.item)
         return self._dispatch_extractors((
@@ -380,7 +373,7 @@ class InstagramUserExtractor(InstagramExtractor):
             (InstagramHighlightsExtractor, base + "highlights/"),
             (InstagramPostsExtractor     , base + "posts/"),
             (InstagramChannelExtractor   , base + "channel/"),
-        ), default)
+        ), ("posts",))
 
 
 class InstagramPostsExtractor(InstagramExtractor):

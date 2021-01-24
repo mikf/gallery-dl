@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -39,10 +39,6 @@ class ExecPP(PostProcessor):
         events = options.get("event")
         if events is None:
             events = ("after",)
-            if options.get("final"):
-                self.log.warning("'final' is deprecated, "
-                                 "use '\"event\": \"finalize\"' instead")
-                events = ("finalize",)
         elif isinstance(events, str):
             events = events.split(",")
         for event in events:
