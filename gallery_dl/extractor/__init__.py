@@ -86,6 +86,7 @@ modules = [
     "photobucket",
     "photovogue",
     "piczel",
+    "pillowfort",
     "pinterest",
     "pixiv",
     "pixnet",

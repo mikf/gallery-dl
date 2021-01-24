@@ -100,6 +100,7 @@ Pawoo                https://pawoo.net/                  Images from Statuses, U
 Photobucket          https://photobucket.com/            Albums, individual Images
 PhotoVogue           https://www.vogue.it/en/photovogue/ User Profiles
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
+Pillowfort           https://www.pillowfort.social/      Posts, User Profiles
 Pinterest            https://www.pinterest.com/          |pinterest-C|                                      Supported
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
 Pixnet               https://www.pixnet.net/             Folders, individual Images, Sets, User Profiles
