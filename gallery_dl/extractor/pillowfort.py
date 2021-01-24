@@ -26,9 +26,13 @@ class PillowfortExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.item = match.group(1)
+        self.reblogs = self.config("reblogs", False)
 
     def items(self):
         for post in self.posts():
+
+            if "original_post" in post and not self.reblogs:
+                continue
 
             files = post["media"]
             del post["media"]
@@ -112,8 +116,8 @@ class PillowfortUserExtractor(PillowfortExtractor):
     pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
     test = ("https://www.pillowfort.social/Pome", {
         "pattern": r"https://img\d+\.pillowfort\.social/posts/",
-        "range": "1-25",
-        "count": 25,
+        "range": "1-15",
+        "count": 15,
     })
 
     def posts(self):

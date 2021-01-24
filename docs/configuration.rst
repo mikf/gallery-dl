@@ -1223,6 +1223,16 @@ Description
     Download subalbums.
 
 
+extractor.pillowfort.reblogs
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract media from reblogged posts.
+
+
 extractor.pinterest.sections
 ----------------------------
 Type
