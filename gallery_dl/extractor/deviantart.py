@@ -176,10 +176,11 @@ class DeviantartExtractor(Extractor):
     @staticmethod
     def commit(deviation, target):
         url = target["src"]
+        name = target.get("filename") or url
         target = target.copy()
         target["filename"] = deviation["filename"]
         deviation["target"] = target
-        deviation["extension"] = target["extension"] = text.ext_from_url(url)
+        deviation["extension"] = target["extension"] = text.ext_from_url(name)
         return Message.Url, url, deviation
 
     def _commit_journal_html(self, deviation, journal):
