@@ -26,6 +26,7 @@ class TwitterExtractor(Extractor):
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     cookiedomain = ".twitter.com"
+    cookienames = ("auth_token",)
     root = "https://twitter.com"
 
     def __init__(self, match):
@@ -231,9 +232,10 @@ class TwitterExtractor(Extractor):
         """Yield all relevant tweet objects"""
 
     def login(self):
-        username, password = self._get_auth_info()
-        if username:
-            self._update_cookies(self._login_impl(username, password))
+        if not self._check_cookies(self.cookienames):
+            username, password = self._get_auth_info()
+            if username:
+                self._update_cookies(self._login_impl(username, password))
 
     @cache(maxage=360*24*3600, keyarg=1)
     def _login_impl(self, username, password):
