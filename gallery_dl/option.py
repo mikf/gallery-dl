@@ -136,9 +136,9 @@ def build_parser():
         help="Print URLs instead of downloading",
     )
     output.add_argument(
-        "-G",
+        "-G", "--resolve-urls",
         dest="list_urls", action="store_const", const=128,
-        help=argparse.SUPPRESS,
+        help="Print URLs instead of downloading; resolve intermediary URLs",
     )
     output.add_argument(
         "-j", "--dump-json",
