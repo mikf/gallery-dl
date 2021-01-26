@@ -723,7 +723,7 @@ class DeviantartPopularExtractor(DeviantartExtractor):
 
     def deviations(self):
         return self.api.browse_popular(
-            self.search_term, self.time_range, self.category_path, self.offset)
+            self.search_term, self.time_range, self.offset)
 
     def prepare(self, deviation):
         DeviantartExtractor.prepare(self, deviation)
@@ -918,13 +918,16 @@ class DeviantartOAuthAPI():
             self.client_id,
         )
 
-    def browse_popular(self, query=None, timerange=None,
-                       category_path=None, offset=0):
+    def browse_popular(self, query=None, timerange=None, offset=0):
         """Yield popular deviations"""
         endpoint = "browse/popular"
-        params = {"q": query, "offset": offset, "limit": 120,
-                  "timerange": timerange, "category_path": category_path,
-                  "mature_content": self.mature}
+        params = {
+            "q"             : query,
+            "limit"         : 50 if self.metadata else 120,
+            "timerange"     : timerange,
+            "offset"        : offset,
+            "mature_content": self.mature,
+        }
         return self._pagination(endpoint, params)
 
     def browse_user_journals(self, username, offset=0):
