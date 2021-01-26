@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -525,6 +525,39 @@ class AsynchronousMixin():
         except Exception as exc:
             messages.put(exc)
         messages.put(None)
+
+
+class BaseExtractor(Extractor):
+    instances = None
+
+    def __init__(self, match):
+        if not self.category:
+            for index, group in enumerate(match.groups()):
+                if group is not None:
+                    self.category, self.root = self.instances[index]
+                    break
+        Extractor.__init__(self, match)
+
+    @classmethod
+    def update(cls, instances):
+        extra_instances = config.get(("extractor",), cls.basecategory)
+        if extra_instances:
+            for category, info in extra_instances.items():
+                if isinstance(info, dict) and "root" in info:
+                    instances[category] = info
+
+        pattern_list = []
+        instance_list = cls.instances = []
+        for category, info in instances.items():
+            root = info["root"]
+            instance_list.append((category, root))
+
+            pattern = info.get("pattern")
+            if not pattern:
+                pattern = re.escape(root[root.index(":") + 3:])
+            pattern_list.append(pattern + "()")
+
+        return r"(?:https?://)?(?:" + "|".join(pattern_list) + r")"
 
 
 def generate_extractors(extractor_data, symtable, classes):
