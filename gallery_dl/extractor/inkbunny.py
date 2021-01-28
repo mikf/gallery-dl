@@ -54,7 +54,11 @@ class InkbunnyExtractor(Extractor):
                 post["date"] = text.parse_datetime(
                     file["create_datetime"] + "00", "%Y-%m-%d %H:%M:%S.%f%z")
                 text.nameext_from_url(file["file_name"], post)
-                yield Message.Url, file["file_url_full"], post
+
+                url = file["file_url_full"]
+                if "/private_files/" in url:
+                    url += "?sid=" + self.api.session_id
+                yield Message.Url, url, post
 
 
 class InkbunnyUserExtractor(InkbunnyExtractor):
