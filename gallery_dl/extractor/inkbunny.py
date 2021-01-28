@@ -158,7 +158,10 @@ class InkbunnyPostExtractor(InkbunnyExtractor):
         self.submission_id = match.group(1)
 
     def posts(self):
-        return self.api.detail(({"submission_id": self.submission_id},))
+        submissions = self.api.detail(({"submission_id": self.submission_id},))
+        if submissions[0] is None:
+            raise exception.NotFoundError("submission")
+        return submissions
 
 
 class InkbunnyAPI():
