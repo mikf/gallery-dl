@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Utility classes to setup OAuth and link accounts to gallery-dl"""
 
 from .common import Extractor, Message
-from . import deviantart, flickr, reddit, smugmug, tumblr
+from . import deviantart, flickr, mastodon, reddit, smugmug, tumblr
 from .. import text, oauth, util, config, exception
 from ..cache import cache
 import urllib.parse
@@ -324,8 +324,10 @@ class OAuthMastodon(OAuthBase):
     def items(self):
         yield Message.Version, 1
 
-        application = self.oauth_config(self.instance)
-        if not application:
+        for application in mastodon.INSTANCES.values():
+            if self.instance == application["root"].partition("://")[2]:
+                break
+        else:
             application = self._register(self.instance)
 
         self._oauth2_authorization_code_grant(
