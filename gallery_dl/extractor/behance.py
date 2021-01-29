@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -83,6 +83,11 @@ class BehanceGalleryExtractor(BehanceExtractor):
             "count": 20,
             "url": "6bebff0d37f85349f9ad28bd8b76fd66627c1e2f",
         }),
+        # 'video' modules (#1282)
+        ("https://www.behance.net/gallery/101185577/COLCCI", {
+            "pattern": r"ytdl:https://adobeprod-a\.akamaihd\.net/",
+            "count": 3,
+        }),
     )
 
     def __init__(self, match):
@@ -120,8 +125,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
             page, 'id="beconfig-store_state">', '</script>')[0])
         return self._update(data["project"]["project"])
 
-    @staticmethod
-    def get_images(data):
+    def get_images(self, data):
         """Extract image results from an API response"""
         result = []
         append = result.append
@@ -131,6 +135,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
             if mtype == "image":
                 url = module["sizes"]["original"]
+                append((url, module))
+
+            elif mtype == "video":
+                page = self.request(module["src"]).text
+                url = text.extract(page, '<source src="', '"')[0]
+                if text.ext_from_url(url) == "m3u8":
+                    url = "ytdl:" + url
                 append((url, module))
 
             elif mtype == "media_collection":
