@@ -134,6 +134,12 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning(msg)
                 return False
 
+            # check for invalid responses
+            validate = pathfmt.kwdict.get("_http_validate")
+            if validate and not validate(response):
+                self.log.warning("Invalid response")
+                return False
+
             # set missing filename extension from MIME type
             if not pathfmt.extension:
                 pathfmt.set_extension(self._find_extension(response))
