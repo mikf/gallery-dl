@@ -41,12 +41,15 @@ class PillowfortExtractor(Extractor):
                 post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
             yield Message.Directory, post
 
-            for post["num"], file in enumerate(files, 1):
+            post["num"] = 0
+            for file in files:
                 url = file["url"]
-                post.update(file)
-                post["date"] = text.parse_datetime(
-                    file["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-                yield Message.Url, url, text.nameext_from_url(url, post)
+                if url:
+                    post.update(file)
+                    post["num"] += 1
+                    post["date"] = text.parse_datetime(
+                        file["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                    yield Message.Url, url, text.nameext_from_url(url, post)
 
 
 class PillowfortPostExtractor(PillowfortExtractor):
