@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -111,10 +111,6 @@ class Job():
             if self.pred_queue(url, kwds):
                 self.handle_queue(url, kwds)
 
-        elif msg[0] == Message.Metadata:
-            self.update_kwdict(msg[1])
-            self.handle_metadata(msg[1])
-
         elif msg[0] == Message.Version:
             if msg[1] != 1:
                 raise "unsupported message-version ({}, {})".format(
@@ -127,9 +123,6 @@ class Job():
 
     def handle_directory(self, kwdict):
         """Handle Message.Directory"""
-
-    def handle_metadata(self, kwdict):
-        """Handle Message.Metadata"""
 
     def handle_queue(self, url, kwdict):
         """Handle Message.Queue"""
@@ -279,15 +272,6 @@ class DownloadJob(Job):
         if "post" in self.hooks:
             for callback in self.hooks["post"]:
                 callback(self.pathfmt)
-
-    def handle_metadata(self, kwdict):
-        """Run postprocessors with metadata from 'kwdict'"""
-        if "metadata" in self.hooks:
-            kwdict["extension"] = "metadata"
-            pathfmt = self.pathfmt
-            pathfmt.set_filename(kwdict)
-            for callback in self.hooks["metadata"]:
-                callback(pathfmt)
 
     def handle_queue(self, url, kwdict):
         if url in self.visited:
@@ -623,9 +607,6 @@ class DataJob(Job):
 
     def handle_directory(self, kwdict):
         self.data.append((Message.Directory, self.filter(kwdict)))
-
-    def handle_metadata(self, kwdict):
-        self.data.append((Message.Metadata, self.filter(kwdict)))
 
     def handle_queue(self, url, kwdict):
         self.data.append((Message.Queue, url, self.filter(kwdict)))
