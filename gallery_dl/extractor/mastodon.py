@@ -10,6 +10,7 @@
 
 from .common import BaseExtractor, Message
 from .. import text, exception
+from ..cache import cache
 
 
 class MastodonExtractor(BaseExtractor):
@@ -24,7 +25,6 @@ class MastodonExtractor(BaseExtractor):
         BaseExtractor.__init__(self, match)
         self.instance = self.root.partition("://")[2]
         self.item = match.group(match.lastindex)
-        self.api = MastodonAPI(self)
 
     def items(self):
         for status in self.statuses():
@@ -96,14 +96,15 @@ class MastodonUserExtractor(MastodonExtractor):
     )
 
     def statuses(self):
+        api = MastodonAPI(self)
         username = self.item
         handle = "@{}@{}".format(username, self.instance)
-        for account in self.api.account_search(handle, 1):
+        for account in api.account_search(handle, 1):
             if account["username"] == username:
                 break
         else:
             raise exception.NotFoundError("account")
-        return self.api.account_statuses(account["id"])
+        return api.account_statuses(account["id"])
 
 
 class MastodonStatusExtractor(MastodonExtractor):
@@ -123,7 +124,7 @@ class MastodonStatusExtractor(MastodonExtractor):
     )
 
     def statuses(self):
-        return (self.api.status(self.item),)
+        return (MastodonAPI(self).status(self.item),)
 
 
 class MastodonAPI():
@@ -133,16 +134,21 @@ class MastodonAPI():
     https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md
     """
 
-    def __init__(self, extractor, access_token=None):
+    def __init__(self, extractor):
         self.root = extractor.root
         self.extractor = extractor
 
+        access_token = extractor.config("access-token")
+        if access_token is None or access_token == "cache":
+            access_token = _access_token_cache(extractor.instance)
         if not access_token:
-            access_token = extractor.config("access-token")
-            if not access_token:
-                if extractor.category not in INSTANCES:
-                    raise exception.StopExtraction("missing access token")
+            try:
                 access_token = INSTANCES[extractor.category]["access-token"]
+            except (KeyError, TypeError):
+                raise exception.StopExtraction(
+                    "Missing access token.\n"
+                    "Run 'gallery-dl oauth:mastodon:%s' to obtain one.",
+                    extractor.instance)
 
         self.headers = {"Authorization": "Bearer " + access_token}
 
@@ -196,3 +202,8 @@ class MastodonAPI():
             if not url:
                 return
             url = url["url"]
+
+
+@cache(maxage=100*365*24*3600, keyarg=0)
+def _access_token_cache(instance):
+    return None
