@@ -110,6 +110,7 @@ modules = [
     "subscribestar",
     "tsumino",
     "tumblr",
+    "tumblrgallery",
     "twitter",
     "unsplash",
     "vanillarock",

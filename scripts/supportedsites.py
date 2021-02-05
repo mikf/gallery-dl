@@ -89,6 +89,7 @@ CATEGORY_MAP = {
     "speakerdeck"    : "Speaker Deck",
     "subscribestar"  : "SubscribeStar",
     "thebarchive"    : "The /b/ Archive",
+    "tumblrgallery"  : "TumblrGallery",
     "vanillarock"    : "もえぴりあ",
     "vsco"           : "VSCO",
     "webtoons"       : "Webtoon",
