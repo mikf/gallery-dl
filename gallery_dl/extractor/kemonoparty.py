@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import re
 
 
 class KemonopartyExtractor(Extractor):
@@ -21,6 +22,8 @@ class KemonopartyExtractor(Extractor):
     archive_fmt = "{user}_{id}_{filename}.{extension}"
 
     def items(self):
+        find_inline = re.compile(r'src="(/inline/[^"]+)').findall
+
         for post in self.posts():
 
             files = []
@@ -28,6 +31,9 @@ class KemonopartyExtractor(Extractor):
                 files.append(post["file"])
             if post["attachments"]:
                 files.extend(post["attachments"])
+            for path in find_inline(post["content"] or ""):
+                files.append({"path": path, "name": path})
+
             post["date"] = text.parse_datetime(
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
             yield Message.Directory, post
@@ -68,27 +74,34 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
     """Extractor for a single kemono.party post"""
     subcategory = "post"
     pattern = r"(?:https?://)?kemono\.party/([^/?#]+)/user/(\d+)/post/(\d+)"
-    test = ("https://kemono.party/fanbox/user/6993449/post/506575", {
-        "pattern": r"https://kemono\.party/files/fanbox"
-                   r"/6993449/506575/P058kDFYus7DbqAkGlfWTlOr\.jpeg",
-        "keyword": {
-            "added": "Wed, 06 May 2020 20:28:02 GMT",
-            "content": str,
-            "date": "dt:2019-08-11 02:09:04",
-            "edited": None,
-            "embed": dict,
-            "extension": "jpeg",
-            "filename": "P058kDFYus7DbqAkGlfWTlOr",
-            "id": "506575",
-            "num": 1,
-            "published": "Sun, 11 Aug 2019 02:09:04 GMT",
-            "service": "fanbox",
-            "shared_file": False,
-            "subcategory": "post",
-            "title": "c96取り置き",
-            "user": "6993449",
-        },
-    })
+    test = (
+        ("https://kemono.party/fanbox/user/6993449/post/506575", {
+            "pattern": r"https://kemono\.party/files/fanbox"
+                       r"/6993449/506575/P058kDFYus7DbqAkGlfWTlOr\.jpeg",
+            "keyword": {
+                "added": "Wed, 06 May 2020 20:28:02 GMT",
+                "content": str,
+                "date": "dt:2019-08-11 02:09:04",
+                "edited": None,
+                "embed": dict,
+                "extension": "jpeg",
+                "filename": "P058kDFYus7DbqAkGlfWTlOr",
+                "id": "506575",
+                "num": 1,
+                "published": "Sun, 11 Aug 2019 02:09:04 GMT",
+                "service": "fanbox",
+                "shared_file": False,
+                "subcategory": "post",
+                "title": "c96取り置き",
+                "user": "6993449",
+            },
+        }),
+        # inline image (#1286)
+        ("https://kemono.party/fanbox/user/7356311/post/802343", {
+            "pattern": r"https://kemono\.party/inline/fanbox"
+                       r"/uaozO4Yga6ydkGIJFAQDixfE\.jpeg",
+        }),
+    )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
