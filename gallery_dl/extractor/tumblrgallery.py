@@ -109,7 +109,8 @@ class TumblrgalleryPostExtractor(TumblrgalleryGalleryExtractor):
 
         for image_src in urls:
             yield image_src, {
-                "id": text.extract(image_src, "tumblr_", "_")[0] or text.nameext_from_url(image_src)["filename"]
+                "id": text.extract(image_src, "tumblr_", "_")[0] or
+                text.nameext_from_url(image_src)["filename"]
             }
 
 
@@ -146,7 +147,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryGalleryExtractor):
             )
             if response.status_code != 200:
                 return
-                
+
             page = response.text
             page_num += 1
 
