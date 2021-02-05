@@ -9,13 +9,14 @@
 """Extract images from https://tumblrgallery.xyz/"""
 
 from .common import GalleryExtractor
-from .. import text, exception
+from .. import text
+
 
 class TumblrgalleryGalleryExtractor(GalleryExtractor):
     """Base class for tumblrgallery extractors"""
     category = "tumblrgallery"
     root = "https://www.tumblrgallery.xyz"
-    pattern =  (r"(?:https?://)tumblrgallery\.xyz"
+    pattern = (r"(?:https?://)tumblrgallery\.xyz"
                r"(/tumblrblog/gallery/(\d+).html)")
     test = (
         "https://tumblrgallery.xyz/tumblrblog/gallery/103975.html", {
@@ -27,7 +28,6 @@ class TumblrgalleryGalleryExtractor(GalleryExtractor):
     filename_fmt = "{category}_{gallery_id}_{num:>03}_{id}.{extension}"
     directory_fmt = ("{category}", "{gallery_id} {title}")
     cookiedomain = None
-
 
     def __init__(self, match):
         self.gallery_id = text.parse_int(match.group(2))
@@ -44,7 +44,8 @@ class TumblrgalleryGalleryExtractor(GalleryExtractor):
         pageNum = 1
         while True:
             response = self.request(
-                "{}/tumblrblog/gallery/{}/{}.html".format(self.root, self.gallery_id, pageNum),
+                "{}/tumblrblog/gallery/{}/{}.html"
+                .format(self.root, self.gallery_id, pageNum),
                 allow_redirects=False
             )
             if response.status_code != 200:
@@ -53,9 +54,13 @@ class TumblrgalleryGalleryExtractor(GalleryExtractor):
             page = response.text
             pageNum += 1
 
-            urls = list(text.extract_iter(page, '<div class="report xx-co-me"> <a href="', '" data-fancybox="gallery"'))
-            
+            urls = list(text.extract_iter(
+                page,
+                '<div class="report xx-co-me"> <a href="',
+                '" data-fancybox="gallery"'
+            ))
+
             for image_src in urls:
                 yield image_src, {
-                    "id":  text.extract(image_src, "tumblr_", "_")[0]
+                    "id": text.extract(image_src, "tumblr_", "_")[0]
                 }
