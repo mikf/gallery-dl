@@ -97,7 +97,7 @@ class TumblrgalleryPostExtractor(TumblrgalleryGalleryExtractor):
     def metadata(self, page):
         """Collect metadata for extractor-job"""
         return {
-            "title" : text.unescape(text.extract(page, "<title>", "</title>"))[0],
+            "title" : text.remove_html(text.unescape(text.extract(post_page, "<title>", "</title>")[0])),
             "gallery_id": self.gallery_id,
         }
 
@@ -125,7 +125,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryGalleryExtractor):
         }
     )
 
-    filename_fmt = "{category}_{num:>03}_{gallery_id}_{id}.{extension}"
+    filename_fmt = "{category}_{num:>03}_{gallery_id}_{title}_{id}.{extension}"
     directory_fmt = ("{category}", "{search_term}")
 
     def __init__(self, match):
@@ -165,5 +165,6 @@ class TumblrgallerySearchExtractor(TumblrgalleryGalleryExtractor):
                     allow_redirects=False
                 ).text
                 for image_src in TumblrgalleryPostExtractor.images(self, post_page):
+                    image_src[1]["title"] = text.remove_html(text.unescape(text.extract(post_page, "<title>", "</title>")[0]))
                     image_src[1]["gallery_id"] = gallery_id
                     yield image_src
