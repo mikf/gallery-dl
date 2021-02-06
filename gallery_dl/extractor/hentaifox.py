@@ -82,12 +82,13 @@ class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
     """Extractor for search results and listings on hentaifox.com"""
     subcategory = "search"
     pattern = (r"(?:https?://)?(?:www\.)?hentaifox\.com"
-               r"(/(?:parody|tag|artist|character|search)/[^/?%#]+)")
+               r"(/(?:parody|tag|artist|character|search|group)/[^/?%#]+)")
     test = (
         ("https://hentaifox.com/parody/touhou-project/"),
         ("https://hentaifox.com/character/reimu-hakurei/"),
         ("https://hentaifox.com/artist/distance/"),
         ("https://hentaifox.com/search/touhou/"),
+        ("https://hentaifox.com/group/v-slash/"),
         ("https://hentaifox.com/tag/heterochromia/", {
             "pattern": HentaifoxGalleryExtractor.pattern,
             "count": ">= 60",
