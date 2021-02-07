@@ -33,6 +33,7 @@ Dynasty Reader       https://dynasty-scans.com/          Chapters, individual Im
 E-Hentai             https://e-hentai.org/               Favorites, Galleries, Search Results               Supported
 e621                 https://e621.net/                   Pools, Popular Images, Posts, Tag Searches         Supported
 Eka's Portal         https://aryion.com/                 Galleries, Posts                                   Supported
+EroMe                https://www.erome.com/              Albums, Search Results, User Profiles
 ExHentai             https://exhentai.org/               Favorites, Galleries, Search Results               Supported
 Fallen Angels Scans  https://www.fascans.com/            Chapters, Manga
 Fashion Nova         https://www.fashionnova.com/        Collections, Products

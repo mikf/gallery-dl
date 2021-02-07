@@ -28,6 +28,7 @@ modules = [
     "deviantart",
     "dynastyscans",
     "e621",
+    "erome",
     "exhentai",
     "fallenangels",
     "flickr",

@@ -27,6 +27,7 @@ CATEGORY_MAP = {
     "dokireader"     : "Doki Reader",
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
+    "erome"          : "EroMe",
     "e-hentai"       : "E-Hentai",
     "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
