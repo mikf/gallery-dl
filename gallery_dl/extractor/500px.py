@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -153,7 +153,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
     def metadata(self):
         user = self._request_graphql(
             "ProfileRendererQuery", {"username": self.user_name},
-            "5a17a9af1830b58b94a912995b7947b24f27f1301c6ea8ab71a9eb1a6a86585b",
+            "105058632482dd2786fd5775745908dc928f537b28e28356b076522757d65c19",
         )["profile"]
         self.user_id = str(user["legacyId"])
 
