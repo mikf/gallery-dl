@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann, Leonardo Taccari
+# Copyright 2016-2021 Mike Fährmann, Leonardo Taccari
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -61,7 +61,7 @@ class SlidesharePresentationExtractor(Extractor):
         title, pos = text.extract(
             page, '<span class="j-title-breadcrumb">', '</span>', pos)
         views, pos = text.extract(
-            page, '<span class="notranslate pippin-data">', 'views<', pos)
+            page, '<span class="notranslate">', 'views<', pos)
         published, pos = text.extract(
             page, '<time datetime="', '"', pos)
         alt_descr, pos = text.extract(
