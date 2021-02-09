@@ -41,8 +41,11 @@ class KemonopartyExtractor(Extractor):
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
+                url = file["path"]
+                if url[0] == "/":
+                    url = self.root + url
                 text.nameext_from_url(file["name"], post)
-                yield Message.Url, self.root + file["path"], post
+                yield Message.Url, url, post
 
 
 class KemonopartyUserExtractor(KemonopartyExtractor):
