@@ -12,6 +12,8 @@ from .common import Extractor, Message
 from .. import text
 import re
 
+BASE_PATTERN = r"(?:https?://)?kemono\.party/([^/?#]+)/user/([^/?#]+)"
+
 
 class KemonopartyExtractor(Extractor):
     """Base class for kemonoparty extractors"""
@@ -46,11 +48,14 @@ class KemonopartyExtractor(Extractor):
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
-    pattern = r"(?:https?://)?kemono\.party/([^/?#]+)/user/(\d+)/?(?:$|[?#])"
-    test = ("https://kemono.party/fanbox/user/6993449", {
-        "range": "1-25",
-        "count": 25,
-    })
+    pattern = BASE_PATTERN + r"/?(?:$|[?#])"
+    test = (
+        ("https://kemono.party/fanbox/user/6993449", {
+            "range": "1-25",
+            "count": 25,
+        }),
+        ("https://kemono.party/subscribestar/user/alcorart"),
+    )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
@@ -73,7 +78,7 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
 class KemonopartyPostExtractor(KemonopartyExtractor):
     """Extractor for a single kemono.party post"""
     subcategory = "post"
-    pattern = r"(?:https?://)?kemono\.party/([^/?#]+)/user/(\d+)/post/(\d+)"
+    pattern = BASE_PATTERN + r"/post/([^/?#]+)"
     test = (
         ("https://kemono.party/fanbox/user/6993449/post/506575", {
             "pattern": r"https://kemono\.party/files/fanbox"
@@ -101,6 +106,8 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
             "pattern": r"https://kemono\.party/inline/fanbox"
                        r"/uaozO4Yga6ydkGIJFAQDixfE\.jpeg",
         }),
+        ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
+        ("https://kemono.party/gumroad/user/trylsc/post/IURjT"),
     )
 
     def __init__(self, match):
