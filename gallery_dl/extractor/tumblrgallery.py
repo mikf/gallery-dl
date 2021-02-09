@@ -97,7 +97,9 @@ class TumblrgalleryPostExtractor(TumblrgalleryGalleryExtractor):
     def metadata(self, page):
         """Collect metadata for extractor-job"""
         return {
-            "title" : text.remove_html(text.unescape(text.extract(post_page, "<title>", "</title>")[0])),
+            "title" : text.remove_html(
+                text.unescape(text.extract(page, "<title>", "</title>")[0])
+            ).replace("_", "-"),
             "gallery_id": self.gallery_id,
         }
 
@@ -164,7 +166,13 @@ class TumblrgallerySearchExtractor(TumblrgalleryGalleryExtractor):
                     .format(self.root, gallery_id),
                     allow_redirects=False
                 ).text
-                for image_src in TumblrgalleryPostExtractor.images(self, post_page):
-                    image_src[1]["title"] = text.remove_html(text.unescape(text.extract(post_page, "<title>", "</title>")[0]))
+                for image_src in TumblrgalleryPostExtractor.images(
+                    self, post_page
+                ):
+                    image_src[1]["title"] = text.remove_html(
+                        text.unescape(
+                            text.extract(post_page, "<title>", "</title>")[0]
+                        )
+                    ).replace("_", "-")
                     image_src[1]["gallery_id"] = gallery_id
                     yield image_src
