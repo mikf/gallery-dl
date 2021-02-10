@@ -127,7 +127,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryGalleryExtractor):
         }
     )
 
-    filename_fmt = "{category}_{num:>03}_{gallery_id}_{title}_{id}.{extension}"
+    filename_fmt = "{category}_{num:>03}_{gallery_id}_{id}_{title}.{extension}"
     directory_fmt = ("{category}", "{search_term}")
 
     def __init__(self, match):
