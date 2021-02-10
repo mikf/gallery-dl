@@ -19,9 +19,8 @@ class ImagehostImageExtractor(Extractor):
     basecategory = "imagehost"
     subcategory = "image"
     archive_fmt = "{token}"
-    https = False
-    method = "post"
-    params = "simple"
+    https = True
+    params = None
     cookies = None
     encoding = None
 
@@ -30,6 +29,7 @@ class ImagehostImageExtractor(Extractor):
         self.page_url = "http{}://{}".format(
             "s" if self.https else "", match.group(1))
         self.token = match.group(2)
+
         if self.params == "simple":
             self.params = {
                 "imgContinue": "Continue+to+image+...+",
@@ -42,14 +42,11 @@ class ImagehostImageExtractor(Extractor):
                 "adb": "1",
                 "next": "Continue+to+image+...+",
             }
-        else:
-            self.params = {}
-            self.method = "get"
 
     def items(self):
         page = self.request(
             self.page_url,
-            method=self.method,
+            method=("POST" if self.params else "GET"),
             data=self.params,
             cookies=self.cookies,
             encoding=self.encoding,
@@ -91,7 +88,7 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
             "exception": exception.NotFoundError,
         }),
     )
-    https = True
+    params = "simple"
     encoding = "utf-8"
 
     def __init__(self, match):
@@ -122,7 +119,7 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
         "keyword": "a8bb9ab8b2f6844071945d31f8c6e04724051f37",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
+    params = "simple"
     encoding = "utf-8"
 
     def get_info(self, page):
@@ -143,7 +140,7 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
         "url": "46812995d557f2c6adf0ebd0e631e6e4e45facde",
         "content": "59ec819cbd972dd9a71f25866fbfc416f2f215b3",
     })
-    params = None
+    https = False
 
     def get_info(self, page):
         url = text.extract(page, "SRC='", "'")[0]
@@ -159,8 +156,6 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
         "keyword": "d1060a4c2e3b73b83044e20681712c0ffdd6cfef",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
-    params = None
 
     @property
     @memcache(maxage=3*3600)
@@ -182,8 +177,6 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
         "keyword": "100e310a19a2fa22d87e1bbc427ecb9f6501e0c0",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
-    params = None
 
     def get_info(self, page):
         pos = page.find('id="imgpreview"')
@@ -204,8 +197,6 @@ class PixhostImageExtractor(ImagehostImageExtractor):
         "keyword": "3bad6d59db42a5ebbd7842c2307e1c3ebd35e6b0",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
-    params = None
     cookies = {"pixhostads": "1", "pixhosttest": "1"}
 
     def get_info(self, page):
@@ -224,8 +215,6 @@ class PostimgImageExtractor(ImagehostImageExtractor):
         "keyword": "2d05808d04e4e83e33200db83521af06e3147a84",
         "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
     })
-    https = True
-    params = None
 
     def get_info(self, page):
         url     , pos = text.extract(page, 'id="main-image" src="', '"')
@@ -243,8 +232,6 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
         "keyword": "704757ca8825f51cec516ec44c1e627c1f2058ca",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
-    params = None
 
     def get_info(self, page):
         url = text.extract(page, 'src="', '"', page.index("<img "))[0]
@@ -259,8 +246,6 @@ class ViprImageExtractor(ImagehostImageExtractor):
         "url": "88f6a3ecbf3356a11ae0868b518c60800e070202",
         "keyword": "c432e8a1836b0d97045195b745731c2b1bb0e771",
     })
-    https = True
-    params = None
 
     def get_info(self, page):
         url = text.extract(page, '<img src="', '"')[0]
@@ -276,7 +261,6 @@ class ImgclickImageExtractor(ImagehostImageExtractor):
         "keyword": "6895256143eab955622fc149aa367777a8815ba3",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
     params = "complex"
 
     def get_info(self, page):
