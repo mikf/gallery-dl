@@ -1131,13 +1131,31 @@ class DeviantartOAuthAPI():
         self.log.info("Collecting folder information for '%s'", username)
         folders = self.gallery_folders(username)
 
+        # create 'folderid'-to-'folder' mapping
+        fmap = {
+            folder["folderid"]: folder
+            for folder in folders
+        }
+
         # add parent names to folders, but ignore "Featured" as parent
-        fmap = {}
         featured = folders[0]["folderid"]
-        for folder in folders:
-            if folder["parent"] and folder["parent"] != featured:
-                folder["name"] = fmap[folder["parent"]] + "/" + folder["name"]
-            fmap[folder["folderid"]] = folder["name"]
+        done = False
+
+        while not done:
+            done = True
+            for folder in folders:
+                parent = folder["parent"]
+                if not parent:
+                    pass
+                elif parent == featured:
+                    folder["parent"] = None
+                else:
+                    parent = fmap[parent]
+                    if parent["parent"]:
+                        done = False
+                    else:
+                        folder["name"] = parent["name"] + "/" + folder["name"]
+                        folder["parent"] = None
 
         # map deviationids to folder names
         dmap = collections.defaultdict(list)
