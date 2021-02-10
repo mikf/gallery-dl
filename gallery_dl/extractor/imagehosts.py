@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -265,3 +265,21 @@ class ViprImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         url = text.extract(page, '<img src="', '"')[0]
         return url, url
+
+
+class ImgclickImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgclick.net"""
+    category = "imgclick"
+    pattern = r"(?:https?://)?((?:www\.)?imgclick\.net/([^/?#]+))"
+    test = ("http://imgclick.net/4tbrre1oxew9/test-_-_.png.html", {
+        "url": "b967f2d372ffb9f5d3a927c6dd560e120b10a808",
+        "keyword": "6895256143eab955622fc149aa367777a8815ba3",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })
+    https = True
+    params = "complex"
+
+    def get_info(self, page):
+        url     , pos = text.extract(page, '<br><img src="', '"')
+        filename, pos = text.extract(page, 'alt="', '"', pos)
+        return url, filename

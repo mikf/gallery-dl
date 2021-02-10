@@ -149,6 +149,7 @@ Yandere              https://yande.re/                   Pools, Popular Images, 
 Acidimg              https://acidimg.cc/                 individual Images
 Imagetwist           https://imagetwist.com/             individual Images
 Imagevenue           http://imagevenue.com/              individual Images
+Imgclick             https://imgclick.net/               individual Images
 Imgspice             https://imgspice.com/               individual Images
 Imxto                https://imx.to/                     individual Images
 Pixhost              https://pixhost.to/                 individual Images
