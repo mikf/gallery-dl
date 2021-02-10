@@ -91,7 +91,7 @@ class MetadataPP(PostProcessor):
 
     def _filename_extfmt(self, pathfmt):
         kwdict = pathfmt.kwdict
-        ext = kwdict["extension"]
+        ext = kwdict.get("extension")
         kwdict["extension"] = pathfmt.extension
         kwdict["extension"] = pathfmt.prefix + self._extension_fmt(kwdict)
         filename = pathfmt.build_filename()
