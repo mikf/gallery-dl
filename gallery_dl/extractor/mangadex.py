@@ -17,7 +17,6 @@ class MangadexExtractor(Extractor):
     """Base class for mangadex extractors"""
     category = "mangadex"
     root = "https://mangadex.org"
-    api_root = "https://api.mangadex.org"
 
     # mangadex-to-iso639-1 codes
     iso639_map = {
@@ -26,6 +25,10 @@ class MangadexExtractor(Extractor):
         "gb": "en",
         "vn": "vi",
     }
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.api_root = self.config("api-server") or "https://mangadex.org/api"
 
     def chapter_data(self, chapter_id):
         """Request API results for 'chapter_id'"""
