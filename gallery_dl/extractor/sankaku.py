@@ -242,7 +242,7 @@ class SankakuAPI():
                 success = True
             if not success:
                 code = data.get("code")
-                if code == "invalid_token":
+                if code and code.endswith(("invalid-token", "invalid_token")):
                     _authenticate_impl.invalidate(self.username)
                     continue
                 raise exception.StopExtraction(code)
