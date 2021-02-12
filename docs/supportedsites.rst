@@ -103,7 +103,7 @@ PhotoVogue           https://www.vogue.it/en/photovogue/ User Profiles
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
 Pillowfort           https://www.pillowfort.social/      Posts, User Profiles
 Pinterest            https://www.pinterest.com/          |pinterest-C|                                      Supported
-Pixiv                https://www.pixiv.net/              |pixiv-C|                                          Required
+Pixiv                https://www.pixiv.net/              |pixiv-C|                                          `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Pixnet               https://www.pixnet.net/             Folders, individual Images, Sets, User Profiles
 Plurk                https://www.plurk.com/              Posts, Timelines
 Pornhub              https://www.pornhub.com/            Galleries, User Profiles

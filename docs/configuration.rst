@@ -272,7 +272,6 @@ Description
 
     Specifying a username and password is required for
 
-    * ``pixiv``
     * ``nijie``
     * ``seiga``
 
