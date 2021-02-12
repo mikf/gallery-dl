@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,12 @@
 """Utility classes to setup OAuth and link accounts to gallery-dl"""
 
 from .common import Extractor, Message
-from . import deviantart, flickr, reddit, smugmug, tumblr
+from . import deviantart, flickr, pixiv, reddit, smugmug, tumblr
 from .. import text, oauth, util, config, exception
 from ..cache import cache
 import urllib.parse
+import hashlib
+import base64
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
 REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
@@ -62,14 +64,14 @@ class OAuthBase(Extractor):
         self.client.send(b"HTTP/1.1 200 OK\r\n\r\n" + msg.encode())
         self.client.close()
 
-    def open(self, url, params):
+    def open(self, url, params, recv=None):
         """Open 'url' in browser amd return response parameters"""
         import webbrowser
         url += "?" + urllib.parse.urlencode(params)
         if not self.config("browser", True) or not webbrowser.open(url):
             print("Please open this URL in your browser:")
             print(url, end="\n\n", flush=True)
-        return self.recv()
+        return (recv or self.recv)()
 
     def _oauth1_authorization_flow(
             self, request_token_url, authorize_url, access_token_url):
@@ -360,6 +362,69 @@ class OAuthMastodon(OAuthBase):
         self.log.info("client-secret:\n%s", data["client-secret"])
 
         return data
+
+
+class OAuthPixiv(OAuthBase):
+    subcategory = "pixiv"
+    pattern = "oauth:pixiv$"
+
+    def items(self):
+        yield Message.Version, 1
+
+        code_verifier = util.generate_token(32)
+        digest = hashlib.sha256(code_verifier.encode("ascii")).digest()
+        code_challenge = base64.urlsafe_b64encode(
+            digest).rstrip(b"=").decode("ascii")
+
+        url = "https://app-api.pixiv.net/web/v1/login"
+        params = {
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
+            "client": "pixiv-android",
+        }
+        code = self.open(url, params, self._input)
+
+        url = "https://oauth.secure.pixiv.net/auth/token"
+        headers = {
+            "User-Agent": "PixivAndroidApp/5.0.234 (Android 11; Pixel 5)",
+        }
+        data = {
+            "client_id"     : self.oauth_config(
+                "client-id"    , pixiv.PixivAppAPI.CLIENT_ID),
+            "client_secret" : self.oauth_config(
+                "client-secret", pixiv.PixivAppAPI.CLIENT_SECRET),
+            "code"          : code,
+            "code_verifier" : code_verifier,
+            "grant_type"    : "authorization_code",
+            "include_policy": "true",
+            "redirect_uri"  : "https://app-api.pixiv.net"
+                              "/web/v1/users/auth/pixiv/callback",
+        }
+        data = self.session.post(url, headers=headers, data=data).json()
+
+        if "error" in data:
+            print(data)
+            if data["error"] == "invalid_request":
+                print("'code' expired, try again")
+            return
+
+        token = data["refresh_token"]
+        if self.cache:
+            username = self.oauth_config("username")
+            pixiv._refresh_token_cache.update(username, token)
+            self.log.info("Writing 'refresh-token' to cache")
+
+        print(self._generate_message(("refresh-token",), (token,)))
+
+    def _input(self):
+        print("""
+1) Open your browser's Developer Tools (F12) and switch to the Network tab
+2) Login
+4) Select the last network monitor entry ('callback?state=...')
+4) Copy its 'code' query parameter, paste it below, and press Enter
+""")
+        code = input("code: ")
+        return code.rpartition("=")[2].strip()
 
 
 MASTODON_MSG_TEMPLATE = """

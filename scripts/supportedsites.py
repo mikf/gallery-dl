@@ -189,7 +189,7 @@ AUTH_MAP = {
     "patreon"        : _COOKIES,
     "pawoo"          : _OAUTH,
     "pinterest"      : "Supported",
-    "pixiv"          : "Required",
+    "pixiv"          : _OAUTH,
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
     "seiga"          : "Required",

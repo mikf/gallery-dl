@@ -510,49 +510,48 @@ class PixivAppAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.log = extractor.log
-        self.username, self.password = extractor._get_auth_info()
+        self.username = extractor._get_auth_info()[0]
         self.user = None
+
+        extractor.session.headers.update({
+            "App-OS"        : "ios",
+            "App-OS-Version": "13.1.2",
+            "App-Version"   : "7.7.6",
+            "User-Agent"    : "PixivIOSApp/7.7.6 (iOS 13.1.2; iPhone11,8)",
+            "Referer"       : "https://app-api.pixiv.net/",
+        })
 
         self.client_id = extractor.config(
             "client-id", self.CLIENT_ID)
         self.client_secret = extractor.config(
             "client-secret", self.CLIENT_SECRET)
-        extractor.session.headers.update({
-            "App-OS": "ios",
-            "App-OS-Version": "10.3.1",
-            "App-Version": "6.7.1",
-            "User-Agent": "PixivIOSApp/6.7.1 (iOS 10.3.1; iPhone8,1)",
-            "Referer": "https://app-api.pixiv.net/",
-        })
+
+        token = extractor.config("refresh-token")
+        if token is None or token == "cache":
+            token = _refresh_token_cache(self.username)
+        self.refresh_token = token
 
     def login(self):
         """Login and gain an access token"""
-        self.user, auth = self._login_impl(self.username, self.password)
+        self.user, auth = self._login_impl(self.username)
         self.extractor.session.headers["Authorization"] = auth
 
     @cache(maxage=3600, keyarg=1)
-    def _login_impl(self, username, password):
-        if not username or not password:
+    def _login_impl(self, username):
+        if not self.refresh_token:
             raise exception.AuthenticationError(
-                "Username and password required")
+                "'refresh-token' required.\n"
+                "Run `gallery-dl oauth:pixiv` to get one.")
 
+        self.log.info("Refreshing access token")
         url = "https://oauth.secure.pixiv.net/auth/token"
         data = {
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
-            "get_secure_url": 1,
+            "client_id"     : self.client_id,
+            "client_secret" : self.client_secret,
+            "grant_type"    : "refresh_token",
+            "refresh_token" : self.refresh_token,
+            "get_secure_url": "1",
         }
-        refresh_token = _refresh_token_cache(username)
-
-        if refresh_token:
-            self.log.info("Refreshing access token")
-            data["grant_type"] = "refresh_token"
-            data["refresh_token"] = refresh_token
-        else:
-            self.log.info("Logging in as %s", username)
-            data["grant_type"] = "password"
-            data["username"] = username
-            data["password"] = password
 
         time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S+00:00")
         headers = {
@@ -565,11 +564,9 @@ class PixivAppAPI():
             url, method="POST", headers=headers, data=data, fatal=False)
         if response.status_code >= 400:
             self.log.debug(response.text)
-            raise exception.AuthenticationError()
+            raise exception.AuthenticationError("Invalid refresh token")
 
         data = response.json()["response"]
-        if not refresh_token:
-            _refresh_token_cache.update(username, data["refresh_token"])
         return data["user"], "Bearer " + data["access_token"]
 
     def illust_detail(self, illust_id):

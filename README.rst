@@ -214,7 +214,7 @@ Username & Password
 
 Some extractors require you to provide valid login credentials in the form of
 a username & password pair. This is necessary for
-``pixiv``, ``nijie``, and ``seiga``
+``nijie`` and ``seiga``
 and optional for
 ``aryion``,
 ``danbooru``,
@@ -237,7 +237,7 @@ You can set the necessary information in your configuration file
 
     {
         "extractor": {
-            "pixiv": {
+            "seiga": {
                 "username": "<username>",
                 "password": "<password>"
             }
