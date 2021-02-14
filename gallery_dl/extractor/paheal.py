@@ -115,10 +115,12 @@ class PahealPostExtractor(PahealExtractor):
         tags  , pos = text.extract(page, ": ", "<")
         md5   , pos = text.extract(page, "/_thumbs/", "/", pos)
         url   , pos = text.extract(page, "id='main_image' src='", "'", pos)
-        width , pos = text.extract(page, "data-width='", "'", pos)
-        height, pos = text.extract(page, "data-height='", "'", pos)
+        width , pos = text.extract(page, "data-width=", " ", pos)
+        height, pos = text.extract(page, "data-height=", " ", pos)
 
         return ({
             "id": self.post_id, "md5": md5, "tags": tags, "file_url": url,
-            "width": width, "height": height, "size": 0,
+            "size"  : 0,
+            "width" : width.strip("'\""),
+            "height": height.strip("'\""),
         },)
