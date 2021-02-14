@@ -34,6 +34,10 @@ class PatreonExtractor(Extractor):
             PatreonExtractor._warning = False
 
         for post in self.posts():
+
+            if not post.get("current_user_can_view", True):
+                self.log.warning("Not allowed to view post %s", post["id"])
+                continue
             post["num"] = 0
             hashes = set()
 
@@ -113,14 +117,17 @@ class PatreonExtractor(Extractor):
         """Process and extend a 'post' object"""
         attr = post["attributes"]
         attr["id"] = text.parse_int(post["id"])
-        attr["images"] = self._files(post, included, "images")
-        attr["attachments"] = self._files(post, included, "attachments")
-        attr["date"] = text.parse_datetime(
-            attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-        user = post["relationships"]["user"]
-        attr["creator"] = (
-            self._user(user["links"]["related"]) or
-            included["user"][user["data"]["id"]])
+
+        if post.get("current_user_can_view", True):
+            attr["images"] = self._files(post, included, "images")
+            attr["attachments"] = self._files(post, included, "attachments")
+            attr["date"] = text.parse_datetime(
+                attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            user = post["relationships"]["user"]
+            attr["creator"] = (
+                self._user(user["links"]["related"]) or
+                included["user"][user["data"]["id"]])
+
         return attr
 
     @staticmethod
