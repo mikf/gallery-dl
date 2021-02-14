@@ -186,7 +186,8 @@ class FuraffinityGalleryExtractor(FuraffinityExtractor):
     subcategory = "gallery"
     pattern = BASE_PATTERN + r"/gallery/([^/?#]+)"
     test = ("https://www.furaffinity.net/gallery/mirlinthloth/", {
-        "pattern": r"https://d\d?.facdn.net/art/mirlinthloth/\d+/\d+.\w+\.\w+",
+        "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
+                   r"/art/mirlinthloth/\d+/\d+.\w+\.\w+",
         "range": "45-50",
         "count": 6,
     })
@@ -198,7 +199,8 @@ class FuraffinityScrapsExtractor(FuraffinityExtractor):
     directory_fmt = ("{category}", "{user!l}", "Scraps")
     pattern = BASE_PATTERN + r"/scraps/([^/?#]+)"
     test = ("https://www.furaffinity.net/scraps/mirlinthloth/", {
-        "pattern": r"https://d\d?.facdn.net/art/[^/]+(/stories)?/\d+/\d+.\w+.",
+        "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
+                   r"/art/[^/]+(/stories)?/\d+/\d+.\w+.",
         "count": ">= 3",
     })
 
@@ -209,7 +211,8 @@ class FuraffinityFavoriteExtractor(FuraffinityExtractor):
     directory_fmt = ("{category}", "{user!l}", "Favorites")
     pattern = BASE_PATTERN + r"/favorites/([^/?#]+)"
     test = ("https://www.furaffinity.net/favorites/mirlinthloth/", {
-        "pattern": r"https://d\d?.facdn.net/art/[^/]+/\d+/\d+.\w+\.\w+",
+        "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
+                   r"/art/[^/]+/\d+/\d+.\w+\.\w+",
         "range": "45-50",
         "count": 6,
     })
@@ -224,7 +227,8 @@ class FuraffinitySearchExtractor(FuraffinityExtractor):
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
     test = ("https://www.furaffinity.net/search/?q=cute", {
-        "pattern": r"https://d\d?.facdn.net/art/[^/]+/\d+/\d+.\w+\.\w+",
+        "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
+                   r"/art/[^/]+/\d+/\d+.\w+\.\w+",
         "range": "45-50",
         "count": 6,
     })
@@ -243,9 +247,9 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
     pattern = BASE_PATTERN + r"/(?:view|full)/(\d+)"
     test = (
         ("https://www.furaffinity.net/view/21835115/", {
-            "pattern": r"https://d\d*\.facdn\.net/(download/)?art/mirlinthloth"
-                       r"/music/1488278723/1480267446.mirlinthloth_dj_fennmink"
-                       r"_-_bude_s_4_ever\.mp3",
+            "pattern": r"https://d\d*\.f(uraffinity|acdn)\.net/(download/)?art"
+                       r"/mirlinthloth/music/1488278723/1480267446.mirlinthlot"
+                       r"h_dj_fennmink_-_bude_s_4_ever\.mp3",
             "keyword": {
                 "artist"     : "mirlinthloth",
                 "artist_url" : "mirlinthloth",
@@ -256,7 +260,7 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
                 "id"         : 21835115,
                 "tags"       : list,
                 "title"      : "Bude's 4 Ever",
-                "url"        : r"re:https://d\d?.facdn.net/art/mirlinthloth/m",
+                "url"        : r"re:https://d\d?\.f(uraffinity|acdn)\.net/art",
                 "user"       : "mirlinthloth",
                 "views"      : int,
                 "favorites"  : int,
