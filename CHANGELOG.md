@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.16.5 - 2021-02-14
+### Additions
+- [behance] support `video` modules ([#1282](https://github.com/mikf/gallery-dl/issues/1282))
+- [erome] add `album`, `user`, and `search` extractors ([#409](https://github.com/mikf/gallery-dl/issues/409))
+- [hentaifox] support searching by group ([#1294](https://github.com/mikf/gallery-dl/issues/1294))
+- [imgclick] add `image` extractor ([#1307](https://github.com/mikf/gallery-dl/issues/1307))
+- [kemonoparty] extract inline images ([#1286](https://github.com/mikf/gallery-dl/issues/1286))
+- [kemonoparty] support URLs with non-numeric user and post IDs ([#1303](https://github.com/mikf/gallery-dl/issues/1303))
+- [pillowfort] add `user` and `post` extractors ([#846](https://github.com/mikf/gallery-dl/issues/846))
+### Changes
+- [kemonoparty] include `service` in directories and archive keys
+- [pixiv] require a `refresh-token` to login ([#1304](https://github.com/mikf/gallery-dl/issues/1304))
+- [snap] use `core18` as base
+### Fixes
+- [500px] update query hashes
+- [deviantart] update parameters for `/browse/popular` ([#1267](https://github.com/mikf/gallery-dl/issues/1267))
+- [deviantart] provide filename extension for original file downloads ([#1272](https://github.com/mikf/gallery-dl/issues/1272))
+- [deviantart] fix `folders` option ([#1302](https://github.com/mikf/gallery-dl/issues/1302))
+- [inkbunny] add `sid` parameter to private file downloads ([#1281](https://github.com/mikf/gallery-dl/issues/1281))
+- [kemonoparty] fix absolute file URLs
+- [mangadex] revert to `https://mangadex.org/api/` and add `api-server` option ([#1310](https://github.com/mikf/gallery-dl/issues/1310))
+- [nsfwalbum] use fallback for deleted content ([#1259](https://github.com/mikf/gallery-dl/issues/1259))
+- [sankaku] update `invalid token` detection ([#1309](https://github.com/mikf/gallery-dl/issues/1309))
+- [slideshare] fix extraction
+- [postprocessor:metadata] fix crash with `extension-format` ([#1285](https://github.com/mikf/gallery-dl/issues/1285))
+
 ## 1.16.4 - 2021-01-23
 ### Additions
 - [furaffinity] add `descriptions` option ([#1231](https://github.com/mikf/gallery-dl/issues/1231))
