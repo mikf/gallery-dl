@@ -37,7 +37,7 @@ class VanillarockPostExtractor(VanillarockExtractor):
 
     def items(self):
         extr = text.extract_from(self.request(self.root + self.path).text)
-        name = extr("<title>", "</title>")
+        name = extr('<h1 class="entry-title">', "<")
 
         imgs = []
         while True:
@@ -48,7 +48,7 @@ class VanillarockPostExtractor(VanillarockExtractor):
 
         data = {
             "count": len(imgs),
-            "title": text.unescape(name.rpartition(" | ")[0]),
+            "title": text.unescape(name),
             "path" : self.path.strip("/"),
             "date" : text.parse_datetime(extr(
                 '<div class="date">', '</div>'), "%Y-%m-%d %H:%M"),
@@ -76,7 +76,7 @@ class VanillarockTagExtractor(VanillarockExtractor):
           "%ad%e7%94%bb%e5%83%8f/%e8%90%8c%e3%81%88%e3%83%bb%e3%82%bd%e3%83%95"
           "%e3%83%88%e3%82%a8%e3%83%ad"), {
             "pattern": VanillarockPostExtractor.pattern,
-            "count": 3,
+            "count": ">= 5",
         }),
     )
 
