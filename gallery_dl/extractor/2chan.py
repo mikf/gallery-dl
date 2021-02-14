@@ -22,8 +22,8 @@ class _2chanThreadExtractor(Extractor):
     url_fmt = "https://{server}.2chan.net/{board}/src/{filename}"
     pattern = r"(?:https?://)?([^.]+)\.2chan\.net/([^/]+)/res/(\d+)"
     test = ("http://dec.2chan.net/70/res/4752.htm", {
-        "url": "20c211ae7c06b18ec345a057fe0b68dde979b051",
-        "keyword": "23a529b46313b927fc94b577e5e1fdb3aa164ac1",
+        "url": "f49aa31340e9a3429226af24e19e01f5b819ca1f",
+        "keyword": "44599c21b248e79692b2eb2da12699bd0ed5640a",
     })
 
     def __init__(self, match):
