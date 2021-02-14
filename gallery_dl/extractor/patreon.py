@@ -103,7 +103,13 @@ class PatreonExtractor(Extractor):
             if "included" in posts:
                 included = self._transform(posts["included"])
                 for post in posts["data"]:
-                    yield self._process(post, included)
+                    try:
+                        yield self._process(post, included)
+                    except exception.AuthorizationError as e:
+                        # Patreon may throw an authoriation error per-post;
+                        # this doesn't mean the whole job will error out.
+                        self.log.warning(e.message)
+                        continue
 
             if "links" not in posts:
                 return
@@ -112,6 +118,10 @@ class PatreonExtractor(Extractor):
     def _process(self, post, included):
         """Process and extend a 'post' object"""
         attr = post["attributes"]
+
+        if not attr.get('current_user_can_view'):
+            raise exception.AuthorizationError(post["id"])
+
         attr["id"] = text.parse_int(post["id"])
         attr["images"] = self._files(post, included, "images")
         attr["attachments"] = self._files(post, included, "attachments")
