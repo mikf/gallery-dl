@@ -17,7 +17,7 @@ import datetime
 import requests
 import threading
 from .message import Message
-from .. import config, text, util, exception, cloudflare
+from .. import config, text, util, exception
 
 
 class Extractor():
@@ -140,21 +140,20 @@ class Extractor():
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
 
-                reason = response.reason
-                if cloudflare.is_challenge(response):
-                    self.log.info("Solving Cloudflare challenge")
-                    response, domain, cookies = cloudflare.solve_challenge(
-                        session, response, kwargs)
-                    if cookies:
-                        cloudflare.cookies.update(
-                            self.category, (domain, cookies))
-                        return response
-                if cloudflare.is_captcha(response):
-                    self.log.warning("Cloudflare CAPTCHA")
-
-                msg = "'{} {}' for '{}'".format(code, reason, url)
+                msg = "'{} {}' for '{}'".format(code, response.reason, url)
+                server = response.headers.get("Server")
+                if server and server.startswith("cloudflare"):
+                    if code == 503 and \
+                            b"jschl-answer" in response.content:
+                        self.log.warning("Cloudflare IUAM challenge")
+                        break
+                    if code == 403 and \
+                            b'name="captcha-bypass"' in response.content:
+                        self.log.warning("Cloudflare CAPTCHA")
+                        break
                 if code < 500 and code != 429 and code != 430:
                     break
+
             finally:
                 Extractor.request_timestamp = time.time()
 
@@ -263,11 +262,6 @@ class Extractor():
                 self.log.warning(
                     "expected 'dict' or 'str' value for 'cookies' option, "
                     "got '%s' (%s)", cookies.__class__.__name__, cookies)
-
-        cookies = cloudflare.cookies(self.category)
-        if cookies:
-            domain, cookies = cookies
-            self._update_cookies_dict(cookies, domain)
 
     def _store_cookies(self):
         """Store the session's cookiejar in a cookies.txt file"""
@@ -528,7 +522,7 @@ class AsynchronousMixin():
 
 
 class BaseExtractor(Extractor):
-    instances = None
+    instances = ()
 
     def __init__(self, match):
         if not self.category:
