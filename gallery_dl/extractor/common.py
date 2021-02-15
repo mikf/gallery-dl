@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -527,46 +527,37 @@ class AsynchronousMixin():
         messages.put(None)
 
 
-def generate_extractors(extractor_data, symtable, classes):
-    """Dynamically generate Extractor classes"""
-    extractors = config.get(("extractor",), classes[0].basecategory)
-    ckey = extractor_data.get("_ckey")
-    prev = None
+class BaseExtractor(Extractor):
+    instances = None
 
-    if extractors:
-        extractor_data.update(extractors)
+    def __init__(self, match):
+        if not self.category:
+            for index, group in enumerate(match.groups()):
+                if group is not None:
+                    self.category, self.root = self.instances[index]
+                    break
+        Extractor.__init__(self, match)
 
-    for category, info in extractor_data.items():
+    @classmethod
+    def update(cls, instances):
+        extra_instances = config.get(("extractor",), cls.basecategory)
+        if extra_instances:
+            for category, info in extra_instances.items():
+                if isinstance(info, dict) and "root" in info:
+                    instances[category] = info
 
-        if not isinstance(info, dict) or "root" not in info:
-            continue
+        pattern_list = []
+        instance_list = cls.instances = []
+        for category, info in instances.items():
+            root = info["root"]
+            instance_list.append((category, root))
 
-        root = info["root"]
-        domain = root[root.index(":") + 3:]
-        pattern = info.get("pattern") or re.escape(domain)
-        name = (info.get("name") or category).capitalize()
+            pattern = info.get("pattern")
+            if not pattern:
+                pattern = re.escape(root[root.index(":") + 3:])
+            pattern_list.append(pattern + "()")
 
-        for cls in classes:
-
-            class Extr(cls):
-                pass
-            Extr.__module__ = cls.__module__
-            Extr.__name__ = Extr.__qualname__ = \
-                name + cls.subcategory.capitalize() + "Extractor"
-            Extr.__doc__ = \
-                "Extractor for " + cls.subcategory + "s from " + domain
-            Extr.category = category
-            Extr.pattern = r"(?:https?://)?" + pattern + cls.pattern_fmt
-            Extr.test = info.get("test-" + cls.subcategory)
-            Extr.root = root
-
-            if "extra" in info:
-                for key, value in info["extra"].items():
-                    setattr(Extr, key, value)
-            if prev and ckey:
-                setattr(Extr, ckey, prev)
-
-            symtable[Extr.__name__] = prev = Extr
+        return r"(?:https?://)?(?:" + "|".join(pattern_list) + r")"
 
 
 # Undo automatic pyOpenSSL injection by requests
