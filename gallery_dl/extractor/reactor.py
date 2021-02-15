@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,6 +24,7 @@ class ReactorExtractor(Extractor):
     basecategory = "reactor"
     filename_fmt = "{post_id}_{num:>02}{title[:100]:?_//}.{extension}"
     archive_fmt = "{post_id}_{num}"
+    instances = ()
 
     def __init__(self, match):
         Extractor.__init__(self, match)

@@ -10,6 +10,7 @@ import sys
 import time
 import errno
 import logging
+import operator
 import collections
 from . import extractor, downloader, postprocessor
 from . import config, text, util, output, exception
@@ -440,7 +441,21 @@ class DownloadJob(Job):
         if wlist is not None:
             if isinstance(wlist, str):
                 wlist = wlist.split(",")
-            blist = {e.category for e in extractor._list_classes()}
+
+            # build a set of all categories
+            blist = set()
+            add = blist.add
+            update = blist.update
+            get = operator.itemgetter(0)
+
+            for extr in extractor._list_classes():
+                category = extr.category
+                if category:
+                    add(category)
+                else:
+                    update(map(get, extr.instances))
+
+            # remove whitelisted categories
             blist.difference_update(wlist)
             return blist
 
