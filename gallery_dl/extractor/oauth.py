@@ -9,7 +9,7 @@
 """Utility classes to setup OAuth and link accounts to gallery-dl"""
 
 from .common import Extractor, Message
-from . import deviantart, flickr, pixiv, reddit, smugmug, tumblr
+from . import deviantart, flickr, mastodon, pixiv, reddit, smugmug, tumblr
 from .. import text, oauth, util, config, exception
 from ..cache import cache
 import urllib.parse
@@ -106,9 +106,9 @@ class OAuthBase(Extractor):
         ))
 
     def _oauth2_authorization_code_grant(
-            self, client_id, client_secret, auth_url, token_url,
+            self, client_id, client_secret, auth_url, token_url, *,
             scope="read", key="refresh_token", auth=True,
-            message_template=None, cache=None):
+            cache=None, instance=None):
         """Perform an OAuth2 authorization code grant"""
 
         state = "gallery-dl_{}_{}".format(
@@ -117,12 +117,12 @@ class OAuthBase(Extractor):
         )
 
         auth_params = {
-            "client_id": client_id,
+            "client_id"    : client_id,
             "response_type": "code",
-            "state": state,
-            "redirect_uri": self.redirect_uri,
-            "duration": "permanent",
-            "scope": scope,
+            "state"        : state,
+            "redirect_uri" : self.redirect_uri,
+            "duration"     : "permanent",
+            "scope"        : scope,
         }
 
         # receive an authorization code
@@ -140,8 +140,8 @@ class OAuthBase(Extractor):
 
         # exchange the authorization code for a token
         data = {
-            "grant_type": "authorization_code",
-            "code": params["code"],
+            "grant_type"  : "authorization_code",
+            "code"        : params["code"],
             "redirect_uri": self.redirect_uri,
         }
 
@@ -159,27 +159,18 @@ class OAuthBase(Extractor):
             self.send(data["error"])
             return
 
+        token = data[key]
+        token_name = key.replace("_", "-")
+
         # write to cache
         if self.cache and cache:
-            cache.update("#" + str(client_id), data[key])
-            self.log.info("Writing 'refresh-token' to cache")
+            cache.update(instance or ("#" + str(client_id)), token)
+            self.log.info("Writing '%s' to cache", token_name)
 
         # display token
-        if message_template:
-            msg = message_template.format(
-                category=self.subcategory,
-                key=key.partition("_")[0],
-                token=data[key],
-                instance=getattr(self, "instance", ""),
-                client_id=client_id,
-                client_secret=client_secret,
-            )
-        else:
-            msg = self._generate_message(
-                ("refresh-token",),
-                (data[key],),
-            )
-        self.send(msg)
+        self.send(self._generate_message(
+            (token_name,), (token,),
+        ))
 
     def _generate_message(self, names, values):
         _vh, _va, _is, _it = (
@@ -326,8 +317,10 @@ class OAuthMastodon(OAuthBase):
     def items(self):
         yield Message.Version, 1
 
-        application = self.oauth_config(self.instance)
-        if not application:
+        for application in mastodon.INSTANCES.values():
+            if self.instance == application["root"].partition("://")[2]:
+                break
+        else:
             application = self._register(self.instance)
 
         self._oauth2_authorization_code_grant(
@@ -335,8 +328,9 @@ class OAuthMastodon(OAuthBase):
             application["client-secret"],
             "https://{}/oauth/authorize".format(self.instance),
             "https://{}/oauth/token".format(self.instance),
+            instance=self.instance,
             key="access_token",
-            message_template=MASTODON_MSG_TEMPLATE,
+            cache=mastodon._access_token_cache,
         )
 
     @cache(maxage=10*365*24*3600, keyarg=1)
@@ -425,29 +419,3 @@ class OAuthPixiv(OAuthBase):
 """)
         code = input("code: ")
         return code.rpartition("=")[2].strip()
-
-
-MASTODON_MSG_TEMPLATE = """
-Your 'access-token' is
-
-{token}
-
-Put this value into your configuration file as
-'extractor.mastodon.{instance}.{key}-token'.
-
-You can also add your 'client-id' and 'client-secret' values
-if you want to register another account in the future.
-
-Example:
-{{
-    "extractor": {{
-        "mastodon": {{
-            "{instance}": {{
-                "{key}-token": "{token}",
-                "client-id": "{client_id}",
-                "client-secret": "{client_secret}"
-            }}
-        }}
-    }}
-}}
-"""

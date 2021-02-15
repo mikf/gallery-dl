@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -42,8 +42,6 @@ class PatreonExtractor(Extractor):
             hashes = set()
 
             yield Message.Directory, post
-            yield Message.Metadata, post
-
             for kind, url, name in itertools.chain(
                 self._images(post),
                 self._attachments(post),

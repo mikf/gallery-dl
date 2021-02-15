@@ -219,10 +219,6 @@ class TestExtractorWait(unittest.TestCase):
 
 class TextExtractorOAuth(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        mastodon.generate_extractors()
-
     def test_oauth1(self):
         for category in ("flickr", "smugmug", "tumblr"):
             extr = extractor.find("oauth:" + category)
