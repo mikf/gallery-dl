@@ -35,6 +35,7 @@ modules = [
     "furaffinity",
     "fuskator",
     "gelbooru",
+    "gelbooru_v01",
     "gelbooru_v02",
     "gfycat",
     "hbrowse",
