@@ -35,6 +35,7 @@ modules = [
     "furaffinity",
     "fuskator",
     "gelbooru",
+    "gelbooru_v02",
     "gfycat",
     "hbrowse",
     "hentai2read",
