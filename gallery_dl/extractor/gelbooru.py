@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,13 +8,14 @@
 
 """Extractors for https://gelbooru.com/"""
 
-from . import booru
+from . import gelbooru_v02
 from .. import text, exception
 
 
 class GelbooruBase():
     """Base class for gelbooru extractors"""
     category = "gelbooru"
+    basecategory = "booru"
     root = "https://gelbooru.com"
 
     @staticmethod
@@ -27,7 +28,8 @@ class GelbooruBase():
         return url
 
 
-class GelbooruTagExtractor(GelbooruBase, booru.BooruTagExtractor):
+class GelbooruTagExtractor(GelbooruBase,
+                           gelbooru_v02.GelbooruV02TagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")
@@ -42,7 +44,8 @@ class GelbooruTagExtractor(GelbooruBase, booru.BooruTagExtractor):
     )
 
 
-class GelbooruPoolExtractor(GelbooruBase, booru.BooruPoolExtractor):
+class GelbooruPoolExtractor(GelbooruBase,
+                            gelbooru_v02.GelbooruV02PoolExtractor):
     """Extractor for image-pools from gelbooru.com"""
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=pool&s=show&id=(?P<pool>\d+)")
@@ -72,7 +75,8 @@ class GelbooruPoolExtractor(GelbooruBase, booru.BooruPoolExtractor):
         }
 
 
-class GelbooruPostExtractor(GelbooruBase, booru.BooruPostExtractor):
+class GelbooruPostExtractor(GelbooruBase,
+                            gelbooru_v02.GelbooruV02PostExtractor):
     """Extractor for single images from gelbooru.com"""
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=view&id=(?P<post>\d+)")
