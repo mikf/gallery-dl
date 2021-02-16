@@ -1,0 +1,32 @@
+name: executables
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Build executable
+      run: |
+        pip install requests urllib3==1.25.11 youtube-dl pyinstaller
+        python scripts/pyinstaller.py
+
+    - name: Upload executable
+      uses: actions/upload-artifact@v2
+      with:
+        name: gallery-dl-${{ matrix.os }}
+        path: |
+          dist
