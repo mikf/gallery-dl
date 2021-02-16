@@ -61,6 +61,7 @@ BASE_PATTERN = GelbooruV02Extractor.update({
     "realbooru": {"root": "https://realbooru.com"},
     "rule34"   : {"root": "https://rule34.xxx"},
     "safebooru": {"root": "https://safebooru.org"},
+    "tbib"     : {"root": "https://tbib.org"},
 })
 
 
@@ -81,6 +82,9 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
         }),
         ("https://realbooru.com/index.php?page=post&s=list&tags=wine", {
             "count": ">= 64",
+        }),
+        ("https://tbib.org/index.php?page=post&s=list&tags=yuyaiyaui", {
+            "count": ">= 120",
         }),
     )
 
@@ -175,6 +179,10 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
         ("https://realbooru.com/index.php?page=post&s=view&id=668483", {
             "url": "2421b5b0e15d5e20f9067090a8b0fd4114d3e7d9",
             "content": "7f5873ce3b6cd295ea2e81fcb49583098ea9c8da",
+        }),
+        ("https://tbib.org/index.php?page=post&s=view&id=9233957", {
+            "url": "5a6ebe07bfff8e6d27f7c30b5480f27abcb577d2",
+            "content": "1c3831b6fbaa4686e3c79035b5d98460b1c85c43",
         }),
     )
 
