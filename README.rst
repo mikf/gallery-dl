@@ -27,6 +27,7 @@ Optional
 Installation
 ============
 
+
 Pip
 ---
 
@@ -55,27 +56,6 @@ Note: Windows users should use :code:`py -3` instead of :code:`python3`.
     $ python3 -m pip install --upgrade pip setuptools wheel
 
 
-From Source
------------
-
-Get the code by either
-
-* Downloading a stable_ or dev_ archive and unpacking it
-* Or via :code:`git clone https://github.com/mikf/gallery-dl.git`
-
-Navigate into the respective directory and run the :code:`setup.py` file.
-
-.. code:: bash
-
-    $ wget https://github.com/mikf/gallery-dl/archive/master.tar.gz
-    $ tar -xf master.tar.gz
-    # or
-    $ git clone https://github.com/mikf/gallery-dl.git
-
-    $ cd gallery-dl*
-    $ python3 setup.py install
-
-
 Standalone Executable
 ---------------------
 
@@ -99,6 +79,7 @@ Linux users that are using a distro that is supported by Snapd_ can install *gal
 
     $ snap install gallery-dl
 
+
 Chocolatey
 ----------
 
@@ -108,14 +89,16 @@ Windows users that have Chocolatey_ installed can install *gallery-dl* from the 
 
     $ choco install gallery-dl
 
-Scoop
-----------
 
-Apart from Chocolatey, *gallery-dl* is also available in Scoop_ "main" bucket for Windows users.
+Scoop
+-----
+
+*gallery-dl* is also available in the Scoop_ "main" bucket for Windows users:
 
 .. code:: powershell
 
     $ scoop install gallery-dl
+
 
 Usage
 =====
