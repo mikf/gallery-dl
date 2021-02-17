@@ -543,7 +543,7 @@ class BaseExtractor(Extractor):
         pattern_list = []
         instance_list = cls.instances = []
         for category, info in instances.items():
-            root = info["root"]
+            root = info["root"].rstrip("/")
             instance_list.append((category, root))
 
             pattern = info.get("pattern")
