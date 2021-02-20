@@ -4,7 +4,7 @@ import base64
 from .common import Extractor, Message
 
 
-class CyberdropExtractor(Extractor):
+class CyberdropAlbumExtractor(Extractor):
     pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.me/a/([^/]+)/?"
     category = "cyberdrop"
     subcategory = "album"
