@@ -7,7 +7,7 @@ from .common import Extractor, Message
 class CyberdropExtractor(Extractor):
     pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.me/a/([^/]+)/?"
     category = "cyberdrop"
-    subcategory = "thread"
+    subcategory = "album"
     directory_fmt = ("{category}", "{album}")
     root = "https://cyberdrop.me"
 
@@ -27,7 +27,8 @@ class CyberdropExtractor(Extractor):
         if (len(results)) != 1:
             raise RuntimeError("could not find file list in html")
 
-        fileList = [base64.b64decode(s.encode('ascii')).decode('utf8') for s in results[0].split(",")]
+        fileList = [base64.b64decode(s.encode('ascii')).decode('utf8')
+                    for s in results[0].split(",")]
 
         for f in fileList:
             ext = f[f.rindex(".") + 1:]
