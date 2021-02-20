@@ -578,7 +578,7 @@ class TwitterAPI():
         return self._pagination(endpoint, params)
 
     def list_members(self, list_id):
-        endpoint = "/graphql/3pV4YlpljXUTFAa1jVNWQw/ListMembers"
+        endpoint = "/graphql/tA7h9hy4U0Yc9COfIOh3qQ/ListMembers"
         variables = {
             "listId": list_id,
             "count" : 20,
@@ -588,7 +588,7 @@ class TwitterAPI():
         return self._pagination_members(endpoint, variables)
 
     def list_by_rest_id(self, list_id):
-        endpoint = "/graphql/EhaI2uiCBJI97e28GN8WjQ/ListByRestId"
+        endpoint = "/graphql/18MAHTcDU-TdJSjWWmoH7w/ListByRestId"
         params = {"variables": '{"listId":"' + list_id + '"'
                                ',"withUserResult":false}'}
         try:
@@ -597,7 +597,7 @@ class TwitterAPI():
             raise exception.NotFoundError("list")
 
     def user_by_screen_name(self, screen_name):
-        endpoint = "/graphql/ZRnOhhXPwue_JGILb9TNug/UserByScreenName"
+        endpoint = "/graphql/hc-pka9A7gyS3xODIafnrQ/UserByScreenName"
         params = {"variables": '{"screen_name":"' + screen_name + '"'
                                ',"withHighlightedLabel":true}'}
         try:
