@@ -26,7 +26,7 @@ Behance              https://www.behance.net/            Collections, Galleries,
 Blogger              https://www.blogger.com/            Blogs, Posts, Search Results
 Cyberdrop            https://cyberdrop.me/               Albums
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag Searches         Supported
-Derpibooru           https://derpibooru.org/             Galleries, Posts, Search Results                   `API Key <configuration.rst#extractorderpibooruapi-key>`__
+Derpibooru           https://derpibooru.org/             Galleries, Posts, Search Results                   `API Key <configuration.rst#extractorderpibooruapi-key>`__
 Desuarchive          https://desuarchive.org/            Boards, Search Results, Threads
 DeviantArt           https://www.deviantart.com/         |deviantart-C|                                     `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Doki Reader          https://kobato.hologfx.com/reader/  Chapters, Manga
@@ -137,9 +137,9 @@ Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searc
 Twitter              https://twitter.com/                |twitter-C|                                        Supported
 Unsplash             https://unsplash.com/               |unsplash-C|
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
-Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  `API Key <configuration.rst#extractorwallhavenapi-key>`__
+Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  `API Key <configuration.rst#extractorwallhavenapi-key>`__
 Warosu               https://warosu.org/                 Threads
-Weasyl               https://www.weasyl.com/             Favorites, Folders, Journals, Submissions          `API Key <configuration.rst#extractorweasylapi-key>`__
+Weasyl               https://www.weasyl.com/             Favorites, Folders, Journals, Submissions          `API Key <configuration.rst#extractorweasylapi-key>`__
 Webtoon              https://www.webtoons.com/           Comics, Episodes
 Weibo                https://www.weibo.com/              Images from Statuses, User Profiles
 WikiArt.org          https://www.wikiart.org/            |wikiart-C|
