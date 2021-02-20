@@ -15,8 +15,10 @@ Site                 URL                                 Capabilities           
 500px                https://500px.com/                  Galleries, individual Images, User Profiles
 8kun                 https://8kun.top/                   Boards, Threads
 8muses               https://comics.8muses.com/          Albums
+Acidimg              https://acidimg.cc/                 individual Images
 Adobe Portfolio      https://www.myportfolio.com/        Galleries
 Adult Empire         https://www.adultempire.com/        Galleries
+Allgirlbooru         https://allgirl.booru.org/          Posts, Tag Searches
 arch.b4k.co          https://arch.b4k.co/                Boards, Search Results, Threads
 Archive of Sins      https://archiveofsins.com/          Boards, Search Results, Threads
 Archived.Moe         https://archived.moe/               Boards, Search Results, Threads
@@ -56,17 +58,23 @@ Hiperdex             https://hiperdex.com/               Artists, Chapters, Mang
 Hitomi.la            https://hitomi.la/                  Galleries, Tag Searches
 Hypnohub             https://hypnohub.net/               Pools, Popular Images, Posts, Tag Searches
 Idol Complex         https://idol.sankakucomplex.com/    Pools, Posts, Tag Searches                         Supported
+Illusioncardsbooru   https://illusioncards.booru.org/    Posts, Tag Searches
 ImageBam             http://www.imagebam.com/            Galleries, individual Images
 ImageChest           https://imgchest.com/               Galleries
 ImageFap             https://www.imagefap.com/           Galleries, individual Images, User Profiles
+Imagetwist           https://imagetwist.com/             individual Images
+Imagevenue           http://imagevenue.com/              individual Images
 ImgBB                https://imgbb.com/                  Albums, individual Images, User Profiles           Supported
 imgbox               https://imgbox.com/                 Galleries, individual Images
+Imgclick             https://imgclick.net/               individual Images
+Imgspice             https://imgspice.com/               individual Images
 imgth                https://imgth.com/                  Galleries
 imgur                https://imgur.com/                  |imgur-C|
+Imxto                https://imx.to/                     individual Images
 Inkbunny             https://inkbunny.net/               Posts, User Profiles                               Supported
 Instagram            https://www.instagram.com/          |instagram-C|                                      Supported
 Issuu                https://issuu.com/                  Publications, User Profiles
-Joyreactor           http://joyreactor.com/              Posts, Search Results, Tag Searches, User Profiles
+Joyreactor           http://joyreactor.cc/               Posts, Search Results, Tag Searches, User Profiles
 Keenspot             http://www.keenspot.com/            Comics
 Kemonoparty          https://kemono.party/               Posts, User Profiles
 Khinsider            https://downloads.khinsider.com/    Soundtracks
@@ -103,11 +111,13 @@ PhotoVogue           https://www.vogue.it/en/photovogue/ User Profiles
 Piczel               https://piczel.tv/                  Folders, individual Images, User Profiles
 Pillowfort           https://www.pillowfort.social/      Posts, User Profiles
 Pinterest            https://www.pinterest.com/          |pinterest-C|                                      Supported
+Pixhost              https://pixhost.to/                 individual Images
 Pixiv                https://www.pixiv.net/              |pixiv-C|                                          `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Pixnet               https://www.pixnet.net/             Folders, individual Images, Sets, User Profiles
 Plurk                https://www.plurk.com/              Posts, Timelines
 Pornhub              https://www.pornhub.com/            Galleries, User Profiles
 Pornreactor          http://pornreactor.cc/              Posts, Search Results, Tag Searches, User Profiles
+Postimg              https://postimages.org/             individual Images
 PowerManga           https://read.powermanga.org/        Chapters, Manga
 Pururin              https://pururin.io/                 Galleries
 Read Comic Online    https://readcomiconline.to/         Comic Issues, Comics
@@ -130,11 +140,15 @@ SlideShare           https://www.slideshare.net/         Presentations
 SmugMug              https://www.smugmug.com/            |smugmug-C|                                        `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Speaker Deck         https://speakerdeck.com/            Presentations
 SubscribeStar        https://www.subscribestar.com/      Posts, User Profiles                               Supported
+Tbib                 https://tbib.org/                   Pools, Posts, Tag Searches
 The /b/ Archive      https://thebarchive.com/            Boards, Search Results, Threads
+Thecollection        https://the-collection.booru.org/   Posts, Tag Searches
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Supported
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
+Turboimagehost       https://www.turboimagehost.com/     individual Images
 Twitter              https://twitter.com/                |twitter-C|                                        Supported
 Unsplash             https://unsplash.com/               |unsplash-C|
+Vipr                 https://vipr.im/                    individual Images
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
 Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  `API Key <configuration.rst#extractorwallhavenapi-key>`__
 Warosu               https://warosu.org/                 Threads
@@ -146,16 +160,6 @@ xHamster             https://xhamster.com/               Galleries, User Profile
 XVideos              https://www.xvideos.com/            Galleries, User Profiles
 Yandere              https://yande.re/                   Pools, Popular Images, Posts, Tag Searches
 |yuki-S|             https://yuki.la/                    Threads
-Acidimg              https://acidimg.cc/                 individual Images
-Imagetwist           https://imagetwist.com/             individual Images
-Imagevenue           http://imagevenue.com/              individual Images
-Imgclick             https://imgclick.net/               individual Images
-Imgspice             https://imgspice.com/               individual Images
-Imxto                https://imx.to/                     individual Images
-Pixhost              https://pixhost.to/                 individual Images
-Postimg              https://postimages.org/             individual Images
-Turboimagehost       https://www.turboimagehost.com/     individual Images
-Vipr                 https://vipr.im/                    individual Images
 かべうち                 https://kabe-uchiroom.com/          User Profiles
 もえぴりあ                https://vanilla-rock.com/           Posts, Tag Searches
 半次元                  https://bcy.net/                    Posts, User Profiles

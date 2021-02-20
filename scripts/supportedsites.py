@@ -232,16 +232,13 @@ def domain(cls):
     return ""
 
 
-def category_text(cls):
+def category_text(c):
     """Return a human-readable representation of a category"""
-    c = cls.category
     return CATEGORY_MAP.get(c) or c.capitalize()
 
 
-def subcategory_text(cls):
+def subcategory_text(c, sc):
     """Return a human-readable representation of a subcategory"""
-    c, sc = cls.category, cls.subcategory
-
     if c in SUBCATEGORY_MAP:
         scm = SUBCATEGORY_MAP[c]
         if sc in scm:
@@ -254,66 +251,61 @@ def subcategory_text(cls):
     return sc if sc.endswith("s") else sc + "s"
 
 
-def category_key(cls):
+def category_key(c):
     """Generate sorting keys by category"""
-    key = category_text(cls).lower()
-    if cls.__module__.endswith(".imagehosts"):
-        key = "zz" + key
-    return key
+    return category_text(c[0]).lower()
 
 
-def subcategory_key(cls):
+def subcategory_key(sc):
     """Generate sorting keys by subcategory"""
-    if cls.subcategory == "issue":
-        return "A"
-    return cls.subcategory
+    return "A" if sc == "issue" else sc
 
 
 def build_extractor_list():
     """Generate a sorted list of lists of extractor classes"""
-    extractors = collections.defaultdict(list)
+    categories = collections.defaultdict(list)
+    domains = {}
 
-    # get lists of extractor classes grouped by category
-    for extr in extractor.extractors():
-        if not extr.category or extr.category in IGNORE_LIST:
+    for extr in extractor._list_classes():
+        category = extr.category
+        if category in IGNORE_LIST:
             continue
-        extractors[extr.category].append(extr)
+        if category:
+            categories[category].append(extr.subcategory)
+            if category not in domains:
+                domains[category] = domain(extr)
+        else:
+            for category, root in extr.instances:
+                categories[category].append(extr.subcategory)
+                if category not in domains:
+                    domains[category] = root + "/"
 
-    # sort extractor lists with the same category
-    for extrlist in extractors.values():
-        extrlist.sort(key=subcategory_key)
+    # sort subcategory lists
+    for subcategories in categories.values():
+        subcategories.sort(key=subcategory_key)
 
-    # ugly hack to add e-hentai.org
-    eh = []
-    for extr in extractors["exhentai"]:
-        class eh_extr(extr):
-            category = "e-hentai"
-            root = "https://e-hentai.org"
-        eh.append(eh_extr)
-    extractors["e-hentai"] = eh
+    # add e-hentai.org
+    categories["e-hentai"] = categories["exhentai"]
+    domains["e-hentai"] = domains["exhentai"].replace("x", "-")
 
-    # sort lists by category
-    return sorted(
-        extractors.values(),
-        key=lambda lst: category_key(lst[0]),
-    )
+    return categories, domains
 
 
 # define table columns
 COLUMNS = (
     ("Site", 20,
-     lambda x: category_text(x[0])),
+     lambda c, scs, d: category_text(c)),
     ("URL" , 35,
-     lambda x: domain(x[0])),
+     lambda c, scs, d: d),
     ("Capabilities", 50,
-     lambda x: ", ".join(subcategory_text(extr) for extr in x
-                         if subcategory_text(extr))),
+     lambda c, scs, d: ", ".join(subcategory_text(c, sc) for sc in scs
+                                 if subcategory_text(c, sc))),
     ("Authentication", 16,
-     lambda x: AUTH_MAP.get(x[0].category, "")),
+     lambda c, scs, d: AUTH_MAP.get(c, "")),
 )
 
 
-def write_output(fobj, columns, extractors):
+def write_output(fp, columns, categories, domains):
 
     def pad(output, col, category=None):
         size = col[1]
@@ -326,7 +318,7 @@ def write_output(fobj, columns, extractors):
 
         return output + " " * (size - len(output))
 
-    w = fobj.write
+    w = fp.write
     subs = []
 
     # caption
@@ -343,9 +335,11 @@ def write_output(fobj, columns, extractors):
     w(sep)
 
     # table body
-    for lst in extractors:
+    clist = sorted(categories.items(), key=category_key)
+    for category, subcategories in clist:
+        domain = domains[category]
         w(" ".join(
-            pad(col[2](lst), col, lst[0].category)
+            pad(col[2](category, subcategories, domain), col, category)
             for col in columns
         ).strip())
         w("\n")
@@ -359,6 +353,7 @@ def write_output(fobj, columns, extractors):
         w(".. {} replace:: {}\n".format(sub, value))
 
 
+categories, domains = build_extractor_list()
 outfile = sys.argv[1] if len(sys.argv) > 1 else "supportedsites.rst"
 with open(util.path("docs", outfile), "w") as file:
-    write_output(file, COLUMNS, build_extractor_list())
+    write_output(file, COLUMNS, categories, domains)
