@@ -78,6 +78,7 @@ modules = [
     "myhentaigallery",
     "myportfolio",
     "naver",
+    "naverwebtoon",
     "newgrounds",
     "ngomik",
     "nhentai",
