@@ -23,6 +23,7 @@ modules = [
     "bcy",
     "behance",
     "blogger",
+    "cyberdrop",
     "danbooru",
     "derpibooru",
     "deviantart",

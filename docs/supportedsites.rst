@@ -26,6 +26,7 @@ ArtStation           https://www.artstation.com/         |artstation-C|
 baraag               https://baraag.net/                 Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 Behance              https://www.behance.net/            Collections, Galleries, User Profiles
 Blogger              https://www.blogger.com/            Blogs, Posts, Search Results
+Cyberdrop            https://cyberdrop.me/               Albums
 Danbooru             https://danbooru.donmai.us/         Pools, Popular Images, Posts, Tag Searches         Supported
 Derpibooru           https://derpibooru.org/             Galleries, Posts, Search Results                   `API Key <configuration.rst#extractorderpibooruapi-key>`__
 Desuarchive          https://desuarchive.org/            Boards, Search Results, Threads
