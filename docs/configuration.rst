@@ -1843,6 +1843,16 @@ Description
     and adjust their filename extensions if they do not match.
 
 
+downloader.http.headers
+-----------------------
+Type
+    ``object``
+Example
+    ``{"Accept": "image/webp,*/*", "Referer": "https://example.org/"}``
+Description
+    Additional HTTP headers to send when downloading files,
+
+
 downloader.ytdl.format
 ----------------------
 Type
