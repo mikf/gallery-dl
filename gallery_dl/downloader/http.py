@@ -31,6 +31,7 @@ class HttpDownloader(DownloaderBase):
         self.downloading = False
 
         self.adjust_extension = self.config("adjust-extensions", True)
+        self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
         self.retries = self.config("retries", extractor._retries)
@@ -100,6 +101,9 @@ class HttpDownloader(DownloaderBase):
             file_size = pathfmt.part_size()
             if file_size:
                 headers["Range"] = "bytes={}-".format(file_size)
+            # general headers
+            if self.headers:
+                headers.update(self.headers)
             # file-specific headers
             extra = pathfmt.kwdict.get("_http_headers")
             if extra:
