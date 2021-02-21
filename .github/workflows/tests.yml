@@ -39,6 +39,6 @@ jobs:
         pip install nose
         make test
 
-    - name: Generate man pages and bash/zsh completion
+    - name: Test autogeneration of man pages, bash/zsh completion, etc
       run: |
-        make man completion
+        make
