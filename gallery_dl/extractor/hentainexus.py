@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -62,6 +62,9 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         page = self.request(url).text
         data = json.loads(self._decode(text.extract(
             page, 'initReader("', '"')[0]))
+
+        if not self.config("original", True):
+            self.session.headers["Accept"] = "image/webp,*/*"
 
         pages = data.get("pages")
         if pages:
