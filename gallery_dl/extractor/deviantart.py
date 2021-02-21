@@ -78,6 +78,10 @@ class DeviantartExtractor(Extractor):
             else:
                 self.user = profile["user"]["username"]
 
+        if self.extra:
+            finditer_stash = DeviantartStashExtractor.pattern.finditer
+            finditer_deviation = DeviantartDeviationExtractor.pattern.finditer
+
         yield Message.Version, 1
         for deviation in self.deviations():
             if isinstance(deviation, tuple):
@@ -134,9 +138,13 @@ class DeviantartExtractor(Extractor):
             if self.extra:
                 txt = (deviation.get("description", "") +
                        deviation.get("_journal", ""))
-                for match in DeviantartStashExtractor.pattern.finditer(txt):
+                for match in finditer_stash(txt):
                     url = text.ensure_http_scheme(match.group(0))
                     deviation["_extractor"] = DeviantartStashExtractor
+                    yield Message.Queue, url, deviation
+                for match in finditer_deviation(txt):
+                    url = text.ensure_http_scheme(match.group(0))
+                    deviation["_extractor"] = DeviantartDeviationExtractor
                     yield Message.Queue, url, deviation
 
     def deviations(self):
