@@ -1,7 +1,7 @@
-import re
 import base64
 
 from .common import Extractor, Message
+from .. import text
 
 
 class CyberdropAlbumExtractor(Extractor):
@@ -17,26 +17,17 @@ class CyberdropAlbumExtractor(Extractor):
         self.album_url = self.root + "/a/" + self.album_id
 
     def items(self):
-        initial_page_response = self.request(self.album_url)
+        initial_page = self.request(self.album_url).text
 
-        albumNameRegex = r"name: '([^']+)'"
-        albumName = re.findall(albumNameRegex, initial_page_response.text)[0]
+        albumName, _ = text.extract(initial_page, "name: '", "'")
 
-        fileListRegex = r"fl:.'([^']+)'"
-        results = re.findall(fileListRegex, initial_page_response.text)
-        if (len(results)) != 1:
-            raise RuntimeError("could not find file list in html")
+        encodedFileList, _ = text.extract(initial_page, "fl: '", "'")
 
-        fileList = [base64.b64decode(s.encode('ascii')).decode('utf8')
-                    for s in results[0].split(",")]
+        fileList = [base64.b64decode(s.encode()).decode()
+                    for s in encodedFileList.split(",")]
 
         for f in fileList:
-            ext = f[f.rindex(".") + 1:]
-            name = f[:f.rindex(".")]
-            data = {
-                "extension": ext,
-                "filename": name
-            }
+            data = text.nameext_from_url(f)
             yield Message.Directory, {
                 "album": self.album_id + ": " + albumName
             }
