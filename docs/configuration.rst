@@ -729,7 +729,7 @@ Type
 Default
     ``false``
 Description
-    Download extra Sta.sh resources from
+    Download embedded Deviations and Sta.sh resources from
     description texts and journals.
 
     Note: Enabling this option also enables deviantart.metadata_.
