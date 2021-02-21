@@ -1045,6 +1045,16 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.hentainexus.original
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download original files instead of WebP versions.
+
+
 extractor.hitomi.metadata
 -------------------------
 Type
