@@ -212,9 +212,12 @@ IGNORE_LIST = (
 
 def domain(cls):
     """Return the web-domain related to an extractor class"""
-    url = sys.modules[cls.__module__].__doc__.split()[-1]
-    if url.startswith("http"):
-        return url
+    try:
+        url = sys.modules[cls.__module__].__doc__.split()[-1]
+        if url.startswith("http"):
+            return url
+    except Exception:
+        pass
 
     if hasattr(cls, "root") and cls.root:
         return cls.root + "/"
