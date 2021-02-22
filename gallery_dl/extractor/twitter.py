@@ -362,6 +362,23 @@ class TwitterListMembersExtractor(TwitterExtractor):
             yield Message.Queue, url, user
 
 
+class TwitterFollowingExtractor(TwitterExtractor):
+    """Extractor for followed users"""
+    subcategory = "following"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/following(?!\w)"
+    test = (
+        ("https://twitter.com/supernaturepics/following"),
+        ("https://www.twitter.com/id:2976459548/following"),
+    )
+
+    def items(self):
+        self.login()
+        for user in TwitterAPI(self).user_following(self.user):
+            user["_extractor"] = TwitterTimelineExtractor
+            url = "{}/i/user/{}".format(self.root, user["rest_id"])
+            yield Message.Queue, url, user
+
+
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for all images from a search timeline"""
     subcategory = "search"
@@ -577,16 +594,6 @@ class TwitterAPI():
         params["spelling_corrections"] = "1"
         return self._pagination(endpoint, params)
 
-    def list_members(self, list_id):
-        endpoint = "/graphql/tA7h9hy4U0Yc9COfIOh3qQ/ListMembers"
-        variables = {
-            "listId": list_id,
-            "count" : 20,
-            "withTweetResult": False,
-            "withUserResult" : False,
-        }
-        return self._pagination_members(endpoint, variables)
-
     def list_by_rest_id(self, list_id):
         endpoint = "/graphql/18MAHTcDU-TdJSjWWmoH7w/ListByRestId"
         params = {"variables": '{"listId":"' + list_id + '"'
@@ -595,6 +602,31 @@ class TwitterAPI():
             return self._call(endpoint, params)["data"]["list"]
         except KeyError:
             raise exception.NotFoundError("list")
+
+    def list_members(self, list_id):
+        endpoint = "/graphql/tA7h9hy4U0Yc9COfIOh3qQ/ListMembers"
+        variables = {
+            "listId": list_id,
+            "count" : 100,
+            "withTweetResult": False,
+            "withUserResult" : False,
+        }
+        return self._pagination_graphql(
+            endpoint, variables, "list", "members_timeline")
+
+    def user_following(self, screen_name):
+        endpoint = "/graphql/Q_QTiPvoXwsA13eoA7okIQ/Following"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count" : 100,
+            "withTweetResult": False,
+            "withUserResult" : False,
+            "withTweetQuoteCount"   : False,
+            "withHighlightedLabel"  : False,
+            "includePromotedContent": False,
+        }
+        return self._pagination_graphql(
+            endpoint, variables, "user", "following_timeline")
 
     def user_by_screen_name(self, screen_name):
         endpoint = "/graphql/hc-pka9A7gyS3xODIafnrQ/UserByScreenName"
@@ -728,15 +760,15 @@ class TwitterAPI():
                 return
             params["cursor"] = cursor
 
-    def _pagination_members(self, endpoint, variables):
+    def _pagination_graphql(self, endpoint, variables, key, timeline):
         while True:
             cursor = entry = stop = None
             params = {"variables": json.dumps(variables)}
             data = self._call(endpoint, params)
 
             try:
-                instructions = (data["data"]["list"]["members_timeline"]
-                                ["timeline"]["instructions"])
+                instructions = \
+                    data["data"][key][timeline]["timeline"]["instructions"]
             except KeyError:
                 raise exception.AuthorizationError()
 
