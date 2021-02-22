@@ -906,6 +906,19 @@ Description
     instead of the value listed on ``https://e-hentai.org/home.php``
 
 
+extractor.exhentai.metadata
+---------------------------
+Type
+    ``string``
+Default
+    ``"html"``
+Description
+    Select the gallery metadata source.
+
+    * ``"api"``: Get data from the `API <https://ehwiki.org/wiki/API>`_.
+    * ``"html"``: Extract data from HTML.
+
+
 extractor.exhentai.original
 ---------------------------
 Type
