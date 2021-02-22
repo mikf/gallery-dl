@@ -10,6 +10,8 @@ and powerful filenaming capabilities.
 
 |pypi| |build| |gitter|
 
+.. contents::
+
 
 Dependencies
 ============
@@ -47,9 +49,9 @@ pip_ as well:
 
 Note: Windows users should use :code:`py -3` instead of :code:`python3`.
 
-| It is advised to use the latest version of pip_,
-  including the essential packages :code:`setuptools` and :code:`wheel`.
-| To ensure that these packages are up-to-date, run
+It is advised to use the latest version of pip_,
+including the essential packages :code:`setuptools` and :code:`wheel`.
+To ensure these packages are up-to-date, run
 
 .. code:: bash
 
@@ -59,15 +61,14 @@ Note: Windows users should use :code:`py -3` instead of :code:`python3`.
 Standalone Executable
 ---------------------
 
-Download a standalone executable file,
-put it into your `PATH <https://en.wikipedia.org/wiki/PATH_(variable)>`__,
-and run it inside a command prompt (like ``cmd.exe``).
+Prebuilt executable files with a Python interpreter and
+required Python packages included are available for
 
 - `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.16.5/gallery-dl.exe>`__
 - `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.16.5/gallery-dl.bin>`__
 
-These executables include a Python interpreter
-and all required Python packages.
+| Executables build from the latest commit can be found at
+| https://github.com/mikf/gallery-dl/actions/workflows/executables.yml
 
 
 Snap
@@ -236,6 +237,7 @@ or you can provide them directly via the
     $ gallery-dl -u <username> -p <password> URL
     $ gallery-dl -o username=<username> -o password=<password> URL
 
+
 Cookies
 -------
 
@@ -279,12 +281,14 @@ the :code:`--cookies` command-line option:
 
     $ gallery-dl --cookies "$HOME/path/to/cookies.txt" URL
 
+
 OAuth
 -----
 
 *gallery-dl* supports user authentication via OAuth_ for
-``deviantart``, ``flickr``, ``reddit``, ``smugmug`` and ``tumblr``.
-This is entirely optional, but grants *gallery-dl* the ability
+``deviantart``, ``flickr``, ``reddit``, ``smugmug``, ``tumblr``,
+and ``mastodon`` instances.
+This is mostly optional, but grants *gallery-dl* the ability
 to issue requests on your account's behalf and enables it to access resources
 which would otherwise be unavailable to a public user.
 
@@ -299,13 +303,20 @@ You will be sent to the site's authorization page and asked to grant read
 access to *gallery-dl*. Authorize it and you will be shown one or more
 "tokens", which should be added to your configuration file.
 
+To authenticate with a ``mastodon`` instance, run *gallery-dl* with
+``oauth:mastodon:<instance>`` as argument. For example:
+
+.. code:: bash
+
+    $ gallery-dl oauth:mastodon:pawoo.net
+    $ gallery-dl oauth:mastodon:https://mastodon.social/
+
+
 
 .. _gallery-dl.conf:         https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
-.. _stable:                  https://github.com/mikf/gallery-dl/archive/v1.16.5.tar.gz
-.. _dev:                     https://github.com/mikf/gallery-dl/archive/master.tar.gz
 
 .. _Python:     https://www.python.org/downloads/
 .. _PyPI:       https://pypi.org/
