@@ -182,9 +182,6 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             gpage = self._gallery_page()
 
         data = self.get_metadata(gpage)
-        self.count = data["count"]
-
-        yield Message.Version, 1
         yield Message.Directory, data
 
         images = itertools.chain(
@@ -200,6 +197,11 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
     def get_metadata(self, page):
         """Extract gallery metadata"""
+        if self.config("metadata") == "api":
+            return self.metadata_from_api()
+        return self.metadata_from_page(page)
+
+    def metadata_from_page(self, page):
         extr = text.extract_from(page)
         data = {
             "gallery_id"   : self.gallery_id,
@@ -225,11 +227,31 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "torrentcount" : text.parse_int(extr('>Torrent Download (', ')')),
         }
 
+        self.count = data["count"]
         data["lang"] = util.language_to_code(data["language"])
         data["tags"] = [
             text.unquote(tag.replace("+", " "))
             for tag in text.extract_iter(page, 'hentai.org/tag/', '"')
         ]
+
+        return data
+
+    def metadata_from_api(self):
+        url = self.root + "/api.php"
+        data = {
+            "method": "gdata",
+            "gidlist": ((self.gallery_id, self.gallery_token),),
+            "namespace": 1,
+        }
+
+        data = self.request(url, method="POST", json=data).json()
+        if "error" in data:
+            raise exception.StopExtraction(data["error"])
+
+        data = data["gmetadata"][0]
+        data["eh_category"] = data["category"]
+        data["date"] = text.parse_timestamp(data["posted"])
+        self.count = data["filecount"]
 
         return data
 
