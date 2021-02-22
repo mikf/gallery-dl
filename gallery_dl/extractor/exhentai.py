@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,7 +15,6 @@ import itertools
 import random
 import time
 import math
-
 
 BASE_PATTERN = r"(?:https?://)?(e[x-]|g\.e-)hentai\.org"
 
@@ -205,8 +204,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         data = {
             "gallery_id"   : self.gallery_id,
             "gallery_token": self.gallery_token,
+            "thumb"        : extr("background:transparent url(", ")"),
             "title"        : text.unescape(extr('<h1 id="gn">', '</h1>')),
             "title_jp"     : text.unescape(extr('<h1 id="gj">', '</h1>')),
+            "uploader"     : text.unquote(extr('/uploader/', '"')),
             "date"         : text.parse_datetime(extr(
                 '>Posted:</td><td class="gdt2">', '</td>'), "%Y-%m-%d %H:%M"),
             "parent"       : extr(
@@ -219,11 +220,14 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 '>File Size:</td><td class="gdt2">', '<').rstrip("Bb")),
             "count"        : text.parse_int(extr(
                 '>Length:</td><td class="gdt2">', ' ')),
+            "favorites"    : text.parse_int(extr('id="favcount">', ' ')),
+            "rating"       : text.parse_float(extr(">Average: ", "<")),
+            "torrentcount" : text.parse_int(extr('>Torrent Download (', ')')),
         }
 
         data["lang"] = util.language_to_code(data["language"])
         data["tags"] = [
-            text.unquote(tag)
+            text.unquote(tag.replace("+", " "))
             for tag in text.extract_iter(page, 'hentai.org/tag/', '"')
         ]
 
