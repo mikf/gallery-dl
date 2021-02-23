@@ -731,21 +731,25 @@ class PathFormat():
     }
 
     def __init__(self, extractor):
-        filename_fmt = extractor.config("filename", extractor.filename_fmt)
-        directory_fmt = extractor.config("directory", extractor.directory_fmt)
-        kwdefault = extractor.config("keywords-default")
+        filename_fmt = extractor.config("filename")
+        if filename_fmt is None:
+            filename_fmt = extractor.filename_fmt
+
+        directory_fmt = extractor.config("directory")
+        if directory_fmt is None:
+            directory_fmt = extractor.directory_fmt
 
         extension_map = extractor.config("extension-map")
         if extension_map is None:
             extension_map = self.EXTENSION_MAP
         self.extension_map = extension_map.get
 
+        kwdefault = extractor.config("keywords-default")
         try:
             self.filename_formatter = Formatter(
                 filename_fmt, kwdefault).format_map
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
-
         try:
             self.directory_formatters = [
                 Formatter(dirfmt, kwdefault).format_map
@@ -754,20 +758,23 @@ class PathFormat():
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)
 
-        self.directory = self.realdirectory = ""
-        self.filename = self.extension = self.prefix = ""
-        self.path = self.realpath = self.temppath = ""
         self.kwdict = {}
+        self.directory = self.realdirectory = \
+            self.filename = self.extension = self.prefix = \
+            self.path = self.realpath = self.temppath = ""
         self.delete = self._create_directory = False
 
         basedir = extractor._parentdir
         if not basedir:
-            basedir = expand_path(
-                extractor.config("base-directory", (".", "gallery-dl")))
-            if os.altsep and os.altsep in basedir:
-                basedir = basedir.replace(os.altsep, os.sep)
-            if basedir[-1] != os.sep:
-                basedir += os.sep
+            basedir = extractor.config("base-directory")
+            if basedir is None:
+                basedir = "." + os.sep + "gallery-dl" + os.sep
+            else:
+                basedir = expand_path(basedir)
+                if os.altsep and os.altsep in basedir:
+                    basedir = basedir.replace(os.altsep, os.sep)
+                if basedir[-1] != os.sep:
+                    basedir += os.sep
         self.basedirectory = basedir
 
         restrict = extractor.config("path-restrict", "auto")
