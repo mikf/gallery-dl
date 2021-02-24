@@ -769,7 +769,7 @@ class PathFormat():
             basedir = extractor.config("base-directory")
             if basedir is None:
                 basedir = "." + os.sep + "gallery-dl" + os.sep
-            else:
+            elif basedir:
                 basedir = expand_path(basedir)
                 if os.altsep and os.altsep in basedir:
                     basedir = basedir.replace(os.altsep, os.sep)
