@@ -9,6 +9,7 @@
 """Common classes and constants used by extractor modules."""
 
 import re
+import ssl
 import time
 import netrc
 import queue
@@ -16,6 +17,7 @@ import logging
 import datetime
 import requests
 import threading
+from requests.adapters import HTTPAdapter
 from .message import Message
 from .. import config, text, util, exception
 
@@ -38,9 +40,10 @@ class Extractor():
 
     def __init__(self, match):
         self.session = requests.Session()
+        self.session.headers.clear()
+
         self.log = logging.getLogger(self.category)
         self.url = match.string
-
         self._cookiefile = None
         self._cookiejar = self.session.cookies
         self._parentdir = ""
@@ -62,7 +65,11 @@ class Extractor():
             self.config = self._config_shared
             self.config_accumulate = self._config_shared_accumulate
 
-        self._init_headers()
+        browser = self.config("browser")
+        if browser:
+            self._emulate_browser(browser)
+        else:
+            self._init_headers()
         self._init_cookies()
         self._init_proxies()
 
@@ -211,19 +218,33 @@ class Extractor():
 
         return username, password
 
-    def _init_headers(self):
-        """Initialize HTTP headers for the 'session' object"""
-        headers = self.session.headers
-        headers.clear()
+    def _emulate_browser(self, browser):
+        browser, _, platform = browser.lower().partition(":")
 
+        if not platform or platform == "auto":
+            platform = "windows" if util.WINDOWS else "linux"
+
+        if platform == "windows":
+            platform = "Windows NT 10.0; Win64; x64"
+        elif platform == "linux":
+            platform = "X11; Linux x86_64"
+        elif platform == "macos":
+            platform = "Macintosh; Intel Mac OS X 11.2"
+
+        if browser == "chrome":
+            _emulate_browser_chrome(self.session, platform)
+        else:
+            _emulate_browser_firefox(self.session, platform)
+
+    def _init_headers(self):
+        """Initialize HTTP headers for 'session'"""
+        headers = self.session.headers
         headers["User-Agent"] = self.config(
-            "user-agent", ("Mozilla/5.0 (X11; Linux x86_64; rv:68.0) "
-                           "Gecko/20100101 Firefox/68.0"))
+            "user-agent", ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
+                           "rv:78.0) Gecko/20100101 Firefox/78.0"))
         headers["Accept"] = "*/*"
         headers["Accept-Language"] = "en-US,en;q=0.5"
         headers["Accept-Encoding"] = "gzip, deflate"
-        headers["Connection"] = "keep-alive"
-        headers["Upgrade-Insecure-Requests"] = "1"
 
     def _init_proxies(self):
         """Update the session's proxy map"""
@@ -554,6 +575,96 @@ class BaseExtractor(Extractor):
         return r"(?:https?://)?(?:" + "|".join(pattern_list) + r")"
 
 
+class HTTPSAdapter(HTTPAdapter):
+
+    def __init__(self, ciphers):
+        context = self.ssl_context = ssl.create_default_context()
+        context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
+                            ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
+        context.set_ecdh_curve("prime256v1")
+        context.set_ciphers(ciphers)
+        HTTPAdapter.__init__(self)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["ssl_context"] = self.ssl_context
+        return HTTPAdapter.init_poolmanager(self, *args, **kwargs)
+
+    def proxy_manager_for(self, *args, **kwargs):
+        kwargs["ssl_context"] = self.ssl_context
+        return HTTPAdapter.proxy_manager_for(self, *args, **kwargs)
+
+
+def _emulate_browser_firefox(session, platform):
+    headers = session.headers
+
+    headers["User-Agent"] = ("Mozilla/5.0 (" + platform + "; rv:78.0) "
+                             "Gecko/20100101 Firefox/78.0")
+    headers["Accept"] = ("text/html,application/xhtml+xml,"
+                         "application/xml;q=0.9,image/webp,*/*;q=0.8")
+    headers["Accept-Language"] = "en-US,en;q=0.5"
+    headers["Accept-Encoding"] = "gzip, deflate"
+    headers["Referer"] = None
+    headers["Upgrade-Insecure-Requests"] = "1"
+    headers["Cookie"] = None
+
+    session.mount("https://", HTTPSAdapter(
+        "TLS_AES_128_GCM_SHA256:"
+        "TLS_CHACHA20_POLY1305_SHA256:"
+        "TLS_AES_256_GCM_SHA384:"
+        "ECDHE-ECDSA-AES128-GCM-SHA256:"
+        "ECDHE-RSA-AES128-GCM-SHA256:"
+        "ECDHE-ECDSA-CHACHA20-POLY1305:"
+        "ECDHE-RSA-CHACHA20-POLY1305:"
+        "ECDHE-ECDSA-AES256-GCM-SHA384:"
+        "ECDHE-RSA-AES256-GCM-SHA384:"
+        "ECDHE-ECDSA-AES256-SHA:"
+        "ECDHE-ECDSA-AES128-SHA:"
+        "ECDHE-RSA-AES128-SHA:"
+        "ECDHE-RSA-AES256-SHA:"
+        "DHE-RSA-AES128-SHA:"
+        "DHE-RSA-AES256-SHA:"
+        "AES128-SHA:"
+        "AES256-SHA:"
+        "DES-CBC3-SHA"
+    ))
+
+
+def _emulate_browser_chrome(session, platform):
+    headers = session.headers
+    if platform.startswith("Macintosh"):
+        platform = platform.replace(".", "_") + "_0"
+
+    headers["Upgrade-Insecure-Requests"] = "1"
+    headers["User-Agent"] = (
+        "Mozilla/5.0 (" + platform + ") AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36")
+    headers["Accept"] = ("text/html,application/xhtml+xml,application/xml;"
+                         "q=0.9,image/webp,image/apng,*/*;q=0.8")
+    headers["Referer"] = None
+    headers["Accept-Encoding"] = "gzip, deflate"
+    headers["Accept-Language"] = "en-US,en;q=0.9"
+    headers["Cookie"] = None
+
+    session.mount("https://", HTTPSAdapter(
+        "TLS_AES_128_GCM_SHA256:"
+        "TLS_AES_256_GCM_SHA384:"
+        "TLS_CHACHA20_POLY1305_SHA256:"
+        "ECDHE-ECDSA-AES128-GCM-SHA256:"
+        "ECDHE-RSA-AES128-GCM-SHA256:"
+        "ECDHE-ECDSA-AES256-GCM-SHA384:"
+        "ECDHE-RSA-AES256-GCM-SHA384:"
+        "ECDHE-ECDSA-CHACHA20-POLY1305:"
+        "ECDHE-RSA-CHACHA20-POLY1305:"
+        "ECDHE-RSA-AES128-SHA:"
+        "ECDHE-RSA-AES256-SHA:"
+        "AES128-GCM-SHA256:"
+        "AES256-GCM-SHA384:"
+        "AES128-SHA:"
+        "AES256-SHA:"
+        "DES-CBC3-SHA"
+    ))
+
+
 # Undo automatic pyOpenSSL injection by requests
 pyopenssl = config.get((), "pyopenssl", False)
 if not pyopenssl:
@@ -563,38 +674,3 @@ if not pyopenssl:
     except ImportError:
         pass
 del pyopenssl
-
-
-# Replace urllib3's default cipher list to avoid Cloudflare CAPTCHAs
-ciphers = config.get((), "ciphers", True)
-if ciphers:
-
-    if ciphers is True:
-        ciphers = (
-            # Firefox's list
-            "TLS_AES_128_GCM_SHA256:"
-            "TLS_CHACHA20_POLY1305_SHA256:"
-            "TLS_AES_256_GCM_SHA384:"
-            "ECDHE-ECDSA-AES128-GCM-SHA256:"
-            "ECDHE-RSA-AES128-GCM-SHA256:"
-            "ECDHE-ECDSA-CHACHA20-POLY1305:"
-            "ECDHE-RSA-CHACHA20-POLY1305:"
-            "ECDHE-ECDSA-AES256-GCM-SHA384:"
-            "ECDHE-RSA-AES256-GCM-SHA384:"
-            "ECDHE-ECDSA-AES256-SHA:"
-            "ECDHE-ECDSA-AES128-SHA:"
-            "ECDHE-RSA-AES128-SHA:"
-            "ECDHE-RSA-AES256-SHA:"
-            "DHE-RSA-AES128-SHA:"
-            "DHE-RSA-AES256-SHA:"
-            "AES128-SHA:"
-            "AES256-SHA:"
-            "DES-CBC3-SHA"
-        )
-    elif isinstance(ciphers, list):
-        ciphers = ":".join(ciphers)
-
-    from requests.packages.urllib3.util import ssl_  # noqa
-    ssl_.DEFAULT_CIPHERS = ciphers
-    del ssl_
-del ciphers
