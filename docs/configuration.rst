@@ -380,12 +380,30 @@ extractor.*.user-agent
 Type
     ``string``
 Default
-    ``"Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0"``
+    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"``
 Description
     User-Agent header value to be used for HTTP requests.
 
     Note: This option has no effect on `pixiv` extractors,
     as these need specific values to function correctly.
+
+
+extractor.*.browser
+-------------------
+Type
+    ``string``
+Example
+    * ``"firefox"``
+    * ``"chrome:macos"``
+Description
+    Try to emulate a real browser (``firefox`` or ``chrome``)
+    by using their default HTTP headers and TLS ciphers for HTTP requests.
+
+    Optionally, the operating system used in the ``User-Agent`` header can be
+    specified after a ``:`` (``windows``, ``linux``, or ``macos``).
+
+    Note: ``requests`` and ``urllib3`` only support HTTP/1.1, while a real
+    browser would use HTTP/2.
 
 
 extractor.*.keywords
@@ -2455,20 +2473,6 @@ Description
 
     Set this option to ``null`` or an invalid path to disable
     this cache.
-
-
-ciphers
--------
-Type
-    ``bool`` or ``string``
-Default
-    ``true``
-Description
-    * ``true``: Update urllib3's default cipher list
-    * ``false``: Leave the default cipher list as is
-    * Any ``string``: Replace urllib3's default ciphers with these
-      (See `SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
-      for details)
 
 
 pyopenssl

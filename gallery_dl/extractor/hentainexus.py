@@ -63,17 +63,18 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         data = json.loads(self._decode(text.extract(
             page, 'initReader("', '"')[0]))
 
+        headers = None
         if not self.config("original", True):
-            self.session.headers["Accept"] = "image/webp,*/*"
+            headers = {"_http_headers": {"Accept": "image/webp,*/*"}}
 
         pages = data.get("pages")
         if pages:
-            return [(page, None) for page in pages]
+            return [(page, headers) for page in pages]
 
         base = data["b"] + data["r"]
         gid = data["i"]
         return [
-            ("{}{}/{}/{}".format(base, page["h"], gid, page["p"]), None)
+            ("{}{}/{}/{}".format(base, page["h"], gid, page["p"]), headers)
             for page in data["f"]
         ]
 
