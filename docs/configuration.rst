@@ -927,14 +927,15 @@ Description
 extractor.exhentai.metadata
 ---------------------------
 Type
-    ``string``
+    ``bool``
 Default
-    ``"html"``
+    ``false``
 Description
-    Select the gallery metadata source.
+    Load extended gallery metadata from the
+    `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_.
 
-    * ``"api"``: Get data from the `API <https://ehwiki.org/wiki/API>`_.
-    * ``"html"``: Extract data from HTML.
+    Adds ``archiver_key``, ``posted``, and ``torrents``.
+    Makes ``date`` and ``filesize`` more precise.
 
 
 extractor.exhentai.original
