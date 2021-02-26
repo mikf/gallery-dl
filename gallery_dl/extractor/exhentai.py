@@ -22,10 +22,10 @@ BASE_PATTERN = r"(?:https?://)?(e[x-]|g\.e-)hentai\.org"
 class ExhentaiExtractor(Extractor):
     """Base class for exhentai extractors"""
     category = "exhentai"
-    directory_fmt = ("{category}", "{gallery_id} {title[:247]}")
+    directory_fmt = ("{category}", "{gid} {title[:247]}")
     filename_fmt = (
-        "{gallery_id}_{num:>04}_{image_token}_{filename}.{extension}")
-    archive_fmt = "{gallery_id}_{num}"
+        "{gid}_{num:>04}_{image_token}_{filename}.{extension}")
+    archive_fmt = "{gid}_{num}"
     cookienames = ("ipb_member_id", "ipb_pass_hash")
     cookiedomain = ".exhentai.org"
     root = "https://exhentai.org"
@@ -131,7 +131,39 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
         ("https://exhentai.org/g/1200119/d55c44d3d0/", {
-            "keyword": "199db053b4ccab94463b459e1cfe079df8cdcdd1",
+            "keyword": {
+                "cost": int,
+                "date": "dt:2018-03-18 20:15:00",
+                "eh_category": "Non-H",
+                "expunged": False,
+                "favorites": "17",
+                "filecount": "4",
+                "filesize": 1488978,
+                "gid": 1200119,
+                "height": int,
+                "image_token": "re:[0-9a-f]{10}",
+                "lang": "jp",
+                "language": "Japanese",
+                "parent": "",
+                "rating": r"re:\d\.\d+",
+                "size": int,
+                "tags": [
+                    "parody:komi-san wa komyushou desu.",
+                    "character:shouko komi",
+                    "group:seventh lowlife",
+                    "sample",
+                ],
+                "thumb": "https://exhentai.org/t/ce/0a/ce0a5bcb583229a9b07c0f8"
+                         "3bcb1630ab1350640-624622-736-1036-jpg_250.jpg",
+                "title": "C93 [Seventh_Lowlife] Komi-san ha Tokidoki Daitan de"
+                         "su (Komi-san wa Komyushou desu) [Sample]",
+                "title_jpn": "(C93) [Comiketjack (わ！)] 古見さんは、時々大胆"
+                             "です。 (古見さんは、コミュ症です。) [見本]",
+                "token": "d55c44d3d0",
+                "torrentcount": "0",
+                "uploader": "klorpa",
+                "width": int,
+            },
             "content": "e9891a4c017ed0bb734cd1efba5cd03f594d31ff",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -182,6 +214,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             gpage = self._gallery_page()
 
         data = self.get_metadata(gpage)
+        self.count = text.parse_int(data["filecount"])
         yield Message.Directory, data
 
         images = itertools.chain(
@@ -197,37 +230,38 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
     def get_metadata(self, page):
         """Extract gallery metadata"""
-        if self.config("metadata") == "api":
-            return self.metadata_from_api()
-        return self.metadata_from_page(page)
+        data = self.metadata_from_page(page)
+        if self.config("metadata", False):
+            data.update(self.metadata_from_api())
+            data["date"] = text.parse_timestamp(data["posted"])
+        return data
 
     def metadata_from_page(self, page):
         extr = text.extract_from(page)
         data = {
-            "gallery_id"   : self.gallery_id,
-            "gallery_token": self.gallery_token,
+            "gid"          : self.gallery_id,
+            "token"        : self.gallery_token,
             "thumb"        : extr("background:transparent url(", ")"),
             "title"        : text.unescape(extr('<h1 id="gn">', '</h1>')),
-            "title_jp"     : text.unescape(extr('<h1 id="gj">', '</h1>')),
+            "title_jpn"    : text.unescape(extr('<h1 id="gj">', '</h1>')),
+            "_"            : extr('<div id="gdc"><div class="cs ct', '"'),
+            "eh_category"  : extr('>', '<'),
             "uploader"     : text.unquote(extr('/uploader/', '"')),
             "date"         : text.parse_datetime(extr(
                 '>Posted:</td><td class="gdt2">', '</td>'), "%Y-%m-%d %H:%M"),
             "parent"       : extr(
                 '>Parent:</td><td class="gdt2"><a href="', '"'),
-            "visible"      : extr(
+            "expunged"     : "Yes" != extr(
                 '>Visible:</td><td class="gdt2">', '<'),
-            "language"     : extr(
-                '>Language:</td><td class="gdt2">', ' '),
-            "gallery_size" : text.parse_bytes(extr(
+            "language"     : extr('>Language:</td><td class="gdt2">', ' '),
+            "filesize"     : text.parse_bytes(extr(
                 '>File Size:</td><td class="gdt2">', '<').rstrip("Bb")),
-            "count"        : text.parse_int(extr(
-                '>Length:</td><td class="gdt2">', ' ')),
-            "favorites"    : text.parse_int(extr('id="favcount">', ' ')),
-            "rating"       : text.parse_float(extr(">Average: ", "<")),
-            "torrentcount" : text.parse_int(extr('>Torrent Download (', ')')),
+            "filecount"    : extr('>Length:</td><td class="gdt2">', ' '),
+            "favorites"    : extr('id="favcount">', ' '),
+            "rating"       : extr(">Average: ", "<"),
+            "torrentcount" : extr('>Torrent Download (', ')'),
         }
 
-        self.count = data["count"]
         data["lang"] = util.language_to_code(data["language"])
         data["tags"] = [
             text.unquote(tag.replace("+", " "))
@@ -248,12 +282,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if "error" in data:
             raise exception.StopExtraction(data["error"])
 
-        data = data["gmetadata"][0]
-        data["eh_category"] = data["category"]
-        data["date"] = text.parse_timestamp(data["posted"])
-        self.count = data["filecount"]
-
-        return data
+        return data["gmetadata"][0]
 
     def image_from_page(self, page):
         """Get image url and data from webpage"""
