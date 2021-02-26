@@ -1593,6 +1593,17 @@ Description
     Fetch media from `Cards <https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards>`__.
 
 
+extractor.twitter.conversations
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from all Tweets and replies in a `conversation
+    <https://help.twitter.com/en/using-twitter/twitter-conversations>`__.
+
+
 extractor.twitter.quoted
 ------------------------
 Type
