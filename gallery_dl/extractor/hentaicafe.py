@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,7 @@
 
 from . import foolslide
 from .. import text
-from .common import Extractor
+from .common import Extractor, Message
 from ..cache import memcache
 import re
 
@@ -18,6 +18,7 @@ import re
 class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
     """Extractor for manga-chapters from hentai.cafe"""
     category = "hentaicafe"
+    root = "https://hentai.cafe"
     directory_fmt = ("{category}", "{manga}")
     filename_fmt = "c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}"
     pattern = (r"(?:https?://)?(?:www\.)?hentai\.cafe"
@@ -26,7 +27,6 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
         "url": "8c6a8c56875ba3ed7ab0a74a64f9960077767fc2",
         "keyword": "6913608267d883c82b887303b9ced13821188329",
     })
-    root = "https://hentai.cafe"
 
     def metadata(self, page):
         info = text.unescape(text.extract(page, '<title>', '</title>')[0])
@@ -46,6 +46,7 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
 class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
     """Extractor for manga from hentai.cafe"""
     category = "hentaicafe"
+    root = "https://hentai.cafe"
     pattern = (r"(?:https?://)?" + r"(?:www\.)?hentai\.cafe"
                r"(/hc\.fyi/\d+|(?:/manga/series)?/[^/?#]+)/?$")
     test = (
@@ -71,13 +72,20 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
         }),
 
     )
-    root = "https://hentai.cafe"
-    reverse = False
-    request = Extractor.request
-    chapterclass = HentaicafeChapterExtractor
+
+    def items(self):
+        page = Extractor.request(self, self.gallery_url).text
+
+        chapters = self.chapters(page)
+        if self.config("chapter-reverse", False):
+            chapters.reverse()
+
+        for chapter, data in chapters:
+            data["_extractor"] = HentaicafeChapterExtractor
+            yield Message.Queue, chapter, data
 
     def chapters(self, page):
-        if "/manga/series/" in self.manga_url:
+        if "/manga/series/" in self.gallery_url:
             chapters = foolslide.FoolslideMangaExtractor.chapters(self, page)
             chapters.reverse()
             return chapters
