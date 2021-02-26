@@ -468,6 +468,11 @@ class TwitterTweetExtractor(TwitterExtractor):
                 "date"    : "dt:2020-08-20 04:00:28",
             },
         }),
+        # all Tweets from a conversation (#1319)
+        ("https://twitter.com/BlankArts_/status/1323314488611872769", {
+            "options": (("conversations", True),),
+            "count": ">= 50",
+        }),
     )
 
     def __init__(self, match):
@@ -475,6 +480,8 @@ class TwitterTweetExtractor(TwitterExtractor):
         self.tweet_id = match.group(2)
 
     def tweets(self):
+        if self.config("conversations", False):
+            return TwitterAPI(self).conversation(self.tweet_id)
         return TwitterAPI(self).tweet(self.tweet_id)
 
 
@@ -553,6 +560,10 @@ class TwitterAPI():
                 else:
                     break
         return tweets
+
+    def conversation(self, conversation_id):
+        endpoint = "/2/timeline/conversation/{}.json".format(conversation_id)
+        return self._pagination(endpoint)
 
     def timeline_profile(self, screen_name):
         user_id = self._user_id_by_screen_name(screen_name)
@@ -722,6 +733,13 @@ class TwitterAPI():
                         # keep going even if there are no tweets
                         tweet = True
                     cursor = cursor["value"]
+
+                elif entry_startswith("conversationThread-"):
+                    tweet_ids.extend(
+                        item["entryId"][6:]
+                        for item in entry["content"]["timelineModule"]["items"]
+                        if item["entryId"].startswith("tweet-")
+                    )
 
             # process tweets
             for tweet_id in tweet_ids:
