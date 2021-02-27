@@ -166,8 +166,6 @@ class ImgurAlbumExtractor(ImgurExtractor):
                     "privacy"       : "private",
                     "score"         : int,
                     "title"         : "138",
-                    "topic"         : "",
-                    "topic_id"      : 0,
                     "upvote_count"  : int,
                     "url"           : "https://imgur.com/a/TcBmP",
                     "view_count"    : int,
