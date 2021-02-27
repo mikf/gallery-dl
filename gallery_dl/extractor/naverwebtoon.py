@@ -89,10 +89,9 @@ class NaverwebtoonComicExtractor(NaverwebtoonExtractor):
     categorytransfer = True
     pattern = (BASE_PATTERN + r"/list\.nhn\?([^#]+)")
     test = (
-        ("https://comic.naver.com/webtoon/list.nhn?titleId=26458", {
+        ("https://comic.naver.com/webtoon/list.nhn?titleId=22073", {
             "pattern": NaverwebtoonEpisodeExtractor.pattern,
-            # "range": "",
-            "count": ">= 10",
+            "count": 32,
         }),
     )
 
