@@ -248,9 +248,9 @@ class PatreonCreatorExtractor(PatreonExtractor):
 
         creator_id = query.get("u")
         if creator_id:
-            url = "{}/user?u={}".format(self.root, creator_id)
+            url = "{}/user/posts?u={}".format(self.root, creator_id)
         else:
-            url = "{}/{}".format(self.root, self.creator.lower())
+            url = "{}/{}/posts".format(self.root, self.creator)
 
         page = self.request(url, notfound="creator").text
         campaign_id = text.extract(page, "/campaign/", "/")[0]
