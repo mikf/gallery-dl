@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import exception, text
 
-BASE_PATTERN = r"(?:(?:https?://)?comic\.naver\.com)?/("
+BASE_PATTERN = r"(?:https?://)?comic\.naver\.com/webtoon"
 
 
 class NaverwebtoonExtractor(Extractor):
@@ -20,11 +20,7 @@ class NaverwebtoonExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.path, self.query = match.gropus()
-
-    def request(self, url, **kwargs):
-        response = Extractor.request(self, url, **kwargs)
-        return response
+        self.query = match.group(1)
 
 
 class NaverwebtoonEpisodeExtractor(NaverwebtoonExtractor):
@@ -32,7 +28,7 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonExtractor):
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{episode}-{num:>02}.{extension}"
     archive_fmt = "{title_id}_{episode}_{num}"
-    pattern = (BASE_PATTERN + r"/webtoon)/detail.nhn\?([^/&#]+)")
+    pattern = (BASE_PATTERN + r"/detail\.nhn\?([^#]+)")
     test = (
         (("https://comic.naver.com/webtoon/detail.nhn?"
           "titleId=26458&no=1&weekday=tue"), {
@@ -53,18 +49,17 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonExtractor):
             raise exception.NotFoundError("no")
 
     def items(self):
-        url = "{}/{}/detail.nhn?{}".format(self.root, self.path, self.query)
+        url = "{}/webtoon/detail.nhn?{}".format(self.root, self.query)
         page = self.request(url).text
         data = self.get_job_metadata(page)
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for data["num"], url in enumerate(self.get_image_urls(page), 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
     def get_job_metadata(self, page):
         """Collect metadata for extractor-job"""
-        title, pos = text.extract(page, '<meta property="og:title" content="', '"')
+        title, pos = text.extract(page, 'property="og:title" content="', '"')
         comic, pos = text.extract(page, '<h2>', '<span', pos)
         authors, pos = text.extract(page, 'class="wrt_nm">', '</span>', pos)
         authors = authors.strip().split("/")
@@ -85,13 +80,14 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonExtractor):
 
     @staticmethod
     def get_image_urls(page):
-        return list(text.extract_iter(page, '<div class="wt_viewer" style="background:#FFFFFF">', '</div>'))
+        view_area = text.extract(page, 'id="comic_view_area"', '</div>')[0]
+        return text.extract_iter(view_area, '<img src="', '"')
 
 
 class NaverwebtoonComicExtractor(NaverwebtoonExtractor):
     subcategory = "comic"
     categorytransfer = True
-    pattern = (BASE_PATTERN + r"/webtoon)/list.nhn\?([^/&#]+)")
+    pattern = (BASE_PATTERN + r"/list\.nhn\?([^#]+)")
     test = (
         ("https://comic.naver.com/webtoon/list.nhn?titleId=26458", {
             "pattern": NaverwebtoonEpisodeExtractor.pattern,
@@ -106,32 +102,28 @@ class NaverwebtoonComicExtractor(NaverwebtoonExtractor):
         self.title_id = query.get("titleId")
         if not self.title_id:
             raise exception.NotFoundError("titleId")
-        self.page_no = int(query.get("page", 1))
+        self.page_no = text.parse_int(query.get("page", 1))
 
     def items(self):
-        page = None
+        url = self.root + "/webtoon/list.nhn"
+        params = {"titleId": self.title_id, "page": self.page_no}
         data = {"_extractor": NaverwebtoonEpisodeExtractor}
 
         while True:
-            path = "/{}/list.nhn?titleId={}&page={}".format(
-                self.path, self.title_id, self.page_no)
-
-            if page and path not in page:
-                return
-
-            page = self.request(self.root + path).text
+            page = self.request(url, params=params).text
             data["page"] = self.page_no
 
-            for url in self.get_episode_urls(page):
-                yield Message.Queue, url, data
+            for episode_url in self.get_episode_urls(page):
+                yield Message.Queue, episode_url, data
 
-            self.page_no += 1
+            if 'class="next"' not in page:
+                return
+            params["page"] += 1
 
-    @staticmethod
-    def get_episode_urls(page):
+    def get_episode_urls(self, page):
         """Extract and return all episode urls in page"""
-        page = text.extract(page, 'class="viewList"', '</table>')[0]
         return [
-            match.group(0)
-            for match in NaverwebtoonEpisodeExtractor.pattern.finditer(page)
-        ]
+            self.root + "/webtoon/detail.nhn?" + query
+            for query in text.extract_iter(
+                page, '<a href="/webtoon/detail.nhn?', '"')
+        ][::2]
