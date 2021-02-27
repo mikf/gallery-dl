@@ -122,7 +122,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
                 "total_photos": int,
                 "twitter_username": None,
                 "updated_at": str,
-                "username": "johnwestrock"
+                "username": "davehoefler",
             },
             "views": int,
             "width": 4480,
@@ -138,7 +138,7 @@ class UnsplashUserExtractor(UnsplashExtractor):
     """Extractor for all photos of an unsplash user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/@(\w+)/?$"
-    test = ("https://unsplash.com/@johnwestrock", {
+    test = ("https://unsplash.com/@davehoefler", {
         "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
                    r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
         "range": "1-30",
@@ -155,7 +155,7 @@ class UnsplashFavoriteExtractor(UnsplashExtractor):
     """Extractor for all likes of an unsplash user"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/@(\w+)/likes"
-    test = ("https://unsplash.com/@johnwestrock/likes", {
+    test = ("https://unsplash.com/@davehoefler/likes", {
         "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
                    r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
         "range": "1-30",

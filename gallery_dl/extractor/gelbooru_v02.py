@@ -72,7 +72,7 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]+)"
     test = (
         ("https://rule34.xxx/index.php?page=post&s=list&tags=danraku", {
-            "content": "0a3aa1e302bd4ed0599305cd4c225ca8d28249b2",
+            "content": "97e4bbf86c3860be18de384d02d544251afe1d45",
             "pattern": r"https?://.*rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
             "count": 1,
         }),
@@ -155,7 +155,7 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=view&id=(\d+)"
     test = (
         ("https://rule34.xxx/index.php?page=post&s=view&id=1995545", {
-            "content": "0a3aa1e302bd4ed0599305cd4c225ca8d28249b2",
+            "content": "97e4bbf86c3860be18de384d02d544251afe1d45",
             "options": (("tags", True),),
             "keyword": {
                 "tags_artist": "danraku",

@@ -50,7 +50,8 @@ class EromeExtractor(Extractor):
             for data["num"], group in enumerate(util.advance(groups, 1), 1):
                 url = (text.extract(group, '<source src="', '"')[0] or
                        text.extract(group, 'data-src="', '"')[0])
-                yield Message.Url, url, text.nameext_from_url(url, data)
+                if url:
+                    yield Message.Url, url, text.nameext_from_url(url, data)
 
     def albums(self):
         return ()
@@ -84,14 +85,14 @@ class EromeAlbumExtractor(EromeExtractor):
     """Extractor for albums on erome.com"""
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a/(\w+)"
-    test = ("https://www.erome.com/a/UHUX1B73", {
-        "pattern": r"https://s\d+\.erome\.com/342/UHUX1B73/\w+",
-        "count": 5,
+    test = ("https://www.erome.com/a/KandxY7y", {
+        "pattern": r"https://s\d+\.erome\.com/355/KandxY7y/\w+",
+        "count": 26,
         "keyword": {
-            "album_id": "UHUX1B73",
+            "album_id": "KandxY7y",
             "num": int,
-            "title": "Ryan Ryans",
-            "user": "gutiquq",
+            "title": "Therealbrittfitt",
+            "user": "pokow",
         },
     })
 

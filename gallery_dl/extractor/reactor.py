@@ -232,11 +232,11 @@ class JoyreactorSearchExtractor(ReactorSearchExtractor):
     category = "joyreactor"
     pattern = JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
     test = (
-        ("http://joyreactor.cc/search/Cirno", {
+        ("http://joyreactor.cc/search/Nature", {
             "range": "1-25",
             "count": ">= 20",
         }),
-        ("http://joyreactor.com/search?q=Cirno", {
+        ("http://joyreactor.com/search?q=Nature", {
             "range": "1-25",
             "count": ">= 20",
         }),
@@ -306,10 +306,7 @@ class PornreactorSearchExtractor(ReactorSearchExtractor):
     category = "pornreactor"
     pattern = PR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
     test = (
-        ("http://pornreactor.cc/search?q=ecchi+hentai", {
-            "range": "1-25",
-            "count": ">= 25",
-        }),
+        ("http://pornreactor.cc/search?q=ecchi+hentai"),
         ("http://fapreactor.com/search/ecchi+hentai"),
     )
 
