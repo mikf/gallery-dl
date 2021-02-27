@@ -32,8 +32,8 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonExtractor):
     test = (
         (("https://comic.naver.com/webtoon/detail.nhn?"
           "titleId=26458&no=1&weekday=tue"), {
-            "url": "",
-            "content": "",
+            "url": "47a956ba8c7a837213d5985f50c569fcff986f75",
+            "content": "3806b6e8befbb1920048de9888dfce6220f69a60",
             "count": 14
         }),
     )
