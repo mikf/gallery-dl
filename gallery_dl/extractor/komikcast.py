@@ -69,7 +69,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     @staticmethod
     def images(page):
         readerarea = text.extract(
-            page, '<div id="readerarea">', '<div class="navig">')[0]
+            page, '<div id="readerarea"', '<div class="navig')[0]
         return [
             (text.unescape(url), None)
             for url in re.findall(r"<img[^>]* src=[\"']([^\"']+)", readerarea)
