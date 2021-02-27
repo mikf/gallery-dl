@@ -26,7 +26,7 @@ class NaverwebtoonExtractor(Extractor):
 class NaverwebtoonEpisodeExtractor(NaverwebtoonExtractor):
     subcategory = "episode"
     directory_fmt = ("{category}", "{comic}")
-    filename_fmt = "{episode}-{num:>02}.{extension}"
+    filename_fmt = "{episode:>03}-{num:>02}.{extension}"
     archive_fmt = "{title_id}_{episode}_{num}"
     pattern = (BASE_PATTERN + r"/detail\.nhn\?([^#]+)")
     test = (
