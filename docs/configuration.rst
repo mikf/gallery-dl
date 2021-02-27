@@ -392,8 +392,9 @@ extractor.*.browser
 -------------------
 Type
     ``string``
+Default
+    ``"firefox"`` for ``patreon``, ``null`` everywhere else
 Example
-    * ``"firefox"``
     * ``"chrome:macos"``
 Description
     Try to emulate a real browser (``firefox`` or ``chrome``)

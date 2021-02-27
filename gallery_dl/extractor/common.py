@@ -32,6 +32,7 @@ class Extractor():
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
     cookiedomain = ""
+    browser = None
     root = ""
     test = None
     request_interval = 0.0
@@ -65,7 +66,7 @@ class Extractor():
             self.config = self._config_shared
             self.config_accumulate = self._config_shared_accumulate
 
-        browser = self.config("browser")
+        browser = self.config("browser", self.browser)
         if browser:
             self._emulate_browser(browser)
         else:
