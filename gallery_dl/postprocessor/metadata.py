@@ -39,7 +39,7 @@ class MetadataPP(PostProcessor):
         if directory:
             self._directory = self._directory_custom
             sep = os.sep + (os.altsep or "")
-            self._metadir = directory.rstrip(sep) + os.sep
+            self._metadir = util.expand_path(directory).rstrip(sep) + os.sep
 
         filename = options.get("filename")
         extfmt = options.get("extension-format")
