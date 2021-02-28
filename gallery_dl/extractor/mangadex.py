@@ -181,7 +181,7 @@ class MangadexMangaExtractor(MangadexExtractor):
 
     def chapters(self):
         """Return a sorted list of chapter-metadata dicts"""
-        manga = self.manga_data(self.manga_id)
+        manga = self.manga_data(int(self.manga_id))
         results = []
 
         for cdata in self.manga_chapters(self.manga_id):
