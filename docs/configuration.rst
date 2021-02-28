@@ -1171,6 +1171,16 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.mangadex.api-server
+-----------------------------
+Type
+    ``string``
+Default
+    ``"https://api.mangadex.org"``
+Description
+    The server to use for API requests.
+
+
 extractor.newgrounds.flash
 --------------------------
 Type
