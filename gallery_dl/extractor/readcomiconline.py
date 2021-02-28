@@ -47,12 +47,13 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     pattern = (r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
                r"(/Comic/[^/?#]+/[^/?#]+\?id=(\d+))")
     test = ("https://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
-        "url": "2bbab6ec4fbc05d269cca420a82a9b5acda28682",
-        "keyword": "30fe110273e871305001f33c18634516a0a51421",
+        "url": "30d29c5afc65043bfd384c010257ec2d0ecbafa6",
+        "keyword": "2d9ec81ce1b11fac06ebf96ce33cdbfca0e85eb5",
     })
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, match)
+        self.gallery_url += "&quality=hq"
         self.issue_id = match.group(2)
 
     def metadata(self, page):
