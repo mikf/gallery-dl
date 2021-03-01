@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,11 +16,35 @@ class WallhavenExtractor(Extractor):
     """Base class for wallhaven extractors"""
     category = "wallhaven"
     filename_fmt = "{category}_{id}_{resolution}.{extension}"
+    archive_fmt = "{id}"
     root = "https://wallhaven.cc"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.api = WallhavenAPI(self)
+    def items(self):
+        metadata = self.metadata()
+        for wp in self.wallpapers():
+            self._transform(wp)
+            wp.update(metadata)
+            url = wp["url"]
+            yield Message.Directory, wp
+            yield Message.Url, url, text.nameext_from_url(url, wp)
+
+    def wallpapers(self):
+        """Return relevant 'wallpaper' objects"""
+
+    def metadata(self):
+        """Return general metadata"""
+        return ()
+
+    @staticmethod
+    def _transform(wp):
+        wp["url"] = wp.pop("path")
+        if "tags" in wp:
+            wp["tags"] = [t["name"] for t in wp["tags"]]
+        wp["date"] = text.parse_datetime(
+            wp.pop("created_at"), "%Y-%m-%d %H:%M:%S")
+        wp["width"] = wp.pop("dimension_x")
+        wp["height"] = wp.pop("dimension_y")
+        wp["wh_category"] = wp["category"]
 
 
 class WallhavenSearchExtractor(WallhavenExtractor):
@@ -42,18 +66,16 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         WallhavenExtractor.__init__(self, match)
         self.params = text.parse_query(match.group(1))
 
-    def items(self):
-        yield Message.Version, 1
-        yield Message.Directory, {"search": self.params}
-        for wp in self.api.search(self.params.copy()):
-            wp["search"] = self.params
-            yield Message.Url, wp["url"], wp
+    def wallpapers(self):
+        return WallhavenAPI(self).search(self.params.copy())
+
+    def metadata(self):
+        return {"search": self.params}
 
 
 class WallhavenImageExtractor(WallhavenExtractor):
     """Extractor for individual wallpaper on wallhaven.cc"""
     subcategory = "image"
-    archive_fmt = "{id}"
     pattern = (r"(?:https?://)?(?:wallhaven\.cc/w/|whvn\.cc/"
                r"|w\.wallhaven\.cc/[a-z]+/\w\w/wallhaven-)(\w+)")
     test = (
@@ -65,7 +87,7 @@ class WallhavenImageExtractor(WallhavenExtractor):
                 "width"      : 1920,
                 "height"     : 1200,
                 "resolution" : "1920x1200",
-                "ratio"      : 1.6,
+                "ratio"      : "1.6",
                 "colors"     : list,
                 "tags"       : list,
                 "file_size"  : 278799,
@@ -95,15 +117,15 @@ class WallhavenImageExtractor(WallhavenExtractor):
         WallhavenExtractor.__init__(self, match)
         self.wallpaper_id = match.group(1)
 
-    def items(self):
-        data = self.api.info(self.wallpaper_id)
-        yield Message.Version, 1
-        yield Message.Directory, data
-        yield Message.Url, data["url"], data
+    def wallpapers(self):
+        return (WallhavenAPI(self).info(self.wallpaper_id),)
 
 
 class WallhavenAPI():
-    """Minimal interface to wallhaven's API"""
+    """Interface for wallhaven's API
+
+    Ref: https://wallhaven.cc/help/api
+    """
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -117,32 +139,27 @@ class WallhavenAPI():
         self.headers = {"X-API-Key": key}
 
     def info(self, wallpaper_id):
-        url = "https://wallhaven.cc/api/v1/w/" + wallpaper_id
-        return self._update(self._call(url)["data"])
+        endpoint = "/v1/w/" + wallpaper_id
+        return self._call(endpoint)["data"]
 
     def search(self, params):
-        url = "https://wallhaven.cc/api/v1/search"
-        while True:
-            data = self._call(url, params)
-            yield from map(self._update, data["data"])
-            if data["meta"]["current_page"] >= data["meta"]["last_page"]:
-                return
-            params["page"] = data["meta"]["current_page"] + 1
+        endpoint = "/v1/search"
+        return self._pagination(endpoint, params)
 
-    def _call(self, url, params=None):
+    def _call(self, endpoint, params=None):
+        url = "https://wallhaven.cc/api" + endpoint
         return self.extractor.request(
             url, headers=self.headers, params=params).json()
 
-    @staticmethod
-    def _update(wp):
-        width, _, height = wp["resolution"].partition("x")
-        wp["url"] = wp.pop("path")
-        if "tags" in wp:
-            wp["tags"] = [t["name"] for t in wp["tags"]]
-        wp["date"] = text.parse_datetime(
-            wp.pop("created_at"), "%Y-%m-%d %H:%M:%S")
-        wp["ratio"] = text.parse_float(wp["ratio"])
-        wp["width"] = wp.pop("dimension_x")
-        wp["height"] = wp.pop("dimension_y")
-        wp["wh_category"] = wp["category"]
-        return text.nameext_from_url(wp["url"], wp)
+    def _pagination(self, endpoint, params=None):
+        if params is None:
+            params = {}
+
+        while True:
+            data = self._call(endpoint, params)
+            yield from data["data"]
+
+            meta = data["meta"]
+            if meta["current_page"] >= meta["last_page"]:
+                return
+            params["page"] = meta["current_page"] + 1
