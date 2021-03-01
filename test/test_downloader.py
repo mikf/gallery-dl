@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -74,7 +74,7 @@ class TestDownloaderModule(unittest.TestCase):
         self.assertEqual(downloader.find(1234) , None)
         self.assertEqual(downloader.find(None) , None)
 
-    @patch("importlib.import_module")
+    @patch("builtins.__import__")
     def test_cache(self, import_module):
         import_module.return_value = MockDownloaderModule()
         downloader.find("http")
@@ -86,14 +86,14 @@ class TestDownloaderModule(unittest.TestCase):
         downloader.find("ytdl")
         self.assertEqual(import_module.call_count, 3)
 
-    @patch("importlib.import_module")
+    @patch("builtins.__import__")
     def test_cache_http(self, import_module):
         import_module.return_value = MockDownloaderModule()
         downloader.find("http")
         downloader.find("https")
         self.assertEqual(import_module.call_count, 1)
 
-    @patch("importlib.import_module")
+    @patch("builtins.__import__")
     def test_cache_https(self, import_module):
         import_module.return_value = MockDownloaderModule()
         downloader.find("https")
