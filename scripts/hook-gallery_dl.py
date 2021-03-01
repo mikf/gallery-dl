@@ -7,3 +7,5 @@ hiddenimports = [
     for package in (extractor, downloader, postprocessor)
     for module in package.modules
 ]
+
+hiddenimports.append("youtube_dl")

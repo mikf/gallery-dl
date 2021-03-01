@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,6 @@
 
 """Downloader module for URLs requiring youtube-dl support"""
 
-from youtube_dl import YoutubeDL, DEFAULT_OUTTMPL
 from .common import DownloaderBase
 from .. import text
 import os
@@ -16,8 +15,14 @@ import os
 
 class YoutubeDLDownloader(DownloaderBase):
     scheme = "ytdl"
+    module = None
 
     def __init__(self, job):
+        module = self.module
+        if not module:
+            module_name = self.config("module") or "youtube_dl"
+            module = YoutubeDLDownloader.module = __import__(module_name)
+
         DownloaderBase.__init__(self, job)
         extractor = job.extractor
 
@@ -42,10 +47,11 @@ class YoutubeDLDownloader(DownloaderBase):
             options["logger"] = self.log
         self.forward_cookies = self.config("forward-cookies", False)
 
-        outtmpl = self.config("outtmpl")
-        self.outtmpl = DEFAULT_OUTTMPL if outtmpl == "default" else outtmpl
+        self.outtmpl = self.config("outtmpl")
+        if self.outtmpl == "default":
+            self.outtmpl = module.DEFAULT_OUTTMPL
 
-        self.ytdl = YoutubeDL(options)
+        self.ytdl = module.YoutubeDL(options)
 
     def download(self, url, pathfmt):
         if self.forward_cookies:

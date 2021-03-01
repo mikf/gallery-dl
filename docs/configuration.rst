@@ -1943,6 +1943,16 @@ Description
     `downloader.ytdl.raw-options`_ to ``true`` to suppress all output.
 
 
+downloader.ytdl.module
+----------------------
+Type
+    ``string``
+Default
+    ``"youtube_dl"``
+Description
+    Name of the youtube-dl Python module to import.
+
+
 downloader.ytdl.outtmpl
 -----------------------
 Type
