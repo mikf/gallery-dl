@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -53,7 +53,7 @@ class TestPostprocessorModule(unittest.TestCase):
         self.assertEqual(postprocessor.find(1234) , None)
         self.assertEqual(postprocessor.find(None) , None)
 
-    @patch("importlib.import_module")
+    @patch("builtins.__import__")
     def test_cache(self, import_module):
         import_module.return_value = MockPostprocessorModule()
 

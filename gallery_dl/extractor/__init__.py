@@ -7,7 +7,6 @@
 # published by the Free Software Foundation.
 
 import re
-import importlib
 
 modules = [
     "2chan",
@@ -185,11 +184,12 @@ def _list_classes():
     """Yield all available extractor classes"""
     yield from _cache
 
+    globals_ = globals()
     for module_name in _module_iter:
-        module = importlib.import_module("."+module_name, __package__)
+        module = __import__(module_name, globals_, None, (), 1)
         yield from add_module(module)
 
-    globals()["_list_classes"] = lambda : _cache
+    globals_["_list_classes"] = lambda : _cache
 
 
 def _get_classes(module):
