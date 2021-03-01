@@ -73,6 +73,26 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         return {"search": self.params}
 
 
+class WallhavenCollectionExtractor(WallhavenExtractor):
+    """Extractor for a collection on wallhaven.cc"""
+    subcategory = "collection"
+    directory_fmt = ("{category}", "{username}", "{collection_id}")
+    pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/favorites/(\d+)"
+    test = ("https://wallhaven.cc/user/AksumkA/favorites/74", {
+        "count": ">= 50",
+    })
+
+    def __init__(self, match):
+        WallhavenExtractor.__init__(self, match)
+        self.username, self.collection_id = match.groups()
+
+    def wallpapers(self):
+        return WallhavenAPI(self).collection(self.username, self.collection_id)
+
+    def metadata(self):
+        return {"username": self.username, "collection_id": self.collection_id}
+
+
 class WallhavenImageExtractor(WallhavenExtractor):
     """Extractor for individual wallpaper on wallhaven.cc"""
     subcategory = "image"
@@ -141,6 +161,14 @@ class WallhavenAPI():
     def info(self, wallpaper_id):
         endpoint = "/v1/w/" + wallpaper_id
         return self._call(endpoint)["data"]
+
+    def collection(self, username, collection_id):
+        endpoint = "/v1/collections/{}/{}".format(username, collection_id)
+        return self._pagination(endpoint)
+
+    def collections(self, username):
+        endpoint = "/v1/collections/" + username
+        return self._pagination(endpoint)
 
     def search(self, params):
         endpoint = "/v1/search"

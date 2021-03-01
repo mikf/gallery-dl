@@ -151,7 +151,7 @@ Twitter              https://twitter.com/                |twitter-C|            
 Unsplash             https://unsplash.com/               |unsplash-C|
 Vipr                 https://vipr.im/                    individual Images
 VSCO                 https://vsco.co/                    Collections, individual Images, User Profiles
-Wallhaven            https://wallhaven.cc/               individual Images, Search Results                  `API Key <configuration.rst#extractorwallhavenapi-key>`__
+Wallhaven            https://wallhaven.cc/               Collections, individual Images, Search Results     `API Key <configuration.rst#extractorwallhavenapi-key>`__
 Warosu               https://warosu.org/                 Threads
 Weasyl               https://www.weasyl.com/             Favorites, Folders, Journals, Submissions          `API Key <configuration.rst#extractorweasylapi-key>`__
 Webtoon              https://www.webtoons.com/           Comics, Episodes
