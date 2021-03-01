@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,14 +19,6 @@ import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import extractor, util, job, config, exception  # noqa E402
 
-
-# these don't work on Travis CI
-TRAVIS_SKIP = {
-    "exhentai", "mangafox", "dynastyscans", "nijie", "instagram", "ngomik",
-    "archivedmoe", "archiveofsins", "thebarchive", "fireden", "4plebs",
-    "sankaku", "idolcomplex", "mangahere", "mangadex", "sankakucomplex",
-    "warosu", "fuskator", "patreon", "komikcast", "twitter",
-}
 
 # temporary issues, etc.
 BROKEN = {
@@ -361,8 +353,6 @@ def generate_tests():
         del sys.argv[1:]
     else:
         skip = set(BROKEN)
-        if "CI" in os.environ and "TRAVIS" in os.environ:
-            skip |= set(TRAVIS_SKIP)
         if skip:
             print("skipping:", ", ".join(skip))
         fltr = lambda c, bc: c not in skip  # noqa: E731
