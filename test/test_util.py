@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -460,6 +460,16 @@ class TestOther(unittest.TestCase):
             list(util.unique("ABABABCAABBCC")), "ABC")
         self.assertSequenceEqual(
             list(util.unique([1, 2, 1, 3, 2, 1])), [1, 2, 3])
+
+    def test_unique_sequence(self):
+        self.assertSequenceEqual(
+            list(util.unique_sequence("")), "")
+        self.assertSequenceEqual(
+            list(util.unique_sequence("AABBCC")), "ABC")
+        self.assertSequenceEqual(
+            list(util.unique_sequence("ABABABCAABBCC")), "ABABABCABC")
+        self.assertSequenceEqual(
+            list(util.unique_sequence([1, 2, 1, 3, 2, 1])), [1, 2, 1, 3, 2, 1])
 
     def test_raises(self):
         func = util.raises(Exception)
