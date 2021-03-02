@@ -11,10 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 import urllib.parse
-import random
-import time
 import json
-
 
 BASE_PATTERN = r"(?:https?://)?((?:[^/.]+\.)?reactor\.cc)"
 
@@ -25,16 +22,12 @@ class ReactorExtractor(Extractor):
     filename_fmt = "{post_id}_{num:>02}{title[:100]:?_//}.{extension}"
     archive_fmt = "{post_id}_{num}"
     instances = ()
+    request_interval = 5.0
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.root = "http://" + match.group(1)
         self.session.headers["Referer"] = self.root
-
-        self.wait_min = self.config("wait-min", 3)
-        self.wait_max = self.config("wait-max", 6)
-        if self.wait_max < self.wait_min:
-            self.wait_max = self.wait_min
 
         if not self.category:
             # set category based on domain name
@@ -61,8 +54,6 @@ class ReactorExtractor(Extractor):
 
     def _pagination(self, url):
         while True:
-            time.sleep(random.uniform(self.wait_min, self.wait_max))
-
             response = self.request(url)
             if response.history:
                 # sometimes there is a redirect from

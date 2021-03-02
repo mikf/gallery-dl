@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,8 +13,6 @@ from .common import Message
 from ..cache import cache
 from .. import text, util, exception
 import collections
-import random
-import time
 import re
 
 
@@ -24,6 +22,7 @@ class IdolcomplexExtractor(SankakuExtractor):
     cookienames = ("login", "pass_hash")
     cookiedomain = "idol.sankakucomplex.com"
     root = "https://" + cookiedomain
+    request_interval = 5.0
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
@@ -31,17 +30,12 @@ class IdolcomplexExtractor(SankakuExtractor):
         self.start_page = 1
         self.start_post = 0
         self.extags = self.config("tags", False)
-        self.wait_min = self.config("wait-min", 3.0)
-        self.wait_max = self.config("wait-max", 6.0)
-        if self.wait_max < self.wait_min:
-            self.wait_max = self.wait_min
 
     def items(self):
         self.login()
         data = self.metadata()
 
         for post_id in util.advance(self.post_ids(), self.start_post):
-            self.wait()
             post = self._parse_post(post_id)
             url = post["file_url"]
             post.update(data)
@@ -130,10 +124,6 @@ class IdolcomplexExtractor(SankakuExtractor):
 
         return data
 
-    def wait(self):
-        """Wait for a randomly chosen amount of seconds"""
-        time.sleep(random.uniform(self.wait_min, self.wait_max))
-
 
 class IdolcomplexTagExtractor(IdolcomplexExtractor):
     """Extractor for images from idol.sankakucomplex.com by search-tags"""
@@ -192,7 +182,6 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
             params["page"] = self.start_page
 
         while True:
-            self.wait()
             page = self.request(self.root, params=params, retries=10).text
             pos = page.find("<div id=more-popular-posts-link>") + 1
 

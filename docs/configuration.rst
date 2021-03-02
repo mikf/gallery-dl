@@ -949,21 +949,6 @@ Description
     Download full-sized original images if available.
 
 
-extractor.exhentai.wait-min & .wait-max
----------------------------------------
-Type
-    ``float``
-Default
-    ``3.0`` and ``6.0``
-Description
-    Minimum and maximum wait time in seconds between each image
-
-    ExHentai detects and blocks automated downloaders.
-    *gallery-dl* waits a randomly selected number of
-    seconds between ``wait-min`` and ``wait-max`` after
-    each image to prevent getting blocked.
-
-
 extractor.flickr.access-token & .access-token-secret
 ----------------------------------------------------
 Type
@@ -1351,17 +1336,6 @@ Default
     ``false``
 Description
     Also search Plurk comments for URLs.
-
-
-extractor.reactor.wait-min & .wait-max
---------------------------------------
-Type
-    ``float``
-Default
-    ``3.0`` and ``6.0``
-Description
-    Minimum and maximum wait time in seconds between HTTP requests
-    during the extraction process.
 
 
 extractor.readcomiconline.captcha
