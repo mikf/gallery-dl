@@ -152,12 +152,15 @@ SUBCATEGORY_MAP = {
         "media": "Media Timelines",
         "list-members": "List Members",
     },
-    "wikiart": {
-        "artists": "Artist Listings",
+    "wallhaven": {
+        "collections": "",
     },
     "weasyl": {
         "journals"   : "",
         "submissions": "",
+    },
+    "wikiart": {
+        "artists": "Artist Listings",
     },
 }
 

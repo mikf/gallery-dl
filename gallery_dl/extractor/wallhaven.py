@@ -93,6 +93,27 @@ class WallhavenCollectionExtractor(WallhavenExtractor):
         return {"username": self.username, "collection_id": self.collection_id}
 
 
+class WallhavenCollectionsExtractor(WallhavenExtractor):
+    """Extractor for all collections of a wallhaven user"""
+    subcategory = "collections"
+    pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/favorites/?$"
+    test = ("https://wallhaven.cc/user/AksumkA/favorites", {
+        "pattern": WallhavenCollectionExtractor.pattern,
+        "count": 4,
+    })
+
+    def __init__(self, match):
+        WallhavenExtractor.__init__(self, match)
+        self.username = match.group(1)
+
+    def items(self):
+        for collection in WallhavenAPI(self).collections(self.username):
+            collection["_extractor"] = WallhavenCollectionExtractor
+            url = "https://wallhaven.cc/user/{}/favorites/{}".format(
+                self.username, collection["id"])
+            yield Message.Queue, url, collection
+
+
 class WallhavenImageExtractor(WallhavenExtractor):
     """Extractor for individual wallpaper on wallhaven.cc"""
     subcategory = "image"
@@ -187,7 +208,7 @@ class WallhavenAPI():
             data = self._call(endpoint, params)
             yield from data["data"]
 
-            meta = data["meta"]
-            if meta["current_page"] >= meta["last_page"]:
+            meta = data.get("meta")
+            if not meta or meta["current_page"] >= meta["last_page"]:
                 return
             params["page"] = meta["current_page"] + 1
