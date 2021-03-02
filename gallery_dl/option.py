@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -149,6 +149,11 @@ def build_parser():
         "-s", "--simulate",
         dest="jobtype", action="store_const", const=job.SimulationJob,
         help="Simulate data extraction; do not download anything",
+    )
+    output.add_argument(
+        "-E", "--extractor-info",
+        dest="jobtype", action="store_const", const=job.InfoJob,
+        help="Print extractor defaults and settings",
     )
     output.add_argument(
         "-K", "--list-keywords",

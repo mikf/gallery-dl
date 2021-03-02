@@ -7,6 +7,7 @@
 # published by the Free Software Foundation.
 
 import sys
+import json
 import time
 import errno
 import logging
@@ -573,6 +574,38 @@ class UrlJob(Job):
             UrlJob(url, self, self.depth + 1).run()
         except exception.NoExtractorError:
             self._write_unsupported(url)
+
+
+class InfoJob(Job):
+    """Print extractor defaults and settings"""
+
+    def run(self):
+        ex = self.extractor
+        pm = self._print_multi
+        pc = self._print_config
+
+        if ex.basecategory:
+            pm("Category / Subcategory / Basecategory",
+               ex.category, ex.subcategory, ex.basecategory)
+        else:
+            pm("Category / Subcategory", ex.category, ex.subcategory)
+
+        pc("Filename format", "filename", ex.filename_fmt)
+        pc("Directory format", "directory", ex.directory_fmt)
+        pc("Request interval", "sleep-request", ex.request_interval)
+
+        return 0
+
+    def _print_multi(self, title, *values):
+        print(title, "\n  ", " / ".join(json.dumps(v) for v in values), sep="")
+
+    def _print_config(self, title, optname, value):
+        optval = self.extractor.config(optname, util.SENTINEL)
+        if optval is not util.SENTINEL:
+            print(title, "(custom):\n ", json.dumps(optval))
+            print(title, "(default):\n ", json.dumps(value))
+        elif value:
+            print(title, "(default):\n ", json.dumps(value))
 
 
 class DataJob(Job):
