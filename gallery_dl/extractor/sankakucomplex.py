@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -125,17 +125,14 @@ class SankakucomplexTagExtractor(SankakucomplexExtractor):
 
     def items(self):
         pnum = 1
-        last = None
         data = {"_extractor": SankakucomplexArticleExtractor}
 
-        yield Message.Version, 1
         while True:
             url = "{}/{}/page/{}/".format(self.root, self.path, pnum)
             response = self.request(url, fatal=False)
             if response.status_code >= 400:
                 return
-            for url in text.extract_iter(response.text, 'data-direct="', '"'):
-                if url != last:
-                    last = url
-                    yield Message.Queue, url, data
+            for url in util.unique_sequence(text.extract_iter(
+                    response.text, 'data-direct="', '"')):
+                yield Message.Queue, url, data
             pnum += 1
