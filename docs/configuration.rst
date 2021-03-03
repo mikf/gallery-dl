@@ -282,9 +282,10 @@ Description
     * ``e621``
     * ``exhentai``
     * ``idolcomplex``
+    * ``imgbb``
     * ``inkbunny``
     * ``instagram``
-    * ``luscious``
+    * ``mangoxo``
     * ``pinterest``
     * ``sankaku``
     * ``subscribestar``
@@ -1017,19 +1018,6 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
-extractor.gelbooru.api
-----------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Enable use of Gelbooru's API.
-
-    Set this value to `false` if the API has been disabled to switch
-    to manual information extraction.
-
-
 extractor.gfycat.format
 -----------------------
 Type
@@ -1657,7 +1645,7 @@ Description
     Name of the image format to download.
 
     Available formats are
-        ``"raw"``, ``"full"``, ``"regular"``, ``"small"``, and ``"thumb"``.
+    ``"raw"``, ``"full"``, ``"regular"``, ``"small"``, and ``"thumb"``.
 
 
 extractor.vsco.videos
