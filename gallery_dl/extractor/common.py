@@ -40,16 +40,15 @@ class Extractor():
     request_timestamp = 0.0
 
     def __init__(self, match):
-        self.session = requests.Session()
-        self.session.headers.clear()
-
         self.log = logging.getLogger(self.category)
         self.url = match.string
-        self._cookiefile = None
-        self._cookiejar = self.session.cookies
+
+        if self.basecategory:
+            self.config = self._config_shared
+            self.config_accumulate = self._config_shared_accumulate
+        self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 
-        self._cfgpath = ("extractor", self.category, self.subcategory)
         self._write_pages = self.config("write-pages", False)
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
@@ -62,15 +61,7 @@ class Extractor():
         if self.request_interval < self.request_interval_min:
             self.request_interval = self.request_interval_min
 
-        if self.basecategory:
-            self.config = self._config_shared
-            self.config_accumulate = self._config_shared_accumulate
-
-        browser = self.config("browser", self.browser)
-        if browser:
-            self._emulate_browser(browser)
-        else:
-            self._init_headers()
+        self._init_session()
         self._init_cookies()
         self._init_proxies()
 
@@ -219,33 +210,46 @@ class Extractor():
 
         return username, password
 
-    def _emulate_browser(self, browser):
-        browser, _, platform = browser.lower().partition(":")
+    def _init_session(self):
+        self.session = session = requests.Session()
+        headers = session.headers
+        headers.clear()
 
-        if not platform or platform == "auto":
-            platform = "windows" if util.WINDOWS else "linux"
+        browser = self.config("browser") or self.browser
+        if browser:
+            browser, _, platform = browser.lower().partition(":")
 
-        if platform == "windows":
-            platform = "Windows NT 10.0; Win64; x64"
-        elif platform == "linux":
-            platform = "X11; Linux x86_64"
-        elif platform == "macos":
-            platform = "Macintosh; Intel Mac OS X 11.2"
+            if not platform or platform == "auto":
+                platform = ("Windows NT 10.0; Win64; x64"
+                            if util.WINDOWS else "X11; Linux x86_64")
+            elif platform == "windows":
+                platform = "Windows NT 10.0; Win64; x64"
+            elif platform == "linux":
+                platform = "X11; Linux x86_64"
+            elif platform == "macos":
+                platform = "Macintosh; Intel Mac OS X 11.2"
 
-        if browser == "chrome":
-            _emulate_browser_chrome(self.session, platform)
+            if browser == "chrome":
+                _emulate_browser_chrome(session, platform)
+            else:
+                _emulate_browser_firefox(session, platform)
         else:
-            _emulate_browser_firefox(self.session, platform)
+            headers["User-Agent"] = self.config("user-agent", (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
+                "rv:78.0) Gecko/20100101 Firefox/78.0"))
+            headers["Accept"] = "*/*"
+            headers["Accept-Language"] = "en-US,en;q=0.5"
+            headers["Accept-Encoding"] = "gzip, deflate"
 
-    def _init_headers(self):
-        """Initialize HTTP headers for 'session'"""
-        headers = self.session.headers
-        headers["User-Agent"] = self.config(
-            "user-agent", ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                           "rv:78.0) Gecko/20100101 Firefox/78.0"))
-        headers["Accept"] = "*/*"
-        headers["Accept-Language"] = "en-US,en;q=0.5"
-        headers["Accept-Encoding"] = "gzip, deflate"
+        custom_headers = self.config("headers")
+        if custom_headers:
+            headers.update(custom_headers)
+
+        ciphers = self.config("ciphers")
+        if ciphers:
+            if isinstance(ciphers, list):
+                ciphers = ":".join(ciphers)
+            session.mount("https://", HTTPSAdapter(ciphers))
 
     def _init_proxies(self):
         """Update the session's proxy map"""
@@ -263,6 +267,8 @@ class Extractor():
 
     def _init_cookies(self):
         """Populate the session's cookiejar"""
+        self._cookiefile = None
+        self._cookiejar = self.session.cookies
         if self.cookiedomain is None:
             return
 
@@ -597,7 +603,6 @@ class HTTPSAdapter(HTTPAdapter):
 
 def _emulate_browser_firefox(session, platform):
     headers = session.headers
-
     headers["User-Agent"] = ("Mozilla/5.0 (" + platform + "; rv:78.0) "
                              "Gecko/20100101 Firefox/78.0")
     headers["Accept"] = ("text/html,application/xhtml+xml,"
@@ -631,10 +636,10 @@ def _emulate_browser_firefox(session, platform):
 
 
 def _emulate_browser_chrome(session, platform):
-    headers = session.headers
     if platform.startswith("Macintosh"):
         platform = platform.replace(".", "_") + "_0"
 
+    headers = session.headers
     headers["Upgrade-Insecure-Requests"] = "1"
     headers["User-Agent"] = (
         "Mozilla/5.0 (" + platform + ") AppleWebKit/537.36 "
