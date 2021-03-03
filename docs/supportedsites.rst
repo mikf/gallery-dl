@@ -97,6 +97,7 @@ Mangoxo              https://www.mangoxo.com/            Albums, Channels       
 mastodon.social      https://mastodon.social/            Images from Statuses, User Profiles                `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
 My Hentai Gallery    https://myhentaigallery.com/        Galleries
 Naver                https://blog.naver.com/             Blogs, Posts
+NaverWebtoon         https://comic.naver.com/            Comics, Episodes
 Newgrounds           https://www.newgrounds.com/         |newgrounds-C|                                     Supported
 Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
@@ -146,6 +147,7 @@ The /b/ Archive      https://thebarchive.com/            Boards, Search Results,
 Thecollection        https://the-collection.booru.org/   Posts, Tag Searches
 Tsumino              https://www.tsumino.com/            Galleries, Search Results                          Supported
 Tumblr               https://www.tumblr.com/             Likes, Posts, Tag Searches, User Profiles          `OAuth <https://github.com/mikf/gallery-dl#oauth>`__
+TumblrGallery        https://tumblrgallery.xyz/          Posts, Search Results, Tumblrblogs
 Turboimagehost       https://www.turboimagehost.com/     individual Images
 Twitter              https://twitter.com/                |twitter-C|                                        Supported
 Unsplash             https://unsplash.com/               |unsplash-C|
