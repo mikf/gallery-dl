@@ -1,50 +1,36 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://tumblrgallery.xyz/"""
+"""Extractors for https://tumblrgallery.xyz/"""
 
 from .common import GalleryExtractor
 from .. import text
 
+BASE_PATTERN = r"(?:https?://)?tumblrgallery\.xyz"
 
-BASE_PATTERN = r"(?:https?://)tumblrgallery\.xyz"
 
-
-class TumblrgalleryGalleryExtractor(GalleryExtractor):
+class TumblrgalleryExtractor(GalleryExtractor):
     """Base class for tumblrgallery extractors"""
     category = "tumblrgallery"
-    cookiedomain = None
-
-    def __init__(self, match):
-        self.root = "https://tumblrgallery.xyz"
-        GalleryExtractor.__init__(self, match)
-
-
-class TumblrgalleryTumblrblogExtractor(TumblrgalleryGalleryExtractor):
-    """Extractor for Tumblrblog on tumblrgallery.xyz"""
-    subcategory = "tumblrblog"
-    pattern = BASE_PATTERN + r"(/tumblrblog/gallery/(\d+).html)"
-    test = (
-        "https://tumblrgallery.xyz/tumblrblog/gallery/103975.html", {
-            "pattern": r"/tumblrblog/gallery/103975.html"
-                       r"103975",
-        }
-    )
-
     filename_fmt = "{category}_{gallery_id}_{num:>03}_{id}.{extension}"
     directory_fmt = ("{category}", "{gallery_id} {title}")
+    root = "https://tumblrgallery.xyz"
+
+
+class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
+    """Extractor for Tumblrblog on tumblrgallery.xyz"""
+    subcategory = "tumblrblog"
+    pattern = BASE_PATTERN + r"(/tumblrblog/gallery/(\d+)\.html)"
+    test = ("https://tumblrgallery.xyz/tumblrblog/gallery/103975.html",)
 
     def __init__(self, match):
-        TumblrgalleryGalleryExtractor.__init__(self, match)
+        TumblrgalleryExtractor.__init__(self, match)
         self.gallery_id = text.parse_int(match.group(2))
 
     def metadata(self, page):
-        """Collect metadata for extractor-job"""
         return {
             "title" : text.unescape(text.extract(page, "<h1>", "</h1>"))[0],
             "gallery_id": self.gallery_id,
@@ -76,26 +62,17 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryGalleryExtractor):
                 }
 
 
-class TumblrgalleryPostExtractor(TumblrgalleryGalleryExtractor):
+class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
     """Extractor for Posts on tumblrgallery.xyz"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"(/post/(\d+).html)"
-    test = (
-        "https://tumblrgallery.xyz/post/405674.html", {
-            "pattern": r"/post/405674.html"
-                       r"405674",
-        }
-    )
-
-    filename_fmt = "{category}_{gallery_id}_{num:>03}_{id}.{extension}"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
+    pattern = BASE_PATTERN + r"(/post/(\d+)\.html)"
+    test = ("https://tumblrgallery.xyz/post/405674.html",)
 
     def __init__(self, match):
-        TumblrgalleryGalleryExtractor.__init__(self, match)
+        TumblrgalleryExtractor.__init__(self, match)
         self.gallery_id = text.parse_int(match.group(2))
 
     def metadata(self, page):
-        """Collect metadata for extractor-job"""
         return {
             "title" : text.remove_html(
                 text.unescape(text.extract(page, "<title>", "</title>")[0])
@@ -117,25 +94,19 @@ class TumblrgalleryPostExtractor(TumblrgalleryGalleryExtractor):
             }
 
 
-class TumblrgallerySearchExtractor(TumblrgalleryGalleryExtractor):
+class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
     """Extractor for Search result on tumblrgallery.xyz"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"(/s\.php\?q=(.*))"
-    test = (
-        "https://tumblrgallery.xyz/s.php?q=everyday-life", {
-            "pattern": r"everyday-life",
-        }
-    )
-
     filename_fmt = "{category}_{num:>03}_{gallery_id}_{id}_{title}.{extension}"
     directory_fmt = ("{category}", "{search_term}")
+    pattern = BASE_PATTERN + r"(/s\.php\?q=([^&#]+))"
+    test = ("https://tumblrgallery.xyz/s.php?q=everyday-life",)
 
     def __init__(self, match):
+        TumblrgalleryExtractor.__init__(self, match)
         self.search_term = match.group(2)
-        TumblrgalleryGalleryExtractor.__init__(self, match)
 
     def metadata(self, page):
-        """Collect metadata for extractor-job"""
         return {
             "search_term": self.search_term,
         }
