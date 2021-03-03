@@ -14,15 +14,38 @@ from .common import Extractor, Message
 from ..cache import memcache
 import re
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?hentai\.cafe"
 
-class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
-    """Extractor for manga-chapters from hentai.cafe"""
+
+class HentaicafeBase():
+    """Base class for hentaicafe extractors"""
     category = "hentaicafe"
     root = "https://hentai.cafe"
+
+    def _pagination(self, urlfmt):
+        data = {"_extractor": HentaicafeMangaExtractor}
+        pnum = text.parse_int(self.page_start, 1)
+
+        while True:
+            page = self.request(urlfmt(pnum)).text
+
+            for entry in text.extract_iter(
+                    page, 'class="entry-featured', 'title="'):
+                url = text.extract(entry, 'href="', '"')[0]
+                if url:
+                    yield Message.Queue, url, data
+
+            if '>&#x2192;<' not in page:
+                return
+            pnum += 1
+
+
+class HentaicafeChapterExtractor(HentaicafeBase,
+                                 foolslide.FoolslideChapterExtractor):
+    """Extractor for manga-chapters from hentai.cafe"""
     directory_fmt = ("{category}", "{manga}")
     filename_fmt = "c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}"
-    pattern = (r"(?:https?://)?(?:www\.)?hentai\.cafe"
-               r"(/manga/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)")
+    pattern = BASE_PATTERN + r"(/manga/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     test = ("https://hentai.cafe/manga/read/saitom-box/en/0/1/", {
         "url": "8c6a8c56875ba3ed7ab0a74a64f9960077767fc2",
         "keyword": "6913608267d883c82b887303b9ced13821188329",
@@ -43,12 +66,10 @@ class HentaicafeChapterExtractor(foolslide.FoolslideChapterExtractor):
         return {"artist": (), "tags": ()}
 
 
-class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
+class HentaicafeMangaExtractor(HentaicafeBase,
+                               foolslide.FoolslideMangaExtractor):
     """Extractor for manga from hentai.cafe"""
-    category = "hentaicafe"
-    root = "https://hentai.cafe"
-    pattern = (r"(?:https?://)?" + r"(?:www\.)?hentai\.cafe"
-               r"(/hc\.fyi/\d+|(?:/manga/series)?/[^/?#]+)/?$")
+    pattern = BASE_PATTERN + r"(/hc\.fyi/\d+|(?:/manga/series)?/[^/?#]+)/?$"
     test = (
         # single chapter
         ("https://hentai.cafe/hazuki-yuuto-summer-blues/", {
@@ -108,3 +129,45 @@ class HentaicafeMangaExtractor(foolslide.FoolslideMangaExtractor):
             for url in re.findall(
                 r'<a +class="x-btn[^"]*" +href="([^"]+)"', page)
         ]
+
+
+class HentaicafeSearchExtractor(HentaicafeBase, Extractor):
+    """Extractor for hentaicafe search results"""
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/(?:page/(\d+)/?)?\?s=([^&#]+)"
+    test = ("https://hentai.cafe/?s=benimura", {
+        "pattern": HentaicafeMangaExtractor.pattern,
+        "count": ">= 10",
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.page_start, self.search = match.groups()
+
+    def items(self):
+        fmt = "{}/page/{}?s={}".format
+        return self._pagination(lambda pnum: fmt(self.root, pnum, self.search))
+
+
+class HentaicafeTagExtractor(HentaicafeBase, Extractor):
+    """Extractor for hentaicafe tag/artist searches"""
+    subcategory = "tag"
+    pattern = (BASE_PATTERN +
+               r"/hc\.fyi/(tag|artist|category)/([^/?#]+)(?:/page/(\d+))?")
+    test = (
+        ("https://hentai.cafe/hc.fyi/tag/vanilla"),
+        ("https://hentai.cafe/hc.fyi/category/book/page/5"),
+        ("https://hentai.cafe/hc.fyi/artist/benimura-karu", {
+            "pattern": HentaicafeMangaExtractor.pattern,
+            "count": ">= 10",
+        }),
+    )
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.type, self.search, self.page_start = match.groups()
+
+    def items(self):
+        fmt = "{}/hc.fyi/{}/{}/page/{}".format
+        return self._pagination(
+            lambda pnum: fmt(self.root, self.type, self.search, pnum))
