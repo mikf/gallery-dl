@@ -50,6 +50,10 @@ plugs:
     interface: system-files
     read:
     - /etc/gallery-dl.conf
+  dot-netrc:
+    interface: personal-files
+    read:
+    - $HOME/.netrc
 
 parts:
   # Launcher programs to fix problems at runtime
