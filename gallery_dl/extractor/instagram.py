@@ -85,19 +85,17 @@ class InstagramExtractor(Extractor):
 
         return response
 
-    def _request_api(self, endpoint, params=None):
+    def _request_api(self, endpoint, **kwargs):
         url = "https://i.instagram.com/api" + endpoint
-        headers = {
+        kwargs["headers"] = {
             "X-CSRFToken"   : self.csrf_token,
             "X-IG-App-ID"   : "936619743392459",
             "X-IG-WWW-Claim": self.www_claim,
         }
-        cookies = {
+        kwargs["cookies"] = {
             "csrftoken": self.csrf_token,
         }
-        return self.request(
-            url, params=params, headers=headers, cookies=cookies,
-        ).json()
+        return self.request(url, **kwargs).json()
 
     def _request_graphql(self, query_hash, variables):
         url = self.root + "/graphql/query/"
@@ -231,19 +229,29 @@ class InstagramExtractor(Extractor):
         return data
 
     def _parse_post_reel(self, post):
-        reel_id = str(post["id"]).rpartition(":")[2]
-        owner = post["user"]
 
-        data = {
-            "expires"    : text.parse_timestamp(post.get("expiring_at")),
-            "owner_id"   : owner["pk"],
-            "username"   : owner.get("username"),
-            "fullname"   : owner.get("full_name"),
-            "post_id"    : reel_id,
-            "post_shortcode": self._shortcode_from_id(reel_id),
-        }
+        if "media" in post:
+            media = post["media"]
+            owner = media["user"]
+            post["items"] = (media,)
+            data = {
+                "post_id" : media["pk"],
+                "post_shortcode": self._shortcode_from_id(media["pk"]),
+            }
+        else:
+            reel_id = str(post["id"]).rpartition(":")[2]
+            owner = post["user"]
+            data = {
+                "expires" : text.parse_timestamp(post.get("expiring_at")),
+                "post_id" : reel_id,
+                "post_shortcode": self._shortcode_from_id(reel_id),
+            }
 
+        data["owner_id"] = owner["pk"]
+        data["username"] = owner.get("username")
+        data["fullname"] = owner.get("full_name")
         data["_files"] = files = []
+
         for num, item in enumerate(post["items"], 1):
 
             image = item["image_versions2"]["candidates"][0]
@@ -351,7 +359,7 @@ class InstagramExtractor(Extractor):
 
     def _pagination_api(self, endpoint, params):
         while True:
-            data = self._request_api(endpoint, params)
+            data = self._request_api(endpoint, method="POST", data=params)
             yield from data["items"]
 
             info = data["paging_info"]
@@ -625,7 +633,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
 
         endpoint = "/v1/feed/reels_media/"
         params = {"reel_ids": reel_id}
-        return self._request_api(endpoint, params)["reels"].values()
+        return self._request_api(endpoint, params=params)["reels"].values()
 
 
 class InstagramHighlightsExtractor(InstagramExtractor):
@@ -658,3 +666,25 @@ class InstagramHighlightsExtractor(InstagramExtractor):
                    "&reel_ids=".join(text.quote(rid) for rid in reel_ids)
         reels = self._request_api(endpoint)["reels"]
         return [reels[rid] for rid in reel_ids]
+
+
+class InstagramReelsExtractor(InstagramExtractor):
+    """Extractor for an Instagram user's reels"""
+    subcategory = "reels"
+    pattern = USER_PATTERN + r"/reels"
+    test = ("https://www.instagram.com/instagram/reels/", {
+        "range": "40-60",
+        "count": ">= 20",
+    })
+
+    def posts(self):
+        url = "{}/{}/".format(self.root, self.item)
+        user = self._extract_profile_page(url)
+
+        endpoint = "/v1/clips/user/"
+        data = {
+            "target_user_id": user["id"],
+            "page_size"     : "50",
+        }
+
+        return self._pagination_api(endpoint, data)

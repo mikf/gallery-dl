@@ -175,7 +175,7 @@ Yandere              https://yande.re/                   Pools, Popular Images, 
 .. |furaffinity-C| replace:: Favorites, Galleries, Posts, Scraps, Search Results, User Profiles
 .. |hentaifoundry-C| replace:: Favorites, individual Images, Pictures, Popular Images, Recent Images, Scraps, Stories, User Profiles
 .. |imgur-C| replace:: Albums, Favorites, Galleries, individual Images, Search Results, Subreddits, Tag Searches, User Profiles
-.. |instagram-C| replace:: Channels, Highlights, Posts, Saved Posts, Stories, Tag Searches, User Profiles
+.. |instagram-C| replace:: Channels, Highlights, Posts, Reels, Saved Posts, Stories, Tag Searches, User Profiles
 .. |newgrounds-C| replace:: Art, Audio, Favorites, individual Images, Media Files, Movies, User Profiles
 .. |nijie-C| replace:: Doujin, Favorites, Illustrations, individual Images, User Profiles
 .. |pinterest-C| replace:: Pins, pin.it Links, related Pins, Sections, User Profiles
