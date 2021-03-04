@@ -46,10 +46,10 @@ class InstagramExtractor(Extractor):
 
         for post in self.posts():
 
-            if post["__typename"] == "GraphReel":
-                post = self._parse_reel(post["id"])
+            if "__typename" in post:
+                post = self._parse_post_graphql(post)
             else:
-                post = self._parse_post(post)
+                post = self._parse_post_reel(post)
             post.update(data)
             files = post.pop("_files")
 
@@ -85,8 +85,8 @@ class InstagramExtractor(Extractor):
 
         return response
 
-    def _api_request(self, endpoint, params):
-        url = "https://i.instagram.com/api/" + endpoint
+    def _request_api(self, endpoint, params=None):
+        url = "https://i.instagram.com/api" + endpoint
         headers = {
             "X-CSRFToken"   : self.csrf_token,
             "X-IG-App-ID"   : "936619743392459",
@@ -99,7 +99,7 @@ class InstagramExtractor(Extractor):
             url, params=params, headers=headers, cookies=cookies,
         ).json()
 
-    def _graphql_request(self, query_hash, variables):
+    def _request_graphql(self, query_hash, variables):
         url = self.root + "/graphql/query/"
         params = {
             "query_hash": query_hash,
@@ -162,7 +162,7 @@ class InstagramExtractor(Extractor):
             for key in ("sessionid", "mid", "csrftoken")
         }
 
-    def _parse_post(self, post):
+    def _parse_post_graphql(self, post):
         if post.get("is_video") and "video_url" not in post:
             url = "{}/tv/{}/".format(self.root, post["shortcode"])
             post = self._extract_post_page(url)
@@ -230,18 +230,12 @@ class InstagramExtractor(Extractor):
 
         return data
 
-    def _parse_reel(self, reel_id):
-        params = {"reel_ids": reel_id}
-        data = self._api_request("v1/feed/reels_media/", params)
-        if not data["reels_media"]:
-            raise exception.NotFoundError("reel")
-        reel = data["reels_media"][0]
-
-        reel_id = reel_id.rpartition(":")[2]
-        owner = reel["user"]
+    def _parse_post_reel(self, post):
+        reel_id = str(post["id"]).rpartition(":")[2]
+        owner = post["user"]
 
         data = {
-            "expires"    : text.parse_timestamp(reel.get("expiring_at")),
+            "expires"    : text.parse_timestamp(post.get("expiring_at")),
             "owner_id"   : owner["pk"],
             "username"   : owner.get("username"),
             "fullname"   : owner.get("full_name"),
@@ -250,7 +244,7 @@ class InstagramExtractor(Extractor):
         }
 
         data["_files"] = files = []
-        for num, item in enumerate(reel["items"], 1):
+        for num, item in enumerate(post["items"], 1):
 
             image = item["image_versions2"]["candidates"][0]
 
@@ -337,7 +331,7 @@ class InstagramExtractor(Extractor):
             }
         return user[key]
 
-    def _pagination(self, query_hash, variables, data):
+    def _pagination_graphql(self, query_hash, variables, data):
         while True:
             for edge in data["edges"]:
                 yield edge["node"]
@@ -352,8 +346,18 @@ class InstagramExtractor(Extractor):
 
             variables["after"] = self._cursor = info["end_cursor"]
             self.log.debug("Cursor: %s", self._cursor)
-            data = next(iter(self._graphql_request(
+            data = next(iter(self._request_graphql(
                 query_hash, variables)["user"].values()))
+
+    def _pagination_api(self, endpoint, params):
+        while True:
+            data = self._request_api(endpoint, params)
+            yield from data["items"]
+
+            info = data["paging_info"]
+            if not info["more_available"]:
+                return
+            params["max_id"] = info["max_id"]
 
 
 class InstagramUserExtractor(InstagramExtractor):
@@ -392,7 +396,7 @@ class InstagramPostsExtractor(InstagramExtractor):
         query_hash = "003056d32c2554def87228bc3fd9668a"
         variables = {"id": user["id"], "first": 50}
         edge = self._get_edge_data(user, "edge_owner_to_timeline_media")
-        return self._pagination(query_hash, variables, edge)
+        return self._pagination_graphql(query_hash, variables, edge)
 
 
 class InstagramChannelExtractor(InstagramExtractor):
@@ -411,7 +415,7 @@ class InstagramChannelExtractor(InstagramExtractor):
         query_hash = "bc78b344a68ed16dd5d7f264681c4c76"
         variables = {"id": user["id"], "first": 50}
         edge = self._get_edge_data(user, "edge_felix_video_timeline")
-        return self._pagination(query_hash, variables, edge)
+        return self._pagination_graphql(query_hash, variables, edge)
 
 
 class InstagramSavedExtractor(InstagramExtractor):
@@ -427,7 +431,7 @@ class InstagramSavedExtractor(InstagramExtractor):
         query_hash = "2ce1d673055b99250e93b6f88f878fde"
         variables = {"id": user["id"], "first": 50}
         edge = self._get_edge_data(user, "edge_saved_media")
-        return self._pagination(query_hash, variables, edge)
+        return self._pagination_graphql(query_hash, variables, edge)
 
 
 class InstagramTagExtractor(InstagramExtractor):
@@ -451,9 +455,9 @@ class InstagramTagExtractor(InstagramExtractor):
         query_hash = "9b498c08113f1e09617a1703c22b2f32"
         variables = {"tag_name": hashtag["name"], "first": 50}
         edge = self._get_edge_data(hashtag, "edge_hashtag_to_media")
-        return self._pagination(query_hash, variables, edge)
+        return self._pagination_graphql(query_hash, variables, edge)
 
-    def _pagination(self, query_hash, variables, data):
+    def _pagination_graphql(self, query_hash, variables, data):
         while True:
             for edge in data["edges"]:
                 yield edge["node"]
@@ -464,7 +468,7 @@ class InstagramTagExtractor(InstagramExtractor):
 
             variables["after"] = self._cursor = info["end_cursor"]
             self.log.debug("Cursor: %s", self._cursor)
-            data = self._graphql_request(
+            data = self._request_graphql(
                 query_hash, variables)["hashtag"]["edge_hashtag_to_media"]
 
 
@@ -575,7 +579,7 @@ class InstagramPostExtractor(InstagramExtractor):
     )
 
     def posts(self):
-        query_hash = "a9441f24ac73000fa17fe6e6da11d59d"
+        query_hash = "2c4c2e343a8f64c625ba02b2aa12c7f8"
         variables = {
             "shortcode"            : self.item,
             "child_comment_count"  : 3,
@@ -583,7 +587,7 @@ class InstagramPostExtractor(InstagramExtractor):
             "parent_comment_count" : 24,
             "has_threaded_comments": True
         }
-        data = self._graphql_request(query_hash, variables)
+        data = self._request_graphql(query_hash, variables)
         media = data.get("shortcode_media")
         if not media:
             raise exception.NotFoundError("post")
@@ -619,7 +623,9 @@ class InstagramStoriesExtractor(InstagramExtractor):
                 return ()
             reel_id = user["id"]
 
-        return ({"__typename": "GraphReel", "id": reel_id},)
+        endpoint = "/v1/feed/reels_media/"
+        params = {"reel_ids": reel_id}
+        return self._request_api(endpoint, params)["reels"].values()
 
 
 class InstagramHighlightsExtractor(InstagramExtractor):
@@ -642,12 +648,13 @@ class InstagramHighlightsExtractor(InstagramExtractor):
             "include_highlight_reels": True,
             "include_live_status": True,
         }
-        data = self._graphql_request(query_hash, variables)
+        data = self._request_graphql(query_hash, variables)
+        edges = data["user"]["edge_highlight_reels"]["edges"]
+        if not edges:
+            return ()
 
-        return [
-            {
-                "__typename": "GraphReel",
-                "id"        : "highlight:" + edge["node"]["id"],
-            }
-            for edge in data["user"]["edge_highlight_reels"]["edges"]
-        ]
+        reel_ids = ["highlight:" + edge["node"]["id"] for edge in edges]
+        endpoint = "/v1/feed/reels_media/?reel_ids=" + \
+                   "&reel_ids=".join(text.quote(rid) for rid in reel_ids)
+        reels = self._request_api(endpoint)["reels"]
+        return [reels[rid] for rid in reel_ids]
