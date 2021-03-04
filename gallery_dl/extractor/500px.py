@@ -50,6 +50,8 @@ class _500pxExtractor(Extractor):
 
     def _extend(self, edges):
         """Extend photos with additional metadata and higher resolution URLs"""
+        ids = [str(edge["node"]["legacyId"]) for edge in edges]
+
         url = "https://api.500px.com/v1/photos"
         params = {
             "expanded_user_info"    : "true",
@@ -62,14 +64,14 @@ class _500pxExtractor(Extractor):
             "liked_by"              : "1",
             "following_sample"      : "100",
             "image_size"            : "4096",
-            "ids"                   : ",".join(
-                str(edge["node"]["legacyId"]) for edge in edges),
+            "ids"                   : ",".join(ids),
         }
 
-        data = self._request_api(url, params)["photos"]
+        photos = self._request_api(url, params)["photos"]
         return [
-            data[str(edge["node"]["legacyId"])]
-            for edge in edges
+            photos[pid] for pid in ids
+            if pid in photos or
+            self.log.warning("Unable to fetch photo %s", pid)
         ]
 
     def _request_api(self, url, params, csrf_token=None):
@@ -141,6 +143,10 @@ class _500pxGalleryExtractor(_500pxExtractor):
                 "gallery": dict,
                 "user": dict,
             },
+        }),
+        # unavailable photos (#1335)
+        ("https://500px.com/p/Light_Expression_Photography/galleries/street", {
+            "count": 0,
         }),
         ("https://500px.com/fashvamp/galleries/lera"),
     )
