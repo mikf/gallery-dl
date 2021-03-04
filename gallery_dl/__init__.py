@@ -196,7 +196,7 @@ def main():
                     cnt, "entry" if cnt == 1 else "entries", cache._path(),
                 )
         else:
-            if not args.urls and not args.inputfile:
+            if not args.urls and not args.inputfiles:
                 parser.error(
                     "The following arguments are required: URL\n"
                     "Use 'gallery-dl --help' to get a list of all options.")
@@ -208,18 +208,19 @@ def main():
                 jobtype = args.jobtype or job.DownloadJob
 
             urls = args.urls
-            if args.inputfile:
-                try:
-                    if args.inputfile == "-":
-                        if sys.stdin:
-                            urls += parse_inputfile(sys.stdin, log)
+            if args.inputfiles:
+                for inputfile in args.inputfiles:
+                    try:
+                        if inputfile == "-":
+                            if sys.stdin:
+                                urls += parse_inputfile(sys.stdin, log)
+                            else:
+                                log.warning("input file: stdin is not readable")
                         else:
-                            log.warning("input file: stdin is not readable")
-                    else:
-                        with open(args.inputfile, encoding="utf-8") as file:
-                            urls += parse_inputfile(file, log)
-                except OSError as exc:
-                    log.warning("input file: %s", exc)
+                            with open(inputfile, encoding="utf-8") as file:
+                                urls += parse_inputfile(file, log)
+                    except OSError as exc:
+                        log.warning("input file: %s", exc)
 
             # unsupported file logging handler
             handler = output.setup_logging_handler(
