@@ -98,8 +98,9 @@ def build_parser():
     )
     general.add_argument(
         "-i", "--input-file",
-        dest="inputfile", metavar="FILE",
-        help="Download URLs found in FILE ('-' for stdin)",
+        dest="inputfiles", metavar="FILE", action="append",
+        help=("Download URLs found in FILE ('-' for stdin). "
+              "More than one --input-file can be specified"),
     )
     general.add_argument(
         "--cookies",
