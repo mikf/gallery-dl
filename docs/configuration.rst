@@ -1298,6 +1298,16 @@ Description
     Also download related artworks.
 
 
+extractor.pixiv.translated-tags
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Provide translated ´`tags``.
+
+
 extractor.pixiv.ugoira
 ----------------------
 Type
