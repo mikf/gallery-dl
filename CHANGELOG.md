@@ -1,5 +1,42 @@
 # Changelog
 
+## 1.17.0 - 2021-03-05
+### Additions
+- [cyberdrop] add support for `https://cyberdrop.me/` ([#1328](https://github.com/mikf/gallery-dl/issues/1328))
+- [exhentai] add `metadata` option; extract more metadata from gallery pages ([#1325](https://github.com/mikf/gallery-dl/issues/1325))
+- [hentaicafe] add `search` and `tag` extractors ([#1345](https://github.com/mikf/gallery-dl/issues/1345))
+- [hentainexus] add `original` option ([#1322](https://github.com/mikf/gallery-dl/issues/1322))
+- [instagram] support `/user/reels/` URLs ([#1329](https://github.com/mikf/gallery-dl/issues/1329))
+- [naverwebtoon] add support for `https://comic.naver.com/` ([#1331](https://github.com/mikf/gallery-dl/issues/1331))
+- [pixiv] add `translated-tags` option ([#1354](https://github.com/mikf/gallery-dl/issues/1354))
+- [tbib] add support for `https://tbib.org/` ([#473](https://github.com/mikf/gallery-dl/issues/473), [#1082](https://github.com/mikf/gallery-dl/issues/1082))
+- [tumblrgallery] add support for `https://tumblrgallery.xyz/` ([#1298](https://github.com/mikf/gallery-dl/issues/1298))
+- [twitter] add extractor for followed users ([#1337](https://github.com/mikf/gallery-dl/issues/1337))
+- [twitter] add option to download all media from conversations ([#1319](https://github.com/mikf/gallery-dl/issues/1319))
+- [wallhaven] add `collections` extractor ([#1351](https://github.com/mikf/gallery-dl/issues/1351))
+- [snap] allow access to user's .netrc for site authentication ([#1352](https://github.com/mikf/gallery-dl/issues/1352))
+- add extractors for Gelbooru v0.1 sites ([#234](https://github.com/mikf/gallery-dl/issues/234), [#426](https://github.com/mikf/gallery-dl/issues/426), [#473](https://github.com/mikf/gallery-dl/issues/473), [#767](https://github.com/mikf/gallery-dl/issues/767), [#1238](https://github.com/mikf/gallery-dl/issues/1238))
+- add `-E/--extractor-info` command-line option ([#875](https://github.com/mikf/gallery-dl/issues/875))
+- add GitHub Actions workflow for building standalone executables ([#1312](https://github.com/mikf/gallery-dl/issues/1312))
+- add `browser` and `headers` options ([#1117](https://github.com/mikf/gallery-dl/issues/1117))
+- add option to use different youtube-dl forks ([#1330](https://github.com/mikf/gallery-dl/issues/1330))
+- support using multiple input files at once ([#1353](https://github.com/mikf/gallery-dl/issues/1353))
+### Changes
+- [deviantart] extend `extra` option to also download embedded DeviantArt posts.
+- [exhentai] rename metadata fields to match API results ([#1325](https://github.com/mikf/gallery-dl/issues/1325))
+- [mangadex] use `api.mangadex.org` as default API server
+- [mastodon] cache OAuth tokens ([#616](https://github.com/mikf/gallery-dl/issues/616))
+- replace `wait-min` and `wait-max` with `sleep-request`
+### Fixes
+- [500px] skip unavailable photos ([#1335](https://github.com/mikf/gallery-dl/issues/1335))
+- [komikcast] fix extraction
+- [readcomiconline] download high quality image versions ([#1347](https://github.com/mikf/gallery-dl/issues/1347))
+- [twitter] update GraphQL endpoints
+- fix crash when `base-directory` is an empty string ([#1339](https://github.com/mikf/gallery-dl/issues/1339))
+### Removals
+- remove support for formerly deprecated options
+- remove `cloudflare` module
+
 ## 1.16.5 - 2021-02-14
 ### Additions
 - [behance] support `video` modules ([#1282](https://github.com/mikf/gallery-dl/issues/1282))
