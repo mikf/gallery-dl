@@ -29,11 +29,12 @@ class PixivExtractor(Extractor):
         Extractor.__init__(self, match)
         self.api = PixivAppAPI(self)
         self.load_ugoira = self.config("ugoira", True)
+        self.translated_tags = self.config("translated-tags", False)
 
     def items(self):
+        tkey = "translated_name" if self.translated_tags else "name"
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         metadata = self.metadata()
-        yield Message.Version, 1
 
         for work in self.works():
             if not work["user"]["id"]:
@@ -45,7 +46,7 @@ class PixivExtractor(Extractor):
             del work["image_urls"]
             del work["meta_pages"]
             work["num"] = 0
-            work["tags"] = [tag["name"] for tag in work["tags"]]
+            work["tags"] = [tag[tkey] or tag["name"] for tag in work["tags"]]
             work["date"] = text.parse_datetime(work["create_date"])
             work["rating"] = ratings.get(work["x_restrict"])
             work["suffix"] = ""
