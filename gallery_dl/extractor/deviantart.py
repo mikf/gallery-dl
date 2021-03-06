@@ -78,9 +78,18 @@ class DeviantartExtractor(Extractor):
             else:
                 self.user = profile["user"]["username"]
 
-        if self.extra:
-            finditer_stash = DeviantartStashExtractor.pattern.finditer
-            finditer_deviation = DeviantartDeviationExtractor.pattern.finditer
+        extra = self.extra
+        if extra:
+            if extra == "stash":
+                extra_stash = DeviantartStashExtractor.pattern.finditer
+                extra_deviation = None
+            elif extra == "deviations":
+                extra_deviation = DeviantartDeviationExtractor.pattern.finditer
+                extra_stash = None
+            else:
+                extra_stash = DeviantartStashExtractor.pattern.finditer
+                extra_deviation = DeviantartDeviationExtractor.pattern.finditer
+            extra = True
 
         yield Message.Version, 1
         for deviation in self.deviations():
@@ -131,21 +140,23 @@ class DeviantartExtractor(Extractor):
 
             if "excerpt" in deviation and self.commit_journal:
                 journal = self.api.deviation_content(deviation["deviationid"])
-                if self.extra:
+                if extra:
                     deviation["_journal"] = journal["html"]
                 yield self.commit_journal(deviation, journal)
 
-            if self.extra:
+            if extra:
                 txt = (deviation.get("description", "") +
                        deviation.get("_journal", ""))
-                for match in finditer_stash(txt):
-                    url = text.ensure_http_scheme(match.group(0))
-                    deviation["_extractor"] = DeviantartStashExtractor
-                    yield Message.Queue, url, deviation
-                for match in finditer_deviation(txt):
-                    url = text.ensure_http_scheme(match.group(0))
-                    deviation["_extractor"] = DeviantartDeviationExtractor
-                    yield Message.Queue, url, deviation
+                if extra_stash:
+                    for match in extra_stash(txt):
+                        url = text.ensure_http_scheme(match.group(0))
+                        deviation["_extractor"] = DeviantartStashExtractor
+                        yield Message.Queue, url, deviation
+                if extra_deviation:
+                    for match in extra_deviation(txt):
+                        url = text.ensure_http_scheme(match.group(0))
+                        deviation["_extractor"] = DeviantartDeviationExtractor
+                        yield Message.Queue, url, deviation
 
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
