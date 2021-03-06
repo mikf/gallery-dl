@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.17.0 - 2021-03-05
 ### Additions
 - [cyberdrop] add support for `https://cyberdrop.me/` ([#1328](https://github.com/mikf/gallery-dl/issues/1328))
