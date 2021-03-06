@@ -745,14 +745,18 @@ Description
 extractor.deviantart.extra
 --------------------------
 Type
-    ``bool``
+    ``bool`` or ``string``
 Default
     ``false``
 Description
     Download embedded Deviations and Sta.sh resources from
     description texts and journals.
 
-    Note: Enabling this option also enables deviantart.metadata_.
+    Set this option to ``"stash"`` or ``"deviations"``
+    to select only one of them as a source.
+
+    Note: Enabling this option also enables
+    `deviantart.metadata <extractor.deviantart.metadata_>`_.
 
 
 extractor.deviantart.flat
@@ -2760,7 +2764,6 @@ Description
 
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_
-.. _deviantart.metadata: `extractor.deviantart.metadata`_
 .. _postprocessors: `extractor.*.postprocessors`_
 .. _download archive: `extractor.*.archive`_
 
