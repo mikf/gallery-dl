@@ -216,7 +216,7 @@ class Extractor():
         headers.clear()
 
         browser = self.config("browser") or self.browser
-        if browser:
+        if browser and isinstance(browser, str):
             browser, _, platform = browser.lower().partition(":")
 
             if not platform or platform == "auto":
