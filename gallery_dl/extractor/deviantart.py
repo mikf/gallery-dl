@@ -80,18 +80,19 @@ class DeviantartExtractor(Extractor):
 
         extra = self.extra
         if extra:
-            if extra == "stash":
-                extra_stash = DeviantartStashExtractor.pattern.finditer
-                extra_deviation = None
-            elif extra == "deviations":
-                extra_deviation = DeviantartDeviationExtractor.pattern.finditer
-                extra_stash = None
+            if extra is True or extra == "all":
+                extra = (DeviantartStashExtractor,
+                         DeviantartDeviationExtractor)
             else:
-                extra_stash = DeviantartStashExtractor.pattern.finditer
-                extra_deviation = DeviantartDeviationExtractor.pattern.finditer
-            extra = True
+                items = extra
+                extra = []
+                if isinstance(items, str):
+                    items = items.split(",")
+                if "stash" in items:
+                    extra.append(DeviantartStashExtractor)
+                if "posts" in items:
+                    extra.append(DeviantartDeviationExtractor)
 
-        yield Message.Version, 1
         for deviation in self.deviations():
             if isinstance(deviation, tuple):
                 url, data = deviation
@@ -147,15 +148,10 @@ class DeviantartExtractor(Extractor):
             if extra:
                 txt = (deviation.get("description", "") +
                        deviation.get("_journal", ""))
-                if extra_stash:
-                    for match in extra_stash(txt):
+                for extr in extra:
+                    for match in extr.pattern.finditer(txt):
                         url = text.ensure_http_scheme(match.group(0))
-                        deviation["_extractor"] = DeviantartStashExtractor
-                        yield Message.Queue, url, deviation
-                if extra_deviation:
-                    for match in extra_deviation(txt):
-                        url = text.ensure_http_scheme(match.group(0))
-                        deviation["_extractor"] = DeviantartDeviationExtractor
+                        deviation["_extractor"] = extr
                         yield Message.Queue, url, deviation
 
     def deviations(self):
@@ -784,7 +780,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         }),
         # sta.sh URLs from description (#302)
         (("https://www.deviantart.com/uotapo/art/INANAKI-Memo-590297498"), {
-            "options": (("extra", 1), ("original", 0)),
+            "options": (("extra", "stash"), ("original", False)),
             "pattern": DeviantartStashExtractor.pattern,
             "range": "2-",
             "count": 4,

@@ -745,15 +745,20 @@ Description
 extractor.deviantart.extra
 --------------------------
 Type
-    ``bool`` or ``string``
+    ``string`` or ``list`` of ``strings``
 Default
-    ``false``
+    ``null``
+Example
+    ``stash,posts``
 Description
-    Download embedded Deviations and Sta.sh resources from
-    description texts and journals.
+    A (comma-separated) list of extra content to extract
+    from description texts and journals.
 
-    Set this option to ``"stash"`` or ``"deviations"``
-    to select only one of them as a source.
+    Possible values are
+    ``"posts"`` (embedded DeviantArt posts) and
+    ``"stash"`` (Sta.sh resources).
+
+    You can use ``"all"`` instead of listing all values separately.
 
     Note: Enabling this option also enables
     `deviantart.metadata <extractor.deviantart.metadata_>`_.
