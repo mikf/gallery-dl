@@ -246,6 +246,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "torrentcount" : extr('>Torrent Download (', ')'),
         }
 
+        f = data["favorites"][0]
+        if f == "N":
+            data["favorites"] = "0"
+        elif f == "O":
+            data["favorites"] = "1"
+
         data["lang"] = util.language_to_code(data["language"])
         data["tags"] = [
             text.unquote(tag.replace("+", " "))
