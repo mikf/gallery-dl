@@ -474,7 +474,9 @@ class DownloadJob(Job):
 class SimulationJob(DownloadJob):
     """Simulate the extraction process without downloading anything"""
 
-    def handle_url(self, url, kwdict, fallback=None):
+    def handle_url(self, url, kwdict):
+        if not kwdict["extension"]:
+            kwdict["extension"] = "jpg"
         self.pathfmt.set_filename(kwdict)
         self.out.skip(self.pathfmt.path)
         if self.sleep:
