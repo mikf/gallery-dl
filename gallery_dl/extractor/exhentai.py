@@ -424,9 +424,11 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 class ExhentaiSearchExtractor(ExhentaiExtractor):
     """Extractor for exhentai search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/?\?(.*)$"
+    pattern = BASE_PATTERN + r"/(?:\?([^#]*)|tag/([^/?#]+))"
     test = (
         ("https://e-hentai.org/?f_search=touhou"),
+        ("https://exhentai.org/?f_cats=767&f_search=touhou"),
+        ("https://exhentai.org/tag/parody:touhou+project"),
         (("https://exhentai.org/?f_doujinshi=0&f_manga=0&f_artistcg=0"
           "&f_gamecg=0&f_western=0&f_non-h=1&f_imageset=0&f_cosplay=0"
           "&f_asianporn=0&f_misc=0&f_search=touhou&f_apply=Apply+Filter"), {
@@ -438,9 +440,19 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(2))
-        self.params["page"] = text.parse_int(self.params.get("page"))
         self.search_url = self.root
+
+        _, query, tag = match.groups()
+        if tag:
+            if "+" in tag:
+                ns, _, tag = tag.rpartition(":")
+                tag = '{}:"{}$"'.format(ns, tag.replace("+", " "))
+            else:
+                tag += "$"
+            self.params = {"f_search": tag, "page": 0}
+        else:
+            self.params = text.parse_query(query)
+            self.params["page"] = text.parse_int(self.params.get("page"))
 
     def items(self):
         self.login()
@@ -465,7 +477,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
     """Extractor for favorited exhentai galleries"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/favorites\.php(?:\?(.*))?"
+    pattern = BASE_PATTERN + r"/favorites\.php(?:\?([^#]*)())?"
     test = (
         ("https://e-hentai.org/favorites.php", {
             "count": 1,
