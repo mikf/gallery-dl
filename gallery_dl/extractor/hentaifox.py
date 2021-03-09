@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text
+import json
 
 
 class HentaifoxBase():
@@ -23,7 +24,7 @@ class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
     pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com(/gallery/(\d+))"
     test = ("https://hentaifox.com/gallery/56622/", {
         "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
-        "keyword": "b7ff141331d0c7fc711ab28d45dfbb013a83d8e9",
+        "keyword": "bcd6b67284f378e5cc30b89b761140e3e60fcd92",
         "count": 24,
     })
 
@@ -48,34 +49,28 @@ class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
         }
 
     def images(self, page):
-        pos = page.find('id="load_all"')
-        if pos >= 0:
-            extr = text.extract
-            load_id = extr(page, 'id="load_id" value="', '"', pos)[0]
-            load_dir = extr(page, 'id="load_dir" value="', '"', pos)[0]
-            load_pages = extr(page, 'id="load_pages" value="', '"', pos)[0]
+        cover, pos = text.extract(page, '<img src="', '"')
+        data , pos = text.extract(page, "$.parseJSON('", "');", pos)
+        path = "/".join(cover.split("/")[3:-1])
 
-            url = self.root + "/includes/thumbs_loader.php"
-            data = {
-                "u_id"         : self.gallery_id,
-                "g_id"         : load_id,
-                "img_dir"      : load_dir,
-                "visible_pages": "0",
-                "total_pages"  : load_pages,
-                "type"         : "2",
-            }
-            headers = {
-                "Origin": self.root,
-                "Referer": self.gallery_url,
-                "X-Requested-With": "XMLHttpRequest",
-            }
-            page = self.request(
-                url, method="POST", headers=headers, data=data).text
+        result = []
+        append = result.append
+        extmap = {"j": "jpg", "p": "png", "g": "gif"}
+        urlfmt = ("/" + path + "/{}.{}").format
 
-        return [
-            (url.replace("t.", "."), None)
-            for url in text.extract_iter(page, 'data-src="', '"')
-        ]
+        server1 = "https://i.hentaifox.com"
+        server2 = "https://i2.hentaifox.com"
+
+        for num, image in json.loads(data).items():
+            ext, width, height = image.split(",")
+            path = urlfmt(num, extmap[ext])
+            append((server1 + path, {
+                "width"    : width,
+                "height"   : height,
+                "_fallback": (server2 + path,),
+            }))
+
+        return result
 
 
 class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
