@@ -23,9 +23,15 @@ class GelbooruBase():
         url = post["file_url"]
         if url.startswith(("https://mp4.gelbooru.com/", "https://video-cdn")):
             md5 = post["md5"]
-            url = "https://img2.gelbooru.com/images/{}/{}/{}.webm".format(
-                md5[0:2], md5[2:4], md5)
+            path = "/images/{}/{}/{}.webm".format(md5[0:2], md5[2:4], md5)
+            post["_fallback"] = GelbooruBase._video_fallback(path)
+            url = "https://img3.gelbooru.com" + path
         return url
+
+    @staticmethod
+    def _video_fallback(path):
+        yield "https://img2.gelbooru.com" + path
+        yield "https://img1.gelbooru.com" + path
 
 
 class GelbooruTagExtractor(GelbooruBase,
@@ -80,7 +86,15 @@ class GelbooruPostExtractor(GelbooruBase,
     """Extractor for single images from gelbooru.com"""
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=view&id=(?P<post>\d+)")
-    test = ("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
-        "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
-        "count": 1,
-    })
+    test = (
+        ("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
+            "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
+            "count": 1,
+        }),
+        # video
+        ("https://gelbooru.com/index.php?page=post&s=view&id=5938076", {
+            "content": "6360452fa8c2f0c1137749e81471238564df832a",
+            "pattern": r"https://img\d\.gelbooru\.com/images"
+                       r"/22/61/226111273615049235b001b381707bd0\.webm",
+        }),
+    )
