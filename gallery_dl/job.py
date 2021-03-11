@@ -42,7 +42,14 @@ class Job():
         self.status = 0
         self.pred_url = self._prepare_predicates("image", True)
         self.pred_queue = self._prepare_predicates("chapter", False)
+        self.kwdict = {}
 
+        # user-supplied metadata
+        kwdict = self.extractor.config("keywords")
+        if kwdict:
+            self.kwdict.update(kwdict)
+
+        # data from parent job
         if parent:
             pextr = parent.extractor
 
@@ -56,9 +63,6 @@ class Job():
 
             # reuse connection adapters
             extr.session.adapters = pextr.session.adapters
-
-        # user-supplied metadata
-        self.userkwds = self.extractor.config("keywords")
 
     def run(self):
         """Execute or run the job"""
@@ -137,8 +141,8 @@ class Job():
         extr = self.extractor
         kwdict["category"] = extr.category
         kwdict["subcategory"] = extr.subcategory
-        if self.userkwds:
-            kwdict.update(self.userkwds)
+        if self.kwdict:
+            kwdict.update(self.kwdict)
 
     def _prepare_predicates(self, target, skip=True):
         predicates = []
@@ -183,7 +187,7 @@ class Job():
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
 
-    def __init__(self, url, parent=None):
+    def __init__(self, url, parent=None, kwdict=None):
         Job.__init__(self, url, parent)
         self.log = self.get_logger("download")
         self.blacklist = None
@@ -198,6 +202,8 @@ class DownloadJob(Job):
             pfmt = parent.pathfmt
             if pfmt and parent.extractor.config("parent-directory"):
                 self.extractor._parentdir = pfmt.directory
+            if kwdict and parent.extractor.config("parent-metadata"):
+                self.kwdict.update(kwdict)
         else:
             self.visited = set()
 
@@ -291,7 +297,7 @@ class DownloadJob(Job):
                     extr = None
 
         if extr:
-            self.status |= self.__class__(extr, self).run()
+            self.status |= self.__class__(extr, self, kwdict).run()
         else:
             self._write_unsupported(url)
 

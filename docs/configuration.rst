@@ -133,6 +133,16 @@ Description
     for any spawned child extractors.
 
 
+extractor.*.parent-metadata
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Overwrite any metadata provided by a child extractor with its parent's.
+
+
 extractor.*.path-restrict
 -------------------------
 Type
