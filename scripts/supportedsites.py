@@ -106,6 +106,7 @@ SUBCATEGORY_MAP = {
     "doujin" : "Doujin",
     "gallery": "Galleries",
     "image"  : "individual Images",
+    "index"  : "Site Index",
     "issue"  : "Comic Issues",
     "manga"  : "Manga",
     "popular": "Popular Images",

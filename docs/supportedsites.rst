@@ -103,7 +103,7 @@ Ngomik               http://ngomik.in/                   Chapters
 nhentai              https://nhentai.net/                Galleries, Search Results
 Niconico Seiga       https://seiga.nicovideo.jp/         individual Images, User Profiles                   Required
 nijie                https://nijie.info/                 |nijie-C|                                          Required
-Nozomi.la            https://nozomi.la/                  Posts, Search Results, Tag Searches
+Nozomi.la            https://nozomi.la/                  Site Index, Posts, Search Results, Tag Searches
 NSFWalbum.com        https://nsfwalbum.com/              Albums
 Nyafuu Archive       https://archive.nyafuu.org/         Boards, Search Results, Threads
 Patreon              https://www.patreon.com/            Creators, Posts, User Profiles                     `Cookies <https://github.com/mikf/gallery-dl#cookies>`__
