@@ -128,7 +128,7 @@ upload-pypi() {
 ROOTDIR="$(realpath "$(dirname "$0")/..")/"
 README="README.rst"
 CHANGELOG="CHANGELOG.md"
-SUPPORTEDSITES="./docs/supportedsites.rst"
+SUPPORTEDSITES="./docs/supportedsites.md"
 
 LASTTAG="$(git describe --abbrev=0 --tags)"
 OLDVERSION="${LASTTAG#v}"
