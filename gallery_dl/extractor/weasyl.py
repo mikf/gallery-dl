@@ -203,7 +203,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
 class WeasylFavoriteExtractor(WeasylExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{owner_login}", "Favorites")
-    pattern = BASE_PATTERN + r"favorites\?userid=(\d+)&feature=submit"
+    pattern = BASE_PATTERN + r"favorites\?userid=(\d+)"
     test = ("https://www.weasyl.com/favorites?userid=184616&feature=submit", {
         "count": ">= 5",
     })
