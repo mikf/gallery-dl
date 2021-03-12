@@ -317,7 +317,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _gallery-dl.conf:         https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
-.. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.rst
+.. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md
 
 .. _Python:     https://www.python.org/downloads/
 .. _PyPI:       https://pypi.org/
