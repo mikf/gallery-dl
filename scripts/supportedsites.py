@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Generate a reStructuredText document with all supported sites"""
+"""Generate a Markdown document listing all supported sites"""
 
 import os
 import sys
@@ -15,6 +15,7 @@ CATEGORY_MAP = {
     "2chan"          : "Futaba Channel",
     "35photo"        : "35PHOTO",
     "adultempire"    : "Adult Empire",
+    "allgirl"        : "All girl",
     "archivedmoe"    : "Archived.Moe",
     "archiveofsins"  : "Archive of Sins",
     "artstation"     : "ArtStation",
@@ -42,6 +43,7 @@ CATEGORY_MAP = {
     "hentaihere"     : "HentaiHere",
     "hitomi"         : "Hitomi.la",
     "idolcomplex"    : "Idol Complex",
+    "illusioncardsbooru": "Illusion Game Cards",
     "imagebam"       : "ImageBam",
     "imagefap"       : "ImageFap",
     "imgbb"          : "ImgBB",
@@ -90,7 +92,9 @@ CATEGORY_MAP = {
     "smugmug"        : "SmugMug",
     "speakerdeck"    : "Speaker Deck",
     "subscribestar"  : "SubscribeStar",
+    "tbib"           : "The Big ImageBoard",
     "thebarchive"    : "The /b/ Archive",
+    "thecollection"  : "The /co/llection",
     "tumblrgallery"  : "TumblrGallery",
     "vanillarock"    : "もえぴりあ",
     "vsco"           : "VSCO",
@@ -99,6 +103,7 @@ CATEGORY_MAP = {
     "worldthree"     : "World Three",
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
+    "yandere"        : "yande.re",
     "yuki"           : "yuki.la 4chan archive",
 }
 
@@ -165,6 +170,14 @@ SUBCATEGORY_MAP = {
     "wikiart": {
         "artists": "Artist Listings",
     },
+}
+
+BASE_MAP = {
+    "foolfuuka"   : "FoolFuuka 4chan Archives",
+    "foolslide"   : "FoOlSlide Instances",
+    "gelbooru_v01": "Gelbooru Beta 0.1.11",
+    "gelbooru_v02": "Gelbooru Beta 0.2",
+    "moebooru"    : "Moebooru and MyImouto",
 }
 
 _OAUTH = '<a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a>'
@@ -275,7 +288,8 @@ def subcategory_key(sc):
 
 def build_extractor_list():
     """Generate a sorted list of lists of extractor classes"""
-    categories = collections.defaultdict(list)
+    categories = collections.defaultdict(lambda: collections.defaultdict(list))
+    default = categories[""]
     domains = {}
 
     for extr in extractor._list_classes():
@@ -283,21 +297,23 @@ def build_extractor_list():
         if category in IGNORE_LIST:
             continue
         if category:
-            categories[category].append(extr.subcategory)
+            default[category].append(extr.subcategory)
             if category not in domains:
                 domains[category] = domain(extr)
         else:
+            base = categories[extr.basecategory]
             for category, root in extr.instances:
-                categories[category].append(extr.subcategory)
+                base[category].append(extr.subcategory)
                 if category not in domains:
                     domains[category] = root + "/"
 
     # sort subcategory lists
-    for subcategories in categories.values():
-        subcategories.sort(key=subcategory_key)
+    for base in categories.values():
+        for subcategories in base.values():
+            subcategories.sort(key=subcategory_key)
 
     # add e-hentai.org
-    categories["e-hentai"] = categories["exhentai"]
+    default["e-hentai"] = default["exhentai"]
     domains["e-hentai"] = domains["exhentai"].replace("x", "-")
 
     return categories, domains
@@ -328,14 +344,22 @@ def generate_output(columns, categories, domains):
 
     tbody = []
     append = tbody.append
-    clist = sorted(categories.items(), key=category_key)
-    for category, subcategories in clist:
-        append("<tr>")
-        for column in columns:
-            domain = domains[category]
-            content = column[2](category, subcategories, domain)
-            append("    <td>" + content + "</td>")
-        append("</tr>")
+
+    for name, base in categories.items():
+
+        if name and base:
+            name = BASE_MAP.get(name) or (name.capitalize() + " Instances")
+            append('\n<tr>\n    <td colspan="4"><strong>' +
+                   name + '</strong></td>\n</tr>')
+
+        clist = sorted(base.items(), key=category_key)
+        for category, subcategories in clist:
+            append("<tr>")
+            for column in columns:
+                domain = domains[category]
+                content = column[2](category, subcategories, domain)
+                append("    <td>" + content + "</td>")
+            append("</tr>")
 
     TEMPLATE = """# Supported Sites
 
