@@ -32,12 +32,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>4plebs</td>
-    <td>https://archive.4plebs.org/</td>
-    <td>Boards, Search Results, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>500px</td>
     <td>https://500px.com/</td>
     <td>Galleries, individual Images, User Profiles</td>
@@ -74,40 +68,10 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Allgirlbooru</td>
-    <td>https://allgirl.booru.org/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
-    <td>arch.b4k.co</td>
-    <td>https://arch.b4k.co/</td>
-    <td>Boards, Search Results, Threads</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Archive of Sins</td>
-    <td>https://archiveofsins.com/</td>
-    <td>Boards, Search Results, Threads</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Archived.Moe</td>
-    <td>https://archived.moe/</td>
-    <td>Boards, Search Results, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>ArtStation</td>
     <td>https://www.artstation.com/</td>
     <td>Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results, User Profiles</td>
     <td></td>
-</tr>
-<tr>
-    <td>baraag</td>
-    <td>https://baraag.net/</td>
-    <td>Images from Statuses, User Profiles</td>
-    <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
     <td>Behance</td>
@@ -140,22 +104,10 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="configuration.rst#extractorderpibooruapi-key">API Key</a></td>
 </tr>
 <tr>
-    <td>Desuarchive</td>
-    <td>https://desuarchive.org/</td>
-    <td>Boards, Search Results, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
     <td>Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
-</tr>
-<tr>
-    <td>Doki Reader</td>
-    <td>https://kobato.hologfx.com/reader/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
 </tr>
 <tr>
     <td>Dynasty Reader</td>
@@ -197,18 +149,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Fallen Angels Scans</td>
     <td>https://www.fascans.com/</td>
     <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Fashion Nova</td>
-    <td>https://www.fashionnova.com/</td>
-    <td>Collections, Products</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Fireden</td>
-    <td>https://boards.fireden.net/</td>
-    <td>Boards, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
@@ -308,22 +248,10 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Hypnohub</td>
-    <td>https://hypnohub.net/</td>
-    <td>Pools, Popular Images, Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>Idol Complex</td>
     <td>https://idol.sankakucomplex.com/</td>
     <td>Pools, Posts, Tag Searches</td>
     <td>Supported</td>
-</tr>
-<tr>
-    <td>Illusioncardsbooru</td>
-    <td>https://illusioncards.booru.org/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
 </tr>
 <tr>
     <td>ImageBam</td>
@@ -440,21 +368,9 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Kirei Cake</td>
-    <td>https://reader.kireicake.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
     <td>Komikcast</td>
     <td>https://komikcast.com/</td>
     <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Konachan</td>
-    <td>https://konachan.com/</td>
-    <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
@@ -467,12 +383,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>livedoor Blog</td>
     <td>http://blog.livedoor.jp/</td>
     <td>Blogs, Posts</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Lolibooru</td>
-    <td>https://lolibooru.moe/</td>
-    <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
@@ -528,12 +438,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://www.mangoxo.com/</td>
     <td>Albums, Channels</td>
     <td>Supported</td>
-</tr>
-<tr>
-    <td>mastodon.social</td>
-    <td>https://mastodon.social/</td>
-    <td>Images from Statuses, User Profiles</td>
-    <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
     <td>My Hentai Gallery</td>
@@ -596,22 +500,10 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Nyafuu Archive</td>
-    <td>https://archive.nyafuu.org/</td>
-    <td>Boards, Search Results, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
     <td>Creators, Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
-</tr>
-<tr>
-    <td>Pawoo</td>
-    <td>https://pawoo.net/</td>
-    <td>Images from Statuses, User Profiles</td>
-    <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
     <td>Photobucket</td>
@@ -686,12 +578,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>PowerManga</td>
-    <td>https://read.powermanga.org/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
     <td>Pururin</td>
     <td>https://pururin.io/</td>
     <td>Galleries</td>
@@ -701,18 +587,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Read Comic Online</td>
     <td>https://readcomiconline.to/</td>
     <td>Comic Issues, Comics</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Realbooru</td>
-    <td>https://realbooru.com/</td>
-    <td>Pools, Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
-    <td>RebeccaBlackTech</td>
-    <td>https://rbt.asia/</td>
-    <td>Boards, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
@@ -734,24 +608,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Rule 34</td>
-    <td>https://rule34.xxx/</td>
-    <td>Pools, Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Safebooru</td>
-    <td>https://safebooru.org/</td>
-    <td>Pools, Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Sakugabooru</td>
-    <td>https://www.sakugabooru.com/</td>
-    <td>Pools, Popular Images, Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>Sankaku Channel</td>
     <td>https://sankaku.app/</td>
     <td>Book Searches, Pools, Posts, Tag Searches</td>
@@ -767,12 +623,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Sen Manga</td>
     <td>https://raw.senmanga.com/</td>
     <td>Chapters</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Sense-Scans</td>
-    <td>https://sensescans.com/reader/</td>
-    <td>Chapters, Manga</td>
     <td></td>
 </tr>
 <tr>
@@ -816,24 +666,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://www.subscribestar.com/</td>
     <td>Posts, User Profiles</td>
     <td>Supported</td>
-</tr>
-<tr>
-    <td>Tbib</td>
-    <td>https://tbib.org/</td>
-    <td>Pools, Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
-    <td>The /b/ Archive</td>
-    <td>https://thebarchive.com/</td>
-    <td>Boards, Search Results, Threads</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Thecollection</td>
-    <td>https://the-collection.booru.org/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
 </tr>
 <tr>
     <td>Tsumino</td>
@@ -932,12 +764,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Yandere</td>
-    <td>https://yande.re/</td>
-    <td>Pools, Popular Images, Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>yuki.la 4chan archive</td>
     <td>https://yuki.la/</td>
     <td>Threads</td>
@@ -959,6 +785,208 @@ Consider all sites to be NSFW unless otherwise known.
     <td>半次元</td>
     <td>https://bcy.net/</td>
     <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Gelbooru Beta 0.1.11</strong></td>
+</tr>
+<tr>
+    <td>Allgirlbooru</td>
+    <td>https://allgirl.booru.org/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Illusion Game Cards</td>
+    <td>https://illusioncards.booru.org/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>The /co/llection</td>
+    <td>https://the-collection.booru.org/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Gelbooru Beta 0.2</strong></td>
+</tr>
+<tr>
+    <td>Realbooru</td>
+    <td>https://realbooru.com/</td>
+    <td>Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Rule 34</td>
+    <td>https://rule34.xxx/</td>
+    <td>Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Safebooru</td>
+    <td>https://safebooru.org/</td>
+    <td>Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>The Big ImageBoard</td>
+    <td>https://tbib.org/</td>
+    <td>Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Moebooru and MyImouto</strong></td>
+</tr>
+<tr>
+    <td>Hypnohub</td>
+    <td>https://hypnohub.net/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Konachan</td>
+    <td>https://konachan.com/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Lolibooru</td>
+    <td>https://lolibooru.moe/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Sakugabooru</td>
+    <td>https://www.sakugabooru.com/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>yande.re</td>
+    <td>https://yande.re/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>FoolFuuka 4chan Archives</strong></td>
+</tr>
+<tr>
+    <td>4plebs</td>
+    <td>https://archive.4plebs.org/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>arch.b4k.co</td>
+    <td>https://arch.b4k.co/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Archive of Sins</td>
+    <td>https://archiveofsins.com/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Archived.Moe</td>
+    <td>https://archived.moe/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Desuarchive</td>
+    <td>https://desuarchive.org/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Fireden</td>
+    <td>https://boards.fireden.net/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Nyafuu Archive</td>
+    <td>https://archive.nyafuu.org/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>RebeccaBlackTech</td>
+    <td>https://rbt.asia/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>The /b/ Archive</td>
+    <td>https://thebarchive.com/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>FoOlSlide Instances</strong></td>
+</tr>
+<tr>
+    <td>Doki Reader</td>
+    <td>https://kobato.hologfx.com/reader/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Kirei Cake</td>
+    <td>https://reader.kireicake.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>PowerManga</td>
+    <td>https://read.powermanga.org/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Sense-Scans</td>
+    <td>https://sensescans.com/reader/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Mastodon Instances</strong></td>
+</tr>
+<tr>
+    <td>baraag</td>
+    <td>https://baraag.net/</td>
+    <td>Images from Statuses, User Profiles</td>
+    <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
+</tr>
+<tr>
+    <td>mastodon.social</td>
+    <td>https://mastodon.social/</td>
+    <td>Images from Statuses, User Profiles</td>
+    <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
+</tr>
+<tr>
+    <td>Pawoo</td>
+    <td>https://pawoo.net/</td>
+    <td>Images from Statuses, User Profiles</td>
+    <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Shopify Instances</strong></td>
+</tr>
+<tr>
+    <td>Fashion Nova</td>
+    <td>https://www.fashionnova.com/</td>
+    <td>Collections, Products</td>
     <td></td>
 </tr>
 </tbody>
