@@ -47,6 +47,9 @@ BASE_PATTERN = GelbooruV01Extractor.update({
     "thecollection"     : {"root": "https://the-collection.booru.org"},
     "illusioncardsbooru": {"root": "https://illusioncards.booru.org"},
     "allgirlbooru"      : {"root": "https://allgirl.booru.org"},
+    "drawfriends"       : {"root": "https://drawfriends.booru.org"},
+    "vidyart"           : {"root": "https://vidyart.booru.org"},
+    "theloudbooru"      : {"root": "https://tlb.booru.org"},
 })
 
 
@@ -70,6 +73,9 @@ class GelbooruV01TagExtractor(GelbooruV01Extractor):
             "range": "1-25",
             "count": 25,
         }),
+        ("https://drawfriends.booru.org/index.php?page=post&s=list&tags=all"),
+        ("https://vidyart.booru.org/index.php?page=post&s=list&tags=all"),
+        ("https://tlb.booru.org/index.php?page=post&s=list&tags=all"),
     )
 
     def __init__(self, match):
@@ -133,6 +139,9 @@ class GelbooruV01PostExtractor(GelbooruV01Extractor):
                 "width": "1600"
             },
         }),
+        ("https://drawfriends.booru.org/index.php?page=post&s=view&id=107474"),
+        ("https://vidyart.booru.org/index.php?page=post&s=view&id=383111"),
+        ("https://tlb.booru.org/index.php?page=post&s=view&id=127223"),
     )
 
     def __init__(self, match):

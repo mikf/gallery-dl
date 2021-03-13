@@ -792,8 +792,20 @@ Consider all sites to be NSFW unless otherwise known.
     <td colspan="4"><strong>Gelbooru Beta 0.1.11</strong></td>
 </tr>
 <tr>
-    <td>Allgirlbooru</td>
+    <td>/v/idyart</td>
+    <td>https://vidyart.booru.org/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>All girl</td>
     <td>https://allgirl.booru.org/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Draw Friends</td>
+    <td>https://drawfriends.booru.org/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
@@ -806,6 +818,12 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>The /co/llection</td>
     <td>https://the-collection.booru.org/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>The Loud Booru</td>
+    <td>https://tlb.booru.org/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
