@@ -22,27 +22,56 @@ class HentaifoxBase():
 class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
     """Extractor for image galleries on hentaifox.com"""
     pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com(/gallery/(\d+))"
-    test = ("https://hentaifox.com/gallery/56622/", {
-        "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
-        "keyword": "bcd6b67284f378e5cc30b89b761140e3e60fcd92",
-        "count": 24,
-    })
+    test = (
+        ("https://hentaifox.com/gallery/56622/", {
+            "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
+            "keyword": "bcd6b67284f378e5cc30b89b761140e3e60fcd92",
+            "count": 24,
+        }),
+        # 'split_tag' element (#1378)
+        ("https://hentaifox.com/gallery/630/", {
+            "keyword": {
+                "artist": ["beti", "betty", "magi", "mimikaki"],
+                "characters": [
+                    "aerith gainsborough",
+                    "tifa lockhart",
+                    "yuffie kisaragi"
+                ],
+                "count": 32,
+                "gallery_id": 630,
+                "group": ["cu-little2"],
+                "parody": ["darkstalkers | vampire", "final fantasy vii"],
+                "tags": ["femdom", "fingering", "masturbation", "yuri"],
+                "title": "Cu-Little Bakanyaï½ž",
+                "type": "doujinshi",
+            },
+        }),
+    )
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)
         self.gallery_id = match.group(2)
 
-    def metadata(self, page, split=text.split_html):
+    @staticmethod
+    def _split(txt):
+        return [
+            text.remove_html(tag.partition(">")[2], "", "")
+            for tag in text.extract_iter(
+                txt, "class='tag_btn", "<span class='t_badge")
+        ]
+
+    def metadata(self, page):
         extr = text.extract_from(page)
+        split = self._split
 
         return {
             "gallery_id": text.parse_int(self.gallery_id),
             "title"     : text.unescape(extr("<h1>", "</h1>")),
-            "parody"    : split(extr(">Parodies:"  , "</ul>"))[::2],
-            "characters": split(extr(">Characters:", "</ul>"))[::2],
-            "tags"      : split(extr(">Tags:"      , "</ul>"))[::2],
-            "artist"    : split(extr(">Artists:"   , "</ul>"))[::2],
-            "group"     : split(extr(">Groups:"    , "</ul>"))[::2],
+            "parody"    : split(extr(">Parodies:"  , "</ul>")),
+            "characters": split(extr(">Characters:", "</ul>")),
+            "tags"      : split(extr(">Tags:"      , "</ul>")),
+            "artist"    : split(extr(">Artists:"   , "</ul>")),
+            "group"     : split(extr(">Groups:"    , "</ul>")),
             "type"      : text.remove_html(extr(">Category:", "<span")),
             "language"  : "English",
             "lang"      : "en",
