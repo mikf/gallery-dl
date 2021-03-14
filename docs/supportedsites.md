@@ -224,12 +224,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Hentainexus</td>
-    <td>https://hentainexus.com/</td>
-    <td>Galleries, Search Results</td>
-    <td></td>
-</tr>
-<tr>
     <td>Hiperdex</td>
     <td>https://hiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
