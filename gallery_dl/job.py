@@ -202,8 +202,11 @@ class DownloadJob(Job):
             pfmt = parent.pathfmt
             if pfmt and parent.extractor.config("parent-directory"):
                 self.extractor._parentdir = pfmt.directory
-            if kwdict and parent.extractor.config("parent-metadata"):
-                self.kwdict.update(kwdict)
+            if parent.extractor.config("parent-metadata"):
+                if parent.kwdict:
+                    self.kwdict.update(parent.kwdict)
+                if kwdict:
+                    self.kwdict.update(kwdict)
         else:
             self.visited = set()
 
