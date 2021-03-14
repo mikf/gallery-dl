@@ -98,12 +98,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
-    <td>Derpibooru</td>
-    <td>https://derpibooru.org/</td>
-    <td>Galleries, Posts, Search Results</td>
-    <td><a href="configuration.rst#extractorderpibooruapi-key">API Key</a></td>
-</tr>
-<tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
     <td>Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, User Profiles</td>
@@ -854,6 +848,22 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://tbib.org/</td>
     <td>Pools, Posts, Tag Searches</td>
     <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Philomena Instances</strong></td>
+</tr>
+<tr>
+    <td>Derpibooru</td>
+    <td>https://derpibooru.org/</td>
+    <td>Galleries, Posts, Search Results</td>
+    <td><a href="configuration.rst#extractorderpibooruapi-key">API Key</a></td>
+</tr>
+<tr>
+    <td>Ponybooru</td>
+    <td>https://ponybooru.org/</td>
+    <td>Galleries, Posts, Search Results</td>
+    <td>API Key</td>
 </tr>
 
 <tr>
