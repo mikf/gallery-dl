@@ -70,7 +70,7 @@ BASE_PATTERN = PhilomenaExtractor.update(INSTANCES)
 class PhilomenaPostExtractor(PhilomenaExtractor):
     """Extractor for single posts on a Philomena booru"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/images/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:images/)?(\d+)"
     test = (
         ("https://derpibooru.org/images/1", {
             "content": "88449eeb0c4fa5d3583d0b794f6bc1d70bf7f889",
@@ -120,6 +120,7 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
                 "wilson_score": float,
             },
         }),
+        ("https://derpibooru.org/1"),
         ("https://ponybooru.org/images/1", {
             "content": "bca26f58fafd791fe07adcd2a28efd7751824605",
         }),
