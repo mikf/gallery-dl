@@ -215,6 +215,7 @@ AUTH_MAP = {
     "pawoo"          : _OAUTH,
     "pinterest"      : "Supported",
     "pixiv"          : _OAUTH,
+    "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
     "seiga"          : "Required",
