@@ -44,7 +44,6 @@ modules = [
     "hentaifox",
     "hentaihand",
     "hentaihere",
-    "hentainexus",
     "hiperdex",
     "hitomi",
     "idolcomplex",
