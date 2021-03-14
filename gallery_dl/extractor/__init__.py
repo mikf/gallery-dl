@@ -39,7 +39,6 @@ modules = [
     "gfycat",
     "hbrowse",
     "hentai2read",
-    "hentaicafe",
     "hentaifoundry",
     "hentaifox",
     "hentaihand",
