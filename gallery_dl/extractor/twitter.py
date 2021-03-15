@@ -224,6 +224,18 @@ class TwitterExtractor(Extractor):
             }
         return cache[uid]
 
+    def _users_result(self, users):
+        if self.config("users") == "media":
+            cls = TwitterMediaExtractor
+            fmt = "{}/id:{}/media".format
+        else:
+            cls = TwitterTimelineExtractor
+            fmt = "{}/i/user/{}".format
+
+        for user in users:
+            user["_extractor"] = cls
+            yield Message.Queue, fmt(self.root, user["rest_id"]), user
+
     def metadata(self):
         """Return general metadata"""
         return {}
@@ -356,10 +368,7 @@ class TwitterListMembersExtractor(TwitterExtractor):
 
     def items(self):
         self.login()
-        for user in TwitterAPI(self).list_members(self.user):
-            user["_extractor"] = TwitterTimelineExtractor
-            url = "{}/i/user/{}".format(self.root, user["rest_id"])
-            yield Message.Queue, url, user
+        return self._users_result(TwitterAPI(self).list_members(self.user))
 
 
 class TwitterFollowingExtractor(TwitterExtractor):
@@ -373,10 +382,7 @@ class TwitterFollowingExtractor(TwitterExtractor):
 
     def items(self):
         self.login()
-        for user in TwitterAPI(self).user_following(self.user):
-            user["_extractor"] = TwitterTimelineExtractor
-            url = "{}/i/user/{}".format(self.root, user["rest_id"])
-            yield Message.Queue, url, user
+        return self._users_result(TwitterAPI(self).user_following(self.user))
 
 
 class TwitterSearchExtractor(TwitterExtractor):

@@ -1650,6 +1650,20 @@ Description
     Extract `TwitPic <https://twitpic.com/>`__ embeds.
 
 
+extractor.twitter.users
+-----------------------
+Type
+    ``string``
+Default
+    ``"timeline"``
+Description
+    Output format for user results from
+    ``following`` and ``list-members`` queries.
+
+    * ``"timeline"``: ``https://twitter.com/i/user/USERID``
+    * ``"media"``: ``https://twitter.com/id:USERID/media``
+
+
 extractor.twitter.videos
 ------------------------
 Type
