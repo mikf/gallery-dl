@@ -68,6 +68,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Architizer</td>
+    <td>https://architizer.com/</td>
+    <td>Projects</td>
+    <td></td>
+</tr>
+<tr>
     <td>ArtStation</td>
     <td>https://www.artstation.com/</td>
     <td>Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results, User Profiles</td>

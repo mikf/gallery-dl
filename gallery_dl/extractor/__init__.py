@@ -17,6 +17,7 @@ modules = [
     "8kun",
     "8muses",
     "adultempire",
+    "architizer",
     "artstation",
     "aryion",
     "bcy",
