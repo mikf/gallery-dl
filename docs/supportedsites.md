@@ -392,12 +392,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Manga Stream</td>
-    <td>https://readms.net/</td>
-    <td>Chapters</td>
-    <td></td>
-</tr>
-<tr>
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
     <td>Chapters, Manga</td>
