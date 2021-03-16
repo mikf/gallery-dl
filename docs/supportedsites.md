@@ -416,12 +416,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Mangareader</td>
-    <td>https://www.mangareader.net/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
     <td>Mangoxo</td>
     <td>https://www.mangoxo.com/</td>
     <td>Albums, Channels</td>
