@@ -889,6 +889,17 @@ class DeviantartFollowingExtractor(DeviantartExtractor):
             yield Message.Queue, url, user
 
 
+class DeviantartWatchExtractor(DeviantartExtractor):
+    """Extractor for Deviations from watched users"""
+    subcategory = "watch"
+    directory_fmt = ("{category}", "{author[username]}")
+    pattern = r"(?:https?://)?(?:www\.)?deviantart\.com/notifications(/)watch/"
+    test = ("https://www.deviantart.com/notifications/watch/",)
+
+    def deviations(self):
+        return self.api.browse_deviantsyouwatch()
+
+
 ###############################################################################
 # API Interfaces ##############################################################
 
@@ -932,6 +943,12 @@ class DeviantartOAuthAPI():
             "default" if self.client_id == self.CLIENT_ID else "custom",
             self.client_id,
         )
+
+    def browse_deviantsyouwatch(self, offset=0):
+        """Yield deviations from users you watch"""
+        endpoint = "browse/deviantsyouwatch"
+        params = {"limit": "50", "offset": offset}
+        return self._pagination(endpoint, params, public=False)
 
     def browse_popular(self, query=None, timerange=None, offset=0):
         """Yield popular deviations"""
