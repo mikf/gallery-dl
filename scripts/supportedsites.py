@@ -123,6 +123,7 @@ SUBCATEGORY_MAP = {
     "status" : "Images from Statuses",
     "tag"    : "Tag Searches",
     "user"   : "User Profiles",
+    "watch"  : "Watches",
     "following"    : "",
     "related-pin"  : "related Pins",
     "related-board": "",
