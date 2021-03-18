@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -377,16 +377,17 @@ class ImgurAPI():
         return self._call(endpoint)
 
     def _call(self, endpoint, params=None):
-        try:
-            return self.extractor.request(
-                "https://api.imgur.com" + endpoint,
-                params=params, headers=self.headers,
-            ).json()
-        except exception.HttpError as exc:
-            if exc.status != 403 or b"capacity" not in exc.response.content:
-                raise
-        self.extractor.sleep(seconds=600)
-        return self._call(endpoint)
+        while True:
+            try:
+                return self.extractor.request(
+                    "https://api.imgur.com" + endpoint,
+                    params=params, headers=self.headers,
+                ).json()
+            except exception.HttpError as exc:
+                if exc.status not in (403, 429) or \
+                        b"capacity" not in exc.response.content:
+                    raise
+            self.extractor.wait(seconds=600)
 
     def _pagination(self, endpoint, params=None, key=None):
         num = 0
