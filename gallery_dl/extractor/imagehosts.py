@@ -257,10 +257,11 @@ class ImgclickImageExtractor(ImagehostImageExtractor):
     category = "imgclick"
     pattern = r"(?:https?://)?((?:www\.)?imgclick\.net/([^/?#]+))"
     test = ("http://imgclick.net/4tbrre1oxew9/test-_-_.png.html", {
-        "url": "b967f2d372ffb9f5d3a927c6dd560e120b10a808",
+        "url": "140dcb250a325f2d26b2d918c18b8ac6a2a0f6ab",
         "keyword": "6895256143eab955622fc149aa367777a8815ba3",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
+    https = False
     params = "complex"
 
     def get_info(self, page):
