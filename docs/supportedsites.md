@@ -285,7 +285,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Imgclick</td>
-    <td>https://imgclick.net/</td>
+    <td>http://imgclick.net/</td>
     <td>individual Images</td>
     <td></td>
 </tr>
