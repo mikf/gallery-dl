@@ -70,7 +70,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Architizer</td>
     <td>https://architizer.com/</td>
-    <td>Projects</td>
+    <td>Firms, Projects</td>
     <td></td>
 </tr>
 <tr>
