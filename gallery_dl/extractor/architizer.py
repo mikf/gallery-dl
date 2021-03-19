@@ -8,7 +8,7 @@
 
 """Extractors for https://architizer.com/"""
 
-from .common import GalleryExtractor
+from .common import GalleryExtractor, Extractor, Message
 from .. import text
 
 
@@ -72,3 +72,30 @@ class ArchitizerProjectExtractor(GalleryExtractor):
             for url in text.extract_iter(
                 page, "property='og:image:secure_url' content='", "?")
         ]
+
+
+class ArchitizerFirmExtractor(Extractor):
+    """Extractor for all projects of a firm"""
+    category = "architizer"
+    subcategory = "firm"
+    root = "https://architizer.com"
+    pattern = r"(?:https?://)?architizer\.com/firms/([^/?#]+)"
+    test = ("https://architizer.com/firms/olson-kundig/", {
+        "pattern": ArchitizerProjectExtractor.pattern,
+        "count": ">= 90",
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.firm = match.group(1)
+
+    def items(self):
+        url = url = "{}/firms/{}/?requesting_merlin=pages".format(
+            self.root, self.firm)
+        page = self.request(url).text
+        data = {"_extractor": ArchitizerProjectExtractor}
+
+        for project in text.extract_iter(page, '<a href="/projects/', '"'):
+            if not project.startswith("q/"):
+                url = "{}/projects/{}".format(self.root, project)
+                yield Message.Queue, url, data
