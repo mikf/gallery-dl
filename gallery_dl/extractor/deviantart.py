@@ -105,7 +105,8 @@ class DeviantartExtractor(Extractor):
                         intermediary, count = re.subn(
                             r"(/f/[^/]+/[^/]+)/v\d+/.*",
                             r"/intermediary\1", content["src"], 1)
-                        if count and self._check_url(intermediary):
+                        if count:
+                            deviation["_fallback"] = (content["src"],)
                             content["src"] = intermediary
                     if self.quality:
                         content["src"] = re.sub(
@@ -281,9 +282,6 @@ class DeviantartExtractor(Extractor):
         mtype = mimetypes.guess_type(url, False)[0]
         if mtype and mtype.startswith("image/"):
             content.update(data)
-
-    def _check_url(self, url):
-        return self.request(url, method="HEAD", fatal=False).status_code < 400
 
     def _limited_request(self, url, **kwargs):
         """Limits HTTP requests to one every 2 seconds"""

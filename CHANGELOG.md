@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.17.1 - 2021-03-19
 ### Additions
 - [architizer] add `project` and `firm` extractors ([#1369](https://github.com/mikf/gallery-dl/issues/1369))
