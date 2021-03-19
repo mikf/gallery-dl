@@ -1,6 +1,31 @@
 # Changelog
 
-## Unreleased
+## 1.17.1 - 2021-03-19
+### Additions
+- [architizer] add `project` and `firm` extractors ([#1369](https://github.com/mikf/gallery-dl/issues/1369))
+- [deviantart] add `watch` extractor ([#794](https://github.com/mikf/gallery-dl/issues/794))
+- [exhentai] support `/tag/` URLs ([#1363](https://github.com/mikf/gallery-dl/issues/1363))
+- [gelbooru_v01] support `drawfriends.booru.org`, `vidyart.booru.org`, and `tlb.booru.org` by default
+- [nozomi] support `/index-N.html` URLs ([#1365](https://github.com/mikf/gallery-dl/issues/1365))
+- [philomena] add generalized extractors for philomena sites ([#1379](https://github.com/mikf/gallery-dl/issues/1379))
+- [philomena] support post URLs without `/images/`
+- [twitter] implement `users` option ([#1337](https://github.com/mikf/gallery-dl/issues/1337))
+- implement `parent-metadata` option ([#1364](https://github.com/mikf/gallery-dl/issues/1364))
+### Changes
+- [deviantart] revert previous changes to `extra` option ([#1356](https://github.com/mikf/gallery-dl/issues/1356), [#1387](https://github.com/mikf/gallery-dl/issues/1387))
+### Fixes
+- [exhentai] improve favorites count extraction ([#1360](https://github.com/mikf/gallery-dl/issues/1360))
+- [gelbooru] update domain for video downloads ([#1368](https://github.com/mikf/gallery-dl/issues/1368))
+- [hentaifox] improve image and metadata extraction ([#1366](https://github.com/mikf/gallery-dl/issues/1366), [#1378](https://github.com/mikf/gallery-dl/issues/1378))
+- [imgur] fix and improve rate limit handling ([#1386](https://github.com/mikf/gallery-dl/issues/1386))
+- [weasyl] improve favorites URL pattern ([#1374](https://github.com/mikf/gallery-dl/issues/1374))
+- use type check before applying `browser` option ([#1358](https://github.com/mikf/gallery-dl/issues/1358))
+- ensure `-s/--simulate` always prints filenames ([#1360](https://github.com/mikf/gallery-dl/issues/1360))
+### Removals
+- [hentaicafe]  remove module
+- [hentainexus] remove module
+- [mangareader] remove module
+- [mangastream] remove module
 
 ## 1.17.0 - 2021-03-05
 ### Additions
