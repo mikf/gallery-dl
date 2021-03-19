@@ -755,23 +755,14 @@ Description
 extractor.deviantart.extra
 --------------------------
 Type
-    ``string`` or ``list`` of ``strings``
+    ``bool``
 Default
-    ``null``
-Example
-    ``stash,posts``
+    ``false``
 Description
-    A (comma-separated) list of extra content to extract
-    from description texts and journals.
+    Download extra Sta.sh resources from
+    description texts and journals.
 
-    Possible values are
-    ``"posts"`` (embedded DeviantArt posts) and
-    ``"stash"`` (Sta.sh resources).
-
-    You can use ``"all"`` instead of listing all values separately.
-
-    Note: Enabling this option also enables
-    `deviantart.metadata <extractor.deviantart.metadata_>`_.
+    Note: Enabling this option also enables deviantart.metadata_.
 
 
 extractor.deviantart.flat
@@ -2793,6 +2784,7 @@ Description
 
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_
+.. _deviantart.metadata: `extractor.deviantart.metadata`_
 .. _postprocessors: `extractor.*.postprocessors`_
 .. _download archive: `extractor.*.archive`_
 
