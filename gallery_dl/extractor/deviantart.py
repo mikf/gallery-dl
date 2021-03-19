@@ -78,21 +78,7 @@ class DeviantartExtractor(Extractor):
             else:
                 self.user = profile["user"]["username"]
 
-        extra = self.extra
-        if extra:
-            if extra is True or extra == "all":
-                extra = (DeviantartStashExtractor,
-                         DeviantartDeviationExtractor)
-            else:
-                items = extra
-                extra = []
-                if isinstance(items, str):
-                    items = items.split(",")
-                if "stash" in items:
-                    extra.append(DeviantartStashExtractor)
-                if "posts" in items:
-                    extra.append(DeviantartDeviationExtractor)
-
+        yield Message.Version, 1
         for deviation in self.deviations():
             if isinstance(deviation, tuple):
                 url, data = deviation
@@ -141,18 +127,17 @@ class DeviantartExtractor(Extractor):
 
             if "excerpt" in deviation and self.commit_journal:
                 journal = self.api.deviation_content(deviation["deviationid"])
-                if extra:
+                if self.extra:
                     deviation["_journal"] = journal["html"]
                 yield self.commit_journal(deviation, journal)
 
-            if extra:
+            if self.extra:
                 txt = (deviation.get("description", "") +
                        deviation.get("_journal", ""))
-                for extr in extra:
-                    for match in extr.pattern.finditer(txt):
-                        url = text.ensure_http_scheme(match.group(0))
-                        deviation["_extractor"] = extr
-                        yield Message.Queue, url, deviation
+                for match in DeviantartStashExtractor.pattern.finditer(txt):
+                    url = text.ensure_http_scheme(match.group(0))
+                    deviation["_extractor"] = DeviantartStashExtractor
+                    yield Message.Queue, url, deviation
 
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
@@ -780,7 +765,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         }),
         # sta.sh URLs from description (#302)
         (("https://www.deviantart.com/uotapo/art/INANAKI-Memo-590297498"), {
-            "options": (("extra", "stash"), ("original", False)),
+            "options": (("extra", 1), ("original", 0)),
             "pattern": DeviantartStashExtractor.pattern,
             "range": "2-",
             "count": 4,
