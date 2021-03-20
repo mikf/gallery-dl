@@ -289,8 +289,9 @@ class DownloadJob(Job):
             return
         self.visited.add(url)
 
-        if "_extractor" in kwdict:
-            extr = kwdict["_extractor"].from_url(url)
+        cls = kwdict.get("_extractor")
+        if cls:
+            extr = cls.from_url(url)
         else:
             extr = extractor.find(url)
             if extr:
