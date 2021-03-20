@@ -1423,6 +1423,7 @@ Description
     This value sets the maximum recursion depth.
 
     Special values:
+
     * ``0``: Recursion is disabled
     * ``-1``: Infinite recursion (don't do this)
 
@@ -1647,12 +1648,23 @@ Type
     ``string``
 Default
     ``"timeline"``
+Example
+    ``"https://twitter.com/search?q=from:{legacy[screen_name]}"``
 Description
-    Output format for user results from
-    ``following`` and ``list-members`` queries.
+    | Format string for user URLs generated from
+      ``following`` and ``list-members`` queries,
+    | whose replacement field values come from Twitter ``user`` objects
+      (`Example <https://gist.githubusercontent.com/mikf/99d2719b3845023326c7a4b6fb88dd04/raw/275b4f0541a2c7dc0a86d3998f7d253e8f10a588/github.json>`_)
 
-    * ``"timeline"``: ``https://twitter.com/i/user/USERID``
-    * ``"media"``: ``https://twitter.com/id:USERID/media``
+    Special values:
+
+    * ``"timeline"``: ``https://twitter.com/i/user/{rest_id}``
+    * ``"media"``: ``https://twitter.com/id:{rest_id}/media``
+
+    Note: To allow gallery-dl to follow custom URL formats, set the blacklist__
+    for ``twitter`` to a non-default value, e.g. an empty string ``""``.
+
+.. __: `extractor.*.blacklist & .whitelist`_
 
 
 extractor.twitter.videos
