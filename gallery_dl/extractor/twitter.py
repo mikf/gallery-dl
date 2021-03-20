@@ -225,16 +225,20 @@ class TwitterExtractor(Extractor):
         return cache[uid]
 
     def _users_result(self, users):
-        if self.config("users") == "media":
-            cls = TwitterMediaExtractor
-            fmt = "{}/id:{}/media".format
-        else:
+        userfmt = self.config("users")
+        if not userfmt or userfmt == "timeline":
             cls = TwitterTimelineExtractor
-            fmt = "{}/i/user/{}".format
+            fmt = (self.root + "/i/user/{rest_id}").format_map
+        elif userfmt == "media":
+            cls = TwitterMediaExtractor
+            fmt = (self.root + "/id:{rest_id}/media").format_map
+        else:
+            cls = None
+            fmt = userfmt.format_map
 
         for user in users:
             user["_extractor"] = cls
-            yield Message.Queue, fmt(self.root, user["rest_id"]), user
+            yield Message.Queue, fmt(user), user
 
     def metadata(self):
         """Return general metadata"""
