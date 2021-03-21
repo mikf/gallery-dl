@@ -876,8 +876,12 @@ class DeviantartWatchExtractor(DeviantartExtractor):
     """Extractor for Deviations from watched users"""
     subcategory = "watch"
     directory_fmt = ("{category}", "{author[username]}")
-    pattern = r"(?:https?://)?(?:www\.)?deviantart\.com/notifications(/)watch/"
-    test = ("https://www.deviantart.com/notifications/watch/",)
+    pattern = (r"(?:https?://)?(?:www\.)?deviantart\.com"
+               r"(/)(?:watch/deviations|notifications/watch)")
+    test = (
+        ("https://www.deviantart.com/watch/deviations"),
+        ("https://www.deviantart.com/notifications/watch"),
+    )
 
     def deviations(self):
         return self.api.browse_deviantsyouwatch()
