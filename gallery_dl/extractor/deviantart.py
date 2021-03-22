@@ -731,9 +731,8 @@ class DeviantartPopularExtractor(DeviantartExtractor):
 class DeviantartWatchExtractor(DeviantartExtractor):
     """Extractor for Deviations from watched users"""
     subcategory = "watch"
-    directory_fmt = ("{category}", "{author[username]}")
     pattern = (r"(?:https?://)?(?:www\.)?deviantart\.com"
-               r"(/)(?:watch/deviations|notifications/watch)")
+               r"/(?:watch/deviations|notifications/watch)()()")
     test = (
         ("https://www.deviantart.com/watch/deviations"),
         ("https://www.deviantart.com/notifications/watch"),
@@ -746,8 +745,7 @@ class DeviantartWatchExtractor(DeviantartExtractor):
 class DeviantartWatchPostsExtractor(DeviantartExtractor):
     """Extractor for Posts from watched users"""
     subcategory = "watch-posts"
-    directory_fmt = ("{category}", "{author[username]}")
-    pattern = r"(?:https?://)?(?:www\.)?deviantart\.com(/)watch/posts"
+    pattern = r"(?:https?://)?(?:www\.)?deviantart\.com/watch/posts()()"
     test = ("https://www.deviantart.com/watch/posts",)
 
     def deviations(self):
