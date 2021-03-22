@@ -20,7 +20,7 @@ import re
 
 BASE_PATTERN = (
     r"(?:https?://)?(?:"
-    r"(?:www\.)?deviantart\.com/([\w-]+)|"
+    r"(?:www\.)?deviantart\.com/(?!watch/)([\w-]+)|"
     r"(?!www\.)([\w-]+)\.deviantart\.com)"
 )
 
@@ -728,6 +728,32 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         deviation["popular"] = self.popular
 
 
+class DeviantartWatchExtractor(DeviantartExtractor):
+    """Extractor for Deviations from watched users"""
+    subcategory = "watch"
+    directory_fmt = ("{category}", "{author[username]}")
+    pattern = (r"(?:https?://)?(?:www\.)?deviantart\.com"
+               r"(/)(?:watch/deviations|notifications/watch)")
+    test = (
+        ("https://www.deviantart.com/watch/deviations"),
+        ("https://www.deviantart.com/notifications/watch"),
+    )
+
+    def deviations(self):
+        return self.api.browse_deviantsyouwatch()
+
+
+class DeviantartWatchPostsExtractor(DeviantartExtractor):
+    """Extractor for Posts from watched users"""
+    subcategory = "watch-posts"
+    directory_fmt = ("{category}", "{author[username]}")
+    pattern = r"(?:https?://)?(?:www\.)?deviantart\.com(/)watch/posts"
+    test = ("https://www.deviantart.com/watch/posts",)
+
+    def deviations(self):
+        return self.api.browse_posts_deviantsyouwatch()
+
+
 ###############################################################################
 # Eclipse #####################################################################
 
@@ -872,21 +898,6 @@ class DeviantartFollowingExtractor(DeviantartExtractor):
             yield Message.Queue, url, user
 
 
-class DeviantartWatchExtractor(DeviantartExtractor):
-    """Extractor for Deviations from watched users"""
-    subcategory = "watch"
-    directory_fmt = ("{category}", "{author[username]}")
-    pattern = (r"(?:https?://)?(?:www\.)?deviantart\.com"
-               r"(/)(?:watch/deviations|notifications/watch)")
-    test = (
-        ("https://www.deviantart.com/watch/deviations"),
-        ("https://www.deviantart.com/notifications/watch"),
-    )
-
-    def deviations(self):
-        return self.api.browse_deviantsyouwatch()
-
-
 ###############################################################################
 # API Interfaces ##############################################################
 
@@ -934,8 +945,16 @@ class DeviantartOAuthAPI():
     def browse_deviantsyouwatch(self, offset=0):
         """Yield deviations from users you watch"""
         endpoint = "browse/deviantsyouwatch"
-        params = {"limit": "50", "offset": offset}
+        params = {"limit": "50", "offset": offset,
+                  "mature_content": self.mature}
         return self._pagination(endpoint, params, public=False)
+
+    def browse_posts_deviantsyouwatch(self, offset=0):
+        """Yield posts from users you watch"""
+        endpoint = "browse/posts/deviantsyouwatch"
+        params = {"limit": "50", "offset": offset,
+                  "mature_content": self.mature}
+        return self._pagination(endpoint, params, public=False, unpack=True)
 
     def browse_popular(self, query=None, timerange=None, offset=0):
         """Yield popular deviations"""
@@ -1096,16 +1115,21 @@ class DeviantartOAuthAPI():
                 self.log.error(msg)
                 return data
 
-    def _pagination(self, endpoint, params, extend=True, public=True):
+    def _pagination(self, endpoint, params,
+                    extend=True, public=True, unpack=False):
         warn = True
         while True:
             data = self._call(endpoint, params, public=public)
             if "results" not in data:
                 self.log.error("Unexpected API response: %s", data)
                 return
+            results = data["results"]
 
+            if unpack:
+                results = [item["journal"] for item in results
+                           if "journal" in item]
             if extend:
-                if public and len(data["results"]) < params["limit"]:
+                if public and len(results) < params["limit"]:
                     if self.refresh_token_key:
                         self.log.debug("Switching to private access token")
                         public = False
@@ -1117,10 +1141,10 @@ class DeviantartOAuthAPI():
                             "oauth:deviantart' and follow the instructions to "
                             "be able to access them.")
                 if self.metadata:
-                    self._metadata(data["results"])
+                    self._metadata(results)
                 if self.folders:
-                    self._folders(data["results"])
-            yield from data["results"]
+                    self._folders(results)
+            yield from results
 
             if not data["has_more"]:
                 return

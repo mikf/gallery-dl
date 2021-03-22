@@ -133,6 +133,7 @@ SUBCATEGORY_MAP = {
     },
     "deviantart": {
         "stash": "Sta.sh",
+        "watch-posts": "",
     },
     "hentaifoundry": {
         "story": "",
