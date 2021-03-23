@@ -124,9 +124,13 @@ class SankakuPoolExtractor(SankakuExtractor):
 
     def metadata(self):
         pool = SankakuAPI(self).pools(self.pool_id)
+        pool["tags"] = [tag["name"] for tag in pool["tags"]]
+        pool["artist_tags"] = [tag["name"] for tag in pool["artist_tags"]]
+
         self._posts = pool.pop("posts")
         for num, post in enumerate(self._posts, 1):
             post["num"] = num
+
         return {"pool": pool}
 
     def posts(self):
