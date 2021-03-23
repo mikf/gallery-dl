@@ -115,6 +115,7 @@ modules = [
     "twitter",
     "unsplash",
     "vanillarock",
+    "vk",
     "vsco",
     "wallhaven",
     "warosu",

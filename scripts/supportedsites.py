@@ -100,6 +100,7 @@ CATEGORY_MAP = {
     "tumblrgallery"  : "TumblrGallery",
     "vanillarock"    : "もえぴりあ",
     "vidyart"        : "/v/idyart",
+    "vk"             : "VK",
     "vsco"           : "VSCO",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
