@@ -55,6 +55,7 @@ class SankakuExtractor(BooruExtractor):
         post["created_at"] = post["created_at"]["s"]
         post["date"] = text.parse_timestamp(post["created_at"])
         post["tags"] = [tag["name"] for tag in post["tags"]]
+        post["tag_string"] = " ".join(post["tags"])
 
     def _extended_tags(self, post):
         tags = collections.defaultdict(list)
@@ -63,6 +64,7 @@ class SankakuExtractor(BooruExtractor):
             tags[types[tag["type"]]].append(tag["name"])
         for key, value in tags.items():
             post["tags_" + key] = value
+            post["tag_string_" + key] = " ".join(value)
 
 
 class SankakuTagExtractor(SankakuExtractor):
