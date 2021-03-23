@@ -254,9 +254,8 @@ class PixivFavoriteExtractor(PixivExtractor):
                      "{user_bookmark[id]} {user_bookmark[account]}")
     archive_fmt = "f_{user_bookmark[id]}_{id}{num}.{extension}"
     pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:(?:en/)?"
-               r"users/(\d+)/(bookmarks/artworks|following)"
-               r"|bookmark\.php)(?:(?<=bookmarks/artworks)"
-               r"(?:/([^/?#]+)))?(?:\?([^#]*))?")
+               r"users/(\d+)/(bookmarks/artworks|following)(?:/([^/?#]+))?"
+               r"|bookmark\.php)(?:\?([^#]*))?")
     test = (
         ("https://www.pixiv.net/en/users/173530/bookmarks/artworks", {
             "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
