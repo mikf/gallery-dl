@@ -686,6 +686,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>VK</td>
+    <td>https://vk.com/</td>
+    <td>Albums</td>
+    <td></td>
+</tr>
+<tr>
     <td>VSCO</td>
     <td>https://vsco.co/</td>
     <td>Collections, individual Images, User Profiles</td>
