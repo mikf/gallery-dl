@@ -123,6 +123,8 @@ class SankakuPoolExtractor(SankakuExtractor):
     def metadata(self):
         pool = SankakuAPI(self).pools(self.pool_id)
         self._posts = pool.pop("posts")
+        for num, post in enumerate(self._posts, 1):
+            post["num"] = num
         return {"pool": pool}
 
     def posts(self):
