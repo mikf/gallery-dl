@@ -708,15 +708,16 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         if path:
             self.category_path = path.strip("/")
         if trange:
-            trange = trange[8:] if trange.startswith("popular-") else ""
+            if trange.startswith("popular-"):
+                trange = trange[8:]
             self.time_range = trange.replace("-", "").replace("hours", "hr")
         if query:
             self.search_term = query.get("q")
 
         self.popular = {
             "search": self.search_term or "",
-            "range": trange or "24-hours",
-            "path": self.category_path,
+            "range" : trange or "",
+            "path"  : self.category_path,
         }
 
     def deviations(self):
