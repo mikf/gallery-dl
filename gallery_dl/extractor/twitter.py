@@ -277,6 +277,10 @@ class TwitterExtractor(Extractor):
         response = self.request(
             url, method="POST", cookies=cookies, data=data)
 
+        if "/account/login_verification" in response.url:
+            raise exception.AuthenticationError(
+                "Login with two-factor authentication is not supported")
+
         cookies = {
             cookie.name: cookie.value
             for cookie in self.session.cookies
