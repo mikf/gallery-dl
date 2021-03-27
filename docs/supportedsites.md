@@ -644,6 +644,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Tapas</td>
+    <td>https://tapas.io/</td>
+    <td>Episodes, Series</td>
+    <td></td>
+</tr>
+<tr>
     <td>Tsumino</td>
     <td>https://www.tsumino.com/</td>
     <td>Galleries, Search Results</td>

@@ -109,6 +109,7 @@ modules = [
     "smugmug",
     "speakerdeck",
     "subscribestar",
+    "tapas",
     "tsumino",
     "tumblr",
     "tumblrgallery",
