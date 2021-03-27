@@ -126,7 +126,8 @@ class AryionExtractor(Extractor):
             "user"  : self.user or artist,
             "title" : title,
             "artist": artist,
-            "path"  : text.split_html(extr("cookiecrumb'>", '</span'))[4:-1:2],
+            "path"  : text.split_html(text.unescape(extr(
+                "cookiecrumb'>", '</span')))[4:-1:2],
             "date"  : extr("class='pretty-date' title='", "'"),
             "size"  : text.parse_int(clen),
             "views" : text.parse_int(extr("Views</b>:", "<").replace(",", "")),
