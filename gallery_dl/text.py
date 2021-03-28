@@ -13,28 +13,7 @@ import html
 import datetime
 import urllib.parse
 
-
 HTML_RE = re.compile("<[^>]+>")
-
-INVALID_XML_CHARS = (
-    "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07",
-    "\x08", "\x0b", "\x0c", "\x0e", "\x0f", "\x10", "\x11", "\x12",
-    "\x13", "\x14", "\x15", "\x16", "\x17", "\x18", "\x19", "\x1a",
-    "\x1b", "\x1c", "\x1d", "\x1e", "\x1f",
-)
-
-
-def clean_xml(xmldata, repl=""):
-    """Replace/Remove invalid control characters in 'xmldata'"""
-    if not isinstance(xmldata, str):
-        try:
-            xmldata = "".join(xmldata)
-        except TypeError:
-            return ""
-    for char in INVALID_XML_CHARS:
-        if char in xmldata:
-            xmldata = xmldata.replace(char, repl)
-    return xmldata
 
 
 def remove_html(txt, repl=" ", sep=" "):

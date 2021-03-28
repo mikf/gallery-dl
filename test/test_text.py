@@ -23,29 +23,6 @@ INVALID_ALT = ((), [], {}, None, "")
 
 class TestText(unittest.TestCase):
 
-    def test_clean_xml(self, f=text.clean_xml):
-        # standard usage
-        self.assertEqual(f(""), "")
-        self.assertEqual(f("foo"), "foo")
-        self.assertEqual(f("\tfoo\nbar\r"), "\tfoo\nbar\r")
-        self.assertEqual(f("<foo>\ab\ba\fr\v</foo>"), "<foo>bar</foo>")
-
-        # 'repl' argument
-        repl = "#"
-        self.assertEqual(f("", repl), "")
-        self.assertEqual(f("foo", repl), "foo")
-        self.assertEqual(f("\tfoo\nbar\r", repl), "\tfoo\nbar\r")
-        self.assertEqual(
-            f("<foo>\ab\ba\fr\v</foo>", repl), "<foo>#b#a#r#</foo>")
-
-        # removal of all illegal control characters
-        value = "".join(chr(x) for x in range(32))
-        self.assertEqual(f(value), "\t\n\r")
-
-        # 'invalid' arguments
-        for value in INVALID:
-            self.assertEqual(f(value), "")
-
     def test_remove_html(self, f=text.remove_html):
         result = "Hello World."
 
