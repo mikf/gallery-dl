@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,7 +32,7 @@ class KomikcastBase():
 
         if manga:
             data["manga"] = manga.partition(" Chapter ")[0]
-        if title and title.lower() != "bahasa indonesia":
+        if title and not title.lower().startswith("bahasa indonesia"):
             data["title"] = title.strip()
         else:
             data["title"] = ""
@@ -53,27 +53,23 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
             "keyword": "f3938e1aff9ad1f302f52447e9781b21f6da26d4",
         }),
         (("https://komikcast.com/chapter/"
-          "tonari-no-kashiwagi-san-chapter-18b/"), {
-            "url": "aff90dd21dbb945a726778b10bdef522af7c42fe",
-            "keyword": "19b5783864c4299913de436513b124b028b557c1",
-        }),
-        (("https://komikcast.com/chapter/090-eko-to-issho-chapter-1/"), {
-            "url": "cda104a32ea2b06b3d6b096726622f519ed1fa33",
+          "solo-spell-caster-chapter-37-bahasa-indonesia/"), {
+            "url": "c3d30de6c796ff6ff36eb86e2e6fa2f8add8e829",
+            "keyword": "ed8a0ff73098776988bf66fb700381a2c748f910",
         }),
     )
 
     def metadata(self, page):
-        info = text.extract(page, '<b>', "</b>")[0]
+        info = text.extract(page, "<title>", " &ndash; Komikcast<")[0]
         return self.parse_chapter_string(info)
 
     @staticmethod
     def images(page):
         readerarea = text.extract(
-            page, '<div id="readerarea"', '<div class="navig')[0]
+            page, '<div class="main-reading-area', '</div')[0]
         return [
             (text.unescape(url), None)
             for url in re.findall(r"<img[^>]* src=[\"']([^\"']+)", readerarea)
-            if "/Banner-" not in url and "/WM-Sampingan." not in url
         ]
 
 
@@ -95,7 +91,7 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
         data = self.metadata(page)
 
         for item in text.extract_iter(
-                page, '<span class="leftoff"><a href="', '</a>'):
+                page, '<a class="chapter-link-item" href="', '</a'):
             url, _, chapter_string = item.rpartition('">Chapter ')
             self.parse_chapter_string(chapter_string, data)
             results.append((url, data.copy()))
@@ -104,14 +100,15 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     @staticmethod
     def metadata(page):
         """Return a dict with general metadata"""
-        manga , pos = text.extract(page, "<title>" , "</title>")
-        genres, pos = text.extract(page, ">Genres:", "</span>", pos)
+        manga , pos = text.extract(page, "<title>" , " &ndash; Komikcast<")
+        genres, pos = text.extract(
+            page, 'class="komik_info-content-genre">', "</span>", pos)
         author, pos = text.extract(page, ">Author:", "</span>", pos)
         mtype , pos = text.extract(page, ">Type:"  , "</span>", pos)
 
         return {
-            "manga": text.unescape(manga[:-12]),
+            "manga": text.unescape(manga),
+            "genres": text.split_html(genres),
             "author": text.remove_html(author),
-            "genres": text.split_html(genres)[::2],
             "type": text.remove_html(mtype),
         }
