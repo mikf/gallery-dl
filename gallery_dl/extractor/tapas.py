@@ -15,7 +15,7 @@ BASE_PATTERN = r"(?:https?://)?tapas\.io"
 
 
 class TapasExtractor(Extractor):
-    """Extractor for manga-chapters from tapas.io"""
+    """Base class for tapas.io extractors"""
     category = "tapas"
     root = "https://tapas.io"
     directory_fmt = ("{category}", "{series[title]}", "{id} {title}")
@@ -144,7 +144,7 @@ class TapasEpisodeExtractor(TapasExtractor):
             "title": "You are a Tomb Raider (2)",
             "unlock_cnt": 0,
             "unlocked": False,
-            "view_cnt": 627,
+            "view_cnt": int,
 
             "series": {
                 "genre": dict,

@@ -69,7 +69,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
     subcategory = "image"
     pattern = BASE_PATTERN + r"/photos/([^/?#]+)"
     test = ("https://unsplash.com/photos/lsoogGC_5dg", {
-        "url": "00accb0a64d5a0df0db911f8b425892718dce524",
+        "url": "ac9d194f58b3fc9aacdfc9784c1b69868f212b6e",
         "keyword": {
             "alt_description": "re:silhouette of trees near body of water ",
             "blur_hash": "LZP4uQS4jboe%#o0WCa}2doJNaaz",

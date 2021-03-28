@@ -85,14 +85,14 @@ class EromeAlbumExtractor(EromeExtractor):
     """Extractor for albums on erome.com"""
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a/(\w+)"
-    test = ("https://www.erome.com/a/KandxY7y", {
-        "pattern": r"https://s\d+\.erome\.com/355/KandxY7y/\w+",
-        "count": 26,
+    test = ("https://www.erome.com/a/TyFMI7ik", {
+        "pattern": r"https://s\d+\.erome\.com/\d+/TyFMI7ik/\w+",
+        "count": 9,
         "keyword": {
-            "album_id": "KandxY7y",
+            "album_id": "TyFMI7ik",
             "num": int,
-            "title": "Therealbrittfitt",
-            "user": "pokow",
+            "title": "Ryan Ryans",
+            "user": "xanub",
         },
     })
 
@@ -103,7 +103,7 @@ class EromeAlbumExtractor(EromeExtractor):
 class EromeUserExtractor(EromeExtractor):
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!a/|search\?)([^/?#]+)"
-    test = ("https://www.erome.com/gutiquq", {
+    test = ("https://www.erome.com/xanub", {
         "range": "1-25",
         "count": 25,
     })
