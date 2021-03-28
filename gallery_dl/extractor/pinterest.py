@@ -220,6 +220,27 @@ class PinterestSectionExtractor(PinterestExtractor):
         return self.api.board_section_pins(self.section["id"])
 
 
+class PinterestSearchExtractor(PinterestExtractor):
+    """Extractor for Pinterest search results"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "Search", "{search}")
+    pattern = BASE_PATTERN + r"/search/pins/?\?q=([^&#]+)"
+    test = ("https://www.pinterest.de/search/pins/?q=nature", {
+        "range": "1-50",
+        "count": ">= 50",
+    })
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self, match)
+        self.search = match.group(1)
+
+    def metadata(self):
+        return {"search": self.search}
+
+    def pins(self):
+        return self.api.search(self.search)
+
+
 class PinterestRelatedPinExtractor(PinterestPinExtractor):
     """Extractor for related pins of another pin from pinterest.com"""
     subcategory = "related-pin"
@@ -296,7 +317,7 @@ class PinterestAPI():
         "Accept-Language"     : "en-US,en;q=0.5",
         "Referer"             : BASE_URL + "/",
         "X-Requested-With"    : "XMLHttpRequest",
-        "X-APP-VERSION"       : "7a20185",
+        "X-APP-VERSION"       : "31461e0",
         "X-CSRFToken"         : None,
         "X-Pinterest-AppState": "active",
         "Origin"              : BASE_URL,
@@ -364,6 +385,11 @@ class PinterestAPI():
         options = {"board_id": board_id, "add_vase": True}
         return self._pagination("BoardRelatedPixieFeed", options)
 
+    def search(self, query):
+        """Yield pins from searches"""
+        options = {"query": query, "scope": "pins", "rs": "typed"}
+        return self._pagination("BaseSearch", options)
+
     def login(self):
         """Login and obtain session cookies"""
         username, password = self.extractor._get_auth_info()
@@ -421,7 +447,10 @@ class PinterestAPI():
     def _pagination(self, resource, options):
         while True:
             data = self._call(resource, options)
-            yield from data["resource_response"]["data"]
+            results = data["resource_response"]["data"]
+            if isinstance(results, dict):
+                results = results["results"]
+            yield from results
 
             try:
                 bookmarks = data["resource"]["options"]["bookmarks"]
