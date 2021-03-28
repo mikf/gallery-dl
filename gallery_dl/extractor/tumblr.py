@@ -257,9 +257,6 @@ class TumblrPostExtractor(TumblrExtractor):
         ("https://mikf123.tumblr.com/post/167623351559/link-post", {
             "count": 2,
         }),
-        ("https://muyanna.tumblr.com/post/180692431632/answer-post", {
-            "count": 1,
-        }),
         ("https://mikf123.tumblr.com/post/167633596145/video-post", {
             "count": 2,
         }),

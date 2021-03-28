@@ -193,7 +193,7 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
             },
         }),
         ("https://ponybooru.org/galleries/27", {
-            "count": 24,
+            "count": ">= 24",
         }),
     )
 
