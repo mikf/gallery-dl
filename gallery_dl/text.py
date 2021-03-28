@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 import re
 import html
-import os.path
 import datetime
 import urllib.parse
 
@@ -77,18 +76,22 @@ def filename_from_url(url):
 
 def ext_from_url(url):
     """Extract the filename extension of an URL"""
-    filename = filename_from_url(url)
-    ext = os.path.splitext(filename)[1]
-    return ext[1:].lower()
+    name, _, ext = filename_from_url(url).rpartition(".")
+    return ext.lower() if name else ""
 
 
 def nameext_from_url(url, data=None):
     """Extract the last part of an URL and fill 'data' accordingly"""
     if data is None:
         data = {}
-    name = unquote(filename_from_url(url))
-    data["filename"], ext = os.path.splitext(name)
-    data["extension"] = ext[1:].lower()
+
+    filename = unquote(filename_from_url(url))
+    name, _, ext = filename.rpartition(".")
+    if name:
+        data["filename"], data["extension"] = name, ext.lower()
+    else:
+        data["filename"], data["extension"] = filename, ""
+
     return data
 
 

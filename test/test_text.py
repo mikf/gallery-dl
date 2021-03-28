@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -142,8 +142,9 @@ class TestText(unittest.TestCase):
 
         # standard usage
         self.assertEqual(f(""), "")
+        self.assertEqual(f("filename"), "")
         self.assertEqual(f("filename.ext"), result)
-        self.assertEqual(f("/filename.ext"), result)
+        self.assertEqual(f("/filename.ExT"), result)
         self.assertEqual(f("example.org/filename.ext"), result)
         self.assertEqual(f("http://example.org/v2/filename.ext"), result)
         self.assertEqual(
@@ -160,7 +161,7 @@ class TestText(unittest.TestCase):
         # standard usage
         self.assertEqual(f(""), empty)
         self.assertEqual(f("filename.ext"), result)
-        self.assertEqual(f("/filename.ext"), result)
+        self.assertEqual(f("/filename.ExT"), result)
         self.assertEqual(f("example.org/filename.ext"), result)
         self.assertEqual(f("http://example.org/v2/filename.ext"), result)
         self.assertEqual(
