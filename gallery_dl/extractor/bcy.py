@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -125,12 +125,15 @@ class BcyUserExtractor(BcyExtractor):
         while True:
             data = self.request(url, params=params).json()
 
-            item = None
-            for item in data["data"]["items"]:
-                yield item["item_detail"]
-
-            if not item:
+            try:
+                items = data["data"]["items"]
+            except KeyError:
                 return
+            if not items:
+                return
+
+            for item in items:
+                yield item["item_detail"]
             params["since"] = item["since"]
 
 
