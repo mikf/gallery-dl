@@ -27,11 +27,12 @@ def remove_html(txt, repl=" ", sep=" "):
     return txt.strip()
 
 
-def split_html(txt, sep=None):
-    """Split input string by html-tags"""
+def split_html(txt):
+    """Split input string by HTML tags"""
     try:
         return [
-            x.strip() for x in HTML_RE.split(txt)
+            unescape(x).strip()
+            for x in HTML_RE.split(txt)
             if x and not x.isspace()
         ]
     except TypeError:
