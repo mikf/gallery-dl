@@ -224,6 +224,7 @@ AUTH_MAP = {
     "seiga"          : "Required",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
+    "tapas"          : "Supported",
     "tsumino"        : "Supported",
     "tumblr"         : _OAUTH,
     "twitter"        : "Supported",
