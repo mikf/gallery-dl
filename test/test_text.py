@@ -59,6 +59,10 @@ class TestText(unittest.TestCase):
         self.assertEqual(
             f("<div><b class='a'>Hello</b><i>World.</i></div>"), result)
 
+        # escaped HTML entities
+        self.assertEqual(
+            f("<i>&lt;foo&gt;</i> <i>&lt;bar&gt; </i>"), ["<foo>", "<bar>"])
+
         # empty HTML
         self.assertEqual(f("<div></div>"), empty)
         self.assertEqual(f(" <div>   </div> "), empty)

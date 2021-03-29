@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from https://dynasty-scans.com/"""
+"""Extractors for https://dynasty-scans.com/"""
 
 from .common import ChapterExtractor, Extractor, Message
 from .. import text
 import json
 import re
-
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?dynasty-scans\.com"
 
@@ -36,7 +35,7 @@ class DynastyscansBase():
         return {
             "url"     : self.root + url,
             "image_id": text.parse_int(image_id),
-            "tags"    : text.split_html(text.unescape(tags)),
+            "tags"    : text.split_html(tags),
             "date"    : text.remove_html(date),
             "source"  : text.unescape(src),
         }
