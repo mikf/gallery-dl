@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?tapas\.io"
 
@@ -21,15 +22,17 @@ class TapasExtractor(Extractor):
     directory_fmt = ("{category}", "{series[title]}", "{id} {title}")
     filename_fmt = "{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
-    _cache = {}
+    cookiedomain = ".tapas.io"
+    cookienames = ("_cpc_",)
+    _cache = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        setcookie = self.session.cookies.set
-        setcookie("birthDate"        , "1981-02-03", domain=".tapas.io")
-        setcookie("adjustedBirthDate", "1981-02-03", domain=".tapas.io")
+        if self._cache is None:
+            TapasExtractor._cache = {}
 
     def items(self):
+        self.login()
         headers = {"Accept": "application/json, text/javascript, */*;"}
 
         for episode_id in self.episode_ids():
@@ -65,6 +68,38 @@ class TapasExtractor(Extractor):
                 for episode["num"], url in enumerate(text.extract_iter(
                         html, 'data-src="', '"'), 1):
                     yield Message.Url, url, text.nameext_from_url(url, episode)
+
+    def login(self):
+        if not self._check_cookies(self.cookienames):
+            username, password = self._get_auth_info()
+            if username:
+                self._update_cookies(self._login_impl(username, password))
+            else:
+                sc = self.session.cookies.set
+                sc("birthDate"        , "1981-02-03", domain=self.cookiedomain)
+                sc("adjustedBirthDate", "1981-02-03", domain=self.cookiedomain)
+
+    @cache(maxage=14*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/account/authenticate"
+        headers = {
+            "Referer" : url,
+        }
+        data = {
+            "from"    : "https://tapas.io/",
+            "email"   : username,
+            "password": password,
+        }
+        response = self.request(
+            url, method="POST", headers=headers, data=data)
+
+        if not response.history or \
+                "/account/signin_fail" in response.history[-1].url:
+            raise exception.AuthenticationError()
+
+        return {"_cpc_": response.history[0].cookies.get("_cpc_")}
 
 
 class TapasSeriesExtractor(TapasExtractor):

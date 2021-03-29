@@ -299,6 +299,7 @@ Description
     * ``pinterest``
     * ``sankaku``
     * ``subscribestar``
+    * ``tapas``
     * ``tsumino``
     * ``twitter``
 

@@ -212,6 +212,7 @@ and optional for
 ``pinterest``,
 ``sankaku``,
 ``subscribestar``,
+``tapas``,
 ``tsumino``,
 and ``twitter``.
 
