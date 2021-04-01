@@ -139,7 +139,7 @@ class TwitterExtractor(Extractor):
                     if key in bvals:
                         files.append(bvals[key]["image_value"])
                         return
-        else:
+        elif self.videos:
             url = "ytdl:{}/i/web/status/{}".format(self.root, tweet["id_str"])
             files.append({"url": url})
 
