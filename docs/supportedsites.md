@@ -694,7 +694,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>VK</td>
     <td>https://vk.com/</td>
-    <td>Albums</td>
+    <td>Photos</td>
     <td></td>
 </tr>
 <tr>
