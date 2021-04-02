@@ -339,6 +339,9 @@ class TwitterLikesExtractor(TwitterExtractor):
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/likes(?!\w)"
     test = ("https://twitter.com/supernaturepics/likes",)
 
+    def metadata(self):
+        return {"user_likes": self.user}
+
     def tweets(self):
         return TwitterAPI(self).timeline_favorites(self.user)
 
