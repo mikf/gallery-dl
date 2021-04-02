@@ -1,6 +1,29 @@
 # Changelog
 
-## Unreleased
+## 1.17.2 - 2021-04-02
+### Additions
+- [deviantart] add support for posts from watched users ([#794](https://github.com/mikf/gallery-dl/issues/794))
+- [manganelo] add `chapter` and `manga` extractors ([#1415](https://github.com/mikf/gallery-dl/issues/1415))
+- [pinterest] add `search` extractor ([#1411](https://github.com/mikf/gallery-dl/issues/1411))
+- [sankaku] add `tag_string` metadata field ([#1388](https://github.com/mikf/gallery-dl/issues/1388))
+- [sankaku] add enumeration index for books ([#1388](https://github.com/mikf/gallery-dl/issues/1388))
+- [tapas] add `series` and `episode` extractors ([#692](https://github.com/mikf/gallery-dl/issues/692))
+- [tapas] implement login with username & password ([#692](https://github.com/mikf/gallery-dl/issues/692))
+- [twitter] allow specifying a custom format for user results ([#1337](https://github.com/mikf/gallery-dl/issues/1337))
+- [twitter] add extractor for direct image links ([#1417](https://github.com/mikf/gallery-dl/issues/1417))
+- [vk] add support for albums ([#474](https://github.com/mikf/gallery-dl/issues/474))
+### Fixes
+- [aryion] unescape paths ([#1414](https://github.com/mikf/gallery-dl/issues/1414))
+- [bcy] improve pagination
+- [deviantart] update `watch` URL pattern ([#794](https://github.com/mikf/gallery-dl/issues/794))
+- [deviantart] fix arguments for search/popular results ([#1408](https://github.com/mikf/gallery-dl/issues/1408))
+- [deviantart] use fallback for `/intermediary/` URLs
+- [exhentai] improve and simplify image limit checks
+- [komikcast] fix extraction
+- [pixiv] fix `favorite` URL pattern ([#1405](https://github.com/mikf/gallery-dl/issues/1405))
+- [sankaku] simplify `pool` tags ([#1388](https://github.com/mikf/gallery-dl/issues/1388))
+- [twitter] improve error message when trying to log in with 2FA ([#1409](https://github.com/mikf/gallery-dl/issues/1409))
+- [twitter] don't use youtube-dl for cards when videos are disabled ([#1416](https://github.com/mikf/gallery-dl/issues/1416))
 
 ## 1.17.1 - 2021-03-19
 ### Additions
