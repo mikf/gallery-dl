@@ -113,19 +113,18 @@ class TwitterExtractor(Extractor):
                     "url"      : base + "orig",
                     "width"    : width,
                     "height"   : height,
-                    "_fallback": self._image_fallback(base, url),
+                    "_fallback": self._image_fallback(base, url + ":"),
                 }))
             else:
                 files.append({"url": media["media_url"]})
 
     @staticmethod
-    def _image_fallback(base, url):
-        url += ":"
-        yield url + "orig"
+    def _image_fallback(new, old):
+        yield old + "orig"
 
         for size in ("large", "medium", "small"):
-            yield base + size
-            yield url + size
+            yield new + size
+            yield old + size
 
     def _extract_card(self, tweet, files):
         card = tweet["card"]
@@ -514,17 +513,17 @@ class TwitterImageExtractor(Extractor):
 
     def items(self):
         base = "https://pbs.twimg.com/media/" + self.id
-        url = base + "." + self.fmt
-        base += "?format=" + self.fmt + "&name="
+        new = base + "?format=" + self.fmt + "&name="
+        old = base + "." + self.fmt + ":"
 
         data = {
             "filename": self.id,
             "extension": self.fmt,
-            "_fallback": TwitterExtractor._image_fallback(base, url),
+            "_fallback": TwitterExtractor._image_fallback(new, old),
         }
 
         yield Message.Directory, data
-        yield Message.Url, base + "orig", data
+        yield Message.Url, new + "orig", data
 
 
 class TwitterAPI():
