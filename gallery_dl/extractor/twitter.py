@@ -499,6 +499,34 @@ class TwitterTweetExtractor(TwitterExtractor):
         return TwitterAPI(self).tweet(self.tweet_id)
 
 
+class TwitterImageExtractor(Extractor):
+    category = "twitter"
+    subcategory = "image"
+    pattern = r"https?://pbs\.twimg\.com/media/([\w-]+)(?:\?format=|\.)(\w+)"
+    test = (
+        ("https://pbs.twimg.com/media/EqcpviCVoAAG-QG?format=jpg%name=orig"),
+        ("https://pbs.twimg.com/media/EqcpviCVoAAG-QG.jpg:orig"),
+    )
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.id, self.fmt = match.groups()
+
+    def items(self):
+        base = "https://pbs.twimg.com/media/" + self.id
+        url = base + "." + self.fmt
+        base += "?format=" + self.fmt + "&name="
+
+        data = {
+            "filename": self.id,
+            "extension": self.fmt,
+            "_fallback": TwitterExtractor._image_fallback(base, url),
+        }
+
+        yield Message.Directory, data
+        yield Message.Url, base + "orig", data
+
+
 class TwitterAPI():
 
     def __init__(self, extractor):
