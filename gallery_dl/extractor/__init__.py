@@ -69,6 +69,7 @@ modules = [
     "mangafox",
     "mangahere",
     "mangakakalot",
+    "manganelo",
     "mangapark",
     "mangoxo",
     "myhentaigallery",

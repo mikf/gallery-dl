@@ -404,6 +404,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Manganelo</td>
+    <td>https://manganelo.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>MangaPark</td>
     <td>https://mangapark.net/</td>
     <td>Chapters, Manga</td>
