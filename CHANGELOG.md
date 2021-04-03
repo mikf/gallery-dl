@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.17.2 - 2021-04-02
 ### Additions
 - [deviantart] add support for posts from watched users ([#794](https://github.com/mikf/gallery-dl/issues/794))
