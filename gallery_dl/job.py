@@ -604,6 +604,7 @@ class InfoJob(Job):
 
         pc("Filename format", "filename", ex.filename_fmt)
         pc("Directory format", "directory", ex.directory_fmt)
+        pc("Archive format", "archive-format", ex.archive_fmt)
         pc("Request interval", "sleep-request", ex.request_interval)
 
         return 0
