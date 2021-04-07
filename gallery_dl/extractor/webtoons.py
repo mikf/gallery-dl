@@ -25,6 +25,7 @@ class WebtoonsExtractor(Extractor):
             match.groups()
         cookies = self.session.cookies
         cookies.set("pagGDPR", "true", domain=self.cookiedomain)
+        cookies.set("rstagGDPR_DE", "true", domain=self.cookiedomain)
         cookies.set("ageGatePass", "true", domain=self.cookiedomain)
 
     def request(self, url, **kwargs):
