@@ -193,12 +193,20 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.count = text.parse_int(data["filecount"])
         yield Message.Directory, data
 
+        def _validate_response(response):
+            # declared inside 'items()' to be able to access 'data'
+            if not response.history and \
+                    response.headers.get("content-length") == "137":
+                self._report_limits(data)
+            return True
+
         images = itertools.chain(
             (self.image_from_page(ipage),), self.images_from_api())
         for url, image in images:
             data.update(image)
             if "/fullimg.php" in url:
                 data["extension"] = ""
+                data["_http_validate"] = _validate_response
             yield Message.Url, url, data
 
     def get_metadata(self, page):
