@@ -328,7 +328,7 @@ class InstagramExtractor(Extractor):
 
     def _get_edge_data(self, user, key):
         cursor = self.config("cursor")
-        if cursor:
+        if cursor or not key:
             return {
                 "edges"    : (),
                 "page_info": {
@@ -386,6 +386,7 @@ class InstagramUserExtractor(InstagramExtractor):
             (InstagramPostsExtractor     , base + "posts/"),
             (InstagramReelsExtractor     , base + "reels/"),
             (InstagramChannelExtractor   , base + "channel/"),
+            (InstagramTaggedExtractor    , base + "tagged/"),
         ), ("posts",))
 
 
@@ -405,6 +406,25 @@ class InstagramPostsExtractor(InstagramExtractor):
         query_hash = "003056d32c2554def87228bc3fd9668a"
         variables = {"id": user["id"], "first": 50}
         edge = self._get_edge_data(user, "edge_owner_to_timeline_media")
+        return self._pagination_graphql(query_hash, variables, edge)
+
+
+class InstagramTaggedExtractor(InstagramExtractor):
+    """Extractor for ProfilePage tagged posts"""
+    subcategory = "tagged"
+    pattern = USER_PATTERN + r"/tagged"
+    test = ("https://www.instagram.com/instagram/tagged/", {
+        "range": "1-16",
+        "count": ">= 16",
+    })
+
+    def posts(self):
+        url = "{}/{}/".format(self.root, self.item)
+        user = self._extract_profile_page(url)
+
+        query_hash = "31fe64d9463cbbe58319dced405c6206"
+        variables = {"id": user["id"], "first": 50}
+        edge = self._get_edge_data(user, None)
         return self._pagination_graphql(query_hash, variables, edge)
 
 
