@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -54,9 +54,16 @@ class _8musesAlbumExtractor(Extractor):
                 "private": False,
             },
         }),
+        # custom sorting
         ("https://www.8muses.com/comics/album/Fakku-Comics/8?sort=az", {
             "count": ">= 70",
             "keyword": {"name": r"re:^[R-Zr-z]"},
+        }),
+        # non-ASCII characters
+        (("https://comics.8muses.com/comics/album/Various-Authors/Chessire88"
+          "/From-Trainers-to-Pokmons"), {
+            "count": 2,
+            "keyword": {"name": "re:From Trainers to Pokémons"},
         }),
     )
 
@@ -125,6 +132,6 @@ class _8musesAlbumExtractor(Extractor):
     @staticmethod
     def _unobfuscate(data):
         return json.loads("".join([
-            chr(33 + (ord(c) + 14) % 94) if c != " " else c
+            chr(33 + (ord(c) + 14) % 94) if "!" <= c <= "~" else c
             for c in text.unescape(data.strip("\t\n\r !"))
         ]))
