@@ -161,13 +161,18 @@ class InstagramExtractor(Extractor):
         }
 
     def _parse_post_graphql(self, post):
+        typename = post["__typename"]
         if post.get("is_video") and "video_url" not in post:
             url = "{}/tv/{}/".format(self.root, post["shortcode"])
+            post = self._extract_post_page(url)
+        elif typename == "GraphSidecar" and \
+                "edge_sidecar_to_children" not in post:
+            url = "{}/p/{}/".format(self.root, post["shortcode"])
             post = self._extract_post_page(url)
 
         owner = post["owner"]
         data = {
-            "typename"   : post["__typename"],
+            "typename"   : typename,
             "date"       : text.parse_timestamp(post["taken_at_timestamp"]),
             "likes"      : post["edge_media_preview_like"]["count"],
             "owner_id"   : owner["id"],
