@@ -9,7 +9,7 @@
 """Extractors for https://www.erome.com/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
 from ..cache import cache
 import itertools
 import time
@@ -32,7 +32,13 @@ class EromeExtractor(Extractor):
     def items(self):
         for album_id in self.albums():
             url = "{}/a/{}".format(self.root, album_id)
-            page = self.request(url).text
+
+            try:
+                page = self.request(url).text
+            except exception.HttpError as exc:
+                self.log.warning(
+                    "Unable to fetch album '%s' (%s)", album_id, exc)
+                continue
 
             title, pos = text.extract(
                 page, 'property="og:title" content="', '"')
