@@ -1230,7 +1230,7 @@ class DeviantartEclipseAPI():
         params = {
             "username"     : user,
             "offset"       : offset,
-            "limit"        : "24",
+            "limit"        : 24,
             "scraps_folder": "true",
         }
         return self._pagination(endpoint, params)
@@ -1240,8 +1240,8 @@ class DeviantartEclipseAPI():
         params = {
             "username": user,
             "moduleid": self._module_id_watching(user),
-            "offset"  : None,
-            "limit"   : "24",
+            "offset"  : offset,
+            "limit"   : 24,
         }
         return self._pagination(endpoint, params)
 
@@ -1260,14 +1260,23 @@ class DeviantartEclipseAPI():
         except Exception:
             return {"error": response.text}
 
-    def _pagination(self, endpoint, params=None):
+    def _pagination(self, endpoint, params):
         while True:
             data = self._call(endpoint, params)
-            yield from data["results"]
 
-            if not data["hasMore"]:
+            results = data.get("results")
+            if results is None:
                 return
-            params["offset"] = data["nextOffset"]
+            yield from results
+
+            if not data.get("hasMore"):
+                return
+
+            next_offset = data.get("nextOffset")
+            if next_offset:
+                params["offset"] = next_offset
+            else:
+                params["offset"] += params["limit"]
 
     def _module_id_watching(self, user):
         url = "{}/{}/about".format(self.extractor.root, user)
