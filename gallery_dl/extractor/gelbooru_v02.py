@@ -69,13 +69,15 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         if not notes_data:
             return
 
-        for note_data in text.extract_iter(notes_data, '<article', '</article>'):
+        note_iter = text.extract_iter(notes_data, '<article', '</article>')
+        extr = text.extract
+        for note_data in note_iter:
             note = {
-                "width": int(text.extract(note_data, 'data-width="', '"')[0]),
-                "height": int(text.extract(note_data, 'data-height="', '"')[0]),
-                "x": int(text.extract(note_data, 'data-x="', '"')[0]),
-                "y": int(text.extract(note_data, 'data-y="', '"')[0]),
-                "text": text.extract(note_data, 'data-body="', '"')[0],
+                "width": int(extr(note_data, 'data-width="', '"')[0]),
+                "height": int(extr(note_data, 'data-height="', '"')[0]),
+                "x": int(extr(note_data, 'data-x="', '"')[0]),
+                "y": int(extr(note_data, 'data-y="', '"')[0]),
+                "text": extr(note_data, 'data-body="', '"')[0],
             }
             notes.append(note)
 
