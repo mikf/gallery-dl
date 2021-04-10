@@ -57,6 +57,29 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 tags[tag_type].append(text.unquote(tag_name))
             for key, value in tags.items():
                 post["tags_" + key] = " ".join(value)
+        return page
+
+    def _notes(self, post, page=None):
+        if not page:
+            url = "{}/index.php?page=post&s=view&id={}".format(
+                self.root, post["id"])
+            page = self.request(url).text
+        notes = []
+        notes_data = text.extract(page, '<section id="notes"', '</section>')[0]
+        if not notes_data:
+            return
+
+        for note_data in text.extract_iter(notes_data, '<article', '</article>'):
+            note = {
+                "width": int(text.extract(note_data, 'data-width="', '"')[0]),
+                "height": int(text.extract(note_data, 'data-height="', '"')[0]),
+                "x": int(text.extract(note_data, 'data-x="', '"')[0]),
+                "y": int(text.extract(note_data, 'data-y="', '"')[0]),
+                "text": text.extract(note_data, 'data-body="', '"')[0],
+            }
+            notes.append(note)
+
+        post["notes"] = notes
 
 
 BASE_PATTERN = GelbooruV02Extractor.update({

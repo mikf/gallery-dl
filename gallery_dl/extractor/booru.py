@@ -24,6 +24,7 @@ class BooruExtractor(BaseExtractor):
         self.login()
         data = self.metadata()
         tags = self.config("tags", False)
+        notes = self.config("notes", False)
 
         for post in self.posts():
             try:
@@ -35,8 +36,11 @@ class BooruExtractor(BaseExtractor):
                                "(md5: %s)", post.get("id"), post.get("md5"))
                 continue
 
+            page_html = None
             if tags:
-                self._extended_tags(post)
+                page_html = self._extended_tags(post)
+            if notes:
+                self._notes(post, page_html)
             self._prepare(post)
             post.update(data)
             text.nameext_from_url(url, post)
@@ -67,3 +71,6 @@ class BooruExtractor(BaseExtractor):
 
     def _extended_tags(self, post, page=None):
         """Generate extended tag information"""
+
+    def _notes(self, post, page=None):
+        """Generate information about notes"""

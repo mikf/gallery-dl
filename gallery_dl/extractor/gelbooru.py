@@ -108,4 +108,24 @@ class GelbooruPostExtractor(GelbooruBase,
             "pattern": r"https://img\d\.gelbooru\.com/images"
                        r"/22/61/226111273615049235b001b381707bd0\.webm",
         }),
+        # notes
+        ("https://gelbooru.com/index.php?page=post&s=view&id=5997331", {
+            "options": (("notes", True),),
+            "keywords": {
+                "notes": [{
+                    "height": 553,
+                    "text": "Look over this way when you talk~",
+                    "width": 246,
+                    "x": 35,
+                    "y": 72
+                },
+                {
+                    "height": 557,
+                    "text": "Hey~\nAre you listening~?",
+                    "width": 246,
+                    "x": 1233,
+                    "y": 109
+                }]
+            }
+        }),
     )
