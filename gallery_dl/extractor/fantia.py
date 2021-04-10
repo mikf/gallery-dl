@@ -7,11 +7,7 @@
 """Extractors for https://fantia.jp/"""
 
 from .common import Extractor, Message
-from .. import text, exception
-from ..cache import memcache
-import collections
-import itertools
-import json
+from .. import text
 
 
 class FantiaExtractor(Extractor):
@@ -33,9 +29,10 @@ class FantiaExtractor(Extractor):
 
         for url, data in self.posts():
             if data["content_filename"]:
-                data["filename"] = data["content_filename"]
-                if "." in data["filename"]:
-                    data["extension"] = data["filename"][data["filename"].rfind(".")+1:]
+                fname = data["content_filename"]
+                data["filename"] = fname
+                if "." in fname:
+                    data["extension"] = fname[fname.rfind(".")+1:]
                 else:
                     data["extension"] = text.ext_from_url(url)
             else:
@@ -58,7 +55,9 @@ class FantiaExtractor(Extractor):
             url = text.ensure_http_scheme(url)
             gallery_page_html = self.request(url, headers=headers).text
             posts_found = False
-            for post_id in text.extract_iter(gallery_page_html, 'class="link-block" href="/posts/', '"'):
+            for post_id in text.extract_iter(
+                gallery_page_html, 'class="link-block" href="/posts/', '"'
+            ):
                 posts_found = True
                 for url, data in self._get_post_data_and_urls(post_id):
                     yield url, data
@@ -81,7 +80,7 @@ class FantiaExtractor(Extractor):
             "fanclub_user_id": resp["fanclub"]["user"]["id"],
             "fanclub_user_name": resp["fanclub"]["user"]["name"],
             "fanclub_name": resp["fanclub"]["name"],
-            "fanclub_url": self.root + "/fanclubs/" + str(resp["fanclub"]["id"]),
+            "fanclub_url": self.root+"/fanclubs/"+str(resp["fanclub"]["id"]),
             "tags": resp["tags"]
         }
 
@@ -103,6 +102,7 @@ class FantiaExtractor(Extractor):
             if "download_uri" in content:
                 post["file_id"] = content["id"]
                 yield self.root+"/"+content["download_uri"], post
+
 
 class FantiaCreatorExtractor(FantiaExtractor):
     """Extractor for a creator's works"""
@@ -128,6 +128,7 @@ class FantiaCreatorExtractor(FantiaExtractor):
         base_url = self.root+"/fanclubs/"+self.creator_id+"/posts?page="
 
         return self._pagination(base_url)
+
 
 class FantiaPostExtractor(FantiaExtractor):
     """Extractor for media from a single post"""

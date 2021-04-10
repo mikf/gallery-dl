@@ -7,11 +7,7 @@
 """Extractors for https://www.fanbox.cc/"""
 
 from .common import Extractor, Message
-from .. import text, exception
-from ..cache import memcache
-import collections
-import itertools
-import json
+from .. import text
 
 
 class FanboxExtractor(Extractor):
@@ -78,7 +74,9 @@ class FanboxExtractor(Extractor):
             final_post = dict(post)
             final_post["isCoverImage"] = True
             final_post["file_url"] = pbody["coverImageUrl"]
-            final_post = text.nameext_from_url(pbody["coverImageUrl"], final_post)
+            final_post = text.nameext_from_url(
+                pbody["coverImageUrl"], final_post
+            )
             final_post["num"] = num
             num += 1
             yield pbody["coverImageUrl"], final_post
@@ -88,7 +86,9 @@ class FanboxExtractor(Extractor):
                 for item in pbody["body"][group]:
                     final_post = dict(post)
                     final_post["file_url"] = item["originalUrl"]
-                    final_post = text.nameext_from_url(item["originalUrl"], final_post)
+                    final_post = text.nameext_from_url(
+                        item["originalUrl"], final_post
+                    )
                     if "extension" in item:
                         final_post["extension"] = item["extension"]
                     final_post["file_id"] = item.get("id", None)
@@ -113,10 +113,12 @@ class FanboxExtractor(Extractor):
                     num += 1
                     yield item["url"], final_post
 
+
 class FanboxCreatorExtractor(FanboxExtractor):
     """Extractor for a creator's works"""
     subcategory = "creator"
-    pattern = r"(?:https?://)?([a-zA-Z0-9_-]+)\.fanbox\.cc/?$|(?:https?://)?(?:www\.)?fanbox\.cc/@([^/?#]+)/?$"
+    pattern = (r"(?:https?://)?([a-zA-Z0-9_-]+)\.fanbox\.cc/?$|"
+               r"(?:https?://)?(?:www\.)?fanbox\.cc/@([^/?#]+)/?$")
     test = (
         ("https://xub.fanbox.cc", {
             "range": "1-15",
@@ -134,14 +136,16 @@ class FanboxCreatorExtractor(FanboxExtractor):
         self.creator_id = match.group(1) or match.group(2)
 
     def posts(self):
-        url = "https://api.fanbox.cc/post.listCreator?creatorId=" + self.creator_id + "&limit=10"
+        url = "https://api.fanbox.cc/post.listCreator?creatorId={}&limit=10"
 
-        return self._pagination(url)
+        return self._pagination(url.format(self._creator_id))
+
 
 class FanboxPostExtractor(FanboxExtractor):
     """Extractor for media from a single post"""
     subcategory = "post"
-    pattern = r"(?:https?://)?(?:www\.)?fanbox\.cc/@[^/?#]+/posts/([^/?#]+)|(?:https?://)?[a-zA-Z0-9_-]+\.fanbox\.cc/posts/([^/?#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?fanbox\.cc/@[^/?#]+/posts/([^/?#]+)|"
+               r"(?:https?://)?[a-zA-Z0-9_-]+\.fanbox\.cc/posts/([^/?#]+)")
     test = (
         ("https://www.fanbox.cc/@xub/posts/1910054", {
             "count": 3,
