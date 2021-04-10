@@ -66,9 +66,12 @@ class DanbooruExtractor(Extractor):
                     post["extension"] = "webm"
 
             if self.extended_metadata:
-                post.update(self.request(
-                    "{}/posts/{}.json?only=artist_commentary,children,notes,parent".format(
-                        self.root, post["id"])).json())
+                template = (
+                    "{}/posts/{}.json"
+                    "?only=artist_commentary,children,notes,parent"
+                )
+                resp = self.request(template.format(self.root, post["id"]))
+                post.update(resp.json())
 
             post.update(data)
             yield Message.Directory, post
