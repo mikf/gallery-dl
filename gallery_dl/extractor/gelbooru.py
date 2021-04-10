@@ -91,6 +91,17 @@ class GelbooruPostExtractor(GelbooruBase,
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
             "count": 1,
         }),
+        ("https://gelbooru.com/index.php?page=post&s=view&id=6018318", {
+            "options": (("tags", True),),
+            "content": "977caf22f27c72a5d07ea4d4d9719acdab810991",
+            "keyword": {
+                "tags_artist": "kirisaki_shuusei",
+                "tags_character": str,
+                "tags_copyright": "vocaloid",
+                "tags_general": str,
+                "tags_metadata": str,
+            },
+        }),
         # video
         ("https://gelbooru.com/index.php?page=post&s=view&id=5938076", {
             "content": "6360452fa8c2f0c1137749e81471238564df832a",

@@ -47,6 +47,8 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 self.root, post["id"])
             page = self.request(url).text
         html = text.extract(page, '<ul id="tag-', '</ul>')[0]
+        if not html:
+            html = text.extract(page, '<ul class="tag-', '</ul>')[0]
         if html:
             tags = collections.defaultdict(list)
             pattern = re.compile(
