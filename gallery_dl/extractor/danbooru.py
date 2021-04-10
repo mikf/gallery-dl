@@ -32,6 +32,7 @@ class DanbooruExtractor(Extractor):
         super().__init__(match)
         self.root = "https://{}.donmai.us".format(match.group(1))
         self.ugoira = self.config("ugoira", False)
+        self.extended_metadata = self.config("extended-metadata", False)
 
         username, api_key = self._get_auth_info()
         if username:
@@ -63,6 +64,11 @@ class DanbooruExtractor(Extractor):
                 else:
                     url = post["large_file_url"]
                     post["extension"] = "webm"
+
+            if self.extended_metadata:
+                post.update(self.request(
+                    "{}/posts/{}.json?only=artist_commentary,children,notes,parent".format(
+                        self.root, post["id"])).json())
 
             post.update(data)
             yield Message.Directory, post
