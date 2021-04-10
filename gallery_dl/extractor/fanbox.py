@@ -115,7 +115,7 @@ class FanboxExtractor(Extractor):
 
 
 class FanboxCreatorExtractor(FanboxExtractor):
-    """Extractor for a creator's works"""
+    """Extractor for a fanbox creator's works"""
     subcategory = "creator"
     pattern = (r"(?:https?://)?([a-zA-Z0-9_-]+)\.fanbox\.cc/?$|"
                r"(?:https?://)?(?:www\.)?fanbox\.cc/@([^/?#]+)/?$")
@@ -142,7 +142,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
 
 
 class FanboxPostExtractor(FanboxExtractor):
-    """Extractor for media from a single post"""
+    """Extractor for media from a single fanbox post"""
     subcategory = "post"
     pattern = (r"(?:https?://)?(?:www\.)?fanbox\.cc/@[^/?#]+/posts/([^/?#]+)|"
                r"(?:https?://)?[a-zA-Z0-9_-]+\.fanbox\.cc/posts/([^/?#]+)")
