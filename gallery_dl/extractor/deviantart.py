@@ -259,9 +259,10 @@ class DeviantartExtractor(Extractor):
 
     @staticmethod
     def _find_folder(folders, name):
-        pattern = re.compile(r"(?i)\W*" + name.replace("-", r"\W+") + r"\W*$")
+        match = re.compile(name.replace(
+            "-", r"[^a-z0-9]+") + "$", re.IGNORECASE).match
         for folder in folders:
-            if pattern.match(folder["name"]):
+            if match(folder["name"]):
                 return folder
         raise exception.NotFoundError("folder")
 
@@ -470,6 +471,12 @@ class DeviantartFolderExtractor(DeviantartExtractor):
         # group
         ("https://www.deviantart.com/yakuzafc/gallery/37412168/Crafts", {
             "count": ">= 4",
+            "options": (("original", False),),
+        }),
+        # name starts with '_', special characters (#1451)
+        (("https://www.deviantart.com/justatest235723"
+          "/gallery/69302698/-test-b-c-d-e-f-"), {
+            "count": 1,
             "options": (("original", False),),
         }),
         ("https://shimoda7.deviantart.com/gallery/722019/Miscellaneous"),
