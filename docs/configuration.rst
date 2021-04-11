@@ -1993,6 +1993,16 @@ Output Options
 ==============
 
 
+output.fallback
+---------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include fallback URLs in the output of ``-g/--get-urls``.
+
+
 output.mode
 -----------
 Type
