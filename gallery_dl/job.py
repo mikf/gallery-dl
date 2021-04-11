@@ -575,7 +575,11 @@ class UrlJob(Job):
             self.handle_queue = self.handle_url
 
     @staticmethod
-    def handle_url(url, kwdict):
+    def handle_url(url, _):
+        print(url)
+
+    @staticmethod
+    def handle_url_fallback(url, kwdict):
         print(url)
         if "_fallback" in kwdict:
             for url in kwdict["_fallback"]:

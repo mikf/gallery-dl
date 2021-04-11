@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 from __future__ import unicode_literals, print_function
 
 __author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2020 Mike Fährmann"
+__copyright__ = "Copyright 2014-2021 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
@@ -204,6 +204,9 @@ def main():
             if args.list_urls:
                 jobtype = job.UrlJob
                 jobtype.maxdepth = args.list_urls
+                if config.get(("output",), "fallback", True):
+                    jobtype.handle_url = \
+                        staticmethod(jobtype.handle_url_fallback)
             else:
                 jobtype = args.jobtype or job.DownloadJob
 
