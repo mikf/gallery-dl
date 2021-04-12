@@ -758,12 +758,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>yuki.la 4chan archive</td>
-    <td>https://yuki.la/</td>
-    <td>Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>かべうち</td>
     <td>https://kabe-uchiroom.com/</td>
     <td>User Profiles</td>

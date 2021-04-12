@@ -108,7 +108,6 @@ CATEGORY_MAP = {
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",
-    "yuki"           : "yuki.la 4chan archive",
 }
 
 SUBCATEGORY_MAP = {
