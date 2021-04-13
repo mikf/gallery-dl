@@ -11,7 +11,7 @@ from .. import text
 
 
 class FanboxExtractor(Extractor):
-    """Base class for fanbox extractors"""
+    """Base class for Fanbox extractors"""
     category = "fanbox"
     root = "https://www.fanbox.cc"
     directory_fmt = ("{category}", "{creator_id}")
@@ -115,7 +115,7 @@ class FanboxExtractor(Extractor):
 
 
 class FanboxCreatorExtractor(FanboxExtractor):
-    """Extractor for a fanbox creator's works"""
+    """Extractor for a Fanbox creator's works"""
     subcategory = "creator"
     pattern = (r"(?:https?://)?([a-zA-Z0-9_-]+)\.fanbox\.cc/?$|"
                r"(?:https?://)?(?:www\.)?fanbox\.cc/@([^/?#]+)/?$")
@@ -142,7 +142,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
 
 
 class FanboxPostExtractor(FanboxExtractor):
-    """Extractor for media from a single fanbox post"""
+    """Extractor for media from a single Fanbox post"""
     subcategory = "post"
     pattern = (r"(?:https?://)?(?:www\.)?fanbox\.cc/@[^/?#]+/posts/([^/?#]+)|"
                r"(?:https?://)?[a-zA-Z0-9_-]+\.fanbox\.cc/posts/([^/?#]+)")

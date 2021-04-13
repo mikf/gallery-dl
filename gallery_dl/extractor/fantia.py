@@ -11,7 +11,7 @@ from .. import text
 
 
 class FantiaExtractor(Extractor):
-    """Base class for fantia extractors"""
+    """Base class for Fantia extractors"""
     category = "fantia"
     root = "https://fantia.jp"
     directory_fmt = ("{category}", "{fanclub_id}")
