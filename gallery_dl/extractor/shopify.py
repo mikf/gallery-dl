@@ -58,6 +58,9 @@ BASE_PATTERN = ShopifyExtractor.update({
         "root": "https://www.fashionnova.com",
         "pattern": r"(?:www\.)?fashionnova\.com",
     },
+    "omgmiamiswimwear": {
+        "root": "https://www.omgmiamiswimwear.com"
+    },
 })
 
 
@@ -74,6 +77,7 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
         }),
         ("https://www.fashionnova.com/collections/mini-dresses/?page=1"),
         ("https://www.fashionnova.com/collections/mini-dresses#1"),
+        ("https://www.omgmiamiswimwear.com/collections/fajas"),
     )
 
     def metadata(self):
@@ -119,6 +123,10 @@ class ShopifyProductExtractor(ShopifyExtractor):
         ("https://www.fashionnova.com/products/essential-slide-red", {
             "pattern": r"https?://cdn\d*\.shopify.com/",
             "count": 3,
+        }),
+        ("https://www.omgmiamiswimwear.com/products/la-medusa-maxi-dress", {
+            "pattern": r"https://cdn\.shopify\.com/s/files/1/1819/6171/",
+            "count": 5,
         }),
         ("https://www.fashionnova.com/collections/flats/products/name"),
     )
