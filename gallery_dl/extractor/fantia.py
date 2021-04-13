@@ -101,7 +101,7 @@ class FantiaExtractor(Extractor):
 class FantiaCreatorExtractor(FantiaExtractor):
     """Extractor for a Fantia creator's works"""
     subcategory = "creator"
-    pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/fanclubs/([^/?#]+)"
+    pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/fanclubs/(\d+)"
     test = (
         ("https://fantia.jp/fanclubs/6939", {
             "range": "1-25",
@@ -127,7 +127,7 @@ class FantiaCreatorExtractor(FantiaExtractor):
 class FantiaPostExtractor(FantiaExtractor):
     """Extractor for media from a single Fantia post"""
     subcategory = "post"
-    pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/posts/([^/?#]+)"
+    pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/posts/(\d+)"
     test = (
         ("https://fantia.jp/posts/508363", {
             "count": 6,
