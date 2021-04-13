@@ -10,6 +10,12 @@ from .common import Extractor, Message
 from .. import text
 
 
+BASE_PATTERN = (
+    r"(?:https?://)?(?:([a-zA-Z0-9_-]+)\.fanbox\.cc|"
+    r"(?:www\.)?fanbox\.cc/@([^/?#]+))"
+)
+
+
 class FanboxExtractor(Extractor):
     """Base class for Fanbox extractors"""
     category = "fanbox"
@@ -117,8 +123,7 @@ class FanboxExtractor(Extractor):
 class FanboxCreatorExtractor(FanboxExtractor):
     """Extractor for a Fanbox creator's works"""
     subcategory = "creator"
-    pattern = (r"(?:https?://)?([a-zA-Z0-9_-]+)\.fanbox\.cc/?$|"
-               r"(?:https?://)?(?:www\.)?fanbox\.cc/@([^/?#]+)/?$")
+    pattern = BASE_PATTERN + r"/?$"
     test = (
         ("https://xub.fanbox.cc", {
             "range": "1-15",
@@ -144,8 +149,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
 class FanboxPostExtractor(FanboxExtractor):
     """Extractor for media from a single Fanbox post"""
     subcategory = "post"
-    pattern = (r"(?:https?://)?(?:www\.)?fanbox\.cc/@[^/?#]+/posts/([^/?#]+)|"
-               r"(?:https?://)?[a-zA-Z0-9_-]+\.fanbox\.cc/posts/([^/?#]+)")
+    pattern = BASE_PATTERN + r"/posts/(\d+)"
     test = (
         ("https://www.fanbox.cc/@xub/posts/1910054", {
             "count": 3,
@@ -160,7 +164,7 @@ class FanboxPostExtractor(FanboxExtractor):
 
     def __init__(self, match):
         FanboxExtractor.__init__(self, match)
-        self.post_id = match.group(1) or match.group(2)
+        self.post_id = match.group(3)
 
     def posts(self):
         return self._get_post_data_and_urls(self.post_id)
