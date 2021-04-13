@@ -726,6 +726,16 @@ Description
     * ``true``: Original ZIP archives
     * ``false``: Converted video files
 
+extractor.danbooru.metadata
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata (notes, artist commentary, parent, children)
+
+    Note: This requires 1 additional HTTP request for each post.
 
 extractor.derpibooru.api-key
 ----------------------------
