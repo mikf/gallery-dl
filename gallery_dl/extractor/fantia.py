@@ -30,7 +30,8 @@ class FantiaExtractor(Extractor):
         for full_response, post in self.posts():
             yield Message.Directory, post
             for url, url_data in self._get_urls_from_post(full_response, post):
-                text.nameext_from_url(url_data["content_filename"] or url, url_data)
+                fname = url_data["content_filename"] or url
+                text.nameext_from_url(fname, url_data)
                 url_data["file_url"] = url
                 yield Message.Url, url, url_data
 
