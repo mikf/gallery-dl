@@ -115,14 +115,14 @@ class GelbooruPostExtractor(GelbooruBase,
                 "notes": [
                     {
                         "height": 553,
-                        "text": "Look over this way when you talk~",
+                        "body": "Look over this way when you talk~",
                         "width": 246,
                         "x": 35,
                         "y": 72
                     },
                     {
                         "height": 557,
-                        "text": "Hey~\nAre you listening~?",
+                        "body": "Hey~\nAre you listening~?",
                         "width": 246,
                         "x": 1233,
                         "y": 109

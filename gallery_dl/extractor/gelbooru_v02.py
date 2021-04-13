@@ -77,7 +77,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 "height": int(extr(note_data, 'data-height="', '"')[0]),
                 "x": int(extr(note_data, 'data-x="', '"')[0]),
                 "y": int(extr(note_data, 'data-y="', '"')[0]),
-                "text": extr(note_data, 'data-body="', '"')[0],
+                "body": extr(note_data, 'data-body="', '"')[0],
             }
             notes.append(note)
 
