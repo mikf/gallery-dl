@@ -99,7 +99,7 @@ class FantiaExtractor(Extractor):
 
 
 class FantiaCreatorExtractor(FantiaExtractor):
-    """Extractor for a fantia creator's works"""
+    """Extractor for a Fantia creator's works"""
     subcategory = "creator"
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/fanclubs/([^/?#]+)"
     test = (
@@ -125,7 +125,7 @@ class FantiaCreatorExtractor(FantiaExtractor):
 
 
 class FantiaPostExtractor(FantiaExtractor):
-    """Extractor for media from a single fantia post"""
+    """Extractor for media from a single Fantia post"""
     subcategory = "post"
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/posts/([^/?#]+)"
     test = (
