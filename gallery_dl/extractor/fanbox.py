@@ -20,7 +20,7 @@ class FanboxExtractor(Extractor):
     """Base class for Fanbox extractors"""
     category = "fanbox"
     root = "https://www.fanbox.cc"
-    directory_fmt = ("{category}", "{creator_id}")
+    directory_fmt = ("{category}", "{creatorId}")
     filename_fmt = "{id}_{num}.{extension}"
     archive_fmt = "{id}_{num}"
     _warning = True
@@ -33,9 +33,9 @@ class FanboxExtractor(Extractor):
                 self.log.warning("no 'FANBOXSESSID' cookie set")
             FanboxExtractor._warning = False
 
-        for url, data in self.posts():
-            yield Message.Directory, data
-            yield Message.Url, url, data
+        for content_body, post in self.posts():
+            yield Message.Directory, post
+            yield from self._get_urls_from_post(content_body, post)
 
     def posts(self):
         """Return all relevant post objects"""
@@ -47,77 +47,64 @@ class FanboxExtractor(Extractor):
             url = text.ensure_http_scheme(url)
             body = self.request(url, headers=headers).json()["body"]
             for item in body["items"]:
-                for url, data in self._get_post_data_and_urls(item["id"]):
-                    yield url, data
+                yield self._get_post_data(item["id"])
 
             url = body["nextUrl"]
 
-    def _get_post_data_and_urls(self, post_id):
+    def _get_post_data(self, post_id):
         """Fetch and process post data"""
         headers = {"Origin": self.root}
         url = "https://api.fanbox.cc/post.info?postId="+post_id
-        pbody = self.request(url, headers=headers).json()["body"]
+        post = self.request(url, headers=headers).json()["body"]
 
-        post = {
-            "id": pbody["id"],
-            "title": pbody["title"],
-            "fee_required": pbody["feeRequired"],
-            "published": pbody["publishedDatetime"],
-            "updated": pbody["updatedDatetime"],
-            "type": pbody["type"],
-            "tags": pbody["tags"],
-            "creator_id": pbody["creatorId"],
-            "has_adult_content": pbody["hasAdultContent"],
-            "post_url": self.root+"/@"+pbody["creatorId"]+"/posts/"+post_id,
-            "creator_user_id": pbody["user"]["userId"],
-            "creator_name": pbody["user"]["name"],
-            "text": pbody["body"].get("text", None) if pbody["body"] else None,
-            "is_cover_image": False
-        }
+        content_body = post.pop("body", None)
+        post["date"] = text.parse_datetime(post["publishedDatetime"])
+        post["text"] = content_body.get("text") if content_body else None
+        post["isCoverImage"] = False
 
+        return content_body, post
+
+    def _get_urls_from_post(self, content_body, post):
         num = 0
-        if "coverImageUrl" in pbody and pbody["coverImageUrl"]:
-            final_post = dict(post)
+        cover_image = post.get("coverImageUrl")
+        if cover_image:
+            final_post = post.copy()
             final_post["isCoverImage"] = True
-            final_post["file_url"] = pbody["coverImageUrl"]
-            final_post = text.nameext_from_url(
-                pbody["coverImageUrl"], final_post
-            )
+            final_post["fileUrl"] = cover_image
+            text.nameext_from_url(cover_image, final_post)
             final_post["num"] = num
             num += 1
-            yield pbody["coverImageUrl"], final_post
+            yield Message.Url, cover_image, final_post
 
-        for group in ["images", "imageMap"]:
-            if group in (pbody["body"] or []):
-                for item in pbody["body"][group]:
-                    final_post = dict(post)
-                    final_post["file_url"] = item["originalUrl"]
-                    final_post = text.nameext_from_url(
-                        item["originalUrl"], final_post
-                    )
+        for group in ("images", "imageMap"):
+            if group in (content_body or []):
+                for item in content_body[group]:
+                    final_post = post.copy()
+                    final_post["fileUrl"] = item["originalUrl"]
+                    text.nameext_from_url(item["originalUrl"], final_post)
                     if "extension" in item:
                         final_post["extension"] = item["extension"]
-                    final_post["file_id"] = item.get("id", None)
-                    final_post["width"] = item.get("width", None)
-                    final_post["height"] = item.get("height", None)
+                    final_post["fileId"] = item.get("id")
+                    final_post["width"] = item.get("width")
+                    final_post["height"] = item.get("height")
                     final_post["num"] = num
                     num += 1
-                    yield item["originalUrl"], final_post
+                    yield Message.Url, item["originalUrl"], final_post
 
-        for group in ["files", "fileMap"]:
-            if group in (pbody["body"] or []):
-                for item in pbody["body"][group]:
-                    final_post = dict(post)
-                    final_post["file_url"] = item["url"]
-                    final_post = text.nameext_from_url(item["url"], final_post)
+        for group in ("files", "fileMap"):
+            if group in (content_body or []):
+                for item in content_body[group]:
+                    final_post = post.copy()
+                    final_post["fileUrl"] = item["url"]
+                    text.nameext_from_url(item["url"], final_post)
                     if "extension" in item:
                         final_post["extension"] = item["extension"]
                     if "name" in item:
                         final_post["filename"] = item["name"]
-                    final_post["file_id"] = item.get("id", None)
+                    final_post["fileId"] = item.get("id")
                     final_post["num"] = num
                     num += 1
-                    yield item["url"], final_post
+                    yield Message.Url, item["url"], final_post
 
 
 class FanboxCreatorExtractor(FanboxExtractor):
@@ -129,7 +116,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
             "range": "1-15",
             "count": ">= 15",
             "keyword": {
-                "creator_id" : "xub",
+                "creatorId" : "xub",
                 "tags"       : list,
                 "title"      : str,
             },
@@ -143,7 +130,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
     def posts(self):
         url = "https://api.fanbox.cc/post.listCreator?creatorId={}&limit=10"
 
-        return self._pagination(url.format(self._creator_id))
+        return self._pagination(url.format(self.creator_id))
 
 
 class FanboxPostExtractor(FanboxExtractor):
@@ -156,8 +143,8 @@ class FanboxPostExtractor(FanboxExtractor):
             "keyword": {
                 "title": "えま★おうがすと",
                 "tags": list,
-                "has_adult_content": True,
-                "is_cover_image": False
+                "hasAdultContent": True,
+                "isCoverImage": False
             },
         }),
     )
@@ -167,4 +154,4 @@ class FanboxPostExtractor(FanboxExtractor):
         self.post_id = match.group(3)
 
     def posts(self):
-        return self._get_post_data_and_urls(self.post_id)
+        yield self._get_post_data(self.post_id)
