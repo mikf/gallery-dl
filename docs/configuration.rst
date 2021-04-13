@@ -733,8 +733,7 @@ Type
 Default
     ``false``
 Description
-    If enabled, additional metadata (notes, artist commentary, parent, children)
-    will extracted.
+    Extract additional metadata (notes, artist commentary, parent, children)
 
     Note: This requires 1 additional HTTP request for each post.
 
