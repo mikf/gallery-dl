@@ -70,7 +70,13 @@ class BooruExtractor(BaseExtractor):
         """Prepare the 'post's metadata"""
 
     def _extended_tags(self, post, page=None):
-        """Generate extended tag information"""
+        """Generate extended tag information
+
+        The return value of this function will be
+        passed to the _notes function as the page parameter.
+        This makes it possible to reuse the same HTML both for
+        extracting tags and notes.
+        """
 
     def _notes(self, post, page=None):
         """Generate information about notes"""
