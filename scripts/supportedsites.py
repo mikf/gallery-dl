@@ -58,6 +58,7 @@ CATEGORY_MAP = {
     "kissmanga"      : "KissManga",
     "lineblog"       : "LINE BLOG",
     "livedoor"       : "livedoor Blog",
+    "omgmiamiswimwear": "Omg Miami Swimwear",
     "mangadex"       : "MangaDex",
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
