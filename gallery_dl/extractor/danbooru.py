@@ -32,7 +32,7 @@ class DanbooruExtractor(Extractor):
         super().__init__(match)
         self.root = "https://{}.donmai.us".format(match.group(1))
         self.ugoira = self.config("ugoira", False)
-        self.extended_metadata = self.config("extended-metadata", False)
+        self.extended_metadata = self.config("metadata", False)
 
         username, api_key = self._get_auth_info()
         if username:

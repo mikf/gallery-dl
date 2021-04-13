@@ -726,8 +726,8 @@ Description
     * ``true``: Original ZIP archives
     * ``false``: Converted video files
 
-extractor.danbooru.extended-metadata
--------------------------
+extractor.danbooru.metadata
+---------------------------
 Type
     ``bool``
 Default
