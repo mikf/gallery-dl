@@ -27,20 +27,12 @@ class FantiaExtractor(Extractor):
                 self.log.warning("no '_session_id' cookie set")
             FantiaExtractor._warning = False
 
-        for url, data in self.posts():
-            if data["content_filename"]:
-                fname = data["content_filename"]
-                data["filename"] = fname
-                if "." in fname:
-                    data["extension"] = fname[fname.rfind(".")+1:]
-                else:
-                    data["extension"] = text.ext_from_url(url)
-            else:
-                data = text.nameext_from_url(url, data)
-            data["file_url"] = url
-
-            yield Message.Directory, data
-            yield Message.Url, url, data
+        for full_response, post in self.posts():
+            yield Message.Directory, post
+            for url, url_data in self._get_urls_from_post(full_response, post):
+                text.nameext_from_url(url_data["content_filename"] or url, url_data)
+                url_data["file_url"] = url
+                yield Message.Url, url, url_data
 
     def posts(self):
         """Return all relevant post objects"""
@@ -59,12 +51,11 @@ class FantiaExtractor(Extractor):
                 gallery_page_html, 'class="link-block" href="/posts/', '"'
             ):
                 posts_found = True
-                for url, data in self._get_post_data_and_urls(post_id):
-                    yield url, data
+                yield self._get_post_data(post_id)
 
             page += 1
 
-    def _get_post_data_and_urls(self, post_id):
+    def _get_post_data(self, post_id):
         """Fetch and process post data"""
         headers = {"Referer": self.root}
         url = self.root+"/api/v1/posts/"+post_id
@@ -83,7 +74,10 @@ class FantiaExtractor(Extractor):
             "fanclub_url": self.root+"/fanclubs/"+str(resp["fanclub"]["id"]),
             "tags": resp["tags"]
         }
+        return resp, post
 
+    def _get_urls_from_post(self, resp, post):
+        """Extract individual URL data from the response"""
         if "thumb" in resp and resp["thumb"] and "original" in resp["thumb"]:
             post["content_filename"] = ""
             post["content_category"] = "thumb"
@@ -151,4 +145,4 @@ class FantiaPostExtractor(FantiaExtractor):
         self.post_id = match.group(1)
 
     def posts(self):
-        return self._get_post_data_and_urls(self.post_id)
+        yield self._get_post_data(self.post_id)
