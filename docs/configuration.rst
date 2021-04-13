@@ -1747,6 +1747,16 @@ Description
 
     Note: This requires 1 additional HTTP request for each post.
 
+extractor.[booru].notes
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract overlay notes (position and text).
+
+    Note: This requires 1 additional HTTP request for each post.
 
 extractor.[manga-extractor].chapter-reverse
 -------------------------------------------
