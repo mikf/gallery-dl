@@ -69,7 +69,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
     subcategory = "image"
     pattern = BASE_PATTERN + r"/photos/([^/?#]+)"
     test = ("https://unsplash.com/photos/lsoogGC_5dg", {
-        "url": "ac9d194f58b3fc9aacdfc9784c1b69868f212b6e",
+        "url": "b99a5829ca955b768a206aa9afc391bd3f3dd55e",
         "keyword": {
             "alt_description": "re:silhouette of trees near body of water ",
             "blur_hash": "LZP4uQS4jboe%#o0WCa}2doJNaaz",
@@ -190,7 +190,7 @@ class UnsplashSearchExtractor(UnsplashExtractor):
     subcategory = "search"
     pattern = BASE_PATTERN + r"/s/photos/([^/?#]+)(?:\?([^/?#]+))?"
     test = ("https://unsplash.com/s/photos/nature", {
-        "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
+        "pattern": r"https://images\.unsplash\.com/((flagged/)?photo-\d+-\w+"
                    r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
         "range": "1-30",
         "count": 30,

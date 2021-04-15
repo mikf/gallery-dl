@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -100,9 +100,6 @@ class LusciousAlbumExtractor(LusciousExtractor):
                 "number_of_comments": int,
                 "number_of_favorites": int,
             },
-        }),
-        ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
-            "url": "0be0cc279be1de99f727764819e03435e2a79915",
         }),
         ("https://luscious.net/albums/not-found_277035/", {
             "exception": exception.NotFoundError,
