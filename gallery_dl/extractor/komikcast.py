@@ -60,7 +60,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     )
 
     def metadata(self, page):
-        info = text.extract(page, "<title>", " &ndash; Komikcast<")[0]
+        info = text.extract(page, "<title>", " – Komikcast<")[0]
         return self.parse_chapter_string(info)
 
     @staticmethod
@@ -100,7 +100,7 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     @staticmethod
     def metadata(page):
         """Return a dict with general metadata"""
-        manga , pos = text.extract(page, "<title>" , " &ndash; Komikcast<")
+        manga , pos = text.extract(page, "<title>" , " – Komikcast<")
         genres, pos = text.extract(
             page, 'class="komik_info-content-genre">', "</span>", pos)
         author, pos = text.extract(page, ">Author:", "</span>", pos)
