@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.slideshare.net/"""
+"""Extractors for https://www.slideshare.net/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -58,15 +58,16 @@ class SlidesharePresentationExtractor(Extractor):
         """Collect metadata for extractor-job"""
         descr, pos = text.extract(
             page, '<meta name="description" content="', '"')
+        category, pos = text.extract(
+            page, '<div class="metadata-item">', '</div>', pos)
+        views, pos = text.extract(
+            page, '<div class="metadata-item">', '</div>', pos)
+        published, pos = text.extract(
+            page, '<div class="metadata-item">', '</div>', pos)
         title, pos = text.extract(
             page, '<span class="j-title-breadcrumb">', '</span>', pos)
-        views, pos = text.extract(
-            page, '<span class="notranslate">', 'views<', pos)
-        published, pos = text.extract(
-            page, '<time datetime="', '"', pos)
         alt_descr, pos = text.extract(
-            page, 'id="slideshow-description-paragraph" class="notranslate">',
-            '</p>', pos)
+            page, '<p class="slideshow-description notranslate">', '</p>', pos)
 
         if descr.endswith("…") and alt_descr:
             descr = text.remove_html(alt_descr).strip()
@@ -76,8 +77,9 @@ class SlidesharePresentationExtractor(Extractor):
             "presentation": self.presentation,
             "title": text.unescape(title.strip()),
             "description": text.unescape(descr),
-            "views": text.parse_int(views.replace(",", "")),
-            "published": published,
+            "views": text.parse_int(views.rpartition(
+                " views")[0].replace(",", "")),
+            "published": published.strip(),
         }
 
     @staticmethod
