@@ -146,7 +146,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
         }),
         # unavailable photos (#1335)
         ("https://500px.com/p/Light_Expression_Photography/galleries/street", {
-            "count": 0,
+            "count": ">= 7",
         }),
         ("https://500px.com/fashvamp/galleries/lera"),
     )
@@ -159,7 +159,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
     def metadata(self):
         user = self._request_graphql(
             "ProfileRendererQuery", {"username": self.user_name},
-            "105058632482dd2786fd5775745908dc928f537b28e28356b076522757d65c19",
+            "fcecc7028c308115b0defebc63acec3fe3c12df86a602c3e1785ba5cfb8fff47",
         )["profile"]
         self.user_id = str(user["legacyId"])
 
