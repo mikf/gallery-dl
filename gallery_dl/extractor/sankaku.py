@@ -147,9 +147,9 @@ class SankakuPostExtractor(SankakuExtractor):
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
             "options": (("tags", True),),
             "keyword": {
-                "tags_artist": ["bonocho"],
-                "tags_studio": ["dc_comics"],
-                "tags_medium": ["sketch", "copyright_name"],
+                "tags_artist"   : ["bonocho"],
+                "tags_studio"   : ["dc_comics"],
+                "tags_medium"   : list,
                 "tags_copyright": list,
                 "tags_character": list,
                 "tags_general"  : list,
