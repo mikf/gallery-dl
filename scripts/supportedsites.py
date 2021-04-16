@@ -402,5 +402,5 @@ Consider all sites to be NSFW unless otherwise known.
 
 categories, domains = build_extractor_list()
 outfile = sys.argv[1] if len(sys.argv) > 1 else "supportedsites.md"
-with open(util.path("docs", outfile), "w", encoding="utf-8") as fp:
+with open(util.path("docs", outfile), "w") as fp:
     fp.write(generate_output(COLUMNS, categories, domains))
