@@ -38,10 +38,12 @@ CATEGORY_MAP = {
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
     "hentaicafe"     : "Hentai Cafe",
+    "hentaicosplays" : "Hentai Cosplay",
     "hentaifoundry"  : "Hentai Foundry",
     "hentaifox"      : "HentaiFox",
     "hentaihand"     : "HentaiHand",
     "hentaihere"     : "HentaiHere",
+    "hentaiimg"      : "Hentai Image",
     "hitomi"         : "Hitomi.la",
     "idolcomplex"    : "Idol Complex",
     "illusioncardsbooru": "Illusion Game Cards",
@@ -75,6 +77,7 @@ CATEGORY_MAP = {
     "nyafuu"         : "Nyafuu Archive",
     "paheal"         : "rule #34",
     "photovogue"     : "PhotoVogue",
+    "pornimagesxxx"  : "Porn Image",
     "powermanga"     : "PowerManga",
     "readcomiconline": "Read Comic Online",
     "rbt"            : "RebeccaBlackTech",
@@ -324,6 +327,13 @@ def build_extractor_list():
     default["e-hentai"] = default["exhentai"]
     domains["e-hentai"] = domains["exhentai"].replace("x", "-")
 
+    # add hentai-cosplays sister sites (hentai-img, porn-images-xxx)
+    default["hentaiimg"] = default["hentaicosplays"]
+    domains["hentaiimg"] = "https://hentai-img.com/"
+
+    default["pornimagesxxx"] = default["hentaicosplays"]
+    domains["pornimagesxxx"] = "https://porn-images-xxx.com/"
+
     return categories, domains
 
 
@@ -392,5 +402,5 @@ Consider all sites to be NSFW unless otherwise known.
 
 categories, domains = build_extractor_list()
 outfile = sys.argv[1] if len(sys.argv) > 1 else "supportedsites.md"
-with open(util.path("docs", outfile), "w") as fp:
+with open(util.path("docs", outfile), "w", encoding="utf-8") as fp:
     fp.write(generate_output(COLUMNS, categories, domains))
