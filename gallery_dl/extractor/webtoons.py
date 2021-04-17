@@ -6,23 +6,20 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.webtoons.com/"""
+"""Extractors for https://www.webtoons.com/"""
 
-from .common import Extractor, Message
+from .common import GalleryExtractor, Extractor, Message
 from .. import exception, text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/((en|fr)"
 
 
-class WebtoonsExtractor(Extractor):
+class WebtoonsBase():
     category = "webtoons"
     root = "https://www.webtoons.com"
-    cookiedomain = "www.webtoons.com"
+    cookiedomain = ".webtoons.com"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.path, self.lang, self.genre , self.comic, self.query = \
-            match.groups()
+    def setup_agegate_cookies(self):
         self._update_cookies({
             "atGDPR"     : "AD_CONSENT",
             "needCCPA"   : "false",
@@ -34,13 +31,13 @@ class WebtoonsExtractor(Extractor):
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
-        if response.history and "/ageGate" in response.request.url:
+        if response.history and "/ageGate" in response.url:
             raise exception.StopExtraction(
-                "Redirected to age gate check ('%s')", response.request.url)
+                "HTTP redirect to age gate check ('%s')", response.request.url)
         return response
 
 
-class WebtoonsEpisodeExtractor(WebtoonsExtractor):
+class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     """Extractor for an episode on webtoons.com"""
     subcategory = "episode"
     directory_fmt = ("{category}", "{comic}")
@@ -60,54 +57,44 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
     )
 
     def __init__(self, match):
-        WebtoonsExtractor.__init__(self, match)
-        query = text.parse_query(self.query)
-        self.title_no = query.get("title_no")
-        if not self.title_no:
-            raise exception.NotFoundError("title_no")
-        self.episode = query.get("episode_no")
-        if not self.episode:
-            raise exception.NotFoundError("episode_no")
+        self.path, self.lang, self.genre, self.comic, query = match.groups()
 
-    def items(self):
-        url = "{}/{}/viewer?{}".format(self.root, self.path, self.query)
+        url = "{}/{}/viewer?{}".format(self.root, self.path, query)
+        GalleryExtractor.__init__(self, match, url)
+        self.setup_agegate_cookies()
         self.session.headers["Referer"] = url
 
-        page = self.request(url).text
-        data = self.get_job_metadata(page)
-        imgs = self.get_image_urls(page)
-        data["count"] = len(imgs)
+        query = text.parse_query(query)
+        self.title_no = query.get("title_no")
+        self.episode = query.get("episode_no")
 
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["num"], url in enumerate(imgs, 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
-
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
+    def metadata(self, page):
         title, pos = text.extract(
             page, '<meta property="og:title" content="', '"')
         descr, pos = text.extract(
             page, '<meta property="og:description" content="', '"', pos)
 
         return {
-            "genre": self.genre,
-            "comic": self.comic,
-            "title_no": self.title_no,
-            "episode": self.episode,
-            "title": text.unescape(title),
+            "genre"      : self.genre,
+            "comic"      : self.comic,
+            "title_no"   : self.title_no,
+            "episode"    : self.episode,
+            "title"      : text.unescape(title),
             "description": text.unescape(descr),
-            "lang": self.lang,
-            "language": util.code_to_language(self.lang),
+            "lang"       : self.lang,
+            "language"   : util.code_to_language(self.lang),
         }
 
     @staticmethod
-    def get_image_urls(page):
-        """Extract and return a list of all image urls"""
-        return list(text.extract_iter(page, 'class="_images" data-url="', '"'))
+    def images(page):
+        return [
+            (url, None)
+            for url in text.extract_iter(
+                page, 'class="_images" data-url="', '"')
+        ]
 
 
-class WebtoonsComicExtractor(WebtoonsExtractor):
+class WebtoonsComicExtractor(WebtoonsBase, Extractor):
     """Extractor for an entire comic on webtoons.com"""
     subcategory = "comic"
     categorytransfer = True
@@ -134,12 +121,13 @@ class WebtoonsComicExtractor(WebtoonsExtractor):
     )
 
     def __init__(self, match):
-        WebtoonsExtractor.__init__(self, match)
-        query = text.parse_query(self.query)
+        Extractor.__init__(self, match)
+        self.setup_agegate_cookies()
+
+        self.path, self.lang, self.genre, self.comic, query = match.groups()
+        query = text.parse_query(query)
         self.title_no = query.get("title_no")
-        if not self.title_no:
-            raise exception.NotFoundError("title_no")
-        self.page_no = int(query.get("page", 1))
+        self.page_no = text.parse_int(query.get("page"), 1)
 
     def items(self):
         page = None
