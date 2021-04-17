@@ -23,10 +23,14 @@ class WebtoonsExtractor(Extractor):
         Extractor.__init__(self, match)
         self.path, self.lang, self.genre , self.comic, self.query = \
             match.groups()
-        cookies = self.session.cookies
-        cookies.set("pagGDPR", "true", domain=self.cookiedomain)
-        cookies.set("rstagGDPR_DE", "true", domain=self.cookiedomain)
-        cookies.set("ageGatePass", "true", domain=self.cookiedomain)
+        self._update_cookies({
+            "atGDPR"     : "AD_CONSENT",
+            "needCCPA"   : "false",
+            "needCOPPA"  : "false",
+            "needGDPR"   : "false",
+            "pagGDPR"    : "true",
+            "ageGatePass": "true",
+        })
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
