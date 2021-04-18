@@ -194,9 +194,21 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Hentai Cosplay</td>
+    <td>https://hentai-cosplays.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>Hentai Foundry</td>
     <td>https://www.hentai-foundry.com/</td>
     <td>Favorites, individual Images, Pictures, Popular Images, Recent Images, Scraps, Stories, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Hentai Image</td>
+    <td>https://hentai-img.com/</td>
+    <td>Galleries</td>
     <td></td>
 </tr>
 <tr>
@@ -539,6 +551,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Plurk</td>
     <td>https://www.plurk.com/</td>
     <td>Posts, Timelines</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Porn Image</td>
+    <td>https://porn-images-xxx.com/</td>
+    <td>Galleries</td>
     <td></td>
 </tr>
 <tr>

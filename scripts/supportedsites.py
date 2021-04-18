@@ -38,10 +38,12 @@ CATEGORY_MAP = {
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
     "hentaicafe"     : "Hentai Cafe",
+    "hentaicosplays" : "Hentai Cosplay",
     "hentaifoundry"  : "Hentai Foundry",
     "hentaifox"      : "HentaiFox",
     "hentaihand"     : "HentaiHand",
     "hentaihere"     : "HentaiHere",
+    "hentaiimg"      : "Hentai Image",
     "hitomi"         : "Hitomi.la",
     "idolcomplex"    : "Idol Complex",
     "illusioncardsbooru": "Illusion Game Cards",
@@ -76,6 +78,7 @@ CATEGORY_MAP = {
     "nyafuu"         : "Nyafuu Archive",
     "paheal"         : "rule #34",
     "photovogue"     : "PhotoVogue",
+    "pornimagesxxx"  : "Porn Image",
     "powermanga"     : "PowerManga",
     "readcomiconline": "Read Comic Online",
     "rbt"            : "RebeccaBlackTech",
@@ -323,6 +326,13 @@ def build_extractor_list():
     # add e-hentai.org
     default["e-hentai"] = default["exhentai"]
     domains["e-hentai"] = domains["exhentai"].replace("x", "-")
+
+    # add hentai-cosplays sister sites (hentai-img, porn-images-xxx)
+    default["hentaiimg"] = default["hentaicosplays"]
+    domains["hentaiimg"] = "https://hentai-img.com/"
+
+    default["pornimagesxxx"] = default["hentaicosplays"]
+    domains["pornimagesxxx"] = "https://porn-images-xxx.com/"
 
     return categories, domains
 
