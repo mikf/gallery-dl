@@ -57,6 +57,7 @@ class Job():
             if pextr.config("category-transfer", pextr.categorytransfer):
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
+                extr._cfgpath = pextr._cfgpath
 
             # transfer parent directory
             extr._parentdir = pextr._parentdir
