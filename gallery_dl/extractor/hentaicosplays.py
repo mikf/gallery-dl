@@ -9,6 +9,7 @@
 
 from .common import GalleryExtractor
 from .. import text
+import re
 
 
 class HentaicosplaysGalleryExtractor(GalleryExtractor):
@@ -28,6 +29,7 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
             "keyword": {
                 "count": 18,
                 "site": "hentai-cosplays",
+                "slug": "---devilism--tide-kurihara-",
                 "title": str,
             },
         }),
@@ -37,6 +39,7 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
             "keyword": {
                 "count": 11,
                 "site": "porn-images-xxx",
+                "slug": "enako-enako-24",
                 "title": str,
             },
         }),
@@ -46,6 +49,7 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
             "keyword": {
                 "count": 2,
                 "site": "hentai-img",
+                "slug": "hollow-cora-502",
                 "title": str,
             },
         }),
@@ -59,8 +63,11 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
 
     def metadata(self, page):
         title = text.extract(page, "<title>", "</title>")[0]
+        _slug_raw = text.extract(page, '<meta property="og:url" content="', '"')[0]
+        slug = re.match(r"^https://[^/]+\/[^/]+\/(?P<slug>[^/]+)/$", _slug_raw).groupdict()["slug"]
         return {
             "title": text.unescape(title.rpartition(" Story Viewer - ")[0]),
+            "slug" : slug,
             "site" : self.site,
         }
 
