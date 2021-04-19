@@ -28,7 +28,8 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
             "keyword": {
                 "count": 18,
                 "site": "hentai-cosplays",
-                "title": str,
+                "slug": "---devilism--tide-kurihara-",
+                "title": "艦 こ れ-devilism の tide Kurihara 憂",
             },
         }),
         ("https://fr.porn-images-xxx.com/image/enako-enako-24/", {
@@ -52,15 +53,16 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
     )
 
     def __init__(self, match):
-        root, self.site, path = match.groups()
+        root, self.site, self.slug = match.groups()
         self.root = text.ensure_http_scheme(root)
-        url = "{}/story/{}/".format(self.root, path)
+        url = "{}/story/{}/".format(self.root, self.slug)
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
         title = text.extract(page, "<title>", "</title>")[0]
         return {
             "title": text.unescape(title.rpartition(" Story Viewer - ")[0]),
+            "slug" : self.slug,
             "site" : self.site,
         }
 
