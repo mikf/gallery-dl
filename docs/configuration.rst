@@ -920,6 +920,20 @@ Description
     Minimum wait time in seconds before API requests.
 
 
+extractor.exhentai.limits
+-------------------------
+Type
+    ``bool`` or ``integer``
+Default
+    ``true``
+Description
+    Check image download limits
+    and stop extraction when they are exceeded.
+
+    If this value is an ``integer``, it gets used as the limit maximum
+    instead of the value listed on ``https://e-hentai.org/home.php``
+
+
 extractor.exhentai.domain
 -------------------------
 Type

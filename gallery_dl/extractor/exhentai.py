@@ -43,7 +43,16 @@ class ExhentaiExtractor(Extractor):
         self.cookiedomain = "." + domain
 
         Extractor.__init__(self, match)
+        self.limits = self.config("limits", True)
         self.original = self.config("original", True)
+
+        if type(self.limits) is int:
+            self._limit_max = self.limits
+            self.limits = True
+        else:
+            self._limit_max = 0
+
+        self._remaining = 0
 
         self.session.headers["Referer"] = self.root + "/"
         if version != "ex":
@@ -69,6 +78,7 @@ class ExhentaiExtractor(Extractor):
             self.log.info("no username given; using e-hentai.org")
             self.root = "https://e-hentai.org"
             self.original = False
+            self.limits = False
             self.session.cookies["nw"] = "1"
 
     @cache(maxage=90*24*3600, keyarg=1)
@@ -204,6 +214,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             (self.image_from_page(ipage),), self.images_from_api())
         for url, image in images:
             data.update(image)
+            if self.limits:
+                self._check_limits(data)
             if "/fullimg.php" in url:
                 data["extension"] = ""
                 data["_http_validate"] = _validate_response
@@ -368,6 +380,35 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if page.startswith(("Invalid page", "Keep trying")):
             raise exception.NotFoundError("image page")
         return page
+
+    def _check_limits(self, data):
+        if not self._remaining or data["num"] % 25 == 0:
+            self._update_limits()
+        self._remaining -= data["cost"]
+
+        if self._remaining <= 0:
+            ExhentaiExtractor.LIMIT = True
+            url = "{}/s/{}/{}-{}".format(
+                self.root, data["image_token"], self.gallery_id, data["num"])
+            raise exception.StopExtraction(
+                "Image limit reached! Continue with '%s' "
+                "as URL after resetting it.", url)
+
+    def _update_limits(self):
+        url = "https://e-hentai.org/home.php"
+        cookies = {
+            cookie.name: cookie.value
+            for cookie in self.session.cookies
+            if cookie.domain == self.cookiedomain and cookie.name != "igneous"
+        }
+
+        page = self.request(url, cookies=cookies).text
+        current, pos = text.extract(page, "<strong>", "</strong>")
+        maximum, pos = text.extract(page, "<strong>", "</strong>", pos)
+        if self._limit_max:
+            maximum = self._limit_max
+        self.log.debug("Image Limits: %s/%s", current, maximum)
+        self._remaining = text.parse_int(maximum) - text.parse_int(current)
 
     @staticmethod
     def _parse_image_info(url):
