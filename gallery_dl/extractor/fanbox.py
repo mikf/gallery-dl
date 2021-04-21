@@ -26,6 +26,9 @@ class FanboxExtractor(Extractor):
     archive_fmt = "{id}_{num}"
     _warning = True
 
+    def __init__(self, match):
+        self.videos = self.config("videos", True)
+
     def items(self):
         yield Message.Version, 1
 
@@ -82,6 +85,25 @@ class FanboxExtractor(Extractor):
 
         if not content_body:
             return
+
+        if self.videos and "video" in content_body:
+            provider = content_body["video"]["serviceProvider"]
+            video_id = content_body["video"]["videoId"]
+            final_post["video"] = content_body["video"]
+            prefix = "ytdl:" if self.videos == "ytdl" else ""
+            final_url = None
+
+            if provider == "soundcloud":
+                final_url = prefix+"https://soundcloud.com/"+video_id
+            elif provider == "youtube":
+                final_url = prefix+"https://youtube.com/watch?v="+video_id
+            elif provider == "vimeo":
+                final_url = prefix+"https://vimeo.com/"+video_id
+            else:
+                self.log.warning("service not recognized: {}".format(provider))
+
+            if final_url:
+                yield Message.Url, final_url, final_post
 
         for group in ("images", "imageMap"):
             if group in content_body:
