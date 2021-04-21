@@ -77,8 +77,11 @@ class FanboxExtractor(Extractor):
             num += 1
             yield Message.Url, cover_image, final_post
 
+        if not content_body:
+            return
+
         for group in ("images", "imageMap"):
-            if group in (content_body or []):
+            if group in content_body:
                 for item in content_body[group]:
                     final_post = post.copy()
                     final_post["fileUrl"] = item["originalUrl"]
@@ -93,7 +96,7 @@ class FanboxExtractor(Extractor):
                     yield Message.Url, item["originalUrl"], final_post
 
         for group in ("files", "fileMap"):
-            if group in (content_body or []):
+            if group in content_body:
                 for item in content_body[group]:
                     final_post = post.copy()
                     final_post["fileUrl"] = item["url"]
