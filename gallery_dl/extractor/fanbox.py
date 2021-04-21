@@ -111,7 +111,7 @@ class FanboxExtractor(Extractor):
 class FanboxCreatorExtractor(FanboxExtractor):
     """Extractor for a Fanbox creator's works"""
     subcategory = "creator"
-    pattern = BASE_PATTERN + r"/?$"
+    pattern = BASE_PATTERN + r"(?:/posts)?/?$"
     test = (
         ("https://xub.fanbox.cc", {
             "range": "1-15",
