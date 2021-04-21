@@ -118,9 +118,8 @@ class FantiaCreatorExtractor(FantiaExtractor):
         self.creator_id = match.group(1)
 
     def posts(self):
-        base_url = self.root+"/fanclubs/"+self.creator_id+"/posts?page="
-
-        return self._pagination(base_url)
+        url = "{}/fanclubs/{}/posts".format(self.root, self.creator_id)
+        return self._pagination(url)
 
 
 class FantiaPostExtractor(FantiaExtractor):
