@@ -122,6 +122,9 @@ class FanboxCreatorExtractor(FanboxExtractor):
                 "title"      : str,
             },
         }),
+        ("https://xub.fanbox.cc/posts"),
+        ("https://www.fanbox.cc/@xub/"),
+        ("https://www.fanbox.cc/@xub/posts"),
     )
 
     def __init__(self, match):
