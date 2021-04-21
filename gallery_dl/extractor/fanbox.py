@@ -48,16 +48,19 @@ class FanboxExtractor(Extractor):
             url = text.ensure_http_scheme(url)
             body = self.request(url, headers=headers).json()["body"]
             for item in body["items"]:
-                yield self._get_post_data(item["id"])
+                yield self._process_post(item)
 
             url = body["nextUrl"]
 
-    def _get_post_data(self, post_id):
+    def _get_post_data_from_id(self, post_id):
         """Fetch and process post data"""
         headers = {"Origin": self.root}
         url = "https://api.fanbox.cc/post.info?postId="+post_id
         post = self.request(url, headers=headers).json()["body"]
 
+        return self._process_post(post)
+
+    def _process_post(self, post):
         content_body = post.pop("body", None)
         post["date"] = text.parse_datetime(post["publishedDatetime"])
         post["text"] = content_body.get("text") if content_body else None
@@ -161,4 +164,4 @@ class FanboxPostExtractor(FanboxExtractor):
         self.post_id = match.group(3)
 
     def posts(self):
-        yield self._get_post_data(self.post_id)
+        (self._get_post_data_from_id(self.post_id),)
