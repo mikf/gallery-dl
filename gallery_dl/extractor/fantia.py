@@ -38,23 +38,21 @@ class FantiaExtractor(Extractor):
     def posts(self):
         """Return all relevant post objects"""
 
-    def _pagination(self, base_url):
+def _pagination(self, url):
+        params = {"page": 1}
         headers = {"Referer": self.root}
-        page = 1
-        posts_found = True
 
-        while posts_found:
-            url = base_url+str(page)
-            url = text.ensure_http_scheme(url)
-            gallery_page_html = self.request(url, headers=headers).text
-            posts_found = False
+        while True:
+            page = self.request(url, params=params, headers=headers).text
+
+            post_id = None
             for post_id in text.extract_iter(
-                gallery_page_html, 'class="link-block" href="/posts/', '"'
-            ):
-                posts_found = True
-                yield self._get_post_data(post_id)
+                    page, 'class="link-block" href="/posts/', '"'):
+                yield post_id
 
-            page += 1
+            if not post_id:
+                return
+            params["page"] += 1
 
     def _get_post_data(self, post_id):
         """Fetch and process post data"""
