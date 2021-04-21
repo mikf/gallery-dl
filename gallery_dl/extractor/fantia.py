@@ -143,4 +143,4 @@ class FantiaPostExtractor(FantiaExtractor):
         self.post_id = match.group(1)
 
     def posts(self):
-        yield self._get_post_data(self.post_id)
+        return (self.post_id,)
