@@ -27,7 +27,8 @@ class FantiaExtractor(Extractor):
                 self.log.warning("no '_session_id' cookie set")
             FantiaExtractor._warning = False
 
-        for full_response, post in self.posts():
+        for post_id in self.posts():
+            full_response, post = self._get_post_data(post_id)
             yield Message.Directory, post
             for url, url_data in self._get_urls_from_post(full_response, post):
                 fname = url_data["content_filename"] or url
@@ -36,9 +37,9 @@ class FantiaExtractor(Extractor):
                 yield Message.Url, url, url_data
 
     def posts(self):
-        """Return all relevant post objects"""
+        """Return post IDs"""
 
-def _pagination(self, url):
+    def _pagination(self, url):
         params = {"page": 1}
         headers = {"Referer": self.root}
 
