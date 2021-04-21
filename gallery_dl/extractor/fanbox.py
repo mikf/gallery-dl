@@ -27,6 +27,7 @@ class FanboxExtractor(Extractor):
     _warning = True
 
     def __init__(self, match):
+        Extractor.__init__(self, match)
         self.videos = self.config("videos", True)
 
     def items(self):
@@ -89,7 +90,6 @@ class FanboxExtractor(Extractor):
         if self.videos and "video" in content_body:
             provider = content_body["video"]["serviceProvider"]
             video_id = content_body["video"]["videoId"]
-            final_post["video"] = content_body["video"]
             prefix = "ytdl:" if self.videos == "ytdl" else ""
             final_url = None
 
@@ -103,7 +103,11 @@ class FanboxExtractor(Extractor):
                 self.log.warning("service not recognized: {}".format(provider))
 
             if final_url:
-                yield Message.Url, final_url, final_post
+                final_post = post.copy()
+                final_post["video"] = content_body["video"]
+                final_post["num"] = num
+                num += 1
+                yield Message.Queue, final_url, final_post
 
         for group in ("images", "imageMap"):
             if group in content_body:
@@ -186,4 +190,4 @@ class FanboxPostExtractor(FanboxExtractor):
         self.post_id = match.group(3)
 
     def posts(self):
-        (self._get_post_data_from_id(self.post_id),)
+        return (self._get_post_data_from_id(self.post_id),)
