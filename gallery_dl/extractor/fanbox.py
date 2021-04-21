@@ -11,8 +11,9 @@ from .. import text
 
 
 BASE_PATTERN = (
-    r"(?:https?://)?(?:([a-zA-Z0-9_-]+)\.fanbox\.cc|"
-    r"(?:www\.)?fanbox\.cc/@([^/?#]+))"
+    r"(?:https?://)?(?:"
+    r"(?!www\.)([\w-]+)\.fanbox\.cc|"
+    r"(?:www\.)?fanbox\.cc/@([\w-]+))"
 )
 
 
