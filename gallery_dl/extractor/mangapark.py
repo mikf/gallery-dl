@@ -18,6 +18,7 @@ class MangaparkBase():
     """Base class for mangapark extractors"""
     category = "mangapark"
     root_fmt = "https://mangapark.{}"
+    browser = "firefox"
 
     @staticmethod
     def parse_chapter_path(path, data):
@@ -65,7 +66,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
         (("https://mangapark.net/manga"
           "/gekkan-shoujo-nozaki-kun/i2067426/v7/c70/1"), {
             "count": 15,
-            "keyword": "edc14993c4752cee3a76e09b2f024d40d854bfd1",
+            "keyword": "8f18f1c977ebe049ef35e3a877eaaab97fb25274",
         }),
         ("https://mangapark.me/manga/gosu/i811615/c55/1"),
         ("https://mangapark.com/manga/gosu/i811615/c55/1"),
@@ -120,8 +121,8 @@ class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
                r"(/manga/[^/?#]+)/?$")
     test = (
         ("https://mangapark.net/manga/aria", {
-            "url": "9b62883c25c8de471f8ab43651e1448536c4ce3f",
-            "keyword": "eb4a9b273c69acf31efa731eba713e1cfa14bab6",
+            "url": "f07caf0bc5097c9b32c8c0d6f446bce1bf4bd329",
+            "keyword": "2c0d28efaf84fcfe62932b6931ef3c3987cd48c0",
         }),
         ("https://mangapark.me/manga/aria"),
         ("https://mangapark.com/manga/aria"),
