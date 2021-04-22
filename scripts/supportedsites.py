@@ -145,6 +145,7 @@ SUBCATEGORY_MAP = {
     "instagram": {
         "posts": "",
         "saved": "Saved Posts",
+        "tagged": "Tagged Posts",
     },
     "newgrounds": {
         "art"  : "Art",
