@@ -947,21 +947,20 @@ Description
     Download full-sized original images if available.
 
 
-extractor.fanbox.videos
+extractor.fanbox.embeds
 -----------------------
 Type
     ``bool`` or ``string``
 Default
     ``true``
 Description
-    Control behavior on videos embedded from external sites.
-    Recognizes embeds from YouTube, Vimeo and SoundCloud.
+    Control behavior on embedded content from external sites.
 
-    * ``true``: Extract video URLs (videos are not downloaded, as
-      galley-dl does not support these sites natively)
-    * ``"ytdl"``: Download videos and let `youtube-dl`_ handle all of
-      video extraction and download
-    * ``false``: Ignore videos
+    * ``true``: Extract embed URLs and download them if supported
+      (videos are not downloaded).
+    * ``"ytdl"``: Like ``true``, but let `youtube-dl`_ handle video
+      extraction and download for YouTube, Vimeo and SoundCloud embeds.
+    * ``false``: Ignore embeds.
 
 
 extractor.flickr.access-token & .access-token-secret
