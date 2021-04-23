@@ -167,6 +167,7 @@ class FanboxExtractor(Extractor):
                 yield embed_result
 
     def _process_embed(self, post, embed):
+        final_post = post.copy()
         provider = embed["serviceProvider"]
         content_id = embed.get("videoId") or embed.get("contentId")
         prefix = "ytdl:" if self.embeds == "ytdl" else ""
@@ -189,6 +190,7 @@ class FanboxExtractor(Extractor):
             # resolve redirect
             response = self.request(url, method="HEAD", allow_redirects=False)
             url = response.headers["Location"]
+            final_post["_extractor"] = FanboxPostExtractor
         elif provider == "twitter":
             url = "https://twitter.com/_/status/"+content_id
         elif provider == "google_forms":
@@ -198,7 +200,6 @@ class FanboxExtractor(Extractor):
             self.log.warning("service not recognized: {}".format(provider))
 
         if url:
-            final_post = post.copy()
             final_post["embed"] = embed
             final_post["embedUrl"] = url
             text.nameext_from_url(url, final_post)
