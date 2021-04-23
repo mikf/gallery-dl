@@ -170,11 +170,16 @@ class BcyPostExtractor(BcyExtractor):
             },
         }),
         # only watermarked images available
-        ("https://bcy.net/item/detail/6780546160802143236", {
+        ("https://bcy.net/item/detail/6950136331708144648", {
             "pattern": r"https://p\d-bcy.byteimg.com/img/banciyuan/[0-9a-f]+"
                        r"~tplv-banciyuan-logo-v3:.+\.image",
-            "count": 8,
+            "count": 10,
             "keyword": {"filter": "watermark"}
+
+        }),
+        # deleted
+        ("https://bcy.net/item/detail/6780546160802143236", {
+            "count": 0,
         }),
         # only visible to logged in users
         ("https://bcy.net/item/detail/6747523535150783495", {
@@ -183,7 +188,10 @@ class BcyPostExtractor(BcyExtractor):
     )
 
     def posts(self):
-        data = self._data_from_post(self.item_id)
+        try:
+            data = self._data_from_post(self.item_id)
+        except KeyError:
+            return ()
         post = data["post_data"]
         post["image_list"] = post["multi"]
         post["plain"] = text.parse_unicode_escapes(post["plain"])
