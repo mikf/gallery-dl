@@ -152,12 +152,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Fanbox</td>
-    <td>https://www.fanbox.cc/</td>
-    <td>Creators, Posts</td>
-    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
-</tr>
-<tr>
     <td>Fantia</td>
     <td>https://fantia.jp/</td>
     <td>Creators, Posts</td>
@@ -552,6 +546,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://www.pixiv.net/</td>
     <td>Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
+</tr>
+<tr>
+    <td>pixivFANBOX</td>
+    <td>https://www.fanbox.cc/</td>
+    <td>Creators, Posts</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
     <td>Pixnet</td>
