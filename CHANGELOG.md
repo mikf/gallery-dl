@@ -1,6 +1,37 @@
 # Changelog
 
-## Unreleased
+## 1.17.3 - 2021-04-25
+### Additions
+- [danbooru] add option for extended metadata extraction ([#1458](https://github.com/mikf/gallery-dl/issues/1458))
+- [fanbox] add extractors ([#1459](https://github.com/mikf/gallery-dl/issues/1459))
+- [fantia] add extractors ([#1459](https://github.com/mikf/gallery-dl/issues/1459))
+- [gelbooru] add an option to extract notes ([#1457](https://github.com/mikf/gallery-dl/issues/1457))
+- [hentaicosplays] add extractor ([#907](https://github.com/mikf/gallery-dl/issues/907), [#1473](https://github.com/mikf/gallery-dl/issues/1473), [#1483](https://github.com/mikf/gallery-dl/issues/1483))
+- [instagram] add extractor for `tagged` posts ([#1439](https://github.com/mikf/gallery-dl/issues/1439))
+- [naverwebtoon] ignore non-comic images
+- [pixiv] also save untranslated tags when `translated-tags` is enabled ([#1501](https://github.com/mikf/gallery-dl/issues/1501))
+- [shopify] support omgmiamiswimwear.com ([#1280](https://github.com/mikf/gallery-dl/issues/1280))
+- implement `output.fallback` option
+- add archive format to InfoJob output ([#875](https://github.com/mikf/gallery-dl/issues/875))
+- build executables with SOCKS proxy support ([#1424](https://github.com/mikf/gallery-dl/issues/1424))
+### Fixes
+- [500px] update query hashes
+- [8muses] fix JSON deobfuscation
+- [artstation] download `/4k/` images ([#1422](https://github.com/mikf/gallery-dl/issues/1422))
+- [deviantart] fix pagination for Eclipse results ([#1444](https://github.com/mikf/gallery-dl/issues/1444))
+- [deviantart] improve folder name matching ([#1451](https://github.com/mikf/gallery-dl/issues/1451))
+- [erome] skip deleted albums ([#1447](https://github.com/mikf/gallery-dl/issues/1447))
+- [exhentai] fix image limit detection ([#1437](https://github.com/mikf/gallery-dl/issues/1437))
+- [exhentai] restore `limits` option ([#1487](https://github.com/mikf/gallery-dl/issues/1487))
+- [gelbooru] fix tag category extraction ([#1455](https://github.com/mikf/gallery-dl/issues/1455))
+- [instagram] update query hashes
+- [komikcast] fix extraction
+- [simplyhentai] fix extraction
+- [slideshare] fix extraction
+- [webtoons] update agegate/GDPR cookies ([#1431](https://github.com/mikf/gallery-dl/issues/1431))
+- fix `category-transfer` option
+### Removals
+- [yuki] remove module for yuki.la
 
 ## 1.17.2 - 2021-04-02
 ### Additions
