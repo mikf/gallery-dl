@@ -31,6 +31,8 @@ modules = [
     "erome",
     "exhentai",
     "fallenangels",
+    "fanbox",
+    "fantia",
     "flickr",
     "furaffinity",
     "fuskator",

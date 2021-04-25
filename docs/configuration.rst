@@ -968,6 +968,22 @@ Description
     Download full-sized original images if available.
 
 
+extractor.fanbox.embeds
+-----------------------
+Type
+    ``bool`` or ``string``
+Default
+    ``true``
+Description
+    Control behavior on embedded content from external sites.
+
+    * ``true``: Extract embed URLs and download them if supported
+      (videos are not downloaded).
+    * ``"ytdl"``: Like ``true``, but let `youtube-dl`_ handle video
+      extraction and download for YouTube, Vimeo and SoundCloud embeds.
+    * ``false``: Ignore embeds.
+
+
 extractor.flickr.access-token & .access-token-secret
 ----------------------------------------------------
 Type

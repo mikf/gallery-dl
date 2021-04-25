@@ -208,6 +208,8 @@ AUTH_MAP = {
     "e621"           : "Supported",
     "e-hentai"       : "Supported",
     "exhentai"       : "Supported",
+    "fanbox"         : _COOKIES,
+    "fantia"         : _COOKIES,
     "flickr"         : _OAUTH,
     "furaffinity"    : _COOKIES,
     "idolcomplex"    : "Supported",
