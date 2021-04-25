@@ -152,6 +152,18 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Fanbox</td>
+    <td>https://www.fanbox.cc/</td>
+    <td>Creators, Posts</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+</tr>
+<tr>
+    <td>Fantia</td>
+    <td>https://fantia.jp/</td>
+    <td>Creators, Posts</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+</tr>
+<tr>
     <td>Flickr</td>
     <td>https://www.flickr.com/</td>
     <td>Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles</td>
