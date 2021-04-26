@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -76,8 +76,12 @@ class UgoiraPP(PostProcessor):
 
         with tempfile.TemporaryDirectory() as tempdir:
             # extract frames
-            with zipfile.ZipFile(pathfmt.temppath) as zfile:
-                zfile.extractall(tempdir)
+            try:
+                with zipfile.ZipFile(pathfmt.temppath) as zfile:
+                    zfile.extractall(tempdir)
+            except FileNotFoundError:
+                pathfmt.temppath = pathfmt.realpath
+                return
 
             # write ffconcat file
             ffconcat = tempdir + "/ffconcat.txt"

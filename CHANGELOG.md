@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.17.3 - 2021-04-25
 ### Additions
 - [danbooru] add option for extended metadata extraction ([#1458](https://github.com/mikf/gallery-dl/issues/1458))
