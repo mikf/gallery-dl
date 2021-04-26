@@ -61,6 +61,7 @@ class DanbooruExtractor(Extractor):
                         "{}/posts/{}.json?only=pixiv_ugoira_frame_data".format(
                             self.root, post["id"])
                     ).json()["pixiv_ugoira_frame_data"]["data"]
+                    post["_http_adjust_extension"] = False
                 else:
                     url = post["large_file_url"]
                     post["extension"] = "webm"
