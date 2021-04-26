@@ -66,6 +66,7 @@ class PixivExtractor(Extractor):
                 url = ugoira["zip_urls"]["medium"].replace(
                     "_ugoira600x600", "_ugoira1920x1080")
                 work["frames"] = ugoira["frames"]
+                work["_http_adjust_extension"] = False
                 yield Message.Url, url, text.nameext_from_url(url, work)
 
             elif work["page_count"] == 1:

@@ -80,6 +80,10 @@ class HttpDownloader(DownloaderBase):
         tries = 0
         msg = ""
 
+        kwdict = pathfmt.kwdict
+        adjust_extension = kwdict.get(
+            "_http_adjust_extension", self.adjust_extension)
+
         if self.part:
             pathfmt.part_enable(self.partdir)
 
@@ -105,7 +109,7 @@ class HttpDownloader(DownloaderBase):
             if self.headers:
                 headers.update(self.headers)
             # file-specific headers
-            extra = pathfmt.kwdict.get("_http_headers")
+            extra = kwdict.get("_http_headers")
             if extra:
                 headers.update(extra)
 
@@ -139,7 +143,7 @@ class HttpDownloader(DownloaderBase):
                 return False
 
             # check for invalid responses
-            validate = pathfmt.kwdict.get("_http_validate")
+            validate = kwdict.get("_http_validate")
             if validate and not validate(response):
                 self.log.warning("Invalid response")
                 return False
@@ -168,7 +172,7 @@ class HttpDownloader(DownloaderBase):
             content = response.iter_content(self.chunk_size)
 
             # check filename extension against file header
-            if self.adjust_extension and not offset and \
+            if adjust_extension and not offset and \
                     pathfmt.extension in FILE_SIGNATURES:
                 try:
                     file_header = next(
@@ -198,7 +202,7 @@ class HttpDownloader(DownloaderBase):
                 if file_header:
                     fp.write(file_header)
                 elif offset:
-                    if self.adjust_extension and \
+                    if adjust_extension and \
                             pathfmt.extension in FILE_SIGNATURES:
                         self._adjust_extension(pathfmt, fp.read(16))
                     fp.seek(offset)
@@ -222,10 +226,9 @@ class HttpDownloader(DownloaderBase):
 
         self.downloading = False
         if self.mtime:
-            pathfmt.kwdict.setdefault(
-                "_mtime", response.headers.get("Last-Modified"))
+            kwdict.setdefault("_mtime", response.headers.get("Last-Modified"))
         else:
-            pathfmt.kwdict["_mtime"] = None
+            kwdict["_mtime"] = None
 
         return True
 
