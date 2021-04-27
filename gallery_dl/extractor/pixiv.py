@@ -29,10 +29,20 @@ class PixivExtractor(Extractor):
         Extractor.__init__(self, match)
         self.api = PixivAppAPI(self)
         self.load_ugoira = self.config("ugoira", True)
-        self.translated_tags = self.config("translated-tags", False)
 
     def items(self):
-        tkey = "translated_name" if self.translated_tags else "name"
+        tags = self.config("tags", "japanese")
+        if tags == "noop":
+            transform_tags = None
+        elif tags == "translated":
+            def transform_tags(work):
+                work["tags"] = list(set(
+                    tag["translated_name"] or tag["name"]
+                    for tag in work["tags"]))
+        else:
+            def transform_tags(work):
+                work["tags"] = [tag["name"] for tag in work["tags"]]
+
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         metadata = self.metadata()
 
@@ -45,12 +55,10 @@ class PixivExtractor(Extractor):
             del work["meta_single_page"]
             del work["image_urls"]
             del work["meta_pages"]
+
+            if transform_tags:
+                transform_tags(work)
             work["num"] = 0
-            if self.translated_tags:
-                work["untranslated_tags"] = [
-                    tag["name"] for tag in work["tags"]
-                ]
-            work["tags"] = [tag[tkey] or tag["name"] for tag in work["tags"]]
             work["date"] = text.parse_datetime(work["create_date"])
             work["rating"] = ratings.get(work["x_restrict"])
             work["suffix"] = ""
