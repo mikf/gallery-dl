@@ -1332,14 +1332,18 @@ Description
     Also download related artworks.
 
 
-extractor.pixiv.translated-tags
--------------------------------
+extractor.pixiv.tags
+--------------------
 Type
-    ``bool``
+    ``string``
 Default
-    ``false``
+    ``"japanese"``
 Description
-    Provide translated ´`tags``.
+    Controls how ``tags`` metadata is transformed.
+
+    * `"japanese"`: List of original Japanese tags
+    * `"translated"`: List of translated tags
+    * `"noop"`: Unmodified list of both Japanese and translated tags
 
 
 extractor.pixiv.ugoira
