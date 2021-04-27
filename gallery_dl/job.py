@@ -27,8 +27,11 @@ class Job():
             extr = extractor.find(extr)
         if not extr:
             raise exception.NoExtractorError()
+
         self.extractor = extr
         self.pathfmt = None
+        self.kwdict = {}
+        self.status = 0
 
         self._logger_extra = {
             "job"      : self,
@@ -39,31 +42,30 @@ class Job():
         extr.log = self._wrap_logger(extr.log)
         extr.log.debug("Using %s for '%s'", extr.__class__.__name__, extr.url)
 
-        self.status = 0
-        self.pred_url = self._prepare_predicates("image", True)
-        self.pred_queue = self._prepare_predicates("chapter", False)
-        self.kwdict = {}
-
-        # user-supplied metadata
-        kwdict = self.extractor.config("keywords")
-        if kwdict:
-            self.kwdict.update(kwdict)
-
         # data from parent job
         if parent:
             pextr = parent.extractor
 
             # transfer (sub)category
             if pextr.config("category-transfer", pextr.categorytransfer):
+                extr._cfgpath = pextr._cfgpath
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
-                extr._cfgpath = pextr._cfgpath
 
             # transfer parent directory
             extr._parentdir = pextr._parentdir
 
             # reuse connection adapters
             extr.session.adapters = pextr.session.adapters
+
+        # user-supplied metadata
+        kwdict = self.extractor.config("keywords")
+        if kwdict:
+            self.kwdict.update(kwdict)
+
+        # predicates
+        self.pred_url = self._prepare_predicates("image", True)
+        self.pred_queue = self._prepare_predicates("chapter", False)
 
     def run(self):
         """Execute or run the job"""
