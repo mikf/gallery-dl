@@ -43,7 +43,7 @@ class KemonopartyExtractor(Extractor):
             for post["num"], file in enumerate(files, 1):
                 url = file["path"]
                 if url[0] == "/":
-                    url = self.root + url
+                    url = "https://data.kemono.party" + url
                 text.nameext_from_url(file["name"], post)
                 yield Message.Url, url, post
 
@@ -84,7 +84,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
     pattern = BASE_PATTERN + r"/post/([^/?#]+)"
     test = (
         ("https://kemono.party/fanbox/user/6993449/post/506575", {
-            "pattern": r"https://kemono\.party/files/fanbox"
+            "pattern": r"https://data\.kemono\.party/files/fanbox"
                        r"/6993449/506575/P058kDFYus7DbqAkGlfWTlOr\.jpeg",
             "keyword": {
                 "added": "Wed, 06 May 2020 20:28:02 GMT",
@@ -106,7 +106,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         }),
         # inline image (#1286)
         ("https://kemono.party/fanbox/user/7356311/post/802343", {
-            "pattern": r"https://kemono\.party/inline/fanbox"
+            "pattern": r"https://data\.kemono\.party/inline/fanbox"
                        r"/uaozO4Yga6ydkGIJFAQDixfE\.jpeg",
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
