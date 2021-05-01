@@ -597,7 +597,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Read Comic Online</td>
-    <td>https://readcomiconline.to/</td>
+    <td>https://readcomiconline.li/</td>
     <td>Comic Issues, Comics</td>
     <td></td>
 </tr>
