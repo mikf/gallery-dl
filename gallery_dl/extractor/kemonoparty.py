@@ -44,6 +44,9 @@ class KemonopartyExtractor(Extractor):
                 url = file["path"]
                 if url[0] == "/":
                     url = "https://data.kemono.party" + url
+                elif url.startswith("https://kemono.party/"):
+                    url = "https://data.kemono.party" + url[20:]
+
                 text.nameext_from_url(file["name"], post)
                 yield Message.Url, url, post
 
@@ -109,8 +112,12 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
             "pattern": r"https://data\.kemono\.party/inline/fanbox"
                        r"/uaozO4Yga6ydkGIJFAQDixfE\.jpeg",
         }),
+        # kemono.party -> data.kemono.party
+        ("https://kemono.party/gumroad/user/trylsc/post/IURjT", {
+            "pattern": r"https://data\.kemono\.party/(file|attachment)s"
+                       r"/gumroad/trylsc/IURjT/",
+        }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
-        ("https://kemono.party/gumroad/user/trylsc/post/IURjT"),
     )
 
     def __init__(self, match):
