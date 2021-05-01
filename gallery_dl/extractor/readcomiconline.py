@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://readcomiconline.to/"""
+"""Extractors for https://readcomiconline.li/"""
 
 from .common import Extractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
 import re
+
+BASE_PATTERN = r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.(?:li|to)"
 
 
 class ReadcomiconlineBase():
@@ -19,7 +21,7 @@ class ReadcomiconlineBase():
     directory_fmt = ("{category}", "{comic}", "{issue:>03}")
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     archive_fmt = "{issue_id}_{page}"
-    root = "https://readcomiconline.to"
+    root = "https://readcomiconline.li"
 
     def request(self, url, **kwargs):
         """Detect and handle redirects to CAPTCHA pages"""
@@ -42,11 +44,10 @@ class ReadcomiconlineBase():
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
-    """Extractor for comic-issues from readcomiconline.to"""
+    """Extractor for comic-issues from readcomiconline.li"""
     subcategory = "issue"
-    pattern = (r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
-               r"(/Comic/[^/?#]+/[^/?#]+\?id=(\d+))")
-    test = ("https://readcomiconline.to/Comic/W-i-t-c-h/Issue-130?id=22289", {
+    pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?id=(\d+))"
+    test = ("https://readcomiconline.li/Comic/W-i-t-c-h/Issue-130?id=22289", {
         "url": "30d29c5afc65043bfd384c010257ec2d0ecbafa6",
         "keyword": "2d9ec81ce1b11fac06ebf96ce33cdbfca0e85eb5",
     })
@@ -78,18 +79,17 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
 
 class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
-    """Extractor for comics from readcomiconline.to"""
+    """Extractor for comics from readcomiconline.li"""
     chapterclass = ReadcomiconlineIssueExtractor
     subcategory = "comic"
-    pattern = (r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.to"
-               r"(/Comic/[^/?#]+/?)$")
+    pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/?)$"
     test = (
-        ("https://readcomiconline.to/Comic/W-i-t-c-h", {
-            "url": "e231bc2a293edb465133c37a8e36a7e7d94cab14",
+        ("https://readcomiconline.li/Comic/W-i-t-c-h", {
+            "url": "74eb8b9504b4084fcc9367b341300b2c52260918",
             "keyword": "3986248e4458fa44a201ec073c3684917f48ee0c",
         }),
         ("https://readcomiconline.to/Comic/Bazooka-Jules", {
-            "url": "711674cb78ed10bd2557315f7a67552d01b33985",
+            "url": "2f66a467a772df4d4592e97a059ddbc3e8991799",
             "keyword": "f5ba5246cd787bb750924d9690cb1549199bd516",
         }),
     )
