@@ -67,7 +67,7 @@ def nameext_from_url(url, data=None):
 
     filename = unquote(filename_from_url(url))
     name, _, ext = filename.rpartition(".")
-    if name:
+    if name and len(ext) <= 16:
         data["filename"], data["extension"] = name, ext.lower()
     else:
         data["filename"], data["extension"] = filename, ""

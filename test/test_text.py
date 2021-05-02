@@ -148,6 +148,10 @@ class TestText(unittest.TestCase):
         self.assertEqual(
             f("http://example.org/v2/filename.ext?param=value#frag"), result)
 
+        # long "extension"
+        fn = "httpswww.example.orgpath-path-path-path-path-path-path-path"
+        self.assertEqual(f(fn), {"filename": fn, "extension": ""})
+
         # invalid arguments
         for value in INVALID:
             self.assertEqual(f(value), empty)
