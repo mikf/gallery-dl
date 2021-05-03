@@ -186,7 +186,7 @@ def main():
         elif args.clear_cache:
             from . import cache
             log = logging.getLogger("cache")
-            cnt = cache.clear()
+            cnt = cache.clear(args.clear_cache)
 
             if cnt is None:
                 log.error("Database file not available")

@@ -114,7 +114,7 @@ def build_parser():
     )
     general.add_argument(
         "--clear-cache",
-        dest="clear_cache", action="store_true",
+        dest="clear_cache", metavar="MODULE", nargs="?", const="all",
         help="Delete all cached login sessions, cookies, etc.",
     )
 
