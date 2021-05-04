@@ -81,6 +81,15 @@ def raises(cls):
     return wrap
 
 
+def identity(x):
+    """Returns its argument"""
+    return x
+
+
+def noop():
+    """Does nothing"""
+
+
 def generate_token(size=16):
     """Generate a random token with hexadecimal digits"""
     data = random.getrandbits(size * 8).to_bytes(size, "big")
@@ -804,7 +813,7 @@ class PathFormat():
     @staticmethod
     def _build_cleanfunc(chars, repl):
         if not chars:
-            return lambda x: x
+            return identity
         elif isinstance(chars, dict):
             def func(x, table=str.maketrans(chars)):
                 return x.translate(table)
