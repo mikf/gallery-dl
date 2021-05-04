@@ -638,7 +638,7 @@ class DataJob(Job):
         self.ascii = config.get(("output",), "ascii", ensure_ascii)
 
         private = config.get(("output",), "private")
-        self.filter = (lambda x: x) if private else util.filter_dict
+        self.filter = util.identity if private else util.filter_dict
 
     def run(self):
         sleep = self.extractor.config("sleep-extractor")

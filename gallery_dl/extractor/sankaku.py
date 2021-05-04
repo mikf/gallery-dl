@@ -10,7 +10,7 @@
 
 from .booru import BooruExtractor
 from .common import Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 import collections
 
@@ -206,7 +206,7 @@ class SankakuAPI():
 
         self.username, self.password = self.extractor._get_auth_info()
         if not self.username:
-            self.authenticate = lambda: None
+            self.authenticate = util.noop
 
     def pools(self, pool_id):
         params = {"lang": "en"}

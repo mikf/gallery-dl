@@ -484,6 +484,13 @@ class TestOther(unittest.TestCase):
         with self.assertRaises(ValueError):
             func(3)
 
+    def test_identity(self):
+        for value in (123, "foo", [1, 2, 3], (1, 2, 3), {1: 2}, None):
+            self.assertIs(util.identity(value), value)
+
+    def test_noop(self):
+        self.assertEqual(util.noop(), None)
+
     def test_generate_token(self):
         tokens = set()
         for _ in range(100):
