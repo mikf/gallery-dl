@@ -158,7 +158,7 @@ class NozomiTagExtractor(NozomiExtractor):
     """Extractor for posts from tag searches on nozomi.la"""
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
-    archive_fmt = "t_{search_tags}_{postid}_{dataid}"
+    archive_fmt = "t_{search_tags}_{dataid}"
     pattern = r"(?:https?://)?nozomi\.la/tag/([^/?#]+)-(\d+)\."
     test = ("https://nozomi.la/tag/3:1_aspect_ratio-1.html", {
         "pattern": r"^https://i.nozomi.la/\w/\w\w/\w+\.\w+$",
@@ -180,7 +180,7 @@ class NozomiSearchExtractor(NozomiExtractor):
     """Extractor for search results on nozomi.la"""
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags:J }")
-    archive_fmt = "t_{search_tags}_{postid}_{dataid}"
+    archive_fmt = "t_{search_tags}_{dataid}"
     pattern = r"(?:https?://)?nozomi\.la/search\.html\?q=([^&#]+)"
     test = ("https://nozomi.la/search.html?q=hibiscus%203:4_ratio#1", {
         "count": ">= 5",
