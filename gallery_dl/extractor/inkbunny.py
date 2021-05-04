@@ -64,7 +64,7 @@ class InkbunnyExtractor(Extractor):
 class InkbunnyUserExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user profiles"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!s/)(gallery/|scraps/)?([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!s/)(gallery/|scraps/)?(\w+)(?:$|[/?#])"
     test = (
         ("https://inkbunny.net/soina", {
             "pattern": r"https://[\w.]+\.metapix\.net/files/full"
@@ -132,6 +132,33 @@ class InkbunnyUserExtractor(InkbunnyExtractor):
             "username": self.user,
             "scraps"  : self.scraps,
             "orderby" : orderby,
+        }
+        if orderby and orderby.startswith("unread_"):
+            params["unread_submissions"] = "yes"
+        return self.api.search(params)
+
+
+class InkbunnyFavoriteExtractor(InkbunnyExtractor):
+    """Extractor for inkbunny user favorites"""
+    subcategory = "favorite"
+    pattern = BASE_PATTERN + r"/userfavorites_process\.php\?favs_user_id=(\d+)"
+    test = (
+        ("https://inkbunny.net/userfavorites_process.php?favs_user_id=20969", {
+            "pattern": r"https://[\w.]+\.metapix\.net/files/full"
+                       r"/\d+/\d+_\w+_.+",
+            "range": "20-50",
+        }),
+    )
+
+    def __init__(self, match):
+        InkbunnyExtractor.__init__(self, match)
+        self.user_id = match.group(1)
+
+    def posts(self):
+        orderby = self.config("orderby", "fav_datetime")
+        params = {
+            "favs_user_id": self.user_id,
+            "orderby"     : orderby,
         }
         if orderby and orderby.startswith("unread_"):
             params["unread_submissions"] = "yes"
