@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -232,14 +232,18 @@ def select():
     }
     omode = config.get(("output",), "mode", "auto").lower()
     if omode in pdict:
-        return pdict[omode]()
+        output = pdict[omode]()
     elif omode == "auto":
         if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-            return ColorOutput() if ANSI else TerminalOutput()
+            output = ColorOutput() if ANSI else TerminalOutput()
         else:
-            return PipeOutput()
+            output = PipeOutput()
     else:
         raise Exception("invalid output mode: " + omode)
+
+    if not config.get(("output",), "skip", True):
+        output.skip = util.identity
+    return output
 
 
 class NullOutput():

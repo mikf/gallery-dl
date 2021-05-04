@@ -2081,6 +2081,16 @@ Description
     on one console line.
 
 
+output.skip
+-----------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Show skipped file downloads.
+
+
 output.progress
 ---------------
 Type
