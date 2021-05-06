@@ -261,7 +261,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>ImageBam</td>
-    <td>http://www.imagebam.com/</td>
+    <td>https://www.imagebam.com/</td>
     <td>Galleries, individual Images</td>
     <td></td>
 </tr>
