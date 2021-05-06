@@ -408,7 +408,7 @@ class InstagramPostsExtractor(InstagramExtractor):
         url = "{}/{}/".format(self.root, self.item)
         user = self._extract_profile_page(url)
 
-        query_hash = "42d2750e44dbac713ff30130659cd891"
+        query_hash = "32b14723a678bd4628d70c1f877b94c9"
         variables = {"id": user["id"], "first": 50}
         edge = self._get_edge_data(user, "edge_owner_to_timeline_media")
         return self._pagination_graphql(query_hash, variables, edge)
@@ -613,7 +613,7 @@ class InstagramPostExtractor(InstagramExtractor):
     )
 
     def posts(self):
-        query_hash = "cf28bf5eb45d62d4dc8e77cdb99d750d"
+        query_hash = "d4e8ae69cb68f66329dcebe82fb69f6d"
         variables = {
             "shortcode"            : self.item,
             "child_comment_count"  : 3,
