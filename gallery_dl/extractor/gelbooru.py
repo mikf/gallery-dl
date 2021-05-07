@@ -8,8 +8,10 @@
 
 """Extractors for https://gelbooru.com/"""
 
+from .common import Extractor, Message
 from . import gelbooru_v02
 from .. import text, exception
+import binascii
 
 
 class GelbooruBase():
@@ -131,3 +133,23 @@ class GelbooruPostExtractor(GelbooruBase,
             }
         }),
     )
+
+
+class GelbooruRedirectExtractor(GelbooruBase, Extractor):
+    subcategory = "redirect"
+    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com"
+               r"/redirect\.php\?s=([^&#]+)")
+    test = (("https://gelbooru.com/redirect.php?s=Ly9nZWxib29ydS5jb20vaW5kZXgu"
+             "cGhwP3BhZ2U9cG9zdCZzPXZpZXcmaWQ9MTgzMDA0Ng=="), {
+        "pattern": r"https://gelbooru.com/index.php"
+                   r"\?page=post&s=view&id=1830046"
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.redirect_url = text.ensure_http_scheme(
+            binascii.a2b_base64(match.group(1)).decode())
+
+    def items(self):
+        data = {"_extractor": GelbooruPostExtractor}
+        yield Message.Queue, self.redirect_url, data
