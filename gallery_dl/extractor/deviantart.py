@@ -930,10 +930,12 @@ class DeviantartOAuthAPI():
         self.folders = extractor.config("folders", False)
         self.metadata = extractor.extra or extractor.config("metadata", False)
 
-        self.client_id = extractor.config(
-            "client-id", self.CLIENT_ID)
-        self.client_secret = extractor.config(
-            "client-secret", self.CLIENT_SECRET)
+        self.client_id = extractor.config("client-id")
+        if self.client_id:
+            self.client_secret = extractor.config("client-secret")
+        else:
+            self.client_id = self.CLIENT_ID
+            self.client_secret = self.CLIENT_SECRET
 
         token = extractor.config("refresh-token")
         if token is None or token == "cache":
