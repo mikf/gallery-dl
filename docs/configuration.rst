@@ -1339,11 +1339,11 @@ Type
 Default
     ``"japanese"``
 Description
-    Controls how ``tags`` metadata is transformed.
+    Controls the ``tags`` metadata field.
 
-    * `"japanese"`: List of original Japanese tags
+    * `"japanese"`: List of Japanese tags
     * `"translated"`: List of translated tags
-    * `"noop"`: Unmodified list of both Japanese and translated tags
+    * `"original"`: Unmodified list with both Japanese and translated tags
 
 
 extractor.pixiv.ugoira
