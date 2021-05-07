@@ -32,7 +32,7 @@ class PixivExtractor(Extractor):
 
     def items(self):
         tags = self.config("tags", "japanese")
-        if tags == "noop":
+        if tags == "original":
             transform_tags = None
         elif tags == "translated":
             def transform_tags(work):
