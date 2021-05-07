@@ -1,6 +1,25 @@
 # Changelog
 
-## Unreleased
+## 1.17.4 - 2021-05-07
+### Additions
+- [gelbooru] add extractor for `/redirect.php` URLs ([#1530](https://github.com/mikf/gallery-dl/issues/1530))
+- [inkbunny] add `favorite` extractor ([#1521](https://github.com/mikf/gallery-dl/issues/1521))
+- add `output.skip` option
+- add an optional argument to `--clear-cache` to select which cache entries to remove ([#1230](https://github.com/mikf/gallery-dl/issues/1230))
+### Changes
+- [pixiv] update `translated-tags` option ([#1507](https://github.com/mikf/gallery-dl/issues/1507))
+  - rename to `tags`
+  - accept `"japanese"`, `"translated"`, and `"original"` as values
+### Fixes
+- [500px] update query hashes
+- [kemonoparty] fix download URLs ([#1514](https://github.com/mikf/gallery-dl/issues/1514))
+- [imagebam] fix extraction
+- [instagram] update query hashes
+- [nozomi] update default archive-fmt for `tag` and `search` extractors ([#1529](https://github.com/mikf/gallery-dl/issues/1529))
+- [pixiv] remove duplicate translated tags ([#1507](https://github.com/mikf/gallery-dl/issues/1507))
+- [readcomiconline] change domain to `readcomiconline.li` ([#1517](https://github.com/mikf/gallery-dl/issues/1517))
+- [sankaku] update invalid-token detection ([#1515](https://github.com/mikf/gallery-dl/issues/1515))
+- fix crash when using `--no-download` with `--ugoira-conv` ([#1507](https://github.com/mikf/gallery-dl/issues/1507))
 
 ## 1.17.3 - 2021-04-25
 ### Additions
