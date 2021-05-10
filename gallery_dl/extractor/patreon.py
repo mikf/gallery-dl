@@ -118,6 +118,7 @@ class PatreonExtractor(Extractor):
         attr["id"] = text.parse_int(post["id"])
 
         if post.get("current_user_can_view", True):
+        if attr.get("current_user_can_view", True):
             attr["images"] = self._files(post, included, "images")
             attr["attachments"] = self._files(post, included, "attachments")
             attr["date"] = text.parse_datetime(
