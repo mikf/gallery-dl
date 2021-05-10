@@ -121,12 +121,16 @@ class PatreonExtractor(Extractor):
         if attr.get("current_user_can_view", True):
             attr["images"] = self._files(post, included, "images")
             attr["attachments"] = self._files(post, included, "attachments")
-            attr["date"] = text.parse_datetime(
-                attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-            user = post["relationships"]["user"]
-            attr["creator"] = (
-                self._user(user["links"]["related"]) or
-                included["user"][user["data"]["id"]])
+        else:
+            attr["images"] = []
+            attr["attachments"] = []
+
+        attr["date"] = text.parse_datetime(
+            attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        user = post["relationships"]["user"]
+        attr["creator"] = (
+            self._user(user["links"]["related"]) or
+            included["user"][user["data"]["id"]])
 
         if post.get("relationships"):
             try:
