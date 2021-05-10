@@ -127,6 +127,16 @@ class PatreonExtractor(Extractor):
                 self._user(user["links"]["related"]) or
                 included["user"][user["data"]["id"]])
 
+        if post.get("relationships"):
+            try:
+                attr["post_tags"] = [
+                    user_tag['id'].replace("user_defined;", '')
+                    for user_tag in post["relationships"]["user_defined_tags"]['data']
+                    if user_tag['type'] == "post_tag"
+                ]
+            except:
+                pass
+
         return attr
 
     @staticmethod
