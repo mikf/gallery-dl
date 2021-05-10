@@ -117,7 +117,6 @@ class PatreonExtractor(Extractor):
         attr = post["attributes"]
         attr["id"] = text.parse_int(post["id"])
 
-        if post.get("current_user_can_view", True):
         if attr.get("current_user_can_view", True):
             attr["images"] = self._files(post, included, "images")
             attr["attachments"] = self._files(post, included, "attachments")
@@ -134,12 +133,13 @@ class PatreonExtractor(Extractor):
 
         if post.get("relationships"):
             try:
+                user_defined_tags = post["relationships"]["user_defined_tags"]['data']
                 attr["post_tags"] = [
                     user_tag['id'].replace("user_defined;", '')
-                    for user_tag in post["relationships"]["user_defined_tags"]['data']
+                    for user_tag in user_defined_tags
                     if user_tag['type'] == "post_tag"
                 ]
-            except:
+            except IndexError:
                 pass
 
         return attr
