@@ -133,7 +133,8 @@ class PatreonExtractor(Extractor):
 
         if post.get("relationships"):
             try:
-                user_defined_tags = post["relationships"]["user_defined_tags"]['data']
+                user_defined_tags = post["relationships"] \
+                    ["user_defined_tags"]['data']
                 attr["post_tags"] = [
                     user_tag['id'].replace("user_defined;", '')
                     for user_tag in user_defined_tags
