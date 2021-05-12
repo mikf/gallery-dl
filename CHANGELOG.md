@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.17.4 - 2021-05-07
 ### Additions
 - [gelbooru] add extractor for `/redirect.php` URLs ([#1530](https://github.com/mikf/gallery-dl/issues/1530))

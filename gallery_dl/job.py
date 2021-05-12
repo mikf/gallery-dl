@@ -80,6 +80,8 @@ class Job():
             if exc.message:
                 log.error(exc.message)
             self.status |= exc.code
+        except exception.TerminateExtraction:
+            raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
             self.status |= exc.code
@@ -400,6 +402,8 @@ class DownloadJob(Job):
                 skip, _, smax = skip.partition(":")
                 if skip == "abort":
                     self._skipexc = exception.StopExtraction
+                elif skip == "terminate":
+                    self._skipexc = exception.TerminateExtraction
                 elif skip == "exit":
                     self._skipexc = sys.exit
                 self._skipcnt = 0

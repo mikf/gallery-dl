@@ -226,9 +226,13 @@ Description
     * ``true``: Skip downloads
     * ``false``: Overwrite already existing files
 
-    * ``"abort"``: Abort the current extractor run
-    * ``"abort:N"``: Skip downloads and abort extractor run
+    * ``"abort"``: Stop the current extractor run
+    * ``"abort:N"``: Skip downloads and stop the current extractor run
       after ``N`` consecutive skips
+
+    * ``"terminate"``: Stop the current extractor run, including parent extractors
+    * ``"terminate:N"``: Skip downloads and stop the current extractor run,
+      including parent extractors, after ``N`` consecutive skips
 
     * ``"exit"``: Exit the program altogether
     * ``"exit:N"``: Skip downloads and exit the program
