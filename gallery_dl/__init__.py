@@ -249,6 +249,8 @@ def main():
                             retval |= jobtype(url.value).run()
                     else:
                         retval |= jobtype(url).run()
+                except exception.TerminateExtraction:
+                    pass
                 except exception.NoExtractorError:
                     log.error("No suitable extractor found for '%s'", url)
                     retval |= 64
