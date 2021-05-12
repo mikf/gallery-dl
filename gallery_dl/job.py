@@ -201,6 +201,7 @@ class DownloadJob(Job):
         self.hooks = ()
         self.downloaders = {}
         self.out = output.select()
+        self._skipcnt = 0
 
         if parent:
             self.visited = parent.visited
@@ -306,7 +307,13 @@ class DownloadJob(Job):
                     extr = None
 
         if extr:
-            self.status |= self.__class__(extr, self, kwdict).run()
+            job = self.__class__(extr, self, kwdict)
+            if extr.config("parent-skip"):
+                job._skipcnt = self._skipcnt
+                self.status |= job.run()
+                self._skipcnt = job._skipcnt
+            else:
+                self.status |= job.run()
         else:
             self._write_unsupported(url)
 
@@ -406,7 +413,6 @@ class DownloadJob(Job):
                     self._skipexc = exception.TerminateExtraction
                 elif skip == "exit":
                     self._skipexc = sys.exit
-                self._skipcnt = 0
                 self._skipmax = text.parse_int(smax)
         else:
             # monkey-patch methods to always return False

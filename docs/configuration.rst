@@ -143,6 +143,16 @@ Description
     Overwrite any metadata provided by a child extractor with its parent's.
 
 
+extractor.*.parent-skip
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Share number of skipped downloads between parent and child extractors.
+
+
 extractor.*.path-restrict
 -------------------------
 Type
