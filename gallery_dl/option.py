@@ -360,6 +360,19 @@ def build_parser():
         help="Convert Pixiv Ugoira to WebM in VP9 lossless mode",
     )
     postprocessor.add_argument(
+        "--ugoira-conv-copy",
+        dest="postprocessors", action="append_const", const={
+            "name"          : "ugoira",
+            "ffmpeg-twopass": False,
+            "whitelist"     : ("pixiv", "danbooru"),
+            "libx264-prevent-odd": False,
+            "extension"     : "mkv",
+            "re-encoding"   : False,
+            "repeat-last"   : False,
+        },
+        help="Convert Pixiv Ugoira to MKV in copy mode (without re-encoding)",
+    )
+    postprocessor.add_argument(
         "--write-metadata",
         dest="postprocessors",
         action="append_const", const={"name": "metadata"},

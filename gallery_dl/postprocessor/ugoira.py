@@ -26,6 +26,8 @@ class UgoiraPP(PostProcessor):
         self.twopass = options.get("ffmpeg-twopass", False)
         self.output = options.get("ffmpeg-output", True)
         self.delete = not options.get("keep-files", False)
+        self.repeat = options.get("repeat-last", True if self.extension != "gif" else False)
+        self.re_encodeing = options.get("re-encoding", True)
 
         ffmpeg = options.get("ffmpeg-location")
         self.ffmpeg = util.expand_path(ffmpeg) if ffmpeg else "ffmpeg"
@@ -90,18 +92,26 @@ class UgoiraPP(PostProcessor):
                 for frame in self._frames:
                     file.write("file '{}'\n".format(frame["file"]))
                     file.write("duration {}\n".format(frame["delay"] / 1000))
-                if self.extension != "gif":
+                if self.repeat:
                     # repeat the last frame to prevent it from only being
                     # displayed for a very short amount of time
                     file.write("file '{}'\n".format(self._frames[-1]["file"]))
 
             # collect command-line arguments
             args = [self.ffmpeg]
-            if rate_in:
-                args += ("-r", str(rate_in))
-            args += ("-i", ffconcat)
-            if rate_out:
-                args += ("-r", str(rate_out))
+            if self.re_encodeing:
+                if rate_in:
+                    args += ("-r", str(rate_in))
+                args += ("-i", ffconcat)
+                if rate_out:
+                    args += ("-r", str(rate_out))
+            else:
+                if rate_in:
+                    args += ("-framerate", str(rate_in))
+                args += ("-i", tempdir + "/%6d.jpg")
+                if rate_out:
+                    args += ("-framerate", str(rate_out))
+                args += ("-codec", "copy")
             if self.prevent_odd:
                 args += ("-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)")
             if self.args:
