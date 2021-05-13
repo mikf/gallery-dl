@@ -26,7 +26,7 @@ class UgoiraPP(PostProcessor):
         self.twopass = options.get("ffmpeg-twopass", False)
         self.output = options.get("ffmpeg-output", True)
         self.delete = not options.get("keep-files", False)
-        self.repeat = options.get("repeat-last", True if self.extension != "gif" else False)
+        self.repeat = options.get("repeat-last-frame", False)
         self.re_encodeing = options.get("re-encoding", True)
 
         ffmpeg = options.get("ffmpeg-location")
