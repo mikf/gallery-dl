@@ -52,9 +52,6 @@ class Job():
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
 
-            # transfer parent directory
-            extr._parentdir = pextr._parentdir
-
             # reuse connection adapters
             extr.session.adapters = pextr.session.adapters
 
@@ -192,7 +189,7 @@ class Job():
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
 
-    def __init__(self, url, parent=None, kwdict=None):
+    def __init__(self, url, parent=None):
         Job.__init__(self, url, parent)
         self.log = self.get_logger("download")
         self.blacklist = None
@@ -201,20 +198,8 @@ class DownloadJob(Job):
         self.hooks = ()
         self.downloaders = {}
         self.out = output.select()
+        self.visited = parent.visited if parent else set()
         self._skipcnt = 0
-
-        if parent:
-            self.visited = parent.visited
-            pfmt = parent.pathfmt
-            if pfmt and parent.extractor.config("parent-directory"):
-                self.extractor._parentdir = pfmt.directory
-            if parent.extractor.config("parent-metadata"):
-                if parent.kwdict:
-                    self.kwdict.update(parent.kwdict)
-                if kwdict:
-                    self.kwdict.update(kwdict)
-        else:
-            self.visited = set()
 
     def handle_url(self, url, kwdict):
         """Download the resource specified in 'url'"""
@@ -307,8 +292,22 @@ class DownloadJob(Job):
                     extr = None
 
         if extr:
-            job = self.__class__(extr, self, kwdict)
-            if extr.config("parent-skip"):
+            job = self.__class__(extr, self)
+            pfmt = self.pathfmt
+            pextr = self.extractor
+
+            if pfmt and pextr.config("parent-directory"):
+                extr._parentdir = pfmt.directory
+            else:
+                extr._parentdir = pextr._parentdir
+
+            if pextr.config("parent-metadata"):
+                if self.kwdict:
+                    job.kwdict.update(self.kwdict)
+                if kwdict:
+                    job.kwdict.update(kwdict)
+
+            if pextr.config("parent-skip"):
                 job._skipcnt = self._skipcnt
                 self.status |= job.run()
                 self._skipcnt = job._skipcnt
