@@ -1346,6 +1346,16 @@ Description
     Download user avatars.
 
 
+extractor.pixiv.user.metadata
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch extended ``user`` metadata.
+
+
 extractor.pixiv.work.related
 ----------------------------
 Type
