@@ -489,6 +489,10 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("conversations", True),),
             "count": ">= 50",
         }),
+        # retweet with missing media entities (#1555)
+        ("https://twitter.com/morino_ya/status/1392763691599237121", {
+            "count": 4,
+        }),
     )
 
     def __init__(self, match):
@@ -802,6 +806,10 @@ class TwitterAPI():
                         tweet = retweet
                     elif retweet:
                         tweet["author"] = users[retweet["user_id_str"]]
+                        if "extended_entities" in retweet and \
+                                "extended_entities" not in tweet:
+                            tweet["extended_entities"] = \
+                                retweet["extended_entities"]
                 tweet["user"] = users[tweet["user_id_str"]]
                 yield tweet
 
