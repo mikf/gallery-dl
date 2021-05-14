@@ -124,7 +124,8 @@ class PixivUserExtractor(PixivExtractor):
         }),
         # deleted account
         ("http://www.pixiv.net/member_illust.php?id=173531", {
-            "count": 0,
+            "options": (("metadata", True),),
+            "exception": exception.NotFoundError,
         }),
         ("https://www.pixiv.net/en/users/173530"),
         ("https://www.pixiv.net/en/users/173530/manga"),
@@ -146,6 +147,11 @@ class PixivUserExtractor(PixivExtractor):
             t2 = text.parse_query(t2).get("tag")
         self.user_id = u1 or u2 or u3
         self.tag = t1 or t2
+
+    def metadata(self):
+        if self.config("metadata"):
+            return {"user": self.api.user_detail(self.user_id)}
+        return {}
 
     def works(self):
         works = self.api.user_illusts(self.user_id)
