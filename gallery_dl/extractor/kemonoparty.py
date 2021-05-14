@@ -35,12 +35,17 @@ class KemonopartyExtractor(Extractor):
         for post in self.posts():
 
             files = []
-            if post["file"]:
-                files.append(post["file"])
-            if post["attachments"]:
-                files.extend(post["attachments"])
+            append = files.append
+            file = post["file"]
+
+            if file:
+                file["type"] = "file"
+                append(file)
+            for attachment in post["attachments"]:
+                attachment["type"] = "attachment"
+                append(attachment)
             for path in find_inline(post["content"] or ""):
-                files.append({"path": path, "name": path})
+                append({"path": path, "name": path, "type": "inline"})
 
             post["date"] = text.parse_datetime(
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
