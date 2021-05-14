@@ -1176,6 +1176,16 @@ Description
     Download video files.
 
 
+extractor.kemonoparty.metadata
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``username`` metadata
+
+
 extractor.khinsider.format
 --------------------------
 Type
