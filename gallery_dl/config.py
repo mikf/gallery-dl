@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -31,6 +31,8 @@ if util.WINDOWS:
 else:
     _default_configs = [
         "/etc/gallery-dl.conf",
+        "${XDG_CONFIG_HOME}/gallery-dl/config.json"
+        if os.environ.get("XDG_CONFIG_HOME") else
         "${HOME}/.config/gallery-dl/config.json",
         "${HOME}/.gallery-dl.conf",
     ]
