@@ -179,6 +179,7 @@ Windows:
 
 Linux, macOS, etc.:
     * ``/etc/gallery-dl.conf``
+    * ``${XDG_CONFIG_HOME}/gallery-dl/config.json``
     * ``${HOME}/.config/gallery-dl/config.json``
     * ``${HOME}/.gallery-dl.conf``
 
