@@ -168,7 +168,6 @@ class TwitterExtractor(Extractor):
                 tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"),
             "user"          : self._transform_user(tweet["user"]),
             "lang"          : tweet["lang"],
-            "content"       : tweet["full_text"],
             "favorite_count": tweet["favorite_count"],
             "quote_count"   : tweet["quote_count"],
             "reply_count"   : tweet["reply_count"],
@@ -186,6 +185,13 @@ class TwitterExtractor(Extractor):
                 "name": u["screen_name"],
                 "nick": u["name"],
             } for u in mentions]
+
+        content = tweet["full_text"]
+        urls = entities.get("urls")
+        if urls:
+            for url in urls:
+                content = content.replace(url["url"], url["expanded_url"])
+        tdata["content"] = content
 
         if "in_reply_to_screen_name" in tweet:
             tdata["reply_to"] = tweet["in_reply_to_screen_name"]
