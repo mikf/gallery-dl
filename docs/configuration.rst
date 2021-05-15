@@ -1398,6 +1398,17 @@ Description
 .. __: https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
 
 
+extractor.pixiv.max-rank
+------------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    When downloading ranking pages, this sets the maximum number of posts to get.
+    A value of ``0`` means no limit.
+
+
 extractor.plurk.comments
 ------------------------
 Type

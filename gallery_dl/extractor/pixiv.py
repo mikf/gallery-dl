@@ -387,9 +387,14 @@ class PixivRankingExtractor(PixivExtractor):
         PixivExtractor.__init__(self, match)
         self.query = match.group(1)
         self.mode = self.date = None
+        self.max_rank = self.config("max-rank", 0)
 
     def works(self):
-        return self.api.illust_ranking(self.mode, self.date)
+        ranking_iter = self.api.illust_ranking(self.mode, self.date)
+        if self.max_rank:
+            return itertools.islice(ranking_iter, self.max_rank)
+        else:
+            return ranking_iter
 
     def metadata(self):
         query = text.parse_query(self.query)
