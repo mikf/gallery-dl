@@ -1306,6 +1306,16 @@ Description
     Download subalbums.
 
 
+extractor.pillowfort.external
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Follow links to external sites, e.g. Twitter,
+
+
 extractor.pillowfort.reblogs
 ----------------------------
 Type

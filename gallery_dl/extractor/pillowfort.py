@@ -26,12 +26,13 @@ class PillowfortExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.item = match.group(1)
-        self.reblogs = self.config("reblogs", False)
 
     def items(self):
-        for post in self.posts():
+        reblogs = self.config("reblogs", False)
+        external = self.config("external", False)
 
-            if "original_post" in post and not self.reblogs:
+        for post in self.posts():
+            if "original_post" in post and not reblogs:
                 continue
 
             files = post["media"]
@@ -44,69 +45,86 @@ class PillowfortExtractor(Extractor):
             post["num"] = 0
             for file in files:
                 url = file["url"]
-                if url:
-                    post.update(file)
+                if not url:
+                    continue
+
+                if file.get("embed_code"):
+                    if not external:
+                        continue
+                    msgtype = Message.Queue
+                else:
                     post["num"] += 1
-                    post["date"] = text.parse_datetime(
-                        file["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-                    yield Message.Url, url, text.nameext_from_url(url, post)
+                    msgtype = Message.Url
+
+                post.update(file)
+                post["date"] = text.parse_datetime(
+                    file["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                yield msgtype, url, text.nameext_from_url(url, post)
 
 
 class PillowfortPostExtractor(PillowfortExtractor):
     """Extractor for a single pillowfort post"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/posts/(\d+)"
-    test = ("https://www.pillowfort.social/posts/27510", {
-        "pattern": r"https://img\d+\.pillowfort\.social/posts/\w+_out\d+\.png",
-        "count": 4,
-        "keyword": {
-            "avatar_url": str,
-            "col": 0,
-            "commentable": True,
-            "comments_count": int,
-            "community_id": None,
-            "content": str,
-            "created_at": str,
-            "date": "type:datetime",
-            "deleted": None,
-            "deleted_at": None,
-            "deleted_by_mod": None,
-            "deleted_for_flag_id": None,
-            "embed_code": None,
-            "id": int,
-            "last_activity": str,
-            "last_activity_elapsed": str,
-            "last_edited_at": None,
-            "likes_count": int,
-            "media_type": "picture",
-            "nsfw": False,
-            "num": int,
-            "original_post_id": None,
-            "original_post_user_id": None,
-            "picture_content_type": None,
-            "picture_file_name": None,
-            "picture_file_size": None,
-            "picture_updated_at": None,
-            "post_id": 27510,
-            "post_type": "picture",
-            "privacy": "public",
-            "reblog_copy_info": list,
-            "rebloggable": True,
-            "reblogged_from_post_id": None,
-            "reblogged_from_user_id": None,
-            "reblogs_count": int,
-            "row": int,
-            "small_image_url": None,
-            "tags": list,
-            "time_elapsed": str,
-            "timestamp": str,
-            "title": "What is Pillowfort.io? ",
-            "updated_at": str,
-            "url": r"re:https://img3.pillowfort.social/posts/.*\.png",
-            "user_id": 5,
-            "username": "Staff"
-        },
-    })
+    test = (
+        ("https://www.pillowfort.social/posts/27510", {
+            "pattern": r"https://img\d+\.pillowfort\.social"
+                       r"/posts/\w+_out\d+\.png",
+            "count": 4,
+            "keyword": {
+                "avatar_url": str,
+                "col": 0,
+                "commentable": True,
+                "comments_count": int,
+                "community_id": None,
+                "content": str,
+                "created_at": str,
+                "date": "type:datetime",
+                "deleted": None,
+                "deleted_at": None,
+                "deleted_by_mod": None,
+                "deleted_for_flag_id": None,
+                "embed_code": None,
+                "id": int,
+                "last_activity": str,
+                "last_activity_elapsed": str,
+                "last_edited_at": None,
+                "likes_count": int,
+                "media_type": "picture",
+                "nsfw": False,
+                "num": int,
+                "original_post_id": None,
+                "original_post_user_id": None,
+                "picture_content_type": None,
+                "picture_file_name": None,
+                "picture_file_size": None,
+                "picture_updated_at": None,
+                "post_id": 27510,
+                "post_type": "picture",
+                "privacy": "public",
+                "reblog_copy_info": list,
+                "rebloggable": True,
+                "reblogged_from_post_id": None,
+                "reblogged_from_user_id": None,
+                "reblogs_count": int,
+                "row": int,
+                "small_image_url": None,
+                "tags": list,
+                "time_elapsed": str,
+                "timestamp": str,
+                "title": "What is Pillowfort.io? ",
+                "updated_at": str,
+                "url": r"re:https://img3.pillowfort.social/posts/.*\.png",
+                "user_id": 5,
+                "username": "Staff"
+            },
+        }),
+        ("https://www.pillowfort.social/posts/1557500", {
+            "options": (("external", True),),
+            "pattern": r"https://twitter\.com/Aliciawitdaart/status"
+                       r"/1282862493841457152",
+        }),
+    )
 
     def posts(self):
         url = "{}/posts/{}/json/".format(self.root, self.item)
