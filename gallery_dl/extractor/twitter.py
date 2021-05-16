@@ -191,7 +191,8 @@ class TwitterExtractor(Extractor):
         if urls:
             for url in urls:
                 content = content.replace(url["url"], url["expanded_url"])
-        tdata["content"] = content
+        txt, _, tco = content.rpartition(" ")
+        tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
         if "in_reply_to_screen_name" in tweet:
             tdata["reply_to"] = tweet["in_reply_to_screen_name"]
