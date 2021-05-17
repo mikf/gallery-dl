@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import re
 
 BASE_PATTERN = r"(?:https?://)?www\.pillowfort\.social"
 
@@ -28,18 +29,26 @@ class PillowfortExtractor(Extractor):
         self.item = match.group(1)
 
     def items(self):
+        inline = self.config("inline", True)
         reblogs = self.config("reblogs", False)
         external = self.config("external", False)
+
+        if inline:
+            inline = re.compile(r'src="(https://img\d+\.pillowfort\.social'
+                                r'/posts/[^"]+)').findall
 
         for post in self.posts():
             if "original_post" in post and not reblogs:
                 continue
 
-            files = post["media"]
-            del post["media"]
+            files = post.pop("media")
+            if inline:
+                for url in inline(post["content"]):
+                    files.append({"url": url})
 
             post["date"] = text.parse_datetime(
                 post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["post_id"] = post.pop("id")
             yield Message.Directory, post
 
             post["num"] = 0
@@ -57,9 +66,17 @@ class PillowfortExtractor(Extractor):
                     msgtype = Message.Url
 
                 post.update(file)
-                post["date"] = text.parse_datetime(
-                    file["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-                yield msgtype, url, text.nameext_from_url(url, post)
+                text.nameext_from_url(url, post)
+                post["hash"], _, post["filename"] = \
+                    post["filename"].partition("_")
+
+                if "id" not in file:
+                    post["id"] = post["hash"]
+                if "created_at" in file:
+                    post["date"] = text.parse_datetime(
+                        file["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+
+                yield msgtype, url, post
 
 
 class PillowfortPostExtractor(PillowfortExtractor):
@@ -120,9 +137,13 @@ class PillowfortPostExtractor(PillowfortExtractor):
             },
         }),
         ("https://www.pillowfort.social/posts/1557500", {
-            "options": (("external", True),),
+            "options": (("external", True), ("inline", False)),
             "pattern": r"https://twitter\.com/Aliciawitdaart/status"
                        r"/1282862493841457152",
+        }),
+        ("https://www.pillowfort.social/posts/1672518", {
+            "options": (("inline", True),),
+            "count": 3,
         }),
     )
 
