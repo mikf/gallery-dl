@@ -1316,6 +1316,16 @@ Description
     Follow links to external sites, e.g. Twitter,
 
 
+extractor.pillowfort.inline
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract inline images.
+
+
 extractor.pillowfort.reblogs
 ----------------------------
 Type
