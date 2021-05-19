@@ -9,7 +9,8 @@
 """Extractors for https://www.pillowfort.social/"""
 
 from .common import Extractor, Message
-from .. import text
+from ..cache import cache
+from .. import text, exception
 import re
 
 BASE_PATTERN = r"(?:https?://)?www\.pillowfort\.social"
@@ -20,15 +21,17 @@ class PillowfortExtractor(Extractor):
     category = "pillowfort"
     root = "https://www.pillowfort.social"
     directory_fmt = ("{category}", "{username}")
-    filename_fmt = ("{post_id} {title|original_post[title]} "
+    filename_fmt = ("{post_id} {title|original_post[title]:?/ /}"
                     "{num:>02}.{extension}")
     archive_fmt = "{id}"
+    cookiedomain = "www.pillowfort.social"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.item = match.group(1)
 
     def items(self):
+        self.login()
         inline = self.config("inline", True)
         reblogs = self.config("reblogs", False)
         external = self.config("external", False)
@@ -77,6 +80,43 @@ class PillowfortExtractor(Extractor):
                         file["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
                 yield msgtype, url, post
+
+    def login(self):
+        cget = self.session.cookies.get
+        if cget("_Pf_new_session", domain=self.cookiedomain) \
+                or cget("remember_user_token", domain=self.cookiedomain):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            cookies = self._login_impl(username, password)
+            self._update_cookies(cookies)
+
+    @cache(maxage=14*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = "https://www.pillowfort.social/users/sign_in"
+        page = self.request(url).text
+        auth = text.extract(page, 'name="authenticity_token" value="', '"')[0]
+
+        headers = {"Origin": self.root, "Referer": url}
+        data = {
+            "utf8"              : "✓",
+            "authenticity_token": auth,
+            "user[email]"       : username,
+            "user[password]"    : password,
+            "user[remember_me]" : "1",
+        }
+        response = self.request(url, method="POST", headers=headers, data=data)
+
+        if not response.history:
+            raise exception.AuthenticationError()
+
+        return {
+            cookie.name: cookie.value
+            for cookie in response.history[0].cookies
+        }
 
 
 class PillowfortPostExtractor(PillowfortExtractor):

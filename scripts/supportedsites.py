@@ -223,6 +223,7 @@ AUTH_MAP = {
     "nijie"          : "Required",
     "patreon"        : _COOKIES,
     "pawoo"          : _OAUTH,
+    "pillowfort"     : "Supported",
     "pinterest"      : "Supported",
     "pixiv"          : _OAUTH,
     "ponybooru"      : "API Key",
