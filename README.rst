@@ -210,6 +210,7 @@ and optional for
 ``inkbunny``,
 ``instagram``,
 ``mangoxo``,
+``pillowfort``,
 ``pinterest``,
 ``sankaku``,
 ``subscribestar``,

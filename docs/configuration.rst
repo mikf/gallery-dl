@@ -310,6 +310,7 @@ Description
     * ``inkbunny``
     * ``instagram``
     * ``mangoxo``
+    * ``pillowfort``
     * ``pinterest``
     * ``sankaku``
     * ``subscribestar``
@@ -1843,7 +1844,7 @@ Description
     Note: This requires 1 additional HTTP request for each post.
 
 extractor.[booru].notes
-----------------------
+-----------------------
 Type
     ``bool``
 Default

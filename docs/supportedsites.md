@@ -527,7 +527,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Pillowfort</td>
     <td>https://www.pillowfort.social/</td>
     <td>Posts, User Profiles</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>Pinterest</td>
