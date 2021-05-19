@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -182,7 +182,7 @@ class AryionGalleryExtractor(AryionExtractor):
             url = "{}/g4/gallery/{}".format(self.root, self.user)
             return self._pagination(url)
         else:
-            self._needle = "class='thumb' href='/g4/view/"
+            self._needle = "thumb' href='/g4/view/"
             url = "{}/g4/latest.php?name={}".format(self.root, self.user)
             return util.advance(self._pagination(url), self.offset)
 
