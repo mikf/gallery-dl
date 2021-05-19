@@ -104,11 +104,14 @@ test:child
 test:child
 """)
 
-    #  def test_child(self):
-        #  extr = TestExtractorParent.from_url("test:parent")
-        #  tjob = job.UrlJob(extr, depth=0)
-        #  self.assertEqual(self._capture_stdout(tjob), """\
-#  """)
+    def test_child(self):
+        extr = TestExtractorParent.from_url("test:parent")
+        tjob = job.UrlJob(extr, depth=0)
+        self.assertEqual(self._capture_stdout(tjob), 3 * """\
+https://example.org/1.jpg
+https://example.org/2.jpg
+https://example.org/3.jpg
+""")
 
 
 class TestInfoJob(TestJob):

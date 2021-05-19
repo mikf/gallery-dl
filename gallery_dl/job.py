@@ -597,10 +597,16 @@ class UrlJob(Job):
             for url in kwdict["_fallback"]:
                 print("|", url)
 
-    def handle_queue(self, url, _):
-        try:
-            UrlJob(url, self, self.depth + 1).run()
-        except exception.NoExtractorError:
+    def handle_queue(self, url, kwdict):
+        cls = kwdict.get("_extractor")
+        if cls:
+            extr = cls.from_url(url)
+        else:
+            extr = extractor.find(url)
+
+        if extr:
+            self.status |= self.__class__(extr, self).run()
+        else:
             self._write_unsupported(url)
 
 
