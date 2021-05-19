@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
 
-
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
 
 
@@ -33,6 +32,8 @@ class AryionExtractor(Extractor):
         self._needle = "class='gallery-item' id='"
 
     def login(self):
+        if self._check_cookies(self.cookienames):
+            return
         username, password = self._get_auth_info()
         if username:
             self._update_cookies(self._login_impl(username, password))
@@ -73,8 +74,7 @@ class AryionExtractor(Extractor):
     def _pagination(self, url):
         while True:
             page = self.request(url).text
-            yield from text.extract_iter(
-                page, self._needle, "'")
+            yield from text.extract_iter(page, self._needle, "'")
 
             pos = page.find("Next &gt;&gt;")
             if pos < 0:
@@ -173,7 +173,7 @@ class AryionGalleryExtractor(AryionExtractor):
 
     def skip(self, num):
         if self.recursive:
-            num = 0
+            return 0
         self.offset += num
         return num
 
