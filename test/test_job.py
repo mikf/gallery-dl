@@ -10,6 +10,7 @@
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
 import io
 import contextlib
@@ -64,6 +65,7 @@ subcategory
 tags[]
   - foo
   - bar
+  - テスト
 user[id]
   123
 user[name]
@@ -166,10 +168,124 @@ Directory format (default):
 """)
 
 
-class TestDataJob(unittest.TestCase):
+class TestDataJob(TestJob):
+    jobclass = job.DataJob
 
     def test_default(self):
-        pass
+        extr = TestExtractor.from_url("test:")
+        tjob = self.jobclass(extr, file=io.StringIO())
+
+        tjob.run()
+
+        self.assertEqual(tjob.data, [
+            (Message.Directory, {
+                "category"   : "test_category",
+                "subcategory": "test_subcategory",
+            }),
+            (Message.Url, "https://example.org/1.jpg", {
+                "category"   : "test_category",
+                "subcategory": "test_subcategory",
+                "filename"   : "1",
+                "extension"  : "jpg",
+                "num"        : 1,
+                "tags"       : ["foo", "bar", "テスト"],
+                "user"       : {"id": 123, "name": "test"},
+            }),
+            (Message.Url, "https://example.org/2.jpg", {
+                "category"   : "test_category",
+                "subcategory": "test_subcategory",
+                "filename"   : "2",
+                "extension"  : "jpg",
+                "num"        : 2,
+                "tags"       : ["foo", "bar", "テスト"],
+                "user"       : {"id": 123, "name": "test"},
+            }),
+            (Message.Url, "https://example.org/3.jpg", {
+                "category"   : "test_category",
+                "subcategory": "test_subcategory",
+                "filename"   : "3",
+                "extension"  : "jpg",
+                "num"        : 3,
+                "tags"       : ["foo", "bar", "テスト"],
+                "user"       : {"id": 123, "name": "test"},
+            }),
+        ])
+
+    def test_exception(self):
+        extr = TestExtractorException.from_url("test:exception")
+        tjob = self.jobclass(extr, file=io.StringIO())
+        tjob.run()
+        self.assertEqual(
+            tjob.data[-1], ("ZeroDivisionError", "division by zero"))
+
+    def test_private(self):
+        config.set(("output",), "private", True)
+        extr = TestExtractor.from_url("test:")
+        tjob = self.jobclass(extr, file=io.StringIO())
+
+        tjob.run()
+
+        for i in range(1, 4):
+            self.assertEqual(
+                tjob.data[i][2]["_fallback"],
+                ("https://example.org/alt/{}.jpg".format(i),),
+            )
+
+    def test_sleep(self):
+        extr = TestExtractor.from_url("test:")
+        tjob = self.jobclass(extr, file=io.StringIO())
+
+        config.set((), "sleep-extractor", 123)
+        with patch("time.sleep") as sleep:
+            tjob.run()
+        sleep.assert_called_once_with(123)
+
+        config.set((), "sleep-extractor", 0)
+        with patch("time.sleep") as sleep:
+            tjob.run()
+        sleep.assert_not_called()
+
+    def test_ascii(self):
+        extr = TestExtractor.from_url("test:")
+        tjob = self.jobclass(extr)
+
+        tjob.file = buffer = io.StringIO()
+        tjob.run()
+        self.assertIn("""\
+      "tags": [
+        "foo",
+        "bar",
+        "\\u30c6\\u30b9\\u30c8"
+      ],
+""", buffer.getvalue())
+
+        tjob.file = buffer = io.StringIO()
+        tjob.ascii = False
+        tjob.run()
+        self.assertIn("""\
+      "tags": [
+        "foo",
+        "bar",
+        "テスト"
+      ],
+""", buffer.getvalue())
+
+    def test_num_string(self):
+        extr = TestExtractor.from_url("test:")
+        tjob = self.jobclass(extr, file=io.StringIO())
+
+        with patch("gallery_dl.util.number_to_string") as nts:
+            tjob.run()
+        nts.assert_not_called()
+
+        config.set(("output",), "num-to-str", True)
+        with patch("gallery_dl.util.number_to_string") as nts:
+            tjob.run()
+        nts.assert_called()
+
+        tjob.run()
+        self.assertEqual(tjob.data[-1][0], Message.Url)
+        self.assertEqual(tjob.data[-1][2]["num"], "3")
 
 
 class TestExtractor(Extractor):
@@ -187,7 +303,7 @@ class TestExtractor(Extractor):
             url = "{}/{}.jpg".format(root, i)
             yield Message.Url, url, text.nameext_from_url(url, {
                 "num" : i,
-                "tags": ["foo", "bar"],
+                "tags": ["foo", "bar", "テスト"],
                 "user": {"id": 123, "name": "test"},
                 "_fallback": ("{}/alt/{}.jpg".format(root, i),),
             })
@@ -207,6 +323,15 @@ class TestExtractorParent(Extractor):
                 "tags": ["abc", "def"],
                 "_extractor": TestExtractor,
             }
+
+
+class TestExtractorException(Extractor):
+    category = "test_category"
+    subcategory = "test_subcategory_exception"
+    pattern = r"test:exception$"
+
+    def items(self):
+        return 1/0
 
 
 if __name__ == '__main__':
