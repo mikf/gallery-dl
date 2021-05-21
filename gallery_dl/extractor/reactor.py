@@ -78,6 +78,8 @@ class ReactorExtractor(Extractor):
 
     def _parse_post(self, post):
         post, _, script = post.partition('<script type="application/ld+json">')
+        if not script:
+            return
         images = text.extract_iter(post, '<div class="image">', '</div>')
         script = script[:script.index("</")].strip()
 
@@ -210,7 +212,7 @@ class JoyreactorTagExtractor(ReactorTagExtractor):
     pattern = JR_BASE_PATTERN + r"/tag/([^/?#]+)"
     test = (
         ("http://joyreactor.cc/tag/Advent+Cirno", {
-            "count": ">= 17",
+            "count": ">= 15",
         }),
         ("http://joyreactor.com/tag/Cirno", {
             "url": "de1e60c15bfb07a0e9603b00dc3d05f60edc7914",
