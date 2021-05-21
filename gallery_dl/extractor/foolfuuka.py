@@ -135,7 +135,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
             "url": "61896d9d9a2edb556b619000a308a984307b6d30",
         }),
         ("https://thebarchive.com/b/thread/739772332/", {
-            "url": "e8b18001307d130d67db31740ce57c8561b5d80c",
+            "url": "07d39d2cb48f40fb337dc992993d965b0cd5f7cd",
         }),
     )
 
