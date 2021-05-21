@@ -92,11 +92,12 @@ class ManganeloMangaExtractor(ManganeloBase, MangaExtractor):
                r"(/(?:manga/|read_)\w+)")
     test = (
         ("https://manganelo.com/manga/ol921234", {
-            "url": "6ba7f083a6944e414ad8214b74a0a40cb60d4562",
+            "pattern": ManganeloChapterExtractor.pattern,
+            "count": ">= 70",
         }),
         ("https://manganelo.com/manga/read_otome_no_teikoku", {
             "pattern": ManganeloChapterExtractor.pattern,
-            "count": ">= 40"
+            "count": ">= 40",
         }),
     )
 
