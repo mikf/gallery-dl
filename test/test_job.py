@@ -276,12 +276,12 @@ class TestDataJob(TestJob):
 
         with patch("gallery_dl.util.number_to_string") as nts:
             tjob.run()
-        nts.assert_not_called()
+        self.assertEqual(len(nts.call_args_list), 0)
 
         config.set(("output",), "num-to-str", True)
         with patch("gallery_dl.util.number_to_string") as nts:
             tjob.run()
-        nts.assert_called()
+        self.assertEqual(len(nts.call_args_list), 52)
 
         tjob.run()
         self.assertEqual(tjob.data[-1][0], Message.Url)
