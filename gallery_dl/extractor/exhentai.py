@@ -128,7 +128,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 "gid": 1200119,
                 "height": int,
                 "image_token": "re:[0-9a-f]{10}",
-                "lang": "jp",
+                "lang": "ja",
                 "language": "Japanese",
                 "parent": "",
                 "rating": r"re:\d\.\d+",
