@@ -16,13 +16,28 @@ class ImagebamExtractor(Extractor):
     """Base class for imagebam extractors"""
     category = "imagebam"
     root = "https://www.imagebam.com"
+    cookies = None
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.key = match.group(1)
+        if self.cookies:
+            self.session.cookies = self.cookies
 
     def get_image_data(self, data):
         page_url = "{}/image/{}".format(self.root, data["image_key"])
         page = self.request(page_url).text
         image_url, pos = text.extract(page, '<img src="https://images', '"')
-        filename = text.unescape(text.extract(page, 'alt="', '"', pos)[0])
 
+        if not image_url:
+            # cache cookies
+            ImagebamExtractor.cookies = self.session.cookies
+            # repeat request to get past "Continue to your image" pages
+            page = self.request(page_url).text
+            image_url, pos = text.extract(
+                page, '<img src="https://images', '"')
+
+        filename = text.unescape(text.extract(page, 'alt="', '"', pos)[0])
         data["url"] = "https://images" + image_url
         data["filename"], _, data["extension"] = filename.rpartition(".")
 
@@ -50,19 +65,15 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
         }),
     )
 
-    def __init__(self, match):
-        ImagebamExtractor.__init__(self, match)
-        self.gallery_key = match.group(1)
-
     def items(self):
-        url = "{}/gallery/{}".format(self.root, self.gallery_key)
+        url = "{}/gallery/{}".format(self.root, self.key)
         page = self.request(url).text
 
         data = self.get_metadata(page)
         keys = self.get_image_keys(page)
         keys.reverse()
         data["count"] = len(keys)
-        data["gallery_key"] = self.gallery_key
+        data["gallery_key"] = self.key
 
         yield Message.Directory, data
         for data["num"], data["image_key"] in enumerate(keys, 1):
@@ -103,14 +114,14 @@ class ImagebamImageExtractor(ImagebamExtractor):
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
         }),
         ("http://images3.imagebam.com/1d/8c/44/94d56c502511890.png"),
+        # NSFW (#1534)
+        ("https://www.imagebam.com/image/0850951366904951", {
+            "url": "d37297b17ed1615b4311c8ed511e50ce46e4c748",
+        }),
     )
 
-    def __init__(self, match):
-        ImagebamExtractor.__init__(self, match)
-        self.image_key = match.group(1)
-
     def items(self):
-        data = {"image_key": self.image_key}
+        data = {"image_key": self.key}
         self.get_image_data(data)
         yield Message.Directory, data
         yield Message.Url, data["url"], data
