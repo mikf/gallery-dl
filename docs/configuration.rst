@@ -1715,6 +1715,20 @@ Description
     will be taken from the original Tweets, not the Retweets.
 
 
+extractor.twitter.text-only
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Produce metadata for Tweets without media content.
+
+    This only has an effect with a ``metadata`` (or ``exec``) post processor
+    with `"event": "post" <metadata.event_>`_
+    and appropriate `filename <metadata.filename_>`_.
+
+
 extractor.twitter.twitpic
 -------------------------
 Type
@@ -2217,7 +2231,7 @@ Postprocessor Options
 This section lists all options available inside
 `Postprocessor Configuration`_ objects.
 
-Each option is titled as ``<name>.<option>``, meaning a post procesor
+Each option is titled as ``<name>.<option>``, meaning a post processor
 of type ``<name>`` will look for an ``<option>`` field inside its "body".
 For example an ``exec`` post processor will recognize
 an `async <exec.async_>`__,  `command <exec.command_>`__,
@@ -2406,7 +2420,7 @@ Description
     The available events are:
 
     ``init``
-        After post procesor initialization
+        After post processor initialization
         and before the first file download
     ``finalize``
         On extractor shutdown, e.g. after all files were downloaded
