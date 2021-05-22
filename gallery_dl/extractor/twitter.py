@@ -32,6 +32,7 @@ class TwitterExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
+        self.textonly = self.config("text-only", False)
         self.retweets = self.config("retweets", True)
         self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)
@@ -64,7 +65,7 @@ class TwitterExtractor(Extractor):
                 self._extract_card(tweet, files)
             if self.twitpic:
                 self._extract_twitpic(tweet, files)
-            if not files:
+            if not files and not self.textonly:
                 continue
 
             tdata = self._transform_tweet(tweet)
