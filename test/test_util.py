@@ -134,6 +134,7 @@ class TestISO639_1(unittest.TestCase):
         self._run_test(util.code_to_language, {
             ("en",): "English",
             ("FR",): "French",
+            ("ja",): "Japanese",
             ("xx",): None,
             (""  ,): None,
             (None,): None,
@@ -149,6 +150,7 @@ class TestISO639_1(unittest.TestCase):
         self._run_test(util.language_to_code, {
             ("English",): "en",
             ("fRENch",): "fr",
+            ("Japanese",): "ja",
             ("xx",): None,
             (""  ,): None,
             (None,): None,

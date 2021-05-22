@@ -330,7 +330,7 @@ CODES = {
     "hu": "Hungarian",
     "id": "Indonesian",
     "it": "Italian",
-    "jp": "Japanese",
+    "ja": "Japanese",
     "ko": "Korean",
     "ms": "Malay",
     "nl": "Dutch",
