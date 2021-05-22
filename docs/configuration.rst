@@ -1715,14 +1715,14 @@ Description
     will be taken from the original Tweets, not the Retweets.
 
 
-extractor.twitter.text-only
----------------------------
+extractor.twitter.text-tweets
+-----------------------------
 Type
     ``bool``
 Default
     ``false``
 Description
-    Produce metadata for Tweets without media content.
+    Also emit metadata for text-only Tweets without media content.
 
     This only has an effect with a ``metadata`` (or ``exec``) post processor
     with `"event": "post" <metadata.event_>`_
