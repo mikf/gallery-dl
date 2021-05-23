@@ -29,6 +29,7 @@ class PixivExtractor(Extractor):
         Extractor.__init__(self, match)
         self.api = PixivAppAPI(self)
         self.load_ugoira = self.config("ugoira", True)
+        self.max_posts = self.config("max-posts", 0)
 
     def items(self):
         tags = self.config("tags", "japanese")
@@ -46,7 +47,10 @@ class PixivExtractor(Extractor):
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         metadata = self.metadata()
 
-        for work in self.works():
+        works = self.works()
+        if self.max_posts:
+            works = itertools.islice(works, self.max_posts)
+        for work in works:
             if not work["user"]["id"]:
                 continue
 
@@ -387,14 +391,9 @@ class PixivRankingExtractor(PixivExtractor):
         PixivExtractor.__init__(self, match)
         self.query = match.group(1)
         self.mode = self.date = None
-        self.max_rank = self.config("max-rank", 0)
 
     def works(self):
-        ranking_iter = self.api.illust_ranking(self.mode, self.date)
-        if self.max_rank:
-            return itertools.islice(ranking_iter, self.max_rank)
-        else:
-            return ranking_iter
+        return self.api.illust_ranking(self.mode, self.date)
 
     def metadata(self):
         query = text.parse_query(self.query)
