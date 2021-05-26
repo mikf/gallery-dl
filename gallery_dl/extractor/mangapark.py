@@ -17,7 +17,7 @@ import re
 class MangaparkBase():
     """Base class for mangapark extractors"""
     category = "mangapark"
-    root_fmt = "https://mangapark.{}"
+    root_fmt = "https://v2.mangapark.{}"
     browser = "firefox"
 
     @staticmethod
