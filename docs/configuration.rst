@@ -2584,6 +2584,17 @@ Description
     to reduce an odd width/height by 1 pixel and make them even.
 
 
+ugoira.repeat-last-frame
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Allow repeating the last frame when necessary
+    to prevent it from only being displayed for a very short amount of time.
+
+
 zip.compression
 ---------------
 Type

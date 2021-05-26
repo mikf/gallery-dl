@@ -36,8 +36,11 @@ class UgoiraPP(PostProcessor):
 
         if options.get("ffmpeg-demuxer") == "concat":
             self._process = self._concat
+            self.repeat = (options.get("repeat-last-frame", True) and
+                           self.extension != "gif")
         else:
             self._process = self._image2
+            self.repeat = False
 
         if options.get("libx264-prevent-odd", True):
             # get last video-codec argument
@@ -123,9 +126,7 @@ class UgoiraPP(PostProcessor):
             for frame in self._frames:
                 file.write("file '{}'\n".format(frame["file"]))
                 file.write("duration {}\n".format(frame["delay"] / 1000))
-            if self.extension != "gif":
-                # repeat the last frame to prevent it from only being
-                # displayed for a very short amount of time
+            if self.repeat:
                 file.write("file '{}'\n".format(frame["file"]))
 
         rate_in, rate_out = self.calculate_framerate(self._frames)
