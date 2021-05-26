@@ -34,6 +34,11 @@ class UgoiraPP(PostProcessor):
         if rate != "auto":
             self.calculate_framerate = lambda _: (None, rate)
 
+        if options.get("ffmpeg-demuxer") == "concat":
+            self._process = self._concat
+        else:
+            self._process = self._image2
+
         if options.get("libx264-prevent-odd", True):
             # get last video-codec argument
             vcodec = None
@@ -72,38 +77,17 @@ class UgoiraPP(PostProcessor):
         if not self._frames:
             return
 
-        rate_in, rate_out = self.calculate_framerate(self._frames)
-
         with tempfile.TemporaryDirectory() as tempdir:
             # extract frames
             try:
                 with zipfile.ZipFile(pathfmt.temppath) as zfile:
                     zfile.extractall(tempdir)
             except FileNotFoundError:
-                pathfmt.temppath = pathfmt.realpath
+                pathfmt.realpath = pathfmt.temppath
                 return
 
-            # write ffconcat file
-            ffconcat = tempdir + "/ffconcat.txt"
-            with open(ffconcat, "w") as file:
-                file.write("ffconcat version 1.0\n")
-                for frame in self._frames:
-                    file.write("file '{}'\n".format(frame["file"]))
-                    file.write("duration {}\n".format(frame["delay"] / 1000))
-                if self.extension != "gif":
-                    # repeat the last frame to prevent it from only being
-                    # displayed for a very short amount of time
-                    file.write("file '{}'\n".format(self._frames[-1]["file"]))
-
-            # collect command-line arguments
-            args = [self.ffmpeg]
-            if rate_in:
-                args += ("-r", str(rate_in))
-            args += ("-i", ffconcat)
-            if rate_out:
-                args += ("-r", str(rate_out))
-            if self.prevent_odd:
-                args += ("-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)")
+            # process frames and collect command-line arguments
+            args = self._process(tempdir)
             if self.args:
                 args += self.args
             self.log.debug("ffmpeg args: %s", args)
@@ -112,7 +96,7 @@ class UgoiraPP(PostProcessor):
             pathfmt.set_extension(self.extension)
             try:
                 if self.twopass:
-                    if "-f" not in args:
+                    if "-f" not in self.args:
                         args += ("-f", self.extension)
                     args += ("-passlogfile", tempdir + "/ffmpeg2pass", "-pass")
                     self._exec(args + ["1", "-y", os.devnull])
@@ -130,6 +114,45 @@ class UgoiraPP(PostProcessor):
                     pathfmt.delete = True
                 else:
                     pathfmt.set_extension("zip")
+
+    def _concat(self, path):
+        # write ffconcat file
+        ffconcat = path + "/ffconcat.txt"
+        with open(ffconcat, "w") as file:
+            file.write("ffconcat version 1.0\n")
+            for frame in self._frames:
+                file.write("file '{}'\n".format(frame["file"]))
+                file.write("duration {}\n".format(frame["delay"] / 1000))
+            if self.extension != "gif":
+                # repeat the last frame to prevent it from only being
+                # displayed for a very short amount of time
+                file.write("file '{}'\n".format(frame["file"]))
+
+        rate_in, rate_out = self.calculate_framerate(self._frames)
+        args = [self.ffmpeg, "-f", "concat"]
+        if rate_in:
+            args += ("-r", str(rate_in))
+        args += ("-i", ffconcat)
+        if rate_out:
+            args += ("-r", str(rate_out))
+        return args
+
+    def _image2(self, path):
+        path += "/"
+
+        # adjust frame mtime values
+        ts = 0
+        for frame in self._frames:
+            os.utime(path + frame["file"], ns=(ts, ts))
+            ts += frame["delay"] * 1000000
+
+        return [
+            self.ffmpeg,
+            "-f", "image2",
+            "-ts_from_file", "2",
+            "-pattern_type", "sequence",
+            "-i", path.replace("%", "%%") + "%06d.jpg",
+        ]
 
     def _exec(self, args):
         out = None if self.output else subprocess.DEVNULL
