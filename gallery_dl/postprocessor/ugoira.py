@@ -152,7 +152,8 @@ class UgoiraPP(PostProcessor):
             "-f", "image2",
             "-ts_from_file", "2",
             "-pattern_type", "sequence",
-            "-i", path.replace("%", "%%") + "%06d.jpg",
+            "-i", "{}%06d.{}".format(
+                path.replace("%", "%%"), frame["file"].rpartition(".")[2]),
         ]
 
     def _exec(self, args):
