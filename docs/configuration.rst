@@ -2498,6 +2498,18 @@ Description
     Additional FFmpeg command-line arguments.
 
 
+ugoira.ffmpeg-demuxer
+---------------------
+Type
+    ``string``
+Default
+    ``image2``
+Description
+    FFmpeg demuxer to read input files with. Possible values are
+    "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" and
+    "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_".
+
+
 ugoira.ffmpeg-location
 ----------------------
 Type
