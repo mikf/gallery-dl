@@ -26,6 +26,7 @@ class UgoiraPP(PostProcessor):
         self.twopass = options.get("ffmpeg-twopass", False)
         self.output = options.get("ffmpeg-output", True)
         self.delete = not options.get("keep-files", False)
+        self.repeat = options.get("repeat-last-frame", True)
 
         ffmpeg = options.get("ffmpeg-location")
         self.ffmpeg = util.expand_path(ffmpeg) if ffmpeg else "ffmpeg"
@@ -34,13 +35,10 @@ class UgoiraPP(PostProcessor):
         if rate != "auto":
             self.calculate_framerate = lambda _: (None, rate)
 
-        if options.get("ffmpeg-demuxer") == "concat":
-            self._process = self._concat
-            self.repeat = (options.get("repeat-last-frame", True) and
-                           self.extension != "gif")
-        else:
+        if options.get("ffmpeg-demuxer") == "image2":
             self._process = self._image2
-            self.repeat = False
+        else:
+            self._process = self._concat
 
         if options.get("libx264-prevent-odd", True):
             # get last video-codec argument
