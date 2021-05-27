@@ -117,15 +117,19 @@ class UgoiraPP(PostProcessor):
                     pathfmt.set_extension("zip")
 
     def _concat(self, path):
-        # write ffconcat file
         ffconcat = path + "/ffconcat.txt"
+
+        content = ["ffconcat version 1.0"]
+        append = content.append
+        for frame in self._frames:
+            append("file '{}'\nduration {}".format(
+                frame["file"], frame["delay"] / 1000))
+        if self.repeat:
+            append("file '{}'".format(frame["file"]))
+        append("")
+
         with open(ffconcat, "w") as file:
-            file.write("ffconcat version 1.0\n")
-            for frame in self._frames:
-                file.write("file '{}'\n".format(frame["file"]))
-                file.write("duration {}\n".format(frame["delay"] / 1000))
-            if self.repeat:
-                file.write("file '{}'\n".format(frame["file"]))
+            file.write("\n".join(content))
 
         rate_in, rate_out = self.calculate_framerate(self._frames)
         args = [self.ffmpeg, "-f", "concat"]
