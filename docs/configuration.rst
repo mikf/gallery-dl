@@ -1844,7 +1844,10 @@ Type
 Default
     ``true``
 Description
-    Extract media from retweeted posts.
+    Fetch media from retweeted posts.
+
+    If this value is ``"original"``, metadata for these files
+    will be taken from the original posts, not the retweeted posts.
 
 
 extractor.weibo.videos
