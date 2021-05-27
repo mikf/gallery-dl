@@ -54,6 +54,7 @@ class KemonopartyExtractor(Extractor):
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
+                post["type"] = file["type"]
                 url = file["path"]
                 if url[0] == "/":
                     url = "https://data.kemono.party" + url
@@ -118,6 +119,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
                 "shared_file": False,
                 "subcategory": "post",
                 "title": "c96取り置き",
+                "type": "file",
                 "user": "6993449",
             },
         }),
