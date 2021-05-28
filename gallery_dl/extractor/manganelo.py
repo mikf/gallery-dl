@@ -4,35 +4,23 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from https://manganelo.com/"""
+"""Extractors for https://manganato.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 import re
 
-
-class ManganeloBase():
-    """Base class for manganelo extractors"""
-    category = "manganelo"
-    root = "https://manganelo.com"
-
-    @staticmethod
-    def parse_page(page, data):
-        """Parse metadata on 'page' and add it to 'data'"""
-        text.extract_all(page, (
-            ("manga"  , '<h1>', '</h1>'),
-            ('author' , '</i>Author(s) :</td>', '</tr>'),
-        ), values=data)
-        data["author"] = text.remove_html(data["author"])
-        return data
+BASE_PATTERN = \
+    r"(?:https?://)?((?:(?:read)?manganato|(?:www\.)?manganelo)\.com)"
 
 
-class ManganeloChapterExtractor(ManganeloBase, ChapterExtractor):
+class ManganeloChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from manganelo.com"""
-    pattern = (r"(?:https?://)?(?:www\.)?manganelo\.com"
-               r"(/chapter/\w+/chapter_[^/?#]+)")
+    category = "manganelo"
+    root = "https://readmanganato.com"
+    pattern = BASE_PATTERN + r"(/(?:manga-\w+|chapter/\w+)/chapter[-_][^/?#]+)"
     test = (
-        ("https://manganelo.com/chapter/gq921227/chapter_23", {
+        ("https://readmanganato.com/manga-gn983696/chapter-23", {
             "pattern": r"https://s\d+\.\w+\.com/mangakakalot/g\d+/gq921227/"
                        r"vol3_chapter_23_24_yen/\d+\.jpg",
             "keyword": "3748087cf41abc97f991530e6fd53b291490d6d0",
@@ -43,11 +31,12 @@ class ManganeloChapterExtractor(ManganeloBase, ChapterExtractor):
             "content": "fbec629c71f66b246bfa0604204407c0d1c8ae38",
             "count": 39,
         }),
+        ("https://manganelo.com/chapter/gq921227/chapter_23"),
     )
 
     def __init__(self, match):
-        self.path = match.group(1)
-        ChapterExtractor.__init__(self, match, self.root + self.path)
+        domain, path = match.groups()
+        ChapterExtractor.__init__(self, match, "https://" + domain + path)
         self.session.headers['Referer'] = self.root
 
     def metadata(self, page):
@@ -85,13 +74,14 @@ class ManganeloChapterExtractor(ManganeloBase, ChapterExtractor):
         ]
 
 
-class ManganeloMangaExtractor(ManganeloBase, MangaExtractor):
+class ManganeloMangaExtractor(MangaExtractor):
     """Extractor for manga from manganelo.com"""
+    category = "manganelo"
+    root = "https://readmanganato.com"
     chapterclass = ManganeloChapterExtractor
-    pattern = (r"(?:https?://)?(?:www\.)?manganelo\.com"
-               r"(/(?:manga/|read_)\w+)")
+    pattern = BASE_PATTERN + r"(/(?:manga[-/]|read_)\w+)/?$"
     test = (
-        ("https://manganelo.com/manga/ol921234", {
+        ("https://manganato.com/manga-gu983703", {
             "pattern": ManganeloChapterExtractor.pattern,
             "count": ">= 70",
         }),
@@ -99,7 +89,13 @@ class ManganeloMangaExtractor(ManganeloBase, MangaExtractor):
             "pattern": ManganeloChapterExtractor.pattern,
             "count": ">= 40",
         }),
+        ("https://manganelo.com/manga/ol921234/"),
     )
+
+    def __init__(self, match):
+        domain, path = match.groups()
+        MangaExtractor.__init__(self, match, "https://" + domain + path)
+        self.session.headers['Referer'] = self.root
 
     def chapters(self, page):
         results = []
@@ -118,3 +114,13 @@ class ManganeloMangaExtractor(ManganeloBase, MangaExtractor):
             data["chapter"] = text.parse_int(chapter)
             data["chapter_minor"] = sep + minor
             results.append((url, data.copy()))
+
+    @staticmethod
+    def parse_page(page, data):
+        """Parse metadata on 'page' and add it to 'data'"""
+        text.extract_all(page, (
+            ("manga"  , '<h1>', '</h1>'),
+            ('author' , '</i>Author(s) :</td>', '</tr>'),
+        ), values=data)
+        data["author"] = text.remove_html(data["author"])
+        return data

@@ -66,6 +66,7 @@ CATEGORY_MAP = {
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
     "mangakakalot"   : "MangaKakalot",
+    "manganelo"      : "Manganato",
     "mangapark"      : "MangaPark",
     "mangastream"    : "Manga Stream",
     "mastodon.social": "mastodon.social",

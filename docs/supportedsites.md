@@ -422,8 +422,8 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Manganelo</td>
-    <td>https://manganelo.com/</td>
+    <td>Manganato</td>
+    <td>https://manganato.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
