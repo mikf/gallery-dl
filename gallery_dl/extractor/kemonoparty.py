@@ -26,18 +26,31 @@ class KemonopartyExtractor(Extractor):
     def items(self):
         find_inline = re.compile(r'src="(/inline/[^"]+)').findall
 
+        if self.config("metadata"):
+            username = text.unescape(text.extract(
+                self.request(self.user_url).text, "<title>", " | Kemono<")[0])
+        else:
+            username = None
+
         for post in self.posts():
 
             files = []
-            if post["file"]:
-                files.append(post["file"])
-            if post["attachments"]:
-                files.extend(post["attachments"])
+            append = files.append
+            file = post["file"]
+
+            if file:
+                file["type"] = "file"
+                append(file)
+            for attachment in post["attachments"]:
+                attachment["type"] = "attachment"
+                append(attachment)
             for path in find_inline(post["content"] or ""):
-                files.append({"path": path, "name": path})
+                append({"path": path, "name": path, "type": "inline"})
 
             post["date"] = text.parse_datetime(
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
+            if username:
+                post["username"] = username
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
@@ -67,6 +80,7 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
         KemonopartyExtractor.__init__(self, match)
         service, user_id = match.groups()
         self.api_url = "{}/api/{}/user/{}".format(self.root, service, user_id)
+        self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
 
     def posts(self):
         url = self.api_url
@@ -125,6 +139,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         service, user_id, post_id = match.groups()
         self.api_url = "{}/api/{}/user/{}/post/{}".format(
             self.root, service, user_id, post_id)
+        self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
 
     def posts(self):
         posts = self.request(self.api_url).json()

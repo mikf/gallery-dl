@@ -143,6 +143,16 @@ Description
     Overwrite any metadata provided by a child extractor with its parent's.
 
 
+extractor.*.parent-skip
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Share number of skipped downloads between parent and child extractors.
+
+
 extractor.*.path-restrict
 -------------------------
 Type
@@ -226,9 +236,13 @@ Description
     * ``true``: Skip downloads
     * ``false``: Overwrite already existing files
 
-    * ``"abort"``: Abort the current extractor run
-    * ``"abort:N"``: Skip downloads and abort extractor run
+    * ``"abort"``: Stop the current extractor run
+    * ``"abort:N"``: Skip downloads and stop the current extractor run
       after ``N`` consecutive skips
+
+    * ``"terminate"``: Stop the current extractor run, including parent extractors
+    * ``"terminate:N"``: Skip downloads and stop the current extractor run,
+      including parent extractors, after ``N`` consecutive skips
 
     * ``"exit"``: Exit the program altogether
     * ``"exit:N"``: Skip downloads and exit the program
@@ -296,6 +310,7 @@ Description
     * ``inkbunny``
     * ``instagram``
     * ``mangoxo``
+    * ``pillowfort``
     * ``pinterest``
     * ``sankaku``
     * ``subscribestar``
@@ -1147,7 +1162,8 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"posts"``, ``reels``, ``"stories"``, ``"highlights"``, ``"channel"``.
+    ``"posts"``, ``"reels"``, ``"channel"``, ``"tagged"``,
+    ``"stories"``, ``"highlights"``.
 
     You can use ``"all"`` instead of listing all values separately.
 
@@ -1160,6 +1176,16 @@ Default
     ``true``
 Description
     Download video files.
+
+
+extractor.kemonoparty.metadata
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``username`` metadata
 
 
 extractor.khinsider.format
@@ -1282,6 +1308,26 @@ Description
     Download subalbums.
 
 
+extractor.pillowfort.external
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Follow links to external sites, e.g. Twitter,
+
+
+extractor.pillowfort.inline
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract inline images.
+
+
 extractor.pillowfort.reblogs
 ----------------------------
 Type
@@ -1320,6 +1366,16 @@ Default
     ``false``
 Description
     Download user avatars.
+
+
+extractor.pixiv.user.metadata
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch extended ``user`` metadata.
 
 
 extractor.pixiv.work.related
@@ -1362,6 +1418,17 @@ Description
     to watchable videos. (Example__)
 
 .. __: https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
+
+
+extractor.pixiv.max-posts
+-------------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    When downloading galleries, this sets the maximum number of posts to get.
+    A value of ``0`` means no limit.
 
 
 extractor.plurk.comments
@@ -1660,6 +1727,20 @@ Description
     will be taken from the original Tweets, not the Retweets.
 
 
+extractor.twitter.text-tweets
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Also emit metadata for text-only Tweets without media content.
+
+    This only has an effect with a ``metadata`` (or ``exec``) post processor
+    with `"event": "post" <metadata.event_>`_
+    and appropriate `filename <metadata.filename_>`_.
+
+
 extractor.twitter.twitpic
 -------------------------
 Type
@@ -1789,7 +1870,7 @@ Description
     Note: This requires 1 additional HTTP request for each post.
 
 extractor.[booru].notes
-----------------------
+-----------------------
 Type
     ``bool``
 Default
@@ -2162,7 +2243,7 @@ Postprocessor Options
 This section lists all options available inside
 `Postprocessor Configuration`_ objects.
 
-Each option is titled as ``<name>.<option>``, meaning a post procesor
+Each option is titled as ``<name>.<option>``, meaning a post processor
 of type ``<name>`` will look for an ``<option>`` field inside its "body".
 For example an ``exec`` post processor will recognize
 an `async <exec.async_>`__,  `command <exec.command_>`__,
@@ -2351,7 +2432,7 @@ Description
     The available events are:
 
     ``init``
-        After post procesor initialization
+        After post processor initialization
         and before the first file download
     ``finalize``
         On extractor shutdown, e.g. after all files were downloaded
@@ -2415,6 +2496,18 @@ Example
     ``["-c:v", "libvpx-vp9", "-an", "-b:v", "2M"]``
 Description
     Additional FFmpeg command-line arguments.
+
+
+ugoira.ffmpeg-demuxer
+---------------------
+Type
+    ``string``
+Default
+    ``image2``
+Description
+    FFmpeg demuxer to read input files with. Possible values are
+    "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" and
+    "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_".
 
 
 ugoira.ffmpeg-location
@@ -2492,24 +2585,14 @@ Description
 
 
 ugoira.repeat-last-frame
---------------------------
+------------------------
 Type
     ``bool``
 Default
-    ``False``
+    ``true``
 Description
-    Repeat the last frame to prevent it from only being
-    displayed for a very short amount of time.
-
-
-ugoira.re-encoding
---------------------------
-Type
-    ``bool``
-Default
-    ``True``
-Description
-    * ``"False"``: Prevent re-encoding during conversion.
+    Allow repeating the last frame when necessary
+    to prevent it from only being displayed for a very short amount of time.
 
 
 zip.compression

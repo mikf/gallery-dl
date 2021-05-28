@@ -52,9 +52,6 @@ class Job():
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
 
-            # transfer parent directory
-            extr._parentdir = pextr._parentdir
-
             # reuse connection adapters
             extr.session.adapters = pextr.session.adapters
 
@@ -80,6 +77,8 @@ class Job():
             if exc.message:
                 log.error(exc.message)
             self.status |= exc.code
+        except exception.TerminateExtraction:
+            raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
             self.status |= exc.code
@@ -190,7 +189,7 @@ class Job():
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
 
-    def __init__(self, url, parent=None, kwdict=None):
+    def __init__(self, url, parent=None):
         Job.__init__(self, url, parent)
         self.log = self.get_logger("download")
         self.blacklist = None
@@ -199,19 +198,8 @@ class DownloadJob(Job):
         self.hooks = ()
         self.downloaders = {}
         self.out = output.select()
-
-        if parent:
-            self.visited = parent.visited
-            pfmt = parent.pathfmt
-            if pfmt and parent.extractor.config("parent-directory"):
-                self.extractor._parentdir = pfmt.directory
-            if parent.extractor.config("parent-metadata"):
-                if parent.kwdict:
-                    self.kwdict.update(parent.kwdict)
-                if kwdict:
-                    self.kwdict.update(kwdict)
-        else:
-            self.visited = set()
+        self.visited = parent.visited if parent else set()
+        self._skipcnt = 0
 
     def handle_url(self, url, kwdict):
         """Download the resource specified in 'url'"""
@@ -304,7 +292,27 @@ class DownloadJob(Job):
                     extr = None
 
         if extr:
-            self.status |= self.__class__(extr, self, kwdict).run()
+            job = self.__class__(extr, self)
+            pfmt = self.pathfmt
+            pextr = self.extractor
+
+            if pfmt and pextr.config("parent-directory"):
+                extr._parentdir = pfmt.directory
+            else:
+                extr._parentdir = pextr._parentdir
+
+            if pextr.config("parent-metadata"):
+                if self.kwdict:
+                    job.kwdict.update(self.kwdict)
+                if kwdict:
+                    job.kwdict.update(kwdict)
+
+            if pextr.config("parent-skip"):
+                job._skipcnt = self._skipcnt
+                self.status |= job.run()
+                self._skipcnt = job._skipcnt
+            else:
+                self.status |= job.run()
         else:
             self._write_unsupported(url)
 
@@ -400,9 +408,10 @@ class DownloadJob(Job):
                 skip, _, smax = skip.partition(":")
                 if skip == "abort":
                     self._skipexc = exception.StopExtraction
+                elif skip == "terminate":
+                    self._skipexc = exception.TerminateExtraction
                 elif skip == "exit":
                     self._skipexc = sys.exit
-                self._skipcnt = 0
                 self._skipmax = text.parse_int(smax)
         else:
             # monkey-patch methods to always return False
@@ -588,10 +597,16 @@ class UrlJob(Job):
             for url in kwdict["_fallback"]:
                 print("|", url)
 
-    def handle_queue(self, url, _):
-        try:
-            UrlJob(url, self, self.depth + 1).run()
-        except exception.NoExtractorError:
+    def handle_queue(self, url, kwdict):
+        cls = kwdict.get("_extractor")
+        if cls:
+            extr = cls.from_url(url)
+        else:
+            extr = extractor.find(url)
+
+        if extr:
+            self.status |= self.__class__(extr, self).run()
+        else:
             self._write_unsupported(url)
 
 

@@ -77,7 +77,7 @@ class WeasylSubmissionExtractor(WeasylExtractor):
             "keyword": {
                 "comments"    : int,
                 "date"        : "dt:2012-04-20 00:38:04",
-                "description" : "<p>(flex)</p>",
+                "description" : "<p>(flex)</p>\n",
                 "favorites"   : int,
                 "folder_name" : "Wesley Stuff",
                 "folderid"    : 2081,
@@ -160,8 +160,8 @@ class WeasylJournalExtractor(WeasylExtractor):
         "keyword": {
             "title"  : "BBCode",
             "date"   : "dt:2013-09-19 23:11:23",
-            "content": "<p><a>javascript:alert(42);</a></p>"
-                       "<p>No more of that!</p>",
+            "content": "<p><a>javascript:alert(42);</a></p>\n\n"
+                       "<p>No more of that!</p>\n",
         },
     })
 

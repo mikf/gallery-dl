@@ -117,12 +117,22 @@ class PatreonExtractor(Extractor):
         attr = post["attributes"]
         attr["id"] = text.parse_int(post["id"])
 
-        if post.get("current_user_can_view", True):
+        if attr.get("current_user_can_view", True):
+
+            relationships = post["relationships"]
             attr["images"] = self._files(post, included, "images")
             attr["attachments"] = self._files(post, included, "attachments")
             attr["date"] = text.parse_datetime(
                 attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-            user = post["relationships"]["user"]
+
+            tags = relationships.get("user_defined_tags")
+            attr["tags"] = [
+                tag["id"].replace("user_defined;", "")
+                for tag in tags["data"]
+                if tag["type"] == "post_tag"
+            ] if tags else []
+
+            user = relationships["user"]
             attr["creator"] = (
                 self._user(user["links"]["related"]) or
                 included["user"][user["data"]["id"]])
@@ -298,6 +308,10 @@ class PatreonPostExtractor(PatreonExtractor):
         # postfile + content
         ("https://www.patreon.com/posts/19987002", {
             "count": 4,
+        }),
+        # tags (#1539)
+        ("https://www.patreon.com/posts/free-post-12497641", {
+            "keyword": {"tags": ["AWMedia"]},
         }),
         ("https://www.patreon.com/posts/not-found-123", {
             "exception": exception.NotFoundError,

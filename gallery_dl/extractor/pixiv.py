@@ -29,6 +29,7 @@ class PixivExtractor(Extractor):
         Extractor.__init__(self, match)
         self.api = PixivAppAPI(self)
         self.load_ugoira = self.config("ugoira", True)
+        self.max_posts = self.config("max-posts", 0)
 
     def items(self):
         tags = self.config("tags", "japanese")
@@ -46,7 +47,10 @@ class PixivExtractor(Extractor):
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         metadata = self.metadata()
 
-        for work in self.works():
+        works = self.works()
+        if self.max_posts:
+            works = itertools.islice(works, self.max_posts)
+        for work in works:
             if not work["user"]["id"]:
                 continue
 
@@ -124,7 +128,8 @@ class PixivUserExtractor(PixivExtractor):
         }),
         # deleted account
         ("http://www.pixiv.net/member_illust.php?id=173531", {
-            "count": 0,
+            "options": (("metadata", True),),
+            "exception": exception.NotFoundError,
         }),
         ("https://www.pixiv.net/en/users/173530"),
         ("https://www.pixiv.net/en/users/173530/manga"),
@@ -146,6 +151,11 @@ class PixivUserExtractor(PixivExtractor):
             t2 = text.parse_query(t2).get("tag")
         self.user_id = u1 or u2 or u3
         self.tag = t1 or t2
+
+    def metadata(self):
+        if self.config("metadata"):
+            return {"user": self.api.user_detail(self.user_id)}
+        return {}
 
     def works(self):
         works = self.api.user_illusts(self.user_id)

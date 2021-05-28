@@ -57,7 +57,8 @@ class ImgurImageExtractor(ImgurExtractor):
     subcategory = "image"
     filename_fmt = "{category}_{id}{title:?_//}.{extension}"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/(?!gallery|search)(\w{7}|\w{5})[sbtmlh]?\.?"
+    pattern = (BASE_PATTERN + r"/(?!gallery|search)"
+               r"(?:r/\w+/)?(\w{7}|\w{5})[sbtmlh]?")
     test = (
         ("https://imgur.com/21yMxCS", {
             "url": "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
@@ -110,6 +111,7 @@ class ImgurImageExtractor(ImgurExtractor):
         ("https://imgur.com/zzzzzzz", {  # not found
             "exception": exception.HttpError,
         }),
+        ("https://m.imgur.com/r/Celebs/iHJ7tsM"),
         ("https://www.imgur.com/21yMxCS"),     # www
         ("https://m.imgur.com/21yMxCS"),       # mobile
         ("https://imgur.com/zxaY6"),           # 5 character key
@@ -289,7 +291,7 @@ class ImgurFavoriteExtractor(ImgurExtractor):
 class ImgurSubredditExtractor(ImgurExtractor):
     """Extractor for a subreddits's imgur links"""
     subcategory = "subreddit"
-    pattern = BASE_PATTERN + r"/r/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/r/([^/?#]+)/?$"
     test = ("https://imgur.com/r/pics", {
         "range": "1-100",
         "count": 100,

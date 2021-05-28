@@ -146,7 +146,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
         }),
         # unavailable photos (#1335)
         ("https://500px.com/p/Light_Expression_Photography/galleries/street", {
-            "count": ">= 7",
+            "count": 0,
         }),
         ("https://500px.com/fashvamp/galleries/lera"),
     )
@@ -172,7 +172,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
         }
         gallery = self._request_graphql(
             "GalleriesDetailQueryRendererQuery", variables,
-            "99a48f93f632338800f26cdacc43a0e4881d610a68e6aab577648c2a9b61e4a9",
+            "eda3c77ca4efe4b3347ec9c08befe3bd2c58099ebfb1f680d829fcd26d34f12d",
         )["gallery"]
 
         self._photos = gallery["photos"]
@@ -200,8 +200,8 @@ class _500pxGalleryExtractor(_500pxExtractor):
             variables["cursor"] = photos["pageInfo"]["endCursor"]
             photos = self._request_graphql(
                 "GalleriesDetailPaginationContainerQuery", variables,
-                "457c66d976f56863c81795f03e98cb54"
-                "3c7c6cdae7abeab8fe9e8e8a67479fa9",
+                "466cf6661a07e7fdca465edb39118efb"
+                "80fb157c6d3f620c7f518cdae0832c78",
             )["galleryByOwnerIdAndSlugOrToken"]["photos"]
 
 

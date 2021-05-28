@@ -69,7 +69,8 @@ class UnsplashImageExtractor(UnsplashExtractor):
     subcategory = "image"
     pattern = BASE_PATTERN + r"/photos/([^/?#]+)"
     test = ("https://unsplash.com/photos/lsoogGC_5dg", {
-        "url": "b99a5829ca955b768a206aa9afc391bd3f3dd55e",
+        "pattern": r"https://images\.unsplash\.com/photo-1586348943529-"
+                   r"beaae6c28db9\?ixid=\w+&ixlib=rb-1.2.1",
         "keyword": {
             "alt_description": "re:silhouette of trees near body of water ",
             "blur_hash": "LZP4uQS4jboe%#o0WCa}2doJNaaz",
@@ -114,7 +115,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
                 "id": "uMJXuywXLiU",
                 "instagram_username": "just_midwest_rock",
                 "last_name": "Hoefler",
-                "location": "Madison, WI",
+                "location": None,
                 "name": "Dave Hoefler",
                 "portfolio_url": str,
                 "total_collections": int,

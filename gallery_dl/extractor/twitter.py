@@ -32,6 +32,7 @@ class TwitterExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
+        self.textonly = self.config("text-tweets", False)
         self.retweets = self.config("retweets", True)
         self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)
@@ -64,7 +65,7 @@ class TwitterExtractor(Extractor):
                 self._extract_card(tweet, files)
             if self.twitpic:
                 self._extract_twitpic(tweet, files)
-            if not files:
+            if not files and not self.textonly:
                 continue
 
             tdata = self._transform_tweet(tweet)
@@ -168,7 +169,6 @@ class TwitterExtractor(Extractor):
                 tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"),
             "user"          : self._transform_user(tweet["user"]),
             "lang"          : tweet["lang"],
-            "content"       : tweet["full_text"],
             "favorite_count": tweet["favorite_count"],
             "quote_count"   : tweet["quote_count"],
             "reply_count"   : tweet["reply_count"],
@@ -186,6 +186,14 @@ class TwitterExtractor(Extractor):
                 "name": u["screen_name"],
                 "nick": u["name"],
             } for u in mentions]
+
+        content = tweet["full_text"]
+        urls = entities.get("urls")
+        if urls:
+            for url in urls:
+                content = content.replace(url["url"], url["expanded_url"])
+        txt, _, tco = content.rpartition(" ")
+        tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
         if "in_reply_to_screen_name" in tweet:
             tdata["reply_to"] = tweet["in_reply_to_screen_name"]
@@ -488,6 +496,10 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/BlankArts_/status/1323314488611872769", {
             "options": (("conversations", True),),
             "count": ">= 50",
+        }),
+        # retweet with missing media entities (#1555)
+        ("https://twitter.com/morino_ya/status/1392763691599237121", {
+            "count": 4,
         }),
     )
 
@@ -802,6 +814,10 @@ class TwitterAPI():
                         tweet = retweet
                     elif retweet:
                         tweet["author"] = users[retweet["user_id_str"]]
+                        if "extended_entities" in retweet and \
+                                "extended_entities" not in tweet:
+                            tweet["extended_entities"] = \
+                                retweet["extended_entities"]
                 tweet["user"] = users[tweet["user_id_str"]]
                 yield tweet
 
