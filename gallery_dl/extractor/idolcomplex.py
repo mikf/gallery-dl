@@ -190,7 +190,7 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
                 return
             yield from ids
 
-            next_qs = text.extract(page, 'next-page-url="/?', '"', pos)[0]
+            next_qs = text.extract(page, 'next-page-url="?', '"', pos)[0]
             next_id = text.parse_query(next_qs).get("next")
 
             # stop if the same "next" parameter occurs twice in a row (#265)

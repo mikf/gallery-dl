@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.17.5 - 2021-05-30
 ### Additions
 - [kemonoparty] add `metadata` option ([#1548](https://github.com/mikf/gallery-dl/issues/1548))
