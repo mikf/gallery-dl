@@ -108,6 +108,7 @@ CATEGORY_MAP = {
     "vidyart"        : "/v/idyart",
     "vk"             : "VK",
     "vsco"           : "VSCO",
+    "wakarimasen"    : "Wakarimasen Archive",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
     "worldthree"     : "World Three",
