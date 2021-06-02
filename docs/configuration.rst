@@ -302,8 +302,8 @@ Description
     and optional for
 
     * ``aryion``
-    * ``danbooru``
-    * ``e621``
+    * ``danbooru`` (*)
+    * ``e621`` (*)
     * ``exhentai``
     * ``idolcomplex``
     * ``imgbb``
@@ -322,7 +322,7 @@ Description
     ``-u/--username`` and ``-p/--password`` command-line options or
     by using a |.netrc|_ file. (see Authentication_)
 
-    Note: The password value for ``danbooru`` and ``e621`` should be
+    (*) The password value for ``danbooru`` and ``e621`` should be
     the API key found in your user profile, not the actual account password.
 
 
