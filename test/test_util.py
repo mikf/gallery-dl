@@ -493,6 +493,30 @@ class TestOther(unittest.TestCase):
     def test_noop(self):
         self.assertEqual(util.noop(), None)
 
+    def test_compile_expression(self):
+        expr = util.compile_expression("1 + 2 * 3")
+        self.assertEqual(expr(), 7)
+        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
+        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 7)
+
+        expr = util.compile_expression("a + b * c")
+        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
+        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 90)
+
+        with self.assertRaises(NameError):
+            expr()
+        with self.assertRaises(NameError):
+            expr({"a": 2})
+
+        with self.assertRaises(SyntaxError):
+            util.compile_expression("")
+        with self.assertRaises(SyntaxError):
+            util.compile_expression("x++")
+
+        expr = util.compile_expression("1 and abort()")
+        with self.assertRaises(exception.StopExtraction):
+            expr()
+
     def test_generate_token(self):
         tokens = set()
         for _ in range(100):

@@ -21,6 +21,7 @@ import sqlite3
 import binascii
 import datetime
 import operator
+import functools
 import itertools
 import urllib.parse
 from http.cookiejar import Cookie
@@ -346,8 +347,6 @@ CODES = {
     "zh": "Chinese",
 }
 
-SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
-
 
 class UniversalNone():
     """None-style object that supports more operations than None itself"""
@@ -373,6 +372,20 @@ class UniversalNone():
 NONE = UniversalNone()
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
+SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
+GLOBALS = {
+    "parse_int": text.parse_int,
+    "urlsplit" : urllib.parse.urlsplit,
+    "datetime" : datetime.datetime,
+    "abort"    : raises(exception.StopExtraction),
+    "terminate": raises(exception.TerminateExtraction),
+    "re"       : re,
+}
+
+
+def compile_expression(expr, name="<expr>", globals=GLOBALS):
+    code_object = compile(expr, name, "eval")
+    return functools.partial(eval, code_object, globals)
 
 
 def build_predicate(predicates):
@@ -472,20 +485,13 @@ class UniquePredicate():
 class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
-    def __init__(self, filterexpr, target="image"):
+    def __init__(self, expr, target="image"):
         name = "<{} filter>".format(target)
-        self.codeobj = compile(filterexpr, name, "eval")
-        self.globals = {
-            "parse_int": text.parse_int,
-            "urlsplit" : urllib.parse.urlsplit,
-            "datetime" : datetime.datetime,
-            "abort"    : raises(exception.StopExtraction),
-            "re"       : re,
-        }
+        self.expr = compile_expression(expr, name)
 
-    def __call__(self, url, kwds):
+    def __call__(self, _, kwdict):
         try:
-            return eval(self.codeobj, self.globals, kwds)
+            return self.expr(kwdict)
         except exception.GalleryDLException:
             raise
         except Exception as exc:
