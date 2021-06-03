@@ -8,7 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text
-import base64
+import binascii
 
 
 class CyberdropAlbumExtractor(Extractor):
@@ -52,7 +52,7 @@ class CyberdropAlbumExtractor(Extractor):
 
         yield Message.Directory, data
         for file_b64 in files:
-            file = base64.b64decode(file_b64.encode()).decode()
+            file = binascii.a2b_base64(file_b64).decode()
             text.nameext_from_url(file, data)
             data["filename"], _, data["id"] = data["filename"].rpartition("-")
             yield Message.Url, "https://f.cyberdrop.cc/" + file, data
