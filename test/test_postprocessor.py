@@ -30,9 +30,9 @@ class MockPostprocessorModule(Mock):
 
 class FakeJob():
 
-    def __init__(self):
-        self.extractor = extractor.find("test:")
-        self.pathfmt = util.PathFormat(self.extractor)
+    def __init__(self, extr=extractor.find("test:")):
+        self.extractor = extr
+        self.pathfmt = util.PathFormat(extr)
         self.out = output.NullOutput()
         self.get_logger = logging.getLogger
         self.hooks = collections.defaultdict(list)
@@ -242,6 +242,15 @@ class MetadataTest(BasePostprocessorTest):
         with patch("builtins.open", mock_open()) as m:
             self._trigger()
         self.assertEqual(self._output(m), "foo\nbar\nbaz\n")
+
+    def test_metadata_tags_dict(self):
+        self._create(
+            {"mode": "tags"},
+            {"tags": {"g": ["foobar1", "foobar2"], "m": ["foobarbaz"]}},
+        )
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+        self.assertEqual(self._output(m), "foobar1\nfoobar2\nfoobarbaz\n")
 
     def test_metadata_custom(self):
         def test(pp_info):

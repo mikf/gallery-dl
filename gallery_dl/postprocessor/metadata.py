@@ -102,11 +102,17 @@ class MetadataPP(PostProcessor):
         if not tags:
             return
 
-        if not isinstance(tags, list):
+        if isinstance(tags, str):
             taglist = tags.split(", ")
             if len(taglist) < len(tags) / 16:
                 taglist = tags.split(" ")
             tags = taglist
+        elif isinstance(tags, dict):
+            taglists = tags.values()
+            tags = []
+            extend = tags.extend
+            for taglist in taglists:
+                extend(taglist)
 
         fp.write("\n".join(tags) + "\n")
 
