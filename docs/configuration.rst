@@ -97,6 +97,28 @@ Description
     a valid filename extension.
 
 
+extractor.*.filename-conditions
+-------------------------------
+Type
+    ``object``
+Example
+    .. code:: json
+
+        {
+            "extension == 'mp4'"        : "{id}_video.{extension}",
+            "extension in ('zip','rar')": "{id}_archive.{extension}",
+            "'nature' in title"         : "{id}_{title}.{extension}"
+        }
+Description
+    An object containing Python expressions mapping to the
+    filename format strings to use.
+
+    When none of the given conditions match, `extractor.*.filename`_ is used.
+
+    Expressions are evaluated in the order as specified in Python 3.6+
+    and in an undetermined order in Python 3.4 and 3.5.
+
+
 extractor.*.directory
 ---------------------
 Type

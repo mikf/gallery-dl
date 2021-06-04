@@ -756,6 +756,7 @@ class PathFormat():
 
     def __init__(self, extractor):
         filename_fmt = extractor.config("filename")
+        filename_conditions = extractor.config("filename-conditions")
         if filename_fmt is None:
             filename_fmt = extractor.filename_fmt
 
@@ -770,6 +771,14 @@ class PathFormat():
 
         kwdefault = extractor.config("keywords-default")
         try:
+            if filename_conditions:
+                self.build_filename = self.build_filename_conditional
+                self.filename_conditions = [
+                    (compile_expression(expr),
+                     Formatter(fmt, kwdefault).format_map)
+                    for expr, fmt in filename_conditions.items()
+                ]
+
             self.filename_formatter = Formatter(
                 filename_fmt, kwdefault).format_map
         except Exception as exc:
@@ -930,6 +939,19 @@ class PathFormat():
         try:
             return self.clean_path(self.clean_segment(
                 self.filename_formatter(self.kwdict)))
+        except Exception as exc:
+            raise exception.FilenameFormatError(exc)
+
+    def build_filename_conditional(self):
+        kwdict = self.kwdict
+
+        try:
+            for condition, formatter in self.filename_conditions:
+                if condition(kwdict):
+                    break
+            else:
+                formatter = self.filename_formatter
+            return self.clean_path(self.clean_segment(formatter(kwdict)))
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
