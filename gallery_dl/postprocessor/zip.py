@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -38,9 +38,11 @@ class ZipPP(PostProcessor):
         self.args = (self.path[:-1] + ext, "a",
                      self.COMPRESSION_ALGORITHMS[algorithm], True)
 
-        job.hooks["file"].append(
-            self.write_safe if options.get("mode") == "safe" else self.write)
-        job.hooks["finalize"].append(self.finalize)
+        job.register_hooks({
+            "file":
+            self.write_safe if options.get("mode") == "safe" else self.write,
+            "finalize": self.finalize,
+        }, options)
 
     def write(self, pathfmt, zfile=None):
         # 'NameToInfo' is not officially documented, but it's available

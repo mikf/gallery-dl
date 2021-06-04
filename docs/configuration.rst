@@ -2936,11 +2936,17 @@ Example
             "name"       : "zip",
             "compression": "store",
             "extension"  : "cbz",
+            "filter"     : "extension not in ('zip', 'rar')",
             "whitelist"  : ["mangadex", "exhentai", "nhentai"]
         }
 Description
     An ``object`` containing a ``"name"`` attribute specifying the
     post-processor type, as well as any of its `options <Postprocessor Options_>`__.
+
+    It is possible to set a ``"filter"`` expression similar to
+    `image-filter <extractor.*.image-filter_>`_ to only run a post-processor
+    condionally.
+
     It is also possible set a ``"whitelist"`` or ``"blacklist"`` to
     only enable or disable a post-processor for the specified
     extractor categories.
