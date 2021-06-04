@@ -335,7 +335,7 @@ def build_parser():
     postprocessor.add_argument(
         "--zip",
         dest="postprocessors",
-        action="append_const", const={"name": "zip"},
+        action="append_const", const="zip",
         help="Store downloaded files in a ZIP archive",
     )
     postprocessor.add_argument(
@@ -362,7 +362,7 @@ def build_parser():
     postprocessor.add_argument(
         "--write-metadata",
         dest="postprocessors",
-        action="append_const", const={"name": "metadata"},
+        action="append_const", const="metadata",
         help="Write metadata to separate JSON files",
     )
     postprocessor.add_argument(
@@ -374,7 +374,7 @@ def build_parser():
     postprocessor.add_argument(
         "--mtime-from-date",
         dest="postprocessors",
-        action="append_const", const={"name": "mtime"},
+        action="append_const", const="mtime",
         help="Set file modification times according to 'date' metadata",
     )
     postprocessor.add_argument(
