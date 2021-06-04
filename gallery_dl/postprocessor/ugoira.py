@@ -55,8 +55,8 @@ class UgoiraPP(PostProcessor):
         else:
             self.prevent_odd = False
 
-        job.hooks["prepare"].append(self.prepare)
-        job.hooks["file"].append(self.convert)
+        job.register_hooks(
+            {"prepare": self.prepare, "file": self.convert}, options)
 
     def prepare(self, pathfmt):
         self._frames = None

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,11 +18,12 @@ class ComparePP(PostProcessor):
         PostProcessor.__init__(self, job)
         if options.get("shallow"):
             self._compare = self._compare_size
-        job.hooks["file"].append(
+
+        job.register_hooks({"file": (
             self.enumerate
             if options.get("action") == "enumerate" else
             self.compare
-        )
+        )}, options)
 
     def compare(self, pathfmt):
         try:

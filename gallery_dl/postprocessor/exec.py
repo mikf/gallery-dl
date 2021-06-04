@@ -41,8 +41,7 @@ class ExecPP(PostProcessor):
             events = ("after",)
         elif isinstance(events, str):
             events = events.split(",")
-        for event in events:
-            job.hooks[event].append(execute)
+        job.register_hooks({event: execute for event in events}, options)
 
     def exec_list(self, pathfmt, status=None):
         if status:

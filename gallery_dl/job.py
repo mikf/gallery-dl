@@ -12,6 +12,7 @@ import time
 import errno
 import logging
 import operator
+import functools
 import collections
 from . import extractor, downloader, postprocessor
 from . import config, text, util, output, exception
@@ -458,6 +459,23 @@ class DownloadJob(Job):
                 if "init" in self.hooks:
                     for callback in self.hooks["init"]:
                         callback(pathfmt)
+
+    def register_hooks(self, hooks, options=None):
+        expr = options.get("filter") if options else None
+
+        if expr:
+            condition = util.compile_expression(expr)
+            for hook, callback in hooks.items():
+                self.hooks[hook].append(functools.partial(
+                    self._call_hook, callback, condition))
+        else:
+            for hook, callback in hooks.items():
+                self.hooks[hook].append(callback)
+
+    @staticmethod
+    def _call_hook(callback, condition, pathfmt):
+        if condition(pathfmt.kwdict):
+            callback(pathfmt)
 
     def _build_blacklist(self):
         wlist = self.extractor.config("whitelist")

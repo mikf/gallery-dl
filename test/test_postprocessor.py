@@ -37,6 +37,10 @@ class FakeJob():
         self.get_logger = logging.getLogger
         self.hooks = collections.defaultdict(list)
 
+    def register_hooks(self, hooks, options):
+        for hook, callback in hooks.items():
+            self.hooks[hook].append(callback)
+
 
 class TestPostprocessorModule(unittest.TestCase):
 

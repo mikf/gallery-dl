@@ -57,8 +57,7 @@ class MetadataPP(PostProcessor):
             events = ("file",)
         elif isinstance(events, str):
             events = events.split(",")
-        for event in events:
-            job.hooks[event].append(self.run)
+        job.register_hooks({event: self.run for event in events}, options)
 
     def run(self, pathfmt):
         directory = self._directory(pathfmt)

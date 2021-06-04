@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -31,9 +31,8 @@ class ClassifyPP(PostProcessor):
             for directory, exts in mapping.items()
             for ext in exts
         }
-
-        job.hooks["prepare"].append(self.prepare)
-        job.hooks["file"].append(self.move)
+        job.register_hooks(
+            {"prepare": self.prepare, "file": self.move}, options)
 
     def prepare(self, pathfmt):
         ext = pathfmt.extension
