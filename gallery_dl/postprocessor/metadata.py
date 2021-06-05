@@ -113,6 +113,7 @@ class MetadataPP(PostProcessor):
             extend = tags.extend
             for taglist in taglists:
                 extend(taglist)
+            tags.sort()
 
         fp.write("\n".join(tags) + "\n")
 
