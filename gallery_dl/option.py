@@ -204,13 +204,6 @@ def build_parser():
               "or -1 for infinite retries (default: 4)"),
     )
     downloader.add_argument(
-        "-A", "--abort",
-        dest="abort", metavar="N", type=int,
-        help=("Abort extractor run after N consecutive file downloads have "
-              "been skipped, e.g. if files with the same filename already "
-              "exist"),
-    )
-    downloader.add_argument(
         "--http-timeout",
         dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
         help="Timeout for HTTP connections (default: 30.0)",
@@ -301,7 +294,19 @@ def build_parser():
         "--download-archive",
         dest="archive", metavar="FILE", action=ConfigAction,
         help=("Record all downloaded files in the archive file and "
-              "skip downloading any file already in it."),
+              "skip downloading any file already in it"),
+    )
+    selection.add_argument(
+        "-A", "--abort",
+        dest="abort", metavar="N", type=int,
+        help=("Stop current extractor run "
+              "after N consecutive file downloads were skipped"),
+    )
+    selection.add_argument(
+        "-T", "--terminate",
+        dest="terminate", metavar="N", type=int,
+        help=("Stop current and parent extractor runs "
+              "after N consecutive file downloads were skipped"),
     )
     selection.add_argument(
         "--range",
