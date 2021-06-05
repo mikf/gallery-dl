@@ -392,6 +392,11 @@ def build_parser():
         help=("Execute CMD after all files were downloaded successfully. "
               "Example: --exec-after 'cd {} && convert * ../doc.pdf'"),
     )
+    postprocessor.add_argument(
+        "-P", "--postprocessor",
+        dest="postprocessors", metavar="NAME", action="append",
+        help="Activate the specified post processor",
+    )
 
     parser.add_argument(
         "urls",
