@@ -41,8 +41,8 @@ class ZipPP(PostProcessor):
         job.register_hooks({
             "file":
             self.write_safe if options.get("mode") == "safe" else self.write,
-            "finalize": self.finalize,
         }, options)
+        job.hooks["finalize"].append(self.finalize)
 
     def write(self, pathfmt, zfile=None):
         # 'NameToInfo' is not officially documented, but it's available
@@ -58,7 +58,7 @@ class ZipPP(PostProcessor):
 
     def write_safe(self, pathfmt):
         with zipfile.ZipFile(*self.args) as zfile:
-            self._write(pathfmt, zfile)
+            self.write(pathfmt, zfile)
 
     def finalize(self, pathfmt, status):
         if self.zfile:
