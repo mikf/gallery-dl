@@ -331,6 +331,7 @@ Description
     * ``imgbb``
     * ``inkbunny``
     * ``instagram``
+    * ``mangadex``
     * ``mangoxo``
     * ``pillowfort``
     * ``pinterest``
@@ -2945,7 +2946,7 @@ Description
 
     It is possible to set a ``"filter"`` expression similar to
     `image-filter <extractor.*.image-filter_>`_ to only run a post-processor
-    condionally.
+    conditionally.
 
     It is also possible set a ``"whitelist"`` or ``"blacklist"`` to
     only enable or disable a post-processor for the specified

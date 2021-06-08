@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from ..cache import memcache
+from ..cache import cache, memcache
 from collections import defaultdict
 
 
@@ -153,6 +153,12 @@ class MangadexAPI():
 
     def __init__(self, extr):
         self.extractor = extr
+        self.headers = {}
+
+        self.username, self.password = self.extractor._get_auth_info()
+        if not self.username:
+            self.authenticate = util.noop
+
         server = extr.config("api-server")
         self.root = ("https://api.mangadex.org" if server is None
                      else text.ensure_http_scheme(server).rstrip("/"))
@@ -185,11 +191,38 @@ class MangadexAPI():
         }
         return self._pagination("/manga/" + uuid + "/feed", params)
 
+    def authenticate(self):
+        self.headers["Authorization"] = \
+            self._authenticate_impl(self.username, self.password)
+
+    @cache(maxage=900, keyarg=1)
+    def _authenticate_impl(self, username, password):
+        refresh_token = _refresh_token_cache(username)
+        if refresh_token:
+            self.extractor.log.info("Refreshing access token")
+            url = self.root + "/auth/refresh"
+            data = {"token": refresh_token}
+        else:
+            self.extractor.log.info("Logging in as %s", username)
+            url = self.root + "/auth/login"
+            data = {"username": username, "password": password}
+
+        data = self.extractor.request(
+            url, method="POST", json=data, fatal=None).json()
+        if data.get("result") != "ok":
+            raise exception.AuthenticationError()
+
+        if refresh_token != data["token"]["refresh"]:
+            _refresh_token_cache.update(username, data["token"]["refresh"])
+        return "Bearer " + data["token"]["session"]
+
     def _call(self, endpoint, params=None):
         url = self.root + endpoint
 
         while True:
-            response = self.extractor.request(url, params=params, fatal=None)
+            self.authenticate()
+            response = self.extractor.request(
+                url, params=params, headers=self.headers, fatal=None)
 
             if response.status_code < 400:
                 return response.json()
@@ -215,3 +248,8 @@ class MangadexAPI():
             params["offset"] = data["offset"] + data["limit"]
             if params["offset"] >= data["total"]:
                 return
+
+
+@cache(maxage=28*24*3600, keyarg=0)
+def _refresh_token_cache(username):
+    return None
