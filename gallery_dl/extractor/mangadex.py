@@ -13,6 +13,8 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 from collections import defaultdict
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
+
 
 class MangadexExtractor(Extractor):
     """Base class for mangadex extractors"""
@@ -95,8 +97,7 @@ class MangadexExtractor(Extractor):
 class MangadexChapterExtractor(MangadexExtractor):
     """Extractor for manga-chapters from mangadex.org"""
     subcategory = "chapter"
-    pattern = (r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
-               r"/chapter/([0-9a-f-]+)")
+    pattern = BASE_PATTERN + r"/chapter/([0-9a-f-]+)"
     test = (
         ("https://mangadex.org/chapter/f946ac53-0b71-4b5d-aeb2-7931b13c4aaa", {
             "keyword": "f6c2b908df06eb834d56193dfe1fa1f7c2c4dccd",
@@ -121,8 +122,7 @@ class MangadexChapterExtractor(MangadexExtractor):
 class MangadexMangaExtractor(MangadexExtractor):
     """Extractor for manga from mangadex.org"""
     subcategory = "manga"
-    pattern = (r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
-               r"/(?:title|manga)/([0-9a-f-]+)")
+    pattern = BASE_PATTERN + r"/(?:title|manga)/(?!feed$)([0-9a-f-]+)"
     test = (
         ("https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc", {
             "keyword": {
@@ -146,6 +146,16 @@ class MangadexMangaExtractor(MangadexExtractor):
 
     def chapters(self):
         return self.api.manga_feed(self.uuid)
+
+
+class MangadexFeedExtractor(MangadexExtractor):
+    """Extractor for chapters from your Followed Feed"""
+    subcategory = "feed"
+    pattern = BASE_PATTERN + r"/title/feed$()"
+    test = ("https://mangadex.org/title/feed",)
+
+    def chapters(self):
+        return self.api.user_follows_manga_feed()
 
 
 class MangadexAPI():
@@ -190,6 +200,13 @@ class MangadexAPI():
             "translatedLanguage[]": config("lang"),
         }
         return self._pagination("/manga/" + uuid + "/feed", params)
+
+    def user_follows_manga_feed(self):
+        params = {
+            "order[publishAt]"    : "desc",
+            "translatedLanguage[]": self.extractor.config("lang"),
+        }
+        return self._pagination("/user/follows/manga/feed", params)
 
     def authenticate(self):
         self.headers["Authorization"] = \

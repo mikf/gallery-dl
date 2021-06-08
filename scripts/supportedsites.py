@@ -150,6 +150,9 @@ SUBCATEGORY_MAP = {
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
     },
+    "mangadex": {
+        "feed" : "Followed Feed",
+    },
     "newgrounds": {
         "art"  : "Art",
         "audio": "Audio",
