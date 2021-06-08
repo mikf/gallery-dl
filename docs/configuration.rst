@@ -58,12 +58,27 @@ option (see the example below).
 extractor.*.filename
 --------------------
 Type
-    ``string``
+    ``string`` or ``object``
 Example
-    ``"{manga}_c{chapter}_{page:>03}.{extension}"``
+    * .. code::
+
+        "{manga}_c{chapter}_{page:>03}.{extension}"
+
+    * .. code:: json
+
+        {
+            "extension == 'mp4'": "{id}_video.{extension}",
+            "'nature' in title" : "{id}_{title}.{extension}",
+            ""                  : "{id}_default.{extension}"
+        }
+
 Description
-    A `format string`_ to build the resulting filename
-    for a downloaded file.
+    A `format string`_ to build filenames for downloaded files with.
+
+    If this is an ``object``, it must contain Python expressions mapping to the
+    filename format strings to use.
+    These expressions are evaluated in the order as specified in Python 3.6+
+    and in an undetermined order in Python 3.4 and 3.5.
 
     The available replacement keys depend on the extractor used. A list
     of keys for a specific one can be acquired by calling *gallery-dl*
@@ -95,28 +110,6 @@ Description
     ``None``, it will be filled in later when the file download is
     starting. This key is therefore always available to provide
     a valid filename extension.
-
-
-extractor.*.filename-conditions
--------------------------------
-Type
-    ``object``
-Example
-    .. code:: json
-
-        {
-            "extension == 'mp4'"        : "{id}_video.{extension}",
-            "extension in ('zip','rar')": "{id}_archive.{extension}",
-            "'nature' in title"         : "{id}_{title}.{extension}"
-        }
-Description
-    An object containing Python expressions mapping to the
-    filename format strings to use.
-
-    When none of the given conditions match, `extractor.*.filename`_ is used.
-
-    Expressions are evaluated in the order as specified in Python 3.6+
-    and in an undetermined order in Python 3.4 and 3.5.
 
 
 extractor.*.directory
