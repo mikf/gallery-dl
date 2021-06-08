@@ -209,6 +209,7 @@ and optional for
 ``imgbb``,
 ``inkbunny``,
 ``instagram``,
+``mangadex``,
 ``mangoxo``,
 ``pillowfort``,
 ``pinterest``,
