@@ -755,17 +755,10 @@ class PathFormat():
     }
 
     def __init__(self, extractor):
-        filename_fmt = extractor.config("filename")
-        directory_fmt = extractor.config("directory")
-        if directory_fmt is None:
-            directory_fmt = extractor.directory_fmt
+        config = extractor.config
+        kwdefault = config("keywords-default")
 
-        extension_map = extractor.config("extension-map")
-        if extension_map is None:
-            extension_map = self.EXTENSION_MAP
-        self.extension_map = extension_map.get
-
-        kwdefault = extractor.config("keywords-default")
+        filename_fmt = config("filename")
         try:
             if filename_fmt is None:
                 filename_fmt = extractor.filename_fmt
@@ -782,6 +775,10 @@ class PathFormat():
                 filename_fmt, kwdefault).format_map
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
+
+        directory_fmt = config("directory")
+        if directory_fmt is None:
+            directory_fmt = extractor.directory_fmt
         try:
             self.directory_formatters = [
                 Formatter(dirfmt, kwdefault).format_map
@@ -798,7 +795,7 @@ class PathFormat():
 
         basedir = extractor._parentdir
         if not basedir:
-            basedir = extractor.config("base-directory")
+            basedir = config("base-directory")
             if basedir is None:
                 basedir = "." + os.sep + "gallery-dl" + os.sep
             elif basedir:
@@ -809,8 +806,13 @@ class PathFormat():
                     basedir += os.sep
         self.basedirectory = basedir
 
-        restrict = extractor.config("path-restrict", "auto")
-        replace = extractor.config("path-replace", "_")
+        extension_map = config("extension-map")
+        if extension_map is None:
+            extension_map = self.EXTENSION_MAP
+        self.extension_map = extension_map.get
+
+        restrict = config("path-restrict", "auto")
+        replace = config("path-replace", "_")
         if restrict == "auto":
             restrict = "\\\\|/<>:\"?*" if WINDOWS else "/"
         elif restrict == "unix":
@@ -821,7 +823,7 @@ class PathFormat():
             restrict = "^0-9A-Za-z_."
         self.clean_segment = self._build_cleanfunc(restrict, replace)
 
-        remove = extractor.config("path-remove", "\x00-\x1f\x7f")
+        remove = config("path-remove", "\x00-\x1f\x7f")
         self.clean_path = self._build_cleanfunc(remove, "")
 
     @staticmethod
