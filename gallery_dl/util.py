@@ -756,10 +756,6 @@ class PathFormat():
 
     def __init__(self, extractor):
         filename_fmt = extractor.config("filename")
-        filename_conditions = extractor.config("filename-conditions")
-        if filename_fmt is None:
-            filename_fmt = extractor.filename_fmt
-
         directory_fmt = extractor.config("directory")
         if directory_fmt is None:
             directory_fmt = extractor.directory_fmt
@@ -771,13 +767,16 @@ class PathFormat():
 
         kwdefault = extractor.config("keywords-default")
         try:
-            if filename_conditions:
-                self.build_filename = self.build_filename_conditional
+            if filename_fmt is None:
+                filename_fmt = extractor.filename_fmt
+            elif isinstance(filename_fmt, dict):
                 self.filename_conditions = [
                     (compile_expression(expr),
                      Formatter(fmt, kwdefault).format_map)
-                    for expr, fmt in filename_conditions.items()
+                    for expr, fmt in filename_fmt.items() if expr
                 ]
+                self.build_filename = self.build_filename_conditional
+                filename_fmt = filename_fmt.get("", extractor.filename_fmt)
 
             self.filename_formatter = Formatter(
                 filename_fmt, kwdefault).format_map
