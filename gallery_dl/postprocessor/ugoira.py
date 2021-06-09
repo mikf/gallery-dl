@@ -105,6 +105,24 @@ class UgoiraPP(PostProcessor):
                 else:
                     args.append(pathfmt.realpath)
                     self._exec(args)
+
+                    # test mkvmerge
+                    timecodes = tempdir + "/timecodes.txt"
+                    content = ["# timestamp format v2"]
+                    append = content.append
+                    timecode = 0
+                    append("{}".format(timecode))
+                    for frame in self._frames:
+                        timecode = timecode + frame["delay"]
+                        append("{}".format(timecode))
+                    if self.repeat:
+                        append("{}".format(timecode))
+                    append("")
+                    with open(timecodes, "w") as file:
+                        file.write("\n".join(content))
+                    self._exec("mkvmerge --timecodes 0:{}/timecodes.txt -o {} = {}".format(
+                        tempdir, tempdir + "/mkvmerge.mkv", pathfmt.realpath))
+                    os.replace(tempdir + "/mkvmerge.mkv", pathfmt.realpath)
             except OSError as exc:
                 print()
                 self.log.error("Unable to invoke FFmpeg (%s: %s)",
