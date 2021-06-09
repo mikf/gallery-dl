@@ -422,8 +422,8 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Manganelo</td>
-    <td>https://manganelo.com/</td>
+    <td>Manganato</td>
+    <td>https://manganato.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -978,6 +978,12 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>The /b/ Archive</td>
     <td>https://thebarchive.com/</td>
+    <td>Boards, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wakarimasen Archive</td>
+    <td>https://archive.wakarimasen.moe/</td>
     <td>Boards, Search Results, Threads</td>
     <td></td>
 </tr>

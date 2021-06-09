@@ -126,6 +126,8 @@ def main():
             config.set((), "postprocessors", args.postprocessors)
         if args.abort:
             config.set((), "skip", "abort:" + str(args.abort))
+        if args.terminate:
+            config.set((), "skip", "terminate:" + str(args.terminate))
         for opts in args.options:
             config.set(*opts)
 

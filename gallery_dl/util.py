@@ -21,6 +21,7 @@ import sqlite3
 import binascii
 import datetime
 import operator
+import functools
 import itertools
 import urllib.parse
 from http.cookiejar import Cookie
@@ -346,8 +347,6 @@ CODES = {
     "zh": "Chinese",
 }
 
-SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
-
 
 class UniversalNone():
     """None-style object that supports more operations than None itself"""
@@ -373,6 +372,20 @@ class UniversalNone():
 NONE = UniversalNone()
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
+SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
+GLOBALS = {
+    "parse_int": text.parse_int,
+    "urlsplit" : urllib.parse.urlsplit,
+    "datetime" : datetime.datetime,
+    "abort"    : raises(exception.StopExtraction),
+    "terminate": raises(exception.TerminateExtraction),
+    "re"       : re,
+}
+
+
+def compile_expression(expr, name="<expr>", globals=GLOBALS):
+    code_object = compile(expr, name, "eval")
+    return functools.partial(eval, code_object, globals)
 
 
 def build_predicate(predicates):
@@ -472,20 +485,13 @@ class UniquePredicate():
 class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
-    def __init__(self, filterexpr, target="image"):
+    def __init__(self, expr, target="image"):
         name = "<{} filter>".format(target)
-        self.codeobj = compile(filterexpr, name, "eval")
-        self.globals = {
-            "parse_int": text.parse_int,
-            "urlsplit" : urllib.parse.urlsplit,
-            "datetime" : datetime.datetime,
-            "abort"    : raises(exception.StopExtraction),
-            "re"       : re,
-        }
+        self.expr = compile_expression(expr, name)
 
-    def __call__(self, url, kwds):
+    def __call__(self, _, kwdict):
         try:
-            return eval(self.codeobj, self.globals, kwds)
+            return self.expr(kwdict)
         except exception.GalleryDLException:
             raise
         except Exception as exc:
@@ -750,6 +756,7 @@ class PathFormat():
 
     def __init__(self, extractor):
         filename_fmt = extractor.config("filename")
+        filename_conditions = extractor.config("filename-conditions")
         if filename_fmt is None:
             filename_fmt = extractor.filename_fmt
 
@@ -764,6 +771,14 @@ class PathFormat():
 
         kwdefault = extractor.config("keywords-default")
         try:
+            if filename_conditions:
+                self.build_filename = self.build_filename_conditional
+                self.filename_conditions = [
+                    (compile_expression(expr),
+                     Formatter(fmt, kwdefault).format_map)
+                    for expr, fmt in filename_conditions.items()
+                ]
+
             self.filename_formatter = Formatter(
                 filename_fmt, kwdefault).format_map
         except Exception as exc:
@@ -924,6 +939,19 @@ class PathFormat():
         try:
             return self.clean_path(self.clean_segment(
                 self.filename_formatter(self.kwdict)))
+        except Exception as exc:
+            raise exception.FilenameFormatError(exc)
+
+    def build_filename_conditional(self):
+        kwdict = self.kwdict
+
+        try:
+            for condition, formatter in self.filename_conditions:
+                if condition(kwdict):
+                    break
+            else:
+                formatter = self.filename_formatter
+            return self.clean_path(self.clean_segment(formatter(kwdict)))
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 

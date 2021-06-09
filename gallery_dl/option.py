@@ -204,13 +204,6 @@ def build_parser():
               "or -1 for infinite retries (default: 4)"),
     )
     downloader.add_argument(
-        "-A", "--abort",
-        dest="abort", metavar="N", type=int,
-        help=("Abort extractor run after N consecutive file downloads have "
-              "been skipped, e.g. if files with the same filename already "
-              "exist"),
-    )
-    downloader.add_argument(
         "--http-timeout",
         dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
         help="Timeout for HTTP connections (default: 30.0)",
@@ -301,7 +294,19 @@ def build_parser():
         "--download-archive",
         dest="archive", metavar="FILE", action=ConfigAction,
         help=("Record all downloaded files in the archive file and "
-              "skip downloading any file already in it."),
+              "skip downloading any file already in it"),
+    )
+    selection.add_argument(
+        "-A", "--abort",
+        dest="abort", metavar="N", type=int,
+        help=("Stop current extractor run "
+              "after N consecutive file downloads were skipped"),
+    )
+    selection.add_argument(
+        "-T", "--terminate",
+        dest="terminate", metavar="N", type=int,
+        help=("Stop current and parent extractor runs "
+              "after N consecutive file downloads were skipped"),
     )
     selection.add_argument(
         "--range",
@@ -335,7 +340,7 @@ def build_parser():
     postprocessor.add_argument(
         "--zip",
         dest="postprocessors",
-        action="append_const", const={"name": "zip"},
+        action="append_const", const="zip",
         help="Store downloaded files in a ZIP archive",
     )
     postprocessor.add_argument(
@@ -375,7 +380,7 @@ def build_parser():
     postprocessor.add_argument(
         "--write-metadata",
         dest="postprocessors",
-        action="append_const", const={"name": "metadata"},
+        action="append_const", const="metadata",
         help="Write metadata to separate JSON files",
     )
     postprocessor.add_argument(
@@ -387,7 +392,7 @@ def build_parser():
     postprocessor.add_argument(
         "--mtime-from-date",
         dest="postprocessors",
-        action="append_const", const={"name": "mtime"},
+        action="append_const", const="mtime",
         help="Set file modification times according to 'date' metadata",
     )
     postprocessor.add_argument(
@@ -404,6 +409,11 @@ def build_parser():
             "name": "exec", "event": "finalize"},
         help=("Execute CMD after all files were downloaded successfully. "
               "Example: --exec-after 'cd {} && convert * ../doc.pdf'"),
+    )
+    postprocessor.add_argument(
+        "-P", "--postprocessor",
+        dest="postprocessors", metavar="NAME", action="append",
+        help="Activate the specified post processor",
     )
 
     parser.add_argument(

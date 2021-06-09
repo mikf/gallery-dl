@@ -57,8 +57,7 @@ class MetadataPP(PostProcessor):
             events = ("file",)
         elif isinstance(events, str):
             events = events.split(",")
-        for event in events:
-            job.hooks[event].append(self.run)
+        job.register_hooks({event: self.run for event in events}, options)
 
     def run(self, pathfmt):
         directory = self._directory(pathfmt)
@@ -103,11 +102,18 @@ class MetadataPP(PostProcessor):
         if not tags:
             return
 
-        if not isinstance(tags, list):
+        if isinstance(tags, str):
             taglist = tags.split(", ")
             if len(taglist) < len(tags) / 16:
                 taglist = tags.split(" ")
             tags = taglist
+        elif isinstance(tags, dict):
+            taglists = tags.values()
+            tags = []
+            extend = tags.extend
+            for taglist in taglists:
+                extend(taglist)
+            tags.sort()
 
         fp.write("\n".join(tags) + "\n")
 

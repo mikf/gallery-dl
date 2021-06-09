@@ -97,6 +97,28 @@ Description
     a valid filename extension.
 
 
+extractor.*.filename-conditions
+-------------------------------
+Type
+    ``object``
+Example
+    .. code:: json
+
+        {
+            "extension == 'mp4'"        : "{id}_video.{extension}",
+            "extension in ('zip','rar')": "{id}_archive.{extension}",
+            "'nature' in title"         : "{id}_{title}.{extension}"
+        }
+Description
+    An object containing Python expressions mapping to the
+    filename format strings to use.
+
+    When none of the given conditions match, `extractor.*.filename`_ is used.
+
+    Expressions are evaluated in the order as specified in Python 3.6+
+    and in an undetermined order in Python 3.4 and 3.5.
+
+
 extractor.*.directory
 ---------------------
 Type
@@ -302,8 +324,8 @@ Description
     and optional for
 
     * ``aryion``
-    * ``danbooru``
-    * ``e621``
+    * ``danbooru`` (*)
+    * ``e621`` (*)
     * ``exhentai``
     * ``idolcomplex``
     * ``imgbb``
@@ -322,7 +344,7 @@ Description
     ``-u/--username`` and ``-p/--password`` command-line options or
     by using a |.netrc|_ file. (see Authentication_)
 
-    Note: The password value for ``danbooru`` and ``e621`` should be
+    (*) The password value for ``danbooru`` and ``e621`` should be
     the API key found in your user profile, not the actual account password.
 
 
@@ -1844,7 +1866,10 @@ Type
 Default
     ``true``
 Description
-    Extract media from retweeted posts.
+    Fetch media from retweeted posts.
+
+    If this value is ``"original"``, metadata for these files
+    will be taken from the original posts, not the retweeted posts.
 
 
 extractor.weibo.videos
@@ -2911,11 +2936,17 @@ Example
             "name"       : "zip",
             "compression": "store",
             "extension"  : "cbz",
+            "filter"     : "extension not in ('zip', 'rar')",
             "whitelist"  : ["mangadex", "exhentai", "nhentai"]
         }
 Description
     An ``object`` containing a ``"name"`` attribute specifying the
     post-processor type, as well as any of its `options <Postprocessor Options_>`__.
+
+    It is possible to set a ``"filter"`` expression similar to
+    `image-filter <extractor.*.image-filter_>`_ to only run a post-processor
+    condionally.
+
     It is also possible set a ``"whitelist"`` or ``"blacklist"`` to
     only enable or disable a post-processor for the specified
     extractor categories.

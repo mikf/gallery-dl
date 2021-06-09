@@ -132,10 +132,15 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
     archive_fmt = "t_{search_tags}_{id}"
     pattern = r"(?:https?://)?idol\.sankakucomplex\.com/\?([^#]*)"
     test = (
-        ("https://idol.sankakucomplex.com/?tags=lyumos+wreath", {
-            "count": ">= 6",
+        ("https://idol.sankakucomplex.com/?tags=lyumos", {
+            "count": 5,
+            "range": "18-22",
             "pattern": r"https://is\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
                        r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+",
+        }),
+        ("https://idol.sankakucomplex.com/?tags=order:favcount", {
+            "count": 5,
+            "range": "18-22",
         }),
         ("https://idol.sankakucomplex.com"
          "/?tags=lyumos+wreath&page=3&next=694215"),
@@ -184,21 +189,21 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
         while True:
             page = self.request(self.root, params=params, retries=10).text
             pos = page.find("<div id=more-popular-posts-link>") + 1
+            yield from text.extract_iter(page, '" id=p', '>', pos)
 
-            ids = list(text.extract_iter(page, '" id=p', '>', pos))
-            if not ids:
-                return
-            yield from ids
-
-            next_qs = text.extract(page, 'next-page-url="/?', '"', pos)[0]
-            next_id = text.parse_query(next_qs).get("next")
-
-            # stop if the same "next" parameter occurs twice in a row (#265)
-            if "next" in params and params["next"] == next_id:
+            next_url = text.extract(page, 'next-page-url="', '"', pos)[0]
+            if not next_url:
                 return
 
-            params["next"] = next_id or (text.parse_int(ids[-1]) - 1)
-            params["page"] = "2"
+            next_params = text.parse_query(text.unescape(
+                next_url).lstrip("?/"))
+
+            if "next" in next_params:
+                # stop if the same "next" value occurs twice in a row (#265)
+                if "next" in params and params["next"] == next_params["next"]:
+                    return
+                next_params["page"] = "2"
+            params = next_params
 
 
 class IdolcomplexPoolExtractor(IdolcomplexExtractor):

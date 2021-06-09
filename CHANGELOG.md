@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+## 1.17.5 - 2021-05-30
+### Additions
+- [kemonoparty] add `metadata` option ([#1548](https://github.com/mikf/gallery-dl/issues/1548))
+- [kemonoparty] add `type` metadata field ([#1556](https://github.com/mikf/gallery-dl/issues/1556))
+- [mangapark] recognize v2.mangapark URLs ([#1578](https://github.com/mikf/gallery-dl/issues/1578))
+- [patreon] extract user-defined `tags` ([#1539](https://github.com/mikf/gallery-dl/issues/1539), [#1540](https://github.com/mikf/gallery-dl/issues/1540))
+- [pillowfort] implement login with username & password ([#846](https://github.com/mikf/gallery-dl/issues/846))
+- [pillowfort] add `inline` and `external` options ([#846](https://github.com/mikf/gallery-dl/issues/846))
+- [pixiv] implement `max-posts` option ([#1558](https://github.com/mikf/gallery-dl/issues/1558))
+- [pixiv] add `metadata` option ([#1551](https://github.com/mikf/gallery-dl/issues/1551))
+- [twitter] add `text-tweets` option ([#570](https://github.com/mikf/gallery-dl/issues/570))
+- [weibo] extend `retweets` option ([#1542](https://github.com/mikf/gallery-dl/issues/1542))
+- [postprocessor:ugoira] support using the `image2` demuxer ([#1550](https://github.com/mikf/gallery-dl/issues/1550))
+- [postprocessor:ugoira] add `repeat-last-frame` option ([#1550](https://github.com/mikf/gallery-dl/issues/1550))
+- support `XDG_CONFIG_HOME` ([#1545](https://github.com/mikf/gallery-dl/issues/1545))
+- implement `parent-skip` and `"skip": "terminate"` options ([#1399](https://github.com/mikf/gallery-dl/issues/1399))
+### Changes
+- [twitter] resolve `t.co` URLs in `content` ([#1532](https://github.com/mikf/gallery-dl/issues/1532))
+### Fixes
+- [500px] update query hashes ([#1573](https://github.com/mikf/gallery-dl/issues/1573))
+- [aryion] find text posts in `recursive=false` mode ([#1568](https://github.com/mikf/gallery-dl/issues/1568))
+- [imagebam] fix extraction of NSFW images ([#1534](https://github.com/mikf/gallery-dl/issues/1534))
+- [imgur] update URL patterns ([#1561](https://github.com/mikf/gallery-dl/issues/1561))
+- [manganelo] update domain to `manganato.com`
+- [reactor] skip deleted/empty posts
+- [twitter] add missing retweet media entities ([#1555](https://github.com/mikf/gallery-dl/issues/1555))
+- fix ISO 639-1 code for Japanese (`jp` -> `ja`)
+
 ## 1.17.4 - 2021-05-07
 ### Additions
 - [gelbooru] add extractor for `/redirect.php` URLs ([#1530](https://github.com/mikf/gallery-dl/issues/1530))

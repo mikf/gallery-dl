@@ -73,6 +73,9 @@ class OAuthBase(Extractor):
             print(url, end="\n\n", flush=True)
         return (recv or self.recv)()
 
+    def error(self, msg):
+        return self.send("Remote server reported an error:\n\n" + str(msg))
+
     def _oauth1_authorization_flow(
             self, request_token_url, authorize_url, access_token_url):
         """Perform the OAuth 1.0a authorization flow"""
@@ -135,8 +138,7 @@ class OAuthBase(Extractor):
             ))
             return
         if "error" in params:
-            self.send(params["error"])
-            return
+            return self.error(params)
 
         # exchange the authorization code for a token
         data = {
@@ -156,8 +158,7 @@ class OAuthBase(Extractor):
 
         # check token response
         if "error" in data:
-            self.send(data["error"])
-            return
+            return self.error(data)
 
         token = data[key]
         token_name = key.replace("_", "-")

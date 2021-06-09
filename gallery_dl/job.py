@@ -12,6 +12,7 @@ import time
 import errno
 import logging
 import operator
+import functools
 import collections
 from . import extractor, downloader, postprocessor
 from . import config, text, util, output, exception
@@ -375,17 +376,17 @@ class DownloadJob(Job):
 
     def initialize(self, kwdict=None):
         """Delayed initialization of PathFormat, etc."""
-        config = self.extractor.config
+        cfg = self.extractor.config
         pathfmt = self.pathfmt = util.PathFormat(self.extractor)
         if kwdict:
             pathfmt.set_directory(kwdict)
 
-        self.sleep = config("sleep")
-        if not config("download", True):
+        self.sleep = cfg("sleep")
+        if not cfg("download", True):
             # monkey-patch method to do nothing and always return True
             self.download = pathfmt.fix_extension
 
-        archive = config("archive")
+        archive = cfg("archive")
         if archive:
             path = util.expand_path(archive)
             try:
@@ -399,7 +400,7 @@ class DownloadJob(Job):
             else:
                 self.extractor.log.debug("Using download archive '%s'", path)
 
-        skip = config("skip", True)
+        skip = cfg("skip", True)
         if skip:
             self._skipexc = None
             if skip == "enumerate":
@@ -427,7 +428,10 @@ class DownloadJob(Job):
             category = self.extractor.category
             basecategory = self.extractor.basecategory
 
+            pp_conf = config.get((), "postprocessor") or {}
             for pp_dict in postprocessors:
+                if isinstance(pp_dict, str):
+                    pp_dict = pp_conf.get(pp_dict) or {"name": pp_dict}
 
                 whitelist = pp_dict.get("whitelist")
                 if whitelist and category not in whitelist and \
@@ -458,6 +462,23 @@ class DownloadJob(Job):
                 if "init" in self.hooks:
                     for callback in self.hooks["init"]:
                         callback(pathfmt)
+
+    def register_hooks(self, hooks, options=None):
+        expr = options.get("filter") if options else None
+
+        if expr:
+            condition = util.compile_expression(expr)
+            for hook, callback in hooks.items():
+                self.hooks[hook].append(functools.partial(
+                    self._call_hook, callback, condition))
+        else:
+            for hook, callback in hooks.items():
+                self.hooks[hook].append(callback)
+
+    @staticmethod
+    def _call_hook(callback, condition, pathfmt):
+        if condition(pathfmt.kwdict):
+            callback(pathfmt)
 
     def _build_blacklist(self):
         wlist = self.extractor.config("whitelist")
