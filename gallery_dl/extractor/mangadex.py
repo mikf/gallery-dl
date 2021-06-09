@@ -26,14 +26,7 @@ class MangadexExtractor(Extractor):
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     archive_fmt = "{chapter_id}_{page}"
     root = "https://mangadex.org"
-
-    # mangadex-to-iso639-1 codes
-    iso639_map = {
-        "br": "pt",
-        "ct": "ca",
-        "gb": "en",
-        "vn": "vi",
-    }
+    _cache = {}
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -42,56 +35,55 @@ class MangadexExtractor(Extractor):
 
     def items(self):
         for chapter in self.chapters():
+            uuid = chapter["data"]["id"]
+            data = self._transform(chapter)
+            data["_extractor"] = MangadexChapterExtractor
+            self._cache[uuid] = (chapter, data)
+            yield Message.Queue, self.root + "/chapter/" + uuid, data
 
-            relationships = defaultdict(list)
-            for item in chapter["relationships"]:
-                relationships[item["type"]].append(item["id"])
-            manga = self.api.manga(relationships["manga"][0])
-            for item in manga["relationships"]:
-                relationships[item["type"]].append(item["id"])
+    def _transform(self, chapter):
+        relationships = defaultdict(list)
+        for item in chapter["relationships"]:
+            relationships[item["type"]].append(item["id"])
+        manga = self.api.manga(relationships["manga"][0])
+        for item in manga["relationships"]:
+            relationships[item["type"]].append(item["id"])
 
-            cattributes = chapter["data"]["attributes"]
-            mattributes = manga["data"]["attributes"]
-            lang = cattributes["translatedLanguage"].partition("-")[0]
+        cattributes = chapter["data"]["attributes"]
+        mattributes = manga["data"]["attributes"]
+        lang = cattributes["translatedLanguage"].partition("-")[0]
 
-            if cattributes["chapter"]:
-                chnum, sep, minor = cattributes["chapter"].partition(".")
-            else:
-                chnum, sep, minor = 0, "", ""
+        if cattributes["chapter"]:
+            chnum, sep, minor = cattributes["chapter"].partition(".")
+        else:
+            chnum, sep, minor = 0, "", ""
 
-            data = {
-                "manga"   : mattributes["title"]["en"],
-                "manga_id": manga["data"]["id"],
-                "title"   : cattributes["title"],
-                "volume"  : text.parse_int(cattributes["volume"]),
-                "chapter" : text.parse_int(chnum),
-                "chapter_minor": sep + minor,
-                "chapter_id": chapter["data"]["id"],
-                "date"    : text.parse_datetime(cattributes["publishAt"]),
-                "lang"    : lang,
-                "language": util.code_to_language(lang),
-                "count"   : len(cattributes["data"]),
-            }
+        data = {
+            "manga"   : mattributes["title"]["en"],
+            "manga_id": manga["data"]["id"],
+            "title"   : cattributes["title"],
+            "volume"  : text.parse_int(cattributes["volume"]),
+            "chapter" : text.parse_int(chnum),
+            "chapter_minor": sep + minor,
+            "chapter_id": chapter["data"]["id"],
+            "date"    : text.parse_datetime(cattributes["publishAt"]),
+            "lang"    : lang,
+            "language": util.code_to_language(lang),
+            "count"   : len(cattributes["data"]),
+        }
 
-            if self.config("metadata"):
-                data["artist"] = [
-                    self.api.author(uuid)["data"]["attributes"]["name"]
-                    for uuid in relationships["artist"]]
-                data["author"] = [
-                    self.api.author(uuid)["data"]["attributes"]["name"]
-                    for uuid in relationships["author"]]
-                data["group"] = [
-                    self.api.group(uuid)["data"]["attributes"]["name"]
-                    for uuid in relationships["scanlation_group"]]
+        if self.config("metadata"):
+            data["artist"] = [
+                self.api.author(uuid)["data"]["attributes"]["name"]
+                for uuid in relationships["artist"]]
+            data["author"] = [
+                self.api.author(uuid)["data"]["attributes"]["name"]
+                for uuid in relationships["author"]]
+            data["group"] = [
+                self.api.group(uuid)["data"]["attributes"]["name"]
+                for uuid in relationships["scanlation_group"]]
 
-            base = "{}/data/{}/".format(
-                self.api.athome_server(chapter["data"]["id"])["baseUrl"],
-                cattributes["hash"])
-
-            yield Message.Directory, data
-            for data["page"], page in enumerate(cattributes["data"], 1):
-                text.nameext_from_url(page, data)
-                yield Message.Url, base + page, data
+        return data
 
 
 class MangadexChapterExtractor(MangadexExtractor):
@@ -115,8 +107,20 @@ class MangadexChapterExtractor(MangadexExtractor):
         }),
     )
 
-    def chapters(self):
-        return (self.api.chapter(self.uuid),)
+    def items(self):
+        try:
+            chapter, data = self._cache.pop(self.uuid)
+        except KeyError:
+            chapter = self.api.chapter(self.uuid)
+            data = self._transform(chapter)
+        yield Message.Directory, data
+
+        cattributes = chapter["data"]["attributes"]
+        base = "{}/data/{}/".format(
+            self.api.athome_server(self.uuid)["baseUrl"], cattributes["hash"])
+        for data["page"], page in enumerate(cattributes["data"], 1):
+            text.nameext_from_url(page, data)
+            yield Message.Url, base + page, data
 
 
 class MangadexMangaExtractor(MangadexExtractor):
@@ -138,9 +142,12 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "language": str,
             },
         }),
-        ("https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/"),
+        ("https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/", {
+            "options": (("lang", "en"),),
+            "count": ">= 100",
+        }),
         ("https://mangadex.org/title/7c1e2742-a086-4fd3-a3be-701fd6cf0be9", {
-            "count": 16,
+            "count": 1,
         }),
     )
 
