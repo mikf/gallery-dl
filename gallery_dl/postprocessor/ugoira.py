@@ -122,7 +122,8 @@ class UgoiraPP(PostProcessor):
                         file.write("\n".join(content))
                     self._exec("mkvmerge --timecodes 0:{}/timecodes.txt -o {} = {}".format(
                         tempdir, tempdir + "/mkvmerge.mkv", pathfmt.realpath))
-                    os.replace(tempdir + "/mkvmerge.mkv", pathfmt.realpath)
+                    from shutil import move
+                    move(tempdir + "/mkvmerge.mkv", pathfmt.realpath)
             except OSError as exc:
                 print()
                 self.log.error("Unable to invoke FFmpeg (%s: %s)",
