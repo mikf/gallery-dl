@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from https://fanfox.net/"""
+"""Extractors for from https://fanfox.net/"""
 
 from .common import ChapterExtractor
 from .. import text
@@ -15,14 +15,15 @@ from .. import text
 class MangafoxChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from fanfox.net"""
     category = "mangafox"
-    pattern = (r"(?:https?://)?(?:www\.|m\.)?(?:mangafox\.me|fanfox\.net)"
-               r"(/manga/[^/]+/((?:v(\d+)/)?c(\d+)([^/?#]*)))")
+    pattern = (r"(?:https?://)?(?:www\.|m\.)?(?:fanfox\.net|mangafox\.me)"
+               r"(/manga/[^/]+/((?:v([^/?#]+)/)?c(\d+)([^/?#]*)))")
     test = (
         ("http://fanfox.net/manga/kidou_keisatsu_patlabor/v05/c006.2/1.html", {
             "keyword": "5661dab258d42d09d98f194f7172fb9851a49766",
             "content": "5c50c252dcf12ffecf68801f4db8a2167265f66c",
         }),
         ("http://mangafox.me/manga/kidou_keisatsu_patlabor/v05/c006.2/"),
+        ("http://fanfox.net/manga/black_clover/vTBD/c295/1.html"),
     )
     root = "https://m.fanfox.net"
 
