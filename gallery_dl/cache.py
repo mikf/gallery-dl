@@ -168,7 +168,7 @@ def cache(maxage=3600, keyarg=None):
     return wrap
 
 
-def clear(module="all"):
+def clear(module):
     """Delete database entries for 'module'"""
     db = DatabaseCacheDecorator.db
     if not db:
@@ -176,19 +176,18 @@ def clear(module="all"):
 
     rowcount = 0
     cursor = db.cursor()
-    module = module.lower()
 
     try:
-        if module == "all":
+        if module == "ALL":
             cursor.execute("DELETE FROM data")
         else:
             cursor.execute(
                 "DELETE FROM data "
                 "WHERE key LIKE 'gallery_dl.extractor.' || ? || '.%'",
-                (module,)
+                (module.lower(),)
             )
     except sqlite3.OperationalError:
-        pass  # database is not initialized,  can't be modified, etc.
+        pass  # database not initialized, cannot be modified, etc.
     else:
         rowcount = cursor.rowcount
         db.commit()

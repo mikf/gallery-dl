@@ -114,8 +114,9 @@ def build_parser():
     )
     general.add_argument(
         "--clear-cache",
-        dest="clear_cache", metavar="MODULE", nargs="?", const="all",
-        help="Delete all cached login sessions, cookies, etc.",
+        dest="clear_cache", metavar="MODULE",
+        help="Delete cached login sessions, cookies, etc. for MODULE "
+             "(ALL to delete everything)",
     )
 
     output = parser.add_argument_group("Output Options")
