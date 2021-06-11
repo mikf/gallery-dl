@@ -33,10 +33,10 @@ class TwitterExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.textonly = self.config("text-tweets", False)
-        self.retweets = self.config("retweets", True)
+        self.retweets = self.config("retweets", False)
         self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)
-        self.quoted = self.config("quoted", True)
+        self.quoted = self.config("quoted", False)
         self.videos = self.config("videos", True)
         self.cards = self.config("cards", False)
         self._user_cache = {}
@@ -44,7 +44,6 @@ class TwitterExtractor(Extractor):
     def items(self):
         self.login()
         metadata = self.metadata()
-        yield Message.Version, 1
 
         for tweet in self.tweets():
 
@@ -406,7 +405,6 @@ class TwitterFollowingExtractor(TwitterExtractor):
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for all images from a search timeline"""
     subcategory = "search"
-    directory_fmt = ("{category}", "Search", "{search}")
     pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
     test = ("https://twitter.com/search?q=nature", {
         "range": "1-40",
@@ -456,14 +454,14 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("replies", False),),
             "count": 0,
         }),
-        # quoted tweet (#526, #854)
+        # "quoted" option (#854)
         ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
+            "options": (("quoted", True),),
             "pattern": r"https://pbs\.twimg\.com/media/Ea[KG].+=jpg",
             "count": 8,
         }),
-        # "quoted" option (#854)
+        # quoted tweet (#526, #854)
         ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
-            "options": (("quoted", False),),
             "pattern": r"https://pbs\.twimg\.com/media/EaK.+=jpg",
             "count": 4,
         }),
@@ -499,6 +497,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         # retweet with missing media entities (#1555)
         ("https://twitter.com/morino_ya/status/1392763691599237121", {
+            "options": (("retweets", True),),
             "count": 4,
         }),
     )
