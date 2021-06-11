@@ -10,8 +10,10 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from ..cache import memcache
+from ..cache import cache, memcache
 from collections import defaultdict
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
 
 
 class MangadexExtractor(Extractor):
@@ -24,14 +26,7 @@ class MangadexExtractor(Extractor):
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     archive_fmt = "{chapter_id}_{page}"
     root = "https://mangadex.org"
-
-    # mangadex-to-iso639-1 codes
-    iso639_map = {
-        "br": "pt",
-        "ct": "ca",
-        "gb": "en",
-        "vn": "vi",
-    }
+    _cache = {}
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -40,63 +35,61 @@ class MangadexExtractor(Extractor):
 
     def items(self):
         for chapter in self.chapters():
+            uuid = chapter["data"]["id"]
+            data = self._transform(chapter)
+            data["_extractor"] = MangadexChapterExtractor
+            self._cache[uuid] = (chapter, data)
+            yield Message.Queue, self.root + "/chapter/" + uuid, data
 
-            relationships = defaultdict(list)
-            for item in chapter["relationships"]:
-                relationships[item["type"]].append(item["id"])
-            manga = self.api.manga(relationships["manga"][0])
-            for item in manga["relationships"]:
-                relationships[item["type"]].append(item["id"])
+    def _transform(self, chapter):
+        relationships = defaultdict(list)
+        for item in chapter["relationships"]:
+            relationships[item["type"]].append(item["id"])
+        manga = self.api.manga(relationships["manga"][0])
+        for item in manga["relationships"]:
+            relationships[item["type"]].append(item["id"])
 
-            cattributes = chapter["data"]["attributes"]
-            mattributes = manga["data"]["attributes"]
-            lang = cattributes["translatedLanguage"].partition("-")[0]
+        cattributes = chapter["data"]["attributes"]
+        mattributes = manga["data"]["attributes"]
+        lang = cattributes["translatedLanguage"].partition("-")[0]
 
-            if cattributes["chapter"]:
-                chnum, sep, minor = cattributes["chapter"].partition(".")
-            else:
-                chnum, sep, minor = 0, "", ""
+        if cattributes["chapter"]:
+            chnum, sep, minor = cattributes["chapter"].partition(".")
+        else:
+            chnum, sep, minor = 0, "", ""
 
-            data = {
-                "manga"   : mattributes["title"]["en"],
-                "manga_id": manga["data"]["id"],
-                "title"   : cattributes["title"],
-                "volume"  : text.parse_int(cattributes["volume"]),
-                "chapter" : text.parse_int(chnum),
-                "chapter_minor": sep + minor,
-                "chapter_id": chapter["data"]["id"],
-                "date"    : text.parse_datetime(cattributes["publishAt"]),
-                "lang"    : lang,
-                "language": util.code_to_language(lang),
-                "count"   : len(cattributes["data"]),
-            }
+        data = {
+            "manga"   : mattributes["title"]["en"],
+            "manga_id": manga["data"]["id"],
+            "title"   : cattributes["title"],
+            "volume"  : text.parse_int(cattributes["volume"]),
+            "chapter" : text.parse_int(chnum),
+            "chapter_minor": sep + minor,
+            "chapter_id": chapter["data"]["id"],
+            "date"    : text.parse_datetime(cattributes["publishAt"]),
+            "lang"    : lang,
+            "language": util.code_to_language(lang),
+            "count"   : len(cattributes["data"]),
+        }
 
-            if self.config("metadata"):
-                data["artist"] = [
-                    self.api.author(uuid)["data"]["attributes"]["name"]
-                    for uuid in relationships["artist"]]
-                data["author"] = [
-                    self.api.author(uuid)["data"]["attributes"]["name"]
-                    for uuid in relationships["author"]]
-                data["group"] = [
-                    self.api.group(uuid)["data"]["attributes"]["name"]
-                    for uuid in relationships["scanlation_group"]]
+        if self.config("metadata"):
+            data["artist"] = [
+                self.api.author(uuid)["data"]["attributes"]["name"]
+                for uuid in relationships["artist"]]
+            data["author"] = [
+                self.api.author(uuid)["data"]["attributes"]["name"]
+                for uuid in relationships["author"]]
+            data["group"] = [
+                self.api.group(uuid)["data"]["attributes"]["name"]
+                for uuid in relationships["scanlation_group"]]
 
-            base = "{}/data/{}/".format(
-                self.api.athome_server(chapter["data"]["id"])["baseUrl"],
-                cattributes["hash"])
-
-            yield Message.Directory, data
-            for data["page"], page in enumerate(cattributes["data"], 1):
-                text.nameext_from_url(page, data)
-                yield Message.Url, base + page, data
+        return data
 
 
 class MangadexChapterExtractor(MangadexExtractor):
     """Extractor for manga-chapters from mangadex.org"""
     subcategory = "chapter"
-    pattern = (r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
-               r"/chapter/([0-9a-f-]+)")
+    pattern = BASE_PATTERN + r"/chapter/([0-9a-f-]+)"
     test = (
         ("https://mangadex.org/chapter/f946ac53-0b71-4b5d-aeb2-7931b13c4aaa", {
             "keyword": "f6c2b908df06eb834d56193dfe1fa1f7c2c4dccd",
@@ -114,15 +107,26 @@ class MangadexChapterExtractor(MangadexExtractor):
         }),
     )
 
-    def chapters(self):
-        return (self.api.chapter(self.uuid),)
+    def items(self):
+        try:
+            chapter, data = self._cache.pop(self.uuid)
+        except KeyError:
+            chapter = self.api.chapter(self.uuid)
+            data = self._transform(chapter)
+        yield Message.Directory, data
+
+        cattributes = chapter["data"]["attributes"]
+        base = "{}/data/{}/".format(
+            self.api.athome_server(self.uuid)["baseUrl"], cattributes["hash"])
+        for data["page"], page in enumerate(cattributes["data"], 1):
+            text.nameext_from_url(page, data)
+            yield Message.Url, base + page, data
 
 
 class MangadexMangaExtractor(MangadexExtractor):
     """Extractor for manga from mangadex.org"""
     subcategory = "manga"
-    pattern = (r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
-               r"/(?:title|manga)/([0-9a-f-]+)")
+    pattern = BASE_PATTERN + r"/(?:title|manga)/(?!feed$)([0-9a-f-]+)"
     test = (
         ("https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc", {
             "keyword": {
@@ -138,9 +142,12 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "language": str,
             },
         }),
-        ("https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/"),
+        ("https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/", {
+            "options": (("lang", "en"),),
+            "count": ">= 100",
+        }),
         ("https://mangadex.org/title/7c1e2742-a086-4fd3-a3be-701fd6cf0be9", {
-            "count": 16,
+            "count": 1,
         }),
     )
 
@@ -148,11 +155,27 @@ class MangadexMangaExtractor(MangadexExtractor):
         return self.api.manga_feed(self.uuid)
 
 
+class MangadexFeedExtractor(MangadexExtractor):
+    """Extractor for chapters from your Followed Feed"""
+    subcategory = "feed"
+    pattern = BASE_PATTERN + r"/title/feed$()"
+    test = ("https://mangadex.org/title/feed",)
+
+    def chapters(self):
+        return self.api.user_follows_manga_feed()
+
+
 class MangadexAPI():
     """Interface for the MangaDex API v5"""
 
     def __init__(self, extr):
         self.extractor = extr
+        self.headers = {}
+
+        self.username, self.password = self.extractor._get_auth_info()
+        if not self.username:
+            self.authenticate = util.noop
+
         server = extr.config("api-server")
         self.root = ("https://api.mangadex.org" if server is None
                      else text.ensure_http_scheme(server).rstrip("/"))
@@ -185,11 +208,45 @@ class MangadexAPI():
         }
         return self._pagination("/manga/" + uuid + "/feed", params)
 
+    def user_follows_manga_feed(self):
+        params = {
+            "order[publishAt]"    : "desc",
+            "translatedLanguage[]": self.extractor.config("lang"),
+        }
+        return self._pagination("/user/follows/manga/feed", params)
+
+    def authenticate(self):
+        self.headers["Authorization"] = \
+            self._authenticate_impl(self.username, self.password)
+
+    @cache(maxage=900, keyarg=1)
+    def _authenticate_impl(self, username, password):
+        refresh_token = _refresh_token_cache(username)
+        if refresh_token:
+            self.extractor.log.info("Refreshing access token")
+            url = self.root + "/auth/refresh"
+            data = {"token": refresh_token}
+        else:
+            self.extractor.log.info("Logging in as %s", username)
+            url = self.root + "/auth/login"
+            data = {"username": username, "password": password}
+
+        data = self.extractor.request(
+            url, method="POST", json=data, fatal=None).json()
+        if data.get("result") != "ok":
+            raise exception.AuthenticationError()
+
+        if refresh_token != data["token"]["refresh"]:
+            _refresh_token_cache.update(username, data["token"]["refresh"])
+        return "Bearer " + data["token"]["session"]
+
     def _call(self, endpoint, params=None):
         url = self.root + endpoint
 
         while True:
-            response = self.extractor.request(url, params=params, fatal=None)
+            self.authenticate()
+            response = self.extractor.request(
+                url, params=params, headers=self.headers, fatal=None)
 
             if response.status_code < 400:
                 return response.json()
@@ -215,3 +272,8 @@ class MangadexAPI():
             params["offset"] = data["offset"] + data["limit"]
             if params["offset"] >= data["total"]:
                 return
+
+
+@cache(maxage=28*24*3600, keyarg=0)
+def _refresh_token_cache(username):
+    return None

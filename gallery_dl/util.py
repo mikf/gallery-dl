@@ -755,34 +755,30 @@ class PathFormat():
     }
 
     def __init__(self, extractor):
-        filename_fmt = extractor.config("filename")
-        filename_conditions = extractor.config("filename-conditions")
-        if filename_fmt is None:
-            filename_fmt = extractor.filename_fmt
+        config = extractor.config
+        kwdefault = config("keywords-default")
 
-        directory_fmt = extractor.config("directory")
-        if directory_fmt is None:
-            directory_fmt = extractor.directory_fmt
-
-        extension_map = extractor.config("extension-map")
-        if extension_map is None:
-            extension_map = self.EXTENSION_MAP
-        self.extension_map = extension_map.get
-
-        kwdefault = extractor.config("keywords-default")
+        filename_fmt = config("filename")
         try:
-            if filename_conditions:
-                self.build_filename = self.build_filename_conditional
+            if filename_fmt is None:
+                filename_fmt = extractor.filename_fmt
+            elif isinstance(filename_fmt, dict):
                 self.filename_conditions = [
                     (compile_expression(expr),
                      Formatter(fmt, kwdefault).format_map)
-                    for expr, fmt in filename_conditions.items()
+                    for expr, fmt in filename_fmt.items() if expr
                 ]
+                self.build_filename = self.build_filename_conditional
+                filename_fmt = filename_fmt.get("", extractor.filename_fmt)
 
             self.filename_formatter = Formatter(
                 filename_fmt, kwdefault).format_map
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
+
+        directory_fmt = config("directory")
+        if directory_fmt is None:
+            directory_fmt = extractor.directory_fmt
         try:
             self.directory_formatters = [
                 Formatter(dirfmt, kwdefault).format_map
@@ -799,7 +795,7 @@ class PathFormat():
 
         basedir = extractor._parentdir
         if not basedir:
-            basedir = extractor.config("base-directory")
+            basedir = config("base-directory")
             if basedir is None:
                 basedir = "." + os.sep + "gallery-dl" + os.sep
             elif basedir:
@@ -810,8 +806,13 @@ class PathFormat():
                     basedir += os.sep
         self.basedirectory = basedir
 
-        restrict = extractor.config("path-restrict", "auto")
-        replace = extractor.config("path-replace", "_")
+        extension_map = config("extension-map")
+        if extension_map is None:
+            extension_map = self.EXTENSION_MAP
+        self.extension_map = extension_map.get
+
+        restrict = config("path-restrict", "auto")
+        replace = config("path-replace", "_")
         if restrict == "auto":
             restrict = "\\\\|/<>:\"?*" if WINDOWS else "/"
         elif restrict == "unix":
@@ -822,7 +823,7 @@ class PathFormat():
             restrict = "^0-9A-Za-z_."
         self.clean_segment = self._build_cleanfunc(restrict, replace)
 
-        remove = extractor.config("path-remove", "\x00-\x1f\x7f")
+        remove = config("path-remove", "\x00-\x1f\x7f")
         self.clean_path = self._build_cleanfunc(remove, "")
 
     @staticmethod

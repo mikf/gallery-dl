@@ -412,8 +412,8 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
+    <td>Chapters, Followed Feed, Manga</td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>MangaKakalot</td>

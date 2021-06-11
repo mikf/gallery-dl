@@ -150,6 +150,9 @@ SUBCATEGORY_MAP = {
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
     },
+    "mangadex": {
+        "feed" : "Followed Feed",
+    },
     "newgrounds": {
         "art"  : "Art",
         "audio": "Audio",
@@ -219,6 +222,7 @@ AUTH_MAP = {
     "imgbb"          : "Supported",
     "inkbunny"       : "Supported",
     "instagram"      : "Supported",
+    "mangadex"       : "Supported",
     "mangoxo"        : "Supported",
     "mastodon.social": _OAUTH,
     "newgrounds"     : "Supported",

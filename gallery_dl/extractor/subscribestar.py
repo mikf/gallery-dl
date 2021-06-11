@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
 import json
-
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?subscribestar\.(com|adult)"
 
@@ -45,8 +44,8 @@ class SubscribestarExtractor(Extractor):
             yield Message.Directory, data
             for item in media:
                 item.update(data)
-                url = item["url"]
-                yield Message.Url, url, text.nameext_from_url(url, item)
+                text.nameext_from_url(item.get("name") or item["url"], item)
+                yield Message.Url, item["url"], item
 
     def posts(self):
         """Yield HTML content of all relevant posts"""
@@ -105,6 +104,8 @@ class SubscribestarExtractor(Extractor):
                 media.append({
                     "id"  : text.parse_int(text.extract(
                         att, 'data-upload-id="', '"')[0]),
+                    "name": text.unescape(text.extract(
+                        att, 'doc_preview-title">', '<')[0] or ""),
                     "url" : text.extract(att, 'href="', '"')[0],
                     "type": "attachment",
                 })
