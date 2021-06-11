@@ -6,23 +6,16 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from __future__ import unicode_literals, print_function
+import sys
+import json
+import logging
+from . import version, config, option, output, extractor, job, util, exception
 
 __author__ = "Mike Fährmann"
 __copyright__ = "Copyright 2014-2021 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
-
-import sys
-
-if sys.hexversion < 0x3040000:
-    sys.exit("Python 3.4+ required")
-
-import json
-import logging
-from . import version, config, option, output, extractor, job, util, exception
-
 __version__ = version.__version__
 
 
