@@ -7,9 +7,6 @@ import os.path
 import warnings
 from setuptools import setup
 
-if sys.hexversion < 0x3040000:
-    sys.exit("Python 3.4+ required")
-
 
 def read(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
