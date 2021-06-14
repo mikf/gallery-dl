@@ -54,14 +54,16 @@ class SankakuExtractor(BooruExtractor):
     def _prepare(post):
         post["created_at"] = post["created_at"]["s"]
         post["date"] = text.parse_timestamp(post["created_at"])
-        post["tags"] = [tag["name"] for tag in post["tags"]]
+        post["tags"] = [tag["name"] for tag in post["tags"] if tag["name"]]
         post["tag_string"] = " ".join(post["tags"])
 
     def _extended_tags(self, post):
         tags = collections.defaultdict(list)
         types = self.TAG_TYPES
         for tag in post["tags"]:
-            tags[types[tag["type"]]].append(tag["name"])
+            name = tag["name"]
+            if name:
+                tags[types[tag["type"]]].append(name)
         for key, value in tags.items():
             post["tags_" + key] = value
             post["tag_string_" + key] = " ".join(value)
@@ -159,6 +161,15 @@ class SankakuPostExtractor(SankakuExtractor):
         ("https://sankaku.app/post/show/21418978", {
             "pattern": r"https://s\.sankakucomplex\.com"
                        r"/data/13/3c/133cda3bfde249c504284493903fb985\.jpg",
+        }),
+        # empty tags (#1617)
+        ("https://sankaku.app/post/show/20758561", {
+            "options": (("tags", True),),
+            "count": 1,
+            "keyword": {
+                "tags": list,
+                "tags_general": ["key(mangaka)", "key(mangaka)"],
+            },
         }),
         ("https://beta.sankakucomplex.com/post/show/360451"),
         ("https://chan.sankakucomplex.com/post/show/360451"),
