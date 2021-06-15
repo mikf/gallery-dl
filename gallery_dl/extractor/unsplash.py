@@ -172,13 +172,16 @@ class UnsplashFavoriteExtractor(UnsplashExtractor):
 class UnsplashCollectionExtractor(UnsplashExtractor):
     """Extractor for an unsplash collection"""
     subcategory = "collection"
-    pattern = BASE_PATTERN + r"/collections/(\d+)"
-    test = ("https://unsplash.com/collections/3178572/winter", {
-        "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
-                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
-        "range": "1-30",
-        "count": 30,
-    })
+    pattern = BASE_PATTERN + r"/collections/([^/?#]+)"
+    test = (
+        ("https://unsplash.com/collections/3178572/winter", {
+            "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
+                       r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
+            "range": "1-30",
+            "count": 30,
+        }),
+        ("https://unsplash.com/collections/_8qJQ2bCMWE/2021.05"),
+    )
 
     def photos(self):
         url = "{}/napi/collections/{}/photos".format(self.root, self.item)
