@@ -918,7 +918,7 @@ class DeviantartOAuthAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.log = extractor.log
-        self.headers = {}
+        self.headers = {"dA-minor-version": "20200519"}
 
         self.delay = extractor.config("wait-min", 0)
         self.delay_min = max(2, self.delay)

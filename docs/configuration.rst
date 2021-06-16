@@ -1715,7 +1715,7 @@ extractor.twitter.quoted
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Fetch media from quoted Tweets.
 
@@ -1735,7 +1735,7 @@ extractor.twitter.retweets
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Fetch media from Retweets.
 
