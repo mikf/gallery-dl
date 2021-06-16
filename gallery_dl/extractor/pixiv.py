@@ -321,34 +321,30 @@ class PixivFavoriteExtractor(PixivExtractor):
 
     def __init__(self, match):
         uid, kind, self.tag, query = match.groups()
+        query = text.parse_query(query)
 
-        if query:
-            self.query = text.parse_query(query)
-            uid = self.query.get("id")
+        if not uid:
+            uid = query.get("id")
             if not uid:
                 self.subcategory = "bookmark"
-            elif self.query.get("type") == "user":
-                self.subcategory = "following"
-                self.items = self._items_following
-        else:
-            self.query = {}
-            if kind == "following":
-                self.subcategory = "following"
-                self.items = self._items_following
+
+        if kind == "following" or query.get("type") == "user":
+            self.subcategory = "following"
+            self.items = self._items_following
 
         PixivExtractor.__init__(self, match)
+        self.query = query
         self.user_id = uid
 
     def works(self):
         tag = None
-        restrict = "public"
-
         if "tag" in self.query:
             tag = text.unquote(self.query["tag"])
         elif self.tag:
             tag = text.unquote(self.tag)
 
-        if "rest" in self.query and self.query["rest"] == "hide":
+        restrict = "public"
+        if self.query.get("rest") == "hide":
             restrict = "private"
 
         return self.api.user_bookmarks_illust(self.user_id, tag, restrict)
@@ -364,9 +360,11 @@ class PixivFavoriteExtractor(PixivExtractor):
         return {"user_bookmark": user}
 
     def _items_following(self):
-        yield Message.Version, 1
+        restrict = "public"
+        if self.query.get("rest") == "hide":
+            restrict = "private"
 
-        for preview in self.api.user_following(self.user_id):
+        for preview in self.api.user_following(self.user_id, restrict):
             user = preview["user"]
             user["_extractor"] = PixivUserExtractor
             url = "https://www.pixiv.net/users/{}".format(user["id"])
@@ -622,8 +620,8 @@ class PixivAppAPI():
         params = {"user_id": user_id}
         return self._call("v1/user/detail", params)["user"]
 
-    def user_following(self, user_id):
-        params = {"user_id": user_id}
+    def user_following(self, user_id, restrict="public"):
+        params = {"user_id": user_id, "restrict": restrict}
         return self._pagination("v1/user/following", params, "user_previews")
 
     def user_illusts(self, user_id):
