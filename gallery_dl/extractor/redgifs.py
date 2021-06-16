@@ -71,6 +71,6 @@ class RedgifsImageExtractor(RedgifsExtractor):
 
 
 class RedgifsAPI(GfycatAPI):
-    API_ROOT = "https://napi.redgifs.com"
+    API_ROOT = "https://api.redgifs.com"
     ACCESS_KEY = ("dBLwVuGn9eq4dtXLs8WSfpjcYFY7bPQe"
                   "AqGPSFgqeW5B9uzj2cMVhF63pTFF4Rg9")
