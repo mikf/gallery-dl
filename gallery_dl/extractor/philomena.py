@@ -107,11 +107,11 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
                 "source_url": "https://www.deviantart.com/speccysy/art"
                               "/Afternoon-Flight-215193985",
                 "spoilered": False,
-                "tag_count": 37,
+                "tag_count": 38,
                 "tag_ids": list,
                 "tags": list,
                 "thumbnails_generated": True,
-                "updated_at": "2021-04-07T06:01:30Z",
+                "updated_at": "2021-05-28T17:39:38Z",
                 "uploader": "Clover the Clever",
                 "uploader_id": 211188,
                 "upvotes": int,
@@ -149,6 +149,10 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
             "range": "40-60",
             "count": 21,
         }),
+        (("https://derpibooru.org/tags/"
+          "artist-colon--dash-_-fwslash--fwslash-%255Bkorroki%255D_aternak"), {
+            "count": ">= 2",
+        }),
         ("https://ponybooru.org/search?q=cute", {
             "range": "40-60",
             "count": 21,
@@ -159,7 +163,18 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
         PhilomenaExtractor.__init__(self, match)
         groups = match.groups()
         if groups[-1]:
-            self.params = {"q": groups[-1]}
+            q = groups[-1]
+            for old, new in (
+                ("-colon-"  , ":"),
+                ("-dash-"   , "-"),
+                ("-dot-"    , "."),
+                ("-plus-"   , "+"),
+                ("-fwslash-", "/"),
+                ("-bwslash-", "\\"),
+            ):
+                if old in q:
+                    q = q.replace(old, new)
+            self.params = {"q": text.unquote(text.unquote(q))}
         else:
             self.params = text.parse_query(groups[-2])
 
