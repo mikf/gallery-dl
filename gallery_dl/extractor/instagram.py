@@ -120,10 +120,7 @@ class InstagramExtractor(Extractor):
         if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
             if username:
-                self.session.cookies.set(
-                    "ig_cb", "2", domain="www.instagram.com")
                 self._update_cookies(self._login_impl(username, password))
-
         self.session.cookies.set(
             "csrftoken", self.csrf_token, domain=self.cookiedomain)
 
@@ -131,33 +128,42 @@ class InstagramExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        page = self.request(self.root + "/accounts/login/").text
+        url = self.root + "/accounts/login/"
+        page = self.request(url).text
+
         headers = {
-            "Referer"         : self.root + "/accounts/login/",
+            "X-Web-Device-Id" : text.extract(page, '"device_id":"', '"')[0],
             "X-IG-App-ID"     : "936619743392459",
+            "X-ASBD-ID"       : "437806",
+            "X-IG-WWW-Claim"  : "0",
             "X-Requested-With": "XMLHttpRequest",
+            "Referer"         : url,
         }
+        url = self.root + "/data/shared_data/"
+        data = self.request(url, headers=headers).json()
 
-        response = self.request(self.root + "/web/__mid/", headers=headers)
-        headers["X-CSRFToken"] = response.cookies["csrftoken"]
-        headers["X-Instagram-AJAX"] = text.extract(
-            page, '"rollout_hash":"', '"')[0]
-
-        url = self.root + "/accounts/login/ajax/"
+        headers["X-CSRFToken"] = data["config"]["csrf_token"]
+        headers["X-Instagram-AJAX"] = data["rollout_hash"]
+        headers["Origin"] = self.root
         data = {
             "username"     : username,
             "enc_password" : "#PWD_INSTAGRAM_BROWSER:0:{}:{}".format(
                 int(time.time()), password),
-            "queryParams"  : "{}",
-            "optIntoOneTap": "false",
+            "queryParams"         : "{}",
+            "optIntoOneTap"       : "false",
+            "stopDeletionNonce"   : "",
+            "trustedDeviceRecords": "{}",
         }
+        url = self.root + "/accounts/login/ajax/"
         response = self.request(url, method="POST", headers=headers, data=data)
 
         if not response.json().get("authenticated"):
             raise exception.AuthenticationError()
+
+        cget = self.session.cookies.get
         return {
-            key: self.session.cookies.get(key)
-            for key in ("sessionid", "mid", "csrftoken")
+            name: cget(name)
+            for name in ("sessionid", "mid", "ig_did")
         }
 
     def _parse_post_graphql(self, post):
