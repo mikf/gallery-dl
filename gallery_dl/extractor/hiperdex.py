@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,14 +13,13 @@ from .. import text
 from ..cache import memcache
 import re
 
-
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?hiperdex\.(?:com|net|info)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?hiperdex\d?\.(?:com|net|info)"
 
 
 class HiperdexBase():
     """Base class for hiperdex extractors"""
     category = "hiperdex"
-    root = "https://hiperdex.com"
+    root = "https://hiperdex2.com"
 
     @memcache(keyarg=1)
     def manga_data(self, manga, page=None):
@@ -66,8 +65,8 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     """Extractor for manga chapters from hiperdex.com"""
     pattern = BASE_PATTERN + r"(/manga/([^/?#]+)/([^/?#]+))"
     test = (
-        ("https://hiperdex.com/manga/domestic-na-kanojo/154-5/", {
-            "pattern": r"https://hiperdex.(com|net|info)/wp-content/uploads"
+        ("https://hiperdex2.com/manga/domestic-na-kanojo/154-5/", {
+            "pattern": r"https://hiperdex\d?.(com|net|info)/wp-content/uploads"
                        r"/WP-manga/data/manga_\w+/[0-9a-f]{32}/\d+\.webp",
             "count": 9,
             "keyword": {
@@ -107,7 +106,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     chapterclass = HiperdexChapterExtractor
     pattern = BASE_PATTERN + r"(/manga/([^/?#]+))/?$"
     test = (
-        ("https://hiperdex.com/manga/youre-not-that-special/", {
+        ("https://hiperdex2.com/manga/youre-not-that-special/", {
             "count": 51,
             "pattern": HiperdexChapterExtractor.pattern,
             "keyword": {
@@ -159,7 +158,7 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     reverse = False
     pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/([^/?#]+))"
     test = (
-        ("https://hiperdex.com/manga-artist/beck-ho-an/"),
+        ("https://hiperdex2.com/manga-artist/beck-ho-an/"),
         ("https://hiperdex.net/manga-artist/beck-ho-an/"),
         ("https://hiperdex.info/manga-artist/beck-ho-an/"),
         ("https://hiperdex.com/manga-author/viagra/", {
