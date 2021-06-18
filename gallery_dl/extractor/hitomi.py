@@ -35,12 +35,12 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }),
         # Game CG with scenes (#321)
         ("https://hitomi.la/galleries/733697.html", {
-            "url": "ec3fe9b708ee376ec579b90d053ad485c0777552",
+            "url": "8dfbcb1e51cec43a7112d58b7e92153155ada3b9",
             "count": 210,
         }),
         # fallback for galleries only available through /reader/ URLs
         ("https://hitomi.la/galleries/1045954.html", {
-            "url": "bf4ed4e726204da5bc37a236ca476a2a96081388",
+            "url": "a5af7fdca1f5c93c289af128914a8488ea345036",
             "count": 1413,
         }),
         # gallery with "broken" redirect
@@ -140,8 +140,8 @@ class HitomiGalleryExtractor(GalleryExtractor):
 
             # see https://ltn.hitomi.la/common.js
             inum = int(ihash[-3:-1], 16)
-            frontends = 2 if inum < 0x30 else 3
-            inum = 1 if inum < 0x09 else inum
+            frontends = 2 if inum < 0x70 else 3
+            inum = 1 if inum < 0x49 else inum
 
             url = "https://{}b.hitomi.la/images/{}/{}/{}.{}".format(
                 chr(97 + (inum % frontends)),
