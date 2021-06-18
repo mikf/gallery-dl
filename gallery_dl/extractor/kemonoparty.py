@@ -20,8 +20,8 @@ class KemonopartyExtractor(Extractor):
     category = "kemonoparty"
     root = "https://kemono.party"
     directory_fmt = ("{category}", "{service}", "{user}")
-    filename_fmt = "{id}_{title}_{filename}.{extension}"
-    archive_fmt = "{service}_{user}_{id}_{filename}.{extension}"
+    filename_fmt = "{id}_{title}_{num:>02}_{filename}.{extension}"
+    archive_fmt = "{service}_{user}_{id}_{num}"
 
     def items(self):
         find_inline = re.compile(r'src="(/inline/[^"]+)').findall
