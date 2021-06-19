@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util
 
-
 BASE_PATTERN = r"(?:https?://)?(?:www\.|sfw\.)?furaffinity\.net"
 
 
@@ -19,7 +18,7 @@ class FuraffinityExtractor(Extractor):
     """Base class for furaffinity extractors"""
     category = "furaffinity"
     directory_fmt = ("{category}", "{user!l}")
-    filename_fmt = "{id} {title}.{extension}"
+    filename_fmt = "{id}{title:? //}.{extension}"
     archive_fmt = "{id}"
     cookiedomain = ".furaffinity.net"
     root = "https://www.furaffinity.net"
@@ -55,9 +54,6 @@ class FuraffinityExtractor(Extractor):
     def _parse_post(self, post_id):
         url = "{}/view/{}/".format(self.root, post_id)
         extr = text.extract_from(self.request(url).text)
-        title, _, artist = text.unescape(extr(
-            'property="og:title" content="', '"')).rpartition(" by ")
-        artist_url = artist.replace("_", "").lower()
         path = extr('href="//d', '"')
 
         if not path:
@@ -74,18 +70,16 @@ class FuraffinityExtractor(Extractor):
         rh = text.remove_html
 
         data = text.nameext_from_url(path, {
-            "id"        : pi(post_id),
-            "title"     : title,
-            "artist"    : artist,
-            "artist_url": artist_url,
-            "user"      : self.user or artist_url,
-            "url"       : "https://d" + path
+            "id" : pi(post_id),
+            "url": "https://d" + path,
         })
 
         tags = extr('class="tags-row">', '</section>')
         if tags:
             # new site layout
             data["tags"] = text.split_html(tags)
+            data["title"] = text.unescape(extr("<h2><p>", "</p></h2>"))
+            data["artist"] = extr("<strong>", "<")
             data["description"] = self._process_description(extr(
                 'class="section-body">', '</div>'))
             data["views"] = pi(rh(extr('class="views">', '</span>')))
@@ -100,6 +94,8 @@ class FuraffinityExtractor(Extractor):
             data["height"] = pi(extr("", "p"))
         else:
             # old site layout
+            data["title"] = text.unescape(extr("<h2>", "</h2>"))
+            data["artist"] = extr(">", "<")
             data["fa_category"] = extr("<b>Category:</b>", "<").strip()
             data["theme"] = extr("<b>Theme:</b>", "<").strip()
             data["species"] = extr("<b>Species:</b>", "<").strip()
@@ -114,6 +110,9 @@ class FuraffinityExtractor(Extractor):
             data["rating"] = extr('<img alt="', ' ')
             data["description"] = self._process_description(extr(
                 "</table>", "</table>"))
+
+        data["artist_url"] = data["artist"].replace("_", "").lower()
+        data["user"] = self.user or data["artist_url"]
         data["date"] = text.parse_timestamp(data["filename"].partition(".")[0])
 
         return data
