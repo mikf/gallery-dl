@@ -1,6 +1,37 @@
 # Changelog
 
-## Unreleased
+## 1.18.0 - 2021-06-19
+### Additions
+- [foolfuuka] support `archive.wakarimasen.moe` ([#1595](https://github.com/mikf/gallery-dl/issues/1595))
+- [mangadex] implement login with username & password ([#1535](https://github.com/mikf/gallery-dl/issues/1535))
+- [mangadex] add extractor for a user's followed feed ([#1535](https://github.com/mikf/gallery-dl/issues/1535))
+- [pixiv] support fetching privately followed users ([#1628](https://github.com/mikf/gallery-dl/issues/1628))
+- implement conditional filenames ([#1394](https://github.com/mikf/gallery-dl/issues/1394))
+- implement `filter` option for post processors ([#1460](https://github.com/mikf/gallery-dl/issues/1460))
+- add `-T/--terminate` command-line option ([#1399](https://github.com/mikf/gallery-dl/issues/1399))
+- add `-P/--postprocessor` command-line option ([#1583](https://github.com/mikf/gallery-dl/issues/1583))
+### Changes
+- [kemonoparty] update default filenames and archive IDs ([#1514](https://github.com/mikf/gallery-dl/issues/1514))
+- [twitter] update default settings
+  - change `retweets` and `quoted` options from `true` to `false`
+  - change directory format for search results to the same as other extractors
+- require an argument for `--clear-cache`
+### Fixes
+- [500px] update GraphQL queries
+- [furaffinity] improve metadata extraction ([#1630](https://github.com/mikf/gallery-dl/issues/1630))
+- [hitomi] update image URL generation ([#1637](https://github.com/mikf/gallery-dl/issues/1637))
+- [idolcomplex] improve and fix pagination ([#1594](https://github.com/mikf/gallery-dl/issues/1594), [#1601](https://github.com/mikf/gallery-dl/issues/1601))
+- [instagram] fix login ([#1631](https://github.com/mikf/gallery-dl/issues/1631))
+- [instagram] update query hashes
+- [mangadex] update to API v5 ([#1535](https://github.com/mikf/gallery-dl/issues/1535))
+- [mangafox] improve URL pattern ([#1608](https://github.com/mikf/gallery-dl/issues/1608))
+- [oauth] prevent exceptions when reporting errors ([#1603](https://github.com/mikf/gallery-dl/issues/1603))
+- [philomena] fix tag escapes handling ([#1629](https://github.com/mikf/gallery-dl/issues/1629))
+- [redgifs] update API server address ([#1632](https://github.com/mikf/gallery-dl/issues/1632))
+- [sankaku] handle empty tags ([#1617](https://github.com/mikf/gallery-dl/issues/1617))
+- [subscribestar] improve attachment filenames ([#1609](https://github.com/mikf/gallery-dl/issues/1609))
+- [unsplash] update collections URL pattern ([#1627](https://github.com/mikf/gallery-dl/issues/1627))
+- [postprocessor:metadata] handle dicts in `mode:tags` ([#1598](https://github.com/mikf/gallery-dl/issues/1598))
 
 ## 1.17.5 - 2021-05-30
 ### Additions
