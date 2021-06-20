@@ -777,9 +777,20 @@ class PathFormat():
             raise exception.FilenameFormatError(exc)
 
         directory_fmt = config("directory")
-        if directory_fmt is None:
-            directory_fmt = extractor.directory_fmt
         try:
+            if directory_fmt is None:
+                directory_fmt = extractor.directory_fmt
+            elif isinstance(directory_fmt, dict):
+                self.directory_conditions = [
+                    (compile_expression(expr), [
+                        Formatter(fmt, kwdefault).format_map
+                        for fmt in fmts
+                    ])
+                    for expr, fmts in directory_fmt.items() if expr
+                ]
+                self.build_directory = self.build_directory_conditional
+                directory_fmt = directory_fmt.get("", extractor.directory_fmt)
+
             self.directory_formatters = [
                 Formatter(dirfmt, kwdefault).format_map
                 for dirfmt in directory_fmt
@@ -870,29 +881,14 @@ class PathFormat():
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
         self.kwdict = kwdict
-
-        # Build path segments by applying 'kwdict' to directory format strings
-        segments = []
-        append = segments.append
-        try:
-            for formatter in self.directory_formatters:
-                segment = formatter(kwdict).strip()
-                if WINDOWS:
-                    # remove trailing dots and spaces (#647)
-                    segment = segment.rstrip(". ")
-                if segment:
-                    append(self.clean_segment(segment))
-        except Exception as exc:
-            raise exception.DirectoryFormatError(exc)
-
-        # Join path segments
         sep = os.sep
-        directory = self.clean_path(self.basedirectory + sep.join(segments))
 
-        # Ensure 'directory' ends with a path separator
+        segments = self.build_directory(kwdict)
         if segments:
-            directory += sep
-        self.directory = directory
+            self.directory = directory = self.clean_path(
+                self.basedirectory + sep.join(segments) + sep)
+        else:
+            self.directory = directory = self.clean_path(self.basedirectory)
 
         if WINDOWS:
             # Enable longer-than-260-character paths on Windows
@@ -955,6 +951,43 @@ class PathFormat():
             return self.clean_path(self.clean_segment(formatter(kwdict)))
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
+
+    def build_directory(self, kwdict):
+        """Apply 'kwdict' to directory format strings"""
+        segments = []
+        append = segments.append
+
+        try:
+            for formatter in self.directory_formatters:
+                segment = formatter(kwdict).strip()
+                if WINDOWS:
+                    # remove trailing dots and spaces (#647)
+                    segment = segment.rstrip(". ")
+                if segment:
+                    append(self.clean_segment(segment))
+            return segments
+        except Exception as exc:
+            raise exception.DirectoryFormatError(exc)
+
+    def build_directory_conditional(self, kwdict):
+        segments = []
+        append = segments.append
+
+        try:
+            for condition, formatters in self.directory_conditions:
+                if condition(kwdict):
+                    break
+            else:
+                formatters = self.directory_formatters
+            for formatter in formatters:
+                segment = formatter(kwdict).strip()
+                if WINDOWS:
+                    segment = segment.rstrip(". ")
+                if segment:
+                    append(self.clean_segment(segment))
+            return segments
+        except Exception as exc:
+            raise exception.DirectoryFormatError(exc)
 
     def build_path(self):
         """Combine directory and filename to full paths"""

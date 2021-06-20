@@ -60,7 +60,7 @@ extractor.*.filename
 Type
     ``string`` or ``object``
 Example
-    * .. code::
+    * .. code:: json
 
         "{manga}_c{chapter}_{page:>03}.{extension}"
 
@@ -115,11 +115,25 @@ Description
 extractor.*.directory
 ---------------------
 Type
-    ``list`` of ``strings``
+    ``list`` of ``strings`` or ``object``
 Example
-    ``["{category}", "{manga}", "c{chapter} - {title}"]``
+    * .. code:: json
+
+        ["{category}", "{manga}", "c{chapter} - {title}"]
+
+    * .. code:: json
+
+        {
+            "'nature' in content": ["Nature Pictures"],
+            "retweet_id != 0"    : ["{category}", "{user[name]}", "Retweets"],
+            ""                   : ["{category}", "{user[name]}"]
+        }
+
 Description
-    A list of `format strings`_ for the resulting target directory.
+    A list of `format strings`_ to build target directory paths with.
+
+    If this is an ``object``, it must contain Python expressions mapping to the
+    list of format strings to use.
 
     Each individual string in such a list represents a single path
     segment, which will be joined together and appended to the
