@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.18.0 - 2021-06-19
 ### Additions
 - [foolfuuka] support `archive.wakarimasen.moe` ([#1595](https://github.com/mikf/gallery-dl/issues/1595))
