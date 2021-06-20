@@ -804,19 +804,6 @@ class PathFormat():
             self.path = self.realpath = self.temppath = ""
         self.delete = self._create_directory = False
 
-        basedir = extractor._parentdir
-        if not basedir:
-            basedir = config("base-directory")
-            if basedir is None:
-                basedir = "." + os.sep + "gallery-dl" + os.sep
-            elif basedir:
-                basedir = expand_path(basedir)
-                if os.altsep and os.altsep in basedir:
-                    basedir = basedir.replace(os.altsep, os.sep)
-                if basedir[-1] != os.sep:
-                    basedir += os.sep
-        self.basedirectory = basedir
-
         extension_map = config("extension-map")
         if extension_map is None:
             extension_map = self.EXTENSION_MAP
@@ -836,6 +823,22 @@ class PathFormat():
 
         remove = config("path-remove", "\x00-\x1f\x7f")
         self.clean_path = self._build_cleanfunc(remove, "")
+
+        basedir = extractor._parentdir
+        if not basedir:
+            basedir = config("base-directory")
+            sep = os.sep
+            if basedir is None:
+                basedir = "." + sep + "gallery-dl" + sep
+            elif basedir:
+                basedir = expand_path(basedir)
+                altsep = os.altsep
+                if altsep and altsep in basedir:
+                    basedir = basedir.replace(altsep, sep)
+                if basedir[-1] != sep:
+                    basedir += sep
+            basedir = self.clean_path(basedir)
+        self.basedirectory = basedir
 
     @staticmethod
     def _build_cleanfunc(chars, repl):
@@ -885,10 +888,10 @@ class PathFormat():
 
         segments = self.build_directory(kwdict)
         if segments:
-            self.directory = directory = self.clean_path(
-                self.basedirectory + sep.join(segments) + sep)
+            self.directory = directory = self.basedirectory + self.clean_path(
+                sep.join(segments) + sep)
         else:
-            self.directory = directory = self.clean_path(self.basedirectory)
+            self.directory = directory = self.basedirectory
 
         if WINDOWS:
             # Enable longer-than-260-character paths on Windows
