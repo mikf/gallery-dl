@@ -771,6 +771,7 @@ Description
     * ``true``: Original ZIP archives
     * ``false``: Converted video files
 
+
 extractor.danbooru.metadata
 ---------------------------
 Type
@@ -781,6 +782,7 @@ Description
     Extract additional metadata (notes, artist commentary, parent, children)
 
     Note: This requires 1 additional HTTP request for each post.
+
 
 extractor.derpibooru.api-key
 ----------------------------
@@ -1242,6 +1244,27 @@ Default
     ``"https://api.mangadex.org"``
 Description
     The server to use for API requests.
+
+
+extractor.mangadex.lang
+-----------------------
+Type
+    ``string``
+Example
+    ``"en"``
+Description
+    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`_ language code
+    to filter chapters by.
+
+
+extractor.mangadex.metadata
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Provide ``artist``, ``author``, and ``group`` metadata fields.
 
 
 extractor.newgrounds.flash
