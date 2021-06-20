@@ -851,8 +851,8 @@ class PathFormat():
             def func(x, c=chars, r=repl):
                 return x.replace(c, r)
         else:
-            def func(x, sub=re.compile("[" + chars + "]").sub, r=repl):
-                return sub(r, x)
+            return functools.partial(
+                re.compile("[" + chars + "]").sub, repl)
         return func
 
     def open(self, mode="wb"):
