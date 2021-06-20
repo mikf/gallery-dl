@@ -931,17 +931,15 @@ class PathFormat():
                 self.temppath = self.realpath = self.realpath[:-1]
         return True
 
-    def build_filename(self):
+    def build_filename(self, kwdict):
         """Apply 'kwdict' to filename format string"""
         try:
             return self.clean_path(self.clean_segment(
-                self.filename_formatter(self.kwdict)))
+                self.filename_formatter(kwdict)))
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
-    def build_filename_conditional(self):
-        kwdict = self.kwdict
-
+    def build_filename_conditional(self, kwdict):
         try:
             for condition, formatter in self.filename_conditions:
                 if condition(kwdict):
@@ -994,7 +992,7 @@ class PathFormat():
         if self._create_directory:
             os.makedirs(self.realdirectory, exist_ok=True)
             self._create_directory = False
-        self.filename = filename = self.build_filename()
+        self.filename = filename = self.build_filename(self.kwdict)
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
         if not self.temppath:
