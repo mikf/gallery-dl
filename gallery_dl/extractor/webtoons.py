@@ -11,7 +11,7 @@
 from .common import GalleryExtractor, Extractor, Message
 from .. import exception, text, util
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/((en|fr)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/(([^/?#]+)"
 
 
 class WebtoonsBase():
@@ -118,6 +118,9 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
           "list?title_no=210827&page=9"), {
             "count": ">= 18",
         }),
+        # (#1643)
+        ("https://www.webtoons.com/es/romance/lore-olympus/"
+         "list?title_no=1725"),
     )
 
     def __init__(self, match):
