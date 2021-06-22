@@ -559,6 +559,7 @@ class Formatter():
         Replaces all occurrences of <old> with <new>
         Example: {f:R /_/} -> "f_o_o_b_a_r" (if "f" is "f o o b a r")
     """
+    CACHE = {}
     CONVERSIONS = {
         "l": str.lower,
         "u": str.upper,
@@ -575,19 +576,26 @@ class Formatter():
 
     def __init__(self, format_string, default=None):
         self.default = default
-        self.result = []
-        self.fields = []
+        key = (format_string, default)
 
-        for literal_text, field_name, format_spec, conversion in \
-                _string.formatter_parser(format_string):
-            if literal_text:
-                self.result.append(literal_text)
-            if field_name:
-                self.fields.append((
-                    len(self.result),
-                    self._field_access(field_name, format_spec, conversion),
-                ))
-                self.result.append("")
+        try:
+            self.result, self.fields = self.CACHE[key]
+        except KeyError:
+            self.result = []
+            self.fields = []
+
+            for literal_text, field_name, format_spec, conv in \
+                    _string.formatter_parser(format_string):
+                if literal_text:
+                    self.result.append(literal_text)
+                if field_name:
+                    self.fields.append((
+                        len(self.result),
+                        self._field_access(field_name, format_spec, conv),
+                    ))
+                    self.result.append("")
+
+            self.CACHE[key] = (self.result, self.fields)
 
         if len(self.result) == 1:
             if self.fields:
