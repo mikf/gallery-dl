@@ -28,7 +28,8 @@ class KemonopartyExtractor(Extractor):
 
         if self.config("metadata"):
             username = text.unescape(text.extract(
-                self.request(self.user_url).text, "<title>", " | Kemono<")[0])
+                self.request(self.user_url).text, "<title>", " | Kemono"
+            )[0]).lstrip()
         else:
             username = None
 
@@ -132,6 +133,11 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         ("https://kemono.party/gumroad/user/trylsc/post/IURjT", {
             "pattern": r"https://data\.kemono\.party/(file|attachment)s"
                        r"/gumroad/trylsc/IURjT/",
+        }),
+        # username (#1548, #1652)
+        ("https://kemono.party/gumroad/user/3252870377455/post/aJnAH", {
+            "options": (("metadata", True),),
+            "keyword": {"username": "Kudalyn's Creations"},
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
     )
