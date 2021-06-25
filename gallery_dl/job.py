@@ -626,7 +626,7 @@ class UrlJob(Job):
             extr = extractor.find(url)
 
         if extr:
-            self.status |= self.__class__(extr, self).run()
+            self.status |= self.__class__(extr, self, self.depth + 1).run()
         else:
             self._write_unsupported(url)
 
