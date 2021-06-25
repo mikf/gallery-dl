@@ -271,6 +271,7 @@ class TestFormatter(unittest.TestCase):
         "s": " \n\r\tSPACE    ",
         "u": "%27%3C%20/%20%3E%27",
         "t": 1262304000,
+        "dt": datetime.datetime(2010, 1, 1),
         "name": "Name",
         "title1": "Title",
         "title2": "",
@@ -295,6 +296,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{n!S}", "")
         self._run_test("{t!d}", datetime.datetime(2010, 1, 1))
         self._run_test("{t!d:%Y-%m-%d}", "2010-01-01")
+        self._run_test("{dt!T}", "1262304000")
 
         with self.assertRaises(KeyError):
             self._run_test("{a!q}", "hello world")
@@ -600,6 +602,11 @@ class TestOther(unittest.TestCase):
         self.assertEqual(f([1])  , "1")
         self.assertEqual(f(["a", "b", "c"]), "a, b, c")
         self.assertEqual(f([1, 2, 3]), "1, 2, 3")
+
+    def test_to_timestamp(self, f=util.to_timestamp):
+        self.assertEqual(f(util.EPOCH), "0")
+        self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
+        self.assertEqual(f(None), "")
 
     def test_universal_none(self):
         obj = util.NONE

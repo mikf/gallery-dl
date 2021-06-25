@@ -145,6 +145,14 @@ def to_string(value):
     return str(value)
 
 
+def to_timestamp(dt):
+    """Convert naive datetime to UTC timestamp string"""
+    try:
+        return str((dt - EPOCH) // SECOND)
+    except Exception:
+        return ""
+
+
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
     """Serialize 'obj' as JSON and write it to 'fp'"""
     json.dump(
@@ -370,6 +378,8 @@ class UniversalNone():
 
 
 NONE = UniversalNone()
+EPOCH = datetime.datetime(1970, 1, 1)
+SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
@@ -536,6 +546,7 @@ class Formatter():
     - "d": calls text.parse_timestamp
     - "U": calls urllib.parse.unquote
     - "S": calls util.to_string()
+    - "T": calls util.to_timestamü()
     - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
 
     Extra Format Specifiers:
@@ -566,6 +577,7 @@ class Formatter():
         "c": str.capitalize,
         "C": string.capwords,
         "t": str.strip,
+        "T": to_timestamp,
         "d": text.parse_timestamp,
         "U": urllib.parse.unquote,
         "S": to_string,
