@@ -174,8 +174,7 @@ class Extractor():
         elif until:
             if isinstance(until, datetime.datetime):
                 # convert to UTC timestamp
-                epoch = datetime.datetime(1970, 1, 1)
-                until = (until - epoch) / datetime.timedelta(0, 1)
+                until = (until - util.EPOCH) / util.SECOND
             else:
                 until = float(until)
             seconds = until - now
