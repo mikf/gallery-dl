@@ -90,6 +90,7 @@ CATEGORY_MAP = {
     "sankakucomplex" : "Sankaku Complex",
     "seaotterscans"  : "Sea Otter Scans",
     "seiga"          : "Niconico Seiga",
+    "seisoparty"     : "Seiso",
     "senmanga"       : "Sen Manga",
     "sensescans"     : "Sense-Scans",
     "sexcom"         : "Sex.com",

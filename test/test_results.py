@@ -317,6 +317,8 @@ def setup_test_config():
 
     config.set(("extractor", "kemonoparty"), "cookies", {
         "__ddg1": "0gBDGpJ3KZQmA4B9QH25", "__ddg2": "lmj5s1jnJOvhPXCX"})
+    config.set(("extractor", "seisoparty"), "cookies", {
+        "__ddg1": "Y8rBxSDHO5UCEtQvzyI9", "__ddg2": "lmj5s1jnJOvhPXCX"})
 
     config.set(("extractor", "mastodon.social"), "access-token",
                "Blf9gVqG7GytDTfVMiyYQjwVMQaNACgf3Ds3IxxVDUQ")
