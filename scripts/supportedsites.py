@@ -68,6 +68,7 @@ CATEGORY_MAP = {
     "mangakakalot"   : "MangaKakalot",
     "manganelo"      : "Manganato",
     "mangapark"      : "MangaPark",
+    "mangasee"       : "MangaSee",
     "mangastream"    : "Manga Stream",
     "mastodon.social": "mastodon.social",
     "myhentaigallery": "My Hentai Gallery",
