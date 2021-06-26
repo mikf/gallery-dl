@@ -74,6 +74,7 @@ modules = [
     "mangakakalot",
     "manganelo",
     "mangapark",
+    "mangasee",
     "mangoxo",
     "myhentaigallery",
     "myportfolio",
