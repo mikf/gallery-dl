@@ -25,7 +25,7 @@ class SeisopartyExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user_name = None
         self._find_files = re.compile(
-            r'href="(https://cdn\.seiso\.party/files/[^"]+)').findall
+            r'href="(https://cdn(?:-\d)?\.seiso\.party/files/[^"]+)').findall
 
     def items(self):
         for post in self.posts():
@@ -114,6 +114,10 @@ class SeisopartyPostExtractor(SeisopartyExtractor):
                 "user": "21",
                 "username": "雨",
             },
+        }),
+        ("https://seiso.party/post/patreon/429/95949", {
+            "pattern": r"https://cdn-2\.seiso\.party/files/patreon/95949/",
+            "count": 2,
         }),
     )
 
