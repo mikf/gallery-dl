@@ -17,7 +17,7 @@ class SeisopartyExtractor(Extractor):
     """Base class for seisoparty extractors"""
     category = "seisoparty"
     root = "https://seiso.party"
-    directory_fmt = ("{category}", "{service}", "{user}")
+    directory_fmt = ("{category}", "{service}", "{username}")
     filename_fmt = "{id}_{title}_{num:>02}_{filename}.{extension}"
     archive_fmt = "{service}_{user}_{id}_{num}"
 
