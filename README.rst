@@ -5,7 +5,7 @@ gallery-dl
 *gallery-dl* is a command-line program to download image galleries and
 collections from several image hosting sites (see `Supported Sites`_).
 It is a cross-platform tool with many configuration options
-and powerful filenaming capabilities.
+and powerful `filenaming capabilities <Formatting_>`_.
 
 
 |pypi| |build| |gitter|
@@ -322,6 +322,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md
+.. _Formatting:              https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
 
 .. _Python:     https://www.python.org/downloads/
 .. _PyPI:       https://pypi.org/

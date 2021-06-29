@@ -482,7 +482,7 @@ Default
     ``"None"``
 Description
     Default value used for missing or undefined keyword names in
-    format strings.
+    `format strings`_.
 
 
 extractor.*.category-transfer
@@ -542,7 +542,9 @@ Type
 Example
     ``"{id}_{offset}"``
 Description
-    An alternative `format string`_ to build archive IDs with.
+    An alternative `format string`__ to build archive IDs with.
+
+.. __: https://docs.python.org/3/library/string.html#format-string-syntax
 
 
 extractor.*.postprocessors
@@ -708,7 +710,7 @@ Description
 
 
 extractor.*.date-format
-----------------------------
+-----------------------
 Type
     ``string``
 Default
@@ -3028,13 +3030,13 @@ Description
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
 .. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects
 .. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
-.. _format string:      https://docs.python.org/3/library/string.html#formatstrings
-.. _format strings:     https://docs.python.org/3/library/string.html#formatstrings
 .. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _webbrowser.open():  https://docs.python.org/3/library/webbrowser.html
 .. _mature_content:     https://www.deviantart.com/developers/http/v1/20160316/object/deviation
 .. _Authentication:     https://github.com/mikf/gallery-dl#authentication
 .. _OAuth:              https://github.com/mikf/gallery-dl#oauth
+.. _format string:      https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
+.. _format strings:     https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
 .. _youtube-dl:         https://github.com/ytdl-org/youtube-dl
 .. _requests.request(): https://requests.readthedocs.io/en/master/api/#requests.request
 .. _timeout:            https://requests.readthedocs.io/en/master/user/advanced/#timeouts
