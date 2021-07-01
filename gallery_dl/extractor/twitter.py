@@ -709,7 +709,7 @@ class TwitterAPI():
     def _guest_token(self):
         root = "https://api.twitter.com"
         endpoint = "/1.1/guest/activate.json"
-        return self._call(endpoint, None, root, "POST")["guest_token"]
+        return str(self._call(endpoint, None, root, "POST")["guest_token"])
 
     def _call(self, endpoint, params, root=None, method="GET"):
         if root is None:
