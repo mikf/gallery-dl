@@ -13,13 +13,13 @@ from .. import text
 from ..cache import memcache
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?hiperdex\d?\.(?:com|net|info)"
+BASE_PATTERN = r"((?:https?://)?(?:www\.)?hiperdex\d?\.(?:com|net|info))"
 
 
 class HiperdexBase():
     """Base class for hiperdex extractors"""
     category = "hiperdex"
-    root = "https://hiperdex2.com"
+    root = "https://hiperdex.com"
 
     @memcache(keyarg=1)
     def manga_data(self, manga, page=None):
@@ -65,7 +65,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     """Extractor for manga chapters from hiperdex.com"""
     pattern = BASE_PATTERN + r"(/manga/([^/?#]+)/([^/?#]+))"
     test = (
-        ("https://hiperdex2.com/manga/domestic-na-kanojo/154-5/", {
+        ("https://hiperdex.com/manga/domestic-na-kanojo/154-5/", {
             "pattern": r"https://hiperdex\d?.(com|net|info)/wp-content/uploads"
                        r"/WP-manga/data/manga_\w+/[0-9a-f]{32}/\d+\.webp",
             "count": 9,
@@ -82,12 +82,14 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
                 "type"   : "Manga",
             },
         }),
+        ("https://hiperdex2.com/manga/domestic-na-kanojo/154-5/"),
         ("https://hiperdex.net/manga/domestic-na-kanojo/154-5/"),
         ("https://hiperdex.info/manga/domestic-na-kanojo/154-5/"),
     )
 
     def __init__(self, match):
-        path, self.manga, self.chapter = match.groups()
+        root, path, self.manga, self.chapter = match.groups()
+        self.root = text.ensure_http_scheme(root)
         ChapterExtractor.__init__(self, match, self.root + path + "/")
 
     def metadata(self, _):
@@ -106,7 +108,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     chapterclass = HiperdexChapterExtractor
     pattern = BASE_PATTERN + r"(/manga/([^/?#]+))/?$"
     test = (
-        ("https://hiperdex2.com/manga/youre-not-that-special/", {
+        ("https://hiperdex.com/manga/youre-not-that-special/", {
             "count": 51,
             "pattern": HiperdexChapterExtractor.pattern,
             "keyword": {
@@ -123,12 +125,14 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
                 "type"   : "Manhwa",
             },
         }),
+        ("https://hiperdex2.com/manga/youre-not-that-special/"),
         ("https://hiperdex.net/manga/youre-not-that-special/"),
         ("https://hiperdex.info/manga/youre-not-that-special/"),
     )
 
     def __init__(self, match):
-        path, self.manga = match.groups()
+        root, path, self.manga = match.groups()
+        self.root = text.ensure_http_scheme(root)
         MangaExtractor.__init__(self, match, self.root + path + "/")
 
     def chapters(self, page):
@@ -156,10 +160,10 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     categorytransfer = False
     chapterclass = HiperdexMangaExtractor
     reverse = False
-    pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/([^/?#]+))"
+    pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/(?:[^/?#]+))"
     test = (
-        ("https://hiperdex2.com/manga-artist/beck-ho-an/"),
         ("https://hiperdex.net/manga-artist/beck-ho-an/"),
+        ("https://hiperdex2.com/manga-artist/beck-ho-an/"),
         ("https://hiperdex.info/manga-artist/beck-ho-an/"),
         ("https://hiperdex.com/manga-author/viagra/", {
             "pattern": HiperdexMangaExtractor.pattern,
@@ -168,7 +172,8 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     )
 
     def __init__(self, match):
-        MangaExtractor.__init__(self, match, self.root + match.group(1) + "/")
+        self.root = text.ensure_http_scheme(match.group(1))
+        MangaExtractor.__init__(self, match, self.root + match.group(2) + "/")
 
     def chapters(self, page):
         results = []
