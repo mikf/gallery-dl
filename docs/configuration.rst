@@ -1269,6 +1269,16 @@ Description
     Provide ``artist``, ``author``, and ``group`` metadata fields.
 
 
+extractor.mastodon.text-posts
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Also emit metadata for text-only posts without media content.
+
+
 extractor.newgrounds.flash
 --------------------------
 Type
