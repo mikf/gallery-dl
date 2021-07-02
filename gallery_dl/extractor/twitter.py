@@ -484,8 +484,9 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("retweets", "original"),),
             "count": 2,
             "keyword": {
-                "tweet_id": 1296296016002547713,
-                "date"    : "dt:2020-08-20 04:00:28",
+                "tweet_id"  : 1296296016002547713,
+                "retweet_id": 1296296016002547713,
+                "date"      : "dt:2020-08-20 04:00:28",
             },
         }),
         # all Tweets from a conversation (#1319)
@@ -806,6 +807,7 @@ class TwitterAPI():
                     if original_retweets:
                         if not retweet:
                             continue
+                        retweet["retweeted_status_id_str"] = retweet["id_str"]
                         retweet["_retweet_id_str"] = tweet["id_str"]
                         tweet = retweet
                     elif retweet:
