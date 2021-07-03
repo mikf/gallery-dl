@@ -8,8 +8,12 @@
 
 """Extractors for from https://fanfox.net/"""
 
-from .common import ChapterExtractor
+from .common import ChapterExtractor, MangaExtractor
 from .. import text
+import re
+
+BASE_PATTERN = \
+    r"(?:https?://)?(?:www\.|m\.)?(?:fanfox\.net|mangafox\.me)"
 
 
 class MangafoxChapterExtractor(ChapterExtractor):
@@ -60,3 +64,60 @@ class MangafoxChapterExtractor(ChapterExtractor):
 
             pnum += 2
             page = self.request("{}/{}.html".format(self.urlbase, pnum)).text
+
+
+class MangafoxMangaExtractor(MangaExtractor):
+    """Extractor for manga from fanfox.net"""
+    category = "mangafox"
+    root = "https://m.fanfox.net"
+    chapterclass = MangafoxChapterExtractor
+    pattern = BASE_PATTERN + r"(/manga/[^/]+)$"
+    test = (
+        ("https://fanfox.net/manga/kanojo_mo_kanojo", {
+            "pattern": MangafoxChapterExtractor.pattern,
+            "count": ">=60",
+        }),
+        ("https://mangafox.me/manga/shangri_la_frontier", {
+            "pattern": MangafoxChapterExtractor.pattern,
+            "count": ">=45",
+        }),
+        ("https://m.fanfox.net/manga/sentai_daishikkaku"),
+    )
+
+    def __init__(self, match):
+        MangaExtractor.__init__(self, match)
+
+    def chapters(self, page):
+        results = []
+        data = self.parse_page(page, {"lang": "en", "language": "English"})
+
+        pos = page.index('<dd class="chlist">')
+        while True:
+            url, pos = text.extract(page, '<a href="//', '"', pos)
+            if url == 'mangafox.la?f=mobile':
+                return results
+            info, pos = text.extract(page, '>', '<span', pos)
+            date, pos = text.extract(page, 'right">', '</span>', pos)
+
+            match = re.match(r"Ch (\d+)(\S*)(?: (.*))?", text.unescape(info))
+            if match:
+                chapter, minor, _ = match.groups()
+                chapter_minor = minor
+            else:
+                chapter, _, minor = url[:-7].rpartition("/c")[2].partition(".")
+                chapter_minor = "." + minor
+
+            data["chapter"] = text.parse_int(chapter)
+            data["chapter_minor"] = chapter_minor if minor else ""
+            data["date"] = date
+            results.append(("https://" + url, data.copy()))
+
+    @staticmethod
+    def parse_page(page, data):
+        """Parse metadata on 'page' and add it to 'data'"""
+        text.extract_all(page, (
+            ("manga"  , '<p class="title">', '</p>'),
+            ("author" , '<p>Author(s):', '</p>'),
+        ), values=data)
+        data["author"] = text.remove_html(data["author"])
+        return data
