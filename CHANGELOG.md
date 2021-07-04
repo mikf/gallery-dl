@@ -1,6 +1,24 @@
 # Changelog
 
-## Unreleased
+## 1.18.1 - 2021-07-04
+### Additions
+- [mangafox] add `manga` extractor ([#1633](https://github.com/mikf/gallery-dl/issues/1633))
+- [mangasee] add `chapter` and `manga` extractors
+- [mastodon] implement `text-posts` option ([#1569](https://github.com/mikf/gallery-dl/issues/1569), [#1669](https://github.com/mikf/gallery-dl/issues/1669))
+- [seisoparty] add `user` and `post` extractors ([#1635](https://github.com/mikf/gallery-dl/issues/1635))
+- implement conditional directories ([#1394](https://github.com/mikf/gallery-dl/issues/1394))
+- add `T` format string conversion ([#1646](https://github.com/mikf/gallery-dl/issues/1646))
+- document format string syntax
+### Changes
+- [twitter] set `retweet_id` for original retweets ([#1481](https://github.com/mikf/gallery-dl/issues/1481))
+### Fixes
+- [directlink] manually encode Referer URLs ([#1647](https://github.com/mikf/gallery-dl/issues/1647))
+- [hiperdex] use domain from input URL
+- [kemonoparty] fix `username` extraction ([#1652](https://github.com/mikf/gallery-dl/issues/1652))
+- [kemonoparty] warn about missing DDoS-GUARD cookies
+- [twitter] ensure guest tokens are returned as string ([#1665](https://github.com/mikf/gallery-dl/issues/1665))
+- [webtoons] match arbitrary language codes ([#1643](https://github.com/mikf/gallery-dl/issues/1643))
+- fix depth counter in UrlJob when specifying `-g` multiple times
 
 ## 1.18.0 - 2021-06-19
 ### Additions
