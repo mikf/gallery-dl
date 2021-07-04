@@ -6,21 +6,21 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for from https://fanfox.net/"""
+"""Extractors for https://fanfox.net/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 import re
 
-BASE_PATTERN = \
-    r"(?:https?://)?(?:www\.|m\.)?(?:fanfox\.net|mangafox\.me)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|m\.)?(?:fanfox\.net|mangafox\.me)"
 
 
 class MangafoxChapterExtractor(ChapterExtractor):
-    """Extractor for manga-chapters from fanfox.net"""
+    """Extractor for manga chapters from fanfox.net"""
     category = "mangafox"
-    pattern = (r"(?:https?://)?(?:www\.|m\.)?(?:fanfox\.net|mangafox\.me)"
-               r"(/manga/[^/]+/((?:v([^/?#]+)/)?c(\d+)([^/?#]*)))")
+    root = "https://m.fanfox.net"
+    pattern = BASE_PATTERN + \
+        r"(/manga/[^/?#]+/((?:v([^/?#]+)/)?c(\d+)([^/?#]*)))"
     test = (
         ("http://fanfox.net/manga/kidou_keisatsu_patlabor/v05/c006.2/1.html", {
             "keyword": "5661dab258d42d09d98f194f7172fb9851a49766",
@@ -29,7 +29,6 @@ class MangafoxChapterExtractor(ChapterExtractor):
         ("http://mangafox.me/manga/kidou_keisatsu_patlabor/v05/c006.2/"),
         ("http://fanfox.net/manga/black_clover/vTBD/c295/1.html"),
     )
-    root = "https://m.fanfox.net"
 
     def __init__(self, match):
         base, self.cstr, self.volume, self.chapter, self.minor = match.groups()
@@ -71,7 +70,7 @@ class MangafoxMangaExtractor(MangaExtractor):
     category = "mangafox"
     root = "https://m.fanfox.net"
     chapterclass = MangafoxChapterExtractor
-    pattern = BASE_PATTERN + r"(/manga/[^/]+)$"
+    pattern = BASE_PATTERN + r"(/manga/[^/?#]+)/?$"
     test = (
         ("https://fanfox.net/manga/kanojo_mo_kanojo", {
             "pattern": MangafoxChapterExtractor.pattern,
@@ -84,13 +83,18 @@ class MangafoxMangaExtractor(MangaExtractor):
         ("https://m.fanfox.net/manga/sentai_daishikkaku"),
     )
 
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match)
-
     def chapters(self, page):
-        results = []
-        data = self.parse_page(page, {"lang": "en", "language": "English"})
+        match_info = re.compile(r"Ch (\d+)(\S*)(?: (.*))?").match
+        manga, pos = text.extract(page, '<p class="title">', '</p>')
+        author, pos = text.extract(page, '<p>Author(s):', '</p>', pos)
+        data = {
+            "manga"   : text.unescape(manga),
+            "author"  : text.remove_html(author),
+            "lang"    : "en",
+            "language": "English",
+        }
 
+        results = []
         pos = page.index('<dd class="chlist">')
         while True:
             url, pos = text.extract(page, '<a href="//', '"', pos)
@@ -99,9 +103,9 @@ class MangafoxMangaExtractor(MangaExtractor):
             info, pos = text.extract(page, '>', '<span', pos)
             date, pos = text.extract(page, 'right">', '</span>', pos)
 
-            match = re.match(r"Ch (\d+)(\S*)(?: (.*))?", text.unescape(info))
+            match = match_info(text.unescape(info))
             if match:
-                chapter, minor, _ = match.groups()
+                chapter, minor, title = match.groups()
                 chapter_minor = minor
             else:
                 chapter, _, minor = url[:-7].rpartition("/c")[2].partition(".")
@@ -111,13 +115,3 @@ class MangafoxMangaExtractor(MangaExtractor):
             data["chapter_minor"] = chapter_minor if minor else ""
             data["date"] = date
             results.append(("https://" + url, data.copy()))
-
-    @staticmethod
-    def parse_page(page, data):
-        """Parse metadata on 'page' and add it to 'data'"""
-        text.extract_all(page, (
-            ("manga"  , '<p class="title">', '</p>'),
-            ("author" , '<p>Author(s):', '</p>'),
-        ), values=data)
-        data["author"] = text.remove_html(data["author"])
-        return data

@@ -400,7 +400,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Manga Fox</td>
     <td>https://fanfox.net/</td>
-    <td>Chapters</td>
+    <td>Chapters, Manga</td>
     <td></td>
 </tr>
 <tr>
