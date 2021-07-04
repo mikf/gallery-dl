@@ -140,8 +140,8 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
     test = (
         ("https://www.subscribestar.com/subscribestar", {
             "count": ">= 20",
-            "pattern": r"https://star-uploads.s\d+-us-west-\d+.amazonaws.com"
-                       r"/uploads/users/11/",
+            "pattern": r"https://(star-uploads|ss-uploads-prod)\.s\d+-us-west-"
+                       r"\d+\.amazonaws\.com/uploads(_v2)?/users/11/",
             "keyword": {
                 "author_id": 11,
                 "author_name": "subscribestar",

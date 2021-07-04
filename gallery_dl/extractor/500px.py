@@ -140,7 +140,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
         }),
         # unavailable photos (#1335)
         ("https://500px.com/p/Light_Expression_Photography/galleries/street", {
-            "count": 0,
+            "count": 4,
         }),
         ("https://500px.com/fashvamp/galleries/lera"),
     )

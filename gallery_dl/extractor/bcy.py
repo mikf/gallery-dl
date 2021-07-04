@@ -173,9 +173,8 @@ class BcyPostExtractor(BcyExtractor):
         ("https://bcy.net/item/detail/6950136331708144648", {
             "pattern": r"https://p\d-bcy.byteimg.com/img/banciyuan/[0-9a-f]+"
                        r"~tplv-banciyuan-logo-v3:.+\.image",
-            "count": 10,
-            "keyword": {"filter": "watermark"}
-
+            "count": 8,
+            "keyword": {"filter": "watermark"},
         }),
         # deleted
         ("https://bcy.net/item/detail/6780546160802143236", {
