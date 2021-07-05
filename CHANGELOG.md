@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.18.1 - 2021-07-04
 ### Additions
 - [mangafox] add `manga` extractor ([#1633](https://github.com/mikf/gallery-dl/issues/1633))
