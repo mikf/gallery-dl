@@ -27,7 +27,13 @@ class MastodonExtractor(BaseExtractor):
         self.item = match.group(match.lastindex)
 
     def items(self):
+        reblogs = self.config("reblogs", False)
+
         for status in self.statuses():
+            if not reblogs and status["reblog"]:
+                self.log.debug("Skipping %s (reblog)", status["id"])
+                continue
+
             attachments = status["media_attachments"]
             del status["media_attachments"]
 
