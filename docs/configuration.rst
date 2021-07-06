@@ -1269,6 +1269,16 @@ Description
     Provide ``artist``, ``author``, and ``group`` metadata fields.
 
 
+extractor.mastodon.reblogs
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract media from reblogged posts.
+
+
 extractor.mastodon.text-posts
 -----------------------------
 Type
