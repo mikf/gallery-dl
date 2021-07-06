@@ -1276,7 +1276,17 @@ Type
 Default
     ``false``
 Description
-    Extract media from reblogged posts.
+    Fetch media from reblogged posts.
+
+
+extractor.mastodon.replies
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Fetch media from replies to other posts.
 
 
 extractor.mastodon.text-posts

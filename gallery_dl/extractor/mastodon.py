@@ -25,13 +25,17 @@ class MastodonExtractor(BaseExtractor):
         BaseExtractor.__init__(self, match)
         self.instance = self.root.partition("://")[2]
         self.item = match.group(match.lastindex)
+        self.reblogs = self.config("reblogs", False)
+        self.replies = self.config("replies", True)
 
     def items(self):
-        reblogs = self.config("reblogs", False)
-
         for status in self.statuses():
-            if not reblogs and status["reblog"]:
+
+            if not self.reblogs and status["reblog"]:
                 self.log.debug("Skipping %s (reblog)", status["id"])
+                continue
+            if not self.replies and status["in_reply_to_id"]:
+                self.log.debug("Skipping %s (reply)", status["id"])
                 continue
 
             attachments = status["media_attachments"]
@@ -110,7 +114,10 @@ class MastodonUserExtractor(MastodonExtractor):
             raise exception.NotFoundError("account")
 
         return api.account_statuses(
-            account["id"], not self.config("text-posts", False))
+            account["id"],
+            only_media=not self.config("text-posts", False),
+            exclude_replies=not self.replies,
+        )
 
 
 class MastodonStatusExtractor(MastodonExtractor):
@@ -164,10 +171,12 @@ class MastodonAPI():
         params = {"q": query, "limit": limit}
         return self._call(endpoint, params).json()
 
-    def account_statuses(self, account_id, only_media=True):
+    def account_statuses(self, account_id, only_media=True,
+                         exclude_replies=False):
         """Fetch an account's statuses"""
         endpoint = "/v1/accounts/{}/statuses".format(account_id)
-        params = {"only_media": "1"} if only_media else None
+        params = {"only_media"     : "1" if only_media else "0",
+                  "exclude_replies": "1" if exclude_replies else "0"}
         return self._pagination(endpoint, params)
 
     def status(self, status_id):
