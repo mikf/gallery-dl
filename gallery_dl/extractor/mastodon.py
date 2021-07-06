@@ -208,6 +208,7 @@ class MastodonAPI():
             if not url:
                 return
             url = url["url"]
+            params = None
 
 
 @cache(maxage=100*365*24*3600, keyarg=0)
