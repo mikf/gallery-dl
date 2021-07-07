@@ -143,8 +143,8 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
     https = False
 
     def get_info(self, page):
-        url = text.extract(page, "SRC='", "'")[0]
-        return text.urljoin(self.page_url, url), url
+        url = 'https://cdno-data' + text.extract(page, 'cdno-data', '"')[0]
+        return url, url
 
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):
