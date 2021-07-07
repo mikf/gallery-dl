@@ -6,10 +6,10 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images and ugoira from https://www.pixiv.net/"""
+"""Extractors for https://www.pixiv.net/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 from datetime import datetime, timedelta
 import itertools
@@ -515,6 +515,48 @@ class PixivFollowExtractor(PixivExtractor):
     def metadata(self):
         self.api.login()
         return {"user_follow": self.api.user}
+
+
+class PixivPixivisionExtractor(PixivExtractor):
+    """Extractor for illustrations from a pixivision article"""
+    subcategory = "pixivision"
+    directory_fmt = ("{category}", "pixivision",
+                     "{pixivision_id} {pixivision_title}")
+    archive_fmt = "V{pixivision_id}_{id}{suffix}.{extension}"
+    pattern = r"(?:https?://)?(?:www\.)?pixivision\.net/(?:en/)?a/(\d+)"
+    test = (
+        ("https://www.pixivision.net/en/a/2791"),
+        ("https://pixivision.net/a/2791", {
+            "count": 7,
+            "keyword": {
+                "pixivision_id": "2791",
+                "pixivision_title": "What's your favorite music? Editor’s "
+                                    "picks featuring: “CD Covers”!",
+            },
+        }),
+    )
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self, match)
+        self.pixivision_id = match.group(1)
+
+    def works(self):
+        return (
+            self.api.illust_detail(illust_id)
+            for illust_id in util.unique_sequence(text.extract_iter(
+                self.page, '<a href="https://www.pixiv.net/en/artworks/', '"'))
+        )
+
+    def metadata(self):
+        url = "https://www.pixivision.net/en/a/" + self.pixivision_id
+        headers = {"User-Agent": "Mozilla/5.0"}
+        self.page = self.request(url, headers=headers).text
+
+        title = text.extract(self.page, '<title>', ' - pixivision<')[0]
+        return {
+            "pixivision_id"   : self.pixivision_id,
+            "pixivision_title": text.unescape(title),
+        }
 
 
 class PixivAppAPI():

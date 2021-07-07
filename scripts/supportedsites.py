@@ -166,6 +166,7 @@ SUBCATEGORY_MAP = {
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
+        "pixivision": "pixivision",
         "work": "individual Images",
     },
     "sankaku": {
