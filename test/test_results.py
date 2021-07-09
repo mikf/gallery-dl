@@ -22,7 +22,6 @@ from gallery_dl import extractor, util, job, config, exception  # noqa E402
 
 # temporary issues, etc.
 BROKEN = {
-    "imagevenue",
     "photobucket",
 }
 
