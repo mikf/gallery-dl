@@ -82,24 +82,30 @@ class KemonopartyExtractor(Extractor):
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/?(?:$|[?#])"
+    pattern = BASE_PATTERN + r"/?(?:\?o=(\d+))?(?:$|[?#])"
     test = (
         ("https://kemono.party/fanbox/user/6993449", {
             "range": "1-25",
             "count": 25,
+        }),
+        # 'max-posts' option, 'o' query parameter (#1674)
+        ("https://kemono.party/patreon/user/881792?o=150", {
+            "options": (("max-posts", 25),),
+            "count": "< 100",
         }),
         ("https://kemono.party/subscribestar/user/alcorart"),
     )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        service, user_id = match.groups()
+        service, user_id, offset = match.groups()
         self.api_url = "{}/api/{}/user/{}".format(self.root, service, user_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
+        self.offset = text.parse_int(offset)
 
     def posts(self):
         url = self.api_url
-        params = {"o": 0}
+        params = {"o": self.offset}
 
         while True:
             posts = self.request(url, params=params).json()
