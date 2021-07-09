@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import itertools
 import re
 
 BASE_PATTERN = r"(?:https?://)?kemono\.party/([^/?#]+)/user/([^/?#]+)"
@@ -40,7 +41,12 @@ class KemonopartyExtractor(Extractor):
         else:
             username = None
 
-        for post in self.posts():
+        posts = self.posts()
+        max_posts = self.config("max-posts")
+        if max_posts:
+            posts = itertools.islice(posts, max_posts)
+
+        for post in posts:
 
             files = []
             append = files.append

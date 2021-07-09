@@ -1212,6 +1212,16 @@ Description
     Download video files.
 
 
+extractor.kemonoparty.max-posts
+-------------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Limit the number of posts to download.
+
+
 extractor.kemonoparty.metadata
 ------------------------------
 Type
