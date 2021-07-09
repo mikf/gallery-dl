@@ -133,18 +133,30 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
 class ImagevenueImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagevenue.com"""
     category = "imagevenue"
-    pattern = (r"(?:https?://)?(img\d+\.imagevenue\.com"
-               r"/img\.php\?image=(?:[a-z]+_)?(\d+)_[^&#]+)")
-    test = (("http://img28116.imagevenue.com/img.php"
-             "?image=th_52709_test_122_64lo.jpg"), {
-        "url": "46812995d557f2c6adf0ebd0e631e6e4e45facde",
-        "content": "59ec819cbd972dd9a71f25866fbfc416f2f215b3",
-    })
-    https = False
+    pattern = (r"(?:https?://)?((?:www|img\d+)\.imagevenue\.com"
+               r"/([A-Z0-9]{8,10}|view/.*|img\.php\?.*))")
+    test = (
+        ("https://www.imagevenue.com/ME13LS07", {
+            "pattern": r"https://cdn-images\.imagevenue\.com"
+                       r"/10/ac/05/ME13LS07_o\.png",
+            "keyword": "ae15d6e3b2095f019eee84cd896700cd34b09c36",
+            "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
+        }),
+        (("https://www.imagevenue.com/view/o?i=92518_13732377"
+          "annakarina424200712535AM_122_486lo.jpg&h=img150&l=loc486"), {
+            "url": "8bf0254e29250d8f5026c0105bbdda3ee3d84980",
+        }),
+        (("http://img28116.imagevenue.com/img.php"
+          "?image=th_52709_test_122_64lo.jpg"), {
+            "url": "f98e3091df7f48a05fb60fbd86f789fc5ec56331",
+        }),
+    )
 
     def get_info(self, page):
-        url = text.extract(page, "SRC='", "'")[0]
-        return text.urljoin(self.page_url, url), url
+        pos = page.index('class="card-body')
+        url, pos = text.extract(page, '<img src="', '"', pos)
+        filename, pos = text.extract(page, 'alt="', '"', pos)
+        return url, text.unescape(filename)
 
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):
