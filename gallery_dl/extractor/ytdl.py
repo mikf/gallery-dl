@@ -56,7 +56,13 @@ class YoutubeDLExtractor(Extractor):
             options["logger"] = self.log
         options["extract_flat"] = "in_playlist"
 
+        username, password = self._get_auth_info()
+        if username:
+            options["username"], options["password"] = username, password
+        del username, password
+
         ytdl = self.ytdl_module.YoutubeDL(options)
+        ytdl.cookiejar = self.session.cookies
 
         # extract youtube_dl info_dict
         info_dict = ytdl._YoutubeDL__extract_info(
