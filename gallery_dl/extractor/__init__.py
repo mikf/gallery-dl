@@ -143,6 +143,7 @@ modules = [
     "recursive",
     "oauth",
     "test",
+    "ytdl",
 ]
 
 

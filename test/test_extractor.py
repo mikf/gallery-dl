@@ -147,7 +147,7 @@ class TestExtractorModule(unittest.TestCase):
             return c.capitalize()
 
         for extr in extractor.extractors():
-            if extr.category not in ("", "oauth"):
+            if extr.category not in ("", "oauth", "ytdl"):
                 expected = "{}{}Extractor".format(
                     capitalize(extr.category),
                     capitalize(extr.subcategory),

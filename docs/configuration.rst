@@ -1955,6 +1955,72 @@ Description
     Download video files.
 
 
+extractor.ytdl.enabled
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Match **all** URLs, even ones without a ``ytdl:`` prefix.
+
+
+extractor.ytdl.format
+---------------------
+Type
+    ``string``
+Default
+    youtube-dl's default, currently ``"bestvideo+bestaudio/best"``
+Description
+    Video `format selection
+    <https://github.com/ytdl-org/youtube-dl#format-selection>`__
+    directly passed to youtube-dl.
+
+
+extractor.ytdl.logging
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Route youtube-dl's output through gallery-dl's logging system.
+    Otherwise youtube-dl will write its output directly to stdout/stderr.
+
+    Note: Set ``quiet`` and ``no_warnings`` in
+    `extractor.ytdl.raw-options`_ to ``true`` to suppress all output.
+
+
+extractor.ytdl.module
+---------------------
+Type
+    ``string``
+Default
+    ``"youtube_dl"``
+Description
+    Name of the youtube-dl Python module to import.
+
+
+extractor.ytdl.raw-options
+--------------------------
+Type
+    ``object``
+Example
+    .. code:: json
+
+        {
+            "quiet": true,
+            "writesubtitles": true,
+            "merge_output_format": "mkv"
+        }
+
+Description
+    Additional options passed directly to the ``YoutubeDL`` constructor.
+
+    All available options can be found in `youtube-dl's docstrings
+    <https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
+
+
 extractor.[booru].tags
 ----------------------
 Type
@@ -1967,6 +2033,7 @@ Description
 
     Note: This requires 1 additional HTTP request for each post.
 
+
 extractor.[booru].notes
 -----------------------
 Type
@@ -1977,6 +2044,7 @@ Description
     Extract overlay notes (position and text).
 
     Note: This requires 1 additional HTTP request for each post.
+
 
 extractor.[manga-extractor].chapter-reverse
 -------------------------------------------

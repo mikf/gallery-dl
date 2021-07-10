@@ -254,6 +254,7 @@ IGNORE_LIST = (
     "oauth",
     "recursive",
     "test",
+    "ytdl",
 )
 
 
