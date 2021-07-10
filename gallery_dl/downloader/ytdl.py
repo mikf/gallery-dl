@@ -41,7 +41,10 @@ class YoutubeDLDownloader(DownloaderBase):
             "max_filesize": text.parse_bytes(
                 self.config("filesize-max"), None),
         }
-        options.update(self.config("raw-options") or {})
+
+        raw_options = self.config("raw-options")
+        if raw_options:
+            options.update(raw_options)
 
         if self.config("logging", True):
             options["logger"] = self.log
@@ -59,19 +62,22 @@ class YoutubeDLDownloader(DownloaderBase):
             for cookie in self.session.cookies:
                 set_cookie(cookie)
 
-        try:
-            info_dict = self.ytdl.extract_info(url[5:], download=False)
-        except Exception:
-            return False
+        kwdict = pathfmt.kwdict
+        info_dict = kwdict.pop("_ytdl_info_dict", None)
+        if not info_dict:
+            try:
+                info_dict = self.ytdl.extract_info(url[5:], download=False)
+            except Exception:
+                return False
 
         if "entries" in info_dict:
-            index = pathfmt.kwdict.get("_ytdl_index")
+            index = kwdict.get("_ytdl_index")
             if index is None:
                 return self._download_playlist(pathfmt, info_dict)
             else:
                 info_dict = info_dict["entries"][index]
 
-        extra = pathfmt.kwdict.get("_ytdl_extra")
+        extra = kwdict.get("_ytdl_extra")
         if extra:
             info_dict.update(extra)
 
@@ -121,6 +127,7 @@ class YoutubeDLDownloader(DownloaderBase):
 
 
 def compatible_formats(formats):
+    """Returns True if 'formats' are compatible for merge"""
     video_ext = formats[0].get("ext")
     audio_ext = formats[1].get("ext")
 
