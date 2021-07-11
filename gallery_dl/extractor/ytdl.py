@@ -9,7 +9,7 @@
 """Extractors for sites supported by youtube-dl"""
 
 from .common import Extractor, Message
-from .. import config
+from .. import config, exception
 
 
 class YoutubeDLExtractor(Extractor):
@@ -31,10 +31,18 @@ class YoutubeDLExtractor(Extractor):
 
         # find suitable youtube_dl extractor
         self.ytdl_url = url = match.group(1)
-        for ie in module.extractor.gen_extractor_classes():
-            if ie.suitable(url):
-                self.ytdl_ie = ie
-                break
+        generic = config.interpolate(("extractor", "ytdl"), "generic", True)
+        if generic == "force":
+            self.ytdl_ie = ie = module.extractor.GenericIE
+            self.force_generic_extractor = True
+        else:
+            for ie in module.extractor.gen_extractor_classes():
+                if ie.suitable(url):
+                    self.ytdl_ie = ie
+                    break
+            if not generic and ie == module.extractor.GenericIE:
+                raise exception.NoExtractorError()
+            self.force_generic_extractor = False
 
         # set subcategory to youtube_dl extractor's key
         self.subcategory = ie.ie_key()
@@ -47,6 +55,7 @@ class YoutubeDLExtractor(Extractor):
             "socket_timeout": self._timeout,
             "nocheckcertificate": not self._verify,
             "proxy": self.session.proxies.get("http"),
+            "force_generic_extractor": self.force_generic_extractor,
         }
 
         raw_options = self.config("raw-options")

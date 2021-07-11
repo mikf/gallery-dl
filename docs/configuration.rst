@@ -1977,6 +1977,19 @@ Description
     directly passed to youtube-dl.
 
 
+extractor.ytdl.generic
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Controls the use of youtube-dl's generic extractor.
+
+    Set this option to ``"force"`` for the same effect as youtube-dl's
+    ``--force-generic-extractor``.
+
+
 extractor.ytdl.logging
 ----------------------
 Type
