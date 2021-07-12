@@ -18,15 +18,17 @@ class YoutubeDLExtractor(Extractor):
     directory_fmt = ("{category}", "{subcategory}")
     filename_fmt = "{title}-{id}.{extension}"
     archive_fmt = "{extractor_key} {id}"
-    ytdl_module = None
     pattern = r"ytdl:(.*)"
     test = ("ytdl:https://www.youtube.com/watch?v=BaW_jenozKc&t=1s&end=9",)
+    ytdl_module = None
+    ytdl_module_name = None
 
     def __init__(self, match):
-        # import youtube_dl module
+        # import main youtube_dl module
         module = self.ytdl_module
         if not module:
-            name = config.get(("extractor", "ytdl"), "module") or "youtube_dl"
+            name = YoutubeDLExtractor.ytdl_module_name = config.get(
+                ("extractor", "ytdl"), "module") or "youtube_dl"
             module = YoutubeDLExtractor.ytdl_module = __import__(name)
 
         # find suitable youtube_dl extractor
@@ -49,6 +51,14 @@ class YoutubeDLExtractor(Extractor):
         Extractor.__init__(self, match)
 
     def items(self):
+        # check subcategory module; import and use if needed
+        name = config.get(("extractor", "ytdl", self.subcategory), "module")
+        if name and name != self.ytdl_module_name:
+            ytdl_module = __import__(name)
+        else:
+            ytdl_module = self.ytdl_module
+        self.log.debug("Using %s", ytdl_module)
+
         # construct YoutubeDL object
         options = {
             "format": self.config("format"),
@@ -70,7 +80,7 @@ class YoutubeDLExtractor(Extractor):
             options["username"], options["password"] = username, password
         del username, password
 
-        ytdl = self.ytdl_module.YoutubeDL(options)
+        ytdl = ytdl_module.YoutubeDL()
         ytdl.cookiejar = self.session.cookies
 
         # extract youtube_dl info_dict
