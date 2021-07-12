@@ -81,7 +81,13 @@ class YoutubeDLExtractor(Extractor):
         del username, password
 
         ytdl = ytdl_module.YoutubeDL()
-        ytdl.cookiejar = self.session.cookies
+
+        # transfer cookies to ytdl
+        cookies = self.session.cookies
+        if cookies:
+            set_cookie = self.ytdl.cookiejar.set_cookie
+            for cookie in self.session.cookies:
+                set_cookie(cookie)
 
         # extract youtube_dl info_dict
         info_dict = ytdl._YoutubeDL__extract_info(
