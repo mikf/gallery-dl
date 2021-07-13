@@ -20,43 +20,37 @@ class YoutubeDLExtractor(Extractor):
     archive_fmt = "{extractor_key} {id}"
     pattern = r"ytdl:(.*)"
     test = ("ytdl:https://www.youtube.com/watch?v=BaW_jenozKc&t=1s&end=9",)
-    ytdl_module = None
-    ytdl_module_name = None
 
     def __init__(self, match):
         # import main youtube_dl module
-        module = self.ytdl_module
-        if not module:
-            name = YoutubeDLExtractor.ytdl_module_name = config.get(
-                ("extractor", "ytdl"), "module") or "youtube_dl"
-            module = YoutubeDLExtractor.ytdl_module = __import__(name)
+        module_name = self.ytdl_module_name = config.get(
+            ("extractor", "ytdl"), "module") or "youtube_dl"
+        module = __import__(module_name)
 
         # find suitable youtube_dl extractor
         self.ytdl_url = url = match.group(1)
         generic = config.interpolate(("extractor", "ytdl"), "generic", True)
         if generic == "force":
-            self.ytdl_ie = ie = module.extractor.GenericIE
+            self.ytdl_ie_key = "Generic"
             self.force_generic_extractor = True
         else:
             for ie in module.extractor.gen_extractor_classes():
                 if ie.suitable(url):
-                    self.ytdl_ie = ie
+                    self.ytdl_ie_key = ie.ie_key()
                     break
-            if not generic and ie == module.extractor.GenericIE:
+            if not generic and self.ytdl_ie_key == "Generic":
                 raise exception.NoExtractorError()
             self.force_generic_extractor = False
 
         # set subcategory to youtube_dl extractor's key
-        self.subcategory = ie.ie_key()
+        self.subcategory = self.ytdl_ie_key
         Extractor.__init__(self, match)
 
     def items(self):
-        # check subcategory module; import and use if needed
-        name = config.get(("extractor", "ytdl", self.subcategory), "module")
-        if name and name != self.ytdl_module_name:
-            ytdl_module = __import__(name)
-        else:
-            ytdl_module = self.ytdl_module
+        # import subcategory module
+        ytdl_module = __import__(
+            config.get(("extractor", "ytdl", self.subcategory), "module") or
+            self.ytdl_module_name)
         self.log.debug("Using %s", ytdl_module)
 
         # construct YoutubeDL object
@@ -92,7 +86,7 @@ class YoutubeDLExtractor(Extractor):
         # extract youtube_dl info_dict
         info_dict = ytdl._YoutubeDL__extract_info(
             self.ytdl_url,
-            ytdl.get_info_extractor(self.ytdl_ie.ie_key()),
+            ytdl.get_info_extractor(self.ytdl_ie_key),
             False, {}, True)
 
         if "entries" in info_dict:
