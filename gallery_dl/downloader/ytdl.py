@@ -15,13 +15,9 @@ import os
 
 class YoutubeDLDownloader(DownloaderBase):
     scheme = "ytdl"
-    module = None
 
     def __init__(self, job):
-        module = self.module
-        if not module:
-            module_name = self.config("module") or "youtube_dl"
-            module = YoutubeDLDownloader.module = __import__(module_name)
+        module = __import__(self.config("module") or "youtube_dl")
 
         DownloaderBase.__init__(self, job)
         extractor = job.extractor
