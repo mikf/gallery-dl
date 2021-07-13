@@ -165,11 +165,23 @@ Description
 extractor.*.parent-metadata
 ---------------------------
 Type
-    ``bool``
+    ``bool`` or ``string``
 Default
     ``false``
 Description
-    Overwrite any metadata provided by a child extractor with its parent's.
+    If ``true``, overwrite any metadata provided by a child extractor
+    with its parent's.
+
+    | If this is a ``string``, add a parent's metadata to its children's
+      to a field named after said string.
+    | For example with ``"parent-metadata": "_p_"``:
+
+    .. code:: json
+
+        {
+            "id": "child-id",
+            "_p_": {"id": "parent-id"}
+        }
 
 
 extractor.*.parent-skip
