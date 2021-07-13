@@ -51,15 +51,20 @@ class KemonopartyExtractor(Extractor):
             files = []
             append = files.append
             file = post["file"]
+            got_attachment = False
 
             if file:
                 file["type"] = "file"
                 append(file)
             for attachment in post["attachments"]:
                 attachment["type"] = "attachment"
+                got_attachment = True
                 append(attachment)
             for path in find_inline(post["content"] or ""):
                 append({"path": path, "name": path, "type": "inline"})
+                
+            if got_attachment:
+                files = files[1:] # ignore the first file if there are attachments
 
             post["date"] = text.parse_datetime(
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
