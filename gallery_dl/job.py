@@ -33,6 +33,7 @@ class Job():
         self.pathfmt = None
         self.kwdict = {}
         self.status = 0
+        self.url_key = extr.config("url-metadata")
 
         self._logger_extra = {
             "job"      : self,
@@ -57,7 +58,7 @@ class Job():
             extr.session.adapters = pextr.session.adapters
 
         # user-supplied metadata
-        kwdict = self.extractor.config("keywords")
+        kwdict = extr.config("keywords")
         if kwdict:
             self.kwdict.update(kwdict)
 
@@ -107,6 +108,8 @@ class Job():
         """Call the appropriate message handler"""
         if msg[0] == Message.Url:
             _, url, kwds = msg
+            if self.url_key:
+                kwds[self.url_key] = url
             if self.pred_url(url, kwds):
                 self.update_kwdict(kwds)
                 self.handle_url(url, kwds)
@@ -117,6 +120,8 @@ class Job():
 
         elif msg[0] == Message.Queue:
             _, url, kwds = msg
+            if self.url_key:
+                kwds[self.url_key] = url
             if self.pred_queue(url, kwds):
                 self.handle_queue(url, kwds)
 
