@@ -302,11 +302,18 @@ class DownloadJob(Job):
             else:
                 extr._parentdir = pextr._parentdir
 
-            if pextr.config("parent-metadata"):
-                if self.kwdict:
-                    job.kwdict.update(self.kwdict)
-                if kwdict:
-                    job.kwdict.update(kwdict)
+            pmeta = pextr.config("parent-metadata")
+            if pmeta:
+                if isinstance(pmeta, str):
+                    data = self.kwdict.copy()
+                    if kwdict:
+                        data.update(kwdict)
+                    job.kwdict[pmeta] = data
+                else:
+                    if self.kwdict:
+                        job.kwdict.update(self.kwdict)
+                    if kwdict:
+                        job.kwdict.update(kwdict)
 
             if pextr.config("parent-skip"):
                 job._skipcnt = self._skipcnt
