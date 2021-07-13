@@ -63,7 +63,7 @@ class KemonopartyExtractor(Extractor):
             for path in find_inline(post["content"] or ""):
                 append({"path": path, "name": path, "type": "inline"})
                 
-            if got_attachment:
+            if post["service"] == "patreon" and got_attachment:
                 files = files[1:] # ignore the first file if there are attachments
 
             post["date"] = text.parse_datetime(
