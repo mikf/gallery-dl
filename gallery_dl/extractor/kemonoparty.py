@@ -51,9 +51,11 @@ class KemonopartyExtractor(Extractor):
             files = []
             append = files.append
             file = post["file"]
-            got_attachment = False
+            
+            # issue 1667 - patreon posts duplicate their main image in the attachments (sometimes)
+            should_skip_main_file = post["service"] == "patreon" and not post["attachments"]
 
-            if file:
+            if file and not should_skip_main_file:
                 file["type"] = "file"
                 append(file)
             for attachment in post["attachments"]:
@@ -62,9 +64,6 @@ class KemonopartyExtractor(Extractor):
                 append(attachment)
             for path in find_inline(post["content"] or ""):
                 append({"path": path, "name": path, "type": "inline"})
-                
-            if post["service"] == "patreon" and got_attachment:
-                files = files[1:] # ignore the first file if there are attachments
 
             post["date"] = text.parse_datetime(
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
