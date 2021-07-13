@@ -60,7 +60,6 @@ class KemonopartyExtractor(Extractor):
                 append(file)
             for attachment in post["attachments"]:
                 attachment["type"] = "attachment"
-                got_attachment = True
                 append(attachment)
             for path in find_inline(post["content"] or ""):
                 append({"path": path, "name": path, "type": "inline"})
