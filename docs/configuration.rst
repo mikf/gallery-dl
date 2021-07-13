@@ -194,6 +194,16 @@ Description
     Share number of skipped downloads between parent and child extractors.
 
 
+extractor.*.url-metadata
+------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert a file's download URL into its metadata dictionary as the given name.
+
+
 extractor.*.path-restrict
 -------------------------
 Type
