@@ -376,7 +376,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/gallery(?:/all|/?\?catpath=)?/?$"
+    pattern = BASE_PATTERN + r"/gallery(?:/all/?|/?\?(?:q|catpath)=.*)?$"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery/", {
             "pattern": r"https://(api-da\.wixmp\.com/_api/download/file"
