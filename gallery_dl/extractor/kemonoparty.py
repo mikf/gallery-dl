@@ -51,9 +51,11 @@ class KemonopartyExtractor(Extractor):
             files = []
             append = files.append
             file = post["file"]
-            
-            # issue 1667 - patreon posts duplicate their main image in the attachments (sometimes)
-            should_skip_main_file = post["service"] == "patreon" and not post["attachments"]
+
+            # issue 1667 - patreon posts duplicate their main image
+            # in the attachments (sometimes)
+            should_skip_main_file = post["service"] == "patreon" \
+            and not post["attachments"]
 
             if file and not should_skip_main_file:
                 file["type"] = "file"
