@@ -130,6 +130,7 @@ modules = [
     "webtoons",
     "weibo",
     "wikiart",
+    "wikieat",
     "xhamster",
     "xvideos",
     "booru",
