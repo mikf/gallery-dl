@@ -1270,6 +1270,19 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.luscious.gif
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Format in which to download animated images.
+
+    Use ``true`` to download animated images as gifs and ``false`` 
+    to download as mp4 videos.
+
+
 extractor.mangadex.api-server
 -----------------------------
 Type
@@ -1556,6 +1569,19 @@ Default
     ``false``
 Description
     Also search Plurk comments for URLs.
+
+
+extractor.reactor.gif
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Format in which to download animated images.
+
+    Use ``true`` to download animated images as gifs and ``false`` 
+    to download as mp4 videos.
 
 
 extractor.readcomiconline.captcha
