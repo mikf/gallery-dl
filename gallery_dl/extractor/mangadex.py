@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
+from ..version import __version__
 from collections import defaultdict
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
@@ -27,6 +28,7 @@ class MangadexExtractor(Extractor):
     archive_fmt = "{chapter_id}_{page}"
     root = "https://mangadex.org"
     _cache = {}
+    _headers = {"User-Agent": "gallery-dl/" + __version__}
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -116,6 +118,7 @@ class MangadexChapterExtractor(MangadexExtractor):
         yield Message.Directory, data
 
         cattributes = chapter["data"]["attributes"]
+        data["_http_headers"] = self._headers
         base = "{}/data/{}/".format(
             self.api.athome_server(self.uuid)["baseUrl"], cattributes["hash"])
         for data["page"], page in enumerate(cattributes["data"], 1):
@@ -170,7 +173,7 @@ class MangadexAPI():
 
     def __init__(self, extr):
         self.extractor = extr
-        self.headers = {}
+        self.headers = extr._headers.copy()
 
         self.username, self.password = self.extractor._get_auth_info()
         if not self.username:
