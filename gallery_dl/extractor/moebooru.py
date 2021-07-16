@@ -32,7 +32,7 @@ class MoebooruExtractor(BooruExtractor):
         html = text.extract(page, '<ul id="tag-', '</ul>')[0]
         if html:
             tags = collections.defaultdict(list)
-            pattern = re.compile(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"']+)")
+            pattern = re.compile(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'+]+)")
             for tag_type, tag_name in pattern.findall(html):
                 tags[tag_type].append(text.unquote(tag_name))
             for key, value in tags.items():
