@@ -88,7 +88,7 @@ class YoutubeDLDownloader(DownloaderBase):
             info_dict["ext"] = "mkv"
 
         if self.outtmpl:
-            self.ytdl.params["outtmpl"] = self.outtmpl
+            self._set_outtmpl(self.outtmpl)
             pathfmt.filename = filename = self.ytdl.prepare_filename(info_dict)
             pathfmt.extension = info_dict["ext"]
             pathfmt.path = pathfmt.directory + filename
@@ -103,7 +103,8 @@ class YoutubeDLDownloader(DownloaderBase):
         if self.part and self.partdir:
             pathfmt.temppath = os.path.join(
                 self.partdir, pathfmt.filename)
-        self.ytdl.params["outtmpl"] = pathfmt.temppath.replace("%", "%%")
+
+        self._set_outtmpl(pathfmt.temppath.replace("%", "%%"))
 
         self.out.start(pathfmt.path)
         try:
@@ -115,11 +116,17 @@ class YoutubeDLDownloader(DownloaderBase):
 
     def _download_playlist(self, pathfmt, info_dict):
         pathfmt.set_extension("%(playlist_index)s.%(ext)s")
-        self.ytdl.params["outtmpl"] = pathfmt.realpath
+        self._set_outtmpl(pathfmt.realpath)
 
         for entry in info_dict["entries"]:
             self.ytdl.process_info(entry)
         return True
+
+    def _set_outtmpl(self, outtmpl):
+        try:
+            self.ytdl.outtmpl_dict["default"] = outtmpl
+        except AttributeError:
+            self.ytdl.params["outtmpl"] = outtmpl
 
 
 def compatible_formats(formats):
