@@ -53,23 +53,27 @@ class YoutubeDLDownloader(DownloaderBase):
         self.ytdl = module.YoutubeDL(options)
 
     def download(self, url, pathfmt):
-        if self.forward_cookies:
-            set_cookie = self.ytdl.cookiejar.set_cookie
-            for cookie in self.session.cookies:
-                set_cookie(cookie)
-
         kwdict = pathfmt.kwdict
+
+        ytdl = kwdict.pop("_ytdl_instance", None)
+        if not ytdl:
+            ytdl = self.ytdl
+            if self.forward_cookies:
+                set_cookie = ytdl.cookiejar.set_cookie
+                for cookie in self.session.cookies:
+                    set_cookie(cookie)
+
         info_dict = kwdict.pop("_ytdl_info_dict", None)
         if not info_dict:
             try:
-                info_dict = self.ytdl.extract_info(url[5:], download=False)
+                info_dict = ytdl.extract_info(url[5:], download=False)
             except Exception:
                 return False
 
         if "entries" in info_dict:
             index = kwdict.get("_ytdl_index")
             if index is None:
-                return self._download_playlist(pathfmt, info_dict)
+                return self._download_playlist(ytdl, pathfmt, info_dict)
             else:
                 info_dict = info_dict["entries"][index]
 
@@ -77,9 +81,9 @@ class YoutubeDLDownloader(DownloaderBase):
         if extra:
             info_dict.update(extra)
 
-        return self._download_video(pathfmt, info_dict)
+        return self._download_video(ytdl, pathfmt, info_dict)
 
-    def _download_video(self, pathfmt, info_dict):
+    def _download_video(self, ytdl, pathfmt, info_dict):
         if "url" in info_dict:
             text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
 
@@ -88,8 +92,8 @@ class YoutubeDLDownloader(DownloaderBase):
             info_dict["ext"] = "mkv"
 
         if self.outtmpl:
-            self._set_outtmpl(self.outtmpl)
-            pathfmt.filename = filename = self.ytdl.prepare_filename(info_dict)
+            self._set_outtmpl(ytdl, self.outtmpl)
+            pathfmt.filename = filename = ytdl.prepare_filename(info_dict)
             pathfmt.extension = info_dict["ext"]
             pathfmt.path = pathfmt.directory + filename
             pathfmt.realpath = pathfmt.temppath = (
@@ -104,29 +108,30 @@ class YoutubeDLDownloader(DownloaderBase):
             pathfmt.temppath = os.path.join(
                 self.partdir, pathfmt.filename)
 
-        self._set_outtmpl(pathfmt.temppath.replace("%", "%%"))
+        self._set_outtmpl(ytdl, pathfmt.temppath.replace("%", "%%"))
 
         self.out.start(pathfmt.path)
         try:
-            self.ytdl.process_info(info_dict)
+            ytdl.process_info(info_dict)
         except Exception:
             self.log.debug("Traceback", exc_info=True)
             return False
         return True
 
-    def _download_playlist(self, pathfmt, info_dict):
+    def _download_playlist(self, ytdl, pathfmt, info_dict):
         pathfmt.set_extension("%(playlist_index)s.%(ext)s")
-        self._set_outtmpl(pathfmt.realpath)
+        self._set_outtmpl(ytdl, pathfmt.realpath)
 
         for entry in info_dict["entries"]:
-            self.ytdl.process_info(entry)
+            ytdl.process_info(entry)
         return True
 
-    def _set_outtmpl(self, outtmpl):
+    @staticmethod
+    def _set_outtmpl(ytdl, outtmpl):
         try:
-            self.ytdl.outtmpl_dict["default"] = outtmpl
+            ytdl.outtmpl_dict["default"] = outtmpl
         except AttributeError:
-            self.ytdl.params["outtmpl"] = outtmpl
+            ytdl.params["outtmpl"] = outtmpl
 
 
 def compatible_formats(formats):
