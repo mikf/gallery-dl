@@ -9,7 +9,7 @@
 """Extractors for sites supported by youtube-dl"""
 
 from .common import Extractor, Message
-from .. import config, exception
+from .. import text, config, exception
 
 
 class YoutubeDLExtractor(Extractor):
@@ -55,11 +55,20 @@ class YoutubeDLExtractor(Extractor):
 
         # construct YoutubeDL object
         options = {
-            "format": self.config("format"),
-            "socket_timeout": self._timeout,
-            "nocheckcertificate": not self._verify,
-            "proxy": self.session.proxies.get("http"),
+            "format"                 : self.config("format"),
+            "retries"                : self._retries,
+            "socket_timeout"         : self._timeout,
+            "nocheckcertificate"     : not self._verify,
+            "proxy"                  : self.session.proxies.get("http"),
             "force_generic_extractor": self.force_generic_extractor,
+            "nopart"                 : not self.config("part", True),
+            "updatetime"             : self.config("mtime", True),
+            "ratelimit"              : text.parse_bytes(
+                self.config("rate"), None),
+            "min_filesize"           : text.parse_bytes(
+                self.config("filesize-min"), None),
+            "max_filesize"           : text.parse_bytes(
+                self.config("filesize-max"), None),
         }
 
         raw_options = self.config("raw-options")
@@ -98,6 +107,7 @@ class YoutubeDLExtractor(Extractor):
         for info_dict in results:
             info_dict["extension"] = None
             info_dict["_ytdl_info_dict"] = info_dict
+            info_dict["_ytdl_instance"] = ytdl
 
             url = "ytdl:" + (info_dict.get("url") or
                              info_dict.get("webpage_url") or
