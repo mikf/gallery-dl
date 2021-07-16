@@ -74,7 +74,7 @@ class YoutubeDLExtractor(Extractor):
             options["username"], options["password"] = username, password
         del username, password
 
-        ytdl = ytdl_module.YoutubeDL()
+        ytdl = ytdl_module.YoutubeDL(options)
 
         # transfer cookies to ytdl
         cookies = self.session.cookies
