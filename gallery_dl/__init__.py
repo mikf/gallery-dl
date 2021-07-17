@@ -127,6 +127,8 @@ def main():
         # extractor modules
         modules = config.get(("extractor",), "modules")
         if modules is not None:
+            if isinstance(modules, str):
+                modules = modules.split(",")
             extractor.modules = modules
             extractor._module_iter = iter(modules)
 
