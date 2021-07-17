@@ -49,7 +49,7 @@ class InstagramExtractor(Extractor):
             if "__typename" in post:
                 post = self._parse_post_graphql(post)
             else:
-                post = self._parse_post_reel(post)
+                post = self._parse_post_api(post)
             post.update(data)
             files = post.pop("_files")
 
@@ -239,16 +239,23 @@ class InstagramExtractor(Extractor):
 
         return data
 
-    def _parse_post_reel(self, post):
+    def _parse_post_api(self, post):
 
         if "media" in post:
             media = post["media"]
             owner = media["user"]
-            post["items"] = (media,)
             data = {
                 "post_id" : media["pk"],
                 "post_shortcode": self._shortcode_from_id(media["pk"]),
             }
+
+            if "carousel_media" in media:
+                post["items"] = media["carousel_media"]
+                data["sidecar_media_id"] = data["post_id"]
+                data["sidecar_shortcode"] = data["post_shortcode"]
+            else:
+                post["items"] = (media,)
+
         else:
             reel_id = str(post["id"]).rpartition(":")[2]
             owner = post["user"]
@@ -279,9 +286,11 @@ class InstagramExtractor(Extractor):
 
             files.append({
                 "num"        : num,
-                "date"       : text.parse_timestamp(item["taken_at"]),
+                "date"       : text.parse_timestamp(item.get("taken_at") or
+                                                    media.get("taken_at")),
                 "media_id"   : item["pk"],
-                "shortcode"  : item["code"],
+                "shortcode"  : (item.get("code") or
+                                self._shortcode_from_id(item["pk"])),
                 "display_url": image["url"],
                 "video_url"  : video["url"] if video else None,
                 "width"      : media["width"],
@@ -485,17 +494,41 @@ class InstagramTagExtractor(InstagramExtractor):
     })
 
     def metadata(self):
-        return {"tag": self.item}
+        return {"tag": text.unquote(self.item)}
 
     def posts(self):
         url = "{}/explore/tags/{}/".format(self.root, self.item)
-        data = self._extract_shared_data(url)
-        hashtag = data["entry_data"]["TagPage"][0]["graphql"]["hashtag"]
+        page = self._extract_shared_data(url)["entry_data"]["TagPage"][0]
 
+        if "data" in page:
+            return self._pagination_sections(page["data"]["recent"])
+
+        hashtag = page["graphql"]["hashtag"]
         query_hash = "9b498c08113f1e09617a1703c22b2f32"
         variables = {"tag_name": hashtag["name"], "first": 50}
         edge = self._get_edge_data(hashtag, "edge_hashtag_to_media")
         return self._pagination_graphql(query_hash, variables, edge)
+
+    def _pagination_sections(self, info):
+        endpoint = "/v1/tags/instagram/sections/"
+        data = {
+            "include_persistent": "0",
+            "max_id" : None,
+            "page"   : None,
+            "surface": "grid",
+            "tab"    : "recent",
+        }
+
+        while True:
+            for section in info["sections"]:
+                yield from section["layout_content"]["medias"]
+
+            if not info.get("more_available"):
+                return
+
+            data["max_id"] = info["next_max_id"]
+            data["page"] = info["next_page"]
+            info = self._request_api(endpoint, method="POST", data=data)
 
     def _pagination_graphql(self, query_hash, variables, data):
         while True:
@@ -619,7 +652,7 @@ class InstagramPostExtractor(InstagramExtractor):
     )
 
     def posts(self):
-        query_hash = "971f52b26328008c768b7d8e4ac9ce3c"
+        query_hash = "1f950d414a6e11c98c556aa007b3157d"
         variables = {
             "shortcode"            : self.item,
             "child_comment_count"  : 3,
