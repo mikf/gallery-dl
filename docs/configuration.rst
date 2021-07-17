@@ -60,7 +60,7 @@ extractor.*.filename
 Type
     ``string`` or ``object``
 Example
-    * .. code::
+    * .. code:: json
 
         "{manga}_c{chapter}_{page:>03}.{extension}"
 
@@ -115,11 +115,25 @@ Description
 extractor.*.directory
 ---------------------
 Type
-    ``list`` of ``strings``
+    ``list`` of ``strings`` or ``object``
 Example
-    ``["{category}", "{manga}", "c{chapter} - {title}"]``
+    * .. code:: json
+
+        ["{category}", "{manga}", "c{chapter} - {title}"]
+
+    * .. code:: json
+
+        {
+            "'nature' in content": ["Nature Pictures"],
+            "retweet_id != 0"    : ["{category}", "{user[name]}", "Retweets"],
+            ""                   : ["{category}", "{user[name]}"]
+        }
+
 Description
-    A list of `format strings`_ for the resulting target directory.
+    A list of `format strings`_ to build target directory paths with.
+
+    If this is an ``object``, it must contain Python expressions mapping to the
+    list of format strings to use.
 
     Each individual string in such a list represents a single path
     segment, which will be joined together and appended to the
@@ -151,11 +165,23 @@ Description
 extractor.*.parent-metadata
 ---------------------------
 Type
-    ``bool``
+    ``bool`` or ``string``
 Default
     ``false``
 Description
-    Overwrite any metadata provided by a child extractor with its parent's.
+    If ``true``, overwrite any metadata provided by a child extractor
+    with its parent's.
+
+    | If this is a ``string``, add a parent's metadata to its children's
+      to a field named after said string.
+    | For example with ``"parent-metadata": "_p_"``:
+
+    .. code:: json
+
+        {
+            "id": "child-id",
+            "_p_": {"id": "parent-id"}
+        }
 
 
 extractor.*.parent-skip
@@ -166,6 +192,16 @@ Default
     ``false``
 Description
     Share number of skipped downloads between parent and child extractors.
+
+
+extractor.*.url-metadata
+------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert a file's download URL into its metadata dictionary as the given name.
 
 
 extractor.*.path-restrict
@@ -468,7 +504,7 @@ Default
     ``"None"``
 Description
     Default value used for missing or undefined keyword names in
-    format strings.
+    `format strings`_.
 
 
 extractor.*.category-transfer
@@ -528,7 +564,9 @@ Type
 Example
     ``"{id}_{offset}"``
 Description
-    An alternative `format string`_ to build archive IDs with.
+    An alternative `format string`__ to build archive IDs with.
+
+.. __: https://docs.python.org/3/library/string.html#format-string-syntax
 
 
 extractor.*.postprocessors
@@ -694,7 +732,7 @@ Description
 
 
 extractor.*.date-format
-----------------------------
+-----------------------
 Type
     ``string``
 Default
@@ -757,6 +795,7 @@ Description
     * ``true``: Original ZIP archives
     * ``false``: Converted video files
 
+
 extractor.danbooru.metadata
 ---------------------------
 Type
@@ -767,6 +806,7 @@ Description
     Extract additional metadata (notes, artist commentary, parent, children)
 
     Note: This requires 1 additional HTTP request for each post.
+
 
 extractor.derpibooru.api-key
 ----------------------------
@@ -1194,6 +1234,16 @@ Description
     Download video files.
 
 
+extractor.kemonoparty.max-posts
+-------------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Limit the number of posts to download.
+
+
 extractor.kemonoparty.metadata
 ------------------------------
 Type
@@ -1228,6 +1278,57 @@ Default
     ``"https://api.mangadex.org"``
 Description
     The server to use for API requests.
+
+
+extractor.mangadex.lang
+-----------------------
+Type
+    ``string``
+Example
+    ``"en"``
+Description
+    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`_ language code
+    to filter chapters by.
+
+
+extractor.mangadex.metadata
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Provide ``artist``, ``author``, and ``group`` metadata fields.
+
+
+extractor.mastodon.reblogs
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from reblogged posts.
+
+
+extractor.mastodon.replies
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Fetch media from replies to other posts.
+
+
+extractor.mastodon.text-posts
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Also emit metadata for text-only posts without media content.
 
 
 extractor.newgrounds.flash
@@ -1876,6 +1977,85 @@ Description
     Download video files.
 
 
+extractor.ytdl.enabled
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Match **all** URLs, even ones without a ``ytdl:`` prefix.
+
+
+extractor.ytdl.format
+---------------------
+Type
+    ``string``
+Default
+    youtube-dl's default, currently ``"bestvideo+bestaudio/best"``
+Description
+    Video `format selection
+    <https://github.com/ytdl-org/youtube-dl#format-selection>`__
+    directly passed to youtube-dl.
+
+
+extractor.ytdl.generic
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Controls the use of youtube-dl's generic extractor.
+
+    Set this option to ``"force"`` for the same effect as youtube-dl's
+    ``--force-generic-extractor``.
+
+
+extractor.ytdl.logging
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Route youtube-dl's output through gallery-dl's logging system.
+    Otherwise youtube-dl will write its output directly to stdout/stderr.
+
+    Note: Set ``quiet`` and ``no_warnings`` in
+    `extractor.ytdl.raw-options`_ to ``true`` to suppress all output.
+
+
+extractor.ytdl.module
+---------------------
+Type
+    ``string``
+Default
+    ``"youtube_dl"``
+Description
+    Name of the youtube-dl Python module to import.
+
+
+extractor.ytdl.raw-options
+--------------------------
+Type
+    ``object``
+Example
+    .. code:: json
+
+        {
+            "quiet": true,
+            "writesubtitles": true,
+            "merge_output_format": "mkv"
+        }
+
+Description
+    Additional options passed directly to the ``YoutubeDL`` constructor.
+
+    All available options can be found in `youtube-dl's docstrings
+    <https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
+
+
 extractor.[booru].tags
 ----------------------
 Type
@@ -1888,6 +2068,7 @@ Description
 
     Note: This requires 1 additional HTTP request for each post.
 
+
 extractor.[booru].notes
 -----------------------
 Type
@@ -1898,6 +2079,7 @@ Description
     Extract overlay notes (position and text).
 
     Note: This requires 1 additional HTTP request for each post.
+
 
 extractor.[manga-extractor].chapter-reverse
 -------------------------------------------
@@ -2991,13 +3173,13 @@ Description
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
 .. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects
 .. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
-.. _format string:      https://docs.python.org/3/library/string.html#formatstrings
-.. _format strings:     https://docs.python.org/3/library/string.html#formatstrings
 .. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _webbrowser.open():  https://docs.python.org/3/library/webbrowser.html
 .. _mature_content:     https://www.deviantart.com/developers/http/v1/20160316/object/deviation
 .. _Authentication:     https://github.com/mikf/gallery-dl#authentication
 .. _OAuth:              https://github.com/mikf/gallery-dl#oauth
+.. _format string:      https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
+.. _format strings:     https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
 .. _youtube-dl:         https://github.com/ytdl-org/youtube-dl
 .. _requests.request(): https://requests.readthedocs.io/en/master/api/#requests.request
 .. _timeout:            https://requests.readthedocs.io/en/master/user/advanced/#timeouts

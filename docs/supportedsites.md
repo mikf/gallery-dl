@@ -400,7 +400,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Manga Fox</td>
     <td>https://fanfox.net/</td>
-    <td>Chapters</td>
+    <td>Chapters, Manga</td>
     <td></td>
 </tr>
 <tr>
@@ -430,6 +430,12 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>MangaPark</td>
     <td>https://mangapark.net/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MangaSee</td>
+    <td>https://mangasee123.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -544,7 +550,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Pixiv</td>
     <td>https://www.pixiv.net/</td>
-    <td>Favorites, Follows, pixiv.me Links, Rankings, Search Results, User Profiles, individual Images</td>
+    <td>Favorites, Follows, pixiv.me Links, pixivision, Rankings, Search Results, User Profiles, individual Images</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -629,6 +635,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Sankaku Complex</td>
     <td>https://www.sankakucomplex.com/</td>
     <td>Articles, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Seiso</td>
+    <td>https://seiso.party/</td>
+    <td>Posts, User Profiles</td>
     <td></td>
 </tr>
 <tr>

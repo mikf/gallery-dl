@@ -74,6 +74,7 @@ modules = [
     "mangakakalot",
     "manganelo",
     "mangapark",
+    "mangasee",
     "mangoxo",
     "myhentaigallery",
     "myportfolio",
@@ -105,6 +106,7 @@ modules = [
     "sankaku",
     "sankakucomplex",
     "seiga",
+    "seisoparty",
     "senmanga",
     "sexcom",
     "simplyhentai",
@@ -141,6 +143,7 @@ modules = [
     "recursive",
     "oauth",
     "test",
+    "ytdl",
 ]
 
 

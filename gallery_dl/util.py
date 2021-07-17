@@ -145,6 +145,14 @@ def to_string(value):
     return str(value)
 
 
+def to_timestamp(dt):
+    """Convert naive datetime to UTC timestamp string"""
+    try:
+        return str((dt - EPOCH) // SECOND)
+    except Exception:
+        return ""
+
+
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
     """Serialize 'obj' as JSON and write it to 'fp'"""
     json.dump(
@@ -370,6 +378,8 @@ class UniversalNone():
 
 
 NONE = UniversalNone()
+EPOCH = datetime.datetime(1970, 1, 1)
+SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
@@ -536,6 +546,7 @@ class Formatter():
     - "d": calls text.parse_timestamp
     - "U": calls urllib.parse.unquote
     - "S": calls util.to_string()
+    - "T": calls util.to_timestamü()
     - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
 
     Extra Format Specifiers:
@@ -559,12 +570,14 @@ class Formatter():
         Replaces all occurrences of <old> with <new>
         Example: {f:R /_/} -> "f_o_o_b_a_r" (if "f" is "f o o b a r")
     """
+    CACHE = {}
     CONVERSIONS = {
         "l": str.lower,
         "u": str.upper,
         "c": str.capitalize,
         "C": string.capwords,
         "t": str.strip,
+        "T": to_timestamp,
         "d": text.parse_timestamp,
         "U": urllib.parse.unquote,
         "S": to_string,
@@ -575,19 +588,26 @@ class Formatter():
 
     def __init__(self, format_string, default=None):
         self.default = default
-        self.result = []
-        self.fields = []
+        key = (format_string, default)
 
-        for literal_text, field_name, format_spec, conversion in \
-                _string.formatter_parser(format_string):
-            if literal_text:
-                self.result.append(literal_text)
-            if field_name:
-                self.fields.append((
-                    len(self.result),
-                    self._field_access(field_name, format_spec, conversion),
-                ))
-                self.result.append("")
+        try:
+            self.result, self.fields = self.CACHE[key]
+        except KeyError:
+            self.result = []
+            self.fields = []
+
+            for literal_text, field_name, format_spec, conv in \
+                    _string.formatter_parser(format_string):
+                if literal_text:
+                    self.result.append(literal_text)
+                if field_name:
+                    self.fields.append((
+                        len(self.result),
+                        self._field_access(field_name, format_spec, conv),
+                    ))
+                    self.result.append("")
+
+            self.CACHE[key] = (self.result, self.fields)
 
         if len(self.result) == 1:
             if self.fields:
@@ -777,9 +797,20 @@ class PathFormat():
             raise exception.FilenameFormatError(exc)
 
         directory_fmt = config("directory")
-        if directory_fmt is None:
-            directory_fmt = extractor.directory_fmt
         try:
+            if directory_fmt is None:
+                directory_fmt = extractor.directory_fmt
+            elif isinstance(directory_fmt, dict):
+                self.directory_conditions = [
+                    (compile_expression(expr), [
+                        Formatter(fmt, kwdefault).format_map
+                        for fmt in fmts
+                    ])
+                    for expr, fmts in directory_fmt.items() if expr
+                ]
+                self.build_directory = self.build_directory_conditional
+                directory_fmt = directory_fmt.get("", extractor.directory_fmt)
+
             self.directory_formatters = [
                 Formatter(dirfmt, kwdefault).format_map
                 for dirfmt in directory_fmt
@@ -792,19 +823,6 @@ class PathFormat():
             self.filename = self.extension = self.prefix = \
             self.path = self.realpath = self.temppath = ""
         self.delete = self._create_directory = False
-
-        basedir = extractor._parentdir
-        if not basedir:
-            basedir = config("base-directory")
-            if basedir is None:
-                basedir = "." + os.sep + "gallery-dl" + os.sep
-            elif basedir:
-                basedir = expand_path(basedir)
-                if os.altsep and os.altsep in basedir:
-                    basedir = basedir.replace(os.altsep, os.sep)
-                if basedir[-1] != os.sep:
-                    basedir += os.sep
-        self.basedirectory = basedir
 
         extension_map = config("extension-map")
         if extension_map is None:
@@ -826,6 +844,22 @@ class PathFormat():
         remove = config("path-remove", "\x00-\x1f\x7f")
         self.clean_path = self._build_cleanfunc(remove, "")
 
+        basedir = extractor._parentdir
+        if not basedir:
+            basedir = config("base-directory")
+            sep = os.sep
+            if basedir is None:
+                basedir = "." + sep + "gallery-dl" + sep
+            elif basedir:
+                basedir = expand_path(basedir)
+                altsep = os.altsep
+                if altsep and altsep in basedir:
+                    basedir = basedir.replace(altsep, sep)
+                if basedir[-1] != sep:
+                    basedir += sep
+            basedir = self.clean_path(basedir)
+        self.basedirectory = basedir
+
     @staticmethod
     def _build_cleanfunc(chars, repl):
         if not chars:
@@ -837,8 +871,8 @@ class PathFormat():
             def func(x, c=chars, r=repl):
                 return x.replace(c, r)
         else:
-            def func(x, sub=re.compile("[" + chars + "]").sub, r=repl):
-                return sub(r, x)
+            return functools.partial(
+                re.compile("[" + chars + "]").sub, repl)
         return func
 
     def open(self, mode="wb"):
@@ -870,29 +904,14 @@ class PathFormat():
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
         self.kwdict = kwdict
-
-        # Build path segments by applying 'kwdict' to directory format strings
-        segments = []
-        append = segments.append
-        try:
-            for formatter in self.directory_formatters:
-                segment = formatter(kwdict).strip()
-                if WINDOWS:
-                    # remove trailing dots and spaces (#647)
-                    segment = segment.rstrip(". ")
-                if segment:
-                    append(self.clean_segment(segment))
-        except Exception as exc:
-            raise exception.DirectoryFormatError(exc)
-
-        # Join path segments
         sep = os.sep
-        directory = self.clean_path(self.basedirectory + sep.join(segments))
 
-        # Ensure 'directory' ends with a path separator
+        segments = self.build_directory(kwdict)
         if segments:
-            directory += sep
-        self.directory = directory
+            self.directory = directory = self.basedirectory + self.clean_path(
+                sep.join(segments) + sep)
+        else:
+            self.directory = directory = self.basedirectory
 
         if WINDOWS:
             # Enable longer-than-260-character paths on Windows
@@ -935,17 +954,15 @@ class PathFormat():
                 self.temppath = self.realpath = self.realpath[:-1]
         return True
 
-    def build_filename(self):
+    def build_filename(self, kwdict):
         """Apply 'kwdict' to filename format string"""
         try:
             return self.clean_path(self.clean_segment(
-                self.filename_formatter(self.kwdict)))
+                self.filename_formatter(kwdict)))
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
-    def build_filename_conditional(self):
-        kwdict = self.kwdict
-
+    def build_filename_conditional(self, kwdict):
         try:
             for condition, formatter in self.filename_conditions:
                 if condition(kwdict):
@@ -956,12 +973,49 @@ class PathFormat():
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
+    def build_directory(self, kwdict):
+        """Apply 'kwdict' to directory format strings"""
+        segments = []
+        append = segments.append
+
+        try:
+            for formatter in self.directory_formatters:
+                segment = formatter(kwdict).strip()
+                if WINDOWS:
+                    # remove trailing dots and spaces (#647)
+                    segment = segment.rstrip(". ")
+                if segment:
+                    append(self.clean_segment(segment))
+            return segments
+        except Exception as exc:
+            raise exception.DirectoryFormatError(exc)
+
+    def build_directory_conditional(self, kwdict):
+        segments = []
+        append = segments.append
+
+        try:
+            for condition, formatters in self.directory_conditions:
+                if condition(kwdict):
+                    break
+            else:
+                formatters = self.directory_formatters
+            for formatter in formatters:
+                segment = formatter(kwdict).strip()
+                if WINDOWS:
+                    segment = segment.rstrip(". ")
+                if segment:
+                    append(self.clean_segment(segment))
+            return segments
+        except Exception as exc:
+            raise exception.DirectoryFormatError(exc)
+
     def build_path(self):
         """Combine directory and filename to full paths"""
         if self._create_directory:
             os.makedirs(self.realdirectory, exist_ok=True)
             self._create_directory = False
-        self.filename = filename = self.build_filename()
+        self.filename = filename = self.build_filename(self.kwdict)
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
         if not self.temppath:

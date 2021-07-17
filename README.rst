@@ -5,7 +5,7 @@ gallery-dl
 *gallery-dl* is a command-line program to download image galleries and
 collections from several image hosting sites (see `Supported Sites`_).
 It is a cross-platform tool with many configuration options
-and powerful filenaming capabilities.
+and powerful `filenaming capabilities <Formatting_>`_.
 
 
 |pypi| |build| |gitter|
@@ -64,8 +64,8 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.17.5/gallery-dl.exe>`__
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.17.5/gallery-dl.bin>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.18.1/gallery-dl.exe>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.18.1/gallery-dl.bin>`__
 
 | Executables build from the latest commit can be found at
 | https://github.com/mikf/gallery-dl/actions/workflows/executables.yml
@@ -322,6 +322,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
 .. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
 .. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md
+.. _Formatting:              https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
 
 .. _Python:     https://www.python.org/downloads/
 .. _PyPI:       https://pypi.org/

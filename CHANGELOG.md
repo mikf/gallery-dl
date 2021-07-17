@@ -2,6 +2,59 @@
 
 ## Unreleased
 
+## 1.18.1 - 2021-07-04
+### Additions
+- [mangafox] add `manga` extractor ([#1633](https://github.com/mikf/gallery-dl/issues/1633))
+- [mangasee] add `chapter` and `manga` extractors
+- [mastodon] implement `text-posts` option ([#1569](https://github.com/mikf/gallery-dl/issues/1569), [#1669](https://github.com/mikf/gallery-dl/issues/1669))
+- [seisoparty] add `user` and `post` extractors ([#1635](https://github.com/mikf/gallery-dl/issues/1635))
+- implement conditional directories ([#1394](https://github.com/mikf/gallery-dl/issues/1394))
+- add `T` format string conversion ([#1646](https://github.com/mikf/gallery-dl/issues/1646))
+- document format string syntax
+### Changes
+- [twitter] set `retweet_id` for original retweets ([#1481](https://github.com/mikf/gallery-dl/issues/1481))
+### Fixes
+- [directlink] manually encode Referer URLs ([#1647](https://github.com/mikf/gallery-dl/issues/1647))
+- [hiperdex] use domain from input URL
+- [kemonoparty] fix `username` extraction ([#1652](https://github.com/mikf/gallery-dl/issues/1652))
+- [kemonoparty] warn about missing DDoS-GUARD cookies
+- [twitter] ensure guest tokens are returned as string ([#1665](https://github.com/mikf/gallery-dl/issues/1665))
+- [webtoons] match arbitrary language codes ([#1643](https://github.com/mikf/gallery-dl/issues/1643))
+- fix depth counter in UrlJob when specifying `-g` multiple times
+
+## 1.18.0 - 2021-06-19
+### Additions
+- [foolfuuka] support `archive.wakarimasen.moe` ([#1595](https://github.com/mikf/gallery-dl/issues/1595))
+- [mangadex] implement login with username & password ([#1535](https://github.com/mikf/gallery-dl/issues/1535))
+- [mangadex] add extractor for a user's followed feed ([#1535](https://github.com/mikf/gallery-dl/issues/1535))
+- [pixiv] support fetching privately followed users ([#1628](https://github.com/mikf/gallery-dl/issues/1628))
+- implement conditional filenames ([#1394](https://github.com/mikf/gallery-dl/issues/1394))
+- implement `filter` option for post processors ([#1460](https://github.com/mikf/gallery-dl/issues/1460))
+- add `-T/--terminate` command-line option ([#1399](https://github.com/mikf/gallery-dl/issues/1399))
+- add `-P/--postprocessor` command-line option ([#1583](https://github.com/mikf/gallery-dl/issues/1583))
+### Changes
+- [kemonoparty] update default filenames and archive IDs ([#1514](https://github.com/mikf/gallery-dl/issues/1514))
+- [twitter] update default settings
+  - change `retweets` and `quoted` options from `true` to `false`
+  - change directory format for search results to the same as other extractors
+- require an argument for `--clear-cache`
+### Fixes
+- [500px] update GraphQL queries
+- [furaffinity] improve metadata extraction ([#1630](https://github.com/mikf/gallery-dl/issues/1630))
+- [hitomi] update image URL generation ([#1637](https://github.com/mikf/gallery-dl/issues/1637))
+- [idolcomplex] improve and fix pagination ([#1594](https://github.com/mikf/gallery-dl/issues/1594), [#1601](https://github.com/mikf/gallery-dl/issues/1601))
+- [instagram] fix login ([#1631](https://github.com/mikf/gallery-dl/issues/1631))
+- [instagram] update query hashes
+- [mangadex] update to API v5 ([#1535](https://github.com/mikf/gallery-dl/issues/1535))
+- [mangafox] improve URL pattern ([#1608](https://github.com/mikf/gallery-dl/issues/1608))
+- [oauth] prevent exceptions when reporting errors ([#1603](https://github.com/mikf/gallery-dl/issues/1603))
+- [philomena] fix tag escapes handling ([#1629](https://github.com/mikf/gallery-dl/issues/1629))
+- [redgifs] update API server address ([#1632](https://github.com/mikf/gallery-dl/issues/1632))
+- [sankaku] handle empty tags ([#1617](https://github.com/mikf/gallery-dl/issues/1617))
+- [subscribestar] improve attachment filenames ([#1609](https://github.com/mikf/gallery-dl/issues/1609))
+- [unsplash] update collections URL pattern ([#1627](https://github.com/mikf/gallery-dl/issues/1627))
+- [postprocessor:metadata] handle dicts in `mode:tags` ([#1598](https://github.com/mikf/gallery-dl/issues/1598))
+
 ## 1.17.5 - 2021-05-30
 ### Additions
 - [kemonoparty] add `metadata` option ([#1548](https://github.com/mikf/gallery-dl/issues/1548))

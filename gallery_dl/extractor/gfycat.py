@@ -177,7 +177,10 @@ class GfycatAPI():
 
     @cache(keyarg=1, maxage=3600)
     def _authenticate_impl(self, category):
-        url = "https://weblogin." + category + ".com/oauth/webtoken"
+        if category == "redgifs":
+            url = "https://api.redgifs.com/v1/oauth/webtoken"
+        else:
+            url = "https://weblogin." + category + ".com/oauth/webtoken"
         data = {"access_key": self.ACCESS_KEY}
         headers = {"Referer": self.extractor.root + "/",
                    "Origin" : self.extractor.root}

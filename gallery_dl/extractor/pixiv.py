@@ -6,10 +6,10 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images and ugoira from https://www.pixiv.net/"""
+"""Extractors for https://www.pixiv.net/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 from datetime import datetime, timedelta
 import itertools
@@ -321,34 +321,30 @@ class PixivFavoriteExtractor(PixivExtractor):
 
     def __init__(self, match):
         uid, kind, self.tag, query = match.groups()
+        query = text.parse_query(query)
 
-        if query:
-            self.query = text.parse_query(query)
-            uid = self.query.get("id")
+        if not uid:
+            uid = query.get("id")
             if not uid:
                 self.subcategory = "bookmark"
-            elif self.query.get("type") == "user":
-                self.subcategory = "following"
-                self.items = self._items_following
-        else:
-            self.query = {}
-            if kind == "following":
-                self.subcategory = "following"
-                self.items = self._items_following
+
+        if kind == "following" or query.get("type") == "user":
+            self.subcategory = "following"
+            self.items = self._items_following
 
         PixivExtractor.__init__(self, match)
+        self.query = query
         self.user_id = uid
 
     def works(self):
         tag = None
-        restrict = "public"
-
         if "tag" in self.query:
             tag = text.unquote(self.query["tag"])
         elif self.tag:
             tag = text.unquote(self.tag)
 
-        if "rest" in self.query and self.query["rest"] == "hide":
+        restrict = "public"
+        if self.query.get("rest") == "hide":
             restrict = "private"
 
         return self.api.user_bookmarks_illust(self.user_id, tag, restrict)
@@ -364,9 +360,11 @@ class PixivFavoriteExtractor(PixivExtractor):
         return {"user_bookmark": user}
 
     def _items_following(self):
-        yield Message.Version, 1
+        restrict = "public"
+        if self.query.get("rest") == "hide":
+            restrict = "private"
 
-        for preview in self.api.user_following(self.user_id):
+        for preview in self.api.user_following(self.user_id, restrict):
             user = preview["user"]
             user["_extractor"] = PixivUserExtractor
             url = "https://www.pixiv.net/users/{}".format(user["id"])
@@ -519,6 +517,48 @@ class PixivFollowExtractor(PixivExtractor):
         return {"user_follow": self.api.user}
 
 
+class PixivPixivisionExtractor(PixivExtractor):
+    """Extractor for illustrations from a pixivision article"""
+    subcategory = "pixivision"
+    directory_fmt = ("{category}", "pixivision",
+                     "{pixivision_id} {pixivision_title}")
+    archive_fmt = "V{pixivision_id}_{id}{suffix}.{extension}"
+    pattern = r"(?:https?://)?(?:www\.)?pixivision\.net/(?:en/)?a/(\d+)"
+    test = (
+        ("https://www.pixivision.net/en/a/2791"),
+        ("https://pixivision.net/a/2791", {
+            "count": 7,
+            "keyword": {
+                "pixivision_id": "2791",
+                "pixivision_title": "What's your favorite music? Editor’s "
+                                    "picks featuring: “CD Covers”!",
+            },
+        }),
+    )
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self, match)
+        self.pixivision_id = match.group(1)
+
+    def works(self):
+        return (
+            self.api.illust_detail(illust_id)
+            for illust_id in util.unique_sequence(text.extract_iter(
+                self.page, '<a href="https://www.pixiv.net/en/artworks/', '"'))
+        )
+
+    def metadata(self):
+        url = "https://www.pixivision.net/en/a/" + self.pixivision_id
+        headers = {"User-Agent": "Mozilla/5.0"}
+        self.page = self.request(url, headers=headers).text
+
+        title = text.extract(self.page, '<title>', ' - pixivision<')[0]
+        return {
+            "pixivision_id"   : self.pixivision_id,
+            "pixivision_title": text.unescape(title),
+        }
+
+
 class PixivAppAPI():
     """Minimal interface for the Pixiv App API for mobile devices
 
@@ -622,8 +662,8 @@ class PixivAppAPI():
         params = {"user_id": user_id}
         return self._call("v1/user/detail", params)["user"]
 
-    def user_following(self, user_id):
-        params = {"user_id": user_id}
+    def user_following(self, user_id, restrict="public"):
+        params = {"user_id": user_id, "restrict": restrict}
         return self._pagination("v1/user/following", params, "user_previews")
 
     def user_illusts(self, user_id):

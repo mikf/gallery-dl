@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for mastodon instances"""
+"""Extractors for Mastodon instances"""
 
 from .common import BaseExtractor, Message
 from .. import text, exception
@@ -25,29 +25,36 @@ class MastodonExtractor(BaseExtractor):
         BaseExtractor.__init__(self, match)
         self.instance = self.root.partition("://")[2]
         self.item = match.group(match.lastindex)
+        self.reblogs = self.config("reblogs", False)
+        self.replies = self.config("replies", True)
 
     def items(self):
         for status in self.statuses():
+
+            if not self.reblogs and status["reblog"]:
+                self.log.debug("Skipping %s (reblog)", status["id"])
+                continue
+            if not self.replies and status["in_reply_to_id"]:
+                self.log.debug("Skipping %s (reply)", status["id"])
+                continue
+
             attachments = status["media_attachments"]
-            if attachments:
-                self.prepare(status)
-                yield Message.Directory, status
-                for media in attachments:
-                    status["media"] = media
-                    url = media["url"]
-                    yield Message.Url, url, text.nameext_from_url(url, status)
+            del status["media_attachments"]
+
+            status["instance"] = self.instance
+            status["tags"] = [tag["name"] for tag in status["tags"]]
+            status["date"] = text.parse_datetime(
+                status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
+
+            yield Message.Directory, status
+            for media in attachments:
+                status["media"] = media
+                url = media["url"]
+                yield Message.Url, url, text.nameext_from_url(url, status)
 
     def statuses(self):
-        """Return an iterable containing all relevant Status-objects"""
+        """Return an iterable containing all relevant Status objects"""
         return ()
-
-    def prepare(self, status):
-        """Prepare a status object"""
-        del status["media_attachments"]
-        status["instance"] = self.instance
-        status["tags"] = [tag["name"] for tag in status["tags"]]
-        status["date"] = text.parse_datetime(
-            status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 
 
 INSTANCES = {
@@ -97,6 +104,7 @@ class MastodonUserExtractor(MastodonExtractor):
 
     def statuses(self):
         api = MastodonAPI(self)
+
         username = self.item
         handle = "@{}@{}".format(username, self.instance)
         for account in api.account_search(handle, 1):
@@ -104,7 +112,12 @@ class MastodonUserExtractor(MastodonExtractor):
                 break
         else:
             raise exception.NotFoundError("account")
-        return api.account_statuses(account["id"])
+
+        return api.account_statuses(
+            account["id"],
+            only_media=not self.config("text-posts", False),
+            exclude_replies=not self.replies,
+        )
 
 
 class MastodonStatusExtractor(MastodonExtractor):
@@ -130,8 +143,8 @@ class MastodonStatusExtractor(MastodonExtractor):
 class MastodonAPI():
     """Minimal interface for the Mastodon API
 
+    https://docs.joinmastodon.org/
     https://github.com/tootsuite/mastodon
-    https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md
     """
 
     def __init__(self, extractor):
@@ -153,15 +166,17 @@ class MastodonAPI():
         self.headers = {"Authorization": "Bearer " + access_token}
 
     def account_search(self, query, limit=40):
-        """Search for content"""
+        """Search for accounts"""
         endpoint = "/v1/accounts/search"
         params = {"q": query, "limit": limit}
         return self._call(endpoint, params).json()
 
-    def account_statuses(self, account_id):
-        """Get an account's statuses"""
+    def account_statuses(self, account_id, only_media=True,
+                         exclude_replies=False):
+        """Fetch an account's statuses"""
         endpoint = "/v1/accounts/{}/statuses".format(account_id)
-        params = {"only_media": "1"}
+        params = {"only_media"     : "1" if only_media else "0",
+                  "exclude_replies": "1" if exclude_replies else "0"}
         return self._pagination(endpoint, params)
 
     def status(self, status_id):
@@ -202,6 +217,7 @@ class MastodonAPI():
             if not url:
                 return
             url = url["url"]
+            params = None
 
 
 @cache(maxage=100*365*24*3600, keyarg=0)

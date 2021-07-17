@@ -113,18 +113,16 @@ class TwitterExtractor(Extractor):
                     "url"      : base + "orig",
                     "width"    : width,
                     "height"   : height,
-                    "_fallback": self._image_fallback(base, url + ":"),
+                    "_fallback": self._image_fallback(base),
                 }))
             else:
                 files.append({"url": media["media_url"]})
 
     @staticmethod
-    def _image_fallback(new, old):
-        yield old + "orig"
-
-        for size in ("large", "medium", "small"):
-            yield new + size
-            yield old + size
+    def _image_fallback(base):
+        yield base + "large"
+        yield base + "medium"
+        yield base + "small"
 
     def _extract_card(self, tweet, files):
         card = tweet["card"]
@@ -486,8 +484,9 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("retweets", "original"),),
             "count": 2,
             "keyword": {
-                "tweet_id": 1296296016002547713,
-                "date"    : "dt:2020-08-20 04:00:28",
+                "tweet_id"  : 1296296016002547713,
+                "retweet_id": 1296296016002547713,
+                "date"      : "dt:2020-08-20 04:00:28",
             },
         }),
         # all Tweets from a conversation (#1319)
@@ -526,18 +525,17 @@ class TwitterImageExtractor(Extractor):
         self.id, self.fmt = match.groups()
 
     def items(self):
-        base = "https://pbs.twimg.com/media/" + self.id
-        new = base + "?format=" + self.fmt + "&name="
-        old = base + "." + self.fmt + ":"
+        base = "https://pbs.twimg.com/media/{}?format={}&name=".format(
+            self.id, self.fmt)
 
         data = {
             "filename": self.id,
             "extension": self.fmt,
-            "_fallback": TwitterExtractor._image_fallback(new, old),
+            "_fallback": TwitterExtractor._image_fallback(base),
         }
 
         yield Message.Directory, data
-        yield Message.Url, new + "orig", data
+        yield Message.Url, base + "orig", data
 
 
 class TwitterAPI():
@@ -712,7 +710,7 @@ class TwitterAPI():
     def _guest_token(self):
         root = "https://api.twitter.com"
         endpoint = "/1.1/guest/activate.json"
-        return self._call(endpoint, None, root, "POST")["guest_token"]
+        return str(self._call(endpoint, None, root, "POST")["guest_token"])
 
     def _call(self, endpoint, params, root=None, method="GET"):
         if root is None:
@@ -809,6 +807,7 @@ class TwitterAPI():
                     if original_retweets:
                         if not retweet:
                             continue
+                        retweet["retweeted_status_id_str"] = retweet["id_str"]
                         retweet["_retweet_id_str"] = tweet["id_str"]
                         tweet = retweet
                     elif retweet:

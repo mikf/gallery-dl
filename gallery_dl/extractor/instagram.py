@@ -120,10 +120,7 @@ class InstagramExtractor(Extractor):
         if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
             if username:
-                self.session.cookies.set(
-                    "ig_cb", "2", domain="www.instagram.com")
                 self._update_cookies(self._login_impl(username, password))
-
         self.session.cookies.set(
             "csrftoken", self.csrf_token, domain=self.cookiedomain)
 
@@ -131,33 +128,42 @@ class InstagramExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        page = self.request(self.root + "/accounts/login/").text
+        url = self.root + "/accounts/login/"
+        page = self.request(url).text
+
         headers = {
-            "Referer"         : self.root + "/accounts/login/",
+            "X-Web-Device-Id" : text.extract(page, '"device_id":"', '"')[0],
             "X-IG-App-ID"     : "936619743392459",
+            "X-ASBD-ID"       : "437806",
+            "X-IG-WWW-Claim"  : "0",
             "X-Requested-With": "XMLHttpRequest",
+            "Referer"         : url,
         }
+        url = self.root + "/data/shared_data/"
+        data = self.request(url, headers=headers).json()
 
-        response = self.request(self.root + "/web/__mid/", headers=headers)
-        headers["X-CSRFToken"] = response.cookies["csrftoken"]
-        headers["X-Instagram-AJAX"] = text.extract(
-            page, '"rollout_hash":"', '"')[0]
-
-        url = self.root + "/accounts/login/ajax/"
+        headers["X-CSRFToken"] = data["config"]["csrf_token"]
+        headers["X-Instagram-AJAX"] = data["rollout_hash"]
+        headers["Origin"] = self.root
         data = {
             "username"     : username,
             "enc_password" : "#PWD_INSTAGRAM_BROWSER:0:{}:{}".format(
                 int(time.time()), password),
-            "queryParams"  : "{}",
-            "optIntoOneTap": "false",
+            "queryParams"         : "{}",
+            "optIntoOneTap"       : "false",
+            "stopDeletionNonce"   : "",
+            "trustedDeviceRecords": "{}",
         }
+        url = self.root + "/accounts/login/ajax/"
         response = self.request(url, method="POST", headers=headers, data=data)
 
         if not response.json().get("authenticated"):
             raise exception.AuthenticationError()
+
+        cget = self.session.cookies.get
         return {
-            key: self.session.cookies.get(key)
-            for key in ("sessionid", "mid", "csrftoken")
+            name: cget(name)
+            for name in ("sessionid", "mid", "ig_did")
         }
 
     def _parse_post_graphql(self, post):
@@ -408,7 +414,7 @@ class InstagramPostsExtractor(InstagramExtractor):
         url = "{}/{}/".format(self.root, self.item)
         user = self._extract_profile_page(url)
 
-        query_hash = "32b14723a678bd4628d70c1f877b94c9"
+        query_hash = "7ea6ae3cf6fb05e73fcbe1732b1d2a42"
         variables = {"id": user["id"], "first": 50}
         edge = self._get_edge_data(user, "edge_owner_to_timeline_media")
         return self._pagination_graphql(query_hash, variables, edge)
@@ -427,7 +433,7 @@ class InstagramTaggedExtractor(InstagramExtractor):
         url = "{}/{}/".format(self.root, self.item)
         user = self._extract_profile_page(url)
 
-        query_hash = "31fe64d9463cbbe58319dced405c6206"
+        query_hash = "be13233562af2d229b008d2976b998b5"
         variables = {"id": user["id"], "first": 50}
         edge = self._get_edge_data(user, None)
         return self._pagination_graphql(query_hash, variables, edge)
@@ -613,13 +619,13 @@ class InstagramPostExtractor(InstagramExtractor):
     )
 
     def posts(self):
-        query_hash = "d4e8ae69cb68f66329dcebe82fb69f6d"
+        query_hash = "971f52b26328008c768b7d8e4ac9ce3c"
         variables = {
             "shortcode"            : self.item,
             "child_comment_count"  : 3,
             "fetch_comment_count"  : 40,
             "parent_comment_count" : 24,
-            "has_threaded_comments": True
+            "has_threaded_comments": True,
         }
         data = self._request_graphql(query_hash, variables)
         media = data.get("shortcode_media")

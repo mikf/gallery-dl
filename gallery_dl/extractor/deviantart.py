@@ -258,19 +258,25 @@ class DeviantartExtractor(Extractor):
         return Message.Url, txt, deviation
 
     @staticmethod
-    def _find_folder(folders, name):
-        match = re.compile(name.replace(
-            "-", r"[^a-z0-9]+") + "$", re.IGNORECASE).match
-        for folder in folders:
-            if match(folder["name"]):
-                return folder
+    def _find_folder(folders, name, uuid):
+        if uuid.isdecimal():
+            match = re.compile(name.replace(
+                "-", r"[^a-z0-9]+") + "$", re.IGNORECASE).match
+            for folder in folders:
+                if match(folder["name"]):
+                    return folder
+        else:
+            for folder in folders:
+                if folder["folderid"] == uuid:
+                    return folder
         raise exception.NotFoundError("folder")
 
     def _folder_urls(self, folders, category, extractor):
-        base = "{}/{}/{}/0/".format(self.root, self.user, category)
+        base = "{}/{}/{}/".format(self.root, self.user, category)
         for folder in folders:
             folder["_extractor"] = extractor
-            yield base + folder["name"], folder
+            url = "{}{}/{}".format(base, folder["folderid"], folder["name"])
+            yield url, folder
 
     def _update_content_default(self, deviation, content):
         public = "premium_folder_data" not in deviation
@@ -422,7 +428,8 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
         }),
         # group
         ("https://www.deviantart.com/yakuzafc/gallery", {
-            "pattern": r"https://www.deviantart.com/yakuzafc/gallery/0/",
+            "pattern": r"https://www.deviantart.com/yakuzafc/gallery"
+                       r"/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/",
             "count": ">= 15",
         }),
         # 'folders' option (#276)
@@ -461,7 +468,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     subcategory = "folder"
     directory_fmt = ("{category}", "{username}", "{folder[title]}")
     archive_fmt = "F_{folder[uuid]}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/gallery/(\d+)/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/gallery/([^/?#]+)/([^/?#]+)"
     test = (
         # user
         ("https://www.deviantart.com/shimoda7/gallery/722019/Miscellaneous", {
@@ -471,6 +478,12 @@ class DeviantartFolderExtractor(DeviantartExtractor):
         # group
         ("https://www.deviantart.com/yakuzafc/gallery/37412168/Crafts", {
             "count": ">= 4",
+            "options": (("original", False),),
+        }),
+        # uuid
+        (("https://www.deviantart.com/shimoda7/gallery"
+          "/B38E3C6A-2029-6B45-757B-3C8D3422AD1A/misc"), {
+            "count": 5,
             "options": (("original", False),),
         }),
         # name starts with '_', special characters (#1451)
@@ -491,7 +504,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
 
     def deviations(self):
         folders = self.api.gallery_folders(self.user)
-        folder = self._find_folder(folders, self.folder_name)
+        folder = self._find_folder(folders, self.folder_name, self.folder_id)
         self.folder = {
             "title": folder["name"],
             "uuid" : folder["folderid"],
@@ -611,10 +624,15 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     directory_fmt = ("{category}", "{username}", "Favourites",
                      "{collection[title]}")
     archive_fmt = "C_{collection[uuid]}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/favourites/(\d+)/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/favourites/([^/?#]+)/([^/?#]+)"
     test = (
-        (("https://www.deviantart.com/pencilshadings"
-          "/favourites/70595441/3D-Favorites"), {
+        (("https://www.deviantart.com/pencilshadings/favourites"
+          "/70595441/3D-Favorites"), {
+            "count": ">= 20",
+            "options": (("original", False),),
+        }),
+        (("https://www.deviantart.com/pencilshadings/favourites"
+          "/F050486B-CB62-3C66-87FB-1105A7F6379F/3D Favorites"), {
             "count": ">= 20",
             "options": (("original", False),),
         }),
@@ -630,7 +648,8 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
 
     def deviations(self):
         folders = self.api.collections_folders(self.user)
-        folder = self._find_folder(folders, self.collection_name)
+        folder = self._find_folder(
+            folders, self.collection_name, self.collection_id)
         self.collection = {
             "title": folder["name"],
             "uuid" : folder["folderid"],

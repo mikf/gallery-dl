@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import itertools
 import re
 
 BASE_PATTERN = r"(?:https?://)?kemono\.party/([^/?#]+)/user/([^/?#]+)"
@@ -20,19 +21,32 @@ class KemonopartyExtractor(Extractor):
     category = "kemonoparty"
     root = "https://kemono.party"
     directory_fmt = ("{category}", "{service}", "{user}")
-    filename_fmt = "{id}_{title}_{filename}.{extension}"
-    archive_fmt = "{service}_{user}_{id}_{filename}.{extension}"
+    filename_fmt = "{id}_{title}_{num:>02}_{filename}.{extension}"
+    archive_fmt = "{service}_{user}_{id}_{num}"
+    cookiedomain = ".kemono.party"
+    _warning = True
 
     def items(self):
+        if self._warning:
+            if not self._check_cookies(("__ddg1", "__ddg2")):
+                self.log.warning("no DDoS-GUARD cookies set (__ddg1, __ddg2)")
+            KemonopartyExtractor._warning = False
+
         find_inline = re.compile(r'src="(/inline/[^"]+)').findall
 
         if self.config("metadata"):
             username = text.unescape(text.extract(
-                self.request(self.user_url).text, "<title>", " | Kemono<")[0])
+                self.request(self.user_url).text, "<title>", " | Kemono"
+            )[0]).lstrip()
         else:
             username = None
 
-        for post in self.posts():
+        posts = self.posts()
+        max_posts = self.config("max-posts")
+        if max_posts:
+            posts = itertools.islice(posts, max_posts)
+
+        for post in posts:
 
             files = []
             append = files.append
@@ -68,24 +82,30 @@ class KemonopartyExtractor(Extractor):
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/?(?:$|[?#])"
+    pattern = BASE_PATTERN + r"/?(?:\?o=(\d+))?(?:$|[?#])"
     test = (
         ("https://kemono.party/fanbox/user/6993449", {
             "range": "1-25",
             "count": 25,
+        }),
+        # 'max-posts' option, 'o' query parameter (#1674)
+        ("https://kemono.party/patreon/user/881792?o=150", {
+            "options": (("max-posts", 25),),
+            "count": "< 100",
         }),
         ("https://kemono.party/subscribestar/user/alcorart"),
     )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        service, user_id = match.groups()
+        service, user_id, offset = match.groups()
         self.api_url = "{}/api/{}/user/{}".format(self.root, service, user_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
+        self.offset = text.parse_int(offset)
 
     def posts(self):
         url = self.api_url
-        params = {"o": 0}
+        params = {"o": self.offset}
 
         while True:
             posts = self.request(url, params=params).json()
@@ -132,6 +152,11 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         ("https://kemono.party/gumroad/user/trylsc/post/IURjT", {
             "pattern": r"https://data\.kemono\.party/(file|attachment)s"
                        r"/gumroad/trylsc/IURjT/",
+        }),
+        # username (#1548, #1652)
+        ("https://kemono.party/gumroad/user/3252870377455/post/aJnAH", {
+            "options": (("metadata", True),),
+            "keyword": {"username": "Kudalyn's Creations"},
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
     )

@@ -140,7 +140,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
         }),
         # unavailable photos (#1335)
         ("https://500px.com/p/Light_Expression_Photography/galleries/street", {
-            "count": 0,
+            "count": 4,
         }),
         ("https://500px.com/fashvamp/galleries/lera"),
     )
@@ -192,8 +192,6 @@ class _500pxGalleryExtractor(_500pxExtractor):
             variables["cursor"] = photos["pageInfo"]["endCursor"]
             photos = self._request_graphql(
                 "GalleriesDetailPaginationContainerQuery", variables,
-                "466cf6661a07e7fdca465edb39118efb"
-                "80fb157c6d3f620c7f518cdae0832c78",
             )["galleryByOwnerIdAndSlugOrToken"]["photos"]
 
 

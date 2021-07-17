@@ -68,6 +68,7 @@ CATEGORY_MAP = {
     "mangakakalot"   : "MangaKakalot",
     "manganelo"      : "Manganato",
     "mangapark"      : "MangaPark",
+    "mangasee"       : "MangaSee",
     "mangastream"    : "Manga Stream",
     "mastodon.social": "mastodon.social",
     "myhentaigallery": "My Hentai Gallery",
@@ -90,6 +91,7 @@ CATEGORY_MAP = {
     "sankakucomplex" : "Sankaku Complex",
     "seaotterscans"  : "Sea Otter Scans",
     "seiga"          : "Niconico Seiga",
+    "seisoparty"     : "Seiso",
     "senmanga"       : "Sen Manga",
     "sensescans"     : "Sense-Scans",
     "sexcom"         : "Sex.com",
@@ -164,6 +166,7 @@ SUBCATEGORY_MAP = {
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
+        "pixivision": "pixivision",
         "work": "individual Images",
     },
     "sankaku": {
@@ -251,6 +254,7 @@ IGNORE_LIST = (
     "oauth",
     "recursive",
     "test",
+    "ytdl",
 )
 
 
