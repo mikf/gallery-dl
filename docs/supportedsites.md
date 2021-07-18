@@ -285,7 +285,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Imagevenue</td>
-    <td>http://imagevenue.com/</td>
+    <td>https://imagevenue.com/</td>
     <td>individual Images</td>
     <td></td>
 </tr>
@@ -597,7 +597,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Pururin</td>
-    <td>https://pururin.io/</td>
+    <td>https://pururin.to/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
