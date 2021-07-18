@@ -105,5 +105,5 @@ class NaverwebtoonComicExtractor(NaverwebtoonBase, Extractor):
         return [
             self.root + "/webtoon/detail.nhn?" + query
             for query in text.extract_iter(
-                page, '<a href="/webtoon/detail.nhn?', '"')
+                page, '<a href="/webtoon/detail?', '"')
         ][::2]
