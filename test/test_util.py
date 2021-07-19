@@ -124,7 +124,7 @@ class TestPredicate(unittest.TestCase):
 
         pred = util.build_predicate([util.UniquePredicate(),
                                      util.UniquePredicate()])
-        self.assertIsInstance(pred, util.ChainPredicate)
+        self.assertIs(pred.func, util.chain_predicates)
 
 
 class TestISO639_1(unittest.TestCase):
