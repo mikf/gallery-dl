@@ -107,23 +107,23 @@ class Job():
     def dispatch(self, msg):
         """Call the appropriate message handler"""
         if msg[0] == Message.Url:
-            _, url, kwds = msg
+            _, url, kwdict = msg
             if self.url_key:
-                kwds[self.url_key] = url
-            if self.pred_url(url, kwds):
-                self.update_kwdict(kwds)
-                self.handle_url(url, kwds)
+                kwdict[self.url_key] = url
+            if self.pred_url(url, kwdict):
+                self.update_kwdict(kwdict)
+                self.handle_url(url, kwdict)
 
         elif msg[0] == Message.Directory:
             self.update_kwdict(msg[1])
             self.handle_directory(msg[1])
 
         elif msg[0] == Message.Queue:
-            _, url, kwds = msg
+            _, url, kwdict = msg
             if self.url_key:
-                kwds[self.url_key] = url
-            if self.pred_queue(url, kwds):
-                self.handle_queue(url, kwds)
+                kwdict[self.url_key] = url
+            if self.pred_queue(url, kwdict):
+                self.handle_queue(url, kwdict)
 
         elif msg[0] == Message.Version:
             if msg[1] != 1:
