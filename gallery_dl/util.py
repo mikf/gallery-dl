@@ -403,8 +403,14 @@ def build_predicate(predicates):
         return lambda url, kwdict: True
     elif len(predicates) == 1:
         return predicates[0]
-    else:
-        return ChainPredicate(predicates)
+    return functools.partial(chain_predicates, predicates)
+
+
+def chain_predicates(predicates, url, kwdict):
+    for pred in predicates:
+        if not pred(url, kwdict):
+            return False
+    return True
 
 
 class RangePredicate():
@@ -506,18 +512,6 @@ class FilterPredicate():
             raise
         except Exception as exc:
             raise exception.FilterError(exc)
-
-
-class ChainPredicate():
-    """Predicate; True if all of its predicates return True"""
-    def __init__(self, predicates):
-        self.predicates = predicates
-
-    def __call__(self, url, kwdict):
-        for pred in self.predicates:
-            if not pred(url, kwdict):
-                return False
-        return True
 
 
 class ExtendedUrl():
