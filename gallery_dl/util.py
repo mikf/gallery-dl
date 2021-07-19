@@ -400,7 +400,7 @@ def compile_expression(expr, name="<expr>", globals=GLOBALS):
 
 def build_predicate(predicates):
     if not predicates:
-        return lambda url, kwds: True
+        return lambda url, kwdict: True
     elif len(predicates) == 1:
         return predicates[0]
     else:
@@ -418,7 +418,7 @@ class RangePredicate():
         else:
             self.lower, self.upper = 0, 0
 
-    def __call__(self, url, kwds):
+    def __call__(self, url, _):
         self.index += 1
 
         if self.index > self.upper:
@@ -483,7 +483,7 @@ class UniquePredicate():
     def __init__(self):
         self.urls = set()
 
-    def __call__(self, url, kwds):
+    def __call__(self, url, _):
         if url.startswith("text:"):
             return True
         if url not in self.urls:
@@ -513,9 +513,9 @@ class ChainPredicate():
     def __init__(self, predicates):
         self.predicates = predicates
 
-    def __call__(self, url, kwds):
+    def __call__(self, url, kwdict):
         for pred in self.predicates:
-            if not pred(url, kwds):
+            if not pred(url, kwdict):
                 return False
         return True
 
