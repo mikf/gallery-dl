@@ -37,7 +37,7 @@ class ArchitizerProjectExtractor(GalleryExtractor):
             "subcategory": "project",
             "title": "House LO",
             "type": "Residential › Private House",
-            "year": "2018",
+            "year": "2020",
         },
     })
 
