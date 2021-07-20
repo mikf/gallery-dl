@@ -569,6 +569,16 @@ Description
 .. __: https://docs.python.org/3/library/string.html#format-string-syntax
 
 
+extractor.*.archive-prefix
+--------------------------
+Type
+    ``string``
+Default
+    ``"{category}"``
+Description
+    Prefix for archive IDs.
+
+
 extractor.*.postprocessors
 --------------------------
 Type
