@@ -1076,9 +1076,9 @@ class DownloadArchive():
             # fallback for missing WITHOUT ROWID support (#553)
             self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
                                 "(entry PRIMARY KEY)")
-
-        self.keygen = (extractor.category + extractor.config(
-            "archive-format", extractor.archive_fmt)
+        self.keygen = (
+            extractor.config("archive-prefix", extractor.category) +
+            extractor.config("archive-format", extractor.archive_fmt)
         ).format_map
 
     def check(self, kwdict):
