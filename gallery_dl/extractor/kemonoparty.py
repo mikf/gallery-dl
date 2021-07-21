@@ -54,8 +54,9 @@ class KemonopartyExtractor(Extractor):
 
             # issue 1667 - patreon posts duplicate their main image
             # in the attachments (sometimes)
+            # solution: skip the main file if there are attachments
             should_skip_main_file = post["service"] == "patreon" \
-            and not post["attachments"]
+                and post["attachments"]
 
             if file and not should_skip_main_file:
                 file["type"] = "file"
