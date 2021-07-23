@@ -24,6 +24,7 @@ CATEGORY_MAP = {
     "baraag"         : "baraag",
     "bbc"            : "BBC",
     "bcy"            : "半次元",
+    "comicvine"      : "Comic Vine",
     "deviantart"     : "DeviantArt",
     "dokireader"     : "Doki Reader",
     "drawfriends"    : "Draw Friends",

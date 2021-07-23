@@ -98,6 +98,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Comic Vine</td>
+    <td>https://comicvine.gamespot.com/</td>
+    <td>Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Cyberdrop</td>
     <td>https://cyberdrop.me/</td>
     <td>Albums</td>
