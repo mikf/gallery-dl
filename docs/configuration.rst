@@ -1264,6 +1264,16 @@ Description
     Extract ``username`` metadata
 
 
+extractor.kemonoparty.patreon-skip-file
+---------------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Skip main files in Patreon posts to avoid duplicates.
+
+
 extractor.khinsider.format
 --------------------------
 Type

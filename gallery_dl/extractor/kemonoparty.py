@@ -33,6 +33,8 @@ class KemonopartyExtractor(Extractor):
             KemonopartyExtractor._warning = False
 
         find_inline = re.compile(r'src="(/inline/[^"]+)').findall
+        skip_service = \
+            "patreon" if self.config("patreon-skip-file", True) else None
 
         if self.config("metadata"):
             username = text.unescape(text.extract(
@@ -54,7 +56,8 @@ class KemonopartyExtractor(Extractor):
 
             if file:
                 file["type"] = "file"
-                append(file)
+                if post["service"] != skip_service or not post["attachments"]:
+                    append(file)
             for attachment in post["attachments"]:
                 attachment["type"] = "attachment"
                 append(attachment)
@@ -157,6 +160,11 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         ("https://kemono.party/gumroad/user/3252870377455/post/aJnAH", {
             "options": (("metadata", True),),
             "keyword": {"username": "Kudalyn's Creations"},
+        }),
+        # skip patreon main file (#1667, #1689)
+        ("https://kemono.party/patreon/user/4158582/post/32099982", {
+            "count": 2,
+            "keyword": {"type": "attachment"},
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
     )
