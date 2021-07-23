@@ -24,6 +24,7 @@ modules = [
     "bcy",
     "behance",
     "blogger",
+    "comicvine",
     "cyberdrop",
     "danbooru",
     "deviantart",
