@@ -1,6 +1,29 @@
 # Changelog
 
-## Unreleased
+## 1.18.2 - 2021-07-23
+### Additions
+- [bbc] add `gallery` and `programme` extractors ([#1706](https://github.com/mikf/gallery-dl/issues/1706))
+- [comicvine] add extractor ([#1712](https://github.com/mikf/gallery-dl/issues/1712))
+- [kemonoparty] add `max-posts` option ([#1674](https://github.com/mikf/gallery-dl/issues/1674))
+- [kemonoparty] parse `o` query parameters ([#1674](https://github.com/mikf/gallery-dl/issues/1674))
+- [mastodon] add `reblogs` and `replies` options ([#1669](https://github.com/mikf/gallery-dl/issues/1669))
+- [pixiv] add extractor for `pixivision` articles ([#1672](https://github.com/mikf/gallery-dl/issues/1672))
+- [ytdl] add experimental extractor for sites supported by youtube-dl ([#1680](https://github.com/mikf/gallery-dl/issues/1680), [#878](https://github.com/mikf/gallery-dl/issues/878))
+- extend `parent-metadata` functionality ([#1687](https://github.com/mikf/gallery-dl/issues/1687), [#1651](https://github.com/mikf/gallery-dl/issues/1651), [#1364](https://github.com/mikf/gallery-dl/issues/1364))
+- add `archive-prefix` option ([#1711](https://github.com/mikf/gallery-dl/issues/1711))
+- add `url-metadata` option ([#1659](https://github.com/mikf/gallery-dl/issues/1659), [#1073](https://github.com/mikf/gallery-dl/issues/1073))
+### Changes
+- [kemonoparty] skip duplicated patreon files ([#1689](https://github.com/mikf/gallery-dl/issues/1689), [#1667](https://github.com/mikf/gallery-dl/issues/1667))
+- [mangadex] use custom User-Agent header ([#1535](https://github.com/mikf/gallery-dl/issues/1535))
+### Fixes
+- [hitomi] fix image URLs ([#1679](https://github.com/mikf/gallery-dl/issues/1679))
+- [imagevenue] fix extraction ([#1677](https://github.com/mikf/gallery-dl/issues/1677))
+- [instagram] fix extraction of `/explore/tags/` posts ([#1666](https://github.com/mikf/gallery-dl/issues/1666))
+- [moebooru] fix `tags` ending with a `+` when logged in ([#1702](https://github.com/mikf/gallery-dl/issues/1702))
+- [naverwebtoon] fix comic extraction
+- [pururin] update domain and fix extraction
+- [vk] improve metadata extraction and URL pattern ([#1691](https://github.com/mikf/gallery-dl/issues/1691))
+- [downloader:ytdl] fix `outtmpl` setting for yt-dlp ([#1680](https://github.com/mikf/gallery-dl/issues/1680))
 
 ## 1.18.1 - 2021-07-04
 ### Additions
