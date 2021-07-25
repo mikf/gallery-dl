@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.18.2 - 2021-07-23
 ### Additions
 - [bbc] add `gallery` and `programme` extractors ([#1706](https://github.com/mikf/gallery-dl/issues/1706))
