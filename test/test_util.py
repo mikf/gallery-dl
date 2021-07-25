@@ -532,6 +532,22 @@ class TestOther(unittest.TestCase):
         self.assertEqual(len(token), 80 * 2)
         self.assertRegex(token, r"^[0-9a-f]+$")
 
+    def test_format_value(self):
+        self.assertEqual(util.format_value(0)         , "0B")
+        self.assertEqual(util.format_value(1)         , "1B")
+        self.assertEqual(util.format_value(12)        , "12B")
+        self.assertEqual(util.format_value(123)       , "123B")
+        self.assertEqual(util.format_value(1234)      , "1.23kB")
+        self.assertEqual(util.format_value(12345)     , "12.34kB")
+        self.assertEqual(util.format_value(123456)    , "123.45kB")
+        self.assertEqual(util.format_value(1234567)   , "1.23MB")
+        self.assertEqual(util.format_value(12345678)  , "12.34MB")
+        self.assertEqual(util.format_value(123456789) , "123.45MB")
+        self.assertEqual(util.format_value(1234567890), "1.23GB")
+
+        self.assertEqual(util.format_value(123   , "B/s"), "123B/s")
+        self.assertEqual(util.format_value(123456, "B/s"), "123.45kB/s")
+
     def test_combine_dict(self):
         self.assertEqual(
             util.combine_dict({}, {}),

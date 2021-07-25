@@ -97,6 +97,17 @@ def generate_token(size=16):
     return binascii.hexlify(data).decode()
 
 
+def format_value(value, unit="B", suffixes="kMGTPEZY"):
+    value = format(value)
+    value_len = len(value)
+    index = value_len - 4
+    if index >= 0:
+        offset = (value_len - 1) % 3 + 1
+        return (value[:offset] + "." + value[offset:offset+2] +
+                suffixes[index // 3] + unit)
+    return value + unit
+
+
 def combine_dict(a, b):
     """Recursively combine the contents of 'b' into 'a'"""
     for key, value in b.items():
