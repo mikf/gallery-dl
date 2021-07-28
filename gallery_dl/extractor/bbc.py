@@ -60,11 +60,14 @@ class BbcProgrammeExtractor(Extractor):
     category = "bbc"
     subcategory = "programme"
     root = "https://www.bbc.co.uk"
-    pattern = BASE_PATTERN + r"[^/?#]+/galleries)"
-    test = ("https://www.bbc.co.uk/programmes/b006q2x0/galleries", {
+    pattern = BASE_PATTERN + r"[^/?#]+/galleries?[^/#]+)"
+    test = (
+        ("https://www.bbc.co.uk/programmes/b006q2x0/galleries", {
         "pattern": BbcGalleryExtractor.pattern,
         "count": ">= 24",
-    })
+        }),
+        ("https://www.bbc.co.uk/programmes/b006q2x0/galleries?page=5"),
+    )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
