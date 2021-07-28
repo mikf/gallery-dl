@@ -60,21 +60,34 @@ class BbcProgrammeExtractor(Extractor):
     category = "bbc"
     subcategory = "programme"
     root = "https://www.bbc.co.uk"
-    pattern = BASE_PATTERN + r"[^/?#]+/galleries)"
-    test = ("https://www.bbc.co.uk/programmes/b006q2x0/galleries", {
-        "pattern": BbcGalleryExtractor.pattern,
-        "count": ">= 24",
-    })
+    pattern = BASE_PATTERN + r"[^/?#]+/galleries)(?:/?\?page=(\d+))?"
+    test = (
+        ("https://www.bbc.co.uk/programmes/b006q2x0/galleries", {
+            "pattern": BbcGalleryExtractor.pattern,
+            "range": "1-50",
+            "count": ">= 50",
+        }),
+        ("https://www.bbc.co.uk/programmes/b006q2x0/galleries?page=40", {
+            "pattern": BbcGalleryExtractor.pattern,
+            "count": ">= 100",
+        }),
+    )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.galleries_url = self.root + match.group(1)
+        self.path, self.page = match.groups()
 
     def items(self):
-        page = self.request(self.galleries_url).text
         data = {"_extractor": BbcGalleryExtractor}
+        params = {"page": text.parse_int(self.page, 1)}
+        galleries_url = self.root + self.path
 
-        for programme_id in text.extract_iter(
-                page, '<a href="https://www.bbc.co.uk/programmes/', '"'):
-            url = "https://www.bbc.co.uk/programmes/" + programme_id
-            yield Message.Queue, url, data
+        while True:
+            page = self.request(galleries_url, params=params).text
+            for programme_id in text.extract_iter(
+                    page, '<a href="https://www.bbc.co.uk/programmes/', '"'):
+                url = "https://www.bbc.co.uk/programmes/" + programme_id
+                yield Message.Queue, url, data
+            if 'rel="next"' not in page:
+                return
+            params["page"] += 1
