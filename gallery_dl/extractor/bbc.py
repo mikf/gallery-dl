@@ -63,9 +63,9 @@ class BbcProgrammeExtractor(Extractor):
     pattern = BASE_PATTERN + r"[^/?#]+/galleries?[^/#]+)"
     test = (
         ("https://www.bbc.co.uk/programmes/b006q2x0/galleries", {
-        "pattern": BbcGalleryExtractor.pattern,
-        "count": ">= 24",
-        }),
+            "pattern": BbcGalleryExtractor.pattern,
+            "count": ">= 24",
+            }),
         ("https://www.bbc.co.uk/programmes/b006q2x0/galleries?page=5"),
     )
 
