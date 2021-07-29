@@ -43,11 +43,24 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
     def images(self, page):
         iframe = self.root + "/iframe_image.php?id="
         backend = self.root + "/backend.php"
+        retries = self._retries
+
         for image_id in text.extract_iter(page, 'data-img-id="', '"'):
             spirit = self._annihilate(text.extract(self.request(
                 iframe + image_id).text, 'giraffe.annihilate("', '"')[0])
             params = {"spirit": spirit, "photo": image_id}
-            data = self.request(backend, params=params).json()
+
+            tries = 0
+            while tries <= retries:
+                try:
+                    data = self.request(backend, params=params).json()
+                    break
+                except Exception:
+                    tries += 1
+            else:
+                self.log.warning("Unable to fetch image %s", image_id)
+                continue
+
             yield data[0], {
                 "id"    : text.parse_int(image_id),
                 "width" : text.parse_int(data[1]),
