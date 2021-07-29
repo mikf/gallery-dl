@@ -27,7 +27,7 @@ class BbcGalleryExtractor(GalleryExtractor):
     test = (
         ("https://www.bbc.co.uk/programmes/p084qtzs/p085g9kg", {
             "pattern": r"https://ichef\.bbci\.co\.uk"
-                       r"/images/ic/976x549_b/\w+\.jpg",
+                       r"/images/ic/1920xn/\w+\.jpg",
             "count": 37,
             "keyword": {
                 "programme": "p084qtzs",
@@ -50,8 +50,8 @@ class BbcGalleryExtractor(GalleryExtractor):
 
     def images(self, page):
         return [
-            (imgset.rpartition(", ")[2].partition(" ")[0], None)
-            for imgset in text.extract_iter(page, 'data-image-src-sets="', '"')
+            (src.replace("/320x180_b/", "/1920xn/"), None)
+            for src in text.extract_iter(page, 'data-image-src="', '"')
         ]
 
 
