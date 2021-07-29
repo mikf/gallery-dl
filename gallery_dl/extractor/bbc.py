@@ -54,9 +54,17 @@ class BbcGalleryExtractor(GalleryExtractor):
         dimensions = "/{}xn/".format(width)
 
         return [
-            (src.replace("/320x180_b/", dimensions), None)
+            (src.replace("/320x180_b/", dimensions),
+             {"_fallback": self._fallback_urls(src, width)})
             for src in text.extract_iter(page, 'data-image-src="', '"')
         ]
+
+    @staticmethod
+    def _fallback_urls(src, max_width):
+        front, _, back = src.partition("/320x180_b/")
+        for width in (1920, 1600, 1280, 976):
+            if width < max_width:
+                yield "{}/{}xn/{}".format(front, width, back)
 
 
 class BbcProgrammeExtractor(Extractor):
