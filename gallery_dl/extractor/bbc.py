@@ -49,8 +49,12 @@ class BbcGalleryExtractor(GalleryExtractor):
         }
 
     def images(self, page):
+        width = self.config("width")
+        width = width - width % 16 if width else 1920
+        dimensions = "/{}xn/".format(width)
+
         return [
-            (src.replace("/320x180_b/", "/1920xn/"), None)
+            (src.replace("/320x180_b/", dimensions), None)
             for src in text.extract_iter(page, 'data-image-src="', '"')
         ]
 

@@ -783,6 +783,19 @@ Description
     * ``false``: Get posts from "Latest Updates" pages
 
 
+extractor.bbc.width
+-------------------
+Type
+    ``int``
+Default
+    ``1920``
+Description
+    Specifies the requested image width.
+
+    This value must be divisble by 16 and gets rounded down otherwise.
+    The maximum possible value appears to be ``1920``.
+
+
 extractor.blogger.videos
 ------------------------
 Type
