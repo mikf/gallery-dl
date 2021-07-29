@@ -95,8 +95,7 @@ class DeviantartExtractor(Extractor):
             if "content" in deviation:
                 content = deviation["content"]
 
-                if self.original and deviation["is_downloadable"] and \
-                        text.ext_from_url(content["src"]) != "gif":
+                if self.original and deviation["is_downloadable"]:
                     self._update_content(deviation, content)
 
                 if content["src"].startswith("https://images-wixmp-"):
@@ -807,10 +806,19 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         (("https://www.deviantart.com/josephbiwald/art/Destiny-2-804940104"), {
             "pattern": r"https://images-wixmp-\w+\.wixmp\.com/.*,q_100,"
         }),
-        # non-download URL for GIFs (#242)
+        # GIF (#242)
         (("https://www.deviantart.com/skatergators/art/COM-Moni-781571783"), {
             "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
                         r"/f/[^/]+/[^.]+\.gif\?token="),
+        }),
+        # Flash animation with GIF preview (#1731)
+        ("https://www.deviantart.com/yuumei/art/Flash-Comic-214724929", {
+            "pattern": r"https://api-da\.wixmp\.com/_api/download"
+                       r"/file\?downloadToken=.+",
+            "keyword": {
+                "filename": "flash_comic_tutorial_by_yuumei-d3juatd",
+                "extension": "swf",
+            },
         }),
         # sta.sh URLs from description (#302)
         (("https://www.deviantart.com/uotapo/art/INANAKI-Memo-590297498"), {
