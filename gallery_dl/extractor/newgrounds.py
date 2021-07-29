@@ -31,6 +31,11 @@ class NewgroundsExtractor(Extractor):
         self.user_root = "https://{}.newgrounds.com".format(self.user)
         self.flash = self.config("flash", True)
 
+        fmt = self.config("format", "original")
+        self.format = (True if not fmt or fmt == "original" else
+                       fmt if isinstance(fmt, int) else
+                       text.parse_int(fmt.rstrip("p")))
+
     def items(self):
         self.login()
 
@@ -175,8 +180,23 @@ class NewgroundsExtractor(Extractor):
                 "Referer": self.root,
             }
             sources = self.request(url, headers=headers).json()["sources"]
-            src = sources["360p"][0]["src"].replace(".360p.", ".")
-            fallback = self._video_fallback(sources)
+
+            if self.format is True:
+                src = sources["360p"][0]["src"].replace(".360p.", ".")
+                formats = sources
+            else:
+                formats = []
+                for fmt, src in sources.items():
+                    width = text.parse_int(fmt.rstrip("p"))
+                    if width <= self.format:
+                        formats.append((width, src))
+                if formats:
+                    formats.sort(reverse=True)
+                    src, formats = formats[0][1][0]["src"], formats[1:]
+                else:
+                    src = ""
+
+            fallback = self._video_fallback(formats)
             date = text.parse_timestamp(src.rpartition("?")[2])
 
         return {
@@ -192,11 +212,13 @@ class NewgroundsExtractor(Extractor):
         }
 
     @staticmethod
-    def _video_fallback(sources):
-        sources = list(sources.items())
-        sources.sort(key=lambda src: text.parse_int(src[0][:-1]), reverse=True)
-        for src in sources:
-            yield src[1][0]["src"]
+    def _video_fallback(formats):
+        if isinstance(formats, dict):
+            formats = list(formats.items())
+            formats.sort(key=lambda fmt: text.parse_int(fmt[0].rstrip("p")),
+                         reverse=True)
+        for fmt in formats:
+            yield fmt[1][0]["src"]
 
     def _pagination(self, kind):
         root = self.user_root
@@ -321,7 +343,13 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
         ("https://www.newgrounds.com/portal/view/161181/format/flash", {
             "pattern": r"https://uploads\.ungrounded\.net/161000"
                        r"/161181_ddautta_mask__550x281_\.swf\?f1081628129",
-        })
+        }),
+        # format selection (#1729)
+        ("https://www.newgrounds.com/portal/view/758545", {
+            "options": (("format", "720p"),),
+            "pattern": r"https://uploads\.ungrounded\.net/alternate/1482000"
+                       r"/1482860_alternate_102516\.720p\.mp4\?\d+",
+        }),
     )
 
     def __init__(self, match):
