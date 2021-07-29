@@ -46,13 +46,16 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
         retries = self._retries
 
         for image_id in text.extract_iter(page, 'data-img-id="', '"'):
-            spirit = self._annihilate(text.extract(self.request(
-                iframe + image_id).text, 'giraffe.annihilate("', '"')[0])
-            params = {"spirit": spirit, "photo": image_id}
-
+            spirit = None
             tries = 0
+
             while tries <= retries:
                 try:
+                    if not spirit:
+                        spirit = self._annihilate(text.extract(
+                            self.request(iframe + image_id).text,
+                            'giraffe.annihilate("', '"')[0])
+                        params = {"spirit": spirit, "photo": image_id}
                     data = self.request(backend, params=params).json()
                     break
                 except Exception:
