@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -33,7 +33,6 @@ class NewgroundsExtractor(Extractor):
 
     def items(self):
         self.login()
-        yield Message.Version, 1
 
         for post_url in self.posts():
             try:
@@ -59,7 +58,7 @@ class NewgroundsExtractor(Extractor):
 
     def posts(self):
         """Return urls of all relevant image pages"""
-        return self._pagination(self.subcategory)
+        return self._pagination(self._path)
 
     def login(self):
         username, password = self._get_auth_info()
@@ -336,7 +335,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
 
 class NewgroundsArtExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
-    subcategory = "art"
+    subcategory = _path = "art"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/art/?$"
     test = ("https://tomfulp.newgrounds.com/art", {
         "pattern": NewgroundsImageExtractor.pattern,
@@ -346,7 +345,7 @@ class NewgroundsArtExtractor(NewgroundsExtractor):
 
 class NewgroundsAudioExtractor(NewgroundsExtractor):
     """Extractor for all audio submissions of a newgrounds user"""
-    subcategory = "audio"
+    subcategory = _path = "audio"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/audio/?$"
     test = ("https://tomfulp.newgrounds.com/audio", {
         "pattern": r"https://audio.ngfiles.com/\d+/\d+_.+\.mp3",
@@ -356,7 +355,7 @@ class NewgroundsAudioExtractor(NewgroundsExtractor):
 
 class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
-    subcategory = "movies"
+    subcategory = _path = "movies"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/movies/?$"
     test = ("https://tomfulp.newgrounds.com/movies", {
         "pattern": r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+_.+",
