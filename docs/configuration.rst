@@ -1361,6 +1361,21 @@ Description
     Download original Adobe Flash animations instead of pre-rendered videos.
 
 
+extractor.newgrounds.format
+---------------------------
+Type
+    ``string``
+Default
+    ``"original"``
+Example
+    ``"720p"``
+Description
+    Selects the preferred format for video downloads.
+
+    If the selected format is not available,
+    the next smaller one gets chosen.
+
+
 extractor.newgrounds.include
 ----------------------------
 Type
