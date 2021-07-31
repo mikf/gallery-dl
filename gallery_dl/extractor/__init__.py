@@ -146,6 +146,7 @@ modules = [
     "oauth",
     "test",
     "ytdl",
+    "desktopography",
 ]
 
 
