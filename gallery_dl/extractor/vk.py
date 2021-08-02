@@ -88,6 +88,7 @@ class VkPhotosExtractor(Extractor):
         yield Message.Directory, data
         sub = re.compile(r"/imp[fg]/").sub
         needle = 'data-id="{}_'.format(user_id)
+        cnt = 0
 
         while True:
             offset, html = self.request(
