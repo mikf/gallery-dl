@@ -38,8 +38,8 @@ class KemonopartyExtractor(Extractor):
 
         if self.config("metadata"):
             username = text.unescape(text.extract(
-                self.request(self.user_url).text, "<title>", " | Kemono"
-            )[0]).lstrip()
+                self.request(self.user_url).text,
+                '<meta name="artist_name" content="', '"')[0])
         else:
             username = None
 
