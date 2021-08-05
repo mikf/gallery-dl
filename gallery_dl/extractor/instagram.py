@@ -43,6 +43,7 @@ class InstagramExtractor(Extractor):
         self.login()
         data = self.metadata()
         videos = self.config("videos", True)
+        video_headers = {"User-Agent": "Mozilla/5.0"}
 
         for post in self.posts():
 
@@ -60,6 +61,8 @@ class InstagramExtractor(Extractor):
                     url = file["display_url"]
                 elif not videos:
                     continue
+                else:
+                    file["_http_headers"] = video_headers
                 file.update(post)
                 yield Message.Url, url, text.nameext_from_url(url, file)
 
