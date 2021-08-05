@@ -98,20 +98,21 @@ class HttpDownloader(DownloaderBase):
                 time.sleep(tries)
 
             tries += 1
-            headers = {"Accept": "*/*"}
             file_header = None
 
-            # check for .part file
-            file_size = pathfmt.part_size()
-            if file_size:
-                headers["Range"] = "bytes={}-".format(file_size)
-            # general headers
-            if self.headers:
-                headers.update(self.headers)
-            # file-specific headers
+            # collect HTTP headers
+            headers = {"Accept": "*/*"}
+            #   file-specific headers
             extra = kwdict.get("_http_headers")
             if extra:
                 headers.update(extra)
+            #   general headers
+            if self.headers:
+                headers.update(self.headers)
+            #   partial content
+            file_size = pathfmt.part_size()
+            if file_size:
+                headers["Range"] = "bytes={}-".format(file_size)
 
             # connect to (remote) source
             try:
