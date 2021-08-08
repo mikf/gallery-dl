@@ -47,9 +47,6 @@ class FuraffinityExtractor(Extractor):
                             post["_description"], 'href="http', '"'):
                         yield Message.Queue, "http" + url, post
 
-    def posts(self):
-        return self._pagination()
-
     def metadata(self):
         return None
 
@@ -126,12 +123,12 @@ class FuraffinityExtractor(Extractor):
     def _process_description(description):
         return text.unescape(text.remove_html(description, "", ""))
 
-    def _pagination(self):
+    def _pagination(self, path):
         num = 1
 
         while True:
             url = "{}/{}/{}/{}/".format(
-                self.root, self.subcategory, self.user, num)
+                self.root, path, self.user, num)
             page = self.request(url).text
             post_id = None
 
@@ -196,6 +193,9 @@ class FuraffinityGalleryExtractor(FuraffinityExtractor):
         "count": 6,
     })
 
+    def posts(self):
+        return self._pagination("gallery")
+
 
 class FuraffinityScrapsExtractor(FuraffinityExtractor):
     """Extractor for a furaffinity user's scraps"""
@@ -207,6 +207,9 @@ class FuraffinityScrapsExtractor(FuraffinityExtractor):
                    r"/art/[^/]+(/stories)?/\d+/\d+.\w+.",
         "count": ">= 3",
     })
+
+    def posts(self):
+        return self._pagination("scraps")
 
 
 class FuraffinityFavoriteExtractor(FuraffinityExtractor):
