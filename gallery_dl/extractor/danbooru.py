@@ -32,6 +32,7 @@ class DanbooruExtractor(Extractor):
         super().__init__(match)
         self.root = "https://{}.donmai.us".format(match.group(1))
         self.ugoira = self.config("ugoira", False)
+        self.external = self.config("external", False)
         self.extended_metadata = self.config("metadata", False)
 
         username, api_key = self._get_auth_info()
@@ -52,6 +53,10 @@ class DanbooruExtractor(Extractor):
             try:
                 url = post["file_url"]
             except KeyError:
+                if self.external and post["source"]:
+                    post.update(data)
+                    yield Message.Directory, post
+                    yield Message.Queue, post["source"], post
                 continue
 
             text.nameext_from_url(url, post)
@@ -125,6 +130,11 @@ class DanbooruTagExtractor(DanbooruExtractor):
         # test page transitions
         ("https://danbooru.donmai.us/posts?tags=mushishi", {
             "count": ">= 300",
+        }),
+        # 'external' option (#1747)
+        ("https://danbooru.donmai.us/posts?tags=pixiv_id%3A1476533", {
+            "options": (("external", True),),
+            "pattern": r"http://img16.pixiv.net/img/takaraakihito/1476533.jpg",
         }),
         ("https://hijiribe.donmai.us/posts?tags=bonocho"),
         ("https://sonohara.donmai.us/posts?tags=bonocho"),

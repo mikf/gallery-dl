@@ -806,17 +806,15 @@ Description
     Download embedded videos hosted on https://www.blogger.com/
 
 
-extractor.danbooru.ugoira
--------------------------
+extractor.danbooru.external
+---------------------------
 Type
     ``bool``
 Default
     ``false``
 Description
-    Controls the download target for Ugoira posts.
-
-    * ``true``: Original ZIP archives
-    * ``false``: Converted video files
+    For unavailable or restricted posts,
+    follow the ``source`` and download from there if possible.
 
 
 extractor.danbooru.metadata
@@ -829,6 +827,19 @@ Description
     Extract additional metadata (notes, artist commentary, parent, children)
 
     Note: This requires 1 additional HTTP request for each post.
+
+
+extractor.danbooru.ugoira
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Controls the download target for Ugoira posts.
+
+    * ``true``: Original ZIP archives
+    * ``false``: Converted video files
 
 
 extractor.derpibooru.api-key
