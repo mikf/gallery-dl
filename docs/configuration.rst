@@ -1128,6 +1128,16 @@ Description
     * ``"html"``: Raw HTML content
 
 
+extractor.furaffinity.external
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Follow external URLs linked in descriptions.
+
+
 extractor.furaffinity.include
 -----------------------------
 Type
