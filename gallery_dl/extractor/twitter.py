@@ -726,21 +726,25 @@ class TwitterAPI():
             if csrf_token:
                 self.headers["x-csrf-token"] = csrf_token
 
+            data = response.json()
+            if "errors" in data:
+                try:
+                    msg = ", ".join(
+                        '"' + error["message"] + '"'
+                        for error in data["errors"]
+                    )
+                except Exception:
+                    msg = data["errors"]
+                if response.status_code < 400:
+                    self.extractor.log.warning(msg)
+
             if response.status_code < 400:
-                return response.json()
+                return data
             if response.status_code == 429:
                 until = response.headers.get("x-rate-limit-reset")
                 seconds = None if until else 60
                 self.extractor.wait(until=until, seconds=seconds)
                 continue
-
-            try:
-                msg = ", ".join(
-                    '"' + error["message"] + '"'
-                    for error in response.json()["errors"]
-                )
-            except Exception:
-                msg = response.text
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, msg)
 
