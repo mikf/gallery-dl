@@ -29,9 +29,10 @@ class FuraffinityExtractor(Extractor):
         self.offset = 0
 
         if self.config("descriptions") == "html":
-            self._process_description = lambda x: x.strip()
+            self._process_description = str.strip
 
     def items(self):
+        external = self.config("external", False)
         metadata = self.metadata()
         for post_id in util.advance(self.posts(), self.offset):
             post = self._parse_post(post_id)
@@ -40,6 +41,11 @@ class FuraffinityExtractor(Extractor):
                     post.update(metadata)
                 yield Message.Directory, post
                 yield Message.Url, post["url"], post
+
+                if external:
+                    for url in text.extract_iter(
+                            post["_description"], 'href="http', '"'):
+                        yield Message.Queue, "http" + url, post
 
     def posts(self):
         return self._pagination()
@@ -80,8 +86,7 @@ class FuraffinityExtractor(Extractor):
             data["tags"] = text.split_html(tags)
             data["title"] = text.unescape(extr("<h2><p>", "</p></h2>"))
             data["artist"] = extr("<strong>", "<")
-            data["description"] = self._process_description(extr(
-                'class="section-body">', '</div>'))
+            data["_description"] = extr('class="section-body">', '</div>')
             data["views"] = pi(rh(extr('class="views">', '</span>')))
             data["favorites"] = pi(rh(extr('class="favorites">', '</span>')))
             data["comments"] = pi(rh(extr('class="comments">', '</span>')))
@@ -108,12 +113,12 @@ class FuraffinityExtractor(Extractor):
             data["tags"] = text.split_html(extr(
                 'id="keywords">', '</div>'))[::2]
             data["rating"] = extr('<img alt="', ' ')
-            data["description"] = self._process_description(extr(
-                "</table>", "</table>"))
+            data["_description"] = extr("</table>", "</table>")
 
         data["artist_url"] = data["artist"].replace("_", "").lower()
         data["user"] = self.user or data["artist_url"]
         data["date"] = text.parse_timestamp(data["filename"].partition(".")[0])
+        data["description"] = self._process_description(data["_description"])
 
         return data
 
@@ -272,6 +277,13 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
                 "width"      : 120,
                 "height"     : 120,
             },
+        }),
+        # 'external' option (#1492)
+        ("https://www.furaffinity.net/view/42166511/", {
+            "options": (("external", True),),
+            "pattern": r"https://d\d*\.f(uraffinity|acdn)\.net/"
+                       r"|http://www\.postybirb\.com",
+            "count": 2,
         }),
         ("https://furaffinity.net/view/21835115/"),
         ("https://sfw.furaffinity.net/view/21835115/"),
