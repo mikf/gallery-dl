@@ -38,14 +38,14 @@ easily installed or upgraded using pip_:
 
 .. code:: bash
 
-    $ python3 -m pip install -U gallery-dl
+    $ python3 -m pip install --upgrade gallery-dl
 
 Installing the latest dev version directly from GitHub can be done with
 pip_ as well:
 
 .. code:: bash
 
-    $ python3 -m pip install -U -I --no-deps --no-cache-dir https://github.com/mikf/gallery-dl/archive/master.tar.gz
+    $ python3 -m pip install --upgrade -I --no-deps --no-cache-dir https://github.com/mikf/gallery-dl/archive/master.tar.gz
 
 Note: Windows users should use :code:`py -3` instead of :code:`python3`.
 
