@@ -50,11 +50,16 @@ class TwitterExtractor(Extractor):
             if not self.retweets and "retweeted_status_id_str" in tweet:
                 self.log.debug("Skipping %s (retweet)", tweet["id_str"])
                 continue
-            if not self.replies and "in_reply_to_user_id_str" in tweet:
-                self.log.debug("Skipping %s (reply)", tweet["id_str"])
-                continue
             if not self.quoted and "quoted" in tweet:
                 self.log.debug("Skipping %s (quoted tweet)", tweet["id_str"])
+                continue
+            if "in_reply_to_user_id_str" in tweet and (
+                not self.replies or (
+                    self.replies == "self" and
+                    tweet["in_reply_to_user_id_str"] != tweet["user_id_str"]
+                )
+            ):
+                self.log.debug("Skipping %s (reply)", tweet["id_str"])
                 continue
 
             files = []
@@ -450,6 +455,15 @@ class TwitterTweetExtractor(TwitterExtractor):
         # 'replies' option (#705)
         ("https://twitter.com/i/web/status/1170041925560258560", {
             "options": (("replies", False),),
+            "count": 0,
+        }),
+        # 'replies' to self (#1254)
+        ("https://twitter.com/i/web/status/1424882930803908612", {
+            "options": (("replies", "self"),),
+            "count": 4,
+        }),
+        ("https://twitter.com/i/web/status/1424898916156284928", {
+            "options": (("replies", "self"),),
             "count": 0,
         }),
         # "quoted" option (#854)
