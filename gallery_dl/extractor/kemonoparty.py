@@ -74,9 +74,7 @@ class KemonopartyExtractor(Extractor):
                 post["type"] = file["type"]
                 url = file["path"]
                 if url[0] == "/":
-                    url = "https://data.kemono.party" + url
-                elif url.startswith("https://kemono.party/"):
-                    url = "https://data.kemono.party" + url[20:]
+                    url = self.root + url
 
                 text.nameext_from_url(file["name"], post)
                 yield Message.Url, url, post
@@ -125,7 +123,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
     pattern = BASE_PATTERN + r"/post/([^/?#]+)"
     test = (
         ("https://kemono.party/fanbox/user/6993449/post/506575", {
-            "pattern": r"https://data\.kemono\.party/files/fanbox"
+            "pattern": r"https://kemono\.party/files/fanbox"
                        r"/6993449/506575/P058kDFYus7DbqAkGlfWTlOr\.jpeg",
             "keyword": {
                 "added": "Wed, 06 May 2020 20:28:02 GMT",
@@ -148,12 +146,12 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         }),
         # inline image (#1286)
         ("https://kemono.party/fanbox/user/7356311/post/802343", {
-            "pattern": r"https://data\.kemono\.party/inline/fanbox"
+            "pattern": r"https://kemono\.party/inline/fanbox"
                        r"/uaozO4Yga6ydkGIJFAQDixfE\.jpeg",
         }),
         # kemono.party -> data.kemono.party
         ("https://kemono.party/gumroad/user/trylsc/post/IURjT", {
-            "pattern": r"https://data\.kemono\.party/(file|attachment)s"
+            "pattern": r"https://kemono\.party/(file|attachment)s"
                        r"/gumroad/trylsc/IURjT/",
         }),
         # username (#1548, #1652)
