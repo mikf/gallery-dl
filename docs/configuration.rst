@@ -1899,6 +1899,9 @@ Default
 Description
     Fetch media from replies to other Tweets.
 
+    If this value is ``"self"``, only consider replies where
+    reply and original Tweet are from the same user.
+
 
 extractor.twitter.retweets
 --------------------------
