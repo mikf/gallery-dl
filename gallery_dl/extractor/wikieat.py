@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text
 
 
-class _WikieatThreadExtractor(Extractor):
+class WikieatThreadExtractor(Extractor):
     """Extractor for Wikieat threads"""
     category = "wikieat"
     subcategory = "thread"
@@ -20,16 +20,18 @@ class _WikieatThreadExtractor(Extractor):
     filename_fmt = "{time}{num:?-//} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     pattern = r"(?:https?://)?wikieat\.club/([^/]+)/res/(\d+)"
-    test = (
-        ("https://wikieat.club/cel/res/25321.html")
-    )
+    test = ("https://wikieat.club/cel/res/25321.html", {
+        "pattern": r"https://wikieat\.club/cel/src/\d+(-\d)?\.\w+",
+        "count": ">= 200",
+    })
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "https://wikieat.club/{}/res/{}.json".format(self.board, self.thread)
+        url = "https://wikieat.club/{}/res/{}.json".format(
+            self.board, self.thread)
         posts = self.request(url).json()["posts"]
         title = posts[0].get("sub") or text.remove_html(posts[0]["com"])
         process = self._process
@@ -62,14 +64,15 @@ class _WikieatThreadExtractor(Extractor):
         return Message.Url, url, post
 
 
-class _WikieatBoardExtractor(Extractor):
+class WikieatBoardExtractor(Extractor):
     """Extractor for Wikieat boards"""
     category = "wikieat"
     subcategory = "board"
-    pattern = r"(?:https?://)?wikieat\.club/([^/?#]+)/(?:index|catalog|\d+)\.html"
+    pattern = (r"(?:https?://)?wikieat\.club"
+               r"/([^/?#]+)/(?:index|catalog|\d+)\.html")
     test = (
         ("https://wikieat.club/cel/index.html", {
-            "pattern": _WikieatThreadExtractor.pattern,
+            "pattern": WikieatThreadExtractor.pattern,
             "count": ">= 100",
         }),
         ("https://wikieat.club/cel/catalog.html"),
@@ -89,5 +92,5 @@ class _WikieatBoardExtractor(Extractor):
                 url = "https://wikieat.club/{}/res/{}.html".format(
                     self.board, thread["no"])
                 thread["page"] = page["page"]
-                thread["_extractor"] = _WikieatThreadExtractor
+                thread["_extractor"] = WikieatThreadExtractor
                 yield Message.Queue, url, thread
