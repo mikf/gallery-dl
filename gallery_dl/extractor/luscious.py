@@ -116,6 +116,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
     def __init__(self, match):
         LusciousExtractor.__init__(self, match)
         self.album_id = match.group(1)
+        self.gif = self.config("gif", False)
 
     def items(self):
         album = self.metadata()
@@ -130,7 +131,8 @@ class LusciousAlbumExtractor(LusciousExtractor):
             image["date"] = text.parse_timestamp(image["created"])
             image["id"] = text.parse_int(image["id"])
 
-            url = image["url_to_video"] or image["url_to_original"]
+            url = image["url_to_original"] or image["url_to_video"] \
+                if self.gif else image["url_to_video"] or image["url_to_original"]
             yield Message.Url, url, text.nameext_from_url(url, image)
 
     def metadata(self):

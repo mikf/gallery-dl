@@ -28,6 +28,7 @@ class ReactorExtractor(Extractor):
         Extractor.__init__(self, match)
         self.root = "http://" + match.group(1)
         self.session.headers["Referer"] = self.root
+        self.gif = self.config("gif", False)
 
         if not self.category:
             # set category based on domain name
@@ -123,6 +124,12 @@ class ReactorExtractor(Extractor):
                 url = "ytdl:" + text.unescape(url)
             elif "/post/webm/" not in url and "/post/mp4/" not in url:
                 url = url.replace("/post/", "/post/full/")
+
+            if self.gif and ("/post/webm/" in url or "/post/mp4/" in url):
+                gif_url = text.extract(image, '<a href="', '"')[0]
+                if not gif_url:
+                    continue
+                url = gif_url
 
             yield {
                 "url": url,
