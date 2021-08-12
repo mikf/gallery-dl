@@ -1325,7 +1325,7 @@ Description
 
 
 extractor.luscious.gif
---------------------------
+----------------------
 Type
     ``bool``
 Default
@@ -1333,7 +1333,7 @@ Default
 Description
     Format in which to download animated images.
 
-    Use ``true`` to download animated images as gifs and ``false`` 
+    Use ``true`` to download animated images as gifs and ``false``
     to download as mp4 videos.
 
 
@@ -1641,7 +1641,7 @@ Description
 
 
 extractor.reactor.gif
---------------------------
+---------------------
 Type
     ``bool``
 Default
@@ -1649,7 +1649,7 @@ Default
 Description
     Format in which to download animated images.
 
-    Use ``true`` to download animated images as gifs and ``false`` 
+    Use ``true`` to download animated images as gifs and ``false``
     to download as mp4 videos.
 
 
