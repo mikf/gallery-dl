@@ -596,8 +596,8 @@ class TwitterAPI():
             "ext": "mediaStats,highlightedLabel",
         }
 
-        cookies = self.extractor.session.cookies
-        cookiedomain = ".twitter.com"
+        cookies = extractor.session.cookies
+        cookiedomain = extractor.cookiedomain
 
         # CSRF
         csrf_token = cookies.get("ct0", domain=cookiedomain)
@@ -751,14 +751,35 @@ class TwitterAPI():
                     msg = data["errors"]
                 if response.status_code < 400:
                     self.extractor.log.warning(msg)
+            else:
+                msg = ""
 
             if response.status_code < 400:
+                # success
                 return data
+
             if response.status_code == 429:
+                # rate limit exceeded
                 until = response.headers.get("x-rate-limit-reset")
                 seconds = None if until else 60
                 self.extractor.wait(until=until, seconds=seconds)
                 continue
+
+            if response.status_code == 401 and \
+                    "have been blocked from viewing" in msg:
+                # account blocked
+                extr = extr = self.extractor
+                if self.headers["x-twitter-auth-type"] and \
+                        extr.config("logout"):
+                    guest_token = self._guest_token()
+                    extr.session.cookies.set(
+                        "gt", guest_token, domain=extr.cookiedomain)
+                    self.headers["x-guest-token"] = guest_token
+                    self.headers["x-twitter-auth-type"] = None
+                    extr.log.info("Retrying API request as guest")
+                    continue
+
+            # error
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, msg)
 
