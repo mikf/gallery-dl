@@ -1,6 +1,32 @@
 # Changelog
 
-## Unreleased
+## 1.18.3 - 2021-08-13
+### Additions
+- [bbc] add `width` option ([#1706](https://github.com/mikf/gallery-dl/issues/1706))
+- [danbooru] add `external` option ([#1747](https://github.com/mikf/gallery-dl/issues/1747))
+- [furaffinity] add `external` option ([#1492](https://github.com/mikf/gallery-dl/issues/1492))
+- [luscious] add `gif` option ([#1701](https://github.com/mikf/gallery-dl/issues/1701))
+- [newgrounds] add `format` option ([#1729](https://github.com/mikf/gallery-dl/issues/1729))
+- [reactor] add `gif` option ([#1701](https://github.com/mikf/gallery-dl/issues/1701))
+- [twitter] warn about suspended accounts ([#1759](https://github.com/mikf/gallery-dl/issues/1759))
+- [twitter] extend `replies` option ([#1254](https://github.com/mikf/gallery-dl/issues/1254))
+- [twitter] add option to log out and retry when blocked ([#1719](https://github.com/mikf/gallery-dl/issues/1719))
+- [wikieat] add `thread` and `board` extractors ([#1699](https://github.com/mikf/gallery-dl/issues/1699), [#1607](https://github.com/mikf/gallery-dl/issues/1607))
+### Changes
+- [instagram] increase default delay between HTTP requests from 5s to 8s ([#1732](https://github.com/mikf/gallery-dl/issues/1732))
+### Fixes
+- [bbc] improve image dimensions ([#1706](https://github.com/mikf/gallery-dl/issues/1706))
+- [bbc] support multi-page gallery listings ([#1730](https://github.com/mikf/gallery-dl/issues/1730))
+- [behance] fix `collection` extraction
+- [deviantart] get original files for GIF previews ([#1731](https://github.com/mikf/gallery-dl/issues/1731))
+- [furaffinity] fix errors when using `category-transfer` ([#1274](https://github.com/mikf/gallery-dl/issues/1274))
+- [hitomi] fix image URLs ([#1765](https://github.com/mikf/gallery-dl/issues/1765))
+- [instagram] use custom User-Agent header for video downloads ([#1682](https://github.com/mikf/gallery-dl/issues/1682), [#1623](https://github.com/mikf/gallery-dl/issues/1623), [#1580](https://github.com/mikf/gallery-dl/issues/1580))
+- [kemonoparty] fix username extraction ([#1750](https://github.com/mikf/gallery-dl/issues/1750))
+- [kemonoparty] update file server domain ([#1764](https://github.com/mikf/gallery-dl/issues/1764))
+- [newgrounds] fix errors when using `category-transfer` ([#1274](https://github.com/mikf/gallery-dl/issues/1274))
+- [nsfwalbum] retry backend requests when extracting image URLs ([#1733](https://github.com/mikf/gallery-dl/issues/1733), [#1271](https://github.com/mikf/gallery-dl/issues/1271))
+- [vk] prevent exception for empty/private profiles ([#1742](https://github.com/mikf/gallery-dl/issues/1742))
 
 ## 1.18.2 - 2021-07-23
 ### Additions
