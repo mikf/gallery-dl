@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.18.3 - 2021-08-13
 ### Additions
 - [bbc] add `width` option ([#1706](https://github.com/mikf/gallery-dl/issues/1706))
