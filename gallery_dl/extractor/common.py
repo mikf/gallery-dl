@@ -226,7 +226,7 @@ class Extractor():
             elif platform == "linux":
                 platform = "X11; Linux x86_64"
             elif platform == "macos":
-                platform = "Macintosh; Intel Mac OS X 11.2"
+                platform = "Macintosh; Intel Mac OS X 11.5"
 
             if browser == "chrome":
                 _emulate_browser_chrome(session, platform)
@@ -235,7 +235,7 @@ class Extractor():
         else:
             headers["User-Agent"] = self.config("user-agent", (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                "rv:78.0) Gecko/20100101 Firefox/78.0"))
+                "rv:91.0) Gecko/20100101 Firefox/91.0"))
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
             headers["Accept-Encoding"] = "gzip, deflate"
@@ -602,8 +602,8 @@ class HTTPSAdapter(HTTPAdapter):
 
 def _emulate_browser_firefox(session, platform):
     headers = session.headers
-    headers["User-Agent"] = ("Mozilla/5.0 (" + platform + "; rv:78.0) "
-                             "Gecko/20100101 Firefox/78.0")
+    headers["User-Agent"] = ("Mozilla/5.0 (" + platform + "; rv:91.0) "
+                             "Gecko/20100101 Firefox/91.0")
     headers["Accept"] = ("text/html,application/xhtml+xml,"
                          "application/xml;q=0.9,image/webp,*/*;q=0.8")
     headers["Accept-Language"] = "en-US,en;q=0.5"
@@ -636,13 +636,13 @@ def _emulate_browser_firefox(session, platform):
 
 def _emulate_browser_chrome(session, platform):
     if platform.startswith("Macintosh"):
-        platform = platform.replace(".", "_") + "_0"
+        platform = platform.replace(".", "_") + "_2"
 
     headers = session.headers
     headers["Upgrade-Insecure-Requests"] = "1"
     headers["User-Agent"] = (
         "Mozilla/5.0 (" + platform + ") AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36")
+        "(KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36")
     headers["Accept"] = ("text/html,application/xhtml+xml,application/xml;"
                          "q=0.9,image/webp,image/apng,*/*;q=0.8")
     headers["Referer"] = None
