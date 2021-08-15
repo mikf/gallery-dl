@@ -1906,6 +1906,16 @@ Description
     <https://help.twitter.com/en/using-twitter/twitter-conversations>`__.
 
 
+extractor.twitter.logout
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Logout and retry as guest when access to another user's Tweets is blocked.
+
+
 extractor.twitter.quoted
 ------------------------
 Type
