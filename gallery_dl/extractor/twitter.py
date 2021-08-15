@@ -768,12 +768,14 @@ class TwitterAPI():
             if response.status_code == 401 and \
                     "have been blocked from viewing" in msg:
                 # account blocked
-                extr = extr = self.extractor
+                extr = self.extractor
                 if self.headers["x-twitter-auth-type"] and \
                         extr.config("logout"):
                     guest_token = self._guest_token()
                     extr.session.cookies.set(
                         "gt", guest_token, domain=extr.cookiedomain)
+                    extr._cookiefile = None
+                    del extr.session.cookies["auth_token"]
                     self.headers["x-guest-token"] = guest_token
                     self.headers["x-twitter-auth-type"] = None
                     extr.log.info("Retrying API request as guest")
