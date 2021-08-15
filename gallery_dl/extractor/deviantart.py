@@ -896,9 +896,6 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
         eclipse_api = DeviantartEclipseAPI(self)
         if self._warning:
             DeviantartScrapsExtractor._warning = False
-            if not self._check_cookies(self.cookienames):
-                self.log.warning(
-                    "No session cookies set: Unable to fetch mature scraps.")
 
         for obj in eclipse_api.gallery_scraps(self.user, self.offset):
             deviation = obj["deviation"]
