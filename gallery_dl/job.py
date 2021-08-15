@@ -199,6 +199,7 @@ class DownloadJob(Job):
         Job.__init__(self, url, parent)
         self.log = self.get_logger("download")
         self.blacklist = None
+        self.fallback = None
         self.archive = None
         self.sleep = None
         self.hooks = ()
@@ -237,8 +238,9 @@ class DownloadJob(Job):
         # download from URL
         if not self.download(url):
 
-            # use fallback URLs if available
-            for num, url in enumerate(kwdict.get("_fallback", ()), 1):
+            # use fallback URLs if available/enabled
+            fallback = kwdict.get("_fallback", ()) if self.fallback else ()
+            for num, url in enumerate(fallback, 1):
                 util.remove_file(pathfmt.temppath)
                 self.log.info("Trying fallback URL #%d", num)
                 if self.download(url):
@@ -394,6 +396,7 @@ class DownloadJob(Job):
             pathfmt.set_directory(kwdict)
 
         self.sleep = cfg("sleep")
+        self.fallback = cfg("fallback", True)
         if not cfg("download", True):
             # monkey-patch method to do nothing and always return True
             self.download = pathfmt.fix_extension
