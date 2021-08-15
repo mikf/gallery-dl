@@ -194,16 +194,6 @@ Description
     Share number of skipped downloads between parent and child extractors.
 
 
-extractor.*.url-metadata
-------------------------
-Type
-    ``string``
-Default
-    ``null``
-Description
-    Insert a file's download URL into its metadata dictionary as the given name.
-
-
 extractor.*.path-restrict
 -------------------------
 Type
@@ -507,6 +497,16 @@ Description
     `format strings`_.
 
 
+extractor.*.url-metadata
+------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert a file's download URL into its metadata dictionary as the given name.
+
+
 extractor.*.category-transfer
 -----------------------------
 Type
@@ -669,6 +669,16 @@ Description
     Setting this to ``false`` won't download any files, but all other
     functions (`postprocessors`_, `download archive`_, etc.)
     will be executed as normal.
+
+
+extractor.*.fallback
+--------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Use fallback download URLs when a download fails.
 
 
 extractor.*.image-range
