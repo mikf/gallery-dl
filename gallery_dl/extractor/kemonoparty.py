@@ -24,13 +24,9 @@ class KemonopartyExtractor(Extractor):
     filename_fmt = "{id}_{title}_{num:>02}_{filename}.{extension}"
     archive_fmt = "{service}_{user}_{id}_{num}"
     cookiedomain = ".kemono.party"
-    _warning = True
 
     def items(self):
-        if self._warning:
-            if not self._check_cookies(("__ddg1", "__ddg2")):
-                self.log.warning("no DDoS-GUARD cookies set (__ddg1, __ddg2)")
-            KemonopartyExtractor._warning = False
+        self._prepare_ddosguard_cookies()
 
         find_inline = re.compile(r'src="(/inline/[^"]+)').findall
         skip_service = \
