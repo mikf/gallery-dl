@@ -29,7 +29,6 @@ class _500pxExtractor(Extractor):
     def items(self):
         first = True
         data = self.metadata()
-        yield Message.Version, 1
 
         for photo in self.photos():
             url = photo["images"][-1]["url"]

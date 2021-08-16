@@ -43,7 +43,6 @@ class ImgbbExtractor(Extractor):
         data = self.metadata(page)
         first = True
 
-        yield Message.Version, 1
         for img in self.images(page):
             image = {
                 "id"       : img["url_viewer"].rpartition("/")[2],
@@ -230,6 +229,5 @@ class ImgbbImageExtractor(ImgbbExtractor):
         }
         image["extension"] = text.ext_from_url(image["url"])
 
-        yield Message.Version, 1
         yield Message.Directory, image
         yield Message.Url, image["url"], image

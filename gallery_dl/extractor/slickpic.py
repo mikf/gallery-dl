@@ -68,7 +68,6 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
             "count": len(imgs),
         }
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for num, img in enumerate(imgs, 1):
             url = img["url_rsz"] + "/o/" + img["fname"]
@@ -137,6 +136,5 @@ class SlickpicUserExtractor(SlickpicExtractor):
         data = {"_extractor": SlickpicAlbumExtractor}
         base = self.root + "/albums/"
 
-        yield Message.Version, 1
         for album in text.extract_iter(page, 'href="' + base, '"'):
             yield Message.Queue, base + album, data

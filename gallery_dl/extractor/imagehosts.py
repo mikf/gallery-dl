@@ -57,7 +57,6 @@ class ImagehostImageExtractor(Extractor):
         if self.https and url.startswith("http:"):
             url = "https:" + url[5:]
 
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
 

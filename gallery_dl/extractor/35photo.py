@@ -22,7 +22,6 @@ class _35photoExtractor(Extractor):
     def items(self):
         first = True
         data = self.metadata()
-        yield Message.Version, 1
 
         for photo_id in self.photos():
             for photo in self._photo_data(photo_id):

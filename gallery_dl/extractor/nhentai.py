@@ -117,7 +117,6 @@ class NhentaiSearchExtractor(NhentaiBase, Extractor):
         self.params = text.parse_query(match.group(1))
 
     def items(self):
-        yield Message.Version, 1
         data = {"_extractor": NhentaiGalleryExtractor}
         for gallery_id in self._pagination(self.params):
             url = "{}/g/{}/".format(self.root, gallery_id)

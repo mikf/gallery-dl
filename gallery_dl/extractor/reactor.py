@@ -37,7 +37,6 @@ class ReactorExtractor(Extractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, data
         for post in self.posts():
             for image in self._parse_post(post):
@@ -197,7 +196,6 @@ class ReactorPostExtractor(ReactorExtractor):
         self.post_id = match.group(2)
 
     def items(self):
-        yield Message.Version, 1
         post = self.request(self.url).text
         pos = post.find('class="uhead">')
         for image in self._parse_post(post[pos:]):

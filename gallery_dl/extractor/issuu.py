@@ -94,7 +94,6 @@ class IssuuUserExtractor(IssuuBase, Extractor):
         url = "{}/call/profile/v1/documents/{}".format(self.root, self.user)
         params = {"offset": 0, "limit": "25"}
 
-        yield Message.Version, 1
         while True:
             data = self.request(url, params=params).json()
 

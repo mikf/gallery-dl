@@ -60,7 +60,6 @@ class PornhubGalleryExtractor(PornhubExtractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, data
         for num, image in enumerate(self.images(), 1):
             url = image["url"]
@@ -146,7 +145,6 @@ class PornhubUserExtractor(PornhubExtractor):
         }
 
         data = {"_extractor": PornhubGalleryExtractor}
-        yield Message.Version, 1
         while True:
             page = self.request(
                 url, method="POST", headers=headers, params=params).text

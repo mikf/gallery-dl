@@ -134,13 +134,6 @@ class Job():
             if self.pred_queue(url, kwdict):
                 self.handle_queue(url, kwdict)
 
-        elif msg[0] == Message.Version:
-            if msg[1] != 1:
-                raise "unsupported message-version ({}, {})".format(
-                    self.extractor.category, msg[1]
-                )
-            # TODO: support for multiple message versions
-
     def handle_url(self, url, kwdict):
         """Handle Message.Url"""
 

@@ -95,7 +95,6 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
         del album["Uris"]
         data = {"Album": album, "User": user}
 
-        yield Message.Version, 1
         yield Message.Directory, data
 
         for image in self.api.album_images(self.album_id, "ImageSizeDetails"):
@@ -133,7 +132,6 @@ class SmugmugImageExtractor(SmugmugExtractor):
         data = {"Image": image}
         text.nameext_from_url(url, data)
 
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
 
@@ -170,7 +168,6 @@ class SmugmugPathExtractor(SmugmugExtractor):
         self.domain, self.user, self.path = match.groups()
 
     def items(self):
-        yield Message.Version, 1
 
         if not self.user:
             self.user = self.api.site_user(self.domain)["NickName"]

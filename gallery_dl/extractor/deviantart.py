@@ -78,7 +78,6 @@ class DeviantartExtractor(Extractor):
             else:
                 self.user = profile["user"]["username"]
 
-        yield Message.Version, 1
         for deviation in self.deviations():
             if isinstance(deviation, tuple):
                 url, data = deviation
@@ -924,7 +923,6 @@ class DeviantartFollowingExtractor(DeviantartExtractor):
     def items(self):
         eclipse_api = DeviantartEclipseAPI(self)
 
-        yield Message.Version, 1
         for user in eclipse_api.user_watching(self.user, self.offset):
             url = "{}/{}".format(self.root, user["username"])
             user["_extractor"] = DeviantartUserExtractor

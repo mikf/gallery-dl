@@ -25,7 +25,6 @@ class NozomiExtractor(Extractor):
     archive_fmt = "{dataid}"
 
     def items(self):
-        yield Message.Version, 1
 
         data = self.metadata()
         self.session.headers["Origin"] = self.root

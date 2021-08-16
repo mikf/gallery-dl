@@ -38,8 +38,6 @@ class RedditExtractor(Extractor):
         visited = set()
         depth = 0
 
-        yield Message.Version, 1
-
         while True:
             extra = []
 
@@ -257,7 +255,6 @@ class RedditImageExtractor(Extractor):
 
     def items(self):
         data = text.nameext_from_url(self.url)
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, self.url, data
 

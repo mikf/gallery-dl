@@ -34,7 +34,6 @@ class BloggerExtractor(Extractor):
         self.api = BloggerAPI(self)
 
     def items(self):
-        yield Message.Version, 1
 
         blog = self.api.blog_by_url("http://" + self.blog)
         blog["pages"] = blog["pages"]["totalItems"]

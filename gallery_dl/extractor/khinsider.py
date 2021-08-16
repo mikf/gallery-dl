@@ -40,7 +40,6 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
             raise exception.NotFoundError("soundtrack")
 
         data = self.metadata(page)
-        yield Message.Version, 1
         yield Message.Directory, data
         for track in self.tracks(page):
             track.update(data)

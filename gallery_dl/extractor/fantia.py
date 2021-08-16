@@ -20,7 +20,6 @@ class FantiaExtractor(Extractor):
     _warning = True
 
     def items(self):
-        yield Message.Version, 1
 
         if self._warning:
             if "_session_id" not in self.session.cookies:

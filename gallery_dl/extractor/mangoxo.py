@@ -106,7 +106,6 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
         data = self.metadata(page)
         imgs = self.images(url, page)
 
-        yield Message.Version, 1
         yield Message.Directory, data
 
         data["extension"] = None
@@ -174,8 +173,6 @@ class MangoxoChannelExtractor(MangoxoExtractor):
         num = total = 1
         url = "{}/channel/{}/album/".format(self.root, self.channel_id)
         data = {"_extractor": MangoxoAlbumExtractor}
-
-        yield Message.Version, 1
 
         while True:
             page = self.request(url + str(num)).text

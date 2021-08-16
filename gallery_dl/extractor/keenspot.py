@@ -55,7 +55,6 @@ class KeenspotComicExtractor(Extractor):
 
     def items(self):
         data = {"comic": self.comic}
-        yield Message.Version, 1
         yield Message.Directory, data
 
         with self.request(self.root + "/") as response:

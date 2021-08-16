@@ -39,7 +39,6 @@ class SpeakerdeckPresentationExtractor(Extractor):
         data = self.get_job_metadata()
         imgs = self.get_image_urls()
         data["count"] = len(imgs)
-        yield Message.Version, 1
         yield Message.Directory, data
         for data["num"], url in enumerate(imgs, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
