@@ -339,6 +339,11 @@ class Extractor():
                         return True
         return False
 
+    def _prepare_ddosguard_cookies(self):
+        if not self._cookiejar.get("__ddg2", domain=self.cookiedomain):
+            self._cookiejar.set(
+                "__ddg2", util.generate_token(), domain=self.cookiedomain)
+
     def _get_date_min_max(self, dmin=None, dmax=None):
         """Retrieve and parse 'date-min' and 'date-max' config values"""
         def get(key, default):
