@@ -33,7 +33,6 @@ class ImgthGalleryExtractor(Extractor):
     def items(self):
         page = self.request(self.url_base + "0").text
         data = self.metadata(page)
-        yield Message.Version, 1
         yield Message.Directory, data
         for data["num"], url in enumerate(self.images(page), 1):
             yield Message.Url, url, text.nameext_from_url(url, data)

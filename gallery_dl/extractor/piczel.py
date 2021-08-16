@@ -22,7 +22,6 @@ class PiczelExtractor(Extractor):
     api_root = "https://tombstone.piczel.tv"
 
     def items(self):
-        yield Message.Version, 1
         for post in self.posts():
             post["tags"] = [t["title"] for t in post["tags"] if t["title"]]
             post["date"] = text.parse_datetime(

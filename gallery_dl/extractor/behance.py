@@ -19,7 +19,6 @@ class BehanceExtractor(Extractor):
     root = "https://www.behance.net"
 
     def items(self):
-        yield Message.Version, 1
         for gallery in self.galleries():
             gallery["_extractor"] = BehanceGalleryExtractor
             yield Message.Queue, gallery["url"], self._update(gallery)
@@ -99,7 +98,6 @@ class BehanceGalleryExtractor(BehanceExtractor):
         imgs = self.get_images(data)
         data["count"] = len(imgs)
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for data["num"], (url, module) in enumerate(imgs, 1):
             data["module"] = module

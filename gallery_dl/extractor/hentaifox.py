@@ -129,7 +129,6 @@ class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
         self.path = match.group(1)
 
     def items(self):
-        yield Message.Version, 1
         for gallery in self.galleries():
             yield Message.Queue, gallery["url"], gallery
 

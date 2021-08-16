@@ -112,7 +112,6 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
         self.query = match.group(1) or ""
 
     def items(self):
-        yield Message.Version, 1
         yield Message.Directory, {}
         for image_id in self.images():
             image = self._parse_image_page(image_id)

@@ -448,7 +448,6 @@ class GalleryExtractor(Extractor):
                 pass
             images = enumerate(imgs, 1)
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for data[self.enum], (url, imgdata) in images:
             if imgdata:
@@ -504,7 +503,6 @@ class MangaExtractor(Extractor):
         if self.reverse:
             chapters.reverse()
 
-        yield Message.Version, 1
         for chapter, data in chapters:
             data["_extractor"] = self.chapterclass
             yield Message.Queue, chapter, data

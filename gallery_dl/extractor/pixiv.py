@@ -213,7 +213,6 @@ class PixivMeExtractor(PixivExtractor):
         data = {"_extractor": PixivUserExtractor}
         response = self.request(
             url, method="HEAD", allow_redirects=False, notfound="user")
-        yield Message.Version, 1
         yield Message.Queue, response.headers["Location"], data
 
 

@@ -54,7 +54,6 @@ class PhotobucketAlbumExtractor(Extractor):
         self.session.headers["Referer"] = self.url
 
     def items(self):
-        yield Message.Version, 1
         for image in self.images():
             image["titleOrFilename"] = text.unescape(image["titleOrFilename"])
             image["title"] = text.unescape(image["title"])
@@ -172,6 +171,5 @@ class PhotobucketImageExtractor(Extractor):
         mtype, _, mid = base64.b64decode(image["id"]).partition(b":")
         image["pictureId"] = mid.decode() if mtype == b"mediaId" else ""
 
-        yield Message.Version, 1
         yield Message.Directory, image
         yield Message.Url, image["fileUrl"], image

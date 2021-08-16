@@ -56,7 +56,6 @@ class VanillarockPostExtractor(VanillarockExtractor):
                 '<div class="cat-tag">', '</div>'))[::2],
         }
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for data["num"], url in enumerate(imgs, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
@@ -84,7 +83,6 @@ class VanillarockTagExtractor(VanillarockExtractor):
         url = self.root + self.path
         data = {"_extractor": VanillarockPostExtractor}
 
-        yield Message.Version, 1
         while url:
             extr = text.extract_from(self.request(url).text)
             while True:

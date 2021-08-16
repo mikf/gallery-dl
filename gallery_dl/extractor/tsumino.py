@@ -152,7 +152,6 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
         self.query = match.group(1)
 
     def items(self):
-        yield Message.Version, 1
         for gallery in self.galleries():
             url = "{}/entry/{}".format(self.root, gallery["id"])
             gallery["_extractor"] = TsuminoGalleryExtractor

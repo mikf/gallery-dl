@@ -120,7 +120,6 @@ class LusciousAlbumExtractor(LusciousExtractor):
 
     def items(self):
         album = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, {"album": album}
         for num, image in enumerate(self.images(), 1):
             image["num"] = num
@@ -443,7 +442,6 @@ fragment AlbumMinimal on Album {
     }
 }
 """
-        yield Message.Version, 1
         while True:
             data = self._graphql("AlbumListWithPeek", variables, query)
 

@@ -94,7 +94,6 @@ class FoolslideChapterExtractor(FoolslideExtractor):
         data["count"] = len(imgs)
         data["chapter_id"] = text.parse_int(imgs[0]["chapter_id"])
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for data["page"], image in enumerate(imgs, 1):
             try:

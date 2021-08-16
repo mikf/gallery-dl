@@ -89,7 +89,6 @@ class PixnetImageExtractor(PixnetExtractor):
         data["blog"] = self.blog
         data["user"] = data.pop("author_name")
 
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, data["url"], data
 
@@ -120,7 +119,6 @@ class PixnetSetExtractor(PixnetExtractor):
         page = self.request(url, encoding="utf-8").text
         data = self.metadata(page)
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for num, info in enumerate(self._pagination(page), 1):
             url, pos = text.extract(info, ' href="', '"')

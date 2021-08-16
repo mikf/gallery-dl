@@ -102,7 +102,6 @@ class NaverBlogExtractor(NaverBase, Extractor):
         self.blog_id = match.group(1) or match.group(2)
 
     def items(self):
-        yield Message.Version, 1
 
         # fetch first post number
         url = "{}/PostList.nhn?blogId={}".format(self.root, self.blog_id)

@@ -36,7 +36,6 @@ class NijieExtractor(AsynchronousMixin, Extractor):
 
     def items(self):
         self.login()
-        yield Message.Version, 1
 
         for image_id in self.image_ids():
 

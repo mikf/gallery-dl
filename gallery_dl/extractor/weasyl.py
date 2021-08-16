@@ -123,7 +123,6 @@ class WeasylSubmissionsExtractor(WeasylExtractor):
         self.owner_login = match.group(1)
 
     def items(self):
-        yield Message.Version, 1
         yield Message.Directory, {"owner_login": self.owner_login}
         yield from self.submissions(self.owner_login)
 
@@ -141,7 +140,6 @@ class WeasylFolderExtractor(WeasylExtractor):
         self.owner_login, self.folderid = match.groups()
 
     def items(self):
-        yield Message.Version, 1
         iter = self.submissions(self.owner_login, self.folderid)
         # Folder names are only on single submission api calls
         msg, url, data = next(iter)
@@ -171,7 +169,6 @@ class WeasylJournalExtractor(WeasylExtractor):
 
     def items(self):
         data = self.retrieve_journal(self.journalid)
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, data["html"], data
 
@@ -190,7 +187,6 @@ class WeasylJournalsExtractor(WeasylExtractor):
         self.owner_login = match.group(1)
 
     def items(self):
-        yield Message.Version, 1
         yield Message.Directory, {"owner_login": self.owner_login}
 
         url = "{}/journals/{}".format(self.root, self.owner_login)

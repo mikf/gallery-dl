@@ -30,7 +30,6 @@ class VscoExtractor(Extractor):
 
     def items(self):
         videos = self.config("videos", True)
-        yield Message.Version, 1
         yield Message.Directory, {"user": self.user}
         for img in self.images():
 

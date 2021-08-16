@@ -71,7 +71,6 @@ class TestExtractor(Extractor):
         if not tests:
             raise exception.NotFoundError("test")
 
-        yield Message.Version, 1
         for test in tests:
             yield Message.Queue, test[0], {}
 

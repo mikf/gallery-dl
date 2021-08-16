@@ -21,7 +21,6 @@ class SexcomExtractor(Extractor):
     root = "https://www.sex.com"
 
     def items(self):
-        yield Message.Version, 1
         yield Message.Directory, self.metadata()
         for pin in map(self._parse_pin, self.pins()):
             if pin:

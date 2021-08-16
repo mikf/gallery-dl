@@ -128,7 +128,6 @@ class SimplyhentaiImageExtractor(Extractor):
         })
         data["token"] = data["filename"].rpartition("_")[2]
 
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
 
@@ -192,6 +191,5 @@ class SimplyhentaiVideoExtractor(Extractor):
                 date), "%B %d, %Y %H:%M"),
         })
 
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, video_url, data

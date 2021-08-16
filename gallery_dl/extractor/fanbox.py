@@ -31,7 +31,6 @@ class FanboxExtractor(Extractor):
         self.embeds = self.config("embeds", True)
 
     def items(self):
-        yield Message.Version, 1
 
         if self._warning:
             if "FANBOXSESSID" not in self.session.cookies:

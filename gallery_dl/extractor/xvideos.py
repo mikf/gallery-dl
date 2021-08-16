@@ -129,7 +129,6 @@ class XvideosUserExtractor(XvideosBase, Extractor):
         ]
         galleries.sort(key=lambda x: x["id"])
 
-        yield Message.Version, 1
         for gallery in galleries:
             url = "https://www.xvideos.com/profiles/{}/photos/{}".format(
                 self.user, gallery["id"])

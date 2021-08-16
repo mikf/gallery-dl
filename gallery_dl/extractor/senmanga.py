@@ -42,7 +42,6 @@ class SenmangaChapterExtractor(Extractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, data
         for data["page"] in range(1, data["count"]+1):
             data["extension"] = None
