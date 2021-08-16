@@ -68,12 +68,16 @@ class Job():
 
     def run(self):
         """Execute or run the job"""
-        sleep = self.extractor.config("sleep-extractor")
+        extractor = self.extractor
+        log = extractor.log
+        msg = None
+
+        sleep = extractor.config("sleep-extractor")
         if sleep:
             time.sleep(sleep)
+
         try:
-            log = self.extractor.log
-            for msg in self.extractor:
+            for msg in extractor:
                 self.dispatch(msg)
         except exception.StopExtraction as exc:
             if exc.message:
@@ -100,8 +104,13 @@ class Job():
         except BaseException:
             self.status |= 1
             raise
+        else:
+            if msg is None:
+                log.warning("No results for %s", extractor.url)
+                self.status |= 8
         finally:
             self.handle_finalize()
+
         return self.status
 
     def dispatch(self, msg):
