@@ -31,8 +31,8 @@ class OAuthBase(Extractor):
         self.cache = config.get(("extractor", self.category), "cache", True)
 
     def oauth_config(self, key, default=None):
-        return config.interpolate(
-            ("extractor", self.subcategory), key, default)
+        value = config.interpolate(("extractor", self.subcategory), key)
+        return value if value is not None else default
 
     def recv(self):
         """Open local HTTP server and recv callback parameters"""
