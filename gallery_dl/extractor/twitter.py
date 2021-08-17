@@ -749,8 +749,8 @@ class TwitterAPI():
                     )
                 except Exception:
                     msg = data["errors"]
-                if response.status_code < 400:
-                    self.extractor.log.warning(msg)
+                if msg and response.status_code < 400:
+                    raise exception.StopExtraction(msg)
             else:
                 msg = ""
 
