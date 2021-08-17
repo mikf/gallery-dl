@@ -26,7 +26,6 @@ CATEGORY_MAP = {
     "bcy"            : "半次元",
     "comicvine"      : "Comic Vine",
     "deviantart"     : "DeviantArt",
-    "dokireader"     : "Doki Reader",
     "drawfriends"    : "Draw Friends",
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
