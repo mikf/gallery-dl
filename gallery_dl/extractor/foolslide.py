@@ -39,9 +39,6 @@ class FoolslideExtractor(BaseExtractor):
 
 
 BASE_PATTERN = FoolslideExtractor.update({
-    "dokireader": {
-        "root": "https://kobato.hologfx.com/reader",
-    },
     "kireicake": {
         "root": "https://reader.kireicake.com",
     },
@@ -66,10 +63,6 @@ class FoolslideChapterExtractor(FoolslideExtractor):
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"(/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     test = (
-        (("https://kobato.hologfx.com/reader/read/"
-          "hitoribocchi_no_oo_seikatsu/en/3/34"), {
-            "keyword": "6e719ac86f0c6dab89390dd7e507e678459e0dbc",
-        }),
         ("https://reader.kireicake.com/read/wonderland/en/1/1/", {
             "url": "b2d36bc0bc67e4c461c3a4d6444a2fd339f5d07e",
             "keyword": "9f80947920a325e33aea7f5cd69ea669171903b6",
@@ -127,11 +120,6 @@ class FoolslideMangaExtractor(FoolslideExtractor):
     categorytransfer = True
     pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
     test = (
-        (("https://kobato.hologfx.com/reader/series/"
-          "boku_ha_ohimesama_ni_narenai/"), {
-            "url": "1c1f5a7258ce4f631f5fc32be548d78a6a57990d",
-            "keyword": "614d89a6045b85c822cbd3e67578ea7577dfc995",
-        }),
         ("https://reader.kireicake.com/series/wonderland/", {
             "url": "d067b649af1cc88fa8c8b698fde04a10909fd169",
             "keyword": "268f43772fb239888ca5c5f6a4f65f99ffb3eefb",
