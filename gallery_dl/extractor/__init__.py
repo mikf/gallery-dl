@@ -12,6 +12,7 @@ modules = [
     "2chan",
     "35photo",
     "3dbooru",
+    "420chan",
     "4chan",
     "500px",
     "8kun",
