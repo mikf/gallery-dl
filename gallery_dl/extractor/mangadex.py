@@ -61,7 +61,8 @@ class MangadexExtractor(Extractor):
             chnum, sep, minor = 0, "", ""
 
         data = {
-            "manga"   : mattributes["title"]["en"],
+            "manga"   : (mattributes["title"].get("en") or
+                         next(iter(mattributes["title"].values()))),
             "manga_id": manga["data"]["id"],
             "title"   : cattributes["title"],
             "volume"  : text.parse_int(cattributes["volume"]),
