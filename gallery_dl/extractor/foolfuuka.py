@@ -273,3 +273,47 @@ class FoolfuukaSearchExtractor(FoolfuukaExtractor):
             if len(posts) <= 3:
                 return
             params["page"] += 1
+
+
+class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
+    """Base extractor for FoolFuuka galleries"""
+    subcategory = "gallery"
+    directory_fmt = ("{category}", "{board}", "gallery")
+    pattern = BASE_PATTERN + r"/([^/?#]+)/gallery(?:/(\d+))?"
+    test = (
+        ("https://archive.4plebs.org/tg/gallery/1"),
+        ("https://archived.moe/gd/gallery/2"),
+        ("https://archiveofsins.com/h/gallery/3"),
+        ("https://arch.b4k.co/meta/gallery/"),
+        ("https://desuarchive.org/a/gallery/5"),
+        ("https://boards.fireden.net/sci/gallery/6"),
+        ("https://archive.nyafuu.org/c/gallery/7"),
+        ("https://rbt.asia/g/gallery/8"),
+        ("https://thebarchive.com/b/gallery/9"),
+        ("https://archive.wakarimasen.moe/a/gallery/10"),
+    )
+
+    def __init__(self, match):
+        FoolfuukaExtractor.__init__(self, match)
+
+        board = match.group(match.lastindex)
+        if board.isdecimal():
+            self.board = match.group(match.lastindex-1)
+            self.pages = (board,)
+        else:
+            self.board = board
+            self.pages = map(format, itertools.count(1))
+
+    def metadata(self):
+        return {"board": self.board}
+
+    def posts(self):
+        base = "{}/_/api/chan/gallery/?board={}&page=".format(
+            self.root, self.board)
+
+        for page in self.pages:
+            with self.request(base + page) as response:
+                posts = response.json()
+            if not posts:
+                return
+            yield from posts
