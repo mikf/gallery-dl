@@ -966,61 +966,61 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>4plebs</td>
     <td>https://archive.4plebs.org/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
     <td>arch.b4k.co</td>
     <td>https://arch.b4k.co/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
     <td>Archive of Sins</td>
     <td>https://archiveofsins.com/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
     <td>Archived.Moe</td>
     <td>https://archived.moe/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
     <td>Desuarchive</td>
     <td>https://desuarchive.org/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
     <td>Fireden</td>
     <td>https://boards.fireden.net/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
     <td>Nyafuu Archive</td>
     <td>https://archive.nyafuu.org/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
     <td>RebeccaBlackTech</td>
     <td>https://rbt.asia/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
     <td>The /b/ Archive</td>
     <td>https://thebarchive.com/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 <tr>
     <td>Wakarimasen Archive</td>
     <td>https://archive.wakarimasen.moe/</td>
-    <td>Boards, Search Results, Threads</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 
