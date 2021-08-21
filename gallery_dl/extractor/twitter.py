@@ -217,6 +217,7 @@ class TwitterExtractor(Extractor):
                 "name"            : user["screen_name"],
                 "nick"            : user["name"],
                 "description"     : user["description"],
+                "url"             : "",
                 "location"        : user["location"],
                 "date"            : text.parse_datetime(
                     user["created_at"], "%a %b %d %H:%M:%S %z %Y"),
@@ -231,6 +232,11 @@ class TwitterExtractor(Extractor):
                 "media_count"     : user["media_count"],
                 "statuses_count"  : user["statuses_count"],
             }
+            if "urls" in user["entities"]["description"]:
+                for tco in user["entities"]["description"]["urls"]:
+                    cache[uid]["description"]=cache[uid]["description"].replace(tco["url"], tco["expanded_url"])
+            if "url" in user["entities"]:
+                cache[uid]["url"]=user["entities"]["url"]["urls"][0]["expanded_url"]
         return cache[uid]
 
     def _users_result(self, users):
