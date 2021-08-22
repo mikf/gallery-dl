@@ -234,9 +234,11 @@ class TwitterExtractor(Extractor):
             }
             if "urls" in user["entities"]["description"]:
                 for tco in user["entities"]["description"]["urls"]:
-                    cache[uid]["description"]=cache[uid]["description"].replace(tco["url"], tco["expanded_url"])
+                    cache[uid]["description"]=cache[uid]["description"]\
+                        .replace(tco["url"], tco["expanded_url"])
             if "url" in user["entities"]:
-                cache[uid]["url"]=user["entities"]["url"]["urls"][0]["expanded_url"]
+                cache[uid]["url"]=\
+                    user["entities"]["url"]["urls"][0]["expanded_url"]
         return cache[uid]
 
     def _users_result(self, users):
