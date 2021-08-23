@@ -220,7 +220,6 @@ class TwitterExtractor(Extractor):
             "id"              : text.parse_int(uid),
             "name"            : user["screen_name"],
             "nick"            : user["name"],
-            "description"     : user["description"],
             "location"        : user["location"],
             "date"            : text.parse_datetime(
                 user["created_at"], "%a %b %d %H:%M:%S %z %Y"),
@@ -235,6 +234,13 @@ class TwitterExtractor(Extractor):
             "media_count"     : user["media_count"],
             "statuses_count"  : user["statuses_count"],
         }
+
+        descr = user["description"]
+        urls = entities["description"].get("urls")
+        if urls:
+            for url in urls:
+                descr = descr.replace(url["url"], url["expanded_url"])
+        udata["description"] = descr
 
         if "url" in entities:
             udata["url"] = entities["url"]["urls"][0]["expanded_url"]
@@ -469,6 +475,11 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/i/web/status/1424882930803908612", {
             "options": (("replies", "self"),),
             "count": 4,
+            "keyword": {"user": {
+                "description": "re:business email-- rhettaro.bloom@gmail.com "
+                               "patreon- http://patreon.com/Princecanary",
+                "url": "http://princecanary.tumblr.com",
+            }},
         }),
         ("https://twitter.com/i/web/status/1424898916156284928", {
             "options": (("replies", "self"),),
