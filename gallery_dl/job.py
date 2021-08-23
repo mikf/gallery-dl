@@ -106,8 +106,7 @@ class Job():
             raise
         else:
             if msg is None:
-                log.warning("No results for %s", extractor.url)
-                self.status |= 8
+                log.info("No results for %s", extractor.url)
         finally:
             self.handle_finalize()
 
