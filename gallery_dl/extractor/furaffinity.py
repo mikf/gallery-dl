@@ -232,16 +232,27 @@ class FuraffinitySearchExtractor(FuraffinityExtractor):
     """Extractor for furaffinity search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
-    pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
-    test = ("https://www.furaffinity.net/search/?q=cute", {
-        "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
-                   r"/art/[^/]+/\d+/\d+.\w+\.\w+",
-        "range": "45-50",
-        "count": 6,
-    })
+    pattern = BASE_PATTERN + r"/search(?:/([^/?#]+))?/?[?&]([^#]+)"
+    test = (
+        ("https://www.furaffinity.net/search/?q=cute", {
+            "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
+                       r"/art/[^/]+/\d+/\d+.\w+\.\w+",
+            "range": "45-50",
+            "count": 6,
+        }),
+        ("https://www.furaffinity.net/search/cute&rating-general=0", {
+            "range": "1",
+            "count": 1,
+        }),
+    )
+
+    def __init__(self, match):
+        FuraffinityExtractor.__init__(self, match)
+        self.query = text.parse_query(match.group(2))
+        if self.user and "q" not in self.query:
+            self.query["q"] = text.unescape(self.user)
 
     def metadata(self):
-        self.query = text.parse_query(self.user)
         return {"search": self.query.get("q")}
 
     def posts(self):
