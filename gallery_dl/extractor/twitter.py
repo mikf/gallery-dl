@@ -208,30 +208,32 @@ class TwitterExtractor(Extractor):
         return tdata
 
     def _transform_user(self, user):
-        uid = user["id_str"]
-        cache = self._user_cache
+        try:
+            return self._user_cache[user["id_str"]]
+        except KeyError:
+            pass
 
-        if uid not in cache:
-            cache[uid] = {
-                "id"              : text.parse_int(uid),
-                "name"            : user["screen_name"],
-                "nick"            : user["name"],
-                "description"     : user["description"],
-                "location"        : user["location"],
-                "date"            : text.parse_datetime(
-                    user["created_at"], "%a %b %d %H:%M:%S %z %Y"),
-                "verified"        : user.get("verified", False),
-                "profile_banner"  : user.get("profile_banner_url", ""),
-                "profile_image"   : user.get(
-                    "profile_image_url_https", "").replace("_normal.", "."),
-                "favourites_count": user["favourites_count"],
-                "followers_count" : user["followers_count"],
-                "friends_count"   : user["friends_count"],
-                "listed_count"    : user["listed_count"],
-                "media_count"     : user["media_count"],
-                "statuses_count"  : user["statuses_count"],
-            }
-        return cache[uid]
+        uid = user["id_str"]
+        self._user_cache[uid] = udata = {
+            "id"              : text.parse_int(uid),
+            "name"            : user["screen_name"],
+            "nick"            : user["name"],
+            "description"     : user["description"],
+            "location"        : user["location"],
+            "date"            : text.parse_datetime(
+                user["created_at"], "%a %b %d %H:%M:%S %z %Y"),
+            "verified"        : user.get("verified", False),
+            "profile_banner"  : user.get("profile_banner_url", ""),
+            "profile_image"   : user.get(
+                "profile_image_url_https", "").replace("_normal.", "."),
+            "favourites_count": user["favourites_count"],
+            "followers_count" : user["followers_count"],
+            "friends_count"   : user["friends_count"],
+            "listed_count"    : user["listed_count"],
+            "media_count"     : user["media_count"],
+            "statuses_count"  : user["statuses_count"],
+        }
+        return udata
 
     def _users_result(self, users):
         userfmt = self.config("users")
