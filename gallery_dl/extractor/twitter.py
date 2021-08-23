@@ -214,6 +214,8 @@ class TwitterExtractor(Extractor):
             pass
 
         uid = user["id_str"]
+        entities = user["entities"]
+
         self._user_cache[uid] = udata = {
             "id"              : text.parse_int(uid),
             "name"            : user["screen_name"],
@@ -233,6 +235,10 @@ class TwitterExtractor(Extractor):
             "media_count"     : user["media_count"],
             "statuses_count"  : user["statuses_count"],
         }
+
+        if "url" in entities:
+            udata["url"] = entities["url"]["urls"][0]["expanded_url"]
+
         return udata
 
     def _users_result(self, users):
