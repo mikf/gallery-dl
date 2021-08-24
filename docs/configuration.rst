@@ -245,6 +245,24 @@ Description
     escaped with backslashes, e.g. ``"\\[\\]"``
 
 
+extractor.*.path-strip
+----------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Set of characters to remove from the end of generated path segment names
+    using `str.rstrip() <https://docs.python.org/3/library/stdtypes.html#str.rstrip>`_
+
+    Special values:
+
+    * ``"auto"``: Use characters from ``"unix"`` or ``"windows"``
+      depending on the local operating system
+    * ``"unix"``: ``""``
+    * ``"windows"``: ``". "``
+
+
 extractor.*.extension-map
 -------------------------
 Type

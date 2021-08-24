@@ -849,6 +849,15 @@ class PathFormat():
         remove = config("path-remove", "\x00-\x1f\x7f")
         self.clean_path = self._build_cleanfunc(remove, "")
 
+        strip = config("path-strip", "auto")
+        if strip == "auto":
+            strip = ". " if WINDOWS else ""
+        elif strip == "unix":
+            strip = ""
+        elif strip == "windows":
+            strip = ". "
+        self.strip = strip
+
         basedir = extractor._parentdir
         if not basedir:
             basedir = config("base-directory")
@@ -982,13 +991,14 @@ class PathFormat():
         """Apply 'kwdict' to directory format strings"""
         segments = []
         append = segments.append
+        strip = self.strip
 
         try:
             for formatter in self.directory_formatters:
                 segment = formatter(kwdict).strip()
-                if WINDOWS:
+                if strip:
                     # remove trailing dots and spaces (#647)
-                    segment = segment.rstrip(". ")
+                    segment = segment.rstrip(strip)
                 if segment:
                     append(self.clean_segment(segment))
             return segments
@@ -998,6 +1008,7 @@ class PathFormat():
     def build_directory_conditional(self, kwdict):
         segments = []
         append = segments.append
+        strip = self.strip
 
         try:
             for condition, formatters in self.directory_conditions:
@@ -1007,8 +1018,8 @@ class PathFormat():
                 formatters = self.directory_formatters
             for formatter in formatters:
                 segment = formatter(kwdict).strip()
-                if WINDOWS:
-                    segment = segment.rstrip(". ")
+                if strip:
+                    segment = segment.rstrip(strip)
                 if segment:
                     append(self.clean_segment(segment))
             return segments
