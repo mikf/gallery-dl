@@ -116,7 +116,7 @@ class DeviantartExtractor(Extractor):
                 content = self.api.deviation_download(deviation["deviationid"])
                 yield self.commit(deviation, content)
 
-            if "videos" in deviation:
+            if "videos" in deviation and deviation["videos"]:
                 video = max(deviation["videos"],
                             key=lambda x: text.parse_int(x["quality"][:-1]))
                 yield self.commit(deviation, video)
