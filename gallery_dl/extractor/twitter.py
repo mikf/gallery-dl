@@ -882,6 +882,7 @@ class TwitterAPI():
                 if "quoted_status_id_str" in tweet:
                     quoted = tweets.get(tweet["quoted_status_id_str"])
                     if quoted:
+                        quoted = quoted.copy()
                         quoted["author"] = users[quoted["user_id_str"]]
                         quoted["user"] = tweet["user"]
                         quoted["quoted"] = True
