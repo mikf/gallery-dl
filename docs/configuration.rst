@@ -1043,6 +1043,17 @@ Description
     or whenever your `cache file <cache.file_>`__ is deleted or cleared.
 
 
+extractor.deviantart.watch
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Automatically watch users when encountering "Watchers-Only Deviations"
+    (requires a `refresh-token <extractor.deviantart.refresh-token_>`_).
+
+
 extractor.deviantart.wait-min
 -----------------------------
 Type

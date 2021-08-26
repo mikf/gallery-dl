@@ -66,8 +66,6 @@ class DeviantartExtractor(Extractor):
 
     def items(self):
         self.api = DeviantartOAuthAPI(self)
-        if not self.api.refresh_token_key:
-            self._fetch_premium = self._fetch_premium_notoken
 
         if self.user:
             profile = self.api.user_profile(self.user)
@@ -85,8 +83,10 @@ class DeviantartExtractor(Extractor):
                 continue
 
             if "premium_folder_data" in deviation:
-                if not self._fetch_premium(deviation):
+                data = self._fetch_premium(deviation)
+                if not data:
                     continue
+                deviation.update(data)
 
             self.prepare(deviation)
             yield Message.Directory, deviation
@@ -306,39 +306,48 @@ class DeviantartExtractor(Extractor):
             self.wait(seconds=180)
 
     def _fetch_premium(self, deviation):
-        cache = self._premium_cache
+        try:
+            return self._premium_cache[deviation["deviationid"]]
+        except KeyError:
+            pass
 
-        if deviation["deviationid"] not in cache:
-
-            # check accessibility
+        # check accessibility
+        if self.api.refresh_token_key:
             dev = self.api.deviation(deviation["deviationid"], False)
             has_access = dev["premium_folder_data"]["has_access"]
+            username = dev["author"]["username"]
+            folder = dev["premium_folder_data"]
 
-            if has_access:
-                self.log.info("Fetching premium folder data")
-            else:
-                self.log.warning("Unable to access premium content (type: %s)",
-                                 dev["premium_folder_data"]["type"])
-            # fill cache
-            for dev in self.api.gallery(
-                deviation["author"]["username"],
-                deviation["premium_folder_data"]["gallery_id"],
-                public=False,
-            ):
-                cache[dev["deviationid"]] = dev if has_access else None
-
-        data = cache[deviation["deviationid"]]
-        if data:
-            deviation.update(data)
-            return True
-        return False
-
-    def _fetch_premium_notoken(self, deviation):
-        if not self._premium_cache:
+            if not has_access and folder["type"] == "watchers" and \
+                    self.config("watch"):
+                if self.api.user_friends_watch(username):
+                    has_access = True
+                    self.log.info(
+                        "Watching %s for premium folder access", username)
+                else:
+                    self.warning.info(
+                        "Error when trying to watch %s. "
+                        "Try again with a new refresh-token", username)
+        else:
             self.log.warning(
                 "Unable to access premium content (no refresh-token)")
-            self._premium_cache = True
-        return False
+            self._fetch_premium = lambda _: None
+            return None
+
+        if has_access:
+            self.log.info("Fetching premium folder data")
+        else:
+            self.log.warning("Unable to access premium content (type: %s)",
+                             folder["type"])
+            self._fetch_premium = lambda _: None
+            return None
+
+        # fill cache
+        cache = self._premium_cache
+        for dev in self.api.gallery(
+                username, folder["gallery_id"], public=False):
+            cache[dev["deviationid"]] = dev
+        return cache[deviation["deviationid"]]
 
 
 class DeviantartUserExtractor(DeviantartExtractor):
@@ -1031,13 +1040,13 @@ class DeviantartOAuthAPI():
         """Get extended content of a single Deviation"""
         endpoint = "deviation/content"
         params = {"deviationid": deviation_id}
-        return self._call(endpoint, params, public=public)
+        return self._call(endpoint, params=params, public=public)
 
     def deviation_download(self, deviation_id, public=True):
         """Get the original file download (if allowed)"""
         endpoint = "deviation/download/" + deviation_id
         params = {"mature_content": self.mature}
-        return self._call(endpoint, params, public=public)
+        return self._call(endpoint, params=params, public=public)
 
     def deviation_metadata(self, deviations):
         """ Fetch deviation metadata for a set of deviations"""
@@ -1048,7 +1057,7 @@ class DeviantartOAuthAPI():
             for num, deviation in enumerate(deviations)
         )
         params = {"mature_content": self.mature}
-        return self._call(endpoint, params)["metadata"]
+        return self._call(endpoint, params=params)["metadata"]
 
     def gallery(self, username, folder_id, offset=0, extend=True, public=True):
         """Yield all Deviation-objects contained in a gallery folder"""
@@ -1077,6 +1086,29 @@ class DeviantartOAuthAPI():
         """Get user profile information"""
         endpoint = "user/profile/" + username
         return self._call(endpoint, fatal=False)
+
+    def user_friends_watch(self, username):
+        """Watch a user"""
+        endpoint = "user/friends/watch/" + username
+        data = {
+            "watch[friend]"       : "0",
+            "watch[deviations]"   : "0",
+            "watch[journals]"     : "0",
+            "watch[forum_threads]": "0",
+            "watch[critiques]"    : "0",
+            "watch[scraps]"       : "0",
+            "watch[activity]"     : "0",
+            "watch[collections]"  : "0",
+            "mature_content"      : self.mature,
+        }
+        return self._call(
+            endpoint, method="POST", data=data, public=False, fatal=False)
+
+    def user_friends_unwatch(self, username):
+        """Unwatch a user"""
+        endpoint = "user/friends/unwatch/" + username
+        return self._call(
+            endpoint, method="POST", public=False, fatal=False)
 
     def authenticate(self, refresh_token_key):
         """Authenticate the application by requesting an access token"""
@@ -1109,16 +1141,18 @@ class DeviantartOAuthAPI():
                 refresh_token_key, data["refresh_token"])
         return "Bearer " + data["access_token"]
 
-    def _call(self, endpoint, params=None, fatal=True, public=True):
+    def _call(self, endpoint, fatal=True, public=True, **kwargs):
         """Call an API endpoint"""
         url = "https://www.deviantart.com/api/v1/oauth2/" + endpoint
+        kwargs["fatal"] = None
+
         while True:
             if self.delay:
                 time.sleep(self.delay)
 
             self.authenticate(None if public else self.refresh_token_key)
-            response = self.extractor.request(
-                url, headers=self.headers, params=params, fatal=None)
+            kwargs["headers"] = self.headers
+            response = self.extractor.request(url, **kwargs)
             data = response.json()
             status = response.status_code
 
@@ -1146,7 +1180,7 @@ class DeviantartOAuthAPI():
                     extend=True, public=True, unpack=False):
         warn = True
         while True:
-            data = self._call(endpoint, params, public=public)
+            data = self._call(endpoint, params=params, public=public)
             if "results" not in data:
                 self.log.error("Unexpected API response: %s", data)
                 return
