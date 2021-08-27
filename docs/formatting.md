@@ -63,6 +63,12 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>Foo Bar</code></td>
 </tr>
 <tr>
+    <td align="center"><code>j</code></td>
+    <td>Serialize value to a JSON formatted string</td>
+    <td><code>{tags!j}</code></td>
+    <td><code>["sun", "tree", "water"]</code></td>
+</tr>
+<tr>
     <td align="center"><code>t</code></td>
     <td>Trim a string, i.e. remove leading and trailing whitespace characters</td>
     <td><code>{bar!t}</code></td>
