@@ -243,7 +243,8 @@ class TwitterExtractor(Extractor):
         udata["description"] = descr
 
         if "url" in entities:
-            udata["url"] = entities["url"]["urls"][0]["expanded_url"]
+            url = entities["url"]["urls"][0]
+            udata["url"] = url.get("expanded_url") or url.get("url")
 
         return udata
 
