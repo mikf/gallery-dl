@@ -547,6 +547,7 @@ class Formatter():
     - "u": calls str.upper
     - "c": calls str.capitalize
     - "C": calls string.capwords
+    - "j". calls json.dumps
     - "t": calls str.strip
     - "d": calls text.parse_timestamp
     - "U": calls urllib.parse.unquote
@@ -581,6 +582,7 @@ class Formatter():
         "u": str.upper,
         "c": str.capitalize,
         "C": string.capwords,
+        "j": json.dumps,
         "t": str.strip,
         "T": to_timestamp,
         "d": text.parse_timestamp,
