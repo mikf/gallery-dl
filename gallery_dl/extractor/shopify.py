@@ -48,7 +48,10 @@ BASE_PATTERN = ShopifyExtractor.update({
         "pattern": r"(?:www\.)?fashionnova\.com",
     },
     "omgmiamiswimwear": {
-        "root": "https://www.omgmiamiswimwear.com"
+        "root": "https://www.omgmiamiswimwear.com",
+    },
+    "windsorstore": {
+        "root": "https://www.windsorstore.com",
     },
 })
 
@@ -62,11 +65,11 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
         ("https://www.fashionnova.com/collections/mini-dresses", {
             "range": "1-20",
             "count": 20,
-            "archive": False,
         }),
         ("https://www.fashionnova.com/collections/mini-dresses/?page=1"),
         ("https://www.fashionnova.com/collections/mini-dresses#1"),
         ("https://www.omgmiamiswimwear.com/collections/fajas"),
+        ("https://www.windsorstore.com/collections/dresses-ball-gowns"),
     )
 
     def metadata(self):
@@ -100,6 +103,8 @@ class ShopifyProductExtractor(ShopifyExtractor):
             "count": 5,
         }),
         ("https://www.fashionnova.com/collections/flats/products/name"),
+        ("https://www.windsorstore.com/collections/accessories-belts/products"
+         "/rhine-buckle-dbl-o-ring-pu-strap-belt-073010158001"),
     )
 
     def products(self):
