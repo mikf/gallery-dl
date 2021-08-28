@@ -10,7 +10,6 @@
 
 from .common import BaseExtractor, Message
 from .. import text
-import re
 
 
 class ShopifyExtractor(BaseExtractor):
@@ -27,17 +26,7 @@ class ShopifyExtractor(BaseExtractor):
         data = self.metadata()
         yield Message.Directory, data
 
-        headers = {"X-Requested-With": "XMLHttpRequest"}
-        for url in self.products():
-            response = self.request(
-                url + ".json", headers=headers, fatal=False)
-            if response.status_code >= 400:
-                self.log.warning('Skipping %s ("%s: %s")',
-                                 url, response.status_code, response.reason)
-                continue
-            product = response.json()["product"]
-            del product["image"]
-
+        for product in self.products():
             for num, image in enumerate(product.pop("images"), 1):
                 text.nameext_from_url(image["src"], image)
                 image.update(data)
@@ -84,34 +73,16 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
         return self.request(self.item_url + ".json").json()
 
     def products(self):
-        params = {"page": 1}
-        fetch = True
-        last = None
+        url = self.item_url + "/products.json"
 
-        for pattern in (
-            r"/collections/[\w-]+/products/[\w-]+",
-            r"href=[\"'](/products/[\w-]+)",
-        ):
-            search_re = re.compile(pattern)
+        while url:
+            response = self.request(url)
+            yield from response.json()["products"]
 
-            while True:
-                if fetch:
-                    page = self.request(self.item_url, params=params).text
-                urls = search_re.findall(page)
-
-                if len(urls) < 3:
-                    if last:
-                        return
-                    fetch = False
-                    break
-                fetch = True
-
-                for path in urls:
-                    if last == path:
-                        continue
-                    last = path
-                    yield self.root + path
-                params["page"] += 1
+            url = response.links.get("next")
+            if not url:
+                return
+            url = url["url"]
 
 
 class ShopifyProductExtractor(ShopifyExtractor):
@@ -132,4 +103,6 @@ class ShopifyProductExtractor(ShopifyExtractor):
     )
 
     def products(self):
-        return (self.item_url,)
+        product = self.request(self.item_url + ".json").json()["product"]
+        del product["image"]
+        return (product,)
