@@ -1083,5 +1083,11 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Collections, Products</td>
     <td></td>
 </tr>
+<tr>
+    <td>Windsorstore</td>
+    <td>https://www.windsorstore.com/</td>
+    <td>Collections, Products</td>
+    <td></td>
+</tr>
 </tbody>
 </table>
