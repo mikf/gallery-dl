@@ -762,6 +762,30 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         deviation["popular"] = self.popular
 
 
+class DeviantartTagExtractor(DeviantartExtractor):
+    """Extractor for deviations from tag searches"""
+    subcategory = "tag"
+    directory_fmt = ("{category}", "Tags", "{search_tags}")
+    archive_fmt = "T_{search_tags}_{index}.{extension}"
+    pattern = r"(?:https?://)?www\.deviantart\.com/tag/([^/?#]+)"
+    test = ("https://www.deviantart.com/tag/nature", {
+        "options": (("original", False),),
+        "range": "1-30",
+        "count": 30,
+    })
+
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self, match)
+        self.tag = text.unquote(match.group(1))
+
+    def deviations(self):
+        return self.api.browse_tags(self.tag, self.offset)
+
+    def prepare(self, deviation):
+        DeviantartExtractor.prepare(self, deviation)
+        deviation["search_tags"] = self.tag
+
+
 class DeviantartWatchExtractor(DeviantartExtractor):
     """Extractor for Deviations from watched users"""
     subcategory = "watch"
@@ -1004,6 +1028,17 @@ class DeviantartOAuthAPI():
         }
         return self._pagination(endpoint, params)
 
+    def browse_tags(self, tag, offset=0):
+        """ Browse a tag """
+        endpoint = "browse/tags"
+        params = {
+            "tag"           : tag,
+            "offset"        : offset,
+            "limit"         : 50,
+            "mature_content": self.mature,
+        }
+        return self._pagination(endpoint, params)
+
     def browse_user_journals(self, username, offset=0):
         """Yield all journal entries of a specific user"""
         endpoint = "browse/user/journals"
@@ -1209,7 +1244,12 @@ class DeviantartOAuthAPI():
 
             if not data["has_more"]:
                 return
-            params["offset"] = data["next_offset"]
+            if "next_cursor" in data:
+                params["offset"] = None
+                params["cursor"] = data["next_cursor"]
+            else:
+                params["offset"] = data["next_offset"]
+                params["cursor"] = None
 
     def _pagination_folders(self, endpoint, params):
         result = []
