@@ -220,7 +220,7 @@ class OAuthDeviantart(OAuthBase):
                 "client-secret", deviantart.DeviantartOAuthAPI.CLIENT_SECRET),
             "https://www.deviantart.com/oauth2/authorize",
             "https://www.deviantart.com/oauth2/token",
-            scope="browse",
+            scope="browse user.manage",
             cache=deviantart._refresh_token_cache,
         )
 
