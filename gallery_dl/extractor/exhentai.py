@@ -203,8 +203,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         def _validate_response(response):
             # declared inside 'items()' to be able to access 'data'
-            if not response.history and \
-                    response.headers.get("content-length") == "137":
+            if not response.history and response.headers.get(
+                    "content-type", "").startswith("text/html"):
                 self._report_limits(data)
             return True
 
