@@ -41,6 +41,7 @@ class DeviantartExtractor(Extractor):
         self.extra = self.config("extra", False)
         self.quality = self.config("quality", "100")
         self.original = self.config("original", True)
+        self.comments = self.config("comments", False)
         self.user = match.group(1) or match.group(2)
         self.group = False
         self.api = None
@@ -161,6 +162,12 @@ class DeviantartExtractor(Extractor):
             deviation["published_time"])
         deviation["date"] = text.parse_timestamp(
             deviation["published_time"])
+
+        if self.comments:
+            deviation["comments"] = (
+                self.api.comments_deviation(deviation["deviationid"])
+                if deviation["stats"]["comments"] else ()
+            )
 
         # filename metadata
         alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
@@ -827,7 +834,9 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "exception": exception.NotFoundError,
         }),
         (("https://www.deviantart.com/myria-moon/art/Aime-Moi-261986576"), {
+            "options": (("comments", True),),
             "pattern": r"https://api-da\.wixmp\.com/_api/download/file",
+            "keyword": {"comments": list},
         }),
         # wixmp URL rewrite
         (("https://www.deviantart.com/citizenfresh/art/Hverarond-789295466"), {
@@ -1059,7 +1068,14 @@ class DeviantartOAuthAPI():
         endpoint = "collections/folders"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
-        return self._pagination_folders(endpoint, params)
+        return self._pagination_list(endpoint, params)
+
+    def comments_deviation(self, deviation_id, offset=0):
+        """Fetch comments posted on a deviation"""
+        endpoint = "comments/deviation/" + deviation_id
+        params = {"maxdepth": "5", "offset": offset, "limit": 50,
+                  "mature_content": self.mature}
+        return self._pagination_list(endpoint, params=params, key="thread")
 
     def deviation(self, deviation_id, public=True):
         """Query and return info about a single Deviation"""
@@ -1114,7 +1130,7 @@ class DeviantartOAuthAPI():
         endpoint = "gallery/folders"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
-        return self._pagination_folders(endpoint, params)
+        return self._pagination_list(endpoint, params)
 
     @memcache(keyarg=1)
     def user_profile(self, username):
@@ -1212,14 +1228,14 @@ class DeviantartOAuthAPI():
                 return data
 
     def _pagination(self, endpoint, params,
-                    extend=True, public=True, unpack=False):
+                    extend=True, public=True, unpack=False, key="results"):
         warn = True
         while True:
             data = self._call(endpoint, params=params, public=public)
-            if "results" not in data:
+            if key not in data:
                 self.log.error("Unexpected API response: %s", data)
                 return
-            results = data["results"]
+            results = data[key]
 
             if unpack:
                 results = [item["journal"] for item in results
@@ -1251,9 +1267,9 @@ class DeviantartOAuthAPI():
                 params["offset"] = data["next_offset"]
                 params["cursor"] = None
 
-    def _pagination_folders(self, endpoint, params):
+    def _pagination_list(self, endpoint, params, key="results"):
         result = []
-        result.extend(self._pagination(endpoint, params, False))
+        result.extend(self._pagination(endpoint, params, False, key=key))
         return result
 
     def _metadata(self, deviations):
