@@ -896,6 +896,16 @@ Description
     See `Filters <https://derpibooru.org/filters>`_ for details.
 
 
+extractor.deviantart.comments
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``comments`` metadata.
+
+
 extractor.deviantart.extra
 --------------------------
 Type
