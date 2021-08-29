@@ -326,7 +326,7 @@ class DeviantartExtractor(Extractor):
             folder = dev["premium_folder_data"]
 
             if not has_access and folder["type"] == "watchers" and \
-                    self.config("watch"):
+                    self.config("auto-watch"):
                 if self.api.user_friends_watch(username):
                     has_access = True
                     self.log.info(

@@ -1053,8 +1053,8 @@ Description
     or whenever your `cache file <cache.file_>`__ is deleted or cleared.
 
 
-extractor.deviantart.watch
---------------------------
+extractor.deviantart.auto-watch
+-------------------------------
 Type
     ``bool``
 Default
