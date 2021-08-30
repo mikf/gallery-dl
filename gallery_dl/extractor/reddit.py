@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,17 +21,14 @@ class RedditExtractor(Extractor):
     archive_fmt = "{filename}"
     cookiedomain = None
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.api = RedditAPI(self)
-        self.max_depth = self.config("recursion", 0)
-
     def items(self):
+        self.api = RedditAPI(self)
         match_submission = RedditSubmissionExtractor.pattern.match
         match_subreddit = RedditSubredditExtractor.pattern.match
         match_user = RedditUserExtractor.pattern.match
 
         parentdir = self.config("parent-directory")
+        max_depth = self.config("recursion", 0)
         videos = self.config("videos", True)
 
         submissions = self.submissions()
@@ -103,7 +100,7 @@ class RedditExtractor(Extractor):
                     elif not match_user(url) and not match_subreddit(url):
                         yield Message.Queue, text.unescape(url), data
 
-            if not extra or depth == self.max_depth:
+            if not extra or depth == max_depth:
                 return
             depth += 1
             submissions = (
