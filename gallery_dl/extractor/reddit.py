@@ -257,28 +257,30 @@ class RedditImageExtractor(Extractor):
 
 
 class RedditAPI():
-    """Minimal interface for the reddit API"""
+    """Interface for the Reddit API
+
+    Ref: https://www.reddit.com/dev/api/
+    """
     CLIENT_ID = "6N9uN0krSDE-ig"
     USER_AGENT = "Python:gallery-dl:0.8.4 (by /u/mikf1)"
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.comments = text.parse_int(extractor.config("comments", 0))
-        self.morecomments = extractor.config("morecomments", False)
         self.log = extractor.log
 
-        client_id = extractor.config("client-id", self.CLIENT_ID)
-        user_agent = extractor.config("user-agent", self.USER_AGENT)
+        config = extractor.config
+        self.comments = text.parse_int(config("comments", 0))
+        self.morecomments = config("morecomments", False)
 
-        if (client_id == self.CLIENT_ID) ^ (user_agent == self.USER_AGENT):
-            raise exception.StopExtraction(
-                "Conflicting values for 'client-id' and 'user-agent': "
-                "overwrite either both or none of them.")
+        client_id = config("client-id")
+        if client_id is None:
+            self.client_id = self.CLIENT_ID
+            self.headers = {"User-Agent": self.USER_AGENT}
+        else:
+            self.client_id = client_id
+            self.headers = {"User-Agent": config("user-agent")}
 
-        self.client_id = client_id
-        self.headers = {"User-Agent": user_agent}
-
-        token = extractor.config("refresh-token")
+        token = config("refresh-token")
         if token is None or token == "cache":
             key = "#" + self.client_id
             self.refresh_token = _refresh_token_cache(key)
