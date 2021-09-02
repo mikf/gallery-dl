@@ -136,7 +136,7 @@ class DynastyscansImageExtractor(DynastyscansSearchExtractor):
     pattern = BASE_PATTERN + r"/images/(\d+)"
     test = ("https://dynasty-scans.com/images/1245", {
         "url": "15e54bd94148a07ed037f387d046c27befa043b2",
-        "keyword": "3b630c6139e5ff06e141541d57960f8a2957efbb",
+        "keyword": "0d8976c2d6fbc9ed6aa712642631b96e456dc37f",
     })
 
     def images(self):

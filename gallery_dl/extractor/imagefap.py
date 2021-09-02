@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -36,12 +36,14 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 
     test = (
         ("https://www.imagefap.com/pictures/7102714", {
-            "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
+            "pattern": r"https://cdnh\.imagefap\.com"
+                       r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "2ba96e84c2952c4750e9fa94a3f2b1f965cec2f3",
             "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
         ("https://www.imagefap.com/gallery/5486966", {
-            "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
+            "pattern": r"https://cdnh\.imagefap\.com"
+                       r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "3e24eace5b09639b881ebd393165862feb46adde",
         }),
         ("https://www.imagefap.com/gallery.php?gid=7102714"),
@@ -105,7 +107,8 @@ class ImagefapImageExtractor(ImagefapExtractor):
     pattern = BASE_PATTERN + r"/photo/(\d+)"
     test = (
         ("https://www.imagefap.com/photo/1369341772/", {
-            "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
+            "pattern": r"https://cdnh\.imagefap\.com"
+                       r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "8894e45f7262020d8d66ce59917315def1fc475b",
         }),
         ("https://beta.imagefap.com/photo/1369341772/"),

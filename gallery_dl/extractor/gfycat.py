@@ -102,7 +102,7 @@ class GfycatImageExtractor(GfycatExtractor):
             "keyword": {
                 "gfyId": "graygenerouscowrie",
                 "gfyName": "GrayGenerousCowrie",
-                "gfyNumber": "755075459",
+                "gfyNumber": 755075459,
                 "title": "Bottom's up",
                 "username": "jackson3oh3",
                 "createDate": 1495884169,
