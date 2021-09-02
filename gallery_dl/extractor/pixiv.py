@@ -551,7 +551,7 @@ class PixivPixivisionExtractor(PixivExtractor):
         headers = {"User-Agent": "Mozilla/5.0"}
         self.page = self.request(url, headers=headers).text
 
-        title = text.extract(self.page, '<title>', ' - pixivision<')[0]
+        title = text.extract(self.page, '<title>', '<')[0]
         return {
             "pixivision_id"   : self.pixivision_id,
             "pixivision_title": text.unescape(title),
