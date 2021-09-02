@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://nhentai.net/"""
+"""Extractors for https://nhentai.net/"""
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, util
@@ -23,7 +23,7 @@ class NhentaiBase():
 
 class NhentaiGalleryExtractor(NhentaiBase, GalleryExtractor):
     """Extractor for image galleries from nhentai.net"""
-    pattern = r"(?:https?://)?nhentai\.net(/g/(\d+))"
+    pattern = r"(?:https?://)?nhentai\.net/g/(\d+)"
     test = ("https://nhentai.net/g/147850/", {
         "url": "5179dbf0f96af44005a0ff705a0ad64ac26547d0",
         "keyword": {
@@ -49,13 +49,11 @@ class NhentaiGalleryExtractor(NhentaiBase, GalleryExtractor):
     })
 
     def __init__(self, match):
-        GalleryExtractor.__init__(self, match)
-        self.gallery_id = match.group(2)
-        self.data = None
+        url = self.root + "/api/gallery/" + match.group(1)
+        GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        self.data = data = json.loads(text.parse_unicode_escapes(text.extract(
-            page, 'JSON.parse("', '");')[0]))
+        self.data = data = json.loads(page)
 
         title_en = data["title"].get("english", "")
         title_ja = data["title"].get("japanese", "")
