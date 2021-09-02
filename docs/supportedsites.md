@@ -496,7 +496,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>nhentai</td>
     <td>https://nhentai.net/</td>
-    <td>Galleries, Search Results</td>
+    <td>Favorites, Galleries, Search Results</td>
     <td></td>
 </tr>
 <tr>
