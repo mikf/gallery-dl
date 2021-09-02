@@ -332,7 +332,7 @@ class DeviantartExtractor(Extractor):
                     self.log.info(
                         "Watching %s for premium folder access", username)
                 else:
-                    self.warning.info(
+                    self.log.warning(
                         "Error when trying to watch %s. "
                         "Try again with a new refresh-token", username)
         else:

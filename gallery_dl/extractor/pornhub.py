@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -31,7 +31,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
     test = (
         ("https://www.pornhub.com/album/19289801", {
             "pattern": r"https://\w+.phncdn.com/pics/albums/\d+/\d+/\d+/\d+/",
-            "count": 308,
+            "count": ">= 300",
             "keyword": {
                 "id"     : int,
                 "num"    : int,

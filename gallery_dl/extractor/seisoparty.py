@@ -105,7 +105,7 @@ class SeisopartyPostExtractor(SeisopartyExtractor):
             "url": "75f13b92de0ce399b6163c3de18f1f36011c2366",
             "count": 2,
             "keyword": {
-                "content": "この前描いためぐるちゃんのPSDファイルです。\n"
+                "content": "この前描いためぐるちゃんのPSDファイルです。<br/>"
                            "どうぞよろしくお願いします。",
                 "date": "dt:2021-05-06 12:38:31",
                 "extension": "re:psd|jpg",

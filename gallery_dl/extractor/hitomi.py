@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -35,12 +35,12 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }),
         # Game CG with scenes (#321)
         ("https://hitomi.la/galleries/733697.html", {
-            "url": "1de8510bd4c3048a1cbbf242505d8449e93ba5a4",
+            "url": "e057652b40629d3d72b0ef059c6ec7556417139c",
             "count": 210,
         }),
         # fallback for galleries only available through /reader/ URLs
         ("https://hitomi.la/galleries/1045954.html", {
-            "url": "681bb07d8ce4d0c4d0592e47b239b6e42d566386",
+            "url": "779b94b47d5f0c2341db03499270d2b5370196f6",
             "count": 1413,
         }),
         # gallery with "broken" redirect
