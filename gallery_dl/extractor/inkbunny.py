@@ -30,9 +30,8 @@ class InkbunnyExtractor(Extractor):
 
     def items(self):
         self.api.authenticate()
-        to_bool = ("deleted", "digitalsales", "favorite", "forsale",
-                   "friends_only", "guest_block", "hidden", "printsales",
-                   "public", "scraps")
+        to_bool = ("deleted", "favorite", "friends_only", "guest_block",
+                   "hidden", "public", "scraps")
 
         for post in self.posts():
             post["date"] = text.parse_datetime(
@@ -42,7 +41,8 @@ class InkbunnyExtractor(Extractor):
             files = post["files"]
 
             for key in to_bool:
-                post[key] = (post[key] == "t")
+                if key in post:
+                    post[key] = (post[key] == "t")
 
             del post["keywords"]
             del post["files"]
@@ -81,17 +81,14 @@ class InkbunnyUserExtractor(InkbunnyExtractor):
                 "user_id"      : "20969",
                 "comments_count" : "re:[0-9]+",
                 "deleted"        : bool,
-                "digitalsales"   : bool,
                 "favorite"       : bool,
                 "favorites_count": "re:[0-9]+",
-                "forsale"        : bool,
                 "friends_only"   : bool,
                 "guest_block"    : bool,
                 "hidden"         : bool,
                 "pagecount"      : "re:[0-9]+",
                 "pools"          : list,
                 "pools_count"    : int,
-                "printsales"     : bool,
                 "public"         : bool,
                 "rating_id"      : "re:[0-9]+",
                 "rating_name"    : str,
