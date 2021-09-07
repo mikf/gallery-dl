@@ -896,6 +896,28 @@ Description
     See `Filters <https://derpibooru.org/filters>`_ for details.
 
 
+extractor.deviantart.auto-watch
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Automatically watch users when encountering "Watchers-Only Deviations"
+    (requires a `refresh-token <extractor.deviantart.refresh-token_>`_).
+
+
+extractor.deviantart.auto-unwatch
+---------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    After watching a user through `auto-watch <extractor.deviantart.auto-watch_>`_,
+    unwatch that user at the end of the current extractor run.
+
+
 extractor.deviantart.comments
 -----------------------------
 Type
@@ -1051,17 +1073,6 @@ Description
     Note: The ``refresh-token`` becomes invalid
     `after 3 months <https://www.deviantart.com/developers/authentication#refresh>`__
     or whenever your `cache file <cache.file_>`__ is deleted or cleared.
-
-
-extractor.deviantart.auto-watch
--------------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Automatically watch users when encountering "Watchers-Only Deviations"
-    (requires a `refresh-token <extractor.deviantart.refresh-token_>`_).
 
 
 extractor.deviantart.wait-min
