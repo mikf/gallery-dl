@@ -46,6 +46,13 @@ class DeviantartExtractor(Extractor):
         self.group = False
         self.api = None
 
+        unwatch = self.config("auto-unwatch")
+        if unwatch:
+            self.unwatch = []
+            self.finalize = self._unwatch_premium
+        else:
+            self.unwatch = None
+
         if self.quality:
             self.quality = ",q_{}".format(self.quality)
 
@@ -318,43 +325,47 @@ class DeviantartExtractor(Extractor):
         except KeyError:
             pass
 
-        # check accessibility
-        if self.api.refresh_token_key:
-            dev = self.api.deviation(deviation["deviationid"], False)
-            has_access = dev["premium_folder_data"]["has_access"]
-            username = dev["author"]["username"]
-            folder = dev["premium_folder_data"]
-
-            if not has_access and folder["type"] == "watchers" and \
-                    self.config("auto-watch"):
-                if self.api.user_friends_watch(username):
-                    has_access = True
-                    self.log.info(
-                        "Watching %s for premium folder access", username)
-                else:
-                    self.log.warning(
-                        "Error when trying to watch %s. "
-                        "Try again with a new refresh-token", username)
-        else:
+        if not self.api.refresh_token_key:
             self.log.warning(
                 "Unable to access premium content (no refresh-token)")
             self._fetch_premium = lambda _: None
             return None
 
-        if has_access:
-            self.log.info("Fetching premium folder data")
-        else:
+        dev = self.api.deviation(deviation["deviationid"], False)
+        folder = dev["premium_folder_data"]
+        username = dev["author"]["username"]
+        has_access = folder["has_access"]
+
+        if not has_access and folder["type"] == "watchers" and \
+                self.config("auto-watch"):
+            if self.unwatch is not None:
+                self.unwatch.append(username)
+            if self.api.user_friends_watch(username):
+                has_access = True
+                self.log.info(
+                    "Watching %s for premium folder access", username)
+            else:
+                self.log.warning(
+                    "Error when trying to watch %s. "
+                    "Try again with a new refresh-token", username)
+
+        if not has_access:
             self.log.warning("Unable to access premium content (type: %s)",
                              folder["type"])
             self._fetch_premium = lambda _: None
             return None
 
-        # fill cache
+        self.log.info("Fetching premium folder data")
         cache = self._premium_cache
         for dev in self.api.gallery(
                 username, folder["gallery_id"], public=False):
             cache[dev["deviationid"]] = dev
         return cache[deviation["deviationid"]]
+
+    def _unwatch_premium(self):
+        for username in self.unwatch:
+            self.log.info("Unwatching %s", username)
+            self.api.user_friends_unwatch(username)
 
 
 class DeviantartUserExtractor(DeviantartExtractor):
@@ -1153,13 +1164,15 @@ class DeviantartOAuthAPI():
             "mature_content"      : self.mature,
         }
         return self._call(
-            endpoint, method="POST", data=data, public=False, fatal=False)
+            endpoint, method="POST", data=data, public=False, fatal=False,
+        ).get("success")
 
     def user_friends_unwatch(self, username):
         """Unwatch a user"""
         endpoint = "user/friends/unwatch/" + username
         return self._call(
-            endpoint, method="POST", public=False, fatal=False)
+            endpoint, method="POST", public=False, fatal=False,
+        ).get("success")
 
     def authenticate(self, refresh_token_key):
         """Authenticate the application by requesting an access token"""
