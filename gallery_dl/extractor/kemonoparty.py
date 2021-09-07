@@ -173,3 +173,20 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
     def posts(self):
         posts = self.request(self.api_url).json()
         return (posts[0],) if len(posts) > 1 else posts
+
+
+class KemonopartyFavoriteExtractor(KemonopartyExtractor):
+    """Extractor for kemono.party favorites"""
+    subcategory = "favorite"
+    pattern = r"(?:https?://)?kemono\.party/favorites"
+    test = ("https://kemono.party/favorites",)
+
+    def items(self):
+        self._prepare_ddosguard_cookies()
+        users = self.request(self.root + "/api/favorites").json()
+
+        for user in users:
+            user["_extractor"] = KemonopartyUserExtractor
+            url = "{}/{}/user/{}".format(
+                self.root, user["service"], user["id"])
+            yield Message.Queue, url, user
