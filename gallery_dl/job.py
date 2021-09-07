@@ -109,6 +109,8 @@ class Job():
                 log.info("No results for %s", extractor.url)
         finally:
             self.handle_finalize()
+            if extractor.finalize:
+                extractor.finalize()
 
         return self.status
 
