@@ -46,9 +46,10 @@ class EromeExtractor(Extractor):
             user, pos = text.extract(
                 page, 'href="https://www.erome.com/', '"', pos)
             data = {
-                "album_id": album_id,
-                "title"   : text.unescape(title),
-                "user"    : text.unquote(user),
+                "album_id"     : album_id,
+                "title"        : text.unescape(title),
+                "user"         : text.unquote(user),
+                "_http_headers": {"Referer": url},
             }
 
             yield Message.Directory, data
