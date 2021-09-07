@@ -42,6 +42,7 @@ class Extractor():
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
         self.url = match.string
+        self.finalize = None
 
         if self.basecategory:
             self.config = self._config_shared

@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.18.4 - 2021-09-04
 ### Additions
 - [420chan] add `thread` and `board` extractors ([#1773](https://github.com/mikf/gallery-dl/issues/1773))
