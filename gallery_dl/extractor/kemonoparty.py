@@ -9,7 +9,8 @@
 """Extractors for https://kemono.party/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 import itertools
 import re
 
@@ -74,6 +75,25 @@ class KemonopartyExtractor(Extractor):
 
                 text.nameext_from_url(file["name"], post)
                 yield Message.Url, url, post
+
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=28*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/account/login"
+        data = {"username": username, "password": password}
+
+        response = self.request(url, method="POST", data=data)
+        if response.url.endswith("/account/login") and \
+                "Username or password is incorrect" in response.text:
+            raise exception.AuthenticationError()
+
+        return {c.name: c.value for c in response.history[0].cookies}
 
 
 class KemonopartyUserExtractor(KemonopartyExtractor):
@@ -179,12 +199,17 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     """Extractor for kemono.party favorites"""
     subcategory = "favorite"
     pattern = r"(?:https?://)?kemono\.party/favorites"
-    test = ("https://kemono.party/favorites",)
+    test = ("https://kemono.party/favorites", {
+        "pattern": KemonopartyUserExtractor.pattern,
+        "url": "f4b5b796979bcba824af84206578c79101c7f0e1",
+        "count": 3,
+    })
 
     def items(self):
         self._prepare_ddosguard_cookies()
-        users = self.request(self.root + "/api/favorites").json()
+        self.login()
 
+        users = self.request(self.root + "/api/favorites").json()
         for user in users:
             user["_extractor"] = KemonopartyUserExtractor
             url = "{}/{}/user/{}".format(
