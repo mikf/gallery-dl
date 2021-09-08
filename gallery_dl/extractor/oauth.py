@@ -415,7 +415,7 @@ class OAuthPixiv(OAuthBase):
         print("""
 1) Open your browser's Developer Tools (F12) and switch to the Network tab
 2) Login
-4) Select the last network monitor entry ('callback?state=...')
+3) Select the last network monitor entry ('callback?state=...')
 4) Copy its 'code' query parameter, paste it below, and press Enter
 """)
         code = input("code: ")
