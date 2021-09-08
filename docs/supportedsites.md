@@ -383,7 +383,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Kemonoparty</td>
     <td>https://kemono.party/</td>
     <td>Favorites, Posts, User Profiles</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>Khinsider</td>

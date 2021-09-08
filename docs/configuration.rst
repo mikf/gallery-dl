@@ -368,6 +368,7 @@ Description
     * ``imgbb``
     * ``inkbunny``
     * ``instagram``
+    * ``kemonoparty``
     * ``mangadex``
     * ``mangoxo``
     * ``pillowfort``
