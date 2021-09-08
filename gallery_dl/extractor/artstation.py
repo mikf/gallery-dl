@@ -158,7 +158,8 @@ class ArtstationUserExtractor(ArtstationExtractor):
 
     def projects(self):
         url = "{}/users/{}/projects.json".format(self.root, self.user)
-        return self._pagination(url)
+        params = {"album_id": "all"}
+        return self._pagination(url, params)
 
 
 class ArtstationAlbumExtractor(ArtstationExtractor):
