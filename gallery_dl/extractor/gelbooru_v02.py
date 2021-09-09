@@ -176,6 +176,58 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
                 yield post.attrib
 
 
+class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
+    subcategory = "favorite"
+    directory_fmt = ("{category}", "favorites", "{favorite_id}")
+    archive_fmt = "f_{favorite_id}_{id}"
+    per_page = 50
+    pattern = BASE_PATTERN + r"/index\.php\?page=favorites&s=view&id=(\d+)"
+    test = (
+        ("https://rule34.xxx/index.php?page=favorites&s=view&id=1030218", {
+            "count": 3,
+        }),
+        ("https://safebooru.org/index.php?page=favorites&s=view&id=17567", {
+            "count": 2,
+        }),
+        ("https://realbooru.com/index.php?page=favorites&s=view&id=274", {
+            "count": 4,
+        }),
+        ("https://tbib.org/index.php?page=favorites&s=view&id=7881", {
+            "count": 3,
+        }),
+    )
+
+    def __init__(self, match):
+        GelbooruV02Extractor.__init__(self, match)
+        self.favorite_id = match.group(match.lastindex)
+
+    def metadata(self):
+        return {"favorite_id": text.parse_int(self.favorite_id)}
+
+    def posts(self):
+        url = self.root + "/index.php"
+        params = {
+            "page": "favorites",
+            "s"   : "view",
+            "id"  : self.favorite_id,
+            "pid" : self.page_start * self.per_page,
+        }
+
+        data = {}
+        while True:
+            num_ids = 0
+            page = self.request(url, params=params).text
+
+            for data["id"] in text.extract_iter(page, '" id="p', '"'):
+                num_ids += 1
+                for post in self._api_request(data):
+                    yield post.attrib
+
+            if num_ids < self.per_page:
+                return
+            params["pid"] += self.per_page
+
+
 class GelbooruV02PostExtractor(GelbooruV02Extractor):
     subcategory = "post"
     archive_fmt = "{id}"
