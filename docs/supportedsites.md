@@ -888,25 +888,25 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Realbooru</td>
     <td>https://realbooru.com/</td>
-    <td>Pools, Posts, Tag Searches</td>
+    <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>Rule 34</td>
     <td>https://rule34.xxx/</td>
-    <td>Pools, Posts, Tag Searches</td>
+    <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>Safebooru</td>
     <td>https://safebooru.org/</td>
-    <td>Pools, Posts, Tag Searches</td>
+    <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>The Big ImageBoard</td>
     <td>https://tbib.org/</td>
-    <td>Pools, Posts, Tag Searches</td>
+    <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
 
