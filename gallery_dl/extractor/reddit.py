@@ -139,7 +139,7 @@ class RedditSubredditExtractor(RedditExtractor):
     """Extractor for URLs from subreddits on reddit.com"""
     subcategory = "subreddit"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/r/"
-               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?(?:$|#)")
+               r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?(?:$|#)")
     test = (
         ("https://www.reddit.com/r/lavaporn/", {
             "range": "1-20",
@@ -152,9 +152,11 @@ class RedditSubredditExtractor(RedditExtractor):
     )
 
     def __init__(self, match):
+        self.subreddit, sub, params = match.groups()
+        self.params = text.parse_query(params)
+        if sub:
+            self.subcategory += "-" + sub
         RedditExtractor.__init__(self, match)
-        self.subreddit = match.group(1)
-        self.params = text.parse_query(match.group(2))
 
     def submissions(self):
         return self.api.submissions_subreddit(self.subreddit, self.params)
@@ -164,7 +166,7 @@ class RedditUserExtractor(RedditExtractor):
     """Extractor for URLs from posts by a reddit user"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
-               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?")
+               r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?")
     test = (
         ("https://www.reddit.com/user/username/", {
             "count": ">= 2",
@@ -175,9 +177,11 @@ class RedditUserExtractor(RedditExtractor):
     )
 
     def __init__(self, match):
+        self.user, sub, params = match.groups()
+        self.params = text.parse_query(params)
+        if sub:
+            self.subcategory += "-" + sub
         RedditExtractor.__init__(self, match)
-        self.user = match.group(1)
-        self.params = text.parse_query(match.group(2))
 
     def submissions(self):
         return self.api.submissions_user(self.user, self.params)
