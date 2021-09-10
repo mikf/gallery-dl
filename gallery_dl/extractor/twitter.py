@@ -316,7 +316,7 @@ class TwitterExtractor(Extractor):
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
-    """Extractor for all images from a user's timeline"""
+    """Extractor for Tweets from a user's timeline"""
     subcategory = "timeline"
     pattern = (BASE_PATTERN + r"/(?!search)(?:([^/?#]+)/?(?:$|[?#])"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
@@ -341,8 +341,25 @@ class TwitterTimelineExtractor(TwitterExtractor):
         return TwitterAPI(self).timeline_profile(self.user)
 
 
+class TwitterRepliesExtractor(TwitterExtractor):
+    """Extractor for Tweets from a user's timeline including replies"""
+    subcategory = "replies"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/with_replies(?!\w)"
+    test = (
+        ("https://twitter.com/supernaturepics/with_replies", {
+            "range": "1-40",
+            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
+        }),
+        ("https://mobile.twitter.com/supernaturepics/with_replies#t"),
+        ("https://www.twitter.com/id:2976459548/with_replies"),
+    )
+
+    def tweets(self):
+        return TwitterAPI(self).timeline_profile(self.user, replies=True)
+
+
 class TwitterMediaExtractor(TwitterExtractor):
-    """Extractor for all images from a user's Media Tweets"""
+    """Extractor for Tweets from a user's Media timeline"""
     subcategory = "media"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/media(?!\w)"
     test = (
@@ -652,11 +669,11 @@ class TwitterAPI():
         endpoint = "/2/timeline/conversation/{}.json".format(conversation_id)
         return self._pagination(endpoint)
 
-    def timeline_profile(self, screen_name):
+    def timeline_profile(self, screen_name, replies=False):
         user_id = self._user_id_by_screen_name(screen_name)
         endpoint = "/2/timeline/profile/{}.json".format(user_id)
         params = self.params.copy()
-        params["include_tweet_replies"] = "false"
+        params["include_tweet_replies"] = "true" if replies else "false"
         return self._pagination(endpoint, params)
 
     def timeline_media(self, screen_name):
