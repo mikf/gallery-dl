@@ -103,12 +103,16 @@ class Extractor():
 
     def request(self, url, *, method="GET", session=None, retries=None,
                 encoding=None, fatal=True, notfound=None, **kwargs):
-        tries = 1
-        retries = self._retries if retries is None else retries
-        session = self.session if session is None else session
-        kwargs.setdefault("timeout", self._timeout)
-        kwargs.setdefault("verify", self._verify)
+        if retries is None:
+            retries = self._retries
+        if session is None:
+            session = self.session
+        if "timeout" not in kwargs:
+            kwargs["timeout"] = self._timeout
+        if "verify" not in kwargs:
+            kwargs["verify"] = self._verify
         response = None
+        tries = 1
 
         if self.request_interval:
             seconds = (self.request_interval -
