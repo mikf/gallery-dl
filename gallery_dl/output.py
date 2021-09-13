@@ -10,6 +10,7 @@ import os
 import sys
 import shutil
 import logging
+import unicodedata
 from . import config, util
 
 
@@ -270,9 +271,14 @@ class PipeOutput(NullOutput):
 class TerminalOutput(NullOutput):
 
     def __init__(self):
-        self.short = config.get(("output",), "shorten", True)
-        if self.short:
-            self.width = shutil.get_terminal_size().columns - OFFSET
+        shorten = config.get(("output",), "shorten", True)
+        if shorten:
+            func = shorten_string_eaw if shorten == "eaw" else shorten_string
+            limit = shutil.get_terminal_size().columns - OFFSET
+            sep = CHAR_ELLIPSIES
+            self.shorten = lambda txt: func(txt, limit, sep)
+        else:
+            self.shorten = util.identity
 
     def start(self, path):
         print(self.shorten("  " + path), end="", flush=True)
@@ -282,17 +288,6 @@ class TerminalOutput(NullOutput):
 
     def success(self, path, tries):
         print("\r", self.shorten(CHAR_SUCCESS + path), sep="")
-
-    def shorten(self, txt):
-        """Reduce the length of 'txt' to the width of the terminal"""
-        if self.short and len(txt) > self.width:
-            hwidth = self.width // 2 - OFFSET
-            return "".join((
-                txt[:hwidth-1],
-                CHAR_ELLIPSIES,
-                txt[-hwidth-(self.width % 2):]
-            ))
-        return txt
 
 
 class ColorOutput(TerminalOutput):
@@ -305,6 +300,56 @@ class ColorOutput(TerminalOutput):
 
     def success(self, path, tries):
         print("\r\033[1;32m", self.shorten(path), "\033[0m", sep="")
+
+
+class EAWCache(dict):
+
+    def __missing__(self, key):
+        width = self[key] = \
+            2 if unicodedata.east_asian_width(key) in "WF" else 1
+        return width
+
+
+def shorten_string(txt, limit, sep="…"):
+    """Limit width of 'txt'; assume all characters have a width of 1"""
+    if len(txt) <= limit:
+        return txt
+    limit -= len(sep)
+    return txt[:limit // 2] + sep + txt[-((limit+1) // 2):]
+
+
+def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
+    """Limit width of 'txt'; check for east-asian characters with width > 1"""
+    char_widths = [cache[c] for c in txt]
+    text_width = sum(char_widths)
+
+    if text_width <= limit:
+        # no shortening required
+        return txt
+
+    limit -= len(sep)
+    if text_width == len(txt):
+        # all characters have a width of 1
+        return txt[:limit // 2] + sep + txt[-((limit+1) // 2):]
+
+    # wide characters
+    left = 0
+    lwidth = limit // 2
+    while True:
+        lwidth -= char_widths[left]
+        if lwidth < 0:
+            break
+        left += 1
+
+    right = -1
+    rwidth = (limit+1) // 2 + (lwidth + char_widths[left])
+    while True:
+        rwidth -= char_widths[right]
+        if rwidth < 0:
+            break
+        right -= 1
+
+    return txt[:left] + sep + txt[right+1:]
 
 
 if util.WINDOWS:
