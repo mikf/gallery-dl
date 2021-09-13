@@ -2531,6 +2531,9 @@ Description
     Controls whether the output strings should be shortened to fit
     on one console line.
 
+    Set this option to ``"eaw"`` to also work with east-asian characters
+    with a display width greater than 1.
+
 
 output.skip
 -----------
