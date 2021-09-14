@@ -54,13 +54,13 @@ class Extractor():
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
-        self.request_interval = self.config(
-            "sleep-request", self.request_interval)
+        self._interval = util.build_duration_func(
+            self.config("sleep-request", self.request_interval),
+            self.request_interval_min,
+        )
 
         if self._retries < 0:
             self._retries = float("inf")
-        if self.request_interval < self.request_interval_min:
-            self.request_interval = self.request_interval_min
 
         self._init_session()
         self._init_cookies()
@@ -114,8 +114,8 @@ class Extractor():
         response = None
         tries = 1
 
-        if self.request_interval:
-            seconds = (self.request_interval -
+        if self._interval:
+            seconds = (self._interval() -
                        (time.time() - Extractor.request_timestamp))
             if seconds > 0.0:
                 self.log.debug("Sleeping for %.5s seconds", seconds)

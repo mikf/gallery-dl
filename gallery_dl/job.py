@@ -72,9 +72,9 @@ class Job():
         log = extractor.log
         msg = None
 
-        sleep = extractor.config("sleep-extractor")
+        sleep = util.build_duration_func(extractor.config("sleep-extractor"))
         if sleep:
-            time.sleep(sleep)
+            time.sleep(sleep())
 
         try:
             for msg in extractor:
@@ -236,7 +236,7 @@ class DownloadJob(Job):
             return
 
         if self.sleep:
-            time.sleep(self.sleep)
+            time.sleep(self.sleep())
 
         # download from URL
         if not self.download(url):
@@ -398,7 +398,7 @@ class DownloadJob(Job):
         if kwdict:
             pathfmt.set_directory(kwdict)
 
-        self.sleep = cfg("sleep")
+        self.sleep = util.build_duration_func(cfg("sleep"))
         self.fallback = cfg("fallback", True)
         if not cfg("download", True):
             # monkey-patch method to do nothing and always return True
@@ -541,7 +541,7 @@ class SimulationJob(DownloadJob):
         self.pathfmt.set_filename(kwdict)
         self.out.skip(self.pathfmt.path)
         if self.sleep:
-            time.sleep(self.sleep)
+            time.sleep(self.sleep())
         if self.archive:
             self.archive.add(kwdict)
 
@@ -695,9 +695,10 @@ class DataJob(Job):
         self.filter = util.identity if private else util.filter_dict
 
     def run(self):
-        sleep = self.extractor.config("sleep-extractor")
+        sleep = util.build_duration_func(
+            self.extractor.config("sleep-extractor"))
         if sleep:
-            time.sleep(sleep)
+            time.sleep(sleep())
 
         # collect data
         try:
