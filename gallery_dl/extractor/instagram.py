@@ -29,7 +29,7 @@ class InstagramExtractor(Extractor):
     root = "https://www.instagram.com"
     cookiedomain = ".instagram.com"
     cookienames = ("sessionid",)
-    request_interval = 8.0
+    request_interval = (6.0, 12.0)
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -679,7 +679,6 @@ class InstagramStoriesExtractor(InstagramExtractor):
         ("https://www.instagram.com/stories/instagram/"),
         ("https://www.instagram.com/stories/highlights/18042509488170095/"),
     )
-    request_interval = 1.0
 
     def __init__(self, match):
         self.highlight_id, self.user = match.groups()
