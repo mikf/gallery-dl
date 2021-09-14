@@ -409,6 +409,24 @@ def compile_expression(expr, name="<expr>", globals=GLOBALS):
     return functools.partial(eval, code_object, globals)
 
 
+def build_duration_func(duration, min=0.0):
+    if not duration:
+        return None
+
+    try:
+        lower, upper = duration
+    except TypeError:
+        pass
+    else:
+        return functools.partial(
+            random.uniform,
+            lower if lower > min else min,
+            upper if upper > min else min,
+        )
+
+    return functools.partial(identity, duration if duration > min else min)
+
+
 def build_predicate(predicates):
     if not predicates:
         return lambda url, kwdict: True

@@ -314,7 +314,7 @@ Description
 extractor.*.sleep
 -----------------
 Type
-    ``float``
+    |Duration|_
 Default
     ``0``
 Description
@@ -324,7 +324,7 @@ Description
 extractor.*.sleep-extractor
 ---------------------------
 Type
-    ``float``
+    |Duration|_
 Default
     ``0``
 Description
@@ -335,7 +335,7 @@ Description
 extractor.*.sleep-request
 -------------------------
 Type
-    ``float``
+    |Duration|_
 Default
     ``0``
 Description
@@ -3167,7 +3167,8 @@ Custom Types
 Date
 ----
 Type
-    ``string`` or ``integer``
+    * ``string``
+    * ``integer``
 Example
     * ``"2019-01-01T00:00:00"``
     * ``"2019"`` with ``"%Y"`` as `date-format`_
@@ -3179,10 +3180,28 @@ Description
     * If given as ``integer``, it is interpreted as UTC timestamp.
 
 
+Duration
+--------
+Type
+    * ``float``
+    * ``list`` with 2 ``floats``
+Example
+    * ``2.85``
+    * ``[1.5, 3.0]``
+Description
+    A |Duration|_ represents a span of time in seconds.
+
+    * If given as a single ``float``, it will be used as that exact value.
+    * If given as a ``list`` with 2 floating-point numbers ``a`` & ``b`` ,
+      it will be randomly chosen with uniform distribution such that ``a <= N <=b``.
+      (see `random.uniform() <https://docs.python.org/3/library/random.html#random.uniform>`_)
+
+
 Path
 ----
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Example
     * ``"file.ext"``
     * ``"~/path/to/file.ext"``
@@ -3328,6 +3347,7 @@ Description
 .. |datetime| replace:: ``datetime``
 .. |datetime.max| replace:: ``datetime.max``
 .. |Date| replace:: ``Date``
+.. |Duration| replace:: ``Duration``
 .. |Path| replace:: ``Path``
 .. |Last-Modified| replace:: ``Last-Modified``
 .. |Logging Configuration| replace:: ``Logging Configuration``
