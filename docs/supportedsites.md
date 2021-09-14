@@ -148,7 +148,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Eka's Portal</td>
     <td>https://aryion.com/</td>
-    <td>Galleries, Posts</td>
+    <td>Galleries, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr>

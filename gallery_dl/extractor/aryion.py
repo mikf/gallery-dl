@@ -56,10 +56,13 @@ class AryionExtractor(Extractor):
 
     def items(self):
         self.login()
+        data = self.metadata()
 
         for post_id in self.posts():
             post = self._parse_post(post_id)
             if post:
+                if data:
+                    post.update(data)
                 yield Message.Directory, post
                 yield Message.Url, post["url"], post
             elif post is False and self.recursive:
@@ -70,6 +73,9 @@ class AryionExtractor(Extractor):
 
     def posts(self):
         """Yield relevant post IDs"""
+
+    def metadata(self):
+        """Return general metadata"""
 
     def _pagination(self, url):
         while True:
@@ -185,6 +191,25 @@ class AryionGalleryExtractor(AryionExtractor):
             self._needle = "thumb' href='/g4/view/"
             url = "{}/g4/latest.php?name={}".format(self.root, self.user)
             return util.advance(self._pagination(url), self.offset)
+
+
+class AryionTagExtractor(AryionExtractor):
+    """Extractor for tag searches on eka's portal"""
+    subcategory = "tag"
+    directory_fmt = ("{category}", "tags", "{search_tags}")
+    archive_fmt = "t_{search_tags}_{id}"
+    pattern = BASE_PATTERN + r"/tags\.php\?([^#]+)"
+    test = ("https://aryion.com/g4/tags.php?tag=star+wars&p=18", {
+        "count": ">= 5",
+    })
+
+    def metadata(self):
+        return {"search_tags": text.parse_query(self.user).get("tag")}
+
+    def posts(self):
+        url = "{}/g4/tags.php?{}".format(self.root, self.user)
+        self.user = None
+        return self._pagination(url)
 
 
 class AryionPostExtractor(AryionExtractor):
