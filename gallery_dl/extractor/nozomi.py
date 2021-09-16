@@ -168,7 +168,7 @@ class NozomiTagExtractor(NozomiExtractor):
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
         tags, self.pnum = match.groups()
-        self.tags = text.unquote(tags).lower()
+        self.tags = text.unquote(tags)
         self.nozomi = "/nozomi/{}.nozomi".format(self.tags)
 
     def metadata(self):
@@ -187,7 +187,7 @@ class NozomiSearchExtractor(NozomiExtractor):
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
-        self.tags = text.unquote(match.group(1)).lower().split()
+        self.tags = text.unquote(match.group(1)).split()
 
     def metadata(self):
         return {"search_tags": self.tags}
