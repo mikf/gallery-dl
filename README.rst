@@ -212,7 +212,6 @@ and optional for
 ``mangadex``,
 ``mangoxo``,
 ``pillowfort``,
-``pinterest``,
 ``sankaku``,
 ``subscribestar``,
 ``tapas``,

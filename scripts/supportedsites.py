@@ -229,7 +229,7 @@ AUTH_MAP = {
     "patreon"        : _COOKIES,
     "pawoo"          : _OAUTH,
     "pillowfort"     : "Supported",
-    "pinterest"      : "Supported",
+    "pinterest"      : _COOKIES,
     "pixiv"          : _OAUTH,
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
