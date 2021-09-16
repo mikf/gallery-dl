@@ -372,7 +372,6 @@ Description
     * ``mangadex``
     * ``mangoxo``
     * ``pillowfort``
-    * ``pinterest``
     * ``sankaku``
     * ``subscribestar``
     * ``tapas``
