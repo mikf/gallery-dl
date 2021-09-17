@@ -66,7 +66,8 @@ class FantiaExtractor(Extractor):
             "comment": resp["comment"],
             "rating": resp["rating"],
             "posted_at": resp["posted_at"],
-            "date": text.parse_datetime(resp["posted_at"], "%a, %d %b %Y %H:%M:%S %z"),
+            "date": text.parse_datetime(
+                resp["posted_at"], "%a, %d %b %Y %H:%M:%S %z"),
             "fanclub_id": resp["fanclub"]["id"],
             "fanclub_user_id": resp["fanclub"]["user"]["id"],
             "fanclub_user_name": resp["fanclub"]["user"]["name"],

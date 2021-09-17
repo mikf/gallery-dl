@@ -28,6 +28,7 @@ modules = [
     "comicvine",
     "cyberdrop",
     "danbooru",
+    "desktopography",
     "deviantart",
     "dynastyscans",
     "e621",
@@ -148,7 +149,6 @@ modules = [
     "oauth",
     "test",
     "ytdl",
-    "desktopography",
 ]
 
 

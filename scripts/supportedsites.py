@@ -134,6 +134,9 @@ SUBCATEGORY_MAP = {
     "artstation": {
         "artwork": "Artwork Listings",
     },
+    "desktopography": {
+        "site": "",
+    },
     "deviantart": {
         "stash": "Sta.sh",
         "watch-posts": "",
