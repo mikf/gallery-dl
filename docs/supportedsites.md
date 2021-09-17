@@ -122,6 +122,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Desktopography</td>
+    <td>https://desktopography.net/</td>
+    <td>Entrys, Exhibitions</td>
+    <td></td>
+</tr>
+<tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
     <td>Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, Tag Searches, User Profiles, Watches</td>
