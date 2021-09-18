@@ -2262,6 +2262,15 @@ Description
     * ``false``: Start with the first chapter
 
 
+extractor.[manga-extractor].page-reverse
+----------------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download manga chapter pages in reverse order.
+
 
 Downloader Options
 ==================
