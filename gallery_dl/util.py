@@ -139,6 +139,17 @@ def delete_items(obj, keys):
             del obj[key]
 
 
+def enumerate_reversed(iterable, start=0, length=None):
+    """Enumerate 'iterable' and return its elements in reverse order"""
+    start -= 1
+    if length is None:
+        length = len(iterable)
+    return zip(
+        range(length - start, start, -1),
+        reversed(iterable),
+    )
+
+
 def number_to_string(value, numbers=(int, float)):
     """Convert numbers (int, float) to string; Return everything else as is."""
     return str(value) if value.__class__ in numbers else value

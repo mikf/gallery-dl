@@ -447,16 +447,23 @@ class GalleryExtractor(Extractor):
         imgs = self.images(page)
 
         if "count" in data:
-            images = zip(
-                range(1, data["count"]+1),
-                imgs,
-            )
+            if self.config("page-reverse"):
+                images = util.enumerate_reversed(imgs, 1, data["count"])
+            else:
+                images = zip(
+                    range(1, data["count"]+1),
+                    imgs,
+                )
         else:
+            enum = enumerate
             try:
                 data["count"] = len(imgs)
             except TypeError:
                 pass
-            images = enumerate(imgs, 1)
+            else:
+                if self.config("page-reverse"):
+                    enum = util.enumerate_reversed
+            images = enum(imgs, 1)
 
         yield Message.Directory, data
         for data[self.enum], (url, imgdata) in images:

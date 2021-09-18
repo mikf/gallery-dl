@@ -122,7 +122,10 @@ class MangadexChapterExtractor(MangadexExtractor):
         data["_http_headers"] = self._headers
         base = "{}/data/{}/".format(
             self.api.athome_server(self.uuid)["baseUrl"], cattributes["hash"])
-        for data["page"], page in enumerate(cattributes["data"], 1):
+
+        enum = util.enumerate_reversed if self.config(
+            "page-reverse") else enumerate
+        for data["page"], page in enum(cattributes["data"], 1):
             text.nameext_from_url(page, data)
             yield Message.Url, base + page, data
 
