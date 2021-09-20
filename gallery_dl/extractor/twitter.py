@@ -139,8 +139,10 @@ class TwitterExtractor(Extractor):
                 for size in ("original", "x_large", "large", "small"):
                     key = prefix + size
                     if key in bvals:
-                        files.append(bvals[key]["image_value"])
-                        return
+                        value = bvals[key].get("image_value")
+                        if value and "url" in value:
+                            files.append(value)
+                            return
         elif self.videos:
             url = "ytdl:{}/i/web/status/{}".format(self.root, tweet["id_str"])
             files.append({"url": url})
