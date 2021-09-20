@@ -15,7 +15,7 @@ class CyberdropAlbumExtractor(Extractor):
     category = "cyberdrop"
     subcategory = "album"
     root = "https://cyberdrop.me"
-    directory_fmt = ("{category}", "{album_id} {album_name}")
+    directory_fmt = ("{category}", "{album_name} ({album_id})")
     archive_fmt = "{album_id}_{id}"
     pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.me/a/([^/?#]+)"
     test = ("https://cyberdrop.me/a/keKRjm4t", {
