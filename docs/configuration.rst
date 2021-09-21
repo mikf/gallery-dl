@@ -3098,7 +3098,7 @@ How To
       application and put them in your configuration file
       as ``"client-id"`` and ``"client-secret"``
     * clear your `cache <cache.file_>`__ to delete any remaining
-      ``access-token`` entries. (``gallery-dl --clear-cache``)
+      ``access-token`` entries. (``gallery-dl --clear-cache deviantart``)
     * get a new `refresh-token <extractor.deviantart.refresh-token_>`__ for the
       new ``client-id`` (``gallery-dl oauth:deviantart``)
 
