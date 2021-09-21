@@ -834,7 +834,7 @@ class DeviantartWatchPostsExtractor(DeviantartExtractor):
 class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
-    archive_fmt = "{index}.{extension}"
+    archive_fmt = "g_{_username}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
     test = (
         (("https://www.deviantart.com/shimoda7/art/For-the-sake-10073852"), {
