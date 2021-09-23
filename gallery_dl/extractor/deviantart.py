@@ -349,17 +349,17 @@ class DeviantartExtractor(Extractor):
                     "Error when trying to watch %s. "
                     "Try again with a new refresh-token", username)
 
-        if not has_access:
+        if has_access:
+            self.log.info("Fetching premium folder data")
+        else:
             self.log.warning("Unable to access premium content (type: %s)",
                              folder["type"])
-            self._fetch_premium = lambda _: None
-            return None
 
-        self.log.info("Fetching premium folder data")
         cache = self._premium_cache
         for dev in self.api.gallery(
                 username, folder["gallery_id"], public=False):
-            cache[dev["deviationid"]] = dev
+            cache[dev["deviationid"]] = dev if has_access else None
+
         return cache[deviation["deviationid"]]
 
     def _unwatch_premium(self):
