@@ -372,6 +372,16 @@ def build_parser():
         help="Write metadata to separate JSON files",
     )
     postprocessor.add_argument(
+        "--write-infojson",
+        dest="postprocessors",
+        action="append_const", const={
+            "name"    : "metadata",
+            "event"   : "init",
+            "filename": "info.json",
+        },
+        help="Write gallery metadata to a info.json file",
+    )
+    postprocessor.add_argument(
         "--write-tags",
         dest="postprocessors",
         action="append_const", const={"name": "metadata", "mode": "tags"},
