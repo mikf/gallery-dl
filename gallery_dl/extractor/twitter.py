@@ -50,7 +50,7 @@ class TwitterExtractor(Extractor):
             if not self.retweets and "retweeted_status_id_str" in tweet:
                 self.log.debug("Skipping %s (retweet)", tweet["id_str"])
                 continue
-            if not self.quoted and "quoted" in tweet:
+            if not self.quoted and "quoted_by_id_str" in tweet:
                 self.log.debug("Skipping %s (quoted tweet)", tweet["id_str"])
                 continue
             if "in_reply_to_user_id_str" in tweet and (
@@ -201,6 +201,8 @@ class TwitterExtractor(Extractor):
 
         if "in_reply_to_screen_name" in tweet:
             tdata["reply_to"] = tweet["in_reply_to_screen_name"]
+        if "quoted_by_id_str" in tweet:
+            tdata["quote_by"] = text.parse_int(tweet["quoted_by_id_str"])
 
         if "author" in tweet:
             tdata["author"] = self._transform_user(tweet["author"])
@@ -905,7 +907,7 @@ class TwitterAPI():
                         quoted = quoted.copy()
                         quoted["author"] = users[quoted["user_id_str"]]
                         quoted["user"] = tweet["user"]
-                        quoted["quoted"] = True
+                        quoted["quoted_by_id_str"] = tweet["id_str"]
                         yield quoted
 
             # update cursor value
