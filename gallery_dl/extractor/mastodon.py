@@ -115,6 +115,29 @@ class MastodonUserExtractor(MastodonExtractor):
         )
 
 
+class MastodonFollowingExtractor(MastodonExtractor):
+    """Extractor for followed mastodon users"""
+    subcategory = "following"
+    pattern = BASE_PATTERN + r"/users/([^/?#]+)/following"
+    test = (
+        ("https://mastodon.social/users/0x4f/following", {
+            "extractor": False,
+            "count": ">= 20",
+        }),
+        ("https://mastodon.social/users/id:10843/following"),
+        ("https://pawoo.net/users/yoru_nine/following"),
+        ("https://baraag.net/users/pumpkinnsfw/following"),
+    )
+
+    def items(self):
+        api = MastodonAPI(self)
+        account_id = api.account_id_by_username(self.item)
+
+        for account in api.account_following(account_id):
+            account["_extractor"] = MastodonUserExtractor
+            yield Message.Queue, account["url"], account
+
+
 class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
     subcategory = "status"
@@ -169,6 +192,10 @@ class MastodonAPI():
             if account["username"] == username:
                 return account["id"]
         raise exception.NotFoundError("account")
+
+    def account_following(self, account_id):
+        endpoint = "/v1/accounts/{}/following".format(account_id)
+        return self._pagination(endpoint, None)
 
     def account_search(self, query, limit=40):
         """Search for accounts"""
