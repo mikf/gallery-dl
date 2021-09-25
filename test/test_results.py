@@ -91,6 +91,8 @@ class TestExtractorResults(unittest.TestCase):
             for url, kwdict in zip(tjob.url_list, tjob.kwdict_list):
                 if "_extractor" in kwdict:
                     extr = kwdict["_extractor"].from_url(url)
+                    if extr is None and not result.get("extractor", True):
+                        continue
                     self.assertIsInstance(extr, kwdict["_extractor"])
                     self.assertEqual(extr.url, url)
         else:
