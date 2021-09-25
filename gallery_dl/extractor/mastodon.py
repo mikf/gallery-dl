@@ -87,7 +87,7 @@ BASE_PATTERN = MastodonExtractor.update(INSTANCES)
 class MastodonUserExtractor(MastodonExtractor):
     """Extractor for all images of an account/user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/@([^/?#]+)(?:/media)?/?$"
+    pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)(?:/media)?/?$"
     test = (
         ("https://mastodon.social/@jk", {
             "pattern": r"https://files.mastodon.social/media_attachments"
@@ -100,21 +100,16 @@ class MastodonUserExtractor(MastodonExtractor):
             "count": 60,
         }),
         ("https://baraag.net/@pumpkinnsfw"),
+        ("https://mastodon.social/@id:10843"),
+        ("https://mastodon.social/users/id:10843"),
+        ("https://mastodon.social/users/jk"),
     )
 
     def statuses(self):
         api = MastodonAPI(self)
 
-        username = self.item
-        handle = "@{}@{}".format(username, self.instance)
-        for account in api.account_search(handle, 1):
-            if account["username"] == username:
-                break
-        else:
-            raise exception.NotFoundError("account")
-
         return api.account_statuses(
-            account["id"],
+            api.account_id_by_username(self.item),
             only_media=not self.config("text-posts", False),
             exclude_replies=not self.replies,
         )
@@ -164,6 +159,16 @@ class MastodonAPI():
                     extractor.instance)
 
         self.headers = {"Authorization": "Bearer " + access_token}
+
+    def account_id_by_username(self, username):
+        if username.startswith("id:"):
+            return username[3:]
+
+        handle = "@{}@{}".format(username, self.extractor.instance)
+        for account in self.account_search(handle, 1):
+            if account["username"] == username:
+                return account["id"]
+        raise exception.NotFoundError("account")
 
     def account_search(self, query, limit=40):
         """Search for accounts"""
