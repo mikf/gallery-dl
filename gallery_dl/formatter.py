@@ -24,8 +24,22 @@ def parse(format_string, default=None):
     try:
         return _CACHE[key]
     except KeyError:
-        formatter = _CACHE[key] = StringFormatter(format_string, default)
-        return formatter
+        pass
+
+    cls = StringFormatter
+    if format_string.startswith("\f"):
+        kind, _, format_string = format_string.partition(" ")
+        kind = kind[1:]
+
+        if kind == "T":
+            cls = TemplateFormatter
+        elif kind == "E":
+            cls = ExpressionFormatter
+        elif kind == "M":
+            cls = ModuleFormatter
+
+    formatter = _CACHE[key] = cls(format_string, default)
+    return formatter
 
 
 class StringFormatter():
@@ -146,6 +160,31 @@ class StringFormatter():
                 obj = self.default
             return fmt(obj)
         return wrap
+
+
+class TemplateFormatter(StringFormatter):
+    """Read format_string from file"""
+
+    def __init__(self, path, default=None):
+        with open(util.expand_path(path)) as fp:
+            format_string = fp.read()
+        StringFormatter.__init__(self, format_string, default)
+
+
+class ExpressionFormatter():
+    """Generate text by evaluating a Python expression"""
+
+    def __init__(self, expression, default=None):
+        self.format_map = util.compile_expression(expression)
+
+
+class ModuleFormatter():
+    """Generate text by calling an external function"""
+
+    def __init__(self, function_spec, default=None):
+        module_name, _, function_name = function_spec.partition(":")
+        module = __import__(module_name)
+        self.format_map = getattr(module, function_name)
 
 
 def parse_field_name(field_name):
