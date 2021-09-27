@@ -15,7 +15,7 @@ import operator
 import functools
 import collections
 from . import extractor, downloader, postprocessor
-from . import config, text, util, output, exception
+from . import config, text, util, formatter, output, exception
 from .extractor.message import Message
 
 
@@ -409,7 +409,7 @@ class DownloadJob(Job):
             path = util.expand_path(archive)
             try:
                 if "{" in path:
-                    path = util.Formatter(path).format_map(kwdict)
+                    path = formatter.parse(path).format_map(kwdict)
                 self.archive = util.DownloadArchive(path, self.extractor)
             except Exception as exc:
                 self.extractor.log.warning(

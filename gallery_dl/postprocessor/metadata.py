@@ -9,7 +9,7 @@
 """Write metadata to external files"""
 
 from .common import PostProcessor
-from .. import util
+from .. import util, formatter
 import os
 
 
@@ -24,7 +24,7 @@ class MetadataPP(PostProcessor):
             cfmt = options.get("content-format") or options.get("format")
             if isinstance(cfmt, list):
                 cfmt = "\n".join(cfmt) + "\n"
-            self._content_fmt = util.Formatter(cfmt).format_map
+            self._content_fmt = formatter.parse(cfmt).format_map
             ext = "txt"
         elif mode == "tags":
             self.write = self._write_tags
@@ -45,10 +45,10 @@ class MetadataPP(PostProcessor):
         extfmt = options.get("extension-format")
         if filename:
             self._filename = self._filename_custom
-            self._filename_fmt = util.Formatter(filename).format_map
+            self._filename_fmt = formatter.parse(filename).format_map
         elif extfmt:
             self._filename = self._filename_extfmt
-            self._extension_fmt = util.Formatter(extfmt).format_map
+            self._extension_fmt = formatter.parse(extfmt).format_map
         else:
             self.extension = options.get("extension", ext)
 
