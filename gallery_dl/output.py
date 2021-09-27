@@ -11,7 +11,7 @@ import sys
 import shutil
 import logging
 import unicodedata
-from . import config, util
+from . import config, util, formatter
 
 
 # --------------------------------------------------------------------
@@ -92,13 +92,13 @@ class Formatter(logging.Formatter):
         if isinstance(fmt, dict):
             for key in ("debug", "info", "warning", "error"):
                 value = fmt[key] if key in fmt else LOG_FORMAT
-                fmt[key] = (util.Formatter(value).format_map,
+                fmt[key] = (formatter.parse(value).format_map,
                             "{asctime" in value)
         else:
             if fmt == LOG_FORMAT:
                 fmt = (fmt.format_map, False)
             else:
-                fmt = (util.Formatter(fmt).format_map, "{asctime" in fmt)
+                fmt = (formatter.parse(fmt).format_map, "{asctime" in fmt)
             fmt = {"debug": fmt, "info": fmt, "warning": fmt, "error": fmt}
 
         self.formats = fmt

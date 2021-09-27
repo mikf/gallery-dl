@@ -15,18 +15,15 @@ import json
 import time
 import random
 import shutil
-import string
-import _string
 import sqlite3
 import binascii
 import datetime
-import operator
 import functools
 import itertools
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
-from . import text, exception
+from . import text, exception, formatter
 
 
 def bencode(num, alphabet="0123456789"):
@@ -563,244 +560,6 @@ class ExtendedUrl():
         return self.value
 
 
-class Formatter():
-    """Custom, extended version of string.Formatter
-
-    This string formatter implementation is a mostly performance-optimized
-    variant of the original string.Formatter class. Unnecessary features have
-    been removed (positional arguments, unused argument check) and new
-    formatting options have been added.
-
-    Extra Conversions:
-    - "l": calls str.lower on the target value
-    - "u": calls str.upper
-    - "c": calls str.capitalize
-    - "C": calls string.capwords
-    - "j". calls json.dumps
-    - "t": calls str.strip
-    - "d": calls text.parse_timestamp
-    - "U": calls urllib.parse.unquote
-    - "S": calls util.to_string()
-    - "T": calls util.to_timestamü()
-    - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
-
-    Extra Format Specifiers:
-    - "?<before>/<after>/":
-        Adds <before> and <after> to the actual value if it evaluates to True.
-        Otherwise the whole replacement field becomes an empty string.
-        Example: {f:?-+/+-/} -> "-+Example+-" (if "f" contains "Example")
-                             -> ""            (if "f" is None, 0, "")
-
-    - "L<maxlen>/<replacement>/":
-        Replaces the output with <replacement> if its length (in characters)
-        exceeds <maxlen>. Otherwise everything is left as is.
-        Example: {f:L5/too long/} -> "foo"      (if "f" is "foo")
-                                  -> "too long" (if "f" is "foobar")
-
-    - "J<separator>/":
-        Joins elements of a list (or string) using <separator>
-        Example: {f:J - /} -> "a - b - c" (if "f" is ["a", "b", "c"])
-
-    - "R<old>/<new>/":
-        Replaces all occurrences of <old> with <new>
-        Example: {f:R /_/} -> "f_o_o_b_a_r" (if "f" is "f o o b a r")
-    """
-    CACHE = {}
-    CONVERSIONS = {
-        "l": str.lower,
-        "u": str.upper,
-        "c": str.capitalize,
-        "C": string.capwords,
-        "j": json.dumps,
-        "t": str.strip,
-        "T": to_timestamp,
-        "d": text.parse_timestamp,
-        "U": urllib.parse.unquote,
-        "S": to_string,
-        "s": str,
-        "r": repr,
-        "a": ascii,
-    }
-
-    def __init__(self, format_string, default=None):
-        self.default = default
-        key = (format_string, default)
-
-        try:
-            self.result, self.fields = self.CACHE[key]
-        except KeyError:
-            self.result = []
-            self.fields = []
-
-            for literal_text, field_name, format_spec, conv in \
-                    _string.formatter_parser(format_string):
-                if literal_text:
-                    self.result.append(literal_text)
-                if field_name:
-                    self.fields.append((
-                        len(self.result),
-                        self._field_access(field_name, format_spec, conv),
-                    ))
-                    self.result.append("")
-
-            self.CACHE[key] = (self.result, self.fields)
-
-        if len(self.result) == 1:
-            if self.fields:
-                self.format_map = self.fields[0][1]
-            else:
-                self.format_map = lambda _: format_string
-            del self.result, self.fields
-
-    def format_map(self, kwdict):
-        """Apply 'kwdict' to the initial format_string and return its result"""
-        result = self.result
-        for index, func in self.fields:
-            result[index] = func(kwdict)
-        return "".join(result)
-
-    def _field_access(self, field_name, format_spec, conversion):
-        fmt = self._parse_format_spec(format_spec, conversion)
-
-        if "|" in field_name:
-            return self._apply_list([
-                self._parse_field_name(fn)
-                for fn in field_name.split("|")
-            ], fmt)
-        else:
-            key, funcs = self._parse_field_name(field_name)
-            if funcs:
-                return self._apply(key, funcs, fmt)
-            return self._apply_simple(key, fmt)
-
-    @staticmethod
-    def _parse_field_name(field_name):
-        first, rest = _string.formatter_field_name_split(field_name)
-        funcs = []
-
-        for is_attr, key in rest:
-            if is_attr:
-                func = operator.attrgetter
-            else:
-                func = operator.itemgetter
-                try:
-                    if ":" in key:
-                        start, _, stop = key.partition(":")
-                        stop, _, step = stop.partition(":")
-                        start = int(start) if start else None
-                        stop = int(stop) if stop else None
-                        step = int(step) if step else None
-                        key = slice(start, stop, step)
-                except TypeError:
-                    pass  # key is an integer
-
-            funcs.append(func(key))
-
-        return first, funcs
-
-    def _parse_format_spec(self, format_spec, conversion):
-        fmt = self._build_format_func(format_spec)
-        if not conversion:
-            return fmt
-
-        conversion = self.CONVERSIONS[conversion]
-        if fmt is format:
-            return conversion
-        else:
-            def chain(obj):
-                return fmt(conversion(obj))
-            return chain
-
-    def _build_format_func(self, format_spec):
-        if format_spec:
-            fmt = format_spec[0]
-            if fmt == "?":
-                return self._parse_optional(format_spec)
-            if fmt == "L":
-                return self._parse_maxlen(format_spec)
-            if fmt == "J":
-                return self._parse_join(format_spec)
-            if fmt == "R":
-                return self._parse_replace(format_spec)
-            return self._default_format(format_spec)
-        return format
-
-    def _apply(self, key, funcs, fmt):
-        def wrap(kwdict):
-            try:
-                obj = kwdict[key]
-                for func in funcs:
-                    obj = func(obj)
-            except Exception:
-                obj = self.default
-            return fmt(obj)
-        return wrap
-
-    def _apply_simple(self, key, fmt):
-        def wrap(kwdict):
-            return fmt(kwdict[key] if key in kwdict else self.default)
-        return wrap
-
-    def _apply_list(self, lst, fmt):
-        def wrap(kwdict):
-            for key, funcs in lst:
-                try:
-                    obj = kwdict[key]
-                    for func in funcs:
-                        obj = func(obj)
-                    if obj:
-                        break
-                except Exception:
-                    pass
-            else:
-                obj = self.default
-            return fmt(obj)
-        return wrap
-
-    def _parse_optional(self, format_spec):
-        before, after, format_spec = format_spec.split("/", 2)
-        before = before[1:]
-        fmt = self._build_format_func(format_spec)
-
-        def optional(obj):
-            return before + fmt(obj) + after if obj else ""
-        return optional
-
-    def _parse_maxlen(self, format_spec):
-        maxlen, replacement, format_spec = format_spec.split("/", 2)
-        maxlen = text.parse_int(maxlen[1:])
-        fmt = self._build_format_func(format_spec)
-
-        def mlen(obj):
-            obj = fmt(obj)
-            return obj if len(obj) <= maxlen else replacement
-        return mlen
-
-    def _parse_join(self, format_spec):
-        separator, _, format_spec = format_spec.partition("/")
-        separator = separator[1:]
-        fmt = self._build_format_func(format_spec)
-
-        def join(obj):
-            return fmt(separator.join(obj))
-        return join
-
-    def _parse_replace(self, format_spec):
-        old, new, format_spec = format_spec.split("/", 2)
-        old = old[1:]
-        fmt = self._build_format_func(format_spec)
-
-        def replace(obj):
-            return fmt(obj.replace(old, new))
-        return replace
-
-    @staticmethod
-    def _default_format(format_spec):
-        def wrap(obj):
-            return format(obj, format_spec)
-        return wrap
-
-
 class PathFormat():
     EXTENSION_MAP = {
         "jpeg": "jpg",
@@ -821,13 +580,13 @@ class PathFormat():
             elif isinstance(filename_fmt, dict):
                 self.filename_conditions = [
                     (compile_expression(expr),
-                     Formatter(fmt, kwdefault).format_map)
+                     formatter.parse(fmt, kwdefault).format_map)
                     for expr, fmt in filename_fmt.items() if expr
                 ]
                 self.build_filename = self.build_filename_conditional
                 filename_fmt = filename_fmt.get("", extractor.filename_fmt)
 
-            self.filename_formatter = Formatter(
+            self.filename_formatter = formatter.parse(
                 filename_fmt, kwdefault).format_map
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
@@ -839,7 +598,7 @@ class PathFormat():
             elif isinstance(directory_fmt, dict):
                 self.directory_conditions = [
                     (compile_expression(expr), [
-                        Formatter(fmt, kwdefault).format_map
+                        formatter.parse(fmt, kwdefault).format_map
                         for fmt in fmts
                     ])
                     for expr, fmts in directory_fmt.items() if expr
@@ -848,7 +607,7 @@ class PathFormat():
                 directory_fmt = directory_fmt.get("", extractor.directory_fmt)
 
             self.directory_formatters = [
-                Formatter(dirfmt, kwdefault).format_map
+                formatter.parse(dirfmt, kwdefault).format_map
                 for dirfmt in directory_fmt
             ]
         except Exception as exc:
@@ -1009,12 +768,12 @@ class PathFormat():
 
     def build_filename_conditional(self, kwdict):
         try:
-            for condition, formatter in self.filename_conditions:
+            for condition, fmt in self.filename_conditions:
                 if condition(kwdict):
                     break
             else:
-                formatter = self.filename_formatter
-            return self.clean_path(self.clean_segment(formatter(kwdict)))
+                fmt = self.filename_formatter
+            return self.clean_path(self.clean_segment(fmt(kwdict)))
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
@@ -1025,8 +784,8 @@ class PathFormat():
         strip = self.strip
 
         try:
-            for formatter in self.directory_formatters:
-                segment = formatter(kwdict).strip()
+            for fmt in self.directory_formatters:
+                segment = fmt(kwdict).strip()
                 if strip:
                     # remove trailing dots and spaces (#647)
                     segment = segment.rstrip(strip)
@@ -1047,8 +806,8 @@ class PathFormat():
                     break
             else:
                 formatters = self.directory_formatters
-            for formatter in formatters:
-                segment = formatter(kwdict).strip()
+            for fmt in formatters:
+                segment = fmt(kwdict).strip()
                 if strip:
                     segment = segment.rstrip(strip)
                 if segment:

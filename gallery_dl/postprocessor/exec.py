@@ -9,7 +9,7 @@
 """Execute processes"""
 
 from .common import PostProcessor
-from .. import util
+from .. import util, formatter
 import subprocess
 
 
@@ -33,7 +33,7 @@ class ExecPP(PostProcessor):
             self.args = args
             execute = self.exec_string
         else:
-            self.args = [util.Formatter(arg) for arg in args]
+            self.args = [formatter.parse(arg) for arg in args]
             execute = self.exec_list
 
         events = options.get("event")
