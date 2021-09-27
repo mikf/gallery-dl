@@ -19,7 +19,7 @@ import collections
 from datetime import datetime, timezone as tz
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, output, util  # noqa E402
+from gallery_dl import extractor, output, path  # noqa E402
 from gallery_dl import postprocessor, config  # noqa E402
 from gallery_dl.postprocessor.common import PostProcessor  # noqa E402
 
@@ -32,7 +32,7 @@ class FakeJob():
 
     def __init__(self, extr=extractor.find("test:")):
         self.extractor = extr
-        self.pathfmt = util.PathFormat(extr)
+        self.pathfmt = path.PathFormat(extr)
         self.out = output.NullOutput()
         self.get_logger = logging.getLogger
         self.hooks = collections.defaultdict(list)

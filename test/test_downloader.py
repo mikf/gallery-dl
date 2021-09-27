@@ -22,7 +22,7 @@ import http.server
 
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import downloader, extractor, output, config, util  # noqa E402
+from gallery_dl import downloader, extractor, output, config, path  # noqa E402
 
 
 class MockDownloaderModule(Mock):
@@ -33,7 +33,7 @@ class FakeJob():
 
     def __init__(self):
         self.extractor = extractor.find("test:")
-        self.pathfmt = util.PathFormat(self.extractor)
+        self.pathfmt = path.PathFormat(self.extractor)
         self.out = output.NullOutput()
         self.get_logger = logging.getLogger
 
