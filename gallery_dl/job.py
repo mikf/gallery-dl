@@ -15,7 +15,7 @@ import operator
 import functools
 import collections
 from . import extractor, downloader, postprocessor
-from . import config, text, util, formatter, output, exception
+from . import config, text, util, path, formatter, output, exception
 from .extractor.message import Message
 
 
@@ -394,7 +394,7 @@ class DownloadJob(Job):
     def initialize(self, kwdict=None):
         """Delayed initialization of PathFormat, etc."""
         cfg = self.extractor.config
-        pathfmt = self.pathfmt = util.PathFormat(self.extractor)
+        pathfmt = self.pathfmt = path.PathFormat(self.extractor)
         if kwdict:
             pathfmt.set_directory(kwdict)
 
@@ -406,17 +406,18 @@ class DownloadJob(Job):
 
         archive = cfg("archive")
         if archive:
-            path = util.expand_path(archive)
+            archive = util.expand_path(archive)
             try:
-                if "{" in path:
-                    path = formatter.parse(path).format_map(kwdict)
-                self.archive = util.DownloadArchive(path, self.extractor)
+                if "{" in archive:
+                    archive = formatter.parse(archive).format_map(kwdict)
+                self.archive = util.DownloadArchive(archive, self.extractor)
             except Exception as exc:
                 self.extractor.log.warning(
                     "Failed to open download archive at '%s' ('%s: %s')",
-                    path, exc.__class__.__name__, exc)
+                    archive, exc.__class__.__name__, exc)
             else:
-                self.extractor.log.debug("Using download archive '%s'", path)
+                self.extractor.log.debug(
+                    "Using download archive '%s'", archive)
 
         skip = cfg("skip", True)
         if skip:
@@ -471,6 +472,7 @@ class DownloadJob(Job):
                 except Exception as exc:
                     pp_log.error("'%s' initialization failed:  %s: %s",
                                  name, exc.__class__.__name__, exc)
+                    pp_log.debug("", exc_info=True)
                 else:
                     pp_list.append(pp_obj)
 
