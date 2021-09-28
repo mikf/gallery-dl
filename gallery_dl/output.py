@@ -294,15 +294,15 @@ class TerminalOutput(NullOutput):
 
     def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
         if bytes_total is None:
-            print("\r {:>8} {:>10} \r".format(
-                util.format_value(bytes_downloaded, "B"),
-                util.format_value(bytes_per_second, "B/s"),
+            print("\r {:>7}B {:>7}B/s \r".format(
+                util.format_value(bytes_downloaded),
+                util.format_value(bytes_per_second),
             ), end="")
         else:
-            print("\r{:>3}% {:>8} {:>10} \r".format(
+            print("\r{:>3}% {:>7}B {:>7}B/s \r".format(
                 bytes_downloaded * 100 // bytes_total,
-                util.format_value(bytes_downloaded, "B"),
-                util.format_value(bytes_per_second, "B/s"),
+                util.format_value(bytes_downloaded),
+                util.format_value(bytes_per_second),
             ), end="")
 
 
