@@ -17,7 +17,8 @@ import hashlib
 import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, util, job, config, exception  # noqa E402
+from gallery_dl import \
+    extractor, util, job, config, exception, formatter  # noqa E402
 
 
 # temporary issues, etc.
@@ -262,7 +263,7 @@ class TestPathfmt():
         return 0
 
 
-class TestFormatter(util.Formatter):
+class TestFormatter(formatter.StringFormatter):
 
     @staticmethod
     def _noop(_):

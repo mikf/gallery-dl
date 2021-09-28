@@ -279,3 +279,23 @@ class ImgclickImageExtractor(ImagehostImageExtractor):
         url     , pos = text.extract(page, '<br><img src="', '"')
         filename, pos = text.extract(page, 'alt="', '"', pos)
         return url, filename
+
+
+class FappicImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from fappic.com"""
+    category = "fappic"
+    pattern = r"(?:https?://)?((?:www\.)?fappic\.com/(\w+)/[^/?#]+)"
+    test = ("https://www.fappic.com/98wxqcklyh8k/test.png", {
+        "pattern": r"https://img\d+\.fappic\.com/img/\w+/test\.png",
+        "keyword": "433b1d310b0ff12ad8a71ac7b9d8ba3f8cd1e898",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })
+
+    def get_info(self, page):
+        url     , pos = text.extract(page, '<a href="/?click"><img src="', '"')
+        filename, pos = text.extract(page, 'alt="', '"', pos)
+
+        if filename.startswith("Porn-Picture-"):
+            filename = filename[13:]
+
+        return url, filename
