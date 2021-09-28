@@ -42,6 +42,10 @@ class YoutubeDLDownloader(DownloaderBase):
         if raw_options:
             options.update(raw_options)
 
+        self.progress = self.config("progress", 3.0)
+        if self.progress is not None:
+            options["progress_hooks"] = (self._progress_hook,)
+
         if self.config("logging", True):
             options["logger"] = self.log
         self.forward_cookies = self.config("forward-cookies", False)
@@ -56,7 +60,10 @@ class YoutubeDLDownloader(DownloaderBase):
         kwdict = pathfmt.kwdict
 
         ytdl = kwdict.pop("_ytdl_instance", None)
-        if not ytdl:
+        if ytdl:
+            if self.progress is not None and not ytdl._progress_hooks:
+                ytdl.add_progress_hook(self._progress_hook)
+        else:
             ytdl = self.ytdl
             if self.forward_cookies:
                 set_cookie = ytdl.cookiejar.set_cookie
@@ -125,6 +132,15 @@ class YoutubeDLDownloader(DownloaderBase):
         for entry in info_dict["entries"]:
             ytdl.process_info(entry)
         return True
+
+    def _progress_hook(self, info):
+        if info["status"] == "downloading" and \
+                info["elapsed"] >= self.progress:
+            self.out.progress(
+                info["total_bytes"],
+                info["downloaded_bytes"],
+                int(info["speed"]),
+            )
 
     @staticmethod
     def _set_outtmpl(ytdl, outtmpl):

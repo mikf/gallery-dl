@@ -2344,6 +2344,19 @@ Description
     alongside the actual output files.
 
 
+downloader.*.progress
+---------------------
+Type
+    ``float``
+Default
+    ``3.0``
+Description
+    Number of seconds until a download progress indicator
+    for the current download is displayed.
+
+    Set this option to ``null`` to disable this indicator.
+
+
 downloader.*.rate
 -----------------
 Type
