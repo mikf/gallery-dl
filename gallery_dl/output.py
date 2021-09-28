@@ -258,6 +258,9 @@ class NullOutput():
     def success(self, path, tries):
         """Print a message indicating the completion of a download"""
 
+    def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
+        """Display download progress"""
+
 
 class PipeOutput(NullOutput):
 
@@ -288,6 +291,19 @@ class TerminalOutput(NullOutput):
 
     def success(self, path, tries):
         print("\r", self.shorten(CHAR_SUCCESS + path), sep="")
+
+    def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
+        if bytes_total is None:
+            print("\r {:>8} {:>10} \r".format(
+                util.format_value(bytes_downloaded, "B"),
+                util.format_value(bytes_per_second, "B/s"),
+            ), end="")
+        else:
+            print("\r{:>3}% {:>8} {:>10} \r".format(
+                bytes_downloaded * 100 // bytes_total,
+                util.format_value(bytes_downloaded, "B"),
+                util.format_value(bytes_per_second, "B/s"),
+            ), end="")
 
 
 class ColorOutput(TerminalOutput):
