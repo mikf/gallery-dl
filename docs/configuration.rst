@@ -524,6 +524,12 @@ Default
 Description
     Insert a file's download URL into its metadata dictionary as the given name.
 
+    For example, setting this option to ``"gdl_file_url"`` will cause a new
+    metadata field with name ``gdl_file_url`` to appear, which contains the
+    current file's download URL.
+    This can then be used in `filenames <extractor.*.filename_>`_,
+    with a ``metadata`` post processor, etc.
+
 
 extractor.*.category-transfer
 -----------------------------
