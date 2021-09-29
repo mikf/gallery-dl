@@ -40,13 +40,51 @@ FILES = [
     ]
 ]
 
+DESCRIPTION = ("Command-line program to download image galleries and "
+               "collections from several image hosting sites")
+LONG_DESCRIPTION = read("README.rst")
+
+
+if "py2exe" in sys.argv:
+    try:
+        import py2exe
+    except ImportError:
+        sys.exit("Error importing 'py2exe'")
+
+    # py2exe dislikes version specifiers with a trailing '-dev'
+    VERSION = VERSION.partition("-")[0]
+
+    params = {
+        "console": [{
+            "script"         : "./gallery_dl/__main__.py",
+            "dest_base"      : "gallery-dl",
+            "version"        : VERSION,
+            "description"    : DESCRIPTION,
+            "comments"       : LONG_DESCRIPTION,
+            "product_name"   : "gallery-dl",
+            "product_version": VERSION,
+        }],
+        "options": {"py2exe": {
+            "bundle_files": 0,
+            "compressed"  : 1,
+            "optimize"    : 1,
+            "dist_dir"    : ".",
+            "packages"    : ["gallery_dl"],
+            "includes"    : ["youtube_dl"],
+            "dll_excludes": ["w9xpopen.exe"],
+        }},
+        "zipfile": None,
+    }
+
+else:
+    params = {}
+
 
 setup(
     name="gallery_dl",
     version=VERSION,
-    description=("Command-line program to download image galleries and "
-                 "collections from several image hosting sites"),
-    long_description=read("README.rst"),
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
     url="https://github.com/mikf/gallery-dl",
     download_url="https://github.com/mikf/gallery-dl/releases/latest",
     author="Mike Fährmann",
@@ -96,4 +134,5 @@ setup(
         "Topic :: Utilities",
     ],
     test_suite="test",
+    **params,
 )
