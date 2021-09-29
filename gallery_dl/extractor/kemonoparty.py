@@ -69,9 +69,8 @@ class KemonopartyExtractor(Extractor):
 
             for post["num"], file in enumerate(files, 1):
                 post["type"] = file["type"]
-                url = file["path"]
                 if url[0] == "/":
-                    url = self.root + url
+                    url = self.root + '/data' + url.replace(self.root, '')
 
                 text.nameext_from_url(file["name"], post)
                 yield Message.Url, url, post
