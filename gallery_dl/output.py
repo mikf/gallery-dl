@@ -293,17 +293,13 @@ class TerminalOutput(NullOutput):
         print("\r", self.shorten(CHAR_SUCCESS + path), sep="")
 
     def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
+        bdl = util.format_value(bytes_downloaded)
+        bps = util.format_value(bytes_per_second)
         if bytes_total is None:
-            print("\r {:>7}B {:>7}B/s \r".format(
-                util.format_value(bytes_downloaded),
-                util.format_value(bytes_per_second),
-            ), end="")
+            print("\r{:>7}B {:>7}B/s ".format(bdl, bps), end="")
         else:
-            print("\r{:>3}% {:>7}B {:>7}B/s \r".format(
-                bytes_downloaded * 100 // bytes_total,
-                util.format_value(bytes_downloaded),
-                util.format_value(bytes_per_second),
-            ), end="")
+            print("\r{:>3}% {:>7}B {:>7}B/s ".format(
+                bytes_downloaded * 100 // bytes_total, bdl, bps), end="")
 
 
 class ColorOutput(TerminalOutput):
