@@ -270,7 +270,7 @@ class TestFormatter(formatter.StringFormatter):
         return ""
 
     def _apply_simple(self, key, fmt):
-        if key == "extension" or "._parse_optional." in repr(fmt):
+        if key == "extension" or "_parse_optional." in repr(fmt):
             return self._noop
 
         def wrap(obj):
@@ -278,7 +278,7 @@ class TestFormatter(formatter.StringFormatter):
         return wrap
 
     def _apply(self, key, funcs, fmt):
-        if key == "extension" or "._parse_optional." in repr(fmt):
+        if key == "extension" or "_parse_optional." in repr(fmt):
             return self._noop
 
         def wrap(obj):
