@@ -9,6 +9,8 @@
 """Compare versions of the same file and replace/enumerate them on mismatch"""
 
 from .common import PostProcessor
+from .. import text, util, exception
+import sys
 import os
 
 
@@ -19,16 +21,33 @@ class ComparePP(PostProcessor):
         if options.get("shallow"):
             self._compare = self._compare_size
 
-        job.register_hooks({"file": (
-            self.enumerate
-            if options.get("action") == "enumerate" else
-            self.compare
-        )}, options)
+        action = options.get("action")
+        if action == "enumerate":
+            job.register_hooks({"file": self.enumerate}, options)
+        else:
+            job.register_hooks({"file": self.compare}, options)
+            action, _, smax = action.partition(":")
+            self._skipmax = text.parse_int(smax)
+            self._skipexc = self._skipcnt = 0
+            if action == "abort":
+                self._skipexc = exception.StopExtraction
+            elif action == "terminate":
+                self._skipexc = exception.TerminateExtraction
+            elif action == "exit":
+                self._skipexc = sys.exit
 
     def compare(self, pathfmt):
         try:
             if self._compare(pathfmt.realpath, pathfmt.temppath):
+                if self._skipexc:
+                    self._skipcnt += 1
+                    if self._skipcnt >= self._skipmax:
+                        util.remove_file(pathfmt.temppath)
+                        print()
+                        raise self._skipexc()
                 pathfmt.delete = True
+            else:
+                self._skipcnt = 0
         except OSError:
             pass
 
