@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache
 
 
 class GfycatExtractor(Extractor):
@@ -155,7 +154,6 @@ class GfycatImageExtractor(GfycatExtractor):
 
 class GfycatAPI():
     API_ROOT = "https://api.gfycat.com"
-    ACCESS_KEY = "Anr96uuqt9EdamSCwK4txKPjMsf2M95Rfa5FLLhPFucu8H5HTzeutyAa"
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -175,23 +173,8 @@ class GfycatAPI():
         params = {"search_text": query, "count": 150}
         return self._pagination(endpoint, params)
 
-    @cache(keyarg=1, maxage=3600)
-    def _authenticate_impl(self, category):
-        if category == "redgifs":
-            url = "https://api.redgifs.com/v1/oauth/webtoken"
-        else:
-            url = "https://weblogin." + category + ".com/oauth/webtoken"
-        data = {"access_key": self.ACCESS_KEY}
-        headers = {"Referer": self.extractor.root + "/",
-                   "Origin" : self.extractor.root}
-        response = self.extractor.request(
-            url, method="POST", headers=headers, json=data)
-        return "Bearer " + response.json()["access_token"]
-
     def _call(self, endpoint, params=None):
         url = self.API_ROOT + endpoint
-        self.headers["Authorization"] = self._authenticate_impl(
-            self.extractor.category)
         return self.extractor.request(
             url, params=params, headers=self.headers).json()
 
