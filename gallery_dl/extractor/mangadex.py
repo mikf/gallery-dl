@@ -156,6 +156,9 @@ class MangadexMangaExtractor(MangadexExtractor):
         ("https://mangadex.org/title/7c1e2742-a086-4fd3-a3be-701fd6cf0be9", {
             "count": 1,
         }),
+        ("https://mangadex.org/title/584ef094-b2ab-40ce-962c-bce341fb9d10", {
+            "count": ">= 20",
+        })
     )
 
     def chapters(self):
@@ -212,6 +215,8 @@ class MangadexAPI():
             "order[volume]"       : order,
             "order[chapter]"      : order,
             "translatedLanguage[]": config("lang"),
+            "contentRating[]"     : [
+                "safe", "suggestive", "erotica", "pornographic"],
         }
         return self._pagination("/manga/" + uuid + "/feed", params)
 
