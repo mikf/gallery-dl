@@ -20,21 +20,23 @@ class ComparePP(PostProcessor):
         PostProcessor.__init__(self, job)
         if options.get("shallow"):
             self._compare = self._compare_size
-
-        action = options.get("action")
-        if action == "enumerate":
-            job.register_hooks({"file": self.enumerate}, options)
-        else:
-            job.register_hooks({"file": self.compare}, options)
-            action, _, smax = action.partition(":")
+        
+        if (br := options.get("break")):
+            br, _, smax = br.partition(":")
             self._skipmax = text.parse_int(smax)
             self._skipexc = self._skipcnt = 0
-            if action == "abort":
+            if br == "abort":
                 self._skipexc = exception.StopExtraction
-            elif action == "terminate":
+            elif br == "terminate":
                 self._skipexc = exception.TerminateExtraction
-            elif action == "exit":
+            elif br == "exit":
                 self._skipexc = sys.exit
+
+        job.register_hooks({"file": (
+            self.enumerate
+            if options.get("action") == "enumerate" else
+            self.compare
+        )}, options)
 
     def compare(self, pathfmt):
         try:
@@ -52,12 +54,19 @@ class ComparePP(PostProcessor):
             pass
 
     def enumerate(self, pathfmt):
-        num = 1
+        num = 0
         try:
             while not self._compare(pathfmt.realpath, pathfmt.temppath):
+                num += 1
                 pathfmt.prefix = str(num) + "."
                 pathfmt.set_extension(pathfmt.extension, False)
-                num += 1
+                self._skipcnt = 0
+            if self._skipexc and num == 0:
+                self._skipcnt += 1
+                if self._skipcnt >= self._skipmax:
+                    util.remove_file(pathfmt.temppath)
+                    print()
+                    raise self._skipexc()
             pathfmt.delete = True
         except OSError:
             pass

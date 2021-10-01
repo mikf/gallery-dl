@@ -2692,18 +2692,27 @@ Description
 
     * ``"replace"``: Replace/Overwrite the old version with the new one
 
-    * ``"abort:N"``: Same as ``"replace"`` and stop the current extractor run
-      after ``N`` consecutive files compared as equal.
-
-    * ``"terminate:N"``: Same as ``"replace"``
-      and stop the current extractor run, including parent extractors,
-      after ``N`` consecutive files compared as equal.
-
-    * ``"exit:N"``: Same as ``"replace"`` and exit the program
-      after ``N`` consecutive files compared as equal.
-
     * ``"enumerate"``: Add an enumeration index to the filename of the new
       version like `skip = "enumerate" <extractor.*.skip_>`__
+
+
+compare.break
+----------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Break after a set number of consecutive files compare as equal.
+
+    * ``"abort:N"``: After ``N`` consecutive files compared as equal,
+    stops the current extractor run.
+
+    * ``"terminate:N"``: After ``N`` consecutive files compared as equal,
+    stops the current extractor run, including parent extractors.
+
+    * ``"exit:N"``: After ``N`` consecutive files compared as equal,
+    exits the program.
 
 
 compare.shallow
