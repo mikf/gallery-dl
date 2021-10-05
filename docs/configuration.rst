@@ -2688,22 +2688,32 @@ Type
 Default
     ``"replace"``
 Description
-    The action to take when files do not compare as equal.
+    The action to take when files do **not** compare as equal.
 
     * ``"replace"``: Replace/Overwrite the old version with the new one
 
-    * ``"abort:N"``: Same as ``"replace"`` and stop the current extractor run
-      after ``N`` consecutive files compared as equal.
-
-    * ``"terminate:N"``: Same as ``"replace"``
-      and stop the current extractor run, including parent extractors,
-      after ``N`` consecutive files compared as equal.
-
-    * ``"exit:N"``: Same as ``"replace"`` and exit the program
-      after ``N`` consecutive files compared as equal.
-
     * ``"enumerate"``: Add an enumeration index to the filename of the new
       version like `skip = "enumerate" <extractor.*.skip_>`__
+
+
+compare.equal
+-------------
+Type
+    ``string``
+Default
+    ``"null"``
+Description
+    The action to take when files do compare as equal.
+
+    * ``"abort:N"``: Stop the current extractor run
+      after ``N`` consecutive files compared as equal.
+
+    * ``"terminate:N"``: Stop the current extractor run,
+      including parent extractors,
+      after ``N`` consecutive files compared as equal.
+
+    * ``"exit:N"``: Exit the program
+      after ``N`` consecutive files compared as equal.
 
 
 compare.shallow
