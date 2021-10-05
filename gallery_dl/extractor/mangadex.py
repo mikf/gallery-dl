@@ -209,22 +209,15 @@ class MangadexAPI():
         return self._call("/manga/" + uuid)["data"]
 
     def manga_feed(self, uuid):
-        config = self.extractor.config
-        order = "desc" if config("chapter-reverse") else "asc"
+        order = "desc" if self.extractor.config("chapter-reverse") else "asc"
         params = {
-            "order[volume]"       : order,
-            "order[chapter]"      : order,
-            "translatedLanguage[]": config("lang"),
-            "contentRating[]"     : [
-                "safe", "suggestive", "erotica", "pornographic"],
+            "order[volume]" : order,
+            "order[chapter]": order,
         }
         return self._pagination("/manga/" + uuid + "/feed", params)
 
     def user_follows_manga_feed(self):
-        params = {
-            "order[publishAt]"    : "desc",
-            "translatedLanguage[]": self.extractor.config("lang"),
-        }
+        params = {"order[publishAt]": "desc"}
         return self._pagination("/user/follows/manga/feed", params)
 
     def authenticate(self):
@@ -275,7 +268,19 @@ class MangadexAPI():
     def _pagination(self, endpoint, params=None):
         if params is None:
             params = {}
+
+        config = self.extractor.config
+        ratings = config("ratings")
+        if ratings is None:
+            ratings = ("safe", "suggestive", "erotica", "pornographic")
+
+        params["contentRating[]"] = ratings
+        params["translatedLanguage[]"] = config("lang")
         params["offset"] = 0
+
+        api_params = config("api-parameters")
+        if api_params:
+            params.update(api_params)
 
         while True:
             data = self._call(endpoint, params)
