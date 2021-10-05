@@ -41,6 +41,16 @@ class TwitterExtractor(Extractor):
         self.cards = self.config("cards", False)
         self._user_cache = {}
 
+        size = self.config("size")
+        if size is None:
+            self._size_image = "orig"
+            self._size_fallback = ("large", "medium", "small")
+        else:
+            if isinstance(size, str):
+                size = size.split(",")
+            self._size_image = size[0]
+            self._size_fallback = size[1:]
+
     def items(self):
         self.login()
         metadata = self.metadata()
@@ -115,7 +125,7 @@ class TwitterExtractor(Extractor):
                 base, _, fmt = url.rpartition(".")
                 base += "?format=" + fmt + "&name="
                 files.append(text.nameext_from_url(url, {
-                    "url"      : base + "orig",
+                    "url"      : base + self._size_image,
                     "width"    : width,
                     "height"   : height,
                     "_fallback": self._image_fallback(base),
@@ -123,11 +133,9 @@ class TwitterExtractor(Extractor):
             else:
                 files.append({"url": media["media_url"]})
 
-    @staticmethod
-    def _image_fallback(base):
-        yield base + "large"
-        yield base + "medium"
-        yield base + "small"
+    def _image_fallback(self, base):
+        for fmt in self._size_fallback:
+            yield base + fmt
 
     def _extract_card(self, tweet, files):
         card = tweet["card"]
