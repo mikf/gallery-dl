@@ -1403,6 +1403,19 @@ Description
     The server to use for API requests.
 
 
+extractor.mangadex.api-parameters
+---------------------------------
+Type
+    ``object``
+Example
+    ``{"order[updatedAt]": "desc"}``
+Description
+    Additional query parameters to send when fetching manga chapters.
+
+    (See `/manga/{id}/feed <https://api.mangadex.org/docs.html#operation/get-manga-id-feed>`_
+    and `/user/follows/manga/feed <https://api.mangadex.org/docs.html#operation/get-user-follows-manga-feed>`_)
+
+
 extractor.mangadex.lang
 -----------------------
 Type
@@ -1422,6 +1435,16 @@ Default
     ``false``
 Description
     Provide ``artist``, ``author``, and ``group`` metadata fields.
+
+
+extractor.mangadex.ratings
+--------------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["safe", "suggestive", "erotica", "pornographic"]``
+Description
+    List of acceptable content ratings for returned chapters.
 
 
 extractor.mastodon.reblogs
