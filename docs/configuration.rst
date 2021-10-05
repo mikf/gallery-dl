@@ -1241,7 +1241,7 @@ Default
     ``"mp4"``
 Description
     The name of the preferred animation format, which can be one of
-    ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"`` or ``"mjpg"``.
+    ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"``, or ``"mjpg"``.
 
     If the selected format is not available, ``"mp4"``, ``"webm"``
     and ``"gif"`` (in that order) will be tried instead, until an
@@ -1264,16 +1264,6 @@ Description
     ``"pictures"``, ``"scraps"``, ``"stories"``, ``"favorite"``.
 
     You can use ``"all"`` instead of listing all values separately.
-
-
-extractor.hentainexus.original
-------------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Download original files instead of WebP versions.
 
 
 extractor.hitomi.metadata
@@ -1842,8 +1832,7 @@ Default
     ``"mp4"``
 Description
     The name of the preferred format, which can be one of
-    ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"``, ``"mobile"``,
-    or ``"mini"``.
+    ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"``, ``"mobile"``, or ``"mini"``.
 
     If the selected format is not available, ``"mp4"``, ``"webm"``
     and ``"gif"`` (in that order) will be tried instead, until an
@@ -1970,6 +1959,21 @@ Default
 Description
     Fetch media from all Tweets and replies in a `conversation
     <https://help.twitter.com/en/using-twitter/twitter-conversations>`__.
+
+
+extractor.twitter.size
+----------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["orig", "large", "medium", "small"]``
+Description
+    The image version to download.
+    Any entries after the first one will be used for potential
+    `fallback <extractor.*.fallback_>`_ URLs.
+
+    Known available sizes are
+    ``4096x4096``, ``orig``, ``large``, ``medium``, and ``small``.
 
 
 extractor.twitter.logout
