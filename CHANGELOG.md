@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.19.0 - 2021-10-01
 ### Additions
 - [aryion] add `tag` extractor ([#1849](https://github.com/mikf/gallery-dl/issues/1849))
