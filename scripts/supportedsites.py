@@ -238,6 +238,7 @@ AUTH_MAP = {
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
     "seiga"          : "Required",
+    "seisoparty"     : "Supported",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",

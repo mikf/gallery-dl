@@ -9,7 +9,8 @@
 """Extractors for https://seiso.party/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 import re
 
 
@@ -51,6 +52,25 @@ class SeisopartyExtractor(Extractor):
             "content" : text.unescape(extr("\n<p>\n", "\n</p>\n").strip()),
             "files"   : self._find_files(page),
         }
+
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=28*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/account/login"
+        data = {"username": username, "password": password}
+
+        response = self.request(url, method="POST", data=data)
+        if response.url.endswith("/account/login") and \
+                "Username or password is incorrect" in response.text:
+            raise exception.AuthenticationError()
+
+        return {c.name: c.value for c in response.history[0].cookies}
 
 
 class SeisopartyUserExtractor(SeisopartyExtractor):
@@ -144,10 +164,12 @@ class SeisopartyFavoriteExtractor(SeisopartyExtractor):
     pattern = r"(?:https?://)?seiso\.party/favorites/artists/?(?:\?([^#]+))?"
     test = (
         ("https://seiso.party/favorites/artists", {
-            "count": 0,
+            "pattern": SeisopartyUserExtractor.pattern,
+            "url": "0c862434bc3bbbe84cbf41c3a6152473a8cde683",
+            "count": 3,
         }),
-        ("https://seiso.party/favorites/artists?page=2&sort=id", {
-            "count": 0,
+        ("https://seiso.party/favorites/artists?sort=id&sort_direction=asc", {
+            "url": "629a8b9c6d3a8a64f521908bdb3d7426ac03f8d3",
         }),
     )
 
@@ -157,6 +179,7 @@ class SeisopartyFavoriteExtractor(SeisopartyExtractor):
 
     def items(self):
         self._prepare_ddosguard_cookies()
+        self.login()
 
         url = self.root + "/favorites/artists"
         data = {"_extractor": SeisopartyUserExtractor}

@@ -671,7 +671,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Seiso</td>
     <td>https://seiso.party/</td>
     <td>Favorites, Posts, User Profiles</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>Sen Manga</td>
