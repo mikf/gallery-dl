@@ -670,7 +670,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Seiso</td>
     <td>https://seiso.party/</td>
-    <td>Posts, User Profiles</td>
+    <td>Favorites, Posts, User Profiles</td>
     <td></td>
 </tr>
 <tr>
