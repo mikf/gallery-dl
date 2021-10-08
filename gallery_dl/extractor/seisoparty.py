@@ -136,3 +136,43 @@ class SeisopartyPostExtractor(SeisopartyExtractor):
         url = "{}/post/{}/{}/{}".format(
             self.root, self.service, self.user_id, self.post_id)
         return (self._parse_post(self.request(url).text, self.post_id),)
+
+
+class SeisopartyFavoriteExtractor(SeisopartyExtractor):
+    """Extractor for seiso.party favorites"""
+    subcategory = "favorite"
+    pattern = r"(?:https?://)?seiso\.party/favorites/artists/?(?:\?([^#]+))?"
+    test = (
+        ("https://seiso.party/favorites/artists", {
+            "count": 0,
+        }),
+        ("https://seiso.party/favorites/artists?page=2&sort=id", {
+            "count": 0,
+        }),
+    )
+
+    def __init__(self, match):
+        SeisopartyExtractor.__init__(self, match)
+        self.query = match.group(1)
+
+    def items(self):
+        self._prepare_ddosguard_cookies()
+
+        url = self.root + "/favorites/artists"
+        data = {"_extractor": SeisopartyUserExtractor}
+        params = text.parse_query(self.query)
+        params["page"] = text.parse_int(params.get("page"), 1)
+
+        while True:
+            page = self.request(url, params=params).text
+
+            cnt = 0
+            for card in text.extract_iter(
+                    page, '<div class="artist-card', '</a>'):
+                path = text.extract(card, '<a href="', '"')[0]
+                yield Message.Queue, self.root + path, data
+                cnt += 1
+
+            if cnt < 25:
+                return
+            params["page"] += 1
