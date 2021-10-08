@@ -373,6 +373,7 @@ Description
     * ``mangoxo``
     * ``pillowfort``
     * ``sankaku``
+    * ``seisoparty``
     * ``subscribestar``
     * ``tapas``
     * ``tsumino``
