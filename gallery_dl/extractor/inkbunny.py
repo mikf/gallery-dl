@@ -135,6 +135,26 @@ class InkbunnyUserExtractor(InkbunnyExtractor):
         return self.api.search(params)
 
 
+class InkbunnyPoolExtractor(InkbunnyExtractor):
+    """Extractor for inkbunny pools"""
+    subcategory = "pool"
+    pattern = BASE_PATTERN + r"/poolview_process\.php\?pool_id=(\d+)"
+    test = ("https://inkbunny.net/poolview_process.php?pool_id=28985", {
+        "count": 9,
+    })
+
+    def __init__(self, match):
+        InkbunnyExtractor.__init__(self, match)
+        self.pool_id = match.group(1)
+
+    def posts(self):
+        params = {
+            "pool_id": self.pool_id,
+            "orderby": "pool_order",
+        }
+        return self.api.search(params)
+
+
 class InkbunnyFavoriteExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user favorites"""
     subcategory = "favorite"
