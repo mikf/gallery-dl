@@ -67,3 +67,8 @@ target/
 
 /*.snap
 /*_source.tar.bz2
+
+venv
+.vscode
+.DS_Store
+gallery-dl
