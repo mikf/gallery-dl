@@ -364,7 +364,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Inkbunny</td>
     <td>https://inkbunny.net/</td>
-    <td>Favorites, Posts, User Profiles</td>
+    <td>Favorites, Pools, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
