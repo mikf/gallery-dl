@@ -8,7 +8,6 @@
 
 from .common import Extractor, Message
 from .. import text
-import binascii
 
 
 class CyberdropAlbumExtractor(Extractor):
@@ -19,7 +18,7 @@ class CyberdropAlbumExtractor(Extractor):
     archive_fmt = "{album_id}_{id}"
     pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.me/a/([^/?#]+)"
     test = ("https://cyberdrop.me/a/keKRjm4t", {
-        "pattern": r"https://f\.cyberdrop\.cc/.*\.[a-z]+$",
+        "pattern": r"https://fs-\d+\.cyberdrop\.to/.*\.[a-z]+$",
         "keyword": {
             "album_id": "keKRjm4t",
             "album_name": "Fate (SFW)",
@@ -38,7 +37,14 @@ class CyberdropAlbumExtractor(Extractor):
     def items(self):
         url = self.root + "/a/" + self.album_id
         extr = text.extract_from(self.request(url).text)
-        extr("const albumData = {", "")
+
+        files = []
+        append = files.append
+        while True:
+            url = extr('downloadUrl: "', '"')
+            if not url:
+                break
+            append(text.unescape(url))
 
         data = {
             "album_id"   : self.album_id,
@@ -46,13 +52,11 @@ class CyberdropAlbumExtractor(Extractor):
             "date"       : text.parse_timestamp(extr("timestamp: ", ",")),
             "album_size" : text.parse_int(extr("totalSize: ", ",")),
             "description": extr("description: `", "`"),
+            "count"      : len(files),
         }
-        files = extr("fl: '", "'").split(",")
-        data["count"] = len(files)
 
         yield Message.Directory, data
-        for file_b64 in files:
-            file = binascii.a2b_base64(file_b64).decode()
-            text.nameext_from_url(file, data)
+        for url in files:
+            text.nameext_from_url(url, data)
             data["filename"], _, data["id"] = data["filename"].rpartition("-")
-            yield Message.Url, "https://f.cyberdrop.cc/" + file, data
+            yield Message.Url, url, data
