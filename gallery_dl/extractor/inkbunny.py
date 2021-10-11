@@ -138,19 +138,32 @@ class InkbunnyUserExtractor(InkbunnyExtractor):
 class InkbunnyPoolExtractor(InkbunnyExtractor):
     """Extractor for inkbunny pools"""
     subcategory = "pool"
-    pattern = BASE_PATTERN + r"/poolview_process\.php\?pool_id=(\d+)"
-    test = ("https://inkbunny.net/poolview_process.php?pool_id=28985", {
-        "count": 9,
-    })
+    pattern = (BASE_PATTERN + r"/(?:"
+               r"poolview_process\.php\?pool_id=(\d+)|"
+               r"submissionsviewall\.php\?([^#]+&mode=pool&[^#]+))")
+    test = (
+        ("https://inkbunny.net/poolview_process.php?pool_id=28985", {
+            "count": 9,
+        }),
+        ("https://inkbunny.net/submissionsviewall.php?rid=ffffffffff"
+         "&mode=pool&pool_id=28985&page=1&orderby=pool_order&random=no"),
+    )
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        self.pool_id = match.group(1)
+        pid = match.group(1)
+        if pid:
+            self.pool_id = pid
+            self.orderby = "pool_order"
+        else:
+            params = text.parse_query(match.group(2))
+            self.pool_id = params.get("pool_id")
+            self.orderby = params.get("orderby", "pool_order")
 
     def posts(self):
         params = {
             "pool_id": self.pool_id,
-            "orderby": "pool_order",
+            "orderby": self.orderby,
         }
         return self.api.search(params)
 
@@ -158,26 +171,36 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
 class InkbunnyFavoriteExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user favorites"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/userfavorites_process\.php\?favs_user_id=(\d+)"
+    pattern = (BASE_PATTERN + r"/(?:"
+               r"userfavorites_process\.php\?favs_user_id=(\d+)|"
+               r"submissionsviewall\.php\?([^#]+&mode=userfavs&[^#]+))")
     test = (
         ("https://inkbunny.net/userfavorites_process.php?favs_user_id=20969", {
             "pattern": r"https://[\w.]+\.metapix\.net/files/full"
                        r"/\d+/\d+_\w+_.+",
             "range": "20-50",
         }),
+        ("https://inkbunny.net/submissionsviewall.php?rid=ffffffffff"
+         "&mode=userfavs&random=no&orderby=fav_datetime&page=1&user_id=20969"),
     )
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        self.user_id = match.group(1)
+        uid = match.group(1)
+        if uid:
+            self.user_id = uid
+            self.orderby = self.config("orderby", "fav_datetime")
+        else:
+            params = text.parse_query(match.group(2))
+            self.user_id = params.get("user_id")
+            self.orderby = params.get("orderby", "fav_datetime")
 
     def posts(self):
-        orderby = self.config("orderby", "fav_datetime")
         params = {
             "favs_user_id": self.user_id,
-            "orderby"     : orderby,
+            "orderby"     : self.orderby,
         }
-        if orderby and orderby.startswith("unread_"):
+        if self.orderby and self.orderby.startswith("unread_"):
             params["unread_submissions"] = "yes"
         return self.api.search(params)
 
