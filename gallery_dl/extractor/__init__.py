@@ -95,6 +95,7 @@ modules = [
     "philomena",
     "photobucket",
     "photovogue",
+    "picarto",
     "piczel",
     "pillowfort",
     "pinterest",

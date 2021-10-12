@@ -554,6 +554,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Picarto</td>
+    <td>https://picarto.tv/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>Piczel</td>
     <td>https://piczel.tv/</td>
     <td>Folders, individual Images, User Profiles</td>
