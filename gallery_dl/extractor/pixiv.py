@@ -558,6 +558,68 @@ class PixivPixivisionExtractor(PixivExtractor):
         }
 
 
+class PixivSketchExtractor(Extractor):
+    """Extractor for user pages on sketch.pixiv.net"""
+    category = "pixiv"
+    subcategory = "sketch"
+    directory_fmt = ("{category}", "sketch", "{user[unique_name]}")
+    filename_fmt = "{post_id} {id}.{extension}"
+    archive_fmt = "S{user[id]}_{id}"
+    root = "https://sketch.pixiv.net"
+    cookiedomain = ".pixiv.net"
+    pattern = r"(?:https?://)?sketch\.pixiv\.net/@([^/?#]+)"
+    test = ("https://sketch.pixiv.net/@nicoby", {
+        "pattern": r"https://img\-sketch\.pixiv\.net/uploads/medium"
+                   r"/file/\d+/\d+\.(jpg|png)",
+        "count": ">= 35",
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.username = match.group(1)
+
+    def items(self):
+        headers = {"Referer": "{}/@{}".format(self.root, self.username)}
+
+        for post in self.posts():
+            media = post["media"]
+            post["post_id"] = post["id"]
+            post["date"] = text.parse_datetime(
+                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            util.delete_items(post, ("id", "media", "_links"))
+
+            yield Message.Directory, post
+            post["_http_headers"] = headers
+
+            for photo in media:
+                original = photo["photo"]["original"]
+                post["id"] = photo["id"]
+                post["width"] = original["width"]
+                post["height"] = original["height"]
+
+                url = original["url"]
+                text.nameext_from_url(url, post)
+                yield Message.Url, url, post
+
+    def posts(self):
+        url = "{}/api/walls/@{}/posts/public.json".format(
+            self.root, self.username)
+        headers = {
+            "Accept": "application/vnd.sketch-v4+json",
+            "X-Requested-With": "{}/@{}".format(self.root, self.username),
+            "Referer": self.root + "/",
+        }
+
+        while True:
+            data = self.request(url, headers=headers).json()
+            yield from data["data"]["items"]
+
+            next_url = data["_links"].get("next")
+            if not next_url:
+                return
+            url = self.root + next_url["href"]
+
+
 class PixivAppAPI():
     """Minimal interface for the Pixiv App API for mobile devices
 
