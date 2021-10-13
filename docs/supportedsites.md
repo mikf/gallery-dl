@@ -394,7 +394,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Kemonoparty</td>
     <td>https://kemono.party/</td>
-    <td>Favorites, Posts, User Profiles</td>
+    <td>Discord Servers, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
