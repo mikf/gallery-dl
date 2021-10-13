@@ -149,6 +149,9 @@ SUBCATEGORY_MAP = {
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
     },
+    "kemonoparty": {
+        "discord": "Discord Servers",
+    },
     "mangadex": {
         "feed" : "Followed Feed",
     },
