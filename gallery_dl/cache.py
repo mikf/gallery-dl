@@ -211,13 +211,18 @@ def _path():
     return os.path.join(cachedir, "cache.sqlite3")
 
 
-try:
-    dbfile = _path()
+def _init():
+    try:
+        dbfile = _path()
 
-    # restrict access permissions for new db files
-    os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
+        # restrict access permissions for new db files
+        os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
 
-    DatabaseCacheDecorator.db = sqlite3.connect(
-        dbfile, timeout=60, check_same_thread=False)
-except (OSError, TypeError, sqlite3.OperationalError):
-    cache = memcache  # noqa: F811
+        DatabaseCacheDecorator.db = sqlite3.connect(
+            dbfile, timeout=60, check_same_thread=False)
+    except (OSError, TypeError, sqlite3.OperationalError):
+        global cache
+        cache = memcache
+
+
+_init()

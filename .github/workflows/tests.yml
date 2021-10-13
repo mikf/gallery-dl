@@ -36,7 +36,6 @@ jobs:
 
     - name: Run tests
       run: |
-        pip install nose
         make test
 
     - name: Test autogeneration of man pages, bash/zsh completion, etc
