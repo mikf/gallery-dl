@@ -19,7 +19,7 @@ release: man completion supportedsites
 	scripts/release.sh
 
 test:
-	scripts/run_tests.sh
+	scripts/run_tests.py
 
 executable:
 	scripts/pyinstaller.py
