@@ -99,6 +99,49 @@ class NhentaiGalleryExtractor(NhentaiBase, GalleryExtractor):
         ]
 
 
+class NhentaiTagExtractor(NhentaiBase, Extractor):
+    """Extractor for nhentai tag searches"""
+    subcategory = "tag"
+    pattern = (r"(?:https?://)?nhentai\.net("
+               r"/(?:artist|category|character|group|language|parody|tag)"
+               r"/[^/?#]+(?:/popular[^/?#]*)?/?)(?:\?([^#]+))?")
+    test = (
+        ("https://nhentai.net/tag/sole-female/", {
+            "pattern": NhentaiGalleryExtractor.pattern,
+            "count": 30,
+            "range": "1-30",
+        }),
+        ("https://nhentai.net/artist/itou-life/"),
+        ("https://nhentai.net/group/itou-life/"),
+        ("https://nhentai.net/parody/touhou-project/"),
+        ("https://nhentai.net/character/patchouli-knowledge/popular"),
+        ("https://nhentai.net/category/doujinshi/popular-today"),
+        ("https://nhentai.net/language/english/popular-week"),
+    )
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.path, self.query = match.groups()
+
+    def items(self):
+        data = {"_extractor": NhentaiGalleryExtractor}
+        for gallery_id in self._pagination():
+            url = "{}/g/{}/".format(self.root, gallery_id)
+            yield Message.Queue, url, data
+
+    def _pagination(self):
+        url = self.root + self.path
+        params = text.parse_query(self.query)
+        params["page"] = text.parse_int(params.get("page"), 1)
+
+        while True:
+            page = self.request(url, params=params).text
+            yield from text.extract_iter(page, 'href="/g/', '/')
+            if 'class="next"' not in page:
+                return
+            params["page"] += 1
+
+
 class NhentaiSearchExtractor(NhentaiBase, Extractor):
     """Extractor for nhentai search results"""
     subcategory = "search"
