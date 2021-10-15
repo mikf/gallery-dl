@@ -204,16 +204,23 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                      "{channel_name|channel}")
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server}_{id}_{num}"
-    pattern = r"(?:https?://)?kemono\.party/discord/server/(\d+)"
-    test = ("https://kemono.party/discord/server/256559665620451329", {
-        "pattern": r"https://kemono\.party/data/attachments/discord"
-                   r"/256559665620451329/\d+/\d+/.+",
-        "count": ">= 2",
-    })
+    pattern = r"(?:https?://)?kemono\.party/discord/server/(\d+)(?:/?#(.*))?"
+    test = (
+        ("https://kemono.party/discord/server/256559665620451329", {
+            "pattern": r"https://kemono\.party/data/attachments/discord"
+                       r"/256559665620451329/\d+/\d+/.+",
+            "count": ">= 2",
+        }),
+        (("https://kemono.party/discord"
+          "/server/488668827274444803#finish-work"), {
+            "count": 4,
+            "keyword": {"channel_name": "finish-work"},
+        }),
+    )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        self.server = match.group(1)
+        self.server, self.channel = match.groups()
 
     def items(self):
         self._prepare_ddosguard_cookies()
@@ -238,7 +245,16 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
         url = "{}/api/discord/channels/lookup?q={}".format(
             self.root, self.server)
 
-        for channel in self.request(url).json():
+        channels = self.request(url).json()
+        if self.channel is not None:
+            for channel in channels:
+                if channel["name"] == self.channel:
+                    channels = (channel,)
+                    break
+            else:
+                raise exception.NotFoundError("channel")
+
+        for channel in channels:
             url = "{}/api/discord/channel/{}".format(self.root, channel["id"])
             params = {"skip": 0}
             channel_name = channel["name"]
