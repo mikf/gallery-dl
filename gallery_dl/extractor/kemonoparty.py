@@ -200,7 +200,8 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
 class KemonopartyDiscordExtractor(KemonopartyExtractor):
     """Extractor for kemono.party discord servers"""
     subcategory = "discord"
-    directory_fmt = ("{category}", "discord", "{server}", "{channel}")
+    directory_fmt = ("{category}", "discord", "{server}",
+                     "{channel_name|channel}")
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server}_{id}_{num}"
     pattern = r"(?:https?://)?kemono\.party/discord/server/(\d+)"
@@ -240,13 +241,17 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
         for channel in self.request(url).json():
             url = "{}/api/discord/channel/{}".format(self.root, channel["id"])
             params = {"skip": 0}
+            channel_name = channel["name"]
 
             while True:
                 posts = self.request(url, params=params).json()
-                yield from posts
+
+                for post in posts:
+                    post["channel_name"] = channel_name
+                    yield post
 
                 if len(posts) < 25:
-                    return
+                    break
                 params["skip"] += 25
 
 
