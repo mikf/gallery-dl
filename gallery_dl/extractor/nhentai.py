@@ -157,3 +157,34 @@ class NhentaiFavoriteExtractor(NhentaiBase, Extractor):
             if 'class="next"' not in page:
                 return
             params["page"] += 1
+
+class NhentaiArtistExtractor(NhentaiBase, Extractor):
+    """Extractor for nhentai artists"""
+    subcategory = "artist"
+    pattern = r"(?:https?://)?nhentai\.net/artist/([^/?#]+)/?(popular(?:-today|-week|-month)?)?(?:\?([^#]+))?"
+    test = ("https://nhentai.net/artist/ayane/",)
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.artist = match.group(1)
+        self.sort = match.group(2)
+        if self.sort is None:
+            self.sort = ""
+        self.params = text.parse_query(match.group(3))
+
+    def items(self):
+        data = {"_extractor": NhentaiGalleryExtractor}
+        for gallery_id in self._pagination(self.params):
+            url = "{}/g/{}/".format(self.root, gallery_id)
+            yield Message.Queue, url, data
+
+    def _pagination(self, params):
+        url = "{}/artist/{}/{}".format(self.root, self.artist, self.sort)
+        params["page"] = text.parse_int(params.get("page"), 1)
+
+        while True:
+            page = self.request(url, params=params).text
+            yield from text.extract_iter(page, 'href="/g/', '/')
+            if 'class="next"' not in page:
+                return
+            params["page"] += 1
