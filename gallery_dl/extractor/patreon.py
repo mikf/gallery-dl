@@ -82,15 +82,14 @@ class PatreonExtractor(Extractor):
             if url:
                 yield "attachment", url, attachment["name"]
 
-    @staticmethod
-    def _content(post):
+    def _content(self, post):
         content = post.get("content")
         if content:
             for img in text.extract_iter(
                     content, '<img data-media-id="', '>'):
                 url = text.extract(img, 'src="', '"')[0]
                 if url:
-                    yield "content", url, url
+                    yield "content", url, self._filename(url) or url
 
     def posts(self):
         """Return all relevant post objects"""
@@ -305,8 +304,9 @@ class PatreonPostExtractor(PatreonExtractor):
             "count": 4,
         }),
         # postfile + content
-        ("https://www.patreon.com/posts/19987002", {
-            "count": 4,
+        ("https://www.patreon.com/posts/56127163", {
+            "count": 3,
+            "keyword": {"filename": r"re:^(?!1).+$"},
         }),
         # tags (#1539)
         ("https://www.patreon.com/posts/free-post-12497641", {
