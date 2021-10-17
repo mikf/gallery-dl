@@ -1577,6 +1577,19 @@ Description
     port than the default.
 
 
+extractor.patreon.files
+-----------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["images", "attachments", "postfile", "content"]``
+Description
+    Determines the type and order of files to be downloaded.
+
+    Available types are
+    ``postfile``, ``images``, ``attachments``, and ``content``.
+
+
 extractor.photobucket.subalbums
 -------------------------------
 Type
