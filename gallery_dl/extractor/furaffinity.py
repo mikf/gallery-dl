@@ -250,7 +250,7 @@ class FuraffinitySearchExtractor(FuraffinityExtractor):
         FuraffinityExtractor.__init__(self, match)
         self.query = text.parse_query(match.group(2))
         if self.user and "q" not in self.query:
-            self.query["q"] = text.unescape(self.user)
+            self.query["q"] = text.unquote(self.user)
 
     def metadata(self):
         return {"search": self.query.get("q")}
