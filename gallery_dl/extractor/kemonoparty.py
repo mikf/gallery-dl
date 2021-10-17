@@ -29,7 +29,9 @@ class KemonopartyExtractor(Extractor):
     def items(self):
         self._prepare_ddosguard_cookies()
 
-        find_inline = re.compile(r'src="(/inline/[^"]+)').findall
+        find_inline = re.compile(
+            r'src="(?:https?://kemono\.party)?(/inline/[^"]+'
+            r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
         skip_service = \
             "patreon" if self.config("patreon-skip-file", True) else None
 
