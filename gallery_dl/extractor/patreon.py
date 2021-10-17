@@ -32,22 +32,19 @@ class PatreonExtractor(Extractor):
             if "session_id" not in self.session.cookies:
                 self.log.warning("no 'session_id' cookie set")
             PatreonExtractor._warning = False
+        generators = self._build_file_generators(self.config("files"))
 
         for post in self.posts():
 
             if not post.get("current_user_can_view", True):
                 self.log.warning("Not allowed to view post %s", post["id"])
                 continue
+            yield Message.Directory, post
+
             post["num"] = 0
             hashes = set()
-
-            yield Message.Directory, post
-            for kind, url, name in itertools.chain(
-                self._images(post),
-                self._attachments(post),
-                self._postfile(post),
-                self._content(post),
-            ):
+            for kind, url, name in itertools.chain.from_iterable(
+                    g(post) for g in generators):
                 fhash = self._filehash(url)
                 if fhash not in hashes or not fhash:
                     hashes.add(fhash)
@@ -154,7 +151,7 @@ class PatreonExtractor(Extractor):
                 included[file["type"]][file["id"]]
                 for file in files["data"]
             ]
-        return []
+        return ()
 
     @memcache(keyarg=1)
     def _user(self, url):
@@ -210,6 +207,20 @@ class PatreonExtractor(Extractor):
             "&json-api-use-default-includes=false"
             "&json-api-version=1.0"
         )
+
+    def _build_file_generators(self, filetypes):
+        if filetypes is None:
+            return (self._images, self._attachments,
+                    self._postfile, self._content)
+        genmap = {
+            "images"     : self._images,
+            "attachments": self._attachments,
+            "postfile"   : self._postfile,
+            "content"    : self._content,
+        }
+        if isinstance(filetypes, str):
+            filetypes = filetypes.split(",")
+        return [genmap[ft] for ft in filetypes]
 
 
 class PatreonCreatorExtractor(PatreonExtractor):
