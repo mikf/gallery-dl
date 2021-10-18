@@ -14,7 +14,8 @@ from ..cache import cache
 import itertools
 import re
 
-BASE_PATTERN = r"(?:https?://)?kemono\.party/([^/?#]+)/user/([^/?#]+)"
+BASE_PATTERN = r"(?:https?://)?kemono\.party"
+USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 
 
 class KemonopartyExtractor(Extractor):
@@ -103,7 +104,7 @@ class KemonopartyExtractor(Extractor):
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/?(?:\?o=(\d+))?(?:$|[?#])"
+    pattern = USER_PATTERN + r"/?(?:\?o=(\d+))?(?:$|[?#])"
     test = (
         ("https://kemono.party/fanbox/user/6993449", {
             "range": "1-25",
@@ -140,7 +141,7 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
 class KemonopartyPostExtractor(KemonopartyExtractor):
     """Extractor for a single kemono.party post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/post/([^/?#]+)"
+    pattern = USER_PATTERN + r"/post/([^/?#]+)"
     test = (
         ("https://kemono.party/fanbox/user/6993449/post/506575", {
             "pattern": r"https://kemono.party/data/21/0f"
@@ -206,28 +207,30 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                      "{channel_name|channel}")
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server}_{id}_{num}"
-    pattern = r"(?:https?://)?kemono\.party/discord/server/(\d+)(?:/?#(.*))?"
+    pattern = BASE_PATTERN + r"/discord/server/(\d+)(?:/channel/(\d+))?#(.*)"
     test = (
-        ("https://kemono.party/discord/server/256559665620451329", {
-            "pattern": r"https://kemono\.party/data/attachments/discord"
-                       r"/256559665620451329/\d+/\d+/.+",
-            "count": ">= 2",
-        }),
         (("https://kemono.party/discord"
           "/server/488668827274444803#finish-work"), {
             "count": 4,
             "keyword": {"channel_name": "finish-work"},
         }),
+        (("https://kemono.party/discord"
+          "/server/256559665620451329/channel/462437519519383555#"), {
+            "pattern": r"https://kemono\.party/data/attachments/discord"
+                       r"/256559665620451329/\d+/\d+/.+",
+            "count": ">= 2",
+        }),
     )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        self.server, self.channel = match.groups()
+        self.server, self.channel, self.channel_name = match.groups()
 
     def items(self):
         self._prepare_ddosguard_cookies()
 
         for post in self.posts():
+            post["channel_name"] = self.channel_name
             post["date"] = text.parse_datetime(
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
             yield Message.Directory, post
@@ -244,39 +247,56 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                 yield Message.Url, url, post
 
     def posts(self):
-        url = "{}/api/discord/channels/lookup?q={}".format(
-            self.root, self.server)
-
-        channels = self.request(url).json()
-        if self.channel is not None:
-            for channel in channels:
-                if channel["name"] == self.channel:
-                    channels = (channel,)
+        if self.channel is None:
+            url = "{}/api/discord/channels/lookup?q={}".format(
+                self.root, self.server)
+            for channel in self.request(url).json():
+                if channel["name"] == self.channel_name:
+                    self.channel = channel["id"]
                     break
             else:
                 raise exception.NotFoundError("channel")
 
+        url = "{}/api/discord/channel/{}".format(self.root, self.channel)
+        params = {"skip": 0}
+
+        while True:
+            posts = self.request(url, params=params).json()
+            yield from posts
+
+            if len(posts) < 25:
+                break
+            params["skip"] += 25
+
+
+class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
+    subcategory = "discord-server"
+    pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
+    test = ("https://kemono.party/discord/server/488668827274444803", {
+        "pattern": KemonopartyDiscordExtractor.pattern,
+        "count": 13,
+    })
+
+    def __init__(self, match):
+        KemonopartyExtractor.__init__(self, match)
+        self.server = match.group(1)
+
+    def items(self):
+        url = "{}/api/discord/channels/lookup?q={}".format(
+            self.root, self.server)
+        channels = self.request(url).json()
+
         for channel in channels:
-            url = "{}/api/discord/channel/{}".format(self.root, channel["id"])
-            params = {"skip": 0}
-            channel_name = channel["name"]
-
-            while True:
-                posts = self.request(url, params=params).json()
-
-                for post in posts:
-                    post["channel_name"] = channel_name
-                    yield post
-
-                if len(posts) < 25:
-                    break
-                params["skip"] += 25
+            url = "{}/discord/server/{}/channel/{}#{}".format(
+                self.root, self.server, channel["id"], channel["name"])
+            channel["_extractor"] = KemonopartyDiscordExtractor
+            yield Message.Queue, url, channel
 
 
 class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     """Extractor for kemono.party favorites"""
     subcategory = "favorite"
-    pattern = r"(?:https?://)?kemono\.party/favorites"
+    pattern = BASE_PATTERN + r"/favorites"
     test = ("https://kemono.party/favorites", {
         "pattern": KemonopartyUserExtractor.pattern,
         "url": "f4b5b796979bcba824af84206578c79101c7f0e1",

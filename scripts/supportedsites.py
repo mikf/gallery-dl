@@ -151,6 +151,7 @@ SUBCATEGORY_MAP = {
     },
     "kemonoparty": {
         "discord": "Discord Servers",
+        "discord-server": "",
     },
     "mangadex": {
         "feed" : "Followed Feed",
