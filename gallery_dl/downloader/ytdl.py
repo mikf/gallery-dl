@@ -136,8 +136,9 @@ class YoutubeDLDownloader(DownloaderBase):
     def _progress_hook(self, info):
         if info["status"] == "downloading" and \
                 info["elapsed"] >= self.progress:
+            total = info.get("total_bytes") or info.get("total_bytes_estimate")
             self.out.progress(
-                info["total_bytes"],
+                None if total is None else int(total),
                 info["downloaded_bytes"],
                 int(info["speed"]),
             )
