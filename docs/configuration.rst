@@ -1237,16 +1237,20 @@ Description
 extractor.gfycat.format
 -----------------------
 Type
-    ``string``
+    * ``list`` of ``strings``
+    * ``string``
 Default
-    ``"mp4"``
+    ``["mp4", "webm", "mobile", "gif"]``
 Description
-    The name of the preferred animation format, which can be one of
-    ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"``, or ``"mjpg"``.
+    List of names of the preferred animation format, which can be
+    ``"mp4"``, ``"webm"``, ``"mobile"``, ``"gif"``, or ``"webp"``.
 
-    If the selected format is not available, ``"mp4"``, ``"webm"``
-    and ``"gif"`` (in that order) will be tried instead, until an
-    available format is found.
+    If a selected format is not available, the next one in the list will be
+    tried until an available format is found.
+
+    If the format is given as ``string``, it will be extended with
+    ``["mp4", "webm", "mobile", "gif"]``. Use a list with one element to
+    restrict it to only one possible format.
 
 
 extractor.hentaifoundry.include
@@ -1864,16 +1868,20 @@ Description
 extractor.redgifs.format
 ------------------------
 Type
-    ``string``
+    * ``list`` of ``strings``
+    * ``string``
 Default
-    ``"mp4"``
+    ``["mp4", "webm", "mobile", "gif"]``
 Description
-    The name of the preferred format, which can be one of
+    List of names of the preferred animation format, which can be
     ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"``, ``"mobile"``, or ``"mini"``.
 
-    If the selected format is not available, ``"mp4"``, ``"webm"``
-    and ``"gif"`` (in that order) will be tried instead, until an
-    available format is found.
+    If a selected format is not available, the next one in the list will be
+    tried until an available format is found.
+
+    If the format is given as ``string``, it will be extended with
+    ``["mp4", "webm", "mobile", "gif"]``. Use a list with one element to
+    restrict it to only one possible format.
 
 
 extractor.sankakucomplex.embeds

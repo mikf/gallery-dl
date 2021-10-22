@@ -22,7 +22,13 @@ class GfycatExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.key = match.group(1).lower()
-        self.formats = (self.config("format", "mp4"), "mp4", "webm", "gif")
+
+        formats = self.config("format")
+        if formats is None:
+            formats = ("mp4", "webm", "mobile", "gif")
+        elif isinstance(formats, str):
+            formats = (formats, "mp4", "webm", "mobile", "gif")
+        self.formats = formats
 
     def items(self):
         metadata = self.metadata()
@@ -30,23 +36,25 @@ class GfycatExtractor(Extractor):
             if "gfyName" not in gfycat:
                 self.log.warning("Skipping '%s' (malformed)", gfycat["gfyId"])
                 continue
-            url = self._select_format(gfycat)
+            url = self._process(gfycat)
             gfycat.update(metadata)
-            gfycat["date"] = text.parse_timestamp(gfycat.get("createDate"))
             yield Message.Directory, gfycat
             yield Message.Url, url, gfycat
 
-    def _select_format(self, gfyitem):
+    def _process(self, gfycat):
+        gfycat["_fallback"] = formats = self._formats(gfycat)
+        gfycat["date"] = text.parse_timestamp(gfycat.get("createDate"))
+        return next(formats, "")
+
+    def _formats(self, gfycat):
         for fmt in self.formats:
             key = fmt + "Url"
-            if key in gfyitem:
-                url = gfyitem[key]
+            if key in gfycat:
+                url = gfycat[key]
                 if url.startswith("http:"):
                     url = "https" + url[4:]
-                gfyitem["extension"] = url.rpartition(".")[2]
-                return url
-        gfyitem["extension"] = ""
-        return ""
+                gfycat["extension"] = url.rpartition(".")[2]
+                yield url
 
     def metadata(self):
         return {}
@@ -146,8 +154,7 @@ class GfycatImageExtractor(GfycatExtractor):
             if "gfyName" not in gfycat:
                 self.log.warning("Skipping '%s' (malformed)", gfycat["gfyId"])
                 return
-            url = self._select_format(gfycat)
-            gfycat["date"] = text.parse_timestamp(gfycat.get("createDate"))
+            url = self._process(gfycat)
             yield Message.Directory, gfycat
             yield Message.Url, url, gfycat
 
