@@ -220,6 +220,13 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                        r"/256559665620451329/\d+/\d+/.+",
             "count": ">= 2",
         }),
+        # 'inline' files
+        (("https://kemono.party/discord"
+          "/server/315262215055736843/channel/315262215055736843#general"), {
+            "pattern": r"https://cdn\.discordapp\.com/attachments/\d+/\d+/.+$",
+            "range": "1-5",
+            "options": (("image-filter", "type == 'inline'"),),
+        }),
     )
 
     def __init__(self, match):
@@ -229,14 +236,30 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
     def items(self):
         self._prepare_ddosguard_cookies()
 
-        for post in self.posts():
+        find_inline = re.compile(
+            r"https?://(?:cdn|media)\.discordapp.com/\S+").findall
+
+        posts = self.posts()
+        max_posts = self.config("max-posts")
+        if max_posts:
+            posts = itertools.islice(posts, max_posts)
+
+        for post in posts:
+            files = []
+            append = files.append
+            for attachment in post["attachments"]:
+                attachment["type"] = "attachment"
+                append(attachment)
+            for path in find_inline(post["content"] or ""):
+                append({"path": path, "name": path, "type": "inline"})
+
             post["channel_name"] = self.channel_name
             post["date"] = text.parse_datetime(
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
             yield Message.Directory, post
 
-            for post["num"], file in enumerate(post["attachments"], 1):
-                post["type"] = "attachment"
+            for post["num"], file in enumerate(files, 1):
+                post["type"] = file["type"]
                 url = file["path"]
                 if url[0] == "/":
                     url = self.root + "/data" + url
