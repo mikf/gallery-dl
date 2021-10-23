@@ -746,29 +746,27 @@ class DeviantartPopularExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.search_term = self.time_range = self.category_path = None
         self.user = ""
 
         trange1, path, trange2, query = match.groups()
-        trange = trange1 or trange2
         query = text.parse_query(query)
+        self.search_term = query.get("q")
 
-        if not trange:
-            trange = query.get("order")
-
-        if path:
-            self.category_path = path.strip("/")
-        if trange:
-            if trange.startswith("popular-"):
-                trange = trange[8:]
-            self.time_range = trange.replace("-", "").replace("hours", "hr")
-        if query:
-            self.search_term = query.get("q")
+        trange = trange1 or trange2 or query.get("order", "")
+        if trange.startswith("popular-"):
+            trange = trange[8:]
+        self.time_range = {
+            "most-recent" : "now",
+            "this-week"   : "1week",
+            "this-month"  : "1month",
+            "this-century": "alltime",
+            "all-time"    : "alltime",
+        }.get(trange, "alltime")
 
         self.popular = {
             "search": self.search_term or "",
-            "range" : trange or "",
-            "path"  : self.category_path,
+            "range" : trange or "all-time",
+            "path"  : path.strip("/") if path else "",
         }
 
     def deviations(self):
