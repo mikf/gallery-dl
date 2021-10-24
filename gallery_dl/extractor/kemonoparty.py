@@ -237,7 +237,8 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
         self._prepare_ddosguard_cookies()
 
         find_inline = re.compile(
-            r"https?://(?:cdn|media)\.discordapp.com/\S+").findall
+            r"https?://(?:cdn\.discordapp.com|media\.discordapp\.net)"
+            r"(/[A-Za-z0-9-._~:/?#\[\]@!$&'()*+,;%=]+)").findall
 
         posts = self.posts()
         max_posts = self.config("max-posts")
@@ -251,7 +252,8 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                 attachment["type"] = "attachment"
                 append(attachment)
             for path in find_inline(post["content"] or ""):
-                append({"path": path, "name": path, "type": "inline"})
+                append({"path": "https://cdn.discordapp.com" + path,
+                        "name": path, "type": "inline"})
 
             post["channel_name"] = self.channel_name
             post["date"] = text.parse_datetime(
