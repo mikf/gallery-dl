@@ -1,6 +1,30 @@
 # Changelog
 
-## Unreleased
+## 1.19.1 - 2021-10-24
+### Additions
+- [inkbunny] add `following` extractor ([#515](https://github.com/mikf/gallery-dl/issues/515))
+- [inkbunny] add `pool` extractor ([#1937](https://github.com/mikf/gallery-dl/issues/1937))
+- [kemonoparty] add `discord` extractor ([#1827](https://github.com/mikf/gallery-dl/issues/1827), [#1940](https://github.com/mikf/gallery-dl/issues/1940))
+- [nhentai] add `tag` extractor ([#1950](https://github.com/mikf/gallery-dl/issues/1950), [#1955](https://github.com/mikf/gallery-dl/issues/1955))
+- [patreon] add `files` option ([#1935](https://github.com/mikf/gallery-dl/issues/1935))
+- [picarto] add `gallery` extractor ([#1931](https://github.com/mikf/gallery-dl/issues/1931))
+- [pixiv] add `sketch` extractor ([#1497](https://github.com/mikf/gallery-dl/issues/1497))
+- [seisoparty] add `favorite` extractor ([#1906](https://github.com/mikf/gallery-dl/issues/1906))
+- [twitter] add `size` option ([#1881](https://github.com/mikf/gallery-dl/issues/1881))
+- [vk] add `album` extractor ([#474](https://github.com/mikf/gallery-dl/issues/474), [#1952](https://github.com/mikf/gallery-dl/issues/1952))
+- [postprocessor:compare] add `equal` option ([#1592](https://github.com/mikf/gallery-dl/issues/1592))
+### Fixes
+- [cyberdrop] extract direct download URLs ([#1943](https://github.com/mikf/gallery-dl/issues/1943))
+- [deviantart] update `search` argument handling ([#1911](https://github.com/mikf/gallery-dl/issues/1911))
+- [deviantart] full resolution for non-downloadable images ([#293](https://github.com/mikf/gallery-dl/issues/293))
+- [furaffinity] unquote search queries ([#1958](https://github.com/mikf/gallery-dl/issues/1958))
+- [inkbunny] match "long" URLs for pools and favorites ([#1937](https://github.com/mikf/gallery-dl/issues/1937))
+- [kemonoparty] improve inline extraction ([#1899](https://github.com/mikf/gallery-dl/issues/1899))
+- [mangadex] update parameter handling for API requests ([#1908](https://github.com/mikf/gallery-dl/issues/1908))
+- [patreon] better filenames for `content` images ([#1954](https://github.com/mikf/gallery-dl/issues/1954))
+- [redgifs][gfycat] provide fallback URLs ([#1962](https://github.com/mikf/gallery-dl/issues/1962))
+- [downloader:ytdl] prevent crash in `_progress_hook()`
+- restore SOCKS support for Windows executables
 
 ## 1.19.0 - 2021-10-01
 ### Additions
