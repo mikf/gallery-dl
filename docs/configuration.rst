@@ -1053,17 +1053,6 @@ Description
     everything else (archives, etc.).
 
 
-extractor.deviantart.quality
-----------------------------
-Type
-    ``integer``
-Default
-    ``100``
-Description
-    JPEG quality level of newer images for which
-    an original file download is not available.
-
-
 extractor.deviantart.refresh-token
 ----------------------------------
 Type

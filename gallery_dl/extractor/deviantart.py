@@ -14,6 +14,7 @@ from ..cache import cache, memcache
 import collections
 import itertools
 import mimetypes
+import binascii
 import time
 import re
 
@@ -39,7 +40,6 @@ class DeviantartExtractor(Extractor):
         self.offset = 0
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
-        self.quality = self.config("quality", "100")
         self.original = self.config("original", True)
         self.comments = self.config("comments", False)
         self.user = match.group(1) or match.group(2)
@@ -52,9 +52,6 @@ class DeviantartExtractor(Extractor):
             self.finalize = self._unwatch_premium
         else:
             self.unwatch = None
-
-        if self.quality:
-            self.quality = ",q_{}".format(self.quality)
 
         if self.original != "image":
             self._update_content = self._update_content_default
@@ -104,19 +101,8 @@ class DeviantartExtractor(Extractor):
 
                 if self.original and deviation["is_downloadable"]:
                     self._update_content(deviation, content)
-
-                if content["src"].startswith("https://images-wixmp-"):
-                    if deviation["index"] <= 790677560:
-                        # https://github.com/r888888888/danbooru/issues/4069
-                        intermediary, count = re.subn(
-                            r"(/f/[^/]+/[^/]+)/v\d+/.*",
-                            r"/intermediary\1", content["src"], 1)
-                        if count:
-                            deviation["_fallback"] = (content["src"],)
-                            content["src"] = intermediary
-                    if self.quality:
-                        content["src"] = re.sub(
-                            r",q_\d+", self.quality, content["src"], 1)
+                else:
+                    self._update_token(deviation, content)
 
                 yield self.commit(deviation, content)
 
@@ -301,6 +287,32 @@ class DeviantartExtractor(Extractor):
         mtype = mimetypes.guess_type(url, False)[0]
         if mtype and mtype.startswith("image/"):
             content.update(data)
+
+    def _update_token(self, deviation, content):
+        """Replace JWT to be able to remove width/height limits
+
+        All credit goes to @Ironchest337
+        for discovering and implementing this method
+        """
+        url, sep, _ = content["src"].partition("/v1/")
+        if not sep:
+            return
+
+        #  header = b'{"typ":"JWT","alg":"none"}'
+        payload = (
+            b'{"sub":"urn:app:","iss":"urn:app:","obj":[[{"path":"/f/' +
+            url.partition("/f/")[2].encode() +
+            b'"}]],"aud":["urn:service:file.download"]}'
+        )
+
+        deviation["_fallback"] = (content["src"],)
+        content["src"] = (
+            "{}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{}.".format(
+                url,
+                #  base64 of 'header' is precomputed as 'eyJ0eX...'
+                #  binascii.a2b_base64(header).rstrip(b"=\n").decode(),
+                binascii.b2a_base64(payload).rstrip(b"=\n").decode())
+        )
 
     def _limited_request(self, url, **kwargs):
         """Limits HTTP requests to one every 2 seconds"""
@@ -849,12 +861,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         }),
         # wixmp URL rewrite
         (("https://www.deviantart.com/citizenfresh/art/Hverarond-789295466"), {
-            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
-                        r"/intermediary/f/[^/]+/[^.]+\.jpg")
-        }),
-        # wixmp URL rewrite v2 (#369)
-        (("https://www.deviantart.com/josephbiwald/art/Destiny-2-804940104"), {
-            "pattern": r"https://images-wixmp-\w+\.wixmp\.com/.*,q_100,"
+            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com/f"
+                        r"/[^/]+/[^.]+\.jpg\?token="),
         }),
         # GIF (#242)
         (("https://www.deviantart.com/skatergators/art/COM-Moni-781571783"), {
