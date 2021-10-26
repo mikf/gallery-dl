@@ -36,7 +36,13 @@ class GfycatExtractor(Extractor):
             if "gfyName" not in gfycat:
                 self.log.warning("Skipping '%s' (malformed)", gfycat["gfyId"])
                 continue
+
             url = self._process(gfycat)
+            if not url:
+                self.log.warning("Skipping '%s' (format not available)",
+                                 gfycat["gfyId"])
+                continue
+
             gfycat.update(metadata)
             yield Message.Directory, gfycat
             yield Message.Url, url, gfycat
@@ -44,7 +50,7 @@ class GfycatExtractor(Extractor):
     def _process(self, gfycat):
         gfycat["_fallback"] = formats = self._formats(gfycat)
         gfycat["date"] = text.parse_timestamp(gfycat.get("createDate"))
-        return next(formats, "")
+        return next(formats, None)
 
     def _formats(self, gfycat):
         for fmt in self.formats:
@@ -158,6 +164,10 @@ class GfycatImageExtractor(GfycatExtractor):
                 self.log.warning("Skipping '%s' (malformed)", gfycat["gfyId"])
                 return
             url = self._process(gfycat)
+            if not url:
+                self.log.warning("Skipping '%s' (format not available)",
+                                 gfycat["gfyId"])
+                return
             yield Message.Directory, gfycat
             yield Message.Url, url, gfycat
 
