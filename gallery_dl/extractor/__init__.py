@@ -115,6 +115,7 @@ modules = [
     "senmanga",
     "sexcom",
     "simplyhentai",
+    "skeb",
     "slickpic",
     "slideshare",
     "smugmug",

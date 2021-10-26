@@ -698,6 +698,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Skeb</td>
+    <td>https://skeb.jp/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>SlickPic</td>
     <td>https://www.slickpic.com/</td>
     <td>Albums, User Profiles</td>
