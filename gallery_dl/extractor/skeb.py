@@ -92,7 +92,7 @@ class SkebExtractor(Extractor):
                 "header_url"   : client["header_url"],
             }
         return resp, post
-    
+
     def _get_urls_from_post(self, resp, post):
         if "og_image_url" in resp:
             post["content_category"] = "thumb"
