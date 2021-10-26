@@ -73,6 +73,9 @@ class GfycatUserExtractor(GfycatExtractor):
         "count": ">= 100",
     })
 
+    def metadata(self):
+        return {"userName": self.key}
+
     def gfycats(self):
         return GfycatAPI(self).user(self.key)
 

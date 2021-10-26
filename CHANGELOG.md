@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.19.1 - 2021-10-24
 ### Additions
 - [inkbunny] add `following` extractor ([#515](https://github.com/mikf/gallery-dl/issues/515))
