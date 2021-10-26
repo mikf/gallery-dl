@@ -28,6 +28,9 @@ class RedgifsUserExtractor(RedgifsExtractor):
         "count": ">= 100",
     })
 
+    def metadata(self):
+        return {"userName": self.key}
+
     def gfycats(self):
         return RedgifsAPI(self).user(self.key)
 
