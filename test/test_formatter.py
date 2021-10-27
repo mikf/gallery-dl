@@ -173,6 +173,13 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{d[a]:?</>/L1/too long/}", "<too long>")
         self._run_test("{d[c]:?</>/L5/too long/}", "")
 
+    def test_environ(self):
+        os.environ["FORMATTER_TEST"] = value = self.kwdict["a"]
+
+        self._run_test("{_env[FORMATTER_TEST]}"  , value)
+        self._run_test("{_env[FORMATTER_TEST]!l}", value.lower())
+        self._run_test("{z|_env[FORMATTER_TEST]}", value)
+
     def _run_test(self, format_string, result, default=None):
         fmt = formatter.parse(format_string, default)
         output = fmt.format_map(self.kwdict)
