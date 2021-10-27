@@ -426,7 +426,7 @@ class InstagramPostsExtractor(InstagramExtractor):
         url = "{}/{}/".format(self.root, self.item)
         user = self._extract_profile_page(url)
 
-        query_hash = "7ea6ae3cf6fb05e73fcbe1732b1d2a42"
+        query_hash = "8c2a529969ee035a5063f2fc8602a0fd"
         variables = {"id": user["id"], "first": 50}
         edge = self._get_edge_data(user, "edge_owner_to_timeline_media")
         return self._pagination_graphql(query_hash, variables, edge)
@@ -655,7 +655,7 @@ class InstagramPostExtractor(InstagramExtractor):
     )
 
     def posts(self):
-        query_hash = "1f950d414a6e11c98c556aa007b3157d"
+        query_hash = "2efa04f61586458cef44441f474eee7c"
         variables = {
             "shortcode"            : self.item,
             "child_comment_count"  : 3,
@@ -713,25 +713,14 @@ class InstagramHighlightsExtractor(InstagramExtractor):
         url = "{}/{}/".format(self.root, self.item)
         user = self._extract_profile_page(url)
 
-        query_hash = "d4d88dc1500312af6f937f7b804c68c3"
-        variables = {
-            "user_id": user["id"],
-            "include_chaining": False,
-            "include_reel": True,
-            "include_suggested_users": False,
-            "include_logged_out_extras": False,
-            "include_highlight_reels": True,
-            "include_live_status": True,
-        }
-        data = self._request_graphql(query_hash, variables)
-        edges = data["user"]["edge_highlight_reels"]["edges"]
-        if not edges:
-            return ()
+        endpoint = "/v1/highlights/{}/highlights_tray/".format(user["id"])
+        tray = self._request_api(endpoint)["tray"]
 
-        reel_ids = ["highlight:" + edge["node"]["id"] for edge in edges]
-        endpoint = "/v1/feed/reels_media/?reel_ids=" + \
-                   "&reel_ids=".join(text.quote(rid) for rid in reel_ids)
-        reels = self._request_api(endpoint)["reels"]
+        reel_ids = [highlight["id"] for highlight in tray]
+        endpoint = "/v1/feed/reels_media/"
+        params = {"reel_ids": reel_ids}
+        reels = self._request_api(endpoint, params=params)["reels"]
+
         return [reels[rid] for rid in reel_ids]
 
 
