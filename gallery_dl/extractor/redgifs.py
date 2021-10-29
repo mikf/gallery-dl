@@ -36,7 +36,7 @@ class RedgifsExtractor(Extractor):
             url = self._process(gif)
             if not url:
                 self.log.warning("Skipping '%s' (format not available)",
-                                 gif["gfyId"])
+                                 gif["id"])
                 continue
 
             gif.update(metadata)
