@@ -36,6 +36,7 @@ class TwitterExtractor(Extractor):
         self.retweets = self.config("retweets", False)
         self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)
+        self.pinned = self.config("pinned", False)
         self.quoted = self.config("quoted", False)
         self.videos = self.config("videos", True)
         self.cards = self.config("cards", False)
@@ -838,7 +839,7 @@ class TwitterAPI():
         if params is None:
             params = self.params.copy()
         original_retweets = (self.extractor.retweets == "original")
-        pinned_tweet = True
+        pinned_tweet = self.extractor.pinned
 
         while True:
             cursor = tweet = None

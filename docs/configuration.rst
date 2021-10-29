@@ -2020,6 +2020,16 @@ Description
     Logout and retry as guest when access to another user's Tweets is blocked.
 
 
+extractor.twitter.pinned
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from pinned Tweets.
+
+
 extractor.twitter.quoted
 ------------------------
 Type
