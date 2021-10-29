@@ -1863,13 +1863,13 @@ Default
     ``["mp4", "webm", "mobile", "gif"]``
 Description
     List of names of the preferred animation format, which can be
-    ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"``, ``"mobile"``, or ``"mini"``.
+    ``"mp4"``, ``"gif"``, `"mobile"``, or ``"mini"``.
 
     If a selected format is not available, the next one in the list will be
     tried until an available format is found.
 
     If the format is given as ``string``, it will be extended with
-    ``["mp4", "webm", "mobile", "gif"]``. Use a list with one element to
+    ``["mp4", "mobile", "gif"]``. Use a list with one element to
     restrict it to only one possible format.
 
 
