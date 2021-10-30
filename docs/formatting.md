@@ -129,8 +129,8 @@ Format specifiers can be used for advanced formatting by using the options provi
 </thead>
 <tbody>
 <tr>
-    <td rowspan="2"><code>?&lt;before&gt;/&lt;after&gt;/</code></td>
-    <td rowspan="2">Adds <code>&lt;before&gt;</code> and <code>&lt;after&gt;</code> to the actual value if it evaluates to <code>True</code>. Otherwise the whole replacement field becomes an empty string.</td>
+    <td rowspan="2"><code>?&lt;start&gt;/&lt;end&gt;/</code></td>
+    <td rowspan="2">Adds <code>&lt;start&gt;</code> and <code>&lt;end&gt;</code> to the actual value if it evaluates to <code>True</code>. Otherwise the whole replacement field becomes an empty string.</td>
     <td><code>{foo:?[/]/}</code></td>
     <td><code>[Foo&nbsp;Bar]</code></td>
 </tr>
@@ -170,3 +170,38 @@ For example `{foo:?//RF/B/Ro/e/> 10}` -> `   Bee Bar`
 - `RF/B/` - Replaces `F` with `B`
 - `Ro/e/` - Replaces `o` with `e`
 - `> 10` - Left-fills the string with spaces until it is 10 characters long
+
+
+## Special Type Format Strings
+
+Starting a format string with '\f<Type> ' allows to set a different format string type than the default. Available ones are:
+
+<table>
+<thead>
+<tr>
+    <th>Type</th>
+    <th>Description</th>
+    <th width="32%">Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td align="center"><code>T</code></td>
+    <td>A template file containing the actual format string</td>
+    <td><code>\fT ~/.templates/booru.txt</code></td>
+</tr>
+<tr>
+    <td align="center"><code>E</code></td>
+    <td>An arbitrary Python expression</td>
+    <td><code>\fE title.upper().replace(' ', '-')</code></td>
+</tr>
+<tr>
+    <td align="center"><code>M</code></td>
+    <td> Name of a Python module followed by one of its functions.
+     This function gets called with the current metadata dict as
+     argument and should return a string.</td>
+    <td><code>\fM my_module:generate_text</code></td>
+</tr>
+</tbody>
+</table>
+
