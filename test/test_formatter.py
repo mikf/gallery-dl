@@ -173,12 +173,30 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{d[a]:?</>/L1/too long/}", "<too long>")
         self._run_test("{d[c]:?</>/L5/too long/}", "")
 
-    def test_environ(self):
+    def test_globals_env(self):
         os.environ["FORMATTER_TEST"] = value = self.kwdict["a"]
 
         self._run_test("{_env[FORMATTER_TEST]}"  , value)
         self._run_test("{_env[FORMATTER_TEST]!l}", value.lower())
         self._run_test("{z|_env[FORMATTER_TEST]}", value)
+
+    def test_globals_now(self):
+        fmt = formatter.parse("{_now}")
+        out1 = fmt.format_map(self.kwdict)
+        self.assertRegex(out1, r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)?$")
+
+        out = formatter.parse("{_now:%Y%m%d}").format_map(self.kwdict)
+        now = datetime.datetime.now()
+        self.assertRegex(out, r"^\d{8}$")
+        self.assertEqual(out, format(now, "%Y%m%d"))
+
+        out = formatter.parse("{z|_now:%Y}").format_map(self.kwdict)
+        self.assertRegex(out, r"^\d{4}$")
+        self.assertEqual(out, format(now, "%Y"))
+
+        out2 = fmt.format_map(self.kwdict)
+        self.assertRegex(out1, r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)?$")
+        self.assertNotEqual(out1, out2)
 
     def _run_test(self, format_string, result, default=None):
         fmt = formatter.parse(format_string, default)
