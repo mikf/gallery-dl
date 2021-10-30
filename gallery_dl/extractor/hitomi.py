@@ -140,7 +140,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
 
             # see https://ltn.hitomi.la/common.js
             inum = int(ihash[-3:-1], 16)
-            offset = 1 if inum < 0x7b else 0
+            offset = 1 if inum < 0x7c else 0
 
             url = "https://{}b.hitomi.la/images/{}/{}/{}.{}".format(
                 chr(97 + offset),
