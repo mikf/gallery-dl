@@ -36,12 +36,16 @@ class MangoxoExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
+        url = self.root + "/login"
+        page = self.request(url).text
+        token = text.extract(page, 'id="loginToken" value="', '"')[0]
+
         url = self.root + "/api/login"
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "Referer": self.root + "/login",
         }
-        data = self._sign_by_md5(username, password)
+        data = self._sign_by_md5(username, password, token)
         response = self.request(url, method="POST", headers=headers, data=data)
 
         data = response.json()
@@ -50,11 +54,12 @@ class MangoxoExtractor(Extractor):
         return {"SESSION": self.session.cookies.get("SESSION")}
 
     @staticmethod
-    def _sign_by_md5(username, password):
+    def _sign_by_md5(username, password, token):
         # https://dns.mangoxo.com/libs/plugins/phoenix-ui/js/phoenix-ui.js
         params = [
             ("username" , username),
             ("password" , password),
+            ("token"    , token),
             ("timestamp", str(int(time.time()))),
         ]
         query = "&".join("=".join(item) for item in sorted(params))
@@ -79,8 +84,8 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
         "url": "ad921fe62663b06e7d73997f7d00646cab7bdd0d",
         "keyword": {
             "channel": {
-                "id": "Jpw9ywQ4",
-                "name": "绘画艺术赏析",
+                "id": "gaxO16d8",
+                "name": "Phoenix",
                 "cover": str,
             },
             "album": {
@@ -116,14 +121,14 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
 
     def metadata(self, page):
         """Return general metadata"""
-        title, pos = text.extract(page, '<title>', '</title>')
-        _    , pos = text.extract(page, 'class="desc"', '', pos)
-        cid  , pos = text.extract(page, '//www.mangoxo.com/channel/', '"', pos)
-        cname, pos = text.extract(page, '>', '<', pos)
-        count, pos = text.extract(page, 'id="pic-count">', '<', pos)
-        cover, pos = text.extract(page, ' src="', '"', pos)
-        date , pos = text.extract(page, '</i>', '<', pos)
-        descr, pos = text.extract(page, '<pre>', '</pre>', pos)
+        extr = text.extract_from(page)
+        title = extr('<title>', '</title>')
+        count = extr('id="pic-count">', '<')
+        cid = extr('<img alt="', '"')
+        cover = extr(' src="', '"')
+        cname = extr('target="_blank">', '<')
+        date = extr('</i>', '<')
+        descr = extr('<pre>', '</pre>')
 
         return {
             "channel": {
@@ -157,8 +162,8 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
 class MangoxoChannelExtractor(MangoxoExtractor):
     """Extractor for all albums on a mangoxo channel"""
     subcategory = "channel"
-    pattern = r"(?:https?://)?(?:www\.)?mangoxo\.com/channel/(\w+)"
-    test = ("https://www.mangoxo.com/channel/QeYKRkO0", {
+    pattern = r"(?:https?://)?(?:www\.)?mangoxo\.com/(\w+)/album"
+    test = ("https://www.mangoxo.com/phoenix/album", {
         "pattern": MangoxoAlbumExtractor.pattern,
         "range": "1-30",
         "count": "> 20",
@@ -166,12 +171,12 @@ class MangoxoChannelExtractor(MangoxoExtractor):
 
     def __init__(self, match):
         MangoxoExtractor.__init__(self, match)
-        self.channel_id = match.group(1)
+        self.user = match.group(1)
 
     def items(self):
         self.login()
         num = total = 1
-        url = "{}/channel/{}/album/".format(self.root, self.channel_id)
+        url = "{}/{}/album/".format(self.root, self.user)
         data = {"_extractor": MangoxoAlbumExtractor}
 
         while True:
