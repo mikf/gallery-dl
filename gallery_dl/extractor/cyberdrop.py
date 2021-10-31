@@ -17,18 +17,32 @@ class CyberdropAlbumExtractor(Extractor):
     directory_fmt = ("{category}", "{album_name} ({album_id})")
     archive_fmt = "{album_id}_{id}"
     pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.me/a/([^/?#]+)"
-    test = ("https://cyberdrop.me/a/keKRjm4t", {
-        "pattern": r"https://fs-\d+\.cyberdrop\.to/.*\.[a-z]+$",
-        "keyword": {
-            "album_id": "keKRjm4t",
-            "album_name": "Fate (SFW)",
-            "album_size": 150069254,
-            "count": 62,
-            "date": "dt:2020-06-18 13:14:20",
-            "description": "",
-            "id": r"re:\w{8}",
-        },
-    })
+    test = (
+        # images
+        ("https://cyberdrop.me/a/keKRjm4t", {
+            "pattern": r"https://fs-\d+\.cyberdrop\.to/.*\.(jpg|png|webp)$",
+            "keyword": {
+                "album_id": "keKRjm4t",
+                "album_name": "Fate (SFW)",
+                "album_size": 150069254,
+                "count": 62,
+                "date": "dt:2020-06-18 13:14:20",
+                "description": "",
+                "id": r"re:\w{8}",
+            },
+        }),
+        # videos
+        ("https://cyberdrop.me/a/l8gIAXVD", {
+            "pattern": r"https://fs-\d+\.cyberdrop\.to/.*\.mp4$",
+            "count": 31,
+            "keyword": {
+                "album_id": "l8gIAXVD",
+                "album_name": "Achelois17 videos",
+                "album_size": 652037121,
+                "date": "dt:2020-06-16 15:40:44",
+            },
+        }),
+    )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -41,7 +55,7 @@ class CyberdropAlbumExtractor(Extractor):
         files = []
         append = files.append
         while True:
-            url = extr('downloadUrl: "', '"')
+            url = extr('id="file" href="', '"')
             if not url:
                 break
             append(text.unescape(url))
