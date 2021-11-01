@@ -9,7 +9,7 @@
 """Extractors for https://bcy.net/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 import json
 import re
 
@@ -93,7 +93,7 @@ class BcyExtractor(Extractor):
 
     def _data_from_post(self, post_id):
         url = "{}/item/detail/{}".format(self.root, post_id)
-        page = self.request(url).text
+        page = self.request(url, notfound="post").text
         return json.loads(
             text.extract(page, 'JSON.parse("', '");')[0]
             .replace('\\\\u002F', '/')
@@ -178,6 +178,7 @@ class BcyPostExtractor(BcyExtractor):
         }),
         # deleted
         ("https://bcy.net/item/detail/6780546160802143236", {
+            "exception": exception.NotFoundError,
             "count": 0,
         }),
         # only visible to logged in users

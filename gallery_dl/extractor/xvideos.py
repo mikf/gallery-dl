@@ -31,7 +31,10 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
                r"/([^/?#]+)/photos/(\d+)")
     test = (
         ("https://www.xvideos.com/profiles/pervertedcouple/photos/751031", {
-            "url": "cb4657a37eea5ab6b1d333491cee7eeb529b0645",
+            "count": 8,
+            "pattern": r"https://profile-pics-l3\.xvideos-cdn\.com"
+                       r"/[0-9a-f]{40}-\d+/videos/profiles/galleries/84/ca/37"
+                       r"/pervertedcouple/gal751031/pic_\d+_big\.jpg",
             "keyword": {
                 "gallery": {
                     "id"   : 751031,

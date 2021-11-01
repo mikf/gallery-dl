@@ -151,7 +151,7 @@ class PatreonExtractor(Extractor):
                 included[file["type"]][file["id"]]
                 for file in files["data"]
             ]
-        return ()
+        return []
 
     @memcache(keyarg=1)
     def _user(self, url):

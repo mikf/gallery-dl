@@ -99,8 +99,10 @@ class PahealPostExtractor(PahealExtractor):
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/view/(\d+)")
     test = ("https://rule34.paheal.net/post/view/481609", {
-        "url": "a91d579be030753282f55b8cb4eeaa89c45a9116",
-        "keyword": "e02e4dcf8cdf4e9c206e695253c9024d79a2e20a",
+        "pattern": r"https://tulip\.paheal\.net/_images"
+                   r"/bbdc1c33410c2cdce7556c7990be26b7/481609%20-%20"
+                   r"Azumanga_Daioh%20Osaka%20Vuvuzela%20inanimate\.jpg",
+        "keyword": "abe7c1220ba5601f9639aa79fbb9689674ec8f5c",
         "content": "7b924bcf150b352ac75c9d281d061e174c851a11",
     })
 

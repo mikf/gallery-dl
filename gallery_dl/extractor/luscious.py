@@ -105,7 +105,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
             "exception": exception.NotFoundError,
         }),
         ("https://members.luscious.net/albums/login-required_323871/", {
-            "count": 78,
+            "count": 64,
         }),
         ("https://www.luscious.net/albums/okinami_277031/"),
         ("https://members.luscious.net/albums/okinami_277031/"),
