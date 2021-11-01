@@ -11,6 +11,7 @@ import os
 import sys
 import unittest
 import datetime
+import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import formatter  # noqa E402
@@ -197,6 +198,71 @@ class TestFormatter(unittest.TestCase):
         out2 = fmt.format_map(self.kwdict)
         self.assertRegex(out1, r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)?$")
         self.assertNotEqual(out1, out2)
+
+    def test_template(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path1 = os.path.join(tmpdirname, "tpl1")
+            path2 = os.path.join(tmpdirname, "tpl2")
+
+            with open(path1, "w") as fp:
+                fp.write("{a}")
+            fmt1 = formatter.parse("\fT " + path1)
+
+            with open(path2, "w") as fp:
+                fp.write("{a!u:Rh/C/}\nFooBar")
+            fmt2 = formatter.parse("\fT " + path2)
+
+        self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
+        self.assertEqual(fmt2.format_map(self.kwdict), "HELLO WORLD\nFooBar")
+
+        with self.assertRaises(OSError):
+            formatter.parse("\fT /")
+
+    def test_expression(self):
+        self._run_test("\fE a", self.kwdict["a"])
+        self._run_test("\fE name * 2 + ' ' + a", "{}{} {}".format(
+            self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
+
+    def test_module(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path = os.path.join(tmpdirname, "testmod.py")
+
+            with open(path, "w") as fp:
+                fp.write("""
+def gentext(kwdict):
+    name = kwdict.get("Name") or kwdict.get("name") or "foo"
+    return "'{title1}' by {}".format(name, **kwdict)
+
+def lengths(kwdict):
+    a = 0
+    for k, v in kwdict.items():
+        try:
+            a += len(v)
+        except TypeError:
+            pass
+    return format(a)
+
+def noarg():
+    return ""
+""")
+            sys.path.insert(0, tmpdirname)
+            try:
+                fmt1 = formatter.parse("\fM testmod:gentext")
+                fmt2 = formatter.parse("\fM testmod:lengths")
+                fmt3 = formatter.parse("\fM testmod:noarg")
+
+                with self.assertRaises(AttributeError):
+                    formatter.parse("\fM testmod:missing")
+                with self.assertRaises(ImportError):
+                    formatter.parse("\fM missing:missing")
+            finally:
+                sys.path.pop(0)
+
+        self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
+        self.assertEqual(fmt2.format_map(self.kwdict), "65")
+
+        with self.assertRaises(TypeError):
+            self.assertEqual(fmt3.format_map(self.kwdict), "")
 
     def _run_test(self, format_string, result, default=None):
         fmt = formatter.parse(format_string, default)
