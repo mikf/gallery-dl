@@ -137,11 +137,12 @@ class DeviantartExtractor(Extractor):
 
     def prepare(self, deviation):
         """Adjust the contents of a Deviation-object"""
-        try:
-            deviation["index"] = text.parse_int(
-                deviation["url"].rpartition("-")[2])
-        except KeyError:
-            deviation["index"] = 0
+        if "index" not in deviation:
+            try:
+                deviation["index"] = text.parse_int(
+                    deviation["url"].rpartition("-")[2])
+            except KeyError:
+                deviation["index"] = 0
 
         if self.user:
             deviation["username"] = self.user
@@ -602,7 +603,10 @@ class DeviantartStashExtractor(DeviantartExtractor):
         if stash_id[0] == "0":
             uuid = text.extract(page, '//deviation/', '"')[0]
             if uuid:
-                yield self.api.deviation(uuid)
+                deviation = self.api.deviation(uuid)
+                deviation["index"] = text.parse_int(text.extract(
+                    page, 'gmi-deviationid="', '"')[0])
+                yield deviation
                 return
 
         for item in text.extract_iter(
