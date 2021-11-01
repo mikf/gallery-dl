@@ -150,7 +150,7 @@ class TapasEpisodeExtractor(TapasExtractor):
     subcategory = "episode"
     pattern = BASE_PATTERN + r"/episode/(\d+)"
     test = ("https://tapas.io/episode/2068651", {
-        "url": "0e536117dfaa17972e83d2e0141e6f9e91a33611",
+        "url": "f122b05648a9f53c2ddb2f6854a7a80ab946e9e8",
         "pattern": "^text:",
         "keyword": {
             "book": True,

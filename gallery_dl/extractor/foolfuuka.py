@@ -125,7 +125,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
             "url": "3ae1473f6916ac831efe5cc4d4e7d3298ce79406",
         }),
         ("https://boards.fireden.net/sci/thread/11264294/", {
-            "url": "3adfe181ee86a8c23021c705f623b3657a9b0a43",
+            "url": "61cab625c95584a12a30049d054931d64f8d20aa",
         }),
         ("https://archive.nyafuu.org/c/thread/2849220/", {
             "url": "bbe6f82944a45e359f5c8daf53f565913dc13e4f",
