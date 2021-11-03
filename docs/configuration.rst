@@ -1328,6 +1328,16 @@ Description
     Download video files.
 
 
+extractor.kemonoparty.comments
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``comments`` metadata.
+
+
 extractor.kemonoparty.max-posts
 -------------------------------
 Type
