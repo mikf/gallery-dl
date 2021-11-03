@@ -35,6 +35,7 @@ class KemonopartyExtractor(Extractor):
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
         skip_service = \
             "patreon" if self.config("patreon-skip-file", True) else None
+        comments = self.config("comments")
 
         if self.config("metadata"):
             username = text.unescape(text.extract(
@@ -68,6 +69,8 @@ class KemonopartyExtractor(Extractor):
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
             if username:
                 post["username"] = username
+            if comments:
+                post["comments"] = self._extract_comments(post)
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
@@ -99,6 +102,24 @@ class KemonopartyExtractor(Extractor):
             raise exception.AuthenticationError()
 
         return {c.name: c.value for c in response.history[0].cookies}
+
+    def _extract_comments(self, post):
+        url = "{}/{}/user/{}/post/{}".format(
+            self.root, post["service"], post["user"], post["id"])
+        page = self.request(url).text
+
+        comments = []
+        for comment in text.extract_iter(page, "<article", "</article>"):
+            extr = text.extract_from(comment)
+            cid = extr('id="', '"')
+            comments.append({
+                "id"  : cid,
+                "user": extr('href="#' + cid + '"', '</').strip(" \n\r>"),
+                "body": extr(
+                    '<section class="comment__body">', '</section>').strip(),
+                "date": extr('datetime="', '"'),
+            })
+        return comments
 
 
 class KemonopartyUserExtractor(KemonopartyExtractor):
