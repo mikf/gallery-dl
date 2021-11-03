@@ -112,12 +112,18 @@ class RedditExtractor(Extractor):
         """Return an iterable containing all (submission, comments) tuples"""
 
     def _extract_gallery(self, submission):
-        if submission["gallery_data"] is None:
+        gallery = submission["gallery_data"]
+        if gallery is None:
             self.log.warning("gallery %s: deleted", submission["id"])
             return
 
-        meta = submission["media_metadata"]
-        for item in submission["gallery_data"]["items"]:
+        meta = submission.get("media_metadata")
+        if meta is None:
+            self.log.warning("gallery %s: missing 'media_metadata'",
+                             submission["id"])
+            return
+
+        for item in gallery["items"]:
             data = meta[item["media_id"]]
             if data["status"] != "valid" or "s" not in data:
                 self.log.warning(
@@ -220,6 +226,10 @@ class RedditSubmissionExtractor(RedditExtractor):
         # "failed" gallery item (#1127)
         ("https://www.reddit.com/r/cosplay/comments/jvwaqr", {
             "count": 1,
+        }),
+        # gallery with no 'media_metadata' (#2001)
+        ("https://www.reddit.com/r/kpopfap/comments/qjj04q/", {
+            "count": 0,
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
