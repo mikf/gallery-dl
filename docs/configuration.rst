@@ -1870,16 +1870,16 @@ Type
     * ``list`` of ``strings``
     * ``string``
 Default
-    ``["mp4", "webm", "mobile", "gif"]``
+    ``["hd", "sd", "gif"]``
 Description
     List of names of the preferred animation format, which can be
-    ``"mp4"``, ``"gif"``, `"mobile"``, or ``"mini"``.
+    ``"hd"``, ``"sd"``, `"gif"``, `"vthumbnail"``, `"thumbnail"``, or ``"poster"``.
 
     If a selected format is not available, the next one in the list will be
     tried until an available format is found.
 
     If the format is given as ``string``, it will be extended with
-    ``["mp4", "mobile", "gif"]``. Use a list with one element to
+    ``["hd", "sd", "gif"]``. Use a list with one element to
     restrict it to only one possible format.
 
 
