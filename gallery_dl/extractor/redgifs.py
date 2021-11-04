@@ -15,8 +15,8 @@ from .. import text
 class RedgifsExtractor(Extractor):
     """Base class for redgifs extractors"""
     category = "redgifs"
-    filename_fmt = "{category}_{gifName}.{extension}"
-    archive_fmt = "{gifName}"
+    filename_fmt = "{category}_{id}.{extension}"
+    archive_fmt = "{id}"
     root = "https://www.redgifs.com"
 
     def __init__(self, match):
@@ -25,9 +25,9 @@ class RedgifsExtractor(Extractor):
 
         formats = self.config("format")
         if formats is None:
-            formats = ("mp4", "mobile", "gif")
+            formats = ("hd", "sd", "gif")
         elif isinstance(formats, str):
-            formats = (formats, "mp4", "mobile", "gif")
+            formats = (formats, "hd", "sd", "gif")
         self.formats = formats
 
     def items(self):
@@ -49,12 +49,10 @@ class RedgifsExtractor(Extractor):
         return next(formats, None)
 
     def _formats(self, gif):
+        urls = gif["urls"]
         for fmt in self.formats:
-            key = fmt + "Url"
-            if key in gif:
-                url = gif[key]
-                if url.startswith("http:"):
-                    url = "https" + url[4:]
+            if fmt in urls:
+                url = urls[fmt]
                 text.nameext_from_url(url, gif)
                 yield url
 
@@ -127,18 +125,17 @@ class RedgifsAPI():
         self.extractor = extractor
 
     def gif(self, gif_id):
-        endpoint = "/v1/gifs/" + gif_id
-        return self._call(endpoint)["gfyItem"]
+        endpoint = "/v2/gifs/" + gif_id
+        return self._call(endpoint)["gif"]
 
-    def user(self, user):
-        endpoint = "/v1/users/{}/gifs".format(user.lower())
-        params = {"count": 100}
+    def user(self, user, order="best"):
+        endpoint = "/v2/users/{}/search".format(user.lower())
+        params = {"order": order}
         return self._pagination(endpoint, params)
 
     def search(self, query, order="trending"):
-        endpoint = "/v1/gifs/search"
-        params = {"search_text": query, "count": 150,
-                  "order": order, "type": "g"}
+        endpoint = "/v2/gifs/search"
+        params = {"search_text": query, "order": order}
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):
@@ -146,10 +143,12 @@ class RedgifsAPI():
         return self.extractor.request(url, params=params).json()
 
     def _pagination(self, endpoint, params):
+        params["page"] = 1
+
         while True:
             data = self._call(endpoint, params)
             yield from data["gifs"]
 
-            if not data["cursor"]:
+            if params["page"] >= data["pages"]:
                 return
-            params["cursor"] = data["cursor"]
+            params["page"] += 1
