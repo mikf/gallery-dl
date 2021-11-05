@@ -21,7 +21,7 @@ class RedgifsExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.key = match.group(1).lower()
+        self.key = match.group(1)
 
         formats = self.config("format")
         if formats is None:
@@ -51,8 +51,8 @@ class RedgifsExtractor(Extractor):
     def _formats(self, gif):
         urls = gif["urls"]
         for fmt in self.formats:
-            if fmt in urls:
-                url = urls[fmt]
+            url = urls.get(fmt)
+            if url:
                 text.nameext_from_url(url, gif)
                 yield url
 
@@ -129,7 +129,7 @@ class RedgifsAPI():
         self.extractor = extractor
 
     def gif(self, gif_id):
-        endpoint = "/v2/gifs/" + gif_id
+        endpoint = "/v2/gifs/" + gif_id.lower()
         return self._call(endpoint)["gif"]
 
     def user(self, user, order="best"):
