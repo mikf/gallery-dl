@@ -84,19 +84,23 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     """Extractor for redgifs search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
-    pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/gifs/browse/([^/?#]+)"
-    test = ("https://www.redgifs.com/gifs/browse/jav", {
-        "pattern": r"https://\w+\.redgifs\.com/[A-Za-z]+\.mp4",
-        "range": "1-10",
-        "count": 10,
-    })
+    pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/browse/?\?([^#]+)"
+    test = (
+        ("https://www.redgifs.com/browse?tags=JAV", {
+            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z]+\.mp4",
+            "range": "1-10",
+            "count": 10,
+        }),
+        ("https://www.redgifs.com/browse?type=i&verified=y&order=top7"),
+    )
 
     def metadata(self):
-        self.key = text.unquote(self.key).replace("-", " ")
-        return {"search": self.key}
+        self.params = params = text.parse_query(self.key)
+        search = params.get("tags") or params.get("order") or "trending"
+        return {"search": search}
 
     def gifs(self):
-        return RedgifsAPI(self).search(self.key)
+        return RedgifsAPI(self).search(self.params)
 
 
 class RedgifsImageExtractor(RedgifsExtractor):
@@ -133,9 +137,10 @@ class RedgifsAPI():
         params = {"order": order}
         return self._pagination(endpoint, params)
 
-    def search(self, query, order="trending"):
+    def search(self, params):
         endpoint = "/v2/gifs/search"
-        params = {"search_text": query, "order": order}
+        params["search_text"] = params.pop("tags", None)
+        params.pop("needSendGtm", None)
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):
