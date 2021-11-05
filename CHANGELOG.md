@@ -1,6 +1,24 @@
 # Changelog
 
-## Unreleased
+## 1.19.2 - 2021-11-05
+### Additions
+- [kemonoparty] add `comments` option ([#1980](https://github.com/mikf/gallery-dl/issues/1980))
+- [skeb] add `user` and `post` extractors ([#1031](https://github.com/mikf/gallery-dl/issues/1031), [#1971](https://github.com/mikf/gallery-dl/issues/1971))
+- [twitter] add `pinned` option
+- support accessing environment variables and the current local datetime in format strings ([#1968](https://github.com/mikf/gallery-dl/issues/1968))
+- add special type format strings to docs ([#1987](https://github.com/mikf/gallery-dl/issues/1987))
+### Fixes
+- [cyberdrop] fix video extraction ([#1993](https://github.com/mikf/gallery-dl/issues/1993))
+- [deviantart] fix `index` values for stashed deviations
+- [gfycat] provide consistent `userName` values for `user` downloads ([#1962](https://github.com/mikf/gallery-dl/issues/1962))
+- [gfycat] show warning when there are no available formats
+- [hitomi] fix image URLs ([#1975](https://github.com/mikf/gallery-dl/issues/1975), [#1982](https://github.com/mikf/gallery-dl/issues/1982), [#1988](https://github.com/mikf/gallery-dl/issues/1988))
+- [instagram] update query hashes
+- [mangakakalot] update domain and fix extraction
+- [mangoxo] fix login and extraction
+- [reddit] prevent crash for galleries with no `media_metadata` ([#2001](https://github.com/mikf/gallery-dl/issues/2001))
+- [redgifs] update to API v2 ([#1984](https://github.com/mikf/gallery-dl/issues/1984))
+- fix calculating retry sleep times ([#1990](https://github.com/mikf/gallery-dl/issues/1990))
 
 ## 1.19.1 - 2021-10-24
 ### Additions
