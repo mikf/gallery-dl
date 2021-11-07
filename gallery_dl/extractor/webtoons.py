@@ -62,7 +62,6 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         url = "{}/{}/viewer?{}".format(self.root, self.path, query)
         GalleryExtractor.__init__(self, match, url)
         self.setup_agegate_cookies()
-        self.session.headers["Referer"] = url
 
         query = text.parse_query(query)
         self.title_no = query.get("title_no")
@@ -88,7 +87,12 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     @staticmethod
     def images(page):
         return [
-            (url, None)
+            (
+                url.replace(
+                    "webtoon-phinf.pstatic.net", "swebtoon-phinf.pstatic.net"
+                ),
+                None
+            )
             for url in text.extract_iter(
                 page, 'class="_images" data-url="', '"')
         ]
