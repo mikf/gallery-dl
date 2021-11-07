@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.19.2 - 2021-11-05
 ### Additions
 - [kemonoparty] add `comments` option ([#1980](https://github.com/mikf/gallery-dl/issues/1980))
