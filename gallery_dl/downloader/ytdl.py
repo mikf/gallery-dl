@@ -9,7 +9,7 @@
 """Downloader module for URLs requiring youtube-dl support"""
 
 from .common import DownloaderBase
-from .. import text
+from .. import ytdl, text
 import os
 
 
@@ -17,70 +17,53 @@ class YoutubeDLDownloader(DownloaderBase):
     scheme = "ytdl"
 
     def __init__(self, job):
-        module = __import__(self.config("module") or "youtube_dl")
-
         DownloaderBase.__init__(self, job)
-        extractor = job.extractor
 
+        extractor = job.extractor
         retries = self.config("retries", extractor._retries)
-        options = {
-            "format": self.config("format") or None,
-            "ratelimit": text.parse_bytes(self.config("rate"), None),
+        self.ytdl_opts = {
             "retries": retries+1 if retries >= 0 else float("inf"),
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
-            "nopart": not self.part,
-            "updatetime": self.config("mtime", True),
-            "proxy": extractor.session.proxies.get("http"),
-            "min_filesize": text.parse_bytes(
-                self.config("filesize-min"), None),
-            "max_filesize": text.parse_bytes(
-                self.config("filesize-max"), None),
         }
 
-        raw_options = self.config("raw-options")
-        if raw_options:
-            options.update(raw_options)
-
-        self.progress = self.config("progress", 3.0)
-        if self.progress is not None:
-            options["progress_hooks"] = (self._progress_hook,)
-
-        if self.config("logging", True):
-            options["logger"] = self.log
+        self.ytdl_instance = None
         self.forward_cookies = self.config("forward-cookies", False)
-
+        self.progress = self.config("progress", 3.0)
         self.outtmpl = self.config("outtmpl")
-        if self.outtmpl == "default":
-            self.outtmpl = module.DEFAULT_OUTTMPL
-
-        self.ytdl = module.YoutubeDL(options)
 
     def download(self, url, pathfmt):
         kwdict = pathfmt.kwdict
 
-        ytdl = kwdict.pop("_ytdl_instance", None)
-        if ytdl:
-            if self.progress is not None and not ytdl._progress_hooks:
-                ytdl.add_progress_hook(self._progress_hook)
-        else:
-            ytdl = self.ytdl
+        ytdl_instance = kwdict.pop("_ytdl_instance", None)
+        if not ytdl_instance:
+            ytdl_instance = self.ytdl_instance
+            if not ytdl_instance:
+                module = __import__(self.config("module") or "youtube_dl")
+                self.ytdl_instance = ytdl_instance = ytdl.construct_YoutubeDL(
+                    module, self, self.ytdl_opts)
+                if self.outtmpl == "default":
+                    self.outtmpl = module.DEFAULT_OUTTMPL
             if self.forward_cookies:
-                set_cookie = ytdl.cookiejar.set_cookie
+                set_cookie = ytdl_instance.cookiejar.set_cookie
                 for cookie in self.session.cookies:
                     set_cookie(cookie)
+
+        if self.progress is not None and not ytdl_instance._progress_hooks:
+            ytdl_instance.add_progress_hook(self._progress_hook)
 
         info_dict = kwdict.pop("_ytdl_info_dict", None)
         if not info_dict:
             try:
-                info_dict = ytdl.extract_info(url[5:], download=False)
+                info_dict = ytdl_instance.extract_info(url[5:], download=False)
             except Exception:
                 return False
 
         if "entries" in info_dict:
             index = kwdict.get("_ytdl_index")
             if index is None:
-                return self._download_playlist(ytdl, pathfmt, info_dict)
+                return self._download_playlist(
+                    ytdl_instance, pathfmt, info_dict)
             else:
                 info_dict = info_dict["entries"][index]
 
@@ -88,9 +71,9 @@ class YoutubeDLDownloader(DownloaderBase):
         if extra:
             info_dict.update(extra)
 
-        return self._download_video(ytdl, pathfmt, info_dict)
+        return self._download_video(ytdl_instance, pathfmt, info_dict)
 
-    def _download_video(self, ytdl, pathfmt, info_dict):
+    def _download_video(self, ytdl_instance, pathfmt, info_dict):
         if "url" in info_dict:
             text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
 
@@ -99,8 +82,9 @@ class YoutubeDLDownloader(DownloaderBase):
             info_dict["ext"] = "mkv"
 
         if self.outtmpl:
-            self._set_outtmpl(ytdl, self.outtmpl)
-            pathfmt.filename = filename = ytdl.prepare_filename(info_dict)
+            self._set_outtmpl(ytdl_instance, self.outtmpl)
+            pathfmt.filename = filename = \
+                ytdl_instance.prepare_filename(info_dict)
             pathfmt.extension = info_dict["ext"]
             pathfmt.path = pathfmt.directory + filename
             pathfmt.realpath = pathfmt.temppath = (
@@ -115,22 +99,22 @@ class YoutubeDLDownloader(DownloaderBase):
             pathfmt.temppath = os.path.join(
                 self.partdir, pathfmt.filename)
 
-        self._set_outtmpl(ytdl, pathfmt.temppath.replace("%", "%%"))
+        self._set_outtmpl(ytdl_instance, pathfmt.temppath.replace("%", "%%"))
 
         self.out.start(pathfmt.path)
         try:
-            ytdl.process_info(info_dict)
+            ytdl_instance.process_info(info_dict)
         except Exception:
             self.log.debug("Traceback", exc_info=True)
             return False
         return True
 
-    def _download_playlist(self, ytdl, pathfmt, info_dict):
+    def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
         pathfmt.set_extension("%(playlist_index)s.%(ext)s")
-        self._set_outtmpl(ytdl, pathfmt.realpath)
+        self._set_outtmpl(ytdl_instance, pathfmt.realpath)
 
         for entry in info_dict["entries"]:
-            ytdl.process_info(entry)
+            ytdl_instance.process_info(entry)
         return True
 
     def _progress_hook(self, info):
@@ -144,11 +128,11 @@ class YoutubeDLDownloader(DownloaderBase):
             )
 
     @staticmethod
-    def _set_outtmpl(ytdl, outtmpl):
+    def _set_outtmpl(ytdl_instance, outtmpl):
         try:
-            ytdl.outtmpl_dict["default"] = outtmpl
+            ytdl_instance.outtmpl_dict["default"] = outtmpl
         except AttributeError:
-            ytdl.params["outtmpl"] = outtmpl
+            ytdl_instance.params["outtmpl"] = outtmpl
 
 
 def compatible_formats(formats):

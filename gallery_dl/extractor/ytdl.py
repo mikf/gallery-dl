@@ -9,7 +9,7 @@
 """Extractors for sites supported by youtube-dl"""
 
 from .common import Extractor, Message
-from .. import text, config, exception
+from .. import ytdl, config, exception
 
 
 class YoutubeDLExtractor(Extractor):
@@ -54,52 +54,40 @@ class YoutubeDLExtractor(Extractor):
         self.log.debug("Using %s", ytdl_module)
 
         # construct YoutubeDL object
-        options = {
-            "format"                 : self.config("format"),
+        extr_opts = {
+            "extract_flat"           : "in_playlist",
+            "force_generic_extractor": self.force_generic_extractor,
+        }
+        user_opts = {
             "retries"                : self._retries,
             "socket_timeout"         : self._timeout,
             "nocheckcertificate"     : not self._verify,
-            "proxy"                  : self.session.proxies.get("http"),
-            "force_generic_extractor": self.force_generic_extractor,
-            "nopart"                 : not self.config("part", True),
-            "updatetime"             : self.config("mtime", True),
-            "ratelimit"              : text.parse_bytes(
-                self.config("rate"), None),
-            "min_filesize"           : text.parse_bytes(
-                self.config("filesize-min"), None),
-            "max_filesize"           : text.parse_bytes(
-                self.config("filesize-max"), None),
         }
-
-        raw_options = self.config("raw-options")
-        if raw_options:
-            options.update(raw_options)
-        if self.config("logging", True):
-            options["logger"] = self.log
-        options["extract_flat"] = "in_playlist"
 
         username, password = self._get_auth_info()
         if username:
-            options["username"], options["password"] = username, password
+            user_opts["username"], user_opts["password"] = username, password
         del username, password
 
-        ytdl = ytdl_module.YoutubeDL(options)
+        ytdl_instance = ytdl.construct_YoutubeDL(
+            ytdl_module, self, user_opts, extr_opts)
 
         # transfer cookies to ytdl
         cookies = self.session.cookies
         if cookies:
-            set_cookie = self.ytdl.cookiejar.set_cookie
-            for cookie in self.session.cookies:
+            set_cookie = ytdl_instance.cookiejar.set_cookie
+            for cookie in cookies:
                 set_cookie(cookie)
 
         # extract youtube_dl info_dict
-        info_dict = ytdl._YoutubeDL__extract_info(
+        info_dict = ytdl_instance._YoutubeDL__extract_info(
             self.ytdl_url,
-            ytdl.get_info_extractor(self.ytdl_ie_key),
+            ytdl_instance.get_info_extractor(self.ytdl_ie_key),
             False, {}, True)
 
         if "entries" in info_dict:
-            results = self._process_entries(ytdl, info_dict["entries"])
+            results = self._process_entries(
+                ytdl_instance, info_dict["entries"])
         else:
             results = (info_dict,)
 
@@ -107,7 +95,7 @@ class YoutubeDLExtractor(Extractor):
         for info_dict in results:
             info_dict["extension"] = None
             info_dict["_ytdl_info_dict"] = info_dict
-            info_dict["_ytdl_instance"] = ytdl
+            info_dict["_ytdl_instance"] = ytdl_instance
 
             url = "ytdl:" + (info_dict.get("url") or
                              info_dict.get("webpage_url") or
@@ -116,15 +104,15 @@ class YoutubeDLExtractor(Extractor):
             yield Message.Directory, info_dict
             yield Message.Url, url, info_dict
 
-    def _process_entries(self, ytdl, entries):
+    def _process_entries(self, ytdl_instance, entries):
         for entry in entries:
             if entry.get("_type") in ("url", "url_transparent"):
-                info_dict = ytdl.extract_info(
+                info_dict = ytdl_instance.extract_info(
                     entry["url"], False,
                     ie_key=entry.get("ie_key"))
                 if "entries" in info_dict:
                     yield from self._process_entries(
-                        ytdl, info_dict["entries"])
+                        ytdl_instance, info_dict["entries"])
                 else:
                     yield info_dict
             else:
