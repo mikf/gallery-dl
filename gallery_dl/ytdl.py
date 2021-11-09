@@ -178,7 +178,7 @@ def parse_command_line(module, argv):
         opts.parse_metadata = []
     if opts.metafromtitle is not None:
         opts.parse_metadata.append("title:%s" % opts.metafromtitle)
-    opts.parse_metadata = list(itertools.chain(*map(
+    opts.parse_metadata = list(itertools.chain.from_iterable(map(
         metadataparser_actions, opts.parse_metadata)))
 
     download_archive_fn = module.expand_path(opts.download_archive) \
