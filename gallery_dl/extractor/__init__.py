@@ -111,7 +111,6 @@ modules = [
     "sankaku",
     "sankakucomplex",
     "seiga",
-    "seisoparty",
     "senmanga",
     "sexcom",
     "simplyhentai",
