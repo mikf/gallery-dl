@@ -9,6 +9,7 @@
 
 """Extractors for https://www.instagram.com/"""
 
+import itertools
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
@@ -403,7 +404,8 @@ class InstagramUserExtractor(InstagramExtractor):
     def items(self):
         base = "{}/{}/".format(self.root, self.item)
         stories = "{}/stories/{}/".format(self.root, self.item)
-        return self._dispatch_extractors((
+
+        work = self._dispatch_extractors((
             (InstagramStoriesExtractor   , stories),
             (InstagramHighlightsExtractor, base + "highlights/"),
             (InstagramPostsExtractor     , base + "posts/"),
@@ -411,6 +413,34 @@ class InstagramUserExtractor(InstagramExtractor):
             (InstagramChannelExtractor   , base + "channel/"),
             (InstagramTaggedExtractor    , base + "tagged/"),
         ), ("posts",))
+
+        if self.config("avatar"):
+            user = self._extract_profile_page(base)
+
+            info = self._request_api(
+                "/v1/users/{}/info/".format(user["id"]))["user"]
+
+            avatar = info["hd_profile_pic_url_info"]
+
+            data = {
+                "media_id"   : info["profile_pic_id"],
+                "owner_id"   : user["id"],
+                "display_url": avatar["url"],
+                "height"     : avatar["height"],
+                "width"      : avatar["width"],
+                "typename"   : "Avatar",
+                "username"   : user["username"],
+                "fullname"   : user["full_name"]
+            }
+
+            text.nameext_from_url(avatar["url"], data)
+
+            avatar_result = [(Message.Directory, data),
+                             (Message.Url, avatar["url"], data)]
+
+            work = itertools.chain(iter(avatar_result), work)
+
+        return work
 
 
 class InstagramPostsExtractor(InstagramExtractor):

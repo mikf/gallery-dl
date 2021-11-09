@@ -1328,6 +1328,16 @@ Description
     Download video files.
 
 
+extractor.instagram.avatar
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download user avatars.
+
+
 extractor.kemonoparty.comments
 -----------------------------
 Type
