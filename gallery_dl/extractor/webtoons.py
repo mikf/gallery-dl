@@ -48,7 +48,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     test = (
         (("https://www.webtoons.com/en/comedy/safely-endangered"
           "/ep-572-earth/viewer?title_no=352&episode_no=572"), {
-            "url": "11041d71a3f92728305c11a228e77cf0f7aa02ef",
+            "url": "55bec5d7c42aba19e3d0d56db25fdf0b0b13be38",
             "content": ("1748c7e82b6db910fa179f6dc7c4281b0f680fa7",
                         "42055e44659f6ffc410b3fb6557346dfbb993df3",
                         "49e1f2def04c6f7a6a3dacf245a1cd9abe77a6a9"),
@@ -62,7 +62,6 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         url = "{}/{}/viewer?{}".format(self.root, self.path, query)
         GalleryExtractor.__init__(self, match, url)
         self.setup_agegate_cookies()
-        self.session.headers["Referer"] = url
 
         query = text.parse_query(query)
         self.title_no = query.get("title_no")
@@ -88,7 +87,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     @staticmethod
     def images(page):
         return [
-            (url, None)
+            (url.replace("://webtoon-phinf.", "://swebtoon-phinf."), None)
             for url in text.extract_iter(
                 page, 'class="_images" data-url="', '"')
         ]
