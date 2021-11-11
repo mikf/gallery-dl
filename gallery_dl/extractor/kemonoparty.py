@@ -66,7 +66,8 @@ class KemonopartyExtractor(Extractor):
                 append({"path": path, "name": path, "type": "inline"})
 
             post["date"] = text.parse_datetime(
-                post["published"], "%a, %d %b %Y %H:%M:%S %Z")
+                post["published"] or post["added"],
+                "%a, %d %b %Y %H:%M:%S %Z")
             if username:
                 post["username"] = username
             if comments:
