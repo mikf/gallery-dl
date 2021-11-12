@@ -1329,7 +1329,7 @@ Description
 
 
 extractor.kemonoparty.comments
------------------------------
+------------------------------
 Type
     ``bool``
 Default
@@ -2288,6 +2288,28 @@ Description
     <https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
 
 
+extractor.ytdl.cmdline-args
+---------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"--quiet --write-sub --merge-output-format mkv"``
+    * ``["--quiet", "--write-sub", "--merge-output-format", "mkv"]``
+Description
+    Additional options specified as youtube-dl command-line arguments.
+
+
+extractor.ytdl.config-file
+--------------------------
+Type
+    |Path|_
+Example
+    ``"~/.config/youtube-dl/config"``
+Description
+    Location of a youtube-dl configuration file to load options from.
+
+
 extractor.[booru].tags
 ----------------------
 Type
@@ -2573,6 +2595,28 @@ Description
 
     All available options can be found in `youtube-dl's docstrings
     <https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
+
+
+downloader.ytdl.cmdline-args
+----------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"--quiet --write-sub --merge-output-format mkv"``
+    * ``["--quiet", "--write-sub", "--merge-output-format", "mkv"]``
+Description
+    Additional options specified as youtube-dl command-line arguments.
+
+
+downloader.ytdl.config-file
+---------------------------
+Type
+    |Path|_
+Example
+    ``"~/.config/youtube-dl/config"``
+Description
+    Location of a youtube-dl configuration file to load options from.
 
 
 
