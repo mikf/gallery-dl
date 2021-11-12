@@ -423,7 +423,7 @@ class InstagramUserExtractor(InstagramExtractor):
             avatar = info["hd_profile_pic_url_info"]
 
             # users that haven't had their avatar changed in long time
-            # don't have a profile_pic_id, so we need to fall back to the user id,
+            # don't have a profile_pic_id, so we use the user id instead,
             # this shouldn't be an issue because if the avatar is changed,
             # the new avatar will have a profile_pic_id
             data = {
