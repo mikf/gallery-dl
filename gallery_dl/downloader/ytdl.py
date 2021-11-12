@@ -121,10 +121,11 @@ class YoutubeDLDownloader(DownloaderBase):
         if info["status"] == "downloading" and \
                 info["elapsed"] >= self.progress:
             total = info.get("total_bytes") or info.get("total_bytes_estimate")
+            speed = info.get("speed")
             self.out.progress(
                 None if total is None else int(total),
                 info["downloaded_bytes"],
-                int(info["speed"]),
+                int(speed) if speed else 0,
             )
 
     @staticmethod
