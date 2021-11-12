@@ -170,9 +170,14 @@ def parse_command_line(module, argv):
 
     def metadataparser_actions(f):
         if isinstance(f, str):
-            return (module.MetadataFromFieldPP.to_action(f),)
-        return ((module.MetadataParserPP.Actions.REPLACE, x, *f[1:])
-                for x in f[0].split(","))
+            yield module.MetadataFromFieldPP.to_action(f)
+        else:
+            REPLACE = module.MetadataParserPP.Actions.REPLACE
+            args = f[1:]
+            for x in f[0].split(","):
+                action = [REPLACE, x]
+                action += args
+                yield action
 
     if getattr(opts, "parse_metadata", None) is None:
         opts.parse_metadata = []
