@@ -427,7 +427,8 @@ class InstagramUserExtractor(InstagramExtractor):
             # this shouldn't be an issue because if the avatar is changed,
             # the new avatar will have a profile_pic_id
             data = {
-                "media_id"   : info.get("profile_pic_id", "avatar_" + user["id"]),
+                "media_id"   : info.get("profile_pic_id",
+                                        "avatar_" + user["id"]),
                 "owner_id"   : user["id"],
                 "display_url": avatar["url"],
                 "height"     : avatar["height"],
