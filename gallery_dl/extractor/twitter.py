@@ -793,16 +793,21 @@ class TwitterAPI():
             data = response.json()
             if "errors" in data:
                 try:
-                    msg = ", ".join(
-                        '"' + error["message"] + '"'
-                        for error in data["errors"]
-                    )
+                    errors, warnings = [], []
+                    for error in data["errors"]:
+                        if error.get("kind") == "NonFatal":
+                            warnings.append(error["message"])
+                        else:
+                            errors.append(error["message"])
+                    errors = ", ".join(errors)
                 except Exception:
-                    msg = data["errors"]
-                if msg and response.status_code < 400:
-                    raise exception.StopExtraction(msg)
+                    errors = data["errors"]
+                if warnings:
+                    self.extractor.log.warning(", ".join(warnings))
+                if errors and response.status_code < 400:
+                    raise exception.StopExtraction(errors)
             else:
-                msg = ""
+                errors = ""
 
             if response.status_code < 400:
                 # success
@@ -816,7 +821,7 @@ class TwitterAPI():
                 continue
 
             if response.status_code == 401 and \
-                    "have been blocked from viewing" in msg:
+                    "have been blocked from viewing" in errors:
                 # account blocked
                 extr = self.extractor
                 if self.headers["x-twitter-auth-type"] and \
@@ -833,7 +838,7 @@ class TwitterAPI():
 
             # error
             raise exception.StopExtraction(
-                "%s %s (%s)", response.status_code, response.reason, msg)
+                "%s %s (%s)", response.status_code, response.reason, errors)
 
     def _pagination(self, endpoint, params=None):
         if params is None:
