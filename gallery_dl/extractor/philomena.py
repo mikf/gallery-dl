@@ -62,6 +62,8 @@ INSTANCES = {
                    "filter_id": "56027"},
     "ponybooru" : {"root": "https://ponybooru.org",
                    "filter_id": "2"},
+    "furbooru"  : {"root": "https://furbooru.org",
+                   "filter_id": "2"},
 }
 
 BASE_PATTERN = PhilomenaExtractor.update(INSTANCES)
@@ -124,6 +126,9 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
         ("https://ponybooru.org/images/1", {
             "content": "bca26f58fafd791fe07adcd2a28efd7751824605",
         }),
+        ("https://furbooru.org/images/1", {
+            "content": "9eaa1e1b32fa0f16520912257dbefaff238d5fd2",
+        }),
     )
 
     def __init__(self, match):
@@ -154,6 +159,10 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
             "count": ">= 2",
         }),
         ("https://ponybooru.org/search?q=cute", {
+            "range": "40-60",
+            "count": 21,
+        }),
+        ("https://furbooru.org/search?q=cute", {
             "range": "40-60",
             "count": 21,
         }),
@@ -209,6 +218,9 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
         }),
         ("https://ponybooru.org/galleries/27", {
             "count": ">= 24",
+        }),
+        ("https://furbooru.org/galleries/27", {
+            "count": ">= 13",
         }),
     )
 

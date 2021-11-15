@@ -938,6 +938,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="configuration.rst#extractorderpibooruapi-key">API Key</a></td>
 </tr>
 <tr>
+    <td>Furbooru</td>
+    <td>https://furbooru.org/</td>
+    <td>Galleries, Posts, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Ponybooru</td>
     <td>https://ponybooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
