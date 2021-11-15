@@ -155,9 +155,11 @@ def parse_command_line(module, argv):
     if _video_multistreams_set is False and _audio_multistreams_set is False:
         _unused_compat_opt("multistreams")
 
-    outtmpl = opts.outtmpl
-    outtmpl_default = \
-        outtmpl.get("default") if isinstance(outtmpl, dict) else outtmpl
+    if isinstance(opts.outtmpl, dict):
+        outtmpl = opts.outtmpl
+        outtmpl_default = outtmpl.get("default")
+    else:
+        opts.outtmpl = outtmpl = outtmpl_default = ""
 
     if "filename" in compat_opts:
         if outtmpl_default is None:
@@ -168,29 +170,32 @@ def parse_command_line(module, argv):
     if opts.extractaudio and not opts.keepvideo and opts.format is None:
         opts.format = "bestaudio/best"
 
-    def metadataparser_actions(f):
-        if isinstance(f, str):
-            yield module.MetadataFromFieldPP.to_action(f)
-        else:
-            REPLACE = module.MetadataParserPP.Actions.REPLACE
-            args = f[1:]
-            for x in f[0].split(","):
-                action = [REPLACE, x]
-                action += args
-                yield action
+    if ytdlp:
+        def metadataparser_actions(f):
+            if isinstance(f, str):
+                yield module.MetadataFromFieldPP.to_action(f)
+            else:
+                REPLACE = module.MetadataParserPP.Actions.REPLACE
+                args = f[1:]
+                for x in f[0].split(","):
+                    action = [REPLACE, x]
+                    action += args
+                    yield action
 
-    if getattr(opts, "parse_metadata", None) is None:
-        opts.parse_metadata = []
-    if opts.metafromtitle is not None:
-        opts.parse_metadata.append("title:%s" % opts.metafromtitle)
-    opts.parse_metadata = list(itertools.chain.from_iterable(map(
-        metadataparser_actions, opts.parse_metadata)))
+        if getattr(opts, "parse_metadata", None) is None:
+            opts.parse_metadata = []
+        if opts.metafromtitle is not None:
+            opts.parse_metadata.append("title:%s" % opts.metafromtitle)
+            opts.metafromtitle = None
+        opts.parse_metadata = list(itertools.chain.from_iterable(map(
+            metadataparser_actions, opts.parse_metadata)))
+    else:
+        opts.parse_metadata = ()
 
     download_archive_fn = module.expand_path(opts.download_archive) \
         if opts.download_archive is not None else opts.download_archive
 
-    printing_json = opts.dumpjson or opts.print_json or opts.dump_single_json
-    if getattr(opts, "getcomments", None) and not printing_json:
+    if getattr(opts, "getcomments", None):
         opts.writeinfojson = True
 
     if getattr(opts, "no_sponsorblock", None):
@@ -210,6 +215,11 @@ def parse_command_line(module, argv):
 
     # PostProcessors
     postprocessors = []
+    if opts.metafromtitle:
+        postprocessors.append({
+            "key": "MetadataFromTitle",
+            "titleformat": opts.metafromtitle,
+        })
     if getattr(opts, "add_postprocessors", None):
         postprocessors += list(opts.add_postprocessors)
     if sponsorblock_query:
@@ -226,11 +236,11 @@ def parse_command_line(module, argv):
             "when": "pre_process",
         })
     if opts.convertsubtitles:
-        postprocessors.append({
-            "key": "FFmpegSubtitlesConvertor",
-            "format": opts.convertsubtitles,
-            "when": "before_dl",
-        })
+        pp = {"key": "FFmpegSubtitlesConvertor",
+              "format": opts.convertsubtitles}
+        if ytdlp:
+            pp["when"] = "before_dl"
+        postprocessors.append(pp)
     if getattr(opts, "convertthumbnails", None):
         postprocessors.append({
             "key": "FFmpegThumbnailsConvertor",
@@ -311,7 +321,8 @@ def parse_command_line(module, argv):
         })
         if not already_have_thumbnail:
             opts.writethumbnail = True
-            opts.outtmpl["pl_thumbnail"] = ""
+            if isinstance(opts.outtmpl, dict):
+                opts.outtmpl["pl_thumbnail"] = ""
     if getattr(opts, "split_chapters", None):
         postprocessors.append({
             "key": "FFmpegSplitChapters",
@@ -351,8 +362,6 @@ def parse_command_line(module, argv):
         "forcefilename": opts.getfilename,
         "forceformat": opts.getformat,
         "forceprint": getattr(opts, "forceprint", None) or (),
-        "forcejson": opts.dumpjson or opts.print_json,
-        "dump_single_json": opts.dump_single_json,
         "force_write_download_archive": getattr(
             opts, "force_write_download_archive", None),
         "simulate": opts.simulate,
@@ -471,7 +480,6 @@ def parse_command_line(module, argv):
         "postprocessors": postprocessors,
         "fixup": opts.fixup,
         "source_address": opts.source_address,
-        "call_home": opts.call_home,
         "sleep_interval_requests": getattr(
             opts, "sleep_interval_requests", None),
         "sleep_interval": opts.sleep_interval,
@@ -479,7 +487,6 @@ def parse_command_line(module, argv):
         "sleep_interval_subtitles": getattr(
             opts, "sleep_interval_subtitles", None),
         "external_downloader": opts.external_downloader,
-        "list_thumbnails": opts.list_thumbnails,
         "playlist_items": opts.playlist_items,
         "xattr_set_filesize": opts.xattr_set_filesize,
         "match_filter": match_filter,
