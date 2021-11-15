@@ -439,15 +439,27 @@ class InstagramTaggedExtractor(InstagramExtractor):
     test = ("https://www.instagram.com/instagram/tagged/", {
         "range": "1-16",
         "count": ">= 16",
+        "keyword": {
+            "tagged_owner_id" : "25025320",
+            "tagged_username" : "instagram",
+            "tagged_full_name": "Instagram",
+        },
     })
 
-    def posts(self):
+    def metadata(self):
         url = "{}/{}/".format(self.root, self.item)
-        user = self._extract_profile_page(url)
+        self.user = user = self._extract_profile_page(url)
 
+        return {
+            "tagged_owner_id" : user["id"],
+            "tagged_username" : user["username"],
+            "tagged_full_name": user["full_name"],
+        }
+
+    def posts(self):
         query_hash = "be13233562af2d229b008d2976b998b5"
-        variables = {"id": user["id"], "first": 50}
-        edge = self._get_edge_data(user, None)
+        variables = {"id": self.user["id"], "first": 50}
+        edge = self._get_edge_data(self.user, None)
         return self._pagination_graphql(query_hash, variables, edge)
 
 
