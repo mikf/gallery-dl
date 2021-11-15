@@ -80,14 +80,19 @@ class YoutubeDLExtractor(Extractor):
                 set_cookie(cookie)
 
         # extract youtube_dl info_dict
-        info_dict = ytdl_instance._YoutubeDL__extract_info(
-            self.ytdl_url,
-            ytdl_instance.get_info_extractor(self.ytdl_ie_key),
-            False, {}, True)
+        try:
+            info_dict = ytdl_instance._YoutubeDL__extract_info(
+                self.ytdl_url,
+                ytdl_instance.get_info_extractor(self.ytdl_ie_key),
+                False, {}, True)
+        except ytdl_module.utils.YoutubeDLError:
+            raise exception.StopExtraction("Failed to extract video data")
 
-        if "entries" in info_dict:
+        if not info_dict:
+            return
+        elif "entries" in info_dict:
             results = self._process_entries(
-                ytdl_instance, info_dict["entries"])
+                ytdl_module, ytdl_instance, info_dict["entries"])
         else:
             results = (info_dict,)
 
@@ -104,15 +109,23 @@ class YoutubeDLExtractor(Extractor):
             yield Message.Directory, info_dict
             yield Message.Url, url, info_dict
 
-    def _process_entries(self, ytdl_instance, entries):
+    def _process_entries(self, ytdl_module, ytdl_instance, entries):
         for entry in entries:
-            if entry.get("_type") in ("url", "url_transparent"):
-                info_dict = ytdl_instance.extract_info(
-                    entry["url"], False,
-                    ie_key=entry.get("ie_key"))
-                if "entries" in info_dict:
+            if not entry:
+                continue
+            elif entry.get("_type") in ("url", "url_transparent"):
+                try:
+                    info_dict = ytdl_instance.extract_info(
+                        entry["url"], False,
+                        ie_key=entry.get("ie_key"))
+                except ytdl_module.utils.YoutubeDLError:
+                    continue
+
+                if not info_dict:
+                    continue
+                elif "entries" in info_dict:
                     yield from self._process_entries(
-                        ytdl_instance, info_dict["entries"])
+                        ytdl_module, ytdl_instance, info_dict["entries"])
                 else:
                     yield info_dict
             else:
