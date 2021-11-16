@@ -41,7 +41,9 @@ class TwitterExtractor(Extractor):
         self.videos = self.config("videos", True)
         self.cards = self.config("cards", False)
         self._user_cache = {}
+        self._init_sizes()
 
+    def _init_sizes(self):
         size = self.config("size")
         if size is None:
             self._size_image = "orig"
@@ -580,13 +582,17 @@ class TwitterImageExtractor(Extractor):
     subcategory = "image"
     pattern = r"https?://pbs\.twimg\.com/media/([\w-]+)(?:\?format=|\.)(\w+)"
     test = (
-        ("https://pbs.twimg.com/media/EqcpviCVoAAG-QG?format=jpg%name=orig"),
+        ("https://pbs.twimg.com/media/EqcpviCVoAAG-QG?format=jpg&name=orig", {
+            "options": (("size", "4096x4096,orig"),),
+            "url": "cb3042a6f6826923da98f0d2b66c427e9385114c",
+        }),
         ("https://pbs.twimg.com/media/EqcpviCVoAAG-QG.jpg:orig"),
     )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.id, self.fmt = match.groups()
+        TwitterExtractor._init_sizes(self)
 
     def items(self):
         base = "https://pbs.twimg.com/media/{}?format={}&name=".format(
@@ -595,11 +601,11 @@ class TwitterImageExtractor(Extractor):
         data = {
             "filename": self.id,
             "extension": self.fmt,
-            "_fallback": TwitterExtractor._image_fallback(base),
+            "_fallback": TwitterExtractor._image_fallback(self, base),
         }
 
         yield Message.Directory, data
-        yield Message.Url, base + "orig", data
+        yield Message.Url, base + self._size_image, data
 
 
 class TwitterAPI():
