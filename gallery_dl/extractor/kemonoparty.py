@@ -33,8 +33,7 @@ class KemonopartyExtractor(Extractor):
         self._find_inline = re.compile(
             r'src="(?:https?://kemono\.party)?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
-        self._skip_service = \
-            "patreon" if self.config("patreon-skip-file", True) else None
+        find_hash = re.compile("/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})").match
         generators = self._build_file_generators(self.config("files"))
         comments = self.config("comments")
 
@@ -61,12 +60,25 @@ class KemonopartyExtractor(Extractor):
                 post["comments"] = self._extract_comments(post)
             yield Message.Directory, post
 
+            hashes = set()
             post["num"] = 0
             for file in itertools.chain.from_iterable(
                     g(post) for g in generators):
+                url = file["path"]
+
+                match = find_hash(url)
+                if match:
+                    post["hash"] = hash = match.group(1)
+                    if hash in hashes:
+                        self.log.debug("Skipping %s (duplicate)", url)
+                        continue
+                    hashes.add(hash)
+                else:
+                    post["hash"] = ""
+
                 post["type"] = file["type"]
                 post["num"] += 1
-                url = file["path"]
+
                 if url[0] == "/":
                     url = self.root + "/data" + url
                 elif url.startswith("https://kemono.party"):
@@ -99,8 +111,6 @@ class KemonopartyExtractor(Extractor):
         if not file:
             return ()
         file["type"] = "file"
-        if post["service"] == self._skip_service and post["attachments"]:
-            return ()
         return (file,)
 
     def _attachments(self, post):
@@ -196,6 +206,8 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
                 "embed": dict,
                 "extension": "jpeg",
                 "filename": "P058kDFYus7DbqAkGlfWTlOr",
+                "hash": "210f35388e28bbcf756db18dd516e2d8"
+                        "2ce758e0d32881eeee76d43e1716d382",
                 "id": "506575",
                 "num": 1,
                 "published": "Sun, 11 Aug 2019 02:09:04 GMT",
@@ -211,6 +223,8 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         ("https://kemono.party/fanbox/user/7356311/post/802343", {
             "pattern": r"https://kemono\.party/data/47/b5/47b5c014ecdcfabdf2c8"
                        r"5eec53f1133a76336997ae8596f332e97d956a460ad2\.jpg",
+            "keyword": {"hash": "47b5c014ecdcfabdf2c85eec53f1133a"
+                                "76336997ae8596f332e97d956a460ad2"},
         }),
         # kemono.party -> data.kemono.party
         ("https://kemono.party/gumroad/user/trylsc/post/IURjT", {
@@ -223,10 +237,9 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
             "options": (("metadata", True),),
             "keyword": {"username": "Kudalyn's Creations"},
         }),
-        # skip patreon main file (#1667, #1689)
+        # skip patreon duplicates
         ("https://kemono.party/patreon/user/4158582/post/32099982", {
             "count": 2,
-            "keyword": {"type": "attachment"},
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
     )
