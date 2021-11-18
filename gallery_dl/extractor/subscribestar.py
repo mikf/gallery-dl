@@ -38,8 +38,6 @@ class SubscribestarExtractor(Extractor):
         self.login()
         for post_html in self.posts():
             media = self._media_from_post(post_html)
-            if not media:
-                continue
             data = self._data_from_post(post_html)
             yield Message.Directory, data
             for num, item in enumerate(media, 1):
