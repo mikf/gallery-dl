@@ -1343,11 +1343,11 @@ extractor.kemonoparty.files
 Type
     ``list`` of ``strings``
 Default
-    ``["postfile", "attachments", "inline"]``
+    ``["file", "attachments", "inline"]``
 Description
     Determines the type and order of files to be downloaded.
 
-    Available types are ``postfile``, ``attachments``, and ``inline``.
+    Available types are ``file``, ``attachments``, and ``inline``.
 
 
 extractor.kemonoparty.max-posts
