@@ -136,7 +136,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Dynasty Reader</td>
     <td>https://dynasty-scans.com/</td>
-    <td>Chapters, individual Images, Search Results</td>
+    <td>Chapters, individual Images, Manga, Search Results</td>
     <td></td>
 </tr>
 <tr>

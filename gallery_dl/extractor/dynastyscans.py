@@ -8,7 +8,7 @@
 
 """Extractors for https://dynasty-scans.com/"""
 
-from .common import ChapterExtractor, Extractor, Message
+from .common import ChapterExtractor, MangaExtractor, Extractor, Message
 from .. import text
 import json
 import re
@@ -86,6 +86,22 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
         return [
             (self.root + img["image"], None)
             for img in json.loads(data)
+        ]
+
+
+class DynastyscansMangaExtractor(DynastyscansBase, MangaExtractor):
+    chapterclass = DynastyscansChapterExtractor
+    reverse = False
+    pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
+    test = ("https://dynasty-scans.com/series/hitoribocchi_no_oo_seikatsu", {
+        "pattern": DynastyscansChapterExtractor.pattern,
+        "count": ">= 100",
+    })
+
+    def chapters(self, page):
+        return [
+            (self.root + path, {})
+            for path in text.extract_iter(page, '<dd>\n<a href="', '"')
         ]
 
 
