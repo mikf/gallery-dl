@@ -106,7 +106,7 @@ class KemonopartyExtractor(Extractor):
 
         return {c.name: c.value for c in response.history[0].cookies}
 
-    def _postfile(self, post):
+    def _file(self, post):
         file = post["file"]
         if not file:
             return ()
@@ -124,9 +124,9 @@ class KemonopartyExtractor(Extractor):
 
     def _build_file_generators(self, filetypes):
         if filetypes is None:
-            return (self._postfile, self._attachments, self._inline)
+            return (self._file, self._attachments, self._inline)
         genmap = {
-            "postfile"   : self._postfile,
+            "file"       : self._file,
             "attachments": self._attachments,
             "inline"     : self._inline,
         }
