@@ -160,10 +160,16 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>{foo:Ro/()/}</code></td>
     <td><code>F()()&nbsp;Bar</code></td>
 </tr>
+<tr>
+    <td><code>D&lt;format&gt;/</code></td>
+    <td>Parse a string value to a <code>datetime</code> object according to <a href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes"><code>&lt;format&gt;</code></a></td>
+    <td><code>{updated:D%b %d %Y %I:%M %p/}</code></td>
+    <td><code>2010-01-01 00:00:00</code></td>
+</tr>
 </tbody>
 </table>
 
-All special format specifiers (`?`, `L`, `J`, `R`) can be chained and combined with one another, but must always come before any standard format specifiers:
+All special format specifiers (`?`, `L`, `J`, `R`, `D`) can be chained and combined with one another, but must always come before any standard format specifiers:
 
 For example `{foo:?//RF/B/Ro/e/> 10}` -> `   Bee Bar`
 - `?//` - Tests if `foo` has a value

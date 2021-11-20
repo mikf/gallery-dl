@@ -29,6 +29,7 @@ class TestFormatter(unittest.TestCase):
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
         "dt": datetime.datetime(2010, 1, 1),
+        "ds": "2010-01-01T01:00:00+0100",
         "name": "Name",
         "title1": "Title",
         "title2": "",
@@ -162,6 +163,11 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!l:Rl//}" , "heo word")
         self._run_test("{name:Rame/othing/}", "Nothing")
 
+    def test_datetime(self):
+        self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", "2010-01-01 00:00:00")
+        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+0100")
+        self._run_test("{l:D%Y}", "None")
+
     def test_chain_special(self):
         # multiple replacements
         self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
@@ -173,6 +179,9 @@ class TestFormatter(unittest.TestCase):
         # optional-and-maxlen
         self._run_test("{d[a]:?</>/L1/too long/}", "<too long>")
         self._run_test("{d[c]:?</>/L5/too long/}", "")
+
+        # parse and format datetime
+        self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/%Y%m%d}", "20100101")
 
     def test_globals_env(self):
         os.environ["FORMATTER_TEST"] = value = self.kwdict["a"]
@@ -259,7 +268,7 @@ def noarg():
                 sys.path.pop(0)
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "65")
+        self.assertEqual(fmt2.format_map(self.kwdict), "89")
 
         with self.assertRaises(TypeError):
             self.assertEqual(fmt3.format_map(self.kwdict), "")

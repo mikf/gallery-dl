@@ -274,6 +274,8 @@ def build_format_func(format_spec):
             return _parse_join(format_spec)
         if fmt == "R":
             return _parse_replace(format_spec)
+        if fmt == "D":
+            return _parse_datetime(format_spec)
         return _default_format(format_spec)
     return format
 
@@ -317,6 +319,16 @@ def _parse_replace(format_spec):
     def replace(obj):
         return fmt(obj.replace(old, new))
     return replace
+
+
+def _parse_datetime(format_spec):
+    dt_format, _, format_spec = format_spec.partition("/")
+    dt_format = dt_format[1:]
+    fmt = build_format_func(format_spec)
+
+    def dt(obj):
+        return fmt(text.parse_datetime(obj, dt_format))
+    return dt
 
 
 def _default_format(format_spec):
