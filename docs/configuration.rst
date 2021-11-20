@@ -1338,6 +1338,16 @@ Description
     Extract ``comments`` metadata.
 
 
+extractor.kemonoparty.dms
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract a user's direct messages as ``dms`` metadata.
+
+
 extractor.kemonoparty.files
 ---------------------------
 Type

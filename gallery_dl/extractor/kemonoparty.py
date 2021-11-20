@@ -36,13 +36,14 @@ class KemonopartyExtractor(Extractor):
         find_hash = re.compile("/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})").match
         generators = self._build_file_generators(self.config("files"))
         comments = self.config("comments")
+        username = dms = None
 
         if self.config("metadata"):
             username = text.unescape(text.extract(
                 self.request(self.user_url).text,
                 '<meta name="artist_name" content="', '"')[0])
-        else:
-            username = None
+        if self.config("dms"):
+            dms = True
 
         posts = self.posts()
         max_posts = self.config("max-posts")
@@ -58,6 +59,10 @@ class KemonopartyExtractor(Extractor):
                 post["username"] = username
             if comments:
                 post["comments"] = self._extract_comments(post)
+            if dms is not None:
+                if dms is True:
+                    dms = self._extract_dms(post)
+                post["dms"] = dms
             yield Message.Directory, post
 
             hashes = set()
@@ -152,6 +157,21 @@ class KemonopartyExtractor(Extractor):
             })
         return comments
 
+    def _extract_dms(self, post):
+        url = "{}/{}/user/{}/dms".format(
+            self.root, post["service"], post["user"])
+        page = self.request(url).text
+
+        dms = []
+        for dm in text.extract_iter(page, "<article", "</article>"):
+            dms.append({
+                "body": text.unescape(text.extract(
+                    dm, '<div class="dm-card__content">', '</div>',
+                )[0].strip()),
+                "date": text.extract(dm, 'datetime="', '"')[0],
+            })
+        return dms
+
 
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
@@ -240,6 +260,17 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         # skip patreon duplicates
         ("https://kemono.party/patreon/user/4158582/post/32099982", {
             "count": 2,
+        }),
+        # DMs (#2008)
+        ("https://kemono.party/patreon/user/34134344/post/52245464", {
+            "options": (("dms", True),),
+            "keyword": {"dms": [{
+                "body": r"re:Hi! Thank you very much for supporting the work I"
+                        r" did in May. Here's your reward pack! I hope you fin"
+                        r"d something you enjoy in it. :)\n\nhttps://www.media"
+                        r"fire.com/file/\w+/Set13_tier_2.zip/file",
+                "date": "2021-07-31 02:47:51.327865",
+            }]},
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
     )
