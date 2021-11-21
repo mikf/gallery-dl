@@ -148,6 +148,14 @@ class TestExtractorResults(unittest.TestCase):
                 self._test_kwdict(value, test)
             elif isinstance(test, type):
                 self.assertIsInstance(value, test, msg=key)
+            elif isinstance(test, list):
+                subtest = False
+                for idx, item in enumerate(test):
+                    if isinstance(item, dict):
+                        subtest = True
+                        self._test_kwdict(value[idx], item)
+                if not subtest:
+                    self.assertEqual(value, test, msg=key)
             elif isinstance(test, str):
                 if test.startswith("re:"):
                     self.assertRegex(value, test[3:], msg=key)
