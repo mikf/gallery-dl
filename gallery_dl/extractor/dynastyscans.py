@@ -48,12 +48,12 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {
             "url": "dce64e8c504118f1ab4135c00245ea12413896cb",
-            "keyword": "1564965671ac69bb7fbc340538397f6bd0aa269b",
+            "keyword": "b67599703c27316a2fe4f11c3232130a1904e032",
         }),
         (("http://dynasty-scans.com/chapters/"
           "new_game_the_spinoff_special_13"), {
             "url": "dbe5bbb74da2edcfb1832895a484e2a40bc8b538",
-            "keyword": "22b35029bc65d6d95db2e2c147b0a37f2d290f29",
+            "keyword": "6b674eb3a274999153f6be044973b195008ced2f",
         }),
     )
 
@@ -76,7 +76,8 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
             "author"  : text.remove_html(author),
             "group"   : (text.remove_html(group) or
                          text.extract(group, ' alt="', '"')[0] or ""),
-            "date"    : extr('"icon-calendar"></i> ', '<'),
+            "date"    : text.parse_datetime(extr(
+                '"icon-calendar"></i> ', '<'), "%b %d, %Y"),
             "lang"    : "en",
             "language": "English",
         }
