@@ -262,13 +262,13 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
             "count": 2,
         }),
         # DMs (#2008)
-        ("https://kemono.party/patreon/user/34134344/post/52245464", {
+        ("https://kemono.party/patreon/user/34134344/post/38129255", {
             "options": (("dms", True),),
             "keyword": {"dms": [{
                 "body": r"re:Hi! Thank you very much for supporting the work I"
                         r" did in May. Here's your reward pack! I hope you fin"
-                        r"d something you enjoy in it. :)\n\nhttps://www.media"
-                        r"fire.com/file/\w+/Set13_tier_2.zip/file",
+                        r"d something you enjoy in it. :\)\n\nhttps://www.medi"
+                        r"afire.com/file/\w+/Set13_tier_2.zip/file",
                 "date": "2021-07-31 02:47:51.327865",
             }]},
         }),
