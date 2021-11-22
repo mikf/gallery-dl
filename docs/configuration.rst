@@ -1443,16 +1443,6 @@ Description
     to filter chapters by.
 
 
-extractor.mangadex.metadata
----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Provide ``artist``, ``author``, and ``group`` metadata fields.
-
-
 extractor.mangadex.ratings
 --------------------------
 Type
