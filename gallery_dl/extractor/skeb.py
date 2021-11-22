@@ -21,6 +21,7 @@ class SkebExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user_name = match.group(1)
+        self.thumbnails = self.config("thumbnails", False)
 
     def items(self):
         for post_num in self.posts():
@@ -94,7 +95,7 @@ class SkebExtractor(Extractor):
         return resp, post
 
     def _get_urls_from_post(self, resp, post):
-        if "og_image_url" in resp:
+        if self.thumbnails and "og_image_url" in resp:
             post["content_category"] = "thumb"
             post["file_id"] = "thumb"
             post["file_url"] = resp["og_image_url"]
