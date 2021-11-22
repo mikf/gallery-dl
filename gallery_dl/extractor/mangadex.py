@@ -46,10 +46,10 @@ class MangadexExtractor(Extractor):
     def _transform(self, chapter):
         relationships = defaultdict(list)
         for item in chapter["relationships"]:
-            relationships[item["type"]].append(item["id"])
-        manga = self.api.manga(relationships["manga"][0])
+            relationships[item["type"]].append(item)
+        manga = self.api.manga(relationships["manga"][0]["id"])
         for item in manga["relationships"]:
-            relationships[item["type"]].append(item["id"])
+            relationships[item["type"]].append(item)
 
         cattributes = chapter["attributes"]
         mattributes = manga["attributes"]
@@ -75,16 +75,12 @@ class MangadexExtractor(Extractor):
             "count"   : len(cattributes["data"]),
         }
 
-        if self.config("metadata"):
-            data["artist"] = [
-                self.api.author(uuid)["attributes"]["name"]
-                for uuid in relationships["artist"]]
-            data["author"] = [
-                self.api.author(uuid)["attributes"]["name"]
-                for uuid in relationships["author"]]
-            data["group"] = [
-                self.api.group(uuid)["attributes"]["name"]
-                for uuid in relationships["scanlation_group"]]
+        data["artist"] = [artist["attributes"]["name"]
+                          for artist in relationships["artist"]]
+        data["author"] = [author["attributes"]["name"]
+                          for author in relationships["author"]]
+        data["group"] = [group["attributes"]["name"]
+                         for group in relationships["scanlation_group"]]
 
         return data
 
@@ -95,12 +91,11 @@ class MangadexChapterExtractor(MangadexExtractor):
     pattern = BASE_PATTERN + r"/chapter/([0-9a-f-]+)"
     test = (
         ("https://mangadex.org/chapter/f946ac53-0b71-4b5d-aeb2-7931b13c4aaa", {
-            "keyword": "f6c2b908df06eb834d56193dfe1fa1f7c2c4dccd",
+            "keyword": "86fb262cf767dac6d965cd904ad499adba466404",
             #  "content": "50383a4c15124682057b197d40261641a98db514",
         }),
         # oneshot
         ("https://mangadex.org/chapter/61a88817-9c29-4281-bdf1-77b3c1be9831", {
-            "options": (("metadata", True),),
             "count": 64,
             "keyword": "6abcbe1e24eeb1049dc931958853cd767ee483fb",
         }),
@@ -147,6 +142,8 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "date"    : "type:datetime",
                 "lang"    : str,
                 "language": str,
+                "artist"  : ["Arakawa Hiromu"],
+                "author"  : ["Arakawa Hiromu"],
             },
         }),
         ("https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/", {
@@ -193,20 +190,14 @@ class MangadexAPI():
     def athome_server(self, uuid):
         return self._call("/at-home/server/" + uuid)
 
-    @memcache(keyarg=1)
-    def author(self, uuid):
-        return self._call("/author/" + uuid)["data"]
-
     def chapter(self, uuid):
-        return self._call("/chapter/" + uuid)["data"]
-
-    @memcache(keyarg=1)
-    def group(self, uuid):
-        return self._call("/group/" + uuid)["data"]
+        params = {"includes[]": ("scanlation_group",)}
+        return self._call("/chapter/" + uuid, params)["data"]
 
     @memcache(keyarg=1)
     def manga(self, uuid):
-        return self._call("/manga/" + uuid)["data"]
+        params = {"includes[]": ("artist", "author")}
+        return self._call("/manga/" + uuid, params)["data"]
 
     def manga_feed(self, uuid):
         order = "desc" if self.extractor.config("chapter-reverse") else "asc"
@@ -275,6 +266,7 @@ class MangadexAPI():
             ratings = ("safe", "suggestive", "erotica", "pornographic")
 
         params["contentRating[]"] = ratings
+        params["includes[]"] = ("scanlation_group",)
         params["translatedLanguage[]"] = config("lang")
         params["offset"] = 0
 
