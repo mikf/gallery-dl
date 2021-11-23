@@ -81,6 +81,16 @@ def identity(x):
     return x
 
 
+def true(_):
+    """Always returns True"""
+    return True
+
+
+def false(_):
+    """Always returns False"""
+    return False
+
+
 def noop():
     """Does nothing"""
 
@@ -430,6 +440,66 @@ def build_duration_func(duration, min=0.0):
         )
 
     return functools.partial(identity, duration if duration > min else min)
+
+
+def build_extractor_filter(categories, negate=True, special=None):
+    """Build a function that takes an Extractor class as argument
+    and returns True if that class is allowed by 'categories'
+    """
+    if isinstance(categories, str):
+        categories = categories.split(",")
+
+    catset = set()  # set of categories / basecategories
+    subset = set()  # set of subcategories
+    catsub = []     # list of category-subcategory pairs
+
+    for item in categories:
+        category, _, subcategory = item.partition(":")
+        if category and category != "*":
+            if subcategory and subcategory != "*":
+                catsub.append((category, subcategory))
+            else:
+                catset.add(category)
+        elif subcategory and subcategory != "*":
+            subset.add(subcategory)
+
+    if special:
+        catset |= special
+    elif not catset and not subset and not catsub:
+        return true if negate else false
+
+    tests = []
+
+    if negate:
+        if catset:
+            tests.append(lambda extr:
+                         extr.category not in catset and
+                         extr.basecategory not in catset)
+        if subset:
+            tests.append(lambda extr: extr.subcategory not in subset)
+    else:
+        if catset:
+            tests.append(lambda extr:
+                         extr.category in catset or
+                         extr.basecategory in catset)
+        if subset:
+            tests.append(lambda extr: extr.subcategory in subset)
+
+    if catsub:
+        def test(extr):
+            for category, subcategory in catsub:
+                if category in (extr.category, extr.basecategory) and \
+                        subcategory == extr.subcategory:
+                    return not negate
+            return negate
+        tests.append(test)
+
+    if len(tests) == 1:
+        return tests[0]
+    if negate:
+        return lambda extr: all(t(extr) for t in tests)
+    else:
+        return lambda extr: any(t(extr) for t in tests)
 
 
 def build_predicate(predicates):
