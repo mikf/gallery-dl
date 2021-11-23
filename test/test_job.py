@@ -37,6 +37,31 @@ class TestJob(unittest.TestCase):
             return buffer.getvalue()
 
 
+class TestDownloadJob(TestJob):
+    jobclass = job.DownloadJob
+
+    def test_extractor_filter(self):
+        extr = TestExtractor.from_url("test:")
+        tjob = self.jobclass(extr)
+
+        func = tjob._build_extractor_filter()
+        self.assertEqual(func(TestExtractor)      , False)
+        self.assertEqual(func(TestExtractorParent), False)
+        self.assertEqual(func(TestExtractorAlt)   , True)
+
+        config.set((), "blacklist", ":test_subcategory")
+        func = tjob._build_extractor_filter()
+        self.assertEqual(func(TestExtractor)      , False)
+        self.assertEqual(func(TestExtractorParent), True)
+        self.assertEqual(func(TestExtractorAlt)   , False)
+
+        config.set((), "whitelist", "test_category:test_subcategory")
+        func = tjob._build_extractor_filter()
+        self.assertEqual(func(TestExtractor)      , True)
+        self.assertEqual(func(TestExtractorParent), False)
+        self.assertEqual(func(TestExtractorAlt)   , False)
+
+
 class TestKeywordJob(TestJob):
     jobclass = job.KeywordJob
 
@@ -332,6 +357,11 @@ class TestExtractorException(Extractor):
 
     def items(self):
         return 1/0
+
+
+class TestExtractorAlt(Extractor):
+    category = "test_category_alt"
+    subcategory = "test_subcategory"
 
 
 if __name__ == '__main__':

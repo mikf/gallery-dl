@@ -11,7 +11,6 @@ import json
 import time
 import errno
 import logging
-import operator
 import functools
 import collections
 from . import extractor, downloader, postprocessor
@@ -201,7 +200,6 @@ class DownloadJob(Job):
     def __init__(self, url, parent=None):
         Job.__init__(self, url, parent)
         self.log = self.get_logger("download")
-        self.blacklist = None
         self.fallback = None
         self.archive = None
         self.sleep = None
@@ -209,6 +207,7 @@ class DownloadJob(Job):
         self.downloaders = {}
         self.out = output.select()
         self.visited = parent.visited if parent else set()
+        self._extractor_filter = None
         self._skipcnt = 0
 
     def handle_url(self, url, kwdict):
@@ -297,9 +296,9 @@ class DownloadJob(Job):
         else:
             extr = extractor.find(url)
             if extr:
-                if self.blacklist is None:
-                    self.blacklist = self._build_blacklist()
-                if extr.category in self.blacklist:
+                if self._extractor_filter is None:
+                    self._extractor_filter = self._build_extractor_filter()
+                if not self._extractor_filter(extr):
                     extr = None
 
         if extr:
@@ -444,22 +443,20 @@ class DownloadJob(Job):
             self.hooks = collections.defaultdict(list)
             pp_log = self.get_logger("postprocessor")
             pp_list = []
-            category = self.extractor.category
-            basecategory = self.extractor.basecategory
 
             pp_conf = config.get((), "postprocessor") or {}
             for pp_dict in postprocessors:
                 if isinstance(pp_dict, str):
                     pp_dict = pp_conf.get(pp_dict) or {"name": pp_dict}
 
-                whitelist = pp_dict.get("whitelist")
-                if whitelist and category not in whitelist and \
-                        basecategory not in whitelist:
-                    continue
-
-                blacklist = pp_dict.get("blacklist")
-                if blacklist and (
-                        category in blacklist or basecategory in blacklist):
+                clist = pp_dict.get("whitelist")
+                if clist is not None:
+                    negate = False
+                else:
+                    clist = pp_dict.get("blacklist")
+                    negate = True
+                if clist and not util.build_extractor_filter(
+                        clist, negate)(self.extractor):
                     continue
 
                 name = pp_dict.get("name")
@@ -500,38 +497,18 @@ class DownloadJob(Job):
         if condition(pathfmt.kwdict):
             callback(pathfmt)
 
-    def _build_blacklist(self):
-        wlist = self.extractor.config("whitelist")
-        if wlist is not None:
-            if isinstance(wlist, str):
-                wlist = wlist.split(",")
-
-            # build a set of all categories
-            blist = set()
-            add = blist.add
-            update = blist.update
-            get = operator.itemgetter(0)
-
-            for extr in extractor._list_classes():
-                category = extr.category
-                if category:
-                    add(category)
-                else:
-                    update(map(get, extr.instances))
-
-            # remove whitelisted categories
-            blist.difference_update(wlist)
-            return blist
-
-        blist = self.extractor.config("blacklist")
-        if blist is not None:
-            if isinstance(blist, str):
-                blist = blist.split(",")
-            blist = set(blist)
+    def _build_extractor_filter(self):
+        clist = self.extractor.config("whitelist")
+        if clist is not None:
+            negate = False
         else:
-            blist = {self.extractor.category}
-        blist |= util.SPECIAL_EXTRACTORS
-        return blist
+            clist = self.extractor.config("blacklist")
+            negate = True
+            if clist is None:
+                clist = (self.extractor.category,)
+
+        return util.build_extractor_filter(
+            clist, negate, util.SPECIAL_EXTRACTORS)
 
 
 class SimulationJob(DownloadJob):
