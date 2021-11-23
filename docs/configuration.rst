@@ -1905,6 +1905,16 @@ Description
     Download videos.
 
 
+extractor.skeb.thumbnails
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download thumbnails.
+
+
 extractor.smugmug.videos
 ------------------------
 Type
