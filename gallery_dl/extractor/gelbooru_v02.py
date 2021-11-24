@@ -27,8 +27,21 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         params["pid"] = self.page_start
         params["limit"] = self.per_page
 
+        post = None
         while True:
-            root = self._api_request(params)
+            try:
+                root = self._api_request(params)
+            except ElementTree.ParseError:
+                if "tags" not in params or post is None:
+                    raise
+                taglist = [tag for tag in params["tags"].split()
+                           if not tag.startswith("id:<")]
+                taglist.append("id:<" + str(post.attrib["id"]))
+                params["tags"] = " ".join(taglist)
+                params["pid"] = 0
+                continue
+
+            post = None
             for post in root:
                 yield post.attrib
 
