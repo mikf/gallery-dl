@@ -53,6 +53,10 @@ BASE_PATTERN = ShopifyExtractor.update({
     "windsorstore": {
         "root": "https://www.windsorstore.com",
     },
+    "loungeunderwear": {
+        "root": "https://loungeunderwear.com",
+        "pattern": r"(?:[a-z]+\.)?loungeunderwear\.com",
+    },
 })
 
 
@@ -70,6 +74,7 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
         ("https://www.fashionnova.com/collections/mini-dresses#1"),
         ("https://www.omgmiamiswimwear.com/collections/fajas"),
         ("https://www.windsorstore.com/collections/dresses-ball-gowns"),
+        ("https://loungeunderwear.com/collections/apparel"),
     )
 
     def metadata(self):
@@ -105,6 +110,7 @@ class ShopifyProductExtractor(ShopifyExtractor):
         ("https://www.fashionnova.com/collections/flats/products/name"),
         ("https://www.windsorstore.com/collections/accessories-belts/products"
          "/rhine-buckle-dbl-o-ring-pu-strap-belt-073010158001"),
+        ("https://de.loungeunderwear.com/products/ribbed-crop-top-black"),
     )
 
     def products(self):
