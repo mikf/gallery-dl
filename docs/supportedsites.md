@@ -959,6 +959,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
+<tr>
+    <td>ThatPervert</td>
+    <td>http://thatpervert.com/</td>
+    <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>Moebooru and MyImouto</strong></td>

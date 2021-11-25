@@ -99,6 +99,7 @@ CATEGORY_MAP = {
     "speakerdeck"    : "Speaker Deck",
     "subscribestar"  : "SubscribeStar",
     "tbib"           : "The Big ImageBoard",
+    "thatpervert"    : "ThatPervert",
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
     "theloudbooru"   : "The Loud Booru",
