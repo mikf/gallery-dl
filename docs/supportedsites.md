@@ -380,12 +380,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Joyreactor</td>
-    <td>http://joyreactor.cc/</td>
-    <td>Posts, Search Results, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
     <td>Comics</td>
@@ -617,12 +611,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Pornhub</td>
     <td>https://www.pornhub.com/</td>
     <td>Galleries, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Pornreactor</td>
-    <td>http://pornreactor.cc/</td>
-    <td>Posts, Search Results, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -948,6 +936,28 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://ponybooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
     <td>API Key</td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Reactor Instances</strong></td>
+</tr>
+<tr>
+    <td>JoyReactor</td>
+    <td>http://joyreactor.cc/</td>
+    <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>PornReactor</td>
+    <td>http://pornreactor.cc/</td>
+    <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Reactor</td>
+    <td>http://reactor.cc/</td>
+    <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
 </tr>
 
 <tr>
