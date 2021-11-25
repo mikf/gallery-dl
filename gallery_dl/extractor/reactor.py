@@ -158,6 +158,9 @@ BASE_PATTERN = ReactorExtractor.update({
         "root": "http://pornreactor.cc",
         "pattern": r"(?:www\.)?(?:pornreactor\.cc|fapreactor.com)",
     },
+    "thatpervert": {
+        "root": "http://thatpervert.com",
+    },
 })
 
 
