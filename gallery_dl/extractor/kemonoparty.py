@@ -14,7 +14,7 @@ from ..cache import cache
 import itertools
 import re
 
-BASE_PATTERN = r"(?:https?://)?kemono\.party"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?kemono\.party"
 USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 
 
@@ -273,6 +273,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
             }]},
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
+        ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
     )
 
     def __init__(self, match):
