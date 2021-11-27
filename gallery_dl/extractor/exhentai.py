@@ -122,7 +122,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 "date": "dt:2018-03-18 20:15:00",
                 "eh_category": "Non-H",
                 "expunged": False,
-                "favorites": "18",
+                "favorites": "19",
                 "filecount": "4",
                 "filesize": 1488978,
                 "gid": 1200119,
