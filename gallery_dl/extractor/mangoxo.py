@@ -122,18 +122,18 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
     def metadata(self, page):
         """Return general metadata"""
         extr = text.extract_from(page)
-        title = extr('<title>', '</title>')
-        count = extr('id="pic-count">', '<')
-        cid = extr('<img alt="', '"')
+        title = extr('<img id="cover-img" alt="', '"')
+        cid = extr('href="https://www.mangoxo.com/user/', '"')
+        cname = extr('<img alt="', '"')
         cover = extr(' src="', '"')
-        cname = extr('target="_blank">', '<')
-        date = extr('</i>', '<')
+        count = extr('id="pic-count">', '<')
+        date = extr('class="fa fa-calendar"></i>', '<')
         descr = extr('<pre>', '</pre>')
 
         return {
             "channel": {
                 "id": cid,
-                "name": text.unescape(cname.strip()),
+                "name": text.unescape(cname),
                 "cover": cover,
             },
             "album": {
