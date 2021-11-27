@@ -1,6 +1,35 @@
 # Changelog
 
-## Unreleased
+## 1.19.3 - 2021-11-27
+### Additions
+- [dynastyscans] add `manga` extractor ([#2035](https://github.com/mikf/gallery-dl/issues/2035))
+- [instagram] include user metadata for `tagged` downloads ([#2024](https://github.com/mikf/gallery-dl/issues/2024))
+- [kemonoparty] implement `files` option ([#1991](https://github.com/mikf/gallery-dl/issues/1991))
+- [kemonoparty] add `dms` option ([#2008](https://github.com/mikf/gallery-dl/issues/2008))
+- [mangadex] always provide `artist`, `author`, and `group` metadata fields ([#2049](https://github.com/mikf/gallery-dl/issues/2049))
+- [philomena] support furbooru.org ([#1995](https://github.com/mikf/gallery-dl/issues/1995))
+- [reactor] support thatpervert.com ([#2029](https://github.com/mikf/gallery-dl/issues/2029))
+- [shopify] support loungeunderwear.com ([#2053](https://github.com/mikf/gallery-dl/issues/2053))
+- [skeb] add `thumbnails` option ([#2047](https://github.com/mikf/gallery-dl/issues/2047), [#2051](https://github.com/mikf/gallery-dl/issues/2051))
+- [subscribestar] add `num` enumeration index ([#2040](https://github.com/mikf/gallery-dl/issues/2040))
+- [subscribestar] emit metadata for posts without media ([#1569](https://github.com/mikf/gallery-dl/issues/1569))
+- [ytdl] implement `cmdline-args` and `config-file` options to allow parsing ytdl command-line options ([#1680](https://github.com/mikf/gallery-dl/issues/1680))
+- [formatter] implement `D` format specifier
+- extend `blacklist`/`whitelist` syntax ([#2025](https://github.com/mikf/gallery-dl/issues/2025))
+### Fixes
+- [dynastyscans] provide `date` as datetime object ([#2050](https://github.com/mikf/gallery-dl/issues/2050))
+- [exhentai] fix extraction for disowned galleries ([#2055](https://github.com/mikf/gallery-dl/issues/2055))
+- [gelbooru] apply workaround for pagination limits
+- [kemonoparty] skip duplicate files ([#2032](https://github.com/mikf/gallery-dl/issues/2032), [#1991](https://github.com/mikf/gallery-dl/issues/1991), [#1899](https://github.com/mikf/gallery-dl/issues/1899))
+- [kemonoparty] provide `date` metadata for gumroad ([#2007](https://github.com/mikf/gallery-dl/issues/2007))
+- [mangoxo] fix metadata extraction
+- [twitter] distinguish between fatal & nonfatal errors ([#2020](https://github.com/mikf/gallery-dl/issues/2020))
+- [twitter] fix extractor for direct image links ([#2030](https://github.com/mikf/gallery-dl/issues/2030))
+- [webtoons] use download URLs that do not require a `Referer` header ([#2005](https://github.com/mikf/gallery-dl/issues/2005))
+- [ytdl] improve error handling ([#1680](https://github.com/mikf/gallery-dl/issues/1680))
+- [downloader:ytdl] prevent crash in `_progress_hook()` ([#1680](https://github.com/mikf/gallery-dl/issues/1680))
+### Removals
+- [seisoparty] remove module
 
 ## 1.19.2 - 2021-11-05
 ### Additions
