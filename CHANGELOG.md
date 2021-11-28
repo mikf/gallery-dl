@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.19.3 - 2021-11-27
 ### Additions
 - [dynastyscans] add `manga` extractor ([#2035](https://github.com/mikf/gallery-dl/issues/2035))

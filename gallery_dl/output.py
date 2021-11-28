@@ -296,10 +296,10 @@ class TerminalOutput(NullOutput):
         bdl = util.format_value(bytes_downloaded)
         bps = util.format_value(bytes_per_second)
         if bytes_total is None:
-            print("\r{:>7}B {:>7}B/s ".format(bdl, bps), end="")
+            sys.stderr.write("\r{:>7}B {:>7}B/s ".format(bdl, bps))
         else:
-            print("\r{:>3}% {:>7}B {:>7}B/s ".format(
-                bytes_downloaded * 100 // bytes_total, bdl, bps), end="")
+            sys.stderr.write("\r{:>3}% {:>7}B {:>7}B/s ".format(
+                bytes_downloaded * 100 // bytes_total, bdl, bps))
 
 
 class ColorOutput(TerminalOutput):
