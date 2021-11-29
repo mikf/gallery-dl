@@ -2275,9 +2275,12 @@ extractor.ytdl.module
 Type
     ``string``
 Default
-    ``"youtube_dl"``
+    ``null``
 Description
     Name of the youtube-dl Python module to import.
+
+    Setting this to ``null`` will try to import ``"yt_dlp"``
+    followed by ``"youtube_dl"`` as fallback.
 
 
 extractor.ytdl.raw-options
@@ -2564,9 +2567,12 @@ downloader.ytdl.module
 Type
     ``string``
 Default
-    ``"youtube_dl"``
+    ``null``
 Description
     Name of the youtube-dl Python module to import.
+
+    Setting this to ``null`` will first try to import ``"yt_dlp"``
+    and use ``"youtube_dl"`` as fallback.
 
 
 downloader.ytdl.outtmpl

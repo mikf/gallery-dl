@@ -14,6 +14,15 @@ import itertools
 from . import text, util, exception
 
 
+def import_module(module_name):
+    if module_name is None:
+        try:
+            return __import__("yt_dlp")
+        except ImportError:
+            return __import__("youtube_dl")
+    return __import__(module_name.replace("-", "_"))
+
+
 def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
     opts = argv = None
     config = obj.config
