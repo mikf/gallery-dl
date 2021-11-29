@@ -1353,7 +1353,7 @@ extractor.kemonoparty.files
 Type
     ``list`` of ``strings``
 Default
-    ``["file", "attachments", "inline"]``
+    ``["attachments", "file", "inline"]``
 Description
     Determines the type and order of files to be downloaded.
 
