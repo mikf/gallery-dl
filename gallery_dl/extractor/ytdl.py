@@ -23,9 +23,9 @@ class YoutubeDLExtractor(Extractor):
 
     def __init__(self, match):
         # import main youtube_dl module
-        module_name = self.ytdl_module_name = config.get(
-            ("extractor", "ytdl"), "module") or "youtube_dl"
-        module = __import__(module_name)
+        ytdl_module = ytdl.import_module(config.get(
+            ("extractor", "ytdl"), "module"))
+        self.ytdl_module_name = ytdl_module.__name__
 
         # find suitable youtube_dl extractor
         self.ytdl_url = url = match.group(1)
@@ -34,7 +34,7 @@ class YoutubeDLExtractor(Extractor):
             self.ytdl_ie_key = "Generic"
             self.force_generic_extractor = True
         else:
-            for ie in module.extractor.gen_extractor_classes():
+            for ie in ytdl_module.extractor.gen_extractor_classes():
                 if ie.suitable(url):
                     self.ytdl_ie_key = ie.ie_key()
                     break
@@ -48,7 +48,7 @@ class YoutubeDLExtractor(Extractor):
 
     def items(self):
         # import subcategory module
-        ytdl_module = __import__(
+        ytdl_module = ytdl.import_module(
             config.get(("extractor", "ytdl", self.subcategory), "module") or
             self.ytdl_module_name)
         self.log.debug("Using %s", ytdl_module)
