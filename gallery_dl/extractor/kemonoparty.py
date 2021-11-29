@@ -129,7 +129,7 @@ class KemonopartyExtractor(Extractor):
 
     def _build_file_generators(self, filetypes):
         if filetypes is None:
-            return (self._file, self._attachments, self._inline)
+            return (self._attachments, self._file, self._inline)
         genmap = {
             "file"       : self._file,
             "attachments": self._attachments,
