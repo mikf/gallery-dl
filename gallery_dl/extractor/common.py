@@ -11,13 +11,12 @@
 import re
 import ssl
 import time
+import httpx
 import netrc
 import queue
 import logging
 import datetime
-import requests
 import threading
-from requests.adapters import HTTPAdapter
 from .message import Message
 from .. import config, text, util, exception
 
@@ -62,7 +61,7 @@ class Extractor():
         if self._retries < 0:
             self._retries = float("inf")
 
-        self._init_session()
+        self.session = self._init_session()
         self._init_cookies()
         self._init_proxies()
 
@@ -109,8 +108,6 @@ class Extractor():
             session = self.session
         if "timeout" not in kwargs:
             kwargs["timeout"] = self._timeout
-        if "verify" not in kwargs:
-            kwargs["verify"] = self._verify
         response = None
         tries = 1
 
@@ -124,12 +121,9 @@ class Extractor():
         while True:
             try:
                 response = session.request(method, url, **kwargs)
-            except (requests.exceptions.ConnectionError,
-                    requests.exceptions.Timeout,
-                    requests.exceptions.ChunkedEncodingError,
-                    requests.exceptions.ContentDecodingError) as exc:
+            except httpx.TransportError as exc:
                 msg = exc
-            except (requests.exceptions.RequestException) as exc:
+            except httpx.HTTPError as exc:
                 raise exception.HttpError(exc)
             else:
                 code = response.status_code
@@ -144,7 +138,8 @@ class Extractor():
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
 
-                msg = "'{} {}' for '{}'".format(code, response.reason, url)
+                msg = "'{} {}' for '{}'".format(
+                    code, response.reason_phrase, url)
                 server = response.headers.get("Server")
                 if server and server.startswith("cloudflare"):
                     if code == 503 and \
@@ -216,10 +211,6 @@ class Extractor():
         return username, password
 
     def _init_session(self):
-        self.session = session = requests.Session()
-        headers = session.headers
-        headers.clear()
-
         browser = self.config("browser") or self.browser
         if browser and isinstance(browser, str):
             browser, _, platform = browser.lower().partition(":")
@@ -235,10 +226,13 @@ class Extractor():
                 platform = "Macintosh; Intel Mac OS X 11.5"
 
             if browser == "chrome":
-                _emulate_browser_chrome(session, platform)
+                session = _emulate_browser_chrome(platform)
             else:
-                _emulate_browser_firefox(session, platform)
+                session = _emulate_browser_firefox(platform)
         else:
+            session = httpx.Client(verify=self._verify, follow_redirects=True)
+            headers = session.headers
+            headers.clear()
             headers["User-Agent"] = self.config("user-agent", (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
                 "rv:91.0) Gecko/20100101 Firefox/91.0"))
@@ -248,13 +242,9 @@ class Extractor():
 
         custom_headers = self.config("headers")
         if custom_headers:
-            headers.update(custom_headers)
+            session.headers.update(custom_headers)
 
-        ciphers = self.config("ciphers")
-        if ciphers:
-            if isinstance(ciphers, list):
-                ciphers = ":".join(ciphers)
-            session.mount("https://", HTTPSAdapter(ciphers))
+        return session
 
     def _init_proxies(self):
         """Update the session's proxy map"""
@@ -273,7 +263,7 @@ class Extractor():
     def _init_cookies(self):
         """Populate the session's cookiejar"""
         self._cookiefile = None
-        self._cookiejar = self.session.cookies
+        self._cookies = self.session.cookies
         if self.cookiedomain is None:
             return
 
@@ -301,7 +291,7 @@ class Extractor():
         if self._cookiefile and self.config("cookies-update", True):
             try:
                 with open(self._cookiefile, "w") as fp:
-                    util.save_cookiestxt(fp, self._cookiejar)
+                    util.save_cookiestxt(fp, self._cookies.jar)
             except OSError as exc:
                 self.log.warning("cookies: %s", exc)
 
@@ -310,7 +300,7 @@ class Extractor():
         if isinstance(cookies, dict):
             self._update_cookies_dict(cookies, domain or self.cookiedomain)
         else:
-            setcookie = self._cookiejar.set_cookie
+            setcookie = self._cookies.jar.set_cookie
             try:
                 cookies = iter(cookies)
             except TypeError:
@@ -321,13 +311,13 @@ class Extractor():
 
     def _update_cookies_dict(self, cookiedict, domain):
         """Update cookiejar with name-value pairs from a dict"""
-        setcookie = self._cookiejar.set
+        setcookie = self._cookies.set
         for name, value in cookiedict.items():
             setcookie(name, value, domain=domain)
 
     def _check_cookies(self, cookienames, *, domain=None):
         """Check if all 'cookienames' are in the session's cookiejar"""
-        if not self._cookiejar:
+        if not self._cookies:
             return False
 
         if domain is None:
@@ -335,7 +325,7 @@ class Extractor():
         names = set(cookienames)
         now = time.time()
 
-        for cookie in self._cookiejar:
+        for cookie in self._cookies.jar:
             if cookie.name in names and cookie.domain == domain:
                 if cookie.expires and cookie.expires < now:
                     self.log.warning("Cookie '%s' has expired", cookie.name)
@@ -346,8 +336,8 @@ class Extractor():
         return False
 
     def _prepare_ddosguard_cookies(self):
-        if not self._cookiejar.get("__ddg2", domain=self.cookiedomain):
-            self._cookiejar.set(
+        if not self._cookies.get("__ddg2", domain=self.cookiedomain):
+            self._cookies.set(
                 "__ddg2", util.generate_token(), domain=self.cookiedomain)
 
     def _get_date_min_max(self, dmin=None, dmax=None):
@@ -597,38 +587,12 @@ class BaseExtractor(Extractor):
         return r"(?:https?://)?(?:" + "|".join(pattern_list) + r")"
 
 
-class HTTPSAdapter(HTTPAdapter):
-
-    def __init__(self, ciphers):
-        context = self.ssl_context = ssl.create_default_context()
-        context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
-                            ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
-        context.set_ecdh_curve("prime256v1")
-        context.set_ciphers(ciphers)
-        HTTPAdapter.__init__(self)
-
-    def init_poolmanager(self, *args, **kwargs):
-        kwargs["ssl_context"] = self.ssl_context
-        return HTTPAdapter.init_poolmanager(self, *args, **kwargs)
-
-    def proxy_manager_for(self, *args, **kwargs):
-        kwargs["ssl_context"] = self.ssl_context
-        return HTTPAdapter.proxy_manager_for(self, *args, **kwargs)
-
-
-def _emulate_browser_firefox(session, platform):
-    headers = session.headers
-    headers["User-Agent"] = ("Mozilla/5.0 (" + platform + "; rv:91.0) "
-                             "Gecko/20100101 Firefox/91.0")
-    headers["Accept"] = ("text/html,application/xhtml+xml,"
-                         "application/xml;q=0.9,image/webp,*/*;q=0.8")
-    headers["Accept-Language"] = "en-US,en;q=0.5"
-    headers["Accept-Encoding"] = "gzip, deflate"
-    headers["Referer"] = None
-    headers["Upgrade-Insecure-Requests"] = "1"
-    headers["Cookie"] = None
-
-    session.mount("https://", HTTPSAdapter(
+def _emulate_browser_firefox(platform):
+    context = ssl.create_default_context()
+    context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
+                        ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
+    context.set_ecdh_curve("prime256v1")
+    context.set_ciphers(
         "TLS_AES_128_GCM_SHA256:"
         "TLS_CHACHA20_POLY1305_SHA256:"
         "TLS_AES_256_GCM_SHA384:"
@@ -647,26 +611,31 @@ def _emulate_browser_firefox(session, platform):
         "AES128-SHA:"
         "AES256-SHA:"
         "DES-CBC3-SHA"
-    ))
+    )
 
-
-def _emulate_browser_chrome(session, platform):
-    if platform.startswith("Macintosh"):
-        platform = platform.replace(".", "_") + "_2"
+    session = httpx.Client(http2=True, verify=context, follow_redirects=True)
 
     headers = session.headers
-    headers["Upgrade-Insecure-Requests"] = "1"
-    headers["User-Agent"] = (
-        "Mozilla/5.0 (" + platform + ") AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36")
-    headers["Accept"] = ("text/html,application/xhtml+xml,application/xml;"
-                         "q=0.9,image/webp,image/apng,*/*;q=0.8")
-    headers["Referer"] = None
-    headers["Accept-Encoding"] = "gzip, deflate"
-    headers["Accept-Language"] = "en-US,en;q=0.9"
-    headers["Cookie"] = None
+    headers.clear()
+    headers["user-agent"] = ("Mozilla/5.0 (" + platform + "; rv:91.0) "
+                             "Gecko/20100101 Firefox/91.0")
+    headers["accept"] = ("text/html,application/xhtml+xml,"
+                         "application/xml;q=0.9,image/webp,*/*;q=0.8")
+    headers["accept-language"] = "en-US,en;q=0.5"
+    headers["accept-encoding"] = "gzip, deflate, br"
+    #  headers["referer"] = None
+    headers["upgrade-insecure-requests"] = "1"
+    #  headers["cookie"] = None
 
-    session.mount("https://", HTTPSAdapter(
+    return session
+
+
+def _emulate_browser_chrome(platform):
+    context = ssl.create_default_context()
+    context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
+                        ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
+    context.set_ecdh_curve("prime256v1")
+    context.set_ciphers(
         "TLS_AES_128_GCM_SHA256:"
         "TLS_AES_256_GCM_SHA384:"
         "TLS_CHACHA20_POLY1305_SHA256:"
@@ -683,15 +652,22 @@ def _emulate_browser_chrome(session, platform):
         "AES128-SHA:"
         "AES256-SHA:"
         "DES-CBC3-SHA"
-    ))
+    )
 
+    session = httpx.Client(http2=True, verify=context, follow_redirects=True)
 
-# Undo automatic pyOpenSSL injection by requests
-pyopenssl = config.get((), "pyopenssl", False)
-if not pyopenssl:
-    try:
-        from requests.packages.urllib3.contrib import pyopenssl  # noqa
-        pyopenssl.extract_from_urllib3()
-    except ImportError:
-        pass
-del pyopenssl
+    if platform.startswith("Macintosh"):
+        platform = platform.replace(".", "_") + "_2"
+
+    headers = session.headers
+    headers.clear()
+    headers["Upgrade-Insecure-Requests"] = "1"
+    headers["User-Agent"] = (
+        "Mozilla/5.0 (" + platform + ") AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36")
+    headers["Accept"] = ("text/html,application/xhtml+xml,application/xml;"
+                         "q=0.9,image/webp,image/apng,*/*;q=0.8")
+    #  headers["Referer"] = None
+    headers["Accept-Encoding"] = "gzip, deflate"
+    headers["Accept-Language"] = "en-US,en;q=0.9"
+    #  headers["Cookie"] = None

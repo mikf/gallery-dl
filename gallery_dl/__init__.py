@@ -140,7 +140,7 @@ def main():
             import platform
             import subprocess
             import os.path
-            import requests
+            import httpx
 
             head = ""
             try:
@@ -158,12 +158,7 @@ def main():
             log.debug("Version %s%s", __version__, head)
             log.debug("Python %s - %s",
                       platform.python_version(), platform.platform())
-            try:
-                log.debug("requests %s - urllib3 %s",
-                          requests.__version__,
-                          requests.packages.urllib3.__version__)
-            except AttributeError:
-                pass
+            log.debug("httpx %s", httpx.__version__)
 
         if args.list_modules:
             for module_name in extractor.modules:

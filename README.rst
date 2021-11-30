@@ -17,7 +17,7 @@ Dependencies
 ============
 
 - Python_ 3.4+
-- Requests_
+- HTTPX_
 
 Optional
 --------
@@ -326,7 +326,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _Python:     https://www.python.org/downloads/
 .. _PyPI:       https://pypi.org/
 .. _pip:        https://pip.pypa.io/en/stable/
-.. _Requests:   https://requests.readthedocs.io/en/master/
+.. _HTTPX:      https://github.com/encode/httpx
 .. _FFmpeg:     https://www.ffmpeg.org/
 .. _youtube-dl: https://ytdl-org.github.io/youtube-dl/
 .. _pyOpenSSL:  https://pyopenssl.org/

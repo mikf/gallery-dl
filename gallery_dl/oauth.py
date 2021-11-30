@@ -16,9 +16,6 @@ import string
 import hashlib
 import urllib.parse
 
-import requests
-import requests.auth
-
 from . import text
 from .cache import cache
 
@@ -38,6 +35,7 @@ def concat(*args):
     return "&".join(quote(item) for item in args)
 
 
+'''
 class OAuth1Session(requests.Session):
     """Extension to requests.Session to support OAuth 1.0"""
 
@@ -101,6 +99,17 @@ class OAuth1Client(requests.auth.AuthBase):
         signature = hmac.new(key, message, hashlib.sha1).digest()
 
         return quote(base64.b64encode(signature).decode())
+'''
+
+
+class OAuth1Session():
+    def __init__(self, consumer_key, consumer_secret,
+                 token=None, token_secret=None):
+        pass
+
+
+class OAuth1Client():
+    pass
 
 
 class OAuth1API():

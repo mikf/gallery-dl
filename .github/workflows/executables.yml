@@ -21,7 +21,7 @@ jobs:
 
     - name: Build executable
       run: |
-        pip install requests requests[socks] urllib3==1.25.11 youtube-dl pyinstaller
+        pip install httpx youtube-dl pyinstaller
         python scripts/pyinstaller.py
 
     - name: Upload executable
