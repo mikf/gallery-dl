@@ -9,16 +9,11 @@
 """Downloader module for http:// and https:// URLs"""
 
 import time
+import httpx
 import mimetypes
-from requests.exceptions import RequestException, ConnectionError, Timeout
+from ssl import SSLError
 from .common import DownloaderBase
 from .. import text, util
-
-from ssl import SSLError
-try:
-    from OpenSSL.SSL import Error as OpenSSLError
-except ImportError:
-    OpenSSLError = SSLError
 
 
 class HttpDownloader(DownloaderBase):
@@ -79,7 +74,6 @@ class HttpDownloader(DownloaderBase):
                 util.remove_file(pathfmt.temppath)
 
     def _download_impl(self, url, pathfmt):
-        response = None
         tries = 0
         msg = ""
 
@@ -92,16 +86,11 @@ class HttpDownloader(DownloaderBase):
 
         while True:
             if tries:
-                if response:
-                    response.close()
-                    response = None
                 self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
                 if tries > self.retries:
                     return False
                 time.sleep(tries)
-
             tries += 1
-            file_header = None
 
             # collect HTTP headers
             headers = {"Accept": "*/*"}
@@ -119,115 +108,117 @@ class HttpDownloader(DownloaderBase):
 
             # connect to (remote) source
             try:
-                response = self.session.request(
-                    "GET", url, stream=True, headers=headers,
-                    timeout=self.timeout, verify=self.verify)
-            except (ConnectionError, Timeout) as exc:
+                with self.session.stream("GET", url, headers=headers, timeout=self.timeout) as response:
+
+                    # check response
+                    code = response.status_code
+                    if code == 200:  # OK
+                        offset = 0
+                        size = response.headers.get("Content-Length")
+                    elif code == 206:  # Partial Content
+                        offset = file_size
+                        size = response.headers["Content-Range"].rpartition("/")[2]
+                    elif code == 416 and file_size:  # Requested Range Not Satisfiable
+                        break
+                    else:
+                        msg = "'{} {}' for '{}'".format(
+                            code, response.reason_phrase, url)
+                        if code == 429 or 500 <= code < 600:  # Server Error
+                            continue
+                        self.log.warning(msg)
+                        return False
+
+                    # check for invalid responses
+                    validate = kwdict.get("_http_validate")
+                    if validate and not validate(response):
+                        self.log.warning("Invalid response")
+                        return False
+
+                    # set missing filename extension from MIME type
+                    if not pathfmt.extension:
+                        pathfmt.set_extension(self._find_extension(response))
+                        if pathfmt.exists():
+                            pathfmt.temppath = ""
+                            return True
+
+                    # check file size
+                    size = text.parse_int(size, None)
+                    if size is not None:
+                        if self.minsize and size < self.minsize:
+                            self.log.warning(
+                                "File size smaller than allowed minimum (%s < %s)",
+                                size, self.minsize)
+                            return False
+                        if self.maxsize and size > self.maxsize:
+                            self.log.warning(
+                                "File size larger than allowed maximum (%s > %s)",
+                                size, self.maxsize)
+                            return False
+
+                    content = response.iter_bytes(self.chunk_size)
+                    file_header = None
+
+                    # check filename extension against file header
+                    if adjust_extension and not offset and \
+                            pathfmt.extension in FILE_SIGNATURES:
+                        try:
+                            file_header = next(content, b"")
+                            #  content
+                            #  if response.headers.get("transfer-encoding", "").lower() == "chunked" else
+                            #  response.iter_bytes(16), b"")
+                        except (httpx.HTTPError, SSLError) as exc:
+                            msg = str(exc)
+                            print()
+                            continue
+                        if self._adjust_extension(pathfmt, file_header) and \
+                                pathfmt.exists():
+                            pathfmt.temppath = ""
+                            return True
+
+                    # set open mode
+                    if not offset:
+                        mode = "w+b"
+                        if file_size:
+                            self.log.debug("Unable to resume partial download")
+                    else:
+                        mode = "r+b"
+                        self.log.debug("Resuming download at byte %d", offset)
+
+                    # download content
+                    self.downloading = True
+                    with pathfmt.open(mode) as fp:
+                        if file_header:
+                            fp.write(file_header)
+                            offset += len(file_header)
+                        elif offset:
+                            if adjust_extension and \
+                                    pathfmt.extension in FILE_SIGNATURES:
+                                self._adjust_extension(pathfmt, fp.read(16))
+                            fp.seek(offset)
+
+                        self.out.start(pathfmt.path)
+                        try:
+                            self.receive(fp, content, size, offset)
+                        except (httpx.HTTPError, SSLError) as exc:
+                            msg = str(exc)
+                            print()
+                            continue
+
+                        # check file size
+                        if size and fp.tell() < size:
+                            msg = "file size mismatch ({} < {})".format(
+                                fp.tell(), size)
+                            print()
+                            continue
+
+                    break
+
+            except (httpx.TimeoutException, httpx.NetworkError) as exc:
                 msg = str(exc)
                 continue
             except Exception as exc:
                 self.log.warning(exc)
                 return False
-
-            # check response
-            code = response.status_code
-            if code == 200:  # OK
-                offset = 0
-                size = response.headers.get("Content-Length")
-            elif code == 206:  # Partial Content
-                offset = file_size
-                size = response.headers["Content-Range"].rpartition("/")[2]
-            elif code == 416 and file_size:  # Requested Range Not Satisfiable
-                break
-            else:
-                msg = "'{} {}' for '{}'".format(code, response.reason, url)
-                if code == 429 or 500 <= code < 600:  # Server Error
-                    continue
-                self.log.warning(msg)
-                return False
-
-            # check for invalid responses
-            validate = kwdict.get("_http_validate")
-            if validate and not validate(response):
-                self.log.warning("Invalid response")
-                return False
-
-            # set missing filename extension from MIME type
-            if not pathfmt.extension:
-                pathfmt.set_extension(self._find_extension(response))
-                if pathfmt.exists():
-                    pathfmt.temppath = ""
-                    return True
-
-            # check file size
-            size = text.parse_int(size, None)
-            if size is not None:
-                if self.minsize and size < self.minsize:
-                    self.log.warning(
-                        "File size smaller than allowed minimum (%s < %s)",
-                        size, self.minsize)
-                    return False
-                if self.maxsize and size > self.maxsize:
-                    self.log.warning(
-                        "File size larger than allowed maximum (%s > %s)",
-                        size, self.maxsize)
-                    return False
-
-            content = response.iter_content(self.chunk_size)
-
-            # check filename extension against file header
-            if adjust_extension and not offset and \
-                    pathfmt.extension in FILE_SIGNATURES:
-                try:
-                    file_header = next(
-                        content if response.raw.chunked
-                        else response.iter_content(16), b"")
-                except (RequestException, SSLError, OpenSSLError) as exc:
-                    msg = str(exc)
-                    print()
-                    continue
-                if self._adjust_extension(pathfmt, file_header) and \
-                        pathfmt.exists():
-                    pathfmt.temppath = ""
-                    return True
-
-            # set open mode
-            if not offset:
-                mode = "w+b"
-                if file_size:
-                    self.log.debug("Unable to resume partial download")
-            else:
-                mode = "r+b"
-                self.log.debug("Resuming download at byte %d", offset)
-
-            # download content
-            self.downloading = True
-            with pathfmt.open(mode) as fp:
-                if file_header:
-                    fp.write(file_header)
-                    offset += len(file_header)
-                elif offset:
-                    if adjust_extension and \
-                            pathfmt.extension in FILE_SIGNATURES:
-                        self._adjust_extension(pathfmt, fp.read(16))
-                    fp.seek(offset)
-
-                self.out.start(pathfmt.path)
-                try:
-                    self.receive(fp, content, size, offset)
-                except (RequestException, SSLError, OpenSSLError) as exc:
-                    msg = str(exc)
-                    print()
-                    continue
-
-                # check file size
-                if size and fp.tell() < size:
-                    msg = "file size mismatch ({} < {})".format(
-                        fp.tell(), size)
-                    print()
-                    continue
-
-            break
 
         self.downloading = False
         if self.mtime:

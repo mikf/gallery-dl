@@ -9,7 +9,6 @@
 """Recursive extractor"""
 
 from .common import Extractor, Message
-import requests
 import re
 
 
@@ -22,29 +21,29 @@ class RecursiveExtractor(Extractor):
     })
 
     def items(self):
-        self.session.mount("file://", FileAdapter())
+        #  self.session.mount("file://", FileAdapter())
         page = self.request(self.url.partition(":")[2]).text
-        del self.session.adapters["file://"]
+        #  del self.session.adapters["file://"]
 
         for match in re.finditer(r"https?://[^\s\"']+", page):
             yield Message.Queue, match.group(0), {}
 
 
-class FileAdapter(requests.adapters.BaseAdapter):
-    """Requests adapter for local files"""
+#  class FileAdapter(requests.adapters.BaseAdapter):
+    #  """Requests adapter for local files"""
 
-    def send(self, request, **kwargs):
-        response = requests.Response()
-        try:
-            response.raw = open(request.url[7:], "rb")
-        except OSError:
-            import io
-            response.raw = io.BytesIO()
-            response.status_code = requests.codes.bad_request
-        else:
-            response.raw.release_conn = response.raw.close
-            response.status_code = requests.codes.ok
-        return response
+    #  def send(self, request, **kwargs):
+        #  response = requests.Response()
+        #  try:
+            #  response.raw = open(request.url[7:], "rb")
+        #  except OSError:
+            #  import io
+            #  response.raw = io.BytesIO()
+            #  response.status_code = requests.codes.bad_request
+        #  else:
+            #  response.raw.release_conn = response.raw.close
+            #  response.status_code = requests.codes.ok
+        #  return response
 
-    def close(self):
-        pass
+    #  def close(self):
+        #  pass

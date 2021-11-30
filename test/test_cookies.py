@@ -49,7 +49,7 @@ class TestCookiejar(unittest.TestCase):
         cookies = extractor.find("test:").session.cookies
         self.assertEqual(len(cookies), 1)
 
-        cookie = next(iter(cookies))
+        cookie = next(iter(cookies.jar))
         self.assertEqual(cookie.domain, ".example.org")
         self.assertEqual(cookie.path  , "/")
         self.assertEqual(cookie.name  , "NAME")
@@ -93,7 +93,7 @@ class TestCookiedict(unittest.TestCase):
             cookies = extr.session.cookies
             for key in self.cdict:
                 self.assertTrue(key in cookies)
-            for c in cookies:
+            for c in cookies.jar:
                 self.assertEqual(c.domain, extr.cookiedomain)
 
 

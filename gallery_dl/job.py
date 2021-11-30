@@ -54,7 +54,7 @@ class Job():
                 extr.subcategory = pextr.subcategory
 
             # reuse connection adapters
-            extr.session.adapters = pextr.session.adapters
+            #  extr.session.adapters = pextr.session.adapters
 
         # user-supplied metadata
         kwdict = extr.config("keywords")

@@ -92,9 +92,9 @@ setup(
     maintainer="Mike Fährmann",
     maintainer_email="mike_faehrmann@web.de",
     license="GPLv2",
-    python_requires=">=3.4",
+    python_requires=">=3.6",
     install_requires=[
-        "requests>=2.11.0",
+        "httpx",
     ],
     extras_require={
         "video": [
@@ -122,8 +122,6 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
         "Operating System :: MacOS",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
