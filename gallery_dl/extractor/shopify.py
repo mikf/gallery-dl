@@ -47,8 +47,23 @@ BASE_PATTERN = ShopifyExtractor.update({
         "root": "https://www.fashionnova.com",
         "pattern": r"(?:www\.)?fashionnova\.com",
     },
+    "loveraid": {
+        "root": "https://www.loveraid.com",
+    },
+    "michaelscameras": {
+        "root": "https://michaels.com.au",
+    },
+    "modcloth": {
+        "root": "https://modcloth.com",
+    },
     "omgmiamiswimwear": {
         "root": "https://www.omgmiamiswimwear.com",
+    },
+    "pinupgirlclothing": {
+        "root": "https://pinupgirlclothing.com",
+    },
+    "unique-vintage": {
+        "root": "https://www.unique-vintage.com",
     },
     "windsorstore": {
         "root": "https://www.windsorstore.com",
