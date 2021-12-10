@@ -296,7 +296,7 @@ class PinterestPinitExtractor(PinterestExtractor):
     def items(self):
         url = "https://api.pinterest.com/url_shortener/{}/redirect".format(
             self.shortened_id)
-        response = self.request(url, method="HEAD", allow_redirects=False)
+        response = self.request(url, method="HEAD", follow_redirects=False)
         location = response.headers.get("Location")
         if not location or not PinterestPinExtractor.pattern.match(location):
             raise exception.NotFoundError("pin")

@@ -32,7 +32,7 @@ class ImgbbExtractor(Extractor):
         url = self.page_url
         params = {"sort": self.sort}
         while True:
-            response = self.request(url, params=params, allow_redirects=False)
+            response = self.request(url, params=params, follow_redirects=False)
             if response.status_code < 300:
                 break
             url = response.headers["location"]

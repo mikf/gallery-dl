@@ -42,7 +42,7 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
             response = self.request(
                 "{}/tumblrblog/gallery/{}/{}.html"
                 .format(self.root, self.gallery_id, page_num),
-                allow_redirects=False
+                follow_redirects=False
             )
             if response.status_code != 200:
                 return
@@ -117,7 +117,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
             response = self.request(
                 "{}/s.php?q={}&page={}"
                 .format(self.root, self.search_term, page_num),
-                allow_redirects=False
+                follow_redirects=False
             )
             if response.status_code != 200:
                 return
@@ -135,7 +135,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
                 post_page = self.request(
                     "{}/post/{}.html"
                     .format(self.root, gallery_id),
-                    allow_redirects=False
+                    follow_redirects=False
                 ).text
                 for image_src in TumblrgalleryPostExtractor.images(
                     self, post_page

@@ -212,7 +212,7 @@ class PixivMeExtractor(PixivExtractor):
         url = "https://pixiv.me/" + self.account
         data = {"_extractor": PixivUserExtractor}
         response = self.request(
-            url, method="HEAD", allow_redirects=False, notfound="user")
+            url, method="HEAD", follow_redirects=False, notfound="user")
         yield Message.Queue, response.headers["Location"], data
 
 
