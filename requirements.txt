@@ -1,1 +1,2 @@
-requests>=2.11.0
+requests>=2.21.0
+certifi>=2021.10.8
