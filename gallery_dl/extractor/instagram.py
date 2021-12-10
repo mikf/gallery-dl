@@ -564,7 +564,7 @@ class InstagramPostExtractor(InstagramExtractor):
     """Extractor for an Instagram post"""
     subcategory = "post"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?:p|tv|reel)/([^/?#]+)")
+               r"/(?:[^/?#]+/)?(?:p|tv|reel)/([^/?#]+)")
     test = (
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
@@ -662,6 +662,9 @@ class InstagramPostExtractor(InstagramExtractor):
                 }]
             }
         }),
+
+        # URL with username (#2085)
+        ("https://www.instagram.com/dm/p/CW042g7B9CY/"),
 
         ("https://www.instagram.com/reel/CDg_6Y1pxWu/"),
     )
