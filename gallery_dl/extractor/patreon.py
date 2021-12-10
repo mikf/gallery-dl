@@ -73,7 +73,7 @@ class PatreonExtractor(Extractor):
         for attachment in post["attachments"]:
             url = self.request(
                 attachment["url"], method="HEAD",
-                allow_redirects=False, fatal=False,
+                follow_redirects=False, fatal=False,
             ).headers.get("Location")
 
             if url:

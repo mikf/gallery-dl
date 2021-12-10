@@ -187,7 +187,7 @@ class FanboxExtractor(Extractor):
             # to a proper Fanbox URL
             url = "https://www.pixiv.net/fanbox/"+content_id
             # resolve redirect
-            response = self.request(url, method="HEAD", allow_redirects=False)
+            response = self.request(url, method="HEAD", follow_redirects=False)
             url = response.headers["Location"]
             final_post["_extractor"] = FanboxPostExtractor
         elif provider == "twitter":
