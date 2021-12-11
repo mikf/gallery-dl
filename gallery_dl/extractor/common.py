@@ -111,6 +111,19 @@ class Extractor():
         response = None
         tries = 1
 
+        headers = self._headers.copy()
+        kw_headers = kwargs.get("headers")
+        if kw_headers:
+            headers.update(kw_headers)
+        for key in [k for k, v in headers.items() if v is None]:
+            del headers[key]
+        kwargs["headers"] = headers
+
+        kw_params = kwargs.get("params")
+        if kw_params:
+            kwargs["params"] = {
+                k: v for k, v in kw_params.items() if v is not None}
+
         if self._interval:
             seconds = (self._interval() -
                        (time.time() - Extractor.request_timestamp))
@@ -226,24 +239,34 @@ class Extractor():
                 platform = "Macintosh; Intel Mac OS X 11.5"
 
             if browser == "chrome":
-                session = _emulate_browser_chrome(platform)
+                self._headers, ciphers = _emulate_browser_chrome(platform)
             else:
-                session = _emulate_browser_firefox(platform)
+                self._headers, ciphers = _emulate_browser_firefox(platform)
+
+            context = ssl.create_default_context()
+            context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
+                                ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
+            context.set_ecdh_curve("prime256v1")
+            context.set_ciphers(ciphers)
+
+            session = httpx.Client(
+                http2=True, verify=context, follow_redirects=True)
         else:
             session = httpx.Client(verify=self._verify, follow_redirects=True)
-            headers = session.headers
-            headers.clear()
-            headers["User-Agent"] = self.config("user-agent", (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                "rv:91.0) Gecko/20100101 Firefox/91.0"))
-            headers["Accept"] = "*/*"
-            headers["Accept-Language"] = "en-US,en;q=0.5"
-            headers["Accept-Encoding"] = "gzip, deflate"
+            self._headers = {
+                "User-Agent": self.config("user-agent", (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
+                    "rv:91.0) Gecko/20100101 Firefox/91.0")),
+                "accept": "*/*",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Encoding": "gzip, deflate",
+            }
 
         custom_headers = self.config("headers")
         if custom_headers:
-            session.headers.update(custom_headers)
+            self._headers.update(custom_headers)
 
+        session.headers.clear()
         return session
 
     def _init_proxies(self):
@@ -588,11 +611,17 @@ class BaseExtractor(Extractor):
 
 
 def _emulate_browser_firefox(platform):
-    context = ssl.create_default_context()
-    context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
-                        ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
-    context.set_ecdh_curve("prime256v1")
-    context.set_ciphers(
+    return {
+        "User-Agent": "Mozilla/5.0 (" + platform + "; rv:91.0) "
+                      "Gecko/20100101 Firefox/91.0",
+        "Accept": "text/html,application/xhtml+xml,"
+                  "application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Referer": None,
+        "Upgrade-Insecure-Requests": "1",
+        "Cookie": None,
+    }, (
         "TLS_AES_128_GCM_SHA256:"
         "TLS_CHACHA20_POLY1305_SHA256:"
         "TLS_AES_256_GCM_SHA384:"
@@ -613,29 +642,22 @@ def _emulate_browser_firefox(platform):
         "DES-CBC3-SHA"
     )
 
-    session = httpx.Client(http2=True, verify=context, follow_redirects=True)
-
-    headers = session.headers
-    headers.clear()
-    headers["user-agent"] = ("Mozilla/5.0 (" + platform + "; rv:91.0) "
-                             "Gecko/20100101 Firefox/91.0")
-    headers["accept"] = ("text/html,application/xhtml+xml,"
-                         "application/xml;q=0.9,image/webp,*/*;q=0.8")
-    headers["accept-language"] = "en-US,en;q=0.5"
-    headers["accept-encoding"] = "gzip, deflate, br"
-    #  headers["referer"] = None
-    headers["upgrade-insecure-requests"] = "1"
-    #  headers["cookie"] = None
-
-    return session
-
 
 def _emulate_browser_chrome(platform):
-    context = ssl.create_default_context()
-    context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
-                        ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
-    context.set_ecdh_curve("prime256v1")
-    context.set_ciphers(
+    if platform.startswith("Macintosh"):
+        platform = platform.replace(".", "_") + "_2"
+
+    return {
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (" + platform + ") AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;"
+                  "q=0.9,image/webp,image/apng,*/*;q=0.8",
+        "Referer": None,
+        "Accept-Encoding": "gzip, deflate",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Cookie": None,
+    }, (
         "TLS_AES_128_GCM_SHA256:"
         "TLS_AES_256_GCM_SHA384:"
         "TLS_CHACHA20_POLY1305_SHA256:"
@@ -653,21 +675,3 @@ def _emulate_browser_chrome(platform):
         "AES256-SHA:"
         "DES-CBC3-SHA"
     )
-
-    session = httpx.Client(http2=True, verify=context, follow_redirects=True)
-
-    if platform.startswith("Macintosh"):
-        platform = platform.replace(".", "_") + "_2"
-
-    headers = session.headers
-    headers.clear()
-    headers["Upgrade-Insecure-Requests"] = "1"
-    headers["User-Agent"] = (
-        "Mozilla/5.0 (" + platform + ") AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36")
-    headers["Accept"] = ("text/html,application/xhtml+xml,application/xml;"
-                         "q=0.9,image/webp,image/apng,*/*;q=0.8")
-    #  headers["Referer"] = None
-    headers["Accept-Encoding"] = "gzip, deflate"
-    headers["Accept-Language"] = "en-US,en;q=0.9"
-    #  headers["Cookie"] = None

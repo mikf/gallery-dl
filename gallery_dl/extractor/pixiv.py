@@ -638,7 +638,7 @@ class PixivAppAPI():
         self.username = extractor._get_auth_info()[0]
         self.user = None
 
-        extractor.session.headers.update({
+        extractor._headers.update({
             "App-OS"        : "ios",
             "App-OS-Version": "13.1.2",
             "App-Version"   : "7.7.6",
@@ -659,7 +659,7 @@ class PixivAppAPI():
     def login(self):
         """Login and gain an access token"""
         self.user, auth = self._login_impl(self.username)
-        self.extractor.session.headers["Authorization"] = auth
+        self.extractor._headers["Authorization"] = auth
 
     @cache(maxage=3600, keyarg=1)
     def _login_impl(self, username):

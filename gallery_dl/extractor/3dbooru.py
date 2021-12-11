@@ -19,10 +19,8 @@ class _3dbooruBase():
 
     def __init__(self, match):
         super().__init__(match)
-        self.session.headers.update({
-            "Referer": "http://behoimi.org/post/show/",
-            "Accept-Encoding": "identity",
-        })
+        self._headers["Referer"] = "http://behoimi.org/post/show/"
+        self._headers["Accept-Encoding"] = "identity"
 
 
 class _3dbooruTagExtractor(_3dbooruBase, moebooru.MoebooruTagExtractor):

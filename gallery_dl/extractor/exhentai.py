@@ -52,7 +52,7 @@ class ExhentaiExtractor(Extractor):
         else:
             self.limits = False
 
-        self.session.headers["Referer"] = self.root + "/"
+        self._headers["Referer"] = self.root + "/"
         if version != "ex":
             self.session.cookies.set("nw", "1", domain=self.cookiedomain)
 

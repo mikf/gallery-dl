@@ -64,7 +64,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
         url = "https://ltn.hitomi.la/galleries/{}.js".format(gid)
         GalleryExtractor.__init__(self, match, url)
         self.info = None
-        self.session.headers["Referer"] = "{}/reader/{}.html".format(
+        self._headers["Referer"] = "{}/reader/{}.html".format(
             self.root, gid)
 
     def metadata(self, page):

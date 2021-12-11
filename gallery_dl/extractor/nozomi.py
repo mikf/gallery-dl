@@ -27,8 +27,8 @@ class NozomiExtractor(Extractor):
     def items(self):
 
         data = self.metadata()
-        self.session.headers["Origin"] = self.root
-        self.session.headers["Referer"] = self.root + "/"
+        self._headers["Origin"] = self.root
+        self._headers["Referer"] = self.root + "/"
 
         for post_id in map(str, self.posts()):
             url = "https://j.nozomi.la/post/{}/{}/{}.json".format(

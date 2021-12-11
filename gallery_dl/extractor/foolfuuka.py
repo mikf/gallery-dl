@@ -21,7 +21,7 @@ class FoolfuukaExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.session.headers["Referer"] = self.root
+        self._headers["Referer"] = self.root
         if self.category == "b4k":
             self.remote = self._remote_direct
 

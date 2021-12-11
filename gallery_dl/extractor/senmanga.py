@@ -38,7 +38,7 @@ class SenmangaChapterExtractor(Extractor):
         part = match.group(1)
         self.chapter_url = "{}/{}/".format(self.root, part)
         self.img_url = "{}/viewer/{}/".format(self.root, part)
-        self.session.headers["Referer"] = self.chapter_url
+        self._headers["Referer"] = self.chapter_url
 
     def items(self):
         data = self.metadata()
