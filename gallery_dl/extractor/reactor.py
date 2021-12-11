@@ -27,7 +27,7 @@ class ReactorExtractor(BaseExtractor):
         pos = url.index("/", 10)
 
         self.root, self.path = url[:pos], url[pos:]
-        self.session.headers["Referer"] = self.root
+        self._headers["Referer"] = self.root
         self.gif = self.config("gif", False)
 
         if self.category == "reactor":

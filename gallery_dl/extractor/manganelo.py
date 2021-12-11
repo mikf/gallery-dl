@@ -37,7 +37,7 @@ class ManganeloChapterExtractor(ChapterExtractor):
     def __init__(self, match):
         domain, path = match.groups()
         ChapterExtractor.__init__(self, match, "https://" + domain + path)
-        self.session.headers['Referer'] = self.root
+        self._headers['Referer'] = self.root
 
     def metadata(self, page):
         _     , pos = text.extract(page, '<a class="a-h" ', '/a>')
@@ -95,7 +95,7 @@ class ManganeloMangaExtractor(MangaExtractor):
     def __init__(self, match):
         domain, path = match.groups()
         MangaExtractor.__init__(self, match, "https://" + domain + path)
-        self.session.headers['Referer'] = self.root
+        self._headers['Referer'] = self.root
 
     def chapters(self, page):
         results = []

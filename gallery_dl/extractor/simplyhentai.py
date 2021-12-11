@@ -40,7 +40,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
             path = "/" + subdomain.rstrip(".") + path
         url = "https://old.simply-hentai.com" + path
         GalleryExtractor.__init__(self, match, url)
-        self.session.headers["Referer"] = url
+        self._headers["Referer"] = url
 
     def metadata(self, page):
         extr = text.extract_from(page)

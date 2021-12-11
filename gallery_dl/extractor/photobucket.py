@@ -51,7 +51,7 @@ class PhotobucketAlbumExtractor(Extractor):
         Extractor.__init__(self, match)
         self.album_path = ""
         self.root = "https://" + match.group(1)
-        self.session.headers["Referer"] = self.url
+        self._headers["Referer"] = self.url
 
     def items(self):
         for image in self.images():
@@ -129,7 +129,7 @@ class PhotobucketImageExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1) or match.group(3)
         self.media_id = match.group(2)
-        self.session.headers["Referer"] = self.url
+        self._headers["Referer"] = self.url
 
     def items(self):
         url = "https://photobucket.com/galleryd/search.php"

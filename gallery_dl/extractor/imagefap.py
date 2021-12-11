@@ -26,7 +26,7 @@ class ImagefapExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.session.headers["Referer"] = self.root
+        self._headers["Referer"] = self.root
 
 
 class ImagefapGalleryExtractor(ImagefapExtractor):

@@ -32,7 +32,7 @@ class NijieExtractor(AsynchronousMixin, Extractor):
         Extractor.__init__(self, match)
         self.user_id = text.parse_int(match.group(1))
         self.user_name = None
-        self.session.headers["Referer"] = self.root + "/"
+        self._headers["Referer"] = self.root + "/"
 
     def items(self):
         self.login()

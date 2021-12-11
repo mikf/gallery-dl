@@ -22,6 +22,7 @@ class HttpDownloader(DownloaderBase):
     def __init__(self, job):
         DownloaderBase.__init__(self, job)
         extractor = job.extractor
+        self._headers = extractor._headers
         self.chunk_size = 16384
         self.downloading = False
 
@@ -93,7 +94,8 @@ class HttpDownloader(DownloaderBase):
             tries += 1
 
             # collect HTTP headers
-            headers = {"Accept": "*/*"}
+            headers = self._headers.copy()
+            headers["Accept"] = "*/*"
             #   file-specific headers
             extra = kwdict.get("_http_headers")
             if extra:

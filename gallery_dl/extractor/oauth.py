@@ -254,7 +254,7 @@ class OAuthReddit(OAuthBase):
     def items(self):
         yield Message.Version, 1
 
-        self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
+        self._headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
         self._oauth2_authorization_code_grant(
             self.oauth_config("client-id", reddit.RedditAPI.CLIENT_ID),
             "",
