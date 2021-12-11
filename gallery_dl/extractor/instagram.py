@@ -689,14 +689,15 @@ class InstagramStoriesExtractor(InstagramExtractor):
     """Extractor for Instagram stories"""
     subcategory = "stories"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/stories/(?:highlights/(\d+)|([^/?#]+))")
+               r"/stories/(?:highlights/(\d+)|([^/?#]+)(?:/(\d+))?)")
     test = (
         ("https://www.instagram.com/stories/instagram/"),
         ("https://www.instagram.com/stories/highlights/18042509488170095/"),
+        ("https://instagram.com/stories/geekmig/2724343156064789461"),
     )
 
     def __init__(self, match):
-        self.highlight_id, self.user = match.groups()
+        self.highlight_id, self.user, self.media_id = match.groups()
         if self.highlight_id:
             self.subcategory = InstagramHighlightsExtractor.subcategory
         InstagramExtractor.__init__(self, match)
@@ -715,7 +716,18 @@ class InstagramStoriesExtractor(InstagramExtractor):
 
         endpoint = "/v1/feed/reels_media/"
         params = {"reel_ids": reel_id}
-        return self._request_api(endpoint, params=params)["reels"].values()
+        reels = self._request_api(endpoint, params=params)["reels"]
+
+        if self.media_id:
+            reel = reels[reel_id]
+            for item in reel["items"]:
+                if item["pk"] == self.media_id:
+                    reel["items"] = (item,)
+                    break
+            else:
+                raise exception.NotFoundError("story")
+
+        return reels.values()
 
 
 class InstagramHighlightsExtractor(InstagramExtractor):
