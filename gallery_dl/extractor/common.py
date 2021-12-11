@@ -430,7 +430,7 @@ class Extractor():
 
         fname = "{:>02}_{}".format(
             Extractor._dump_index,
-            Extractor._dump_sanitize('_', response.url)
+            Extractor._dump_sanitize('_', str(response.url))
         )[:250]
 
         try:

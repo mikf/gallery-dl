@@ -201,7 +201,7 @@ def dump_response(response, fp, *,
         res_headers = response.headers.copy()
         outfmt = """\
 {request.method} {request.url}
-Status: {response.status_code} {response.reason}
+Status: {response.status_code} {response.reason_phrase}
 
 Request Headers
 ---------------
