@@ -108,6 +108,7 @@ modules = [
     "readcomiconline",
     "reddit",
     "redgifs",
+    "rule34us",
     "sankaku",
     "sankakucomplex",
     "seiga",
