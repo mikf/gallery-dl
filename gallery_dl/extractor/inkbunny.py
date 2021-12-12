@@ -205,6 +205,28 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
         return self.api.search(params)
 
 
+class InkbunnySearchExtractor(InkbunnyExtractor):
+    """Extractor for inkbunny search results"""
+    subcategory = "search"
+    pattern = (BASE_PATTERN +
+               r"/submissionsviewall\.php\?([^#]+&mode=search&[^#]+)")
+    test = (("https://inkbunny.net/submissionsviewall.php?rid=ffffffffff"
+             "&mode=search&page=1&orderby=create_datetime&text=cute"
+             "&stringtype=and&keywords=yes&title=yes&description=no&artist="
+             "&favsby=&type=&days=&keyword_id=&user_id=&random=&md5="), {
+        "range": "1-10",
+        "count": 10,
+    })
+
+    def __init__(self, match):
+        InkbunnyExtractor.__init__(self, match)
+        self.params = text.parse_query(match.group(1))
+        self.params.pop("rid", None)
+
+    def posts(self):
+        return self.api.search(self.params)
+
+
 class InkbunnyFollowingExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user watches"""
     subcategory = "following"
