@@ -650,6 +650,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Rule 34</td>
+    <td>https://rule34.us/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Sankaku Channel</td>
     <td>https://sankaku.app/</td>
     <td>Book Searches, Pools, Posts, Tag Searches</td>

@@ -85,6 +85,7 @@ CATEGORY_MAP = {
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
     "rule34"         : "Rule 34",
+    "rule34us"       : "Rule 34",
     "sankaku"        : "Sankaku Channel",
     "sankakucomplex" : "Sankaku Complex",
     "seiga"          : "Niconico Seiga",
