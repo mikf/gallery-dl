@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 import json
-
 
 BASE_PATTERN = r"(?:https?://)?(?:web\.)?500px\.com"
 
@@ -30,7 +29,6 @@ class _500pxExtractor(Extractor):
     def items(self):
         first = True
         data = self.metadata()
-        yield Message.Version, 1
 
         for photo in self.photos():
             url = photo["images"][-1]["url"]
@@ -50,6 +48,8 @@ class _500pxExtractor(Extractor):
 
     def _extend(self, edges):
         """Extend photos with additional metadata and higher resolution URLs"""
+        ids = [str(edge["node"]["legacyId"]) for edge in edges]
+
         url = "https://api.500px.com/v1/photos"
         params = {
             "expanded_user_info"    : "true",
@@ -62,29 +62,28 @@ class _500pxExtractor(Extractor):
             "liked_by"              : "1",
             "following_sample"      : "100",
             "image_size"            : "4096",
-            "ids"                   : ",".join(
-                str(edge["node"]["legacyId"]) for edge in edges),
+            "ids"                   : ",".join(ids),
         }
 
-        data = self._request_api(url, params)["photos"]
+        photos = self._request_api(url, params)["photos"]
         return [
-            data[str(edge["node"]["legacyId"])]
-            for edge in edges
+            photos[pid] for pid in ids
+            if pid in photos or
+            self.log.warning("Unable to fetch photo %s", pid)
         ]
 
     def _request_api(self, url, params, csrf_token=None):
         headers = {"Origin": self.root, "X-CSRF-Token": csrf_token}
         return self.request(url, headers=headers, params=params).json()
 
-    def _request_graphql(self, opname, variables, query_hash):
+    def _request_graphql(self, opname, variables):
         url = "https://api.500px.com/graphql"
-        params = {
+        data = {
             "operationName": opname,
             "variables"    : json.dumps(variables),
-            "extensions"   : '{"persistedQuery":{"version":1'
-                             ',"sha256Hash":"' + query_hash + '"}}',
+            "query"        : QUERIES[opname],
         }
-        return self.request(url, params=params).json()["data"]
+        return self.request(url, method="POST", json=data).json()["data"]
 
 
 class _500pxUserExtractor(_500pxExtractor):
@@ -109,8 +108,6 @@ class _500pxUserExtractor(_500pxExtractor):
         variables = {"username": self.user, "pageSize": 20}
         photos = self._request_graphql(
             "OtherPhotosQuery", variables,
-            "018a5e5117bd72bdf28066aad02c4f2d"
-            "8acdf7f6127215d231da60e24080eb1b",
         )["user"]["photos"]
 
         while True:
@@ -122,8 +119,6 @@ class _500pxUserExtractor(_500pxExtractor):
             variables["cursor"] = photos["pageInfo"]["endCursor"]
             photos = self._request_graphql(
                 "OtherPhotosPaginationContainerQuery", variables,
-                "b4af70d42c71a5e43f0be36ce60dc81e"
-                "9742ebc117cde197350f2b86b5977d98",
             )["userByUsername"]["photos"]
 
 
@@ -142,6 +137,10 @@ class _500pxGalleryExtractor(_500pxExtractor):
                 "user": dict,
             },
         }),
+        # unavailable photos (#1335)
+        ("https://500px.com/p/Light_Expression_Photography/galleries/street", {
+            "count": 4,
+        }),
         ("https://500px.com/fashvamp/galleries/lera"),
     )
 
@@ -153,7 +152,6 @@ class _500pxGalleryExtractor(_500pxExtractor):
     def metadata(self):
         user = self._request_graphql(
             "ProfileRendererQuery", {"username": self.user_name},
-            "5a17a9af1830b58b94a912995b7947b24f27f1301c6ea8ab71a9eb1a6a86585b",
         )["profile"]
         self.user_id = str(user["legacyId"])
 
@@ -166,7 +164,6 @@ class _500pxGalleryExtractor(_500pxExtractor):
         }
         gallery = self._request_graphql(
             "GalleriesDetailQueryRendererQuery", variables,
-            "fb8bb66d31b58903e2f01ebe66bbe7937b982753be3211855b7bce4e286c1a49",
         )["gallery"]
 
         self._photos = gallery["photos"]
@@ -194,8 +191,6 @@ class _500pxGalleryExtractor(_500pxExtractor):
             variables["cursor"] = photos["pageInfo"]["endCursor"]
             photos = self._request_graphql(
                 "GalleriesDetailPaginationContainerQuery", variables,
-                "457c66d976f56863c81795f03e98cb54"
-                "3c7c6cdae7abeab8fe9e8e8a67479fa9",
             )["galleryByOwnerIdAndSlugOrToken"]["photos"]
 
 
@@ -255,3 +250,394 @@ class _500pxImageExtractor(_500pxExtractor):
     def photos(self):
         edges = ({"node": {"legacyId": self.photo_id}},)
         return self._extend(edges)
+
+
+QUERIES = {
+
+    "OtherPhotosQuery": """\
+query OtherPhotosQuery($username: String!, $pageSize: Int) {
+  user: userByUsername(username: $username) {
+    ...OtherPhotosPaginationContainer_user_RlXb8
+    id
+  }
+}
+
+fragment OtherPhotosPaginationContainer_user_RlXb8 on User {
+  photos(first: $pageSize, privacy: PROFILE, sort: ID_DESC) {
+    edges {
+      node {
+        id
+        legacyId
+        canonicalPath
+        width
+        height
+        name
+        isLikedByMe
+        notSafeForWork
+        photographer: uploader {
+          id
+          legacyId
+          username
+          displayName
+          canonicalPath
+          followedByUsers {
+            isFollowedByMe
+          }
+        }
+        images(sizes: [33, 35]) {
+          size
+          url
+          jpegUrl
+          webpUrl
+          id
+        }
+        __typename
+      }
+      cursor
+    }
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+""",
+
+    "OtherPhotosPaginationContainerQuery": """\
+query OtherPhotosPaginationContainerQuery($username: String!, $pageSize: Int, $cursor: String) {
+  userByUsername(username: $username) {
+    ...OtherPhotosPaginationContainer_user_3e6UuE
+    id
+  }
+}
+
+fragment OtherPhotosPaginationContainer_user_3e6UuE on User {
+  photos(first: $pageSize, after: $cursor, privacy: PROFILE, sort: ID_DESC) {
+    edges {
+      node {
+        id
+        legacyId
+        canonicalPath
+        width
+        height
+        name
+        isLikedByMe
+        notSafeForWork
+        photographer: uploader {
+          id
+          legacyId
+          username
+          displayName
+          canonicalPath
+          followedByUsers {
+            isFollowedByMe
+          }
+        }
+        images(sizes: [33, 35]) {
+          size
+          url
+          jpegUrl
+          webpUrl
+          id
+        }
+        __typename
+      }
+      cursor
+    }
+    totalCount
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+""",
+
+    "ProfileRendererQuery": """\
+query ProfileRendererQuery($username: String!) {
+  profile: userByUsername(username: $username) {
+    id
+    legacyId
+    userType: type
+    username
+    firstName
+    displayName
+    registeredAt
+    canonicalPath
+    avatar {
+      ...ProfileAvatar_avatar
+      id
+    }
+    userProfile {
+      firstname
+      lastname
+      state
+      country
+      city
+      about
+      id
+    }
+    socialMedia {
+      website
+      twitter
+      instagram
+      facebook
+      id
+    }
+    coverPhotoUrl
+    followedByUsers {
+      totalCount
+      isFollowedByMe
+    }
+    followingUsers {
+      totalCount
+    }
+    membership {
+      expiryDate
+      membershipTier: tier
+      photoUploadQuota
+      refreshPhotoUploadQuotaAt
+      paymentStatus
+      id
+    }
+    profileTabs {
+      tabs {
+        name
+        visible
+      }
+    }
+    ...EditCover_cover
+    photoStats {
+      likeCount
+      viewCount
+    }
+    photos(privacy: PROFILE) {
+      totalCount
+    }
+    licensingPhotos(status: ACCEPTED) {
+      totalCount
+    }
+    portfolio {
+      id
+      status
+      userDisabled
+    }
+  }
+}
+
+fragment EditCover_cover on User {
+  coverPhotoUrl
+}
+
+fragment ProfileAvatar_avatar on UserAvatar {
+  images(sizes: [MEDIUM, LARGE]) {
+    size
+    url
+    id
+  }
+}
+""",
+
+    "GalleriesDetailQueryRendererQuery": """\
+query GalleriesDetailQueryRendererQuery($galleryOwnerLegacyId: ID!, $ownerLegacyId: String, $slug: String, $token: String, $pageSize: Int, $gallerySize: Int) {
+  galleries(galleryOwnerLegacyId: $galleryOwnerLegacyId, first: $gallerySize) {
+    edges {
+      node {
+        legacyId
+        description
+        name
+        privacy
+        canonicalPath
+        notSafeForWork
+        buttonName
+        externalUrl
+        cover {
+          images(sizes: [35, 33]) {
+            size
+            webpUrl
+            jpegUrl
+            id
+          }
+          id
+        }
+        photos {
+          totalCount
+        }
+        id
+      }
+    }
+  }
+  gallery: galleryByOwnerIdAndSlugOrToken(ownerLegacyId: $ownerLegacyId, slug: $slug, token: $token) {
+    ...GalleriesDetailPaginationContainer_gallery_RlXb8
+    id
+  }
+}
+
+fragment GalleriesDetailPaginationContainer_gallery_RlXb8 on Gallery {
+  id
+  legacyId
+  name
+  privacy
+  notSafeForWork
+  ownPhotosOnly
+  canonicalPath
+  publicSlug
+  lastPublishedAt
+  photosAddedSinceLastPublished
+  reportStatus
+  creator {
+    legacyId
+    id
+  }
+  cover {
+    images(sizes: [33, 32, 36, 2048]) {
+      url
+      size
+      webpUrl
+      id
+    }
+    id
+  }
+  description
+  externalUrl
+  buttonName
+  photos(first: $pageSize) {
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        legacyId
+        canonicalPath
+        name
+        description
+        category
+        uploadedAt
+        location
+        width
+        height
+        isLikedByMe
+        photographer: uploader {
+          id
+          legacyId
+          username
+          displayName
+          canonicalPath
+          avatar {
+            images(sizes: SMALL) {
+              url
+              id
+            }
+            id
+          }
+          followedByUsers {
+            totalCount
+            isFollowedByMe
+          }
+        }
+        images(sizes: [33, 32]) {
+          size
+          url
+          webpUrl
+          id
+        }
+        __typename
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+""",
+
+    "GalleriesDetailPaginationContainerQuery": """\
+query GalleriesDetailPaginationContainerQuery($ownerLegacyId: String, $slug: String, $token: String, $pageSize: Int, $cursor: String) {
+  galleryByOwnerIdAndSlugOrToken(ownerLegacyId: $ownerLegacyId, slug: $slug, token: $token) {
+    ...GalleriesDetailPaginationContainer_gallery_3e6UuE
+    id
+  }
+}
+
+fragment GalleriesDetailPaginationContainer_gallery_3e6UuE on Gallery {
+  id
+  legacyId
+  name
+  privacy
+  notSafeForWork
+  ownPhotosOnly
+  canonicalPath
+  publicSlug
+  lastPublishedAt
+  photosAddedSinceLastPublished
+  reportStatus
+  creator {
+    legacyId
+    id
+  }
+  cover {
+    images(sizes: [33, 32, 36, 2048]) {
+      url
+      size
+      webpUrl
+      id
+    }
+    id
+  }
+  description
+  externalUrl
+  buttonName
+  photos(first: $pageSize, after: $cursor) {
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        legacyId
+        canonicalPath
+        name
+        description
+        category
+        uploadedAt
+        location
+        width
+        height
+        isLikedByMe
+        photographer: uploader {
+          id
+          legacyId
+          username
+          displayName
+          canonicalPath
+          avatar {
+            images(sizes: SMALL) {
+              url
+              id
+            }
+            id
+          }
+          followedByUsers {
+            totalCount
+            isFollowedByMe
+          }
+        }
+        images(sizes: [33, 32]) {
+          size
+          url
+          webpUrl
+          id
+        }
+        __typename
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+""",
+
+}

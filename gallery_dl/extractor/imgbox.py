@@ -20,7 +20,6 @@ class ImgboxExtractor(Extractor):
 
     def items(self):
         data = self.get_job_metadata()
-        yield Message.Version, 1
         yield Message.Directory, data
 
         for image_key in self.get_image_keys():

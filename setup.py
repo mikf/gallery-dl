@@ -7,9 +7,6 @@ import os.path
 import warnings
 from setuptools import setup
 
-if sys.hexversion < 0x3040000:
-    sys.exit("Python 3.4+ required")
-
 
 def read(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
@@ -43,13 +40,51 @@ FILES = [
     ]
 ]
 
+DESCRIPTION = ("Command-line program to download image galleries and "
+               "collections from several image hosting sites")
+LONG_DESCRIPTION = read("README.rst")
+
+
+if "py2exe" in sys.argv:
+    try:
+        import py2exe
+    except ImportError:
+        sys.exit("Error importing 'py2exe'")
+
+    # py2exe dislikes version specifiers with a trailing '-dev'
+    VERSION = VERSION.partition("-")[0]
+
+    params = {
+        "console": [{
+            "script"         : "./gallery_dl/__main__.py",
+            "dest_base"      : "gallery-dl",
+            "version"        : VERSION,
+            "description"    : DESCRIPTION,
+            "comments"       : LONG_DESCRIPTION,
+            "product_name"   : "gallery-dl",
+            "product_version": VERSION,
+        }],
+        "options": {"py2exe": {
+            "bundle_files": 0,
+            "compressed"  : 1,
+            "optimize"    : 1,
+            "dist_dir"    : ".",
+            "packages"    : ["gallery_dl"],
+            "includes"    : ["youtube_dl"],
+            "dll_excludes": ["w9xpopen.exe"],
+        }},
+        "zipfile": None,
+    }
+
+else:
+    params = {}
+
 
 setup(
     name="gallery_dl",
     version=VERSION,
-    description=("Command-line program to download image-galleries and "
-                 "-collections from several image hosting sites"),
-    long_description=read("README.rst"),
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
     url="https://github.com/mikf/gallery-dl",
     download_url="https://github.com/mikf/gallery-dl/releases/latest",
     author="Mike Fährmann",
@@ -92,10 +127,12 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Multimedia :: Graphics",
         "Topic :: Utilities",
     ],
     test_suite="test",
+    **params,
 )

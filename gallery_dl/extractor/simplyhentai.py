@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,9 +16,9 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from simply-hentai.com"""
     category = "simplyhentai"
     archive_fmt = "{image_id}"
-    pattern = (r"(?:https?://)?(?!videos\.)([\w-]+\.simply-hentai\.com"
+    pattern = (r"(?:https?://)?(?!videos\.)([\w-]+\.)?simply-hentai\.com"
                r"(?!/(?:album|gifs?|images?|series)(?:/|$))"
-               r"(?:/(?!(?:page|all-pages)(?:/|\.|$))[^/?#]+)+)")
+               r"((?:/(?!(?:page|all-pages)(?:/|\.|$))[^/?#]+)+)")
     test = (
         (("https://original-work.simply-hentai.com"
           "/amazon-no-hiyaku-amazon-elixir"), {
@@ -35,7 +35,10 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
     )
 
     def __init__(self, match):
-        url = "https://" + match.group(1)
+        subdomain, path = match.groups()
+        if subdomain and subdomain not in ("www.", "old."):
+            path = "/" + subdomain.rstrip(".") + path
+        url = "https://old.simply-hentai.com" + path
         GalleryExtractor.__init__(self, match, url)
         self.session.headers["Referer"] = url
 
@@ -43,7 +46,6 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         extr = text.extract_from(page)
         split = text.split_html
 
-        self.gallery_url = extr('<link rel="canonical" href="', '"')
         title = extr('<meta property="og:title" content="', '"')
         image = extr('<meta property="og:image" content="', '"')
         if not title:
@@ -99,7 +101,7 @@ class SimplyhentaiImageExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.page_url = "https://www." + match.group(1)
+        self.page_url = "https://old." + match.group(1)
         self.type = match.group(2)
 
     def items(self):
@@ -126,7 +128,6 @@ class SimplyhentaiImageExtractor(Extractor):
         })
         data["token"] = data["filename"].rpartition("_")[2]
 
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
 
@@ -190,6 +191,5 @@ class SimplyhentaiVideoExtractor(Extractor):
                 date), "%B %d, %Y %H:%M"),
         })
 
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, video_url, data

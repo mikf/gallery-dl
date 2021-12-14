@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,10 +12,7 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
 import itertools
-import random
-import time
 import math
-
 
 BASE_PATTERN = r"(?:https?://)?(e[x-]|g\.e-)hentai\.org"
 
@@ -23,13 +20,14 @@ BASE_PATTERN = r"(?:https?://)?(e[x-]|g\.e-)hentai\.org"
 class ExhentaiExtractor(Extractor):
     """Base class for exhentai extractors"""
     category = "exhentai"
-    directory_fmt = ("{category}", "{gallery_id} {title[:247]}")
+    directory_fmt = ("{category}", "{gid} {title[:247]}")
     filename_fmt = (
-        "{gallery_id}_{num:>04}_{image_token}_{filename}.{extension}")
-    archive_fmt = "{gallery_id}_{num}"
+        "{gid}_{num:>04}_{image_token}_{filename}.{extension}")
+    archive_fmt = "{gid}_{num}"
     cookienames = ("ipb_member_id", "ipb_pass_hash")
     cookiedomain = ".exhentai.org"
     root = "https://exhentai.org"
+    request_interval = 5.0
 
     LIMIT = False
 
@@ -45,20 +43,15 @@ class ExhentaiExtractor(Extractor):
         self.cookiedomain = "." + domain
 
         Extractor.__init__(self, match)
-        self.limits = self.config("limits", True)
         self.original = self.config("original", True)
-        self.wait_min = self.config("wait-min", 3)
-        self.wait_max = self.config("wait-max", 6)
 
-        if type(self.limits) is int:
-            self._limit_max = self.limits
-            self.limits = True
+        limits = self.config("limits", False)
+        if limits and limits.__class__ is int:
+            self.limits = limits
+            self._remaining = 0
         else:
-            self._limit_max = 0
+            self.limits = False
 
-        self._remaining = 0
-        if self.wait_max < self.wait_min:
-            self.wait_max = self.wait_min
         self.session.headers["Referer"] = self.root + "/"
         if version != "ex":
             self.session.cookies.set("nw", "1", domain=self.cookiedomain)
@@ -69,14 +62,6 @@ class ExhentaiExtractor(Extractor):
             self.log.info("sadpanda.jpg")
             raise exception.AuthorizationError()
         return response
-
-    def wait(self, waittime=None):
-        """Wait for a randomly chosen amount of seconds"""
-        if not waittime:
-            waittime = random.uniform(self.wait_min, self.wait_max)
-        else:
-            waittime = random.uniform(waittime * 0.66, waittime * 1.33)
-        time.sleep(waittime)
 
     def login(self):
         """Login and set necessary cookies"""
@@ -132,7 +117,39 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
         ("https://exhentai.org/g/1200119/d55c44d3d0/", {
-            "keyword": "199db053b4ccab94463b459e1cfe079df8cdcdd1",
+            "keyword": {
+                "cost": int,
+                "date": "dt:2018-03-18 20:15:00",
+                "eh_category": "Non-H",
+                "expunged": False,
+                "favorites": "19",
+                "filecount": "4",
+                "filesize": 1488978,
+                "gid": 1200119,
+                "height": int,
+                "image_token": "re:[0-9a-f]{10}",
+                "lang": "ja",
+                "language": "Japanese",
+                "parent": "",
+                "rating": r"re:\d\.\d+",
+                "size": int,
+                "tags": [
+                    "parody:komi-san wa komyushou desu.",
+                    "character:shouko komi",
+                    "group:seventh lowlife",
+                    "sample",
+                ],
+                "thumb": "https://exhentai.org/t/ce/0a/ce0a5bcb583229a9b07c0f8"
+                         "3bcb1630ab1350640-624622-736-1036-jpg_250.jpg",
+                "title": "C93 [Seventh_Lowlife] Komi-san ha Tokidoki Daitan de"
+                         "su (Komi-san wa Komyushou desu) [Sample]",
+                "title_jpn": "(C93) [Comiketjack (わ！)] 古見さんは、時々大胆"
+                             "です。 (古見さんは、コミュ症です。) [見本]",
+                "token": "d55c44d3d0",
+                "torrentcount": "0",
+                "uploader": "klorpa",
+                "width": int,
+            },
             "content": "e9891a4c017ed0bb734cd1efba5cd03f594d31ff",
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
@@ -169,7 +186,6 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 self.log.error("Failed to extract initial image token")
                 self.log.debug("Page content:\n%s", gpage)
                 return
-            self.wait()
             ipage = self._image_page()
         else:
             ipage = self._image_page()
@@ -179,14 +195,18 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 self.log.debug("Page content:\n%s", ipage)
                 return
             self.gallery_token = part.split("/")[1]
-            self.wait()
             gpage = self._gallery_page()
 
         data = self.get_metadata(gpage)
-        self.count = data["count"]
-
-        yield Message.Version, 1
+        self.count = text.parse_int(data["filecount"])
         yield Message.Directory, data
+
+        def _validate_response(response):
+            # declared inside 'items()' to be able to access 'data'
+            if not response.history and response.headers.get(
+                    "content-type", "").startswith("text/html"):
+                self._report_limits(data)
+            return True
 
         images = itertools.chain(
             (self.image_from_page(ipage),), self.images_from_api())
@@ -196,38 +216,76 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 self._check_limits(data)
             if "/fullimg.php" in url:
                 data["extension"] = ""
-                self.wait(self.wait_max / 4)
+                data["_http_validate"] = _validate_response
+            else:
+                data["_http_validate"] = None
             yield Message.Url, url, data
 
     def get_metadata(self, page):
         """Extract gallery metadata"""
+        data = self.metadata_from_page(page)
+        if self.config("metadata", False):
+            data.update(self.metadata_from_api())
+            data["date"] = text.parse_timestamp(data["posted"])
+        return data
+
+    def metadata_from_page(self, page):
         extr = text.extract_from(page)
         data = {
-            "gallery_id"   : self.gallery_id,
-            "gallery_token": self.gallery_token,
+            "gid"          : self.gallery_id,
+            "token"        : self.gallery_token,
+            "thumb"        : extr("background:transparent url(", ")"),
             "title"        : text.unescape(extr('<h1 id="gn">', '</h1>')),
-            "title_jp"     : text.unescape(extr('<h1 id="gj">', '</h1>')),
+            "title_jpn"    : text.unescape(extr('<h1 id="gj">', '</h1>')),
+            "_"            : extr('<div id="gdc"><div class="cs ct', '"'),
+            "eh_category"  : extr('>', '<'),
+            "uploader"     : extr('<div id="gdn">', '</div>'),
             "date"         : text.parse_datetime(extr(
                 '>Posted:</td><td class="gdt2">', '</td>'), "%Y-%m-%d %H:%M"),
             "parent"       : extr(
                 '>Parent:</td><td class="gdt2"><a href="', '"'),
-            "visible"      : extr(
+            "expunged"     : "Yes" != extr(
                 '>Visible:</td><td class="gdt2">', '<'),
-            "language"     : extr(
-                '>Language:</td><td class="gdt2">', ' '),
-            "gallery_size" : text.parse_bytes(extr(
+            "language"     : extr('>Language:</td><td class="gdt2">', ' '),
+            "filesize"     : text.parse_bytes(extr(
                 '>File Size:</td><td class="gdt2">', '<').rstrip("Bb")),
-            "count"        : text.parse_int(extr(
-                '>Length:</td><td class="gdt2">', ' ')),
+            "filecount"    : extr('>Length:</td><td class="gdt2">', ' '),
+            "favorites"    : extr('id="favcount">', ' '),
+            "rating"       : extr(">Average: ", "<"),
+            "torrentcount" : extr('>Torrent Download (', ')'),
         }
+
+        if data["uploader"].startswith("<"):
+            data["uploader"] = text.unescape(text.extract(
+                data["uploader"], ">", "<")[0])
+
+        f = data["favorites"][0]
+        if f == "N":
+            data["favorites"] = "0"
+        elif f == "O":
+            data["favorites"] = "1"
 
         data["lang"] = util.language_to_code(data["language"])
         data["tags"] = [
-            text.unquote(tag)
+            text.unquote(tag.replace("+", " "))
             for tag in text.extract_iter(page, 'hentai.org/tag/', '"')
         ]
 
         return data
+
+    def metadata_from_api(self):
+        url = self.root + "/api.php"
+        data = {
+            "method": "gdata",
+            "gidlist": ((self.gallery_id, self.gallery_token),),
+            "namespace": 1,
+        }
+
+        data = self.request(url, method="POST", json=data).json()
+        if "error" in data:
+            raise exception.StopExtraction(data["error"])
+
+        return data["gmetadata"][0]
 
     def image_from_page(self, page):
         """Get image url and data from webpage"""
@@ -254,6 +312,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         data["image_token"] = self.key["start"] = extr('var startkey="', '";')
         self.key["show"] = extr('var showkey="', '";')
 
+        if iurl.endswith("g/509.gif"):
+            self._report_limits(data)
         return url, text.nameext_from_url(iurl, data)
 
     def images_from_api(self):
@@ -267,7 +327,6 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "showkey": self.key["show"],
         }
         for request["page"] in range(self.image_num + 1, self.count + 1):
-            self.wait()
             page = self.request(api_url, method="POST", json=request).json()
             imgkey = nextkey
             nextkey, pos = text.extract(page["i3"], "'", "'")
@@ -289,9 +348,39 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             data["num"] = request["page"]
             data["image_token"] = imgkey
+
+            if imgurl.endswith("g/509.gif"):
+                self._report_limits(data)
             yield url, text.nameext_from_url(imgurl, data)
 
             request["imgkey"] = nextkey
+
+    def _report_limits(self, data):
+        ExhentaiExtractor.LIMIT = True
+        raise exception.StopExtraction(
+            "Image limit reached! "
+            "Continue with '%s/s/%s/%s-%s' as URL after resetting it.",
+            self.root, data["image_token"], self.gallery_id, data["num"])
+
+    def _check_limits(self, data):
+        if not self._remaining or data["num"] % 25 == 0:
+            self._update_limits()
+        self._remaining -= data["cost"]
+        if self._remaining <= 0:
+            self._report_limits(data)
+
+    def _update_limits(self):
+        url = "https://e-hentai.org/home.php"
+        cookies = {
+            cookie.name: cookie.value
+            for cookie in self.session.cookies
+            if cookie.domain == self.cookiedomain and cookie.name != "igneous"
+        }
+
+        page = self.request(url, cookies=cookies).text
+        current = text.extract(page, "<strong>", "</strong>")[0]
+        self.log.debug("Image Limits: %s/%s", current, self.limits)
+        self._remaining = self.limits - text.parse_int(current)
 
     def _gallery_page(self):
         url = "{}/g/{}/{}/".format(
@@ -315,35 +404,6 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if page.startswith(("Invalid page", "Keep trying")):
             raise exception.NotFoundError("image page")
         return page
-
-    def _check_limits(self, data):
-        if not self._remaining or data["num"] % 20 == 0:
-            self._update_limits()
-        self._remaining -= data["cost"]
-
-        if self._remaining <= 0:
-            ExhentaiExtractor.LIMIT = True
-            url = "{}/s/{}/{}-{}".format(
-                self.root, data["image_token"], self.gallery_id, data["num"])
-            raise exception.StopExtraction(
-                "Image limit reached! Continue with '%s' "
-                "as URL after resetting it.", url)
-
-    def _update_limits(self):
-        url = "https://e-hentai.org/home.php"
-        cookies = {
-            cookie.name: cookie.value
-            for cookie in self.session.cookies
-            if cookie.domain == self.cookiedomain and cookie.name != "igneous"
-        }
-
-        page = self.request(url, cookies=cookies).text
-        current, pos = text.extract(page, "<strong>", "</strong>")
-        maximum, pos = text.extract(page, "<strong>", "</strong>", pos)
-        if self._limit_max:
-            maximum = self._limit_max
-        self.log.debug("Image Limits: %s/%s", current, maximum)
-        self._remaining = text.parse_int(maximum) - text.parse_int(current)
 
     @staticmethod
     def _parse_image_info(url):
@@ -380,9 +440,11 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 class ExhentaiSearchExtractor(ExhentaiExtractor):
     """Extractor for exhentai search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/?\?(.*)$"
+    pattern = BASE_PATTERN + r"/(?:\?([^#]*)|tag/([^/?#]+))"
     test = (
         ("https://e-hentai.org/?f_search=touhou"),
+        ("https://exhentai.org/?f_cats=767&f_search=touhou"),
+        ("https://exhentai.org/tag/parody:touhou+project"),
         (("https://exhentai.org/?f_doujinshi=0&f_manga=0&f_artistcg=0"
           "&f_gamecg=0&f_western=0&f_non-h=1&f_imageset=0&f_cosplay=0"
           "&f_asianporn=0&f_misc=0&f_search=touhou&f_apply=Apply+Filter"), {
@@ -394,13 +456,22 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(2))
-        self.params["page"] = text.parse_int(self.params.get("page"))
         self.search_url = self.root
+
+        _, query, tag = match.groups()
+        if tag:
+            if "+" in tag:
+                ns, _, tag = tag.rpartition(":")
+                tag = '{}:"{}$"'.format(ns, tag.replace("+", " "))
+            else:
+                tag += "$"
+            self.params = {"f_search": tag, "page": 0}
+        else:
+            self.params = text.parse_query(query)
+            self.params["page"] = text.parse_int(self.params.get("page"))
 
     def items(self):
         self.login()
-        yield Message.Version, 1
         data = {"_extractor": ExhentaiGalleryExtractor}
 
         while True:
@@ -417,13 +488,12 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
             if 'class="ptdd">&gt;<' in page or ">No hits found</p>" in page:
                 return
             self.params["page"] += 1
-            self.wait()
 
 
 class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
     """Extractor for favorited exhentai galleries"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/favorites\.php(?:\?(.*))?"
+    pattern = BASE_PATTERN + r"/favorites\.php(?:\?([^#]*)())?"
     test = (
         ("https://e-hentai.org/favorites.php", {
             "count": 1,

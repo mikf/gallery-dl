@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,7 +22,7 @@ import http.server
 
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import downloader, extractor, output, config, util  # noqa E402
+from gallery_dl import downloader, extractor, output, config, path  # noqa E402
 
 
 class MockDownloaderModule(Mock):
@@ -33,7 +33,7 @@ class FakeJob():
 
     def __init__(self):
         self.extractor = extractor.find("test:")
-        self.pathfmt = util.PathFormat(self.extractor)
+        self.pathfmt = path.PathFormat(self.extractor)
         self.out = output.NullOutput()
         self.get_logger = logging.getLogger
 
@@ -74,7 +74,7 @@ class TestDownloaderModule(unittest.TestCase):
         self.assertEqual(downloader.find(1234) , None)
         self.assertEqual(downloader.find(None) , None)
 
-    @patch("importlib.import_module")
+    @patch("builtins.__import__")
     def test_cache(self, import_module):
         import_module.return_value = MockDownloaderModule()
         downloader.find("http")
@@ -86,14 +86,14 @@ class TestDownloaderModule(unittest.TestCase):
         downloader.find("ytdl")
         self.assertEqual(import_module.call_count, 3)
 
-    @patch("importlib.import_module")
+    @patch("builtins.__import__")
     def test_cache_http(self, import_module):
         import_module.return_value = MockDownloaderModule()
         downloader.find("http")
         downloader.find("https")
         self.assertEqual(import_module.call_count, 1)
 
-    @patch("importlib.import_module")
+    @patch("builtins.__import__")
     def test_cache_https(self, import_module):
         import_module.return_value = MockDownloaderModule()
         downloader.find("https")

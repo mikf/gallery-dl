@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
-
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
 
@@ -30,9 +29,10 @@ class AryionExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.recursive = True
-        self._needle = "class='gallery-item' id='"
 
     def login(self):
+        if self._check_cookies(self.cookienames):
+            return
         username, password = self._get_auth_info()
         if username:
             self._update_cookies(self._login_impl(username, password))
@@ -55,26 +55,50 @@ class AryionExtractor(Extractor):
 
     def items(self):
         self.login()
+        data = self.metadata()
 
         for post_id in self.posts():
             post = self._parse_post(post_id)
             if post:
+                if data:
+                    post.update(data)
                 yield Message.Directory, post
                 yield Message.Url, post["url"], post
             elif post is False and self.recursive:
                 base = self.root + "/g4/view/"
                 data = {"_extractor": AryionPostExtractor}
-                for post_id in self._pagination(base + post_id):
+                for post_id in self._pagination_params(base + post_id):
                     yield Message.Queue, base + post_id, data
 
     def posts(self):
         """Yield relevant post IDs"""
 
-    def _pagination(self, url):
+    def metadata(self):
+        """Return general metadata"""
+
+    def _pagination_params(self, url, params=None):
+        if params is None:
+            params = {"p": 1}
+        else:
+            params["p"] = text.parse_int(params.get("p"), 1)
+
+        while True:
+            page = self.request(url, params=params).text
+
+            cnt = 0
+            for post_id in text.extract_iter(
+                    page, "class='gallery-item' id='", "'"):
+                cnt += 1
+                yield post_id
+
+            if cnt < 40:
+                return
+            params["p"] += 1
+
+    def _pagination_next(self, url):
         while True:
             page = self.request(url).text
-            yield from text.extract_iter(
-                page, self._needle, "'")
+            yield from text.extract_iter(page, "thumb' href='/g4/view/", "'")
 
             pos = page.find("Next &gt;&gt;")
             if pos < 0:
@@ -126,7 +150,8 @@ class AryionExtractor(Extractor):
             "user"  : self.user or artist,
             "title" : title,
             "artist": artist,
-            "path"  : text.split_html(extr("cookiecrumb'>", '</span'))[4:-1:2],
+            "path"  : text.split_html(extr(
+                "cookiecrumb'>", '</span'))[4:-1:2],
             "date"  : extr("class='pretty-date' title='", "'"),
             "size"  : text.parse_int(clen),
             "views" : text.parse_int(extr("Views</b>:", "<").replace(",", "")),
@@ -172,18 +197,37 @@ class AryionGalleryExtractor(AryionExtractor):
 
     def skip(self, num):
         if self.recursive:
-            num = 0
+            return 0
         self.offset += num
         return num
 
     def posts(self):
         if self.recursive:
             url = "{}/g4/gallery/{}".format(self.root, self.user)
-            return self._pagination(url)
+            return self._pagination_params(url)
         else:
-            self._needle = "class='thumb' href='/g4/view/"
             url = "{}/g4/latest.php?name={}".format(self.root, self.user)
-            return util.advance(self._pagination(url), self.offset)
+            return util.advance(self._pagination_next(url), self.offset)
+
+
+class AryionTagExtractor(AryionExtractor):
+    """Extractor for tag searches on eka's portal"""
+    subcategory = "tag"
+    directory_fmt = ("{category}", "tags", "{search_tags}")
+    archive_fmt = "t_{search_tags}_{id}"
+    pattern = BASE_PATTERN + r"/tags\.php\?([^#]+)"
+    test = ("https://aryion.com/g4/tags.php?tag=star+wars&p=19", {
+        "count": ">= 5",
+    })
+
+    def metadata(self):
+        self.params = text.parse_query(self.user)
+        self.user = None
+        return {"search_tags": self.params.get("tag")}
+
+    def posts(self):
+        url = self.root + "/g4/tags.php"
+        return self._pagination_params(url, self.params)
 
 
 class AryionPostExtractor(AryionExtractor):

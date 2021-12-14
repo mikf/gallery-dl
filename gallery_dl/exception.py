@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,6 +23,7 @@ Exception
       +-- FilterError
       +-- NoExtractorError
       +-- StopExtraction
+      +-- TerminateExtraction
 """
 
 
@@ -109,3 +110,8 @@ class StopExtraction(GalleryDLException):
         GalleryDLException.__init__(self)
         self.message = message % args if args else message
         self.code = 1 if message else 0
+
+
+class TerminateExtraction(GalleryDLException):
+    """Terminate data extraction"""
+    code = 0

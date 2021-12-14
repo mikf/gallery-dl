@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extractors for https://bcy.net/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 import json
 import re
 
@@ -93,7 +93,7 @@ class BcyExtractor(Extractor):
 
     def _data_from_post(self, post_id):
         url = "{}/item/detail/{}".format(self.root, post_id)
-        page = self.request(url).text
+        page = self.request(url, notfound="post").text
         return json.loads(
             text.extract(page, 'JSON.parse("', '");')[0]
             .replace('\\\\u002F', '/')
@@ -125,12 +125,15 @@ class BcyUserExtractor(BcyExtractor):
         while True:
             data = self.request(url, params=params).json()
 
-            item = None
-            for item in data["data"]["items"]:
-                yield item["item_detail"]
-
-            if not item:
+            try:
+                items = data["data"]["items"]
+            except KeyError:
                 return
+            if not items:
+                return
+
+            for item in items:
+                yield item["item_detail"]
             params["since"] = item["since"]
 
 
@@ -167,11 +170,16 @@ class BcyPostExtractor(BcyExtractor):
             },
         }),
         # only watermarked images available
-        ("https://bcy.net/item/detail/6780546160802143236", {
+        ("https://bcy.net/item/detail/6950136331708144648", {
             "pattern": r"https://p\d-bcy.byteimg.com/img/banciyuan/[0-9a-f]+"
                        r"~tplv-banciyuan-logo-v3:.+\.image",
             "count": 8,
-            "keyword": {"filter": "watermark"}
+            "keyword": {"filter": "watermark"},
+        }),
+        # deleted
+        ("https://bcy.net/item/detail/6780546160802143236", {
+            "exception": exception.NotFoundError,
+            "count": 0,
         }),
         # only visible to logged in users
         ("https://bcy.net/item/detail/6747523535150783495", {
@@ -180,7 +188,10 @@ class BcyPostExtractor(BcyExtractor):
     )
 
     def posts(self):
-        data = self._data_from_post(self.item_id)
+        try:
+            data = self._data_from_post(self.item_id)
+        except KeyError:
+            return ()
         post = data["post_data"]
         post["image_list"] = post["multi"]
         post["plain"] = text.parse_unicode_escapes(post["plain"])

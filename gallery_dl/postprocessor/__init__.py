@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Post-processing modules"""
-
-import importlib
 
 modules = [
     "classify",
@@ -28,16 +26,16 @@ def find(name):
     except KeyError:
         pass
 
-    klass = None
+    cls = None
     if name in modules:  # prevent unwanted imports
         try:
-            module = importlib.import_module("." + name, __package__)
+            module = __import__(name, globals(), None, (), 1)
         except ImportError:
             pass
         else:
-            klass = module.__postprocessor__
-    _cache[name] = klass
-    return klass
+            cls = module.__postprocessor__
+    _cache[name] = cls
+    return cls
 
 
 # --------------------------------------------------------------------

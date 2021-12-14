@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,8 @@ import os
 import sys
 import shutil
 import logging
-from . import config, util
+import unicodedata
+from . import config, util, formatter
 
 
 # --------------------------------------------------------------------
@@ -91,13 +92,13 @@ class Formatter(logging.Formatter):
         if isinstance(fmt, dict):
             for key in ("debug", "info", "warning", "error"):
                 value = fmt[key] if key in fmt else LOG_FORMAT
-                fmt[key] = (util.Formatter(value).format_map,
+                fmt[key] = (formatter.parse(value).format_map,
                             "{asctime" in value)
         else:
             if fmt == LOG_FORMAT:
                 fmt = (fmt.format_map, False)
             else:
-                fmt = (util.Formatter(fmt).format_map, "{asctime" in fmt)
+                fmt = (formatter.parse(fmt).format_map, "{asctime" in fmt)
             fmt = {"debug": fmt, "info": fmt, "warning": fmt, "error": fmt}
 
         self.formats = fmt
@@ -232,14 +233,18 @@ def select():
     }
     omode = config.get(("output",), "mode", "auto").lower()
     if omode in pdict:
-        return pdict[omode]()
+        output = pdict[omode]()
     elif omode == "auto":
         if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-            return ColorOutput() if ANSI else TerminalOutput()
+            output = ColorOutput() if ANSI else TerminalOutput()
         else:
-            return PipeOutput()
+            output = PipeOutput()
     else:
         raise Exception("invalid output mode: " + omode)
+
+    if not config.get(("output",), "skip", True):
+        output.skip = util.identity
+    return output
 
 
 class NullOutput():
@@ -253,54 +258,118 @@ class NullOutput():
     def success(self, path, tries):
         """Print a message indicating the completion of a download"""
 
+    def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
+        """Display download progress"""
+
 
 class PipeOutput(NullOutput):
 
     def skip(self, path):
-        print(CHAR_SKIP, path, sep="", flush=True)
+        stdout = sys.stdout
+        stdout.write(CHAR_SKIP + path + "\n")
+        stdout.flush()
 
     def success(self, path, tries):
-        print(path, flush=True)
+        stdout = sys.stdout
+        stdout.write(path + "\n")
+        stdout.flush()
 
 
 class TerminalOutput(NullOutput):
 
     def __init__(self):
-        self.short = config.get(("output",), "shorten", True)
-        if self.short:
-            self.width = shutil.get_terminal_size().columns - OFFSET
+        shorten = config.get(("output",), "shorten", True)
+        if shorten:
+            func = shorten_string_eaw if shorten == "eaw" else shorten_string
+            limit = shutil.get_terminal_size().columns - OFFSET
+            sep = CHAR_ELLIPSIES
+            self.shorten = lambda txt: func(txt, limit, sep)
+        else:
+            self.shorten = util.identity
 
     def start(self, path):
-        print(self.shorten("  " + path), end="", flush=True)
+        stdout = sys.stdout
+        stdout.write(self.shorten("  " + path))
+        stdout.flush()
 
     def skip(self, path):
-        print(self.shorten(CHAR_SKIP + path))
+        sys.stdout.write(self.shorten(CHAR_SKIP + path) + "\n")
 
     def success(self, path, tries):
-        print("\r", self.shorten(CHAR_SUCCESS + path), sep="")
+        sys.stdout.write("\r" + self.shorten(CHAR_SUCCESS + path) + "\n")
 
-    def shorten(self, txt):
-        """Reduce the length of 'txt' to the width of the terminal"""
-        if self.short and len(txt) > self.width:
-            hwidth = self.width // 2 - OFFSET
-            return "".join((
-                txt[:hwidth-1],
-                CHAR_ELLIPSIES,
-                txt[-hwidth-(self.width % 2):]
-            ))
-        return txt
+    def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
+        bdl = util.format_value(bytes_downloaded)
+        bps = util.format_value(bytes_per_second)
+        if bytes_total is None:
+            sys.stderr.write("\r{:>7}B {:>7}B/s ".format(bdl, bps))
+        else:
+            sys.stderr.write("\r{:>3}% {:>7}B {:>7}B/s ".format(
+                bytes_downloaded * 100 // bytes_total, bdl, bps))
 
 
 class ColorOutput(TerminalOutput):
 
     def start(self, path):
-        print(self.shorten(path), end="", flush=True)
+        stdout = sys.stdout
+        stdout.write(self.shorten(path))
+        stdout.flush()
 
     def skip(self, path):
-        print("\033[2m", self.shorten(path), "\033[0m", sep="")
+        sys.stdout.write("\033[2m" + self.shorten(path) + "\033[0m\n")
 
     def success(self, path, tries):
-        print("\r\033[1;32m", self.shorten(path), "\033[0m", sep="")
+        sys.stdout.write("\r\033[1;32m" + self.shorten(path) + "\033[0m\n")
+
+
+class EAWCache(dict):
+
+    def __missing__(self, key):
+        width = self[key] = \
+            2 if unicodedata.east_asian_width(key) in "WF" else 1
+        return width
+
+
+def shorten_string(txt, limit, sep="…"):
+    """Limit width of 'txt'; assume all characters have a width of 1"""
+    if len(txt) <= limit:
+        return txt
+    limit -= len(sep)
+    return txt[:limit // 2] + sep + txt[-((limit+1) // 2):]
+
+
+def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
+    """Limit width of 'txt'; check for east-asian characters with width > 1"""
+    char_widths = [cache[c] for c in txt]
+    text_width = sum(char_widths)
+
+    if text_width <= limit:
+        # no shortening required
+        return txt
+
+    limit -= len(sep)
+    if text_width == len(txt):
+        # all characters have a width of 1
+        return txt[:limit // 2] + sep + txt[-((limit+1) // 2):]
+
+    # wide characters
+    left = 0
+    lwidth = limit // 2
+    while True:
+        lwidth -= char_widths[left]
+        if lwidth < 0:
+            break
+        left += 1
+
+    right = -1
+    rwidth = (limit+1) // 2 + (lwidth + char_widths[left])
+    while True:
+        rwidth -= char_widths[right]
+        if rwidth < 0:
+            break
+        right -= 1
+
+    return txt[:left] + sep + txt[right+1:]
 
 
 if util.WINDOWS:

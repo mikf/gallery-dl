@@ -66,7 +66,7 @@ build-windows() {
 
     # build windows exe in vm
     ln -fs "${ROOTDIR}" /tmp/
-    vmstart "Windows 7" &
+    vmstart "windows7_x86_sp1" &
     disown
     while [ ! -e "gallery-dl.exe" ] ; do
         sleep 5
@@ -107,18 +107,17 @@ supportedsites() {
     fi
 }
 
-git-upload() {
+upload-git() {
     cd "${ROOTDIR}"
     echo Pushing changes to github
 
     git add "gallery_dl/version.py" "${README}" "${CHANGELOG}"
     git commit -S -m "release version ${NEWVERSION}"
     git tag -s -m "version ${NEWVERSION}" "v${NEWVERSION}"
-    git push
-    git push origin "v${NEWVERSION}"
+    git push --atomic origin master "v${NEWVERSION}"
 }
 
-pypi-upload() {
+upload-pypi() {
     cd "${ROOTDIR}/dist"
     echo Uploading to PyPI
 
@@ -129,7 +128,7 @@ pypi-upload() {
 ROOTDIR="$(realpath "$(dirname "$0")/..")/"
 README="README.rst"
 CHANGELOG="CHANGELOG.md"
-SUPPORTEDSITES="./docs/supportedsites.rst"
+SUPPORTEDSITES="./docs/supportedsites.md"
 
 LASTTAG="$(git describe --abbrev=0 --tags)"
 OLDVERSION="${LASTTAG#v}"
@@ -156,6 +155,6 @@ build-python
 build-linux
 build-windows
 sign
-git-upload
-pypi-upload
+upload-git
+upload-pypi
 update-dev

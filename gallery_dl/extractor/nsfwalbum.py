@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -43,16 +43,39 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
     def images(self, page):
         iframe = self.root + "/iframe_image.php?id="
         backend = self.root + "/backend.php"
+        retries = self._retries
+
         for image_id in text.extract_iter(page, 'data-img-id="', '"'):
-            spirit = text.extract(self.request(
-                iframe + image_id).text, 'giraffe.annihilate("', '"')[0]
-            params = {"spirit": self._annihilate(spirit), "photo": image_id}
-            data = self.request(backend, params=params).json()
+            spirit = None
+            tries = 0
+
+            while tries <= retries:
+                try:
+                    if not spirit:
+                        spirit = self._annihilate(text.extract(
+                            self.request(iframe + image_id).text,
+                            'giraffe.annihilate("', '"')[0])
+                        params = {"spirit": spirit, "photo": image_id}
+                    data = self.request(backend, params=params).json()
+                    break
+                except Exception:
+                    tries += 1
+            else:
+                self.log.warning("Unable to fetch image %s", image_id)
+                continue
+
             yield data[0], {
                 "id"    : text.parse_int(image_id),
                 "width" : text.parse_int(data[1]),
                 "height": text.parse_int(data[2]),
+                "_http_validate": self._validate_response,
+                "_fallback": ("{}/imageProxy.php?photoId={}&spirit={}".format(
+                    self.root, image_id, spirit),),
             }
+
+    @staticmethod
+    def _validate_response(response):
+        return not response.request.url.endswith("/no_image.jpg")
 
     @staticmethod
     def _annihilate(value, base=6):

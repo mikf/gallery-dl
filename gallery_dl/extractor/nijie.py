@@ -36,7 +36,6 @@ class NijieExtractor(AsynchronousMixin, Extractor):
 
     def items(self):
         self.login()
-        yield Message.Version, 1
 
         for image_id in self.image_ids():
 
@@ -100,6 +99,10 @@ class NijieExtractor(AsynchronousMixin, Extractor):
 
     @cache(maxage=150*24*3600, keyarg=1)
     def _login_impl(self, username, password):
+        if not username or not password:
+            raise exception.AuthenticationError(
+                "Username and password required")
+
         self.log.info("Logging in as %s", username)
         url = "{}/login_int.php".format(self.root)
         data = {"email": username, "password": password, "save": "on"}

@@ -1,28 +1,21 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from __future__ import unicode_literals, print_function
-
-__author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2020 Mike Fährmann"
-__license__ = "GPLv2"
-__maintainer__ = "Mike Fährmann"
-__email__ = "mike_faehrmann@web.de"
-
 import sys
-
-if sys.hexversion < 0x3040000:
-    sys.exit("Python 3.4+ required")
-
 import json
 import logging
 from . import version, config, option, output, extractor, job, util, exception
 
+__author__ = "Mike Fährmann"
+__copyright__ = "Copyright 2014-2021 Mike Fährmann"
+__license__ = "GPLv2"
+__maintainer__ = "Mike Fährmann"
+__email__ = "mike_faehrmann@web.de"
 __version__ = version.__version__
 
 
@@ -126,12 +119,16 @@ def main():
             config.set((), "postprocessors", args.postprocessors)
         if args.abort:
             config.set((), "skip", "abort:" + str(args.abort))
+        if args.terminate:
+            config.set((), "skip", "terminate:" + str(args.terminate))
         for opts in args.options:
             config.set(*opts)
 
         # extractor modules
         modules = config.get(("extractor",), "modules")
         if modules is not None:
+            if isinstance(modules, str):
+                modules = modules.split(",")
             extractor.modules = modules
             extractor._module_iter = iter(modules)
 
@@ -145,20 +142,23 @@ def main():
             import os.path
             import requests
 
-            head = ""
-            try:
-                out, err = subprocess.Popen(
-                    ("git", "rev-parse", "--short", "HEAD"),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    cwd=os.path.dirname(os.path.abspath(__file__)),
-                ).communicate()
-                if out and not err:
-                    head = " - Git HEAD: " + out.decode().rstrip()
-            except (OSError, subprocess.SubprocessError):
-                pass
+            extra = ""
+            if getattr(sys, "frozen", False):
+                extra = " - Executable"
+            else:
+                try:
+                    out, err = subprocess.Popen(
+                        ("git", "rev-parse", "--short", "HEAD"),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        cwd=os.path.dirname(os.path.abspath(__file__)),
+                    ).communicate()
+                    if out and not err:
+                        extra = " - Git HEAD: " + out.decode().rstrip()
+                except (OSError, subprocess.SubprocessError):
+                    pass
 
-            log.debug("Version %s%s", __version__, head)
+            log.debug("Version %s%s", __version__, extra)
             log.debug("Python %s - %s",
                       platform.python_version(), platform.platform())
             try:
@@ -186,7 +186,7 @@ def main():
         elif args.clear_cache:
             from . import cache
             log = logging.getLogger("cache")
-            cnt = cache.clear()
+            cnt = cache.clear(args.clear_cache)
 
             if cnt is None:
                 log.error("Database file not available")
@@ -196,7 +196,7 @@ def main():
                     cnt, "entry" if cnt == 1 else "entries", cache._path(),
                 )
         else:
-            if not args.urls and not args.inputfile:
+            if not args.urls and not args.inputfiles:
                 parser.error(
                     "The following arguments are required: URL\n"
                     "Use 'gallery-dl --help' to get a list of all options.")
@@ -204,22 +204,26 @@ def main():
             if args.list_urls:
                 jobtype = job.UrlJob
                 jobtype.maxdepth = args.list_urls
+                if config.get(("output",), "fallback", True):
+                    jobtype.handle_url = \
+                        staticmethod(jobtype.handle_url_fallback)
             else:
                 jobtype = args.jobtype or job.DownloadJob
 
             urls = args.urls
-            if args.inputfile:
-                try:
-                    if args.inputfile == "-":
-                        if sys.stdin:
-                            urls += parse_inputfile(sys.stdin, log)
+            if args.inputfiles:
+                for inputfile in args.inputfiles:
+                    try:
+                        if inputfile == "-":
+                            if sys.stdin:
+                                urls += parse_inputfile(sys.stdin, log)
+                            else:
+                                log.warning("input file: stdin is not readable")
                         else:
-                            log.warning("input file: stdin is not readable")
-                    else:
-                        with open(args.inputfile, encoding="utf-8") as file:
-                            urls += parse_inputfile(file, log)
-                except OSError as exc:
-                    log.warning("input file: %s", exc)
+                            with open(inputfile, encoding="utf-8") as file:
+                                urls += parse_inputfile(file, log)
+                    except OSError as exc:
+                        log.warning("input file: %s", exc)
 
             # unsupported file logging handler
             handler = output.setup_logging_handler(
@@ -245,6 +249,8 @@ def main():
                             retval |= jobtype(url.value).run()
                     else:
                         retval |= jobtype(url).run()
+                except exception.TerminateExtraction:
+                    pass
                 except exception.NoExtractorError:
                     log.error("No suitable extractor found for '%s'", url)
                     retval |= 64

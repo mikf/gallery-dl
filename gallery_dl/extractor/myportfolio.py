@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -51,9 +51,11 @@ class MyportfolioGalleryExtractor(Extractor):
         self.prefix = "myportfolio:" if domain1 else ""
 
     def items(self):
-        yield Message.Version, 1
         url = "https://" + self.domain + (self.path or "")
-        page = self.request(url).text
+        response = self.request(url)
+        if response.history and response.url.endswith(".adobe.com/missing"):
+            raise exception.NotFoundError()
+        page = response.text
 
         projects = text.extract(
             page, '<section class="project-covers', '</section>')[0]
@@ -78,12 +80,12 @@ class MyportfolioGalleryExtractor(Extractor):
         # <user> and <title> can contain a "-" as well, so we get the title
         # from somewhere else and cut that amount from the og:title content
 
-        user, pos = text.extract(
-            page, 'property=og:title content="', '"')
-        desc, pos = text.extract(
-            page, 'property=og:description content="', '"', pos)
-        title, pos = text.extract(
-            page, '<h1 ', '</h1>', pos)
+        extr = text.extract_from(page)
+        user = extr('property="og:title" content="', '"') or \
+            extr('property=og:title content="', '"')
+        descr = extr('property="og:description" content="', '"') or \
+            extr('property=og:description content="', '"')
+        title = extr('<h1 ', '</h1>')
 
         if title:
             title = title.partition(">")[2]
@@ -96,7 +98,7 @@ class MyportfolioGalleryExtractor(Extractor):
         return {
             "user": text.unescape(user),
             "title": text.unescape(title),
-            "description": text.unescape(desc or ""),
+            "description": text.unescape(descr),
         }
 
     @staticmethod

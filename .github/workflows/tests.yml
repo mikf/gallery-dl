@@ -11,11 +11,11 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.4, 3.5, 3.6, 3.7, 3.8, 3.9, pypy3]
+        python-version: ["3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "pypy3"]
 
     steps:
     - uses: actions/checkout@v2
@@ -36,9 +36,8 @@ jobs:
 
     - name: Run tests
       run: |
-        pip install nose
         make test
 
-    - name: Generate man pages and bash/zsh completion
+    - name: Test autogeneration of man pages, bash/zsh completion, etc
       run: |
-        make man completion
+        make

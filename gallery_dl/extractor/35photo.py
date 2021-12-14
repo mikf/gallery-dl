@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,7 +22,6 @@ class _35photoExtractor(Extractor):
     def items(self):
         first = True
         data = self.metadata()
-        yield Message.Version, 1
 
         for photo_id in self.photos():
             for photo in self._photo_data(photo_id):
@@ -104,7 +103,8 @@ class _35photoUserExtractor(_35photoExtractor):
                r"/(?!photo_|genre_|tags/|rating/)([^/?#]+)")
     test = (
         ("https://35photo.pro/liya", {
-            "pattern": r"https://m\d+.35photo.pro/photos_(main|series)/.*.jpg",
+            "pattern": r"https://([a-z][0-9]\.)?35photo\.pro"
+                       r"/photos_(main|series)/.*\.jpg",
             "count": 9,
         }),
         ("https://35photo.pro/suhoveev", {
@@ -214,7 +214,7 @@ class _35photoImageExtractor(_35photoExtractor):
     test = ("https://35photo.pro/photo_753340/", {
         "count": 1,
         "keyword": {
-            "url"        : r"re:https://m\d+.35photo.pro/photos_main/.*.jpg",
+            "url"        : r"re:https://35photo\.pro/photos_main/.*\.jpg",
             "id"         : 753340,
             "title"      : "Winter walk",
             "description": str,

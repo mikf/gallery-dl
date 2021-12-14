@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -36,12 +36,14 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 
     test = (
         ("https://www.imagefap.com/pictures/7102714", {
-            "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
+            "pattern": r"https://cdnh\.imagefap\.com"
+                       r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "2ba96e84c2952c4750e9fa94a3f2b1f965cec2f3",
             "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
         ("https://www.imagefap.com/gallery/5486966", {
-            "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
+            "pattern": r"https://cdnh\.imagefap\.com"
+                       r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "3e24eace5b09639b881ebd393165862feb46adde",
         }),
         ("https://www.imagefap.com/gallery.php?gid=7102714"),
@@ -57,7 +59,6 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
         url = "{}/pictures/{}/".format(self.root, self.gid)
         page = self.request(url).text
         data = self.get_job_metadata(page)
-        yield Message.Version, 1
         yield Message.Directory, data
         for url, image in self.get_images():
             data.update(image)
@@ -106,7 +107,8 @@ class ImagefapImageExtractor(ImagefapExtractor):
     pattern = BASE_PATTERN + r"/photo/(\d+)"
     test = (
         ("https://www.imagefap.com/photo/1369341772/", {
-            "pattern": r"https://cdn.imagefap.com/images/full/\d+/\d+/\d+.jpg",
+            "pattern": r"https://cdnh\.imagefap\.com"
+                       r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "8894e45f7262020d8d66ce59917315def1fc475b",
         }),
         ("https://beta.imagefap.com/photo/1369341772/"),
@@ -118,7 +120,6 @@ class ImagefapImageExtractor(ImagefapExtractor):
 
     def items(self):
         url, data = self.get_image()
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
 
@@ -169,7 +170,6 @@ class ImagefapUserExtractor(ImagefapExtractor):
         self.user, self.user_id = match.groups()
 
     def items(self):
-        yield Message.Version, 1
         for gid, name in self.get_gallery_data():
             url = "{}/gallery/{}".format(self.root, gid)
             data = {

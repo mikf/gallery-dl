@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -25,7 +25,6 @@ class NozomiExtractor(Extractor):
     archive_fmt = "{dataid}"
 
     def items(self):
-        yield Message.Version, 1
 
         data = self.metadata()
         self.session.headers["Origin"] = self.root
@@ -47,8 +46,13 @@ class NozomiExtractor(Extractor):
             post["artist"] = self._list(post.get("artist"))
             post["copyright"] = self._list(post.get("copyright"))
             post["character"] = self._list(post.get("character"))
-            post["date"] = text.parse_datetime(
-                post["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
+
+            try:
+                post["date"] = text.parse_datetime(
+                    post["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
+            except Exception:
+                post["date"] = None
+
             post.update(data)
 
             images = post["imageurls"]
@@ -57,18 +61,29 @@ class NozomiExtractor(Extractor):
                     del post[key]
 
             yield Message.Directory, post
-            for image in images:
+            for post["num"], image in enumerate(images, 1):
                 post["url"] = url = text.urljoin(self.root, image["imageurl"])
                 text.nameext_from_url(url, post)
                 post["is_video"] = bool(image.get("is_video"))
                 post["dataid"] = post["filename"]
                 yield Message.Url, url, post
 
+    def posts(self):
+        url = "https://n.nozomi.la" + self.nozomi
+        offset = (text.parse_int(self.pnum, 1) - 1) * 256
+
+        while True:
+            headers = {"Range": "bytes={}-{}".format(offset, offset+255)}
+            response = self.request(url, headers=headers)
+            yield from decode_nozomi(response.content)
+
+            offset += 256
+            cr = response.headers.get("Content-Range", "").rpartition("/")[2]
+            if text.parse_int(cr, offset) <= offset:
+                return
+
     def metadata(self):
         return {}
-
-    def posts(self):
-        return ()
 
     @staticmethod
     def _list(src):
@@ -90,13 +105,11 @@ class NozomiPostExtractor(NozomiExtractor):
                 "dataid"   : "re:aaa9f7c632cde1e1a5baaff3fb6a6d857ec73df7fdc5",
                 "date"     : "dt:2016-07-26 02:32:03",
                 "extension": "jpg",
-                "favorites": int,
                 "filename" : str,
                 "height"   : 768,
                 "is_video" : False,
                 "postid"   : 3649262,
                 "source"   : "danbooru",
-                "sourceid" : 2434215,
                 "tags"     : list,
                 "type"     : "jpg",
                 "url"      : str,
@@ -106,9 +119,13 @@ class NozomiPostExtractor(NozomiExtractor):
         #  multiple images per post
         ("https://nozomi.la/post/25588032.html", {
             "url": "6aa3b7db385abcc9d374bdffd19187bccbf8f228",
-            "keyword": "8c3a2561ccc9ad429be9850d1383a952d0b4a8ab",
+            "keyword": "f60e048df36308b6b25dfaac419b586895d360bc",
             "count": 7,
         }),
+        # empty 'date' (#1163)
+        ("https://nozomi.la/post/130309.html", {
+            "keyword": {"date": None},
+        })
     )
 
     def __init__(self, match):
@@ -119,12 +136,29 @@ class NozomiPostExtractor(NozomiExtractor):
         return (self.post_id,)
 
 
+class NozomiIndexExtractor(NozomiExtractor):
+    """Extractor for the nozomi.la index"""
+    subcategory = "index"
+    pattern = (r"(?:https?://)?nozomi\.la/"
+               r"(?:(index(?:-Popular)?)-(\d+)\.html)?(?:$|#|\?)")
+    test = (
+        ("https://nozomi.la/"),
+        ("https://nozomi.la/index-2.html"),
+        ("https://nozomi.la/index-Popular-33.html"),
+    )
+
+    def __init__(self, match):
+        NozomiExtractor.__init__(self, match)
+        index, self.pnum = match.groups()
+        self.nozomi = "/{}.nozomi".format(index or "index")
+
+
 class NozomiTagExtractor(NozomiExtractor):
     """Extractor for posts from tag searches on nozomi.la"""
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
-    archive_fmt = "t_{search_tags}_{postid}"
-    pattern = r"(?:https?://)?nozomi\.la/tag/([^/?#]+)-\d+\."
+    archive_fmt = "t_{search_tags}_{dataid}"
+    pattern = r"(?:https?://)?nozomi\.la/tag/([^/?#]+)-(\d+)\."
     test = ("https://nozomi.la/tag/3:1_aspect_ratio-1.html", {
         "pattern": r"^https://i.nozomi.la/\w/\w\w/\w+\.\w+$",
         "count": ">= 25",
@@ -133,31 +167,19 @@ class NozomiTagExtractor(NozomiExtractor):
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
-        self.tags = text.unquote(match.group(1)).lower()
+        tags, self.pnum = match.groups()
+        self.tags = text.unquote(tags)
+        self.nozomi = "/nozomi/{}.nozomi".format(self.tags)
 
     def metadata(self):
         return {"search_tags": self.tags}
-
-    def posts(self):
-        url = "https://n.nozomi.la/nozomi/{}.nozomi".format(self.tags)
-        i = 0
-
-        while True:
-            headers = {"Range": "bytes={}-{}".format(i, i+255)}
-            response = self.request(url, headers=headers)
-            yield from decode_nozomi(response.content)
-
-            i += 256
-            cr = response.headers.get("Content-Range", "").rpartition("/")[2]
-            if text.parse_int(cr, i) <= i:
-                return
 
 
 class NozomiSearchExtractor(NozomiExtractor):
     """Extractor for search results on nozomi.la"""
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags:J }")
-    archive_fmt = "t_{search_tags}_{postid}"
+    archive_fmt = "t_{search_tags}_{dataid}"
     pattern = r"(?:https?://)?nozomi\.la/search\.html\?q=([^&#]+)"
     test = ("https://nozomi.la/search.html?q=hibiscus%203:4_ratio#1", {
         "count": ">= 5",
@@ -165,7 +187,7 @@ class NozomiSearchExtractor(NozomiExtractor):
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
-        self.tags = text.unquote(match.group(1)).lower().split()
+        self.tags = text.unquote(match.group(1)).split()
 
     def metadata(self):
         return {"search_tags": self.tags}

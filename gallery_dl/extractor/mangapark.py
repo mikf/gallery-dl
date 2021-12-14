@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,7 +17,8 @@ import re
 class MangaparkBase():
     """Base class for mangapark extractors"""
     category = "mangapark"
-    root_fmt = "https://mangapark.{}"
+    root_fmt = "https://v2.mangapark.{}"
+    browser = "firefox"
 
     @staticmethod
     def parse_chapter_path(path, data):
@@ -50,12 +51,12 @@ class MangaparkBase():
 
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.net"""
-    pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
+    pattern = (r"(?:https?://)?(?:www\.|v2\.)?mangapark\.(me|net|com)"
                r"/manga/([^?#]+/i\d+)")
     test = (
         ("https://mangapark.net/manga/gosu/i811653/c055/1", {
             "count": 50,
-            "keyword": "8344bdda8cd8414e7729a4e148379f147e3437da",
+            "keyword": "db1ed9af4f972756a25dbfa5af69a8f155b043ff",
         }),
         (("https://mangapark.net/manga"
           "/ad-astra-per-aspera-hata-kenjirou/i662051/c001.2/1"), {
@@ -116,12 +117,12 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
 class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
     """Extractor for manga from mangapark.net"""
     chapterclass = MangaparkChapterExtractor
-    pattern = (r"(?:https?://)?(?:www\.)?mangapark\.(me|net|com)"
+    pattern = (r"(?:https?://)?(?:www\.|v2\.)?mangapark\.(me|net|com)"
                r"(/manga/[^/?#]+)/?$")
     test = (
         ("https://mangapark.net/manga/aria", {
-            "url": "9b62883c25c8de471f8ab43651e1448536c4ce3f",
-            "keyword": "eb4a9b273c69acf31efa731eba713e1cfa14bab6",
+            "url": "b8f7db2f581404753c4af37af66c049a41273b94",
+            "keyword": "2c0d28efaf84fcfe62932b6931ef3c3987cd48c0",
         }),
         ("https://mangapark.me/manga/aria"),
         ("https://mangapark.com/manga/aria"),

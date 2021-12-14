@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,24 +21,19 @@ class RedditExtractor(Extractor):
     archive_fmt = "{filename}"
     cookiedomain = None
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.api = RedditAPI(self)
-        self.max_depth = self.config("recursion", 0)
-
     def items(self):
+        self.api = RedditAPI(self)
         match_submission = RedditSubmissionExtractor.pattern.match
         match_subreddit = RedditSubredditExtractor.pattern.match
         match_user = RedditUserExtractor.pattern.match
 
         parentdir = self.config("parent-directory")
+        max_depth = self.config("recursion", 0)
         videos = self.config("videos", True)
 
         submissions = self.submissions()
         visited = set()
         depth = 0
-
-        yield Message.Version, 1
 
         while True:
             extra = []
@@ -105,7 +100,7 @@ class RedditExtractor(Extractor):
                     elif not match_user(url) and not match_subreddit(url):
                         yield Message.Queue, text.unescape(url), data
 
-            if not extra or depth == self.max_depth:
+            if not extra or depth == max_depth:
                 return
             depth += 1
             submissions = (
@@ -117,12 +112,18 @@ class RedditExtractor(Extractor):
         """Return an iterable containing all (submission, comments) tuples"""
 
     def _extract_gallery(self, submission):
-        if submission["gallery_data"] is None:
+        gallery = submission["gallery_data"]
+        if gallery is None:
             self.log.warning("gallery %s: deleted", submission["id"])
             return
 
-        meta = submission["media_metadata"]
-        for item in submission["gallery_data"]["items"]:
+        meta = submission.get("media_metadata")
+        if meta is None:
+            self.log.warning("gallery %s: missing 'media_metadata'",
+                             submission["id"])
+            return
+
+        for item in gallery["items"]:
             data = meta[item["media_id"]]
             if data["status"] != "valid" or "s" not in data:
                 self.log.warning(
@@ -144,7 +145,7 @@ class RedditSubredditExtractor(RedditExtractor):
     """Extractor for URLs from subreddits on reddit.com"""
     subcategory = "subreddit"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/r/"
-               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?(?:$|#)")
+               r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?(?:$|#)")
     test = (
         ("https://www.reddit.com/r/lavaporn/", {
             "range": "1-20",
@@ -157,9 +158,11 @@ class RedditSubredditExtractor(RedditExtractor):
     )
 
     def __init__(self, match):
+        self.subreddit, sub, params = match.groups()
+        self.params = text.parse_query(params)
+        if sub:
+            self.subcategory += "-" + sub
         RedditExtractor.__init__(self, match)
-        self.subreddit = match.group(1)
-        self.params = text.parse_query(match.group(2))
 
     def submissions(self):
         return self.api.submissions_subreddit(self.subreddit, self.params)
@@ -169,7 +172,7 @@ class RedditUserExtractor(RedditExtractor):
     """Extractor for URLs from posts by a reddit user"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
-               r"([^/?#]+(?:/[a-z]+)?)/?(?:\?([^#]*))?")
+               r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?")
     test = (
         ("https://www.reddit.com/user/username/", {
             "count": ">= 2",
@@ -180,9 +183,11 @@ class RedditUserExtractor(RedditExtractor):
     )
 
     def __init__(self, match):
+        self.user, sub, params = match.groups()
+        self.params = text.parse_query(params)
+        if sub:
+            self.subcategory += "-" + sub
         RedditExtractor.__init__(self, match)
-        self.user = match.group(1)
-        self.params = text.parse_query(match.group(2))
 
     def submissions(self):
         return self.api.submissions_user(self.user, self.params)
@@ -222,6 +227,10 @@ class RedditSubmissionExtractor(RedditExtractor):
         ("https://www.reddit.com/r/cosplay/comments/jvwaqr", {
             "count": 1,
         }),
+        # gallery with no 'media_metadata' (#2001)
+        ("https://www.reddit.com/r/kpopfap/comments/qjj04q/", {
+            "count": 0,
+        }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://m.reddit.com/r/lavaporn/comments/2a00np/"),
@@ -257,34 +266,35 @@ class RedditImageExtractor(Extractor):
 
     def items(self):
         data = text.nameext_from_url(self.url)
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, self.url, data
 
 
 class RedditAPI():
-    """Minimal interface for the reddit API"""
+    """Interface for the Reddit API
+
+    Ref: https://www.reddit.com/dev/api/
+    """
     CLIENT_ID = "6N9uN0krSDE-ig"
     USER_AGENT = "Python:gallery-dl:0.8.4 (by /u/mikf1)"
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.comments = text.parse_int(extractor.config("comments", 0))
-        self.morecomments = extractor.config("morecomments", False)
         self.log = extractor.log
 
-        client_id = extractor.config("client-id", self.CLIENT_ID)
-        user_agent = extractor.config("user-agent", self.USER_AGENT)
+        config = extractor.config
+        self.comments = text.parse_int(config("comments", 0))
+        self.morecomments = config("morecomments", False)
 
-        if (client_id == self.CLIENT_ID) ^ (user_agent == self.USER_AGENT):
-            raise exception.StopExtraction(
-                "Conflicting values for 'client-id' and 'user-agent': "
-                "overwrite either both or none of them.")
+        client_id = config("client-id")
+        if client_id is None:
+            self.client_id = self.CLIENT_ID
+            self.headers = {"User-Agent": self.USER_AGENT}
+        else:
+            self.client_id = client_id
+            self.headers = {"User-Agent": config("user-agent")}
 
-        self.client_id = client_id
-        self.headers = {"User-Agent": user_agent}
-
-        token = extractor.config("refresh-token")
+        token = config("refresh-token")
         if token is None or token == "cache":
             key = "#" + self.client_id
             self.refresh_token = _refresh_token_cache(key)

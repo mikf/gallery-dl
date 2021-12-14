@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,12 @@
 """Utility classes to setup OAuth and link accounts to gallery-dl"""
 
 from .common import Extractor, Message
-from . import deviantart, flickr, reddit, smugmug, tumblr
+from . import deviantart, flickr, mastodon, pixiv, reddit, smugmug, tumblr
 from .. import text, oauth, util, config, exception
 from ..cache import cache
 import urllib.parse
+import hashlib
+import base64
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
 REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
@@ -29,8 +31,8 @@ class OAuthBase(Extractor):
         self.cache = config.get(("extractor", self.category), "cache", True)
 
     def oauth_config(self, key, default=None):
-        return config.interpolate(
-            ("extractor", self.subcategory), key, default)
+        value = config.interpolate(("extractor", self.subcategory), key)
+        return value if value is not None else default
 
     def recv(self):
         """Open local HTTP server and recv callback parameters"""
@@ -62,14 +64,17 @@ class OAuthBase(Extractor):
         self.client.send(b"HTTP/1.1 200 OK\r\n\r\n" + msg.encode())
         self.client.close()
 
-    def open(self, url, params):
+    def open(self, url, params, recv=None):
         """Open 'url' in browser amd return response parameters"""
         import webbrowser
         url += "?" + urllib.parse.urlencode(params)
         if not self.config("browser", True) or not webbrowser.open(url):
             print("Please open this URL in your browser:")
             print(url, end="\n\n", flush=True)
-        return self.recv()
+        return (recv or self.recv)()
+
+    def error(self, msg):
+        return self.send("Remote server reported an error:\n\n" + str(msg))
 
     def _oauth1_authorization_flow(
             self, request_token_url, authorize_url, access_token_url):
@@ -104,9 +109,9 @@ class OAuthBase(Extractor):
         ))
 
     def _oauth2_authorization_code_grant(
-            self, client_id, client_secret, auth_url, token_url,
+            self, client_id, client_secret, auth_url, token_url, *,
             scope="read", key="refresh_token", auth=True,
-            message_template=None, cache=None):
+            cache=None, instance=None):
         """Perform an OAuth2 authorization code grant"""
 
         state = "gallery-dl_{}_{}".format(
@@ -115,12 +120,12 @@ class OAuthBase(Extractor):
         )
 
         auth_params = {
-            "client_id": client_id,
+            "client_id"    : client_id,
             "response_type": "code",
-            "state": state,
-            "redirect_uri": self.redirect_uri,
-            "duration": "permanent",
-            "scope": scope,
+            "state"        : state,
+            "redirect_uri" : self.redirect_uri,
+            "duration"     : "permanent",
+            "scope"        : scope,
         }
 
         # receive an authorization code
@@ -133,13 +138,12 @@ class OAuthBase(Extractor):
             ))
             return
         if "error" in params:
-            self.send(params["error"])
-            return
+            return self.error(params)
 
         # exchange the authorization code for a token
         data = {
-            "grant_type": "authorization_code",
-            "code": params["code"],
+            "grant_type"  : "authorization_code",
+            "code"        : params["code"],
             "redirect_uri": self.redirect_uri,
         }
 
@@ -154,30 +158,20 @@ class OAuthBase(Extractor):
 
         # check token response
         if "error" in data:
-            self.send(data["error"])
-            return
+            return self.error(data)
+
+        token = data[key]
+        token_name = key.replace("_", "-")
 
         # write to cache
         if self.cache and cache:
-            cache.update("#" + str(client_id), data[key])
-            self.log.info("Writing 'refresh-token' to cache")
+            cache.update(instance or ("#" + str(client_id)), token)
+            self.log.info("Writing '%s' to cache", token_name)
 
         # display token
-        if message_template:
-            msg = message_template.format(
-                category=self.subcategory,
-                key=key.partition("_")[0],
-                token=data[key],
-                instance=getattr(self, "instance", ""),
-                client_id=client_id,
-                client_secret=client_secret,
-            )
-        else:
-            msg = self._generate_message(
-                ("refresh-token",),
-                (data[key],),
-            )
-        self.send(msg)
+        self.send(self._generate_message(
+            (token_name,), (token,),
+        ))
 
     def _generate_message(self, names, values):
         _vh, _va, _is, _it = (
@@ -226,7 +220,7 @@ class OAuthDeviantart(OAuthBase):
                 "client-secret", deviantart.DeviantartOAuthAPI.CLIENT_SECRET),
             "https://www.deviantart.com/oauth2/authorize",
             "https://www.deviantart.com/oauth2/token",
-            scope="browse",
+            scope="browse user.manage",
             cache=deviantart._refresh_token_cache,
         )
 
@@ -324,8 +318,10 @@ class OAuthMastodon(OAuthBase):
     def items(self):
         yield Message.Version, 1
 
-        application = self.oauth_config(self.instance)
-        if not application:
+        for application in mastodon.INSTANCES.values():
+            if self.instance == application["root"].partition("://")[2]:
+                break
+        else:
             application = self._register(self.instance)
 
         self._oauth2_authorization_code_grant(
@@ -333,8 +329,9 @@ class OAuthMastodon(OAuthBase):
             application["client-secret"],
             "https://{}/oauth/authorize".format(self.instance),
             "https://{}/oauth/token".format(self.instance),
+            instance=self.instance,
             key="access_token",
-            message_template=MASTODON_MSG_TEMPLATE,
+            cache=mastodon._access_token_cache,
         )
 
     @cache(maxage=10*365*24*3600, keyarg=1)
@@ -362,27 +359,64 @@ class OAuthMastodon(OAuthBase):
         return data
 
 
-MASTODON_MSG_TEMPLATE = """
-Your 'access-token' is
+class OAuthPixiv(OAuthBase):
+    subcategory = "pixiv"
+    pattern = "oauth:pixiv$"
 
-{token}
+    def items(self):
+        yield Message.Version, 1
 
-Put this value into your configuration file as
-'extractor.mastodon.{instance}.{key}-token'.
+        code_verifier = util.generate_token(32)
+        digest = hashlib.sha256(code_verifier.encode("ascii")).digest()
+        code_challenge = base64.urlsafe_b64encode(
+            digest).rstrip(b"=").decode("ascii")
 
-You can also add your 'client-id' and 'client-secret' values
-if you want to register another account in the future.
+        url = "https://app-api.pixiv.net/web/v1/login"
+        params = {
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
+            "client": "pixiv-android",
+        }
+        code = self.open(url, params, self._input)
 
-Example:
-{{
-    "extractor": {{
-        "mastodon": {{
-            "{instance}": {{
-                "{key}-token": "{token}",
-                "client-id": "{client_id}",
-                "client-secret": "{client_secret}"
-            }}
-        }}
-    }}
-}}
-"""
+        url = "https://oauth.secure.pixiv.net/auth/token"
+        headers = {
+            "User-Agent": "PixivAndroidApp/5.0.234 (Android 11; Pixel 5)",
+        }
+        data = {
+            "client_id"     : self.oauth_config(
+                "client-id"    , pixiv.PixivAppAPI.CLIENT_ID),
+            "client_secret" : self.oauth_config(
+                "client-secret", pixiv.PixivAppAPI.CLIENT_SECRET),
+            "code"          : code,
+            "code_verifier" : code_verifier,
+            "grant_type"    : "authorization_code",
+            "include_policy": "true",
+            "redirect_uri"  : "https://app-api.pixiv.net"
+                              "/web/v1/users/auth/pixiv/callback",
+        }
+        data = self.session.post(url, headers=headers, data=data).json()
+
+        if "error" in data:
+            print(data)
+            if data["error"] == "invalid_request":
+                print("'code' expired, try again")
+            return
+
+        token = data["refresh_token"]
+        if self.cache:
+            username = self.oauth_config("username")
+            pixiv._refresh_token_cache.update(username, token)
+            self.log.info("Writing 'refresh-token' to cache")
+
+        print(self._generate_message(("refresh-token",), (token,)))
+
+    def _input(self):
+        print("""
+1) Open your browser's Developer Tools (F12) and switch to the Network tab
+2) Login
+3) Select the last network monitor entry ('callback?state=...')
+4) Copy its 'code' query parameter, paste it below, and press Enter
+""")
+        code = input("code: ")
+        return code.rpartition("=")[2].strip()

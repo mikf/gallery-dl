@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,6 +14,7 @@ import unittest
 import io
 import random
 import string
+import datetime
 import http.cookiejar
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -123,7 +124,7 @@ class TestPredicate(unittest.TestCase):
 
         pred = util.build_predicate([util.UniquePredicate(),
                                      util.UniquePredicate()])
-        self.assertIsInstance(pred, util.ChainPredicate)
+        self.assertIs(pred.func, util.chain_predicates)
 
 
 class TestISO639_1(unittest.TestCase):
@@ -133,6 +134,7 @@ class TestISO639_1(unittest.TestCase):
         self._run_test(util.code_to_language, {
             ("en",): "English",
             ("FR",): "French",
+            ("ja",): "Japanese",
             ("xx",): None,
             (""  ,): None,
             (None,): None,
@@ -148,6 +150,7 @@ class TestISO639_1(unittest.TestCase):
         self._run_test(util.language_to_code, {
             ("English",): "en",
             ("fRENch",): "fr",
+            ("Japanese",): "ja",
             ("xx",): None,
             (""  ,): None,
             (None,): None,
@@ -257,162 +260,6 @@ class TestCookiesTxt(unittest.TestCase):
         )
 
 
-class TestFormatter(unittest.TestCase):
-
-    kwdict = {
-        "a": "hElLo wOrLd",
-        "b": "äöü",
-        "d": {"a": "foo", "b": 0, "c": None},
-        "l": ["a", "b", "c"],
-        "n": None,
-        "s": " \n\r\tSPACE    ",
-        "u": "%27%3C%20/%20%3E%27",
-        "name": "Name",
-        "title1": "Title",
-        "title2": "",
-        "title3": None,
-        "title4": 0,
-    }
-
-    def test_conversions(self):
-        self._run_test("{a!l}", "hello world")
-        self._run_test("{a!u}", "HELLO WORLD")
-        self._run_test("{a!c}", "Hello world")
-        self._run_test("{a!C}", "Hello World")
-        self._run_test("{s!t}", "SPACE")
-        self._run_test("{a!U}", self.kwdict["a"])
-        self._run_test("{u!U}", "'< / >'")
-        self._run_test("{a!s}", self.kwdict["a"])
-        self._run_test("{a!r}", "'" + self.kwdict["a"] + "'")
-        self._run_test("{a!a}", "'" + self.kwdict["a"] + "'")
-        self._run_test("{b!a}", "'\\xe4\\xf6\\xfc'")
-        self._run_test("{a!S}", self.kwdict["a"])
-        self._run_test("{l!S}", "a, b, c")
-        self._run_test("{n!S}", "")
-        with self.assertRaises(KeyError):
-            self._run_test("{a!q}", "hello world")
-
-    def test_optional(self):
-        self._run_test("{name}{title1}", "NameTitle")
-        self._run_test("{name}{title1:?//}", "NameTitle")
-        self._run_test("{name}{title1:? **/''/}", "Name **Title''")
-
-        self._run_test("{name}{title2}", "Name")
-        self._run_test("{name}{title2:?//}", "Name")
-        self._run_test("{name}{title2:? **/''/}", "Name")
-
-        self._run_test("{name}{title3}", "NameNone")
-        self._run_test("{name}{title3:?//}", "Name")
-        self._run_test("{name}{title3:? **/''/}", "Name")
-
-        self._run_test("{name}{title4}", "Name0")
-        self._run_test("{name}{title4:?//}", "Name")
-        self._run_test("{name}{title4:? **/''/}", "Name")
-
-    def test_missing(self):
-        replacement = "None"
-
-        self._run_test("{missing}", replacement)
-        self._run_test("{missing.attr}", replacement)
-        self._run_test("{missing[key]}", replacement)
-        self._run_test("{missing:?a//}", "")
-
-        self._run_test("{name[missing]}", replacement)
-        self._run_test("{name[missing].attr}", replacement)
-        self._run_test("{name[missing][key]}", replacement)
-        self._run_test("{name[missing]:?a//}", "")
-
-    def test_missing_custom_default(self):
-        replacement = default = "foobar"
-        self._run_test("{missing}"     , replacement, default)
-        self._run_test("{missing.attr}", replacement, default)
-        self._run_test("{missing[key]}", replacement, default)
-        self._run_test("{missing:?a//}", "a" + default, default)
-
-    def test_alternative(self):
-        self._run_test("{a|z}"    , "hElLo wOrLd")
-        self._run_test("{z|a}"    , "hElLo wOrLd")
-        self._run_test("{z|y|a}"  , "hElLo wOrLd")
-        self._run_test("{z|y|x|a}", "hElLo wOrLd")
-        self._run_test("{z|n|a|y}", "hElLo wOrLd")
-
-        self._run_test("{z|a!C}"      , "Hello World")
-        self._run_test("{z|a:Rh/C/}"  , "CElLo wOrLd")
-        self._run_test("{z|a!C:RH/C/}", "Cello World")
-        self._run_test("{z|y|x:?</>/}", "")
-
-        self._run_test("{d[c]|d[b]|d[a]}", "foo")
-        self._run_test("{d[a]|d[b]|d[c]}", "foo")
-        self._run_test("{d[z]|d[y]|d[x]}", "None")
-
-    def test_indexing(self):
-        self._run_test("{l[0]}" , "a")
-        self._run_test("{a[6]}" , "w")
-
-    def test_slicing(self):
-        v = self.kwdict["a"]
-        self._run_test("{a[1:10]}"  , v[1:10])
-        self._run_test("{a[-10:-1]}", v[-10:-1])
-        self._run_test("{a[5:]}" , v[5:])
-        self._run_test("{a[50:]}", v[50:])
-        self._run_test("{a[:5]}" , v[:5])
-        self._run_test("{a[:50]}", v[:50])
-        self._run_test("{a[:]}"  , v)
-        self._run_test("{a[1:10:2]}"  , v[1:10:2])
-        self._run_test("{a[-10:-1:2]}", v[-10:-1:2])
-        self._run_test("{a[5::2]}" , v[5::2])
-        self._run_test("{a[50::2]}", v[50::2])
-        self._run_test("{a[:5:2]}" , v[:5:2])
-        self._run_test("{a[:50:2]}", v[:50:2])
-        self._run_test("{a[::]}"   , v)
-
-    def test_maxlen(self):
-        v = self.kwdict["a"]
-        self._run_test("{a:L5/foo/}" , "foo")
-        self._run_test("{a:L50/foo/}", v)
-        self._run_test("{a:L50/foo/>50}", " " * 39 + v)
-        self._run_test("{a:L50/foo/>51}", "foo")
-        self._run_test("{a:Lab/foo/}", "foo")
-
-    def test_join(self):
-        self._run_test("{l:J}"       , "abc")
-        self._run_test("{l:J,}"      , "a,b,c")
-        self._run_test("{l:J,/}"     , "a,b,c")
-        self._run_test("{l:J,/>20}"  , "               a,b,c")
-        self._run_test("{l:J - }"    , "a - b - c")
-        self._run_test("{l:J - /}"   , "a - b - c")
-        self._run_test("{l:J - />20}", "           a - b - c")
-
-        self._run_test("{a:J/}"      , self.kwdict["a"])
-        self._run_test("{a:J, /}"    , ", ".join(self.kwdict["a"]))
-
-    def test_replace(self):
-        self._run_test("{a:Rh/C/}"  , "CElLo wOrLd")
-        self._run_test("{a!l:Rh/C/}", "Cello world")
-        self._run_test("{a!u:Rh/C/}", "HELLO WORLD")
-
-        self._run_test("{a!l:Rl/_/}", "he__o wor_d")
-        self._run_test("{a!l:Rl//}" , "heo word")
-        self._run_test("{name:Rame/othing/}", "Nothing")
-
-    def test_chain_special(self):
-        # multiple replacements
-        self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
-        self._run_test("{d[b]!s:R1/Q/R2/A/R0/Y/}", "Y")
-
-        # join-and-replace
-        self._run_test("{l:J-/Rb/E/}", "a-E-c")
-
-        # optional-and-maxlen
-        self._run_test("{d[a]:?</>/L1/too long/}", "<too long>")
-        self._run_test("{d[c]:?</>/L5/too long/}", "")
-
-    def _run_test(self, format_string, result, default=None):
-        formatter = util.Formatter(format_string, default)
-        output = formatter.format_map(self.kwdict)
-        self.assertEqual(output, result, format_string)
-
-
 class TestOther(unittest.TestCase):
 
     def test_bencode(self):
@@ -456,6 +303,16 @@ class TestOther(unittest.TestCase):
         self.assertSequenceEqual(
             list(util.unique([1, 2, 1, 3, 2, 1])), [1, 2, 3])
 
+    def test_unique_sequence(self):
+        self.assertSequenceEqual(
+            list(util.unique_sequence("")), "")
+        self.assertSequenceEqual(
+            list(util.unique_sequence("AABBCC")), "ABC")
+        self.assertSequenceEqual(
+            list(util.unique_sequence("ABABABCAABBCC")), "ABABABCABC")
+        self.assertSequenceEqual(
+            list(util.unique_sequence([1, 2, 1, 3, 2, 1])), [1, 2, 1, 3, 2, 1])
+
     def test_raises(self):
         func = util.raises(Exception)
         with self.assertRaises(Exception):
@@ -468,6 +325,115 @@ class TestOther(unittest.TestCase):
             func(2)
         with self.assertRaises(ValueError):
             func(3)
+
+    def test_identity(self):
+        for value in (123, "foo", [1, 2, 3], (1, 2, 3), {1: 2}, None):
+            self.assertIs(util.identity(value), value)
+
+    def test_noop(self):
+        self.assertEqual(util.noop(), None)
+
+    def test_compile_expression(self):
+        expr = util.compile_expression("1 + 2 * 3")
+        self.assertEqual(expr(), 7)
+        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
+        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 7)
+
+        expr = util.compile_expression("a + b * c")
+        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
+        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 90)
+
+        with self.assertRaises(NameError):
+            expr()
+        with self.assertRaises(NameError):
+            expr({"a": 2})
+
+        with self.assertRaises(SyntaxError):
+            util.compile_expression("")
+        with self.assertRaises(SyntaxError):
+            util.compile_expression("x++")
+
+        expr = util.compile_expression("1 and abort()")
+        with self.assertRaises(exception.StopExtraction):
+            expr()
+
+    def test_extractor_filter(self):
+        # empty
+        func = util.build_extractor_filter("")
+        self.assertEqual(func(TestExtractor)      , True)
+        self.assertEqual(func(TestExtractorParent), True)
+        self.assertEqual(func(TestExtractorAlt)   , True)
+
+        # category
+        func = util.build_extractor_filter("test_category")
+        self.assertEqual(func(TestExtractor)      , False)
+        self.assertEqual(func(TestExtractorParent), False)
+        self.assertEqual(func(TestExtractorAlt)   , True)
+
+        # subcategory
+        func = util.build_extractor_filter("*:test_subcategory")
+        self.assertEqual(func(TestExtractor)      , False)
+        self.assertEqual(func(TestExtractorParent), True)
+        self.assertEqual(func(TestExtractorAlt)   , False)
+
+        # basecategory
+        func = util.build_extractor_filter("test_basecategory")
+        self.assertEqual(func(TestExtractor)      , False)
+        self.assertEqual(func(TestExtractorParent), False)
+        self.assertEqual(func(TestExtractorAlt)   , False)
+
+        # category-subcategory pair
+        func = util.build_extractor_filter("test_category:test_subcategory")
+        self.assertEqual(func(TestExtractor)      , False)
+        self.assertEqual(func(TestExtractorParent), True)
+        self.assertEqual(func(TestExtractorAlt)   , True)
+
+        # combination
+        func = util.build_extractor_filter(
+            ["test_category", "*:test_subcategory"])
+        self.assertEqual(func(TestExtractor)      , False)
+        self.assertEqual(func(TestExtractorParent), False)
+        self.assertEqual(func(TestExtractorAlt)   , False)
+
+        # whitelist
+        func = util.build_extractor_filter(
+            "test_category:test_subcategory", negate=False)
+        self.assertEqual(func(TestExtractor)      , True)
+        self.assertEqual(func(TestExtractorParent), False)
+        self.assertEqual(func(TestExtractorAlt)   , False)
+
+        func = util.build_extractor_filter(
+            ["test_category:test_subcategory", "*:test_subcategory_parent"],
+            negate=False)
+        self.assertEqual(func(TestExtractor)      , True)
+        self.assertEqual(func(TestExtractorParent), True)
+        self.assertEqual(func(TestExtractorAlt)   , False)
+
+    def test_generate_token(self):
+        tokens = set()
+        for _ in range(100):
+            token = util.generate_token()
+            tokens.add(token)
+            self.assertEqual(len(token), 16 * 2)
+            self.assertRegex(token, r"^[0-9a-f]+$")
+        self.assertGreaterEqual(len(tokens), 99)
+
+        token = util.generate_token(80)
+        self.assertEqual(len(token), 80 * 2)
+        self.assertRegex(token, r"^[0-9a-f]+$")
+
+    def test_format_value(self):
+        self.assertEqual(util.format_value(0)         , "0")
+        self.assertEqual(util.format_value(1)         , "1")
+        self.assertEqual(util.format_value(12)        , "12")
+        self.assertEqual(util.format_value(123)       , "123")
+        self.assertEqual(util.format_value(1234)      , "1.23k")
+        self.assertEqual(util.format_value(12345)     , "12.34k")
+        self.assertEqual(util.format_value(123456)    , "123.45k")
+        self.assertEqual(util.format_value(1234567)   , "1.23M")
+        self.assertEqual(util.format_value(12345678)  , "12.34M")
+        self.assertEqual(util.format_value(123456789) , "123.45M")
+        self.assertEqual(util.format_value(1234567890), "1.23G")
 
     def test_combine_dict(self):
         self.assertEqual(
@@ -540,6 +506,11 @@ class TestOther(unittest.TestCase):
         self.assertEqual(f(["a", "b", "c"]), "a, b, c")
         self.assertEqual(f([1, 2, 3]), "1, 2, 3")
 
+    def test_to_timestamp(self, f=util.to_timestamp):
+        self.assertEqual(f(util.EPOCH), "0")
+        self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
+        self.assertEqual(f(None), "")
+
     def test_universal_none(self):
         obj = util.NONE
 
@@ -548,6 +519,22 @@ class TestOther(unittest.TestCase):
         self.assertEqual(repr(obj), repr(None))
         self.assertIs(obj.attr, obj)
         self.assertIs(obj["key"], obj)
+
+
+class TestExtractor():
+    category = "test_category"
+    subcategory = "test_subcategory"
+    basecategory = "test_basecategory"
+
+
+class TestExtractorParent(TestExtractor):
+    category = "test_category"
+    subcategory = "test_subcategory_parent"
+
+
+class TestExtractorAlt(TestExtractor):
+    category = "test_category_alt"
+    subcategory = "test_subcategory"
 
 
 if __name__ == '__main__':

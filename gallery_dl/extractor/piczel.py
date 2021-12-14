@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,9 +19,9 @@ class PiczelExtractor(Extractor):
     filename_fmt = "{category}_{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     root = "https://piczel.tv"
+    api_root = "https://tombstone.piczel.tv"
 
     def items(self):
-        yield Message.Version, 1
         for post in self.posts():
             post["tags"] = [t["title"] for t in post["tags"] if t["title"]]
             post["date"] = text.parse_datetime(
@@ -78,7 +78,7 @@ class PiczelUserExtractor(PiczelExtractor):
         self.user = match.group(1)
 
     def posts(self):
-        url = "{}/api/users/{}/gallery".format(self.root, self.user)
+        url = "{}/api/users/{}/gallery".format(self.api_root, self.user)
         return self._pagination(url)
 
 
@@ -98,7 +98,7 @@ class PiczelFolderExtractor(PiczelExtractor):
         self.user, self.folder_id = match.groups()
 
     def posts(self):
-        url = "{}/api/users/{}/gallery".format(self.root, self.user)
+        url = "{}/api/users/{}/gallery".format(self.api_root, self.user)
         return self._pagination(url, int(self.folder_id))
 
 
@@ -107,7 +107,8 @@ class PiczelImageExtractor(PiczelExtractor):
     subcategory = "image"
     pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/image/(\d+)"
     test = ("https://piczel.tv/gallery/image/7807", {
-        "url": "85225dd53a03c3b6028f6c4a45b71eccc07f7066",
+        "pattern": r"https://(\w+\.)?piczel\.tv/static/uploads/gallery_image"
+                   r"/32920/image/7807/25737334-Lulena\.png",
         "content": "df9a053a24234474a19bce2b7e27e0dec23bff87",
         "keyword": {
             "created_at": "2018-07-22T05:13:58.000Z",
@@ -115,7 +116,6 @@ class PiczelImageExtractor(PiczelExtractor):
             "description": None,
             "extension": "png",
             "favorites_count": int,
-            "folder": dict,
             "folder_id": 1113,
             "id": 7807,
             "is_flash": False,
@@ -136,5 +136,5 @@ class PiczelImageExtractor(PiczelExtractor):
         self.image_id = match.group(1)
 
     def posts(self):
-        url = "{}/api/gallery/{}".format(self.root, self.image_id)
+        url = "{}/api/gallery/{}".format(self.api_root, self.image_id)
         return (self.request(url).json(),)

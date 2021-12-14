@@ -25,7 +25,6 @@ class LivedoorExtractor(Extractor):
         self.user = match.group(1)
 
     def items(self):
-        yield Message.Version, 1
         for post in self.posts():
             images = self._images(post)
             if images:

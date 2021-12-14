@@ -147,7 +147,7 @@ class TestExtractorModule(unittest.TestCase):
             return c.capitalize()
 
         for extr in extractor.extractors():
-            if extr.category not in ("", "oauth"):
+            if extr.category not in ("", "oauth", "ytdl"):
                 expected = "{}{}Extractor".format(
                     capitalize(extr.category),
                     capitalize(extr.subcategory),
@@ -218,10 +218,6 @@ class TestExtractorWait(unittest.TestCase):
 
 
 class TextExtractorOAuth(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        mastodon.generate_extractors()
 
     def test_oauth1(self):
         for category in ("flickr", "smugmug", "tumblr"):

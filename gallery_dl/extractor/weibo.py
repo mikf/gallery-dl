@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -27,16 +27,21 @@ class WeiboExtractor(Extractor):
         self.videos = self.config("videos", True)
 
     def items(self):
-        yield Message.Version, 1
+        original_retweets = (self.retweets == "original")
 
         for status in self.statuses():
 
-            files = self._files_from_status(status)
             if self.retweets and "retweeted_status" in status:
-                files = itertools.chain(
-                    files,
-                    self._files_from_status(status["retweeted_status"]),
-                )
+                if original_retweets:
+                    status = status["retweeted_status"]
+                    files = self._files_from_status(status)
+                else:
+                    files = itertools.chain(
+                        self._files_from_status(status),
+                        self._files_from_status(status["retweeted_status"]),
+                    )
+            else:
+                files = self._files_from_status(status)
 
             for num, file in enumerate(files, 1):
                 if num == 1:
@@ -143,6 +148,11 @@ class WeiboStatusExtractor(WeiboExtractor):
         }),
         # non-numeric status ID (#664)
         ("https://weibo.com/3314883543/Iy7fj4qVg"),
+        # original retweets (#1542)
+        ("https://m.weibo.cn/detail/4600272267522211", {
+            "options": (("retweets", "original"),),
+            "keyword": {"status": {"id": "4600167083287033"}},
+        }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
     )

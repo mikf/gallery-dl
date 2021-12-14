@@ -1,25 +1,27 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://pururin.io/"""
+"""Extractors for https://pururin.to/"""
 
 from .common import GalleryExtractor
 from .. import text, util
+import binascii
 import json
 
 
 class PururinGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries on pururin.io"""
     category = "pururin"
-    pattern = r"(?:https?://)?(?:www\.)?pururin\.io/(?:gallery|read)/(\d+)"
+    pattern = r"(?:https?://)?(?:www\.)?pururin\.[ti]o/(?:gallery|read)/(\d+)"
     test = (
-        ("https://pururin.io/gallery/38661/iowant-2", {
-            "pattern": r"https://cdn.pururin.io/\w+/images/data/\d+/\d+\.jpg",
+        ("https://pururin.to/gallery/38661/iowant-2", {
+            "pattern": r"https://cdn.pururin.[ti]o/\w+"
+                       r"/images/data/\d+/\d+\.jpg",
             "keyword": {
                 "title"     : "re:I ?owant 2!!",
                 "title_en"  : "re:I ?owant 2!!",
@@ -29,10 +31,10 @@ class PururinGalleryExtractor(GalleryExtractor):
                 "artist"    : ["Shoda Norihiro"],
                 "group"     : ["Obsidian Order"],
                 "parody"    : ["Kantai Collection"],
-                "characters": ["Admiral", "Iowa"],
+                "characters": ["Iowa", "Teitoku"],
                 "tags"      : list,
                 "type"      : "Doujinshi",
-                "collection": "",
+                "collection": "I owant you!",
                 "convention": "C92",
                 "rating"    : float,
                 "uploader"  : "demo",
@@ -41,11 +43,12 @@ class PururinGalleryExtractor(GalleryExtractor):
                 "language"  : "English",
             }
         }),
-        ("https://pururin.io/gallery/7661/unisis-team-vanilla", {
+        ("https://pururin.to/gallery/7661/unisis-team-vanilla", {
             "count": 17,
         }),
+        ("https://pururin.io/gallery/38661/iowant-2"),
     )
-    root = "https://pururin.io"
+    root = "https://pururin.to"
 
     def __init__(self, match):
         self.gallery_id = match.group(1)
@@ -70,8 +73,8 @@ class PururinGalleryExtractor(GalleryExtractor):
 
         url = "{}/read/{}/01/x".format(self.root, self.gallery_id)
         page = self.request(url).text
-        info = json.loads(text.unescape(text.extract(
-            page, ':gallery="', '"')[0]))
+        info = json.loads(binascii.a2b_base64(text.extract(
+            page, '<gallery-read encoded="', '"')[0]).decode())
         self._ext = info["image_extension"]
         self._cnt = info["total_pages"]
 
@@ -97,6 +100,6 @@ class PururinGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        ufmt = "https://cdn.pururin.io/assets/images/data/{}/{{}}.{}".format(
+        ufmt = "https://cdn.pururin.to/assets/images/data/{}/{{}}.{}".format(
             self.gallery_id, self._ext)
         return [(ufmt.format(num), None) for num in range(1, self._cnt + 1)]

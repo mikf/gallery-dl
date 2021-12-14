@@ -1,103 +1,43 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://gelbooru.com/"""
+"""Extractors for https://gelbooru.com/"""
 
-from . import booru
-from .common import Message
-from .. import text
+from .common import Extractor, Message
+from . import gelbooru_v02
+from .. import text, exception
+import binascii
 
 
-class GelbooruExtractor(booru.XmlParserMixin,
-                        booru.GelbooruPageMixin,
-                        booru.BooruExtractor):
+class GelbooruBase():
     """Base class for gelbooru extractors"""
     category = "gelbooru"
-    api_url = "https://gelbooru.com/index.php"
-    post_url = "https://gelbooru.com/index.php?page=post&s=view&id={}"
-    pool_url = "https://gelbooru.com/index.php?page=pool&s=show&id={}"
-
-    def __init__(self, match):
-        super().__init__(match)
-
-        self.use_api = self.config("api", True)
-        if self.use_api:
-            self.params.update({"page": "dapi", "s": "post", "q": "index"})
-        else:
-            self.items = self.items_noapi
-            self.session.cookies["fringeBenefits"] = "yup"
-            self.per_page = 42
+    basecategory = "booru"
+    root = "https://gelbooru.com"
 
     @staticmethod
-    def get_file_url(image):
-        url = image["file_url"]
-        if url.startswith("https://mp4.gelbooru.com/"):
-            ihash = image["md5"]
-            return "https://img2.gelbooru.com/images/{}/{}/{}.webm".format(
-                ihash[0:2], ihash[2:4], ihash)
+    def _file_url(post):
+        url = post["file_url"]
+        if url.startswith(("https://mp4.gelbooru.com/", "https://video-cdn")):
+            md5 = post["md5"]
+            path = "/images/{}/{}/{}.webm".format(md5[0:2], md5[2:4], md5)
+            post["_fallback"] = GelbooruBase._video_fallback(path)
+            url = "https://img3.gelbooru.com" + path
         return url
 
-    def items_noapi(self):
-        yield Message.Version, 1
-        data = self.get_metadata()
-
-        for post in self.get_posts():
-            post = self.get_post_data(post)
-            url = post["file_url"]
-            post.update(data)
-            text.nameext_from_url(url, post)
-            yield Message.Directory, post
-            yield Message.Url, url, post
-
-    def get_posts(self):
-        """Return an iterable containing all relevant post objects"""
-        url = "https://gelbooru.com/index.php?page=post&s=list"
-        params = {
-            "tags": self.params["tags"],
-            "pid" : self.page_start * self.per_page
-        }
-
-        while True:
-            page = self.request(url, params=params).text
-            ids = list(text.extract_iter(page, '<span id="s', '"'))
-            yield from ids
-            if len(ids) < self.per_page:
-                return
-            params["pid"] += self.per_page
-
-    def get_post_data(self, post_id):
-        """Extract metadata of a single post"""
-        page = self.request(self.post_url.format(post_id)).text
-        data = text.extract_all(page, (
-            (None        , '<meta name="keywords"', ''),
-            ("tags"      , ' imageboard- ', '"'),
-            ("id"        , '<li>Id: ', '<'),
-            ("created_at", '<li>Posted: ', '<'),
-            ("width"     , '<li>Size: ', 'x'),
-            ("height"    , '', '<'),
-            ("source"    , '<li>Source: <a href="', '"'),
-            ("rating"    , '<li>Rating: ', '<'),
-            (None        , '<li>Score: ', ''),
-            ("score"     , '>', '<'),
-            ("file_url"  , '<li><a href="http', '"'),
-            ("change"    , ' id="lupdated" value="', '"'),
-        ))[0]
-        data["file_url"] = "http" + data["file_url"].replace("m//", "m/", 1)
-        data["md5"] = data["file_url"].rpartition("/")[2].partition(".")[0]
-        data["rating"] = (data["rating"] or "?")[0].lower()
-        data["tags"] = " ".join(
-            [tag.replace(" ", "_") for tag in data["tags"].split(", ")])
-        if self.extags:
-            self.extended_tags(data, page)
-        return data
+    @staticmethod
+    def _video_fallback(path):
+        yield "https://img2.gelbooru.com" + path
+        yield "https://img1.gelbooru.com" + path
 
 
-class GelbooruTagExtractor(booru.TagMixin, GelbooruExtractor):
+class GelbooruTagExtractor(GelbooruBase,
+                           gelbooru_v02.GelbooruV02TagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")
@@ -112,7 +52,8 @@ class GelbooruTagExtractor(booru.TagMixin, GelbooruExtractor):
     )
 
 
-class GelbooruPoolExtractor(booru.PoolMixin, GelbooruExtractor):
+class GelbooruPoolExtractor(GelbooruBase,
+                            gelbooru_v02.GelbooruV02PoolExtractor):
     """Extractor for image-pools from gelbooru.com"""
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=pool&s=show&id=(?P<pool>\d+)")
@@ -126,15 +67,89 @@ class GelbooruPoolExtractor(booru.PoolMixin, GelbooruExtractor):
         }),
     )
 
+    def metadata(self):
+        url = "{}/index.php?page=pool&s=show&id={}".format(
+            self.root, self.pool_id)
+        page = self.request(url).text
 
-class GelbooruPostExtractor(booru.PostMixin, GelbooruExtractor):
+        name, pos = text.extract(page, "<h3>Now Viewing: ", "</h3>")
+        if not name:
+            raise exception.NotFoundError("pool")
+        self.post_ids = text.extract_iter(page, 'class="" id="p', '"', pos)
+
+        return {
+            "pool": text.parse_int(self.pool_id),
+            "pool_name": text.unescape(name),
+        }
+
+
+class GelbooruPostExtractor(GelbooruBase,
+                            gelbooru_v02.GelbooruV02PostExtractor):
     """Extractor for single images from gelbooru.com"""
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=post&s=view&id=(?P<post>\d+)")
-    test = ("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
-        "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
-        "count": 1,
+    test = (
+        ("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
+            "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
+            "count": 1,
+        }),
+        ("https://gelbooru.com/index.php?page=post&s=view&id=6018318", {
+            "options": (("tags", True),),
+            "content": "977caf22f27c72a5d07ea4d4d9719acdab810991",
+            "keyword": {
+                "tags_artist": "kirisaki_shuusei",
+                "tags_character": str,
+                "tags_copyright": "vocaloid",
+                "tags_general": str,
+                "tags_metadata": str,
+            },
+        }),
+        # video
+        ("https://gelbooru.com/index.php?page=post&s=view&id=5938076", {
+            "content": "6360452fa8c2f0c1137749e81471238564df832a",
+            "pattern": r"https://img\d\.gelbooru\.com/images"
+                       r"/22/61/226111273615049235b001b381707bd0\.webm",
+        }),
+        # notes
+        ("https://gelbooru.com/index.php?page=post&s=view&id=5997331", {
+            "options": (("notes", True),),
+            "keywords": {
+                "notes": [
+                    {
+                        "height": 553,
+                        "body": "Look over this way when you talk~",
+                        "width": 246,
+                        "x": 35,
+                        "y": 72
+                    },
+                    {
+                        "height": 557,
+                        "body": "Hey~\nAre you listening~?",
+                        "width": 246,
+                        "x": 1233,
+                        "y": 109
+                    }
+                ]
+            }
+        }),
+    )
+
+
+class GelbooruRedirectExtractor(GelbooruBase, Extractor):
+    subcategory = "redirect"
+    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com"
+               r"/redirect\.php\?s=([^&#]+)")
+    test = (("https://gelbooru.com/redirect.php?s=Ly9nZWxib29ydS5jb20vaW5kZXgu"
+             "cGhwP3BhZ2U9cG9zdCZzPXZpZXcmaWQ9MTgzMDA0Ng=="), {
+        "pattern": r"https://gelbooru.com/index.php"
+                   r"\?page=post&s=view&id=1830046"
     })
 
-    def get_posts(self):
-        return (self.post,)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.redirect_url = text.ensure_http_scheme(
+            binascii.a2b_base64(match.group(1)).decode())
+
+    def items(self):
+        data = {"_extractor": GelbooruPostExtractor}
+        yield Message.Queue, self.redirect_url, data

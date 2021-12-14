@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2019 Mike Fährmann
+# Copyright 2016-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,7 +29,6 @@ class SeigaExtractor(Extractor):
         images = iter(self.get_images())
         data = next(images)
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for image in util.advance(images, self.start_image):
             data.update(image)
@@ -54,6 +53,10 @@ class SeigaExtractor(Extractor):
 
     @cache(maxage=7*24*3600, keyarg=1)
     def _login_impl(self, username, password):
+        if not username or not password:
+            raise exception.AuthenticationError(
+                "Username and password required")
+
         self.log.info("Logging in as %s", username)
         url = "https://account.nicovideo.jp/api/v1/login"
         data = {"mail_tel": username, "password": password}

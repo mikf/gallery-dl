@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -101,14 +101,11 @@ class LusciousAlbumExtractor(LusciousExtractor):
                 "number_of_favorites": int,
             },
         }),
-        ("https://luscious.net/albums/virgin-killer-sweater_282582/", {
-            "url": "0be0cc279be1de99f727764819e03435e2a79915",
-        }),
         ("https://luscious.net/albums/not-found_277035/", {
             "exception": exception.NotFoundError,
         }),
         ("https://members.luscious.net/albums/login-required_323871/", {
-            "count": 78,
+            "count": 64,
         }),
         ("https://www.luscious.net/albums/okinami_277031/"),
         ("https://members.luscious.net/albums/okinami_277031/"),
@@ -119,10 +116,10 @@ class LusciousAlbumExtractor(LusciousExtractor):
     def __init__(self, match):
         LusciousExtractor.__init__(self, match)
         self.album_id = match.group(1)
+        self.gif = self.config("gif", False)
 
     def items(self):
         album = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, {"album": album}
         for num, image in enumerate(self.images(), 1):
             image["num"] = num
@@ -133,7 +130,10 @@ class LusciousAlbumExtractor(LusciousExtractor):
             image["date"] = text.parse_timestamp(image["created"])
             image["id"] = text.parse_int(image["id"])
 
-            url = image["url_to_video"] or image["url_to_original"]
+            url = (image["url_to_original"] or image["url_to_video"]
+                   if self.gif else
+                   image["url_to_video"] or image["url_to_original"])
+
             yield Message.Url, url, text.nameext_from_url(url, image)
 
     def metadata(self):
@@ -442,7 +442,6 @@ fragment AlbumMinimal on Album {
     }
 }
 """
-        yield Message.Version, 1
         while True:
             data = self._graphql("AlbumListWithPeek", variables, query)
 

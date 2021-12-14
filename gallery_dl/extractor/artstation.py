@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.artstation.com/"""
+"""Extractors for https://www.artstation.com/"""
 
 from .common import Extractor, Message
 from .. import text, util, exception
@@ -29,7 +29,6 @@ class ArtstationExtractor(Extractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, data
 
         for project in self.projects():
@@ -49,7 +48,20 @@ class ArtstationExtractor(Extractor):
                 if adict["has_image"]:
                     url = adict["image_url"]
                     text.nameext_from_url(url, asset)
-                    yield Message.Url, self._no_cache(url), asset
+
+                    url = self._no_cache(url)
+                    lhs, _, rhs = url.partition("/large/")
+                    if rhs:
+                        url = lhs + "/4k/" + rhs
+                        asset["_fallback"] = self._image_fallback(lhs, rhs)
+
+                    yield Message.Url, url, asset
+
+    @staticmethod
+    def _image_fallback(lhs, rhs):
+        yield lhs + "/large/" + rhs
+        yield lhs + "/medium/" + rhs
+        yield lhs + "/small/" + rhs
 
     def metadata(self):
         """Return general metadata"""
@@ -135,8 +147,8 @@ class ArtstationUserExtractor(ArtstationExtractor):
                r"|((?!www)\w+)\.artstation\.com(?:/projects)?)/?$")
     test = (
         ("https://www.artstation.com/gaerikim/", {
-            "pattern": r"https://\w+\.artstation\.com/p/assets"
-                       r"/images/images/\d+/\d+/\d+/large/[^/]+",
+            "pattern": r"https://\w+\.artstation\.com/p/assets/images"
+                       r"/images/\d+/\d+/\d+/(4k|large|medium|small)/[^/]+",
             "count": ">= 6",
         }),
         ("https://www.artstation.com/gaerikim/albums/all/"),
@@ -146,7 +158,8 @@ class ArtstationUserExtractor(ArtstationExtractor):
 
     def projects(self):
         url = "{}/users/{}/projects.json".format(self.root, self.user)
-        return self._pagination(url)
+        params = {"album_id": "all"}
+        return self._pagination(url, params)
 
 
 class ArtstationAlbumExtractor(ArtstationExtractor):
@@ -202,8 +215,8 @@ class ArtstationLikesExtractor(ArtstationExtractor):
                r"/(?!artwork|projects|search)([^/?#]+)/likes/?")
     test = (
         ("https://www.artstation.com/mikf/likes", {
-            "pattern": r"https://\w+\.artstation\.com/p/assets"
-                       r"/images/images/\d+/\d+/\d+/large/[^/]+",
+            "pattern": r"https://\w+\.artstation\.com/p/assets/images"
+                       r"/images/\d+/\d+/\d+/(4k|large|medium|small)/[^/]+",
             "count": 6,
         }),
         # no likes
@@ -250,7 +263,6 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
             self.root)
 
         challenge = self.request(challenge_url).json()
-        yield Message.Version, 1
         yield Message.Directory, {"challenge": challenge}
 
         params = {"sorting": self.sorting}
@@ -344,10 +356,10 @@ class ArtstationImageExtractor(ArtstationExtractor):
     test = (
         ("https://www.artstation.com/artwork/LQVJr", {
             "pattern": r"https?://\w+\.artstation\.com/p/assets"
-                       r"/images/images/008/760/279/large/.+",
-            "content": "1f645ce7634e44675ebde8f6b634d36db0617d3c",
+                       r"/images/images/008/760/279/4k/.+",
+            "content": "7b113871465fdc09d127adfdc2767d51cf45a7e9",
             # SHA1 hash without _no_cache()
-            # "content": "2e8aaf6400aeff2345274f45e90b6ed3f2a0d946",
+            # "content": "44b80f9af36d40efc5a2668cdd11d36d6793bae9",
         }),
         # multiple images per project
         ("https://www.artstation.com/artwork/Db3dy", {

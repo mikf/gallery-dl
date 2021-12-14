@@ -1,47 +1,56 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 import re
-import importlib
 
 modules = [
     "2chan",
     "35photo",
     "3dbooru",
+    "420chan",
     "4chan",
     "500px",
     "8kun",
     "8muses",
     "adultempire",
+    "architizer",
     "artstation",
     "aryion",
+    "bbc",
     "bcy",
     "behance",
     "blogger",
+    "comicvine",
+    "cyberdrop",
     "danbooru",
+    "desktopography",
     "deviantart",
     "dynastyscans",
     "e621",
+    "erome",
     "exhentai",
     "fallenangels",
+    "fanbox",
+    "fantia",
     "flickr",
     "furaffinity",
     "fuskator",
     "gelbooru",
+    "gelbooru_v01",
+    "gelbooru_v02",
     "gfycat",
     "hbrowse",
     "hentai2read",
-    "hentaicafe",
+    "hentaicosplays",
     "hentaifoundry",
     "hentaifox",
     "hentaihand",
     "hentaihere",
-    "hentainexus",
     "hiperdex",
     "hitomi",
     "idolcomplex",
@@ -57,6 +66,7 @@ modules = [
     "issuu",
     "kabeuchi",
     "keenspot",
+    "kemonoparty",
     "khinsider",
     "komikcast",
     "lineblog",
@@ -66,14 +76,14 @@ modules = [
     "mangafox",
     "mangahere",
     "mangakakalot",
-    "mangapanda",
+    "manganelo",
     "mangapark",
-    "mangareader",
-    "mangastream",
+    "mangasee",
     "mangoxo",
     "myhentaigallery",
     "myportfolio",
     "naver",
+    "naverwebtoon",
     "newgrounds",
     "ngomik",
     "nhentai",
@@ -82,8 +92,12 @@ modules = [
     "nsfwalbum",
     "paheal",
     "patreon",
+    "philomena",
     "photobucket",
+    "photovogue",
+    "picarto",
     "piczel",
+    "pillowfort",
     "pinterest",
     "pixiv",
     "pixnet",
@@ -92,26 +106,28 @@ modules = [
     "pururin",
     "reactor",
     "readcomiconline",
-    "realbooru",
     "reddit",
     "redgifs",
-    "rule34",
-    "safebooru",
     "sankaku",
     "sankakucomplex",
     "seiga",
     "senmanga",
     "sexcom",
     "simplyhentai",
+    "skeb",
     "slickpic",
     "slideshare",
     "smugmug",
     "speakerdeck",
     "subscribestar",
+    "tapas",
     "tsumino",
     "tumblr",
+    "tumblrgallery",
     "twitter",
+    "unsplash",
     "vanillarock",
+    "vk",
     "vsco",
     "wallhaven",
     "warosu",
@@ -119,9 +135,10 @@ modules = [
     "webtoons",
     "weibo",
     "wikiart",
+    "wikieat",
     "xhamster",
     "xvideos",
-    "yuki",
+    "booru",
     "moebooru",
     "foolfuuka",
     "foolslide",
@@ -132,6 +149,7 @@ modules = [
     "recursive",
     "oauth",
     "test",
+    "ytdl",
     "generic",
 ]
 
@@ -180,11 +198,12 @@ def _list_classes():
     """Yield all available extractor classes"""
     yield from _cache
 
+    globals_ = globals()
     for module_name in _module_iter:
-        module = importlib.import_module("."+module_name, __package__)
+        module = __import__(module_name, globals_, None, (), 1)
         yield from add_module(module)
 
-    globals()["_list_classes"] = lambda : _cache
+    globals_["_list_classes"] = lambda : _cache
 
 
 def _get_classes(module):

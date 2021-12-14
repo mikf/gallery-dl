@@ -155,7 +155,6 @@ class FlickrAlbumExtractor(FlickrExtractor):
         return self._album_items()
 
     def _album_items(self):
-        yield Message.Version, 1
         data = FlickrExtractor.metadata(self)
         data["_extractor"] = FlickrAlbumExtractor
 

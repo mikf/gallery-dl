@@ -1,0 +1,39 @@
+name: executables
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["windows-latest", "ubuntu-latest", "macOS-latest"]
+        python-version: ["3.9"]
+        architecture: ["x64"]
+        include:
+        - os: "windows-2016"
+          python-version: "3.8"
+          architecture: "x86"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }} ${{ matrix.architecture }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: ${{ matrix.architecture }}
+
+    - name: Build executable
+      run: |
+        pip install requests==2.25.1 requests[socks] urllib3==1.25.11 yt-dlp pyinstaller
+        python scripts/pyinstaller.py
+
+    - name: Upload executable
+      uses: actions/upload-artifact@v2
+      with:
+        name: gallery-dl-${{ matrix.os }}-${{ matrix.architecture }}-${{ matrix.python-version }}
+        path: |
+          dist

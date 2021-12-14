@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,7 @@ import collections
 from datetime import datetime, timezone as tz
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, output, util  # noqa E402
+from gallery_dl import extractor, output, path  # noqa E402
 from gallery_dl import postprocessor, config  # noqa E402
 from gallery_dl.postprocessor.common import PostProcessor  # noqa E402
 
@@ -30,12 +30,16 @@ class MockPostprocessorModule(Mock):
 
 class FakeJob():
 
-    def __init__(self):
-        self.extractor = extractor.find("test:")
-        self.pathfmt = util.PathFormat(self.extractor)
+    def __init__(self, extr=extractor.find("test:")):
+        self.extractor = extr
+        self.pathfmt = path.PathFormat(extr)
         self.out = output.NullOutput()
         self.get_logger = logging.getLogger
         self.hooks = collections.defaultdict(list)
+
+    def register_hooks(self, hooks, options):
+        for hook, callback in hooks.items():
+            self.hooks[hook].append(callback)
 
 
 class TestPostprocessorModule(unittest.TestCase):
@@ -53,7 +57,7 @@ class TestPostprocessorModule(unittest.TestCase):
         self.assertEqual(postprocessor.find(1234) , None)
         self.assertEqual(postprocessor.find(None) , None)
 
-    @patch("importlib.import_module")
+    @patch("builtins.__import__")
     def test_cache(self, import_module):
         import_module.return_value = MockPostprocessorModule()
 
@@ -239,6 +243,15 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
         self.assertEqual(self._output(m), "foo\nbar\nbaz\n")
 
+    def test_metadata_tags_dict(self):
+        self._create(
+            {"mode": "tags"},
+            {"tags": {"g": ["foobar1", "foobar2"], "m": ["foobarbaz"]}},
+        )
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+        self.assertEqual(self._output(m), "foobar1\nfoobar2\nfoobarbaz\n")
+
     def test_metadata_custom(self):
         def test(pp_info):
             pp = self._create(pp_info, {"foo": "bar"})
@@ -306,14 +319,14 @@ class MetadataTest(BasePostprocessorTest):
 
     def test_metadata_filename(self):
         self._create({
-            "filename"        : "{category}_{filename}_meta.data",
+            "filename"        : "{category}_{filename}_/meta/\n\r.data",
             "extension-format": "json",
         })
 
         with patch("builtins.open", mock_open()) as m:
             self._trigger()
 
-        path = self.pathfmt.realdirectory + "test_file_meta.data"
+        path = self.pathfmt.realdirectory + "test_file__meta_.data"
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
     @staticmethod

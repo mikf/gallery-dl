@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,9 +19,8 @@ class ImagehostImageExtractor(Extractor):
     basecategory = "imagehost"
     subcategory = "image"
     archive_fmt = "{token}"
-    https = False
-    method = "post"
-    params = "simple"
+    https = True
+    params = None
     cookies = None
     encoding = None
 
@@ -30,6 +29,7 @@ class ImagehostImageExtractor(Extractor):
         self.page_url = "http{}://{}".format(
             "s" if self.https else "", match.group(1))
         self.token = match.group(2)
+
         if self.params == "simple":
             self.params = {
                 "imgContinue": "Continue+to+image+...+",
@@ -42,14 +42,11 @@ class ImagehostImageExtractor(Extractor):
                 "adb": "1",
                 "next": "Continue+to+image+...+",
             }
-        else:
-            self.params = {}
-            self.method = "get"
 
     def items(self):
         page = self.request(
             self.page_url,
-            method=self.method,
+            method=("POST" if self.params else "GET"),
             data=self.params,
             cookies=self.cookies,
             encoding=self.encoding,
@@ -60,7 +57,6 @@ class ImagehostImageExtractor(Extractor):
         if self.https and url.startswith("http:"):
             url = "https:" + url[5:]
 
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, url, data
 
@@ -91,7 +87,7 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
             "exception": exception.NotFoundError,
         }),
     )
-    https = True
+    params = "simple"
     encoding = "utf-8"
 
     def __init__(self, match):
@@ -122,7 +118,7 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
         "keyword": "a8bb9ab8b2f6844071945d31f8c6e04724051f37",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
+    params = "simple"
     encoding = "utf-8"
 
     def get_info(self, page):
@@ -136,18 +132,30 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
 class ImagevenueImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagevenue.com"""
     category = "imagevenue"
-    pattern = (r"(?:https?://)?(img\d+\.imagevenue\.com"
-               r"/img\.php\?image=(?:[a-z]+_)?(\d+)_[^&#]+)")
-    test = (("http://img28116.imagevenue.com/img.php"
-             "?image=th_52709_test_122_64lo.jpg"), {
-        "url": "46812995d557f2c6adf0ebd0e631e6e4e45facde",
-        "content": "59ec819cbd972dd9a71f25866fbfc416f2f215b3",
-    })
-    params = None
+    pattern = (r"(?:https?://)?((?:www|img\d+)\.imagevenue\.com"
+               r"/([A-Z0-9]{8,10}|view/.*|img\.php\?.*))")
+    test = (
+        ("https://www.imagevenue.com/ME13LS07", {
+            "pattern": r"https://cdn-images\.imagevenue\.com"
+                       r"/10/ac/05/ME13LS07_o\.png",
+            "keyword": "ae15d6e3b2095f019eee84cd896700cd34b09c36",
+            "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
+        }),
+        (("https://www.imagevenue.com/view/o?i=92518_13732377"
+          "annakarina424200712535AM_122_486lo.jpg&h=img150&l=loc486"), {
+            "url": "8bf0254e29250d8f5026c0105bbdda3ee3d84980",
+        }),
+        (("http://img28116.imagevenue.com/img.php"
+          "?image=th_52709_test_122_64lo.jpg"), {
+            "url": "f98e3091df7f48a05fb60fbd86f789fc5ec56331",
+        }),
+    )
 
     def get_info(self, page):
-        url = text.extract(page, "SRC='", "'")[0]
-        return text.urljoin(self.page_url, url), url
+        pos = page.index('class="card-body')
+        url, pos = text.extract(page, '<img src="', '"', pos)
+        filename, pos = text.extract(page, 'alt="', '"', pos)
+        return url, text.unescape(filename)
 
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):
@@ -159,8 +167,6 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
         "keyword": "d1060a4c2e3b73b83044e20681712c0ffdd6cfef",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
-    params = None
 
     @property
     @memcache(maxage=3*3600)
@@ -182,8 +188,6 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
         "keyword": "100e310a19a2fa22d87e1bbc427ecb9f6501e0c0",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
-    params = None
 
     def get_info(self, page):
         pos = page.find('id="imgpreview"')
@@ -204,8 +208,6 @@ class PixhostImageExtractor(ImagehostImageExtractor):
         "keyword": "3bad6d59db42a5ebbd7842c2307e1c3ebd35e6b0",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
-    params = None
     cookies = {"pixhostads": "1", "pixhosttest": "1"}
 
     def get_info(self, page):
@@ -224,8 +226,6 @@ class PostimgImageExtractor(ImagehostImageExtractor):
         "keyword": "2d05808d04e4e83e33200db83521af06e3147a84",
         "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
     })
-    https = True
-    params = None
 
     def get_info(self, page):
         url     , pos = text.extract(page, 'id="main-image" src="', '"')
@@ -243,9 +243,59 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
         "keyword": "704757ca8825f51cec516ec44c1e627c1f2058ca",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = True
-    params = None
 
     def get_info(self, page):
         url = text.extract(page, 'src="', '"', page.index("<img "))[0]
         return url, url
+
+
+class ViprImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from vipr.im"""
+    category = "vipr"
+    pattern = r"(?:https?://)?(vipr\.im/(\w+))"
+    test = ("https://vipr.im/kcd5jcuhgs3v.html", {
+        "url": "88f6a3ecbf3356a11ae0868b518c60800e070202",
+        "keyword": "c432e8a1836b0d97045195b745731c2b1bb0e771",
+    })
+
+    def get_info(self, page):
+        url = text.extract(page, '<img src="', '"')[0]
+        return url, url
+
+
+class ImgclickImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgclick.net"""
+    category = "imgclick"
+    pattern = r"(?:https?://)?((?:www\.)?imgclick\.net/([^/?#]+))"
+    test = ("http://imgclick.net/4tbrre1oxew9/test-_-_.png.html", {
+        "url": "140dcb250a325f2d26b2d918c18b8ac6a2a0f6ab",
+        "keyword": "6895256143eab955622fc149aa367777a8815ba3",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })
+    https = False
+    params = "complex"
+
+    def get_info(self, page):
+        url     , pos = text.extract(page, '<br><img src="', '"')
+        filename, pos = text.extract(page, 'alt="', '"', pos)
+        return url, filename
+
+
+class FappicImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from fappic.com"""
+    category = "fappic"
+    pattern = r"(?:https?://)?((?:www\.)?fappic\.com/(\w+)/[^/?#]+)"
+    test = ("https://www.fappic.com/98wxqcklyh8k/test.png", {
+        "pattern": r"https://img\d+\.fappic\.com/img/\w+/test\.png",
+        "keyword": "433b1d310b0ff12ad8a71ac7b9d8ba3f8cd1e898",
+        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+    })
+
+    def get_info(self, page):
+        url     , pos = text.extract(page, '<a href="/?click"><img src="', '"')
+        filename, pos = text.extract(page, 'alt="', '"', pos)
+
+        if filename.startswith("Porn-Picture-"):
+            filename = filename[13:]
+
+        return url, filename

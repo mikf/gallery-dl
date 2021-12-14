@@ -6,29 +6,38 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.webtoons.com/"""
+"""Extractors for https://www.webtoons.com/"""
 
-from .common import Extractor, Message
+from .common import GalleryExtractor, Extractor, Message
 from .. import exception, text, util
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/(([^/?#]+)"
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/((en|fr)"
 
-
-class WebtoonsExtractor(Extractor):
+class WebtoonsBase():
     category = "webtoons"
     root = "https://www.webtoons.com"
-    cookiedomain = "www.webtoons.com"
+    cookiedomain = ".webtoons.com"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.session.cookies.set("ageGatePass", "true",
-                                 domain=self.cookiedomain)
-        self.path, self.lang, self.genre , self.comic, self.query = \
-            match.groups()
+    def setup_agegate_cookies(self):
+        self._update_cookies({
+            "atGDPR"     : "AD_CONSENT",
+            "needCCPA"   : "false",
+            "needCOPPA"  : "false",
+            "needGDPR"   : "false",
+            "pagGDPR"    : "true",
+            "ageGatePass": "true",
+        })
+
+    def request(self, url, **kwargs):
+        response = Extractor.request(self, url, **kwargs)
+        if response.history and "/ageGate" in response.url:
+            raise exception.StopExtraction(
+                "HTTP redirect to age gate check ('%s')", response.request.url)
+        return response
 
 
-class WebtoonsEpisodeExtractor(WebtoonsExtractor):
+class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     """Extractor for an episode on webtoons.com"""
     subcategory = "episode"
     directory_fmt = ("{category}", "{comic}")
@@ -39,61 +48,52 @@ class WebtoonsEpisodeExtractor(WebtoonsExtractor):
     test = (
         (("https://www.webtoons.com/en/comedy/safely-endangered"
           "/ep-572-earth/viewer?title_no=352&episode_no=572"), {
-            "url": "11041d71a3f92728305c11a228e77cf0f7aa02ef",
-            "content": "4f7701a750368e377d65900e6e8f64a5f9cb9c86",
+            "url": "55bec5d7c42aba19e3d0d56db25fdf0b0b13be38",
+            "content": ("1748c7e82b6db910fa179f6dc7c4281b0f680fa7",
+                        "42055e44659f6ffc410b3fb6557346dfbb993df3",
+                        "49e1f2def04c6f7a6a3dacf245a1cd9abe77a6a9"),
             "count": 5,
         }),
     )
 
     def __init__(self, match):
-        WebtoonsExtractor.__init__(self, match)
-        query = text.parse_query(self.query)
+        self.path, self.lang, self.genre, self.comic, query = match.groups()
+
+        url = "{}/{}/viewer?{}".format(self.root, self.path, query)
+        GalleryExtractor.__init__(self, match, url)
+        self.setup_agegate_cookies()
+
+        query = text.parse_query(query)
         self.title_no = query.get("title_no")
-        if not self.title_no:
-            raise exception.NotFoundError("title_no")
         self.episode = query.get("episode_no")
-        if not self.episode:
-            raise exception.NotFoundError("episode_no")
 
-    def items(self):
-        url = "{}/{}/viewer?{}".format(self.root, self.path, self.query)
-        self.session.headers["Referer"] = url
-
-        page = self.request(url).text
-        data = self.get_job_metadata(page)
-        imgs = self.get_image_urls(page)
-        data["count"] = len(imgs)
-
-        yield Message.Version, 1
-        yield Message.Directory, data
-        for data["num"], url in enumerate(imgs, 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
-
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
+    def metadata(self, page):
         title, pos = text.extract(
             page, '<meta property="og:title" content="', '"')
         descr, pos = text.extract(
             page, '<meta property="og:description" content="', '"', pos)
 
         return {
-            "genre": self.genre,
-            "comic": self.comic,
-            "title_no": self.title_no,
-            "episode": self.episode,
-            "title": text.unescape(title),
+            "genre"      : self.genre,
+            "comic"      : self.comic,
+            "title_no"   : self.title_no,
+            "episode"    : self.episode,
+            "title"      : text.unescape(title),
             "description": text.unescape(descr),
-            "lang": self.lang,
-            "language": util.code_to_language(self.lang),
+            "lang"       : self.lang,
+            "language"   : util.code_to_language(self.lang),
         }
 
     @staticmethod
-    def get_image_urls(page):
-        """Extract and return a list of all image urls"""
-        return list(text.extract_iter(page, 'class="_images" data-url="', '"'))
+    def images(page):
+        return [
+            (url.replace("://webtoon-phinf.", "://swebtoon-phinf."), None)
+            for url in text.extract_iter(
+                page, 'class="_images" data-url="', '"')
+        ]
 
 
-class WebtoonsComicExtractor(WebtoonsExtractor):
+class WebtoonsComicExtractor(WebtoonsBase, Extractor):
     """Extractor for an entire comic on webtoons.com"""
     subcategory = "comic"
     categorytransfer = True
@@ -117,15 +117,19 @@ class WebtoonsComicExtractor(WebtoonsExtractor):
           "list?title_no=210827&page=9"), {
             "count": ">= 18",
         }),
+        # (#1643)
+        ("https://www.webtoons.com/es/romance/lore-olympus/"
+         "list?title_no=1725"),
     )
 
     def __init__(self, match):
-        WebtoonsExtractor.__init__(self, match)
-        query = text.parse_query(self.query)
+        Extractor.__init__(self, match)
+        self.setup_agegate_cookies()
+
+        self.path, self.lang, self.genre, self.comic, query = match.groups()
+        query = text.parse_query(query)
         self.title_no = query.get("title_no")
-        if not self.title_no:
-            raise exception.NotFoundError("title_no")
-        self.page_no = int(query.get("page", 1))
+        self.page_no = text.parse_int(query.get("page"), 1)
 
     def items(self):
         page = None

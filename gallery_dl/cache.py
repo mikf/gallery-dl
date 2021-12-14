@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -168,24 +168,32 @@ def cache(maxage=3600, keyarg=None):
     return wrap
 
 
-def clear():
-    """Delete all database entries"""
+def clear(module):
+    """Delete database entries for 'module'"""
     db = DatabaseCacheDecorator.db
+    if not db:
+        return None
 
-    if db:
-        rowcount = 0
-        cursor = db.cursor()
-        try:
+    rowcount = 0
+    cursor = db.cursor()
+
+    try:
+        if module == "ALL":
             cursor.execute("DELETE FROM data")
-        except sqlite3.OperationalError:
-            pass  # database is not initialized,  can't be modified, etc.
         else:
-            rowcount = cursor.rowcount
-            db.commit()
+            cursor.execute(
+                "DELETE FROM data "
+                "WHERE key LIKE 'gallery_dl.extractor.' || ? || '.%'",
+                (module.lower(),)
+            )
+    except sqlite3.OperationalError:
+        pass  # database not initialized, cannot be modified, etc.
+    else:
+        rowcount = cursor.rowcount
+        db.commit()
+        if rowcount:
             cursor.execute("VACUUM")
-        return rowcount
-
-    return None
+    return rowcount
 
 
 def _path():
@@ -203,13 +211,18 @@ def _path():
     return os.path.join(cachedir, "cache.sqlite3")
 
 
-try:
-    dbfile = _path()
+def _init():
+    try:
+        dbfile = _path()
 
-    # restrict access permissions for new db files
-    os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
+        # restrict access permissions for new db files
+        os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
 
-    DatabaseCacheDecorator.db = sqlite3.connect(
-        dbfile, timeout=30, check_same_thread=False)
-except (OSError, TypeError, sqlite3.OperationalError):
-    cache = memcache  # noqa: F811
+        DatabaseCacheDecorator.db = sqlite3.connect(
+            dbfile, timeout=60, check_same_thread=False)
+    except (OSError, TypeError, sqlite3.OperationalError):
+        global cache
+        cache = memcache
+
+
+_init()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Execute processes"""
 
 from .common import PostProcessor
-from .. import util
+from .. import util, formatter
 import subprocess
 
 
@@ -30,12 +30,10 @@ class ExecPP(PostProcessor):
 
         args = options["command"]
         if isinstance(args, str):
-            if "{}" not in args:
-                args += " {}"
             self.args = args
             execute = self.exec_string
         else:
-            self.args = [util.Formatter(arg) for arg in args]
+            self.args = [formatter.parse(arg) for arg in args]
             execute = self.exec_list
 
         events = options.get("event")
@@ -43,8 +41,7 @@ class ExecPP(PostProcessor):
             events = ("after",)
         elif isinstance(events, str):
             events = events.split(",")
-        for event in events:
-            job.hooks[event].append(execute)
+        job.register_hooks({event: execute for event in events}, options)
 
     def exec_list(self, pathfmt, status=None):
         if status:
@@ -73,12 +70,12 @@ class ExecPP(PostProcessor):
         self.log.debug("Running '%s'", args)
         retcode = subprocess.Popen(args, shell=shell).wait()
         if retcode:
-            self.log.warning(
-                "Executing '%s' returned with non-zero exit status (%d)",
-                " ".join(args) if isinstance(args, list) else args, retcode)
+            self.log.warning("'%s' returned with non-zero exit status (%d)",
+                             args, retcode)
 
-    def _exec_async(self, args):
-        subprocess.Popen(args, shell=self.shell)
+    def _exec_async(self, args, shell):
+        self.log.debug("Running '%s'", args)
+        subprocess.Popen(args, shell=shell)
 
 
 __postprocessor__ = ExecPP

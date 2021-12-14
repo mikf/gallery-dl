@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,29 +22,6 @@ INVALID_ALT = ((), [], {}, None, "")
 
 
 class TestText(unittest.TestCase):
-
-    def test_clean_xml(self, f=text.clean_xml):
-        # standard usage
-        self.assertEqual(f(""), "")
-        self.assertEqual(f("foo"), "foo")
-        self.assertEqual(f("\tfoo\nbar\r"), "\tfoo\nbar\r")
-        self.assertEqual(f("<foo>\ab\ba\fr\v</foo>"), "<foo>bar</foo>")
-
-        # 'repl' argument
-        repl = "#"
-        self.assertEqual(f("", repl), "")
-        self.assertEqual(f("foo", repl), "foo")
-        self.assertEqual(f("\tfoo\nbar\r", repl), "\tfoo\nbar\r")
-        self.assertEqual(
-            f("<foo>\ab\ba\fr\v</foo>", repl), "<foo>#b#a#r#</foo>")
-
-        # removal of all illegal control characters
-        value = "".join(chr(x) for x in range(32))
-        self.assertEqual(f(value), "\t\n\r")
-
-        # 'invalid' arguments
-        for value in INVALID:
-            self.assertEqual(f(value), "")
 
     def test_remove_html(self, f=text.remove_html):
         result = "Hello World."
@@ -81,6 +58,10 @@ class TestText(unittest.TestCase):
         self.assertEqual(f(" Hello <br/> World.  "), result)
         self.assertEqual(
             f("<div><b class='a'>Hello</b><i>World.</i></div>"), result)
+
+        # escaped HTML entities
+        self.assertEqual(
+            f("<i>&lt;foo&gt;</i> <i>&lt;bar&gt; </i>"), ["<foo>", "<bar>"])
 
         # empty HTML
         self.assertEqual(f("<div></div>"), empty)
@@ -142,8 +123,9 @@ class TestText(unittest.TestCase):
 
         # standard usage
         self.assertEqual(f(""), "")
+        self.assertEqual(f("filename"), "")
         self.assertEqual(f("filename.ext"), result)
-        self.assertEqual(f("/filename.ext"), result)
+        self.assertEqual(f("/filename.ExT"), result)
         self.assertEqual(f("example.org/filename.ext"), result)
         self.assertEqual(f("http://example.org/v2/filename.ext"), result)
         self.assertEqual(
@@ -160,11 +142,15 @@ class TestText(unittest.TestCase):
         # standard usage
         self.assertEqual(f(""), empty)
         self.assertEqual(f("filename.ext"), result)
-        self.assertEqual(f("/filename.ext"), result)
+        self.assertEqual(f("/filename.ExT"), result)
         self.assertEqual(f("example.org/filename.ext"), result)
         self.assertEqual(f("http://example.org/v2/filename.ext"), result)
         self.assertEqual(
             f("http://example.org/v2/filename.ext?param=value#frag"), result)
+
+        # long "extension"
+        fn = "httpswww.example.orgpath-path-path-path-path-path-path-path"
+        self.assertEqual(f(fn), {"filename": fn, "extension": ""})
 
         # invalid arguments
         for value in INVALID:

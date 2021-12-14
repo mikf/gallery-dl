@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,32 +10,10 @@
 
 import re
 import html
-import os.path
 import datetime
 import urllib.parse
 
-
 HTML_RE = re.compile("<[^>]+>")
-
-INVALID_XML_CHARS = (
-    "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07",
-    "\x08", "\x0b", "\x0c", "\x0e", "\x0f", "\x10", "\x11", "\x12",
-    "\x13", "\x14", "\x15", "\x16", "\x17", "\x18", "\x19", "\x1a",
-    "\x1b", "\x1c", "\x1d", "\x1e", "\x1f",
-)
-
-
-def clean_xml(xmldata, repl=""):
-    """Replace/Remove invalid control characters in 'xmldata'"""
-    if not isinstance(xmldata, str):
-        try:
-            xmldata = "".join(xmldata)
-        except TypeError:
-            return ""
-    for char in INVALID_XML_CHARS:
-        if char in xmldata:
-            xmldata = xmldata.replace(char, repl)
-    return xmldata
 
 
 def remove_html(txt, repl=" ", sep=" "):
@@ -49,11 +27,12 @@ def remove_html(txt, repl=" ", sep=" "):
     return txt.strip()
 
 
-def split_html(txt, sep=None):
-    """Split input string by html-tags"""
+def split_html(txt):
+    """Split input string by HTML tags"""
     try:
         return [
-            x.strip() for x in HTML_RE.split(txt)
+            unescape(x).strip()
+            for x in HTML_RE.split(txt)
             if x and not x.isspace()
         ]
     except TypeError:
@@ -77,18 +56,22 @@ def filename_from_url(url):
 
 def ext_from_url(url):
     """Extract the filename extension of an URL"""
-    filename = filename_from_url(url)
-    ext = os.path.splitext(filename)[1]
-    return ext[1:].lower()
+    name, _, ext = filename_from_url(url).rpartition(".")
+    return ext.lower() if name else ""
 
 
 def nameext_from_url(url, data=None):
     """Extract the last part of an URL and fill 'data' accordingly"""
     if data is None:
         data = {}
-    name = unquote(filename_from_url(url))
-    data["filename"], ext = os.path.splitext(name)
-    data["extension"] = ext[1:].lower()
+
+    filename = unquote(filename_from_url(url))
+    name, _, ext = filename.rpartition(".")
+    if name and len(ext) <= 16:
+        data["filename"], data["extension"] = name, ext.lower()
+    else:
+        data["filename"], data["extension"] = filename, ""
+
     return data
 
 

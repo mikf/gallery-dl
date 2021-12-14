@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,10 +29,15 @@ class NewgroundsExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.user_root = "https://{}.newgrounds.com".format(self.user)
+        self.flash = self.config("flash", True)
+
+        fmt = self.config("format", "original")
+        self.format = (True if not fmt or fmt == "original" else
+                       fmt if isinstance(fmt, int) else
+                       text.parse_int(fmt.rstrip("p")))
 
     def items(self):
         self.login()
-        yield Message.Version, 1
 
         for post_url in self.posts():
             try:
@@ -58,7 +63,7 @@ class NewgroundsExtractor(Extractor):
 
     def posts(self):
         """Return urls of all relevant image pages"""
-        return self._pagination(self.subcategory)
+        return self._pagination(self._path)
 
     def login(self):
         username, password = self._get_auth_info()
@@ -92,18 +97,22 @@ class NewgroundsExtractor(Extractor):
         }
 
     def extract_post(self, post_url):
+
+        if "/art/view/" in post_url:
+            extract_data = self._extract_image_data
+        elif "/audio/listen/" in post_url:
+            extract_data = self._extract_audio_data
+        else:
+            extract_data = self._extract_media_data
+            if self.flash:
+                post_url += "/format/flash"
+
         response = self.request(post_url, fatal=False)
         if response.status_code >= 400:
             return {}
         page = response.text
         extr = text.extract_from(page)
-
-        if "/art/view/" in post_url:
-            data = self._extract_image_data(extr, post_url)
-        elif "/audio/listen/" in post_url:
-            data = self._extract_audio_data(extr, post_url)
-        else:
-            data = self._extract_media_data(extr, post_url)
+        data = extract_data(extr, post_url)
 
         data["_comment"] = extr('id="author_comments"', '</div>')
         data["comment"] = text.unescape(text.remove_html(
@@ -171,8 +180,23 @@ class NewgroundsExtractor(Extractor):
                 "Referer": self.root,
             }
             sources = self.request(url, headers=headers).json()["sources"]
-            src = sources["360p"][0]["src"].replace(".360p.", ".")
-            fallback = self._video_fallback(sources)
+
+            if self.format is True:
+                src = sources["360p"][0]["src"].replace(".360p.", ".")
+                formats = sources
+            else:
+                formats = []
+                for fmt, src in sources.items():
+                    width = text.parse_int(fmt.rstrip("p"))
+                    if width <= self.format:
+                        formats.append((width, src))
+                if formats:
+                    formats.sort(reverse=True)
+                    src, formats = formats[0][1][0]["src"], formats[1:]
+                else:
+                    src = ""
+
+            fallback = self._video_fallback(formats)
             date = text.parse_timestamp(src.rpartition("?")[2])
 
         return {
@@ -188,11 +212,13 @@ class NewgroundsExtractor(Extractor):
         }
 
     @staticmethod
-    def _video_fallback(sources):
-        sources = list(sources.items())
-        sources.sort(key=lambda src: text.parse_int(src[0][:-1]), reverse=True)
-        for src in sources:
-            yield src[1][0]["src"]
+    def _video_fallback(formats):
+        if isinstance(formats, dict):
+            formats = list(formats.items())
+            formats.sort(key=lambda fmt: text.parse_int(fmt[0].rstrip("p")),
+                         reverse=True)
+        for fmt in formats:
+            yield fmt[1][0]["src"]
 
     def _pagination(self, kind):
         root = self.user_root
@@ -313,6 +339,17 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
                 "user"       : "zj",
             },
         }),
+        # flash animation (#1257)
+        ("https://www.newgrounds.com/portal/view/161181/format/flash", {
+            "pattern": r"https://uploads\.ungrounded\.net/161000"
+                       r"/161181_ddautta_mask__550x281_\.swf\?f1081628129",
+        }),
+        # format selection (#1729)
+        ("https://www.newgrounds.com/portal/view/758545", {
+            "options": (("format", "720p"),),
+            "pattern": r"https://uploads\.ungrounded\.net/alternate/1482000"
+                       r"/1482860_alternate_102516\.720p\.mp4\?\d+",
+        }),
     )
 
     def __init__(self, match):
@@ -326,7 +363,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
 
 class NewgroundsArtExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
-    subcategory = "art"
+    subcategory = _path = "art"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/art/?$"
     test = ("https://tomfulp.newgrounds.com/art", {
         "pattern": NewgroundsImageExtractor.pattern,
@@ -336,7 +373,7 @@ class NewgroundsArtExtractor(NewgroundsExtractor):
 
 class NewgroundsAudioExtractor(NewgroundsExtractor):
     """Extractor for all audio submissions of a newgrounds user"""
-    subcategory = "audio"
+    subcategory = _path = "audio"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/audio/?$"
     test = ("https://tomfulp.newgrounds.com/audio", {
         "pattern": r"https://audio.ngfiles.com/\d+/\d+_.+\.mp3",
@@ -346,7 +383,7 @@ class NewgroundsAudioExtractor(NewgroundsExtractor):
 
 class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
-    subcategory = "movies"
+    subcategory = _path = "movies"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/movies/?$"
     test = ("https://tomfulp.newgrounds.com/movies", {
         "pattern": r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+_.+",

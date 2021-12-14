@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -98,8 +98,9 @@ def build_parser():
     )
     general.add_argument(
         "-i", "--input-file",
-        dest="inputfile", metavar="FILE",
-        help="Download URLs found in FILE ('-' for stdin)",
+        dest="inputfiles", metavar="FILE", action="append",
+        help=("Download URLs found in FILE ('-' for stdin). "
+              "More than one --input-file can be specified"),
     )
     general.add_argument(
         "--cookies",
@@ -113,8 +114,9 @@ def build_parser():
     )
     general.add_argument(
         "--clear-cache",
-        dest="clear_cache", action="store_true",
-        help="Delete all cached login sessions, cookies, etc.",
+        dest="clear_cache", metavar="MODULE",
+        help="Delete cached login sessions, cookies, etc. for MODULE "
+             "(ALL to delete everything)",
     )
 
     output = parser.add_argument_group("Output Options")
@@ -136,6 +138,11 @@ def build_parser():
         help="Print URLs instead of downloading",
     )
     output.add_argument(
+        "-G", "--resolve-urls",
+        dest="list_urls", action="store_const", const=128,
+        help="Print URLs instead of downloading; resolve intermediary URLs",
+    )
+    output.add_argument(
         "-j", "--dump-json",
         dest="jobtype", action="store_const", const=job.DataJob,
         help="Print JSON information",
@@ -144,6 +151,11 @@ def build_parser():
         "-s", "--simulate",
         dest="jobtype", action="store_const", const=job.SimulationJob,
         help="Simulate data extraction; do not download anything",
+    )
+    output.add_argument(
+        "-E", "--extractor-info",
+        dest="jobtype", action="store_const", const=job.InfoJob,
+        help="Print extractor defaults and settings",
     )
     output.add_argument(
         "-K", "--list-keywords",
@@ -191,13 +203,6 @@ def build_parser():
         dest="retries", metavar="N", type=int, action=ConfigAction,
         help=("Maximum number of retries for failed HTTP requests "
               "or -1 for infinite retries (default: 4)"),
-    )
-    downloader.add_argument(
-        "-A", "--abort",
-        dest="abort", metavar="N", type=int,
-        help=("Abort extractor run after N consecutive file downloads have "
-              "been skipped, e.g. if files with the same filename already "
-              "exist"),
     )
     downloader.add_argument(
         "--http-timeout",
@@ -290,7 +295,19 @@ def build_parser():
         "--download-archive",
         dest="archive", metavar="FILE", action=ConfigAction,
         help=("Record all downloaded files in the archive file and "
-              "skip downloading any file already in it."),
+              "skip downloading any file already in it"),
+    )
+    selection.add_argument(
+        "-A", "--abort",
+        dest="abort", metavar="N", type=int,
+        help=("Stop current extractor run "
+              "after N consecutive file downloads were skipped"),
+    )
+    selection.add_argument(
+        "-T", "--terminate",
+        dest="terminate", metavar="N", type=int,
+        help=("Stop current and parent extractor runs "
+              "after N consecutive file downloads were skipped"),
     )
     selection.add_argument(
         "--range",
@@ -324,7 +341,7 @@ def build_parser():
     postprocessor.add_argument(
         "--zip",
         dest="postprocessors",
-        action="append_const", const={"name": "zip"},
+        action="append_const", const="zip",
         help="Store downloaded files in a ZIP archive",
     )
     postprocessor.add_argument(
@@ -351,8 +368,18 @@ def build_parser():
     postprocessor.add_argument(
         "--write-metadata",
         dest="postprocessors",
-        action="append_const", const={"name": "metadata"},
+        action="append_const", const="metadata",
         help="Write metadata to separate JSON files",
+    )
+    postprocessor.add_argument(
+        "--write-infojson",
+        dest="postprocessors",
+        action="append_const", const={
+            "name"    : "metadata",
+            "event"   : "init",
+            "filename": "info.json",
+        },
+        help="Write gallery metadata to a info.json file",
     )
     postprocessor.add_argument(
         "--write-tags",
@@ -363,7 +390,7 @@ def build_parser():
     postprocessor.add_argument(
         "--mtime-from-date",
         dest="postprocessors",
-        action="append_const", const={"name": "mtime"},
+        action="append_const", const="mtime",
         help="Set file modification times according to 'date' metadata",
     )
     postprocessor.add_argument(
@@ -380,6 +407,11 @@ def build_parser():
             "name": "exec", "event": "finalize"},
         help=("Execute CMD after all files were downloaded successfully. "
               "Example: --exec-after 'cd {} && convert * ../doc.pdf'"),
+    )
+    postprocessor.add_argument(
+        "-P", "--postprocessor",
+        dest="postprocessors", metavar="NAME", action="append",
+        help="Activate the specified post processor",
     )
 
     parser.add_argument(

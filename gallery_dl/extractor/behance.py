@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2019 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,6 @@ class BehanceExtractor(Extractor):
     root = "https://www.behance.net"
 
     def items(self):
-        yield Message.Version, 1
         for gallery in self.galleries():
             gallery["_extractor"] = BehanceGalleryExtractor
             yield Message.Queue, gallery["url"], self._update(gallery)
@@ -83,6 +82,11 @@ class BehanceGalleryExtractor(BehanceExtractor):
             "count": 20,
             "url": "6bebff0d37f85349f9ad28bd8b76fd66627c1e2f",
         }),
+        # 'video' modules (#1282)
+        ("https://www.behance.net/gallery/101185577/COLCCI", {
+            "pattern": r"ytdl:https://adobeprod-a\.akamaihd\.net/",
+            "count": 3,
+        }),
     )
 
     def __init__(self, match):
@@ -94,7 +98,6 @@ class BehanceGalleryExtractor(BehanceExtractor):
         imgs = self.get_images(data)
         data["count"] = len(imgs)
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for data["num"], (url, module) in enumerate(imgs, 1):
             data["module"] = module
@@ -120,8 +123,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
             page, 'id="beconfig-store_state">', '</script>')[0])
         return self._update(data["project"]["project"])
 
-    @staticmethod
-    def get_images(data):
+    def get_images(self, data):
         """Extract image results from an API response"""
         result = []
         append = result.append
@@ -131,6 +133,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
             if mtype == "image":
                 url = module["sizes"]["original"]
+                append((url, module))
+
+            elif mtype == "video":
+                page = self.request(module["src"]).text
+                url = text.extract(page, '<source src="', '"')[0]
+                if text.ext_from_url(url) == "m3u8":
+                    url = "ytdl:" + url
                 append((url, module))
 
             elif mtype == "media_collection":
@@ -206,236 +215,253 @@ class BehanceCollectionExtractor(BehanceExtractor):
 
         query = """
 query GetMoodboardItemsAndRecommendations(
-    $id: Int!
-    $firstItem: Int!
-    $afterItem: String
-    $shouldGetRecommendations: Boolean!
-    $shouldGetItems: Boolean!
-    $shouldGetMoodboardFields: Boolean!
-  ) {
-    viewer @include(if: $shouldGetMoodboardFields) {
-      isOptedOutOfRecommendations
-    }
-    moodboard(id: $id) {
-      ...moodboardFields @include(if: $shouldGetMoodboardFields)
+  $id: Int!
+  $firstItem: Int!
+  $afterItem: String
+  $shouldGetRecommendations: Boolean!
+  $shouldGetItems: Boolean!
+  $shouldGetMoodboardFields: Boolean!
+) {
+  viewer @include(if: $shouldGetMoodboardFields) {
+    isOptedOutOfRecommendations
+    isAdmin
+  }
+  moodboard(id: $id) {
+    ...moodboardFields @include(if: $shouldGetMoodboardFields)
 
-      items(first: $firstItem, after: $afterItem) @include(if: $shouldGetItems)
-      {
-        pageInfo {
-          endCursor
-          hasNextPage
-        }
-        nodes {
-          ...nodesFields
-        }
+    items(first: $firstItem, after: $afterItem) @include(if: $shouldGetItems) {
+      pageInfo {
+        endCursor
+        hasNextPage
       }
+      nodes {
+        ...nodesFields
+      }
+    }
 
-      recommendedItems(first: 80) @include(if: $shouldGetRecommendations) {
-        nodes {
-          ...nodesFields
-          fetchSource
-        }
+    recommendedItems(first: 80) @include(if: $shouldGetRecommendations) {
+      nodes {
+        ...nodesFields
+        fetchSource
       }
     }
   }
+}
 
-  fragment moodboardFields on Moodboard {
+fragment moodboardFields on Moodboard {
+  id
+  label
+  privacy
+  followerCount
+  isFollowing
+  projectCount
+  url
+  isOwner
+  owners {
     id
-    label
-    privacy
-    followerCount
+    displayName
+    url
+    firstName
+    location
+    locationUrl
     isFollowing
-    projectCount
-    url
-    isOwner
-    owners {
-      id
-      displayName
-      url
-      firstName
-      location
-      locationUrl
-      images {
-        size_50 {
-          url
-        }
-        size_100 {
-          url
-        }
-        size_115 {
-          url
-        }
-        size_230 {
-          url
-        }
-        size_138 {
-          url
-        }
-        size_276 {
-          url
-        }
-      }
-    }
-  }
-
-  fragment projectFields on Project {
-    id
-    isOwner
-    publishedOn
-    matureAccess
-    hasMatureContent
-    modifiedOn
-    name
-    url
-    isPrivate
-    slug
-    fields {
-      label
-    }
-    colors {
-      r
-      g
-      b
-    }
-    owners {
-      url
-      displayName
-      id
-      location
-      locationUrl
-      isProfileOwner
-      images {
-        size_50 {
-          url
-        }
-        size_100 {
-          url
-        }
-        size_115 {
-          url
-        }
-        size_230 {
-          url
-        }
-        size_138 {
-          url
-        }
-        size_276 {
-          url
-        }
-      }
-    }
-    covers {
-      size_original {
+    images {
+      size_50 {
         url
       }
-      size_max_808 {
-        url
-      }
-      size_808 {
-        url
-      }
-      size_404 {
-        url
-      }
-      size_202 {
-        url
-      }
-      size_230 {
+      size_100 {
         url
       }
       size_115 {
         url
       }
-    }
-    stats {
-      views {
-        all
+      size_230 {
+        url
       }
-      appreciations {
-        all
+      size_138 {
+        url
       }
-      comments {
-        all
+      size_276 {
+        url
       }
     }
   }
+}
 
-  fragment exifDataValueFields on exifDataValue {
+fragment projectFields on Project {
+  id
+  isOwner
+  publishedOn
+  matureAccess
+  hasMatureContent
+  modifiedOn
+  name
+  url
+  isPrivate
+  slug
+  license {
+    license
+    description
     id
     label
-    value
-    searchValue
+    url
+    text
+    images
   }
-
-  fragment nodesFields on MoodboardItem {
+  fields {
+    label
+  }
+  colors {
+    r
+    g
+    b
+  }
+  owners {
+    url
+    displayName
     id
-    entityType
-    width
-    height
-    flexWidth
-    flexHeight
+    location
+    locationUrl
+    isProfileOwner
+    isFollowing
     images {
-      size
+      size_50 {
+        url
+      }
+      size_100 {
+        url
+      }
+      size_115 {
+        url
+      }
+      size_230 {
+        url
+      }
+      size_138 {
+        url
+      }
+      size_276 {
+        url
+      }
+    }
+  }
+  covers {
+    size_original {
       url
     }
+    size_max_808 {
+      url
+    }
+    size_808 {
+      url
+    }
+    size_404 {
+      url
+    }
+    size_202 {
+      url
+    }
+    size_230 {
+      url
+    }
+    size_115 {
+      url
+    }
+  }
+  stats {
+    views {
+      all
+    }
+    appreciations {
+      all
+    }
+    comments {
+      all
+    }
+  }
+}
 
-    entity {
-      ... on Project {
+fragment exifDataValueFields on exifDataValue {
+  id
+  label
+  value
+  searchValue
+}
+
+fragment nodesFields on MoodboardItem {
+  id
+  entityType
+  width
+  height
+  flexWidth
+  flexHeight
+  images {
+    size
+    url
+  }
+
+  entity {
+    ... on Project {
+      ...projectFields
+    }
+
+    ... on ImageModule {
+      project {
         ...projectFields
       }
 
-      ... on ImageModule {
-        project {
-          ...projectFields
-        }
-
-        exifData {
-          lens {
-            ...exifDataValueFields
-          }
-          software {
-            ...exifDataValueFields
-          }
-          makeAndModel {
-            ...exifDataValueFields
-          }
-          focalLength {
-            ...exifDataValueFields
-          }
-          iso {
-            ...exifDataValueFields
-          }
-          location {
-            ...exifDataValueFields
-          }
-          flash {
-            ...exifDataValueFields
-          }
-          exposureMode {
-            ...exifDataValueFields
-          }
-          shutterSpeed {
-            ...exifDataValueFields
-          }
-          aperture {
-            ...exifDataValueFields
-          }
-        }
+      colors {
+        r
+        g
+        b
       }
 
-      ... on MediaCollectionComponent {
-        project {
-          ...projectFields
+      exifData {
+        lens {
+          ...exifDataValueFields
+        }
+        software {
+          ...exifDataValueFields
+        }
+        makeAndModel {
+          ...exifDataValueFields
+        }
+        focalLength {
+          ...exifDataValueFields
+        }
+        iso {
+          ...exifDataValueFields
+        }
+        location {
+          ...exifDataValueFields
+        }
+        flash {
+          ...exifDataValueFields
+        }
+        exposureMode {
+          ...exifDataValueFields
+        }
+        shutterSpeed {
+          ...exifDataValueFields
+        }
+        aperture {
+          ...exifDataValueFields
         }
       }
     }
+
+    ... on MediaCollectionComponent {
+      project {
+        ...projectFields
+      }
+    }
   }
+}
 """
         variables = {
             "afterItem": "MAo=",
             "firstItem": 40,
-            "id"       : self.collection_id,
+            "id"       : int(self.collection_id),
             "shouldGetItems"          : True,
             "shouldGetMoodboardFields": False,
             "shouldGetRecommendations": False,

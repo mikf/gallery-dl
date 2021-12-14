@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,6 +9,7 @@
 """Common classes and constants used by extractor modules."""
 
 import re
+import ssl
 import time
 import netrc
 import queue
@@ -16,8 +17,9 @@ import logging
 import datetime
 import requests
 import threading
+from requests.adapters import HTTPAdapter
 from .message import Message
-from .. import config, text, util, exception, cloudflare
+from .. import config, text, util, exception
 
 
 class Extractor():
@@ -30,39 +32,37 @@ class Extractor():
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
     cookiedomain = ""
+    browser = None
     root = ""
     test = None
-    _request_last = 0
-    _request_interval = 0
-    _request_interval_min = 0
+    request_interval = 0.0
+    request_interval_min = 0.0
+    request_timestamp = 0.0
 
     def __init__(self, match):
-        self.session = requests.Session()
         self.log = logging.getLogger(self.category)
         self.url = match.string
-
-        self._cookiefile = None
-        self._cookiejar = self.session.cookies
-        self._parentdir = ""
-
-        self._cfgpath = ("extractor", self.category, self.subcategory)
-        self._write_pages = self.config("write-pages", False)
-        self._retries = self.config("retries", 4)
-        self._timeout = self.config("timeout", 30)
-        self._verify = self.config("verify", True)
-        self._request_interval = self.config(
-            "sleep-request", self._request_interval)
-
-        if self._retries < 0:
-            self._retries = float("inf")
-        if self._request_interval < self._request_interval_min:
-            self._request_interval = self._request_interval_min
+        self.finalize = None
 
         if self.basecategory:
             self.config = self._config_shared
             self.config_accumulate = self._config_shared_accumulate
+        self._cfgpath = ("extractor", self.category, self.subcategory)
+        self._parentdir = ""
 
-        self._init_headers()
+        self._write_pages = self.config("write-pages", False)
+        self._retries = self.config("retries", 4)
+        self._timeout = self.config("timeout", 30)
+        self._verify = self.config("verify", True)
+        self._interval = util.build_duration_func(
+            self.config("sleep-request", self.request_interval),
+            self.request_interval_min,
+        )
+
+        if self._retries < 0:
+            self._retries = float("inf")
+
+        self._init_session()
         self._init_cookies()
         self._init_proxies()
 
@@ -103,17 +103,21 @@ class Extractor():
 
     def request(self, url, *, method="GET", session=None, retries=None,
                 encoding=None, fatal=True, notfound=None, **kwargs):
-        tries = 1
-        retries = self._retries if retries is None else retries
-        session = self.session if session is None else session
-        kwargs.setdefault("timeout", self._timeout)
-        kwargs.setdefault("verify", self._verify)
+        if retries is None:
+            retries = self._retries
+        if session is None:
+            session = self.session
+        if "timeout" not in kwargs:
+            kwargs["timeout"] = self._timeout
+        if "verify" not in kwargs:
+            kwargs["verify"] = self._verify
         response = None
+        tries = 1
 
-        if self._request_interval:
-            seconds = (self._request_interval -
-                       (time.time() - Extractor._request_last))
-            if seconds > 0:
+        if self._interval:
+            seconds = (self._interval() -
+                       (time.time() - Extractor.request_timestamp))
+            if seconds > 0.0:
                 self.log.debug("Sleeping for %.5s seconds", seconds)
                 time.sleep(seconds)
 
@@ -140,28 +144,28 @@ class Extractor():
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
 
-                reason = response.reason
-                if cloudflare.is_challenge(response):
-                    self.log.info("Solving Cloudflare challenge")
-                    response, domain, cookies = cloudflare.solve_challenge(
-                        session, response, kwargs)
-                    if cookies:
-                        cloudflare.cookies.update(
-                            self.category, (domain, cookies))
-                        return response
-                if cloudflare.is_captcha(response):
-                    self.log.warning("Cloudflare CAPTCHA")
-
-                msg = "'{} {}' for '{}'".format(code, reason, url)
+                msg = "'{} {}' for '{}'".format(code, response.reason, url)
+                server = response.headers.get("Server")
+                if server and server.startswith("cloudflare"):
+                    if code == 503 and \
+                            b"jschl-answer" in response.content:
+                        self.log.warning("Cloudflare IUAM challenge")
+                        break
+                    if code == 403 and \
+                            b'name="captcha-bypass"' in response.content:
+                        self.log.warning("Cloudflare CAPTCHA")
+                        break
                 if code < 500 and code != 429 and code != 430:
                     break
+
             finally:
-                Extractor._request_last = time.time()
+                Extractor.request_timestamp = time.time()
 
             self.log.debug("%s (%s/%s)", msg, tries, retries+1)
             if tries > retries:
                 break
-            time.sleep(tries)
+            time.sleep(
+                max(tries, self._interval()) if self._interval else tries)
             tries += 1
 
         raise exception.HttpError(msg, response)
@@ -176,8 +180,7 @@ class Extractor():
         elif until:
             if isinstance(until, datetime.datetime):
                 # convert to UTC timestamp
-                epoch = datetime.datetime(1970, 1, 1)
-                until = (until - epoch) / datetime.timedelta(0, 1)
+                until = (until - util.EPOCH) / util.SECOND
             else:
                 until = float(until)
             seconds = until - now
@@ -212,19 +215,46 @@ class Extractor():
 
         return username, password
 
-    def _init_headers(self):
-        """Initialize HTTP headers for the 'session' object"""
-        headers = self.session.headers
+    def _init_session(self):
+        self.session = session = requests.Session()
+        headers = session.headers
         headers.clear()
 
-        headers["User-Agent"] = self.config(
-            "user-agent", ("Mozilla/5.0 (X11; Linux x86_64; rv:68.0) "
-                           "Gecko/20100101 Firefox/68.0"))
-        headers["Accept"] = "*/*"
-        headers["Accept-Language"] = "en-US,en;q=0.5"
-        headers["Accept-Encoding"] = "gzip, deflate"
-        headers["Connection"] = "keep-alive"
-        headers["Upgrade-Insecure-Requests"] = "1"
+        browser = self.config("browser") or self.browser
+        if browser and isinstance(browser, str):
+            browser, _, platform = browser.lower().partition(":")
+
+            if not platform or platform == "auto":
+                platform = ("Windows NT 10.0; Win64; x64"
+                            if util.WINDOWS else "X11; Linux x86_64")
+            elif platform == "windows":
+                platform = "Windows NT 10.0; Win64; x64"
+            elif platform == "linux":
+                platform = "X11; Linux x86_64"
+            elif platform == "macos":
+                platform = "Macintosh; Intel Mac OS X 11.5"
+
+            if browser == "chrome":
+                _emulate_browser_chrome(session, platform)
+            else:
+                _emulate_browser_firefox(session, platform)
+        else:
+            headers["User-Agent"] = self.config("user-agent", (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
+                "rv:91.0) Gecko/20100101 Firefox/91.0"))
+            headers["Accept"] = "*/*"
+            headers["Accept-Language"] = "en-US,en;q=0.5"
+            headers["Accept-Encoding"] = "gzip, deflate"
+
+        custom_headers = self.config("headers")
+        if custom_headers:
+            headers.update(custom_headers)
+
+        ciphers = self.config("ciphers")
+        if ciphers:
+            if isinstance(ciphers, list):
+                ciphers = ":".join(ciphers)
+            session.mount("https://", HTTPSAdapter(ciphers))
 
     def _init_proxies(self):
         """Update the session's proxy map"""
@@ -242,6 +272,8 @@ class Extractor():
 
     def _init_cookies(self):
         """Populate the session's cookiejar"""
+        self._cookiefile = None
+        self._cookiejar = self.session.cookies
         if self.cookiedomain is None:
             return
 
@@ -263,11 +295,6 @@ class Extractor():
                 self.log.warning(
                     "expected 'dict' or 'str' value for 'cookies' option, "
                     "got '%s' (%s)", cookies.__class__.__name__, cookies)
-
-        cookies = cloudflare.cookies(self.category)
-        if cookies:
-            domain, cookies = cookies
-            self._update_cookies_dict(cookies, domain)
 
     def _store_cookies(self):
         """Store the session's cookiejar in a cookies.txt file"""
@@ -317,6 +344,11 @@ class Extractor():
                     if not names:
                         return True
         return False
+
+    def _prepare_ddosguard_cookies(self):
+        if not self._cookiejar.get("__ddg2", domain=self.cookiedomain):
+            self._cookiejar.set(
+                "__ddg2", util.generate_token(), domain=self.cookiedomain)
 
     def _get_date_min_max(self, dmin=None, dmax=None):
         """Retrieve and parse 'date-min' and 'date-max' config values"""
@@ -416,18 +448,24 @@ class GalleryExtractor(Extractor):
         imgs = self.images(page)
 
         if "count" in data:
-            images = zip(
-                range(1, data["count"]+1),
-                imgs,
-            )
+            if self.config("page-reverse"):
+                images = util.enumerate_reversed(imgs, 1, data["count"])
+            else:
+                images = zip(
+                    range(1, data["count"]+1),
+                    imgs,
+                )
         else:
+            enum = enumerate
             try:
                 data["count"] = len(imgs)
             except TypeError:
                 pass
-            images = enumerate(imgs, 1)
+            else:
+                if self.config("page-reverse"):
+                    enum = util.enumerate_reversed
+            images = enum(imgs, 1)
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for data[self.enum], (url, imgdata) in images:
             if imgdata:
@@ -483,7 +521,6 @@ class MangaExtractor(Extractor):
         if self.reverse:
             chapters.reverse()
 
-        yield Message.Version, 1
         for chapter, data in chapters:
             data["_extractor"] = self.chapterclass
             yield Message.Queue, chapter, data
@@ -527,46 +564,126 @@ class AsynchronousMixin():
         messages.put(None)
 
 
-def generate_extractors(extractor_data, symtable, classes):
-    """Dynamically generate Extractor classes"""
-    extractors = config.get(("extractor",), classes[0].basecategory)
-    ckey = extractor_data.get("_ckey")
-    prev = None
+class BaseExtractor(Extractor):
+    instances = ()
 
-    if extractors:
-        extractor_data.update(extractors)
+    def __init__(self, match):
+        if not self.category:
+            for index, group in enumerate(match.groups()):
+                if group is not None:
+                    self.category, self.root = self.instances[index]
+                    break
+        Extractor.__init__(self, match)
 
-    for category, info in extractor_data.items():
+    @classmethod
+    def update(cls, instances):
+        extra_instances = config.get(("extractor",), cls.basecategory)
+        if extra_instances:
+            for category, info in extra_instances.items():
+                if isinstance(info, dict) and "root" in info:
+                    instances[category] = info
 
-        if not isinstance(info, dict):
-            continue
+        pattern_list = []
+        instance_list = cls.instances = []
+        for category, info in instances.items():
+            root = info["root"].rstrip("/")
+            instance_list.append((category, root))
 
-        root = info["root"]
-        domain = root[root.index(":") + 3:]
-        pattern = info.get("pattern") or re.escape(domain)
-        name = (info.get("name") or category).capitalize()
+            pattern = info.get("pattern")
+            if not pattern:
+                pattern = re.escape(root[root.index(":") + 3:])
+            pattern_list.append(pattern + "()")
 
-        for cls in classes:
+        return r"(?:https?://)?(?:" + "|".join(pattern_list) + r")"
 
-            class Extr(cls):
-                pass
-            Extr.__module__ = cls.__module__
-            Extr.__name__ = Extr.__qualname__ = \
-                name + cls.subcategory.capitalize() + "Extractor"
-            Extr.__doc__ = \
-                "Extractor for " + cls.subcategory + "s from " + domain
-            Extr.category = category
-            Extr.pattern = r"(?:https?://)?" + pattern + cls.pattern_fmt
-            Extr.test = info.get("test-" + cls.subcategory)
-            Extr.root = root
 
-            if "extra" in info:
-                for key, value in info["extra"].items():
-                    setattr(Extr, key, value)
-            if prev and ckey:
-                setattr(Extr, ckey, prev)
+class HTTPSAdapter(HTTPAdapter):
 
-            symtable[Extr.__name__] = prev = Extr
+    def __init__(self, ciphers):
+        context = self.ssl_context = ssl.create_default_context()
+        context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
+                            ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
+        context.set_ecdh_curve("prime256v1")
+        context.set_ciphers(ciphers)
+        HTTPAdapter.__init__(self)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["ssl_context"] = self.ssl_context
+        return HTTPAdapter.init_poolmanager(self, *args, **kwargs)
+
+    def proxy_manager_for(self, *args, **kwargs):
+        kwargs["ssl_context"] = self.ssl_context
+        return HTTPAdapter.proxy_manager_for(self, *args, **kwargs)
+
+
+def _emulate_browser_firefox(session, platform):
+    headers = session.headers
+    headers["User-Agent"] = ("Mozilla/5.0 (" + platform + "; rv:91.0) "
+                             "Gecko/20100101 Firefox/91.0")
+    headers["Accept"] = ("text/html,application/xhtml+xml,"
+                         "application/xml;q=0.9,image/webp,*/*;q=0.8")
+    headers["Accept-Language"] = "en-US,en;q=0.5"
+    headers["Accept-Encoding"] = "gzip, deflate"
+    headers["Referer"] = None
+    headers["Upgrade-Insecure-Requests"] = "1"
+    headers["Cookie"] = None
+
+    session.mount("https://", HTTPSAdapter(
+        "TLS_AES_128_GCM_SHA256:"
+        "TLS_CHACHA20_POLY1305_SHA256:"
+        "TLS_AES_256_GCM_SHA384:"
+        "ECDHE-ECDSA-AES128-GCM-SHA256:"
+        "ECDHE-RSA-AES128-GCM-SHA256:"
+        "ECDHE-ECDSA-CHACHA20-POLY1305:"
+        "ECDHE-RSA-CHACHA20-POLY1305:"
+        "ECDHE-ECDSA-AES256-GCM-SHA384:"
+        "ECDHE-RSA-AES256-GCM-SHA384:"
+        "ECDHE-ECDSA-AES256-SHA:"
+        "ECDHE-ECDSA-AES128-SHA:"
+        "ECDHE-RSA-AES128-SHA:"
+        "ECDHE-RSA-AES256-SHA:"
+        "DHE-RSA-AES128-SHA:"
+        "DHE-RSA-AES256-SHA:"
+        "AES128-SHA:"
+        "AES256-SHA:"
+        "DES-CBC3-SHA"
+    ))
+
+
+def _emulate_browser_chrome(session, platform):
+    if platform.startswith("Macintosh"):
+        platform = platform.replace(".", "_") + "_2"
+
+    headers = session.headers
+    headers["Upgrade-Insecure-Requests"] = "1"
+    headers["User-Agent"] = (
+        "Mozilla/5.0 (" + platform + ") AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36")
+    headers["Accept"] = ("text/html,application/xhtml+xml,application/xml;"
+                         "q=0.9,image/webp,image/apng,*/*;q=0.8")
+    headers["Referer"] = None
+    headers["Accept-Encoding"] = "gzip, deflate"
+    headers["Accept-Language"] = "en-US,en;q=0.9"
+    headers["Cookie"] = None
+
+    session.mount("https://", HTTPSAdapter(
+        "TLS_AES_128_GCM_SHA256:"
+        "TLS_AES_256_GCM_SHA384:"
+        "TLS_CHACHA20_POLY1305_SHA256:"
+        "ECDHE-ECDSA-AES128-GCM-SHA256:"
+        "ECDHE-RSA-AES128-GCM-SHA256:"
+        "ECDHE-ECDSA-AES256-GCM-SHA384:"
+        "ECDHE-RSA-AES256-GCM-SHA384:"
+        "ECDHE-ECDSA-CHACHA20-POLY1305:"
+        "ECDHE-RSA-CHACHA20-POLY1305:"
+        "ECDHE-RSA-AES128-SHA:"
+        "ECDHE-RSA-AES256-SHA:"
+        "AES128-GCM-SHA256:"
+        "AES256-GCM-SHA384:"
+        "AES128-SHA:"
+        "AES256-SHA:"
+        "DES-CBC3-SHA"
+    ))
 
 
 # Undo automatic pyOpenSSL injection by requests
@@ -578,38 +695,3 @@ if not pyopenssl:
     except ImportError:
         pass
 del pyopenssl
-
-
-# Replace urllib3's default cipher list to avoid Cloudflare CAPTCHAs
-ciphers = config.get((), "ciphers", True)
-if ciphers:
-
-    if ciphers is True:
-        ciphers = (
-            # Firefox's list
-            "TLS_AES_128_GCM_SHA256:"
-            "TLS_CHACHA20_POLY1305_SHA256:"
-            "TLS_AES_256_GCM_SHA384:"
-            "ECDHE-ECDSA-AES128-GCM-SHA256:"
-            "ECDHE-RSA-AES128-GCM-SHA256:"
-            "ECDHE-ECDSA-CHACHA20-POLY1305:"
-            "ECDHE-RSA-CHACHA20-POLY1305:"
-            "ECDHE-ECDSA-AES256-GCM-SHA384:"
-            "ECDHE-RSA-AES256-GCM-SHA384:"
-            "ECDHE-ECDSA-AES256-SHA:"
-            "ECDHE-ECDSA-AES128-SHA:"
-            "ECDHE-RSA-AES128-SHA:"
-            "ECDHE-RSA-AES256-SHA:"
-            "DHE-RSA-AES128-SHA:"
-            "DHE-RSA-AES256-SHA:"
-            "AES128-SHA:"
-            "AES256-SHA:"
-            "DES-CBC3-SHA"
-        )
-    elif isinstance(ciphers, list):
-        ciphers = ":".join(ciphers)
-
-    from requests.packages.urllib3.util import ssl_  # noqa
-    ssl_.DEFAULT_CIPHERS = ciphers
-    del ssl_
-del ciphers

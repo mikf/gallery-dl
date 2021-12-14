@@ -7,3 +7,5 @@ hiddenimports = [
     for package in (extractor, downloader, postprocessor)
     for module in package.modules
 ]
+
+hiddenimports.append("yt_dlp")

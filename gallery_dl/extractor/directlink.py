@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -59,8 +59,8 @@ class DirectlinkExtractor(Extractor):
         data["path"], _, name = data["path"].rpartition("/")
         data["filename"], _, ext = name.rpartition(".")
         data["extension"] = ext.lower()
-        data["_http_headers"] = {"Referer": self.url}
+        data["_http_headers"] = {
+            "Referer": self.url.encode("latin-1", "ignore")}
 
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, self.url, data

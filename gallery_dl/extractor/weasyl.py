@@ -77,7 +77,7 @@ class WeasylSubmissionExtractor(WeasylExtractor):
             "keyword": {
                 "comments"    : int,
                 "date"        : "dt:2012-04-20 00:38:04",
-                "description" : "<p>(flex)</p>",
+                "description" : "<p>(flex)</p>\n",
                 "favorites"   : int,
                 "folder_name" : "Wesley Stuff",
                 "folderid"    : 2081,
@@ -123,7 +123,6 @@ class WeasylSubmissionsExtractor(WeasylExtractor):
         self.owner_login = match.group(1)
 
     def items(self):
-        yield Message.Version, 1
         yield Message.Directory, {"owner_login": self.owner_login}
         yield from self.submissions(self.owner_login)
 
@@ -141,7 +140,6 @@ class WeasylFolderExtractor(WeasylExtractor):
         self.owner_login, self.folderid = match.groups()
 
     def items(self):
-        yield Message.Version, 1
         iter = self.submissions(self.owner_login, self.folderid)
         # Folder names are only on single submission api calls
         msg, url, data = next(iter)
@@ -160,8 +158,8 @@ class WeasylJournalExtractor(WeasylExtractor):
         "keyword": {
             "title"  : "BBCode",
             "date"   : "dt:2013-09-19 23:11:23",
-            "content": "<p><a>javascript:alert(42);</a></p>"
-                       "<p>No more of that!</p>",
+            "content": "<p><a>javascript:alert(42);</a></p>\n\n"
+                       "<p>No more of that!</p>\n",
         },
     })
 
@@ -171,7 +169,6 @@ class WeasylJournalExtractor(WeasylExtractor):
 
     def items(self):
         data = self.retrieve_journal(self.journalid)
-        yield Message.Version, 1
         yield Message.Directory, data
         yield Message.Url, data["html"], data
 
@@ -190,7 +187,6 @@ class WeasylJournalsExtractor(WeasylExtractor):
         self.owner_login = match.group(1)
 
     def items(self):
-        yield Message.Version, 1
         yield Message.Directory, {"owner_login": self.owner_login}
 
         url = "{}/journals/{}".format(self.root, self.owner_login)
@@ -203,7 +199,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
 class WeasylFavoriteExtractor(WeasylExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{owner_login}", "Favorites")
-    pattern = BASE_PATTERN + r"favorites\?userid=(\d+)&feature=submit"
+    pattern = BASE_PATTERN + r"favorites\?userid=(\d+)"
     test = ("https://www.weasyl.com/favorites?userid=184616&feature=submit", {
         "count": ">= 5",
     })

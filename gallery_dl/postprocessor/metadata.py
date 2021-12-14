@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Write metadata to external files"""
 
 from .common import PostProcessor
-from .. import util
+from .. import util, formatter
 import os
 
 
@@ -24,7 +24,7 @@ class MetadataPP(PostProcessor):
             cfmt = options.get("content-format") or options.get("format")
             if isinstance(cfmt, list):
                 cfmt = "\n".join(cfmt) + "\n"
-            self._content_fmt = util.Formatter(cfmt).format_map
+            self._content_fmt = formatter.parse(cfmt).format_map
             ext = "txt"
         elif mode == "tags":
             self.write = self._write_tags
@@ -39,16 +39,16 @@ class MetadataPP(PostProcessor):
         if directory:
             self._directory = self._directory_custom
             sep = os.sep + (os.altsep or "")
-            self._metadir = directory.rstrip(sep) + os.sep
+            self._metadir = util.expand_path(directory).rstrip(sep) + os.sep
 
         filename = options.get("filename")
         extfmt = options.get("extension-format")
         if filename:
             self._filename = self._filename_custom
-            self._filename_fmt = util.Formatter(filename).format_map
+            self._filename_fmt = formatter.parse(filename).format_map
         elif extfmt:
             self._filename = self._filename_extfmt
-            self._extension_fmt = util.Formatter(extfmt).format_map
+            self._extension_fmt = formatter.parse(extfmt).format_map
         else:
             self.extension = options.get("extension", ext)
 
@@ -57,8 +57,7 @@ class MetadataPP(PostProcessor):
             events = ("file",)
         elif isinstance(events, str):
             events = events.split(",")
-        for event in events:
-            job.hooks[event].append(self.run)
+        job.register_hooks({event: self.run for event in events}, options)
 
     def run(self, pathfmt):
         directory = self._directory(pathfmt)
@@ -82,14 +81,15 @@ class MetadataPP(PostProcessor):
         return (pathfmt.filename or "metadata") + "." + self.extension
 
     def _filename_custom(self, pathfmt):
-        return self._filename_fmt(pathfmt.kwdict)
+        return pathfmt.clean_path(pathfmt.clean_segment(
+            self._filename_fmt(pathfmt.kwdict)))
 
     def _filename_extfmt(self, pathfmt):
         kwdict = pathfmt.kwdict
-        ext = kwdict["extension"]
+        ext = kwdict.get("extension")
         kwdict["extension"] = pathfmt.extension
         kwdict["extension"] = pathfmt.prefix + self._extension_fmt(kwdict)
-        filename = pathfmt.build_filename()
+        filename = pathfmt.build_filename(kwdict)
         kwdict["extension"] = ext
         return filename
 
@@ -102,11 +102,18 @@ class MetadataPP(PostProcessor):
         if not tags:
             return
 
-        if not isinstance(tags, list):
+        if isinstance(tags, str):
             taglist = tags.split(", ")
             if len(taglist) < len(tags) / 16:
                 taglist = tags.split(" ")
             tags = taglist
+        elif isinstance(tags, dict):
+            taglists = tags.values()
+            tags = []
+            extend = tags.extend
+            for taglist in taglists:
+                extend(taglist)
+            tags.sort()
 
         fp.write("\n".join(tags) + "\n")
 

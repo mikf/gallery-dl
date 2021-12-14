@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,21 +17,12 @@ import hashlib
 import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, util, job, config, exception  # noqa E402
+from gallery_dl import \
+    extractor, util, job, config, exception, formatter  # noqa E402
 
-
-# these don't work on Travis CI
-TRAVIS_SKIP = {
-    "exhentai", "mangafox", "dynastyscans", "nijie", "instagram", "ngomik",
-    "archivedmoe", "archiveofsins", "thebarchive", "fireden", "4plebs",
-    "sankaku", "idolcomplex", "mangahere", "mangadex", "sankakucomplex",
-    "warosu", "fuskator", "patreon", "komikcast", "twitter",
-}
 
 # temporary issues, etc.
 BROKEN = {
-    "instagram",
-    "imagevenue",
     "photobucket",
 }
 
@@ -101,6 +92,8 @@ class TestExtractorResults(unittest.TestCase):
             for url, kwdict in zip(tjob.url_list, tjob.kwdict_list):
                 if "_extractor" in kwdict:
                     extr = kwdict["_extractor"].from_url(url)
+                    if extr is None and not result.get("extractor", True):
+                        continue
                     self.assertIsInstance(extr, kwdict["_extractor"])
                     self.assertEqual(extr.url, url)
         else:
@@ -155,6 +148,14 @@ class TestExtractorResults(unittest.TestCase):
                 self._test_kwdict(value, test)
             elif isinstance(test, type):
                 self.assertIsInstance(value, test, msg=key)
+            elif isinstance(test, list):
+                subtest = False
+                for idx, item in enumerate(test):
+                    if isinstance(item, dict):
+                        subtest = True
+                        self._test_kwdict(value[idx], item)
+                if not subtest:
+                    self.assertEqual(value, test, msg=key)
             elif isinstance(test, str):
                 if test.startswith("re:"):
                     self.assertRegex(value, test[3:], msg=key)
@@ -270,14 +271,14 @@ class TestPathfmt():
         return 0
 
 
-class TestFormatter(util.Formatter):
+class TestFormatter(formatter.StringFormatter):
 
     @staticmethod
     def _noop(_):
         return ""
 
     def _apply_simple(self, key, fmt):
-        if key == "extension" or "._parse_optional." in repr(fmt):
+        if key == "extension" or "_parse_optional." in repr(fmt):
             return self._noop
 
         def wrap(obj):
@@ -285,7 +286,7 @@ class TestFormatter(util.Formatter):
         return wrap
 
     def _apply(self, key, funcs, fmt):
-        if key == "extension" or "._parse_optional." in repr(fmt):
+        if key == "extension" or "_parse_optional." in repr(fmt):
             return self._noop
 
         def wrap(obj):
@@ -312,6 +313,7 @@ def setup_test_config():
     config.set(("extractor", "nijie")     , "username", email)
     config.set(("extractor", "seiga")     , "username", email)
     config.set(("extractor", "pinterest") , "username", email2)
+    config.set(("extractor", "pinterest") , "username", None)  # login broken
 
     config.set(("extractor", "newgrounds"), "username", "d1618111")
     config.set(("extractor", "newgrounds"), "password", "d1618111")
@@ -320,7 +322,7 @@ def setup_test_config():
     config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
 
     for category in ("danbooru", "instagram", "twitter", "subscribestar",
-                     "e621", "inkbunny"):
+                     "e621", "inkbunny", "tapas", "pillowfort", "mangadex"):
         config.set(("extractor", category), "username", None)
 
     config.set(("extractor", "mastodon.social"), "access-token",
@@ -361,8 +363,6 @@ def generate_tests():
         del sys.argv[1:]
     else:
         skip = set(BROKEN)
-        if "CI" in os.environ and "TRAVIS" in os.environ:
-            skip |= set(TRAVIS_SKIP)
         if skip:
             print("skipping:", ", ".join(skip))
         fltr = lambda c, bc: c not in skip  # noqa: E731

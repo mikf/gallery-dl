@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,21 +19,23 @@ class HentaihandGalleryExtractor(GalleryExtractor):
     root = "https://hentaihand.com"
     pattern = r"(?:https?://)?(?:www\.)?hentaihand\.com/\w+/comic/([\w-]+)"
     test = (
-        (("https://hentaihand.com/en/comic/kouda-tomohiro-chiyomi-"
-          "blizzard-comic-aun-2016-12-english-nanda-sore-scans"), {
-            "pattern": r"https://cdn.hentaihand.com/.*/images/304546/\d+.jpg$",
-            "count": 19,
+        (("https://hentaihand.com/en/comic/c75-takumi-na-muchi-choudenji-hou-"
+          "no-aishi-kata-how-to-love-a-super-electromagnetic-gun-toaru-kagaku-"
+          "no-railgun-english"), {
+            "pattern": r"https://cdn.hentaihand.com/.*/images/360468/\d+.jpg$",
+            "count": 50,
             "keyword": {
-                "artists"   : ["Kouda Tomohiro"],
-                "date"      : "dt:2020-02-06 00:00:00",
-                "gallery_id": 304546,
+                "artists"   : ["Takumi Na Muchi"],
+                "date"      : "dt:2014-06-28 00:00:00",
+                "gallery_id": 360468,
                 "lang"      : "en",
                 "language"  : "English",
-                "relationships": ["Family", "Step family"],
+                "parodies"  : ["Toaru Kagaku No Railgun"],
+                "relationships": list,
                 "tags"      : list,
-                "title"     : r"re:\[Kouda Tomohiro\] Chiyomi Blizzard",
-                "title_alt" : r"re:\[幸田朋弘\] ちよみブリザード",
-                "type"      : "Manga",
+                "title"     : r"re:\(C75\) \[Takumi na Muchi\] Choudenji Hou ",
+                "title_alt" : r"re:\(C75\) \[たくみなむち\] 超電磁砲のあいしかた",
+                "type"      : "Doujinshi",
             },
         }),
     )
@@ -76,9 +78,9 @@ class HentaihandTagExtractor(Extractor):
                r"/\w+/(parody|character|tag|artist|group|language"
                r"|category|relationship)/([^/?#]+)")
     test = (
-        ("https://hentaihand.com/en/artist/himuro", {
+        ("https://hentaihand.com/en/artist/takumi-na-muchi", {
             "pattern": HentaihandGalleryExtractor.pattern,
-            "count": ">= 18",
+            "count": ">= 6",
         }),
         ("https://hentaihand.com/en/tag/full-color"),
         ("https://hentaihand.com/fr/language/japanese"),

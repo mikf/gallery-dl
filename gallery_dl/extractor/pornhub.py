@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,26 +29,26 @@ class PornhubGalleryExtractor(PornhubExtractor):
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/album/(\d+)"
     test = (
-        ("https://www.pornhub.com/album/17218841", {
+        ("https://www.pornhub.com/album/19289801", {
             "pattern": r"https://\w+.phncdn.com/pics/albums/\d+/\d+/\d+/\d+/",
-            "count": 81,
+            "count": ">= 300",
             "keyword": {
-                "id": int,
-                "num": int,
-                "score": int,
-                "views": int,
+                "id"     : int,
+                "num"    : int,
+                "score"  : int,
+                "views"  : int,
                 "caption": str,
-                "user": "Unknown",
+                "user"   : "Danika Mori",
                 "gallery": {
-                    "id"   : 17218841,
+                    "id"   : 19289801,
                     "score": int,
                     "views": int,
                     "tags" : list,
-                    "title": "Hentai/Ecchi 41",
+                    "title": "Danika Mori Best Moments",
                 },
             },
         }),
-        ("https://www.pornhub.com/album/37180171", {
+        ("https://www.pornhub.com/album/69040172", {
             "exception": exception.AuthorizationError,
         }),
     )
@@ -60,7 +60,6 @@ class PornhubGalleryExtractor(PornhubExtractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, data
         for num, image in enumerate(self.images(), 1):
             url = image["url"]
@@ -118,10 +117,10 @@ class PornhubGalleryExtractor(PornhubExtractor):
 class PornhubUserExtractor(PornhubExtractor):
     """Extractor for all galleries of a pornhub user"""
     subcategory = "user"
-    pattern = (BASE_PATTERN + r"/(users|model)/([^/?#]+)"
+    pattern = (BASE_PATTERN + r"/(users|model|pornstar)/([^/?#]+)"
                "(?:/photos(?:/(public|private|favorites))?)?/?$")
     test = (
-        ("https://www.pornhub.com/users/flyings0l0/photos/public", {
+        ("https://www.pornhub.com/pornstar/danika-mori/photos", {
             "pattern": PornhubGalleryExtractor.pattern,
             "count": ">= 6",
         }),
@@ -146,7 +145,6 @@ class PornhubUserExtractor(PornhubExtractor):
         }
 
         data = {"_extractor": PornhubGalleryExtractor}
-        yield Message.Version, 1
         while True:
             page = self.request(
                 url, method="POST", headers=headers, params=params).text

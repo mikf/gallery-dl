@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text
+import json
 
 
 class HentaifoxBase():
@@ -21,73 +22,97 @@ class HentaifoxBase():
 class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
     """Extractor for image galleries on hentaifox.com"""
     pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com(/gallery/(\d+))"
-    test = ("https://hentaifox.com/gallery/56622/", {
-        "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
-        "keyword": "b7ff141331d0c7fc711ab28d45dfbb013a83d8e9",
-        "count": 24,
-    })
+    test = (
+        ("https://hentaifox.com/gallery/56622/", {
+            "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
+            "keyword": "bcd6b67284f378e5cc30b89b761140e3e60fcd92",
+            "count": 24,
+        }),
+        # 'split_tag' element (#1378)
+        ("https://hentaifox.com/gallery/630/", {
+            "keyword": {
+                "artist": ["beti", "betty", "magi", "mimikaki"],
+                "characters": [
+                    "aerith gainsborough",
+                    "tifa lockhart",
+                    "yuffie kisaragi"
+                ],
+                "count": 32,
+                "gallery_id": 630,
+                "group": ["cu-little2"],
+                "parody": ["darkstalkers | vampire", "final fantasy vii"],
+                "tags": ["femdom", "fingering", "masturbation", "yuri"],
+                "title": "Cu-Little Bakanyaï½ž",
+                "type": "doujinshi",
+            },
+        }),
+    )
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)
         self.gallery_id = match.group(2)
 
-    def metadata(self, page, split=text.split_html):
+    @staticmethod
+    def _split(txt):
+        return [
+            text.remove_html(tag.partition(">")[2], "", "")
+            for tag in text.extract_iter(
+                txt, "class='tag_btn", "<span class='t_badge")
+        ]
+
+    def metadata(self, page):
         extr = text.extract_from(page)
+        split = self._split
 
         return {
             "gallery_id": text.parse_int(self.gallery_id),
             "title"     : text.unescape(extr("<h1>", "</h1>")),
-            "parody"    : split(extr(">Parodies:"  , "</ul>"))[::2],
-            "characters": split(extr(">Characters:", "</ul>"))[::2],
-            "tags"      : split(extr(">Tags:"      , "</ul>"))[::2],
-            "artist"    : split(extr(">Artists:"   , "</ul>"))[::2],
-            "group"     : split(extr(">Groups:"    , "</ul>"))[::2],
+            "parody"    : split(extr(">Parodies:"  , "</ul>")),
+            "characters": split(extr(">Characters:", "</ul>")),
+            "tags"      : split(extr(">Tags:"      , "</ul>")),
+            "artist"    : split(extr(">Artists:"   , "</ul>")),
+            "group"     : split(extr(">Groups:"    , "</ul>")),
             "type"      : text.remove_html(extr(">Category:", "<span")),
             "language"  : "English",
             "lang"      : "en",
         }
 
     def images(self, page):
-        pos = page.find('id="load_all"')
-        if pos >= 0:
-            extr = text.extract
-            load_id = extr(page, 'id="load_id" value="', '"', pos)[0]
-            load_dir = extr(page, 'id="load_dir" value="', '"', pos)[0]
-            load_pages = extr(page, 'id="load_pages" value="', '"', pos)[0]
+        cover, pos = text.extract(page, '<img src="', '"')
+        data , pos = text.extract(page, "$.parseJSON('", "');", pos)
+        path = "/".join(cover.split("/")[3:-1])
 
-            url = self.root + "/includes/thumbs_loader.php"
-            data = {
-                "u_id"         : self.gallery_id,
-                "g_id"         : load_id,
-                "img_dir"      : load_dir,
-                "visible_pages": "0",
-                "total_pages"  : load_pages,
-                "type"         : "2",
-            }
-            headers = {
-                "Origin": self.root,
-                "Referer": self.gallery_url,
-                "X-Requested-With": "XMLHttpRequest",
-            }
-            page = self.request(
-                url, method="POST", headers=headers, data=data).text
+        result = []
+        append = result.append
+        extmap = {"j": "jpg", "p": "png", "g": "gif"}
+        urlfmt = ("/" + path + "/{}.{}").format
 
-        return [
-            (url.replace("t.", "."), None)
-            for url in text.extract_iter(page, 'data-src="', '"')
-        ]
+        server1 = "https://i.hentaifox.com"
+        server2 = "https://i2.hentaifox.com"
+
+        for num, image in json.loads(data).items():
+            ext, width, height = image.split(",")
+            path = urlfmt(num, extmap[ext])
+            append((server1 + path, {
+                "width"    : width,
+                "height"   : height,
+                "_fallback": (server2 + path,),
+            }))
+
+        return result
 
 
 class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
     """Extractor for search results and listings on hentaifox.com"""
     subcategory = "search"
     pattern = (r"(?:https?://)?(?:www\.)?hentaifox\.com"
-               r"(/(?:parody|tag|artist|character|search)/[^/?%#]+)")
+               r"(/(?:parody|tag|artist|character|search|group)/[^/?%#]+)")
     test = (
         ("https://hentaifox.com/parody/touhou-project/"),
         ("https://hentaifox.com/character/reimu-hakurei/"),
         ("https://hentaifox.com/artist/distance/"),
         ("https://hentaifox.com/search/touhou/"),
+        ("https://hentaifox.com/group/v-slash/"),
         ("https://hentaifox.com/tag/heterochromia/", {
             "pattern": HentaifoxGalleryExtractor.pattern,
             "count": ">= 60",
@@ -104,7 +129,6 @@ class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
         self.path = match.group(1)
 
     def items(self):
-        yield Message.Version, 1
         for gallery in self.galleries():
             yield Message.Queue, gallery["url"], gallery
 

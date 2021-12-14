@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache
 
 
 class GfycatExtractor(Extractor):
@@ -22,8 +21,14 @@ class GfycatExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.key = match.group(1)
-        self.formats = (self.config("format", "mp4"), "mp4", "webm", "gif")
+        self.key = match.group(1).lower()
+
+        formats = self.config("format")
+        if formats is None:
+            formats = ("mp4", "webm", "mobile", "gif")
+        elif isinstance(formats, str):
+            formats = (formats, "mp4", "webm", "mobile", "gif")
+        self.formats = formats
 
     def items(self):
         metadata = self.metadata()
@@ -31,19 +36,31 @@ class GfycatExtractor(Extractor):
             if "gfyName" not in gfycat:
                 self.log.warning("Skipping '%s' (malformed)", gfycat["gfyId"])
                 continue
-            url = self._select_format(gfycat)
+
+            url = self._process(gfycat)
+            if not url:
+                self.log.warning("Skipping '%s' (format not available)",
+                                 gfycat["gfyId"])
+                continue
+
             gfycat.update(metadata)
             yield Message.Directory, gfycat
             yield Message.Url, url, gfycat
 
-    def _select_format(self, gfyitem):
+    def _process(self, gfycat):
+        gfycat["_fallback"] = formats = self._formats(gfycat)
+        gfycat["date"] = text.parse_timestamp(gfycat.get("createDate"))
+        return next(formats, None)
+
+    def _formats(self, gfycat):
         for fmt in self.formats:
             key = fmt + "Url"
-            if key in gfyitem:
-                url = gfyitem[key]
-                gfyitem["extension"] = url.rpartition(".")[2]
-                return url
-        return ""
+            if key in gfycat:
+                url = gfycat[key]
+                if url.startswith("http:"):
+                    url = "https" + url[4:]
+                gfycat["extension"] = url.rpartition(".")[2]
+                yield url
 
     def metadata(self):
         return {}
@@ -61,6 +78,9 @@ class GfycatUserExtractor(GfycatExtractor):
         "pattern": r"https://giant\.gfycat\.com/[A-Za-z]+\.mp4",
         "count": ">= 100",
     })
+
+    def metadata(self):
+        return {"userName": self.key}
 
     def gfycats(self):
         return GfycatAPI(self).user(self.key)
@@ -98,10 +118,11 @@ class GfycatImageExtractor(GfycatExtractor):
             "keyword": {
                 "gfyId": "graygenerouscowrie",
                 "gfyName": "GrayGenerousCowrie",
-                "gfyNumber": "755075459",
+                "gfyNumber": 755075459,
                 "title": "Bottom's up",
                 "username": "jackson3oh3",
                 "createDate": 1495884169,
+                "date": "dt:2017-05-27 11:22:49",
                 "md5": "a4796e05b0db9ba9ce5140145cd318aa",
                 "width": 400,
                 "height": 224,
@@ -142,14 +163,17 @@ class GfycatImageExtractor(GfycatExtractor):
             if "gfyName" not in gfycat:
                 self.log.warning("Skipping '%s' (malformed)", gfycat["gfyId"])
                 return
-            url = self._select_format(gfycat)
+            url = self._process(gfycat)
+            if not url:
+                self.log.warning("Skipping '%s' (format not available)",
+                                 gfycat["gfyId"])
+                return
             yield Message.Directory, gfycat
             yield Message.Url, url, gfycat
 
 
 class GfycatAPI():
     API_ROOT = "https://api.gfycat.com"
-    ACCESS_KEY = "Anr96uuqt9EdamSCwK4txKPjMsf2M95Rfa5FLLhPFucu8H5HTzeutyAa"
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -169,20 +193,8 @@ class GfycatAPI():
         params = {"search_text": query, "count": 150}
         return self._pagination(endpoint, params)
 
-    @cache(keyarg=1, maxage=3600)
-    def _authenticate_impl(self, category):
-        url = "https://weblogin." + category + ".com/oauth/webtoken"
-        data = {"access_key": self.ACCESS_KEY}
-        headers = {"Referer": self.extractor.root + "/",
-                   "Origin" : self.extractor.root}
-        response = self.extractor.request(
-            url, method="POST", headers=headers, json=data)
-        return "Bearer " + response.json()["access_token"]
-
     def _call(self, endpoint, params=None):
         url = self.API_ROOT + endpoint
-        self.headers["Authorization"] = self._authenticate_impl(
-            self.extractor.category)
         return self.extractor.request(
             url, params=params, headers=self.headers).json()
 
@@ -190,7 +202,11 @@ class GfycatAPI():
         while True:
             data = self._call(endpoint, params)
             gfycats = data["gfycats"]
-            yield from gfycats
+
+            for gfycat in gfycats:
+                if "gfyName" not in gfycat:
+                    gfycat.update(self.gfycat(gfycat["gfyId"]))
+                yield gfycat
 
             if "found" not in data and len(gfycats) < params["count"] or \
                     not data["gfycats"]:

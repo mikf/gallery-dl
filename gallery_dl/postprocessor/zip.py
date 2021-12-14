@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -38,8 +38,10 @@ class ZipPP(PostProcessor):
         self.args = (self.path[:-1] + ext, "a",
                      self.COMPRESSION_ALGORITHMS[algorithm], True)
 
-        job.hooks["file"].append(
-            self.write_safe if options.get("mode") == "safe" else self.write)
+        job.register_hooks({
+            "file":
+            self.write_safe if options.get("mode") == "safe" else self.write,
+        }, options)
         job.hooks["finalize"].append(self.finalize)
 
     def write(self, pathfmt, zfile=None):
@@ -56,7 +58,7 @@ class ZipPP(PostProcessor):
 
     def write_safe(self, pathfmt):
         with zipfile.ZipFile(*self.args) as zfile:
-            self._write(pathfmt, zfile)
+            self.write(pathfmt, zfile)
 
     def finalize(self, pathfmt, status):
         if self.zfile:
