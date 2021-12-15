@@ -8,18 +8,26 @@
 
 """Extractors for https://rule34.us/"""
 
-from . import booru
+from .booru import BooruExtractor
 from .. import text
+import re
+import collections
 
 
-class Rule34usExtractor(booru.BooruExtractor):
+class Rule34usExtractor(BooruExtractor):
     category = "rule34us"
     root = "https://rule34.us"
     per_page = 42
 
+    def __init__(self, match):
+        BooruExtractor.__init__(self, match)
+        self._find_tags = re.compile(
+            r'<li class="([^-"]+)-tag"[^>]*><a href="[^;"]+;q=([^"]+)').findall
+
     def _parse_post(self, post_id):
         url = "{}/index.php?r=posts/view&id={}".format(self.root, post_id)
-        extr = text.extract_from(self.request(url).text)
+        page = self.request(url).text
+        extr = text.extract_from(page)
 
         post = {
             "id"      : post_id,
@@ -32,6 +40,12 @@ class Rule34usExtractor(booru.BooruExtractor):
             "file_url": extr(' src="', '"'),
         }
         post["md5"] = post["file_url"].rpartition("/")[2].partition(".")[0]
+
+        tags = collections.defaultdict(list)
+        for tag_type, tag_name in self._find_tags(page):
+            tags[tag_type].append(text.unquote(tag_name))
+        for key, value in tags.items():
+            post["tags_" + key] = " ".join(value)
 
         return post
 
@@ -100,6 +114,8 @@ class Rule34usPostExtractor(Rule34usExtractor):
                 "md5": "a294ff8e1f8e0efa041e5dc9d1480011",
                 "score": r"re:\d+",
                 "tags": "tagme, video",
+                "tags_general": "video",
+                "tags_metadata": "tagme",
                 "uploader": "Anonymous",
                 "width": "3184",
             },
