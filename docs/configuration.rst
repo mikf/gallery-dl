@@ -2022,7 +2022,7 @@ extractor.twitter.size
 Type
     ``list`` of ``strings``
 Default
-    ``["orig", "large", "medium", "small"]``
+    ``["orig", "4096x4096", "large", "medium", "small"]``
 Description
     The image version to download.
     Any entries after the first one will be used for potential
