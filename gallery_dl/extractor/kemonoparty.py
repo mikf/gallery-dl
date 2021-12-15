@@ -14,7 +14,7 @@ from ..cache import cache
 import itertools
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?kemono\.party"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?(kemono|coomer)\.party"
 USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 
 
@@ -27,16 +27,29 @@ class KemonopartyExtractor(Extractor):
     archive_fmt = "{service}_{user}_{id}_{num}"
     cookiedomain = ".kemono.party"
 
+    def __init__(self, match):
+        if match.group(1) == "coomer":
+            self.category = "coomerparty"
+            self.root = "https://coomer.party"
+            self.cookiedomain = ".coomer.party"
+        Extractor.__init__(self, match)
+
     def items(self):
         self._prepare_ddosguard_cookies()
 
         self._find_inline = re.compile(
-            r'src="(?:https?://kemono\.party)?(/inline/[^"]+'
+            r'src="(?:https?://(?:kemono|coomer)\.party)?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
         find_hash = re.compile("/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})").match
         generators = self._build_file_generators(self.config("files"))
         comments = self.config("comments")
         username = dms = None
+
+        # prevent files from coomer.party to be sent with gzip compression
+        if "coomer" in self.root:
+            headers = {"Accept-Encoding": "identity"}
+        else:
+            headers = None
 
         if self.config("metadata"):
             username = text.unescape(text.extract(
@@ -83,10 +96,11 @@ class KemonopartyExtractor(Extractor):
 
                 post["type"] = file["type"]
                 post["num"] += 1
+                post["_http_headers"] = headers
 
                 if url[0] == "/":
                     url = self.root + "/data" + url
-                elif url.startswith("https://kemono.party"):
+                elif url.startswith(self.root):
                     url = self.root + "/data" + url[20:]
 
                 text.nameext_from_url(file["name"], post)
@@ -192,7 +206,7 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        service, user_id, offset = match.groups()
+        _, service, user_id, offset = match.groups()
         self.api_url = "{}/api/{}/user/{}".format(self.root, service, user_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
         self.offset = text.parse_int(offset)
@@ -249,7 +263,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         # kemono.party -> data.kemono.party
         ("https://kemono.party/gumroad/user/trylsc/post/IURjT", {
             "pattern": r"https://kemono\.party/data/("
-                       r"files/gumroad/trylsc/IURjT/reward8\.jpg|"
+                       r"a4/7b/a47bfe938d8c1682eef06e885927484cd8df1b.+\.jpg|"
                        r"c6/04/c6048f5067fd9dbfa7a8be565ac194efdfb6e4.+\.zip)",
         }),
         # username (#1548, #1652)
@@ -272,13 +286,18 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
                 "date": "2021-07-31 02:47:51.327865",
             }]},
         }),
+        # coomer.party (#2100)
+        ("https://coomer.party/onlyfans/user/alinity/post/125962203", {
+            "pattern": r"https://coomer\.party/data/7d/3f/7d3fd9804583dc224968"
+                       r"c0591163ec91794552b04f00a6c2f42a15b68231d5a8\.jpg",
+        }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
     )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        service, user_id, post_id = match.groups()
+        _, service, user_id, post_id = match.groups()
         self.api_url = "{}/api/{}/user/{}/post/{}".format(
             self.root, service, user_id, post_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
@@ -319,7 +338,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        self.server, self.channel, self.channel_name = match.groups()
+        _, self.server, self.channel, self.channel_name = match.groups()
 
     def items(self):
         self._prepare_ddosguard_cookies()
@@ -353,7 +372,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                 url = file["path"]
                 if url[0] == "/":
                     url = self.root + "/data" + url
-                elif url.startswith("https://kemono.party"):
+                elif url.startswith(self.root):
                     url = self.root + "/data" + url[20:]
 
                 text.nameext_from_url(file["name"], post)
@@ -392,7 +411,7 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        self.server = match.group(1)
+        self.server = match.group(2)
 
     def items(self):
         url = "{}/api/discord/channels/lookup?q={}".format(
