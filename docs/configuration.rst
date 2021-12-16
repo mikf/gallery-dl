@@ -1081,17 +1081,6 @@ Description
     Minimum wait time in seconds before API requests.
 
 
-extractor.exhentai.limits
--------------------------
-Type
-    ``integer``
-Default
-    ``null``
-Description
-    Sets a custom image download limit and
-    stops extraction when it gets exceeded.
-
-
 extractor.exhentai.domain
 -------------------------
 Type
@@ -1103,6 +1092,17 @@ Description
       depending on the input URL
     * ``"e-hentai.org"``: Use ``e-hentai.org`` for all URLs
     * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
+
+
+extractor.exhentai.limits
+-------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Sets a custom image download limit and
+    stops extraction when it gets exceeded.
 
 
 extractor.exhentai.metadata
@@ -1127,6 +1127,18 @@ Default
     ``true``
 Description
     Download full-sized original images if available.
+
+
+extractor.exhentai.source
+-------------------------
+Type
+    ``string``
+Default
+    ``"gallery"``
+Description
+    Selects an alternative source to download files from.
+
+    * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
 
 
 extractor.fanbox.embeds
