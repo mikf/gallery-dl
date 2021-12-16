@@ -22,7 +22,7 @@ class FantiaExtractor(Extractor):
     def items(self):
 
         if self._warning:
-            if "_session_id" not in self.session.cookies:
+            if not self._check_cookies(("_session_id",)):
                 self.log.warning("no '_session_id' cookie set")
             FantiaExtractor._warning = False
 

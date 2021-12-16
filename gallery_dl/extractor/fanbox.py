@@ -33,7 +33,7 @@ class FanboxExtractor(Extractor):
     def items(self):
 
         if self._warning:
-            if "FANBOXSESSID" not in self.session.cookies:
+            if not self._check_cookies(("FANBOXSESSID",)):
                 self.log.warning("no 'FANBOXSESSID' cookie set")
             FanboxExtractor._warning = False
 
