@@ -26,6 +26,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
         ("https://hitomi.la/galleries/867789.html", {
             "pattern": r"https://[a-c]b.hitomi.la/images/./../[0-9a-f]+.jpg",
             "keyword": "4873ef9a523621fc857b114e0b2820ba4066e9ae",
+            "options": (("metadata", True),),
             "count": 16,
         }),
         # download test
@@ -71,7 +72,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
         self.info = info = json.loads(page.partition("=")[2])
 
         data = self._data_from_gallery_info(info)
-        if self.config("metadata", True):
+        if self.config("metadata", False):
             data.update(self._data_from_gallery_page(info))
         return data
 
