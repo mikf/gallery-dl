@@ -1265,7 +1265,7 @@ extractor.hitomi.metadata
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Try to extract
     ``artist``, ``group``, ``parody``,  and ``characters`` metadata.
