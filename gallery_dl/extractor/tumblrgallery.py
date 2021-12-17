@@ -42,7 +42,7 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
             response = self.request(
                 "{}/tumblrblog/gallery/{}/{}.html"
                 .format(self.root, self.gallery_id, page_num),
-                allow_redirects=False
+                allow_redirects=False, fatal=False,
             )
             if response.status_code != 200:
                 return
@@ -50,11 +50,8 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
             page = response.text
             page_num += 1
 
-            urls = list(text.extract_iter(
-                page,
-                '<div class="report xx-co-me"> <a href="',
-                '" data-fancybox="gallery"'
-            ))
+            urls = text.extract_iter(
+                page, '<div class="report"> <a class="xx-co-me" href="', '"')
 
             for image_src in urls:
                 yield image_src, {
@@ -66,7 +63,11 @@ class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
     """Extractor for Posts on tumblrgallery.xyz"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"(/post/(\d+)\.html)"
-    test = ("https://tumblrgallery.xyz/post/405674.html",)
+    test = ("https://tumblrgallery.xyz/post/405674.html", {
+        "pattern": r"https://78\.media\.tumblr\.com/bec67072219c1f3bc04fd9711d"
+                   r"ec42ef/tumblr_p51qq1XCHS1txhgk3o1_1280\.jpg",
+        "count": 3,
+    })
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
@@ -81,11 +82,8 @@ class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
         }
 
     def images(self, page):
-        urls = list(text.extract_iter(
-            page,
-            '<div class="report xx-co-me"> <a href="',
-            '" data-fancybox="gallery"'
-        ))
+        urls = text.extract_iter(
+            page, '<div class="report"> <a class="xx-co-me" href="', '"')
 
         for image_src in urls:
             yield image_src, {
