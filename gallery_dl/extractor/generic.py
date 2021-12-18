@@ -3,7 +3,7 @@
 """Extractor for images in a generic web page."""
 
 from .common import Extractor, Message
-from .. import text
+from .. import config, text
 import re
 import os.path
 
@@ -15,24 +15,29 @@ class GenericExtractor(Extractor):
     directory_fmt = ("{category}", "{pageurl}")
     archive_fmt = "{imageurl}"
 
-    # Allow any url, optionally prefixed by "g:" or "generic:"
-    # in case we want to override other extractors.
+    # By default, the generic extractor is disabled
+    # and the "g(eneric):" prefix in url is required.
+    # If the extractor is enabled, make the prefix optional
+    pattern = r"(?ix)(?P<generic>g(?:eneric)?:)"
+    if config.get(("extractor", "generic"), "enabled"):
+        pattern += r"?"
+
+    # The generic extractor pattern should match (almost) any valid url
     # Based on: https://tools.ietf.org/html/rfc3986#appendix-B
-    pattern = r"""(?ix)
-            (?P<generic>g(?:eneric)?:)?     # optional "g(eneric):" prefix
-            (?P<scheme>https?://)?          # optional http or https scheme
-            (?P<domain>[^/?&#]+)            # required domain
-            (?P<path>/[^?&#]*)?             # optional path
-            (?:\?(?P<query>[^/?#]*))?       # optional query
-            (?:\#(?P<fragment>.*))?$        # optional fragment
-            """
+    pattern += r"""
+        (?P<scheme>https?://)?          # optional http(s) scheme
+        (?P<domain>[-\w\.]+)            # required domain
+        (?P<path>/[^?&#]*)?             # optional path
+        (?:\?(?P<query>[^/?#]*))?       # optional query
+        (?:\#(?P<fragment>.*))?$        # optional fragment
+        """
 
     def __init__(self, match):
         """Init."""
         Extractor.__init__(self, match)
 
-        # Allow (and strip) optional "g(eneric):" prefix;
-        # warn about "forced" or "fall-back" mode
+        # Strip the "g(eneric):" prefix
+        # and inform about "forced" or "fallback" mode
         if match.group('generic'):
             self.log.info("Forcing use of generic information extractor.")
             self.url = match.group(0).partition(":")[2]
