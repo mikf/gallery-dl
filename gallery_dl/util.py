@@ -428,18 +428,26 @@ def build_duration_func(duration, min=0.0):
     if not duration:
         return None
 
-    try:
-        lower, upper = duration
-    except TypeError:
-        pass
+    if isinstance(duration, str):
+        lower, _, upper = duration.partition("-")
+        lower = float(lower)
     else:
+        try:
+            lower, upper = duration
+        except TypeError:
+            lower, upper = duration, None
+
+    if upper:
+        upper = float(upper)
         return functools.partial(
             random.uniform,
             lower if lower > min else min,
             upper if upper > min else min,
         )
-
-    return functools.partial(identity, duration if duration > min else min)
+    else:
+        if lower < min:
+            lower = min
+        return lambda: lower
 
 
 def build_extractor_filter(categories, negate=True, special=None):
