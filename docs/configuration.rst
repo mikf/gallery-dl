@@ -3365,9 +3365,11 @@ Duration
 Type
     * ``float``
     * ``list`` with 2 ``floats``
+    * ``string``
 Example
     * ``2.85``
     * ``[1.5, 3.0]``
+    * ``"2.85"``, ``"1.5-3.0"``
 Description
     A |Duration|_ represents a span of time in seconds.
 
@@ -3375,6 +3377,8 @@ Description
     * If given as a ``list`` with 2 floating-point numbers ``a`` & ``b`` ,
       it will be randomly chosen with uniform distribution such that ``a <= N <=b``.
       (see `random.uniform() <https://docs.python.org/3/library/random.html#random.uniform>`_)
+    * If given as a ``string``, it can either represent a single ``float``
+      value (``"2.85"``) or a range  (``"1.5-3.0"``).
 
 
 Path
