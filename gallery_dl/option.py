@@ -211,8 +211,22 @@ def build_parser():
     )
     downloader.add_argument(
         "--sleep",
-        dest="sleep", metavar="SECONDS", type=float, action=ConfigAction,
-        help="Number of seconds to sleep before each download",
+        dest="sleep", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait before each download. "
+              "This can be either a constant value or a range "
+              "(e.g. 2.7 or 2.0-3.5)"),
+    )
+    downloader.add_argument(
+        "--sleep-request",
+        dest="sleep-request", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait between HTTP requests "
+              "during data extraction"),
+    )
+    downloader.add_argument(
+        "--sleep-extractor",
+        dest="sleep-extractor", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait before starting data extraction "
+              "for an input URL"),
     )
     downloader.add_argument(
         "--filesize-min",
