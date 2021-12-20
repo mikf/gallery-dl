@@ -351,6 +351,11 @@ def build_parser():
               "and other delegated URLs"),
     )
 
+    infojson = {
+        "name"    : "metadata",
+        "event"   : "init",
+        "filename": "info.json",
+    }
     postprocessor = parser.add_argument_group("Post-processing Options")
     postprocessor.add_argument(
         "--zip",
@@ -386,14 +391,16 @@ def build_parser():
         help="Write metadata to separate JSON files",
     )
     postprocessor.add_argument(
+        "--write-info-json",
+        dest="postprocessors",
+        action="append_const", const=infojson,
+        help="Write gallery metadata to a info.json file",
+    )
+    postprocessor.add_argument(
         "--write-infojson",
         dest="postprocessors",
-        action="append_const", const={
-            "name"    : "metadata",
-            "event"   : "init",
-            "filename": "info.json",
-        },
-        help="Write gallery metadata to a info.json file",
+        action="append_const", const=infojson,
+        help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
         "--write-tags",
