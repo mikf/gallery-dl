@@ -772,6 +772,7 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         if trange.startswith("popular-"):
             trange = trange[8:]
         self.time_range = {
+            "newest"      : "now",
             "most-recent" : "now",
             "this-week"   : "1week",
             "this-month"  : "1month",
@@ -786,6 +787,8 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         }
 
     def deviations(self):
+        if self.time_range == "now":
+            return self.api.browse_newest(self.search_term, self.offset)
         return self.api.browse_popular(
             self.search_term, self.time_range, self.offset)
 
@@ -1045,6 +1048,17 @@ class DeviantartOAuthAPI():
         params = {"limit": "50", "offset": offset,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params, public=False, unpack=True)
+
+    def browse_newest(self, query=None, offset=0):
+        """Browse newest deviations"""
+        endpoint = "browse/newest"
+        params = {
+            "q"             : query,
+            "limit"         : 50 if self.metadata else 120,
+            "offset"        : offset,
+            "mature_content": self.mature,
+        }
+        return self._pagination(endpoint, params)
 
     def browse_popular(self, query=None, timerange=None, offset=0):
         """Yield popular deviations"""
