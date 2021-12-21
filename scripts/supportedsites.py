@@ -115,6 +115,7 @@ CATEGORY_MAP = {
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",
+    "zzzz"           : "ZzZz",
 }
 
 SUBCATEGORY_MAP = {
@@ -203,6 +204,7 @@ BASE_MAP = {
     "foolslide"   : "FoOlSlide Instances",
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
     "gelbooru_v02": "Gelbooru Beta 0.2",
+    "lolisafe"    : "lolisafe and chibisafe",
     "moebooru"    : "Moebooru and MyImouto",
 }
 

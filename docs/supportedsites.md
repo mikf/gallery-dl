@@ -1141,5 +1141,21 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Collections, Products</td>
     <td></td>
 </tr>
+
+<tr>
+    <td colspan="4"><strong>lolisafe and chibisafe</strong></td>
+</tr>
+<tr>
+    <td>Bunkr</td>
+    <td>https://bunkr.is/</td>
+    <td>Albums</td>
+    <td></td>
+</tr>
+<tr>
+    <td>ZzZz</td>
+    <td>https://zz.ht/</td>
+    <td>Albums</td>
+    <td></td>
+</tr>
 </tbody>
 </table>

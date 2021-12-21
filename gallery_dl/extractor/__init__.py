@@ -145,6 +145,7 @@ modules = [
     "foolslide",
     "mastodon",
     "shopify",
+    "lolisafe",
     "imagehosts",
     "directlink",
     "recursive",
