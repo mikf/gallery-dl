@@ -98,7 +98,10 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
     filename_fmt = "{category}_{num:>03}_{gallery_id}_{id}_{title}.{extension}"
     directory_fmt = ("{category}", "{search_term}")
     pattern = BASE_PATTERN + r"(/s\.php\?q=([^&#]+))"
-    test = ("https://tumblrgallery.xyz/s.php?q=everyday-life",)
+    test = ("https://tumblrgallery.xyz/s.php?q=everyday-life", {
+        "pattern": r"https://\d+\.media\.tumblr\.com/.+",
+        "count": "< 1000",
+    })
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
@@ -110,17 +113,9 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
         }
 
     def images(self, _):
-        page_num = 1
+        page_url = "s.php?q=" + self.search_term
         while True:
-            url = "{}/s.php?q={}&page={}".format(
-                self.root, self.search_term, page_num)
-            response = self.request(url, allow_redirects=False, fatal=False)
-
-            if response.status_code >= 300:
-                return
-
-            page = response.text
-            page_num += 1
+            page = self.request(self.root + "/" + page_url).text
 
             for gallery_id in text.extract_iter(
                     page, '<div class="title"><a href="post/', '.html'):
@@ -135,3 +130,9 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
                         text.extract(post_page, "<title>", "</title>")[0]
                     )).replace("_", "-")
                     yield url, data
+
+            next_url = text.extract(
+                page, '</span> <a class="btn btn-primary" href="', '"')[0]
+            if not next_url or page_url == next_url:
+                return
+            page_url = next_url
