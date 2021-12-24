@@ -146,6 +146,9 @@ SUBCATEGORY_MAP = {
         "stash": "Sta.sh",
         "watch-posts": "",
     },
+    "fanbox": {
+        "redirect": "",
+    },
     "hentaifoundry": {
         "story": "",
     },
