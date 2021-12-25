@@ -43,6 +43,9 @@ class ShopifyExtractor(BaseExtractor):
 
 
 BASE_PATTERN = ShopifyExtractor.update({
+    "chelsea-crew": {
+        "root": "https://www.chelseacrew.com",
+    },
     "fashionnova": {
         "root": "https://www.fashionnova.com",
         "pattern": r"(?:www\.)?fashionnova\.com",
