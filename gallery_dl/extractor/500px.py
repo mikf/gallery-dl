@@ -28,7 +28,6 @@ class _500pxExtractor(Extractor):
         self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
-        first = True
         data = self.metadata()
 
         for photo in self.photos():
@@ -36,9 +35,7 @@ class _500pxExtractor(Extractor):
             photo["extension"] = photo["image_format"]
             if data:
                 photo.update(data)
-            if first:
-                first = False
-                yield Message.Directory, photo
+            yield Message.Directory, photo
             yield Message.Url, url, photo
 
     def metadata(self):
@@ -146,10 +143,6 @@ class _500pxGalleryExtractor(_500pxExtractor):
                 "gallery": dict,
                 "user": dict,
             },
-        }),
-        # unavailable photos (#1335)
-        ("https://500px.com/p/Light_Expression_Photography/galleries/street", {
-            "count": 4,
         }),
         ("https://500px.com/fashvamp/galleries/lera"),
     )
