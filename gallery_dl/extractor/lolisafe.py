@@ -36,8 +36,9 @@ class LolisafelbumExtractor(LolisafeExtractor):
                 "album_id": "Lktg9Keq",
                 "album_name": 'test テスト "&>',
                 "count": 1,
-                "filename": 'test-テスト-"&>',
+                "filename": 'test-テスト-"&>-QjgneIQv',
                 "id": "QjgneIQv",
+                "name": 'test-テスト-"&>',
                 "num": int,
             },
         }),
@@ -64,10 +65,7 @@ class LolisafelbumExtractor(LolisafeExtractor):
         for data["num"], file in enumerate(files, 1):
             url = file["file"]
             text.nameext_from_url(url, data)
-            data["filename"], sep, data["id"] = \
-                data["filename"].rpartition("-")
-            if not sep:
-                data["filename"] = data["id"]
+            data["name"], sep, data["id"] = data["filename"].rpartition("-")
             yield Message.Url, url, data
 
     def fetch_album(self, album_id):
