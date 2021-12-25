@@ -40,7 +40,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>500px</td>
     <td>https://500px.com/</td>
-    <td>Galleries, individual Images, User Profiles</td>
+    <td>Favorites, Galleries, individual Images, User Profiles</td>
     <td></td>
 </tr>
 <tr>
