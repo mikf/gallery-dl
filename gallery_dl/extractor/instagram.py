@@ -174,10 +174,16 @@ class InstagramExtractor(Extractor):
         if post.get("is_video") and "video_url" not in post:
             url = "{}/tv/{}/".format(self.root, post["shortcode"])
             post = self._extract_post_page(url)
+            if "items" in post:
+                return self._parse_post_api({"media": post["items"][0]})
+            post = post["graphql"]["shortcode_media"]
         elif typename == "GraphSidecar" and \
                 "edge_sidecar_to_children" not in post:
             url = "{}/p/{}/".format(self.root, post["shortcode"])
             post = self._extract_post_page(url)
+            if "items" in post:
+                return self._parse_post_api({"media": post["items"][0]})
+            post = post["graphql"]["shortcode_media"]
 
         owner = post["owner"]
         data = {
@@ -347,7 +353,7 @@ class InstagramExtractor(Extractor):
         data = self._extract_shared_data(url)["entry_data"]
         if "HttpErrorPage" in data:
             raise exception.NotFoundError("post")
-        return data["PostPage"][0]["graphql"]["shortcode_media"]
+        return data["PostPage"][0]
 
     def _get_edge_data(self, user, key):
         cursor = self.config("cursor")
