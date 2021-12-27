@@ -115,6 +115,13 @@ def main():
             config.load(args.cfgfiles, strict=True)
         if args.yamlfiles:
             config.load(args.yamlfiles, strict=True, fmt="yaml")
+        if args.filename:
+            if args.filename == "/O":
+                args.filename = "{filename}.{extension}"
+            config.set((), "filename", args.filename)
+        if args.directory:
+            config.set((), "base-directory", args.directory)
+            config.set((), "directory", ())
         if args.postprocessors:
             config.set((), "postprocessors", args.postprocessors)
         if args.abort:
