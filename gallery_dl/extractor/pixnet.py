@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 
 
-BASE_PATTERN = r"(?:https?://)?(?!www\.)([^.]+)\.pixnet.net"
+BASE_PATTERN = r"(?:https?://)?(?!www\.)([\w-]+)\.pixnet.net"
 
 
 class PixnetExtractor(Extractor):

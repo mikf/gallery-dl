@@ -152,6 +152,7 @@ modules = [
     "oauth",
     "test",
     "ytdl",
+    "generic",
 ]
 
 
