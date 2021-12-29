@@ -1235,6 +1235,17 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.generic.enabled
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Match **all** URLs not otherwise supported by gallery-dl,
+    even ones without a ``generic:`` prefix.
+
+
 extractor.gfycat.format
 -----------------------
 Type
