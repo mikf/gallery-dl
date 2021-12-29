@@ -205,8 +205,9 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
     )
 
     def __init__(self, match):
-        KemonopartyExtractor.__init__(self, match)
         _, service, user_id, offset = match.groups()
+        self.subcategory = service
+        KemonopartyExtractor.__init__(self, match)
         self.api_url = "{}/api/{}/user/{}".format(self.root, service, user_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
         self.offset = text.parse_int(offset)
@@ -247,7 +248,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
                 "published": "Sun, 11 Aug 2019 02:09:04 GMT",
                 "service": "fanbox",
                 "shared_file": False,
-                "subcategory": "post",
+                "subcategory": "fanbox",
                 "title": "c96取り置き",
                 "type": "file",
                 "user": "6993449",
@@ -296,8 +297,9 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
     )
 
     def __init__(self, match):
-        KemonopartyExtractor.__init__(self, match)
         _, service, user_id, post_id = match.groups()
+        self.subcategory = service
+        KemonopartyExtractor.__init__(self, match)
         self.api_url = "{}/api/{}/user/{}/post/{}".format(
             self.root, service, user_id, post_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
