@@ -1,6 +1,43 @@
 # Changelog
 
-## Unreleased
+## 1.20.0 - 2021-12-29
+### Additions
+- [500px] add `favorite` extractor ([#1927](https://github.com/mikf/gallery-dl/issues/1927))
+- [exhentai] add `source` option
+- [fanbox] support pixiv redirects ([#2122](https://github.com/mikf/gallery-dl/issues/2122))
+- [inkbunny] add `search` extractor ([#2094](https://github.com/mikf/gallery-dl/issues/2094))
+- [kemonoparty] support coomer.party ([#2100](https://github.com/mikf/gallery-dl/issues/2100))
+- [lolisafe] add generic album extractor for lolisafe/chibisafe instances ([#2038](https://github.com/mikf/gallery-dl/issues/2038), [#2105](https://github.com/mikf/gallery-dl/issues/2105))
+- [rule34us] add `tag` and `post` extractors ([#1527](https://github.com/mikf/gallery-dl/issues/1527))
+- add a generic extractor ([#735](https://github.com/mikf/gallery-dl/issues/735), [#683](https://github.com/mikf/gallery-dl/issues/683))
+- add `-d/--directory` and `-f/--filename` command-line options
+- add `--sleep-request` and `--sleep-extractor` command-line options
+- allow specifying `sleep-*` options as string
+### Changes
+- [cyberdrop] include file ID in default filenames
+- [hitomi] disable `metadata` by default
+- [kemonoparty] use `service` as subcategory ([#2147](https://github.com/mikf/gallery-dl/issues/2147))
+- [kemonoparty] change default `files` order to `attachments,file,inline` ([#1991](https://github.com/mikf/gallery-dl/issues/1991))
+- [output] write download progress indicator to stderr
+- [ytdl] prefer yt-dlp over youtube-dl ([#1850](https://github.com/mikf/gallery-dl/issues/1850), [#2028](https://github.com/mikf/gallery-dl/issues/2028))
+- rename `--write-infojson` to `--write-info-json`
+### Fixes
+- [500px] create directories per photo
+- [artstation] create directories per asset ([#2136](https://github.com/mikf/gallery-dl/issues/2136))
+- [deviantart] use `/browse/newest` for most-recent searches ([#2096](https://github.com/mikf/gallery-dl/issues/2096))
+- [hitomi] fix image URLs
+- [instagram] fix error when PostPage data is not in GraphQL format ([#2037](https://github.com/mikf/gallery-dl/issues/2037))
+- [instagran] match post URLs with usernames ([#2085](https://github.com/mikf/gallery-dl/issues/2085))
+- [instagram] allow downloading specific stories ([#2088](https://github.com/mikf/gallery-dl/issues/2088))
+- [furaffinity] warn when no session cookies were found
+- [pixiv] respect date ranges in search URLs ([#2133](https://github.com/mikf/gallery-dl/issues/2133))
+- [sexcom] fix and improve embed extraction ([#2145](https://github.com/mikf/gallery-dl/issues/2145))
+- [tumblrgallery] fix extraction ([#2112](https://github.com/mikf/gallery-dl/issues/2112))
+- [tumblrgallery] improve `id` extraction ([#2115](https://github.com/mikf/gallery-dl/issues/2115))
+- [tumblrgallery] improve search pagination ([#2132](https://github.com/mikf/gallery-dl/issues/2132))
+- [twitter] include `4096x4096` as a default image fallback ([#1881](https://github.com/mikf/gallery-dl/issues/1881), [#2107](https://github.com/mikf/gallery-dl/issues/2107))
+- [ytdl] update argument parsing to latest yt-dlp changes ([#2124](https://github.com/mikf/gallery-dl/issues/2124))
+- handle UNC paths ([#2113](https://github.com/mikf/gallery-dl/issues/2113))
 
 ## 1.19.3 - 2021-11-27
 ### Additions
