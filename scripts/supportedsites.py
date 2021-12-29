@@ -269,6 +269,7 @@ IGNORE_LIST = (
     "recursive",
     "test",
     "ytdl",
+    "generic",
 )
 
 
