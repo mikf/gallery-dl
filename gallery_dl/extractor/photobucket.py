@@ -21,8 +21,8 @@ class PhotobucketAlbumExtractor(Extractor):
     directory_fmt = ("{category}", "{username}", "{location}")
     filename_fmt = "{offset:>03}{pictureId:?_//}_{titleOrFilename}.{extension}"
     archive_fmt = "{id}"
-    pattern = (r"(?:https?://)?((?:[^.]+\.)?photobucket\.com)"
-               r"/user/[^/?#]+/library(?:/[^?#]*)?")
+    pattern = (r"(?:https?://)?((?:[\w-]+\.)?photobucket\.com)"
+               r"/user/[^/?&#]+/library(?:/[^?&#]*)?")
     test = (
         ("https://s369.photobucket.com/user/CrpyLrkr/library", {
             "pattern": r"https?://[oi]+\d+.photobucket.com/albums/oo139/",
@@ -109,9 +109,9 @@ class PhotobucketImageExtractor(Extractor):
     directory_fmt = ("{category}", "{username}")
     filename_fmt = "{pictureId:?/_/}{titleOrFilename}.{extension}"
     archive_fmt = "{username}_{id}"
-    pattern = (r"(?:https?://)?(?:[^.]+\.)?photobucket\.com"
-               r"(?:/gallery/user/([^/?#]+)/media/([^/?#]+)"
-               r"|/user/([^/?#]+)/media/[^?#]+\.html)")
+    pattern = (r"(?:https?://)?(?:[\w-]+\.)?photobucket\.com"
+               r"(?:/gallery/user/([^/?&#]+)/media/([^/?&#]+)"
+               r"|/user/([^/?&#]+)/media/[^?&#]+\.html)")
     test = (
         (("https://s271.photobucket.com/user/lakerfanryan"
           "/media/Untitled-3-1.jpg.html"), {

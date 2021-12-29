@@ -169,7 +169,7 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
 class ImgbbUserExtractor(ImgbbExtractor):
     """Extractor for user profiles in imgbb.com"""
     subcategory = "user"
-    pattern = r"(?:https?://)?([^.]+)\.imgbb\.com/?(?:\?([^#]+))?$"
+    pattern = r"(?:https?://)?([\w-]+)\.imgbb\.com/?(?:\?([^#]+))?$"
     test = ("https://folkie.imgbb.com", {
         "range": "1-80",
         "pattern": r"https?://i\.ibb\.co/\w+/[^/?#]+",
