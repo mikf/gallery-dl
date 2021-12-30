@@ -29,7 +29,7 @@ class PatreonExtractor(Extractor):
     def items(self):
 
         if self._warning:
-            if "session_id" not in self.session.cookies:
+            if not self._check_cookies(("session_id",)):
                 self.log.warning("no 'session_id' cookie set")
             PatreonExtractor._warning = False
         generators = self._build_file_generators(self.config("files"))

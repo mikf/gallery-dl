@@ -35,7 +35,7 @@ POST_TYPES = frozenset((
 
 BASE_PATTERN = (
     r"(?:tumblr:(?:https?://)?([^/]+)|"
-    r"(?:https?://)?([^.]+\.tumblr\.com))")
+    r"(?:https?://)?([\w-]+\.tumblr\.com))")
 
 
 class TumblrExtractor(Extractor):

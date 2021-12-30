@@ -40,7 +40,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>500px</td>
     <td>https://500px.com/</td>
-    <td>Galleries, individual Images, User Profiles</td>
+    <td>Favorites, Galleries, individual Images, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -364,7 +364,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Inkbunny</td>
     <td>https://inkbunny.net/</td>
-    <td>Favorites, Pools, Posts, User Profiles</td>
+    <td>Favorites, Pools, Posts, Search Results, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -646,6 +646,12 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>rule #34</td>
     <td>https://rule34.paheal.net/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Rule 34</td>
+    <td>https://rule34.us/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
@@ -1133,6 +1139,22 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Windsorstore</td>
     <td>https://www.windsorstore.com/</td>
     <td>Collections, Products</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>lolisafe and chibisafe</strong></td>
+</tr>
+<tr>
+    <td>Bunkr</td>
+    <td>https://bunkr.is/</td>
+    <td>Albums</td>
+    <td></td>
+</tr>
+<tr>
+    <td>ZzZz</td>
+    <td>https://zz.ht/</td>
+    <td>Albums</td>
     <td></td>
 </tr>
 </tbody>

@@ -14,6 +14,15 @@ import itertools
 from . import text, util, exception
 
 
+def import_module(module_name):
+    if module_name is None:
+        try:
+            return __import__("yt_dlp")
+        except ImportError:
+            return __import__("youtube_dl")
+    return __import__(module_name.replace("-", "_"))
+
+
 def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
     opts = argv = None
     config = obj.config
@@ -95,6 +104,8 @@ def parse_command_line(module, argv):
         opts.continue_dl = False
     if opts.retries is not None:
         opts.retries = parse_retries(opts.retries)
+    if getattr(opts, "file_access_retries", None) is not None:
+        opts.file_access_retries = parse_retries(opts.file_access_retries)
     if opts.fragment_retries is not None:
         opts.fragment_retries = parse_retries(opts.fragment_retries)
     if getattr(opts, "extractor_retries", None) is not None:
@@ -111,6 +122,10 @@ def parse_command_line(module, argv):
         opts.recodevideo = opts.recodevideo.replace(" ", "")
     if getattr(opts, "remuxvideo", None) is not None:
         opts.remuxvideo = opts.remuxvideo.replace(" ", "")
+    if getattr(opts, "wait_for_video", None) is not None:
+        min_wait, _, max_wait = opts.wait_for_video.partition("-")
+        opts.wait_for_video = (module.parse_duration(min_wait),
+                               module.parse_duration(max_wait))
 
     if opts.date is not None:
         date = module.DateRange.day(opts.date)
@@ -207,10 +222,6 @@ def parse_command_line(module, argv):
         opts.sponsorblock_remove = \
             getattr(opts, "sponsorblock_remove", None) or set()
     sponsorblock_query = opts.sponsorblock_mark | opts.sponsorblock_remove
-
-    addchapters = getattr(opts, "addchapters", None)
-    if (opts.addmetadata or opts.sponsorblock_mark) and addchapters is None:
-        addchapters = True
     opts.remove_chapters = getattr(opts, "remove_chapters", None) or ()
 
     # PostProcessors
@@ -297,11 +308,17 @@ def parse_command_line(module, argv):
             "sponsorblock_chapter_title": opts.sponsorblock_chapter_title,
             "force_keyframes": opts.force_keyframes_at_cuts,
         })
-    if opts.addmetadata or addchapters:
+    addchapters = getattr(opts, "addchapters", None)
+    embed_infojson = getattr(opts, "embed_infojson", None)
+    if opts.addmetadata or addchapters or embed_infojson:
         pp = {"key": "FFmpegMetadata"}
         if ytdlp:
-            pp["add_chapters"] = addchapters
+            if embed_infojson is None:
+                embed_infojson = "if_exists"
             pp["add_metadata"] = opts.addmetadata
+            pp["add_chapters"] = addchapters
+            pp["add_infojson"] = embed_infojson
+
         postprocessors.append(pp)
     if getattr(opts, "sponskrub", False) is not False:
         postprocessors.append({
@@ -311,10 +328,11 @@ def parse_command_line(module, argv):
             "cut": opts.sponskrub_cut,
             "force": opts.sponskrub_force,
             "ignoreerror": opts.sponskrub is None,
+            "_from_cli": True,
         })
     if opts.embedthumbnail:
         already_have_thumbnail = (opts.writethumbnail or
-                                  opts.write_all_thumbnails)
+                                  getattr(opts, "write_all_thumbnails", False))
         postprocessors.append({
             "key": "EmbedThumbnail",
             "already_have_thumbnail": already_have_thumbnail,
@@ -395,6 +413,7 @@ def parse_command_line(module, argv):
         "throttledratelimit": getattr(opts, "throttledratelimit", None),
         "overwrites": getattr(opts, "overwrites", None),
         "retries": opts.retries,
+        "file_access_retries": getattr(opts, "file_access_retries", None),
         "fragment_retries": opts.fragment_retries,
         "extractor_retries": getattr(opts, "extractor_retries", None),
         "skip_unavailable_fragments": opts.skip_unavailable_fragments,
@@ -421,8 +440,9 @@ def parse_command_line(module, argv):
         "allow_playlist_files": opts.allow_playlist_files,
         "clean_infojson": opts.clean_infojson,
         "getcomments": getattr(opts, "getcomments", None),
-        "writethumbnail": opts.writethumbnail,
-        "write_all_thumbnails": opts.write_all_thumbnails,
+        "writethumbnail": opts.writethumbnail is True,
+        "write_all_thumbnails": getattr(opts, "write_all_thumbnails", None) or
+        opts.writethumbnail == "all",
         "writelink": getattr(opts, "writelink", None),
         "writeurllink": getattr(opts, "writeurllink", None),
         "writewebloclink": getattr(opts, "writewebloclink", None),
@@ -454,6 +474,7 @@ def parse_command_line(module, argv):
         "download_archive": download_archive_fn,
         "break_on_existing": getattr(opts, "break_on_existing", None),
         "break_on_reject": getattr(opts, "break_on_reject", None),
+        "break_per_url": getattr(opts, "break_per_url", None),
         "skip_playlist_after_errors": getattr(
             opts, "skip_playlist_after_errors", None),
         "cookiefile": opts.cookiefile,
@@ -475,6 +496,8 @@ def parse_command_line(module, argv):
             opts, "youtube_include_hls_manifest", None),
         "encoding": opts.encoding,
         "extract_flat": opts.extract_flat,
+        "live_from_start": getattr(opts, "live_from_start", None),
+        "wait_for_video": getattr(opts, "wait_for_video", None),
         "mark_watched": opts.mark_watched,
         "merge_output_format": opts.merge_output_format,
         "postprocessors": postprocessors,

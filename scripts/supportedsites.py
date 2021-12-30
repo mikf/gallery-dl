@@ -85,6 +85,7 @@ CATEGORY_MAP = {
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
     "rule34"         : "Rule 34",
+    "rule34us"       : "Rule 34",
     "sankaku"        : "Sankaku Channel",
     "sankakucomplex" : "Sankaku Complex",
     "seiga"          : "Niconico Seiga",
@@ -114,6 +115,7 @@ CATEGORY_MAP = {
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",
+    "zzzz"           : "ZzZz",
 }
 
 SUBCATEGORY_MAP = {
@@ -143,6 +145,9 @@ SUBCATEGORY_MAP = {
     "deviantart": {
         "stash": "Sta.sh",
         "watch-posts": "",
+    },
+    "fanbox": {
+        "redirect": "",
     },
     "hentaifoundry": {
         "story": "",
@@ -202,6 +207,7 @@ BASE_MAP = {
     "foolslide"   : "FoOlSlide Instances",
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
     "gelbooru_v02": "Gelbooru Beta 0.2",
+    "lolisafe"    : "lolisafe and chibisafe",
     "moebooru"    : "Moebooru and MyImouto",
 }
 
@@ -263,6 +269,7 @@ IGNORE_LIST = (
     "recursive",
     "test",
     "ytdl",
+    "generic",
 )
 
 

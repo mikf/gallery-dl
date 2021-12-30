@@ -108,6 +108,7 @@ modules = [
     "readcomiconline",
     "reddit",
     "redgifs",
+    "rule34us",
     "sankaku",
     "sankakucomplex",
     "seiga",
@@ -144,12 +145,14 @@ modules = [
     "foolslide",
     "mastodon",
     "shopify",
+    "lolisafe",
     "imagehosts",
     "directlink",
     "recursive",
     "oauth",
     "test",
     "ytdl",
+    "generic",
 ]
 
 

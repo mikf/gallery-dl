@@ -47,7 +47,7 @@ class TwitterExtractor(Extractor):
         size = self.config("size")
         if size is None:
             self._size_image = "orig"
-            self._size_fallback = ("large", "medium", "small")
+            self._size_fallback = ("4096x4096", "large", "medium", "small")
         else:
             if isinstance(size, str):
                 size = size.split(",")

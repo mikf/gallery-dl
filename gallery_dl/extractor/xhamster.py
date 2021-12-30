@@ -13,7 +13,7 @@ from .. import text
 import json
 
 
-BASE_PATTERN = (r"(?:https?://)?((?:[^.]+\.)?xhamster"
+BASE_PATTERN = (r"(?:https?://)?((?:[\w-]+\.)?xhamster"
                 r"(?:\d?\.(?:com|one|desi)|\.porncache\.net))")
 
 

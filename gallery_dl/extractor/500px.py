@@ -21,13 +21,13 @@ class _500pxExtractor(Extractor):
     filename_fmt = "{id}_{name}.{extension}"
     archive_fmt = "{id}"
     root = "https://500px.com"
+    cookiedomain = ".500px.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self._headers["Referer"] = self.root + "/"
 
     def items(self):
-        first = True
         data = self.metadata()
 
         for photo in self.photos():
@@ -35,9 +35,7 @@ class _500pxExtractor(Extractor):
             photo["extension"] = photo["image_format"]
             if data:
                 photo.update(data)
-            if first:
-                first = False
-                yield Message.Directory, photo
+            yield Message.Directory, photo
             yield Message.Url, url, photo
 
     def metadata(self):
@@ -72,24 +70,33 @@ class _500pxExtractor(Extractor):
             self.log.warning("Unable to fetch photo %s", pid)
         ]
 
-    def _request_api(self, url, params, csrf_token=None):
-        headers = {"Origin": self.root, "X-CSRF-Token": csrf_token}
+    def _request_api(self, url, params):
+        headers = {
+            "Origin": self.root,
+            "x-csrf-token": self.session.cookies.get(
+                "x-csrf-token", domain=".500px.com"),
+        }
         return self.request(url, headers=headers, params=params).json()
 
     def _request_graphql(self, opname, variables):
         url = "https://api.500px.com/graphql"
+        headers = {
+            "x-csrf-token": self.session.cookies.get(
+                "x-csrf-token", domain=".500px.com"),
+        }
         data = {
             "operationName": opname,
             "variables"    : json.dumps(variables),
             "query"        : QUERIES[opname],
         }
-        return self.request(url, method="POST", json=data).json()["data"]
+        return self.request(
+            url, method="POST", headers=headers, json=data).json()["data"]
 
 
 class _500pxUserExtractor(_500pxExtractor):
     """Extractor for photos from a user's photostream on 500px.com"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!photo/)(?:p/)?([^/?#]+)/?(?:$|[?#])"
+    pattern = BASE_PATTERN + r"/(?!photo/|liked)(?:p/)?([^/?#]+)/?(?:$|[?#])"
     test = (
         ("https://500px.com/p/light_expression_photography", {
             "pattern": r"https?://drscdn.500px.org/photo/\d+/m%3D4096/v2",
@@ -136,10 +143,6 @@ class _500pxGalleryExtractor(_500pxExtractor):
                 "gallery": dict,
                 "user": dict,
             },
-        }),
-        # unavailable photos (#1335)
-        ("https://500px.com/p/Light_Expression_Photography/galleries/street", {
-            "count": 4,
         }),
         ("https://500px.com/fashvamp/galleries/lera"),
     )
@@ -192,6 +195,30 @@ class _500pxGalleryExtractor(_500pxExtractor):
             photos = self._request_graphql(
                 "GalleriesDetailPaginationContainerQuery", variables,
             )["galleryByOwnerIdAndSlugOrToken"]["photos"]
+
+
+class _500pxFavoriteExtractor(_500pxExtractor):
+    """Extractor for favorite 500px photos"""
+    subcategory = "favorite"
+    pattern = BASE_PATTERN + r"/liked/?$"
+    test = ("https://500px.com/liked",)
+
+    def photos(self):
+        variables = {"pageSize": 20}
+        photos = self._request_graphql(
+            "LikedPhotosQueryRendererQuery", variables,
+        )["likedPhotos"]
+
+        while True:
+            yield from self._extend(photos["edges"])
+
+            if not photos["pageInfo"]["hasNextPage"]:
+                return
+
+            variables["cursor"] = photos["pageInfo"]["endCursor"]
+            photos = self._request_graphql(
+                "LikedPhotosPaginationContainerQuery", variables,
+            )["likedPhotos"]
 
 
 class _500pxImageExtractor(_500pxExtractor):
@@ -631,6 +658,124 @@ fragment GalleriesDetailPaginationContainer_gallery_3e6UuE on Gallery {
         }
         __typename
       }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+""",
+
+    "LikedPhotosQueryRendererQuery": """\
+query LikedPhotosQueryRendererQuery($pageSize: Int) {
+  ...LikedPhotosPaginationContainer_query_RlXb8
+}
+
+fragment LikedPhotosPaginationContainer_query_RlXb8 on Query {
+  likedPhotos(first: $pageSize) {
+    edges {
+      node {
+        id
+        legacyId
+        canonicalPath
+        name
+        description
+        category
+        uploadedAt
+        location
+        width
+        height
+        isLikedByMe
+        notSafeForWork
+        tags
+        photographer: uploader {
+          id
+          legacyId
+          username
+          displayName
+          canonicalPath
+          avatar {
+            images {
+              url
+              id
+            }
+            id
+          }
+          followedByUsers {
+            totalCount
+            isFollowedByMe
+          }
+        }
+        images(sizes: [33, 35]) {
+          size
+          url
+          jpegUrl
+          webpUrl
+          id
+        }
+        __typename
+      }
+      cursor
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+""",
+
+    "LikedPhotosPaginationContainerQuery": """\
+query LikedPhotosPaginationContainerQuery($cursor: String, $pageSize: Int) {
+  ...LikedPhotosPaginationContainer_query_3e6UuE
+}
+
+fragment LikedPhotosPaginationContainer_query_3e6UuE on Query {
+  likedPhotos(first: $pageSize, after: $cursor) {
+    edges {
+      node {
+        id
+        legacyId
+        canonicalPath
+        name
+        description
+        category
+        uploadedAt
+        location
+        width
+        height
+        isLikedByMe
+        notSafeForWork
+        tags
+        photographer: uploader {
+          id
+          legacyId
+          username
+          displayName
+          canonicalPath
+          avatar {
+            images {
+              url
+              id
+            }
+            id
+          }
+          followedByUsers {
+            totalCount
+            isFollowedByMe
+          }
+        }
+        images(sizes: [33, 35]) {
+          size
+          url
+          jpegUrl
+          webpUrl
+          id
+        }
+        __typename
+      }
+      cursor
     }
     pageInfo {
       endCursor

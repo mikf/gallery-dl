@@ -22,6 +22,7 @@ class FuraffinityExtractor(Extractor):
     archive_fmt = "{id}"
     cookiedomain = ".furaffinity.net"
     root = "https://www.furaffinity.net"
+    _warning = True
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -32,6 +33,12 @@ class FuraffinityExtractor(Extractor):
             self._process_description = str.strip
 
     def items(self):
+
+        if self._warning:
+            if not self._check_cookies(("a", "b")):
+                self.log.warning("no 'a' and 'b' session cookies set")
+            FuraffinityExtractor._warning = False
+
         external = self.config("external", False)
         metadata = self.metadata()
         for post_id in util.advance(self.posts(), self.offset):

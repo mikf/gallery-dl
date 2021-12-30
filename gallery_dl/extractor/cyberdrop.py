@@ -6,16 +6,13 @@
 
 """Extractors for https://cyberdrop.me/"""
 
-from .common import Extractor, Message
+from . import lolisafe
 from .. import text
 
 
-class CyberdropAlbumExtractor(Extractor):
+class CyberdropAlbumExtractor(lolisafe.LolisafelbumExtractor):
     category = "cyberdrop"
-    subcategory = "album"
     root = "https://cyberdrop.me"
-    directory_fmt = ("{category}", "{album_name} ({album_id})")
-    archive_fmt = "{album_id}_{id}"
     pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.me/a/([^/?#]+)"
     test = (
         # images
@@ -44,11 +41,7 @@ class CyberdropAlbumExtractor(Extractor):
         }),
     )
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.album_id = match.group(1)
-
-    def items(self):
+    def fetch_album(self, album_id):
         url = self.root + "/a/" + self.album_id
         extr = text.extract_from(self.request(url).text)
 
@@ -58,9 +51,9 @@ class CyberdropAlbumExtractor(Extractor):
             url = extr('id="file" href="', '"')
             if not url:
                 break
-            append(text.unescape(url))
+            append({"file": text.unescape(url)})
 
-        data = {
+        return files, {
             "album_id"   : self.album_id,
             "album_name" : extr("name: '", "'"),
             "date"       : text.parse_timestamp(extr("timestamp: ", ",")),
@@ -68,9 +61,3 @@ class CyberdropAlbumExtractor(Extractor):
             "description": extr("description: `", "`"),
             "count"      : len(files),
         }
-
-        yield Message.Directory, data
-        for url in files:
-            text.nameext_from_url(url, data)
-            data["filename"], _, data["id"] = data["filename"].rpartition("-")
-            yield Message.Url, url, data

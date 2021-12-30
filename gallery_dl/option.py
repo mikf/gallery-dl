@@ -92,15 +92,26 @@ def build_parser():
         help="Print program version and exit",
     )
     general.add_argument(
-        "-d", "--dest",
+        "--dest",
         dest="base-directory", metavar="DEST", action=ConfigAction,
-        help="Destination directory",
+        help=argparse.SUPPRESS,
     )
     general.add_argument(
         "-i", "--input-file",
         dest="inputfiles", metavar="FILE", action="append",
         help=("Download URLs found in FILE ('-' for stdin). "
               "More than one --input-file can be specified"),
+    )
+    general.add_argument(
+        "-f", "--filename",
+        dest="filename", metavar="FORMAT",
+        help=("Filename format string for downloaded files "
+              "('/O' for \"original\" filenames)"),
+    )
+    general.add_argument(
+        "-d", "--directory",
+        dest="directory", metavar="PATH",
+        help="Target location for file downloads",
     )
     general.add_argument(
         "--cookies",
@@ -211,8 +222,22 @@ def build_parser():
     )
     downloader.add_argument(
         "--sleep",
-        dest="sleep", metavar="SECONDS", type=float, action=ConfigAction,
-        help="Number of seconds to sleep before each download",
+        dest="sleep", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait before each download. "
+              "This can be either a constant value or a range "
+              "(e.g. 2.7 or 2.0-3.5)"),
+    )
+    downloader.add_argument(
+        "--sleep-request",
+        dest="sleep-request", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait between HTTP requests "
+              "during data extraction"),
+    )
+    downloader.add_argument(
+        "--sleep-extractor",
+        dest="sleep-extractor", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait before starting data extraction "
+              "for an input URL"),
     )
     downloader.add_argument(
         "--filesize-min",
@@ -337,6 +362,11 @@ def build_parser():
               "and other delegated URLs"),
     )
 
+    infojson = {
+        "name"    : "metadata",
+        "event"   : "init",
+        "filename": "info.json",
+    }
     postprocessor = parser.add_argument_group("Post-processing Options")
     postprocessor.add_argument(
         "--zip",
@@ -372,14 +402,16 @@ def build_parser():
         help="Write metadata to separate JSON files",
     )
     postprocessor.add_argument(
+        "--write-info-json",
+        dest="postprocessors",
+        action="append_const", const=infojson,
+        help="Write gallery metadata to a info.json file",
+    )
+    postprocessor.add_argument(
         "--write-infojson",
         dest="postprocessors",
-        action="append_const", const={
-            "name"    : "metadata",
-            "event"   : "init",
-            "filename": "info.json",
-        },
-        help="Write gallery metadata to a info.json file",
+        action="append_const", const=infojson,
+        help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
         "--write-tags",

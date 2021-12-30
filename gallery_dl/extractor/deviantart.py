@@ -772,6 +772,7 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         if trange.startswith("popular-"):
             trange = trange[8:]
         self.time_range = {
+            "newest"      : "now",
             "most-recent" : "now",
             "this-week"   : "1week",
             "this-month"  : "1month",
@@ -786,6 +787,8 @@ class DeviantartPopularExtractor(DeviantartExtractor):
         }
 
     def deviations(self):
+        if self.time_range == "now":
+            return self.api.browse_newest(self.search_term, self.offset)
         return self.api.browse_popular(
             self.search_term, self.time_range, self.offset)
 
@@ -1034,21 +1037,32 @@ class DeviantartOAuthAPI():
 
     def browse_deviantsyouwatch(self, offset=0):
         """Yield deviations from users you watch"""
-        endpoint = "browse/deviantsyouwatch"
+        endpoint = "/browse/deviantsyouwatch"
         params = {"limit": "50", "offset": offset,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params, public=False)
 
     def browse_posts_deviantsyouwatch(self, offset=0):
         """Yield posts from users you watch"""
-        endpoint = "browse/posts/deviantsyouwatch"
+        endpoint = "/browse/posts/deviantsyouwatch"
         params = {"limit": "50", "offset": offset,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params, public=False, unpack=True)
 
+    def browse_newest(self, query=None, offset=0):
+        """Browse newest deviations"""
+        endpoint = "/browse/newest"
+        params = {
+            "q"             : query,
+            "limit"         : 50 if self.metadata else 120,
+            "offset"        : offset,
+            "mature_content": self.mature,
+        }
+        return self._pagination(endpoint, params)
+
     def browse_popular(self, query=None, timerange=None, offset=0):
         """Yield popular deviations"""
-        endpoint = "browse/popular"
+        endpoint = "/browse/popular"
         params = {
             "q"             : query,
             "limit"         : 50 if self.metadata else 120,
@@ -1060,7 +1074,7 @@ class DeviantartOAuthAPI():
 
     def browse_tags(self, tag, offset=0):
         """ Browse a tag """
-        endpoint = "browse/tags"
+        endpoint = "/browse/tags"
         params = {
             "tag"           : tag,
             "offset"        : offset,
@@ -1071,14 +1085,14 @@ class DeviantartOAuthAPI():
 
     def browse_user_journals(self, username, offset=0):
         """Yield all journal entries of a specific user"""
-        endpoint = "browse/user/journals"
+        endpoint = "/browse/user/journals"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature, "featured": "false"}
         return self._pagination(endpoint, params)
 
     def collections(self, username, folder_id, offset=0):
         """Yield all Deviation-objects contained in a collection folder"""
-        endpoint = "collections/" + folder_id
+        endpoint = "/collections/" + folder_id
         params = {"username": username, "offset": offset, "limit": 24,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
@@ -1086,21 +1100,21 @@ class DeviantartOAuthAPI():
     @memcache(keyarg=1)
     def collections_folders(self, username, offset=0):
         """Yield all collection folders of a specific user"""
-        endpoint = "collections/folders"
+        endpoint = "/collections/folders"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
         return self._pagination_list(endpoint, params)
 
     def comments_deviation(self, deviation_id, offset=0):
         """Fetch comments posted on a deviation"""
-        endpoint = "comments/deviation/" + deviation_id
+        endpoint = "/comments/deviation/" + deviation_id
         params = {"maxdepth": "5", "offset": offset, "limit": 50,
                   "mature_content": self.mature}
         return self._pagination_list(endpoint, params=params, key="thread")
 
     def deviation(self, deviation_id, public=True):
         """Query and return info about a single Deviation"""
-        endpoint = "deviation/" + deviation_id
+        endpoint = "/deviation/" + deviation_id
         deviation = self._call(endpoint, public=public)
         if self.metadata:
             self._metadata((deviation,))
@@ -1110,13 +1124,13 @@ class DeviantartOAuthAPI():
 
     def deviation_content(self, deviation_id, public=False):
         """Get extended content of a single Deviation"""
-        endpoint = "deviation/content"
+        endpoint = "/deviation/content"
         params = {"deviationid": deviation_id}
         return self._call(endpoint, params=params, public=public)
 
     def deviation_download(self, deviation_id, public=True):
         """Get the original file download (if allowed)"""
-        endpoint = "deviation/download/" + deviation_id
+        endpoint = "/deviation/download/" + deviation_id
         params = {"mature_content": self.mature}
         return self._call(endpoint, params=params, public=public)
 
@@ -1124,7 +1138,7 @@ class DeviantartOAuthAPI():
         """ Fetch deviation metadata for a set of deviations"""
         if not deviations:
             return []
-        endpoint = "deviation/metadata?" + "&".join(
+        endpoint = "/deviation/metadata?" + "&".join(
             "deviationids[{}]={}".format(num, deviation["deviationid"])
             for num, deviation in enumerate(deviations)
         )
@@ -1133,14 +1147,14 @@ class DeviantartOAuthAPI():
 
     def gallery(self, username, folder_id, offset=0, extend=True, public=True):
         """Yield all Deviation-objects contained in a gallery folder"""
-        endpoint = "gallery/" + folder_id
+        endpoint = "/gallery/" + folder_id
         params = {"username": username, "offset": offset, "limit": 24,
                   "mature_content": self.mature, "mode": "newest"}
         return self._pagination(endpoint, params, extend, public)
 
     def gallery_all(self, username, offset=0):
         """Yield all Deviation-objects of a specific user"""
-        endpoint = "gallery/all"
+        endpoint = "/gallery/all"
         params = {"username": username, "offset": offset, "limit": 24,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
@@ -1148,7 +1162,7 @@ class DeviantartOAuthAPI():
     @memcache(keyarg=1)
     def gallery_folders(self, username, offset=0):
         """Yield all gallery folders of a specific user"""
-        endpoint = "gallery/folders"
+        endpoint = "/gallery/folders"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
         return self._pagination_list(endpoint, params)
@@ -1156,12 +1170,12 @@ class DeviantartOAuthAPI():
     @memcache(keyarg=1)
     def user_profile(self, username):
         """Get user profile information"""
-        endpoint = "user/profile/" + username
+        endpoint = "/user/profile/" + username
         return self._call(endpoint, fatal=False)
 
     def user_friends_watch(self, username):
         """Watch a user"""
-        endpoint = "user/friends/watch/" + username
+        endpoint = "/user/friends/watch/" + username
         data = {
             "watch[friend]"       : "0",
             "watch[deviations]"   : "0",
@@ -1179,7 +1193,7 @@ class DeviantartOAuthAPI():
 
     def user_friends_unwatch(self, username):
         """Unwatch a user"""
-        endpoint = "user/friends/unwatch/" + username
+        endpoint = "/user/friends/unwatch/" + username
         return self._call(
             endpoint, method="POST", public=False, fatal=False,
         ).get("success")
@@ -1217,7 +1231,7 @@ class DeviantartOAuthAPI():
 
     def _call(self, endpoint, fatal=True, public=True, **kwargs):
         """Call an API endpoint"""
-        url = "https://www.deviantart.com/api/v1/oauth2/" + endpoint
+        url = "https://www.deviantart.com/api/v1/oauth2" + endpoint
         kwargs["fatal"] = None
 
         while True:
@@ -1357,7 +1371,7 @@ class DeviantartEclipseAPI():
         self.log = extractor.log
 
     def deviation_extended_fetch(self, deviation_id, user=None, kind=None):
-        endpoint = "da-browse/shared_api/deviation/extended_fetch"
+        endpoint = "/da-browse/shared_api/deviation/extended_fetch"
         params = {
             "deviationid"    : deviation_id,
             "username"       : user,
@@ -1367,7 +1381,7 @@ class DeviantartEclipseAPI():
         return self._call(endpoint, params)
 
     def gallery_scraps(self, user, offset=None):
-        endpoint = "da-user-profile/api/gallery/contents"
+        endpoint = "/da-user-profile/api/gallery/contents"
         params = {
             "username"     : user,
             "offset"       : offset,
@@ -1377,7 +1391,7 @@ class DeviantartEclipseAPI():
         return self._pagination(endpoint, params)
 
     def user_watching(self, user, offset=None):
-        endpoint = "da-user-profile/api/module/watching"
+        endpoint = "/da-user-profile/api/module/watching"
         params = {
             "username": user,
             "moduleid": self._module_id_watching(user),
@@ -1387,7 +1401,7 @@ class DeviantartEclipseAPI():
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):
-        url = "https://www.deviantart.com/_napi/" + endpoint
+        url = "https://www.deviantart.com/_napi" + endpoint
         headers = {"Referer": "https://www.deviantart.com/"}
 
         response = self.extractor._limited_request(

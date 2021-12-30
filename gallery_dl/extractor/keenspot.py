@@ -19,7 +19,7 @@ class KeenspotComicExtractor(Extractor):
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{comic}_{filename}"
-    pattern = r"(?:https?://)?(?!www\.|forums\.)([^.]+)\.keenspot\.com(/.+)?"
+    pattern = r"(?:https?://)?(?!www\.|forums\.)([\w-]+)\.keenspot\.com(/.+)?"
     test = (
         ("http://marksmen.keenspot.com/", {  # link
             "range": "1-3",

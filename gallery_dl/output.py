@@ -265,10 +265,14 @@ class NullOutput():
 class PipeOutput(NullOutput):
 
     def skip(self, path):
-        print(CHAR_SKIP, path, sep="", flush=True)
+        stdout = sys.stdout
+        stdout.write(CHAR_SKIP + path + "\n")
+        stdout.flush()
 
     def success(self, path, tries):
-        print(path, flush=True)
+        stdout = sys.stdout
+        stdout.write(path + "\n")
+        stdout.flush()
 
 
 class TerminalOutput(NullOutput):
@@ -284,34 +288,38 @@ class TerminalOutput(NullOutput):
             self.shorten = util.identity
 
     def start(self, path):
-        print(self.shorten("  " + path), end="", flush=True)
+        stdout = sys.stdout
+        stdout.write(self.shorten("  " + path))
+        stdout.flush()
 
     def skip(self, path):
-        print(self.shorten(CHAR_SKIP + path))
+        sys.stdout.write(self.shorten(CHAR_SKIP + path) + "\n")
 
     def success(self, path, tries):
-        print("\r", self.shorten(CHAR_SUCCESS + path), sep="")
+        sys.stdout.write("\r" + self.shorten(CHAR_SUCCESS + path) + "\n")
 
     def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
         bdl = util.format_value(bytes_downloaded)
         bps = util.format_value(bytes_per_second)
         if bytes_total is None:
-            print("\r{:>7}B {:>7}B/s ".format(bdl, bps), end="")
+            sys.stderr.write("\r{:>7}B {:>7}B/s ".format(bdl, bps))
         else:
-            print("\r{:>3}% {:>7}B {:>7}B/s ".format(
-                bytes_downloaded * 100 // bytes_total, bdl, bps), end="")
+            sys.stderr.write("\r{:>3}% {:>7}B {:>7}B/s ".format(
+                bytes_downloaded * 100 // bytes_total, bdl, bps))
 
 
 class ColorOutput(TerminalOutput):
 
     def start(self, path):
-        print(self.shorten(path), end="", flush=True)
+        stdout = sys.stdout
+        stdout.write(self.shorten(path))
+        stdout.flush()
 
     def skip(self, path):
-        print("\033[2m", self.shorten(path), "\033[0m", sep="")
+        sys.stdout.write("\033[2m" + self.shorten(path) + "\033[0m\n")
 
     def success(self, path, tries):
-        print("\r\033[1;32m", self.shorten(path), "\033[0m", sep="")
+        sys.stdout.write("\r\033[1;32m" + self.shorten(path) + "\033[0m\n")
 
 
 class EAWCache(dict):
