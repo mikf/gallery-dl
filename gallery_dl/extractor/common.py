@@ -584,7 +584,11 @@ class BaseExtractor(Extractor):
         if not self.category:
             for index, group in enumerate(match.groups()):
                 if group is not None:
-                    self.category, self.root = self.instances[index]
+                    if index:
+                        self.category, self.root = self.instances[index-1]
+                    else:
+                        self.root = group
+                        self.category = group.partition("://")[2]
                     break
         Extractor.__init__(self, match)
 
@@ -607,7 +611,10 @@ class BaseExtractor(Extractor):
                 pattern = re.escape(root[root.index(":") + 3:])
             pattern_list.append(pattern + "()")
 
-        return r"(?:https?://)?(?:" + "|".join(pattern_list) + r")"
+        return (
+            r"(?:" + cls.basecategory + r":(https?://[^/?#]+)|"
+            r"(?:https?://)?(?:" + "|".join(pattern_list) + r"))"
+        )
 
 
 def _emulate_browser_firefox(platform):

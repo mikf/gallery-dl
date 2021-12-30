@@ -10,9 +10,11 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .nozomi import decode_nozomi
+from ..cache import memcache
 from .. import text, util
 import string
 import json
+import re
 
 
 class HitomiGalleryExtractor(GalleryExtractor):
@@ -24,8 +26,10 @@ class HitomiGalleryExtractor(GalleryExtractor):
                r"/(?:[^/?#]+-)?(\d+)")
     test = (
         ("https://hitomi.la/galleries/867789.html", {
-            "pattern": r"https://[a-c]b.hitomi.la/images/./../[0-9a-f]+.jpg",
+            "pattern": r"https://[a-c]b.hitomi.la/images/1639745412/\d+"
+                       r"/[0-9a-f]{64}\.jpg",
             "keyword": "4873ef9a523621fc857b114e0b2820ba4066e9ae",
+            "options": (("metadata", True),),
             "count": 16,
         }),
         # download test
@@ -35,12 +39,12 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }),
         # Game CG with scenes (#321)
         ("https://hitomi.la/galleries/733697.html", {
-            "url": "0cb629ab2bfe93d994a7972f68ad2a5a64ecc161",
+            "url": "479d16fe92117a6a2ce81b4e702e6347922c81e3",
             "count": 210,
         }),
         # fallback for galleries only available through /reader/ URLs
         ("https://hitomi.la/galleries/1045954.html", {
-            "url": "b420755d56a1135104ca8ca0765f44e290db70c3",
+            "url": "ebc1415c5d7f634166ef7e2635b77735de1ea7a2",
             "count": 1413,
         }),
         # gallery with "broken" redirect
@@ -71,7 +75,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
         self.info = info = json.loads(page.partition("=")[2])
 
         data = self._data_from_gallery_info(info)
-        if self.config("metadata", True):
+        if self.config("metadata", False):
             data.update(self._data_from_gallery_page(info))
         return data
 
@@ -133,19 +137,19 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }
 
     def images(self, _):
+        # see https://ltn.hitomi.la/gg.js
+        gg_m, gg_b = _parse_gg(self)
+
         result = []
         for image in self.info["files"]:
             ihash = image["hash"]
             idata = text.nameext_from_url(image["name"])
 
             # see https://ltn.hitomi.la/common.js
-            inum = int(ihash[-3:-1], 16)
-            offset = 1 if inum < 0x7c else 0
-
+            inum = int(ihash[-1] + ihash[-3:-1], 16)
             url = "https://{}b.hitomi.la/images/{}/{}/{}.{}".format(
-                chr(97 + offset),
-                ihash[-1], ihash[-3:-1], ihash,
-                idata["extension"],
+                chr(97 + gg_m.get(inum, 0)),
+                gg_b, inum, ihash, idata["extension"],
             )
             result.append((url, idata))
         return result
@@ -185,3 +189,16 @@ class HitomiTagExtractor(Extractor):
         for gallery_id in decode_nozomi(self.request(url).content):
             url = "https://hitomi.la/galleries/{}.html".format(gallery_id)
             yield Message.Queue, url, data
+
+
+@memcache()
+def _parse_gg(extr):
+    page = extr.request("https://ltn.hitomi.la/gg.js").text
+
+    m = {
+        int(match.group(1)): int(match.group(2))
+        for match in re.finditer(r"case (\d+): o = (\d+); break;", page)
+    }
+    b = re.search(r"b:\s*[\"'](.+)[\"']", page)
+
+    return m, b.group(1).strip("/")

@@ -39,7 +39,7 @@ class YoutubeDLDownloader(DownloaderBase):
         if not ytdl_instance:
             ytdl_instance = self.ytdl_instance
             if not ytdl_instance:
-                module = __import__(self.config("module") or "youtube_dl")
+                module = ytdl.import_module(self.config("module"))
                 self.ytdl_instance = ytdl_instance = ytdl.construct_YoutubeDL(
                     module, self, self.ytdl_opts)
                 if self.outtmpl == "default":

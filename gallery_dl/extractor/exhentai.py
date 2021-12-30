@@ -176,6 +176,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.image_token = match.group(4)
         self.image_num = text.parse_int(match.group(6), 1)
 
+        source = self.config("source")
+        if source == "hitomi":
+            self.items = self._items_hitomi
+
     def items(self):
         self.login()
 
@@ -220,6 +224,18 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             else:
                 data["_http_validate"] = None
             yield Message.Url, url, data
+
+    def _items_hitomi(self):
+        if self.config("metadata", False):
+            data = self.metadata_from_api()
+            data["date"] = text.parse_timestamp(data["posted"])
+        else:
+            data = {}
+
+        from .hitomi import HitomiGalleryExtractor
+        url = "https://hitomi.la/galleries/{}.html".format(self.gallery_id)
+        data["_extractor"] = HitomiGalleryExtractor
+        yield Message.Queue, url, data
 
     def get_metadata(self, page):
         """Extract gallery metadata"""

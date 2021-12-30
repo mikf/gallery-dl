@@ -23,7 +23,7 @@ Optional
 --------
 
 - FFmpeg_: Pixiv Ugoira to WebM conversion
-- youtube-dl_: Video downloads
+- yt-dlp_ or youtube-dl_: Video downloads
 
 
 Installation
@@ -64,8 +64,8 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.19.3/gallery-dl.exe>`__
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.19.3/gallery-dl.bin>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.20.0/gallery-dl.exe>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.20.0/gallery-dl.bin>`__
 
 | Executables build from the latest commit can be found at
 | https://github.com/mikf/gallery-dl/actions/workflows/executables.yml
@@ -328,6 +328,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _pip:        https://pip.pypa.io/en/stable/
 .. _HTTPX:      https://github.com/encode/httpx
 .. _FFmpeg:     https://www.ffmpeg.org/
+.. _yt-dlp:     https://github.com/yt-dlp/yt-dlp
 .. _youtube-dl: https://ytdl-org.github.io/youtube-dl/
 .. _pyOpenSSL:  https://pyopenssl.org/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd

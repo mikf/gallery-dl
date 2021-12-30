@@ -177,8 +177,11 @@ class PathFormat():
             self.directory = directory = self.basedirectory
 
         if WINDOWS:
-            # Enable longer-than-260-character paths on Windows
-            directory = "\\\\?\\" + os.path.abspath(directory)
+            # Enable longer-than-260-character paths
+            if directory.startswith("\\\\"):
+                directory = "\\\\?\\UNC\\" + directory[2:]
+            else:
+                directory = "\\\\?\\" + os.path.abspath(directory)
 
             # abspath() in Python 3.7+ removes trailing path separators (#402)
             if directory[-1] != sep:

@@ -29,12 +29,12 @@ class ArtstationExtractor(Extractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Directory, data
 
         for project in self.projects():
             for asset in self.get_project_assets(project["hash_id"]):
                 asset.update(data)
                 adict = asset["asset"]
+                yield Message.Directory, asset
 
                 if adict["has_embedded_player"] and self.external:
                     player = adict["player_embedded"]

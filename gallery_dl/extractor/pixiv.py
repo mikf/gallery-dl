@@ -456,7 +456,9 @@ class PixivSearchExtractor(PixivExtractor):
         self.sort = self.target = None
 
     def works(self):
-        return self.api.search_illust(self.word, self.sort, self.target)
+        return self.api.search_illust(
+            self.word, self.sort, self.target,
+            date_start=self.date_start, date_end=self.date_end)
 
     def metadata(self):
         query = text.parse_query(self.query)
@@ -489,10 +491,15 @@ class PixivSearchExtractor(PixivExtractor):
             target = "s_tag"
         self.target = target_map[target]
 
+        self.date_start = query.get("scd")
+        self.date_end = query.get("ecd")
+
         return {"search": {
             "word": self.word,
             "sort": self.sort,
             "target": self.target,
+            "date_start": self.date_start,
+            "date_end": self.date_end,
         }}
 
 
@@ -710,9 +717,11 @@ class PixivAppAPI():
         params = {"illust_id": illust_id}
         return self._pagination("v2/illust/related", params)
 
-    def search_illust(self, word, sort=None, target=None, duration=None):
+    def search_illust(self, word, sort=None, target=None, duration=None,
+                      date_start=None, date_end=None):
         params = {"word": word, "search_target": target,
-                  "sort": sort, "duration": duration}
+                  "sort": sort, "duration": duration,
+                  "start_date": date_start, "end_date": date_end}
         return self._pagination("v1/search/illust", params)
 
     def user_bookmarks_illust(self, user_id, tag=None, restrict="public"):

@@ -174,10 +174,16 @@ class InstagramExtractor(Extractor):
         if post.get("is_video") and "video_url" not in post:
             url = "{}/tv/{}/".format(self.root, post["shortcode"])
             post = self._extract_post_page(url)
+            if "items" in post:
+                return self._parse_post_api({"media": post["items"][0]})
+            post = post["graphql"]["shortcode_media"]
         elif typename == "GraphSidecar" and \
                 "edge_sidecar_to_children" not in post:
             url = "{}/p/{}/".format(self.root, post["shortcode"])
             post = self._extract_post_page(url)
+            if "items" in post:
+                return self._parse_post_api({"media": post["items"][0]})
+            post = post["graphql"]["shortcode_media"]
 
         owner = post["owner"]
         data = {
@@ -347,7 +353,7 @@ class InstagramExtractor(Extractor):
         data = self._extract_shared_data(url)["entry_data"]
         if "HttpErrorPage" in data:
             raise exception.NotFoundError("post")
-        return data["PostPage"][0]["graphql"]["shortcode_media"]
+        return data["PostPage"][0]
 
     def _get_edge_data(self, user, key):
         cursor = self.config("cursor")
@@ -564,7 +570,7 @@ class InstagramPostExtractor(InstagramExtractor):
     """Extractor for an Instagram post"""
     subcategory = "post"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?:p|tv|reel)/([^/?#]+)")
+               r"/(?:[^/?#]+/)?(?:p|tv|reel)/([^/?#]+)")
     test = (
         # GraphImage
         ("https://www.instagram.com/p/BqvsDleB3lV/", {
@@ -663,6 +669,9 @@ class InstagramPostExtractor(InstagramExtractor):
             }
         }),
 
+        # URL with username (#2085)
+        ("https://www.instagram.com/dm/p/CW042g7B9CY/"),
+
         ("https://www.instagram.com/reel/CDg_6Y1pxWu/"),
     )
 
@@ -686,14 +695,15 @@ class InstagramStoriesExtractor(InstagramExtractor):
     """Extractor for Instagram stories"""
     subcategory = "stories"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/stories/(?:highlights/(\d+)|([^/?#]+))")
+               r"/stories/(?:highlights/(\d+)|([^/?#]+)(?:/(\d+))?)")
     test = (
         ("https://www.instagram.com/stories/instagram/"),
         ("https://www.instagram.com/stories/highlights/18042509488170095/"),
+        ("https://instagram.com/stories/geekmig/2724343156064789461"),
     )
 
     def __init__(self, match):
-        self.highlight_id, self.user = match.groups()
+        self.highlight_id, self.user, self.media_id = match.groups()
         if self.highlight_id:
             self.subcategory = InstagramHighlightsExtractor.subcategory
         InstagramExtractor.__init__(self, match)
@@ -712,7 +722,18 @@ class InstagramStoriesExtractor(InstagramExtractor):
 
         endpoint = "/v1/feed/reels_media/"
         params = {"reel_ids": reel_id}
-        return self._request_api(endpoint, params=params)["reels"].values()
+        reels = self._request_api(endpoint, params=params)["reels"]
+
+        if self.media_id:
+            reel = reels[reel_id]
+            for item in reel["items"]:
+                if item["pk"] == self.media_id:
+                    reel["items"] = (item,)
+                    break
+            else:
+                raise exception.NotFoundError("story")
+
+        return reels.values()
 
 
 class InstagramHighlightsExtractor(InstagramExtractor):

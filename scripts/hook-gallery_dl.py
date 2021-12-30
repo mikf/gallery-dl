@@ -8,4 +8,4 @@ hiddenimports = [
     for module in package.modules
 ]
 
-hiddenimports.append("youtube_dl")
+hiddenimports.append("yt_dlp")

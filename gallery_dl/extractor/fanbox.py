@@ -33,7 +33,7 @@ class FanboxExtractor(Extractor):
     def items(self):
 
         if self._warning:
-            if "FANBOXSESSID" not in self.session.cookies:
+            if not self._check_cookies(("FANBOXSESSID",)):
                 self.log.warning("no 'FANBOXSESSID' cookie set")
             FanboxExtractor._warning = False
 
@@ -280,3 +280,24 @@ class FanboxPostExtractor(FanboxExtractor):
 
     def posts(self):
         return (self._get_post_data_from_id(self.post_id),)
+
+
+class FanboxRedirectExtractor(Extractor):
+    """Extractor for pixiv redirects to fanbox.cc"""
+    category = "fanbox"
+    subcategory = "redirect"
+    pattern = r"(?:https?://)?(?:www\.)?pixiv\.net/fanbox/creator/(\d+)"
+    test = ("https://www.pixiv.net/fanbox/creator/52336352", {
+        "pattern": FanboxCreatorExtractor.pattern,
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.user_id = match.group(1)
+
+    def items(self):
+        url = "https://www.pixiv.net/fanbox/creator/" + self.user_id
+        data = {"_extractor": FanboxCreatorExtractor}
+        response = self.request(
+            url, method="HEAD", allow_redirects=False, notfound="user")
+        yield Message.Queue, response.headers["Location"], data

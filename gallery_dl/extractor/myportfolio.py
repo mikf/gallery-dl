@@ -20,8 +20,8 @@ class MyportfolioGalleryExtractor(Extractor):
     filename_fmt = "{num:>02}.{extension}"
     archive_fmt = "{user}_{filename}"
     pattern = (r"(?:myportfolio:(?:https?://)?([^/]+)|"
-               r"(?:https?://)?([^.]+\.myportfolio\.com))"
-               r"(/[^/?#]+)?")
+               r"(?:https?://)?([\w-]+\.myportfolio\.com))"
+               r"(/[^/?&#]+)?")
     test = (
         ("https://andrewling.myportfolio.com/volvo-xc-90-hybrid", {
             "url": "acea0690c76db0e5cf267648cefd86e921bc3499",

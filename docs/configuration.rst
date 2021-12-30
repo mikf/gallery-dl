@@ -1081,17 +1081,6 @@ Description
     Minimum wait time in seconds before API requests.
 
 
-extractor.exhentai.limits
--------------------------
-Type
-    ``integer``
-Default
-    ``null``
-Description
-    Sets a custom image download limit and
-    stops extraction when it gets exceeded.
-
-
 extractor.exhentai.domain
 -------------------------
 Type
@@ -1103,6 +1092,17 @@ Description
       depending on the input URL
     * ``"e-hentai.org"``: Use ``e-hentai.org`` for all URLs
     * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
+
+
+extractor.exhentai.limits
+-------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Sets a custom image download limit and
+    stops extraction when it gets exceeded.
 
 
 extractor.exhentai.metadata
@@ -1127,6 +1127,18 @@ Default
     ``true``
 Description
     Download full-sized original images if available.
+
+
+extractor.exhentai.source
+-------------------------
+Type
+    ``string``
+Default
+    ``"gallery"``
+Description
+    Selects an alternative source to download files from.
+
+    * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
 
 
 extractor.fanbox.embeds
@@ -1223,6 +1235,17 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.generic.enabled
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Match **all** URLs not otherwise supported by gallery-dl,
+    even ones without a ``generic:`` prefix.
+
+
 extractor.gfycat.format
 -----------------------
 Type
@@ -1265,7 +1288,7 @@ extractor.hitomi.metadata
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Try to extract
     ``artist``, ``group``, ``parody``,  and ``characters`` metadata.
@@ -1353,7 +1376,7 @@ extractor.kemonoparty.files
 Type
     ``list`` of ``strings``
 Default
-    ``["file", "attachments", "inline"]``
+    ``["attachments", "file", "inline"]``
 Description
     Determines the type and order of files to be downloaded.
 
@@ -2022,7 +2045,7 @@ extractor.twitter.size
 Type
     ``list`` of ``strings``
 Default
-    ``["orig", "large", "medium", "small"]``
+    ``["orig", "4096x4096", "large", "medium", "small"]``
 Description
     The image version to download.
     Any entries after the first one will be used for potential
@@ -2275,9 +2298,12 @@ extractor.ytdl.module
 Type
     ``string``
 Default
-    ``"youtube_dl"``
+    ``null``
 Description
     Name of the youtube-dl Python module to import.
+
+    Setting this to ``null`` will try to import ``"yt_dlp"``
+    followed by ``"youtube_dl"`` as fallback.
 
 
 extractor.ytdl.raw-options
@@ -2564,9 +2590,12 @@ downloader.ytdl.module
 Type
     ``string``
 Default
-    ``"youtube_dl"``
+    ``null``
 Description
     Name of the youtube-dl Python module to import.
+
+    Setting this to ``null`` will first try to import ``"yt_dlp"``
+    and use ``"youtube_dl"`` as fallback.
 
 
 downloader.ytdl.outtmpl
@@ -3347,9 +3376,11 @@ Duration
 Type
     * ``float``
     * ``list`` with 2 ``floats``
+    * ``string``
 Example
     * ``2.85``
     * ``[1.5, 3.0]``
+    * ``"2.85"``, ``"1.5-3.0"``
 Description
     A |Duration|_ represents a span of time in seconds.
 
@@ -3357,6 +3388,8 @@ Description
     * If given as a ``list`` with 2 floating-point numbers ``a`` & ``b`` ,
       it will be randomly chosen with uniform distribution such that ``a <= N <=b``.
       (see `random.uniform() <https://docs.python.org/3/library/random.html#random.uniform>`_)
+    * If given as a ``string``, it can either represent a single ``float``
+      value (``"2.85"``) or a range  (``"1.5-3.0"``).
 
 
 Path

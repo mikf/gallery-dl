@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 
 
-BASE_PATTERN = r"(?:https?://)?(?:[^.]+\.)?pornhub\.com"
+BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?pornhub\.com"
 
 
 class PornhubExtractor(Extractor):
