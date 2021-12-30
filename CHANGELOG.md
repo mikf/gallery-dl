@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.20.0 - 2021-12-29
 ### Additions
 - [500px] add `favorite` extractor ([#1927](https://github.com/mikf/gallery-dl/issues/1927))
