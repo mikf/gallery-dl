@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from . import gelbooru_v02
-from .. import text, exception
+from .. import text, util, exception
 import binascii
 
 
@@ -19,6 +19,42 @@ class GelbooruBase():
     category = "gelbooru"
     basecategory = "booru"
     root = "https://gelbooru.com"
+
+    def _api_request(self, params):
+        url = self.root + "/index.php?page=dapi&s=post&q=index&json=1"
+        data = self.request(url, params=params).json()
+        if "post" not in data:
+            return ()
+        posts = data["post"]
+        if not isinstance(posts, list):
+            return (posts,)
+        return posts
+
+    def _pagination(self, params):
+        params["pid"] = self.page_start
+        params["limit"] = self.per_page
+
+        post = None
+        while True:
+            try:
+                posts = self._api_request(params)
+            except ValueError:
+                if "tags" not in params or post is None:
+                    raise
+                taglist = [tag for tag in params["tags"].split()
+                           if not tag.startswith("id:<")]
+                taglist.append("id:<" + str(post.attrib["id"]))
+                params["tags"] = " ".join(taglist)
+                params["pid"] = 0
+                continue
+
+            post = None
+            for post in posts:
+                yield post
+
+            if len(posts) < self.per_page:
+                return
+            params["pid"] += 1
 
     @staticmethod
     def _file_url(post):
@@ -81,6 +117,11 @@ class GelbooruPoolExtractor(GelbooruBase,
             "pool": text.parse_int(self.pool_id),
             "pool_name": text.unescape(name),
         }
+
+    def posts(self):
+        params = {}
+        for params["id"] in util.advance(self.post_ids, self.page_start):
+            yield from self._api_request(params)
 
 
 class GelbooruPostExtractor(GelbooruBase,
