@@ -92,26 +92,26 @@ def build_parser():
         help="Print program version and exit",
     )
     general.add_argument(
-        "--dest",
-        dest="base-directory", metavar="DEST", action=ConfigAction,
-        help=argparse.SUPPRESS,
-    )
-    general.add_argument(
         "-i", "--input-file",
         dest="inputfiles", metavar="FILE", action="append",
         help=("Download URLs found in FILE ('-' for stdin). "
               "More than one --input-file can be specified"),
     )
     general.add_argument(
+        "-d", "--destination",
+        dest="base-directory", metavar="PATH", action=ConfigAction,
+        help="Target location for file downloads",
+    )
+    general.add_argument(
+        "-D", "--directory",
+        dest="directory", metavar="PATH",
+        help="Exact location for file downloads",
+    )
+    general.add_argument(
         "-f", "--filename",
         dest="filename", metavar="FORMAT",
         help=("Filename format string for downloaded files "
               "('/O' for \"original\" filenames)"),
-    )
-    general.add_argument(
-        "-d", "--directory",
-        dest="directory", metavar="PATH",
-        help="Target location for file downloads",
     )
     general.add_argument(
         "--cookies",
