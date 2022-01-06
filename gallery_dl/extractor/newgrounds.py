@@ -38,6 +38,7 @@ class NewgroundsExtractor(Extractor):
 
     def items(self):
         self.login()
+        metadata = self.metadata()
 
         for post_url in self.posts():
             try:
@@ -48,6 +49,8 @@ class NewgroundsExtractor(Extractor):
                 url = None
 
             if url:
+                if metadata:
+                    post.update(metadata)
                 yield Message.Directory, post
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
@@ -62,8 +65,11 @@ class NewgroundsExtractor(Extractor):
                     "Unable to get download URL for '%s'", post_url)
 
     def posts(self):
-        """Return urls of all relevant image pages"""
+        """Return URLs of all relevant post pages"""
         return self._pagination(self._path)
+
+    def metadata(self):
+        """Return general metadata"""
 
     def login(self):
         username, password = self._get_auth_info()
@@ -493,3 +499,59 @@ class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
             text.ensure_http_scheme(user.rpartition('"')[2])
             for user in text.extract_iter(page, 'class="item-user', '"><img')
         ]
+
+
+class NewgroundsSearchExtractor(NewgroundsExtractor):
+    """Extractor for newgrounds.com search reesults"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "search", "{search_tags}")
+    pattern = (r"(?:https?://)?(?:www\.)?newgrounds\.com"
+               r"/search/conduct/([^/?#]+)/?\?([^#]+)")
+    test = (
+        ("https://www.newgrounds.com/search/conduct/art?terms=tree", {
+            "pattern": NewgroundsImageExtractor.pattern,
+            "keyword": {"search_tags": "tree"},
+            "range": "1-10",
+            "count": 10,
+        }),
+        ("https://www.newgrounds.com/search/conduct/movies?terms=tree", {
+            "pattern": r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+",
+            "range": "1-10",
+            "count": 10,
+        }),
+        ("https://www.newgrounds.com/search/conduct/audio?advanced=1"
+         "&terms=tree+green+nature&match=tdtu&genre=5&suitabilities=e%2Cm"),
+    )
+
+    def __init__(self, match):
+        NewgroundsExtractor.__init__(self, match)
+        self._path, query = match.groups()
+        self.query = text.parse_query(query)
+
+    def posts(self):
+        return self._pagination("/search/conduct/" + self._path, self.query)
+
+    def metadata(self):
+        return {"search_tags": self.query.get("terms", "")}
+
+    def _pagination(self, path, params):
+        url = self.root + path
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": self.root,
+        }
+        params["inner"] = "1"
+        params["page"] = 1
+
+        while True:
+            data = self.request(url, params=params, headers=headers).json()
+
+            post_url = None
+            for post_url in text.extract_iter(data["content"], 'href="', '"'):
+                if not post_url.startswith("/search/"):
+                    yield post_url
+
+            if post_url is None:
+                return
+            params["page"] += 1
