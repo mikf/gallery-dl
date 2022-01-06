@@ -501,14 +501,15 @@ class DownloadJob(Job):
         clist = self.extractor.config("whitelist")
         if clist is not None:
             negate = False
+            special = None
         else:
             clist = self.extractor.config("blacklist")
             negate = True
+            special = util.SPECIAL_EXTRACTORS
             if clist is None:
                 clist = (self.extractor.category,)
 
-        return util.build_extractor_filter(
-            clist, negate, util.SPECIAL_EXTRACTORS)
+        return util.build_extractor_filter(clist, negate, special)
 
 
 class SimulationJob(DownloadJob):
