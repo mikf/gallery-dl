@@ -196,6 +196,7 @@ def _parse_gg(extr):
     page = extr.request("https://ltn.hitomi.la/gg.js").text
 
     m = {}
+
     keys = []
     for match in re.finditer(
             r"case\s+(\d+):(?:\s*o\s*=\s*(\d+))?", page):
@@ -208,7 +209,11 @@ def _parse_gg(extr):
                 m[key] = value
             keys.clear()
 
-    d = re.search(r"default:\s*o\s*=\s*(\d+)", page)
+    for match in re.finditer(
+            r"if\s+\(g\s*===?\s*(\d+)\)[\s{]*o\s*=\s*(\d+)", page):
+        m[int(match.group(1))] = int(match.group(2))
+
+    d = re.search(r"(?:var\s|default:)\s*o\s*=\s*(\d+)", page)
     b = re.search(r"b:\s*[\"'](.+)[\"']", page)
 
-    return m, b.group(1).strip("/"), int(d.group(1)) if d else int(not value)
+    return m, b.group(1).strip("/"), int(d.group(1)) if d else 1
