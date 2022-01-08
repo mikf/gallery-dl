@@ -1,6 +1,18 @@
 # Changelog
 
-## Unreleased
+## 1.20.1 - 2022-01-08
+### Additions
+- [newgrounds] add `search` extractor ([#2161](https://github.com/mikf/gallery-dl/issues/2161))
+### Changes
+- restore `-d/--dest` functionality from before 1.20.0 ([#2148](https://github.com/mikf/gallery-dl/issues/2148))
+- change short option for `--directory` to `-D`
+### Fixes
+- [gelbooru] handle changed API response format ([#2157](https://github.com/mikf/gallery-dl/issues/2157))
+- [hitomi] fix image URLs ([#2153](https://github.com/mikf/gallery-dl/issues/2153))
+- [mangadex] fix extraction ([#2177](https://github.com/mikf/gallery-dl/issues/2177))
+- [rule34] use `https://api.rule34.xxx` for API requests
+- fix cookie checks for patreon, fanbox, fantia
+- improve UNC path handling ([#2126](https://github.com/mikf/gallery-dl/issues/2126))
 
 ## 1.20.0 - 2021-12-29
 ### Additions
