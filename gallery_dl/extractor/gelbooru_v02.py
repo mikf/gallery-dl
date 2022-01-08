@@ -19,8 +19,15 @@ import re
 class GelbooruV02Extractor(booru.BooruExtractor):
     basecategory = "gelbooru_v02"
 
+    def __init__(self, match):
+        booru.BooruExtractor.__init__(self, match)
+        try:
+            self.api_root = INSTANCES[self.category]["api_root"]
+        except KeyError:
+            self.api_root = self.root
+
     def _api_request(self, params):
-        url = self.root + "/index.php?page=dapi&s=post&q=index"
+        url = self.api_root + "/index.php?page=dapi&s=post&q=index"
         return ElementTree.fromstring(self.request(url, params=params).text)
 
     def _pagination(self, params):
@@ -97,12 +104,15 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         post["notes"] = notes
 
 
-BASE_PATTERN = GelbooruV02Extractor.update({
+INSTANCES = {
     "realbooru": {"root": "https://realbooru.com"},
-    "rule34"   : {"root": "https://rule34.xxx"},
+    "rule34"   : {"root": "https://rule34.xxx",
+                  "api_root": " https://api.rule34.xxx"},
     "safebooru": {"root": "https://safebooru.org"},
     "tbib"     : {"root": "https://tbib.org"},
-})
+}
+
+BASE_PATTERN = GelbooruV02Extractor.update(INSTANCES)
 
 
 class GelbooruV02TagExtractor(GelbooruV02Extractor):
