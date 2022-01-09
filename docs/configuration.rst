@@ -550,10 +550,18 @@ Type
     ``list`` of ``strings``
 Default
     ``["oauth", "recursive", "test"]`` + current extractor category
+Example
+    ``["imgur", "gfycat:user", "*:image"]``
 Description
-    A list of extractor categories to ignore (or allow)
+    A list of extractor identifiers to ignore (or allow)
     when spawning child extractors for unknown URLs,
     e.g. from ``reddit`` or ``plurk``.
+
+    Each identifier can be
+
+    * A category or basecategory name (``"imgur"``, ``"mastodon"``)
+    * | A (base)category-subcategory pair, where both names are separated by a colon (``"gfycat:user"``).
+      | Both names can be a `*` or left empty, matching all possible names (``"*:image"``, ``":user"``).
 
     Note: Any ``blacklist`` setting will automatically include
     ``"oauth"``, ``"recursive"``, and ``"test"``.
