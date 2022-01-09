@@ -103,6 +103,9 @@ class HttpDownloader(DownloaderBase):
             #   general headers
             if self.headers:
                 headers.update(self.headers)
+            #   delete None fields
+            for key in [k for k, v in headers.items() if v is None]:
+                del headers[key]
             #   partial content
             file_size = pathfmt.part_size()
             if file_size:
