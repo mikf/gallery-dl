@@ -40,7 +40,7 @@ class MangadexExtractor(Extractor):
             uuid = chapter["id"]
             data = self._transform(chapter)
             data["_extractor"] = MangadexChapterExtractor
-            self._cache[uuid] = (chapter, data)
+            self._cache[uuid] = data
             yield Message.Queue, self.root + "/chapter/" + uuid, data
 
     def _transform(self, chapter):
@@ -72,7 +72,7 @@ class MangadexExtractor(Extractor):
             "date"    : text.parse_datetime(cattributes["publishAt"]),
             "lang"    : lang,
             "language": util.code_to_language(lang),
-            "count"   : len(cattributes["data"]),
+            "count"   : cattributes["pages"],
         }
 
         data["artist"] = [artist["attributes"]["name"]
@@ -107,20 +107,21 @@ class MangadexChapterExtractor(MangadexExtractor):
 
     def items(self):
         try:
-            chapter, data = self._cache.pop(self.uuid)
+            data = self._cache.pop(self.uuid)
         except KeyError:
             chapter = self.api.chapter(self.uuid)
             data = self._transform(chapter)
-        yield Message.Directory, data
 
-        cattributes = chapter["attributes"]
+        yield Message.Directory, data
         data["_http_headers"] = self._headers
-        base = "{}/data/{}/".format(
-            self.api.athome_server(self.uuid)["baseUrl"], cattributes["hash"])
+
+        server = self.api.athome_server(self.uuid)
+        chapter = server["chapter"]
+        base = "{}/data/{}/".format(server["baseUrl"], chapter["hash"])
 
         enum = util.enumerate_reversed if self.config(
             "page-reverse") else enumerate
-        for data["page"], page in enum(cattributes["data"], 1):
+        for data["page"], page in enum(chapter["data"], 1):
             text.nameext_from_url(page, data)
             yield Message.Url, base + page, data
 

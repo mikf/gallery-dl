@@ -26,7 +26,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
                r"/(?:[^/?#]+-)?(\d+)")
     test = (
         ("https://hitomi.la/galleries/867789.html", {
-            "pattern": r"https://[a-c]b.hitomi.la/images/1639745412/\d+"
+            "pattern": r"https://[a-c]b.hitomi.la/images/1641140516/\d+"
                        r"/[0-9a-f]{64}\.jpg",
             "keyword": "4873ef9a523621fc857b114e0b2820ba4066e9ae",
             "options": (("metadata", True),),
@@ -39,12 +39,12 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }),
         # Game CG with scenes (#321)
         ("https://hitomi.la/galleries/733697.html", {
-            "url": "479d16fe92117a6a2ce81b4e702e6347922c81e3",
+            "url": "d4854175da2b5fa4ae62749266c7be0bf237dc99",
             "count": 210,
         }),
         # fallback for galleries only available through /reader/ URLs
         ("https://hitomi.la/galleries/1045954.html", {
-            "url": "ebc1415c5d7f634166ef7e2635b77735de1ea7a2",
+            "url": "eea99c3745719a7a392150335e6ae3f73faa0b85",
             "count": 1413,
         }),
         # gallery with "broken" redirect
@@ -138,7 +138,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
 
     def images(self, _):
         # see https://ltn.hitomi.la/gg.js
-        gg_m, gg_b = _parse_gg(self)
+        gg_m, gg_b, gg_default = _parse_gg(self)
 
         result = []
         for image in self.info["files"]:
@@ -148,7 +148,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
             # see https://ltn.hitomi.la/common.js
             inum = int(ihash[-1] + ihash[-3:-1], 16)
             url = "https://{}b.hitomi.la/images/{}/{}/{}.{}".format(
-                chr(97 + gg_m.get(inum, 0)),
+                chr(97 + gg_m.get(inum, gg_default)),
                 gg_b, inum, ihash, idata["extension"],
             )
             result.append((url, idata))
@@ -195,10 +195,25 @@ class HitomiTagExtractor(Extractor):
 def _parse_gg(extr):
     page = extr.request("https://ltn.hitomi.la/gg.js").text
 
-    m = {
-        int(match.group(1)): int(match.group(2))
-        for match in re.finditer(r"case (\d+): o = (\d+); break;", page)
-    }
+    m = {}
+
+    keys = []
+    for match in re.finditer(
+            r"case\s+(\d+):(?:\s*o\s*=\s*(\d+))?", page):
+        key, value = match.groups()
+        keys.append(int(key))
+
+        if value:
+            value = int(value)
+            for key in keys:
+                m[key] = value
+            keys.clear()
+
+    for match in re.finditer(
+            r"if\s+\(g\s*===?\s*(\d+)\)[\s{]*o\s*=\s*(\d+)", page):
+        m[int(match.group(1))] = int(match.group(2))
+
+    d = re.search(r"(?:var\s|default:)\s*o\s*=\s*(\d+)", page)
     b = re.search(r"b:\s*[\"'](.+)[\"']", page)
 
-    return m, b.group(1).strip("/")
+    return m, b.group(1).strip("/"), int(d.group(1)) if d else 1
