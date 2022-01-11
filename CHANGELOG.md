@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.20.1 - 2022-01-08
 ### Additions
 - [newgrounds] add `search` extractor ([#2161](https://github.com/mikf/gallery-dl/issues/2161))
