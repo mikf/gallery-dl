@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -529,6 +529,12 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
         self.query = text.parse_query(query)
 
     def posts(self):
+        suitabilities = self.query.get("suitabilities")
+        if suitabilities:
+            data = {"view_suitability_" + s: "on"
+                    for s in suitabilities.split(",")}
+            self.request(self.root + "/suitabilities",
+                         method="POST", data=data)
         return self._pagination("/search/conduct/" + self._path, self.query)
 
     def metadata(self):
