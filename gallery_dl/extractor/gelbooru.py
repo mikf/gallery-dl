@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -59,7 +59,7 @@ class GelbooruBase():
     @staticmethod
     def _file_url(post):
         url = post["file_url"]
-        if url.startswith(("https://mp4.gelbooru.com/", "https://video-cdn")):
+        if url.endswith((".webm", ".mp4")):
             md5 = post["md5"]
             path = "/images/{}/{}/{}.webm".format(md5[0:2], md5[2:4], md5)
             post["_fallback"] = GelbooruBase._video_fallback(path)
