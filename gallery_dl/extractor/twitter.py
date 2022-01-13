@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2021 Mike Fährmann
+# Copyright 2016-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -77,7 +77,8 @@ class TwitterExtractor(Extractor):
 
             files = []
             if "extended_entities" in tweet:
-                self._extract_media(tweet, files)
+                self._extract_media(
+                    tweet, tweet["extended_entities"]["media"], files)
             if "card" in tweet and self.cards:
                 self._extract_card(tweet, files)
             if self.twitpic:
@@ -95,8 +96,8 @@ class TwitterExtractor(Extractor):
                     text.nameext_from_url(url, file)
                 yield Message.Url, url, file
 
-    def _extract_media(self, tweet, files):
-        for media in tweet["extended_entities"]["media"]:
+    def _extract_media(self, tweet, entities, files):
+        for media in entities:
             width = media["original_info"].get("width", 0)
             height = media["original_info"].get("height", 0)
 
@@ -142,7 +143,9 @@ class TwitterExtractor(Extractor):
 
     def _extract_card(self, tweet, files):
         card = tweet["card"]
-        if card["name"] in ("summary", "summary_large_image"):
+        name = card["name"]
+
+        if name in ("summary", "summary_large_image"):
             bvals = card["binding_values"]
             for prefix in ("photo_image_full_size_",
                            "summary_photo_image_",
@@ -154,7 +157,15 @@ class TwitterExtractor(Extractor):
                         if value and "url" in value:
                             files.append(value)
                             return
-        elif self.videos:
+        elif name == "unified_card":
+            data = json.loads(
+                card["binding_values"]["unified_card"]["string_value"])
+            if data["type"] == "image_carousel_website":
+                self._extract_media(
+                    tweet, data["media_entities"].values(), files)
+                return
+
+        if self.videos:
             url = "ytdl:{}/i/web/status/{}".format(self.root, tweet["id_str"])
             files.append({"url": url})
 
@@ -544,6 +555,12 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/billboard/status/1306599586602135555", {
             "options": (("cards", True),),
             "pattern": r"https://pbs.twimg.com/card_img/\d+/",
+        }),
+        # unified_card with image_carousel_website
+        ("https://twitter.com/doax_vv_staff/status/1479438945662685184", {
+            "options": (("cards", True),),
+            "pattern": r"https://pbs\.twimg\.com/media/F.+=png",
+            "count": 6,
         }),
         # original retweets (#1026)
         ("https://twitter.com/jessica_3978/status/1296304589591810048", {
