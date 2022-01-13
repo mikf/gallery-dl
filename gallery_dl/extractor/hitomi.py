@@ -159,6 +159,7 @@ class HitomiTagExtractor(Extractor):
     """Extractor for galleries from tag searches on hitomi.la"""
     category = "hitomi"
     subcategory = "tag"
+    root = "https://hitomi.la"
     pattern = (r"(?:https?://)?hitomi\.la/"
                r"(tag|artist|group|series|type|character)/"
                r"([^/?#]+)\.html")
@@ -183,12 +184,29 @@ class HitomiTagExtractor(Extractor):
             self.tag = tag
 
     def items(self):
-        url = "https://ltn.hitomi.la/{}/{}.nozomi".format(self.type, self.tag)
         data = {"_extractor": HitomiGalleryExtractor}
+        nozomi_url = "https://ltn.hitomi.la/{}/{}.nozomi".format(
+            self.type, self.tag)
+        headers = {
+            "Origin": self.root,
+            "Cache-Control": "max-age=0",
+        }
 
-        for gallery_id in decode_nozomi(self.request(url).content):
-            url = "https://hitomi.la/galleries/{}.html".format(gallery_id)
-            yield Message.Queue, url, data
+        offset = 0
+        while True:
+            headers["Referer"] = "{}/{}/{}.html?page={}".format(
+                self.root, self.type, self.tag, offset // 100 + 1)
+            headers["Range"] = "bytes={}-{}".format(offset, offset+99)
+            nozomi = self.request(nozomi_url, headers=headers).content
+
+            for gallery_id in decode_nozomi(nozomi):
+                gallery_url = "{}/galleries/{}.html".format(
+                    self.root, gallery_id)
+                yield Message.Queue, gallery_url, data
+
+            if len(nozomi) < 100:
+                return
+            offset += 100
 
 
 @memcache()
