@@ -11,14 +11,15 @@ Field names select the metadata value to use in a replacement field.
 
 While simple names are usually enough, more complex forms like accessing values by attribute, element index, or slicing are also supported.
 
-|                  | Example           | Result                 |
-| ---------------- | ----------------- | ---------------------- |
-| Name             | `{title}`         | `Hello World`          |
-| Element Index    | `{title[6]}`      | `W`                    |
-| Slicing          | `{title[3:8]}`    | `lo Wo`                |
-| Alternatives     | `{empty\|title}`  | `Hello World`          |
-| Element Access   | `{user[name]}`    | `John Doe`             |
-| Attribute Access | `{extractor.url}` | `https://example.org/` |
+|                      | Example           | Result                 |
+| -------------------- | ----------------- | ---------------------- |
+| Name                 | `{title}`         | `Hello World`          |
+| Element Index        | `{title[6]}`      | `W`                    |
+| Slicing              | `{title[3:8]}`    | `lo Wo`                |
+| Alternatives         | `{empty\|title}`  | `Hello World`          |
+| Element Access       | `{user[name]}`    | `John Doe`             |
+| Attribute Access     | `{extractor.url}` | `https://example.org/` |
+| Environment Variable | `{_env[FOO]}`     | `BAR`                  |
 
 All of these methods can be combined as needed.
 For example `{title[24]|empty|extractor.url[15:-1]}` would result in `.org`.
