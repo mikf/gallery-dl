@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,7 @@ class RedditExtractor(Extractor):
     directory_fmt = ("{category}", "{subreddit}")
     filename_fmt = "{id}{num:? //>02} {title[:220]}.{extension}"
     archive_fmt = "{filename}"
-    cookiedomain = None
+    cookiedomain = ".reddit.com"
 
     def items(self):
         self.api = RedditAPI(self)
@@ -300,6 +300,12 @@ class RedditAPI():
             self.refresh_token = _refresh_token_cache(key)
         else:
             self.refresh_token = token
+
+        if not self.refresh_token:
+            # allow downloading from quarantined subreddits (#2180)
+            extractor._cookiejar.set(
+                "_options", '%7B%22pref_quarantine_optin%22%3A%20true%7D',
+                domain=extractor.cookiedomain)
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
