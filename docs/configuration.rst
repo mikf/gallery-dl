@@ -2030,11 +2030,15 @@ Description
 extractor.twitter.cards
 -----------------------
 Type
-    ``bool``
+    ``bool`` or ``string``
 Default
-    ``false``
+    ``true``
 Description
-    Fetch media from `Cards <https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards>`__.
+    Controls how to handle `Twitter Cards <https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards>`__.
+
+    * ``false``: Ignore cards
+    * ``true``: Download image content from supported cards
+    * ``"ytdl"``: Additionally download video content from unsupported cards using `youtube-dl`_
 
 
 extractor.twitter.conversations

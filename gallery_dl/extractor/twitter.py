@@ -39,7 +39,7 @@ class TwitterExtractor(Extractor):
         self.pinned = self.config("pinned", False)
         self.quoted = self.config("quoted", False)
         self.videos = self.config("videos", True)
-        self.cards = self.config("cards", False)
+        self.cards = self.config("cards", True)
         self._user_cache = {}
         self._init_sizes()
 
@@ -165,7 +165,7 @@ class TwitterExtractor(Extractor):
                     tweet, data["media_entities"].values(), files)
                 return
 
-        if self.videos:
+        if self.cards == "ytdl":
             url = "ytdl:{}/i/web/status/{}".format(self.root, tweet["id_str"])
             files.append({"url": url})
 
