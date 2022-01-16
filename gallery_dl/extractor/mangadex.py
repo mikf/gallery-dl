@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -73,6 +73,7 @@ class MangadexExtractor(Extractor):
             "lang"    : lang,
             "language": util.code_to_language(lang),
             "count"   : cattributes["pages"],
+            "_external_url": cattributes.get("externalUrl"),
         }
 
         data["artist"] = [artist["attributes"]["name"]
@@ -111,6 +112,12 @@ class MangadexChapterExtractor(MangadexExtractor):
         except KeyError:
             chapter = self.api.chapter(self.uuid)
             data = self._transform(chapter)
+
+        if data.get("_external_url"):
+            raise exception.StopExtraction(
+                "Chapter %s%s is not available on MangaDex and can instead be "
+                "read on the official publisher's website at %s.",
+                data["chapter"], data["chapter_minor"], data["_external_url"])
 
         yield Message.Directory, data
         data["_http_headers"] = self._headers
