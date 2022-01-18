@@ -131,6 +131,7 @@ modules = [
     "vk",
     "vsco",
     "wallhaven",
+    "wallpapercave",
     "warosu",
     "weasyl",
     "webtoons",
