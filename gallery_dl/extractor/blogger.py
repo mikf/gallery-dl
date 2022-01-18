@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -41,9 +41,11 @@ class BloggerExtractor(Extractor):
         blog["date"] = text.parse_datetime(blog["published"])
         del blog["selfLink"]
 
-        sub = re.compile(r"/(?:s\d+|w\d+-h\d+)/").sub
+        sub = re.compile(r"(/|=)(?:s\d+|w\d+-h\d+)(?=/|$)").sub
         findall_image = re.compile(
-            r'src="(https?://\d+\.bp\.blogspot\.com/[^"]+)').findall
+            r'src="(https?://(?:'
+            r'blogger\.googleusercontent\.com/img|'
+            r'\d+\.bp\.blogspot\.com)/[^"]+)').findall
         findall_video = re.compile(
             r'src="(https?://www\.blogger\.com/video\.g\?token=[^"]+)').findall
 
@@ -52,7 +54,7 @@ class BloggerExtractor(Extractor):
 
             files = findall_image(content)
             for idx, url in enumerate(files):
-                files[idx] = sub("/s0/", url).replace("http:", "https:", 1)
+                files[idx] = sub(r"\1s0", url).replace("http:", "https:", 1)
 
             if self.videos and 'id="BLOG_video-' in content:
                 page = self.request(post["url"]).text
@@ -136,6 +138,12 @@ class BloggerPostExtractor(BloggerExtractor):
         # image URLs with width/height (#1061)
         ("https://aaaninja.blogspot.com/2020/08/altera-boob-press-2.html", {
             "pattern": r"https://1.bp.blogspot.com/.+/s0/altera_.+png",
+        }),
+        # new image domain (#2204)
+        (("https://randomthingsthroughmyletterbox.blogspot.com/2022/01"
+          "/bitter-flowers-by-gunnar-staalesen-blog.html"), {
+            "pattern": r"https://blogger.googleusercontent.com/img/a/.+=s0$",
+            "count": 8,
         }),
     )
 
