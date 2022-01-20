@@ -463,6 +463,20 @@ Description
     otherwise ``http://`` is assumed.
 
 
+extractor.*.source-address
+--------------------------
+Type
+    * ``string``
+    * ``list`` with 1 ``string`` and 1 ``integer`` as elements
+Example
+    * ``"192.168.178.20"``
+    * ``["192.168.178.20", 8080]``
+Description
+    Client-side IP address to bind to.
+
+    | Can be either a simple ``string`` with just the local IP address
+    | or a ``list`` with IP and explicit port number as elements.
+
 extractor.*.user-agent
 ----------------------
 Type

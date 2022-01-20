@@ -220,6 +220,14 @@ class Extractor():
         headers = session.headers
         headers.clear()
 
+        source_address = self.config("source-address")
+        if source_address:
+            if isinstance(source_address, str):
+                source_address = (source_address, 0)
+            else:
+                source_address = (source_address[0], source_address[1])
+            session.mount("http://", SourceAdapter(source_address))
+
         browser = self.config("browser") or self.browser
         if browser and isinstance(browser, str):
             browser, _, platform = browser.lower().partition(":")
@@ -235,10 +243,12 @@ class Extractor():
                 platform = "Macintosh; Intel Mac OS X 11.5"
 
             if browser == "chrome":
-                _emulate_browser_chrome(session, platform)
+                _emulate_browser_chrome(session, platform, source_address)
             else:
-                _emulate_browser_firefox(session, platform)
+                _emulate_browser_firefox(session, platform, source_address)
         else:
+            if source_address:
+                session.mount("https://", SourceAdapter(source_address))
             headers["User-Agent"] = self.config("user-agent", (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
                 "rv:91.0) Gecko/20100101 Firefox/91.0"))
@@ -605,26 +615,44 @@ class BaseExtractor(Extractor):
         )
 
 
+class SourceAdapter(HTTPAdapter):
+
+    def __init__(self, source_address):
+        self.source_address = source_address
+        HTTPAdapter.__init__(self)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["source_address"] = self.source_address
+        return HTTPAdapter.init_poolmanager(self, *args, **kwargs)
+
+    def proxy_manager_for(self, *args, **kwargs):
+        kwargs["source_address"] = self.source_address
+        return HTTPAdapter.proxy_manager_for(self, *args, **kwargs)
+
+
 class HTTPSAdapter(HTTPAdapter):
 
-    def __init__(self, ciphers):
+    def __init__(self, ciphers, source_address=None):
         context = self.ssl_context = ssl.create_default_context()
         context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
                             ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
         context.set_ecdh_curve("prime256v1")
         context.set_ciphers(ciphers)
+        self.source_address = source_address
         HTTPAdapter.__init__(self)
 
     def init_poolmanager(self, *args, **kwargs):
         kwargs["ssl_context"] = self.ssl_context
+        kwargs["source_address"] = self.source_address
         return HTTPAdapter.init_poolmanager(self, *args, **kwargs)
 
     def proxy_manager_for(self, *args, **kwargs):
         kwargs["ssl_context"] = self.ssl_context
+        kwargs["source_address"] = self.source_address
         return HTTPAdapter.proxy_manager_for(self, *args, **kwargs)
 
 
-def _emulate_browser_firefox(session, platform):
+def _emulate_browser_firefox(session, platform, source_address):
     headers = session.headers
     headers["User-Agent"] = ("Mozilla/5.0 (" + platform + "; rv:91.0) "
                              "Gecko/20100101 Firefox/91.0")
@@ -654,11 +682,12 @@ def _emulate_browser_firefox(session, platform):
         "DHE-RSA-AES256-SHA:"
         "AES128-SHA:"
         "AES256-SHA:"
-        "DES-CBC3-SHA"
+        "DES-CBC3-SHA",
+        source_address
     ))
 
 
-def _emulate_browser_chrome(session, platform):
+def _emulate_browser_chrome(session, platform, source_address):
     if platform.startswith("Macintosh"):
         platform = platform.replace(".", "_") + "_2"
 
@@ -690,7 +719,8 @@ def _emulate_browser_chrome(session, platform):
         "AES256-GCM-SHA384:"
         "AES128-SHA:"
         "AES256-SHA:"
-        "DES-CBC3-SHA"
+        "DES-CBC3-SHA",
+        source_address
     ))
 
 
