@@ -124,6 +124,11 @@ def build_parser():
         help="Use the specified proxy",
     )
     general.add_argument(
+        "--source-address",
+        dest="source-address", metavar="IP", action=ConfigAction,
+        help="Client-side IP address to bind to",
+    )
+    general.add_argument(
         "--clear-cache",
         dest="clear_cache", metavar="MODULE",
         help="Delete cached login sessions, cookies, etc. for MODULE "
