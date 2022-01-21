@@ -1092,7 +1092,8 @@ class TwitterAPI():
         pinned_tweet = self.extractor.pinned
 
         while True:
-            cursor = tweet = entry = stop = None
+            tweets = []
+            cursor = tweet = stop = None
             params = {"variables": json.dumps(variables)}
             data = self._call(endpoint, params)["data"]
 
@@ -1107,70 +1108,66 @@ class TwitterAPI():
             if pinned_tweet:
                 pinned_tweet = False
                 if instructions[-1]["type"] == "TimelinePinEntry":
-                    yield (instructions[-1]["entry"]["content"]["itemContent"]
-                           ["tweet_results"]["result"])
+                    tweets.append(instructions[-1]["entry"]["content"]
+                                  ["itemContent"]["tweet_results"]["result"])
 
             for entry in instructions[0]["entries"]:
                 esw = entry["entryId"].startswith
 
                 if esw("tweet-"):
-                    tweet = (entry["content"]
-                             ["itemContent"]["tweet_results"])
-
-                    if "result" not in tweet:
-                        self.extractor.log.debug(
-                            "Skipping %s (deleted)",
-                            entry["entryId"].rpartition("-")[2])
-                        continue
-
-                    tweet = tweet["result"]
-                    legacy = tweet["legacy"]
-
-                    if "retweeted_status_result" in legacy:
-                        retweet = legacy["retweeted_status_result"]["result"]
-                        if original_retweets:
-                            if not retweet:
-                                continue
-                            retweet["legacy"]["retweeted_status_id_str"] = \
-                                retweet["rest_id"]
-                            retweet["_retweet_id_str"] = tweet["rest_id"]
-                            tweet = retweet
-                        elif retweet:
-                            legacy["retweeted_status_id_str"] = \
-                                retweet["rest_id"]
-                            legacy["author"] = \
-                                retweet["core"]["user_results"]["result"]
-                            if "extended_entities" in retweet["legacy"] and \
-                                    "extended_entities" not in legacy:
-                                legacy["extended_entities"] = \
-                                    retweet["legacy"]["extended_entities"]
-                    yield tweet
-
-                    if "quoted_status_result" in tweet:
-                        quoted = tweet["quoted_status_result"]["result"]
-                        #  quoted["author"] = users[quoted["user_id_str"]]
-                        #  quoted["user"] = tweet["user"]
-                        quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
-                        yield quoted
-
+                    tweets.append(entry)
                 elif esw("homeConversation-"):
-                    for tweet in entry["content"]["items"]:
-                        yield (tweet["item"]["itemContent"]
-                               ["tweet_results"]["result"])
-
+                    tweets.extend(entry["content"]["items"])
                 elif esw("conversationthread-"):
-                    for tweet in entry["content"]["items"]:
-                        yield (tweet["item"]["itemContent"]
-                               ["tweet_results"]["result"])
-
+                    tweets.extend(entry["content"]["items"])
                 elif esw("cursor-bottom-"):
                     cursor = entry["content"]
                     if not cursor.get("stopOnEmptyResponse"):
                         # keep going even if there are no tweets
                         tweet = True
-                    cursor = cursor["value"]
+                    cursor = cursor.get("value")
 
-            if stop or not cursor or not tweet or not entry:
+            for tweet in tweets:
+                try:
+                    tweet = ((tweet.get("content") or tweet["item"])
+                             ["itemContent"]["tweet_results"]["result"])
+                except KeyError:
+                    print(tweet["entryId"])
+                    self.extractor.log.debug(
+                        "Skipping %s (deleted)",
+                        tweet["entryId"].rpartition("-")[2])
+                    continue
+
+                legacy = tweet["legacy"]
+                if "retweeted_status_result" in legacy:
+                    retweet = legacy["retweeted_status_result"]["result"]
+                    if original_retweets:
+                        if not retweet:
+                            continue
+                        retweet["legacy"]["retweeted_status_id_str"] = \
+                            retweet["rest_id"]
+                        retweet["_retweet_id_str"] = tweet["rest_id"]
+                        tweet = retweet
+                    elif retweet:
+                        legacy["retweeted_status_id_str"] = \
+                            retweet["rest_id"]
+                        legacy["author"] = \
+                            retweet["core"]["user_results"]["result"]
+                        if "extended_entities" in retweet["legacy"] and \
+                                "extended_entities" not in legacy:
+                            legacy["extended_entities"] = \
+                                retweet["legacy"]["extended_entities"]
+                yield tweet
+
+                if "quoted_status_result" in tweet:
+                    quoted = tweet["quoted_status_result"]["result"]
+                    quoted["legacy"]["author"] = \
+                        quoted["core"]["user_results"]["result"]
+                    quoted["core"] = tweet["core"]
+                    quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
+                    yield quoted
+
+            if stop or not cursor or not tweet:
                 return
             variables["cursor"] = cursor
 
