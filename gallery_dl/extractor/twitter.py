@@ -1136,6 +1136,8 @@ class TwitterAPI():
                             retweet["_retweet_id_str"] = tweet["rest_id"]
                             tweet = retweet
                         elif retweet:
+                            legacy["retweeted_status_id_str"] = \
+                                retweet["rest_id"]
                             legacy["author"] = \
                                 retweet["core"]["user_results"]["result"]
                             if "extended_entities" in retweet["legacy"] and \
