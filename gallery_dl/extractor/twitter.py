@@ -60,29 +60,34 @@ class TwitterExtractor(Extractor):
 
         for tweet in self.tweets():
 
-            if not self.retweets and "retweeted_status_id_str" in tweet:
-                self.log.debug("Skipping %s (retweet)", tweet["id_str"])
+            if "legacy" in tweet:
+                data = tweet["legacy"]
+            else:
+                data = tweet
+
+            if not self.retweets and "retweeted_status_id_str" in data:
+                self.log.debug("Skipping %s (retweet)", data["id_str"])
                 continue
-            if not self.quoted and "quoted_by_id_str" in tweet:
-                self.log.debug("Skipping %s (quoted tweet)", tweet["id_str"])
+            if not self.quoted and "quoted_by_id_str" in data:
+                self.log.debug("Skipping %s (quoted tweet)", data["id_str"])
                 continue
-            if "in_reply_to_user_id_str" in tweet and (
+            if "in_reply_to_user_id_str" in data and (
                 not self.replies or (
                     self.replies == "self" and
-                    tweet["in_reply_to_user_id_str"] != tweet["user_id_str"]
+                    data["in_reply_to_user_id_str"] != data["user_id_str"]
                 )
             ):
-                self.log.debug("Skipping %s (reply)", tweet["id_str"])
+                self.log.debug("Skipping %s (reply)", data["id_str"])
                 continue
 
             files = []
-            if "extended_entities" in tweet:
+            if "extended_entities" in data:
                 self._extract_media(
-                    tweet, tweet["extended_entities"]["media"], files)
+                    data, data["extended_entities"]["media"], files)
             if "card" in tweet and self.cards:
                 self._extract_card(tweet, files)
             if self.twitpic:
-                self._extract_twitpic(tweet, files)
+                self._extract_twitpic(data, files)
             if not files and not self.textonly:
                 continue
 
@@ -143,10 +148,17 @@ class TwitterExtractor(Extractor):
 
     def _extract_card(self, tweet, files):
         card = tweet["card"]
+        if "legacy" in card:
+            card = card["legacy"]
         name = card["name"]
 
         if name in ("summary", "summary_large_image"):
             bvals = card["binding_values"]
+            if isinstance(bvals, list):
+                bvals = {
+                    bval["key"]: bval["value"]
+                    for bval in card["binding_values"]
+                }
             for prefix in ("photo_image_full_size_",
                            "summary_photo_image_",
                            "thumbnail_image_"):
@@ -158,15 +170,22 @@ class TwitterExtractor(Extractor):
                             files.append(value)
                             return
         elif name == "unified_card":
-            data = json.loads(
-                card["binding_values"]["unified_card"]["string_value"])
+            bvals = card["binding_values"]
+            if isinstance(bvals, list):
+                for bval in card["binding_values"]:
+                    if bval["key"] == "unified_card":
+                        break
+            else:
+                bval = bvals["unified_card"]
+            data = json.loads(bval["value"]["string_value"])
             if data["type"] == "image_carousel_website":
                 self._extract_media(
                     tweet, data["media_entities"].values(), files)
                 return
 
         if self.cards == "ytdl":
-            url = "ytdl:{}/i/web/status/{}".format(self.root, tweet["id_str"])
+            tweet_id = tweet.get("rest_id") or tweet["id_str"]
+            url = "ytdl:{}/i/web/status/{}".format(self.root, tweet_id)
             files.append({"url": url})
 
     def _extract_twitpic(self, tweet, files):
@@ -182,6 +201,15 @@ class TwitterExtractor(Extractor):
                     files.append({"url": url})
 
     def _transform_tweet(self, tweet):
+        if "core" in tweet:
+            user = self._transform_user(
+                tweet["core"]["user_results"]["result"])
+        else:
+            user = self._transform_user(tweet["user"])
+
+        if "legacy" in tweet:
+            tweet = tweet["legacy"]
+
         entities = tweet["entities"]
         tdata = {
             "tweet_id"      : text.parse_int(tweet["id_str"]),
@@ -193,7 +221,7 @@ class TwitterExtractor(Extractor):
                 tweet.get("in_reply_to_status_id_str")),
             "date"          : text.parse_datetime(
                 tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"),
-            "user"          : self._transform_user(tweet["user"]),
+            "user"          : user,
             "lang"          : tweet["lang"],
             "favorite_count": tweet["favorite_count"],
             "quote_count"   : tweet["quote_count"],
@@ -235,11 +263,13 @@ class TwitterExtractor(Extractor):
 
     def _transform_user(self, user):
         try:
-            return self._user_cache[user["id_str"]]
+            return self._user_cache[user.get("rest_id") or user["id_str"]]
         except KeyError:
             pass
 
-        uid = user["id_str"]
+        uid = user.get("rest_id") or user["id_str"]
+        if "legacy" in user:
+            user = user["legacy"]
         entities = user["entities"]
 
         self._user_cache[uid] = udata = {
@@ -364,7 +394,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
             self.user = "id:" + user_id
 
     def tweets(self):
-        return TwitterAPI(self).timeline_profile(self.user)
+        return TwitterAPI(self).user_tweets(self.user)
 
 
 class TwitterRepliesExtractor(TwitterExtractor):
@@ -381,7 +411,7 @@ class TwitterRepliesExtractor(TwitterExtractor):
     )
 
     def tweets(self):
-        return TwitterAPI(self).timeline_profile(self.user, replies=True)
+        return TwitterAPI(self).user_tweets_and_replies(self.user)
 
 
 class TwitterMediaExtractor(TwitterExtractor):
@@ -398,7 +428,7 @@ class TwitterMediaExtractor(TwitterExtractor):
     )
 
     def tweets(self):
-        return TwitterAPI(self).timeline_media(self.user)
+        return TwitterAPI(self).user_media(self.user)
 
 
 class TwitterLikesExtractor(TwitterExtractor):
@@ -411,7 +441,7 @@ class TwitterLikesExtractor(TwitterExtractor):
         return {"user_likes": self.user}
 
     def tweets(self):
-        return TwitterAPI(self).timeline_favorites(self.user)
+        return TwitterAPI(self).user_likes(self.user)
 
 
 class TwitterBookmarkExtractor(TwitterExtractor):
@@ -421,7 +451,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
     test = ("https://twitter.com/i/bookmarks",)
 
     def tweets(self):
-        return TwitterAPI(self).timeline_bookmark()
+        return TwitterAPI(self).user_bookmarks()
 
 
 class TwitterListExtractor(TwitterExtractor):
@@ -435,7 +465,7 @@ class TwitterListExtractor(TwitterExtractor):
     })
 
     def tweets(self):
-        return TwitterAPI(self).timeline_list(self.user)
+        return TwitterAPI(self).list_latest_tweets_timeline(self.user)
 
 
 class TwitterListMembersExtractor(TwitterExtractor):
@@ -542,7 +572,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         # TwitPic embeds (#579)
         ("https://twitter.com/i/web/status/112900228289540096", {
-            "options": (("twitpic", True),),
+            "options": (("twitpic", True), ("cards", False)),
             "pattern": r"https://\w+.cloudfront.net/photos/large/\d+.jpg",
             "count": 3,
         }),
@@ -590,8 +620,19 @@ class TwitterTweetExtractor(TwitterExtractor):
 
     def tweets(self):
         if self.config("conversations", False):
-            return TwitterAPI(self).conversation(self.tweet_id)
-        return TwitterAPI(self).tweet(self.tweet_id)
+            return TwitterAPI(self).tweet_detail(self.tweet_id)
+
+        tweets = []
+        tweet_id = self.tweet_id
+        for tweet in TwitterAPI(self).tweet_detail(tweet_id):
+            if tweet["rest_id"] == tweet_id or \
+                    tweet.get("_retweet_id_str") == tweet_id:
+                tweets.append(tweet)
+
+                tweet_id = tweet["legacy"].get("quoted_status_id_str")
+                if not tweet_id:
+                    break
+        return tweets
 
 
 class TwitterImageExtractor(Extractor):
@@ -642,7 +683,169 @@ class TwitterAPI():
             "x-csrf-token": None,
             "Referer": "https://twitter.com/",
         }
-        self.params = {
+
+        cookies = extractor.session.cookies
+        cookiedomain = extractor.cookiedomain
+
+        # CSRF
+        csrf_token = cookies.get("ct0", domain=cookiedomain)
+        if not csrf_token:
+            csrf_token = util.generate_token()
+            cookies.set("ct0", csrf_token, domain=cookiedomain)
+        self.headers["x-csrf-token"] = csrf_token
+
+        if cookies.get("auth_token", domain=cookiedomain):
+            # logged in
+            self.headers["x-twitter-auth-type"] = "OAuth2Session"
+        else:
+            # guest
+            guest_token = self._guest_token()
+            cookies.set("gt", guest_token, domain=cookiedomain)
+            self.headers["x-guest-token"] = guest_token
+
+    def tweet_detail(self, tweet_id):
+        endpoint = "/graphql/aD0-HB47XIOxiBl5kTkX5Q/TweetDetail"
+        variables = {
+            "focalTweetId": tweet_id,
+            "with_rux_injections": False,
+            "includePromotedContent": True,
+            "withCommunity": True,
+            "withQuickPromoteEligibilityTweetFields": True,
+            "withBirdwatchNotes": False,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "withVoice": True,
+            "withV2Timeline": False,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False
+        }
+        return self._pagination_tweets(
+            endpoint, variables, ("threaded_conversation_with_injections",))
+
+    def user_tweets(self, screen_name):
+        endpoint = "/graphql/DhQ8lYnLh5T5K8aVUgHVnQ/UserTweets"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": True,
+            "withQuickPromoteEligibilityTweetFields": True,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "withVoice": True,
+            "withV2Timeline": False,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
+        }
+        return self._pagination_tweets(endpoint, variables)
+
+    def user_tweets_and_replies(self, screen_name):
+        endpoint = "/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "cursor": "HBaWwLnhx93RkygAAA==",
+            "includePromotedContent": True,
+            "withCommunity": True,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "withVoice": True,
+            "withV2Timeline": False,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
+        }
+        return self._pagination_tweets(endpoint, variables)
+
+    def user_media(self, screen_name):
+        endpoint = "/graphql/NeBRhmkLMUxQkGpBtQ4k5w/UserMedia"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "withClientEventToken": False,
+            "withBirdwatchNotes": False,
+            "withVoice": True,
+            "withV2Timeline": False,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
+        }
+        return self._pagination_tweets(endpoint, variables)
+
+    def user_likes(self, screen_name):
+        endpoint = "/graphql/qICyoimVKJRJdX5UX5a_Gg/Likes"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "withClientEventToken": False,
+            "withBirdwatchNotes": False,
+            "withVoice": True,
+            "withV2Timeline": False,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
+        }
+        return self._pagination_tweets(endpoint, variables)
+
+    def user_bookmarks(self):
+        endpoint = "/graphql/WgbaxqmzjFP7oxkh_PkW4g/Bookmarks"
+        variables = {
+            "count": 100,
+            "includePromotedContent": True,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, ("bookmark_timeline", "timeline"))
+
+    def list_latest_tweets_timeline(self, list_id):
+        endpoint = "/graphql/mwIBwcZV981Bnjb2lPNYfw/ListLatestTweetsTimeline"
+        variables = {
+            "listId": list_id,
+            "count": 100,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, ("list", "tweets_timeline", "timeline"))
+
+    def search(self, query):
+        endpoint = "/2/search/adaptive.json"
+        params = {
             "include_profile_interstitial_type": "1",
             "include_blocking": "1",
             "include_blocked_by": "1",
@@ -667,124 +870,71 @@ class TwitterAPI():
             "count": "100",
             "cursor": None,
             "ext": "mediaStats,highlightedLabel",
+            "q": query,
+            "tweet_search_mode": "live",
+            "query_source": "typed_query",
+            "pc": "1",
+            "spelling_corrections": "1",
         }
-
-        cookies = extractor.session.cookies
-        cookiedomain = extractor.cookiedomain
-
-        # CSRF
-        csrf_token = cookies.get("ct0", domain=cookiedomain)
-        if not csrf_token:
-            csrf_token = util.generate_token()
-            cookies.set("ct0", csrf_token, domain=cookiedomain)
-        self.headers["x-csrf-token"] = csrf_token
-
-        if cookies.get("auth_token", domain=cookiedomain):
-            # logged in
-            self.headers["x-twitter-auth-type"] = "OAuth2Session"
-        else:
-            # guest
-            guest_token = self._guest_token()
-            cookies.set("gt", guest_token, domain=cookiedomain)
-            self.headers["x-guest-token"] = guest_token
-
-    def tweet(self, tweet_id):
-        endpoint = "/2/timeline/conversation/{}.json".format(tweet_id)
-        tweets = []
-        for tweet in self._pagination(endpoint):
-            if tweet["id_str"] == tweet_id or \
-                    tweet.get("_retweet_id_str") == tweet_id:
-                tweets.append(tweet)
-                if "quoted_status_id_str" in tweet:
-                    tweet_id = tweet["quoted_status_id_str"]
-                else:
-                    break
-        return tweets
-
-    def conversation(self, conversation_id):
-        endpoint = "/2/timeline/conversation/{}.json".format(conversation_id)
-        return self._pagination(endpoint)
-
-    def timeline_profile(self, screen_name, replies=False):
-        user_id = self._user_id_by_screen_name(screen_name)
-        endpoint = "/2/timeline/profile/{}.json".format(user_id)
-        params = self.params.copy()
-        params["include_tweet_replies"] = "true" if replies else "false"
-        return self._pagination(endpoint, params)
-
-    def timeline_media(self, screen_name):
-        user_id = self._user_id_by_screen_name(screen_name)
-        endpoint = "/2/timeline/media/{}.json".format(user_id)
-        return self._pagination(endpoint)
-
-    def timeline_favorites(self, screen_name):
-        user_id = self._user_id_by_screen_name(screen_name)
-        endpoint = "/2/timeline/favorites/{}.json".format(user_id)
-        params = self.params.copy()
-        params["sorted_by_time"] = "true"
-        return self._pagination(endpoint)
-
-    def timeline_bookmark(self):
-        endpoint = "/2/timeline/bookmark.json"
-        return self._pagination(endpoint)
-
-    def timeline_list(self, list_id):
-        endpoint = "/2/timeline/list.json"
-        params = self.params.copy()
-        params["list_id"] = list_id
-        params["ranking_mode"] = "reverse_chronological"
-        return self._pagination(endpoint, params)
-
-    def search(self, query):
-        endpoint = "/2/search/adaptive.json"
-        params = self.params.copy()
-        params["q"] = query
-        params["tweet_search_mode"] = "live"
-        params["query_source"] = "typed_query"
-        params["pc"] = "1"
-        params["spelling_corrections"] = "1"
-        return self._pagination(endpoint, params)
+        return self._pagination_search(endpoint, params)
 
     def list_by_rest_id(self, list_id):
-        endpoint = "/graphql/18MAHTcDU-TdJSjWWmoH7w/ListByRestId"
-        params = {"variables": '{"listId":"' + list_id + '"'
-                               ',"withUserResult":false}'}
+        endpoint = "/graphql/BWEhzAk7k8TwbU4lKH2dpw/ListByRestId"
+        params = {"variables": json.dumps({
+            "listId": list_id,
+            "withSuperFollowsUserFields": True,
+        })}
         try:
             return self._call(endpoint, params)["data"]["list"]
         except KeyError:
             raise exception.NotFoundError("list")
 
     def list_members(self, list_id):
-        endpoint = "/graphql/tA7h9hy4U0Yc9COfIOh3qQ/ListMembers"
+        endpoint = "/graphql/Ke6urWMeCV2UlKXGRy4sow/ListMembers"
         variables = {
             "listId": list_id,
-            "count" : 100,
-            "withTweetResult": False,
-            "withUserResult" : False,
+            "count": 100,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "withSafetyModeUserFields": True,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
         }
-        return self._pagination_graphql(
-            endpoint, variables, "list", "members_timeline")
+        return self._pagination_users(
+            endpoint, variables, ("list", "members_timeline", "timeline"))
 
     def user_following(self, screen_name):
-        endpoint = "/graphql/Q_QTiPvoXwsA13eoA7okIQ/Following"
+        endpoint = "/graphql/HBTc0rkOSBXmfSmT7GKEMA/Following"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count" : 100,
-            "withTweetResult": False,
-            "withUserResult" : False,
-            "withTweetQuoteCount"   : False,
-            "withHighlightedLabel"  : False,
+            "count": 100,
             "includePromotedContent": False,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
         }
-        return self._pagination_graphql(
-            endpoint, variables, "user", "following_timeline")
+
+        return self._pagination_users(endpoint, variables)
 
     def user_by_screen_name(self, screen_name):
-        endpoint = "/graphql/hc-pka9A7gyS3xODIafnrQ/UserByScreenName"
-        params = {"variables": '{"screen_name":"' + screen_name + '"'
-                               ',"withHighlightedLabel":true}'}
+        endpoint = "/graphql/7mjxD3-C6BxitPMVQ6w0-Q/UserByScreenName"
+        variables = {
+            "screen_name": screen_name,
+            "withSafetyModeUserFields": True,
+            "withSuperFollowsUserFields": True,
+        }
+        params = {"variables": json.dumps(variables)}
         try:
-            return self._call(endpoint, params)["data"]["user"]
+            return self._call(endpoint, params)["data"]["user"]["result"]
         except KeyError:
             raise exception.NotFoundError("user")
 
@@ -816,19 +966,9 @@ class TwitterAPI():
             data = response.json()
             if "errors" in data:
                 try:
-                    errors, warnings = [], []
-                    for error in data["errors"]:
-                        if error.get("kind") == "NonFatal":
-                            warnings.append(error["message"])
-                        else:
-                            errors.append(error["message"])
-                    errors = ", ".join(errors)
+                    errors = ", ".join(e["message"] for e in data["errors"])
                 except Exception:
                     errors = data["errors"]
-                if warnings:
-                    self.extractor.log.warning(", ".join(warnings))
-                if errors and response.status_code < 400:
-                    raise exception.StopExtraction(errors)
             else:
                 errors = ""
 
@@ -863,11 +1003,8 @@ class TwitterAPI():
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, errors)
 
-    def _pagination(self, endpoint, params=None):
-        if params is None:
-            params = self.params.copy()
+    def _pagination_search(self, endpoint, params=None):
         original_retweets = (self.extractor.retweets == "original")
-        pinned_tweet = self.extractor.pinned
 
         while True:
             cursor = tweet = None
@@ -879,12 +1016,6 @@ class TwitterAPI():
             tweet_ids = []
             tweets = data["globalObjects"]["tweets"]
             users = data["globalObjects"]["users"]
-
-            if pinned_tweet:
-                if "pinEntry" in instr[-1]:
-                    tweet_ids.append(instr[-1]["pinEntry"]["entry"]["content"]
-                                     ["item"]["content"]["tweet"]["id"])
-                pinned_tweet = False
 
             # collect tweet IDs and cursor value
             for entry in instr[0]["addEntries"]["entries"]:
@@ -956,23 +1087,113 @@ class TwitterAPI():
                 return
             params["cursor"] = cursor
 
-    def _pagination_graphql(self, endpoint, variables, key, timeline):
+    def _pagination_tweets(self, endpoint, variables, path=None):
+        original_retweets = (self.extractor.retweets == "original")
+        pinned_tweet = self.extractor.pinned
+
+        while True:
+            cursor = tweet = entry = stop = None
+            params = {"variables": json.dumps(variables)}
+            data = self._call(endpoint, params)["data"]
+
+            if path is None:
+                instructions = (data["user"]["result"]["timeline"]
+                                ["timeline"]["instructions"])
+            else:
+                for key in path:
+                    data = data[key]
+                instructions = data["instructions"]
+
+            if pinned_tweet:
+                pinned_tweet = False
+                if instructions[-1]["type"] == "TimelinePinEntry":
+                    yield (instructions[-1]["entry"]["content"]["itemContent"]
+                           ["tweet_results"]["result"])
+
+            for entry in instructions[0]["entries"]:
+                esw = entry["entryId"].startswith
+
+                if esw("tweet-"):
+                    tweet = (entry["content"]
+                             ["itemContent"]["tweet_results"])
+
+                    if "result" not in tweet:
+                        self.extractor.log.debug(
+                            "Skipping %s (deleted)",
+                            entry["entryId"].rpartition("-")[2])
+                        continue
+
+                    tweet = tweet["result"]
+                    legacy = tweet["legacy"]
+
+                    if "retweeted_status_result" in legacy:
+                        retweet = legacy["retweeted_status_result"]["result"]
+                        if original_retweets:
+                            if not retweet:
+                                continue
+                            retweet["legacy"]["retweeted_status_id_str"] = \
+                                retweet["rest_id"]
+                            retweet["_retweet_id_str"] = tweet["rest_id"]
+                            tweet = retweet
+                        elif retweet:
+                            legacy["author"] = \
+                                retweet["core"]["user_results"]["result"]
+                            if "extended_entities" in retweet["legacy"] and \
+                                    "extended_entities" not in legacy:
+                                legacy["extended_entities"] = \
+                                    retweet["legacy"]["extended_entities"]
+                    yield tweet
+
+                    if "quoted_status_result" in tweet:
+                        quoted = tweet["quoted_status_result"]["result"]
+                        #  quoted["author"] = users[quoted["user_id_str"]]
+                        #  quoted["user"] = tweet["user"]
+                        quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
+                        yield quoted
+
+                elif esw("homeConversation-"):
+                    for tweet in entry["content"]["items"]:
+                        yield (tweet["item"]["itemContent"]
+                               ["tweet_results"]["result"])
+
+                elif esw("conversationthread-"):
+                    for tweet in entry["content"]["items"]:
+                        yield (tweet["item"]["itemContent"]
+                               ["tweet_results"]["result"])
+
+                elif esw("cursor-bottom-"):
+                    cursor = entry["content"]
+                    if not cursor.get("stopOnEmptyResponse"):
+                        # keep going even if there are no tweets
+                        tweet = True
+                    cursor = cursor["value"]
+
+            if stop or not cursor or not tweet or not entry:
+                return
+            variables["cursor"] = cursor
+
+    def _pagination_users(self, endpoint, variables, path=None):
         while True:
             cursor = entry = stop = None
             params = {"variables": json.dumps(variables)}
-            data = self._call(endpoint, params)
+            data = self._call(endpoint, params)["data"]
 
-            try:
-                instructions = \
-                    data["data"][key][timeline]["timeline"]["instructions"]
-            except KeyError:
-                raise exception.AuthorizationError()
+            if path is None:
+                instructions = (data["user"]["result"]["timeline"]
+                                ["timeline"]["instructions"])
+            else:
+                for key in path:
+                    data = data[key]
+                instructions = data["instructions"]
 
             for instr in instructions:
                 if instr["type"] == "TimelineAddEntries":
                     for entry in instr["entries"]:
                         if entry["entryId"].startswith("user-"):
-                            yield entry["content"]["itemContent"]["user"]
+                            user = (entry["content"]["itemContent"]
+                                    ["user_results"]["result"])
+                            if "rest_id" in user:
+                                yield user
                         elif entry["entryId"].startswith("cursor-bottom-"):
                             cursor = entry["content"]["value"]
                 elif instr["type"] == "TimelineTerminateTimeline":
