@@ -174,10 +174,11 @@ class TwitterExtractor(Extractor):
             if isinstance(bvals, list):
                 for bval in card["binding_values"]:
                     if bval["key"] == "unified_card":
+                        bval = bval["value"]["string_value"]
                         break
             else:
-                bval = bvals["unified_card"]
-            data = json.loads(bval["value"]["string_value"])
+                bval = bvals["unified_card"]["string_value"]
+            data = json.loads(bval)
             if data["type"] == "image_carousel_website":
                 self._extract_media(
                     tweet, data["media_entities"].values(), files)
