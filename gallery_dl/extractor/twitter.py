@@ -987,7 +987,7 @@ class TwitterAPI():
         endpoint = "/1.1/guest/activate.json"
         return str(self._call(endpoint, None, root, "POST")["guest_token"])
 
-    def _call(self, endpoint, params, root=None, method="GET"):
+    def _call(self, endpoint, params, root=None, method="GET", warning=True):
         if root is None:
             root = self.root
 
@@ -1012,6 +1012,8 @@ class TwitterAPI():
 
             if response.status_code < 400:
                 # success
+                if errors and warning:
+                    self.extractor.log.warning(errors)
                 return data
 
             if response.status_code == 429:
@@ -1135,13 +1137,16 @@ class TwitterAPI():
             params = {"variables": json.dumps(variables)}
             data = self._call(endpoint, params)["data"]
 
-            if path is None:
-                instructions = (data["user"]["result"]["timeline"]
-                                ["timeline"]["instructions"])
-            else:
-                for key in path:
-                    data = data[key]
-                instructions = data["instructions"]
+            try:
+                if path is None:
+                    instructions = (data["user"]["result"]["timeline"]
+                                    ["timeline"]["instructions"])
+                else:
+                    for key in path:
+                        data = data[key]
+                    instructions = data["instructions"]
+            except KeyError:
+                return
 
             if pinned_tweet:
                 pinned_tweet = False
@@ -1214,13 +1219,16 @@ class TwitterAPI():
             params = {"variables": json.dumps(variables)}
             data = self._call(endpoint, params)["data"]
 
-            if path is None:
-                instructions = (data["user"]["result"]["timeline"]
-                                ["timeline"]["instructions"])
-            else:
-                for key in path:
-                    data = data[key]
-                instructions = data["instructions"]
+            try:
+                if path is None:
+                    instructions = (data["user"]["result"]["timeline"]
+                                    ["timeline"]["instructions"])
+                else:
+                    for key in path:
+                        data = data[key]
+                    instructions = data["instructions"]
+            except KeyError:
+                return
 
             for instr in instructions:
                 if instr["type"] == "TimelineAddEntries":
