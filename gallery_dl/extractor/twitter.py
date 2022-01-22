@@ -495,7 +495,7 @@ class TwitterFollowingExtractor(TwitterExtractor):
 
 
 class TwitterSearchExtractor(TwitterExtractor):
-    """Extractor for all images from a search timeline"""
+    """Extractor for Twitter search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
     test = ("https://twitter.com/search?q=nature", {
@@ -508,7 +508,24 @@ class TwitterSearchExtractor(TwitterExtractor):
         return {"search": text.unquote(self.user)}
 
     def tweets(self):
-        return TwitterAPI(self).search(text.unquote(self.user))
+        return TwitterAPI(self).search_adaptive(text.unquote(self.user))
+
+
+class TwitterEventExtractor(TwitterExtractor):
+    """Extractor for Tweets from a Twitter Event"""
+    subcategory = "event"
+    pattern = BASE_PATTERN + r"/i/events/(\d+)"
+    test = ("https://twitter.com/i/events/1484669206993903616", {
+        "range": "1-20",
+        "count": ">5",
+    })
+
+    def metadata(self):
+        self.api = TwitterAPI(self)
+        return {"event": self.api.live_event(self.user)}
+
+    def tweets(self):
+        return self.api.live_event_timeline(self.user)
 
 
 class TwitterTweetExtractor(TwitterExtractor):
@@ -684,6 +701,35 @@ class TwitterAPI():
             "x-csrf-token": None,
             "Referer": "https://twitter.com/",
         }
+        self.params = {
+            "include_profile_interstitial_type": "1",
+            "include_blocking": "1",
+            "include_blocked_by": "1",
+            "include_followed_by": "1",
+            "include_want_retweets": "1",
+            "include_mute_edge": "1",
+            "include_can_dm": "1",
+            "include_can_media_tag": "1",
+            "include_ext_has_nft_avatar": "1",
+            "skip_status": "1",
+            "cards_platform": "Web-12",
+            "include_cards": "1",
+            "include_ext_alt_text": "true",
+            "include_quote_count": "true",
+            "include_reply_count": "1",
+            "tweet_mode": "extended",
+            "include_entities": "true",
+            "include_user_entities": "true",
+            "include_ext_media_color": "true",
+            "include_ext_media_availability": "true",
+            "include_ext_sensitive_media_warning": "true",
+            "send_error_codes": "true",
+            "simple_quoted_tweet": "true",
+            "count": "100",
+            "cursor": None,
+            "ext": "mediaStats,highlightedLabel,hasNftAvatar,"
+                   "voiceInfo,superFollowMetadata",
+        }
 
         cookies = extractor.session.cookies
         cookiedomain = extractor.cookiedomain
@@ -844,40 +890,31 @@ class TwitterAPI():
         return self._pagination_tweets(
             endpoint, variables, ("list", "tweets_timeline", "timeline"))
 
-    def search(self, query):
+    def search_adaptive(self, query):
         endpoint = "/2/search/adaptive.json"
-        params = {
-            "include_profile_interstitial_type": "1",
-            "include_blocking": "1",
-            "include_blocked_by": "1",
-            "include_followed_by": "1",
-            "include_want_retweets": "1",
-            "include_mute_edge": "1",
-            "include_can_dm": "1",
-            "include_can_media_tag": "1",
-            "skip_status": "1",
-            "cards_platform": "Web-12",
-            "include_cards": "1",
-            "include_ext_alt_text": "true",
-            "include_quote_count": "true",
-            "include_reply_count": "1",
-            "tweet_mode": "extended",
-            "include_entities": "true",
-            "include_user_entities": "true",
-            "include_ext_media_color": "true",
-            "include_ext_media_availability": "true",
-            "send_error_codes": "true",
-            "simple_quoted_tweet": "true",
-            "count": "100",
-            "cursor": None,
-            "ext": "mediaStats,highlightedLabel",
-            "q": query,
-            "tweet_search_mode": "live",
-            "query_source": "typed_query",
-            "pc": "1",
-            "spelling_corrections": "1",
-        }
-        return self._pagination_search(endpoint, params)
+        params = self.params.copy()
+        params["q"] = query
+        params["tweet_search_mode"] = "live"
+        params["query_source"] = "typed_query"
+        params["pc"] = "1"
+        params["spelling_corrections"] = "1"
+        return self._pagination_legacy(endpoint, params)
+
+    def live_event_timeline(self, event_id):
+        endpoint = "/2/live_event/timeline/{}.json".format(event_id)
+        params = self.params.copy()
+        params["timeline_id"] = "recap"
+        params["urt"] = "true"
+        params["get_annotations"] = "true"
+        return self._pagination_legacy(endpoint, params)
+
+    def live_event(self, event_id):
+        endpoint = "/1.1/live_event/1/{}/timeline.json".format(event_id)
+        params = self.params.copy()
+        params["count"] = "0"
+        params["urt"] = "true"
+        return (self._call(endpoint, params)
+                ["twitter_objects"]["live_events"][event_id])
 
     def list_by_rest_id(self, list_id):
         endpoint = "/graphql/BWEhzAk7k8TwbU4lKH2dpw/ListByRestId"
@@ -1004,7 +1041,7 @@ class TwitterAPI():
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, errors)
 
-    def _pagination_search(self, endpoint, params=None):
+    def _pagination_legacy(self, endpoint, params):
         original_retweets = (self.extractor.retweets == "original")
 
         while True:
@@ -1033,7 +1070,7 @@ class TwitterAPI():
 
                 elif entry_startswith(("cursor-bottom-", "sq-cursor-bottom")):
                     cursor = entry["content"]["operation"]["cursor"]
-                    if not cursor.get("stopOnEmptyResponse"):
+                    if not cursor.get("stopOnEmptyResponse", True):
                         # keep going even if there are no tweets
                         tweet = True
                     cursor = cursor["value"]
@@ -1123,7 +1160,7 @@ class TwitterAPI():
                     tweets.extend(entry["content"]["items"])
                 elif esw("cursor-bottom-"):
                     cursor = entry["content"]
-                    if not cursor.get("stopOnEmptyResponse"):
+                    if not cursor.get("stopOnEmptyResponse", True):
                         # keep going even if there are no tweets
                         tweet = True
                     cursor = cursor.get("value")
@@ -1133,7 +1170,6 @@ class TwitterAPI():
                     tweet = ((tweet.get("content") or tweet["item"])
                              ["itemContent"]["tweet_results"]["result"])
                 except KeyError:
-                    print(tweet["entryId"])
                     self.extractor.log.debug(
                         "Skipping %s (deleted)",
                         tweet["entryId"].rpartition("-")[2])
