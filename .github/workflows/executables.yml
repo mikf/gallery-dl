@@ -28,7 +28,7 @@ jobs:
 
     - name: Build executable
       run: |
-        pip install requests==2.25.1 requests[socks] urllib3==1.25.11 yt-dlp pyinstaller
+        pip install requests requests[socks] yt-dlp pyinstaller
         python scripts/pyinstaller.py
 
     - name: Upload executable
