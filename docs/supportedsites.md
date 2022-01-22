@@ -754,7 +754,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Twitter</td>
     <td>https://twitter.com/</td>
-    <td>Bookmarks, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets</td>
+    <td>Bookmarks, Events, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets</td>
     <td>Supported</td>
 </tr>
 <tr>
