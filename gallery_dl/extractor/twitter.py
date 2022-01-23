@@ -1083,8 +1083,7 @@ class TwitterAPI():
             if pinned_tweet:
                 pinned_tweet = False
                 if instructions[-1]["type"] == "TimelinePinEntry":
-                    tweets.append(instructions[-1]["entry"]["content"]
-                                  ["itemContent"]["tweet_results"]["result"])
+                    tweets.append(instructions[-1]["entry"])
 
             for entry in entries:
                 esw = entry["entryId"].startswith
