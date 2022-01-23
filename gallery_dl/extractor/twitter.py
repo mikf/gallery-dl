@@ -56,6 +56,7 @@ class TwitterExtractor(Extractor):
 
     def items(self):
         self.login()
+        self.api = TwitterAPI(self)
         metadata = self.metadata()
 
         for tweet in self.tweets():
@@ -395,7 +396,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
             self.user = "id:" + user_id
 
     def tweets(self):
-        return TwitterAPI(self).user_tweets(self.user)
+        return self.api.user_tweets(self.user)
 
 
 class TwitterRepliesExtractor(TwitterExtractor):
@@ -412,7 +413,7 @@ class TwitterRepliesExtractor(TwitterExtractor):
     )
 
     def tweets(self):
-        return TwitterAPI(self).user_tweets_and_replies(self.user)
+        return self.api.user_tweets_and_replies(self.user)
 
 
 class TwitterMediaExtractor(TwitterExtractor):
@@ -429,7 +430,7 @@ class TwitterMediaExtractor(TwitterExtractor):
     )
 
     def tweets(self):
-        return TwitterAPI(self).user_media(self.user)
+        return self.api.user_media(self.user)
 
 
 class TwitterLikesExtractor(TwitterExtractor):
@@ -442,7 +443,7 @@ class TwitterLikesExtractor(TwitterExtractor):
         return {"user_likes": self.user}
 
     def tweets(self):
-        return TwitterAPI(self).user_likes(self.user)
+        return self.api.user_likes(self.user)
 
 
 class TwitterBookmarkExtractor(TwitterExtractor):
@@ -452,7 +453,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
     test = ("https://twitter.com/i/bookmarks",)
 
     def tweets(self):
-        return TwitterAPI(self).user_bookmarks()
+        return self.api.user_bookmarks()
 
 
 class TwitterListExtractor(TwitterExtractor):
@@ -466,7 +467,7 @@ class TwitterListExtractor(TwitterExtractor):
     })
 
     def tweets(self):
-        return TwitterAPI(self).list_latest_tweets_timeline(self.user)
+        return self.api.list_latest_tweets_timeline(self.user)
 
 
 class TwitterListMembersExtractor(TwitterExtractor):
@@ -508,7 +509,7 @@ class TwitterSearchExtractor(TwitterExtractor):
         return {"search": text.unquote(self.user)}
 
     def tweets(self):
-        return TwitterAPI(self).search_adaptive(text.unquote(self.user))
+        return self.api.search_adaptive(text.unquote(self.user))
 
 
 class TwitterEventExtractor(TwitterExtractor):
@@ -521,7 +522,6 @@ class TwitterEventExtractor(TwitterExtractor):
     })
 
     def metadata(self):
-        self.api = TwitterAPI(self)
         return {"event": self.api.live_event(self.user)}
 
     def tweets(self):
@@ -638,11 +638,11 @@ class TwitterTweetExtractor(TwitterExtractor):
 
     def tweets(self):
         if self.config("conversations", False):
-            return TwitterAPI(self).tweet_detail(self.tweet_id)
+            return self.api.tweet_detail(self.tweet_id)
 
         tweets = []
         tweet_id = self.tweet_id
-        for tweet in TwitterAPI(self).tweet_detail(tweet_id):
+        for tweet in self.api.tweet_detail(tweet_id):
             if tweet["rest_id"] == tweet_id or \
                     tweet.get("_retweet_id_str") == tweet_id:
                 tweets.append(tweet)
@@ -730,6 +730,22 @@ class TwitterAPI():
             "ext": "mediaStats,highlightedLabel,hasNftAvatar,"
                    "voiceInfo,superFollowMetadata",
         }
+        self.variables = {
+            "includePromotedContent": False,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+            "withSuperFollowsTweetFields": True,
+            "withClientEventToken": False,
+            "withBirdwatchNotes": False,
+            "withVoice": True,
+            "withV2Timeline": False,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
+        }
+        self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
 
         cookies = extractor.session.cookies
         cookiedomain = extractor.cookiedomain
@@ -755,20 +771,9 @@ class TwitterAPI():
         variables = {
             "focalTweetId": tweet_id,
             "with_rux_injections": False,
-            "includePromotedContent": True,
             "withCommunity": True,
             "withQuickPromoteEligibilityTweetFields": True,
             "withBirdwatchNotes": False,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
-            "withDownvotePerspective": False,
-            "withReactionsMetadata": False,
-            "withReactionsPerspective": False,
-            "withSuperFollowsTweetFields": True,
-            "withVoice": True,
-            "withV2Timeline": False,
-            "__fs_interactive_text": False,
-            "__fs_dont_mention_me_view_api_enabled": False
         }
         return self._pagination_tweets(
             endpoint, variables, ("threaded_conversation_with_injections",))
@@ -778,18 +783,7 @@ class TwitterAPI():
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
-            "includePromotedContent": True,
             "withQuickPromoteEligibilityTweetFields": True,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
-            "withDownvotePerspective": False,
-            "withReactionsMetadata": False,
-            "withReactionsPerspective": False,
-            "withSuperFollowsTweetFields": True,
-            "withVoice": True,
-            "withV2Timeline": False,
-            "__fs_interactive_text": False,
-            "__fs_dont_mention_me_view_api_enabled": False,
         }
         return self._pagination_tweets(endpoint, variables)
 
@@ -798,19 +792,7 @@ class TwitterAPI():
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
-            "cursor": "HBaWwLnhx93RkygAAA==",
-            "includePromotedContent": True,
             "withCommunity": True,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
-            "withDownvotePerspective": False,
-            "withReactionsMetadata": False,
-            "withReactionsPerspective": False,
-            "withSuperFollowsTweetFields": True,
-            "withVoice": True,
-            "withV2Timeline": False,
-            "__fs_interactive_text": False,
-            "__fs_dont_mention_me_view_api_enabled": False,
         }
         return self._pagination_tweets(endpoint, variables)
 
@@ -819,19 +801,6 @@ class TwitterAPI():
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
-            "includePromotedContent": False,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
-            "withDownvotePerspective": False,
-            "withReactionsMetadata": False,
-            "withReactionsPerspective": False,
-            "withSuperFollowsTweetFields": True,
-            "withClientEventToken": False,
-            "withBirdwatchNotes": False,
-            "withVoice": True,
-            "withV2Timeline": False,
-            "__fs_interactive_text": False,
-            "__fs_dont_mention_me_view_api_enabled": False,
         }
         return self._pagination_tweets(endpoint, variables)
 
@@ -840,19 +809,6 @@ class TwitterAPI():
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
-            "includePromotedContent": False,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
-            "withDownvotePerspective": False,
-            "withReactionsMetadata": False,
-            "withReactionsPerspective": False,
-            "withSuperFollowsTweetFields": True,
-            "withClientEventToken": False,
-            "withBirdwatchNotes": False,
-            "withVoice": True,
-            "withV2Timeline": False,
-            "__fs_interactive_text": False,
-            "__fs_dont_mention_me_view_api_enabled": False,
         }
         return self._pagination_tweets(endpoint, variables)
 
@@ -860,15 +816,6 @@ class TwitterAPI():
         endpoint = "/graphql/WgbaxqmzjFP7oxkh_PkW4g/Bookmarks"
         variables = {
             "count": 100,
-            "includePromotedContent": True,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
-            "withDownvotePerspective": False,
-            "withReactionsMetadata": False,
-            "withReactionsPerspective": False,
-            "withSuperFollowsTweetFields": True,
-            "__fs_interactive_text": False,
-            "__fs_dont_mention_me_view_api_enabled": False,
         }
         return self._pagination_tweets(
             endpoint, variables, ("bookmark_timeline", "timeline"))
@@ -878,14 +825,6 @@ class TwitterAPI():
         variables = {
             "listId": list_id,
             "count": 100,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
-            "withDownvotePerspective": False,
-            "withReactionsMetadata": False,
-            "withReactionsPerspective": False,
-            "withSuperFollowsTweetFields": True,
-            "__fs_interactive_text": False,
-            "__fs_dont_mention_me_view_api_enabled": False,
         }
         return self._pagination_tweets(
             endpoint, variables, ("list", "tweets_timeline", "timeline"))
@@ -918,7 +857,7 @@ class TwitterAPI():
 
     def list_by_rest_id(self, list_id):
         endpoint = "/graphql/BWEhzAk7k8TwbU4lKH2dpw/ListByRestId"
-        params = {"variables": json.dumps({
+        params = {"variables": self._json_dumps({
             "listId": list_id,
             "withSuperFollowsUserFields": True,
         })}
@@ -932,15 +871,7 @@ class TwitterAPI():
         variables = {
             "listId": list_id,
             "count": 100,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
-            "withDownvotePerspective": False,
-            "withReactionsMetadata": False,
-            "withReactionsPerspective": False,
-            "withSuperFollowsTweetFields": True,
             "withSafetyModeUserFields": True,
-            "__fs_interactive_text": False,
-            "__fs_dont_mention_me_view_api_enabled": False,
         }
         return self._pagination_users(
             endpoint, variables, ("list", "members_timeline", "timeline"))
@@ -950,27 +881,16 @@ class TwitterAPI():
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
-            "includePromotedContent": False,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
-            "withDownvotePerspective": False,
-            "withReactionsMetadata": False,
-            "withReactionsPerspective": False,
-            "withSuperFollowsTweetFields": True,
-            "__fs_interactive_text": False,
-            "__fs_dont_mention_me_view_api_enabled": False,
         }
-
         return self._pagination_users(endpoint, variables)
 
     def user_by_screen_name(self, screen_name):
         endpoint = "/graphql/7mjxD3-C6BxitPMVQ6w0-Q/UserByScreenName"
-        variables = {
+        params = {"variables": self._json_dumps({
             "screen_name": screen_name,
             "withSafetyModeUserFields": True,
             "withSuperFollowsUserFields": True,
-        }
-        params = {"variables": json.dumps(variables)}
+        })}
         try:
             return self._call(endpoint, params)["data"]["user"]["result"]
         except KeyError:
@@ -1128,13 +1048,14 @@ class TwitterAPI():
             params["cursor"] = cursor
 
     def _pagination_tweets(self, endpoint, variables, path=None):
+        variables.update(self.variables)
         original_retweets = (self.extractor.retweets == "original")
         pinned_tweet = self.extractor.pinned
 
         while True:
             tweets = []
             cursor = tweet = stop = None
-            params = {"variables": json.dumps(variables)}
+            params = {"variables": self._json_dumps(variables)}
             data = self._call(endpoint, params)["data"]
 
             try:
@@ -1214,9 +1135,11 @@ class TwitterAPI():
             variables["cursor"] = cursor
 
     def _pagination_users(self, endpoint, variables, path=None):
+        variables.update(self.variables)
+
         while True:
             cursor = entry = stop = None
-            params = {"variables": json.dumps(variables)}
+            params = {"variables": self._json_dumps(variables)}
             data = self._call(endpoint, params)["data"]
 
             try:
