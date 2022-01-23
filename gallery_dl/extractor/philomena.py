@@ -172,7 +172,7 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
         PhilomenaExtractor.__init__(self, match)
         groups = match.groups()
         if groups[-1]:
-            q = groups[-1]
+            q = groups[-1].replace("+", " ")
             for old, new in (
                 ("-colon-"  , ":"),
                 ("-dash-"   , "-"),
