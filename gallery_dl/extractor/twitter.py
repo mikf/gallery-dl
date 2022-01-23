@@ -891,15 +891,23 @@ class TwitterAPI():
             "withSafetyModeUserFields": True,
             "withSuperFollowsUserFields": True,
         })}
-        try:
-            return self._call(endpoint, params)["data"]["user"]["result"]
-        except KeyError:
-            raise exception.NotFoundError("user")
+        return self._call(endpoint, params)["data"]["user"]["result"]
 
     def _user_id_by_screen_name(self, screen_name):
         if screen_name.startswith("id:"):
             return screen_name[3:]
-        return self.user_by_screen_name(screen_name)["rest_id"]
+
+        user = ()
+        try:
+            user = self.user_by_screen_name(screen_name)
+            return user["rest_id"]
+        except KeyError:
+            if "unavailable_message" in user:
+                raise exception.NotFoundError("{} ({})".format(
+                    user["unavailable_message"].get("text"),
+                    user.get("reason")), False)
+            else:
+                raise exception.NotFoundError("user")
 
     @cache(maxage=3600)
     def _guest_token(self):
@@ -1053,8 +1061,6 @@ class TwitterAPI():
         pinned_tweet = self.extractor.pinned
 
         while True:
-            tweets = []
-            cursor = tweet = stop = None
             params = {"variables": self._json_dumps(variables)}
             data = self._call(endpoint, params)["data"]
 
@@ -1066,8 +1072,13 @@ class TwitterAPI():
                     for key in path:
                         data = data[key]
                     instructions = data["instructions"]
-            except KeyError:
+
+                entries = instructions[0]["entries"]
+            except (KeyError, IndexError):
                 return
+
+            tweets = []
+            tweet = cursor = None
 
             if pinned_tweet:
                 pinned_tweet = False
@@ -1075,7 +1086,7 @@ class TwitterAPI():
                     tweets.append(instructions[-1]["entry"]["content"]
                                   ["itemContent"]["tweet_results"]["result"])
 
-            for entry in instructions[0]["entries"]:
+            for entry in entries:
                 esw = entry["entryId"].startswith
 
                 if esw("tweet-"):
@@ -1130,7 +1141,7 @@ class TwitterAPI():
                     quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
                     yield quoted
 
-            if stop or not cursor or not tweet:
+            if not tweet or not cursor:
                 return
             variables["cursor"] = cursor
 
