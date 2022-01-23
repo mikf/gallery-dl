@@ -748,23 +748,19 @@ class InstagramHighlightsExtractor(InstagramExtractor):
 
         endpoint = "/v1/highlights/{}/highlights_tray/".format(user["id"])
         tray = self._request_api(endpoint)["tray"]
-
         reel_ids = [highlight["id"] for highlight in tray]
 
         # Anything above 30 responds with statuscode 400.
         # 30 can work, however, sometimes the API will respond with 560 or 500.
-        chunk_size = 15
-        chunked_reel_ids = [reel_ids[offset:offset + chunk_size]
-                            for offset in range(0, len(reel_ids), chunk_size)]
-
-        reels = []
+        chunk_size = 5
         endpoint = "/v1/feed/reels_media/"
-        for chunk_ids in chunked_reel_ids:
-            params = {"reel_ids": chunk_ids}
-            chunk_reels = self._request_api(endpoint, params=params)["reels"]
-            reels += [chunk_reels[rid] for rid in chunk_ids]
 
-        return reels
+        for offset in range(0, len(reel_ids), chunk_size):
+            chunk_ids = reel_ids[offset : offset+chunk_size]
+            params = {"reel_ids": chunk_ids}
+            reels = self._request_api(endpoint, params=params)["reels"]
+            for reel_id in chunk_ids:
+                yield reels[reel_id]
 
 
 class InstagramReelsExtractor(InstagramExtractor):
