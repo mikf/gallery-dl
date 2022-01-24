@@ -515,6 +515,8 @@ class TwitterSearchExtractor(TwitterExtractor):
 class TwitterEventExtractor(TwitterExtractor):
     """Extractor for Tweets from a Twitter Event"""
     subcategory = "event"
+    directory_fmt = ("{category}", "Events",
+                     "{event[id]} {event[short_title]}")
     pattern = BASE_PATTERN + r"/i/events/(\d+)"
     test = ("https://twitter.com/i/events/1484669206993903616", {
         "range": "1-20",
