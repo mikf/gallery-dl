@@ -197,7 +197,7 @@ class SexcomSearchExtractor(SexcomExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search[query]}")
     pattern = (r"(?:https?://)?(?:www\.)?sex\.com/((?:"
-               r"(pic|gif|video)s/([^/?#]+)|search/(pic|gif|video)s"
+               r"(pic|gif|video)s/([^/?#]*)|search/(pic|gif|video)s"
                r")/?(?:\?([^#]+))?)")
     test = (
         ("https://www.sex.com/search/pics?query=ecchi", {
@@ -208,6 +208,7 @@ class SexcomSearchExtractor(SexcomExtractor):
             "range": "1-10",
             "count": 10,
         }),
+        ("https://www.sex.com/pics/?sort=popular&sub=all&page=1"),
     )
 
     def __init__(self, match):
