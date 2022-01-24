@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## 1.20.2 - 2022-01-24
+### Additions
+- [twitter] add `event` extractor (closes [#2109](https://github.com/mikf/gallery-dl/issues/2109))
+- [twitter] support image_carousel_website unified cards
+- add `--source-address` command-line option ([#2206](https://github.com/mikf/gallery-dl/issues/2206))
+- add environment variable syntax to formatting.md ([#2065](https://github.com/mikf/gallery-dl/issues/2065))
+### Changes
+- [twitter] changes to `cards` option
+  - enable `cards` by default
+  - require `cards` to be set to `"ytdl"` to invoke youtube-dl/yt-dlp on unsupported cards
+### Fixes
+- [blogger] support new image domain ([#2204](https://github.com/mikf/gallery-dl/issues/2204))
+- [gelbooru] improve video file detection ([#2188](https://github.com/mikf/gallery-dl/issues/2188))
+- [hitomi] fix `tag` extraction ([#2189](https://github.com/mikf/gallery-dl/issues/2189))
+- [instagram] fix highlights extraction ([#2197](https://github.com/mikf/gallery-dl/issues/2197))
+- [mangadex] re-enable warning for external chapters ([#2193](https://github.com/mikf/gallery-dl/issues/2193))
+- [newgrounds] set suitabilities filter before starting a search ([#2173](https://github.com/mikf/gallery-dl/issues/2173))
+- [philomena] fix search parameter escaping ([#2215](https://github.com/mikf/gallery-dl/issues/2215))
+- [reddit] allow downloading from quarantined subreddits ([#2180](https://github.com/mikf/gallery-dl/issues/2180))
+- [sexcom] extend URL pattern ([#2220](https://github.com/mikf/gallery-dl/issues/2220))
+- [twitter] update to GraphQL API ([#2212](https://github.com/mikf/gallery-dl/issues/2212))
 
 ## 1.20.1 - 2022-01-08
 ### Additions
