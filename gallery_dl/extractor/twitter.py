@@ -1129,21 +1129,26 @@ class TwitterAPI():
                 if "retweeted_status_result" in legacy:
                     retweet = legacy["retweeted_status_result"]["result"]
                     if original_retweets:
-                        if not retweet:
+                        try:
+                            retweet["legacy"]["retweeted_status_id_str"] = \
+                                retweet["rest_id"]
+                            retweet["_retweet_id_str"] = tweet["rest_id"]
+                            tweet = retweet
+                        except KeyError:
                             continue
-                        retweet["legacy"]["retweeted_status_id_str"] = \
-                            retweet["rest_id"]
-                        retweet["_retweet_id_str"] = tweet["rest_id"]
-                        tweet = retweet
-                    elif retweet:
-                        legacy["retweeted_status_id_str"] = \
-                            retweet["rest_id"]
-                        legacy["author"] = \
-                            retweet["core"]["user_results"]["result"]
-                        if "extended_entities" in retweet["legacy"] and \
-                                "extended_entities" not in legacy:
-                            legacy["extended_entities"] = \
-                                retweet["legacy"]["extended_entities"]
+                    else:
+                        try:
+                            legacy["retweeted_status_id_str"] = \
+                                retweet["rest_id"]
+                            legacy["author"] = \
+                                retweet["core"]["user_results"]["result"]
+                            if "extended_entities" in retweet["legacy"] and \
+                                    "extended_entities" not in legacy:
+                                legacy["extended_entities"] = \
+                                    retweet["legacy"]["extended_entities"]
+                        except KeyError:
+                            pass
+
                 yield tweet
 
                 if "quoted_status_result" in tweet:
