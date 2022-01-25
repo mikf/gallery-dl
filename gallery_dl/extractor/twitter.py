@@ -793,7 +793,7 @@ class TwitterAPI():
             endpoint, variables, ("threaded_conversation_with_injections",))
 
     def user_tweets(self, screen_name):
-        endpoint = "/graphql/DhQ8lYnLh5T5K8aVUgHVnQ/UserTweets"
+        endpoint = "/graphql/LNhjy8t3XpIrBYM-ms7sPQ/UserTweets"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -802,7 +802,7 @@ class TwitterAPI():
         return self._pagination_tweets(endpoint, variables)
 
     def user_tweets_and_replies(self, screen_name):
-        endpoint = "/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies"
+        endpoint = "/graphql/Vg5aF036K40ST3FWvnvRGA/UserTweetsAndReplies"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -811,7 +811,7 @@ class TwitterAPI():
         return self._pagination_tweets(endpoint, variables)
 
     def user_media(self, screen_name):
-        endpoint = "/graphql/NeBRhmkLMUxQkGpBtQ4k5w/UserMedia"
+        endpoint = "/graphql/Hl6C7ac051l_QBe3HjGz_A/UserMedia"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -819,7 +819,7 @@ class TwitterAPI():
         return self._pagination_tweets(endpoint, variables)
 
     def user_likes(self, screen_name):
-        endpoint = "/graphql/qICyoimVKJRJdX5UX5a_Gg/Likes"
+        endpoint = "/graphql/smISlRVSnz-GaU_XpU_akw/Likes"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -827,7 +827,7 @@ class TwitterAPI():
         return self._pagination_tweets(endpoint, variables)
 
     def user_bookmarks(self):
-        endpoint = "/graphql/WgbaxqmzjFP7oxkh_PkW4g/Bookmarks"
+        endpoint = "/graphql/yKNebSjZKbo2tOd-Qdc7Xg/Bookmarks"
         variables = {
             "count": 100,
         }
@@ -835,7 +835,7 @@ class TwitterAPI():
             endpoint, variables, ("bookmark_timeline", "timeline"))
 
     def list_latest_tweets_timeline(self, list_id):
-        endpoint = "/graphql/mwIBwcZV981Bnjb2lPNYfw/ListLatestTweetsTimeline"
+        endpoint = "/graphql/RxUL5UHi4Msxt_P9O1729w/ListLatestTweetsTimeline"
         variables = {
             "listId": list_id,
             "count": 100,
@@ -881,7 +881,7 @@ class TwitterAPI():
             raise exception.NotFoundError("list")
 
     def list_members(self, list_id):
-        endpoint = "/graphql/Ke6urWMeCV2UlKXGRy4sow/ListMembers"
+        endpoint = "/graphql/kk9RQtSa2sc-4_9figZVBw/ListMembers"
         variables = {
             "listId": list_id,
             "count": 100,
@@ -891,7 +891,7 @@ class TwitterAPI():
             endpoint, variables, ("list", "members_timeline", "timeline"))
 
     def user_following(self, screen_name):
-        endpoint = "/graphql/HBTc0rkOSBXmfSmT7GKEMA/Following"
+        endpoint = "/graphql/kz464_e4MAOXc3bGOA9kow/Following"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
