@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -180,7 +180,7 @@ class KemonopartyExtractor(Extractor):
         for dm in text.extract_iter(page, "<article", "</article>"):
             dms.append({
                 "body": text.unescape(text.extract(
-                    dm, '<div class="dm-card__content">', '</div>',
+                    dm, '<pre>', '</pre></section>',
                 )[0].strip()),
                 "date": text.extract(dm, 'datetime="', '"')[0],
             })
