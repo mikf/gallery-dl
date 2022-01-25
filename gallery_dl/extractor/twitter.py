@@ -180,7 +180,7 @@ class TwitterExtractor(Extractor):
             else:
                 bval = bvals["unified_card"]["string_value"]
             data = json.loads(bval)
-            if data["type"] == "image_carousel_website":
+            if data.get("type") == "image_carousel_website":
                 self._extract_media(
                     tweet, data["media_entities"].values(), files)
                 return
@@ -382,6 +382,10 @@ class TwitterTimelineExtractor(TwitterExtractor):
         ("https://twitter.com/supernaturepics", {
             "range": "1-40",
             "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
+        }),
+        # suspended account (#2216)
+        ("https://twitter.com/realDonaldTrump", {
+            "exception": exception.NotFoundError,
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
         ("https://www.twitter.com/id:2976459548"),
@@ -612,6 +616,10 @@ class TwitterTweetExtractor(TwitterExtractor):
             "pattern": r"https://pbs\.twimg\.com/media/F.+=png",
             "count": 6,
         }),
+        # unified_card without type
+        ("https://twitter.com/i/web/status/1466183847628865544", {
+            "count": 0,
+        }),
         # original retweets (#1026)
         ("https://twitter.com/jessica_3978/status/1296304589591810048", {
             "options": (("retweets", "original"),),
@@ -631,6 +639,10 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/morino_ya/status/1392763691599237121", {
             "options": (("retweets", True),),
             "count": 4,
+        }),
+        # deleted quote tweet (#2225)
+        ("https://twitter.com/i/web/status/1460044411165888515", {
+            "count": 0,
         }),
     )
 
@@ -1103,17 +1115,17 @@ class TwitterAPI():
                         tweet = True
                     cursor = cursor.get("value")
 
-            for tweet in tweets:
+            for entry in tweets:
                 try:
-                    tweet = ((tweet.get("content") or tweet["item"])
+                    tweet = ((entry.get("content") or entry["item"])
                              ["itemContent"]["tweet_results"]["result"])
+                    legacy = tweet["legacy"]
                 except KeyError:
                     self.extractor.log.debug(
                         "Skipping %s (deleted)",
-                        tweet["entryId"].rpartition("-")[2])
+                        (entry.get("entryId") or "").rpartition("-")[2])
                     continue
 
-                legacy = tweet["legacy"]
                 if "retweeted_status_result" in legacy:
                     retweet = legacy["retweeted_status_result"]["result"]
                     if original_retweets:
@@ -1135,12 +1147,18 @@ class TwitterAPI():
                 yield tweet
 
                 if "quoted_status_result" in tweet:
-                    quoted = tweet["quoted_status_result"]["result"]
-                    quoted["legacy"]["author"] = \
-                        quoted["core"]["user_results"]["result"]
-                    quoted["core"] = tweet["core"]
-                    quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
-                    yield quoted
+                    try:
+                        quoted = tweet["quoted_status_result"]["result"]
+                        quoted["legacy"]["author"] = \
+                            quoted["core"]["user_results"]["result"]
+                        quoted["core"] = tweet["core"]
+                        quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
+                        yield quoted
+                    except KeyError:
+                        self.extractor.log.debug(
+                            "Skipping quote of %s (deleted)",
+                            tweet.get("rest_id"))
+                        continue
 
             if not tweet or not cursor:
                 return
