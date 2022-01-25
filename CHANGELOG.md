@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.20.2 - 2022-01-24
 ### Additions
 - [twitter] add `event` extractor (closes [#2109](https://github.com/mikf/gallery-dl/issues/2109))
