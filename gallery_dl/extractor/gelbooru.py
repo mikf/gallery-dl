@@ -33,28 +33,20 @@ class GelbooruBase():
     def _pagination(self, params):
         params["pid"] = self.page_start
         params["limit"] = self.per_page
+        limit = self.per_page // 2
 
-        post = None
         while True:
-            try:
-                posts = self._api_request(params)
-            except ValueError:
-                if "tags" not in params or post is None:
-                    raise
-                taglist = [tag for tag in params["tags"].split()
-                           if not tag.startswith("id:<")]
-                taglist.append("id:<" + str(post.attrib["id"]))
-                params["tags"] = " ".join(taglist)
-                params["pid"] = 0
-                continue
+            posts = self._api_request(params)
 
-            post = None
             for post in posts:
                 yield post
 
-            if len(posts) < self.per_page:
+            if len(posts) < limit:
                 return
-            params["pid"] += 1
+
+            if "pid" in params:
+                del params["pid"]
+            params["tags"] = "{} id:<{}".format(self.tags, post["id"])
 
     @staticmethod
     def _file_url(post):
@@ -81,9 +73,12 @@ class GelbooruTagExtractor(GelbooruBase,
         ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
             "count": 5,
         }),
-        ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
-            "options": (("api", False),),
-            "count": 5,
+        ("https://gelbooru.com/index.php?page=post&s=list&tags=meiya_neon", {
+            "range": "196-204",
+            "url": "845a61aa1f90fb4ced841e8b7e62098be2e967bf",
+            "pattern": r"https://img\d\.gelbooru\.com"
+                       r"/images/../../[0-9a-f]{32}\.jpg",
+            "count": 9,
         }),
     )
 
