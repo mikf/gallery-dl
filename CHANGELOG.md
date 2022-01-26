@@ -1,9 +1,11 @@
 # Changelog
 
+## Unreleased
+
 ## 1.20.3 - 2022-01-26
 ### Fixes
 - [kemonoparty] fix DMs extraction ([#2008](https://github.com/mikf/gallery-dl/issues/2008))
-- [twitter] fix crash ob Tweets with deleted quotes ([#2225](https://github.com/mikf/gallery-dl/issues/2225))
+- [twitter] fix crash on Tweets with deleted quotes ([#2225](https://github.com/mikf/gallery-dl/issues/2225))
 - [twitter] fix crash on suspended Tweets without `legacy` entry ([#2216](https://github.com/mikf/gallery-dl/issues/2216))
 - [twitter] fix crash on unified cards without `type`
 - [twitter] prevent crash on invalid/deleted Retweets ([#2225](https://github.com/mikf/gallery-dl/issues/2225))
