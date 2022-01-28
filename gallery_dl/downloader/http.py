@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -148,9 +148,15 @@ class HttpDownloader(DownloaderBase):
 
             # check for invalid responses
             validate = kwdict.get("_http_validate")
-            if validate and not validate(response):
-                self.log.warning("Invalid response")
-                return False
+            if validate:
+                result = validate(response)
+                if isinstance(result, str):
+                    url = result
+                    tries -= 1
+                    continue
+                if not result:
+                    self.log.warning("Invalid response")
+                    return False
 
             # set missing filename extension from MIME type
             if not pathfmt.extension:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -42,6 +42,11 @@ class LolisafelbumExtractor(LolisafeExtractor):
                 "num": int,
             },
         }),
+        # mp4 (#2239)
+        ("https://bunkr.is/a/ptRHaCn2", {
+            "pattern": r"https://cdn\.bunkr\.is/_-RnHoW69L\.mp4",
+            "content": "80e61d1dbc5896ae7ef9a28734c747b28b320471",
+        }),
         ("https://bunkr.to/a/Lktg9Keq"),
         ("https://zz.ht/a/lop7W6EZ", {
             "pattern": r"https://z\.zz\.fo/(4anuY|ih560)\.png",
@@ -66,6 +71,11 @@ class LolisafelbumExtractor(LolisafeExtractor):
             url = file["file"]
             text.nameext_from_url(url, data)
             data["name"], sep, data["id"] = data["filename"].rpartition("-")
+
+            if data["extension"] == "mp4":
+                data["_http_validate"] = self._check_rewrite
+            else:
+                data["_http_validate"] = None
             yield Message.Url, url, data
 
     def fetch_album(self, album_id):
@@ -77,3 +87,13 @@ class LolisafelbumExtractor(LolisafeExtractor):
             "album_name": text.unescape(data["title"]),
             "count"     : data["count"],
         }
+
+    @staticmethod
+    def _check_rewrite(response):
+        if response.history and response.headers.get(
+                "Content-Type").startswith("text/html"):
+            # consume content to reuse connection
+            response.content
+            # rewrite to download URL
+            return response.url.replace("/v/", "/d/", 1)
+        return True
