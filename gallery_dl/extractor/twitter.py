@@ -1083,13 +1083,15 @@ class TwitterAPI():
                     instructions = (data["user"]["result"]["timeline"]
                                     ["timeline"]["instructions"])
                 else:
+                    instructions = data
                     for key in path:
-                        data = data[key]
-                    instructions = data["instructions"]
+                        instructions = instructions[key]
+                    instructions = instructions["instructions"]
 
                 entries = instructions[0]["entries"]
             except (KeyError, IndexError):
-                return
+                self.extractor.log.debug(data)
+                raise exception.StopExtraction("Unable to retrieve Tweets")
 
             tweets = []
             tweet = cursor = None
