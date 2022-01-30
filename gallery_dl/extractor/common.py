@@ -38,6 +38,7 @@ class Extractor():
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
+    disabletls12 = False
 
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
@@ -61,6 +62,11 @@ class Extractor():
 
         if self._retries < 0:
             self._retries = float("inf")
+
+        self._additional_adapter_options = 0
+        if self.config("disabletls12"):
+            self._additional_adapter_options |= ssl.OP_NO_TLSv1_2
+            self.log.info("TLS 1.2 disabled.")
 
         self._init_session()
         self._init_cookies()
@@ -243,9 +249,11 @@ class Extractor():
                 platform = "Macintosh; Intel Mac OS X 11.5"
 
             if browser == "chrome":
-                _emulate_browser_chrome(session, platform, source_address)
+                _emulate_browser_chrome(session, platform, source_address,
+                                        self._additional_adapter_options)
             else:
-                _emulate_browser_firefox(session, platform, source_address)
+                _emulate_browser_firefox(session, platform, source_address,
+                                         self._additional_adapter_options)
         else:
             if source_address:
                 session.mount("https://", SourceAdapter(source_address))
@@ -264,7 +272,8 @@ class Extractor():
         if ciphers:
             if isinstance(ciphers, list):
                 ciphers = ":".join(ciphers)
-            session.mount("https://", HTTPSAdapter(ciphers))
+            session.mount("https://", HTTPSAdapter(ciphers,
+                          self._additional_adapter_options))
 
     def _init_proxies(self):
         """Update the session's proxy map"""
@@ -632,10 +641,11 @@ class SourceAdapter(HTTPAdapter):
 
 class HTTPSAdapter(HTTPAdapter):
 
-    def __init__(self, ciphers, source_address=None):
+    def __init__(self, ciphers, additional_options, source_address=None):
         context = self.ssl_context = ssl.create_default_context()
         context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
                             ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
+        context.options |= additional_options
         context.set_ecdh_curve("prime256v1")
         context.set_ciphers(ciphers)
         self.source_address = source_address
@@ -652,7 +662,8 @@ class HTTPSAdapter(HTTPAdapter):
         return HTTPAdapter.proxy_manager_for(self, *args, **kwargs)
 
 
-def _emulate_browser_firefox(session, platform, source_address):
+def _emulate_browser_firefox(session, platform, source_address,
+                             additional_options):
     headers = session.headers
     headers["User-Agent"] = ("Mozilla/5.0 (" + platform + "; rv:91.0) "
                              "Gecko/20100101 Firefox/91.0")
@@ -683,11 +694,13 @@ def _emulate_browser_firefox(session, platform, source_address):
         "AES128-SHA:"
         "AES256-SHA:"
         "DES-CBC3-SHA",
+        additional_options,
         source_address
     ))
 
 
-def _emulate_browser_chrome(session, platform, source_address):
+def _emulate_browser_chrome(session, platform, source_address,
+                            additional_options):
     if platform.startswith("Macintosh"):
         platform = platform.replace(".", "_") + "_2"
 
@@ -720,6 +733,7 @@ def _emulate_browser_chrome(session, platform, source_address):
         "AES128-SHA:"
         "AES256-SHA:"
         "DES-CBC3-SHA",
+        additional_options,
         source_address
     ))
 
