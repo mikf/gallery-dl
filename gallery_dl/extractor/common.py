@@ -64,7 +64,7 @@ class Extractor():
             self._retries = float("inf")
 
         self._additional_adapter_options = 0
-        if self.config("disabletls12"):
+        if self.config("disabletls12") or self.disabletls12:
             self._additional_adapter_options |= ssl.OP_NO_TLSv1_2
             self.log.info("TLS 1.2 disabled.")
 
