@@ -26,6 +26,7 @@ class PatreonExtractor(Extractor):
     archive_fmt = "{id}_{num}"
     browser = "firefox"
     _warning = True
+    disabletls12 = True
 
     def items(self):
 
