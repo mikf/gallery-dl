@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -62,11 +62,6 @@ class Extractor():
 
         if self._retries < 0:
             self._retries = float("inf")
-
-        self._additional_adapter_options = 0
-        if self.config("disabletls12") or self.disabletls12:
-            self._additional_adapter_options |= ssl.OP_NO_TLSv1_2
-            self.log.info("TLS 1.2 disabled.")
 
         self._init_session()
         self._init_cookies()
@@ -225,14 +220,7 @@ class Extractor():
         self.session = session = requests.Session()
         headers = session.headers
         headers.clear()
-
-        source_address = self.config("source-address")
-        if source_address:
-            if isinstance(source_address, str):
-                source_address = (source_address, 0)
-            else:
-                source_address = (source_address[0], source_address[1])
-            session.mount("http://", SourceAdapter(source_address))
+        ssl_options = ssl_ciphers = 0
 
         browser = self.config("browser") or self.browser
         if browser and isinstance(browser, str):
@@ -249,14 +237,21 @@ class Extractor():
                 platform = "Macintosh; Intel Mac OS X 11.5"
 
             if browser == "chrome":
-                _emulate_browser_chrome(session, platform, source_address,
-                                        self._additional_adapter_options)
+                if platform.startswith("Macintosh"):
+                    platform = platform.replace(".", "_") + "_2"
             else:
-                _emulate_browser_firefox(session, platform, source_address,
-                                         self._additional_adapter_options)
+                browser = "firefox"
+
+            for key, value in HTTP_HEADERS[browser]:
+                if value and "{}" in value:
+                    headers[key] = value.format(platform)
+                else:
+                    headers[key] = value
+
+            ssl_options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
+                            ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
+            ssl_ciphers = SSL_CIPHERS[browser]
         else:
-            if source_address:
-                session.mount("https://", SourceAdapter(source_address))
             headers["User-Agent"] = self.config("user-agent", (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
                 "rv:91.0) Gecko/20100101 Firefox/91.0"))
@@ -268,12 +263,28 @@ class Extractor():
         if custom_headers:
             headers.update(custom_headers)
 
-        ciphers = self.config("ciphers")
-        if ciphers:
-            if isinstance(ciphers, list):
-                ciphers = ":".join(ciphers)
-            session.mount("https://", HTTPSAdapter(ciphers,
-                          self._additional_adapter_options))
+        custom_ciphers = self.config("ciphers")
+        if custom_ciphers:
+            if isinstance(custom_ciphers, list):
+                ssl_ciphers = ":".join(custom_ciphers)
+            else:
+                ssl_ciphers = custom_ciphers
+
+        source_address = self.config("source-address")
+        if source_address:
+            if isinstance(source_address, str):
+                source_address = (source_address, 0)
+            else:
+                source_address = (source_address[0], source_address[1])
+
+        if self.config("disabletls12") or self.disabletls12:
+            ssl_options |= ssl.OP_NO_TLSv1_2
+            self.log.debug("TLS 1.2 disabled.")
+
+        adapter = _build_requests_adapter(
+            ssl_options, ssl_ciphers, source_address)
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
 
     def _init_proxies(self):
         """Update the session's proxy map"""
@@ -624,30 +635,10 @@ class BaseExtractor(Extractor):
         )
 
 
-class SourceAdapter(HTTPAdapter):
+class RequestsAdapter(HTTPAdapter):
 
-    def __init__(self, source_address):
-        self.source_address = source_address
-        HTTPAdapter.__init__(self)
-
-    def init_poolmanager(self, *args, **kwargs):
-        kwargs["source_address"] = self.source_address
-        return HTTPAdapter.init_poolmanager(self, *args, **kwargs)
-
-    def proxy_manager_for(self, *args, **kwargs):
-        kwargs["source_address"] = self.source_address
-        return HTTPAdapter.proxy_manager_for(self, *args, **kwargs)
-
-
-class HTTPSAdapter(HTTPAdapter):
-
-    def __init__(self, ciphers, additional_options, source_address=None):
-        context = self.ssl_context = ssl.create_default_context()
-        context.options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
-                            ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
-        context.options |= additional_options
-        context.set_ecdh_curve("prime256v1")
-        context.set_ciphers(ciphers)
+    def __init__(self, ssl_context=None, source_address=None):
+        self.ssl_context = ssl_context
         self.source_address = source_address
         HTTPAdapter.__init__(self)
 
@@ -662,20 +653,59 @@ class HTTPSAdapter(HTTPAdapter):
         return HTTPAdapter.proxy_manager_for(self, *args, **kwargs)
 
 
-def _emulate_browser_firefox(session, platform, source_address,
-                             additional_options):
-    headers = session.headers
-    headers["User-Agent"] = ("Mozilla/5.0 (" + platform + "; rv:91.0) "
-                             "Gecko/20100101 Firefox/91.0")
-    headers["Accept"] = ("text/html,application/xhtml+xml,"
-                         "application/xml;q=0.9,image/webp,*/*;q=0.8")
-    headers["Accept-Language"] = "en-US,en;q=0.5"
-    headers["Accept-Encoding"] = "gzip, deflate"
-    headers["Referer"] = None
-    headers["Upgrade-Insecure-Requests"] = "1"
-    headers["Cookie"] = None
+def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
+    key = (ssl_options, ssl_ciphers, source_address)
+    try:
+        return _adapter_cache[key]
+    except KeyError:
+        pass
 
-    session.mount("https://", HTTPSAdapter(
+    if ssl_options or ssl_ciphers:
+        ssl_context = ssl.create_default_context()
+        if ssl_options:
+            ssl_context.options |= ssl_options
+        if ssl_ciphers:
+            ssl_context.set_ecdh_curve("prime256v1")
+            ssl_context.set_ciphers(ssl_ciphers)
+    else:
+        ssl_context = None
+
+    adapter = _adapter_cache[key] = RequestsAdapter(
+        ssl_context, source_address)
+    return adapter
+
+
+_adapter_cache = {}
+
+
+HTTP_HEADERS = {
+    "firefox": (
+        ("User-Agent", "Mozilla/5.0 ({}; rv:91.0) "
+                       "Gecko/20100101 Firefox/91.0"),
+        ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
+                   "image/avif,*/*;q=0.8"),
+        ("Accept-Language", "en-US,en;q=0.5"),
+        ("Accept-Encoding", "gzip, deflate"),
+        ("Referer", None),
+        ("Connection", "keep-alive"),
+        ("Upgrade-Insecure-Requests", "1"),
+        ("Cookie", None),
+    ),
+    "chrome": (
+        ("Upgrade-Insecure-Requests", "1"),
+        ("User-Agent", "Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, "
+                       "like Gecko) Chrome/92.0.4515.131 Safari/537.36"),
+        ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
+                   "image/webp,image/apng,*/*;q=0.8"),
+        ("Referer", None),
+        ("Accept-Encoding", "gzip, deflate"),
+        ("Accept-Language", "en-US,en;q=0.9"),
+        ("Cookie", None),
+    ),
+}
+
+SSL_CIPHERS = {
+    "firefox": (
         "TLS_AES_128_GCM_SHA256:"
         "TLS_CHACHA20_POLY1305_SHA256:"
         "TLS_AES_256_GCM_SHA384:"
@@ -693,30 +723,9 @@ def _emulate_browser_firefox(session, platform, source_address,
         "DHE-RSA-AES256-SHA:"
         "AES128-SHA:"
         "AES256-SHA:"
-        "DES-CBC3-SHA",
-        additional_options,
-        source_address
-    ))
-
-
-def _emulate_browser_chrome(session, platform, source_address,
-                            additional_options):
-    if platform.startswith("Macintosh"):
-        platform = platform.replace(".", "_") + "_2"
-
-    headers = session.headers
-    headers["Upgrade-Insecure-Requests"] = "1"
-    headers["User-Agent"] = (
-        "Mozilla/5.0 (" + platform + ") AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36")
-    headers["Accept"] = ("text/html,application/xhtml+xml,application/xml;"
-                         "q=0.9,image/webp,image/apng,*/*;q=0.8")
-    headers["Referer"] = None
-    headers["Accept-Encoding"] = "gzip, deflate"
-    headers["Accept-Language"] = "en-US,en;q=0.9"
-    headers["Cookie"] = None
-
-    session.mount("https://", HTTPSAdapter(
+        "DES-CBC3-SHA"
+    ),
+    "chrome": (
         "TLS_AES_128_GCM_SHA256:"
         "TLS_AES_256_GCM_SHA384:"
         "TLS_CHACHA20_POLY1305_SHA256:"
@@ -732,10 +741,9 @@ def _emulate_browser_chrome(session, platform, source_address,
         "AES256-GCM-SHA384:"
         "AES128-SHA:"
         "AES256-SHA:"
-        "DES-CBC3-SHA",
-        additional_options,
-        source_address
-    ))
+        "DES-CBC3-SHA"
+    ),
+}
 
 
 # Undo automatic pyOpenSSL injection by requests

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -52,9 +52,6 @@ class Job():
                 extr._cfgpath = pextr._cfgpath
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
-
-            # reuse connection adapters
-            extr.session.adapters = pextr.session.adapters
 
         # user-supplied metadata
         kwdict = extr.config("keywords")
