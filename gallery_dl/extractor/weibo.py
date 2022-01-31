@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,6 +20,7 @@ class WeiboExtractor(Extractor):
     filename_fmt = "{status[id]}_{num:>02}.{extension}"
     archive_fmt = "{status[id]}_{num}"
     root = "https://m.weibo.cn"
+    request_interval = (1.0, 2.0)
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -111,22 +112,39 @@ class WeiboUserExtractor(WeiboExtractor):
 
     def __init__(self, match):
         WeiboExtractor.__init__(self, match)
-        self.user_id = match.group(1)
+        self.user_id = match.group(1)[-10:]
 
     def statuses(self):
         url = self.root + "/api/container/getIndex"
-        params = {"page": 1, "containerid": "107603" + self.user_id[-10:]}
+        headers = {
+            "Accept": "application/json, text/plain, */*",
+            "X-Requested-With": "XMLHttpRequest",
+            "MWeibo-Pwa": "1",
+            "X-XSRF-TOKEN": None,
+            "Referer": "{}/u/{}".format(self.root, self.user_id),
+        }
+        params = {
+            "type": "uid",
+            "value": self.user_id,
+            "containerid": "107603" + self.user_id,
+        }
 
         while True:
-            data = self.request(url, params=params).json()
-            cards = data["data"]["cards"]
+            response = self.request(url, params=params, headers=headers)
+            headers["X-XSRF-TOKEN"] = response.cookies.get("XSRF-TOKEN")
+            data = response.json()["data"]
 
-            if not cards:
-                return
-            for card in cards:
+            for card in data["cards"]:
                 if "mblog" in card:
                     yield card["mblog"]
-            params["page"] += 1
+
+            info = data.get("cardlistInfo")
+            if not info:
+                continue
+
+            params["since_id"] = sid = info.get("since_id")
+            if not sid:
+                return
 
 
 class WeiboStatusExtractor(WeiboExtractor):
