@@ -38,7 +38,7 @@ class Extractor():
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
-    disabletls12 = False
+    tls12 = True
 
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
@@ -277,7 +277,10 @@ class Extractor():
             else:
                 source_address = (source_address[0], source_address[1])
 
-        if self.config("disabletls12") or self.disabletls12:
+        tls12 = self.config("tls12")
+        if tls12 is None:
+            tls12 = self.tls12
+        if not tls12:
             ssl_options |= ssl.OP_NO_TLSv1_2
             self.log.debug("TLS 1.2 disabled.")
 
