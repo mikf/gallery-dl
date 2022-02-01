@@ -760,6 +760,7 @@ class TwitterAPI():
             "__fs_dont_mention_me_view_api_enabled": False,
         }
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
+        self._user = None
 
         cookies = extractor.session.cookies
         cookiedomain = extractor.cookiedomain
@@ -898,6 +899,15 @@ class TwitterAPI():
         }
         return self._pagination_users(endpoint, variables)
 
+    def user_by_rest_id(self, rest_id):
+        endpoint = "/graphql/I5nvpI91ljifos1Y3Lltyg/UserByRestId"
+        params = {"variables": self._json_dumps({
+            "userId": rest_id,
+            "withSafetyModeUserFields": True,
+            "withSuperFollowsUserFields": True,
+        })}
+        return self._call(endpoint, params)["data"]["user"]["result"]
+
     def user_by_screen_name(self, screen_name):
         endpoint = "/graphql/7mjxD3-C6BxitPMVQ6w0-Q/UserByScreenName"
         params = {"variables": self._json_dumps({
@@ -909,11 +919,12 @@ class TwitterAPI():
 
     def _user_id_by_screen_name(self, screen_name):
         if screen_name.startswith("id:"):
+            self._user = util.SENTINEL
             return screen_name[3:]
 
         user = ()
         try:
-            user = self.user_by_screen_name(screen_name)
+            user = self._user = self.user_by_screen_name(screen_name)
             return user["rest_id"]
         except KeyError:
             if "unavailable_message" in user:
@@ -964,22 +975,6 @@ class TwitterAPI():
                 seconds = None if until else 60
                 self.extractor.wait(until=until, seconds=seconds)
                 continue
-
-            if response.status_code == 401 and \
-                    "have been blocked from viewing" in errors:
-                # account blocked
-                extr = self.extractor
-                if self.headers["x-twitter-auth-type"] and \
-                        extr.config("logout"):
-                    guest_token = self._guest_token()
-                    extr.session.cookies.set(
-                        "gt", guest_token, domain=extr.cookiedomain)
-                    extr._cookiefile = None
-                    del extr.session.cookies["auth_token"]
-                    self.headers["x-guest-token"] = guest_token
-                    self.headers["x-twitter-auth-type"] = None
-                    extr.log.info("Retrying API request as guest")
-                    continue
 
             # error
             raise exception.StopExtraction(
@@ -1070,9 +1065,10 @@ class TwitterAPI():
             params["cursor"] = cursor
 
     def _pagination_tweets(self, endpoint, variables, path=None):
+        extr = self.extractor
         variables.update(self.variables)
-        original_retweets = (self.extractor.retweets == "original")
-        pinned_tweet = self.extractor.pinned
+        original_retweets = (extr.retweets == "original")
+        pinned_tweet = extr.pinned
 
         while True:
             params = {"variables": self._json_dumps(variables)}
@@ -1090,8 +1086,40 @@ class TwitterAPI():
 
                 entries = instructions[0]["entries"]
             except (KeyError, IndexError):
-                self.extractor.log.debug(data)
-                raise exception.StopExtraction("Unable to retrieve Tweets")
+                extr.log.debug(data)
+
+                if self._user:
+                    user = self._user
+                    if user is util.SENTINEL:
+                        try:
+                            user = self.user_by_rest_id(variables["userId"])
+                        except KeyError:
+                            raise exception.NotFoundError("user")
+                    user = user.get("legacy")
+                    if not user:
+                        pass
+                    elif user.get("blocked_by"):
+                        if self.headers["x-twitter-auth-type"] and \
+                                extr.config("logout"):
+                            guest_token = self._guest_token()
+                            extr.session.cookies.set(
+                                "gt", guest_token, domain=extr.cookiedomain)
+                            extr._cookiefile = None
+                            del extr.session.cookies["auth_token"]
+                            self.headers["x-guest-token"] = guest_token
+                            self.headers["x-twitter-auth-type"] = None
+                            extr.log.info("Retrying API request as guest")
+                            continue
+                        raise exception.AuthorizationError(
+                            "{} blocked your account".format(
+                                user["screen_name"]))
+                    elif user.get("protected"):
+                        raise exception.AuthorizationError(
+                            "{}'s Tweets are protected".format(
+                                user["screen_name"]))
+
+                raise exception.StopExtraction(
+                    "Unable to retrieve Tweets from this timeline")
 
             tweets = []
             tweet = cursor = None
@@ -1123,7 +1151,7 @@ class TwitterAPI():
                              ["itemContent"]["tweet_results"]["result"])
                     legacy = tweet["legacy"]
                 except KeyError:
-                    self.extractor.log.debug(
+                    extr.log.debug(
                         "Skipping %s (deleted)",
                         (entry.get("entryId") or "").rpartition("-")[2])
                     continue
@@ -1162,7 +1190,7 @@ class TwitterAPI():
                         quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
                         yield quoted
                     except KeyError:
-                        self.extractor.log.debug(
+                        extr.log.debug(
                             "Skipping quote of %s (deleted)",
                             tweet.get("rest_id"))
                         continue
