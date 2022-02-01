@@ -893,6 +893,18 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr>
+    <td>Censored Booru</td>
+    <td>https://censored.booru.org/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Goon Hentai Booru</td>
+    <td>https://hgoon.booru.org/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>Gelbooru Beta 0.2</strong></td>

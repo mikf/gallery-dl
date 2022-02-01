@@ -50,6 +50,8 @@ BASE_PATTERN = GelbooruV01Extractor.update({
     "drawfriends"       : {"root": "https://drawfriends.booru.org"},
     "vidyart"           : {"root": "https://vidyart.booru.org"},
     "theloudbooru"      : {"root": "https://tlb.booru.org"},
+    "censoredbooru"     : {"root": "https://censored.booru.org"},
+    "hgoonbooru"        : {"root": "https://hgoon.booru.org"}
 })
 
 
@@ -76,6 +78,16 @@ class GelbooruV01TagExtractor(GelbooruV01Extractor):
         ("https://drawfriends.booru.org/index.php?page=post&s=list&tags=all"),
         ("https://vidyart.booru.org/index.php?page=post&s=list&tags=all"),
         ("https://tlb.booru.org/index.php?page=post&s=list&tags=all"),
+        (("https://censored.booru.org"
+          "/index.php?page=post&s=list&tags=caption"), {
+            "range": "1-25",
+            "count": 25,
+        }),
+        (("https://hgoon.booru.org"
+          "/index.php?page=post&s=list&tags=female"), {
+            "range": "1-25",
+            "count": 25,
+        })
     )
 
     def __init__(self, match):
@@ -142,6 +154,8 @@ class GelbooruV01PostExtractor(GelbooruV01Extractor):
         ("https://drawfriends.booru.org/index.php?page=post&s=view&id=107474"),
         ("https://vidyart.booru.org/index.php?page=post&s=view&id=383111"),
         ("https://tlb.booru.org/index.php?page=post&s=view&id=127223"),
+        ("https://censored.booru.org/index.php?page=post&s=view&id=20000"),
+        ("https://hgoon.booru.org/index.php?page=post&s=view&id=8061")
     )
 
     def __init__(self, match):
