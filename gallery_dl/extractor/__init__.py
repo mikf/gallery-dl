@@ -69,6 +69,7 @@ modules = [
     "kemonoparty",
     "khinsider",
     "komikcast",
+    "lightroom",
     "lineblog",
     "livedoor",
     "luscious",

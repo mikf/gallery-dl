@@ -404,6 +404,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Lightroom</td>
+    <td>https://lightroom.adobe.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>LINE BLOG</td>
     <td>https://www.lineblog.me/</td>
     <td>Blogs, Posts</td>
