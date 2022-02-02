@@ -2200,6 +2200,17 @@ Description
     * ``false``: Skip video Tweets
 
 
+extractor.twitter.warnings
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Emit `logging messages <output.log_>`_
+    for non-fatal errors reported by Twitter's API.
+
+
 extractor.unsplash.format
 -------------------------
 Type
