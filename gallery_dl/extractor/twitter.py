@@ -759,6 +759,8 @@ class TwitterAPI():
             "__fs_interactive_text": False,
             "__fs_dont_mention_me_view_api_enabled": False,
         }
+
+        self._log_warnings = extractor.config("warnings")
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
         self._user = None
 
@@ -940,7 +942,7 @@ class TwitterAPI():
         endpoint = "/1.1/guest/activate.json"
         return str(self._call(endpoint, None, root, "POST")["guest_token"])
 
-    def _call(self, endpoint, params, root=None, method="GET", warning=True):
+    def _call(self, endpoint, params, root=None, method="GET"):
         if root is None:
             root = self.root
 
@@ -965,7 +967,7 @@ class TwitterAPI():
 
             if response.status_code < 400:
                 # success
-                if errors and warning:
+                if errors and self._log_warnings:
                     self.extractor.log.warning(errors)
                 return data
 
