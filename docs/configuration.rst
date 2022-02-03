@@ -1305,6 +1305,21 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.hitomi.format
+-----------------------
+Type
+    ``string``
+Default
+    ``"webp"``
+Description
+    Selects which image format to download.
+
+    Available formats are ``"webp"`` and ``"avif"``.
+
+    ``"original"`` will try to download the original ``jpg`` or ``png`` versions,
+    but is most likely going to fail with ``403 Forbidden`` errors.
+
+
 extractor.hitomi.metadata
 -------------------------
 Type
