@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,34 +26,40 @@ class HitomiGalleryExtractor(GalleryExtractor):
                r"/(?:[^/?#]+-)?(\d+)")
     test = (
         ("https://hitomi.la/galleries/867789.html", {
-            "pattern": r"https://[a-c]b.hitomi.la/images/1641140516/\d+"
-                       r"/[0-9a-f]{64}\.jpg",
-            "keyword": "4873ef9a523621fc857b114e0b2820ba4066e9ae",
+            "pattern": r"https://[a-c]a\.hitomi\.la/webp/\d+/\d+"
+                       r"/[0-9a-f]{64}\.webp",
+            "keyword": "4b584d09d535694d7d757c47daf5c15d116420d2",
             "options": (("metadata", True),),
             "count": 16,
         }),
         # download test
         ("https://hitomi.la/galleries/1401410.html", {
             "range": "1",
-            "content": "b3ca8c6c8cc5826cf8b4ceb7252943abad7b8b4c",
+            "content": "d75d5a3d1302a48469016b20e53c26b714d17745",
         }),
         # Game CG with scenes (#321)
         ("https://hitomi.la/galleries/733697.html", {
-            "url": "d4854175da2b5fa4ae62749266c7be0bf237dc99",
+            "url": "c334e6fa571ebc429c125fe6dde0acc32387b42a",
             "count": 210,
         }),
         # fallback for galleries only available through /reader/ URLs
         ("https://hitomi.la/galleries/1045954.html", {
-            "url": "eea99c3745719a7a392150335e6ae3f73faa0b85",
+            "url": "392f82f18a59529d99e908f8995f396fddfcdfd0",
             "count": 1413,
         }),
         # gallery with "broken" redirect
         ("https://hitomi.la/cg/scathacha-sama-okuchi-ecchi-1291900.html", {
             "count": 10,
+            "options": (("format", "original"),),
+            "pattern": r"https://[a-c]b\.hitomi\.la/images/\d+/\d+"
+                       r"/[0-9a-f]{64}\.jpg",
         }),
         # no tags
         ("https://hitomi.la/cg/1615823.html", {
             "count": 22,
+            "options": (("format", "avif"),),
+            "pattern": r"https://[a-c]a\.hitomi\.la/avif/\d+/\d+"
+                       r"/[0-9a-f]{64}\.avif",
         }),
         ("https://hitomi.la/manga/amazon-no-hiyaku-867789.html"),
         ("https://hitomi.la/manga/867789.html"),
@@ -140,16 +146,24 @@ class HitomiGalleryExtractor(GalleryExtractor):
         # see https://ltn.hitomi.la/gg.js
         gg_m, gg_b, gg_default = _parse_gg(self)
 
+        fmt = self.config("format") or "webp"
+        if fmt == "original":
+            subdomain, fmt, ext = "b", "images", None
+        else:
+            subdomain, ext = "a", fmt
+
         result = []
         for image in self.info["files"]:
             ihash = image["hash"]
             idata = text.nameext_from_url(image["name"])
+            if ext:
+                idata["extension"] = ext
 
             # see https://ltn.hitomi.la/common.js
             inum = int(ihash[-1] + ihash[-3:-1], 16)
-            url = "https://{}b.hitomi.la/images/{}/{}/{}.{}".format(
+            url = "https://{}{}.hitomi.la/{}/{}/{}/{}.{}".format(
                 chr(97 + gg_m.get(inum, gg_default)),
-                gg_b, inum, ihash, idata["extension"],
+                subdomain, fmt, gg_b, inum, ihash, idata["extension"],
             )
             result.append((url, idata))
         return result
