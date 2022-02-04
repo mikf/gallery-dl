@@ -676,7 +676,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Sex.com</td>
     <td>https://www.sex.com/</td>
-    <td>Boards, Pins, related Pins, Search Results</td>
+    <td>Boards, Pins, User Pins, related Pins, Search Results</td>
     <td></td>
 </tr>
 <tr>
