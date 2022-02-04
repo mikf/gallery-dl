@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from . import danbooru
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?e(621|926)\.net"
 
@@ -119,3 +120,30 @@ class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):
             "count": ">= 70",
         })
     )
+
+
+class E621FavoriteExtractor(E621Extractor):
+    """Extractor for e621 favorites"""
+    subcategory = "favorite"
+    directory_fmt = ("{category}", "Favorites", "{user_id}")
+    archive_fmt = "f_{user_id}_{id}"
+    pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
+    test = (
+        ("https://e621.net/favorites"),
+        ("https://e621.net/favorites?page=2&user_id=53275", {
+            "pattern": r"https://static\d.e621.net/data/../../[0-9a-f]+",
+            "count": "> 260",
+        })
+    )
+
+    def __init__(self, match):
+        super().__init__(match)
+        self.query = text.parse_query(match.group(2))
+
+    def metadata(self):
+        return {"user_id": self.query.get("user_id", "")}
+
+    def posts(self):
+        if self.page_start is None:
+            self.page_start = 1
+        return self._pagination("/favorites.json", self.query, True)

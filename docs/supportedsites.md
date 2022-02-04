@@ -148,7 +148,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>e621</td>
     <td>https://e621.net/</td>
-    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr>
