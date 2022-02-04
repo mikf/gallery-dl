@@ -182,6 +182,9 @@ SUBCATEGORY_MAP = {
     "sankaku": {
         "books": "Book Searches",
     },
+    "sexcom": {
+        "pins": "User Pins",
+    },
     "smugmug": {
         "path": "Images from Users and Folders",
     },

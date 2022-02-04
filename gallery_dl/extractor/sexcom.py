@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -164,6 +164,27 @@ class SexcomRelatedPinExtractor(SexcomPinExtractor):
     def pins(self):
         url = "{}/pin/related?pinId={}&limit=24&offset=0".format(
             self.root, self.pin_id)
+        return self._pagination(url)
+
+
+class SexcomPinsExtractor(SexcomExtractor):
+    """Extractor for a user's pins on www.sex.com"""
+    subcategory = "pins"
+    directory_fmt = ("{category}", "{user}")
+    pattern = r"(?:https?://)?(?:www\.)?sex\.com/user/([^/?#]+)/pins/"
+    test = ("https://www.sex.com/user/sirjuan79/pins/", {
+        "count": ">= 15",
+    })
+
+    def __init__(self, match):
+        SexcomExtractor.__init__(self, match)
+        self.user = match.group(1)
+
+    def metadata(self):
+        return {"user": text.unquote(self.user)}
+
+    def pins(self):
+        url = "{}/user/{}/pins/".format(self.root, self.user)
         return self._pagination(url)
 
 
