@@ -68,6 +68,7 @@ modules = [
     "keenspot",
     "kemonoparty",
     "khinsider",
+    "kohlchan",
     "komikcast",
     "lineblog",
     "livedoor",
