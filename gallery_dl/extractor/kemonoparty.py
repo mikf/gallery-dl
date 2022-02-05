@@ -45,11 +45,8 @@ class KemonopartyExtractor(Extractor):
         comments = self.config("comments")
         username = dms = None
 
-        # prevent files from coomer.party to be sent with gzip compression
-        if "coomer" in self.root:
-            headers = {"Accept-Encoding": "identity"}
-        else:
-            headers = None
+        # prevent files to be sent with gzip compression
+        headers = {"Accept-Encoding": "identity"}
 
         if self.config("metadata"):
             username = text.unescape(text.extract(
