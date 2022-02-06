@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -75,8 +75,8 @@ class VkPhotosExtractor(VkExtractor):
                r"|(?!album-?\d+_)([^/?#]+))")
     test = (
         ("https://vk.com/id398982326", {
-            "pattern": r"https://sun\d+-\d+\.userapi\.com/c\d+/v\d+"
-                       r"/[0-9a-f]+/[\w-]+\.jpg",
+            "pattern": r"https://sun\d+-\d+\.userapi\.com/sun\d+-\d+"
+                       r"/c\d+/v\d+/[0-9a-f]+/[\w-]+\.jpg",
             "count": ">= 35",
             "keywords": {
                 "id": r"re:\d+",

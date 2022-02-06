@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -84,7 +84,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
         }),
         # 'video' modules (#1282)
         ("https://www.behance.net/gallery/101185577/COLCCI", {
-            "pattern": r"ytdl:https://adobeprod-a\.akamaihd\.net/",
+            "pattern": r"ytdl:https://cdn-prod-ccv\.adobe\.com/",
             "count": 3,
         }),
     )

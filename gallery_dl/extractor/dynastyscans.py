@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -115,8 +115,8 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
     pattern = BASE_PATTERN + r"/images/?(?:\?([^#]+))?$"
     test = (
         ("https://dynasty-scans.com/images?with[]=4930&with[]=5211", {
-            "url": "6b570eedd8a741c2cd34fb98b22a49d772f84191",
-            "keyword": "fa7ff94f82cdf942f7734741d758f160a6b0905a",
+            "url": "22cf0fb64e12b29e79b0a3d26666086a48f9916a",
+            "keyword": "11cbc555a15528d25567977b8808e10369c4c3ee",
         }),
         ("https://dynasty-scans.com/images", {
             "range": "1",

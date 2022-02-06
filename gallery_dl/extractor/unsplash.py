@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -121,7 +121,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
                 "total_collections": int,
                 "total_likes": int,
                 "total_photos": int,
-                "twitter_username": "dave_hoefler",
+                "twitter_username": None,
                 "updated_at": str,
                 "username": "davehoefler",
             },

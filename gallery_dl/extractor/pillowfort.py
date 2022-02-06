@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -145,7 +145,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
                 "id": int,
                 "last_activity": str,
                 "last_activity_elapsed": str,
-                "last_edited_at": None,
+                "last_edited_at": str,
                 "likes_count": int,
                 "media_type": "picture",
                 "nsfw": False,
@@ -169,7 +169,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
                 "tags": list,
                 "time_elapsed": str,
                 "timestamp": str,
-                "title": "What is Pillowfort.io? ",
+                "title": "What is Pillowfort.social?",
                 "updated_at": str,
                 "url": r"re:https://img3.pillowfort.social/posts/.*\.png",
                 "user_id": 5,
