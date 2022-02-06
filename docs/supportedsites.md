@@ -398,6 +398,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Kohlchan</td>
+    <td>https://kohlchan.net/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>Komikcast</td>
     <td>https://komikcast.com/</td>
     <td>Chapters, Manga</td>

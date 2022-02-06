@@ -1,6 +1,24 @@
 # Changelog
 
-## Unreleased
+## 1.20.4 - 2022-02-06
+### Additions
+- [e621] add `favorite` extractor ([#2250](https://github.com/mikf/gallery-dl/issues/2250))
+- [hitomi] add `format` option ([#2260](https://github.com/mikf/gallery-dl/issues/2260))
+- [kohlchan] add Kohlchan extractors ([#2251](https://github.com/mikf/gallery-dl/issues/2251))
+- [sexcom] add `pins` extractor ([#2265](https://github.com/mikf/gallery-dl/issues/2265))
+- [twitter] add `warnings` option ([#2258](https://github.com/mikf/gallery-dl/issues/2258))
+- add ability to disable TLS 1.2 ([#2243](https://github.com/mikf/gallery-dl/issues/2243))
+- add examples for custom gelbooru instances ([#2262](https://github.com/mikf/gallery-dl/issues/2262))
+### Fixes
+- [bunkr] fix mp4 downloads ([#2239](https://github.com/mikf/gallery-dl/issues/2239))
+- [gelbooru] improve and fix pagination ([#2230](https://github.com/mikf/gallery-dl/issues/2230), [#2232](https://github.com/mikf/gallery-dl/issues/2232))
+- [hitomi] "fix" 403 errors ([#2260](https://github.com/mikf/gallery-dl/issues/2260))
+- [kemonoparty] fix downloading smaller text files ([#2267](https://github.com/mikf/gallery-dl/issues/2267))
+- [patreon] disable TLS 1.2 by default ([#2249](https://github.com/mikf/gallery-dl/issues/2249))
+- [twitter] restore errors for protected timelines etc ([#2237](https://github.com/mikf/gallery-dl/issues/2237))
+- [twitter] restore `logout` functionality ([#1719](https://github.com/mikf/gallery-dl/issues/1719))
+- [twitter] provide fallback URLs for card images
+- [weibo] update pagination code ([#2244](https://github.com/mikf/gallery-dl/issues/2244))
 
 ## 1.20.3 - 2022-01-26
 ### Fixes
