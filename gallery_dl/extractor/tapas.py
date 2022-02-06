@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -150,7 +150,7 @@ class TapasEpisodeExtractor(TapasExtractor):
     subcategory = "episode"
     pattern = BASE_PATTERN + r"/episode/(\d+)"
     test = ("https://tapas.io/episode/2068651", {
-        "url": "f122b05648a9f53c2ddb2f6854a7a80ab946e9e8",
+        "url": "0b53644c864a0a097f65accea6bb620be9671078",
         "pattern": "^text:",
         "keyword": {
             "book": True,
@@ -173,7 +173,7 @@ class TapasEpisodeExtractor(TapasExtractor):
             "publish_date": "2021-02-23T16:02:07Z",
             "read": bool,
             "related_ep_id": None,
-            "relative_publish_date": "Feb 23",
+            "relative_publish_date": "Feb 23, 2021",
             "scene": 2,
             "scheduled": False,
             "title": "You are a Tomb Raider (2)",

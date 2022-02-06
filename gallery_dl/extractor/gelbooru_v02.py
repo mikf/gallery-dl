@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -122,9 +122,9 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]+)"
     test = (
         ("https://rule34.xxx/index.php?page=post&s=list&tags=danraku", {
-            "content": "97e4bbf86c3860be18de384d02d544251afe1d45",
+            "content": "622e80be3f496672c44aab5c47fbc6941c61bc79",
             "pattern": r"https?://.*rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
-            "count": 1,
+            "count": 2,
         }),
         ("https://safebooru.org/index.php?page=post&s=list&tags=bonocho", {
             "url": "17c61b386530cf4c30842c9f580d15ef1cd09586",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -122,7 +122,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
             "url": "d309713d2f838797096b3e9cb44fe514a9c9d07a",
         }),
         ("https://desuarchive.org/a/thread/159542679/", {
-            "url": "2bddbe03b01b4630337f6916f6df36d1d443b7b8",
+            "url": "e7d624aded15a069194e38dc731ec23217a422fb",
         }),
         ("https://boards.fireden.net/sci/thread/11264294/", {
             "url": "61cab625c95584a12a30049d054931d64f8d20aa",
@@ -131,10 +131,10 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
             "url": "bbe6f82944a45e359f5c8daf53f565913dc13e4f",
         }),
         ("https://rbt.asia/g/thread/61487650/", {
-            "url": "b4692707cddb4ad1c9ba1cde77c4703025cb86e5",
+            "url": "fadd274b25150a1bdf03a40c58db320fa3b617c4",
         }),
         ("https://archive.rebeccablacktech.com/g/thread/61487650/", {
-            "url": "b4692707cddb4ad1c9ba1cde77c4703025cb86e5",
+            "url": "fadd274b25150a1bdf03a40c58db320fa3b617c4",
         }),
         ("https://thebarchive.com/b/thread/739772332/", {
             "url": "e8b18001307d130d67db31740ce57c8561b5d80c",

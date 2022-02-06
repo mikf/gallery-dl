@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -122,7 +122,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 "date": "dt:2018-03-18 20:15:00",
                 "eh_category": "Non-H",
                 "expunged": False,
-                "favorites": "19",
+                "favorites": "20",
                 "filecount": "4",
                 "filesize": 1488978,
                 "gid": 1200119,
@@ -137,7 +137,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                     "parody:komi-san wa komyushou desu.",
                     "character:shouko komi",
                     "group:seventh lowlife",
-                    "sample",
+                    "other:sample",
                 ],
                 "thumb": "https://exhentai.org/t/ce/0a/ce0a5bcb583229a9b07c0f8"
                          "3bcb1630ab1350640-624622-736-1036-jpg_250.jpg",

@@ -39,12 +39,10 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }),
         # Game CG with scenes (#321)
         ("https://hitomi.la/galleries/733697.html", {
-            "url": "c334e6fa571ebc429c125fe6dde0acc32387b42a",
             "count": 210,
         }),
         # fallback for galleries only available through /reader/ URLs
         ("https://hitomi.la/galleries/1045954.html", {
-            "url": "392f82f18a59529d99e908f8995f396fddfcdfd0",
             "count": 1413,
         }),
         # gallery with "broken" redirect

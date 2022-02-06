@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2021 Mike Fährmann
+# Copyright 2016-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -72,7 +72,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
                     "permissions" : list,
                     "rating"      : float,
                     "slug"        : "okinami-no-koigokoro",
-                    "status"      : str,
+                    "status"      : None,
                     "tags"        : list,
                     "title"       : "Okinami no Koigokoro",
                     "url"         : "/albums/okinami-no-koigokoro_277031/",
@@ -92,7 +92,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
                 "like_status" : "none",
                 "position"    : int,
                 "resolution"  : r"re:\d+x\d+",
-                "status"      : str,
+                "status"      : None,
                 "tags"        : list,
                 "thumbnail"   : str,
                 "title"       : str,
