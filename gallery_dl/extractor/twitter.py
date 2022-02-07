@@ -1091,7 +1091,13 @@ class TwitterAPI():
                         instructions = instructions[key]
                     instructions = instructions["instructions"]
 
-                entries = instructions[0]["entries"]
+                for instr in instructions:
+                    if instr.get("type") == "TimelineAddEntries":
+                        entries = instr["entries"]
+                        break
+                else:
+                    raise KeyError()
+
             except (KeyError, IndexError):
                 extr.log.debug(data)
 

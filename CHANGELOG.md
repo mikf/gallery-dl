@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.20.4 - 2022-02-06
 ### Additions
 - [e621] add `favorite` extractor ([#2250](https://github.com/mikf/gallery-dl/issues/2250))
