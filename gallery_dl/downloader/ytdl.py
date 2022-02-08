@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -39,7 +39,13 @@ class YoutubeDLDownloader(DownloaderBase):
         if not ytdl_instance:
             ytdl_instance = self.ytdl_instance
             if not ytdl_instance:
-                module = ytdl.import_module(self.config("module"))
+                try:
+                    module = ytdl.import_module(self.config("module"))
+                except ImportError as exc:
+                    self.log.error("Cannot import module '%s'", exc.name)
+                    self.log.debug("", exc_info=True)
+                    self.download = lambda u, p: False
+                    return False
                 self.ytdl_instance = ytdl_instance = ytdl.construct_YoutubeDL(
                     module, self, self.ytdl_opts)
                 if self.outtmpl == "default":
