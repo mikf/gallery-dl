@@ -100,7 +100,7 @@ class KemonopartyExtractor(Extractor):
                 elif url.startswith(self.root):
                     url = self.root + "/data" + url[20:]
 
-                text.nameext_from_url(file["name"], post)
+                text.nameext_from_url(file.get("name", url), post)
                 yield Message.Url, url, post
 
     def login(self):
