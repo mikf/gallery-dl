@@ -54,7 +54,8 @@ class ImgboxExtractor(Extractor):
     def get_image_url(page):
         """Extract download-url"""
         pos = page.index(">Image</a>")
-        return 'https://images'+text.extract(page, '<a href="https://images', '?', pos)[0]
+        return 'https://images'+\
+               text.extract(page, '<a href="https://images', '?', pos)[0]
 
 
 class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
