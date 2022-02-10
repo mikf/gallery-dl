@@ -28,10 +28,15 @@ class FuraffinityExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.offset = 0
-        self._new_layout = None
 
         if self.config("descriptions") == "html":
             self._process_description = str.strip
+
+        layout = self.config("layout")
+        if layout and layout != "auto":
+            self._new_layout = False if layout == "old" else True
+        else:
+            self._new_layout = None
 
     def items(self):
 
