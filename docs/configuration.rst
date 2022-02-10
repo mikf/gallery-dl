@@ -1257,6 +1257,20 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.furaffinity.layout
+----------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Selects which site layout to expect when parsing posts.
+
+    * ``"auto"``: Automatically differentiate between ``"old"`` and ``"new"``
+    * ``"old"``: Expect the *old* site layout
+    * ``"new"``: Expect the *new* site layout
+
+
 extractor.generic.enabled
 -------------------------
 Type
