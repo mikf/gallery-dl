@@ -408,8 +408,10 @@ def generate_output(columns, categories, domains):
             name = BASE_MAP.get(name) or (name.capitalize() + " Instances")
             append('\n<tr>\n    <td colspan="4"><strong>' +
                    name + '</strong></td>\n</tr>')
+            clist = base.items()
+        else:
+            clist = sorted(base.items(), key=category_key)
 
-        clist = sorted(base.items(), key=category_key)
         for category, subcategories in clist:
             append("<tr>")
             for column in columns:
