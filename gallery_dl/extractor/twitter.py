@@ -1098,7 +1098,7 @@ class TwitterAPI():
                 else:
                     raise KeyError()
 
-            except (KeyError, IndexError):
+            except LookupError:
                 extr.log.debug(data)
 
                 if self._user:
