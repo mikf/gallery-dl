@@ -607,6 +607,9 @@ class BaseExtractor(Extractor):
                 if group is not None:
                     if index:
                         self.category, self.root = self.instances[index-1]
+                        if not self.root:
+                            url = text.ensure_http_scheme(match.group(0))
+                            self.root = url[:url.index("/", 8)]
                     else:
                         self.root = group
                         self.category = group.partition("://")[2]
@@ -624,7 +627,9 @@ class BaseExtractor(Extractor):
         pattern_list = []
         instance_list = cls.instances = []
         for category, info in instances.items():
-            root = info["root"].rstrip("/")
+            root = info["root"]
+            if root:
+                root = root.rstrip("/")
             instance_list.append((category, root))
 
             pattern = info.get("pattern")
