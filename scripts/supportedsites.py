@@ -349,6 +349,12 @@ def build_extractor_list():
             for category, root in extr.instances:
                 base[category].append(extr.subcategory)
                 if category not in domains:
+                    if not root:
+                        # use domain from first matching test
+                        for url, _ in extr._get_tests():
+                            if extr.from_url(url).category == category:
+                                root = url[:url.index("/", 8)]
+                                break
                     domains[category] = root + "/"
 
     # sort subcategory lists
