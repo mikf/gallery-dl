@@ -53,8 +53,7 @@ class ImgboxExtractor(Extractor):
     @staticmethod
     def get_image_url(page):
         """Extract download-url"""
-        pos = page.index(">Image</a>")
-        return text.extract(page, '<a href="', '"', pos)[0]
+        return text.extract(page, 'property="og:image" content="', '"')[0]
 
 
 class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
@@ -66,12 +65,12 @@ class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
     pattern = r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"
     test = (
         ("https://imgbox.com/g/JaX5V5HX7g", {
-            "url": "678f0bca1251d810372326ea4f16582cafa800e4",
+            "url": "da4f15b161461119ee78841d4b8e8d054d95f906",
             "keyword": "4b1e62820ac2c6205b7ad0b6322cc8e00dbe1b0c",
             "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
         }),
         ("https://imgbox.com/g/cUGEkRbdZZ", {
-            "url": "d839d47cbbbeb121f83c520072512f7e51f52107",
+            "url": "76506a3aab175c456910851f66227e90484ca9f7",
             "keyword": "fb0427b87983197849fb2887905e758f3e50cb6e",
         }),
         ("https://imgbox.com/g/JaX5V5HX7h", {
@@ -109,7 +108,7 @@ class ImgboxImageExtractor(ImgboxExtractor):
     pattern = r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"
     test = (
         ("https://imgbox.com/qHhw7lpG", {
-            "url": "d931f675a9b848fa7cb9077d6c2b14eb07bdb80f",
+            "url": "ee9cdea6c48ad0161c1b5f81f6b0c9110997038c",
             "keyword": "dfc72310026b45f3feb4f9cada20c79b2575e1af",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
         }),
