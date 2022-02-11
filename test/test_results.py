@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -322,7 +322,8 @@ def setup_test_config():
     config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
 
     for category in ("danbooru", "instagram", "twitter", "subscribestar",
-                     "e621", "inkbunny", "tapas", "pillowfort", "mangadex"):
+                     "e621", "atfbooru", "inkbunny", "tapas", "pillowfort",
+                     "mangadex"):
         config.set(("extractor", category), "username", None)
 
     config.set(("extractor", "mastodon.social"), "access-token",

@@ -1,36 +1,29 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://danbooru.donmai.us/"""
+"""Extractors for https://danbooru.donmai.us/ and other Danbooru instances"""
 
-from .common import Extractor, Message
+from .common import BaseExtractor, Message
 from .. import text
 import datetime
 
-BASE_PATTERN = (
-    r"(?:https?://)?"
-    r"(danbooru|hijiribe|sonohara|safebooru)"
-    r"\.donmai\.us"
-)
 
-
-class DanbooruExtractor(Extractor):
+class DanbooruExtractor(BaseExtractor):
     """Base class for danbooru extractors"""
-    basecategory = "booru"
-    category = "danbooru"
-    filename_fmt = "{category}_{id}_{md5}.{extension}"
+    basecategory = "Danbooru"
+    filename_fmt = "{category}_{id}_{filename}.{extension}"
     page_limit = 1000
     page_start = None
     per_page = 200
 
     def __init__(self, match):
-        super().__init__(match)
-        self.root = "https://{}.donmai.us".format(match.group(1))
+        BaseExtractor.__init__(self, match)
+
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
         self.extended_metadata = self.config("metadata", False)
@@ -39,6 +32,20 @@ class DanbooruExtractor(Extractor):
         if username:
             self.log.debug("Using HTTP Basic Auth for user '%s'", username)
             self.session.auth = (username, api_key)
+
+        instance = INSTANCES.get(self.category) or {}
+        iget = instance.get
+
+        self.headers = iget("headers")
+        self.page_limit = iget("page-limit", 1000)
+        self.page_start = iget("page-start")
+        self.per_page = iget("per-page", 200)
+        self.request_interval_min = iget("request-interval-min", 0.0)
+        self._pools = iget("pools")
+
+    def request(self, url, **kwargs):
+        kwargs["headers"] = self.headers
+        return BaseExtractor.request(self, url, **kwargs)
 
     def skip(self, num):
         pages = num // self.per_page
@@ -50,16 +57,31 @@ class DanbooruExtractor(Extractor):
     def items(self):
         data = self.metadata()
         for post in self.posts():
-            try:
-                url = post["file_url"]
-            except KeyError:
-                if self.external and post["source"]:
-                    post.update(data)
-                    yield Message.Directory, post
-                    yield Message.Queue, post["source"], post
-                continue
 
-            text.nameext_from_url(url, post)
+            file = post.get("file")
+            if file:
+                url = file["url"]
+                if not url:
+                    md5 = file["md5"]
+                    url = file["url"] = (
+                        "https://static1.{}/data/{}/{}/{}.{}".format(
+                            self.root[8:], md5[0:2], md5[2:4], md5, file["ext"]
+                        ))
+                post["filename"] = file["md5"]
+                post["extension"] = file["ext"]
+
+            else:
+                try:
+                    url = post["file_url"]
+                except KeyError:
+                    if self.external and post["source"]:
+                        post.update(data)
+                        yield Message.Directory, post
+                        yield Message.Queue, post["source"], post
+                    continue
+
+                text.nameext_from_url(url, post)
+
             if post["extension"] == "zip":
                 if self.ugoira:
                     post["frames"] = self.request(
@@ -89,11 +111,8 @@ class DanbooruExtractor(Extractor):
     def posts(self):
         return ()
 
-    def _pagination(self, endpoint, params=None, pagenum=False):
+    def _pagination(self, endpoint, params, pagenum=False):
         url = self.root + endpoint
-
-        if params is None:
-            params = {}
         params["limit"] = self.per_page
         params["page"] = self.page_start
 
@@ -117,12 +136,36 @@ class DanbooruExtractor(Extractor):
                     return
 
 
+INSTANCES = {
+    "danbooru": {
+        "root": None,
+        "pattern": r"(?:danbooru|hijiribe|sonohara|safebooru)\.donmai\.us",
+    },
+    "e621": {
+        "root": None,
+        "pattern": r"e(?:621|926)\.net",
+        "headers": {"User-Agent": "gallery-dl/1.14.0 (by mikf)"},
+        "pools": "sort",
+        "page-limit": 750,
+        "per-page": 320,
+        "request-interval-min": 1.0,
+    },
+    "atfbooru": {
+        "root": "https://booru.allthefallen.moe",
+        "pattern": r"booru\.allthefallen\.moe",
+        "page-limit": 5000,
+    },
+}
+
+BASE_PATTERN = DanbooruExtractor.update(INSTANCES)
+
+
 class DanbooruTagExtractor(DanbooruExtractor):
     """Extractor for danbooru posts from tag searches"""
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/posts\?(?:[^&#]*&)*tags=([^&#]+)"
+    pattern = BASE_PATTERN + r"/posts\?(?:[^&#]*&)*tags=([^&#]*)"
     test = (
         ("https://danbooru.donmai.us/posts?tags=bonocho", {
             "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
@@ -136,21 +179,29 @@ class DanbooruTagExtractor(DanbooruExtractor):
             "options": (("external", True),),
             "pattern": r"http://img16.pixiv.net/img/takaraakihito/1476533.jpg",
         }),
+        ("https://e621.net/posts?tags=anry", {
+            "url": "8021e5ea28d47c474c1ffc9bd44863c4d45700ba",
+            "content": "501d1e5d922da20ee8ff9806f5ed3ce3a684fd58",
+        }),
+        ("https://booru.allthefallen.moe/posts?tags=yume_shokunin", {
+            "count": 12,
+        }),
         ("https://hijiribe.donmai.us/posts?tags=bonocho"),
         ("https://sonohara.donmai.us/posts?tags=bonocho"),
         ("https://safebooru.donmai.us/posts?tags=bonocho"),
+        ("https://e926.net/posts?tags=anry"),
     )
 
     def __init__(self, match):
-        super().__init__(match)
-        self.tags = text.unquote(match.group(2).replace("+", " "))
+        DanbooruExtractor.__init__(self, match)
+        tags = match.group(match.lastindex)
+        self.tags = text.unquote(tags.replace("+", " "))
 
     def metadata(self):
         return {"search_tags": self.tags}
 
     def posts(self):
-        params = {"tags": self.tags}
-        return self._pagination("/posts.json", params)
+        return self._pagination("/posts.json", {"tags": self.tags})
 
 
 class DanbooruPoolExtractor(DanbooruExtractor):
@@ -158,33 +209,66 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name]}")
     archive_fmt = "p_{pool[id]}_{id}"
-    pattern = BASE_PATTERN + r"/pools/(\d+)"
-    test = ("https://danbooru.donmai.us/pools/7659", {
-        "content": "b16bab12bea5f7ea9e0a836bf8045f280e113d99",
-    })
+    pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
+    test = (
+        ("https://danbooru.donmai.us/pools/7659", {
+            "content": "b16bab12bea5f7ea9e0a836bf8045f280e113d99",
+        }),
+        ("https://e621.net/pools/73", {
+            "url": "1bd09a72715286a79eea3b7f09f51b3493eb579a",
+            "content": "91abe5d5334425d9787811d7f06d34c77974cd22",
+        }),
+        ("https://booru.allthefallen.moe/pools/9", {
+            "url": "902549ffcdb00fe033c3f63e12bc3cb95c5fd8d5",
+            "count": 6,
+        }),
+        ("https://danbooru.donmai.us/pool/show/7659"),
+        ("https://e621.net/pool/show/73"),
+    )
 
     def __init__(self, match):
-        super().__init__(match)
-        self.pool_id = match.group(2)
+        DanbooruExtractor.__init__(self, match)
+        self.pool_id = match.group(match.lastindex)
         self.post_ids = ()
 
     def metadata(self):
         url = "{}/pools/{}.json".format(self.root, self.pool_id)
         pool = self.request(url).json()
         pool["name"] = pool["name"].replace("_", " ")
-        self.post_ids = pool.pop("post_ids")
+        self.post_ids = pool.pop("post_ids", ())
         return {"pool": pool}
 
     def posts(self):
-        params = {"tags": "pool:" + self.pool_id}
-        return self._pagination("/posts.json", params)
+        if self._pools == "sort":
+            self.log.info("Fetching posts of pool %s", self.pool_id)
+
+            id_to_post = {
+                post["id"]: post
+                for post in self._pagination(
+                    "/posts.json", {"tags": "pool:" + self.pool_id})
+            }
+
+            posts = []
+            append = posts.append
+            for num, pid in enumerate(self.post_ids, 1):
+                if pid in id_to_post:
+                    post = id_to_post[pid]
+                    post["num"] = num
+                    append(post)
+                else:
+                    self.log.warning("Post %s is unavailable", pid)
+            return posts
+
+        else:
+            params = {"tags": "pool:" + self.pool_id}
+            return self._pagination("/posts.json", params)
 
 
 class DanbooruPostExtractor(DanbooruExtractor):
     """Extractor for single danbooru posts"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/posts/(\d+)"
+    pattern = BASE_PATTERN + r"/post(?:s|/show)/(\d+)"
     test = (
         ("https://danbooru.donmai.us/posts/294929", {
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
@@ -192,12 +276,21 @@ class DanbooruPostExtractor(DanbooruExtractor):
         ("https://danbooru.donmai.us/posts/3613024", {
             "pattern": r"https?://.+\.zip$",
             "options": (("ugoira", True),)
-        })
+        }),
+        ("https://e621.net/posts/535", {
+            "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",
+            "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
+        }),
+        ("https://booru.allthefallen.moe/posts/22", {
+            "content": "21dda68e1d7e0a554078e62923f537d8e895cac8",
+        }),
+        ("https://danbooru.donmai.us/post/show/294929"),
+        ("https://e621.net/post/show/535"),
     )
 
     def __init__(self, match):
-        super().__init__(match)
-        self.post_id = match.group(2)
+        DanbooruExtractor.__init__(self, match)
+        self.post_id = match.group(match.lastindex)
 
     def posts(self):
         url = "{}/posts/{}.json".format(self.root, self.post_id)
@@ -218,15 +311,23 @@ class DanbooruPopularExtractor(DanbooruExtractor):
             "range": "1-120",
             "count": 120,
         }),
+        ("https://e621.net/explore/posts/popular"),
+        (("https://e621.net/explore/posts/popular"
+          "?date=2019-06-01&scale=month"), {
+            "pattern": r"https://static\d.e621.net/data/../../[0-9a-f]+",
+            "count": ">= 70",
+        }),
+        ("https://booru.allthefallen.moe/explore/posts/popular"),
     )
 
     def __init__(self, match):
-        super().__init__(match)
-        self.params = text.parse_query(match.group(2))
+        DanbooruExtractor.__init__(self, match)
+        self.params = match.group(match.lastindex)
 
     def metadata(self):
-        scale = self.params.get("scale", "day")
-        date = self.params.get("date") or datetime.date.today().isoformat()
+        self.params = params = text.parse_query(self.params)
+        scale = params.get("scale", "day")
+        date = params.get("date") or datetime.date.today().isoformat()
 
         if scale == "week":
             date = datetime.date.fromisoformat(date)
@@ -241,3 +342,30 @@ class DanbooruPopularExtractor(DanbooruExtractor):
             self.page_start = 1
         return self._pagination(
             "/explore/posts/popular.json", self.params, True)
+
+
+class DanbooruFavoriteExtractor(DanbooruExtractor):
+    """Extractor for e621 favorites"""
+    subcategory = "favorite"
+    directory_fmt = ("{category}", "Favorites", "{user_id}")
+    archive_fmt = "f_{user_id}_{id}"
+    pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
+    test = (
+        ("https://e621.net/favorites"),
+        ("https://e621.net/favorites?page=2&user_id=53275", {
+            "pattern": r"https://static\d.e621.net/data/../../[0-9a-f]+",
+            "count": "> 260",
+        }),
+    )
+
+    def __init__(self, match):
+        DanbooruExtractor.__init__(self, match)
+        self.query = text.parse_query(match.group(match.lastindex))
+
+    def metadata(self):
+        return {"user_id": self.query.get("user_id", "")}
+
+    def posts(self):
+        if self.page_start is None:
+            self.page_start = 1
+        return self._pagination("/favorites.json", self.query, True)

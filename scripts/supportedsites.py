@@ -20,6 +20,7 @@ CATEGORY_MAP = {
     "archiveofsins"  : "Archive of Sins",
     "artstation"     : "ArtStation",
     "aryion"         : "Eka's Portal",
+    "atfbooru"       : "ATFBooru",
     "b4k"            : "arch.b4k.co",
     "baraag"         : "baraag",
     "bbc"            : "BBC",
@@ -139,6 +140,12 @@ SUBCATEGORY_MAP = {
     "artstation": {
         "artwork": "Artwork Listings",
     },
+    "atfbooru": {
+        "favorite": "",
+    },
+    "danbooru": {
+        "favorite": "",
+    },
     "desktopography": {
         "site": "",
     },
@@ -225,6 +232,7 @@ _APIKEY_WY = \
 
 AUTH_MAP = {
     "aryion"         : "Supported",
+    "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
