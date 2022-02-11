@@ -363,6 +363,8 @@ def build_extractor_list():
                             if extr.from_url(url).category == category:
                                 root = url[:url.index("/", 8)]
                                 break
+                        else:
+                            continue
                     domains[category] = root + "/"
 
     # sort subcategory lists
