@@ -6,9 +6,8 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractor for https://wallpapercave.com/"""
+"""Extractors for https://wallpapercave.com/"""
 
-import re
 from .common import Extractor, Message
 from .. import text
 
@@ -19,16 +18,13 @@ class WallpapercaveImageExtractor(Extractor):
     subcategory = "image"
     root = "https://wallpapercave.com"
     pattern = r"(?:https?://)?(?:www\.)?wallpapercave\.com"
-
-    def __init__(self, match):
-        super().__init__(match)
-        self.url = match.string
+    test = ("https://wallpapercave.com/w/wp10270355", {
+        "content": "58b088aaa1cf1a60e347015019eb0c5a22b263a6",
+    })
 
     def items(self):
-        page = self.request(self.url).text
-        paths = re.compile(r'<a class="download" href="(.+?)">').findall(page)
-        for path in paths:
-            url = self.root + path
-            image = {}
+        page = self.request(text.ensure_http_scheme(self.url)).text
+        for path in text.extract_iter(page, 'class="download" href="', '"'):
+            image = text.nameext_from_url(path)
             yield Message.Directory, image
-            yield Message.Url, url, text.nameext_from_url(url, image)
+            yield Message.Url, self.root + path, image

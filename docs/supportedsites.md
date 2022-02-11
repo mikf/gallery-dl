@@ -788,7 +788,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="configuration.rst#extractorwallhavenapi-key">API Key</a></td>
 </tr>
 <tr>
-    <td>WallpaperCave</td>
+    <td>Wallpaper Cave</td>
     <td>https://wallpapercave.com/</td>
     <td>individual Images, Search Results</td>
     <td></td>

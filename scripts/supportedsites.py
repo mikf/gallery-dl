@@ -110,6 +110,7 @@ CATEGORY_MAP = {
     "vk"             : "VK",
     "vsco"           : "VSCO",
     "wakarimasen"    : "Wakarimasen Archive",
+    "wallpapercave"  : "Wallpaper Cave",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
     "xhamster"       : "xHamster",
@@ -192,6 +193,9 @@ SUBCATEGORY_MAP = {
     },
     "wallhaven": {
         "collections": "",
+    },
+    "wallpapercave": {
+        "image": "individual Images, Search Results",
     },
     "weasyl": {
         "journals"   : "",
