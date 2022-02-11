@@ -69,6 +69,7 @@ modules = [
     "khinsider",
     "kohlchan",
     "komikcast",
+    "lightroom",
     "lineblog",
     "livedoor",
     "luscious",
