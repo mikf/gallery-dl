@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://lightroom.adobe.com/"""
+"""Extractors for https://lightroom.adobe.com/"""
 
 from .common import Extractor, Message
 from .. import text
-
 import json
 
 
 class LightroomGalleryExtractor(Extractor):
     """Extractor for an image gallery on lightroom.adobe.com"""
-
     category = "lightroom"
     subcategory = "gallery"
     directory_fmt = ("{category}", "{user}", "{title}")
@@ -56,12 +52,13 @@ class LightroomGalleryExtractor(Extractor):
 
         images = self.images(album)
         for img in images:
+            url = img["url"]
             yield Message.Directory, img
-            yield Message.Url, img["url"], text.nameext_from_url(url, img)
+            yield Message.Url, url, text.nameext_from_url(url, img)
 
     def metadata(self, album):
         payload = album["payload"]
-        story = payload.get("story", {})
+        story = payload.get("story") or {}
         return {
             "gallery_id": self.href,
             "user": story.get("author", ""),
@@ -76,12 +73,9 @@ class LightroomGalleryExtractor(Extractor):
 
         while next_url:
             url = base_url + next_url
-            response = self.request(url)
+            page = self.request(url).text
             # skip 1st line as it's a JS loop
-            data_idx = response.text.index("\n") + 1
-            data = json.loads(response.text[data_idx:])
-
-            next_url = data.get("links", {}).get("next", {}).get("href", None)
+            data = json.loads(page[page.index("\n") + 1:])
 
             base_url = data["base"]
             for res in data["resources"]:
@@ -95,11 +89,15 @@ class LightroomGalleryExtractor(Extractor):
                         img_url = value["href"]
 
                 if img_url:
-                    img = album_md.copy()
-                    img.update({
+                    img = {
                         "id": res["asset"]["id"],
                         "num": num,
                         "url": base_url + img_url,
-                    })
+                    }
+                    img.update(album_md)
                     yield img
                     num += 1
+            try:
+                next_url = data["links"]["next"]["href"]
+            except KeyError:
+                next_url = None
