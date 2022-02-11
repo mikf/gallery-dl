@@ -116,12 +116,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Danbooru</td>
-    <td>https://danbooru.donmai.us/</td>
-    <td>Pools, Popular Images, Posts, Tag Searches</td>
-    <td>Supported</td>
-</tr>
-<tr>
     <td>Desktopography</td>
     <td>https://desktopography.net/</td>
     <td>Entrys, Exhibitions</td>
@@ -143,12 +137,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>E-Hentai</td>
     <td>https://e-hentai.org/</td>
     <td>Favorites, Galleries, Search Results</td>
-    <td>Supported</td>
-</tr>
-<tr>
-    <td>e621</td>
-    <td>https://e621.net/</td>
-    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -858,6 +846,28 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://bcy.net/</td>
     <td>Posts, User Profiles</td>
     <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Danbooru Instances</strong></td>
+</tr>
+<tr>
+    <td>Danbooru</td>
+    <td>https://danbooru.donmai.us/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Supported</td>
+</tr>
+<tr>
+    <td>e621</td>
+    <td>https://e621.net/</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Supported</td>
+</tr>
+<tr>
+    <td>ATFBooru</td>
+    <td>https://booru.allthefallen.moe/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Supported</td>
 </tr>
 
 <tr>
