@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -220,11 +220,26 @@ class InkbunnySearchExtractor(InkbunnyExtractor):
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(1))
-        self.params.pop("rid", None)
+        self.query = match.group(1)
 
     def posts(self):
-        return self.api.search(self.params)
+        params = text.parse_query(self.query)
+        pop = params.pop
+
+        pop("rid", None)
+        params["string_join_type"] = pop("stringtype", None)
+        params["dayslimit"] = pop("days", None)
+        params["username"] = pop("artist", None)
+
+        favsby = pop("favsby", None)
+        if favsby:
+            # get user_id from user profile
+            url = "{}/{}".format(self.root, favsby)
+            page = self.request(url).text
+            user_id = text.extract(page, "?user_id=", "'")[0]
+            params["favs_user_id"] = user_id.partition("&")[0]
+
+        return self.api.search(params)
 
 
 class InkbunnyFollowingExtractor(InkbunnyExtractor):
