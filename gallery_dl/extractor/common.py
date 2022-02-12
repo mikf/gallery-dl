@@ -371,8 +371,16 @@ class Extractor():
         for cookie in self._cookiejar:
             if cookie.name in names and (
                     not domain or cookie.domain == domain):
-                if cookie.expires and cookie.expires < now:
-                    self.log.warning("Cookie '%s' has expired", cookie.name)
+                if cookie.expires:
+                    diff = int(cookie.expires - now)
+                    if diff <= 0:
+                        self.log.warning(
+                            "Cookie '%s' has expired", cookie.name)
+                    elif diff <= 86400:
+                        hours = diff // 3600
+                        self.log.warning(
+                            "Cookie '%s' will expire in less than %s hour%s",
+                            cookie.name, hours + 1, "s" if hours else "")
                 else:
                     names.discard(cookie.name)
                     if not names:
