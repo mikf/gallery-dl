@@ -3308,6 +3308,18 @@ Description
     this cache.
 
 
+signals-ignore
+--------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["SIGTTOU", "SIGTTIN", "SIGTERM"]``
+Description
+    The list of signal names to ignore, i.e. set
+    `SIG_IGN <https://docs.python.org/3/library/signal.html#signal.SIG_IGN>`_
+    as signal handler for.
+
+
 pyopenssl
 ---------
 Type
