@@ -172,7 +172,7 @@ class RedditUserExtractor(RedditExtractor):
     """Extractor for URLs from posts by a reddit user"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
-               r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?")
+               r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?$")
     test = (
         ("https://www.reddit.com/user/username/", {
             "count": ">= 2",
@@ -235,6 +235,28 @@ class RedditSubmissionExtractor(RedditExtractor):
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://m.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://redd.it/2a00np/"),
+    )
+
+    def __init__(self, match):
+        RedditExtractor.__init__(self, match)
+        self.submission_id = match.group(1)
+
+    def submissions(self):
+        return (self.api.submission(self.submission_id),)
+
+
+class RedditUserSubmissionExtractor(RedditExtractor):
+    """Extractor for URLs from a submission on an user's personal page on reddit.com"""
+    category = "reddit"
+    subcategory = "usersubmission"
+    pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
+               r"(?:[^/?#]+(?:/(?:[a-z]+))?)/comments/([a-z0-9]+)/?"
+               r"(?:\?([^#]*))?")
+    test = (
+        ("https://www.reddit.com/user/TheSpiritTree/comments/srilyf/", {
+            "pattern": r"https://i.redd.it/8fpgv17yqlh81.jpg",
+            "count": 1,
+        }),
     )
 
     def __init__(self, match):
