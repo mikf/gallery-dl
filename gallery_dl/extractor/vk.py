@@ -34,7 +34,6 @@ class VkExtractor(Extractor):
     def _pagination(self, photos_url, user_id):
         sub = re.compile(r"/imp[fg]/").sub
         needle = 'data-id="{}_'.format(user_id)
-        cnt = 0
 
         headers = {
             "X-Requested-With": "XMLHttpRequest",
@@ -56,7 +55,9 @@ class VkExtractor(Extractor):
             offset = payload[0]
             html = payload[1]
 
-            for cnt, photo in enumerate(text.extract_iter(html, needle, ')')):
+            cnt = 0
+            for photo in text.extract_iter(html, needle, ')'):
+                cnt += 1
                 pid = photo[:photo.find('"')]
                 url = photo[photo.rindex("(")+1:]
                 url = sub("/", url.partition("?")[0])
