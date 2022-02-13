@@ -248,13 +248,6 @@ class RedditSubmissionExtractor(RedditExtractor):
     def submissions(self):
         return (self.api.submission(self.submission_id),)
 
-    def __init__(self, match):
-        RedditExtractor.__init__(self, match)
-        self.submission_id = match.group(1)
-
-    def submissions(self):
-        return (self.api.submission(self.submission_id),)
-
 
 class RedditImageExtractor(Extractor):
     """Extractor for reddit-hosted images"""
