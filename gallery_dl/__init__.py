@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -130,6 +130,19 @@ def main():
             config.set((), "skip", "terminate:" + str(args.terminate))
         for opts in args.options:
             config.set(*opts)
+
+        # signals
+        signals = config.get((), "signals-ignore")
+        if signals:
+            import signal
+            if isinstance(signals, str):
+                signals = signals.split(",")
+            for signal_name in signals:
+                signal_num = getattr(signal, signal_name, None)
+                if signal_num is None:
+                    log.warning("signal '%s' is not defined", signal_name)
+                else:
+                    signal.signal(signal_num, signal.SIG_IGN)
 
         # extractor modules
         modules = config.get(("extractor",), "modules")
