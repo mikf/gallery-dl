@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -106,8 +106,10 @@ class RedgifsSearchExtractor(RedgifsExtractor):
 class RedgifsImageExtractor(RedgifsExtractor):
     """Extractor for individual gifs from redgifs.com"""
     subcategory = "image"
-    pattern = (r"(?:https?://)?(?:www\.)?(?:redgifs\.com/(?:watch|ifr)"
-               r"|gifdeliverynetwork.com)/([A-Za-z]+)")
+    pattern = (r"(?:https?://)?(?:"
+               r"(?:www\.)?redgifs\.com/(?:watch|ifr)|"
+               r"(?:www\.)?gifdeliverynetwork\.com|"
+               r"i\.redgifs\.com/i)/([A-Za-z]+)")
     test = (
         ("https://redgifs.com/watch/foolishforkedabyssiniancat", {
             "pattern": r"https://\w+\.redgifs\.com"
@@ -115,6 +117,7 @@ class RedgifsImageExtractor(RedgifsExtractor):
             "content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
         }),
         ("https://redgifs.com/ifr/FoolishForkedAbyssiniancat"),
+        ("https://i.redgifs.com/i/FoolishForkedAbyssiniancat"),
         ("https://www.gifdeliverynetwork.com/foolishforkedabyssiniancat"),
     )
 
