@@ -1,6 +1,25 @@
 # Changelog
 
-## Unreleased
+## 1.20.5 - 2022-02-14
+### Additions
+- [furaffinity] add `layout` option ([#2277](https://github.com/mikf/gallery-dl/issues/2277))
+- [lightroom] add Lightroom gallery extractor ([#2263](https://github.com/mikf/gallery-dl/issues/2263))
+- [reddit] support standalone submissions on personal user pages ([#2301](https://github.com/mikf/gallery-dl/issues/2301))
+- [redgifs] support i.redgifs.com URLs ([#2300](https://github.com/mikf/gallery-dl/issues/2300))
+- [wallpapercave] add extractor for images and search results ([#2205](https://github.com/mikf/gallery-dl/issues/2205))
+- add `signals-ignore` option ([#2296](https://github.com/mikf/gallery-dl/issues/2296))
+### Changes
+- [danbooru] merge `danbooru` and `e621` extractors
+  - support `atfbooru` ([#2283](https://github.com/mikf/gallery-dl/issues/2283))
+  - remove support for old e621 tag search URLs
+### Fixes
+- [furaffinity] improve new/old layout detection ([#2277](https://github.com/mikf/gallery-dl/issues/2277))
+- [imgbox] fix ImgboxExtractor ([#2281](https://github.com/mikf/gallery-dl/issues/2281))
+- [inkbunny] rename search parameters to their API equivalents
+- [kemonoparty] handle files without names ([#2276](https://github.com/mikf/gallery-dl/issues/2276))
+- [twitter] fix extraction ([#2275](https://github.com/mikf/gallery-dl/issues/2275), [#2295](https://github.com/mikf/gallery-dl/issues/2295))
+- [vk] fix infinite pagination loops ([#2297](https://github.com/mikf/gallery-dl/issues/2297))
+- [downloader:ytdl] make `ImportError`s non-fatal ([#2273](https://github.com/mikf/gallery-dl/issues/2273))
 
 ## 1.20.4 - 2022-02-06
 ### Additions
