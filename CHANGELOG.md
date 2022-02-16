@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 1.20.5 - 2022-02-14
 ### Additions
 - [furaffinity] add `layout` option ([#2277](https://github.com/mikf/gallery-dl/issues/2277))

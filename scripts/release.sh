@@ -54,7 +54,14 @@ build-linux() {
     cd "${ROOTDIR}"
     echo Building Linux executable
 
-    make executable
+    VENV_PATH="/tmp/venv"
+    VENV_PYTHON="${VENV_PATH}/bin/python"
+
+    rm -r "${VENV_PATH}"
+    virtualenv "${VENV_PATH}"
+
+    $VENV_PYTHON -m pip install requests requests[socks] yt-dlp pyinstaller
+    $VENV_PYTHON ./scripts/pyinstaller.py
 }
 
 build-windows() {
