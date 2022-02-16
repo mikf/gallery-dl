@@ -371,20 +371,25 @@ class Extractor():
         for cookie in self._cookiejar:
             if cookie.name in names and (
                     not domain or cookie.domain == domain):
+
                 if cookie.expires:
                     diff = int(cookie.expires - now)
+
                     if diff <= 0:
                         self.log.warning(
                             "Cookie '%s' has expired", cookie.name)
+                        continue
+
                     elif diff <= 86400:
                         hours = diff // 3600
                         self.log.warning(
                             "Cookie '%s' will expire in less than %s hour%s",
                             cookie.name, hours + 1, "s" if hours else "")
-                else:
-                    names.discard(cookie.name)
-                    if not names:
-                        return True
+                        continue
+
+                names.discard(cookie.name)
+                if not names:
+                    return True
         return False
 
     def _prepare_ddosguard_cookies(self):
