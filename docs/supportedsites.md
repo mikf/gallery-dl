@@ -752,6 +752,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Twibooru</td>
+    <td>https://twibooru.org/</td>
+    <td>Galleries, Posts, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Twitter</td>
     <td>https://twitter.com/</td>
     <td>Bookmarks, Events, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets</td>

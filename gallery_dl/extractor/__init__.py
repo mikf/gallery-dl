@@ -126,6 +126,7 @@ modules = [
     "tsumino",
     "tumblr",
     "tumblrgallery",
+    "twibooru",
     "twitter",
     "unsplash",
     "vanillarock",
