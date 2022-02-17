@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -65,6 +65,12 @@ class PatreonExtractor(Extractor):
         return ()
 
     def _images(self, post):
+        image = post.get("image")
+        if image:
+            url = image.get("large_url") or image["url"]
+            name = image.get("file_name") or self._filename(url) or url
+            yield "image", url, name
+
         for image in post["images"]:
             url = image.get("download_url")
             if url:
