@@ -44,7 +44,7 @@ class LolisafelbumExtractor(LolisafeExtractor):
         }),
         # mp4 (#2239)
         ("https://bunkr.is/a/ptRHaCn2", {
-            "pattern": r"https://cdn\.bunkr\.is/_-RnHoW69L\.mp4",
+            "pattern": r"https://media-files\.bunkr\.is/_-RnHoW69L\.mp4",
             "content": "80e61d1dbc5896ae7ef9a28734c747b28b320471",
         }),
         ("https://bunkr.to/a/Lktg9Keq"),
@@ -73,9 +73,8 @@ class LolisafelbumExtractor(LolisafeExtractor):
             data["name"], sep, data["id"] = data["filename"].rpartition("-")
 
             if data["extension"] == "mp4":
-                data["_http_validate"] = self._check_rewrite
-            else:
-                data["_http_validate"] = None
+                url = url.replace(
+                    "//cdn.bunkr.is/", "//media-files.bunkr.is/", 1)
             yield Message.Url, url, data
 
     def fetch_album(self, album_id):
@@ -87,13 +86,3 @@ class LolisafelbumExtractor(LolisafeExtractor):
             "album_name": text.unescape(data["title"]),
             "count"     : data["count"],
         }
-
-    @staticmethod
-    def _check_rewrite(response):
-        if response.history and response.headers.get(
-                "Content-Type").startswith("text/html"):
-            # consume content to reuse connection
-            response.content
-            # rewrite to download URL
-            return response.url.replace("/v/", "/d/", 1)
-        return True
