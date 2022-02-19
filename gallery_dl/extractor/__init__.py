@@ -123,6 +123,7 @@ modules = [
     "speakerdeck",
     "subscribestar",
     "tapas",
+    "telegraph",
     "tsumino",
     "tumblr",
     "tumblrgallery",
