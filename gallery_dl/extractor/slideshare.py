@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2021 Mike Fährmann, Leonardo Taccari
+# Copyright 2016-2022 Mike Fährmann, Leonardo Taccari
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,11 +8,12 @@
 
 """Extractors for https://www.slideshare.net/"""
 
-from .common import Extractor, Message
+from .common import GalleryExtractor
 from .. import text
+import json
 
 
-class SlidesharePresentationExtractor(Extractor):
+class SlidesharePresentationExtractor(GalleryExtractor):
     """Extractor for images from a presentation on slideshare.net"""
     category = "slideshare"
     subcategory = "presentation"
@@ -24,13 +25,36 @@ class SlidesharePresentationExtractor(Extractor):
     test = (
         (("https://www.slideshare.net"
           "/Slideshare/get-started-with-slide-share"), {
-            "url": "23685fb9b94b32c77a547d45dc3a82fe7579ea18",
-            "content": "2e90a01c6ca225579ebf8f98ab46f97a28a5e45c",
+            "pattern": r"https://image\.slidesharecdn\.com/getstartedwithslide"
+                       r"share-150520173821-lva1-app6892/95/get-started-with-s"
+                       r"lide-share-\d+-1024\.jpg\?cb=\d+",
+            "count": 19,
+            "content": "2b6a191eab60b3978fdacfecf2da302dd45bc108",
+            "keyword": {
+                "comments": "0",
+                "description": "Get Started with SlideShare - "
+                               "A Beginngers Guide for Creators",
+                "likes": r"re:\d{3,}",
+                "presentation": "get-started-with-slide-share",
+                "published": "dt:2015-05-20 00:00:00",
+                "title": "Getting Started With SlideShare",
+                "user": "Slideshare",
+                "views": r"re:\d{7,}",
+            },
         }),
-        # long title
+        # long title and description
         (("https://www.slideshare.net/pragmaticsolutions/warum-sie-nicht-ihren"
           "-mitarbeitenden-ndern-sollten-sondern-ihr-managementsystem"), {
             "url": "cf70ca99f57f61affab47ebf8583eb564b21e3a7",
+            "keyword": {
+                "title": "Warum Sie nicht Ihren Mitarbeitenden ändern "
+                         "sollten, sondern Ihr Managementsystem",
+                "description": "Mitarbeitende verhalten sich mehrheitlich so, "
+                               "wie das System es ihnen vorgibt. Welche Voraus"
+                               "setzungen es braucht, damit Ihre Mitarbeitende"
+                               "n ihr ganzes Herzblut einsetzen, bespricht Fre"
+                               "di Schmidli in diesem Referat.",
+            },
         }),
         # mobile URL
         (("https://www.slideshare.net"
@@ -40,48 +64,50 @@ class SlidesharePresentationExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
         self.user, self.presentation = match.groups()
+        url = "https://www.slideshare.net/{}/{}".format(
+            self.user, self.presentation)
+        GalleryExtractor.__init__(self, match, url)
 
-    def items(self):
-        page = self.request("https://www.slideshare.net/" + self.user +
-                            "/" + self.presentation).text
-        data = self.get_job_metadata(page)
-        imgs = self.get_image_urls(page)
-        data["count"] = len(imgs)
-        yield Message.Directory, data
-        for data["num"], url in enumerate(imgs, 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
+    def metadata(self, page):
+        extr = text.extract_from(page)
+        descr = extr('<meta name="description" content="', '"')
+        title = extr('<span class="j-title-breadcrumb">', '</span>')
+        published = extr('<div class="metadata-item">', '</div>')
+        comments = extr('content="UserComments:', '"')
+        likes = extr('content="UserLikes:', '"')
+        views = extr('content="UserPageVisits:', '"')
 
-    def get_job_metadata(self, page):
-        """Collect metadata for extractor-job"""
-        descr, pos = text.extract(
-            page, '<meta name="description" content="', '"')
-        category, pos = text.extract(
-            page, '<div class="metadata-item">', '</div>', pos)
-        views, pos = text.extract(
-            page, '<div class="metadata-item">', '</div>', pos)
-        published, pos = text.extract(
-            page, '<div class="metadata-item">', '</div>', pos)
-        title, pos = text.extract(
-            page, '<span class="j-title-breadcrumb">', '</span>', pos)
-        alt_descr, pos = text.extract(
-            page, '<p class="slideshow-description notranslate">', '</p>', pos)
-
-        if descr.endswith("…") and alt_descr:
-            descr = text.remove_html(alt_descr).strip()
+        if descr.endswith("…"):
+            alt_descr = extr(
+                'id="slideshow-description-text" class="notranslate">', '</p>')
+            if alt_descr:
+                descr = text.remove_html(alt_descr).strip()
 
         return {
             "user": self.user,
             "presentation": self.presentation,
             "title": text.unescape(title.strip()),
             "description": text.unescape(descr),
-            "views": text.parse_int(views.rpartition(
-                " views")[0].replace(",", "")),
-            "published": published.strip(),
+            "views": views,
+            "likes": likes,
+            "comments": comments,
+            "published": text.parse_datetime(
+                published.strip(), "%b. %d, %Y"),
         }
 
     @staticmethod
-    def get_image_urls(page):
-        """Extract and return a list of all image-urls"""
-        return list(text.extract_iter(page, 'data-full="', '"'))
+    def images(page):
+        data = json.loads(text.extract(
+            page, "xtend(true, slideshare_object.slideshow_config, ", ");")[0])
+
+        # useing 'stripped_title' here is technically wrong, but it works all
+        # the same, slideshare doesn't seem to care what characters go there
+        begin = "https://image.slidesharecdn.com/{}/95/{}-".format(
+            data["ppt_location"], data["stripped_title"])
+        end = "-1024.jpg?cb=" + str(data["timestamp"])
+
+        return [
+            (begin + str(n) + end, None)
+            for n in range(1, data["slide_count"]+1)
+        ]
