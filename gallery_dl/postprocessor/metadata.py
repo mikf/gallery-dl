@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -59,6 +59,8 @@ class MetadataPP(PostProcessor):
             events = events.split(",")
         job.register_hooks({event: self.run for event in events}, options)
 
+        self.mtime = options.get("mtime")
+
     def run(self, pathfmt):
         directory = self._directory(pathfmt)
         path = directory + self._filename(pathfmt)
@@ -70,6 +72,11 @@ class MetadataPP(PostProcessor):
             os.makedirs(directory, exist_ok=True)
             with open(path, "w", encoding="utf-8") as fp:
                 self.write(fp, pathfmt.kwdict)
+
+        if self.mtime:
+            mtime = pathfmt.kwdict.get("_mtime")
+            if mtime:
+                util.set_mtime(path, mtime)
 
     def _directory(self, pathfmt):
         return pathfmt.realdirectory

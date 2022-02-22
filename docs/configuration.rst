@@ -3119,6 +3119,17 @@ Description
     Note: Only applies for ``"mode": "custom"``.
 
 
+metadata.mtime
+--------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Set modification times for generated metadata files
+    according to the accompanying downloaded file.
+
+
 mtime.key
 ---------
 Type
