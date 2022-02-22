@@ -3130,6 +3130,16 @@ Description
     according to the accompanying downloaded file.
 
 
+mtime.event
+-----------
+Type
+    ``string``
+Default
+    ``"file"``
+Description
+    See `metadata.event`_
+
+
 mtime.key
 ---------
 Type
