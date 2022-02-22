@@ -424,6 +424,7 @@ GLOBALS = {
     "parse_int": text.parse_int,
     "urlsplit" : urllib.parse.urlsplit,
     "datetime" : datetime.datetime,
+    "timedelta": datetime.timedelta,
     "abort"    : raises(exception.StopExtraction),
     "terminate": raises(exception.TerminateExtraction),
     "re"       : re,
