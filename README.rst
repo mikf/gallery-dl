@@ -16,7 +16,7 @@ and powerful `filenaming capabilities <Formatting_>`_.
 Dependencies
 ============
 
-- Python_ 3.4+
+- Python_ 3.8+
 - Requests_
 
 Optional
