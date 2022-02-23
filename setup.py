@@ -13,6 +13,7 @@ def read(fname):
     with open(path, encoding="utf-8") as file:
         return file.read()
 
+
 def check_file(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
     if os.path.exists(path):
@@ -47,7 +48,7 @@ LONG_DESCRIPTION = read("README.rst")
 
 if "py2exe" in sys.argv:
     try:
-        import py2exe
+        import py2exe  # noqa E401
     except ImportError:
         sys.exit("Error importing 'py2exe'")
 
@@ -92,7 +93,7 @@ setup(
     maintainer="Mike Fährmann",
     maintainer_email="mike_faehrmann@web.de",
     license="GPLv2",
-    python_requires=">=3.4",
+    python_requires=">=3.8",
     install_requires=[
         "requests>=2.11.0",
     ],
@@ -122,13 +123,9 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Operating System :: POSIX",
         "Operating System :: MacOS",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Multimedia :: Graphics",
         "Topic :: Utilities",
