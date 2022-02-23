@@ -14,7 +14,6 @@ import sys
 import json
 import random
 import sqlite3
-import binascii
 import datetime
 import functools
 import itertools
@@ -97,8 +96,7 @@ def noop():
 
 def generate_token(size=16):
     """Generate a random token with hexadecimal digits"""
-    data = random.getrandbits(size * 8).to_bytes(size, "big")
-    return binascii.hexlify(data).decode()
+    return random.getrandbits(size * 8).to_bytes(size, "big").hex()
 
 
 def format_value(value, suffixes="kMGTPEZY"):

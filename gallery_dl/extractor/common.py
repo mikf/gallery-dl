@@ -193,8 +193,8 @@ class Extractor():
             return
 
         if reason:
-            t = datetime.datetime.fromtimestamp(until).time()
-            isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
+            isotime = datetime.datetime.fromtimestamp(
+                until).time().isoformat("seconds")
             self.log.info("Waiting until %s for %s.", isotime, reason)
         time.sleep(seconds)
 
