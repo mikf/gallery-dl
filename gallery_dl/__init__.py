@@ -201,7 +201,8 @@ def main():
                             if sys.stdin:
                                 urls += util.parse_inputfile(sys.stdin, log)
                             else:
-                                log.warning("input file: stdin is not readable")
+                                log.warning(
+                                    "input file: stdin is not readable")
                         else:
                             with open(inputfile, encoding="utf-8") as file:
                                 urls += util.parse_inputfile(file, log)
