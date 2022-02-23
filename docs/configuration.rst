@@ -1979,6 +1979,16 @@ Description
     Download videos.
 
 
+extractor.skeb.sent-requests
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download sent requests.
+
+
 extractor.skeb.thumbnails
 -------------------------
 Type
