@@ -12,6 +12,7 @@ def read(fname):
     with open(path, encoding="utf-8") as file:
         return file.read()
 
+
 def check_file(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
     if os.path.exists(path):
