@@ -138,7 +138,7 @@ class ClassifyTest(BasePostprocessorTest):
 
         with patch("os.makedirs") as mkdirs:
             self._trigger()
-            self.assertEqual(mkdirs.call_count, 0)
+            mkdirs.assert_not_called()
 
     def test_classify_custom(self):
         pp = self._create({"mapping": {

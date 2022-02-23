@@ -67,7 +67,7 @@ class TestCookiejar(unittest.TestCase):
         with mock.patch.object(log, "warning") as mock_warning:
             cookies = extractor.find("test:").session.cookies
             self.assertEqual(len(cookies), 0)
-            self.assertEqual(mock_warning.call_count, 1)
+            mock_warning.assert_called_once()
             self.assertEqual(mock_warning.call_args[0][0], "cookies: %s")
             self.assertIsInstance(mock_warning.call_args[0][1], exc)
 
