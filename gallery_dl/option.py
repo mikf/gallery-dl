@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,13 @@ from . import job, version
 class ConfigAction(argparse.Action):
     """Set argparse results as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
-        namespace.options.append(((), self.dest, values))
+        namespace.options.append(("__global__", self.dest, values))
 
 
 class ConfigConstAction(argparse.Action):
     """Set argparse const values as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
-        namespace.options.append(((), self.dest, self.const))
+        namespace.options.append(("__global__", self.dest, self.const))
 
 
 class AppendCommandAction(argparse.Action):
@@ -47,13 +47,16 @@ class DeprecatedConfigConstAction(argparse.Action):
 class ParseAction(argparse.Action):
     """Parse <key>=<value> options and set them as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
-        key, _, value = values.partition("=")
+        key, sep, value = values.partition("=")
+        section, sep, key = key.rpartition(":")
+
         try:
             value = json.loads(value)
         except ValueError:
             pass
-        key = key.split(".")  # splitting an empty string becomes [""]
-        namespace.options.append((key[:-1], key[-1], value))
+
+        namespace.options.append(
+            (section if sep else "__global__", key, value))
 
 
 class Formatter(argparse.HelpFormatter):

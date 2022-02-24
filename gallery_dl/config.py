@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,7 +20,7 @@ log = logging.getLogger("config")
 # --------------------------------------------------------------------
 # internals
 
-_config = {}
+_config = {"__global__": {}}
 
 if util.WINDOWS:
     _default_configs = [
@@ -64,8 +64,8 @@ def load(files=None, strict=False, fmt="json"):
     for path in files or _default_configs:
         path = util.expand_path(path)
         try:
-            with open(path, encoding="utf-8") as file:
-                confdict = parsefunc(file)
+            with open(path, encoding="utf-8") as fp:
+                confdict = parsefunc(fp)
         except OSError as exc:
             if strict:
                 log.error(exc)
@@ -84,111 +84,114 @@ def load(files=None, strict=False, fmt="json"):
 def clear():
     """Reset configuration to an empty state"""
     _config.clear()
+    _config["__global__"] = {}
 
 
-def get(path, key, default=None, *, conf=_config):
+def build_options_dict(keys, conf=_config):
+    opts = {}
+    update = opts.update
+    for key in keys:
+        if key in conf:
+            update(conf[key])
+    if "__global__" in conf:
+        update(conf["__global__"])
+    return opts
+
+
+def build_extractor_options_dict(extr):
+    ccat = extr.category
+    bcat = extr.basecategory
+    subcat = extr.subcategory
+
+    if bcat:
+        keys = (
+            "general",
+            bcat,
+            bcat + ":" + subcat,
+            ccat,
+            ccat + ":" + subcat,
+        )
+    else:
+        keys = (
+            "general",
+            ccat,
+            ccat + ":" + subcat,
+        )
+
+    return build_options_dict(keys)
+
+
+def build_module_options_dict(extr, package, module, conf=_config):
+    ccat = extr.category
+    bcat = extr.basecategory
+    subcat = extr.subcategory
+    module = package + ":" + module
+
+    if bcat:
+        keys = (
+            package,
+            module,
+            bcat + ":" + package,
+            bcat + ":" + module,
+            bcat + ":" + subcat + ":" + package,
+            bcat + ":" + subcat + ":" + module,
+            ccat + ":" + package,
+            ccat + ":" + module,
+            ccat + ":" + subcat + ":" + package,
+            ccat + ":" + subcat + ":" + module,
+        )
+    else:
+        keys = (
+            package,
+            module,
+            ccat + ":" + package,
+            ccat + ":" + module,
+            ccat + ":" + subcat + ":" + package,
+            ccat + ":" + subcat + ":" + module,
+        )
+
+    return build_options_dict(keys)
+
+
+def get(section, key, default=None, *, conf=_config):
     """Get the value of property 'key' or a default value"""
     try:
-        for p in path:
-            conf = conf[p]
-        return conf[key]
+        return conf[section][key]
     except Exception:
         return default
 
 
-def interpolate(path, key, default=None, *, conf=_config):
-    """Interpolate the value of 'key'"""
-    if key in conf:
-        return conf[key]
-    try:
-        for p in path:
-            conf = conf[p]
-            if key in conf:
-                default = conf[key]
-    except Exception:
-        pass
-    return default
-
-
-def interpolate_common(common, paths, key, default=None, *, conf=_config):
-    """Interpolate the value of 'key'
-    using multiple 'paths' along a 'common' ancestor
-    """
-    if key in conf:
-        return conf[key]
-
-    # follow the common path
-    try:
-        for p in common:
-            conf = conf[p]
-            if key in conf:
-                default = conf[key]
-    except Exception:
-        return default
-
-    # try all paths until a value is found
-    value = util.SENTINEL
-    for path in paths:
-        c = conf
-        try:
-            for p in path:
-                c = c[p]
-                if key in c:
-                    value = c[key]
-        except Exception:
-            pass
-        if value is not util.SENTINEL:
-            return value
-    return default
-
-
-def accumulate(path, key, *, conf=_config):
-    """Accumulate the values of 'key' along 'path'"""
-    result = []
-    try:
-        if key in conf:
-            value = conf[key]
-            if value:
-                result.extend(value)
-        for p in path:
-            conf = conf[p]
-            if key in conf:
-                value = conf[key]
-                if value:
-                    result[:0] = value
-    except Exception:
-        pass
-    return result
-
-
-def set(path, key, value, *, conf=_config):
+def set(section, key, value, *, conf=_config):
     """Set the value of property 'key' for this session"""
-    for p in path:
-        try:
-            conf = conf[p]
-        except KeyError:
-            conf[p] = conf = {}
-    conf[key] = value
+    try:
+        conf[section][key] = value
+    except KeyError:
+        conf[section] = {key: value}
 
 
-def setdefault(path, key, value, *, conf=_config):
+def setdefault(section, key, value, *, conf=_config):
     """Set the value of property 'key' if it doesn't exist"""
-    for p in path:
-        try:
-            conf = conf[p]
-        except KeyError:
-            conf[p] = conf = {}
-    return conf.setdefault(key, value)
+    try:
+        conf[section].setdefault(key, value)
+    except KeyError:
+        conf[section] = {key: value}
 
 
-def unset(path, key, *, conf=_config):
+def unset(section, key, *, conf=_config):
     """Unset the value of property 'key'"""
     try:
-        for p in path:
-            conf = conf[p]
-        del conf[key]
+        del conf[section][key]
     except Exception:
         pass
+
+
+def interpolate(sections, key, default=None, *, conf=_config):
+    if key in conf["__global__"]:
+        return conf["__global__"][key]
+    for section in sections:
+        if section in conf and key in conf[section]:
+            default = conf[section][key]
+    return default
 
 
 class apply():

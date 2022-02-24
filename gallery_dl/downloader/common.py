@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,19 +17,22 @@ class DownloaderBase():
     scheme = ""
 
     def __init__(self, job):
+        extr = job.extractor
+
+        self.options = options = config.build_module_options_dict(
+            extr, "downloader", self.scheme)
+        self.config = cfg = options.get
+
         self.out = job.out
-        self.session = job.extractor.session
-        self.part = self.config("part", True)
-        self.partdir = self.config("part-directory")
         self.log = job.get_logger("downloader." + self.scheme)
+        self.session = extr.session
 
-        if self.partdir:
-            self.partdir = util.expand_path(self.partdir)
+        self.part = cfg("part", True)
+        if partdir := cfg("part-directory"):
+            self.partdir = util.expand_path(partdir)
             os.makedirs(self.partdir, exist_ok=True)
-
-    def config(self, key, default=None):
-        """Interpolate downloader config value for 'key'"""
-        return config.interpolate(("downloader", self.scheme), key, default)
+        else:
+            self.partdir = None
 
     def download(self, url, pathfmt):
         """Write data from 'url' into the file specified by 'pathfmt'"""

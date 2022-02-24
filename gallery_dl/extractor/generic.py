@@ -19,7 +19,7 @@ class GenericExtractor(Extractor):
     # and the "g(eneric):" prefix in url is required.
     # If the extractor is enabled, make the prefix optional
     pattern = r"(?ix)(?P<generic>g(?:eneric)?:)"
-    if config.get(("extractor", "generic"), "enabled"):
+    if config.get("generic", "enabled"):
         pattern += r"?"
 
     # The generic extractor pattern should match (almost) any valid url
