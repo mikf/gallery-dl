@@ -12,7 +12,7 @@ import logging
 from . import version, config, option, output, extractor, job, util, exception
 
 __author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2021 Mike Fährmann"
+__copyright__ = "Copyright 2014-2022 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
@@ -86,8 +86,8 @@ def parse_inputfile(file, log):
                 log.warning("input file: unable to parse '%s': %s", value, exc)
                 continue
 
-            key = key.strip().split(".")
-            conf.append((key[:-1], key[-1], value))
+            section, sep, key = key.strip().rpartition(":")
+            conf.append((section if sep else "__global__", key, value))
 
         else:
             # url
@@ -118,21 +118,21 @@ def main():
         if args.filename:
             if args.filename == "/O":
                 args.filename = "{filename}.{extension}"
-            config.set((), "filename", args.filename)
+            config.set("__global__", "filename", args.filename)
         if args.directory:
-            config.set((), "base-directory", args.directory)
-            config.set((), "directory", ())
+            config.set("__global__", "base-directory", args.directory)
+            config.set("__global__", "directory", ())
         if args.postprocessors:
-            config.set((), "postprocessors", args.postprocessors)
+            config.set("__global__", "postprocessors", args.postprocessors)
         if args.abort:
-            config.set((), "skip", "abort:" + str(args.abort))
+            config.set("__global__", "skip", f"abort:{args.abort}")
         if args.terminate:
-            config.set((), "skip", "terminate:" + str(args.terminate))
+            config.set("__global__", "skip", f"terminate:{args.terminate}")
         for opts in args.options:
             config.set(*opts)
 
         # signals
-        signals = config.get((), "signals-ignore")
+        signals = config.interpolate(("general",), "signals-ignore")
         if signals:
             import signal
             if isinstance(signals, str):
@@ -145,7 +145,7 @@ def main():
                     signal.signal(signal_num, signal.SIG_IGN)
 
         # extractor modules
-        modules = config.get(("extractor",), "modules")
+        modules = config.interpolate(("general", "extractor"), "modules")
         if modules is not None:
             if isinstance(modules, str):
                 modules = modules.split(",")
@@ -224,7 +224,7 @@ def main():
             if args.list_urls:
                 jobtype = job.UrlJob
                 jobtype.maxdepth = args.list_urls
-                if config.get(("output",), "fallback", True):
+                if config.get("output", "fallback", True):
                     jobtype.handle_url = \
                         staticmethod(jobtype.handle_url_fallback)
             else:
@@ -255,7 +255,7 @@ def main():
                 ulog.propagate = False
                 job.Job.ulog = ulog
 
-            pformat = config.get(("output",), "progress", True)
+            pformat = config.get("output", "progress", True)
             if pformat and len(urls) > 1 and args.loglevel < logging.ERROR:
                 urls = progress(urls, pformat)
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -28,11 +28,10 @@ class OAuthBase(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.client = None
-        self.cache = config.get(("extractor", self.category), "cache", True)
+        self.cache = self.config("cache", True)
 
-    def oauth_config(self, key, default=None):
-        value = config.interpolate(("extractor", self.subcategory), key)
-        return value if value is not None else default
+        self.oauth_config = config.build_options_dict((
+            "general", self.subcategory)).get
 
     def recv(self):
         """Open local HTTP server and recv callback parameters"""

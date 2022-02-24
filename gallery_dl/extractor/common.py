@@ -45,18 +45,16 @@ class Extractor():
         self.url = match.string
         self.finalize = None
 
-        if self.basecategory:
-            self.config = self._config_shared
-            self.config_accumulate = self._config_shared_accumulate
-        self._cfgpath = ("extractor", self.category, self.subcategory)
-        self._parentdir = ""
+        self.options = options = config.build_extractor_options_dict(self)
+        self.config = cfg = options.get
 
-        self._write_pages = self.config("write-pages", False)
-        self._retries = self.config("retries", 4)
-        self._timeout = self.config("timeout", 30)
-        self._verify = self.config("verify", True)
+        self._parentdir = ""
+        self._write_pages = cfg("write-pages", False)
+        self._retries = cfg("retries", 4)
+        self._timeout = cfg("timeout", 30)
+        self._verify = cfg("verify", True)
         self._interval = util.build_duration_func(
-            self.config("sleep-request", self.request_interval),
+            cfg("sleep-request", self.request_interval),
             self.request_interval_min,
         )
 
@@ -82,25 +80,6 @@ class Extractor():
 
     def skip(self, num):
         return 0
-
-    def config(self, key, default=None):
-        return config.interpolate(self._cfgpath, key, default)
-
-    def config_accumulate(self, key):
-        return config.accumulate(self._cfgpath, key)
-
-    def _config_shared(self, key, default=None):
-        return config.interpolate_common(("extractor",), (
-            (self.category, self.subcategory),
-            (self.basecategory, self.subcategory),
-        ), key, default)
-
-    def _config_shared_accumulate(self, key):
-        values = config.accumulate(self._cfgpath, key)
-        conf = config.get(("extractor",), self.basecategory)
-        if conf:
-            values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
-        return values
 
     def request(self, url, *, method="GET", session=None, retries=None,
                 encoding=None, fatal=True, notfound=None, **kwargs):
@@ -626,7 +605,7 @@ class BaseExtractor(Extractor):
 
     @classmethod
     def update(cls, instances):
-        extra_instances = config.get(("extractor",), cls.basecategory)
+        extra_instances = config._config.get(cls.basecategory + ":instances")
         if extra_instances:
             for category, info in extra_instances.items():
                 if isinstance(info, dict) and "root" in info:
@@ -763,7 +742,7 @@ SSL_CIPHERS = {
 
 
 # Undo automatic pyOpenSSL injection by requests
-pyopenssl = config.get((), "pyopenssl", False)
+pyopenssl = config.interpolate(("general",), "pyopenssl", False)
 if not pyopenssl:
     try:
         from requests.packages.urllib3.contrib import pyopenssl  # noqa

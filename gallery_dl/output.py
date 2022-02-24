@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -147,7 +147,7 @@ def configure_logging(loglevel):
 
     # stream logging handler
     handler = root.handlers[0]
-    opts = config.interpolate(("output",), "log")
+    opts = config.get("output", "log")
     if opts:
         if isinstance(opts, str):
             opts = {"format": opts}
@@ -173,7 +173,7 @@ def configure_logging(loglevel):
 
 def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
     """Setup a new logging handler"""
-    opts = config.interpolate(("output",), key)
+    opts = config.get("output", key)
     if not opts:
         return None
     if not isinstance(opts, dict):
@@ -231,7 +231,7 @@ def select():
         "color": ColorOutput,
         "null": NullOutput,
     }
-    omode = config.get(("output",), "mode", "auto").lower()
+    omode = config.get("output", "mode", "auto").lower()
     if omode in pdict:
         output = pdict[omode]()
     elif omode == "auto":
@@ -242,7 +242,7 @@ def select():
     else:
         raise Exception("invalid output mode: " + omode)
 
-    if not config.get(("output",), "skip", True):
+    if not config.get("output", "skip", True):
         output.skip = util.identity
     return output
 
@@ -278,7 +278,7 @@ class PipeOutput(NullOutput):
 class TerminalOutput(NullOutput):
 
     def __init__(self):
-        shorten = config.get(("output",), "shorten", True)
+        shorten = config.get("output", "shorten", True)
         if shorten:
             func = shorten_string_eaw if shorten == "eaw" else shorten_string
             limit = shutil.get_terminal_size().columns - OFFSET

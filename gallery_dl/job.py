@@ -49,7 +49,8 @@ class Job():
 
             # transfer (sub)category
             if pextr.config("category-transfer", pextr.categorytransfer):
-                extr._cfgpath = pextr._cfgpath
+                extr.config = pextr.config
+                extr.options = pextr.options
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
 
@@ -435,13 +436,13 @@ class DownloadJob(Job):
             if self.archive:
                 self.archive.check = pathfmt.exists
 
-        postprocessors = self.extractor.config_accumulate("postprocessors")
+        postprocessors = self.extractor.config("postprocessors")
         if postprocessors:
             self.hooks = collections.defaultdict(list)
             pp_log = self.get_logger("postprocessor")
             pp_list = []
 
-            pp_conf = config.get((), "postprocessor") or {}
+            pp_conf = config._config.get("postprocessor") or {}
             for pp_dict in postprocessors:
                 if isinstance(pp_dict, str):
                     pp_dict = pp_conf.get(pp_dict) or {"name": pp_dict}

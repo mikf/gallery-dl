@@ -9,7 +9,7 @@
 """Extractors for https://e-hentai.org/ and https://exhentai.org/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util, config, exception
 from ..cache import cache
 import itertools
 import math
@@ -32,11 +32,9 @@ class ExhentaiExtractor(Extractor):
     LIMIT = False
 
     def __init__(self, match):
-        # allow calling 'self.config()' before 'Extractor.__init__()'
-        self._cfgpath = ("extractor", self.category, self.subcategory)
-
         version = match.group(1)
-        domain = self.config("domain", "auto")
+
+        domain = config.interpolate(("exhentai"), "domain", "auto")
         if domain == "auto":
             domain = ("ex" if version == "ex" else "e-") + "hentai.org"
         self.root = "https://" + domain

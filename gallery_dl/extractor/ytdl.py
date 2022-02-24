@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,13 +23,12 @@ class YoutubeDLExtractor(Extractor):
 
     def __init__(self, match):
         # import main youtube_dl module
-        ytdl_module = ytdl.import_module(config.get(
-            ("extractor", "ytdl"), "module"))
+        ytdl_module = ytdl.import_module(config.get("ytdl", "module"))
         self.ytdl_module_name = ytdl_module.__name__
 
         # find suitable youtube_dl extractor
         self.ytdl_url = url = match.group(1)
-        generic = config.interpolate(("extractor", "ytdl"), "generic", True)
+        generic = config.interpolate(("ytdl",), "generic", True)
         if generic == "force":
             self.ytdl_ie_key = "Generic"
             self.force_generic_extractor = True
@@ -49,7 +48,7 @@ class YoutubeDLExtractor(Extractor):
     def items(self):
         # import subcategory module
         ytdl_module = ytdl.import_module(
-            config.get(("extractor", "ytdl", self.subcategory), "module") or
+            config.get("ytdl:" + self.subcategory, "module") or
             self.ytdl_module_name)
         self.log.debug("Using %s", ytdl_module)
 
@@ -132,6 +131,6 @@ class YoutubeDLExtractor(Extractor):
                 yield entry
 
 
-if config.get(("extractor", "ytdl"), "enabled"):
+if config.get("ytdl", "enabled"):
     # make 'ytdl:' prefix optional
     YoutubeDLExtractor.pattern = r"(?:ytdl:)?(.*)"
