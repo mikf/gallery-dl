@@ -291,19 +291,44 @@ def build_parser():
         help="Additional configuration files",
     )
     configuration.add_argument(
-        "--config-yaml",
-        dest="yamlfiles", metavar="FILE", action="append",
-        help=argparse.SUPPRESS,
-    )
-    configuration.add_argument(
         "-o", "--option",
         dest="options", metavar="OPT", action=ParseAction, default=[],
         help="Additional '<key>=<value>' option values",
     )
     configuration.add_argument(
+        "--config-yaml",
+        dest="yamlfiles", metavar="FILE", action="append",
+        help=argparse.SUPPRESS,
+    )
+    configuration.add_argument(
+        "--config-init",
+        dest="config", action="store_const", const="init",
+        help="Create a basic, initial configuration file",
+    )
+    configuration.add_argument(
+        "--config-open",
+        dest="config", action="store_const", const="open",
+        help="Open a configuration file in the user's preferred application",
+    )
+    configuration.add_argument(
+        "--config-status",
+        dest="config", action="store_const", const="status",
+        help="Show configuration file status",
+    )
+    configuration.add_argument(
+        "--config-update",
+        dest="config", action="store_const", const="update",
+        help="Convert legacy configuration files",
+    )
+    configuration.add_argument(
+        "--config-ignore",
+        dest="load_config", action="store_false",
+        help="Do not load any default configuration files",
+    )
+    configuration.add_argument(
         "--ignore-config",
         dest="load_config", action="store_false",
-        help="Do not read the default configuration files",
+        help=argparse.SUPPRESS,
     )
 
     authentication = parser.add_argument_group("Authentication Options")

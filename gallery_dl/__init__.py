@@ -108,6 +108,9 @@ def main():
         args = parser.parse_args()
         log = output.initialize_logging(args.loglevel)
 
+        if args.config:
+            config._warn_legacy = False
+
         # configuration
         if args.load_config:
             config.load()
@@ -215,6 +218,15 @@ def main():
                     "Deleted %d %s from '%s'",
                     cnt, "entry" if cnt == 1 else "entries", cache._path(),
                 )
+        elif args.config:
+            if args.config == "init":
+                return config.config_init()
+            if args.config == "open":
+                return config.config_open()
+            if args.config == "status":
+                return config.config_status()
+            if args.config == "update":
+                return config.config_update()
         else:
             if not args.urls and not args.inputfiles:
                 parser.error(
