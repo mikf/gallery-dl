@@ -122,12 +122,15 @@ CATEGORY_MAP = {
 }
 
 SUBCATEGORY_MAP = {
+    "art"    : "Art",
+    "audio"  : "Audio",
     "doujin" : "Doujin",
     "gallery": "Galleries",
     "image"  : "individual Images",
     "index"  : "Site Index",
     "issue"  : "Comic Issues",
     "manga"  : "Manga",
+    "media"  : "Media Files",
     "popular": "Popular Images",
     "recent" : "Recent Images",
     "search" : "Search Results",
@@ -172,11 +175,6 @@ SUBCATEGORY_MAP = {
     },
     "mangadex": {
         "feed" : "Followed Feed",
-    },
-    "newgrounds": {
-        "art"  : "Art",
-        "audio": "Audio",
-        "media": "Media Files",
     },
     "pinterest": {
         "board": "",

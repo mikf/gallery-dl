@@ -740,6 +740,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Toyhouse</td>
+    <td>https://toyhou.se/</td>
+    <td>Art, individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Tsumino</td>
     <td>https://www.tsumino.com/</td>
     <td>Galleries, Search Results</td>
