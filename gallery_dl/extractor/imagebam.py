@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,27 +16,16 @@ class ImagebamExtractor(Extractor):
     """Base class for imagebam extractors"""
     category = "imagebam"
     root = "https://www.imagebam.com"
-    cookies = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.key = match.group(1)
-        if self.cookies:
-            self.session.cookies = self.cookies
+        self.session.cookies.set("nsfw_inter", "1", domain="www.imagebam.com")
 
     def get_image_data(self, data):
         page_url = "{}/image/{}".format(self.root, data["image_key"])
         page = self.request(page_url).text
         image_url, pos = text.extract(page, '<img src="https://images', '"')
-
-        if not image_url:
-            # cache cookies
-            ImagebamExtractor.cookies = self.session.cookies
-            # repeat request to get past "Continue to your image" pages
-            page = self.request(page_url).text
-            image_url, pos = text.extract(
-                page, '<img src="https://images', '"')
-
         filename = text.unescape(text.extract(page, 'alt="', '"', pos)[0])
         data["url"] = "https://images" + image_url
         data["filename"], _, data["extension"] = filename.rpartition(".")
