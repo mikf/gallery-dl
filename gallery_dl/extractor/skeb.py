@@ -48,7 +48,8 @@ class SkebExtractor(Extractor):
                 post_num = post["path"].rpartition("/")[2]
                 user_name = post["path"].split("/")[1][1:]
                 if post["private"]:
-                    self.log.debug("Skipping @%s/%s (private)", user_name, post_num)
+                    self.log.debug("Skipping @%s/%s (private)",
+                                   user_name, post_num)
                     continue
                 yield user_name, post_num
 
