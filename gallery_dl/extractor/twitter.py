@@ -765,7 +765,6 @@ class TwitterAPI():
             "__fs_dont_mention_me_view_api_enabled": False,
         }
 
-        self._log_warnings = extractor.config("warnings")
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
         self._user = None
 
@@ -961,20 +960,9 @@ class TwitterAPI():
             if csrf_token:
                 self.headers["x-csrf-token"] = csrf_token
 
-            data = response.json()
-            if "errors" in data:
-                try:
-                    errors = ", ".join(e["message"] for e in data["errors"])
-                except Exception:
-                    errors = data["errors"]
-            else:
-                errors = ""
-
             if response.status_code < 400:
                 # success
-                if errors and self._log_warnings:
-                    self.extractor.log.warning(errors)
-                return data
+                return response.json()
 
             if response.status_code == 429:
                 # rate limit exceeded
@@ -984,6 +972,14 @@ class TwitterAPI():
                 continue
 
             # error
+            try:
+                data = response.json()
+                errors = ", ".join(e["message"] for e in data["errors"])
+            except ValueError:
+                errors = response.text
+            except Exception:
+                errors = data.get("errors", "")
+
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, errors)
 
