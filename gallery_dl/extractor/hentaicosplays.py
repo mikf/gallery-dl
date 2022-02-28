@@ -56,9 +56,8 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
         root, self.site, self.slug = match.groups()
         self.root = text.ensure_http_scheme(root)
         url = "{}/story/{}/".format(self.root, self.slug)
-        headers = {'Referer': url}
-        self.session.headers.update(headers)
         GalleryExtractor.__init__(self, match, url)
+        self.session.headers["Referer"] = url
 
     def metadata(self, page):
         title = text.extract(page, "<title>", "</title>")[0]
