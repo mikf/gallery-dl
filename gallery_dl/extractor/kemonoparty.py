@@ -30,8 +30,8 @@ class KemonopartyExtractor(Extractor):
     def __init__(self, match):
         if match.group(1) == "coomer":
             self.category = "coomerparty"
-            self.root = "https://coomer.party"
             self.cookiedomain = ".coomer.party"
+        self.root = text.root_from_url(match.group(0))
         Extractor.__init__(self, match)
 
     def items(self):
