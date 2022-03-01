@@ -46,6 +46,13 @@ def ensure_http_scheme(url, scheme="https://"):
     return url
 
 
+def root_from_url(url, scheme="https://"):
+    """Extract scheme and domain from a URL"""
+    if not url.startswith(("https://", "http://")):
+        return scheme + url[:url.index("/")]
+    return url[:url.index("/", 8)]
+
+
 def filename_from_url(url):
     """Extract the last part of an URL to use as a filename"""
     try:
