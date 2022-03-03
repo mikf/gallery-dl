@@ -765,6 +765,7 @@ class TwitterAPI():
             "__fs_dont_mention_me_view_api_enabled": False,
         }
 
+        self._nsfw_warning = True
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
         self._user = None
 
@@ -1147,6 +1148,10 @@ class TwitterAPI():
                     tweets.extend(entry["content"]["items"])
                 elif esw("conversationthread-"):
                     tweets.extend(entry["content"]["items"])
+                elif esw("tombstone-"):
+                    self._report_tombstone(
+                        entry,
+                        entry["content"]["itemContent"]["tombstoneInfo"])
                 elif esw("cursor-bottom-"):
                     cursor = entry["content"]
                     if not cursor.get("stopOnEmptyResponse", True):
@@ -1158,6 +1163,9 @@ class TwitterAPI():
                 try:
                     tweet = ((entry.get("content") or entry["item"])
                              ["itemContent"]["tweet_results"]["result"])
+                    if "tombstone" in tweet:
+                        self._report_tombstone(entry, tweet["tombstone"])
+                        continue
                     legacy = tweet["legacy"]
                 except KeyError:
                     extr.log.debug(
@@ -1244,3 +1252,11 @@ class TwitterAPI():
             if stop or not cursor or not entry:
                 return
             variables["cursor"] = cursor
+
+    def _report_tombstone(self, entry, tombstone):
+        text = (tombstone.get("richText") or tombstone["text"])["text"]
+        if text.startswith("Age-restricted") and self._nsfw_warning:
+            self.extractor.log.warning(text)
+            self._nsfw_warning = False
+        self.extractor.log.debug(
+            "Skipping %s (%s)", entry["entryId"].rpartition("-")[2], text)
