@@ -649,6 +649,10 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/i/web/status/1460044411165888515", {
             "count": 0,
         }),
+        # "Misleading" content
+        ("https://twitter.com/i/web/status/1486373748911575046", {
+            "count": 4,
+        }),
     )
 
     def __init__(self, match):
@@ -1166,6 +1170,8 @@ class TwitterAPI():
                     if "tombstone" in tweet:
                         self._report_tombstone(entry, tweet["tombstone"])
                         continue
+                    if "tweet" in tweet:
+                        tweet = tweet["tweet"]
                     legacy = tweet["legacy"]
                 except KeyError:
                     extr.log.debug(
