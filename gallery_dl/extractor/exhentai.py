@@ -232,9 +232,32 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         else:
             data = {}
 
+        self.login()
+
+        if self.gallery_token:
+            gpage = self._gallery_page()
+            self.image_token = text.extract(gpage, 'hentai.org/s/', '"')[0]
+            if not self.image_token:
+                self.log.error("Failed to extract initial image token")
+                self.log.debug("Page content:\n%s", gpage)
+                return
+            ipage = self._image_page()
+        else:
+            ipage = self._image_page()
+            part = text.extract(ipage, 'hentai.org/g/', '"')[0]
+            if not part:
+                self.log.error("Failed to extract gallery token")
+                self.log.debug("Page content:\n%s", ipage)
+                return
+            self.gallery_token = part.split("/")[1]
+            gpage = self._gallery_page()
+
+        mdata = self.get_metadata(gpage)
+
         from .hitomi import HitomiGalleryExtractor
         url = "https://hitomi.la/galleries/{}.html".format(self.gallery_id)
         data["_extractor"] = HitomiGalleryExtractor
+        data["_extractor"]._data_from_gallery_info = (lambda self, page: mdata)
         yield Message.Queue, url, data
 
     def get_metadata(self, page):
