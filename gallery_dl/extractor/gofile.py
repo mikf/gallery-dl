@@ -25,9 +25,9 @@ class GofileFolderExtractor(Extractor):
 
     def _get_content(self, token, content_id):
         response = self.request(
-            "https://api.gofile.io/getContent?contentId={}".format(content_id)
-            + "&token={}".format(token)
-            + "&websiteToken=websiteToken",
+            "https://api.gofile.io/getContent?contentId={}"
+            .format(content_id) +
+            "&token={}".format(token) + "&websiteToken=websiteToken",
             method="GET")
         json_response = response.json()
         if json_response["status"] != "ok":
