@@ -29,7 +29,8 @@ class FantiaExtractor(Extractor):
         for post_id in self.posts():
             full_response, post = self._get_post_data(post_id)
             yield Message.Directory, post
-            for url, url_data in self._get_urls_from_post(full_response, post):
+            for count, (url, url_data) in enumerate(self._get_urls_from_post(full_response, post), start=1):
+                post["num"] = count
                 fname = url_data["content_filename"] or url
                 text.nameext_from_url(fname, url_data)
                 url_data["file_url"] = url
