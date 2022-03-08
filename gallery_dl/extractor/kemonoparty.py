@@ -23,7 +23,7 @@ class KemonopartyExtractor(Extractor):
     category = "kemonoparty"
     root = "https://kemono.party"
     directory_fmt = ("{category}", "{service}", "{user}")
-    filename_fmt = "{id}_{title}_{num:>02}_{filename}.{extension}"
+    filename_fmt = "{id}_{title}_{num:>02}_{filename[:180]}.{extension}"
     archive_fmt = "{service}_{user}_{id}_{num}"
     cookiedomain = ".kemono.party"
 
