@@ -1980,7 +1980,7 @@ Description
 
 
 extractor.skeb.sent-requests
--------------------------
+----------------------------
 Type
     ``bool``
 Default
@@ -3127,6 +3127,16 @@ Default
 Description
     Set modification times for generated metadata files
     according to the accompanying downloaded file.
+
+    Enabling this option will only have an effect
+    *if* there is actual ``mtime`` metadata available, that is
+
+    * after a file download (``"event": "file"`` (default), ``"event": "after"``)
+    * when running *after* an ``mtime`` post processes for the same `event <metadata.event_>`__
+
+    For example, a ``metadata`` post processor for ``"event": "post"`` will
+    *not* be able to set its file's modification time unless an ``mtime``
+    post processor with ``"event": "post"`` runs *before* it.
 
 
 mtime.event
