@@ -19,11 +19,12 @@ class ImagebamExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.key = match.group(1)
+        self.key = match.group(2)
+        self.dir = 'view' if 'view' in match.group(1) else 'image'
         self.session.cookies.set("nsfw_inter", "1", domain="www.imagebam.com")
 
     def get_image_data(self, data):
-        page_url = "{}/image/{}".format(self.root, data["image_key"])
+        page_url = "{}/{}/{}".format(self.root, self.dir, data["image_key"])
         page = self.request(page_url).text
         image_url, pos = text.extract(page, '<img src="https://images', '"')
         filename = text.unescape(text.extract(page, 'alt="', '"', pos)[0])
@@ -95,7 +96,7 @@ class ImagebamImageExtractor(ImagebamExtractor):
     subcategory = "image"
     archive_fmt = "{image_key}"
     pattern = (r"(?:https?://)?(?:\w+\.)?imagebam\.com"
-               r"/(?:image/|(?:[0-9a-f]{2}/){3})([0-9a-f]+)")
+               r"/(image/|(?:[0-9a-f]{2}/){3}|view/)([0-9a-fA-Z]+)")
     test = (
         ("https://www.imagebam.com/image/94d56c502511890", {
             "url": "5e9ba3b1451f8ded0ae3a1b84402888893915d4a",
