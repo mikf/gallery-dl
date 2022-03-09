@@ -126,6 +126,8 @@ class MangadexChapterExtractor(MangadexExtractor):
         chapter = server["chapter"]
         base = "{}/data/{}/".format(server["baseUrl"], chapter["hash"])
 
+        print(data)
+
         enum = util.enumerate_reversed if self.config(
             "page-reverse") else enumerate
         for data["page"], page in enum(chapter["data"], 1):

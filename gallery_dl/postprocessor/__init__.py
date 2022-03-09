@@ -12,6 +12,7 @@ modules = [
     "classify",
     "compare",
     "exec",
+    "mangaplus_drm",
     "metadata",
     "mtime",
     "ugoira",
