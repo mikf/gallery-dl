@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -105,7 +105,7 @@ class SubscribestarExtractor(Extractor):
                         att, 'data-upload-id="', '"')[0]),
                     "name": text.unescape(text.extract(
                         att, 'doc_preview-title">', '<')[0] or ""),
-                    "url" : text.extract(att, 'href="', '"')[0],
+                    "url" : text.unescape(text.extract(att, 'href="', '"')[0]),
                     "type": "attachment",
                 })
 
