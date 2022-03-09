@@ -65,17 +65,20 @@ class PatreonExtractor(Extractor):
         return ()
 
     def _images(self, post):
-        image = post.get("image")
-        if image:
-            url = image.get("large_url") or image["url"]
-            name = image.get("file_name") or self._filename(url) or url
-            yield "image", url, name
-
         for image in post["images"]:
             url = image.get("download_url")
             if url:
                 name = image.get("file_name") or self._filename(url) or url
                 yield "image", url, name
+
+    def _image_large(self, post):
+        image = post.get("image")
+        if image:
+            url = image.get("large_url")
+            if url:
+                name = image.get("file_name") or self._filename(url) or url
+                return (("image_large", url, name),)
+        return ()
 
     def _attachments(self, post):
         for attachment in post["attachments"]:
@@ -218,10 +221,11 @@ class PatreonExtractor(Extractor):
 
     def _build_file_generators(self, filetypes):
         if filetypes is None:
-            return (self._images, self._attachments,
-                    self._postfile, self._content)
+            return (self._images, self._image_large,
+                    self._attachments, self._postfile, self._content)
         genmap = {
             "images"     : self._images,
+            "image_large": self._image_large,
             "attachments": self._attachments,
             "postfile"   : self._postfile,
             "content"    : self._content,

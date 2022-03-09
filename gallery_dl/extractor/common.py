@@ -621,8 +621,7 @@ class BaseExtractor(Extractor):
                     if index:
                         self.category, self.root = self.instances[index-1]
                         if not self.root:
-                            url = text.ensure_http_scheme(match.group(0))
-                            self.root = url[:url.index("/", 8)]
+                            self.root = text.root_from_url(match.group(0))
                     else:
                         self.root = group
                         self.category = group.partition("://")[2]

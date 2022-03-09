@@ -14,7 +14,7 @@ from ..cache import cache
 import itertools
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?(kemono|coomer)\.party"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.party"
 USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 
 
@@ -23,15 +23,15 @@ class KemonopartyExtractor(Extractor):
     category = "kemonoparty"
     root = "https://kemono.party"
     directory_fmt = ("{category}", "{service}", "{user}")
-    filename_fmt = "{id}_{title}_{num:>02}_{filename}.{extension}"
+    filename_fmt = "{id}_{title}_{num:>02}_{filename[:180]}.{extension}"
     archive_fmt = "{service}_{user}_{id}_{num}"
     cookiedomain = ".kemono.party"
 
     def __init__(self, match):
         if match.group(1) == "coomer":
             self.category = "coomerparty"
-            self.root = "https://coomer.party"
             self.cookiedomain = ".coomer.party"
+        self.root = text.root_from_url(match.group(0))
         Extractor.__init__(self, match)
 
     def items(self):
@@ -291,6 +291,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
+        ("https://beta.kemono.party/subscribestar/user/alcorart/post/184330"),
     )
 
     def __init__(self, match):
