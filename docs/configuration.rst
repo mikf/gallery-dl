@@ -477,6 +477,7 @@ Description
     | Can be either a simple ``string`` with just the local IP address
     | or a ``list`` with IP and explicit port number as elements.
 
+
 extractor.*.user-agent
 ----------------------
 Type
@@ -2617,6 +2618,17 @@ Default
     `extractor.*.verify`_
 Description
     Certificate validation during file downloads.
+
+
+downloader.*.proxy
+------------------
+Type
+    ``string`` or ``object``
+Default
+    `extractor.*.proxy`_
+Description
+    | Proxy server used for file downloads.
+    | Disable the use of a proxy by explicitly setting this option to ``null``.
 
 
 downloader.http.adjust-extensions

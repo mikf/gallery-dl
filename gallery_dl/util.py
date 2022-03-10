@@ -522,6 +522,26 @@ def build_extractor_filter(categories, negate=True, special=None):
         return lambda extr: any(t(extr) for t in tests)
 
 
+def build_proxy_map(proxies, log=None):
+    """Generate a proxy map"""
+    if not proxies:
+        return None
+
+    if isinstance(proxies, str):
+        if "://" not in proxies:
+            proxies = "http://" + proxies.lstrip("/")
+        return {"http": proxies, "https": proxies}
+
+    if isinstance(proxies, dict):
+        for scheme, proxy in proxies.items():
+            if "://" not in proxy:
+                proxies[scheme] = "http://" + proxy.lstrip("/")
+        return proxies
+
+    if log:
+        log.warning("invalid proxy specifier: %s", proxies)
+
+
 def build_predicate(predicates):
     if not predicates:
         return lambda url, kwdict: True
