@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2020 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,6 +26,12 @@ class DownloaderBase():
         if self.partdir:
             self.partdir = util.expand_path(self.partdir)
             os.makedirs(self.partdir, exist_ok=True)
+
+        proxies = self.config("proxy", util.SENTINEL)
+        if proxies is util.SENTINEL:
+            self.proxies = job.extractor._proxies
+        else:
+            self.proxies = util.build_proxy_map(proxies, self.log)
 
     def config(self, key, default=None):
         """Interpolate downloader config value for 'key'"""
