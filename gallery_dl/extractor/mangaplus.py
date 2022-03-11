@@ -13,10 +13,10 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..version import __version__
 from uuid import uuid4
-from blackboxprotobuf import decode_message
 import re
 from urllib.parse import urljoin, urlparse
 from pathlib import Path
+from .mangaplus_pb2 import Response
 
 BASE_PATTERN = r"(?:https?://)?mangaplus.shueisha.co.jp"
 
@@ -42,9 +42,59 @@ class MangaPlusExtractor(Extractor):
 
         # add setting for image_quality
 
+    def _transform_chapter(self, chapter_id):
+        message = self.api.manga_viewer(chapter_id)
+        manga_viewer = message.success.mangaViewer
+
+        chapter_metadata = {
+            "manga": manga_viewer.titleName,
+            "chapter": int(re.sub(r"\D", "", manga_viewer.chapterName)),
+        }
+
+        yield Message.Directory, chapter_metadata
+
+        for i, page in enumerate(manga_viewer.pages, start=1):
+            image_url = page.mangaPage.imageUrl
+
+            path_only = urljoin(image_url, urlparse(image_url).path)
+            extension = Path(path_only).suffix[1:]
+
+            page_metadata = {
+                **chapter_metadata,
+                "encryption_key": page.mangaPage.encryptionKey,
+                "extension": extension,
+                "page": i
+            }
+
+            yield Message.Url, image_url, page_metadata
+
+
+class MangaPlusChapterExtractor(MangaPlusExtractor):
+    subcategory = "chapter"
+    pattern = BASE_PATTERN + r"/titles/([0-9]+)"
+
+    def __init__(self, match):
+        MangaPlusExtractor.__init__(self, match)
+
+    def items(self):
+        message = self.api.title_detail(self.id)
+        title_detail = message.success.titleDetailView
+
+        chapters = []
+
+        for chapter in title_detail.firstChapterList:
+            chapters.append(chapter)
+
+        for chapter in title_detail.lastChapterList:
+            chapters.append(chapter)
+
+        for chapter in chapters:
+            yield from self._transform_chapter(chapter.chapterId)
+
 
 class MangaPlusMangaExtractor(MangaPlusExtractor):
     """Extractor for manga from mangaplus.shueisha.co.jp"""
+
     subcategory = "manga"
     pattern = BASE_PATTERN + r"/viewer/([0-9]+)"
 
@@ -52,28 +102,7 @@ class MangaPlusMangaExtractor(MangaPlusExtractor):
         MangaPlusExtractor.__init__(self, match)
 
     def items(self):
-        pages, chapter_metadata = self.api.manga_viewer(self.id)
-
-        chapter_metadata = {
-            "manga": chapter_metadata['title_name'],
-            "chapter": int(re.sub(r"\D", "", chapter_metadata['chapter_name'])),
-        }
-
-        yield Message.Directory, chapter_metadata
-
-        for i, page in enumerate(pages, start=1):
-            url = page['url']
-            path_only = urljoin(url, urlparse(url).path)
-            extension = Path(path_only).suffix[1:]
-
-            page_metadata = {
-                **chapter_metadata,
-                "encryption_key": page['encryption_key'],
-                "extension": extension,
-                "page": i
-            }
-
-            yield Message.Url, page['url'], page_metadata
+        yield from self._transform_chapter(self.id)
 
 
 class MangaPlusAPI():
@@ -86,39 +115,12 @@ class MangaPlusAPI():
             "Session-Token": uuid4().urn
         }
 
-    def manga_viewer(self, chapter_id, split="yes", img_quality="high"):
+    def manga_viewer(self, chapter_id, img_quality="high"):
+        return self._call(
+            f"/manga_viewer?chapter_id={chapter_id}&split=yes&img_quality={img_quality}")
 
-        message = self._call(
-            f"/manga_viewer?chapter_id={chapter_id}&split={split}&img_quality={img_quality}")
-
-        # A lot of magic numbers coming up below. These are paths in the
-        # protobuf message. We're taking a shortcut here since adding protobuf
-        # definitions and a compiler is a bit overkill for this lib.
-        #
-        # Data primarily sourced from:
-        # https://github.com/parasquid/manga_plus-api/blob/c7066684f9bb3f354a55cc7094a420134060d897/lib/manga_plus/proto/manga_plus.proto
-
-        root = message['1']['10']
-
-        metadata = {
-            "title_id": root['9'],
-            "chapter_id": chapter_id,
-            "title_name": root['5'].decode('utf-8'),
-            "chapter_name": root['6'].decode('utf-8')
-        }
-
-        pages = []
-
-        for page in root['1']:
-            if '1' in page:
-                pages.append({
-                    "url": page['1']['1'].decode('utf-8'),
-                    "width": page['1']['2'],
-                    "height": page['1']['3'],
-                    "encryption_key": page['1']['5'].decode('utf-8')
-                })
-
-        return pages, metadata
+    def title_detail(self, title_id):
+        return self._call(f"/title_detail?title_id={title_id}")
 
     def _call(self, endpoint, params=None):
         url = self.root + endpoint
@@ -128,10 +130,10 @@ class MangaPlusAPI():
                 url, params=params, headers=self.headers, fatal=None)
 
             if response.status_code < 400:
+                msg = Response()
+                msg.ParseFromString(response.content)
 
-                message, typedef = decode_message(response.content)
-
-                return message
+                return msg
 
             raise exception.StopExtraction(
                 f"{response.status_code}: bad response from {url}")
