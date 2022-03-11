@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://seiga.nicovideo.jp/"""
+"""Extractors for https://seiga.nicovideo.jp/"""
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from ..cache import cache
 
 
 class SeigaExtractor(Extractor):
@@ -25,7 +24,9 @@ class SeigaExtractor(Extractor):
         self.start_image = 0
 
     def items(self):
-        self.login()
+        if not self._check_cookies(("user_session",)):
+            raise exception.StopExtraction("'user_session' cookie required")
+
         images = iter(self.get_images())
         data = next(images)
 
@@ -44,28 +45,6 @@ class SeigaExtractor(Extractor):
         response = self.request(
             url, method="HEAD", allow_redirects=False, notfound="image")
         return response.headers["Location"].replace("/o/", "/priv/", 1)
-
-    def login(self):
-        """Login and set necessary cookies"""
-        if not self._check_cookies(("user_session",)):
-            username, password = self._get_auth_info()
-            self._update_cookies(self._login_impl(username, password))
-
-    @cache(maxage=7*24*3600, keyarg=1)
-    def _login_impl(self, username, password):
-        if not username or not password:
-            raise exception.AuthenticationError(
-                "Username and password required")
-
-        self.log.info("Logging in as %s", username)
-        url = "https://account.nicovideo.jp/api/v1/login"
-        data = {"mail_tel": username, "password": password}
-
-        self.request(url, method="POST", data=data)
-        if "user_session" not in self.session.cookies:
-            raise exception.AuthenticationError()
-        del self.session.cookies["nicosid"]
-        return self.session.cookies
 
 
 class SeigaUserExtractor(SeigaExtractor):
