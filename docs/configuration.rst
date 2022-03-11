@@ -356,7 +356,6 @@ Description
     Specifying a username and password is required for
 
     * ``nijie``
-    * ``seiga``
 
     and optional for
 

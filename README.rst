@@ -124,11 +124,11 @@ Download images; in this case from danbooru via tag search for 'bonocho':
     $ gallery-dl "https://danbooru.donmai.us/posts?tags=bonocho"
 
 
-Get the direct URL of an image from a site that requires authentication:
+Get the direct URL of an image from a site supporting authentication with username & password:
 
 .. code:: bash
 
-    $ gallery-dl -g -u "<username>" -p "<password>" "https://seiga.nicovideo.jp/seiga/im3211703"
+    $ gallery-dl -g -u "<username>" -p "<password>" "https://twitter.com/i/web/status/604341487988576256"
 
 
 Filter manga chapters by language and chapter number:
@@ -199,7 +199,7 @@ Username & Password
 
 Some extractors require you to provide valid login credentials in the form of
 a username & password pair. This is necessary for
-``nijie`` and ``seiga``
+``nijie``
 and optional for
 ``aryion``,
 ``danbooru``,
@@ -225,7 +225,7 @@ You can set the necessary information in your configuration file
 
     {
         "extractor": {
-            "seiga": {
+            "twitter": {
                 "username": "<username>",
                 "password": "<password>"
             }
