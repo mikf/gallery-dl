@@ -8,6 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import json
 
 
 class FantiaExtractor(Extractor):
@@ -92,13 +93,38 @@ class FantiaExtractor(Extractor):
             post["content_title"] = content["title"]
             post["content_filename"] = content.get("filename", "")
             post["content_id"] = content["id"]
+
+            if "comment" in content:
+                post["content_comment"] = content["comment"]
+
             if "post_content_photos" in content:
                 for photo in content["post_content_photos"]:
                     post["file_id"] = photo["id"]
                     yield photo["url"]["original"], post
+
             if "download_uri" in content:
                 post["file_id"] = content["id"]
                 yield self.root+"/"+content["download_uri"], post
+
+            if content["category"] == "blog" and "comment" in content:
+                comment_json = json.loads(content["comment"])
+                ops = comment_json.get("ops", ())
+
+                # collect blogpost text first
+                blog_text = ""
+                for op in ops:
+                    insert = op.get("insert")
+                    if isinstance(insert, str):
+                        blog_text += insert
+                post["blogpost_text"] = blog_text
+
+                # collect images
+                for op in ops:
+                    insert = op.get("insert")
+                    if isinstance(insert, dict) and "fantiaImage" in insert:
+                        img = insert["fantiaImage"]
+                        post["file_id"] = img["id"]
+                        yield "https://fantia.jp" + img["original_url"], post
 
 
 class FantiaCreatorExtractor(FantiaExtractor):
