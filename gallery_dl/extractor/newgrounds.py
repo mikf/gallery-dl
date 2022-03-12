@@ -173,6 +173,7 @@ class NewgroundsExtractor(Extractor):
     def _extract_media_data(self, extr, url):
         index = url.split("/")[5]
         title = extr('"og:title" content="', '"')
+        descr = extr('"og:description" content="', '"')
         src = extr('{"url":"', '"')
 
         if src:
@@ -211,7 +212,7 @@ class NewgroundsExtractor(Extractor):
             "title"      : text.unescape(title),
             "url"        : src,
             "date"       : date,
-            "description": text.unescape(extr(
+            "description": text.unescape(descr or extr(
                 'itemprop="description" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
             "index"      : text.parse_int(index),
@@ -321,6 +322,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
                 "artist"     : ["kickinthehead", "danpaladin", "tomfulp"],
                 "comment"    : "re:My fan trailer for Alien Hominid HD!",
                 "date"       : "dt:2013-02-01 09:50:49",
+                "description": "Fan trailer for Alien Hominid HD!",
                 "favorites"  : int,
                 "filename"   : "564957_alternate_31",
                 "index"      : 595355,
