@@ -19,6 +19,7 @@ from pathlib import Path
 from .mangaplus_pb2 import Response
 
 BASE_PATTERN = r"(?:https?://)?mangaplus.shueisha.co.jp"
+IMAGE_QUALITIES = ['low', 'medium', 'high', 'super_high']
 
 
 class MangaPlusExtractor(Extractor):
@@ -40,15 +41,22 @@ class MangaPlusExtractor(Extractor):
         self.api = MangaPlusAPI(self)
         self.id = match.group(1)
 
-        # add setting for image_quality
+        self.image_quality = self.config("image-quality", "high")
 
-    def _transform_chapter(self, chapter_id):
-        message = self.api.manga_viewer(chapter_id)
+        if self.image_quality not in IMAGE_QUALITIES:
+            self.log.warn(
+                f"unknown image-quality option '{self.image_quality} "
+                f"(should be one of {', '.join(IMAGE_QUALITIES)})")
+
+    def _transform_chapter(self, chapter_id: int, metadata: dict = None):
+        message = self.api.manga_viewer(chapter_id, self.image_quality)
         manga_viewer = message.success.mangaViewer
 
         chapter_metadata = {
             "manga": manga_viewer.titleName,
+            "manga_id": manga_viewer.titleId,
             "chapter": int(re.sub(r"\D", "", manga_viewer.chapterName)),
+            **(metadata or {}),
         }
 
         yield Message.Directory, chapter_metadata
@@ -66,10 +74,25 @@ class MangaPlusExtractor(Extractor):
                 "page": i
             }
 
+            self.log.debug(f"page metadata for <{image_url}>:")
+            self.log.debug(page_metadata)
+
             yield Message.Url, image_url, page_metadata
+
+    @staticmethod
+    def _transform_title_meta(message):
+        title_detail = message.success.titleDetailView
+
+        return {
+            "author": title_detail.title.author,
+            "manga": title_detail.title.name,
+            "manga_id": title_detail.title.titleId,
+        }
 
 
 class MangaPlusChapterExtractor(MangaPlusExtractor):
+    """Extractor for chapters from mangaplus.shueisha.co.jp"""
+
     subcategory = "chapter"
     pattern = BASE_PATTERN + r"/titles/([0-9]+)"
 
@@ -89,7 +112,12 @@ class MangaPlusChapterExtractor(MangaPlusExtractor):
             chapters.append(chapter)
 
         for chapter in chapters:
-            yield from self._transform_chapter(chapter.chapterId)
+            metadata = {
+                **self._transform_title_meta(message),
+                "chapter_minor": chapter.subTitle
+            }
+
+            yield from self._transform_chapter(chapter.chapterId, metadata)
 
 
 class MangaPlusMangaExtractor(MangaPlusExtractor):
@@ -115,7 +143,7 @@ class MangaPlusAPI():
             "Session-Token": uuid4().urn
         }
 
-    def manga_viewer(self, chapter_id, img_quality="high"):
+    def manga_viewer(self, chapter_id: int, img_quality: str):
         return self._call(
             f"/manga_viewer?chapter_id={chapter_id}&split=yes&img_quality={img_quality}")
 
@@ -133,7 +161,17 @@ class MangaPlusAPI():
                 msg = Response()
                 msg.ParseFromString(response.content)
 
+                self.extractor.log.debug(f"parsed payload from {url}")
+                self.extractor.log.debug(msg)
+
+                if not msg.HasField("success"):
+                    self.extractor.log.debug(response.content)
+                    raise exception.StopExtraction(
+                        f"No valid data returned from {url}")
+
                 return msg
+
+            self.extractor.log.debug(response.text)
 
             raise exception.StopExtraction(
                 f"{response.status_code}: bad response from {url}")
