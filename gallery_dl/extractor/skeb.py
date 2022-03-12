@@ -140,7 +140,7 @@ class SkebPostExtractor(SkebExtractor):
         self.post_num = match.group(2)
 
     def posts(self):
-        return (self.user_name, self.post_num,)
+        return ((self.user_name, self.post_num),)
 
 
 class SkebUserExtractor(SkebExtractor):

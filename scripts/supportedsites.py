@@ -265,7 +265,7 @@ AUTH_MAP = {
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
-    "seiga"          : "Required",
+    "seiga"          : _COOKIES,
     "seisoparty"     : "Supported",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",

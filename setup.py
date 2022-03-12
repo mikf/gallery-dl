@@ -35,6 +35,7 @@ FILES = [
     for (path, files) in [
         ("share/bash-completion/completions", ["data/completion/gallery-dl"]),
         ("share/zsh/site-functions"         , ["data/completion/_gallery-dl"]),
+        ("share/fish/vendor_completions.d"  , ["data/completion/gallery-dl.fish"]),
         ("share/man/man1"                   , ["data/man/gallery-dl.1"]),
         ("share/man/man5"                   , ["data/man/gallery-dl.conf.5"]),
     ]

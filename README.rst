@@ -38,14 +38,14 @@ easily installed or upgraded using pip_:
 
 .. code:: bash
 
-    $ python3 -m pip install -U gallery-dl
+    python3 -m pip install -U gallery-dl
 
 Installing the latest dev version directly from GitHub can be done with
 pip_ as well:
 
 .. code:: bash
 
-    $ python3 -m pip install -U -I --no-deps --no-cache-dir https://github.com/mikf/gallery-dl/archive/master.tar.gz
+    python3 -m pip install -U -I --no-deps --no-cache-dir https://github.com/mikf/gallery-dl/archive/master.tar.gz
 
 Note: Windows users should use :code:`py -3` instead of :code:`python3`.
 
@@ -55,7 +55,7 @@ To ensure these packages are up-to-date, run
 
 .. code:: bash
 
-    $ python3 -m pip install --upgrade pip setuptools wheel
+    python3 -m pip install --upgrade pip setuptools wheel
 
 
 Standalone Executable
@@ -78,7 +78,7 @@ Linux users that are using a distro that is supported by Snapd_ can install *gal
 
 .. code:: bash
 
-    $ snap install gallery-dl
+    snap install gallery-dl
 
 
 Chocolatey
@@ -88,7 +88,7 @@ Windows users that have Chocolatey_ installed can install *gallery-dl* from the 
 
 .. code:: powershell
 
-    $ choco install gallery-dl
+    choco install gallery-dl
 
 
 Scoop
@@ -98,7 +98,7 @@ Scoop
 
 .. code:: powershell
 
-    $ scoop install gallery-dl
+    scoop install gallery-dl
 
 
 Usage
@@ -109,7 +109,7 @@ from:
 
 .. code:: bash
 
-    $ gallery-dl [OPTION]... URL...
+    gallery-dl [OPTION]... URL...
 
 See also :code:`gallery-dl --help`.
 
@@ -121,21 +121,21 @@ Download images; in this case from danbooru via tag search for 'bonocho':
 
 .. code:: bash
 
-    $ gallery-dl "https://danbooru.donmai.us/posts?tags=bonocho"
+    gallery-dl "https://danbooru.donmai.us/posts?tags=bonocho"
 
 
-Get the direct URL of an image from a site that requires authentication:
+Get the direct URL of an image from a site supporting authentication with username & password:
 
 .. code:: bash
 
-    $ gallery-dl -g -u "<username>" -p "<password>" "https://seiga.nicovideo.jp/seiga/im3211703"
+    gallery-dl -g -u "<username>" -p "<password>" "https://twitter.com/i/web/status/604341487988576256"
 
 
 Filter manga chapters by language and chapter number:
 
 .. code:: bash
 
-    $ gallery-dl --chapter-filter "lang == 'fr' and 10 <= chapter < 20" "https://mangadex.org/title/2354/"
+    gallery-dl --chapter-filter "lang == 'fr' and 10 <= chapter < 20" "https://mangadex.org/title/2354/"
 
 
 | Search a remote resource for URLs and download images from them:
@@ -143,7 +143,7 @@ Filter manga chapters by language and chapter number:
 
 .. code:: bash
 
-    $ gallery-dl "r:https://pastebin.com/raw/FLwrCYsT"
+    gallery-dl "r:https://pastebin.com/raw/FLwrCYsT"
 
 
 If a site's address is nonstandard for its extractor, you can prefix the URL with the
@@ -151,7 +151,7 @@ extractor's name to force the use of a specific extractor:
 
 .. code:: bash
 
-    $ gallery-dl "tumblr:https://sometumblrblog.example"
+    gallery-dl "tumblr:https://sometumblrblog.example"
 
 
 Configuration
@@ -199,7 +199,7 @@ Username & Password
 
 Some extractors require you to provide valid login credentials in the form of
 a username & password pair. This is necessary for
-``nijie`` and ``seiga``
+``nijie``
 and optional for
 ``aryion``,
 ``danbooru``,
@@ -225,7 +225,7 @@ You can set the necessary information in your configuration file
 
     {
         "extractor": {
-            "seiga": {
+            "twitter": {
                 "username": "<username>",
                 "password": "<password>"
             }
@@ -238,8 +238,8 @@ or you can provide them directly via the
 
 .. code:: bash
 
-    $ gallery-dl -u <username> -p <password> URL
-    $ gallery-dl -o username=<username> -o password=<password> URL
+    gallery-dl -u <username> -p <password> URL
+    gallery-dl -o username=<username> -o password=<password> URL
 
 
 Cookies
@@ -283,7 +283,7 @@ the :code:`--cookies` command-line option:
 
 .. code:: bash
 
-    $ gallery-dl --cookies "$HOME/path/to/cookies.txt" URL
+    gallery-dl --cookies "$HOME/path/to/cookies.txt" URL
 
 
 OAuth
@@ -301,7 +301,7 @@ To link your account to *gallery-dl*, start by invoking it with
 
 .. code:: bash
 
-    $ gallery-dl oauth:flickr
+    gallery-dl oauth:flickr
 
 You will be sent to the site's authorization page and asked to grant read
 access to *gallery-dl*. Authorize it and you will be shown one or more
@@ -312,8 +312,8 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 
 .. code:: bash
 
-    $ gallery-dl oauth:mastodon:pawoo.net
-    $ gallery-dl oauth:mastodon:https://mastodon.social/
+    gallery-dl oauth:mastodon:pawoo.net
+    gallery-dl oauth:mastodon:https://mastodon.social/
 
 
 

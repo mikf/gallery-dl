@@ -527,7 +527,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Niconico Seiga</td>
     <td>https://seiga.nicovideo.jp/</td>
     <td>individual Images, User Profiles</td>
-    <td>Required</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
     <td>nijie</td>

@@ -121,7 +121,8 @@ class HttpDownloader(DownloaderBase):
             try:
                 response = self.session.request(
                     "GET", url, stream=True, headers=headers,
-                    timeout=self.timeout, verify=self.verify)
+                    timeout=self.timeout, verify=self.verify,
+                    proxies=self.proxies)
             except (ConnectionError, Timeout) as exc:
                 msg = str(exc)
                 continue
