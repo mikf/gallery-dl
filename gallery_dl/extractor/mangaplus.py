@@ -10,7 +10,7 @@
 """Extractors for https://mangaplus.shueisha.co.jp"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import exception
 from ..version import __version__
 from uuid import uuid4
 import re
@@ -144,8 +144,10 @@ class MangaPlusAPI():
         }
 
     def manga_viewer(self, chapter_id: int, img_quality: str):
-        return self._call(
-            f"/manga_viewer?chapter_id={chapter_id}&split=yes&img_quality={img_quality}")
+        return self._call("/manga_viewer"
+                          f"?chapter_id={chapter_id}"
+                          f"&split=yes"
+                          f"&img_quality={img_quality}")
 
     def title_detail(self, title_id):
         return self._call(f"/title_detail?title_id={title_id}")

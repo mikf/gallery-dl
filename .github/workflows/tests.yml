@@ -32,7 +32,7 @@ jobs:
     - name: Lint with flake8
       run: |
         pip install flake8
-        flake8 .
+        flake8 . --exclude="*_pb2.py"
 
     - name: Run tests
       run: |
