@@ -33,9 +33,11 @@ def parse(format_string, default=None):
         pass
 
     cls = StringFormatter
-    if format_string.startswith("\f"):
+
+    if format_string.startswith("\f") or format_string.startswith("\\f"):
         kind, _, format_string = format_string.partition(" ")
-        kind = kind[1:]
+
+        kind = kind[-1]
 
         if kind == "T":
             cls = TemplateFormatter
