@@ -212,5 +212,10 @@ Starting a format string with the _Unicode character FORM FEED (FF)_ `\f` allows
 </tbody>
 </table>
 
-The Linux Bash will automatically escape this character in a normal string. You can bypass this by using _printf_:
-`gallery-dl -f "$(printf '\fM my_module:generate_text')"`.
+The Linux Bash will automatically escape the form feed character in a normal string. You can bypass this by using _printf_:
+
+`gallery-dl -f "$(printf '\fM my_module:generate_text')"`
+
+or:
+
+`format_string=$(printf "\fM my_module:generate_text") && gallery-dl -f "$format_string"`
