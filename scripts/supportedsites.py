@@ -70,7 +70,7 @@ CATEGORY_MAP = {
     "mangapark"      : "MangaPark",
     "mangasee"       : "MangaSee",
     "mastodon.social": "mastodon.social",
-    "mememuseum"     : "meme.museum",
+    "meme.museum"    : "meme.museum",
     "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
     "naverwebtoon"   : "NaverWebtoon",
