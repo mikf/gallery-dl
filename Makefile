@@ -6,7 +6,7 @@ SHAREDIR ?= $(PREFIX)/share
 PYTHON ?= /usr/bin/env python3
 SRC ?= gallery_dl
 
-all: man completion supportedsites
+all: compile man completion supportedsites
 
 clean:
 	$(RM) -r build/
