@@ -181,7 +181,7 @@ For example `{foo:?//RF/B/Ro/e/> 10}` -> `   Bee Bar`
 
 ## Special Type Format Strings
 
-Starting a format string with '\f<Type> ' allows to set a different format string type than the default. Available ones are:
+Starting a format string with the _Unicode character FORM FEED (FF)_ `\f` allows to set a different format string type than the default. Available ones are:
 
 <table>
 <thead>
@@ -212,3 +212,5 @@ Starting a format string with '\f<Type> ' allows to set a different format strin
 </tbody>
 </table>
 
+The Linux Bash will automatically escape this character in a normal string. You can bypass this by using _printf_:
+`gallery-dl -f "$(printf '\fM my_module:generate_text')"`.
