@@ -476,7 +476,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
-    <td>Meme.museum</td>
+    <td>meme.museum</td>
     <td>https://meme.museum/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
