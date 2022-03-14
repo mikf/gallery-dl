@@ -16,7 +16,7 @@ from uuid import uuid4
 import re
 from urllib.parse import urljoin, urlparse
 from pathlib import Path
-from .mangaplus_pb2 import Response
+from ..protobuf.mangaplus_pb2 import Response
 
 BASE_PATTERN = r"(?:https?://)?mangaplus.shueisha.co.jp"
 IMAGE_QUALITIES = ['low', 'medium', 'high', 'super_high']
