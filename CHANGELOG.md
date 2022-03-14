@@ -1,6 +1,43 @@
 # Changelog
 
-## Unreleased
+## 1.21.0 - 2022-03-14
+### Additions
+- [fantia] add `num` enumeration index ([#2377](https://github.com/mikf/gallery-dl/issues/2377))
+- [fantia] support "Blog Post" content ([#2381](https://github.com/mikf/gallery-dl/issues/2381))
+- [imagebam] add support for /view/ paths ([#2378](https://github.com/mikf/gallery-dl/issues/2378))
+- [kemonoparty] match beta.kemono.party URLs ([#2348](https://github.com/mikf/gallery-dl/issues/2348))
+- [kissgoddess] add `gallery` and `model` extractors ([#1052](https://github.com/mikf/gallery-dl/issues/1052), [#2304](https://github.com/mikf/gallery-dl/issues/2304))
+- [mememuseum] add `tag` and `post` extractors ([#2264](https://github.com/mikf/gallery-dl/issues/2264))
+- [newgrounds] add `post_url` metadata field ([#2328](https://github.com/mikf/gallery-dl/issues/2328))
+- [patreon] add `image_large` file type ([#2257](https://github.com/mikf/gallery-dl/issues/2257))
+- [toyhouse] support `art` listings ([#1546](https://github.com/mikf/gallery-dl/issues/1546), [#2331](https://github.com/mikf/gallery-dl/issues/2331))
+- [twibooru] add extractors for searches, galleries, and posts ([#2219](https://github.com/mikf/gallery-dl/issues/2219))
+- [postprocessor:metadata] implement `mtime` option ([#2307](https://github.com/mikf/gallery-dl/issues/2307))
+- [postprocessor:mtime] add `event` option ([#2307](https://github.com/mikf/gallery-dl/issues/2307))
+- add fish shell completion ([#2363](https://github.com/mikf/gallery-dl/issues/2363))
+- add `timedelta` class to global namespace in filter expressions
+### Changes
+- [seiga] require authentication with `user_session` cookie ([#2372](https://github.com/mikf/gallery-dl/issues/2372))
+  - remove username & password login due to 2FA
+- refactor proxy support ([#2357](https://github.com/mikf/gallery-dl/issues/2357))
+  - allow gallery-dl proxy settings to overwrite environment proxies
+  - allow specifying different proxies for data extraction and download
+### Fixes
+- [bunkr] fix mp4 downloads ([#2239](https://github.com/mikf/gallery-dl/issues/2239))
+- [fanbox] fetch data for each individual post ([#2388](https://github.com/mikf/gallery-dl/issues/2388))
+- [hentaicosplays] send `Referer` header ([#2317](https://github.com/mikf/gallery-dl/issues/2317))
+- [imagebam] set `nsfw_inter` cookie ([#2334](https://github.com/mikf/gallery-dl/issues/2334))
+- [kemonoparty] limit default filename length ([#2373](https://github.com/mikf/gallery-dl/issues/2373))
+- [mangadex] fix chapters without `translatedLanguage` ([#2352](https://github.com/mikf/gallery-dl/issues/2352))
+- [newgrounds] fix video descriptions ([#2328](https://github.com/mikf/gallery-dl/issues/2328))
+- [skeb] add `sent-requests` option ([#2322](https://github.com/mikf/gallery-dl/issues/2322), [#2330](https://github.com/mikf/gallery-dl/issues/2330))
+- [slideshare] fix extraction
+- [subscribestar] unescape attachment URLs ([#2370](https://github.com/mikf/gallery-dl/issues/2370))
+- [twitter] fix handling of 429 Too Many Requests responses ([#2339](https://github.com/mikf/gallery-dl/issues/2339))
+- [twitter] warn about age-restricted Tweets ([#2354](https://github.com/mikf/gallery-dl/issues/2354))
+- [twitter] handle Tweets with "softIntervention" entries
+- [twitter] update query hashes
+- fix another bug in `_check_cookies()` ([#2160](https://github.com/mikf/gallery-dl/issues/2160))
 
 ## 1.20.5 - 2022-02-14
 ### Additions
@@ -1239,7 +1276,7 @@
 - Miscellaneous fixes for `*reactor`, `simplyhentai`
 
 ## 1.10.1 - 2019-08-02
-## Fixes
+### Fixes
 - Use the correct domain for exhentai.org input URLs
 
 ## 1.10.0 - 2019-08-01
