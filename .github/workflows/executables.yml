@@ -13,7 +13,7 @@ jobs:
         python-version: ["3.9"]
         architecture: ["x64"]
         include:
-        - os: "windows-2016"
+        - os: "windows-2019"
           python-version: "3.8"
           architecture: "x86"
 
