@@ -25,7 +25,9 @@ executable:
 	scripts/pyinstaller.py
 
 compile:
-	protoc -I=$(SRC) --python_out=$(SRC)/ $(SRC)/**/*.proto
+	$(PYTHON) -m pip show "grpcio-tools" >/dev/null 2>&1 || \
+		{ >&2 echo "python module 'grpcio-tools' must be installed to compile protocol buffers"; exit 1; }
+	$(PYTHON) -m grpc_tools.protoc -I=$(SRC) --python_out=$(SRC)/ $(SRC)/**/*.proto
 
 completion: data/completion/gallery-dl data/completion/_gallery-dl data/completion/gallery-dl.fish
 

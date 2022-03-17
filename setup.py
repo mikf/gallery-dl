@@ -96,6 +96,7 @@ setup(
     python_requires=">=3.4",
     install_requires=[
         "requests>=2.11.0",
+        "grpcio-tools>=1.44.0",
     ],
     extras_require={
         "video": [
