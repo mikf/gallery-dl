@@ -7,13 +7,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Remove DRM on downloads from https://mangaplus.shueisha.co.jp"""
+"""Undo DRM on downloads from https://mangaplus.shueisha.co.jp"""
 
 from .common import PostProcessor
 from pathlib import Path
 
 
-class MangaPlusUnscramblePP(PostProcessor):
+class MangaplusPP(PostProcessor):
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
 
@@ -38,7 +38,7 @@ class MangaPlusUnscramblePP(PostProcessor):
     # algorithm borrowed from:
     # https://github.com/tachiyomiorg/tachiyomi-extensions/blob/b1dfa393779606aef653087360d511140fdcdb2b/src/all/mangaplus/src/eu/kanade/tachiyomi/extension/all/mangaplus/MangaPlus.kt#L382-L391
     @staticmethod
-    def _decode_image(encryption_key: str, image_bytes: bytes):
+    def _decode_image(encryption_key, image_bytes):
         """Shifts bytes on an image to undo MangaPlus DRM"""
         def chunked(size, source):
             for i in range(0, len(source), size):
@@ -52,4 +52,4 @@ class MangaPlusUnscramblePP(PostProcessor):
         return bytes(buffer)
 
 
-__postprocessor__ = MangaPlusUnscramblePP
+__postprocessor__ = MangaplusPP

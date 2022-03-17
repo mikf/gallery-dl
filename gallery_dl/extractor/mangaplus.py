@@ -16,13 +16,17 @@ from uuid import uuid4
 import re
 from urllib.parse import urljoin, urlparse
 from pathlib import Path
-from ..protobuf.mangaplus_pb2 import Response
+
+try:
+    from ..protobuf.mangaplus_pb2 import Response
+except ImportError:
+    Response = None
 
 BASE_PATTERN = r"(?:https?://)?mangaplus.shueisha.co.jp"
 IMAGE_QUALITIES = ['low', 'medium', 'high', 'super_high']
 
 
-class MangaPlusExtractor(Extractor):
+class MangaplusExtractor(Extractor):
     """Base class for mangaplus extractors"""
     category = "mangaplus"
     directory_fmt = (
@@ -38,17 +42,24 @@ class MangaPlusExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
 
-        self.api = MangaPlusAPI(self)
+        if Response is None:
+            self.log.error("'protobuf' module required for {} (install with "
+                           "'python -m pip install protobuf')"
+                           .format(self.api_url))
+
+        self.api = MangaplusAPI(self)
         self.id = match.group(1)
 
         self.image_quality = self.config("image-quality", "high")
 
         if self.image_quality not in IMAGE_QUALITIES:
             self.log.warn(
-                f"unknown image-quality option '{self.image_quality} "
-                f"(should be one of {', '.join(IMAGE_QUALITIES)})")
+                "unknown image-quality option '{selected}' "
+                "(should be one of {options})"
+                .format(selected=self.image_quality,
+                        options=', '.join(IMAGE_QUALITIES)))
 
-    def _transform_chapter(self, chapter_id: int, metadata: dict = None):
+    def _transform_chapter(self, chapter_id, metadata={}):
         message = self.api.manga_viewer(chapter_id, self.image_quality)
         manga_viewer = message.success.mangaViewer
 
@@ -56,8 +67,8 @@ class MangaPlusExtractor(Extractor):
             "manga": manga_viewer.titleName,
             "manga_id": manga_viewer.titleId,
             "chapter": int(re.sub(r"\D", "", manga_viewer.chapterName)),
-            **(metadata or {}),
         }
+        chapter_metadata.update(metadata)
 
         yield Message.Directory, chapter_metadata
 
@@ -68,36 +79,26 @@ class MangaPlusExtractor(Extractor):
             extension = Path(path_only).suffix[1:]
 
             page_metadata = {
-                **chapter_metadata,
                 "encryption_key": page.mangaPage.encryptionKey,
                 "extension": extension,
                 "page": i
             }
+            page_metadata.update(chapter_metadata)
 
-            self.log.debug(f"page metadata for <{image_url}>:")
+            self.log.debug("page metadata for <{}>:".format(image_url))
             self.log.debug(page_metadata)
 
             yield Message.Url, image_url, page_metadata
 
-    @staticmethod
-    def _transform_title_meta(message):
-        title_detail = message.success.titleDetailView
 
-        return {
-            "author": title_detail.title.author,
-            "manga": title_detail.title.name,
-            "manga_id": title_detail.title.titleId,
-        }
-
-
-class MangaPlusChapterExtractor(MangaPlusExtractor):
+class MangaplusChapterExtractor(MangaplusExtractor):
     """Extractor for chapters from mangaplus.shueisha.co.jp"""
 
     subcategory = "chapter"
     pattern = BASE_PATTERN + r"/titles/([0-9]+)"
 
     def __init__(self, match):
-        MangaPlusExtractor.__init__(self, match)
+        MangaplusExtractor.__init__(self, match)
 
     def items(self):
         message = self.api.title_detail(self.id)
@@ -113,27 +114,29 @@ class MangaPlusChapterExtractor(MangaPlusExtractor):
 
         for chapter in chapters:
             metadata = {
-                **self._transform_title_meta(message),
-                "chapter_minor": chapter.subTitle
+                "chapter_minor": chapter.subTitle,
+                "author": title_detail.title.author,
+                "manga": title_detail.title.name,
+                "manga_id": title_detail.title.titleId,
             }
 
             yield from self._transform_chapter(chapter.chapterId, metadata)
 
 
-class MangaPlusMangaExtractor(MangaPlusExtractor):
+class MangaplusMangaExtractor(MangaplusExtractor):
     """Extractor for manga from mangaplus.shueisha.co.jp"""
 
     subcategory = "manga"
     pattern = BASE_PATTERN + r"/viewer/([0-9]+)"
 
     def __init__(self, match):
-        MangaPlusExtractor.__init__(self, match)
+        MangaplusExtractor.__init__(self, match)
 
     def items(self):
         yield from self._transform_chapter(self.id)
 
 
-class MangaPlusAPI():
+class MangaplusAPI():
     def __init__(self, extr):
         self.extractor = extr
         self.root = "https://jumpg-webapi.tokyo-cdn.com/api"
@@ -143,14 +146,13 @@ class MangaPlusAPI():
             "Session-Token": uuid4().urn
         }
 
-    def manga_viewer(self, chapter_id: int, img_quality: str):
-        return self._call("/manga_viewer"
-                          f"?chapter_id={chapter_id}"
-                          f"&split=yes"
-                          f"&img_quality={img_quality}")
+    def manga_viewer(self, chapter_id, img_quality):
+        return self._call(
+            "/manga_viewer?chapter_id={}&split=yes&img_quality={}"
+            .format(chapter_id, img_quality))
 
     def title_detail(self, title_id):
-        return self._call(f"/title_detail?title_id={title_id}")
+        return self._call("/title_detail?title_id={}".format(title_id))
 
     def _call(self, endpoint, params=None):
         url = self.root + endpoint
@@ -163,17 +165,17 @@ class MangaPlusAPI():
                 msg = Response()
                 msg.ParseFromString(response.content)
 
-                self.extractor.log.debug(f"parsed payload from {url}")
+                self.extractor.log.debug("parsed payload from {}".format(url))
                 self.extractor.log.debug(msg)
 
                 if not msg.HasField("success"):
                     self.extractor.log.debug(response.content)
                     raise exception.StopExtraction(
-                        f"No valid data returned from {url}")
+                        "No valid data returned from {}".format(url))
 
                 return msg
 
             self.extractor.log.debug(response.text)
 
             raise exception.StopExtraction(
-                f"{response.status_code}: bad response from {url}")
+                "{}: bad response from {}".format(response.status_code, url))

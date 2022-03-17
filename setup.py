@@ -107,6 +107,7 @@ setup(
         "gallery_dl.extractor",
         "gallery_dl.downloader",
         "gallery_dl.postprocessor",
+        "gallery_dl.protobuf"
     ],
     entry_points={
         "console_scripts": [
