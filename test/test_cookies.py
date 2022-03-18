@@ -180,14 +180,14 @@ class TestCookieUtils(unittest.TestCase):
 
         extr._cookiejar.set("a", "1", expires=now+100)
         with mock.patch.object(log, "warning") as mw:
-            self.assertFalse(extr._check_cookies(("a",)))
+            self.assertTrue(extr._check_cookies(("a",)))
             self.assertEqual(mw.call_count, 1)
             self.assertEqual(mw.call_args[0], (
                 "Cookie '%s' will expire in less than %s hour%s", "a", 1, ""))
 
         extr._cookiejar.set("a", "1", expires=now+100+7200)
         with mock.patch.object(log, "warning") as mw:
-            self.assertFalse(extr._check_cookies(("a",)))
+            self.assertTrue(extr._check_cookies(("a",)))
             self.assertEqual(mw.call_count, 1)
             self.assertEqual(mw.call_args[0], (
                 "Cookie '%s' will expire in less than %s hour%s", "a", 3, "s"))
