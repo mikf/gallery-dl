@@ -232,6 +232,14 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fE name * 2 + ' ' + a", "{}{} {}".format(
             self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
 
+    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
+    def test_fstring(self):
+        self._run_test("\fF {a}", self.kwdict["a"])
+        self._run_test("\fF {name}{name} {a}", "{}{} {}".format(
+            self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
+        self._run_test("\fF foo-'\"{a.upper()}\"'-bar",
+                       """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+
     def test_module(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "testmod.py")

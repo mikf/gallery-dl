@@ -198,6 +198,11 @@ Starting a format string with '\f<Type> ' allows to set a different format strin
     <td><code>\fT ~/.templates/booru.txt</code></td>
 </tr>
 <tr>
+    <td align="center"><code>F</code></td>
+    <td>An <a href="https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals">f-string</a> literal</td>
+    <td><code>\fF '{title.strip()}' by {artist.capitalize()}</code></td>
+</tr>
+<tr>
     <td align="center"><code>E</code></td>
     <td>An arbitrary Python expression</td>
     <td><code>\fE title.upper().replace(' ', '-')</code></td>
