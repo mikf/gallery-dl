@@ -373,7 +373,6 @@ class Extractor():
                         self.log.warning(
                             "Cookie '%s' will expire in less than %s hour%s",
                             cookie.name, hours + 1, "s" if hours else "")
-                        continue
 
                 names.discard(cookie.name)
                 if not names:
