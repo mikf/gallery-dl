@@ -165,22 +165,24 @@ class FuraffinityExtractor(Extractor):
     def _pagination_search(self, query):
         url = self.root + "/search/"
         data = {
-            "page"           : 0,
-            "next_page"      : "Next",
+            "page"           : 1,
             "order-by"       : "relevancy",
             "order-direction": "desc",
             "range"          : "all",
-            "rating-general" : "on",
-            "rating-mature"  : "on",
-            "rating-adult"   : "on",
-            "type-art"       : "on",
-            "type-music"     : "on",
-            "type-flash"     : "on",
-            "type-story"     : "on",
-            "type-photo"     : "on",
-            "type-poetry"    : "on",
+            "range_from"     : "",
+            "range_to"       : "",
+            "rating-general" : "1",
+            "rating-mature"  : "1",
+            "rating-adult"   : "1",
+            "type-art"       : "1",
+            "type-music"     : "1",
+            "type-flash"     : "1",
+            "type-story"     : "1",
+            "type-photo"     : "1",
+            "type-poetry"    : "1",
             "mode"           : "extended",
         }
+
         data.update(query)
         if "page" in query:
             data["page"] = text.parse_int(query["page"])
@@ -194,7 +196,11 @@ class FuraffinityExtractor(Extractor):
 
             if not post_id:
                 return
-            data["page"] += 1
+
+            if "next_page" in data:
+                data["page"] += 1
+            else:
+                data["next_page"] = "Next"
 
 
 class FuraffinityGalleryExtractor(FuraffinityExtractor):
@@ -255,9 +261,10 @@ class FuraffinitySearchExtractor(FuraffinityExtractor):
             "range": "45-50",
             "count": 6,
         }),
-        ("https://www.furaffinity.net/search/cute&rating-general=0", {
-            "range": "1",
-            "count": 1,
+        # first page of search results (#2402)
+        ("https://www.furaffinity.net/search/?q=leaf&range=1day", {
+            "range": "1-3",
+            "count": 3,
         }),
     )
 
