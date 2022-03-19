@@ -1392,6 +1392,16 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.instagram.previews
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download video previews.
+
+
 extractor.instagram.videos
 --------------------------
 Type
