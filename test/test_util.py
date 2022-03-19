@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -189,6 +189,10 @@ class TestCookiesTxt(unittest.TestCase):
             [self._cookie("name", "", ".example.org")],
         )
         _assert(
+            "\tTRUE\t/\tTRUE\t\tname\t",
+            [self._cookie("name", "", "")],
+        )
+        _assert(
             "# Netscape HTTP Cookie File\n"
             "\n"
             "# default\n"
@@ -241,6 +245,8 @@ class TestCookiesTxt(unittest.TestCase):
                     "n4", ""  , "www.example.org", False, "/", False),
                 self._cookie(
                     "n5", "v5", "www.example.org", False, "/path", False, 100),
+                self._cookie(
+                    "n6", "v6", "", False),
             ],
             "# Netscape HTTP Cookie File\n"
             "\n"
