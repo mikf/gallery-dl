@@ -289,12 +289,12 @@ def load_cookiestxt(fp):
 
     for line in fp:
 
-        line = line.lstrip()
+        line = line.lstrip(" ")
         # strip '#HttpOnly_'
         if line.startswith("#HttpOnly_"):
             line = line[10:]
         # ignore empty lines and comments
-        if not line or line[0] in ("#", "$"):
+        if not line or line[0] in ("#", "$", "\n"):
             continue
         # strip trailing '\n'
         if line[-1] == "\n":
@@ -326,6 +326,9 @@ def save_cookiestxt(fp, cookies):
     fp.write("# Netscape HTTP Cookie File\n\n")
 
     for cookie in cookies:
+        if not cookie.domain:
+            continue
+
         if cookie.value is None:
             name = ""
             value = cookie.name
