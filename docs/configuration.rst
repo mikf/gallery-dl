@@ -599,7 +599,9 @@ Description
     memory requirements are significantly lower when the
     amount of stored IDs gets reasonably large.
 
-    Note: archive paths support regular `format string`_ replacements,
+    Note: Archive files that do not already exist get generated automatically.
+
+    Note: Archive paths support regular `format string`_ replacements,
     but be aware that using external inputs for building local paths
     may pose a security risk.
 
@@ -3137,6 +3139,19 @@ Description
     Custom format string to build the content of metadata files with.
 
     Note: Only applies for ``"mode": "custom"``.
+
+
+metadata.archive
+----------------
+Type
+    |Path|_
+Description
+    File to store IDs of generated metadata files in,
+    similar to `extractor.*.archive`_.
+
+    ``archive-format`` and ``archive-prefix`` options,
+    akin to `extractor.*.archive-format`_ and `extractor.*.archive-prefix`_,
+    are supported as well.
 
 
 metadata.mtime

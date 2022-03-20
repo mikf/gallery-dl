@@ -672,11 +672,14 @@ class ExtendedUrl():
 
 class DownloadArchive():
 
-    def __init__(self, path, extractor):
+    def __init__(self, path, format_string, cache_key="_archive_key"):
         con = sqlite3.connect(path, timeout=60, check_same_thread=False)
         con.isolation_level = None
+
         self.close = con.close
         self.cursor = con.cursor()
+        self.keygen = format_string.format_map
+        self._cache_key = cache_key
 
         try:
             self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
@@ -685,20 +688,16 @@ class DownloadArchive():
             # fallback for missing WITHOUT ROWID support (#553)
             self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
                                 "(entry PRIMARY KEY)")
-        self.keygen = (
-            extractor.config("archive-prefix", extractor.category) +
-            extractor.config("archive-format", extractor.archive_fmt)
-        ).format_map
 
     def check(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""
-        key = kwdict["_archive_key"] = self.keygen(kwdict)
+        key = kwdict[self._cache_key] = self.keygen(kwdict)
         self.cursor.execute(
             "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
         return self.cursor.fetchone()
 
     def add(self, kwdict):
         """Add item described by 'kwdict' to archive"""
-        key = kwdict.get("_archive_key") or self.keygen(kwdict)
+        key = kwdict.get(self._cache_key) or self.keygen(kwdict)
         self.cursor.execute(
             "INSERT OR IGNORE INTO archive VALUES (?)", (key,))
