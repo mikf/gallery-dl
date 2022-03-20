@@ -584,6 +584,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>Pixabay</td>
+    <td>https://pixabay.com/photos/</td>
+    <td>Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Pixhost</td>
     <td>https://pixhost.to/</td>
     <td>individual Images</td>
