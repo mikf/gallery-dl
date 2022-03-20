@@ -36,7 +36,8 @@ class PixabayExtractor(Extractor):
 
             photo["item"] = self.item
             if "alt" in photo:
-                photo["tags"] = [s.lower() for s in re.findall(r"\w+", photo["alt"])]
+                photo["tags"] = [s.lower()
+                                 for s in re.findall(r"\w+", photo["alt"])]
 
             yield Message.Directory, photo
             yield Message.Url, url, photo
@@ -48,7 +49,8 @@ class PixabaySearchExtractor(PixabayExtractor):
     pattern = BASE_PATTERN + r"/photos/search/([^/?#]+)/(?:\?([^/?#]+))?"
     directory_fmt = ("{category}", "{item}")
     test = ("https://pixabay.com/photos/search/man face/", {
-        "pattern": r"https://cdn\.pixabay\.com/photo/\d{4}/\d{2}/\d{2}/\d{2}/\d{2}/"
+        "pattern": r"https://cdn\.pixabay\.com/photo/"
+                   r"\d{4}/\d{2}/\d{2}/\d{2}/\d{2}/"
                    r"\w+-\d+_\d+\.\w+",
         "range": "1-30",
         "count": 30,
@@ -57,15 +59,15 @@ class PixabaySearchExtractor(PixabayExtractor):
     def __init__(self, match):
         PixabayExtractor.__init__(self, match)
         self.query = match.group(2)
-    
-    def _pagination(self, page_url, params: dict=None, results=False):
+
+    def _pagination(self, page_url, params: dict = None, results=False):
         self.page_start = params.get("pagi", 1)
         params["pagi"] = int(self.page_start)
         while True:
             json_path = self._json_path(page_url, params)
             try:
-              r = self.request(self.root + json_path, params=params)
-              photos = r.json()
+                r = self.request(self.root + json_path, params=params)
+                photos = r.json()
             except Exception as e:  # sometimes the json is a 404
                 print(e)
                 continue
@@ -77,13 +79,14 @@ class PixabaySearchExtractor(PixabayExtractor):
             if params["pagi"] >= self.total_pages:
                 return
 
-    def _json_path(self, url, params: dict=None):
+    def _json_path(self, url, params: dict = None):
         html = self.request(url, params=params).text
         pat = re.compile(r"__BOOTSTRAP_URL__ = '(.*?)'")
         return pat.search(html).group(1)
 
     def photos(self):
-        page_url = self.root + "/photos/search/" + text.unquote(self.item) + "/"
+        page_url = self.root + "/photos/search/" + \
+            text.unquote(self.item) + "/"
         params = {}
         if self.query:
             params.update(text.parse_query(self.query))
