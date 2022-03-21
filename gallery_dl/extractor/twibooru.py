@@ -36,8 +36,9 @@ class TwibooruExtractor(BooruExtractor):
         post["date"] = text.parse_datetime(
             post["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
-        name, sep, rest = post["name"].rpartition(".")
-        post["filename"] = name if sep else rest
+        if "name" in post:
+            name, sep, rest = post["name"].rpartition(".")
+            post["filename"] = name if sep else rest
 
 
 class TwibooruPostExtractor(TwibooruExtractor):
