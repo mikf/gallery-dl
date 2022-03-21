@@ -3161,7 +3161,7 @@ Type
 Default
     ``false``
 Description
-    Set modification times for generated metadata files
+    Set modification times of generated metadata files
     according to the accompanying downloaded file.
 
     Enabling this option will only have an effect
@@ -3304,6 +3304,16 @@ Description
     adds ``["-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)"]``
     to the list of FFmpeg command-line arguments
     to reduce an odd width/height by 1 pixel and make them even.
+
+
+ugoira.mtime
+------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Set modification times of generated ugoira aniomations.
 
 
 ugoira.repeat-last-frame
