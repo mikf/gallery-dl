@@ -46,7 +46,6 @@ class ImgurExtractor(Extractor):
         album_ex = ImgurAlbumExtractor
         image_ex = ImgurImageExtractor
 
-        yield Message.Version, 1
         for item in items:
             item["_extractor"] = album_ex if item["is_album"] else image_ex
             yield Message.Queue, item["link"], item
@@ -133,7 +132,6 @@ class ImgurImageExtractor(ImgurExtractor):
         image.update(image["media"][0])
         del image["media"]
         url = self._prepare(image)
-        yield Message.Version, 1
         yield Message.Directory, image
         yield Message.Url, url, image
 
@@ -221,7 +219,6 @@ class ImgurAlbumExtractor(ImgurExtractor):
         except KeyError:
             pass
 
-        yield Message.Version, 1
         for num, image in enumerate(images, 1):
             url = self._prepare(image)
             image["num"] = num

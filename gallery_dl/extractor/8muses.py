@@ -55,7 +55,7 @@ class _8musesAlbumExtractor(Extractor):
             },
         }),
         # custom sorting
-        ("https://www.8muses.com/comics/album/Fakku-Comics/8?sort=az", {
+        ("https://www.8muses.com/comics/album/Fakku-Comics/9?sort=az", {
             "count": ">= 70",
             "keyword": {"name": r"re:^[R-Zr-z]"},
         }),

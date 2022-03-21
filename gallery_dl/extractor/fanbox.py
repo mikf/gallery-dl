@@ -31,10 +31,9 @@ class FanboxExtractor(Extractor):
         self.embeds = self.config("embeds", True)
 
     def items(self):
-        yield Message.Version, 1
 
         if self._warning:
-            if "FANBOXSESSID" not in self.session.cookies:
+            if not self._check_cookies(("FANBOXSESSID",)):
                 self.log.warning("no 'FANBOXSESSID' cookie set")
             FanboxExtractor._warning = False
 
@@ -52,19 +51,16 @@ class FanboxExtractor(Extractor):
             url = text.ensure_http_scheme(url)
             body = self.request(url, headers=headers).json()["body"]
             for item in body["items"]:
-                yield self._process_post(item)
+                yield self._get_post_data(item["id"])
 
             url = body["nextUrl"]
 
-    def _get_post_data_from_id(self, post_id):
+    def _get_post_data(self, post_id):
         """Fetch and process post data"""
         headers = {"Origin": self.root}
         url = "https://api.fanbox.cc/post.info?postId="+post_id
         post = self.request(url, headers=headers).json()["body"]
 
-        return self._process_post(post)
-
-    def _process_post(self, post):
         content_body = post.pop("body", None)
         if content_body:
             if "html" in content_body:
@@ -280,4 +276,25 @@ class FanboxPostExtractor(FanboxExtractor):
         self.post_id = match.group(3)
 
     def posts(self):
-        return (self._get_post_data_from_id(self.post_id),)
+        return (self._get_post_data(self.post_id),)
+
+
+class FanboxRedirectExtractor(Extractor):
+    """Extractor for pixiv redirects to fanbox.cc"""
+    category = "fanbox"
+    subcategory = "redirect"
+    pattern = r"(?:https?://)?(?:www\.)?pixiv\.net/fanbox/creator/(\d+)"
+    test = ("https://www.pixiv.net/fanbox/creator/52336352", {
+        "pattern": FanboxCreatorExtractor.pattern,
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.user_id = match.group(1)
+
+    def items(self):
+        url = "https://www.pixiv.net/fanbox/creator/" + self.user_id
+        data = {"_extractor": FanboxCreatorExtractor}
+        response = self.request(
+            url, method="HEAD", allow_redirects=False, notfound="user")
+        yield Message.Queue, response.headers["Location"], data

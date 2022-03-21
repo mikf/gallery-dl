@@ -49,7 +49,6 @@ class _8kunThreadExtractor(Extractor):
             "num"   : 0,
         }
 
-        yield Message.Version, 1
         yield Message.Directory, data
         for post in posts:
             if "filename" in post:

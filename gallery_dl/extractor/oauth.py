@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -31,8 +31,8 @@ class OAuthBase(Extractor):
         self.cache = config.get(("extractor", self.category), "cache", True)
 
     def oauth_config(self, key, default=None):
-        return config.interpolate(
-            ("extractor", self.subcategory), key, default)
+        value = config.interpolate(("extractor", self.subcategory), key)
+        return value if value is not None else default
 
     def recv(self):
         """Open local HTTP server and recv callback parameters"""
@@ -220,7 +220,7 @@ class OAuthDeviantart(OAuthBase):
                 "client-secret", deviantart.DeviantartOAuthAPI.CLIENT_SECRET),
             "https://www.deviantart.com/oauth2/authorize",
             "https://www.deviantart.com/oauth2/token",
-            scope="browse",
+            scope="browse user.manage",
             cache=deviantart._refresh_token_cache,
         )
 
@@ -399,7 +399,7 @@ class OAuthPixiv(OAuthBase):
 
         if "error" in data:
             print(data)
-            if data["error"] == "invalid_request":
+            if data["error"] in ("invalid_request", "invalid_grant"):
                 print("'code' expired, try again")
             return
 
@@ -415,8 +415,12 @@ class OAuthPixiv(OAuthBase):
         print("""
 1) Open your browser's Developer Tools (F12) and switch to the Network tab
 2) Login
-4) Select the last network monitor entry ('callback?state=...')
+3) Select the last network monitor entry ('callback?state=...')
 4) Copy its 'code' query parameter, paste it below, and press Enter
+
+- This 'code' will expire 30 seconds after logging in.
+- Copy-pasting more than just the 'code' value will work as well,
+  like the entire URL or several query parameters.
 """)
         code = input("code: ")
         return code.rpartition("=")[2].strip()

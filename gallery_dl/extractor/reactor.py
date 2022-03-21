@@ -8,35 +8,35 @@
 
 """Generic extractors for *reactor sites"""
 
-from .common import Extractor, Message
+from .common import BaseExtractor, Message
 from .. import text
 import urllib.parse
 import json
 
-BASE_PATTERN = r"(?:https?://)?((?:[^/.]+\.)?reactor\.cc)"
 
-
-class ReactorExtractor(Extractor):
+class ReactorExtractor(BaseExtractor):
     """Base class for *reactor.cc extractors"""
     basecategory = "reactor"
     filename_fmt = "{post_id}_{num:>02}{title[:100]:?_//}.{extension}"
     archive_fmt = "{post_id}_{num}"
-    instances = ()
     request_interval = 5.0
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.root = "http://" + match.group(1)
-        self.session.headers["Referer"] = self.root
+        BaseExtractor.__init__(self, match)
+        url = text.ensure_http_scheme(match.group(0), "http://")
+        pos = url.index("/", 10)
 
-        if not self.category:
+        self.root, self.path = url[:pos], url[pos:]
+        self.session.headers["Referer"] = self.root
+        self.gif = self.config("gif", False)
+
+        if self.category == "reactor":
             # set category based on domain name
             netloc = urllib.parse.urlsplit(self.root).netloc
             self.category = netloc.rpartition(".")[0]
 
     def items(self):
         data = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, data
         for post in self.posts():
             for image in self._parse_post(post):
@@ -50,7 +50,7 @@ class ReactorExtractor(Extractor):
 
     def posts(self):
         """Return all relevant post-objects"""
-        return self._pagination(self.url)
+        return self._pagination(self.root + self.path)
 
     def _pagination(self, url):
         while True:
@@ -124,6 +124,12 @@ class ReactorExtractor(Extractor):
             elif "/post/webm/" not in url and "/post/mp4/" not in url:
                 url = url.replace("/post/", "/post/full/")
 
+            if self.gif and ("/post/webm/" in url or "/post/mp4/" in url):
+                gif_url = text.extract(image, '<a href="', '"')[0]
+                if not gif_url:
+                    continue
+                url = gif_url
+
             yield {
                 "url": url,
                 "post_id": post_id,
@@ -139,29 +145,81 @@ class ReactorExtractor(Extractor):
             }
 
 
+BASE_PATTERN = ReactorExtractor.update({
+    "reactor"    : {
+        "root": "http://reactor.cc",
+        "pattern": r"(?:[^/.]+\.)?reactor\.cc",
+    },
+    "joyreactor" : {
+        "root": "http://joyreactor.cc",
+        "pattern": r"(?:www\.)?joyreactor\.c(?:c|om)",
+    },
+    "pornreactor": {
+        "root": "http://pornreactor.cc",
+        "pattern": r"(?:www\.)?(?:pornreactor\.cc|fapreactor.com)",
+    },
+    "thatpervert": {
+        "root": "http://thatpervert.com",
+    },
+})
+
+
 class ReactorTagExtractor(ReactorExtractor):
     """Extractor for tag searches on *reactor.cc sites"""
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "{search_tags}_{post_id}_{num}"
     pattern = BASE_PATTERN + r"/tag/([^/?#]+)"
-    test = ("http://anime.reactor.cc/tag/Anime+Art",)
+    test = (
+        ("http://reactor.cc/tag/gif"),
+        ("http://anime.reactor.cc/tag/Anime+Art"),
+        ("http://joyreactor.cc/tag/Advent+Cirno", {
+            "count": ">= 15",
+        }),
+        ("http://joyreactor.com/tag/Cirno", {
+            "url": "aa59090590b26f4654881301fe8fe748a51625a8",
+        }),
+        ("http://pornreactor.cc/tag/RiceGnat", {
+            "range": "1-25",
+            "count": ">= 25",
+        }),
+        ("http://fapreactor.com/tag/RiceGnat"),
+    )
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.tag = match.group(2)
+        self.tag = match.group(match.lastindex)
 
     def metadata(self):
         return {"search_tags": text.unescape(self.tag).replace("+", " ")}
 
 
-class ReactorSearchExtractor(ReactorTagExtractor):
+class ReactorSearchExtractor(ReactorExtractor):
     """Extractor for search results on *reactor.cc sites"""
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search_tags}")
     archive_fmt = "s_{search_tags}_{post_id}_{num}"
     pattern = BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
-    test = ("http://anime.reactor.cc/search?q=Art",)
+    test = (
+        ("http://reactor.cc/search?q=Art"),
+        ("http://joyreactor.cc/search/Nature", {
+            "range": "1-25",
+            "count": ">= 20",
+        }),
+        ("http://joyreactor.com/search?q=Nature", {
+            "range": "1-25",
+            "count": ">= 20",
+        }),
+        ("http://pornreactor.cc/search?q=ecchi+hentai"),
+        ("http://fapreactor.com/search/ecchi+hentai"),
+    )
+
+    def __init__(self, match):
+        ReactorExtractor.__init__(self, match)
+        self.tag = match.group(match.lastindex)
+
+    def metadata(self):
+        return {"search_tags": text.unescape(self.tag).replace("+", " ")}
 
 
 class ReactorUserExtractor(ReactorExtractor):
@@ -169,11 +227,23 @@ class ReactorUserExtractor(ReactorExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "user", "{user}")
     pattern = BASE_PATTERN + r"/user/([^/?#]+)"
-    test = ("http://anime.reactor.cc/user/Shuster",)
+    test = (
+        ("http://reactor.cc/user/Dioklet"),
+        ("http://anime.reactor.cc/user/Shuster"),
+        ("http://joyreactor.cc/user/hemantic"),
+        ("http://joyreactor.com/user/Tacoman123", {
+            "url": "60ce9a3e3db791a0899f7fb7643b5b87d09ae3b5",
+        }),
+        ("http://pornreactor.cc/user/Disillusion", {
+            "range": "1-25",
+            "count": ">= 20",
+        }),
+        ("http://fapreactor.com/user/Disillusion"),
+    )
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.user = match.group(2)
+        self.user = match.group(match.lastindex)
 
     def metadata(self):
         return {"user": text.unescape(self.user).replace("+", " ")}
@@ -183,76 +253,11 @@ class ReactorPostExtractor(ReactorExtractor):
     """Extractor for single posts on *reactor.cc sites"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/post/(\d+)"
-    test = ("http://anime.reactor.cc/post/3576250",)
-
-    def __init__(self, match):
-        ReactorExtractor.__init__(self, match)
-        self.post_id = match.group(2)
-
-    def items(self):
-        yield Message.Version, 1
-        post = self.request(self.url).text
-        pos = post.find('class="uhead">')
-        for image in self._parse_post(post[pos:]):
-            if image["num"] == 1:
-                yield Message.Directory, image
-            url = image["url"]
-            yield Message.Url, url, text.nameext_from_url(url, image)
-
-
-# --------------------------------------------------------------------
-# JoyReactor
-
-JR_BASE_PATTERN = r"(?:https?://)?(?:www\.)?(joyreactor\.c(?:c|om))"
-
-
-class JoyreactorTagExtractor(ReactorTagExtractor):
-    """Extractor for tag searches on joyreactor.cc"""
-    category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/tag/([^/?#]+)"
     test = (
-        ("http://joyreactor.cc/tag/Advent+Cirno", {
-            "count": ">= 15",
+        ("http://reactor.cc/post/4999736", {
+            "url": "dfc74d150d7267384d8c229c4b82aa210755daa0",
         }),
-        ("http://joyreactor.com/tag/Cirno", {
-            "url": "aa59090590b26f4654881301fe8fe748a51625a8",
-        }),
-    )
-
-
-class JoyreactorSearchExtractor(ReactorSearchExtractor):
-    """Extractor for search results on joyreactor.cc"""
-    category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
-    test = (
-        ("http://joyreactor.cc/search/Nature", {
-            "range": "1-25",
-            "count": ">= 20",
-        }),
-        ("http://joyreactor.com/search?q=Nature", {
-            "range": "1-25",
-            "count": ">= 20",
-        }),
-    )
-
-
-class JoyreactorUserExtractor(ReactorUserExtractor):
-    """Extractor for all posts of a user on joyreactor.cc"""
-    category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/user/([^/?#]+)"
-    test = (
-        ("http://joyreactor.cc/user/hemantic"),
-        ("http://joyreactor.com/user/Tacoman123", {
-            "url": "60ce9a3e3db791a0899f7fb7643b5b87d09ae3b5",
-        }),
-    )
-
-
-class JoyreactorPostExtractor(ReactorPostExtractor):
-    """Extractor for single posts on joyreactor.cc"""
-    category = "joyreactor"
-    pattern = JR_BASE_PATTERN + r"/post/(\d+)"
-    test = (
+        ("http://anime.reactor.cc/post/3576250"),
         ("http://joyreactor.com/post/3721876", {  # single image
             "pattern": r"http://img\d\.joyreactor\.com/pics/post/full"
                        r"/cartoon-painting-monster-lake-4841316.jpeg",
@@ -276,57 +281,6 @@ class JoyreactorPostExtractor(ReactorPostExtractor):
         ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
             "url": "ab02c6eb7b4035ad961b29ee0770ee41be2fcc39",
         }),
-    )
-
-
-# --------------------------------------------------------------------
-# PornReactor
-
-PR_BASE_PATTERN = r"(?:https?://)?(?:www\.)?(pornreactor\.cc|fapreactor.com)"
-
-
-class PornreactorTagExtractor(ReactorTagExtractor):
-    """Extractor for tag searches on pornreactor.cc"""
-    category = "pornreactor"
-    pattern = PR_BASE_PATTERN + r"/tag/([^/?#]+)"
-    test = (
-        ("http://pornreactor.cc/tag/RiceGnat", {
-            "range": "1-25",
-            "count": ">= 25",
-        }),
-        ("http://fapreactor.com/tag/RiceGnat"),
-    )
-
-
-class PornreactorSearchExtractor(ReactorSearchExtractor):
-    """Extractor for search results on pornreactor.cc"""
-    category = "pornreactor"
-    pattern = PR_BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
-    test = (
-        ("http://pornreactor.cc/search?q=ecchi+hentai"),
-        ("http://fapreactor.com/search/ecchi+hentai"),
-    )
-
-
-class PornreactorUserExtractor(ReactorUserExtractor):
-    """Extractor for all posts of a user on pornreactor.cc"""
-    category = "pornreactor"
-    pattern = PR_BASE_PATTERN + r"/user/([^/?#]+)"
-    test = (
-        ("http://pornreactor.cc/user/Disillusion", {
-            "range": "1-25",
-            "count": ">= 20",
-        }),
-        ("http://fapreactor.com/user/Disillusion"),
-    )
-
-
-class PornreactorPostExtractor(ReactorPostExtractor):
-    """Extractor for single posts on pornreactor.cc"""
-    category = "pornreactor"
-    subcategory = "post"
-    pattern = PR_BASE_PATTERN + r"/post/(\d+)"
-    test = (
         ("http://pornreactor.cc/post/863166", {
             "url": "a09fb0577489e1f9564c25d0ad576f81b19c2ef3",
             "content": "ec6b0568bfb1803648744077da082d14de844340",
@@ -335,3 +289,16 @@ class PornreactorPostExtractor(ReactorPostExtractor):
             "url": "2a956ce0c90e8bc47b4392db4fa25ad1342f3e54",
         }),
     )
+
+    def __init__(self, match):
+        ReactorExtractor.__init__(self, match)
+        self.post_id = match.group(match.lastindex)
+
+    def items(self):
+        post = self.request(self.root + self.path).text
+        pos = post.find('class="uhead">')
+        for image in self._parse_post(post[pos:]):
+            if image["num"] == 1:
+                yield Message.Directory, image
+            url = image["url"]
+            yield Message.Url, url, text.nameext_from_url(url, image)

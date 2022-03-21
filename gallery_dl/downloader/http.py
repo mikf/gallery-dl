@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -31,6 +31,7 @@ class HttpDownloader(DownloaderBase):
         self.downloading = False
 
         self.adjust_extension = self.config("adjust-extensions", True)
+        self.progress = self.config("progress", 3.0)
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
@@ -63,6 +64,8 @@ class HttpDownloader(DownloaderBase):
                 self.receive = self._receive_rate
             else:
                 self.log.warning("Invalid rate limit (%r)", self.rate)
+        if self.progress is not None:
+            self.receive = self._receive_rate
 
     def download(self, url, pathfmt):
         try:
@@ -98,26 +101,28 @@ class HttpDownloader(DownloaderBase):
                 time.sleep(tries)
 
             tries += 1
-            headers = {"Accept": "*/*"}
             file_header = None
 
-            # check for .part file
-            file_size = pathfmt.part_size()
-            if file_size:
-                headers["Range"] = "bytes={}-".format(file_size)
-            # general headers
-            if self.headers:
-                headers.update(self.headers)
-            # file-specific headers
+            # collect HTTP headers
+            headers = {"Accept": "*/*"}
+            #   file-specific headers
             extra = kwdict.get("_http_headers")
             if extra:
                 headers.update(extra)
+            #   general headers
+            if self.headers:
+                headers.update(self.headers)
+            #   partial content
+            file_size = pathfmt.part_size()
+            if file_size:
+                headers["Range"] = "bytes={}-".format(file_size)
 
             # connect to (remote) source
             try:
                 response = self.session.request(
-                    "GET", url, stream=True, headers=headers,
-                    timeout=self.timeout, verify=self.verify)
+                    kwdict.get("_http_method", "GET"), url,
+                    stream=True, headers=headers, timeout=self.timeout,
+                    verify=self.verify, proxies=self.proxies)
             except (ConnectionError, Timeout) as exc:
                 msg = str(exc)
                 continue
@@ -144,9 +149,15 @@ class HttpDownloader(DownloaderBase):
 
             # check for invalid responses
             validate = kwdict.get("_http_validate")
-            if validate and not validate(response):
-                self.log.warning("Invalid response")
-                return False
+            if validate:
+                result = validate(response)
+                if isinstance(result, str):
+                    url = result
+                    tries -= 1
+                    continue
+                if not result:
+                    self.log.warning("Invalid response")
+                    return False
 
             # set missing filename extension from MIME type
             if not pathfmt.extension:
@@ -201,6 +212,7 @@ class HttpDownloader(DownloaderBase):
             with pathfmt.open(mode) as fp:
                 if file_header:
                     fp.write(file_header)
+                    offset += len(file_header)
                 elif offset:
                     if adjust_extension and \
                             pathfmt.extension in FILE_SIGNATURES:
@@ -209,7 +221,7 @@ class HttpDownloader(DownloaderBase):
 
                 self.out.start(pathfmt.path)
                 try:
-                    self.receive(fp, content)
+                    self.receive(fp, content, size, offset)
                 except (RequestException, SSLError, OpenSSLError) as exc:
                     msg = str(exc)
                     print()
@@ -233,28 +245,42 @@ class HttpDownloader(DownloaderBase):
         return True
 
     @staticmethod
-    def receive(fp, content):
+    def receive(fp, content, bytes_total, bytes_downloaded):
         write = fp.write
         for data in content:
             write(data)
 
-    def _receive_rate(self, fp, content):
-        rt = self.rate
-        t1 = time.time()
+    def _receive_rate(self, fp, content, bytes_total, bytes_downloaded):
+        rate = self.rate
+        progress = self.progress
+        bytes_start = bytes_downloaded
+        write = fp.write
+        t1 = tstart = time.time()
 
         for data in content:
-            fp.write(data)
+            write(data)
 
             t2 = time.time()           # current time
-            actual = t2 - t1           # actual elapsed time
-            expected = len(data) / rt  # expected elapsed time
+            elapsed = t2 - t1          # elapsed time
+            num_bytes = len(data)
 
-            if actual < expected:
-                # sleep if less time elapsed than expected
-                time.sleep(expected - actual)
-                t1 = time.time()
-            else:
-                t1 = t2
+            if progress is not None:
+                bytes_downloaded += num_bytes
+                tdiff = t2 - tstart
+                if tdiff >= progress:
+                    self.out.progress(
+                        bytes_total, bytes_downloaded,
+                        int((bytes_downloaded - bytes_start) / tdiff),
+                    )
+
+            if rate:
+                expected = num_bytes / rate  # expected elapsed time
+                if elapsed < expected:
+                    # sleep if less time elapsed than expected
+                    time.sleep(expected - elapsed)
+                    t2 = time.time()
+
+            t1 = t2
 
     def _find_extension(self, response):
         """Get filename extension from MIME type"""

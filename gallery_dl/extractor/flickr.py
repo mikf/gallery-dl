@@ -56,7 +56,7 @@ class FlickrImageExtractor(FlickrExtractor):
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:"
                r"(?:(?:www\.|m\.)?flickr\.com/photos/[^/]+/"
-               r"|[^.]+\.static\.?flickr\.com/(?:\d+/)+)(\d+)"
+               r"|[\w-]+\.static\.?flickr\.com/(?:\d+/)+)(\d+)"
                r"|flic\.kr/p/([A-Za-z1-9]+))")
     test = (
         ("https://www.flickr.com/photos/departingyyz/16089302239", {
@@ -155,7 +155,6 @@ class FlickrAlbumExtractor(FlickrExtractor):
         return self._album_items()
 
     def _album_items(self):
-        yield Message.Version, 1
         data = FlickrExtractor.metadata(self)
         data["_extractor"] = FlickrAlbumExtractor
 

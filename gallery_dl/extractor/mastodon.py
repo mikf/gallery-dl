@@ -87,7 +87,7 @@ BASE_PATTERN = MastodonExtractor.update(INSTANCES)
 class MastodonUserExtractor(MastodonExtractor):
     """Extractor for all images of an account/user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/@([^/?#]+)(?:/media)?/?$"
+    pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)(?:/media)?/?$"
     test = (
         ("https://mastodon.social/@jk", {
             "pattern": r"https://files.mastodon.social/media_attachments"
@@ -100,24 +100,42 @@ class MastodonUserExtractor(MastodonExtractor):
             "count": 60,
         }),
         ("https://baraag.net/@pumpkinnsfw"),
+        ("https://mastodon.social/@id:10843"),
+        ("https://mastodon.social/users/id:10843"),
+        ("https://mastodon.social/users/jk"),
     )
 
     def statuses(self):
         api = MastodonAPI(self)
 
-        username = self.item
-        handle = "@{}@{}".format(username, self.instance)
-        for account in api.account_search(handle, 1):
-            if account["username"] == username:
-                break
-        else:
-            raise exception.NotFoundError("account")
-
         return api.account_statuses(
-            account["id"],
+            api.account_id_by_username(self.item),
             only_media=not self.config("text-posts", False),
             exclude_replies=not self.replies,
         )
+
+
+class MastodonFollowingExtractor(MastodonExtractor):
+    """Extractor for followed mastodon users"""
+    subcategory = "following"
+    pattern = BASE_PATTERN + r"/users/([^/?#]+)/following"
+    test = (
+        ("https://mastodon.social/users/0x4f/following", {
+            "extractor": False,
+            "count": ">= 20",
+        }),
+        ("https://mastodon.social/users/id:10843/following"),
+        ("https://pawoo.net/users/yoru_nine/following"),
+        ("https://baraag.net/users/pumpkinnsfw/following"),
+    )
+
+    def items(self):
+        api = MastodonAPI(self)
+        account_id = api.account_id_by_username(self.item)
+
+        for account in api.account_following(account_id):
+            account["_extractor"] = MastodonUserExtractor
+            yield Message.Queue, account["url"], account
 
 
 class MastodonStatusExtractor(MastodonExtractor):
@@ -164,6 +182,20 @@ class MastodonAPI():
                     extractor.instance)
 
         self.headers = {"Authorization": "Bearer " + access_token}
+
+    def account_id_by_username(self, username):
+        if username.startswith("id:"):
+            return username[3:]
+
+        handle = "@{}@{}".format(username, self.extractor.instance)
+        for account in self.account_search(handle, 1):
+            if account["username"] == username:
+                return account["id"]
+        raise exception.NotFoundError("account")
+
+    def account_following(self, account_id):
+        endpoint = "/v1/accounts/{}/following".format(account_id)
+        return self._pagination(endpoint, None)
 
     def account_search(self, query, limit=40):
         """Search for accounts"""

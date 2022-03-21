@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://dynasty-scans.com/"""
 
-from .common import ChapterExtractor, Extractor, Message
+from .common import ChapterExtractor, MangaExtractor, Extractor, Message
 from .. import text
 import json
 import re
@@ -48,12 +48,12 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
         (("http://dynasty-scans.com/chapters/"
           "hitoribocchi_no_oo_seikatsu_ch33"), {
             "url": "dce64e8c504118f1ab4135c00245ea12413896cb",
-            "keyword": "1564965671ac69bb7fbc340538397f6bd0aa269b",
+            "keyword": "b67599703c27316a2fe4f11c3232130a1904e032",
         }),
         (("http://dynasty-scans.com/chapters/"
           "new_game_the_spinoff_special_13"), {
             "url": "dbe5bbb74da2edcfb1832895a484e2a40bc8b538",
-            "keyword": "22b35029bc65d6d95db2e2c147b0a37f2d290f29",
+            "keyword": "6b674eb3a274999153f6be044973b195008ced2f",
         }),
     )
 
@@ -76,7 +76,8 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
             "author"  : text.remove_html(author),
             "group"   : (text.remove_html(group) or
                          text.extract(group, ' alt="', '"')[0] or ""),
-            "date"    : extr('"icon-calendar"></i> ', '<'),
+            "date"    : text.parse_datetime(extr(
+                '"icon-calendar"></i> ', '<'), "%b %d, %Y"),
             "lang"    : "en",
             "language": "English",
         }
@@ -89,6 +90,22 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
         ]
 
 
+class DynastyscansMangaExtractor(DynastyscansBase, MangaExtractor):
+    chapterclass = DynastyscansChapterExtractor
+    reverse = False
+    pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
+    test = ("https://dynasty-scans.com/series/hitoribocchi_no_oo_seikatsu", {
+        "pattern": DynastyscansChapterExtractor.pattern,
+        "count": ">= 100",
+    })
+
+    def chapters(self, page):
+        return [
+            (self.root + path, {})
+            for path in text.extract_iter(page, '<dd>\n<a href="', '"')
+        ]
+
+
 class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
     """Extrator for image search results on dynasty-scans.com"""
     subcategory = "search"
@@ -98,8 +115,8 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
     pattern = BASE_PATTERN + r"/images/?(?:\?([^#]+))?$"
     test = (
         ("https://dynasty-scans.com/images?with[]=4930&with[]=5211", {
-            "url": "6b570eedd8a741c2cd34fb98b22a49d772f84191",
-            "keyword": "fa7ff94f82cdf942f7734741d758f160a6b0905a",
+            "url": "22cf0fb64e12b29e79b0a3d26666086a48f9916a",
+            "keyword": "11cbc555a15528d25567977b8808e10369c4c3ee",
         }),
         ("https://dynasty-scans.com/images", {
             "range": "1",
@@ -112,7 +129,6 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
         self.query = match.group(1) or ""
 
     def items(self):
-        yield Message.Version, 1
         yield Message.Directory, {}
         for image_id in self.images():
             image = self._parse_image_page(image_id)
@@ -137,7 +153,7 @@ class DynastyscansImageExtractor(DynastyscansSearchExtractor):
     pattern = BASE_PATTERN + r"/images/(\d+)"
     test = ("https://dynasty-scans.com/images/1245", {
         "url": "15e54bd94148a07ed037f387d046c27befa043b2",
-        "keyword": "3b630c6139e5ff06e141541d57960f8a2957efbb",
+        "keyword": "0d8976c2d6fbc9ed6aa712642631b96e456dc37f",
     })
 
     def images(self):

@@ -8,6 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import json
 
 
 class FantiaExtractor(Extractor):
@@ -20,17 +21,18 @@ class FantiaExtractor(Extractor):
     _warning = True
 
     def items(self):
-        yield Message.Version, 1
 
         if self._warning:
-            if "_session_id" not in self.session.cookies:
+            if not self._check_cookies(("_session_id",)):
                 self.log.warning("no '_session_id' cookie set")
             FantiaExtractor._warning = False
 
         for post_id in self.posts():
             full_response, post = self._get_post_data(post_id)
             yield Message.Directory, post
+            post["num"] = 0
             for url, url_data in self._get_urls_from_post(full_response, post):
+                post["num"] += 1
                 fname = url_data["content_filename"] or url
                 text.nameext_from_url(fname, url_data)
                 url_data["file_url"] = url
@@ -67,6 +69,8 @@ class FantiaExtractor(Extractor):
             "comment": resp["comment"],
             "rating": resp["rating"],
             "posted_at": resp["posted_at"],
+            "date": text.parse_datetime(
+                resp["posted_at"], "%a, %d %b %Y %H:%M:%S %z"),
             "fanclub_id": resp["fanclub"]["id"],
             "fanclub_user_id": resp["fanclub"]["user"]["id"],
             "fanclub_user_name": resp["fanclub"]["user"]["name"],
@@ -89,13 +93,38 @@ class FantiaExtractor(Extractor):
             post["content_title"] = content["title"]
             post["content_filename"] = content.get("filename", "")
             post["content_id"] = content["id"]
+
+            if "comment" in content:
+                post["content_comment"] = content["comment"]
+
             if "post_content_photos" in content:
                 for photo in content["post_content_photos"]:
                     post["file_id"] = photo["id"]
                     yield photo["url"]["original"], post
+
             if "download_uri" in content:
                 post["file_id"] = content["id"]
                 yield self.root+"/"+content["download_uri"], post
+
+            if content["category"] == "blog" and "comment" in content:
+                comment_json = json.loads(content["comment"])
+                ops = comment_json.get("ops", ())
+
+                # collect blogpost text first
+                blog_text = ""
+                for op in ops:
+                    insert = op.get("insert")
+                    if isinstance(insert, str):
+                        blog_text += insert
+                post["blogpost_text"] = blog_text
+
+                # collect images
+                for op in ops:
+                    insert = op.get("insert")
+                    if isinstance(insert, dict) and "fantiaImage" in insert:
+                        img = insert["fantiaImage"]
+                        post["file_id"] = img["id"]
+                        yield "https://fantia.jp" + img["original_url"], post
 
 
 class FantiaCreatorExtractor(FantiaExtractor):

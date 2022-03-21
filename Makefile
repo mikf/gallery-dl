@@ -19,12 +19,12 @@ release: man completion supportedsites
 	scripts/release.sh
 
 test:
-	scripts/run_tests.sh
+	scripts/run_tests.py
 
 executable:
 	scripts/pyinstaller.py
 
-completion: data/completion/gallery-dl data/completion/_gallery-dl
+completion: data/completion/gallery-dl data/completion/_gallery-dl data/completion/gallery-dl.fish
 
 man: data/man/gallery-dl.1 data/man/gallery-dl.conf.5
 
@@ -46,3 +46,6 @@ data/completion/gallery-dl: gallery_dl/option.py scripts/completion_bash.py
 
 data/completion/_gallery-dl: gallery_dl/option.py scripts/completion_zsh.py
 	$(PYTHON) scripts/completion_zsh.py
+
+data/completion/gallery-dl.fish: gallery_dl/option.py scripts/completion_fish.py
+	$(PYTHON) scripts/completion_fish.py

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,16 +19,36 @@ import re
 class GelbooruV02Extractor(booru.BooruExtractor):
     basecategory = "gelbooru_v02"
 
+    def __init__(self, match):
+        booru.BooruExtractor.__init__(self, match)
+        try:
+            self.api_root = INSTANCES[self.category]["api_root"]
+        except KeyError:
+            self.api_root = self.root
+
     def _api_request(self, params):
-        url = self.root + "/index.php?page=dapi&s=post&q=index"
+        url = self.api_root + "/index.php?page=dapi&s=post&q=index"
         return ElementTree.fromstring(self.request(url, params=params).text)
 
     def _pagination(self, params):
         params["pid"] = self.page_start
         params["limit"] = self.per_page
 
+        post = None
         while True:
-            root = self._api_request(params)
+            try:
+                root = self._api_request(params)
+            except ElementTree.ParseError:
+                if "tags" not in params or post is None:
+                    raise
+                taglist = [tag for tag in params["tags"].split()
+                           if not tag.startswith("id:<")]
+                taglist.append("id:<" + str(post.attrib["id"]))
+                params["tags"] = " ".join(taglist)
+                params["pid"] = 0
+                continue
+
+            post = None
             for post in root:
                 yield post.attrib
 
@@ -84,12 +104,15 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         post["notes"] = notes
 
 
-BASE_PATTERN = GelbooruV02Extractor.update({
+INSTANCES = {
     "realbooru": {"root": "https://realbooru.com"},
-    "rule34"   : {"root": "https://rule34.xxx"},
+    "rule34"   : {"root": "https://rule34.xxx",
+                  "api_root": " https://api.rule34.xxx"},
     "safebooru": {"root": "https://safebooru.org"},
     "tbib"     : {"root": "https://tbib.org"},
-})
+}
+
+BASE_PATTERN = GelbooruV02Extractor.update(INSTANCES)
 
 
 class GelbooruV02TagExtractor(GelbooruV02Extractor):
@@ -99,9 +122,9 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]+)"
     test = (
         ("https://rule34.xxx/index.php?page=post&s=list&tags=danraku", {
-            "content": "97e4bbf86c3860be18de384d02d544251afe1d45",
+            "content": "622e80be3f496672c44aab5c47fbc6941c61bc79",
             "pattern": r"https?://.*rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
-            "count": 1,
+            "count": 2,
         }),
         ("https://safebooru.org/index.php?page=post&s=list&tags=bonocho", {
             "url": "17c61b386530cf4c30842c9f580d15ef1cd09586",
@@ -174,6 +197,58 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
         for params["id"] in util.advance(self.post_ids, self.page_start):
             for post in self._api_request(params):
                 yield post.attrib
+
+
+class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
+    subcategory = "favorite"
+    directory_fmt = ("{category}", "favorites", "{favorite_id}")
+    archive_fmt = "f_{favorite_id}_{id}"
+    per_page = 50
+    pattern = BASE_PATTERN + r"/index\.php\?page=favorites&s=view&id=(\d+)"
+    test = (
+        ("https://rule34.xxx/index.php?page=favorites&s=view&id=1030218", {
+            "count": 3,
+        }),
+        ("https://safebooru.org/index.php?page=favorites&s=view&id=17567", {
+            "count": 2,
+        }),
+        ("https://realbooru.com/index.php?page=favorites&s=view&id=274", {
+            "count": 4,
+        }),
+        ("https://tbib.org/index.php?page=favorites&s=view&id=7881", {
+            "count": 3,
+        }),
+    )
+
+    def __init__(self, match):
+        GelbooruV02Extractor.__init__(self, match)
+        self.favorite_id = match.group(match.lastindex)
+
+    def metadata(self):
+        return {"favorite_id": text.parse_int(self.favorite_id)}
+
+    def posts(self):
+        url = self.root + "/index.php"
+        params = {
+            "page": "favorites",
+            "s"   : "view",
+            "id"  : self.favorite_id,
+            "pid" : self.page_start * self.per_page,
+        }
+
+        data = {}
+        while True:
+            num_ids = 0
+            page = self.request(url, params=params).text
+
+            for data["id"] in text.extract_iter(page, '" id="p', '"'):
+                num_ids += 1
+                for post in self._api_request(data):
+                    yield post.attrib
+
+            if num_ids < self.per_page:
+                return
+            params["pid"] += self.per_page
 
 
 class GelbooruV02PostExtractor(GelbooruV02Extractor):

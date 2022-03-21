@@ -141,13 +141,17 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
 
         shortlink = text.extract(page, "rel='shortlink' href='", "'")[0]
         data = {
-            "action": "manga_get_chapters",
-            "manga" : shortlink.rpartition("=")[2],
+            "action"   : "manga_get_reading_nav",
+            "manga"    : shortlink.rpartition("=")[2],
+            "chapter"  : "",
+            "volume_id": "",
+            "style"    : "list",
+            "type"     : "manga",
         }
         url = self.root + "/wp-admin/admin-ajax.php"
         page = self.request(url, method="POST", data=data).text
 
-        for url in text.extract_iter(page, 'href="', '"', 320):
+        for url in text.extract_iter(page, 'data-redirect="', '"'):
             chapter = url.rpartition("/")[2]
             results.append((url, self.chapter_data(chapter)))
 

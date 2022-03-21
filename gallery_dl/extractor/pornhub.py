@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 
 
-BASE_PATTERN = r"(?:https?://)?(?:[^.]+\.)?pornhub\.com"
+BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?pornhub\.com"
 
 
 class PornhubExtractor(Extractor):
@@ -31,7 +31,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
     test = (
         ("https://www.pornhub.com/album/19289801", {
             "pattern": r"https://\w+.phncdn.com/pics/albums/\d+/\d+/\d+/\d+/",
-            "count": 308,
+            "count": ">= 300",
             "keyword": {
                 "id"     : int,
                 "num"    : int,
@@ -60,7 +60,6 @@ class PornhubGalleryExtractor(PornhubExtractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, data
         for num, image in enumerate(self.images(), 1):
             url = image["url"]
@@ -146,7 +145,6 @@ class PornhubUserExtractor(PornhubExtractor):
         }
 
         data = {"_extractor": PornhubGalleryExtractor}
-        yield Message.Version, 1
         while True:
             page = self.request(
                 url, method="POST", headers=headers, params=params).text

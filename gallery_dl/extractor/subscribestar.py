@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -38,12 +38,11 @@ class SubscribestarExtractor(Extractor):
         self.login()
         for post_html in self.posts():
             media = self._media_from_post(post_html)
-            if not media:
-                continue
             data = self._data_from_post(post_html)
             yield Message.Directory, data
-            for item in media:
+            for num, item in enumerate(media, 1):
                 item.update(data)
+                item["num"] = num
                 text.nameext_from_url(item.get("name") or item["url"], item)
                 yield Message.Url, item["url"], item
 
@@ -106,7 +105,7 @@ class SubscribestarExtractor(Extractor):
                         att, 'data-upload-id="', '"')[0]),
                     "name": text.unescape(text.extract(
                         att, 'doc_preview-title">', '<')[0] or ""),
-                    "url" : text.extract(att, 'href="', '"')[0],
+                    "url" : text.unescape(text.extract(att, 'href="', '"')[0]),
                     "type": "attachment",
                 })
 
@@ -140,8 +139,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
     test = (
         ("https://www.subscribestar.com/subscribestar", {
             "count": ">= 20",
-            "pattern": r"https://(star-uploads|ss-uploads-prod)\.s\d+-us-west-"
-                       r"\d+\.amazonaws\.com/uploads(_v2)?/users/11/",
+            "pattern": r"https://\w+\.cloudfront\.net/uploads(_v2)?/users/11/",
             "keyword": {
                 "author_id": 11,
                 "author_name": "subscribestar",
@@ -149,6 +147,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
                 "content": str,
                 "date"   : "type:datetime",
                 "id"     : int,
+                "num"    : int,
                 "post_id": int,
                 "type"   : "re:image|video|attachment",
                 "url"    : str,
@@ -190,7 +189,7 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
     pattern = BASE_PATTERN + r"/posts/(\d+)"
     test = (
         ("https://www.subscribestar.com/posts/102468", {
-            "url": "612da5a98af056dd78dc846fbcfa705e721f6675",
+            "count": 1,
             "keyword": {
                 "author_id": 11,
                 "author_name": "subscribestar",
@@ -202,6 +201,7 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
                 "group": "imgs_and_videos",
                 "height": 291,
                 "id": 203885,
+                "num": 1,
                 "pinned": False,
                 "post_id": 102468,
                 "type": "image",
@@ -209,7 +209,7 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
             },
         }),
         ("https://subscribestar.adult/posts/22950", {
-            "url": "440d745a368e6b3e218415f593a5045f384afa0d",
+            "count": 1,
             "keyword": {"date": "dt:2019-04-28 07:32:00"},
         }),
     )

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,7 +17,8 @@ import hashlib
 import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, util, job, config, exception  # noqa E402
+from gallery_dl import \
+    extractor, util, job, config, exception, formatter  # noqa E402
 
 
 # temporary issues, etc.
@@ -91,6 +92,8 @@ class TestExtractorResults(unittest.TestCase):
             for url, kwdict in zip(tjob.url_list, tjob.kwdict_list):
                 if "_extractor" in kwdict:
                     extr = kwdict["_extractor"].from_url(url)
+                    if extr is None and not result.get("extractor", True):
+                        continue
                     self.assertIsInstance(extr, kwdict["_extractor"])
                     self.assertEqual(extr.url, url)
         else:
@@ -145,6 +148,14 @@ class TestExtractorResults(unittest.TestCase):
                 self._test_kwdict(value, test)
             elif isinstance(test, type):
                 self.assertIsInstance(value, test, msg=key)
+            elif isinstance(test, list):
+                subtest = False
+                for idx, item in enumerate(test):
+                    if isinstance(item, dict):
+                        subtest = True
+                        self._test_kwdict(value[idx], item)
+                if not subtest:
+                    self.assertEqual(value, test, msg=key)
             elif isinstance(test, str):
                 if test.startswith("re:"):
                     self.assertRegex(value, test[3:], msg=key)
@@ -260,14 +271,14 @@ class TestPathfmt():
         return 0
 
 
-class TestFormatter(util.Formatter):
+class TestFormatter(formatter.StringFormatter):
 
     @staticmethod
     def _noop(_):
         return ""
 
     def _apply_simple(self, key, fmt):
-        if key == "extension" or "._parse_optional." in repr(fmt):
+        if key == "extension" or "_parse_optional." in repr(fmt):
             return self._noop
 
         def wrap(obj):
@@ -275,7 +286,7 @@ class TestFormatter(util.Formatter):
         return wrap
 
     def _apply(self, key, funcs, fmt):
-        if key == "extension" or "._parse_optional." in repr(fmt):
+        if key == "extension" or "_parse_optional." in repr(fmt):
             return self._noop
 
         def wrap(obj):
@@ -311,13 +322,9 @@ def setup_test_config():
     config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
 
     for category in ("danbooru", "instagram", "twitter", "subscribestar",
-                     "e621", "inkbunny", "tapas", "pillowfort", "mangadex"):
+                     "e621", "atfbooru", "inkbunny", "tapas", "pillowfort",
+                     "mangadex"):
         config.set(("extractor", category), "username", None)
-
-    config.set(("extractor", "kemonoparty"), "cookies", {
-        "__ddg1": "0gBDGpJ3KZQmA4B9QH25", "__ddg2": "lmj5s1jnJOvhPXCX"})
-    config.set(("extractor", "seisoparty"), "cookies", {
-        "__ddg1": "Y8rBxSDHO5UCEtQvzyI9", "__ddg2": "lmj5s1jnJOvhPXCX"})
 
     config.set(("extractor", "mastodon.social"), "access-token",
                "Blf9gVqG7GytDTfVMiyYQjwVMQaNACgf3Ds3IxxVDUQ")
@@ -347,28 +354,23 @@ def generate_tests():
 
     # enable selective testing for direct calls
     if __name__ == '__main__' and len(sys.argv) > 1:
-        if sys.argv[1].lower() == "all":
-            fltr = lambda c, bc: True  # noqa: E731
-        elif sys.argv[1].lower() == "broken":
-            fltr = lambda c, bc: c in BROKEN  # noqa: E731
-        else:
-            argv = sys.argv[1:]
-            fltr = lambda c, bc: c in argv or bc in argv  # noqa: E731
+        categories = sys.argv[1:]
+        negate = False
+        if categories[0].lower() == "all":
+            categories = ()
+            negate = True
+        elif categories[0].lower() == "broken":
+            categories = BROKEN
         del sys.argv[1:]
     else:
-        skip = set(BROKEN)
-        if skip:
-            print("skipping:", ", ".join(skip))
-        fltr = lambda c, bc: c not in skip  # noqa: E731
-
-    # filter available extractor classes
-    extractors = [
-        extr for extr in extractor.extractors()
-        if fltr(extr.category, extr.basecategory)
-    ]
+        categories = BROKEN
+        negate = True
+        if categories:
+            print("skipping:", ", ".join(categories))
+    fltr = util.build_extractor_filter(categories, negate=negate)
 
     # add 'test_...' methods
-    for extr in extractors:
+    for extr in filter(fltr, extractor.extractors()):
         name = "test_" + extr.__name__ + "_"
         for num, tcase in enumerate(extr._get_tests(), 1):
             test = _generate_test(extr, tcase)

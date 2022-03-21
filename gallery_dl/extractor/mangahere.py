@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from https://www.mangahere.cc/"""
+"""Extractors for https://www.mangahere.cc/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
@@ -91,11 +91,12 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
     """Extractor for manga from mangahere.cc"""
     chapterclass = MangahereChapterExtractor
     pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]"
-               r"(/manga/[^/]+)/?(?:#.*)?$")
+               r"(/manga/[^/?#]+/?)(?:#.*)?$")
     test = (
         ("https://www.mangahere.cc/manga/aria/", {
-            "url": "23ad9256f7392de5973b79a36f6875e9fdcb7563",
-            "keyword": "79e326641e7d5d2fed43a1eb9949471b8162a9e0",
+            "url": "dc7f8954efbe87d9fd670c54e5edb5230c01f767",
+            "keyword": "864524eed2dc6a73e366f6ba400b80d894f99b5a",
+            "count": 69,
         }),
         ("https://www.mangahere.cc/manga/hiyokoi/#50", {
             "url": "654850570aa03825cd57e2ae2904af489602c523",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -122,7 +122,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 "date": "dt:2018-03-18 20:15:00",
                 "eh_category": "Non-H",
                 "expunged": False,
-                "favorites": "17",
+                "favorites": "20",
                 "filecount": "4",
                 "filesize": 1488978,
                 "gid": 1200119,
@@ -137,7 +137,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                     "parody:komi-san wa komyushou desu.",
                     "character:shouko komi",
                     "group:seventh lowlife",
-                    "sample",
+                    "other:sample",
                 ],
                 "thumb": "https://exhentai.org/t/ce/0a/ce0a5bcb583229a9b07c0f8"
                          "3bcb1630ab1350640-624622-736-1036-jpg_250.jpg",
@@ -176,6 +176,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.image_token = match.group(4)
         self.image_num = text.parse_int(match.group(6), 1)
 
+        source = self.config("source")
+        if source == "hitomi":
+            self.items = self._items_hitomi
+
     def items(self):
         self.login()
 
@@ -203,8 +207,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         def _validate_response(response):
             # declared inside 'items()' to be able to access 'data'
-            if not response.history and \
-                    response.headers.get("content-length") == "137":
+            if not response.history and response.headers.get(
+                    "content-type", "").startswith("text/html"):
                 self._report_limits(data)
             return True
 
@@ -220,6 +224,18 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             else:
                 data["_http_validate"] = None
             yield Message.Url, url, data
+
+    def _items_hitomi(self):
+        if self.config("metadata", False):
+            data = self.metadata_from_api()
+            data["date"] = text.parse_timestamp(data["posted"])
+        else:
+            data = {}
+
+        from .hitomi import HitomiGalleryExtractor
+        url = "https://hitomi.la/galleries/{}.html".format(self.gallery_id)
+        data["_extractor"] = HitomiGalleryExtractor
+        yield Message.Queue, url, data
 
     def get_metadata(self, page):
         """Extract gallery metadata"""
@@ -239,7 +255,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "title_jpn"    : text.unescape(extr('<h1 id="gj">', '</h1>')),
             "_"            : extr('<div id="gdc"><div class="cs ct', '"'),
             "eh_category"  : extr('>', '<'),
-            "uploader"     : text.unquote(extr('/uploader/', '"')),
+            "uploader"     : extr('<div id="gdn">', '</div>'),
             "date"         : text.parse_datetime(extr(
                 '>Posted:</td><td class="gdt2">', '</td>'), "%Y-%m-%d %H:%M"),
             "parent"       : extr(
@@ -254,6 +270,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "rating"       : extr(">Average: ", "<"),
             "torrentcount" : extr('>Torrent Download (', ')'),
         }
+
+        if data["uploader"].startswith("<"):
+            data["uploader"] = text.unescape(text.extract(
+                data["uploader"], ">", "<")[0])
 
         f = data["favorites"][0]
         if f == "N":

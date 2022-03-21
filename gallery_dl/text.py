@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -44,6 +44,13 @@ def ensure_http_scheme(url, scheme="https://"):
     if url and not url.startswith(("https://", "http://")):
         return scheme + url.lstrip("/:")
     return url
+
+
+def root_from_url(url, scheme="https://"):
+    """Extract scheme and domain from a URL"""
+    if not url.startswith(("https://", "http://")):
+        return scheme + url[:url.index("/")]
+    return url[:url.index("/", 8)]
 
 
 def filename_from_url(url):
@@ -168,7 +175,7 @@ def parse_bytes(value, default=0, suffixes="bkmgtp"):
     """Convert a bytes-amount ("500k", "2.5M", ...) to int"""
     try:
         last = value[-1].lower()
-    except (TypeError, KeyError, IndexError):
+    except (TypeError, LookupError):
         return default
 
     if last in suffixes:

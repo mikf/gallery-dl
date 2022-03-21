@@ -13,7 +13,7 @@ from .. import text
 import json
 
 
-BASE_PATTERN = (r"(?:https?://)?((?:[^.]+\.)?xhamster"
+BASE_PATTERN = (r"(?:https?://)?((?:[\w-]+\.)?xhamster"
                 r"(?:\d?\.(?:com|one|desi)|\.porncache\.net))")
 
 
@@ -90,7 +90,6 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Version, 1
         yield Message.Directory, data
         for num, image in enumerate(self.images(), 1):
             url = image["imageURL"]
@@ -167,7 +166,6 @@ class XhamsterUserExtractor(XhamsterExtractor):
         self.user = match.group(2)
 
     def items(self):
-        yield Message.Version, 1
         url = "{}/users/{}/photos".format(self.root, self.user)
         data = {"_extractor": XhamsterGalleryExtractor}
 

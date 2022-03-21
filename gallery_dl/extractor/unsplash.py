@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -115,7 +115,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
                 "id": "uMJXuywXLiU",
                 "instagram_username": "just_midwest_rock",
                 "last_name": "Hoefler",
-                "location": None,
+                "location": "Madison, WI",
                 "name": "Dave Hoefler",
                 "portfolio_url": str,
                 "total_collections": int,
@@ -193,7 +193,7 @@ class UnsplashSearchExtractor(UnsplashExtractor):
     """Extractor for unsplash search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/s/photos/([^/?#]+)(?:\?([^/?#]+))?"
-    test = ("https://unsplash.com/s/photos/nature", {
+    test = ("https://unsplash.com/s/photos/hair-style", {
         "pattern": r"https://images\.unsplash\.com/((flagged/)?photo-\d+-\w+"
                    r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
         "range": "1-30",
@@ -206,7 +206,7 @@ class UnsplashSearchExtractor(UnsplashExtractor):
 
     def photos(self):
         url = self.root + "/napi/search/photos"
-        params = {"query": text.unquote(self.item)}
+        params = {"query": text.unquote(self.item.replace('-', ' '))}
         if self.query:
             params.update(text.parse_query(self.query))
         return self._pagination(url, params, True)

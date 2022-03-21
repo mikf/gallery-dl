@@ -194,16 +194,6 @@ Description
     Share number of skipped downloads between parent and child extractors.
 
 
-extractor.*.url-metadata
-------------------------
-Type
-    ``string``
-Default
-    ``null``
-Description
-    Insert a file's download URL into its metadata dictionary as the given name.
-
-
 extractor.*.path-restrict
 -------------------------
 Type
@@ -253,6 +243,24 @@ Description
 
     Note: In a string with 2 or more characters, ``[]^-\`` need to be
     escaped with backslashes, e.g. ``"\\[\\]"``
+
+
+extractor.*.path-strip
+----------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Set of characters to remove from the end of generated path segment names
+    using `str.rstrip() <https://docs.python.org/3/library/stdtypes.html#str.rstrip>`_
+
+    Special values:
+
+    * ``"auto"``: Use characters from ``"unix"`` or ``"windows"``
+      depending on the local operating system
+    * ``"unix"``: ``""``
+    * ``"windows"``: ``". "``
 
 
 extractor.*.extension-map
@@ -306,7 +314,7 @@ Description
 extractor.*.sleep
 -----------------
 Type
-    ``float``
+    |Duration|_
 Default
     ``0``
 Description
@@ -316,7 +324,7 @@ Description
 extractor.*.sleep-extractor
 ---------------------------
 Type
-    ``float``
+    |Duration|_
 Default
     ``0``
 Description
@@ -327,7 +335,7 @@ Description
 extractor.*.sleep-request
 -------------------------
 Type
-    ``float``
+    |Duration|_
 Default
     ``0``
 Description
@@ -348,7 +356,6 @@ Description
     Specifying a username and password is required for
 
     * ``nijie``
-    * ``seiga``
 
     and optional for
 
@@ -360,11 +367,12 @@ Description
     * ``imgbb``
     * ``inkbunny``
     * ``instagram``
+    * ``kemonoparty``
     * ``mangadex``
     * ``mangoxo``
     * ``pillowfort``
-    * ``pinterest``
     * ``sankaku``
+    * ``seisoparty``
     * ``subscribestar``
     * ``tapas``
     * ``tsumino``
@@ -454,6 +462,21 @@ Description
     otherwise ``http://`` is assumed.
 
 
+extractor.*.source-address
+--------------------------
+Type
+    * ``string``
+    * ``list`` with 1 ``string`` and 1 ``integer`` as elements
+Example
+    * ``"192.168.178.20"``
+    * ``["192.168.178.20", 8080]``
+Description
+    Client-side IP address to bind to.
+
+    | Can be either a simple ``string`` with just the local IP address
+    | or a ``list`` with IP and explicit port number as elements.
+
+
 extractor.*.user-agent
 ----------------------
 Type
@@ -507,6 +530,22 @@ Description
     `format strings`_.
 
 
+extractor.*.url-metadata
+------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert a file's download URL into its metadata dictionary as the given name.
+
+    For example, setting this option to ``"gdl_file_url"`` will cause a new
+    metadata field with name ``gdl_file_url`` to appear, which contains the
+    current file's download URL.
+    This can then be used in `filenames <extractor.*.filename_>`_,
+    with a ``metadata`` post processor, etc.
+
+
 extractor.*.category-transfer
 -----------------------------
 Type
@@ -525,10 +564,18 @@ Type
     ``list`` of ``strings``
 Default
     ``["oauth", "recursive", "test"]`` + current extractor category
+Example
+    ``["imgur", "gfycat:user", "*:image"]``
 Description
-    A list of extractor categories to ignore (or allow)
+    A list of extractor identifiers to ignore (or allow)
     when spawning child extractors for unknown URLs,
     e.g. from ``reddit`` or ``plurk``.
+
+    Each identifier can be
+
+    * A category or basecategory name (``"imgur"``, ``"mastodon"``)
+    * | A (base)category-subcategory pair, where both names are separated by a colon (``"gfycat:user"``).
+      | Both names can be a `*` or left empty, matching all possible names (``"*:image"``, ``":user"``).
 
     Note: Any ``blacklist`` setting will automatically include
     ``"oauth"``, ``"recursive"``, and ``"test"``.
@@ -552,7 +599,9 @@ Description
     memory requirements are significantly lower when the
     amount of stored IDs gets reasonably large.
 
-    Note: archive paths support regular `format string`_ replacements,
+    Note: Archive files that do not already exist get generated automatically.
+
+    Note: Archive paths support regular `format string`_ replacements,
     but be aware that using external inputs for building local paths
     may pose a security risk.
 
@@ -567,6 +616,16 @@ Description
     An alternative `format string`__ to build archive IDs with.
 
 .. __: https://docs.python.org/3/library/string.html#format-string-syntax
+
+
+extractor.*.archive-prefix
+--------------------------
+Type
+    ``string``
+Default
+    ``"{category}"``
+Description
+    Prefix for archive IDs.
 
 
 extractor.*.postprocessors
@@ -659,6 +718,16 @@ Description
     Setting this to ``false`` won't download any files, but all other
     functions (`postprocessors`_, `download archive`_, etc.)
     will be executed as normal.
+
+
+extractor.*.fallback
+--------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Use fallback download URLs when a download fails.
 
 
 extractor.*.image-range
@@ -773,6 +842,19 @@ Description
     * ``false``: Get posts from "Latest Updates" pages
 
 
+extractor.bbc.width
+-------------------
+Type
+    ``int``
+Default
+    ``1920``
+Description
+    Specifies the requested image width.
+
+    This value must be divisble by 16 and gets rounded down otherwise.
+    The maximum possible value appears to be ``1920``.
+
+
 extractor.blogger.videos
 ------------------------
 Type
@@ -781,6 +863,29 @@ Default
     ``true``
 Description
     Download embedded videos hosted on https://www.blogger.com/
+
+
+extractor.danbooru.external
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For unavailable or restricted posts,
+    follow the ``source`` and download from there if possible.
+
+
+extractor.danbooru.metadata
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata (notes, artist commentary, parent, children)
+
+    Note: This requires 1 additional HTTP request for each post.
 
 
 extractor.danbooru.ugoira
@@ -794,18 +899,6 @@ Description
 
     * ``true``: Original ZIP archives
     * ``false``: Converted video files
-
-
-extractor.danbooru.metadata
----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Extract additional metadata (notes, artist commentary, parent, children)
-
-    Note: This requires 1 additional HTTP request for each post.
 
 
 extractor.derpibooru.api-key
@@ -832,6 +925,38 @@ Description
     to access 18+ content without `API Key <extractor.derpibooru.api-key_>`_.
 
     See `Filters <https://derpibooru.org/filters>`_ for details.
+
+
+extractor.deviantart.auto-watch
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Automatically watch users when encountering "Watchers-Only Deviations"
+    (requires a `refresh-token <extractor.deviantart.refresh-token_>`_).
+
+
+extractor.deviantart.auto-unwatch
+---------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    After watching a user through `auto-watch <extractor.deviantart.auto-watch_>`_,
+    unwatch that user at the end of the current extractor run.
+
+
+extractor.deviantart.comments
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``comments`` metadata.
 
 
 extractor.deviantart.extra
@@ -952,17 +1077,6 @@ Description
     everything else (archives, etc.).
 
 
-extractor.deviantart.quality
-----------------------------
-Type
-    ``integer``
-Default
-    ``100``
-Description
-    JPEG quality level of newer images for which
-    an original file download is not available.
-
-
 extractor.deviantart.refresh-token
 ----------------------------------
 Type
@@ -991,17 +1105,6 @@ Description
     Minimum wait time in seconds before API requests.
 
 
-extractor.exhentai.limits
--------------------------
-Type
-    ``integer``
-Default
-    ``null``
-Description
-    Sets a custom image download limit and
-    stops extraction when it gets exceeded.
-
-
 extractor.exhentai.domain
 -------------------------
 Type
@@ -1013,6 +1116,17 @@ Description
       depending on the input URL
     * ``"e-hentai.org"``: Use ``e-hentai.org`` for all URLs
     * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
+
+
+extractor.exhentai.limits
+-------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Sets a custom image download limit and
+    stops extraction when it gets exceeded.
 
 
 extractor.exhentai.metadata
@@ -1037,6 +1151,18 @@ Default
     ``true``
 Description
     Download full-sized original images if available.
+
+
+extractor.exhentai.source
+-------------------------
+Type
+    ``string``
+Default
+    ``"gallery"``
+Description
+    Selects an alternative source to download files from.
+
+    * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
 
 
 extractor.fanbox.embeds
@@ -1105,6 +1231,16 @@ Description
     * ``"html"``: Raw HTML content
 
 
+extractor.furaffinity.external
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Follow external URLs linked in descriptions.
+
+
 extractor.furaffinity.include
 -----------------------------
 Type
@@ -1123,19 +1259,48 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
-extractor.gfycat.format
------------------------
+extractor.furaffinity.layout
+----------------------------
 Type
     ``string``
 Default
-    ``"mp4"``
+    ``"auto"``
 Description
-    The name of the preferred animation format, which can be one of
-    ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"`` or ``"mjpg"``.
+    Selects which site layout to expect when parsing posts.
 
-    If the selected format is not available, ``"mp4"``, ``"webm"``
-    and ``"gif"`` (in that order) will be tried instead, until an
-    available format is found.
+    * ``"auto"``: Automatically differentiate between ``"old"`` and ``"new"``
+    * ``"old"``: Expect the *old* site layout
+    * ``"new"``: Expect the *new* site layout
+
+
+extractor.generic.enabled
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Match **all** URLs not otherwise supported by gallery-dl,
+    even ones without a ``generic:`` prefix.
+
+
+extractor.gfycat.format
+-----------------------
+Type
+    * ``list`` of ``strings``
+    * ``string``
+Default
+    ``["mp4", "webm", "mobile", "gif"]``
+Description
+    List of names of the preferred animation format, which can be
+    ``"mp4"``, ``"webm"``, ``"mobile"``, ``"gif"``, or ``"webp"``.
+
+    If a selected format is not available, the next one in the list will be
+    tried until an available format is found.
+
+    If the format is given as ``string``, it will be extended with
+    ``["mp4", "webm", "mobile", "gif"]``. Use a list with one element to
+    restrict it to only one possible format.
 
 
 extractor.hentaifoundry.include
@@ -1156,14 +1321,19 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
-extractor.hentainexus.original
-------------------------------
+extractor.hitomi.format
+-----------------------
 Type
-    ``bool``
+    ``string``
 Default
-    ``true``
+    ``"webp"``
 Description
-    Download original files instead of WebP versions.
+    Selects which image format to download.
+
+    Available formats are ``"webp"`` and ``"avif"``.
+
+    ``"original"`` will try to download the original ``jpg`` or ``png`` versions,
+    but is most likely going to fail with ``403 Forbidden`` errors.
 
 
 extractor.hitomi.metadata
@@ -1171,7 +1341,7 @@ extractor.hitomi.metadata
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Try to extract
     ``artist``, ``group``, ``parody``,  and ``characters`` metadata.
@@ -1224,6 +1394,16 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.instagram.previews
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download video previews.
+
+
 extractor.instagram.videos
 --------------------------
 Type
@@ -1232,6 +1412,38 @@ Default
     ``true``
 Description
     Download video files.
+
+
+extractor.kemonoparty.comments
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``comments`` metadata.
+
+
+extractor.kemonoparty.dms
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract a user's direct messages as ``dms`` metadata.
+
+
+extractor.kemonoparty.files
+---------------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["attachments", "file", "inline"]``
+Description
+    Determines the type and order of files to be downloaded.
+
+    Available types are ``file``, ``attachments``, and ``inline``.
 
 
 extractor.kemonoparty.max-posts
@@ -1270,6 +1482,19 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.luscious.gif
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Format in which to download animated images.
+
+    Use ``true`` to download animated images as gifs and ``false``
+    to download as mp4 videos.
+
+
 extractor.mangadex.api-server
 -----------------------------
 Type
@@ -1278,6 +1503,19 @@ Default
     ``"https://api.mangadex.org"``
 Description
     The server to use for API requests.
+
+
+extractor.mangadex.api-parameters
+---------------------------------
+Type
+    ``object``
+Example
+    ``{"order[updatedAt]": "desc"}``
+Description
+    Additional query parameters to send when fetching manga chapters.
+
+    (See `/manga/{id}/feed <https://api.mangadex.org/docs.html#operation/get-manga-id-feed>`_
+    and `/user/follows/manga/feed <https://api.mangadex.org/docs.html#operation/get-user-follows-manga-feed>`_)
 
 
 extractor.mangadex.lang
@@ -1291,14 +1529,14 @@ Description
     to filter chapters by.
 
 
-extractor.mangadex.metadata
----------------------------
+extractor.mangadex.ratings
+--------------------------
 Type
-    ``bool``
+    ``list`` of ``strings``
 Default
-    ``false``
+    ``["safe", "suggestive", "erotica", "pornographic"]``
 Description
-    Provide ``artist``, ``author``, and ``group`` metadata fields.
+    List of acceptable content ratings for returned chapters.
 
 
 extractor.mastodon.reblogs
@@ -1339,6 +1577,21 @@ Default
     ``true``
 Description
     Download original Adobe Flash animations instead of pre-rendered videos.
+
+
+extractor.newgrounds.format
+---------------------------
+Type
+    ``string``
+Default
+    ``"original"``
+Example
+    ``"720p"``
+Description
+    Selects the preferred format for video downloads.
+
+    If the selected format is not available,
+    the next smaller one gets chosen.
 
 
 extractor.newgrounds.include
@@ -1413,6 +1666,19 @@ Description
     of the port specified here. You'll have to manually adjust the
     port number in your browser's address bar when using a different
     port than the default.
+
+
+extractor.patreon.files
+-----------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["images", "image_large", "attachments", "postfile", "content"]``
+Description
+    Determines the type and order of files to be downloaded.
+
+    Available types are
+    ``postfile``, ``images``, ``image_large``, ``attachments``, and ``content``.
 
 
 extractor.photobucket.subalbums
@@ -1558,6 +1824,19 @@ Description
     Also search Plurk comments for URLs.
 
 
+extractor.reactor.gif
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Format in which to download animated images.
+
+    Use ``true`` to download animated images as gifs and ``false``
+    to download as mp4 videos.
+
+
 extractor.readcomiconline.captcha
 ---------------------------------
 Type
@@ -1676,17 +1955,20 @@ Description
 extractor.redgifs.format
 ------------------------
 Type
-    ``string``
+    * ``list`` of ``strings``
+    * ``string``
 Default
-    ``"mp4"``
+    ``["hd", "sd", "gif"]``
 Description
-    The name of the preferred format, which can be one of
-    ``"mp4"``, ``"webm"``, ``"gif"``, ``"webp"``, ``"mobile"``,
-    or ``"mini"``.
+    List of names of the preferred animation format, which can be
+    ``"hd"``, ``"sd"``, `"gif"``, `"vthumbnail"``, `"thumbnail"``, or ``"poster"``.
 
-    If the selected format is not available, ``"mp4"``, ``"webm"``
-    and ``"gif"`` (in that order) will be tried instead, until an
-    available format is found.
+    If a selected format is not available, the next one in the list will be
+    tried until an available format is found.
+
+    If the format is given as ``string``, it will be extended with
+    ``["hd", "sd", "gif"]``. Use a list with one element to
+    restrict it to only one possible format.
 
 
 extractor.sankakucomplex.embeds
@@ -1707,6 +1989,26 @@ Default
     ``true``
 Description
     Download videos.
+
+
+extractor.skeb.sent-requests
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download sent requests.
+
+
+extractor.skeb.thumbnails
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download thumbnails.
 
 
 extractor.smugmug.videos
@@ -1790,14 +2092,44 @@ Description
     You can use ``"all"`` instead of listing all types separately.
 
 
+extractor.twibooru.api-key
+--------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Your `Twibooru API Key <https://twibooru.org/users/edit>`__,
+    to use your account's browsing settings and filters.
+
+
+extractor.twibooru.filter
+-------------------------
+Type
+    ``integer``
+Default
+    ``2`` (`Everything <https://twibooru.org/filters/2>`__ filter)
+Description
+    The content filter ID to use.
+
+    Setting an explicit filter ID overrides any default filters and can be used
+    to access 18+ content without `API Key <extractor.twibooru.api-key_>`__.
+
+    See `Filters <https://twibooru.org/filters>`__ for details.
+
+
 extractor.twitter.cards
 -----------------------
 Type
-    ``bool``
+    ``bool`` or ``string``
 Default
-    ``false``
+    ``true``
 Description
-    Fetch media from `Cards <https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards>`__.
+    Controls how to handle `Twitter Cards <https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards>`__.
+
+    * ``false``: Ignore cards
+    * ``true``: Download image content from supported cards
+    * ``"ytdl"``: Additionally download video content from unsupported cards using `youtube-dl`_
 
 
 extractor.twitter.conversations
@@ -1809,6 +2141,41 @@ Default
 Description
     Fetch media from all Tweets and replies in a `conversation
     <https://help.twitter.com/en/using-twitter/twitter-conversations>`__.
+
+
+extractor.twitter.size
+----------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["orig", "4096x4096", "large", "medium", "small"]``
+Description
+    The image version to download.
+    Any entries after the first one will be used for potential
+    `fallback <extractor.*.fallback_>`_ URLs.
+
+    Known available sizes are
+    ``4096x4096``, ``orig``, ``large``, ``medium``, and ``small``.
+
+
+extractor.twitter.logout
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Logout and retry as guest when access to another user's Tweets is blocked.
+
+
+extractor.twitter.pinned
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from pinned Tweets.
 
 
 extractor.twitter.quoted
@@ -1829,6 +2196,9 @@ Default
     ``true``
 Description
     Fetch media from replies to other Tweets.
+
+    If this value is ``"self"``, only consider replies where
+    reply and original Tweet are from the same user.
 
 
 extractor.twitter.retweets
@@ -2031,9 +2401,12 @@ extractor.ytdl.module
 Type
     ``string``
 Default
-    ``"youtube_dl"``
+    ``null``
 Description
     Name of the youtube-dl Python module to import.
+
+    Setting this to ``null`` will try to import ``"yt_dlp"``
+    followed by ``"youtube_dl"`` as fallback.
 
 
 extractor.ytdl.raw-options
@@ -2054,6 +2427,28 @@ Description
 
     All available options can be found in `youtube-dl's docstrings
     <https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
+
+
+extractor.ytdl.cmdline-args
+---------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"--quiet --write-sub --merge-output-format mkv"``
+    * ``["--quiet", "--write-sub", "--merge-output-format", "mkv"]``
+Description
+    Additional options specified as youtube-dl command-line arguments.
+
+
+extractor.ytdl.config-file
+--------------------------
+Type
+    |Path|_
+Example
+    ``"~/.config/youtube-dl/config"``
+Description
+    Location of a youtube-dl configuration file to load options from.
 
 
 extractor.[booru].tags
@@ -2093,6 +2488,15 @@ Description
     * ``true``: Start with the latest chapter
     * ``false``: Start with the first chapter
 
+
+extractor.[manga-extractor].page-reverse
+----------------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download manga chapter pages in reverse order.
 
 
 Downloader Options
@@ -2167,6 +2571,19 @@ Description
     alongside the actual output files.
 
 
+downloader.*.progress
+---------------------
+Type
+    ``float``
+Default
+    ``3.0``
+Description
+    Number of seconds until a download progress indicator
+    for the current download is displayed.
+
+    Set this option to ``null`` to disable this indicator.
+
+
 downloader.*.rate
 -----------------
 Type
@@ -2212,6 +2629,17 @@ Default
     `extractor.*.verify`_
 Description
     Certificate validation during file downloads.
+
+
+downloader.*.proxy
+------------------
+Type
+    ``string`` or ``object``
+Default
+    `extractor.*.proxy`_
+Description
+    | Proxy server used for file downloads.
+    | Disable the use of a proxy by explicitly setting this option to ``null``.
 
 
 downloader.http.adjust-extensions
@@ -2276,9 +2704,12 @@ downloader.ytdl.module
 Type
     ``string``
 Default
-    ``"youtube_dl"``
+    ``null``
 Description
     Name of the youtube-dl Python module to import.
+
+    Setting this to ``null`` will first try to import ``"yt_dlp"``
+    and use ``"youtube_dl"`` as fallback.
 
 
 downloader.ytdl.outtmpl
@@ -2321,6 +2752,28 @@ Description
     <https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
 
 
+downloader.ytdl.cmdline-args
+----------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"--quiet --write-sub --merge-output-format mkv"``
+    * ``["--quiet", "--write-sub", "--merge-output-format", "mkv"]``
+Description
+    Additional options specified as youtube-dl command-line arguments.
+
+
+downloader.ytdl.config-file
+---------------------------
+Type
+    |Path|_
+Example
+    ``"~/.config/youtube-dl/config"``
+Description
+    Location of a youtube-dl configuration file to load options from.
+
+
 
 Output Options
 ==============
@@ -2361,6 +2814,9 @@ Default
 Description
     Controls whether the output strings should be shortened to fit
     on one console line.
+
+    Set this option to ``"eaw"`` to also work with east-asian characters
+    with a display width greater than 1.
 
 
 output.skip
@@ -2489,11 +2945,32 @@ Type
 Default
     ``"replace"``
 Description
-    The action to take when files do not compare as equal.
+    The action to take when files do **not** compare as equal.
 
     * ``"replace"``: Replace/Overwrite the old version with the new one
+
     * ``"enumerate"``: Add an enumeration index to the filename of the new
       version like `skip = "enumerate" <extractor.*.skip_>`__
+
+
+compare.equal
+-------------
+Type
+    ``string``
+Default
+    ``"null"``
+Description
+    The action to take when files do compare as equal.
+
+    * ``"abort:N"``: Stop the current extractor run
+      after ``N`` consecutive files compared as equal.
+
+    * ``"terminate:N"``: Stop the current extractor run,
+      including parent extractors,
+      after ``N`` consecutive files compared as equal.
+
+    * ``"exit:N"``: Exit the program
+      after ``N`` consecutive files compared as equal.
 
 
 compare.shallow
@@ -2664,6 +3141,50 @@ Description
     Note: Only applies for ``"mode": "custom"``.
 
 
+metadata.archive
+----------------
+Type
+    |Path|_
+Description
+    File to store IDs of generated metadata files in,
+    similar to `extractor.*.archive`_.
+
+    ``archive-format`` and ``archive-prefix`` options,
+    akin to `extractor.*.archive-format`_ and `extractor.*.archive-prefix`_,
+    are supported as well.
+
+
+metadata.mtime
+--------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Set modification times of generated metadata files
+    according to the accompanying downloaded file.
+
+    Enabling this option will only have an effect
+    *if* there is actual ``mtime`` metadata available, that is
+
+    * after a file download (``"event": "file"`` (default), ``"event": "after"``)
+    * when running *after* an ``mtime`` post processes for the same `event <metadata.event_>`__
+
+    For example, a ``metadata`` post processor for ``"event": "post"`` will
+    *not* be able to set its file's modification time unless an ``mtime``
+    post processor with ``"event": "post"`` runs *before* it.
+
+
+mtime.event
+-----------
+Type
+    ``string``
+Default
+    ``"file"``
+Description
+    See `metadata.event`_
+
+
 mtime.key
 ---------
 Type
@@ -2785,6 +3306,16 @@ Description
     to reduce an odd width/height by 1 pixel and make them even.
 
 
+ugoira.mtime
+------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Set modification times of generated ugoira aniomations.
+
+
 ugoira.repeat-last-frame
 ------------------------
 Type
@@ -2879,6 +3410,18 @@ Description
     this cache.
 
 
+signals-ignore
+--------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["SIGTTOU", "SIGTTIN", "SIGTERM"]``
+Description
+    The list of signal names to ignore, i.e. set
+    `SIG_IGN <https://docs.python.org/3/library/signal.html#signal.SIG_IGN>`_
+    as signal handler for.
+
+
 pyopenssl
 ---------
 Type
@@ -2918,7 +3461,7 @@ How To
       application and put them in your configuration file
       as ``"client-id"`` and ``"client-secret"``
     * clear your `cache <cache.file_>`__ to delete any remaining
-      ``access-token`` entries. (``gallery-dl --clear-cache``)
+      ``access-token`` entries. (``gallery-dl --clear-cache deviantart``)
     * get a new `refresh-token <extractor.deviantart.refresh-token_>`__ for the
       new ``client-id`` (``gallery-dl oauth:deviantart``)
 
@@ -2995,7 +3538,8 @@ Custom Types
 Date
 ----
 Type
-    ``string`` or ``integer``
+    * ``string``
+    * ``integer``
 Example
     * ``"2019-01-01T00:00:00"``
     * ``"2019"`` with ``"%Y"`` as `date-format`_
@@ -3007,10 +3551,32 @@ Description
     * If given as ``integer``, it is interpreted as UTC timestamp.
 
 
+Duration
+--------
+Type
+    * ``float``
+    * ``list`` with 2 ``floats``
+    * ``string``
+Example
+    * ``2.85``
+    * ``[1.5, 3.0]``
+    * ``"2.85"``, ``"1.5-3.0"``
+Description
+    A |Duration|_ represents a span of time in seconds.
+
+    * If given as a single ``float``, it will be used as that exact value.
+    * If given as a ``list`` with 2 floating-point numbers ``a`` & ``b`` ,
+      it will be randomly chosen with uniform distribution such that ``a <= N <=b``.
+      (see `random.uniform() <https://docs.python.org/3/library/random.html#random.uniform>`_)
+    * If given as a ``string``, it can either represent a single ``float``
+      value (``"2.85"``) or a range  (``"1.5-3.0"``).
+
+
 Path
 ----
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Example
     * ``"file.ext"``
     * ``"~/path/to/file.ext"``
@@ -3156,6 +3722,7 @@ Description
 .. |datetime| replace:: ``datetime``
 .. |datetime.max| replace:: ``datetime.max``
 .. |Date| replace:: ``Date``
+.. |Duration| replace:: ``Duration``
 .. |Path| replace:: ``Path``
 .. |Last-Modified| replace:: ``Last-Modified``
 .. |Logging Configuration| replace:: ``Logging Configuration``

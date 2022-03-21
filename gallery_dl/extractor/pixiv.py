@@ -213,7 +213,6 @@ class PixivMeExtractor(PixivExtractor):
         data = {"_extractor": PixivUserExtractor}
         response = self.request(
             url, method="HEAD", allow_redirects=False, notfound="user")
-        yield Message.Version, 1
         yield Message.Queue, response.headers["Location"], data
 
 
@@ -457,7 +456,9 @@ class PixivSearchExtractor(PixivExtractor):
         self.sort = self.target = None
 
     def works(self):
-        return self.api.search_illust(self.word, self.sort, self.target)
+        return self.api.search_illust(
+            self.word, self.sort, self.target,
+            date_start=self.date_start, date_end=self.date_end)
 
     def metadata(self):
         query = text.parse_query(self.query)
@@ -490,10 +491,15 @@ class PixivSearchExtractor(PixivExtractor):
             target = "s_tag"
         self.target = target_map[target]
 
+        self.date_start = query.get("scd")
+        self.date_end = query.get("ecd")
+
         return {"search": {
             "word": self.word,
             "sort": self.sort,
             "target": self.target,
+            "date_start": self.date_start,
+            "date_end": self.date_end,
         }}
 
 
@@ -552,11 +558,73 @@ class PixivPixivisionExtractor(PixivExtractor):
         headers = {"User-Agent": "Mozilla/5.0"}
         self.page = self.request(url, headers=headers).text
 
-        title = text.extract(self.page, '<title>', ' - pixivision<')[0]
+        title = text.extract(self.page, '<title>', '<')[0]
         return {
             "pixivision_id"   : self.pixivision_id,
             "pixivision_title": text.unescape(title),
         }
+
+
+class PixivSketchExtractor(Extractor):
+    """Extractor for user pages on sketch.pixiv.net"""
+    category = "pixiv"
+    subcategory = "sketch"
+    directory_fmt = ("{category}", "sketch", "{user[unique_name]}")
+    filename_fmt = "{post_id} {id}.{extension}"
+    archive_fmt = "S{user[id]}_{id}"
+    root = "https://sketch.pixiv.net"
+    cookiedomain = ".pixiv.net"
+    pattern = r"(?:https?://)?sketch\.pixiv\.net/@([^/?#]+)"
+    test = ("https://sketch.pixiv.net/@nicoby", {
+        "pattern": r"https://img\-sketch\.pixiv\.net/uploads/medium"
+                   r"/file/\d+/\d+\.(jpg|png)",
+        "count": ">= 35",
+    })
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.username = match.group(1)
+
+    def items(self):
+        headers = {"Referer": "{}/@{}".format(self.root, self.username)}
+
+        for post in self.posts():
+            media = post["media"]
+            post["post_id"] = post["id"]
+            post["date"] = text.parse_datetime(
+                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            util.delete_items(post, ("id", "media", "_links"))
+
+            yield Message.Directory, post
+            post["_http_headers"] = headers
+
+            for photo in media:
+                original = photo["photo"]["original"]
+                post["id"] = photo["id"]
+                post["width"] = original["width"]
+                post["height"] = original["height"]
+
+                url = original["url"]
+                text.nameext_from_url(url, post)
+                yield Message.Url, url, post
+
+    def posts(self):
+        url = "{}/api/walls/@{}/posts/public.json".format(
+            self.root, self.username)
+        headers = {
+            "Accept": "application/vnd.sketch-v4+json",
+            "X-Requested-With": "{}/@{}".format(self.root, self.username),
+            "Referer": self.root + "/",
+        }
+
+        while True:
+            data = self.request(url, headers=headers).json()
+            yield from data["data"]["items"]
+
+            next_url = data["_links"].get("next")
+            if not next_url:
+                return
+            url = self.root + next_url["href"]
 
 
 class PixivAppAPI():
@@ -649,9 +717,11 @@ class PixivAppAPI():
         params = {"illust_id": illust_id}
         return self._pagination("v2/illust/related", params)
 
-    def search_illust(self, word, sort=None, target=None, duration=None):
+    def search_illust(self, word, sort=None, target=None, duration=None,
+                      date_start=None, date_end=None):
         params = {"word": word, "search_target": target,
-                  "sort": sort, "duration": duration}
+                  "sort": sort, "duration": duration,
+                  "start_date": date_start, "end_date": date_end}
         return self._pagination("v1/search/illust", params)
 
     def user_bookmarks_illust(self, user_id, tag=None, restrict="public"):

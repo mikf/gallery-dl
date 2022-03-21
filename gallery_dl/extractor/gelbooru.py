@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from . import gelbooru_v02
-from .. import text, exception
+from .. import text, util, exception
 import binascii
 
 
@@ -20,10 +20,38 @@ class GelbooruBase():
     basecategory = "booru"
     root = "https://gelbooru.com"
 
+    def _api_request(self, params):
+        url = self.root + "/index.php?page=dapi&s=post&q=index&json=1"
+        data = self.request(url, params=params).json()
+        if "post" not in data:
+            return ()
+        posts = data["post"]
+        if not isinstance(posts, list):
+            return (posts,)
+        return posts
+
+    def _pagination(self, params):
+        params["pid"] = self.page_start
+        params["limit"] = self.per_page
+        limit = self.per_page // 2
+
+        while True:
+            posts = self._api_request(params)
+
+            for post in posts:
+                yield post
+
+            if len(posts) < limit:
+                return
+
+            if "pid" in params:
+                del params["pid"]
+            params["tags"] = "{} id:<{}".format(self.tags, post["id"])
+
     @staticmethod
     def _file_url(post):
         url = post["file_url"]
-        if url.startswith(("https://mp4.gelbooru.com/", "https://video-cdn")):
+        if url.endswith((".webm", ".mp4")):
             md5 = post["md5"]
             path = "/images/{}/{}/{}.webm".format(md5[0:2], md5[2:4], md5)
             post["_fallback"] = GelbooruBase._video_fallback(path)
@@ -45,9 +73,12 @@ class GelbooruTagExtractor(GelbooruBase,
         ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
             "count": 5,
         }),
-        ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
-            "options": (("api", False),),
-            "count": 5,
+        ("https://gelbooru.com/index.php?page=post&s=list&tags=meiya_neon", {
+            "range": "196-204",
+            "url": "845a61aa1f90fb4ced841e8b7e62098be2e967bf",
+            "pattern": r"https://img\d\.gelbooru\.com"
+                       r"/images/../../[0-9a-f]{32}\.jpg",
+            "count": 9,
         }),
     )
 
@@ -81,6 +112,11 @@ class GelbooruPoolExtractor(GelbooruBase,
             "pool": text.parse_int(self.pool_id),
             "pool_name": text.unescape(name),
         }
+
+    def posts(self):
+        params = {}
+        for params["id"] in util.advance(self.post_ids, self.page_start):
+            yield from self._api_request(params)
 
 
 class GelbooruPostExtractor(GelbooruBase,

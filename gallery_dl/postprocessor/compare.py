@@ -9,6 +9,8 @@
 """Compare versions of the same file and replace/enumerate them on mismatch"""
 
 from .common import PostProcessor
+from .. import text, util, exception
+import sys
 import os
 
 
@@ -18,19 +20,32 @@ class ComparePP(PostProcessor):
         PostProcessor.__init__(self, job)
         if options.get("shallow"):
             self._compare = self._compare_size
+        self._equal_exc = self._equal_cnt = 0
+
+        equal = options.get("equal")
+        if equal:
+            equal, _, emax = equal.partition(":")
+            self._equal_max = text.parse_int(emax)
+            if equal == "abort":
+                self._equal_exc = exception.StopExtraction
+            elif equal == "terminate":
+                self._equal_exc = exception.TerminateExtraction
+            elif equal == "exit":
+                self._equal_exc = sys.exit
 
         job.register_hooks({"file": (
             self.enumerate
             if options.get("action") == "enumerate" else
-            self.compare
+            self.replace
         )}, options)
 
-    def compare(self, pathfmt):
+    def replace(self, pathfmt):
         try:
             if self._compare(pathfmt.realpath, pathfmt.temppath):
-                pathfmt.delete = True
+                return self._equal(pathfmt)
         except OSError:
             pass
+        self._equal_cnt = 0
 
     def enumerate(self, pathfmt):
         num = 1
@@ -39,9 +54,10 @@ class ComparePP(PostProcessor):
                 pathfmt.prefix = str(num) + "."
                 pathfmt.set_extension(pathfmt.extension, False)
                 num += 1
-            pathfmt.delete = True
+            return self._equal(pathfmt)
         except OSError:
             pass
+        self._equal_cnt = 0
 
     def _compare(self, f1, f2):
         return self._compare_size(f1, f2) and self._compare_content(f1, f2)
@@ -61,6 +77,15 @@ class ComparePP(PostProcessor):
                     return False
                 if not buf1:
                     return True
+
+    def _equal(self, pathfmt):
+        if self._equal_exc:
+            self._equal_cnt += 1
+            if self._equal_cnt >= self._equal_max:
+                util.remove_file(pathfmt.temppath)
+                print()
+                raise self._equal_exc()
+        pathfmt.delete = True
 
 
 __postprocessor__ = ComparePP

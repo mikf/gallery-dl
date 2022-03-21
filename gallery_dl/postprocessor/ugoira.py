@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -27,6 +27,7 @@ class UgoiraPP(PostProcessor):
         self.output = options.get("ffmpeg-output", True)
         self.delete = not options.get("keep-files", False)
         self.repeat = options.get("repeat-last-frame", True)
+        self.mtime = options.get("mtime")
 
         ffmpeg = options.get("ffmpeg-location")
         self.ffmpeg = util.expand_path(ffmpeg) if ffmpeg else "ffmpeg"
@@ -130,6 +131,10 @@ class UgoiraPP(PostProcessor):
                                exc.__class__.__name__, exc)
                 pathfmt.realpath = pathfmt.temppath
             else:
+                if self.mtime:
+                    mtime = pathfmt.kwdict.get("_mtime")
+                    if mtime:
+                        util.set_mtime(pathfmt.realpath, mtime)
                 if self.delete:
                     pathfmt.delete = True
                 else:

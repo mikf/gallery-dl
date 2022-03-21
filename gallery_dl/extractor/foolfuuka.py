@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -122,19 +122,19 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
             "url": "d309713d2f838797096b3e9cb44fe514a9c9d07a",
         }),
         ("https://desuarchive.org/a/thread/159542679/", {
-            "url": "3ae1473f6916ac831efe5cc4d4e7d3298ce79406",
+            "url": "e7d624aded15a069194e38dc731ec23217a422fb",
         }),
         ("https://boards.fireden.net/sci/thread/11264294/", {
-            "url": "3adfe181ee86a8c23021c705f623b3657a9b0a43",
+            "url": "61cab625c95584a12a30049d054931d64f8d20aa",
         }),
         ("https://archive.nyafuu.org/c/thread/2849220/", {
             "url": "bbe6f82944a45e359f5c8daf53f565913dc13e4f",
         }),
         ("https://rbt.asia/g/thread/61487650/", {
-            "url": "61896d9d9a2edb556b619000a308a984307b6d30",
+            "url": "fadd274b25150a1bdf03a40c58db320fa3b617c4",
         }),
         ("https://archive.rebeccablacktech.com/g/thread/61487650/", {
-            "url": "61896d9d9a2edb556b619000a308a984307b6d30",
+            "url": "fadd274b25150a1bdf03a40c58db320fa3b617c4",
         }),
         ("https://thebarchive.com/b/thread/739772332/", {
             "url": "e8b18001307d130d67db31740ce57c8561b5d80c",
@@ -273,3 +273,47 @@ class FoolfuukaSearchExtractor(FoolfuukaExtractor):
             if len(posts) <= 3:
                 return
             params["page"] += 1
+
+
+class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
+    """Base extractor for FoolFuuka galleries"""
+    subcategory = "gallery"
+    directory_fmt = ("{category}", "{board}", "gallery")
+    pattern = BASE_PATTERN + r"/([^/?#]+)/gallery(?:/(\d+))?"
+    test = (
+        ("https://archive.4plebs.org/tg/gallery/1"),
+        ("https://archived.moe/gd/gallery/2"),
+        ("https://archiveofsins.com/h/gallery/3"),
+        ("https://arch.b4k.co/meta/gallery/"),
+        ("https://desuarchive.org/a/gallery/5"),
+        ("https://boards.fireden.net/sci/gallery/6"),
+        ("https://archive.nyafuu.org/c/gallery/7"),
+        ("https://rbt.asia/g/gallery/8"),
+        ("https://thebarchive.com/b/gallery/9"),
+        ("https://archive.wakarimasen.moe/a/gallery/10"),
+    )
+
+    def __init__(self, match):
+        FoolfuukaExtractor.__init__(self, match)
+
+        board = match.group(match.lastindex)
+        if board.isdecimal():
+            self.board = match.group(match.lastindex-1)
+            self.pages = (board,)
+        else:
+            self.board = board
+            self.pages = map(format, itertools.count(1))
+
+    def metadata(self):
+        return {"board": self.board}
+
+    def posts(self):
+        base = "{}/_/api/chan/gallery/?board={}&page=".format(
+            self.root, self.board)
+
+        for page in self.pages:
+            with self.request(base + page) as response:
+                posts = response.json()
+            if not posts:
+                return
+            yield from posts

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -115,6 +115,13 @@ def main():
             config.load(args.cfgfiles, strict=True)
         if args.yamlfiles:
             config.load(args.yamlfiles, strict=True, fmt="yaml")
+        if args.filename:
+            if args.filename == "/O":
+                args.filename = "{filename}.{extension}"
+            config.set((), "filename", args.filename)
+        if args.directory:
+            config.set((), "base-directory", args.directory)
+            config.set((), "directory", ())
         if args.postprocessors:
             config.set((), "postprocessors", args.postprocessors)
         if args.abort:
@@ -124,9 +131,24 @@ def main():
         for opts in args.options:
             config.set(*opts)
 
+        # signals
+        signals = config.get((), "signals-ignore")
+        if signals:
+            import signal
+            if isinstance(signals, str):
+                signals = signals.split(",")
+            for signal_name in signals:
+                signal_num = getattr(signal, signal_name, None)
+                if signal_num is None:
+                    log.warning("signal '%s' is not defined", signal_name)
+                else:
+                    signal.signal(signal_num, signal.SIG_IGN)
+
         # extractor modules
         modules = config.get(("extractor",), "modules")
         if modules is not None:
+            if isinstance(modules, str):
+                modules = modules.split(",")
             extractor.modules = modules
             extractor._module_iter = iter(modules)
 
@@ -140,20 +162,23 @@ def main():
             import os.path
             import requests
 
-            head = ""
-            try:
-                out, err = subprocess.Popen(
-                    ("git", "rev-parse", "--short", "HEAD"),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    cwd=os.path.dirname(os.path.abspath(__file__)),
-                ).communicate()
-                if out and not err:
-                    head = " - Git HEAD: " + out.decode().rstrip()
-            except (OSError, subprocess.SubprocessError):
-                pass
+            extra = ""
+            if getattr(sys, "frozen", False):
+                extra = " - Executable"
+            else:
+                try:
+                    out, err = subprocess.Popen(
+                        ("git", "rev-parse", "--short", "HEAD"),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        cwd=os.path.dirname(os.path.abspath(__file__)),
+                    ).communicate()
+                    if out and not err:
+                        extra = " - Git HEAD: " + out.decode().rstrip()
+                except (OSError, subprocess.SubprocessError):
+                    pass
 
-            log.debug("Version %s%s", __version__, head)
+            log.debug("Version %s%s", __version__, extra)
             log.debug("Python %s - %s",
                       platform.python_version(), platform.platform())
             try:

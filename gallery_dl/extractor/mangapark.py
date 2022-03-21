@@ -66,7 +66,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
         (("https://mangapark.net/manga"
           "/gekkan-shoujo-nozaki-kun/i2067426/v7/c70/1"), {
             "count": 15,
-            "keyword": "8f18f1c977ebe049ef35e3a877eaaab97fb25274",
+            "keyword": "edc14993c4752cee3a76e09b2f024d40d854bfd1",
         }),
         ("https://mangapark.me/manga/gosu/i811615/c55/1"),
         ("https://mangapark.com/manga/gosu/i811615/c55/1"),
