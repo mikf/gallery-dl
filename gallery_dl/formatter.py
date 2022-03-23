@@ -254,7 +254,7 @@ def parse_format_spec(format_spec, conversion):
             "C": string.capwords,
             "j": json.dumps,
             "t": str.strip,
-            "T": util.to_timestamp,
+            "T": util.datetime_to_timestamp_string,
             "d": text.parse_timestamp,
             "U": text.unescape,
             "S": util.to_string,

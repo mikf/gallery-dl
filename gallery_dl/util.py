@@ -173,8 +173,13 @@ def to_string(value):
     return str(value)
 
 
-def to_timestamp(dt):
-    """Convert naive datetime to UTC timestamp string"""
+def datetime_to_timestamp(dt):
+    """Convert naive UTC datetime to timestamp"""
+    return (dt - EPOCH) / SECOND
+
+
+def datetime_to_timestamp_string(dt):
+    """Convert naive UTC datetime to timestamp string"""
     try:
         return str((dt - EPOCH) // SECOND)
     except Exception:

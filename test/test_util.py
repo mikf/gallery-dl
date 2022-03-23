@@ -537,7 +537,16 @@ class TestOther(unittest.TestCase):
         self.assertEqual(f(["a", "b", "c"]), "a, b, c")
         self.assertEqual(f([1, 2, 3]), "1, 2, 3")
 
-    def test_to_timestamp(self, f=util.to_timestamp):
+    def test_datetime_to_timestamp(self, f=util.datetime_to_timestamp):
+        self.assertEqual(f(util.EPOCH), 0.0)
+        self.assertEqual(f(datetime.datetime(2010, 1, 1)), 1262304000.0)
+        self.assertEqual(f(datetime.datetime(2010, 1, 1, 0, 0, 0, 128000)),
+                         1262304000.128000)
+        with self.assertRaises(TypeError):
+            f(None)
+
+    def test_datetime_to_timestamp_string(
+            self, f=util.datetime_to_timestamp_string):
         self.assertEqual(f(util.EPOCH), "0")
         self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
         self.assertEqual(f(None), "")
