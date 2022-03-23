@@ -121,8 +121,13 @@ class HttpDownloader(DownloaderBase):
             try:
                 response = self.session.request(
                     kwdict.get("_http_method", "GET"), url,
-                    stream=True, headers=headers, timeout=self.timeout,
-                    verify=self.verify, proxies=self.proxies)
+                    stream=True,
+                    headers=headers,
+                    data=kwdict.get("_http_data"),
+                    timeout=self.timeout,
+                    proxies=self.proxies,
+                    verify=self.verify,
+                )
             except (ConnectionError, Timeout) as exc:
                 msg = str(exc)
                 continue
