@@ -123,6 +123,7 @@ modules = [
     "slideshare",
     "smugmug",
     "speakerdeck",
+    "stocksnap",
     "subscribestar",
     "tapas",
     "toyhouse",
