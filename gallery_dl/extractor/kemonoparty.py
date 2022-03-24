@@ -42,6 +42,7 @@ class KemonopartyExtractor(Extractor):
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
         find_hash = re.compile("/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})").match
         generators = self._build_file_generators(self.config("files"))
+        duplicates = self.config("duplicates")
         comments = self.config("comments")
         username = dms = None
 
@@ -84,7 +85,7 @@ class KemonopartyExtractor(Extractor):
                 match = find_hash(url)
                 if match:
                     post["hash"] = hash = match.group(1)
-                    if hash in hashes:
+                    if hash in hashes and not duplicates:
                         self.log.debug("Skipping %s (duplicate)", url)
                         continue
                     hashes.add(hash)
@@ -273,6 +274,11 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         ("https://kemono.party/patreon/user/4158582/post/32099982", {
             "count": 2,
         }),
+        # allow duplicates (#2440)
+        ("https://kemono.party/patreon/user/4158582/post/32099982", {
+            "options": (("duplicates", True),),
+            "count": 3,
+        }),
         # DMs (#2008)
         ("https://kemono.party/patreon/user/34134344/post/38129255", {
             "options": (("dms", True),),
@@ -323,8 +329,9 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
         }),
         (("https://kemono.party/discord"
           "/server/256559665620451329/channel/462437519519383555#"), {
-            "pattern": r"https://kemono\.party/data/attachments/discord"
-                       r"/256559665620451329/\d+/\d+/.+",
+            "pattern": r"https://kemono\.party/data/("
+                       r"e3/77/e377e3525164559484ace2e64425b0cec1db08.*\.png|"
+                       r"51/45/51453640a5e0a4d23fbf57fb85390f9c5ec154.*\.gif)",
             "count": ">= 2",
         }),
         # 'inline' files
