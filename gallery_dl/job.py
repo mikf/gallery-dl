@@ -532,6 +532,10 @@ class SimulationJob(DownloadJob):
 class KeywordJob(Job):
     """Print available keywords"""
 
+    def __init__(self, url, parent=None):
+        Job.__init__(self, url, parent)
+        self.private = config.get(("output",), "private")
+
     def handle_url(self, url, kwdict):
         print("\nKeywords for filenames and --filter:")
         print("------------------------------------")
@@ -569,21 +573,20 @@ class KeywordJob(Job):
                 KeywordJob(extr or url, self).run()
         raise exception.StopExtraction()
 
-    @staticmethod
-    def print_kwdict(kwdict, prefix=""):
+    def print_kwdict(self, kwdict, prefix=""):
         """Print key-value pairs in 'kwdict' with formatting"""
         suffix = "]" if prefix else ""
         for key, value in sorted(kwdict.items()):
-            if key[0] == "_":
+            if key[0] == "_" and not self.private:
                 continue
             key = prefix + key + suffix
 
             if isinstance(value, dict):
-                KeywordJob.print_kwdict(value, key + "[")
+                self.print_kwdict(value, key + "[")
 
             elif isinstance(value, list):
                 if value and isinstance(value[0], dict):
-                    KeywordJob.print_kwdict(value[0], key + "[][")
+                    self.print_kwdict(value[0], key + "[][")
                 else:
                     print(key, "[]", sep="")
                     for val in value:
