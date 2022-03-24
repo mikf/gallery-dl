@@ -1424,6 +1424,19 @@ Description
     Extract ``comments`` metadata.
 
 
+extractor.kemonoparty.duplicates
+--------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Controls how to handle duplicate files in a post.
+
+    * ``true``: Download duplicates
+    * ``false``: Ignore duplicates
+
+
 extractor.kemonoparty.dms
 -------------------------
 Type
