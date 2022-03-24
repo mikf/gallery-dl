@@ -2792,16 +2792,6 @@ Output Options
 ==============
 
 
-output.fallback
----------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Include fallback URLs in the output of ``-g/--get-urls``.
-
-
 output.mode
 -----------
 Type
@@ -2840,6 +2830,28 @@ Default
     ``true``
 Description
     Show skipped file downloads.
+
+
+output.fallback
+---------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include fallback URLs in the output of ``-g/--get-urls``.
+
+
+output.private
+--------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Include private fields,
+    i.e. fields whose name starts with an underscore,
+    in the output of ``-K/--list-keywords`` and ``-j/--dump-json``.
 
 
 output.progress
