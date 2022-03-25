@@ -3250,11 +3250,13 @@ ugoira.ffmpeg-demuxer
 Type
     ``string``
 Default
-    ``image2``
+    ``concat``
 Description
-    FFmpeg demuxer to read input files with. Possible values are
-    "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" and
-    "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_".
+    FFmpeg demuxer to read and process input files with. Possible values are
+
+    * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes)
+    * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, not usable on Windows)
+    * "mkvmerge" (accurate timecodes, only WebM or MKV, requires `mkvmerge <ugoira.mkvmerge-location_>`__)
 
 
 ugoira.ffmpeg-location
@@ -3265,6 +3267,17 @@ Default
     ``"ffmpeg"``
 Description
     Location of the ``ffmpeg`` (or ``avconv``) executable to use.
+
+
+ugoira.mkvmerge-location
+------------------------
+Type
+    |Path|_
+Default
+    ``"mkvmerge"``
+Description
+    Location of the ``mkvmerge`` executable for use with the
+    `mkvmerge demuxer <ugoira.ffmpeg-demuxer_>`__.
 
 
 ugoira.ffmpeg-output
