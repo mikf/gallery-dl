@@ -10,11 +10,19 @@
 
 from .common import PostProcessor
 from .. import util
-import collections
 import subprocess
 import tempfile
 import zipfile
+import shutil
 import os
+
+try:
+    from math import gcd
+except ImportError:
+    def gcd(a, b):
+        while b:
+            a, b = b, a % b
+        return a
 
 
 class UgoiraPP(PostProcessor):
@@ -151,10 +159,26 @@ class UgoiraPP(PostProcessor):
 
     def _process_image2(self, pathfmt, tempdir):
         tempdir += "/"
+        frames = self._frames
+
+        # add extra frame if necessary
+        if self.repeat and not self._delay_is_uniform(frames):
+            last = frames[-1]
+            delay_gcd = self._delay_gcd(frames)
+            if last["delay"] - delay_gcd > 0:
+                last["delay"] -= delay_gcd
+
+                self.log.debug("non-uniform delays; inserting extra frame")
+                last_copy = last.copy()
+                frames.append(last_copy)
+                name, _, ext = last_copy["file"].rpartition(".")
+                last_copy["file"] = "{:>06}.{}".format(int(name)+1, ext)
+                shutil.copyfile(tempdir + last["file"],
+                                tempdir + last_copy["file"])
 
         # adjust frame mtime values
         ts = 0
-        for frame in self._frames:
+        for frame in frames:
             os.utime(tempdir + frame["file"], ns=(ts, ts))
             ts += frame["delay"] * 1000000
 
@@ -228,11 +252,26 @@ class UgoiraPP(PostProcessor):
             file.write("\n".join(content))
         return timecodes
 
+    def calculate_framerate(self, frames):
+        uniform = self._delay_is_uniform(frames)
+        if uniform:
+            return ("1000/{}".format(frames[0]["delay"]), None)
+        return (None, "1000/{}".format(self._delay_gcd(frames)))
+
     @staticmethod
-    def calculate_framerate(framelist):
-        counter = collections.Counter(frame["delay"] for frame in framelist)
-        fps = "1000/{}".format(min(counter))
-        return (fps, None) if len(counter) == 1 else (None, fps)
+    def _delay_gcd(frames):
+        result = frames[0]["delay"]
+        for f in frames:
+            result = gcd(result, f["delay"])
+        return result
+
+    @staticmethod
+    def _delay_is_uniform(frames):
+        delay = frames[0]["delay"]
+        for f in frames:
+            if f["delay"] != delay:
+                return False
+        return True
 
 
 __postprocessor__ = UgoiraPP
