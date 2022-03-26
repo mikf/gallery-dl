@@ -3239,13 +3239,16 @@ ugoira.ffmpeg-demuxer
 Type
     ``string``
 Default
-    ``concat``
+    ``auto``
 Description
     FFmpeg demuxer to read and process input files with. Possible values are
 
     * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes)
     * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, not usable on Windows)
     * "mkvmerge" (accurate timecodes, only WebM or MKV, requires `mkvmerge <ugoira.mkvmerge-location_>`__)
+
+    `"auto"` will select `mkvmerge` if possible and fall back to `image2` or
+    `concat` depending on the local operating system.
 
 
 ugoira.ffmpeg-location

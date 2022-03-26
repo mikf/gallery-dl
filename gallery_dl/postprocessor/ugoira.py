@@ -43,23 +43,28 @@ class UgoiraPP(PostProcessor):
         mkvmerge = options.get("mkvmerge-location")
         self.mkvmerge = util.expand_path(mkvmerge) if mkvmerge else "mkvmerge"
 
-        rate = options.get("framerate", "auto")
-        if rate != "auto":
-            self.calculate_framerate = lambda _: (None, rate)
-
         demuxer = options.get("ffmpeg-demuxer")
-        if demuxer == "image2":
-            self._process = self._process_image2
-            self._finalize = None
-            self.log.debug("using image2 demuxer")
-        elif demuxer == "mkvmerge":
+        if demuxer is None or demuxer == "auto":
+            if self.extension in ("webm", "mkv") and (
+                    mkvmerge or shutil.which("mkvmerge")):
+                demuxer = "mkvmerge"
+            else:
+                demuxer = "concat" if util.WINDOWS else "image2"
+
+        if demuxer == "mkvmerge":
             self._process = self._process_mkvmerge
             self._finalize = self._finalize_mkvmerge
-            self.log.debug("using image2+mkvmerge demuxer")
+        elif demuxer == "image2":
+            self._process = self._process_image2
+            self._finalize = None
         else:
             self._process = self._process_concat
             self._finalize = None
-            self.log.debug("using concat demuxer")
+        self.log.debug("using %s demuxer", demuxer)
+
+        rate = options.get("framerate", "auto")
+        if rate != "auto":
+            self.calculate_framerate = lambda _: (None, rate)
 
         if options.get("libx264-prevent-odd", True):
             # get last video-codec argument
