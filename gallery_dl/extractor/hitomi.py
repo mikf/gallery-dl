@@ -28,8 +28,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
         ("https://hitomi.la/galleries/867789.html", {
             "pattern": r"https://[a-c]a\.hitomi\.la/webp/\d+/\d+"
                        r"/[0-9a-f]{64}\.webp",
-            "keyword": "4b584d09d535694d7d757c47daf5c15d116420d2",
-            "options": (("metadata", True),),
+            "keyword": "86af5371f38117a07407f11af689bdd460b09710",
             "count": 16,
         }),
         # download test
@@ -77,23 +76,18 @@ class HitomiGalleryExtractor(GalleryExtractor):
 
     def metadata(self, page):
         self.info = info = json.loads(page.partition("=")[2])
+        iget = info.get
 
-        data = self._data_from_gallery_info(info)
-        if self.config("metadata", False):
-            data.update(self._data_from_gallery_page(info))
-        return data
-
-    def _data_from_gallery_info(self, info):
-        language = info.get("language")
+        language = iget("language")
         if language:
             language = language.capitalize()
 
-        date = info.get("date")
+        date = iget("date")
         if date:
             date += ":00"
 
         tags = []
-        for tinfo in info.get("tags") or ():
+        for tinfo in iget("tags") or ():
             tag = string.capwords(tinfo["tag"])
             if tinfo.get("female"):
                 tag += " ♀"
@@ -109,35 +103,10 @@ class HitomiGalleryExtractor(GalleryExtractor):
             "lang"      : util.language_to_code(language),
             "date"      : text.parse_datetime(date, "%Y-%m-%d %H:%M:%S%z"),
             "tags"      : tags,
-        }
-
-    def _data_from_gallery_page(self, info):
-        url = "{}/galleries/{}.html".format(self.root, info["id"])
-
-        # follow redirects
-        while True:
-            response = self.request(url, fatal=False)
-            if b"<title>Redirect</title>" not in response.content:
-                break
-            url = text.extract(
-                response.text, 'http-equiv="refresh" content="', '"',
-            )[0].partition("=")[2]
-
-        if response.status_code >= 400:
-            return {}
-
-        def prep(value):
-            return [
-                text.unescape(string.capwords(v))
-                for v in text.extract_iter(value or "", '.html">', '<')
-            ]
-
-        extr = text.extract_from(response.text)
-        return {
-            "artist"    : prep(extr('<h2>', '</h2>')),
-            "group"     : prep(extr('<td>Group</td><td>', '</td>')),
-            "parody"    : prep(extr('<td>Series</td><td>', '</td>')),
-            "characters": prep(extr('<td>Characters</td><td>', '</td>')),
+            "artist"    : [o["artist"] for o in iget("artists") or ()],
+            "group"     : [o["group"] for o in iget("groups") or ()],
+            "parody"    : [o["parody"] for o in iget("parodys") or ()],
+            "characters": [o["character"] for o in iget("characters") or ()]
         }
 
     def images(self, _):
