@@ -1336,17 +1336,6 @@ Description
     but is most likely going to fail with ``403 Forbidden`` errors.
 
 
-extractor.hitomi.metadata
--------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Try to extract
-    ``artist``, ``group``, ``parody``,  and ``characters`` metadata.
-
-
 extractor.imgur.mp4
 -------------------
 Type
