@@ -220,7 +220,7 @@ class UgoiraPP(PostProcessor):
         ]
         if self.extension == "webm":
             args.append("--webm")
-        args.append(pathfmt.realpath)
+        args += ("=", pathfmt.realpath)
 
         pathfmt.realpath = self._realpath
         self._exec(args)
