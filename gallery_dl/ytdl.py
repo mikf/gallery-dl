@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -46,8 +46,6 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
 
     if opts.get("format") is None:
         opts["format"] = config("format")
-    if opts.get("proxy") is None:
-        opts["proxy"] = obj.session.proxies.get("http")
     if opts.get("nopart") is None:
         opts["nopart"] = not config("part", True)
     if opts.get("updatetime") is None:

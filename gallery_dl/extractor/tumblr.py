@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -400,6 +400,15 @@ class TumblrAPI(oauth.OAuth1API):
                 t = (datetime.now() + timedelta(seconds=float(reset))).time()
 
                 self.log.error("Daily API rate limit exceeded")
+
+                api_key = self.api_key or self.session.auth.consumer_key
+                if api_key == self.API_KEY:
+                    self.log.info("Register your own OAuth application and "
+                                  "use its credentials to prevent this error: "
+                                  "https://github.com/mikf/gallery-dl/blob/mas"
+                                  "ter/docs/configuration.rst#extractortumblra"
+                                  "pi-key--api-secret")
+
                 raise exception.StopExtraction(
                     "Aborting - Rate limit will reset at %s",
                     "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second))

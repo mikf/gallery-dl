@@ -386,6 +386,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Kiss Goddess</td>
+    <td>https://kissgoddess.com/</td>
+    <td>Galleries, Models</td>
+    <td></td>
+</tr>
+<tr>
     <td>Kohlchan</td>
     <td>https://kohlchan.net/</td>
     <td>Boards, Threads</td>
@@ -470,6 +476,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>meme.museum</td>
+    <td>https://meme.museum/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>My Hentai Gallery</td>
     <td>https://myhentaigallery.com/</td>
     <td>Galleries</td>
@@ -509,7 +521,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Niconico Seiga</td>
     <td>https://seiga.nicovideo.jp/</td>
     <td>individual Images, User Profiles</td>
-    <td>Required</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
     <td>nijie</td>
@@ -734,6 +746,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Toyhouse</td>
+    <td>https://toyhou.se/</td>
+    <td>Art, individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Tsumino</td>
     <td>https://www.tsumino.com/</td>
     <td>Galleries, Search Results</td>
@@ -755,6 +773,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Turboimagehost</td>
     <td>https://www.turboimagehost.com/</td>
     <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Twibooru</td>
+    <td>https://twibooru.org/</td>
+    <td>Galleries, Posts, Search Results</td>
     <td></td>
 </tr>
 <tr>

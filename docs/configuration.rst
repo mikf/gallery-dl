@@ -356,7 +356,6 @@ Description
     Specifying a username and password is required for
 
     * ``nijie``
-    * ``seiga``
 
     and optional for
 
@@ -476,6 +475,7 @@ Description
 
     | Can be either a simple ``string`` with just the local IP address
     | or a ``list`` with IP and explicit port number as elements.
+
 
 extractor.*.user-agent
 ----------------------
@@ -599,7 +599,9 @@ Description
     memory requirements are significantly lower when the
     amount of stored IDs gets reasonably large.
 
-    Note: archive paths support regular `format string`_ replacements,
+    Note: Archive files that do not already exist get generated automatically.
+
+    Note: Archive paths support regular `format string`_ replacements,
     but be aware that using external inputs for building local paths
     may pose a security risk.
 
@@ -1334,17 +1336,6 @@ Description
     but is most likely going to fail with ``403 Forbidden`` errors.
 
 
-extractor.hitomi.metadata
--------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Try to extract
-    ``artist``, ``group``, ``parody``,  and ``characters`` metadata.
-
-
 extractor.imgur.mp4
 -------------------
 Type
@@ -1392,6 +1383,16 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.instagram.previews
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download video previews.
+
+
 extractor.instagram.videos
 --------------------------
 Type
@@ -1410,6 +1411,19 @@ Default
     ``false``
 Description
     Extract ``comments`` metadata.
+
+
+extractor.kemonoparty.duplicates
+--------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Controls how to handle duplicate files in a post.
+
+    * ``true``: Download duplicates
+    * ``false``: Ignore duplicates
 
 
 extractor.kemonoparty.dms
@@ -1661,12 +1675,12 @@ extractor.patreon.files
 Type
     ``list`` of ``strings``
 Default
-    ``["images", "attachments", "postfile", "content"]``
+    ``["images", "image_large", "attachments", "postfile", "content"]``
 Description
     Determines the type and order of files to be downloaded.
 
     Available types are
-    ``postfile``, ``images``, ``attachments``, and ``content``.
+    ``postfile``, ``images``, ``image_large``, ``attachments``, and ``content``.
 
 
 extractor.photobucket.subalbums
@@ -1979,6 +1993,16 @@ Description
     Download videos.
 
 
+extractor.skeb.sent-requests
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download sent requests.
+
+
 extractor.skeb.thumbnails
 -------------------------
 Type
@@ -2068,6 +2092,32 @@ Description
     ``video``, ``audio``, ``photo``, ``chat``.
 
     You can use ``"all"`` instead of listing all types separately.
+
+
+extractor.twibooru.api-key
+--------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Your `Twibooru API Key <https://twibooru.org/users/edit>`__,
+    to use your account's browsing settings and filters.
+
+
+extractor.twibooru.filter
+-------------------------
+Type
+    ``integer``
+Default
+    ``2`` (`Everything <https://twibooru.org/filters/2>`__ filter)
+Description
+    The content filter ID to use.
+
+    Setting an explicit filter ID overrides any default filters and can be used
+    to access 18+ content without `API Key <extractor.twibooru.api-key_>`__.
+
+    See `Filters <https://twibooru.org/filters>`__ for details.
 
 
 extractor.twitter.cards
@@ -2227,17 +2277,6 @@ Description
     * ``true``: Download videos
     * ``"ytdl"``: Download videos using `youtube-dl`_
     * ``false``: Skip video Tweets
-
-
-extractor.twitter.warnings
---------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Emit `logging messages <output.log_>`_
-    for non-fatal errors reported by Twitter's API.
 
 
 extractor.unsplash.format
@@ -2594,6 +2633,17 @@ Description
     Certificate validation during file downloads.
 
 
+downloader.*.proxy
+------------------
+Type
+    ``string`` or ``object``
+Default
+    `extractor.*.proxy`_
+Description
+    | Proxy server used for file downloads.
+    | Disable the use of a proxy by explicitly setting this option to ``null``.
+
+
 downloader.http.adjust-extensions
 ---------------------------------
 Type
@@ -2731,16 +2781,6 @@ Output Options
 ==============
 
 
-output.fallback
----------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Include fallback URLs in the output of ``-g/--get-urls``.
-
-
 output.mode
 -----------
 Type
@@ -2779,6 +2819,28 @@ Default
     ``true``
 Description
     Show skipped file downloads.
+
+
+output.fallback
+---------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include fallback URLs in the output of ``-g/--get-urls``.
+
+
+output.private
+--------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Include private fields,
+    i.e. fields whose name starts with an underscore,
+    in the output of ``-K/--list-keywords`` and ``-j/--dump-json``.
 
 
 output.progress
@@ -3093,6 +3155,50 @@ Description
     Note: Only applies for ``"mode": "custom"``.
 
 
+metadata.archive
+----------------
+Type
+    |Path|_
+Description
+    File to store IDs of generated metadata files in,
+    similar to `extractor.*.archive`_.
+
+    ``archive-format`` and ``archive-prefix`` options,
+    akin to `extractor.*.archive-format`_ and `extractor.*.archive-prefix`_,
+    are supported as well.
+
+
+metadata.mtime
+--------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Set modification times of generated metadata files
+    according to the accompanying downloaded file.
+
+    Enabling this option will only have an effect
+    *if* there is actual ``mtime`` metadata available, that is
+
+    * after a file download (``"event": "file"`` (default), ``"event": "after"``)
+    * when running *after* an ``mtime`` post processes for the same `event <metadata.event_>`__
+
+    For example, a ``metadata`` post processor for ``"event": "post"`` will
+    *not* be able to set its file's modification time unless an ``mtime``
+    post processor with ``"event": "post"`` runs *before* it.
+
+
+mtime.event
+-----------
+Type
+    ``string``
+Default
+    ``"file"``
+Description
+    See `metadata.event`_
+
+
 mtime.key
 ---------
 Type
@@ -3133,11 +3239,16 @@ ugoira.ffmpeg-demuxer
 Type
     ``string``
 Default
-    ``image2``
+    ``auto``
 Description
-    FFmpeg demuxer to read input files with. Possible values are
-    "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" and
-    "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_".
+    FFmpeg demuxer to read and process input files with. Possible values are
+
+    * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes)
+    * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, not usable on Windows)
+    * "mkvmerge" (accurate timecodes, only WebM or MKV, requires `mkvmerge <ugoira.mkvmerge-location_>`__)
+
+    `"auto"` will select `mkvmerge` if possible and fall back to `image2` or
+    `concat` depending on the local operating system.
 
 
 ugoira.ffmpeg-location
@@ -3148,6 +3259,17 @@ Default
     ``"ffmpeg"``
 Description
     Location of the ``ffmpeg`` (or ``avconv``) executable to use.
+
+
+ugoira.mkvmerge-location
+------------------------
+Type
+    |Path|_
+Default
+    ``"mkvmerge"``
+Description
+    Location of the ``mkvmerge`` executable for use with the
+    `mkvmerge demuxer <ugoira.ffmpeg-demuxer_>`__.
 
 
 ugoira.ffmpeg-output
@@ -3212,6 +3334,16 @@ Description
     adds ``["-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)"]``
     to the list of FFmpeg command-line arguments
     to reduce an odd width/height by 1 pixel and make them even.
+
+
+ugoira.mtime
+------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Set modification times of generated ugoira aniomations.
 
 
 ugoira.repeat-last-frame

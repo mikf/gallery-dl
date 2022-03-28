@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -1004,6 +1004,7 @@ class DeviantartOAuthAPI():
         self.extractor = extractor
         self.log = extractor.log
         self.headers = {"dA-minor-version": "20200519"}
+        self._warn_429 = True
 
         self.delay = extractor.config("wait-min", 0)
         self.delay_min = max(2, self.delay)
@@ -1260,6 +1261,16 @@ class DeviantartOAuthAPI():
                 if self.delay < 30:
                     self.delay += 1
                 self.log.warning("%s. Using %ds delay.", msg, self.delay)
+
+                if self._warn_429 and self.delay >= 3:
+                    self._warn_429 = False
+                    if self.client_id == self.CLIENT_ID:
+                        self.log.info(
+                            "Register your own OAuth application and use its "
+                            "credentials to prevent this error: "
+                            "https://github.com/mikf/gallery-dl/blob/master/do"
+                            "cs/configuration.rst#extractordeviantartclient-id"
+                            "--client-secret")
             else:
                 self.log.error(msg)
                 return data

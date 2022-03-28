@@ -58,6 +58,7 @@ CATEGORY_MAP = {
     "joyreactor"     : "JoyReactor",
     "kabeuchi"       : "かべうち",
     "kireicake"      : "Kirei Cake",
+    "kissgoddess"    : "Kiss Goddess",
     "lineblog"       : "LINE BLOG",
     "livedoor"       : "livedoor Blog",
     "omgmiamiswimwear": "Omg Miami Swimwear",
@@ -69,6 +70,7 @@ CATEGORY_MAP = {
     "mangapark"      : "MangaPark",
     "mangasee"       : "MangaSee",
     "mastodon.social": "mastodon.social",
+    "mememuseum"     : "meme.museum",
     "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
     "naverwebtoon"   : "NaverWebtoon",
@@ -121,12 +123,15 @@ CATEGORY_MAP = {
 }
 
 SUBCATEGORY_MAP = {
+    "art"    : "Art",
+    "audio"  : "Audio",
     "doujin" : "Doujin",
     "gallery": "Galleries",
     "image"  : "individual Images",
     "index"  : "Site Index",
     "issue"  : "Comic Issues",
     "manga"  : "Manga",
+    "media"  : "Media Files",
     "popular": "Popular Images",
     "recent" : "Recent Images",
     "search" : "Search Results",
@@ -171,11 +176,6 @@ SUBCATEGORY_MAP = {
     },
     "mangadex": {
         "feed" : "Followed Feed",
-    },
-    "newgrounds": {
-        "art"  : "Art",
-        "audio": "Audio",
-        "media": "Media Files",
     },
     "pinterest": {
         "board": "",
@@ -266,7 +266,7 @@ AUTH_MAP = {
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
-    "seiga"          : "Required",
+    "seiga"          : _COOKIES,
     "seisoparty"     : "Supported",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",

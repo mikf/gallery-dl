@@ -389,8 +389,10 @@ class DownloadJob(Job):
 
     def initialize(self, kwdict=None):
         """Delayed initialization of PathFormat, etc."""
-        cfg = self.extractor.config
-        pathfmt = self.pathfmt = path.PathFormat(self.extractor)
+        extr = self.extractor
+        cfg = extr.config
+
+        pathfmt = self.pathfmt = path.PathFormat(extr)
         if kwdict:
             pathfmt.set_directory(kwdict)
 
@@ -403,17 +405,18 @@ class DownloadJob(Job):
         archive = cfg("archive")
         if archive:
             archive = util.expand_path(archive)
+            archive_format = (cfg("archive-prefix", extr.category) +
+                              cfg("archive-format", extr.archive_fmt))
             try:
                 if "{" in archive:
                     archive = formatter.parse(archive).format_map(kwdict)
-                self.archive = util.DownloadArchive(archive, self.extractor)
+                self.archive = util.DownloadArchive(archive, archive_format)
             except Exception as exc:
-                self.extractor.log.warning(
+                extr.log.warning(
                     "Failed to open download archive at '%s' ('%s: %s')",
                     archive, exc.__class__.__name__, exc)
             else:
-                self.extractor.log.debug(
-                    "Using download archive '%s'", archive)
+                extr.log.debug("Using download archive '%s'", archive)
 
         skip = cfg("skip", True)
         if skip:
@@ -435,7 +438,7 @@ class DownloadJob(Job):
             if self.archive:
                 self.archive.check = pathfmt.exists
 
-        postprocessors = self.extractor.config_accumulate("postprocessors")
+        postprocessors = extr.config_accumulate("postprocessors")
         if postprocessors:
             self.hooks = collections.defaultdict(list)
             pp_log = self.get_logger("postprocessor")
@@ -453,7 +456,7 @@ class DownloadJob(Job):
                     clist = pp_dict.get("blacklist")
                     negate = True
                 if clist and not util.build_extractor_filter(
-                        clist, negate)(self.extractor):
+                        clist, negate)(extr):
                     continue
 
                 name = pp_dict.get("name")
@@ -471,8 +474,7 @@ class DownloadJob(Job):
                     pp_list.append(pp_obj)
 
             if pp_list:
-                self.extractor.log.debug(
-                    "Active postprocessor modules: %s", pp_list)
+                extr.log.debug("Active postprocessor modules: %s", pp_list)
                 if "init" in self.hooks:
                     for callback in self.hooks["init"]:
                         callback(pathfmt)
@@ -530,6 +532,10 @@ class SimulationJob(DownloadJob):
 class KeywordJob(Job):
     """Print available keywords"""
 
+    def __init__(self, url, parent=None):
+        Job.__init__(self, url, parent)
+        self.private = config.get(("output",), "private")
+
     def handle_url(self, url, kwdict):
         print("\nKeywords for filenames and --filter:")
         print("------------------------------------")
@@ -567,21 +573,20 @@ class KeywordJob(Job):
                 KeywordJob(extr or url, self).run()
         raise exception.StopExtraction()
 
-    @staticmethod
-    def print_kwdict(kwdict, prefix=""):
+    def print_kwdict(self, kwdict, prefix=""):
         """Print key-value pairs in 'kwdict' with formatting"""
         suffix = "]" if prefix else ""
         for key, value in sorted(kwdict.items()):
-            if key[0] == "_":
+            if key[0] == "_" and not self.private:
                 continue
             key = prefix + key + suffix
 
             if isinstance(value, dict):
-                KeywordJob.print_kwdict(value, key + "[")
+                self.print_kwdict(value, key + "[")
 
             elif isinstance(value, list):
                 if value and isinstance(value[0], dict):
-                    KeywordJob.print_kwdict(value[0], key + "[][")
+                    self.print_kwdict(value[0], key + "[][")
                 else:
                     print(key, "[]", sep="")
                     for val in value:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -189,6 +189,10 @@ class TestCookiesTxt(unittest.TestCase):
             [self._cookie("name", "", ".example.org")],
         )
         _assert(
+            "\tTRUE\t/\tTRUE\t\tname\t",
+            [self._cookie("name", "", "")],
+        )
+        _assert(
             "# Netscape HTTP Cookie File\n"
             "\n"
             "# default\n"
@@ -241,6 +245,8 @@ class TestCookiesTxt(unittest.TestCase):
                     "n4", ""  , "www.example.org", False, "/", False),
                 self._cookie(
                     "n5", "v5", "www.example.org", False, "/path", False, 100),
+                self._cookie(
+                    "n6", "v6", "", False),
             ],
             "# Netscape HTTP Cookie File\n"
             "\n"
@@ -531,7 +537,16 @@ class TestOther(unittest.TestCase):
         self.assertEqual(f(["a", "b", "c"]), "a, b, c")
         self.assertEqual(f([1, 2, 3]), "1, 2, 3")
 
-    def test_to_timestamp(self, f=util.to_timestamp):
+    def test_datetime_to_timestamp(self, f=util.datetime_to_timestamp):
+        self.assertEqual(f(util.EPOCH), 0.0)
+        self.assertEqual(f(datetime.datetime(2010, 1, 1)), 1262304000.0)
+        self.assertEqual(f(datetime.datetime(2010, 1, 1, 0, 0, 0, 128000)),
+                         1262304000.128000)
+        with self.assertRaises(TypeError):
+            f(None)
+
+    def test_datetime_to_timestamp_string(
+            self, f=util.datetime_to_timestamp_string):
         self.assertEqual(f(util.EPOCH), "0")
         self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
         self.assertEqual(f(None), "")

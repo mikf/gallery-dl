@@ -649,6 +649,10 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/i/web/status/1460044411165888515", {
             "count": 0,
         }),
+        # "Misleading" content
+        ("https://twitter.com/i/web/status/1486373748911575046", {
+            "count": 4,
+        }),
     )
 
     def __init__(self, match):
@@ -765,7 +769,7 @@ class TwitterAPI():
             "__fs_dont_mention_me_view_api_enabled": False,
         }
 
-        self._log_warnings = extractor.config("warnings")
+        self._nsfw_warning = True
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
         self._user = None
 
@@ -789,7 +793,7 @@ class TwitterAPI():
             self.headers["x-guest-token"] = guest_token
 
     def tweet_detail(self, tweet_id):
-        endpoint = "/graphql/aD0-HB47XIOxiBl5kTkX5Q/TweetDetail"
+        endpoint = "/graphql/ItejhtHVxU7ksltgMmyaLA/TweetDetail"
         variables = {
             "focalTweetId": tweet_id,
             "with_rux_injections": False,
@@ -801,7 +805,7 @@ class TwitterAPI():
             endpoint, variables, ("threaded_conversation_with_injections",))
 
     def user_tweets(self, screen_name):
-        endpoint = "/graphql/LNhjy8t3XpIrBYM-ms7sPQ/UserTweets"
+        endpoint = "/graphql/WZT7sCTrLvSOaWOXLDsWbQ/UserTweets"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -810,7 +814,7 @@ class TwitterAPI():
         return self._pagination_tweets(endpoint, variables)
 
     def user_tweets_and_replies(self, screen_name):
-        endpoint = "/graphql/Vg5aF036K40ST3FWvnvRGA/UserTweetsAndReplies"
+        endpoint = "/graphql/t4wEKVulW4Mbv1P0kgxTEw/UserTweetsAndReplies"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -819,7 +823,7 @@ class TwitterAPI():
         return self._pagination_tweets(endpoint, variables)
 
     def user_media(self, screen_name):
-        endpoint = "/graphql/Hl6C7ac051l_QBe3HjGz_A/UserMedia"
+        endpoint = "/graphql/nRybED9kRbN-TOWioHq1ng/UserMedia"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -827,7 +831,7 @@ class TwitterAPI():
         return self._pagination_tweets(endpoint, variables)
 
     def user_likes(self, screen_name):
-        endpoint = "/graphql/smISlRVSnz-GaU_XpU_akw/Likes"
+        endpoint = "/graphql/9MSTt44HoGjVFSg_u3rHDw/Likes"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -835,7 +839,7 @@ class TwitterAPI():
         return self._pagination_tweets(endpoint, variables)
 
     def user_bookmarks(self):
-        endpoint = "/graphql/yKNebSjZKbo2tOd-Qdc7Xg/Bookmarks"
+        endpoint = "/graphql/uKP9v_I31k0_VSBmlpq2Xg/Bookmarks"
         variables = {
             "count": 100,
         }
@@ -843,7 +847,7 @@ class TwitterAPI():
             endpoint, variables, ("bookmark_timeline", "timeline"))
 
     def list_latest_tweets_timeline(self, list_id):
-        endpoint = "/graphql/RxUL5UHi4Msxt_P9O1729w/ListLatestTweetsTimeline"
+        endpoint = "/graphql/z3l-EHlx-fyg8OvGO4JN8A/ListLatestTweetsTimeline"
         variables = {
             "listId": list_id,
             "count": 100,
@@ -889,7 +893,7 @@ class TwitterAPI():
             raise exception.NotFoundError("list")
 
     def list_members(self, list_id):
-        endpoint = "/graphql/kk9RQtSa2sc-4_9figZVBw/ListMembers"
+        endpoint = "/graphql/snESM0DPs3c7M1SBm4rvVw/ListMembers"
         variables = {
             "listId": list_id,
             "count": 100,
@@ -899,7 +903,7 @@ class TwitterAPI():
             endpoint, variables, ("list", "members_timeline", "timeline"))
 
     def user_following(self, screen_name):
-        endpoint = "/graphql/kz464_e4MAOXc3bGOA9kow/Following"
+        endpoint = "/graphql/mIwX8GogcobVlRwlgpHNYA/Following"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -961,20 +965,9 @@ class TwitterAPI():
             if csrf_token:
                 self.headers["x-csrf-token"] = csrf_token
 
-            data = response.json()
-            if "errors" in data:
-                try:
-                    errors = ", ".join(e["message"] for e in data["errors"])
-                except Exception:
-                    errors = data["errors"]
-            else:
-                errors = ""
-
             if response.status_code < 400:
                 # success
-                if errors and self._log_warnings:
-                    self.extractor.log.warning(errors)
-                return data
+                return response.json()
 
             if response.status_code == 429:
                 # rate limit exceeded
@@ -984,6 +977,14 @@ class TwitterAPI():
                 continue
 
             # error
+            try:
+                data = response.json()
+                errors = ", ".join(e["message"] for e in data["errors"])
+            except ValueError:
+                errors = response.text
+            except Exception:
+                errors = data.get("errors", "")
+
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, errors)
 
@@ -1151,6 +1152,10 @@ class TwitterAPI():
                     tweets.extend(entry["content"]["items"])
                 elif esw("conversationthread-"):
                     tweets.extend(entry["content"]["items"])
+                elif esw("tombstone-"):
+                    self._report_tombstone(
+                        entry,
+                        entry["content"]["itemContent"]["tombstoneInfo"])
                 elif esw("cursor-bottom-"):
                     cursor = entry["content"]
                     if not cursor.get("stopOnEmptyResponse", True):
@@ -1162,6 +1167,11 @@ class TwitterAPI():
                 try:
                     tweet = ((entry.get("content") or entry["item"])
                              ["itemContent"]["tweet_results"]["result"])
+                    if "tombstone" in tweet:
+                        self._report_tombstone(entry, tweet["tombstone"])
+                        continue
+                    if "tweet" in tweet:
+                        tweet = tweet["tweet"]
                     legacy = tweet["legacy"]
                 except KeyError:
                     extr.log.debug(
@@ -1248,3 +1258,11 @@ class TwitterAPI():
             if stop or not cursor or not entry:
                 return
             variables["cursor"] = cursor
+
+    def _report_tombstone(self, entry, tombstone):
+        text = (tombstone.get("richText") or tombstone["text"])["text"]
+        if text.startswith("Age-restricted") and self._nsfw_warning:
+            self.extractor.log.warning(text)
+            self._nsfw_warning = False
+        self.extractor.log.debug(
+            "Skipping %s (%s)", entry["entryId"].rpartition("-")[2], text)

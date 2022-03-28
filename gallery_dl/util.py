@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,6 +12,7 @@ import re
 import os
 import sys
 import json
+import time
 import random
 import sqlite3
 import binascii
@@ -20,6 +21,7 @@ import functools
 import itertools
 import urllib.parse
 from http.cookiejar import Cookie
+from email.utils import mktime_tz, parsedate_tz
 from . import text, exception
 
 
@@ -171,8 +173,13 @@ def to_string(value):
     return str(value)
 
 
-def to_timestamp(dt):
-    """Convert naive datetime to UTC timestamp string"""
+def datetime_to_timestamp(dt):
+    """Convert naive UTC datetime to timestamp"""
+    return (dt - EPOCH) / SECOND
+
+
+def datetime_to_timestamp_string(dt):
+    """Convert naive UTC datetime to timestamp string"""
     try:
         return str((dt - EPOCH) // SECOND)
     except Exception:
@@ -272,18 +279,27 @@ def remove_directory(path):
         pass
 
 
+def set_mtime(path, mtime):
+    try:
+        if isinstance(mtime, str):
+            mtime = mktime_tz(parsedate_tz(mtime))
+        os.utime(path, (time.time(), mtime))
+    except Exception:
+        pass
+
+
 def load_cookiestxt(fp):
     """Parse a Netscape cookies.txt file and return a list of its Cookies"""
     cookies = []
 
     for line in fp:
 
-        line = line.lstrip()
+        line = line.lstrip(" ")
         # strip '#HttpOnly_'
         if line.startswith("#HttpOnly_"):
             line = line[10:]
         # ignore empty lines and comments
-        if not line or line[0] in ("#", "$"):
+        if not line or line[0] in ("#", "$", "\n"):
             continue
         # strip trailing '\n'
         if line[-1] == "\n":
@@ -315,6 +331,9 @@ def save_cookiestxt(fp, cookies):
     fp.write("# Netscape HTTP Cookie File\n\n")
 
     for cookie in cookies:
+        if not cookie.domain:
+            continue
+
         if cookie.value is None:
             name = ""
             value = cookie.name
@@ -413,6 +432,7 @@ GLOBALS = {
     "parse_int": text.parse_int,
     "urlsplit" : urllib.parse.urlsplit,
     "datetime" : datetime.datetime,
+    "timedelta": datetime.timedelta,
     "abort"    : raises(exception.StopExtraction),
     "terminate": raises(exception.TerminateExtraction),
     "re"       : re,
@@ -508,6 +528,26 @@ def build_extractor_filter(categories, negate=True, special=None):
         return lambda extr: all(t(extr) for t in tests)
     else:
         return lambda extr: any(t(extr) for t in tests)
+
+
+def build_proxy_map(proxies, log=None):
+    """Generate a proxy map"""
+    if not proxies:
+        return None
+
+    if isinstance(proxies, str):
+        if "://" not in proxies:
+            proxies = "http://" + proxies.lstrip("/")
+        return {"http": proxies, "https": proxies}
+
+    if isinstance(proxies, dict):
+        for scheme, proxy in proxies.items():
+            if "://" not in proxy:
+                proxies[scheme] = "http://" + proxy.lstrip("/")
+        return proxies
+
+    if log:
+        log.warning("invalid proxy specifier: %s", proxies)
 
 
 def build_predicate(predicates):
@@ -637,11 +677,14 @@ class ExtendedUrl():
 
 class DownloadArchive():
 
-    def __init__(self, path, extractor):
+    def __init__(self, path, format_string, cache_key="_archive_key"):
         con = sqlite3.connect(path, timeout=60, check_same_thread=False)
         con.isolation_level = None
+
         self.close = con.close
         self.cursor = con.cursor()
+        self.keygen = format_string.format_map
+        self._cache_key = cache_key
 
         try:
             self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
@@ -650,20 +693,16 @@ class DownloadArchive():
             # fallback for missing WITHOUT ROWID support (#553)
             self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
                                 "(entry PRIMARY KEY)")
-        self.keygen = (
-            extractor.config("archive-prefix", extractor.category) +
-            extractor.config("archive-format", extractor.archive_fmt)
-        ).format_map
 
     def check(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""
-        key = kwdict["_archive_key"] = self.keygen(kwdict)
+        key = kwdict[self._cache_key] = self.keygen(kwdict)
         self.cursor.execute(
             "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
         return self.cursor.fetchone()
 
     def add(self, kwdict):
         """Add item described by 'kwdict' to archive"""
-        key = kwdict.get("_archive_key") or self.keygen(kwdict)
+        key = kwdict.get(self._cache_key) or self.keygen(kwdict)
         self.cursor.execute(
             "INSERT OR IGNORE INTO archive VALUES (?)", (key,))

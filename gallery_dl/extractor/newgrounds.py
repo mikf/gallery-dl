@@ -103,7 +103,7 @@ class NewgroundsExtractor(Extractor):
         }
 
     def extract_post(self, post_url):
-
+        url = post_url
         if "/art/view/" in post_url:
             extract_data = self._extract_image_data
         elif "/audio/listen/" in post_url:
@@ -111,18 +111,19 @@ class NewgroundsExtractor(Extractor):
         else:
             extract_data = self._extract_media_data
             if self.flash:
-                post_url += "/format/flash"
+                url += "/format/flash"
 
-        response = self.request(post_url, fatal=False)
+        response = self.request(url, fatal=False)
         if response.status_code >= 400:
             return {}
         page = response.text
         extr = text.extract_from(page)
         data = extract_data(extr, post_url)
 
-        data["_comment"] = extr('id="author_comments"', '</div>')
+        data["_comment"] = extr(
+            'id="author_comments"', '</div>').partition(">")[2]
         data["comment"] = text.unescape(text.remove_html(
-            data["_comment"].partition(">")[2], "", ""))
+            data["_comment"], "", ""))
         data["favorites"] = text.parse_int(extr(
             'id="faves_load">', '<').replace(",", ""))
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
@@ -134,6 +135,7 @@ class NewgroundsExtractor(Extractor):
 
         data["tags"].sort()
         data["user"] = self.user or data["artist"][0]
+        data["post_url"] = post_url
         return data
 
     @staticmethod
@@ -171,6 +173,7 @@ class NewgroundsExtractor(Extractor):
     def _extract_media_data(self, extr, url):
         index = url.split("/")[5]
         title = extr('"og:title" content="', '"')
+        descr = extr('"og:description" content="', '"')
         src = extr('{"url":"', '"')
 
         if src:
@@ -209,7 +212,7 @@ class NewgroundsExtractor(Extractor):
             "title"      : text.unescape(title),
             "url"        : src,
             "date"       : date,
-            "description": text.unescape(extr(
+            "description": text.unescape(descr or extr(
                 'itemprop="description" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
             "index"      : text.parse_int(index),
@@ -319,6 +322,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
                 "artist"     : ["kickinthehead", "danpaladin", "tomfulp"],
                 "comment"    : "re:My fan trailer for Alien Hominid HD!",
                 "date"       : "dt:2013-02-01 09:50:49",
+                "description": "Fan trailer for Alien Hominid HD!",
                 "favorites"  : int,
                 "filename"   : "564957_alternate_31",
                 "index"      : 595355,
