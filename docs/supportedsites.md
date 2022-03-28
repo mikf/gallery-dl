@@ -740,6 +740,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Telegraph</td>
+    <td>https://telegra.ph/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>Toyhouse</td>
     <td>https://toyhou.se/</td>
     <td>Art, individual Images</td>
