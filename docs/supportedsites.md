@@ -212,6 +212,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Gofile</td>
+    <td>https://gofile.io/</td>
+    <td>Folders</td>
+    <td></td>
+</tr>
+<tr>
     <td>HBrowse</td>
     <td>https://www.hbrowse.com/</td>
     <td>Chapters, Manga</td>

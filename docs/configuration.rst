@@ -1303,6 +1303,28 @@ Description
     restrict it to only one possible format.
 
 
+extractor.gofile.api-token
+--------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    API token value found at the bottom of your `profile page <https://gofile.io/myProfile>`__.
+
+    If not set, a temporary guest token will be used.
+
+
+extractor.gofile.recursive
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Recursively download files from subfolders.
+
+
 extractor.hentaifoundry.include
 -------------------------------
 Type
