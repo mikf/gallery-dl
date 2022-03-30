@@ -71,6 +71,24 @@ def unique_sequence(iterable):
             yield element
 
 
+def contains(values, elements):
+    """Returns True if at least one of 'elements' is contained in 'values'"""
+    if not isinstance(elements, (tuple, list)):
+        elements = (elements,)
+
+    if isinstance(values, str):
+        fmt = r"\b{}\b".format
+        for e in elements:
+            if re.search(fmt(e), values):
+                return True
+    else:
+        for e in elements:
+            if e in values:
+                return True
+
+    return False
+
+
 def raises(cls):
     """Returns a function that raises 'cls' as exception"""
     def wrap(*args):
@@ -429,6 +447,7 @@ WINDOWS = (os.name == "nt")
 SENTINEL = object()
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
 GLOBALS = {
+    "contains" : contains,
     "parse_int": text.parse_int,
     "urlsplit" : urllib.parse.urlsplit,
     "datetime" : datetime.datetime,
