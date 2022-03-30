@@ -113,10 +113,16 @@ class NewgroundsExtractor(Extractor):
             if self.flash:
                 url += "/format/flash"
 
-        response = self.request(url, fatal=False)
-        if response.status_code >= 400:
-            return {}
-        page = response.text
+        with self.request(url, fatal=False) as response:
+            if response.status_code >= 400:
+                return {}
+            page = response.text
+
+        pos = page.find('id="adults_only"')
+        if pos >= 0:
+            msg = text.extract(page, 'class="highlight">', '<', pos)[0]
+            self.log.warning('"%s"', msg)
+
         extr = text.extract_from(page)
         data = extract_data(extr, post_url)
 
@@ -293,7 +299,12 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
         ("https://www.newgrounds.com/art/view/sailoryon/yon-dream-buster", {
             "url": "84eec95e663041a80630df72719f231e157e5f5d",
             "count": 2,
-        })
+        }),
+        # "adult" rated (#2456)
+        ("https://www.newgrounds.com/art/view/bdoneart/vampire-booty", {
+            "options": (("username", None),),
+            "count": 0,
+        }),
     )
 
     def __init__(self, match):
@@ -359,6 +370,11 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
             "options": (("format", "720p"),),
             "pattern": r"https://uploads\.ungrounded\.net/alternate/1482000"
                        r"/1482860_alternate_102516\.720p\.mp4\?\d+",
+        }),
+        # "adult" rated (#2456)
+        ("https://www.newgrounds.com/portal/view/717744", {
+            "options": (("username", None),),
+            "count": 0,
         }),
     )
 
