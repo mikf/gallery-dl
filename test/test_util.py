@@ -319,6 +319,23 @@ class TestOther(unittest.TestCase):
         self.assertSequenceEqual(
             list(util.unique_sequence([1, 2, 1, 3, 2, 1])), [1, 2, 1, 3, 2, 1])
 
+    def test_contains(self):
+        c = [1, "2", 3, 4, "5", "foo"]
+        self.assertTrue(util.contains(c, 1))
+        self.assertTrue(util.contains(c, "foo"))
+        self.assertTrue(util.contains(c, [1, 3, "5"]))
+        self.assertTrue(util.contains(c, ["a", "b", "5"]))
+        self.assertFalse(util.contains(c, "bar"))
+        self.assertFalse(util.contains(c, [2, 5, "bar"]))
+
+        s = "1, 2, 3, asd, qwe, yxc, foo, bar"
+        self.assertTrue(util.contains(s, 2))
+        self.assertTrue(util.contains(s, "asd"))
+        self.assertTrue(util.contains(s, ["asd", "qwe", "yxc"]))
+        self.assertTrue(util.contains(s, ["sdf", "dfg", "qwe"]))
+        self.assertFalse(util.contains(s, "tag1"))
+        self.assertFalse(util.contains(s, ["tag1", "tag2", "tag3"]))
+
     def test_raises(self):
         func = util.raises(Exception)
         with self.assertRaises(Exception):
