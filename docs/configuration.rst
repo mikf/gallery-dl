@@ -2182,6 +2182,16 @@ Description
     ``4096x4096``, ``orig``, ``large``, ``medium``, and ``small``.
 
 
+extractor.twitter.syndication
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Retrieve age-restricted content using Twitter's syndication API.
+
+
 extractor.twitter.logout
 ------------------------
 Type
