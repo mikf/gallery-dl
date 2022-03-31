@@ -217,23 +217,24 @@ class TwitterExtractor(Extractor):
         if "legacy" in tweet:
             tweet = tweet["legacy"]
 
+        tget = tweet.get
         entities = tweet["entities"]
         tdata = {
             "tweet_id"      : text.parse_int(tweet["id_str"]),
             "retweet_id"    : text.parse_int(
-                tweet.get("retweeted_status_id_str")),
+                tget("retweeted_status_id_str")),
             "quote_id"      : text.parse_int(
-                tweet.get("quoted_status_id_str")),
+                tget("quoted_status_id_str")),
             "reply_id"      : text.parse_int(
-                tweet.get("in_reply_to_status_id_str")),
+                tget("in_reply_to_status_id_str")),
             "date"          : text.parse_datetime(
                 tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"),
             "user"          : user,
             "lang"          : tweet["lang"],
-            "favorite_count": tweet["favorite_count"],
-            "quote_count"   : tweet["quote_count"],
-            "reply_count"   : tweet["reply_count"],
-            "retweet_count" : tweet["retweet_count"],
+            "favorite_count": tget("favorite_count"),
+            "quote_count"   : tget("quote_count"),
+            "reply_count"   : tget("reply_count"),
+            "retweet_count" : tget("retweet_count"),
         }
 
         hashtags = entities.get("hashtags")
@@ -248,7 +249,7 @@ class TwitterExtractor(Extractor):
                 "nick": u["name"],
             } for u in mentions]
 
-        content = tweet["full_text"]
+        content = tget("full_text") or tget("text") or ""
         urls = entities.get("urls")
         if urls:
             for url in urls:
@@ -269,33 +270,36 @@ class TwitterExtractor(Extractor):
         return tdata
 
     def _transform_user(self, user):
+        uid = user.get("rest_id") or user["id_str"]
+
         try:
-            return self._user_cache[user.get("rest_id") or user["id_str"]]
+            return self._user_cache[uid]
         except KeyError:
             pass
 
-        uid = user.get("rest_id") or user["id_str"]
         if "legacy" in user:
             user = user["legacy"]
+
+        uget = user.get
         entities = user["entities"]
 
         self._user_cache[uid] = udata = {
             "id"              : text.parse_int(uid),
             "name"            : user["screen_name"],
             "nick"            : user["name"],
-            "location"        : user["location"],
+            "location"        : uget("location"),
             "date"            : text.parse_datetime(
-                user["created_at"], "%a %b %d %H:%M:%S %z %Y"),
-            "verified"        : user.get("verified", False),
-            "profile_banner"  : user.get("profile_banner_url", ""),
-            "profile_image"   : user.get(
+                uget("created_at"), "%a %b %d %H:%M:%S %z %Y"),
+            "verified"        : uget("verified", False),
+            "profile_banner"  : uget("profile_banner_url", ""),
+            "profile_image"   : uget(
                 "profile_image_url_https", "").replace("_normal.", "."),
-            "favourites_count": user["favourites_count"],
-            "followers_count" : user["followers_count"],
-            "friends_count"   : user["friends_count"],
-            "listed_count"    : user["listed_count"],
-            "media_count"     : user["media_count"],
-            "statuses_count"  : user["statuses_count"],
+            "favourites_count": uget("favourites_count"),
+            "followers_count" : uget("followers_count"),
+            "friends_count"   : uget("friends_count"),
+            "listed_count"    : uget("listed_count"),
+            "media_count"     : uget("media_count"),
+            "statuses_count"  : uget("statuses_count"),
         }
 
         descr = user["description"]
@@ -653,6 +657,11 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/i/web/status/1486373748911575046", {
             "count": 4,
         }),
+        # age-restricted (#2354)
+        ("https://twitter.com/mightbecursed/status/1492954264909479936", {
+            "options": (("syndication", True),),
+            "count": 1,
+        }),
     )
 
     def __init__(self, match):
@@ -770,6 +779,7 @@ class TwitterAPI():
         }
 
         self._nsfw_warning = True
+        self._syndication = extractor.config("syndication")
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
         self._user = None
 
@@ -1153,9 +1163,10 @@ class TwitterAPI():
                 elif esw("conversationthread-"):
                     tweets.extend(entry["content"]["items"])
                 elif esw("tombstone-"):
-                    self._report_tombstone(
-                        entry,
-                        entry["content"]["itemContent"]["tombstoneInfo"])
+                    item = entry["content"]["itemContent"]
+                    item["tweet_results"] = \
+                        {"result": {"tombstone": item["tombstoneInfo"]}}
+                    tweets.append(entry)
                 elif esw("cursor-bottom-"):
                     cursor = entry["content"]
                     if not cursor.get("stopOnEmptyResponse", True):
@@ -1168,8 +1179,10 @@ class TwitterAPI():
                     tweet = ((entry.get("content") or entry["item"])
                              ["itemContent"]["tweet_results"]["result"])
                     if "tombstone" in tweet:
-                        self._report_tombstone(entry, tweet["tombstone"])
-                        continue
+                        tweet = self._process_tombstone(
+                            entry, tweet["tombstone"])
+                        if not tweet:
+                            continue
                     if "tweet" in tweet:
                         tweet = tweet["tweet"]
                     legacy = tweet["legacy"]
@@ -1259,10 +1272,45 @@ class TwitterAPI():
                 return
             variables["cursor"] = cursor
 
-    def _report_tombstone(self, entry, tombstone):
+    def _process_tombstone(self, entry, tombstone):
         text = (tombstone.get("richText") or tombstone["text"])["text"]
-        if text.startswith("Age-restricted") and self._nsfw_warning:
-            self.extractor.log.warning(text)
-            self._nsfw_warning = False
-        self.extractor.log.debug(
-            "Skipping %s (%s)", entry["entryId"].rpartition("-")[2], text)
+        tweet_id = entry["entryId"].rpartition("-")[2]
+
+        if text.startswith("Age-restricted"):
+            if self._syndication:
+                return self._syndication_tweet(tweet_id)
+            elif self._nsfw_warning:
+                self._nsfw_warning = False
+                self.extractor.log.warning('"%s"', text)
+
+        self.extractor.log.debug("Skipping %s (\"%s\")", tweet_id, text)
+
+    def _syndication_tweet(self, tweet_id):
+        tweet = self.extractor.request(
+            "https://cdn.syndication.twimg.com/tweet?id=" + tweet_id).json()
+
+        tweet["user"]["description"] = ""
+        tweet["user"]["entities"] = {"description": {}}
+
+        if "video" in tweet:
+            video = tweet["video"]
+            del video["variants"][:-1]
+            video["variants"][0]["url"] = video["variants"][0]["src"]
+            tweet["extended_entities"] = {"media": [{
+                "video_info"   : video,
+                "original_info": {"width" : 0, "height": 0},
+            }]}
+        elif "photos" in tweet:
+            for p in tweet["photos"]:
+                p["media_url_https"] = p["url"]
+                p["original_info"] = {
+                    "width" : p["width"],
+                    "height": p["height"],
+                }
+            tweet["extended_entities"] = {"media": tweet["photos"]}
+
+        return {
+            "rest_id": tweet["id_str"],
+            "legacy" : tweet,
+            "user"   : tweet["user"],
+        }
