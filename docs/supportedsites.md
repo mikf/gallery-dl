@@ -586,7 +586,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Pinterest</td>
     <td>https://www.pinterest.com/</td>
-    <td>Pins, pin.it Links, related Pins, Search Results, Sections, User Profiles</td>
+    <td>Created Pins, Pins, pin.it Links, related Pins, Search Results, Sections, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>

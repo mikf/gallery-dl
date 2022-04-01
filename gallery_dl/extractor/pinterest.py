@@ -123,7 +123,8 @@ class PinterestBoardExtractor(PinterestExtractor):
     subcategory = "board"
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/(?!_saved)([^/?#&]+)/?$"
+    pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#&]+)"
+               "/(?!_saved|_created)([^/?#&]+)/?$")
     test = (
         ("https://www.pinterest.com/g1952849/test-/", {
             "pattern": r"https://i\.pinimg\.com/originals/",
@@ -189,6 +190,28 @@ class PinterestUserExtractor(PinterestExtractor):
             if url:
                 board["_extractor"] = PinterestBoardExtractor
                 yield Message.Queue, self.root + url, board
+
+
+class PinterestCreatedExtractor(PinterestExtractor):
+    """Extractor for a user's created pins"""
+    subcategory = "created"
+    directory_fmt = ("{category}", "{user}")
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/_created/?$"
+    test = ("https://www.pinterest.com/amazon/_created", {
+        "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
+                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
+        "count": 2,
+    })
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self, match)
+        self.user = text.unquote(match.group(1))
+
+    def metadata(self):
+        return {"user": self.user}
+
+    def pins(self):
+        return self.api.user_activity_pins(self.user)
 
 
 class PinterestSectionExtractor(PinterestExtractor):
@@ -383,6 +406,16 @@ class PinterestAPI():
         """Yield related pins of a specific board"""
         options = {"board_id": board_id, "add_vase": True}
         return self._pagination("BoardRelatedPixieFeed", options)
+
+    def user_activity_pins(self, user):
+        """Yield pins created by 'user'"""
+        options = {
+            "exclude_add_pin_rep": True,
+            "field_set_key"      : "grid_item",
+            "is_own_profile_pins": False,
+            "username"           : user,
+        }
+        return self._pagination("UserActivityPins", options)
 
     def search(self, query):
         """Yield pins from searches"""
