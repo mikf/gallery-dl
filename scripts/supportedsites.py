@@ -180,6 +180,7 @@ SUBCATEGORY_MAP = {
     "pinterest": {
         "board": "",
         "pinit": "pin.it Links",
+        "created": "Created Pins",
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
