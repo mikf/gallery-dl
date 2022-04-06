@@ -20,8 +20,8 @@ BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
     category = "pinterest"
-    filename_fmt = "{category}_{id}.{extension}"
-    archive_fmt = "{id}"
+    filename_fmt = "{category}_{id}{media_id:?_//}.{extension}"
+    archive_fmt = "{id}{media_id}"
     root = "https://www.pinterest.com"
 
     def __init__(self, match):
@@ -35,27 +35,39 @@ class PinterestExtractor(Extractor):
 
         yield Message.Directory, data
         for pin in self.pins():
-
-            try:
-                media = self._media_from_pin(pin)
-            except Exception:
-                self.log.debug("Unable to fetch download URL for pin %s",
-                               pin.get("id"))
-                continue
-
-            if not videos and media.get("duration") is not None:
-                continue
-
             pin.update(data)
-            pin.update(media)
-            url = media["url"]
-            text.nameext_from_url(url, pin)
 
-            if pin["extension"] == "m3u8":
-                url = "ytdl:" + url
-                pin["extension"] = "mp4"
+            carousel_data = pin.get("carousel_data")
+            if carousel_data:
+                for num, slot in enumerate(carousel_data["carousel_slots"], 1):
+                    slot["media_id"] = slot.pop("id")
+                    pin.update(slot)
+                    pin["num"] = num
+                    size, image = next(iter(slot["images"].items()))
+                    url = image["url"].replace("/" + size + "/", "/originals/")
+                    yield Message.Url, url, text.nameext_from_url(url, pin)
 
-            yield Message.Url, url, pin
+            else:
+                try:
+                    media = self._media_from_pin(pin)
+                except Exception:
+                    self.log.debug("Unable to fetch download URL for pin %s",
+                                   pin.get("id"))
+                    continue
+
+                if videos or media.get("duration") is None:
+                    pin.update(media)
+                    pin["num"] = 0
+                    pin["media_id"] = ""
+
+                    url = media["url"]
+                    text.nameext_from_url(url, pin)
+
+                    if pin["extension"] == "m3u8":
+                        url = "ytdl:" + url
+                        pin["extension"] = "mp4"
+
+                    yield Message.Url, url, pin
 
     def metadata(self):
         """Return general metadata"""
@@ -200,7 +212,7 @@ class PinterestCreatedExtractor(PinterestExtractor):
     test = ("https://www.pinterest.com/amazon/_created", {
         "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
                    r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
-        "count": 2,
+        "count": 10,
     })
 
     def __init__(self, match):
