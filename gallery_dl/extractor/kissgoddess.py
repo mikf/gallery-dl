@@ -20,7 +20,7 @@ class KissgoddessGalleryExtractor(GalleryExtractor):
     test = ("https://kissgoddess.com/album/18285.html", {
         "pattern": r"https://pic\.kissgoddess\.com"
                    r"/gallery/16473/18285/s/\d+\.jpg",
-        "count": 8,
+        "count": 19,
         "keyword": {
             "gallery_id": 18285,
             "title": "[Young Champion Extra] 2016.02 No.03 菜乃花 安枝瞳 葉月あや",
@@ -44,6 +44,8 @@ class KissgoddessGalleryExtractor(GalleryExtractor):
 
         while page:
             for url in text.extract_iter(page, "<img src='", "'"):
+                yield url, None
+            for url in text.extract_iter(page, "<img data-original='", "'"):
                 yield url, None
 
             pnum += 1
