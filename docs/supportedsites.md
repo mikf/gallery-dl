@@ -110,6 +110,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Coomer</td>
+    <td>https://coomer.party/</td>
+    <td>Favorites, Posts, User Profiles</td>
+    <td>Supported</td>
+</tr>
+<tr>
     <td>Cyberdrop</td>
     <td>https://cyberdrop.me/</td>
     <td>Albums</td>
@@ -380,7 +386,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Kemonoparty</td>
+    <td>Kemono</td>
     <td>https://kemono.party/</td>
     <td>Discord Servers, Favorites, Posts, User Profiles</td>
     <td>Supported</td>

@@ -26,6 +26,7 @@ CATEGORY_MAP = {
     "bbc"            : "BBC",
     "bcy"            : "半次元",
     "comicvine"      : "Comic Vine",
+    "coomerparty"    : "Coomer",
     "deviantart"     : "DeviantArt",
     "drawfriends"    : "Draw Friends",
     "dynastyscans"   : "Dynasty Reader",
@@ -57,6 +58,7 @@ CATEGORY_MAP = {
     "imgur"          : "imgur",
     "joyreactor"     : "JoyReactor",
     "kabeuchi"       : "かべうち",
+    "kemonoparty"    : "Kemono",
     "kireicake"      : "Kirei Cake",
     "kissgoddess"    : "Kiss Goddess",
     "lineblog"       : "LINE BLOG",
@@ -149,6 +151,10 @@ SUBCATEGORY_MAP = {
     "atfbooru": {
         "favorite": "",
     },
+    "coomerparty": {
+        "discord"       : "",
+        "discord-server": "",
+    },
     "danbooru": {
         "favorite": "",
     },
@@ -239,6 +245,7 @@ AUTH_MAP = {
     "aryion"         : "Supported",
     "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,
+    "coomerparty"    : "Supported",
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
     "deviantart"     : _OAUTH,
@@ -380,6 +387,10 @@ def build_extractor_list():
     # add e-hentai.org
     default["e-hentai"] = default["exhentai"]
     domains["e-hentai"] = domains["exhentai"].replace("x", "-")
+
+    # add coomer.party
+    default["coomerparty"] = default["kemonoparty"]
+    domains["coomerparty"] = domains["kemonoparty"].replace("kemono", "coomer")
 
     # add hentai-cosplays sister sites (hentai-img, porn-images-xxx)
     default["hentaiimg"] = default["hentaicosplays"]
