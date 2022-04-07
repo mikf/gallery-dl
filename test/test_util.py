@@ -328,9 +328,8 @@ class TestOther(unittest.TestCase):
         self.assertFalse(util.contains(c, "bar"))
         self.assertFalse(util.contains(c, [2, 5, "bar"]))
 
-        s = "1, 2, 3, asd, qwe, yxc, foo, bar"
-        self.assertTrue(util.contains(s, 2))
-        self.assertTrue(util.contains(s, "asd"))
+        s = "1, 2, 3, asd, qwe, y(+)c, f(+)(-), bar"
+        self.assertTrue(util.contains(s, "y(+)c"))
         self.assertTrue(util.contains(s, ["asd", "qwe", "yxc"]))
         self.assertTrue(util.contains(s, ["sdf", "dfg", "qwe"]))
         self.assertFalse(util.contains(s, "tag1"))
