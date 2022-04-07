@@ -79,7 +79,7 @@ def contains(values, elements):
     if isinstance(values, str):
         fmt = r"\b{}\b".format
         for e in elements:
-            if re.search(fmt(e), values):
+            if re.compile(fmt(re.escape(e))).search(values):
                 return True
     else:
         for e in elements:
