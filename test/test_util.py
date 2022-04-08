@@ -328,12 +328,17 @@ class TestOther(unittest.TestCase):
         self.assertFalse(util.contains(c, "bar"))
         self.assertFalse(util.contains(c, [2, 5, "bar"]))
 
-        s = "1, 2, 3, asd, qwe, y(+)c, f(+)(-), bar"
+        s = "1 2 3 asd qwe y(+)c f(+)(-) bar"
         self.assertTrue(util.contains(s, "y(+)c"))
         self.assertTrue(util.contains(s, ["asd", "qwe", "yxc"]))
         self.assertTrue(util.contains(s, ["sdf", "dfg", "qwe"]))
         self.assertFalse(util.contains(s, "tag1"))
         self.assertFalse(util.contains(s, ["tag1", "tag2", "tag3"]))
+
+        s = "1, 2, 3, asd, qwe, y(+)c, f(+)(-), bar"
+        self.assertTrue(util.contains(s, "y(+)c", ", "))
+        self.assertTrue(util.contains(s, ["sdf", "dfg", "qwe"], ", "))
+        self.assertFalse(util.contains(s, "tag1", ", "))
 
     def test_raises(self):
         func = util.raises(Exception)

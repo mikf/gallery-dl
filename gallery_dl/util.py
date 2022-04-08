@@ -71,21 +71,17 @@ def unique_sequence(iterable):
             yield element
 
 
-def contains(values, elements):
+def contains(values, elements, separator=" "):
     """Returns True if at least one of 'elements' is contained in 'values'"""
-    if not isinstance(elements, (tuple, list)):
-        elements = (elements,)
-
     if isinstance(values, str):
-        fmt = r"\b{}\b".format
-        for e in elements:
-            if re.compile(fmt(re.escape(e))).search(values):
-                return True
-    else:
-        for e in elements:
-            if e in values:
-                return True
+        values = values.split(separator)
 
+    if not isinstance(elements, (tuple, list)):
+        return elements in values
+
+    for e in elements:
+        if e in values:
+            return True
     return False
 
 
