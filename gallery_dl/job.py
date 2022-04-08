@@ -214,6 +214,9 @@ class DownloadJob(Job):
         archive = self.archive
 
         # prepare download
+        if archive and archive.check(kwdict):
+            pathfmt._create_directory = False
+
         pathfmt.set_filename(kwdict)
 
         if "prepare" in hooks:
