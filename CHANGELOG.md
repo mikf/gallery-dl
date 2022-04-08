@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.21.1 - 2022-04-08
+### Additions
+- [gofile] add gofile.io extractor ([#2364](https://github.com/mikf/gallery-dl/issues/2364))
+- [instagram] add `previews` option ([#2135](https://github.com/mikf/gallery-dl/issues/2135))
+- [kemonoparty] add `duplicates` option ([#2440](https://github.com/mikf/gallery-dl/issues/2440))
+- [pinterest] add extractor for created pins ([#2452](https://github.com/mikf/gallery-dl/issues/2452))
+- [pinterest] support multiple files per pin ([#1619](https://github.com/mikf/gallery-dl/issues/1619), [#2452](https://github.com/mikf/gallery-dl/issues/2452))
+- [telegraph] Add telegra.ph extractor ([#2312](https://github.com/mikf/gallery-dl/issues/2312))
+- [twitter] add `syndication` option ([#2354](https://github.com/mikf/gallery-dl/issues/2354))
+- [twitter] accept fxtwitter.com URLs ([#2484](https://github.com/mikf/gallery-dl/issues/2484))
+- [downloader:http] support using an arbitrary method and sending POST data ([#2433](https://github.com/mikf/gallery-dl/issues/2433))
+- [postprocessor:metadata] implement archive options ([#2421](https://github.com/mikf/gallery-dl/issues/2421))
+- [postprocessor:ugoira] add `mtime` option ([#2307](https://github.com/mikf/gallery-dl/issues/2307))
+- [postprocessor:ugoira] support setting timecodes with `mkvmerge` ([#1550](https://github.com/mikf/gallery-dl/issues/1550))
+- [formatter] support evaluating f-string literals
+- add `--ugoira-conv-copy` command-line option ([#1550](https://github.com/mikf/gallery-dl/issues/1550))
+- implement a `contains()` function for filter statements ([#2446](https://github.com/mikf/gallery-dl/issues/2446))
+### Fixes
+- [aryion] provide correct `date` metadata independent of DST
+- [furaffinity] fix search result pagination ([#2402](https://github.com/mikf/gallery-dl/issues/2402))
+- [hitomi] update and fix metadata extraction ([#2444](https://github.com/mikf/gallery-dl/issues/2444))
+- [kissgoddess] extract all images ([#2473](https://github.com/mikf/gallery-dl/issues/2473))
+- [mangasee] unescape manga names ([#2454](https://github.com/mikf/gallery-dl/issues/2454))
+- [newgrounds] update and fix pagination ([#2456](https://github.com/mikf/gallery-dl/issues/2456))
+- [newgrounds] warn about age-restricted posts ([#2456](https://github.com/mikf/gallery-dl/issues/2456))
+- [pinterest] do not force `m3u8_native` for video downloads ([#2436](https://github.com/mikf/gallery-dl/issues/2436))
+- [twibooru] fix posts without `name` ([#2434](https://github.com/mikf/gallery-dl/issues/2434))
+- [unsplash] replace dash with space in search API queries ([#2429](https://github.com/mikf/gallery-dl/issues/2429))
+- [postprocessor:mtime] fix timestamps from datetime objects ([#2307](https://github.com/mikf/gallery-dl/issues/2307))
+- fix yet another bug in `_check_cookies()` ([#2372](https://github.com/mikf/gallery-dl/issues/2372))
+- fix loading/storing cookies without domain
+
 ## 1.21.0 - 2022-03-14
 ### Additions
 - [fantia] add `num` enumeration index ([#2377](https://github.com/mikf/gallery-dl/issues/2377))
