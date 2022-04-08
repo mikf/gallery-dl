@@ -215,7 +215,10 @@ class DownloadJob(Job):
 
         # prepare download
         if archive and archive.check(kwdict):
+            file_in_archive = True
             pathfmt._create_directory = False
+        else:
+            file_in_archive = False
 
         pathfmt.set_filename(kwdict)
 
@@ -223,7 +226,7 @@ class DownloadJob(Job):
             for callback in hooks["prepare"]:
                 callback(pathfmt)
 
-        if archive and archive.check(kwdict):
+        if file_in_archive:
             pathfmt.fix_extension()
             self.handle_skip()
             return
