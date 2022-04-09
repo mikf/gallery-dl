@@ -102,6 +102,18 @@ class TestText(unittest.TestCase):
         for value in INVALID_ALT:
             self.assertEqual(f(value), value)
 
+    def test_root_from_url(self, f=text.root_from_url):
+        result = "https://example.org"
+        self.assertEqual(f("https://example.org/")    , result)
+        self.assertEqual(f("https://example.org/path"), result)
+        self.assertEqual(f("example.org/")            , result)
+        self.assertEqual(f("example.org/path/")       , result)
+
+        result = "http://example.org"
+        self.assertEqual(f("http://example.org/")     , result)
+        self.assertEqual(f("http://example.org/path/"), result)
+        self.assertEqual(f("example.org/", "http://") , result)
+
     def test_filename_from_url(self, f=text.filename_from_url):
         result = "filename.ext"
 

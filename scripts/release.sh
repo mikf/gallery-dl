@@ -35,12 +35,11 @@ update-dev() {
 
     IFS="." read MAJOR MINOR BUILD <<< "${NEWVERSION}"
     BUILD=$((BUILD+1))
+
     # update version to -dev
     sed -i "s#\"${NEWVERSION}\"#\"${MAJOR}.${MINOR}.${BUILD}-dev\"#" "gallery_dl/version.py"
-    # add 'unreleased' line to changelog
-    sed -i "2i\\\n## Unreleased" "${CHANGELOG}"
 
-    git add "gallery_dl/version.py" "${CHANGELOG}"
+    git add "gallery_dl/version.py"
 }
 
 build-python() {
@@ -54,7 +53,14 @@ build-linux() {
     cd "${ROOTDIR}"
     echo Building Linux executable
 
-    make executable
+    VENV_PATH="/tmp/venv"
+    VENV_PYTHON="${VENV_PATH}/bin/python"
+
+    rm -rf "${VENV_PATH}"
+    virtualenv "${VENV_PATH}"
+
+    $VENV_PYTHON -m pip install requests requests[socks] yt-dlp pyinstaller
+    $VENV_PYTHON ./scripts/pyinstaller.py
 }
 
 build-windows() {
@@ -92,7 +98,7 @@ changelog() {
     # - insert new version and date
     sed -i \
         -e "s*\([( ]\)#\([0-9]\+\)*\1[#\2](https://github.com/mikf/gallery-dl/issues/\2)*g" \
-        -e "s*^## [Uu]nreleased*## ${NEWVERSION} - $(date +%Y-%m-%d)*" \
+        -e "s*^## \w\+\$*## ${NEWVERSION} - $(date +%Y-%m-%d)*" \
         "${CHANGELOG}"
 }
 

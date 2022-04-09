@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,45 +10,40 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+import re
 
 
 class ImagebamExtractor(Extractor):
     """Base class for imagebam extractors"""
     category = "imagebam"
     root = "https://www.imagebam.com"
-    cookies = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.key = match.group(1)
-        if self.cookies:
-            self.session.cookies = self.cookies
+        self.path = match.group(1)
+        self.session.cookies.set("nsfw_inter", "1", domain="www.imagebam.com")
 
-    def get_image_data(self, data):
-        page_url = "{}/image/{}".format(self.root, data["image_key"])
-        page = self.request(page_url).text
-        image_url, pos = text.extract(page, '<img src="https://images', '"')
-
-        if not image_url:
-            # cache cookies
-            ImagebamExtractor.cookies = self.session.cookies
-            # repeat request to get past "Continue to your image" pages
-            page = self.request(page_url).text
-            image_url, pos = text.extract(
-                page, '<img src="https://images', '"')
-
+    def _parse_image_page(self, path):
+        page = self.request(self.root + path).text
+        url, pos = text.extract(page, '<img src="https://images', '"')
         filename = text.unescape(text.extract(page, 'alt="', '"', pos)[0])
-        data["url"] = "https://images" + image_url
+
+        data = {
+            "url"      : "https://images" + url,
+            "image_key": path.rpartition("/")[2],
+        }
         data["filename"], _, data["extension"] = filename.rpartition(".")
+        return data
 
 
 class ImagebamGalleryExtractor(ImagebamExtractor):
-    """Extractor for image galleries from imagebam.com"""
+    """Extractor for imagebam galleries"""
     subcategory = "gallery"
     directory_fmt = ("{category}", "{title} {gallery_key}")
     filename_fmt = "{num:>03} {filename}.{extension}"
     archive_fmt = "{gallery_key}_{image_key}"
-    pattern = r"(?:https?://)?(?:www\.)?imagebam\.com/gallery/([0-9a-z]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?imagebam\.com"
+               r"(/(?:gallery/|view/G)[a-zA-Z0-9]+)")
     test = (
         ("https://www.imagebam.com/gallery/adz2y0f9574bjpmonaismyrhtjgvey4o", {
             "url": "76d976788ae2757ac81694736b07b72356f5c4c8",
@@ -63,50 +58,56 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
         ("http://www.imagebam.com/gallery/gsl8teckymt4vbvx1stjkyk37j70va2c", {
             "exception": exception.HttpError,
         }),
+        # /view/ path (#2378)
+        ("https://www.imagebam.com/view/GA3MT1", {
+            "url": "35018ce1e00a2d2825a33d3cd37857edaf804919",
+            "keyword": "3a9f98178f73694c527890c0d7ca9a92b46987ba",
+        }),
     )
 
     def items(self):
-        url = "{}/gallery/{}".format(self.root, self.key)
-        page = self.request(url).text
+        page = self.request(self.root + self.path).text
 
-        data = self.get_metadata(page)
-        keys = self.get_image_keys(page)
-        keys.reverse()
-        data["count"] = len(keys)
-        data["gallery_key"] = self.key
+        images = self.images(page)
+        images.reverse()
+
+        data = self.metadata(page)
+        data["count"] = len(images)
+        data["gallery_key"] = self.path.rpartition("/")[2]
 
         yield Message.Directory, data
-        for data["num"], data["image_key"] in enumerate(keys, 1):
-            self.get_image_data(data)
-            yield Message.Url, data["url"], data
+        for data["num"], path in enumerate(images, 1):
+            image = self._parse_image_page(path)
+            image.update(data)
+            yield Message.Url, image["url"], image
 
     @staticmethod
-    def get_metadata(page):
-        """Return gallery metadata"""
-        title = text.extract(page, 'id="gallery-name">', '<')[0]
-        return {"title": text.unescape(title.strip())}
+    def metadata(page):
+        return {"title": text.unescape(text.extract(
+            page, 'id="gallery-name">', '<')[0].strip())}
 
-    def get_image_keys(self, page):
-        """Return a list of all image keys"""
-        keys = []
+    def images(self, page):
+        findall = re.compile(r'<a href="https://www\.imagebam\.com'
+                             r'(/(?:image/|view/M)[a-zA-Z0-9]+)').findall
+
+        paths = []
         while True:
-            keys.extend(text.extract_iter(
-                page, '<a href="https://www.imagebam.com/image/', '"'))
+            paths += findall(page)
             pos = page.find('rel="next" aria-label="Next')
             if pos > 0:
                 url = text.rextract(page, 'href="', '"', pos)[0]
                 if url:
                     page = self.request(url).text
                     continue
-            return keys
+            return paths
 
 
 class ImagebamImageExtractor(ImagebamExtractor):
-    """Extractor for single images from imagebam.com"""
+    """Extractor for single imagebam images"""
     subcategory = "image"
     archive_fmt = "{image_key}"
     pattern = (r"(?:https?://)?(?:\w+\.)?imagebam\.com"
-               r"/(?:image/|(?:[0-9a-f]{2}/){3})([0-9a-f]+)")
+               r"(/(?:image/|view/M|(?:[0-9a-f]{2}/){3})[a-zA-Z0-9]+)")
     test = (
         ("https://www.imagebam.com/image/94d56c502511890", {
             "url": "5e9ba3b1451f8ded0ae3a1b84402888893915d4a",
@@ -118,10 +119,19 @@ class ImagebamImageExtractor(ImagebamExtractor):
         ("https://www.imagebam.com/image/0850951366904951", {
             "url": "d37297b17ed1615b4311c8ed511e50ce46e4c748",
         }),
+        # /view/ path (#2378)
+        ("https://www.imagebam.com/view/ME8JOQP", {
+            "url": "4dca72bbe61a0360185cf4ab2bed8265b49565b8",
+            "keyword": "15a494c02fd30846b41b42a26117aedde30e4ceb",
+            "content": "f81008666b17a42d8834c4749b910e1dc10a6e83",
+        }),
     )
 
     def items(self):
-        data = {"image_key": self.key}
-        self.get_image_data(data)
-        yield Message.Directory, data
-        yield Message.Url, data["url"], data
+        path = self.path
+        if path[3] == "/":
+            path = ("/view/" if path[10] == "M" else "/image/") + path[10:]
+
+        image = self._parse_image_page(path)
+        yield Message.Directory, image
+        yield Message.Url, image["url"], image

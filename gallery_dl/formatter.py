@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -43,6 +43,8 @@ def parse(format_string, default=None):
             cls = ExpressionFormatter
         elif kind == "M":
             cls = ModuleFormatter
+        elif kind == "F":
+            cls = FStringFormatter
 
     formatter = _CACHE[key] = cls(format_string, default)
     return formatter
@@ -206,6 +208,13 @@ class ModuleFormatter():
         self.format_map = getattr(module, function_name)
 
 
+class FStringFormatter():
+    """Generate text by evaluaring an f-string literal"""
+
+    def __init__(self, fstring, default=None):
+        self.format_map = util.compile_expression("f'''" + fstring + "'''")
+
+
 def parse_field_name(field_name):
     first, rest = _string.formatter_field_name_split(field_name)
     funcs = []
@@ -245,7 +254,7 @@ def parse_format_spec(format_spec, conversion):
             "C": string.capwords,
             "j": json.dumps,
             "t": str.strip,
-            "T": util.to_timestamp,
+            "T": util.datetime_to_timestamp_string,
             "d": text.parse_timestamp,
             "U": text.unescape,
             "S": util.to_string,

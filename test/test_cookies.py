@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2020 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,6 +12,7 @@ import sys
 import unittest
 from unittest import mock
 
+import time
 import logging
 import tempfile
 from os.path import join
@@ -88,7 +89,7 @@ class TestCookiedict(unittest.TestCase):
         self.assertEqual(sorted(cookies.values()), sorted(self.cdict.values()))
 
     def test_domain(self):
-        for category in ["exhentai", "idolcomplex", "nijie", "seiga"]:
+        for category in ["exhentai", "idolcomplex", "nijie"]:
             extr = _get_extractor(category)
             cookies = extr.session.cookies
             for key in self.cdict:
@@ -107,7 +108,6 @@ class TestCookieLogin(unittest.TestCase):
             "exhentai"   : ("ipb_member_id", "ipb_pass_hash"),
             "idolcomplex": ("login", "pass_hash"),
             "nijie"      : ("nemail", "nlogin"),
-            "seiga"      : ("user_session",),
         }
         for category, cookienames in extr_cookies.items():
             cookies = {name: "value" for name in cookienames}
@@ -116,6 +116,86 @@ class TestCookieLogin(unittest.TestCase):
             with mock.patch.object(extr, "_login_impl") as mock_login:
                 extr.login()
                 mock_login.assert_not_called()
+
+
+class TestCookieUtils(unittest.TestCase):
+
+    def test_check_cookies(self):
+        extr = extractor.find("test:")
+        self.assertFalse(extr._cookiejar, "empty")
+        self.assertFalse(extr.cookiedomain, "empty")
+
+        # always returns False when checking for empty cookie list
+        self.assertFalse(extr._check_cookies(()))
+
+        self.assertFalse(extr._check_cookies(("a",)))
+        self.assertFalse(extr._check_cookies(("a", "b")))
+        self.assertFalse(extr._check_cookies(("a", "b", "c")))
+
+        extr._cookiejar.set("a", "1")
+        self.assertTrue(extr._check_cookies(("a",)))
+        self.assertFalse(extr._check_cookies(("a", "b")))
+        self.assertFalse(extr._check_cookies(("a", "b", "c")))
+
+        extr._cookiejar.set("b", "2")
+        self.assertTrue(extr._check_cookies(("a",)))
+        self.assertTrue(extr._check_cookies(("a", "b")))
+        self.assertFalse(extr._check_cookies(("a", "b", "c")))
+
+    def test_check_cookies_domain(self):
+        extr = extractor.find("test:")
+        self.assertFalse(extr._cookiejar, "empty")
+        extr.cookiedomain = ".example.org"
+
+        self.assertFalse(extr._check_cookies(("a",)))
+        self.assertFalse(extr._check_cookies(("a", "b")))
+
+        extr._cookiejar.set("a", "1")
+        self.assertFalse(extr._check_cookies(("a",)))
+
+        extr._cookiejar.set("a", "1", domain=extr.cookiedomain)
+        self.assertTrue(extr._check_cookies(("a",)))
+
+        extr._cookiejar.set("a", "1", domain="www" + extr.cookiedomain)
+        self.assertEqual(len(extr._cookiejar), 3)
+        self.assertTrue(extr._check_cookies(("a",)))
+
+        extr._cookiejar.set("b", "2", domain=extr.cookiedomain)
+        extr._cookiejar.set("c", "3", domain=extr.cookiedomain)
+        self.assertTrue(extr._check_cookies(("a", "b", "c")))
+
+    def test_check_cookies_expires(self):
+        extr = extractor.find("test:")
+        self.assertFalse(extr._cookiejar, "empty")
+        self.assertFalse(extr.cookiedomain, "empty")
+
+        now = int(time.time())
+        log = logging.getLogger("test")
+
+        extr._cookiejar.set("a", "1", expires=now-100)
+        with mock.patch.object(log, "warning") as mw:
+            self.assertFalse(extr._check_cookies(("a",)))
+            self.assertEqual(mw.call_count, 1)
+            self.assertEqual(mw.call_args[0], ("Cookie '%s' has expired", "a"))
+
+        extr._cookiejar.set("a", "1", expires=now+100)
+        with mock.patch.object(log, "warning") as mw:
+            self.assertTrue(extr._check_cookies(("a",)))
+            self.assertEqual(mw.call_count, 1)
+            self.assertEqual(mw.call_args[0], (
+                "Cookie '%s' will expire in less than %s hour%s", "a", 1, ""))
+
+        extr._cookiejar.set("a", "1", expires=now+100+7200)
+        with mock.patch.object(log, "warning") as mw:
+            self.assertTrue(extr._check_cookies(("a",)))
+            self.assertEqual(mw.call_count, 1)
+            self.assertEqual(mw.call_args[0], (
+                "Cookie '%s' will expire in less than %s hour%s", "a", 3, "s"))
+
+        extr._cookiejar.set("a", "1", expires=now+100+24*3600)
+        with mock.patch.object(log, "warning") as mw:
+            self.assertTrue(extr._check_cookies(("a",)))
+            self.assertEqual(mw.call_count, 0)
 
 
 def _get_extractor(category):

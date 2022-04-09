@@ -63,6 +63,9 @@ class YoutubeDLExtractor(Extractor):
             "nocheckcertificate"     : not self._verify,
         }
 
+        if self._proxies:
+            user_opts["proxy"] = self._proxies.get("http")
+
         username, password = self._get_auth_info()
         if username:
             user_opts["username"], user_opts["password"] = username, password

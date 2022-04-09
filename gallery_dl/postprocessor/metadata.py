@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -59,7 +59,35 @@ class MetadataPP(PostProcessor):
             events = events.split(",")
         job.register_hooks({event: self.run for event in events}, options)
 
+        archive = options.get("archive")
+        if archive:
+            extr = job.extractor
+            archive = util.expand_path(archive)
+            archive_format = (
+                options.get("archive-prefix", extr.category) +
+                options.get("archive-format", "_MD_" + extr.archive_fmt))
+            try:
+                if "{" in archive:
+                    archive = formatter.parse(archive).format_map(
+                        job.pathfmt.kwdict)
+                self.archive = util.DownloadArchive(
+                    archive, archive_format, "_archive_metadata")
+            except Exception as exc:
+                self.log.warning(
+                    "Failed to open download archive at '%s' ('%s: %s')",
+                    archive, exc.__class__.__name__, exc)
+            else:
+                self.log.debug("Using download archive '%s'", archive)
+        else:
+            self.archive = None
+
+        self.mtime = options.get("mtime")
+
     def run(self, pathfmt):
+        archive = self.archive
+        if archive and archive.check(pathfmt.kwdict):
+            return
+
         directory = self._directory(pathfmt)
         path = directory + self._filename(pathfmt)
 
@@ -70,6 +98,14 @@ class MetadataPP(PostProcessor):
             os.makedirs(directory, exist_ok=True)
             with open(path, "w", encoding="utf-8") as fp:
                 self.write(fp, pathfmt.kwdict)
+
+        if archive:
+            archive.add(pathfmt.kwdict)
+
+        if self.mtime:
+            mtime = pathfmt.kwdict.get("_mtime")
+            if mtime:
+                util.set_mtime(path, mtime)
 
     def _directory(self, pathfmt):
         return pathfmt.realdirectory

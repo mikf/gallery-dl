@@ -398,7 +398,7 @@ class OAuthPixiv(OAuthBase):
 
         if "error" in data:
             print(data)
-            if data["error"] == "invalid_request":
+            if data["error"] in ("invalid_request", "invalid_grant"):
                 print("'code' expired, try again")
             return
 
@@ -416,6 +416,10 @@ class OAuthPixiv(OAuthBase):
 2) Login
 3) Select the last network monitor entry ('callback?state=...')
 4) Copy its 'code' query parameter, paste it below, and press Enter
+
+- This 'code' will expire 30 seconds after logging in.
+- Copy-pasting more than just the 'code' value will work as well,
+  like the entire URL or several query parameters.
 """)
         code = input("code: ")
         return code.rpartition("=")[2].strip()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,6 +11,8 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
+from email.utils import parsedate_tz
+from datetime import datetime
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
 
@@ -144,7 +146,8 @@ class AryionExtractor(Extractor):
 
         title, _, artist = text.unescape(extr(
             "<title>g4 :: ", "<")).rpartition(" by ")
-        data = {
+
+        return {
             "id"    : text.parse_int(post_id),
             "url"   : url,
             "user"  : self.user or artist,
@@ -152,7 +155,7 @@ class AryionExtractor(Extractor):
             "artist": artist,
             "path"  : text.split_html(extr(
                 "cookiecrumb'>", '</span'))[4:-1:2],
-            "date"  : extr("class='pretty-date' title='", "'"),
+            "date"  : datetime(*parsedate_tz(lmod)[:6]),
             "size"  : text.parse_int(clen),
             "views" : text.parse_int(extr("Views</b>:", "<").replace(",", "")),
             "width" : text.parse_int(extr("Resolution</b>:", "x")),
@@ -166,12 +169,6 @@ class AryionExtractor(Extractor):
             "extension": ext,
             "_mtime"   : lmod,
         }
-
-        d1, _, d2 = data["date"].partition(",")
-        data["date"] = text.parse_datetime(
-            d1[:-2] + d2, "%b %d %Y %I:%M %p", -5)
-
-        return data
 
 
 class AryionGalleryExtractor(AryionExtractor):
@@ -249,7 +246,7 @@ class AryionPostExtractor(AryionExtractor):
                 "title"    : "I'm on subscribestar now too!",
                 "description": r"re:Doesn't hurt to have a backup, right\?",
                 "tags"     : ["Non-Vore", "subscribestar"],
-                "date"     : "dt:2019-02-16 19:30:00",
+                "date"     : "dt:2019-02-16 19:30:34",
                 "path"     : [],
                 "views"    : int,
                 "favorites": int,

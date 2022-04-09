@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -189,6 +189,10 @@ class TestCookiesTxt(unittest.TestCase):
             [self._cookie("name", "", ".example.org")],
         )
         _assert(
+            "\tTRUE\t/\tTRUE\t\tname\t",
+            [self._cookie("name", "", "")],
+        )
+        _assert(
             "# Netscape HTTP Cookie File\n"
             "\n"
             "# default\n"
@@ -241,6 +245,8 @@ class TestCookiesTxt(unittest.TestCase):
                     "n4", ""  , "www.example.org", False, "/", False),
                 self._cookie(
                     "n5", "v5", "www.example.org", False, "/path", False, 100),
+                self._cookie(
+                    "n6", "v6", "", False),
             ],
             "# Netscape HTTP Cookie File\n"
             "\n"
@@ -312,6 +318,27 @@ class TestOther(unittest.TestCase):
             list(util.unique_sequence("ABABABCAABBCC")), "ABABABCABC")
         self.assertSequenceEqual(
             list(util.unique_sequence([1, 2, 1, 3, 2, 1])), [1, 2, 1, 3, 2, 1])
+
+    def test_contains(self):
+        c = [1, "2", 3, 4, "5", "foo"]
+        self.assertTrue(util.contains(c, 1))
+        self.assertTrue(util.contains(c, "foo"))
+        self.assertTrue(util.contains(c, [1, 3, "5"]))
+        self.assertTrue(util.contains(c, ["a", "b", "5"]))
+        self.assertFalse(util.contains(c, "bar"))
+        self.assertFalse(util.contains(c, [2, 5, "bar"]))
+
+        s = "1 2 3 asd qwe y(+)c f(+)(-) bar"
+        self.assertTrue(util.contains(s, "y(+)c"))
+        self.assertTrue(util.contains(s, ["asd", "qwe", "yxc"]))
+        self.assertTrue(util.contains(s, ["sdf", "dfg", "qwe"]))
+        self.assertFalse(util.contains(s, "tag1"))
+        self.assertFalse(util.contains(s, ["tag1", "tag2", "tag3"]))
+
+        s = "1, 2, 3, asd, qwe, y(+)c, f(+)(-), bar"
+        self.assertTrue(util.contains(s, "y(+)c", ", "))
+        self.assertTrue(util.contains(s, ["sdf", "dfg", "qwe"], ", "))
+        self.assertFalse(util.contains(s, "tag1", ", "))
 
     def test_raises(self):
         func = util.raises(Exception)
@@ -531,7 +558,16 @@ class TestOther(unittest.TestCase):
         self.assertEqual(f(["a", "b", "c"]), "a, b, c")
         self.assertEqual(f([1, 2, 3]), "1, 2, 3")
 
-    def test_to_timestamp(self, f=util.to_timestamp):
+    def test_datetime_to_timestamp(self, f=util.datetime_to_timestamp):
+        self.assertEqual(f(util.EPOCH), 0.0)
+        self.assertEqual(f(datetime.datetime(2010, 1, 1)), 1262304000.0)
+        self.assertEqual(f(datetime.datetime(2010, 1, 1, 0, 0, 0, 128000)),
+                         1262304000.128000)
+        with self.assertRaises(TypeError):
+            f(None)
+
+    def test_datetime_to_timestamp_string(
+            self, f=util.datetime_to_timestamp_string):
         self.assertEqual(f(util.EPOCH), "0")
         self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
         self.assertEqual(f(None), "")

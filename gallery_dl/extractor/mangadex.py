@@ -53,7 +53,10 @@ class MangadexExtractor(Extractor):
 
         cattributes = chapter["attributes"]
         mattributes = manga["attributes"]
-        lang = cattributes["translatedLanguage"].partition("-")[0]
+
+        lang = cattributes.get("translatedLanguage")
+        if lang:
+            lang = lang.partition("-")[0]
 
         if cattributes["chapter"]:
             chnum, sep, minor = cattributes["chapter"].partition(".")
