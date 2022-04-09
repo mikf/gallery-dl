@@ -110,6 +110,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Coomer</td>
+    <td>https://coomer.party/</td>
+    <td>Favorites, Posts, User Profiles</td>
+    <td>Supported</td>
+</tr>
+<tr>
     <td>Cyberdrop</td>
     <td>https://cyberdrop.me/</td>
     <td>Albums</td>
@@ -209,6 +215,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Gfycat</td>
     <td>https://gfycat.com/</td>
     <td>individual Images, Search Results, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Gofile</td>
+    <td>https://gofile.io/</td>
+    <td>Folders</td>
     <td></td>
 </tr>
 <tr>
@@ -374,7 +386,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Kemonoparty</td>
+    <td>Kemono</td>
     <td>https://kemono.party/</td>
     <td>Discord Servers, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
@@ -383,6 +395,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Khinsider</td>
     <td>https://downloads.khinsider.com/</td>
     <td>Soundtracks</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Kiss Goddess</td>
+    <td>https://kissgoddess.com/</td>
+    <td>Galleries, Models</td>
     <td></td>
 </tr>
 <tr>
@@ -470,6 +488,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>meme.museum</td>
+    <td>https://meme.museum/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>My Hentai Gallery</td>
     <td>https://myhentaigallery.com/</td>
     <td>Galleries</td>
@@ -509,7 +533,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Niconico Seiga</td>
     <td>https://seiga.nicovideo.jp/</td>
     <td>individual Images, User Profiles</td>
-    <td>Required</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
     <td>nijie</td>
@@ -568,7 +592,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Pinterest</td>
     <td>https://www.pinterest.com/</td>
-    <td>Pins, pin.it Links, related Pins, Search Results, Sections, User Profiles</td>
+    <td>Created Pins, Pins, pin.it Links, related Pins, Search Results, Sections, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -728,6 +752,18 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Telegraph</td>
+    <td>https://telegra.ph/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Toyhouse</td>
+    <td>https://toyhou.se/</td>
+    <td>Art, individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Tsumino</td>
     <td>https://www.tsumino.com/</td>
     <td>Galleries, Search Results</td>
@@ -749,6 +785,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Turboimagehost</td>
     <td>https://www.turboimagehost.com/</td>
     <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Twibooru</td>
+    <td>https://twibooru.org/</td>
+    <td>Galleries, Posts, Search Results</td>
     <td></td>
 </tr>
 <tr>

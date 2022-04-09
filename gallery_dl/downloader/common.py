@@ -34,5 +34,10 @@ class DownloaderBase():
         else:
             self.partdir = None
 
+        if (proxies := cfg("proxy")) is None:
+            self.proxies = job.extractor._proxies
+        else:
+            self.proxies = util.build_proxy_map(proxies, self.log)
+
     def download(self, url, pathfmt):
         """Write data from 'url' into the file specified by 'pathfmt'"""

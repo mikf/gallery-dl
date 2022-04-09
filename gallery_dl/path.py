@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,10 +10,8 @@
 
 import os
 import re
-import time
 import shutil
 import functools
-from email.utils import mktime_tz, parsedate_tz
 from . import util, formatter, exception
 
 WINDOWS = util.WINDOWS
@@ -327,10 +325,4 @@ class PathFormat():
 
         mtime = self.kwdict.get("_mtime")
         if mtime:
-            # Set file modification time
-            try:
-                if isinstance(mtime, str):
-                    mtime = mktime_tz(parsedate_tz(mtime))
-                os.utime(self.realpath, (time.time(), mtime))
-            except Exception:
-                pass
+            util.set_mtime(self.realpath, mtime)

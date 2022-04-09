@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,7 +16,7 @@ import logging
 import zipfile
 import tempfile
 import collections
-from datetime import datetime, timezone as tz
+from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import extractor, output, path  # noqa E402
@@ -345,7 +345,7 @@ class MtimeTest(BasePostprocessorTest):
         self.assertEqual(pp.key, "date")
 
     def test_mtime_datetime(self):
-        self._create(None, {"date": datetime(1980, 1, 1, tzinfo=tz.utc)})
+        self._create(None, {"date": datetime(1980, 1, 1)})
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 

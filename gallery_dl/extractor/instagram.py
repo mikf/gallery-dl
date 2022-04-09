@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2018-2020 Leonardo Taccari
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -43,6 +43,7 @@ class InstagramExtractor(Extractor):
         self.login()
         data = self.metadata()
         videos = self.config("videos", True)
+        previews = self.config("previews", False)
         video_headers = {"User-Agent": "Mozilla/5.0"}
 
         for post in self.posts():
@@ -56,14 +57,18 @@ class InstagramExtractor(Extractor):
 
             yield Message.Directory, post
             for file in files:
-                url = file.get("video_url")
-                if not url:
-                    url = file["display_url"]
-                elif not videos:
-                    continue
-                else:
-                    file["_http_headers"] = video_headers
                 file.update(post)
+
+                url = file.get("video_url")
+                if url:
+                    if videos:
+                        file["_http_headers"] = video_headers
+                        text.nameext_from_url(url, file)
+                        yield Message.Url, url, file
+                    if not previews:
+                        continue
+
+                url = file["display_url"]
                 yield Message.Url, url, text.nameext_from_url(url, file)
 
     def metadata(self):

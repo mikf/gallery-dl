@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -41,9 +41,9 @@ class BooruExtractor(BaseExtractor):
                 page_html = self._extended_tags(post)
             if notes:
                 self._notes(post, page_html)
-            self._prepare(post)
-            post.update(data)
             text.nameext_from_url(url, post)
+            post.update(data)
+            self._prepare(post)
 
             yield Message.Directory, post
             yield Message.Url, url, post

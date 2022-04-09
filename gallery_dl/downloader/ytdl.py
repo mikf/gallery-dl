@@ -25,6 +25,7 @@ class YoutubeDLDownloader(DownloaderBase):
             "retries": retries+1 if retries >= 0 else float("inf"),
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
+            "proxy": self.proxies.get("http") if self.proxies else None,
         }
 
         self.ytdl_instance = None

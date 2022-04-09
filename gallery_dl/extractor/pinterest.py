@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2021 Mike Fährmann
+# Copyright 2016-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,8 +20,8 @@ BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
     category = "pinterest"
-    filename_fmt = "{category}_{id}.{extension}"
-    archive_fmt = "{id}"
+    filename_fmt = "{category}_{id}{media_id:?_//}.{extension}"
+    archive_fmt = "{id}{media_id}"
     root = "https://www.pinterest.com"
 
     def __init__(self, match):
@@ -35,28 +35,39 @@ class PinterestExtractor(Extractor):
 
         yield Message.Directory, data
         for pin in self.pins():
-
-            try:
-                media = self._media_from_pin(pin)
-            except Exception:
-                self.log.debug("Unable to fetch download URL for pin %s",
-                               pin.get("id"))
-                continue
-
-            if not videos and media.get("duration") is not None:
-                continue
-
             pin.update(data)
-            pin.update(media)
-            url = media["url"]
-            text.nameext_from_url(url, pin)
 
-            if pin["extension"] == "m3u8":
-                url = "ytdl:" + url
-                pin["extension"] = "mp4"
-                pin["_ytdl_extra"] = {"protocol": "m3u8_native"}
+            carousel_data = pin.get("carousel_data")
+            if carousel_data:
+                for num, slot in enumerate(carousel_data["carousel_slots"], 1):
+                    slot["media_id"] = slot.pop("id")
+                    pin.update(slot)
+                    pin["num"] = num
+                    size, image = next(iter(slot["images"].items()))
+                    url = image["url"].replace("/" + size + "/", "/originals/")
+                    yield Message.Url, url, text.nameext_from_url(url, pin)
 
-            yield Message.Url, url, pin
+            else:
+                try:
+                    media = self._media_from_pin(pin)
+                except Exception:
+                    self.log.debug("Unable to fetch download URL for pin %s",
+                                   pin.get("id"))
+                    continue
+
+                if videos or media.get("duration") is None:
+                    pin.update(media)
+                    pin["num"] = 0
+                    pin["media_id"] = ""
+
+                    url = media["url"]
+                    text.nameext_from_url(url, pin)
+
+                    if pin["extension"] == "m3u8":
+                        url = "ytdl:" + url
+                        pin["extension"] = "mp4"
+
+                    yield Message.Url, url, pin
 
     def metadata(self):
         """Return general metadata"""
@@ -124,7 +135,8 @@ class PinterestBoardExtractor(PinterestExtractor):
     subcategory = "board"
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/(?!_saved)([^/?#&]+)/?$"
+    pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#&]+)"
+               "/(?!_saved|_created)([^/?#&]+)/?$")
     test = (
         ("https://www.pinterest.com/g1952849/test-/", {
             "pattern": r"https://i\.pinimg\.com/originals/",
@@ -190,6 +202,28 @@ class PinterestUserExtractor(PinterestExtractor):
             if url:
                 board["_extractor"] = PinterestBoardExtractor
                 yield Message.Queue, self.root + url, board
+
+
+class PinterestCreatedExtractor(PinterestExtractor):
+    """Extractor for a user's created pins"""
+    subcategory = "created"
+    directory_fmt = ("{category}", "{user}")
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/_created/?$"
+    test = ("https://www.pinterest.com/amazon/_created", {
+        "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
+                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
+        "count": 10,
+    })
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self, match)
+        self.user = text.unquote(match.group(1))
+
+    def metadata(self):
+        return {"user": self.user}
+
+    def pins(self):
+        return self.api.user_activity_pins(self.user)
 
 
 class PinterestSectionExtractor(PinterestExtractor):
@@ -384,6 +418,16 @@ class PinterestAPI():
         """Yield related pins of a specific board"""
         options = {"board_id": board_id, "add_vase": True}
         return self._pagination("BoardRelatedPixieFeed", options)
+
+    def user_activity_pins(self, user):
+        """Yield pins created by 'user'"""
+        options = {
+            "exclude_add_pin_rep": True,
+            "field_set_key"      : "grid_item",
+            "is_own_profile_pins": False,
+            "username"           : user,
+        }
+        return self._pagination("UserActivityPins", options)
 
     def search(self, query):
         """Yield pins from searches"""

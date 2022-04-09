@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -70,6 +70,15 @@ class PatreonExtractor(Extractor):
             if url:
                 name = image.get("file_name") or self._filename(url) or url
                 yield "image", url, name
+
+    def _image_large(self, post):
+        image = post.get("image")
+        if image:
+            url = image.get("large_url")
+            if url:
+                name = image.get("file_name") or self._filename(url) or url
+                return (("image_large", url, name),)
+        return ()
 
     def _attachments(self, post):
         for attachment in post["attachments"]:
@@ -212,10 +221,11 @@ class PatreonExtractor(Extractor):
 
     def _build_file_generators(self, filetypes):
         if filetypes is None:
-            return (self._images, self._attachments,
-                    self._postfile, self._content)
+            return (self._images, self._image_large,
+                    self._attachments, self._postfile, self._content)
         genmap = {
             "images"     : self._images,
+            "image_large": self._image_large,
             "attachments": self._attachments,
             "postfile"   : self._postfile,
             "content"    : self._content,

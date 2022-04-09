@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -64,7 +64,7 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
         self.slug = extr('vm.IndexName = "', '"')
 
         data = self._transform_chapter(data)
-        data["manga"] = extr('vm.SeriesName = "', '"')
+        data["manga"] = text.unescape(extr('vm.SeriesName = "', '"'))
         return data
 
     def images(self, page):
