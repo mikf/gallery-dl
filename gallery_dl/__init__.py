@@ -219,6 +219,10 @@ def main():
                     cnt, "entry" if cnt == 1 else "entries", cache._path(),
                 )
         elif args.config:
+            if not args.load_config:
+                del config._default_configs[:]
+            if args.cfgfiles:
+                config._default_configs.extend(args.cfgfiles)
             if args.config == "init":
                 return config.config_init()
             if args.config == "open":
