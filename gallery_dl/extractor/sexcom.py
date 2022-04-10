@@ -87,7 +87,10 @@ class SexcomExtractor(Extractor):
                 data["extension"] = None
                 data["url"] = "ytdl:" + src
         else:
-            data["url"] = text.unescape(extr(' src="', '"').partition("?")[0])
+            data["_http_validate"] = _check_empty
+            url = text.unescape(extr(' src="', '"'))
+            data["url"] = url.partition("?")[0]
+            data["_fallback"] = (url,)
             text.nameext_from_url(data["url"], data)
 
         data["uploader"] = extr('itemprop="author">', '<')
@@ -247,3 +250,7 @@ class SexcomSearchExtractor(SexcomExtractor):
     def pins(self):
         url = "{}/{}".format(self.root, self.path)
         return self._pagination(url)
+
+
+def _check_empty(response):
+    return response.headers.get("content-length") != "0"
