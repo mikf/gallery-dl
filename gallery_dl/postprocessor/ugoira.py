@@ -215,7 +215,7 @@ class UgoiraPP(PostProcessor):
     def _finalize_mkvmerge(self, pathfmt, tempdir):
         args = [
             self.mkvmerge,
-            "-o", self._realpath,
+            "-o", pathfmt.path,  # mkvmerge does not support "raw" paths
             "--timecodes", "0:" + self._write_mkvmerge_timecodes(tempdir),
         ]
         if self.extension == "webm":
