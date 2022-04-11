@@ -1294,7 +1294,10 @@ class TwitterAPI():
 
         if "video" in tweet:
             video = tweet["video"]
-            del video["variants"][:-1]
+            video["variants"] = (max(
+                (v for v in video["variants"] if v["type"] == "video/mp4"),
+                key=lambda v: int(v["src"].split("/")[-2].partition("x")[0])
+            ),)
             video["variants"][0]["url"] = video["variants"][0]["src"]
             tweet["extended_entities"] = {"media": [{
                 "video_info"   : video,
