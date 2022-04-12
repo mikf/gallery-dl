@@ -3275,12 +3275,11 @@ Default
 Description
     FFmpeg demuxer to read and process input files with. Possible values are
 
-    * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes)
-    * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, not usable on Windows)
+    * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes for non-uniform frame delays)
+    * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, requires nanosecond file timestamps, i.e. no Windows or macOS)
     * "mkvmerge" (accurate timecodes, only WebM or MKV, requires `mkvmerge <ugoira.mkvmerge-location_>`__)
 
-    `"auto"` will select `mkvmerge` if possible and fall back to `image2` or
-    `concat` depending on the local operating system.
+    `"auto"` will select `mkvmerge` if available and fall back to `concat` otherwise.
 
 
 ugoira.ffmpeg-location
