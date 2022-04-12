@@ -49,7 +49,7 @@ class UgoiraPP(PostProcessor):
                     mkvmerge or shutil.which("mkvmerge")):
                 demuxer = "mkvmerge"
             else:
-                demuxer = "concat" if util.WINDOWS else "image2"
+                demuxer = "concat"
 
         if demuxer == "mkvmerge":
             self._process = self._process_mkvmerge
