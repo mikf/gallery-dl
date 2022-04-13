@@ -567,7 +567,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>PhotoVogue</td>
-    <td>https://www.vogue.it/en/photovogue/</td>
+    <td>https://www.vogue.com/photovogue/</td>
     <td>User Profiles</td>
     <td></td>
 </tr>
