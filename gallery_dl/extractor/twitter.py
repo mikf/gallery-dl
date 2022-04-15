@@ -1291,12 +1291,20 @@ class TwitterAPI():
 
         tweet["user"]["description"] = ""
         tweet["user"]["entities"] = {"description": {}}
+        tweet["user_id_str"] = tweet["user"]["id_str"]
+
+        if tweet["id_str"] != tweet_id:
+            tweet["retweeted_status_id_str"] = tweet["id_str"]
+            tweet["id_str"] = retweet_id = tweet_id
+        else:
+            retweet_id = None
 
         if "video" in tweet:
             video = tweet["video"]
             video["variants"] = (max(
                 (v for v in video["variants"] if v["type"] == "video/mp4"),
-                key=lambda v: int(v["src"].split("/")[-2].partition("x")[0])
+                key=lambda v: text.parse_int(
+                    v["src"].split("/")[-2].partition("x")[0])
             ),)
             video["variants"][0]["url"] = video["variants"][0]["src"]
             tweet["extended_entities"] = {"media": [{
@@ -1316,4 +1324,5 @@ class TwitterAPI():
             "rest_id": tweet["id_str"],
             "legacy" : tweet,
             "user"   : tweet["user"],
+            "_retweet_id_str": retweet_id,
         }
