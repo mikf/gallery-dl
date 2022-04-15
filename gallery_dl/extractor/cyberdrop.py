@@ -10,7 +10,7 @@ from . import lolisafe
 from .. import text
 
 
-class CyberdropAlbumExtractor(lolisafe.LolisafelbumExtractor):
+class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
     category = "cyberdrop"
     root = "https://cyberdrop.me"
     pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.me/a/([^/?#]+)"
