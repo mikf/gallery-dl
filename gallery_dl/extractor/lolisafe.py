@@ -25,7 +25,7 @@ BASE_PATTERN = LolisafeExtractor.update({
 })
 
 
-class LolisafelbumExtractor(LolisafeExtractor):
+class LolisafeAlbumExtractor(LolisafeExtractor):
     subcategory = "album"
     pattern = BASE_PATTERN + "/a/([^/?#]+)"
     test = (
