@@ -48,7 +48,7 @@ class ReadcomiconlineBase():
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     """Extractor for comic-issues from readcomiconline.li"""
     subcategory = "issue"
-    pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?id=(\d+))"
+    pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?)([^#]+)"
     test = ("https://readcomiconline.li/Comic/W-i-t-c-h/Issue-130?id=22289", {
         "url": "30d29c5afc65043bfd384c010257ec2d0ecbafa6",
         "keyword": "2d9ec81ce1b11fac06ebf96ce33cdbfca0e85eb5",
@@ -56,8 +56,18 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, match)
-        self.gallery_url += "&quality=" + self.config("quality", "hq")
-        self.issue_id = match.group(2)
+
+        params = text.parse_query(match.group(2))
+        quality = self.config("quality")
+
+        if quality is None or quality == "auto":
+            if "quality" not in params:
+                params["quality"] = "hq"
+        else:
+            params["quality"] = str(quality)
+
+        self.gallery_url += "&".join(k + "=" + v for k, v in params.items())
+        self.issue_id = params.get("id")
 
     def metadata(self, page):
         comic, pos = text.extract(page, "   - Read\r\n    ", "\r\n")

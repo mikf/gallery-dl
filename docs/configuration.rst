@@ -1874,6 +1874,19 @@ Description
     * ``"wait``: Ask the user to solve the CAPTCHA and wait.
 
 
+extractor.readcomiconline.quality
+---------------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Sets the ``quality`` query parameter of issue pages. (``"lq"`` or ``"hq"``)
+
+    ``"auto"`` uses the quality parameter of the input URL
+    or ``"hq"`` if not present.
+
+
 extractor.reddit.comments
 -------------------------
 Type
