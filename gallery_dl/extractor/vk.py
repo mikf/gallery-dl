@@ -76,8 +76,8 @@ class VkPhotosExtractor(VkExtractor):
                r"|(?!album-?\d+_)([^/?#]+))")
     test = (
         ("https://vk.com/id398982326", {
-            "pattern": r"https://sun\d+-\d+\.userapi\.com/sun\d+-\d+"
-                       r"/c\d+/v\d+/[0-9a-f]+/[\w-]+\.jpg",
+            "pattern": r"https://sun\d+-\d+\.userapi\.com"
+                       r"/\w+/v\d+/[0-9a-f]+/[\w-]+\.jpg",
             "count": ">= 35",
             "keywords": {
                 "id": r"re:\d+",
@@ -146,8 +146,8 @@ class VkAlbumExtractor(VkExtractor):
     directory_fmt = ("{category}", "{user[id]}", "{album[id]}")
     pattern = BASE_PATTERN + r"/album(-?\d+)_(\d+)$"
     test = (
-        ("https://vk.com/album221469416_0", {
-            "count": 3,
+        ("https://vk.com/album232175027_00", {
+            "count": 8,
         }),
         ("https://vk.com/album-165740836_281339889", {
             "count": 12,
