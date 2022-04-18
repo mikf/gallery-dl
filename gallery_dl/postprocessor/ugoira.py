@@ -137,6 +137,8 @@ class UgoiraPP(PostProcessor):
                 self.log.error("Unable to invoke FFmpeg (%s: %s)",
                                exc.__class__.__name__, exc)
                 pathfmt.realpath = pathfmt.temppath
+            except Exception:
+                pathfmt.realpath = pathfmt.temppath
             else:
                 if self.mtime:
                     mtime = pathfmt.kwdict.get("_mtime")
@@ -150,7 +152,13 @@ class UgoiraPP(PostProcessor):
     def _exec(self, args):
         self.log.debug(args)
         out = None if self.output else subprocess.DEVNULL
-        return subprocess.Popen(args, stdout=out, stderr=out).wait()
+        retcode = subprocess.Popen(args, stdout=out, stderr=out).wait()
+        if retcode:
+            print()
+            self.log.error("Non-zero exit status when running %s (%s)",
+                           args, retcode)
+            raise ValueError()
+        return retcode
 
     def _process_concat(self, pathfmt, tempdir):
         rate_in, rate_out = self.calculate_framerate(self._frames)
