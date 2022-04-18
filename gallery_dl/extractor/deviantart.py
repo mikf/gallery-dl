@@ -1018,6 +1018,7 @@ class DeviantartOAuthAPI():
 
         self.folders = extractor.config("folders", False)
         self.metadata = extractor.extra or extractor.config("metadata", False)
+        self.strategy = extractor.config("pagination")
 
         self.client_id = extractor.config("client-id")
         if self.client_id:
@@ -1309,14 +1310,20 @@ class DeviantartOAuthAPI():
                     self._folders(results)
             yield from results
 
-            if not data["has_more"]:
+            if not data["has_more"] and (
+                    self.strategy != "manual" or not results):
                 return
+
             if "next_cursor" in data:
                 params["offset"] = None
                 params["cursor"] = data["next_cursor"]
-            else:
+            elif data["next_offset"] is not None:
                 params["offset"] = data["next_offset"]
                 params["cursor"] = None
+            else:
+                if params.get("offset") is None:
+                    return
+                params["offset"] = int(params["offset"]) + len(results)
 
     def _pagination_list(self, endpoint, params, key="results"):
         result = []

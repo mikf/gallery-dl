@@ -1077,6 +1077,19 @@ Description
     everything else (archives, etc.).
 
 
+extractor.deviantart.pagination
+-------------------------------
+Type
+    ``string``
+Default
+    ``"api"``
+Description
+    Controls when to stop paginating over API results.
+
+    * ``"api"``: Trust the API and stop when ``has_more`` is ``false``.
+    * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
+
+
 extractor.deviantart.refresh-token
 ----------------------------------
 Type
