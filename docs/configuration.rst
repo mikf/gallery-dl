@@ -1788,6 +1788,16 @@ Description
     Download user avatars.
 
 
+extractor.pixiv.user.background
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download user background banners.
+
+
 extractor.pixiv.user.metadata
 -----------------------------
 Type

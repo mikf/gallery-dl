@@ -100,7 +100,7 @@ class PixivExtractor(Extractor):
 
 
 class PixivUserExtractor(PixivExtractor):
-    """Extractor for works of a pixiv-user"""
+    """Extractor for works of a pixiv user"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:"
                r"(?:en/)?users/(\d+)(?:/(?:artworks|illustrations|manga)"
@@ -120,10 +120,16 @@ class PixivUserExtractor(PixivExtractor):
           "&tag=%E6%89%8B%E3%81%B6%E3%82%8D"), {
             "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
         }),
-        # avatar (#595, 623)
+        # avatar (#595, #623, #1124)
         ("https://www.pixiv.net/en/users/173530", {
             "options": (("avatar", True),),
             "content": "4e57544480cc2036ea9608103e8f024fa737fe66",
+            "range": "1",
+        }),
+        # background (#623, #1124, #2495)
+        ("https://www.pixiv.net/en/users/194921", {
+            "options": (("background", True),),
+            "content": "aeda3536003ea3002f70657cb93c5053f26f5843",
             "range": "1",
         }),
         # deleted account
@@ -154,7 +160,7 @@ class PixivUserExtractor(PixivExtractor):
 
     def metadata(self):
         if self.config("metadata"):
-            return {"user": self.api.user_detail(self.user_id)}
+            return {"user": self.api.user_detail(self.user_id)["user"]}
         return {}
 
     def works(self):
@@ -167,28 +173,54 @@ class PixivUserExtractor(PixivExtractor):
                 if tag in [t["name"].lower() for t in work["tags"]]
             )
 
-        if self.config("avatar"):
-            user = self.api.user_detail(self.user_id)
-            url = user["profile_image_urls"]["medium"].replace("_170.", ".")
-            avatar = {
-                "create_date"     : None,
-                "height"          : 0,
-                "id"              : "avatar",
-                "image_urls"      : None,
-                "meta_pages"      : (),
-                "meta_single_page": {"original_image_url": url},
-                "page_count"      : 1,
-                "sanity_level"    : 0,
-                "tags"            : (),
-                "title"           : "avatar",
-                "type"            : "avatar",
-                "user"            : user,
-                "width"           : 0,
-                "x_restrict"      : 0,
-            }
-            works = itertools.chain((avatar,), works)
+        avatar = self.config("avatar")
+        background = self.config("background")
+        if avatar or background:
+            work_list = []
+            detail = self.api.user_detail(self.user_id)
+            user = detail["user"]
+
+            if avatar:
+                url = user["profile_image_urls"]["medium"]
+                work_list.append((self._make_work(
+                    "avatar", url.replace("_170.", "."), user),))
+
+            if background:
+                url = detail["profile"]["background_image_url"]
+                if url:
+                    if "/c/" in url:
+                        parts = url.split("/")
+                        del parts[3:5]
+                        url = "/".join(parts)
+                    url = url.replace("_master1200.", ".")
+                    work = self._make_work("background", url, user)
+                    if url.endswith(".jpg"):
+                        work["_fallback"] = (url[:-4] + ".png",)
+                    work_list.append((work,))
+
+            work_list.append(works)
+            works = itertools.chain.from_iterable(work_list)
 
         return works
+
+    @staticmethod
+    def _make_work(kind, url, user):
+        return {
+            "create_date"     : None,
+            "height"          : 0,
+            "id"              : kind,
+            "image_urls"      : None,
+            "meta_pages"      : (),
+            "meta_single_page": {"original_image_url": url},
+            "page_count"      : 1,
+            "sanity_level"    : 0,
+            "tags"            : (),
+            "title"           : kind,
+            "type"            : kind,
+            "user"            : user,
+            "width"           : 0,
+            "x_restrict"      : 0,
+        }
 
 
 class PixivMeExtractor(PixivExtractor):
@@ -350,7 +382,7 @@ class PixivFavoriteExtractor(PixivExtractor):
 
     def metadata(self):
         if self.user_id:
-            user = self.api.user_detail(self.user_id)
+            user = self.api.user_detail(self.user_id)["user"]
         else:
             self.api.login()
             user = self.api.user
@@ -730,7 +762,7 @@ class PixivAppAPI():
 
     def user_detail(self, user_id):
         params = {"user_id": user_id}
-        return self._call("v1/user/detail", params)["user"]
+        return self._call("v1/user/detail", params)
 
     def user_following(self, user_id, restrict="public"):
         params = {"user_id": user_id, "restrict": restrict}
