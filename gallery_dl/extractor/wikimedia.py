@@ -24,7 +24,7 @@ class WikimediaArticleExtractor(Extractor):
     category = "wikimedia"
     subcategory = "article"
     filename_fmt = "{filename}.{extension}"
-    archive_fmt = "{filename}"
+    archive_fmt = "a_{sha1}"
     pattern = r"https?://([a-z]{2,})\.wikipedia\.org/wiki/([^#/\?]+)"
     directory_fmt = ("{category}", "{page}")
     test = (
@@ -96,7 +96,7 @@ class WikimediaCategoryExtractor(Extractor):
     category = "wikimedia"
     subcategory = "category"
     filename_fmt = "{filename}.{extension}"
-    archive_fmt = "{filename}"
+    archive_fmt = "c_{sha1}"
     pattern = r"https?://commons.wikimedia.org/wiki/Category:([^#/\?]+)"
     directory_fmt = ("{category}", "{page}")
 
