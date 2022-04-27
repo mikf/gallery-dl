@@ -603,17 +603,20 @@ class BaseExtractor(Extractor):
 
     def __init__(self, match):
         if not self.category:
-            for index, group in enumerate(match.groups()):
-                if group is not None:
-                    if index:
-                        self.category, self.root = self.instances[index-1]
-                        if not self.root:
-                            self.root = text.root_from_url(match.group(0))
-                    else:
-                        self.root = group
-                        self.category = group.partition("://")[2]
-                    break
+            self._init_category(match)
         Extractor.__init__(self, match)
+
+    def _init_category(self, match):
+        for index, group in enumerate(match.groups()):
+            if group is not None:
+                if index:
+                    self.category, self.root = self.instances[index-1]
+                    if not self.root:
+                        self.root = text.root_from_url(match.group(0))
+                else:
+                    self.root = group
+                    self.category = group.partition("://")[2]
+                break
 
     @classmethod
     def update(cls, instances):
