@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.21.2 - 2022-04-27
+### Additions
+- [deviantart] implement `pagination` option ([#2488](https://github.com/mikf/gallery-dl/issues/2488))
+- [pixiv] implement `background` option ([#623](https://github.com/mikf/gallery-dl/issues/623), [#1124](https://github.com/mikf/gallery-dl/issues/1124), [#2495](https://github.com/mikf/gallery-dl/issues/2495))
+- [postprocessor:ugoira] report ffmpeg/mkvmerge errors ([#2487](https://github.com/mikf/gallery-dl/issues/2487))
+### Fixes
+- [cyberdrop] match cyberdrop.to URLs ([#2496](https://github.com/mikf/gallery-dl/issues/2496))
+- [e621] fix 403 errors ([#2533](https://github.com/mikf/gallery-dl/issues/2533))
+- [issuu] fix extraction ([#2483](https://github.com/mikf/gallery-dl/issues/2483))
+- [mangadex] download from available chapters despite `externalUrl` ([#2503](https://github.com/mikf/gallery-dl/issues/2503))
+- [photovogue] update domain and api endpoint ([#2494](https://github.com/mikf/gallery-dl/issues/2494))
+- [sexcom] add fallback for empty files ([#2485](https://github.com/mikf/gallery-dl/issues/2485))
+- [twitter] improve syndication video selection ([#2354](https://github.com/mikf/gallery-dl/issues/2354))
+- [twitter] fix various syndication issues ([#2499](https://github.com/mikf/gallery-dl/issues/2499), [#2354](https://github.com/mikf/gallery-dl/issues/2354))
+- [weibo] fix infinite retries for deleted accounts ([#2521](https://github.com/mikf/gallery-dl/issues/2521))
+- [vk] fix extraction ([#2512](https://github.com/mikf/gallery-dl/issues/2512))
+- [postprocessor:ugoira] use compatible paths with mkvmerge ([#2487](https://github.com/mikf/gallery-dl/issues/2487))
+- [postprocessor:ugoira] do not auto-select the `image2` demuxer ([#2492](https://github.com/mikf/gallery-dl/issues/2492))
+
 ## 1.21.1 - 2022-04-08
 ### Additions
 - [gofile] add gofile.io extractor ([#2364](https://github.com/mikf/gallery-dl/issues/2364))
