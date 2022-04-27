@@ -105,6 +105,10 @@ class WeiboUserExtractor(WeiboExtractor):
         ("https://m.weibo.cn/u/2314621010", {
             "range": "1-30",
         }),
+        # deleted (#2521)
+        ("https://weibo.com/u/7500315942", {
+            "count": 0,
+        }),
         ("https://m.weibo.cn/profile/2314621010"),
         ("https://m.weibo.cn/p/2304132314621010_-_WEIBO_SECOND_PROFILE_WEIBO"),
         ("https://www.weibo.com/p/1003062314621010/home"),
@@ -132,14 +136,24 @@ class WeiboUserExtractor(WeiboExtractor):
         while True:
             response = self.request(url, params=params, headers=headers)
             headers["X-XSRF-TOKEN"] = response.cookies.get("XSRF-TOKEN")
-            data = response.json()["data"]
 
+            data = response.json()
+            if not data.get("ok"):
+                self.log.debug(response.content)
+                if "since_id" not in params:  # first iteration
+                    raise exception.StopExtraction(
+                        '"%s"', data.get("msg") or "unknown error")
+
+            data = data["data"]
             for card in data["cards"]:
                 if "mblog" in card:
                     yield card["mblog"]
 
             info = data.get("cardlistInfo")
             if not info:
+                # occasionally weibo returns an empty response
+                # repeating the same request usually/eventually yields
+                # the correct response.
                 continue
 
             params["since_id"] = sid = info.get("since_id")
