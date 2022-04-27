@@ -461,6 +461,8 @@ def compile_expression(expr, name="<expr>", globals=GLOBALS):
 
 def build_duration_func(duration, min=0.0):
     if not duration:
+        if min:
+            return lambda: min
         return None
 
     if isinstance(duration, str):
