@@ -385,8 +385,6 @@ class TestOther(unittest.TestCase):
             expr()
 
     def test_build_duration_func(self, f=util.build_duration_func):
-        for v in (0, 0.0, "", None, (), []):
-            self.assertIsNone(f(v))
 
         def test_single(df, v):
             for _ in range(10):
@@ -397,6 +395,12 @@ class TestOther(unittest.TestCase):
                 v = df()
                 self.assertGreaterEqual(v, lower)
                 self.assertLessEqual(v, upper)
+
+        for v in (0, 0.0, "", None, (), []):
+            self.assertIsNone(f(v))
+
+        for v in (0, 0.0, "", None, (), []):
+            test_single(f(v, 1.0), 1.0)
 
         test_single(f(3), 3)
         test_single(f(3.0), 3.0)
