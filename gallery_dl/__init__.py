@@ -116,9 +116,12 @@ def main():
         if args.yamlfiles:
             config.load(args.yamlfiles, strict=True, fmt="yaml")
         if args.filename:
-            if args.filename == "/O":
-                args.filename = "{filename}.{extension}"
-            config.set((), "filename", args.filename)
+            filename = args.filename
+            if filename == "/O":
+                filename = "{filename}.{extension}"
+            elif filename.startswith("\\f"):
+                filename = "\f" + filename[2:]
+            config.set((), "filename", filename)
         if args.directory:
             config.set((), "base-directory", args.directory)
             config.set((), "directory", ())
