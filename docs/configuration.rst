@@ -613,9 +613,7 @@ Type
 Example
     ``"{id}_{offset}"``
 Description
-    An alternative `format string`__ to build archive IDs with.
-
-.. __: https://docs.python.org/3/library/string.html#format-string-syntax
+    An alternative `format string`_ to build archive IDs with.
 
 
 extractor.*.archive-prefix
