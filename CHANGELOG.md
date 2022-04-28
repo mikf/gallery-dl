@@ -14,8 +14,8 @@
 - [sexcom] add fallback for empty files ([#2485](https://github.com/mikf/gallery-dl/issues/2485))
 - [twitter] improve syndication video selection ([#2354](https://github.com/mikf/gallery-dl/issues/2354))
 - [twitter] fix various syndication issues ([#2499](https://github.com/mikf/gallery-dl/issues/2499), [#2354](https://github.com/mikf/gallery-dl/issues/2354))
-- [weibo] fix infinite retries for deleted accounts ([#2521](https://github.com/mikf/gallery-dl/issues/2521))
 - [vk] fix extraction ([#2512](https://github.com/mikf/gallery-dl/issues/2512))
+- [weibo] fix infinite retries for deleted accounts ([#2521](https://github.com/mikf/gallery-dl/issues/2521))
 - [postprocessor:ugoira] use compatible paths with mkvmerge ([#2487](https://github.com/mikf/gallery-dl/issues/2487))
 - [postprocessor:ugoira] do not auto-select the `image2` demuxer ([#2492](https://github.com/mikf/gallery-dl/issues/2492))
 
