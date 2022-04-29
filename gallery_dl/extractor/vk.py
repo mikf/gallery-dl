@@ -39,9 +39,15 @@ class VkExtractor(Extractor):
                 self.log.warning("no photo URL found (%s)", photo.get("id"))
                 continue
 
-            photo.update(data)
-            photo["url"], photo["width"], photo["height"] = photo[size]
+            try:
+                photo["url"], photo["width"], photo["height"] = photo[size]
+            except ValueError:
+                # photo without width/height entries (#2535)
+                photo["url"] = photo[size][0]
+                photo["width"] = photo["height"] = 0
+
             photo["id"] = photo["id"].rpartition("_")[2]
+            photo.update(data)
 
             text.nameext_from_url(photo["url"], photo)
             yield Message.Url, photo["url"], photo
@@ -105,7 +111,7 @@ class VkPhotosExtractor(VkExtractor):
             },
         }),
         ("https://vk.com/cosplayinrussia", {
-            "range": "25-35",
+            "range": "15-25",
             "keywords": {
                 "id": r"re:\d+",
                 "user": {
@@ -116,6 +122,11 @@ class VkPhotosExtractor(VkExtractor):
                     "nick": "Косплей | Cosplay 18+",
                 },
             },
+        }),
+        # photos without width/height (#2535)
+        ("https://vk.com/id76957806", {
+            "range": "1-5",
+            "count": 5,
         }),
         ("https://m.vk.com/albums398982326"),
         ("https://www.vk.com/id398982326?profile=1"),
