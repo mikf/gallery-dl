@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,6 +20,7 @@ class ArtstationExtractor(Extractor):
     filename_fmt = "{category}_{id}_{asset[id]}_{title}.{extension}"
     directory_fmt = ("{category}", "{userinfo[username]}")
     archive_fmt = "{asset[id]}"
+    browser = "firefox"
     root = "https://www.artstation.com"
 
     def __init__(self, match):
