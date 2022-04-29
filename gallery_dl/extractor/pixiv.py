@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,11 +10,10 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from ..cache import cache
+from ..cache import cache, memcache
 from datetime import datetime, timedelta
 import itertools
 import hashlib
-import time
 
 
 class PixivExtractor(Extractor):
@@ -735,66 +734,70 @@ class PixivAppAPI():
 
     def illust_detail(self, illust_id):
         params = {"illust_id": illust_id}
-        return self._call("v1/illust/detail", params)["illust"]
+        return self._call("/v1/illust/detail", params)["illust"]
 
     def illust_follow(self, restrict="all"):
         params = {"restrict": restrict}
-        return self._pagination("v2/illust/follow", params)
+        return self._pagination("/v2/illust/follow", params)
 
     def illust_ranking(self, mode="day", date=None):
         params = {"mode": mode, "date": date}
-        return self._pagination("v1/illust/ranking", params)
+        return self._pagination("/v1/illust/ranking", params)
 
     def illust_related(self, illust_id):
         params = {"illust_id": illust_id}
-        return self._pagination("v2/illust/related", params)
+        return self._pagination("/v2/illust/related", params)
 
     def search_illust(self, word, sort=None, target=None, duration=None,
                       date_start=None, date_end=None):
         params = {"word": word, "search_target": target,
                   "sort": sort, "duration": duration,
                   "start_date": date_start, "end_date": date_end}
-        return self._pagination("v1/search/illust", params)
+        return self._pagination("/v1/search/illust", params)
 
     def user_bookmarks_illust(self, user_id, tag=None, restrict="public"):
         params = {"user_id": user_id, "tag": tag, "restrict": restrict}
-        return self._pagination("v1/user/bookmarks/illust", params)
+        return self._pagination("/v1/user/bookmarks/illust", params)
 
+    @memcache()
     def user_detail(self, user_id):
         params = {"user_id": user_id}
-        return self._call("v1/user/detail", params)
+        return self._call("/v1/user/detail", params)
 
     def user_following(self, user_id, restrict="public"):
         params = {"user_id": user_id, "restrict": restrict}
-        return self._pagination("v1/user/following", params, "user_previews")
+        return self._pagination("/v1/user/following", params, "user_previews")
 
     def user_illusts(self, user_id):
         params = {"user_id": user_id}
-        return self._pagination("v1/user/illusts", params)
+        return self._pagination("/v1/user/illusts", params)
 
     def ugoira_metadata(self, illust_id):
         params = {"illust_id": illust_id}
-        return self._call("v1/ugoira/metadata", params)["ugoira_metadata"]
+        return self._call("/v1/ugoira/metadata", params)["ugoira_metadata"]
 
     def _call(self, endpoint, params=None):
-        url = "https://app-api.pixiv.net/" + endpoint
+        url = "https://app-api.pixiv.net" + endpoint
 
-        self.login()
-        response = self.extractor.request(url, params=params, fatal=False)
-        data = response.json()
+        while True:
+            self.login()
+            response = self.extractor.request(url, params=params, fatal=False)
+            data = response.json()
 
-        if "error" in data:
+            if "error" not in data:
+                return data
+
+            self.log.debug(data)
+
             if response.status_code == 404:
                 raise exception.NotFoundError()
 
             error = data["error"]
             if "rate limit" in (error.get("message") or "").lower():
-                self.log.info("Waiting two minutes for API rate limit reset.")
-                time.sleep(120)
-                return self._call(endpoint, params)
-            raise exception.StopExtraction("API request failed: %s", error)
+                self.extractor.wait(seconds=300)
+                continue
 
-        return data
+            raise exception.StopExtraction("API request failed: %s", error)
 
     def _pagination(self, endpoint, params, key="illusts"):
         while True:
