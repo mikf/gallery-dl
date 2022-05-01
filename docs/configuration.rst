@@ -1648,7 +1648,7 @@ Description
 
 
 extractor.nijie.include
-----------------------------
+-----------------------
 Type
     ``string`` or ``list`` of ``strings``
 Default
@@ -1658,7 +1658,7 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"illustration"``, ``"doujin"``, ``"favorite"``.
+    ``"illustration"``, ``"doujin"``, ``"favorite"``, ``"nuita"``.
 
     You can use ``"all"`` instead of listing all values separately.
 

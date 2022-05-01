@@ -538,7 +538,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>nijie</td>
     <td>https://nijie.info/</td>
-    <td>Doujin, Favorites, Illustrations, individual Images, User Profiles</td>
+    <td>Doujin, Favorites, Illustrations, individual Images, Nuita History, User Profiles</td>
     <td>Required</td>
 </tr>
 <tr>
