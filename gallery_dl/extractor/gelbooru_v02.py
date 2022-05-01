@@ -26,6 +26,9 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         except KeyError:
             self.api_root = self.root
 
+        if self.category == "realbooru":
+            self._file_url = self._file_url_realbooru
+
     def _api_request(self, params):
         url = self.api_root + "/index.php?page=dapi&s=post&q=index"
         return ElementTree.fromstring(self.request(url, params=params).text)
@@ -60,6 +63,14 @@ class GelbooruV02Extractor(booru.BooruExtractor):
     def _prepare(post):
         post["date"] = text.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")
+
+    def _file_url_realbooru(self, post):
+        url = post["file_url"]
+        if url.count("/") == 5:
+            md5 = post["md5"]
+            url = "{}/images/{}/{}/{}.{}".format(
+                self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
+        return url
 
     def _extended_tags(self, post, page=None):
         if not page:
@@ -213,7 +224,7 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
             "count": 2,
         }),
         ("https://realbooru.com/index.php?page=favorites&s=view&id=274", {
-            "count": 4,
+            "count": 2,
         }),
         ("https://tbib.org/index.php?page=favorites&s=view&id=7881", {
             "count": 3,
@@ -279,7 +290,8 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
             },
         }),
         ("https://realbooru.com/index.php?page=post&s=view&id=668483", {
-            "url": "2421b5b0e15d5e20f9067090a8b0fd4114d3e7d9",
+            "pattern": r"https://realbooru\.com/images/dc/b5"
+                       r"/dcb5c0ce9ec0bf74a6930608985f4719\.jpeg",
             "content": "7f5873ce3b6cd295ea2e81fcb49583098ea9c8da",
         }),
         ("https://tbib.org/index.php?page=post&s=view&id=9233957", {
