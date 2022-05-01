@@ -19,6 +19,7 @@ import hashlib
 class PixivExtractor(Extractor):
     """Base class for pixiv extractors"""
     category = "pixiv"
+    root = "https://www.pixiv.net"
     directory_fmt = ("{category}", "{user[id]} {user[account]}")
     filename_fmt = "{id}_p{num}.{extension}"
     archive_fmt = "{id}{suffix}.{extension}"
@@ -90,118 +91,6 @@ class PixivExtractor(Extractor):
                     work["suffix"] = "_p{:02}".format(work["num"])
                     yield Message.Url, url, text.nameext_from_url(url, work)
 
-    def works(self):
-        """Return an iterable containing all relevant 'work'-objects"""
-
-    def metadata(self):
-        """Collect metadata for extractor-job"""
-        return {}
-
-
-class PixivUserExtractor(PixivExtractor):
-    """Extractor for works of a pixiv user"""
-    subcategory = "user"
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:"
-               r"(?:en/)?users/(\d+)(?:/(?:artworks|illustrations|manga)"
-               r"(?:/([^/?#]+))?)?/?(?:$|[?#])"
-               r"|member(?:_illust)?\.php\?id=(\d+)(?:&([^#]+))?"
-               r"|(?:u(?:ser)?/|(?:mypage\.php)?#id=)(\d+))")
-    test = (
-        ("https://www.pixiv.net/en/users/173530/artworks", {
-            "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
-        }),
-        # illusts with specific tag
-        (("https://www.pixiv.net/en/users/173530/artworks"
-          "/%E6%89%8B%E3%81%B6%E3%82%8D"), {
-            "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
-        }),
-        (("https://www.pixiv.net/member_illust.php?id=173530"
-          "&tag=%E6%89%8B%E3%81%B6%E3%82%8D"), {
-            "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
-        }),
-        # avatar (#595, #623, #1124)
-        ("https://www.pixiv.net/en/users/173530", {
-            "options": (("avatar", True),),
-            "content": "4e57544480cc2036ea9608103e8f024fa737fe66",
-            "range": "1",
-        }),
-        # background (#623, #1124, #2495)
-        ("https://www.pixiv.net/en/users/194921", {
-            "options": (("background", True),),
-            "content": "aeda3536003ea3002f70657cb93c5053f26f5843",
-            "range": "1",
-        }),
-        # deleted account
-        ("http://www.pixiv.net/member_illust.php?id=173531", {
-            "options": (("metadata", True),),
-            "exception": exception.NotFoundError,
-        }),
-        ("https://www.pixiv.net/en/users/173530"),
-        ("https://www.pixiv.net/en/users/173530/manga"),
-        ("https://www.pixiv.net/en/users/173530/illustrations"),
-        ("https://www.pixiv.net/member_illust.php?id=173530"),
-        ("https://www.pixiv.net/u/173530"),
-        ("https://www.pixiv.net/user/173530"),
-        ("https://www.pixiv.net/mypage.php#id=173530"),
-        ("https://www.pixiv.net/#id=173530"),
-        ("https://touch.pixiv.net/member_illust.php?id=173530"),
-    )
-
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        u1, t1, u2, t2, u3 = match.groups()
-        if t1:
-            t1 = text.unquote(t1)
-        elif t2:
-            t2 = text.parse_query(t2).get("tag")
-        self.user_id = u1 or u2 or u3
-        self.tag = t1 or t2
-
-    def metadata(self):
-        if self.config("metadata"):
-            return {"user": self.api.user_detail(self.user_id)["user"]}
-        return {}
-
-    def works(self):
-        works = self.api.user_illusts(self.user_id)
-
-        if self.tag:
-            tag = self.tag.lower()
-            works = (
-                work for work in works
-                if tag in [t["name"].lower() for t in work["tags"]]
-            )
-
-        avatar = self.config("avatar")
-        background = self.config("background")
-        if avatar or background:
-            work_list = []
-            detail = self.api.user_detail(self.user_id)
-            user = detail["user"]
-
-            if avatar:
-                url = user["profile_image_urls"]["medium"]
-                work_list.append((self._make_work(
-                    "avatar", url.replace("_170.", "."), user),))
-
-            if background:
-                url = detail["profile"]["background_image_url"]
-                if url:
-                    if "/c/" in url:
-                        parts = url.split("/")
-                        del parts[3:5]
-                        url = "/".join(parts)
-                    url = url.replace("_master1200.", ".")
-                    work = self._make_work("background", url, user)
-                    if url.endswith(".jpg"):
-                        work["_fallback"] = (url[:-4] + ".png",)
-                    work_list.append((work,))
-
-            work_list.append(works)
-            works = itertools.chain.from_iterable(work_list)
-
-        return works
-
     @staticmethod
     def _make_work(kind, url, user):
         return {
@@ -220,6 +109,162 @@ class PixivUserExtractor(PixivExtractor):
             "width"           : 0,
             "x_restrict"      : 0,
         }
+
+    def works(self):
+        """Return an iterable containing all relevant 'work' objects"""
+
+    def metadata(self):
+        """Collect metadata for extractor job"""
+        return {}
+
+
+class PixivUserExtractor(PixivExtractor):
+    """Extractor for a pixiv user profile"""
+    subcategory = "user"
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:"
+               r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
+               r")(\d+)(?:$|[?#])")
+    test = (
+        ("https://www.pixiv.net/en/users/173530"),
+        ("https://www.pixiv.net/u/173530"),
+        ("https://www.pixiv.net/member.php?id=173530"),
+        ("https://www.pixiv.net/mypage.php#id=173530"),
+        ("https://www.pixiv.net/#id=173530"),
+    )
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self, match)
+        self.user_id = match.group(1)
+
+    def items(self):
+        default = []
+        if self.config("avatar"):
+            self.log.warning("'avatar' is deprecated, "
+                             "use \"include\": \"…,avatar\" instead")
+            default.append("avatar")
+        if self.config("background"):
+            self.log.warning("'background' is deprecated, "
+                             "use \"include\": \"…,background\" instead")
+            default.append("background")
+        default.append("artworks")
+
+        base = "{}/users/{}/".format(self.root, self.user_id)
+        return self._dispatch_extractors((
+            (PixivAvatarExtractor    , base + "avatar"),
+            (PixivBackgroundExtractor, base + "background"),
+            (PixivArtworksExtractor  , base + "artworks"),
+            (PixivFavoriteExtractor  , base + "bookmarks/artworks"),
+        ), default)
+
+
+class PixivArtworksExtractor(PixivExtractor):
+    """Extractor for artworks of a pixiv user"""
+    subcategory = "artworks"
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:"
+               r"(?:en/)?users/(\d+)/(?:artworks|illustrations|manga)"
+               r"(?:/([^/?#]+))?/?(?:$|[?#])"
+               r"|member_illust\.php\?id=(\d+)(?:&([^#]+))?)")
+    test = (
+        ("https://www.pixiv.net/en/users/173530/artworks", {
+            "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
+        }),
+        # illusts with specific tag
+        (("https://www.pixiv.net/en/users/173530/artworks"
+          "/%E6%89%8B%E3%81%B6%E3%82%8D"), {
+            "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
+        }),
+        (("https://www.pixiv.net/member_illust.php?id=173530"
+          "&tag=%E6%89%8B%E3%81%B6%E3%82%8D"), {
+            "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
+        }),
+        # deleted account
+        ("http://www.pixiv.net/member_illust.php?id=173531", {
+            "options": (("metadata", True),),
+            "exception": exception.NotFoundError,
+        }),
+        ("https://www.pixiv.net/en/users/173530/manga"),
+        ("https://www.pixiv.net/en/users/173530/illustrations"),
+        ("https://www.pixiv.net/member_illust.php?id=173530"),
+        ("https://touch.pixiv.net/member_illust.php?id=173530"),
+    )
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self, match)
+        u1, t1, u2, t2 = match.groups()
+        if t1:
+            t1 = text.unquote(t1)
+        elif t2:
+            t2 = text.parse_query(t2).get("tag")
+        self.user_id = u1 or u2
+        self.tag = t1 or t2
+
+    def metadata(self):
+        if self.config("metadata"):
+            return {"user": self.api.user_detail(self.user_id)["user"]}
+        return {}
+
+    def works(self):
+        works = self.api.user_illusts(self.user_id)
+
+        if self.tag:
+            tag = self.tag.lower()
+            works = (
+                work for work in works
+                if tag in [t["name"].lower() for t in work["tags"]]
+            )
+
+        return works
+
+
+class PixivAvatarExtractor(PixivExtractor):
+    """Extractor for pixiv avatars"""
+    subcategory = "avatar"
+    archive_fmt = "avatar_{user[id]}"
+    pattern = (r"(?:https?://)?(?:www\.)?pixiv\.net"
+               r"/(?:en/)?users/(\d+)/avatar")
+    test = ("https://www.pixiv.net/en/users/173530/avatar", {
+        "content": "4e57544480cc2036ea9608103e8f024fa737fe66",
+    })
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self, match)
+        self.user_id = match.group(1)
+
+    def works(self):
+        user = self.api.user_detail(self.user_id)["user"]
+        url = user["profile_image_urls"]["medium"].replace("_170.", ".")
+        return (self._make_work("avatar", url, user),)
+
+
+class PixivBackgroundExtractor(PixivExtractor):
+    """Extractor for pixiv background banners"""
+    subcategory = "background"
+    archive_fmt = "background_{user[id]}"
+    pattern = (r"(?:https?://)?(?:www\.)?pixiv\.net"
+               r"/(?:en/)?users/(\d+)/background")
+    test = ("https://www.pixiv.net/en/users/194921/background", {
+        "pattern": r"https://i\.pximg\.net/background/img/2021/01/30/16/12/02"
+                   r"/194921_af1f71e557a42f499213d4b9eaccc0f8\.jpg",
+    })
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self, match)
+        self.user_id = match.group(1)
+
+    def works(self):
+        detail = self.api.user_detail(self.user_id)
+        url = detail["profile"]["background_image_url"]
+        if not url:
+            return ()
+        if "/c/" in url:
+            parts = url.split("/")
+            del parts[3:5]
+            url = "/".join(parts)
+        url = url.replace("_master1200.", ".")
+        work = self._make_work("background", url, detail["user"])
+        if url.endswith(".jpg"):
+            work["_fallback"] = (url[:-4] + ".png",)
+        return (work,)
 
 
 class PixivMeExtractor(PixivExtractor):
@@ -311,10 +356,10 @@ class PixivFavoriteExtractor(PixivExtractor):
                r"|bookmark\.php)(?:\?([^#]*))?")
     test = (
         ("https://www.pixiv.net/en/users/173530/bookmarks/artworks", {
-            "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
+            "url": "85a3104eaaaf003c7b3947117ca2f1f0b1cfc949",
         }),
         ("https://www.pixiv.net/bookmark.php?id=173530", {
-            "url": "e717eb511500f2fa3497aaee796a468ecf685cc4",
+            "url": "85a3104eaaaf003c7b3947117ca2f1f0b1cfc949",
         }),
         # bookmarks with specific tag
         (("https://www.pixiv.net/en/users/3137110"
@@ -759,7 +804,7 @@ class PixivAppAPI():
         params = {"user_id": user_id, "tag": tag, "restrict": restrict}
         return self._pagination("/v1/user/bookmarks/illust", params)
 
-    @memcache()
+    @memcache(keyarg=1)
     def user_detail(self, user_id):
         params = {"user_id": user_id}
         return self._call("/v1/user/detail", params)

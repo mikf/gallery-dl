@@ -1776,28 +1776,28 @@ Description
     Download from video pins.
 
 
-extractor.pixiv.user.avatar
----------------------------
+extractor.pixiv.include
+-----------------------
 Type
-    ``bool``
+    * ``string``
+    * ``list`` of ``strings``
 Default
-    ``false``
+    ``"artworks"``
+Example
+    * ``"avatar,background,artworks"``
+    * ``["avatar", "background", "artworks"]``
 Description
-    Download user avatars.
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"artworks"``, ``"avatar"``, ``"background"``, ``"favorite"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
-extractor.pixiv.user.background
--------------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download user background banners.
-
-
-extractor.pixiv.user.metadata
------------------------------
+extractor.pixiv.artworks.metadata
+---------------------------------
 Type
     ``bool``
 Default
