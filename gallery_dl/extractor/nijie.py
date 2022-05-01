@@ -91,6 +91,10 @@ class NijieExtractor(AsynchronousMixin, Extractor):
                 "url": url,
             })
 
+    @staticmethod
+    def _extract_user_name(page):
+        return text.unescape(text.extract(page, "<br />", "<")[0] or "")
+
     def login(self):
         """Login and obtain session cookies"""
         if not self._check_cookies(self.cookienames):
@@ -119,9 +123,8 @@ class NijieExtractor(AsynchronousMixin, Extractor):
         while True:
             page = self.request(url, params=params, notfound="artist").text
 
-            if not self.user_name:
-                self.user_name = text.unescape(text.extract(
-                    page, '<br />', '<')[0] or "")
+            if self.user_name is None:
+                self.user_name = self._extract_user_name(page)
             yield from text.extract_iter(page, 'illust_id="', '"')
 
             if '<a rel="next"' not in page:
@@ -137,11 +140,12 @@ class NijieUserExtractor(NijieExtractor):
     test = ("https://nijie.info/members.php?id=44",)
 
     def items(self):
-        base = "{}/{{}}.php?id={}".format(self.root, self.user_id)
+        fmt = "{}/{{}}.php?id={}".format(self.root, self.user_id).format
         return self._dispatch_extractors((
-            (NijieIllustrationExtractor, base.format("members_illust")),
-            (NijieDoujinExtractor      , base.format("members_dojin")),
-            (NijieFavoriteExtractor    , base.format("user_like_illust_view")),
+            (NijieIllustrationExtractor, fmt("members_illust")),
+            (NijieDoujinExtractor      , fmt("members_dojin")),
+            (NijieFavoriteExtractor    , fmt("user_like_illust_view")),
+            (NijieNuitaExtractor       , fmt("history_nuita")),
         ), ("illustration", "doujin"))
 
 
@@ -215,6 +219,36 @@ class NijieFavoriteExtractor(NijieExtractor):
         data["user_id"] = self.user_id
         data["user_name"] = self.user_name
         return data
+
+
+class NijieNuitaExtractor(NijieExtractor):
+    """Extractor for a nijie user's 抜いた list"""
+    subcategory = "nuita"
+    directory_fmt = ("{category}", "nuita", "{user_id}")
+    archive_fmt = "n_{user_id}_{image_id}_{num}"
+    pattern = BASE_PATTERN + r"/history_nuita\.php\?id=(\d+)"
+    test = ("https://nijie.info/history_nuita.php?id=728995", {
+        "range": "1-10",
+        "count": 10,
+        "keyword": {
+            "user_id"  : 728995,
+            "user_name": "莚",
+        },
+    })
+
+    def image_ids(self):
+        return self._pagination("history_nuita")
+
+    def _extract_data(self, page):
+        data = NijieExtractor._extract_data(page)
+        data["user_id"] = self.user_id
+        data["user_name"] = self.user_name
+        return data
+
+    @staticmethod
+    def _extract_user_name(page):
+        return text.unescape(text.extract(
+            page, "<title>", "さんの抜いた")[0] or "")
 
 
 class NijieImageExtractor(NijieExtractor):
