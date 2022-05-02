@@ -42,6 +42,21 @@ class GelbooruV01Extractor(booru.BooruExtractor):
 
         return post
 
+    def _pagination(self, url, begin, end):
+        pid = self.page_start
+
+        while True:
+            page = self.request(url + str(pid)).text
+
+            cnt = 0
+            for post_id in text.extract_iter(page, begin, end):
+                yield self._parse_post(post_id)
+                cnt += 1
+
+            if cnt < self.per_page:
+                return
+            pid += self.per_page
+
 
 BASE_PATTERN = GelbooruV01Extractor.update({
     "thecollection"     : {"root": "https://the-collection.booru.org"},
@@ -88,20 +103,43 @@ class GelbooruV01TagExtractor(GelbooruV01Extractor):
     def posts(self):
         url = "{}/index.php?page=post&s=list&tags={}&pid=".format(
             self.root, self.tags)
-        pid = self.page_start
+        return self._pagination(url, 'class="thumb"><a id="p', '"')
 
-        while True:
-            page = self.request(url + str(pid)).text
 
-            cnt = 0
-            for post_id in text.extract_iter(
-                    page, 'class="thumb"><a id="p', '"'):
-                yield self._parse_post(post_id)
-                cnt += 1
+class GelbooruV01FavoriteExtractor(GelbooruV01Extractor):
+    subcategory = "favorite"
+    directory_fmt = ("{category}", "favorites", "{favorite_id}")
+    archive_fmt = "f_{favorite_id}_{id}"
+    per_page = 50
+    pattern = BASE_PATTERN + r"/index\.php\?page=favorites&s=view&id=(\d+)"
+    test = (
+        (("https://the-collection.booru.org"
+          "/index.php?page=favorites&s=view&id=1166"), {
+            "count": 2,
+        }),
+        (("https://illusioncards.booru.org"
+          "/index.php?page=favorites&s=view&id=84887"), {
+            "count": 2,
+        }),
+        ("https://allgirl.booru.org/index.php?page=favorites&s=view&id=380", {
+            "count": 4,
+        }),
+        ("https://drawfriends.booru.org/index.php?page=favorites&s=view&id=1"),
+        ("https://vidyart.booru.org/index.php?page=favorites&s=view&id=1"),
+        ("https://tlb.booru.org/index.php?page=favorites&s=view&id=1"),
+    )
 
-            if cnt < self.per_page:
-                return
-            pid += self.per_page
+    def __init__(self, match):
+        GelbooruV01Extractor.__init__(self, match)
+        self.favorite_id = match.group(match.lastindex)
+
+    def metadata(self):
+        return {"favorite_id": text.parse_int(self.favorite_id)}
+
+    def posts(self):
+        url = "{}/index.php?page=favorites&s=view&id={}&pid=".format(
+            self.root, self.favorite_id)
+        return self._pagination(url, "posts[", "]")
 
 
 class GelbooruV01PostExtractor(GelbooruV01Extractor):
