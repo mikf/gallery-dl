@@ -43,7 +43,7 @@ class VkExtractor(Extractor):
                 photo["url"], photo["width"], photo["height"] = photo[size]
             except ValueError:
                 # photo without width/height entries (#2535)
-                photo["url"] = photo[size][0]
+                photo["url"] = photo[size + "src"]
                 photo["width"] = photo["height"] = 0
 
             photo["id"] = photo["id"].rpartition("_")[2]
@@ -125,8 +125,9 @@ class VkPhotosExtractor(VkExtractor):
         }),
         # photos without width/height (#2535)
         ("https://vk.com/id76957806", {
-            "range": "1-5",
-            "count": 5,
+            "pattern": r"https://sun\d+-\d+\.userapi\.com/",
+            "range": "1-9",
+            "count": 9,
         }),
         ("https://m.vk.com/albums398982326"),
         ("https://www.vk.com/id398982326?profile=1"),
