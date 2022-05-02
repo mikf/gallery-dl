@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -310,16 +310,25 @@ class TerminalOutput(NullOutput):
 
 class ColorOutput(TerminalOutput):
 
+    def __init__(self):
+        TerminalOutput.__init__(self)
+
+        colors = config.get(("output",), "colors") or {}
+        self.color_skip = "\033[{}m".format(
+            colors.get("skip", "2"))
+        self.color_success = "\r\033[{}m".format(
+            colors.get("success", "1;32"))
+
     def start(self, path):
         stdout = sys.stdout
         stdout.write(self.shorten(path))
         stdout.flush()
 
     def skip(self, path):
-        sys.stdout.write("\033[2m" + self.shorten(path) + "\033[0m\n")
+        sys.stdout.write(self.color_skip + self.shorten(path) + "\033[0m\n")
 
     def success(self, path, tries):
-        sys.stdout.write("\r\033[1;32m" + self.shorten(path) + "\033[0m\n")
+        sys.stdout.write(self.color_success + self.shorten(path) + "\033[0m\n")
 
 
 class EAWCache(dict):
