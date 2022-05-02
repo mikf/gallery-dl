@@ -930,37 +930,37 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>The /co/llection</td>
     <td>https://the-collection.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>Illusion Game Cards</td>
     <td>https://illusioncards.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>All girl</td>
     <td>https://allgirl.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>Draw Friends</td>
     <td>https://drawfriends.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>/v/idyart</td>
     <td>https://vidyart.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>The Loud Booru</td>
     <td>https://tlb.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 
