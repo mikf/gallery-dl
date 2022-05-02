@@ -409,7 +409,34 @@ class TwitterTimelineExtractor(TwitterExtractor):
             self.user = "id:" + user_id
 
     def tweets(self):
+        if not self.config("strategy"):
+            return self._tweets_twMediaDownloader()
         return self.api.user_tweets(self.user)
+
+    def _tweets_twMediaDownloader(self):
+        tweet = None
+        for tweet in self.api.user_media(self.user):
+            yield tweet
+
+        if tweet is None:
+            return
+
+        if not self.user.startswith("id:"):
+            username = self.user
+        elif "core" in tweet:
+            username = (tweet["core"]["user_results"]["result"]
+                        ["legacy"]["screen_name"])
+        else:
+            username = tweet["user"]["screen_name"]
+
+        if "legacy" in tweet:
+            tweet = tweet["legacy"]
+
+        yield from self.api.search_adaptive(
+            "from:{} include:retweets include:nativeretweets max_id:{} "
+            "filter:images OR card_name:animated_gif OR filter:native_video"
+            .format(username, tweet["id_str"])
+        )
 
 
 class TwitterRepliesExtractor(TwitterExtractor):
