@@ -2877,6 +2877,19 @@ Description
     with a display width greater than 1.
 
 
+output.colors
+-------------
+Type
+    ``object``
+Default
+    ``{"success": "1;32", "skip": "2"}``
+Description
+    Controls the `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#colors--graphics-mode>`__
+    used with |mode: color|__ for successfully downloaded or skipped files.
+
+.. __: `output.mode`_
+
+
 output.skip
 -----------
 Type
@@ -3824,6 +3837,7 @@ Description
 .. |Postprocessor Configuration| replace:: ``Postprocessor Configuration``
 .. |strptime| replace:: strftime() and strptime() Behavior
 .. |postprocessors| replace:: ``postprocessors``
+.. |mode: color| replace:: ``"mode": "color"``
 
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_
