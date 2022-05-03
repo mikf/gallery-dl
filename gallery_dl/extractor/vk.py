@@ -162,7 +162,8 @@ class VkPhotosExtractor(VkExtractor):
                 '<h1 class="page_name">', "<")).replace("  ", " "),
             "info": text.unescape(text.remove_html(extr(
                 '<span class="current_text">', '</span'))),
-            "id"  : extr('<a href="/albums', '"'),
+            "id"  : (extr('<a href="/albums', '"') or
+                     extr('data-from-id="', '"')),
         }}
 
 
