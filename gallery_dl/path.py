@@ -74,7 +74,7 @@ class PathFormat():
         self.directory = self.realdirectory = \
             self.filename = self.extension = self.prefix = \
             self.path = self.realpath = self.temppath = ""
-        self.delete = self._create_directory = False
+        self.delete = False
 
         extension_map = config("extension-map")
         if extension_map is None:
@@ -138,7 +138,11 @@ class PathFormat():
 
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
-        return open(self.temppath, mode)
+        try:
+            return open(self.temppath, mode)
+        except FileNotFoundError:
+            os.makedirs(self.realdirectory, exist_ok=True)
+            return open(self.temppath, mode)
 
     def exists(self):
         """Return True if the file exists on disk"""
@@ -187,7 +191,6 @@ class PathFormat():
                 directory += sep
 
         self.realdirectory = directory
-        self._create_directory = True
 
     def set_filename(self, kwdict):
         """Set general filename data"""
@@ -279,9 +282,6 @@ class PathFormat():
 
     def build_path(self):
         """Combine directory and filename to full paths"""
-        if self._create_directory:
-            os.makedirs(self.realdirectory, exist_ok=True)
-            self._create_directory = False
         self.filename = filename = self.build_filename(self.kwdict)
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
