@@ -93,8 +93,10 @@ class PixivExtractor(Extractor):
 
     @staticmethod
     def _make_work(kind, url, user):
+        p = url.split("/")
         return {
-            "create_date"     : None,
+            "create_date"     : "{}-{}-{}T{}:{}:{}+09:00".format(
+                p[5], p[6], p[7], p[8], p[9], p[10]) if len(p) > 9 else None,
             "height"          : 0,
             "id"              : kind,
             "image_urls"      : None,
@@ -137,24 +139,13 @@ class PixivUserExtractor(PixivExtractor):
         self.user_id = match.group(1)
 
     def items(self):
-        default = []
-        if self.config("avatar"):
-            self.log.warning("'avatar' is deprecated, "
-                             "use \"include\": \"…,avatar\" instead")
-            default.append("avatar")
-        if self.config("background"):
-            self.log.warning("'background' is deprecated, "
-                             "use \"include\": \"…,background\" instead")
-            default.append("background")
-        default.append("artworks")
-
         base = "{}/users/{}/".format(self.root, self.user_id)
         return self._dispatch_extractors((
             (PixivAvatarExtractor    , base + "avatar"),
             (PixivBackgroundExtractor, base + "background"),
             (PixivArtworksExtractor  , base + "artworks"),
             (PixivFavoriteExtractor  , base + "bookmarks/artworks"),
-        ), default)
+        ), ("artworks",))
 
 
 class PixivArtworksExtractor(PixivExtractor):
@@ -219,7 +210,8 @@ class PixivArtworksExtractor(PixivExtractor):
 class PixivAvatarExtractor(PixivExtractor):
     """Extractor for pixiv avatars"""
     subcategory = "avatar"
-    archive_fmt = "avatar_{user[id]}"
+    filename_fmt = "avatar{date:?_//%Y-%m-%d}.{extension}"
+    archive_fmt = "avatar_{user[id]}_{date}"
     pattern = (r"(?:https?://)?(?:www\.)?pixiv\.net"
                r"/(?:en/)?users/(\d+)/avatar")
     test = ("https://www.pixiv.net/en/users/173530/avatar", {
@@ -239,7 +231,8 @@ class PixivAvatarExtractor(PixivExtractor):
 class PixivBackgroundExtractor(PixivExtractor):
     """Extractor for pixiv background banners"""
     subcategory = "background"
-    archive_fmt = "background_{user[id]}"
+    filename_fmt = "background{date?_//:%Y-%m-%d}.{extension}"
+    archive_fmt = "background_{user[id]}_{date}"
     pattern = (r"(?:https?://)?(?:www\.)?pixiv\.net"
                r"/(?:en/)?users/(\d+)/background")
     test = ("https://www.pixiv.net/en/users/194921/background", {
