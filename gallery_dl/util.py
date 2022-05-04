@@ -22,7 +22,7 @@ import itertools
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
-from . import text, formatter, exception
+from . import text, exception
 
 
 def bencode(num, alphabet="0123456789"):
@@ -700,6 +700,8 @@ class DownloadArchive():
 
         self.close = con.close
         self.cursor = con.cursor()
+
+        from . import formatter
         self.keygen = formatter.parse(format_string).format_map
         self._cache_key = cache_key
 
