@@ -80,12 +80,22 @@ class InstagramExtractor(Extractor):
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
 
-        if response.history and "/accounts/login/" in response.request.url:
-            if self._cursor:
-                self.log.info("Use '-o cursor=%s' to continue downloading "
-                              "from the current position", self._cursor)
-            raise exception.StopExtraction(
-                "HTTP redirect to login page (%s)", response.request.url)
+        if response.history:
+
+            url = response.request.url
+            if "/accounts/login/" in url:
+                page = "login"
+            elif "/challenge/" in url:
+                page = "challenge"
+            else:
+                page = None
+
+            if page:
+                if self._cursor:
+                    self.log.info("Use '-o cursor=%s' to continue downloading "
+                                  "from the current position", self._cursor)
+                raise exception.StopExtraction("HTTP redirect to %s page (%s)",
+                                               page, url.partition("?")[0])
 
         www_claim = response.headers.get("x-ig-set-www-claim")
         if www_claim is not None:
