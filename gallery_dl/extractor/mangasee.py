@@ -9,7 +9,7 @@
 """Extractors for https://mangasee123.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
+from .. import text, util
 import json
 
 
@@ -56,6 +56,15 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
             "title": "",
         },
     })
+
+    def __init__(self, match):
+        ChapterExtractor.__init__(self, match)
+        self.session.headers["Referer"] = self.gallery_url
+
+        domain = "mangasee123.com"
+        cookies = self.session.cookies
+        if not cookies.get("PHPSESSID", domain=domain):
+            cookies.set("PHPSESSID", util.generate_token(13), domain=domain)
 
     def metadata(self, page):
         extr = text.extract_from(page)
