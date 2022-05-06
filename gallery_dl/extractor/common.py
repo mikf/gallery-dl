@@ -306,11 +306,10 @@ class Extractor():
                 cookiefile = util.expand_path(cookies)
                 try:
                     with open(cookiefile) as fp:
-                        cookies = util.load_cookiestxt(fp)
+                        util.cookiestxt_load(fp, self._cookiejar)
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
-                    self._update_cookies(cookies)
                     self._cookiefile = cookiefile
             else:
                 self.log.warning(
@@ -322,7 +321,7 @@ class Extractor():
         if self._cookiefile and self.config("cookies-update", True):
             try:
                 with open(self._cookiefile, "w") as fp:
-                    util.save_cookiestxt(fp, self._cookiejar)
+                    util.cookiestxt_store(fp, self._cookiejar)
             except OSError as exc:
                 self.log.warning("cookies: %s", exc)
 
