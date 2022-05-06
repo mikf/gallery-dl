@@ -302,9 +302,9 @@ def set_mtime(path, mtime):
         pass
 
 
-def load_cookiestxt(fp):
-    """Parse a Netscape cookies.txt file and return a list of its Cookies"""
-    cookies = []
+def cookiestxt_load(fp, cookiejar):
+    """Parse a Netscape cookies.txt file and add its Cookies to 'cookiejar'"""
+    set_cookie = cookiejar.set_cookie
 
     for line in fp:
 
@@ -321,11 +321,12 @@ def load_cookiestxt(fp):
 
         domain, domain_specified, path, secure, expires, name, value = \
             line.split("\t")
+
         if not name:
             name = value
             value = None
 
-        cookies.append(Cookie(
+        set_cookie(Cookie(
             0, name, value,
             None, False,
             domain,
@@ -337,12 +338,11 @@ def load_cookiestxt(fp):
             False, None, None, {},
         ))
 
-    return cookies
 
-
-def save_cookiestxt(fp, cookies):
+def cookiestxt_store(fp, cookies):
     """Write 'cookies' in Netscape cookies.txt format to 'fp'"""
-    fp.write("# Netscape HTTP Cookie File\n\n")
+    write = fp.write
+    write("# Netscape HTTP Cookie File\n\n")
 
     for cookie in cookies:
         if not cookie.domain:
@@ -355,15 +355,15 @@ def save_cookiestxt(fp, cookies):
             name = cookie.name
             value = cookie.value
 
-        fp.write("\t".join((
+        write("\t".join((
             cookie.domain,
             "TRUE" if cookie.domain.startswith(".") else "FALSE",
             cookie.path,
             "TRUE" if cookie.secure else "FALSE",
             "0" if cookie.expires is None else str(cookie.expires),
             name,
-            value,
-        )) + "\n")
+            value + "\n",
+        )))
 
 
 def code_to_language(code, default=None):
