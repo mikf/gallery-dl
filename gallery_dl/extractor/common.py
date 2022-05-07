@@ -311,10 +311,17 @@ class Extractor():
                     self.log.warning("cookies: %s", exc)
                 else:
                     self._cookiefile = cookiefile
+            elif isinstance(cookies, (list, tuple)):
+                from ..cookies import load_cookies
+                try:
+                    load_cookies(self._cookiejar, cookies)
+                except Exception as exc:
+                    self.log.warning("cookies: %s", exc)
             else:
                 self.log.warning(
-                    "expected 'dict' or 'str' value for 'cookies' option, "
-                    "got '%s' (%s)", cookies.__class__.__name__, cookies)
+                    "Expected 'dict', 'list', or 'str' value for 'cookies' "
+                    "option, got '%s' (%s)",
+                    cookies.__class__.__name__, cookies)
 
     def _store_cookies(self):
         """Store the session's cookiejar in a cookies.txt file"""
