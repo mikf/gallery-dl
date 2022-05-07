@@ -131,6 +131,10 @@ def main():
             config.set((), "skip", "abort:" + str(args.abort))
         if args.terminate:
             config.set((), "skip", "terminate:" + str(args.terminate))
+        if args.cookies_from_browser:
+            browser, _, profile = args.cookies_from_browser.partition(":")
+            browser, _, keyring = browser.partition("+")
+            config.set((), "cookies", (browser, profile, keyring))
         for opts in args.options:
             config.set(*opts)
 

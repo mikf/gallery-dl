@@ -399,16 +399,19 @@ Description
 extractor.*.cookies
 -------------------
 Type
-    |Path|_ or ``object``
+    |Path|_ or ``object`` or ``list``
 Default
     ``null``
 Description
-    Source to read additional cookies from. Either as
+    Source to read additional cookies from. This can be
 
-    * the |Path|_ to a Mozilla/Netscape format cookies.txt file or
-    * a JSON ``object`` specifying cookies as a name-to-value mapping
+    * The |Path|_ to a Mozilla/Netscape format cookies.txt file
 
-      Example:
+      .. code:: json
+
+        "~/.local/share/cookies-instagram-com.txt"
+
+    * An ``object`` specifying cookies as name-value pairs
 
       .. code:: json
 
@@ -417,6 +420,17 @@ Description
             "sessionid"  : "14313336321%3AsabDFvuASDnlpb%3A31",
             "isAdult"    : "1"
         }
+
+    * A ``list`` with up to 3 entries specifying a browser profile.
+
+      * The first entry is the browser name
+      * The optional second entry is a profile name or an absolote path to a profile directory
+      * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
+
+      .. code:: json
+
+        ["firefox"]
+        ["chromium", "Private", "kwallet"]
 
 
 extractor.*.cookies-update
