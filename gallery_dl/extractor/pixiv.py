@@ -73,7 +73,14 @@ class PixivExtractor(Extractor):
             if work["type"] == "ugoira":
                 if not self.load_ugoira:
                     continue
-                ugoira = self.api.ugoira_metadata(work["id"])
+
+                try:
+                    ugoira = self.api.ugoira_metadata(work["id"])
+                except exception.StopExtraction as exc:
+                    self.log.warning(
+                        "Unable to retrieve Ugoira metatdata (%s - %s)",
+                        work.get("id"), exc.message)
+                    continue
 
                 url = ugoira["zip_urls"]["medium"].replace(
                     "_ugoira600x600", "_ugoira1920x1080")
