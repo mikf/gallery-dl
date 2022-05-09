@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -60,12 +60,14 @@ class MastodonExtractor(BaseExtractor):
 INSTANCES = {
     "mastodon.social": {
         "root"         : "https://mastodon.social",
+        "pattern"      : r"mastodon\.social",
         "access-token" : "Y06R36SMvuXXN5_wiPKFAEFiQaMSQg0o_hGgc86Jj48",
         "client-id"    : "dBSHdpsnOUZgxOnjKSQrWEPakO3ctM7HmsyoOd4FcRo",
         "client-secret": "DdrODTHs_XoeOsNVXnILTMabtdpWrWOAtrmw91wU1zI",
     },
     "pawoo": {
         "root"         : "https://pawoo.net",
+        "pattern"      : r"pawoo\.net",
         "access-token" : "c12c9d275050bce0dc92169a28db09d7"
                          "0d62d0a75a8525953098c167eacd3668",
         "client-id"    : "978a25f843ec01e53d09be2c290cd75c"
@@ -75,6 +77,7 @@ INSTANCES = {
     },
     "baraag": {
         "root"         : "https://baraag.net",
+        "pattern"      : r"baraag\.net",
         "access-token" : "53P1Mdigf4EJMH-RmeFOOSM9gdSDztmrAYFgabOKKE0",
         "client-id"    : "czxx2qilLElYHQ_sm-lO8yXuGwOHxLX9RYYaD0-nq1o",
         "client-secret": "haMaFdMBgK_-BIxufakmI2gFgkYjqmgXGEO2tB-R2xY",

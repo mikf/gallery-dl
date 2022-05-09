@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for Gelbooru v0.1 sites"""
+"""Extractors for Gelbooru Beta 0.1.11 sites"""
 
 from . import booru
 from .. import text
@@ -59,12 +59,30 @@ class GelbooruV01Extractor(booru.BooruExtractor):
 
 
 BASE_PATTERN = GelbooruV01Extractor.update({
-    "thecollection"     : {"root": "https://the-collection.booru.org"},
-    "illusioncardsbooru": {"root": "https://illusioncards.booru.org"},
-    "allgirlbooru"      : {"root": "https://allgirl.booru.org"},
-    "drawfriends"       : {"root": "https://drawfriends.booru.org"},
-    "vidyart"           : {"root": "https://vidyart.booru.org"},
-    "theloudbooru"      : {"root": "https://tlb.booru.org"},
+    "thecollection": {
+        "root": "https://the-collection.booru.org",
+        "pattern": r"the-collection\.booru\.org",
+    },
+    "illusioncardsbooru": {
+        "root": "https://illusioncards.booru.org",
+        "pattern": r"illusioncards\.booru\.org",
+    },
+    "allgirlbooru": {
+        "root": "https://allgirl.booru.org",
+        "pattern": r"allgirl\.booru\.org",
+    },
+    "drawfriends": {
+        "root": "https://drawfriends.booru.org",
+        "pattern": r"drawfriends\.booru\.org",
+    },
+    "vidyart": {
+        "root": "https://vidyart.booru.org",
+        "pattern": r"vidyart\.booru\.org",
+    },
+    "theloudbooru": {
+        "root": "https://tlb.booru.org",
+        "pattern": r"tlb\.booru\.org",
+    },
 })
 
 
