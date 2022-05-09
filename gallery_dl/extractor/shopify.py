@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -49,9 +49,11 @@ BASE_PATTERN = ShopifyExtractor.update({
     },
     "omgmiamiswimwear": {
         "root": "https://www.omgmiamiswimwear.com",
+        "pattern": r"(?:www\.)?omgmiamiswimwear\.com",
     },
     "windsorstore": {
         "root": "https://www.windsorstore.com",
+        "pattern": r"(?:www\.)?windsorstore\.com",
     },
     "loungeunderwear": {
         "root": "https://loungeunderwear.com",

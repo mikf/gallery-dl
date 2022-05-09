@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for 4chan archives based on FoolFuuka"""
+"""Extractors for FoolFuuka 4chan archives"""
 
 from .common import BaseExtractor, Message
 from .. import text
@@ -66,6 +66,7 @@ BASE_PATTERN = FoolfuukaExtractor.update({
     },
     "archivedmoe": {
         "root": "https://archived.moe",
+        "pattern": r"archived\.moe",
     },
     "archiveofsins": {
         "root": "https://archiveofsins.com",
@@ -73,12 +74,15 @@ BASE_PATTERN = FoolfuukaExtractor.update({
     },
     "b4k": {
         "root": "https://arch.b4k.co",
+        "pattern": r"arch\.b4k\.co",
     },
     "desuarchive": {
         "root": "https://desuarchive.org",
+        "pattern": r"desuarchive\.org",
     },
     "fireden": {
         "root": "https://boards.fireden.net",
+        "pattern": r"boards\.fireden\.net",
     },
     "nyafuu": {
         "root": "https://archive.nyafuu.org",
@@ -90,9 +94,11 @@ BASE_PATTERN = FoolfuukaExtractor.update({
     },
     "thebarchive": {
         "root": "https://thebarchive.com",
+        "pattern": r"thebarchive\.com",
     },
     "wakarimasen": {
         "root": "https://archive.wakarimasen.moe",
+        "pattern": r"archive\.wakarimasen\.moe",
     },
 })
 

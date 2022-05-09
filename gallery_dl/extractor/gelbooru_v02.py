@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for Gelbooru v0.2 sites"""
+"""Extractors for Gelbooru Beta 0.2 sites"""
 
 from . import booru
 from .. import text, util, exception
@@ -116,11 +116,23 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
 
 INSTANCES = {
-    "realbooru": {"root": "https://realbooru.com"},
-    "rule34"   : {"root": "https://rule34.xxx",
-                  "api_root": " https://api.rule34.xxx"},
-    "safebooru": {"root": "https://safebooru.org"},
-    "tbib"     : {"root": "https://tbib.org"},
+    "realbooru": {
+        "root": "https://realbooru.com",
+        "pattern": r"realbooru\.com",
+    },
+    "rule34": {
+        "root": "https://rule34.xxx",
+        "pattern": r"rule34\.xxx",
+        "api_root": "https://api.rule34.xxx",
+    },
+    "safebooru": {
+        "root": "https://safebooru.org",
+        "pattern": r"safebooru\.org",
+    },
+    "tbib": {
+        "root": "https://tbib.org",
+        "pattern": r"tbib\.org",
+    },
 }
 
 BASE_PATTERN = GelbooruV02Extractor.update(INSTANCES)
@@ -158,7 +170,7 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
         return {"search_tags": self.tags}
 
     def posts(self):
-        return self._pagination({"tags" : self.tags})
+        return self._pagination({"tags": self.tags})
 
 
 class GelbooruV02PoolExtractor(GelbooruV02Extractor):
