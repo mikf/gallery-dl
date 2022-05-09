@@ -20,6 +20,7 @@ _CACHE = {}
 _CONVERSIONS = None
 _GLOBALS = {
     "_env": lambda: os.environ,
+    "_lit": lambda: _literal,
     "_now": datetime.datetime.now,
 }
 
@@ -219,6 +220,10 @@ def parse_field_name(field_name):
     first, rest = _string.formatter_field_name_split(field_name)
     funcs = []
 
+    if first[0] == "'":
+        funcs.append(operator.itemgetter(first[1:-1]))
+        first = "_lit"
+
     for is_attr, key in rest:
         if is_attr:
             func = operator.attrgetter
@@ -344,3 +349,15 @@ def _default_format(format_spec):
     def wrap(obj):
         return format(obj, format_spec)
     return wrap
+
+
+class Literal():
+    # __getattr__, __getattribute__, and __class_getitem__
+    # are all slower than regular __getitem__
+
+    @staticmethod
+    def __getitem__(key):
+        return key
+
+
+_literal = Literal()
