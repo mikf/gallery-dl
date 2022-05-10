@@ -957,12 +957,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
-    <td>The Loud Booru</td>
-    <td>https://tlb.booru.org/</td>
-    <td>Favorites, Posts, Tag Searches</td>
-    <td></td>
-</tr>
 
 <tr>
     <td colspan="4"><strong>Gelbooru Beta 0.2</strong></td>
