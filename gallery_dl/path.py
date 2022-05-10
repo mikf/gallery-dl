@@ -317,11 +317,18 @@ class PathFormat():
 
         if self.temppath != self.realpath:
             # Move temp file to its actual location
-            try:
-                os.replace(self.temppath, self.realpath)
-            except OSError:
-                shutil.copyfile(self.temppath, self.realpath)
-                os.unlink(self.temppath)
+            while True:
+                try:
+                    os.replace(self.temppath, self.realpath)
+                except FileNotFoundError:
+                    # delayed directory creation
+                    os.makedirs(self.realdirectory, exist_ok=True)
+                    continue
+                except OSError:
+                    # move across different filesystems
+                    shutil.copyfile(self.temppath, self.realpath)
+                    os.unlink(self.temppath)
+                break
 
         mtime = self.kwdict.get("_mtime")
         if mtime:
