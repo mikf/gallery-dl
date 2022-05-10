@@ -877,6 +877,21 @@ Description
     Download embedded videos hosted on https://www.blogger.com/
 
 
+extractor.cyberdrop.domain
+--------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Example
+    ``"cyberdrop.to"``
+Description
+    Specifies the domain used by ``cyberdrop`` regardless of input URL.
+
+    Setting this option to ``"auto"``
+    uses the same domain as a given input URL.
+
+
 extractor.danbooru.external
 ---------------------------
 Type
@@ -1529,6 +1544,20 @@ Description
 
     If the selected format is not available,
     the first in the list gets chosen (usually `mp3`).
+
+
+extractor.lolisafe.domain
+-------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Specifies the domain used by a ``lolisafe`` extractor
+    regardless of input URL.
+
+    Setting this option to ``"auto"``
+    uses the same domain as a given input URL.
 
 
 extractor.luscious.gif
