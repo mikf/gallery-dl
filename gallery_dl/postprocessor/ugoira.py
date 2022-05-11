@@ -119,6 +119,9 @@ class UgoiraPP(PostProcessor):
             if self.args:
                 args += self.args
 
+            # ensure target directory exists
+            os.makedirs(pathfmt.realdirectory, exist_ok=True)
+
             # invoke ffmpeg
             try:
                 if self.twopass:
