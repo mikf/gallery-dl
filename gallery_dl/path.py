@@ -141,7 +141,7 @@ class PathFormat():
         try:
             return open(self.temppath, mode)
         except FileNotFoundError:
-            os.makedirs(self.realdirectory, exist_ok=True)
+            os.makedirs(self.realdirectory)
             return open(self.temppath, mode)
 
     def exists(self):
@@ -322,7 +322,7 @@ class PathFormat():
                     os.replace(self.temppath, self.realpath)
                 except FileNotFoundError:
                     # delayed directory creation
-                    os.makedirs(self.realdirectory, exist_ok=True)
+                    os.makedirs(self.realdirectory)
                     continue
                 except OSError:
                     # move across different filesystems
