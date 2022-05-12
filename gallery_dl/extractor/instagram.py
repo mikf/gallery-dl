@@ -308,7 +308,7 @@ class InstagramExtractor(Extractor):
                 video = None
                 media = image
 
-            files.append({
+            media = {
                 "num"        : num,
                 "date"       : text.parse_timestamp(item.get("taken_at") or
                                                     media.get("taken_at")),
@@ -319,7 +319,9 @@ class InstagramExtractor(Extractor):
                 "video_url"  : video["url"] if video else None,
                 "width"      : media["width"],
                 "height"     : media["height"],
-            })
+            }
+            self._extract_tagged_users(item, media)
+            files.append(media)
 
         return data
 
@@ -332,18 +334,20 @@ class InstagramExtractor(Extractor):
             "0123456789-_")
 
     def _extract_tagged_users(self, src, dest):
-        if "edge_media_to_tagged_user" not in src:
+        if "edge_media_to_tagged_user" not in src and "reel_mentions" not in src:
             return
-        edges = src["edge_media_to_tagged_user"]["edges"]
+        edges = src["edge_media_to_tagged_user"]["edges"] if "edge_media_to_tagged_user" in src else src["reel_mentions"]
         if edges:
             dest["tagged_users"] = tagged_users = []
             for edge in edges:
-                user = edge["node"]["user"]
-                tagged_users.append({
-                    "id"       : user["id"],
+                user = edge["node"]["user"] if "edge_media_to_tagged_user" in src else edge["user"]
+                tagged_user = {
                     "username" : user["username"],
                     "full_name": user["full_name"],
-                })
+                }
+                if "edge_media_to_tagged_user" in src:
+                    tagged_user["id"] = user["id"]
+                tagged_users.append(tagged_user)
 
     def _extract_shared_data(self, url):
         page = self.request(url).text
