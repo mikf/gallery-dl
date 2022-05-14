@@ -345,8 +345,7 @@ class InstagramExtractor(Extractor):
                     "full_name": user["full_name"],
                 })
 
-    def _extract_shared_data(self, url):
-        page = self.request(url).text
+    def _extract_shared_data(self, page):
         shared_data, pos = text.extract(
             page, "window._sharedData =", ";</script>")
         additional_data, pos = text.extract(
@@ -359,13 +358,15 @@ class InstagramExtractor(Extractor):
         return data
 
     def _extract_profile_page(self, url):
-        data = self._extract_shared_data(url)["entry_data"]
+        page = self.request(url).text
+        data = self._extract_shared_data(page)["entry_data"]
         if "HttpErrorPage" in data:
             raise exception.NotFoundError("user")
         return data["ProfilePage"][0]["graphql"]["user"]
 
     def _extract_post_page(self, url):
-        data = self._extract_shared_data(url)["entry_data"]
+        page = self.request(url).text
+        data = self._extract_shared_data(page)["entry_data"]
         if "HttpErrorPage" in data:
             raise exception.NotFoundError("post")
         return data["PostPage"][0]
@@ -534,7 +535,8 @@ class InstagramTagExtractor(InstagramExtractor):
 
     def posts(self):
         url = "{}/explore/tags/{}/".format(self.root, self.item)
-        page = self._extract_shared_data(url)["entry_data"]["TagPage"][0]
+        page = self._extract_shared_data(
+            self.request(url).text)["entry_data"]["TagPage"][0]
 
         if "data" in page:
             return self._pagination_sections(page["data"]["recent"])
@@ -728,8 +730,12 @@ class InstagramStoriesExtractor(InstagramExtractor):
             reel_id = "highlight:" + self.highlight_id
         else:
             url = "{}/stories/{}/".format(self.root, self.user)
+            with self.request(url, allow_redirects=False) as response:
+                if 300 <= response.status_code < 400:
+                    return ()
+                page = response.text
             try:
-                data = self._extract_shared_data(url)["entry_data"]
+                data = self._extract_shared_data(page)["entry_data"]
                 user = data["StoriesPage"][0]["user"]
             except KeyError:
                 return ()
