@@ -16,6 +16,7 @@ import itertools
 class FoolfuukaExtractor(BaseExtractor):
     """Base extractor for FoolFuuka based boards/archives"""
     basecategory = "foolfuuka"
+    filename_fmt = "{timestamp_ms} {filename_media}.{extension}"
     archive_fmt = "{board[shortname]}_{num}_{timestamp}"
     external = "default"
 
@@ -40,6 +41,9 @@ class FoolfuukaExtractor(BaseExtractor):
 
             post["filename"], _, post["extension"] = \
                 media["media"].rpartition(".")
+            post["filename_media"] = media["media_filename"].rpartition(".")[0]
+            post["timestamp_ms"] = text.parse_int(
+                media["media_orig"].rpartition(".")[0])
             yield Message.Url, url, post
 
     def metadata(self):
@@ -107,7 +111,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
     """Base extractor for threads on FoolFuuka based boards/archives"""
     subcategory = "thread"
     directory_fmt = ("{category}", "{board[shortname]}",
-                     "{thread_num}{title:? - //}")
+                     "{thread_num} {title|comment[:50]}")
     pattern = BASE_PATTERN + r"/([^/?#]+)/thread/(\d+)"
     test = (
         ("https://archive.4plebs.org/tg/thread/54059290", {
