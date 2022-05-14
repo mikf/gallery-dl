@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -34,6 +34,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
         base, self.cstr, self.volume, self.chapter, self.minor = match.groups()
         self.urlbase = self.root + base
         ChapterExtractor.__init__(self, match, self.urlbase + "/1.html")
+        self.session.headers["Referer"] = self.root + "/"
 
     def metadata(self, page):
         manga, pos = text.extract(page, "<title>", "</title>")
