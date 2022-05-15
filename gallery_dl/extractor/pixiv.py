@@ -198,7 +198,7 @@ class PixivArtworksExtractor(PixivExtractor):
 
     def metadata(self):
         if self.config("metadata"):
-            return {"user": self.api.user_detail(self.user_id)["user"]}
+            return self.api.user_detail(self.user_id)
         return {}
 
     def works(self):
