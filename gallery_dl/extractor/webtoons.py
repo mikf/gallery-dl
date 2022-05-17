@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2020 Leonardo Taccari
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -41,8 +42,8 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     """Extractor for an episode on webtoons.com"""
     subcategory = "episode"
     directory_fmt = ("{category}", "{comic}")
-    filename_fmt = "{episode}-{num:>02}.{extension}"
-    archive_fmt = "{title_no}_{episode}_{num}"
+    filename_fmt = "{episode_no}-{num:>02}.{extension}"
+    archive_fmt = "{title_no}_{episode_no}_{num}"
     pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)/(?:[^/?#]+))"
                r"/viewer(?:\?([^#'\"]+))")
     test = (
@@ -53,6 +54,18 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
                         "42055e44659f6ffc410b3fb6557346dfbb993df3",
                         "49e1f2def04c6f7a6a3dacf245a1cd9abe77a6a9"),
             "count": 5,
+        }),
+        (("https://www.webtoons.com/en/challenge/punderworld"
+          "/happy-earth-day-/viewer?title_no=312584&episode_no=40"), {
+            "keyword": {
+                "comic": "punderworld",
+                "description": str,
+                "episode": "36",
+                "episode_no": "40",
+                "genre": "challenge",
+                "title": r"re:^Punderworld - .+",
+                "title_no": "312584",
+            },
         }),
     )
 
@@ -65,11 +78,13 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
 
         query = text.parse_query(query)
         self.title_no = query.get("title_no")
-        self.episode = query.get("episode_no")
+        self.episode_no = query.get("episode_no")
 
     def metadata(self, page):
+        keywords, pos = text.extract(
+            page, '<meta name="keywords" content="', '"')
         title, pos = text.extract(
-            page, '<meta property="og:title" content="', '"')
+            page, '<meta property="og:title" content="', '"', pos)
         descr, pos = text.extract(
             page, '<meta property="og:description" content="', '"', pos)
 
@@ -77,8 +92,9 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             "genre"      : self.genre,
             "comic"      : self.comic,
             "title_no"   : self.title_no,
-            "episode"    : self.episode,
+            "episode_no" : self.episode_no,
             "title"      : text.unescape(title),
+            "episode"    : keywords.split(", ")[1],
             "description": text.unescape(descr),
             "lang"       : self.lang,
             "language"   : util.code_to_language(self.lang),
