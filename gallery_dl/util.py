@@ -695,7 +695,11 @@ class ExtendedUrl():
 class DownloadArchive():
 
     def __init__(self, path, format_string, cache_key="_archive_key"):
-        con = sqlite3.connect(path, timeout=60, check_same_thread=False)
+        try:
+            con = sqlite3.connect(path, timeout=60, check_same_thread=False)
+        except sqlite3.OperationalError:
+            os.makedirs(os.path.dirname(path))
+            con = sqlite3.connect(path, timeout=60, check_same_thread=False)
         con.isolation_level = None
 
         self.close = con.close
