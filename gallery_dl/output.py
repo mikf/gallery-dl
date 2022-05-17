@@ -265,14 +265,12 @@ class NullOutput():
 class PipeOutput(NullOutput):
 
     def skip(self, path):
-        stdout = sys.stdout
-        stdout.write(CHAR_SKIP + path + "\n")
-        stdout.flush()
+        sys.stdout.write(CHAR_SKIP + path + "\n")
+        sys.stdout.flush()
 
     def success(self, path, tries):
-        stdout = sys.stdout
-        stdout.write(path + "\n")
-        stdout.flush()
+        sys.stdout.write(path + "\n")
+        sys.stdout.flush()
 
 
 class TerminalOutput(NullOutput):
@@ -288,15 +286,16 @@ class TerminalOutput(NullOutput):
             self.shorten = util.identity
 
     def start(self, path):
-        stdout = sys.stdout
-        stdout.write(self.shorten("  " + path))
-        stdout.flush()
+        sys.stdout.write(self.shorten("  " + path))
+        sys.stdout.flush()
 
     def skip(self, path):
         sys.stdout.write(self.shorten(CHAR_SKIP + path) + "\n")
+        sys.stdout.flush()
 
     def success(self, path, tries):
         sys.stdout.write("\r" + self.shorten(CHAR_SUCCESS + path) + "\n")
+        sys.stdout.flush()
 
     def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
         bdl = util.format_value(bytes_downloaded)
@@ -320,15 +319,16 @@ class ColorOutput(TerminalOutput):
             colors.get("success", "1;32"))
 
     def start(self, path):
-        stdout = sys.stdout
-        stdout.write(self.shorten(path))
-        stdout.flush()
+        sys.stdout.write(self.shorten(path))
+        sys.stdout.flush()
 
     def skip(self, path):
         sys.stdout.write(self.color_skip + self.shorten(path) + "\033[0m\n")
+        sys.stdout.flush()
 
     def success(self, path, tries):
         sys.stdout.write(self.color_success + self.shorten(path) + "\033[0m\n")
+        sys.stdout.flush()
 
 
 class EAWCache(dict):
