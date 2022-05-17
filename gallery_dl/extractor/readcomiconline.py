@@ -24,6 +24,7 @@ class ReadcomiconlineBase():
     archive_fmt = "{issue_id}_{page}"
     root = "https://readcomiconline.li"
     browser = "firefox"
+    request_interval = (1, 9)
 
     def request(self, url, **kwargs):
         """Detect and handle redirects to CAPTCHA pages"""
@@ -85,7 +86,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         return [
             (beau(url), None)
             for url in text.extract_iter(
-                page, 'lstImages.push("', '"'
+                page, "lstImages.push('", "'",
             )
         ]
 
@@ -129,9 +130,12 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
 
 
 def beau(url):
-    """https://readcomiconline.li/Scripts/rguard.min.js?v=1.1"""
+    """https://readcomiconline.li/Scripts/rguard.min.js"""
     if url.startswith("https"):
         return url
+
+    url = url.replace("_x236", "d")
+    url = url.replace("_x945", "g")
 
     containsS0 = "=s0" in url
     url = url[:-3 if containsS0 else -6]
