@@ -205,6 +205,30 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL):
 # --------------------------------------------------------------------
 # Utility functions
 
+def stdout_write_flush(s):
+    sys.stdout.write(s)
+    sys.stdout.flush()
+
+
+def stderr_write_flush(s):
+    sys.stderr.write(s)
+    sys.stderr.flush()
+
+
+if sys.stdout.line_buffering:
+    def stdout_write(s):
+        sys.stdout.write(s)
+else:
+    stdout_write = stdout_write_flush
+
+
+if sys.stderr.line_buffering:
+    def stderr_write(s):
+        sys.stderr.write(s)
+else:
+    stderr_write = stderr_write_flush
+
+
 def replace_std_streams(errors="replace"):
     """Replace standard streams and set their error handlers to 'errors'"""
     for name in ("stdout", "stdin", "stderr"):
@@ -265,12 +289,10 @@ class NullOutput():
 class PipeOutput(NullOutput):
 
     def skip(self, path):
-        sys.stdout.write(CHAR_SKIP + path + "\n")
-        sys.stdout.flush()
+        stdout_write(CHAR_SKIP + path + "\n")
 
     def success(self, path, tries):
-        sys.stdout.write(path + "\n")
-        sys.stdout.flush()
+        stdout_write(path + "\n")
 
 
 class TerminalOutput(NullOutput):
@@ -286,24 +308,21 @@ class TerminalOutput(NullOutput):
             self.shorten = util.identity
 
     def start(self, path):
-        sys.stdout.write(self.shorten("  " + path))
-        sys.stdout.flush()
+        stdout_write_flush(self.shorten("  " + path))
 
     def skip(self, path):
-        sys.stdout.write(self.shorten(CHAR_SKIP + path) + "\n")
-        sys.stdout.flush()
+        stdout_write(self.shorten(CHAR_SKIP + path) + "\n")
 
     def success(self, path, tries):
-        sys.stdout.write("\r" + self.shorten(CHAR_SUCCESS + path) + "\n")
-        sys.stdout.flush()
+        stdout_write("\r" + self.shorten(CHAR_SUCCESS + path) + "\n")
 
     def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
         bdl = util.format_value(bytes_downloaded)
         bps = util.format_value(bytes_per_second)
         if bytes_total is None:
-            sys.stderr.write("\r{:>7}B {:>7}B/s ".format(bdl, bps))
+            stderr_write("\r{:>7}B {:>7}B/s ".format(bdl, bps))
         else:
-            sys.stderr.write("\r{:>3}% {:>7}B {:>7}B/s ".format(
+            stderr_write("\r{:>3}% {:>7}B {:>7}B/s ".format(
                 bytes_downloaded * 100 // bytes_total, bdl, bps))
 
 
@@ -319,16 +338,13 @@ class ColorOutput(TerminalOutput):
             colors.get("success", "1;32"))
 
     def start(self, path):
-        sys.stdout.write(self.shorten(path))
-        sys.stdout.flush()
+        stdout_write_flush(self.shorten(path))
 
     def skip(self, path):
-        sys.stdout.write(self.color_skip + self.shorten(path) + "\033[0m\n")
-        sys.stdout.flush()
+        stdout_write(self.color_skip + self.shorten(path) + "\033[0m\n")
 
     def success(self, path, tries):
-        sys.stdout.write(self.color_success + self.shorten(path) + "\033[0m\n")
-        sys.stdout.flush()
+        stdout_write(self.color_success + self.shorten(path) + "\033[0m\n")
 
 
 class EAWCache(dict):
