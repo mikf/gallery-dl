@@ -333,21 +333,42 @@ class InstagramExtractor(Extractor):
             "abcdefghijklmnopqrstuvwxyz"
             "0123456789-_")
 
-    def _extract_tagged_users(self, src, dest):
-        if "edge_media_to_tagged_user" not in src and "reel_mentions" not in src:
-            return
-        edges = src["edge_media_to_tagged_user"]["edges"] if "edge_media_to_tagged_user" in src else src["reel_mentions"]
+    @staticmethod
+    def _extract_tagged_users(src, dest):
+        dest["tagged_users"] = tagged_users = []
+
+        edges = src.get("edge_media_to_tagged_user")
         if edges:
-            dest["tagged_users"] = tagged_users = []
-            for edge in edges:
-                user = edge["node"]["user"] if "edge_media_to_tagged_user" in src else edge["user"]
-                tagged_user = {
-                    "username" : user["username"],
-                    "full_name": user["full_name"],
-                }
-                if "edge_media_to_tagged_user" in src:
-                    tagged_user["id"] = user["id"]
-                tagged_users.append(tagged_user)
+            for edge in edges["edges"]:
+                user = edge["node"]["user"]
+                tagged_users.append({"id"       : user["id"],
+                                     "username" : user["username"],
+                                     "full_name": user["full_name"]})
+
+        usertags = src.get("usertags")
+        if usertags:
+            for tag in usertags["in"]:
+                user = tag["user"]
+                tagged_users.append({"id"       : user["pk"],
+                                     "username" : user["username"],
+                                     "full_name": user["full_name"]})
+
+        stickers = src.get("story_bloks_stickers")
+        if stickers:
+            for sticker in stickers:
+                sticker = sticker["bloks_sticker"]
+                if sticker["bloks_sticker_type"] == "mention":
+                    user = sticker["sticker_data"]["ig_mention"]
+                    tagged_users.append({"id"       : user["account_id"],
+                                         "username" : user["username"],
+                                         "full_name": user["full_name"]})
+
+        mentions = src.get("reel_mentions")
+        if mentions:
+            for mention in mentions:
+                user = mention["user"]
+                tagged_users.append({"username" : user["username"],
+                                     "full_name": user["full_name"]})
 
     def _extract_shared_data(self, url):
         page = self.request(url).text
