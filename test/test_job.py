@@ -149,10 +149,13 @@ class TestInfoJob(TestJob):
         self.assertEqual(self._capture_stdout(extr), """\
 Category / Subcategory
   "test_category" / "test_subcategory"
+
 Filename format (default):
   "test_{filename}.{extension}"
+
 Directory format (default):
   ["{category}"]
+
 """)
 
     def test_custom(self):
@@ -165,18 +168,22 @@ Directory format (default):
         self.assertEqual(self._capture_stdout(extr), """\
 Category / Subcategory
   "test_category" / "test_subcategory"
+
 Filename format (custom):
   "custom"
 Filename format (default):
   "test_{filename}.{extension}"
+
 Directory format (custom):
   ["custom"]
 Directory format (default):
   ["{category}"]
+
 Request interval (custom):
   321
 Request interval (default):
   123.456
+
 """)
 
     def test_base_category(self):
@@ -186,10 +193,13 @@ Request interval (default):
         self.assertEqual(self._capture_stdout(extr), """\
 Category / Subcategory / Basecategory
   "test_category" / "test_subcategory" / "test_basecategory"
+
 Filename format (default):
   "test_{filename}.{extension}"
+
 Directory format (default):
   ["{category}"]
+
 """)
 
 

@@ -39,8 +39,9 @@ class AppendCommandAction(argparse.Action):
 class DeprecatedConfigConstAction(argparse.Action):
     """Set argparse const values as config values + deprecation warning"""
     def __call__(self, parser, namespace, values, option_string=None):
-        print("warning: {} is deprecated. Use {} instead.".format(
-            "/".join(self.option_strings), self.choices), file=sys.stderr)
+        sys.stderr.write(
+            "warning: {} is deprecated. Use {} instead.\n".format(
+                "/".join(self.option_strings), self.choices))
         namespace.options.append(((), self.dest, self.const))
 
 

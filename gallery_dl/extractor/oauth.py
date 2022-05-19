@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from . import deviantart, flickr, mastodon, pixiv, reddit, smugmug, tumblr
 from .. import text, oauth, util, config, exception
+from ..output import stdout_write
 from ..cache import cache
 import urllib.parse
 import hashlib
@@ -37,7 +38,7 @@ class OAuthBase(Extractor):
     def recv(self):
         """Open local HTTP server and recv callback parameters"""
         import socket
-        print("Waiting for response. (Cancel with Ctrl+c)")
+        stdout_write("Waiting for response. (Cancel with Ctrl+c)\n")
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server.bind(("localhost", self.config("port", 6414)))
@@ -60,7 +61,7 @@ class OAuthBase(Extractor):
 
     def send(self, msg):
         """Send 'msg' to the socket opened in 'recv()'"""
-        print(msg)
+        stdout_write(msg)
         self.client.send(b"HTTP/1.1 200 OK\r\n\r\n" + msg.encode())
         self.client.close()
 
@@ -69,12 +70,13 @@ class OAuthBase(Extractor):
         import webbrowser
         url += "?" + urllib.parse.urlencode(params)
         if not self.config("browser", True) or not webbrowser.open(url):
-            print("Please open this URL in your browser:")
-            print(url, end="\n\n", flush=True)
+            stdout_write(
+                "Please open this URL in your browser:\n\n" + url + "\n\n")
         return (recv or self.recv)()
 
     def error(self, msg):
-        return self.send("Remote server reported an error:\n\n" + str(msg))
+        return self.send(
+            "Remote server reported an error:\n\n{}\n".format(msg))
 
     def _oauth1_authorization_flow(
             self, request_token_url, authorize_url, access_token_url):
@@ -133,7 +135,7 @@ class OAuthBase(Extractor):
 
         # check authorization response
         if state != params.get("state"):
-            self.send("'state' mismatch: expected {}, got {}.".format(
+            self.send("'state' mismatch: expected {}, got {}.\n".format(
                 state, params.get("state")
             ))
             return
@@ -188,7 +190,7 @@ class OAuthBase(Extractor):
 
         opt = self.oauth_config(names[0])
         if self.cache and (opt is None or opt == "cache"):
-            msg += _vh + " been cached and will automatically be used."
+            msg += _vh + " been cached and will automatically be used.\n"
         else:
             msg += "Put " + _va + " into your configuration file as \n"
             msg += " and\n".join(
@@ -200,7 +202,7 @@ class OAuthBase(Extractor):
                     "\nor set\n'extractor.{}.{}' to \"cache\""
                     .format(self.subcategory, names[0])
                 )
-            msg += "\nto use {}.".format(_it)
+            msg += "\nto use {}.\n".format(_it)
 
         return msg
 
@@ -398,9 +400,9 @@ class OAuthPixiv(OAuthBase):
         data = self.session.post(url, headers=headers, data=data).json()
 
         if "error" in data:
-            print(data)
+            stdout_write("\n{}\n".format(data))
             if data["error"] in ("invalid_request", "invalid_grant"):
-                print("'code' expired, try again")
+                stdout_write("'code' expired, try again\n\n")
             return
 
         token = data["refresh_token"]
@@ -409,10 +411,10 @@ class OAuthPixiv(OAuthBase):
             pixiv._refresh_token_cache.update(username, token)
             self.log.info("Writing 'refresh-token' to cache")
 
-        print(self._generate_message(("refresh-token",), (token,)))
+        stdout_write(self._generate_message(("refresh-token",), (token,)))
 
     def _input(self):
-        print("""
+        stdout_write("""\
 1) Open your browser's Developer Tools (F12) and switch to the Network tab
 2) Login
 3) Select the last network monitor entry ('callback?state=...')
@@ -421,6 +423,7 @@ class OAuthPixiv(OAuthBase):
 - This 'code' will expire 30 seconds after logging in.
 - Copy-pasting more than just the 'code' value will work as well,
   like the entire URL or several query parameters.
+
 """)
         code = input("code: ")
         return code.rpartition("=")[2].strip()

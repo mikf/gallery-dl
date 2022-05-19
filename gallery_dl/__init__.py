@@ -12,7 +12,7 @@ import logging
 from . import version, config, option, output, extractor, job, util, exception
 
 __author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2021 Mike Fährmann"
+__copyright__ = "Copyright 2014-2022 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
@@ -22,10 +22,13 @@ __version__ = version.__version__
 def progress(urls, pformat):
     """Wrapper around urls to output a simple progress indicator"""
     if pformat is True:
-        pformat = "[{current}/{total}] {url}"
+        pformat = "[{current}/{total}] {url}\n"
+    else:
+        pformat += "\n"
+
     pinfo = {"total": len(urls)}
     for pinfo["current"], pinfo["url"] in enumerate(urls, 1):
-        print(pformat.format_map(pinfo), file=sys.stderr)
+        output.stderr_write(pformat.format_map(pinfo))
         yield pinfo["url"]
 
 
@@ -196,20 +199,23 @@ def main():
                 pass
 
         if args.list_modules:
-            for module_name in extractor.modules:
-                print(module_name)
+            extractor.modules.append("")
+            sys.stdout.write("\n".join(extractor.modules))
+
         elif args.list_extractors:
+            write = sys.stdout.write
+            fmt = "{}\n{}\nCategory: {} - Subcategory: {}{}\n\n".format
+
             for extr in extractor.extractors():
                 if not extr.__doc__:
                     continue
-                print(extr.__name__)
-                print(extr.__doc__)
-                print("Category:", extr.category,
-                      "- Subcategory:", extr.subcategory)
                 test = next(extr._get_tests(), None)
-                if test:
-                    print("Example :", test[0])
-                print()
+                write(fmt(
+                    extr.__name__, extr.__doc__,
+                    extr.category, extr.subcategory,
+                    "\nExample : " + test[0] if test else "",
+                ))
+
         elif args.clear_cache:
             from . import cache
             log = logging.getLogger("cache")
