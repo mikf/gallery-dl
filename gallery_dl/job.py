@@ -16,6 +16,7 @@ import collections
 from . import extractor, downloader, postprocessor
 from . import config, text, util, path, formatter, output, exception
 from .extractor.message import Message
+from .output import stdout_write
 
 
 class Job():
@@ -537,14 +538,14 @@ class KeywordJob(Job):
         self.private = config.get(("output",), "private")
 
     def handle_url(self, url, kwdict):
-        print("\nKeywords for filenames and --filter:")
-        print("------------------------------------")
+        stdout_write("\nKeywords for filenames and --filter:\n"
+                     "------------------------------------\n")
         self.print_kwdict(kwdict)
         raise exception.StopExtraction()
 
     def handle_directory(self, kwdict):
-        print("Keywords for directory names:")
-        print("-----------------------------")
+        stdout_write("Keywords for directory names:\n"
+                     "-----------------------------\n")
         self.print_kwdict(kwdict)
 
     def handle_queue(self, url, kwdict):
@@ -565,16 +566,17 @@ class KeywordJob(Job):
                 self.extractor.log.info(
                     "Try 'gallery-dl -K \"%s\"' instead.", url)
         else:
-            print("Keywords for --chapter-filter:")
-            print("------------------------------")
+            stdout_write("Keywords for --chapter-filter:\n"
+                         "------------------------------\n")
             self.print_kwdict(kwdict)
             if extr or self.extractor.categorytransfer:
-                print()
+                stdout_write("\n")
                 KeywordJob(extr or url, self).run()
         raise exception.StopExtraction()
 
     def print_kwdict(self, kwdict, prefix=""):
         """Print key-value pairs in 'kwdict' with formatting"""
+        write = sys.stdout.write
         suffix = "]" if prefix else ""
         for key, value in sorted(kwdict.items()):
             if key[0] == "_" and not self.private:
@@ -588,13 +590,13 @@ class KeywordJob(Job):
                 if value and isinstance(value[0], dict):
                     self.print_kwdict(value[0], key + "[][")
                 else:
-                    print(key, "[]", sep="")
+                    write(key + "[]\n")
                     for val in value:
-                        print("  -", val)
+                        write("  - " + str(val) + "\n")
 
             else:
                 # string or number
-                print(key, "\n  ", value, sep="")
+                write("{}\n  {}\n".format(key, value))
 
 
 class UrlJob(Job):
@@ -609,14 +611,14 @@ class UrlJob(Job):
 
     @staticmethod
     def handle_url(url, _):
-        print(url)
+        stdout_write(url + "\n")
 
     @staticmethod
     def handle_url_fallback(url, kwdict):
-        print(url)
+        stdout_write(url + "\n")
         if "_fallback" in kwdict:
             for url in kwdict["_fallback"]:
-                print("|", url)
+                stdout_write("| " + url + "\n")
 
     def handle_queue(self, url, kwdict):
         cls = kwdict.get("_extractor")
@@ -653,15 +655,18 @@ class InfoJob(Job):
         return 0
 
     def _print_multi(self, title, *values):
-        print(title, "\n  ", " / ".join(json.dumps(v) for v in values), sep="")
+        stdout_write("{}\n  {}\n\n".format(
+            title, " / ".join(json.dumps(v) for v in values)))
 
     def _print_config(self, title, optname, value):
         optval = self.extractor.config(optname, util.SENTINEL)
         if optval is not util.SENTINEL:
-            print(title, "(custom):\n ", json.dumps(optval))
-            print(title, "(default):\n ", json.dumps(value))
+            stdout_write(
+                "{} (custom):\n  {}\n{} (default):\n  {}\n\n".format(
+                    title, json.dumps(optval), title, json.dumps(value)))
         elif value:
-            print(title, "(default):\n ", json.dumps(value))
+            stdout_write(
+                "{} (default):\n  {}\n\n".format(title, json.dumps(value)))
 
 
 class DataJob(Job):
