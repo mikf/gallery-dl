@@ -574,21 +574,31 @@ class KeywordJob(Job):
                 KeywordJob(extr or url, self).run()
         raise exception.StopExtraction()
 
-    def print_kwdict(self, kwdict, prefix=""):
+    def print_kwdict(self, kwdict, prefix="", markers=None):
         """Print key-value pairs in 'kwdict' with formatting"""
         write = sys.stdout.write
         suffix = "]" if prefix else ""
+
+        markerid = id(kwdict)
+        if markers is None:
+            markers = {markerid}
+        elif markerid in markers:
+            write("{}\n  <circular reference>\n".format(prefix[:-1]))
+            return  # ignore circular reference
+        else:
+            markers.add(markerid)
+
         for key, value in sorted(kwdict.items()):
             if key[0] == "_" and not self.private:
                 continue
             key = prefix + key + suffix
 
             if isinstance(value, dict):
-                self.print_kwdict(value, key + "[")
+                self.print_kwdict(value, key + "[", markers)
 
             elif isinstance(value, list):
                 if value and isinstance(value[0], dict):
-                    self.print_kwdict(value[0], key + "[][")
+                    self.print_kwdict(value[0], key + "[][", markers)
                 else:
                     write(key + "[]\n")
                     for val in value:
