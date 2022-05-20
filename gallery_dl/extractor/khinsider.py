@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,7 +26,18 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
         "pattern": r"https?://vgm(site|downloads).com"
                    r"/soundtracks/horizon-riders-wii/[^/]+"
                    r"/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack.mp3",
-        "keyword": "12ca70e0709ea15250e577ea388cf2b5b0c65630",
+        "keyword": {
+            "album": {
+                "count": 1,
+                "date": "Sep 18th, 2016",
+                "name": "Horizon Riders (Wii)",
+                "size": 26214400,
+                "type": "Gamerip",
+            },
+            "extension": "mp3",
+            "filename": "Horizon Riders Wii - Full Soundtrack",
+        },
+        "count": 1,
     })
 
     def __init__(self, match):
@@ -48,10 +59,10 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
     def metadata(self, page):
         extr = text.extract_from(page)
         return {"album": {
-            "name" : text.unescape(extr("Album name: <b>", "<")),
+            "name" : text.unescape(extr("<h2>", "<")),
             "count": text.parse_int(extr("Number of Files: <b>", "<")),
             "size" : text.parse_bytes(extr("Total Filesize: <b>", "<")[:-1]),
-            "date" : extr("Date added: <b>", "<"),
+            "date" : extr("Date Added: <b>", "<"),
             "type" : extr("Album type: <b>", "<"),
         }}
 
