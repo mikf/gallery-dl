@@ -2435,6 +2435,20 @@ Description
     to use your account's browsing settings and filters.
 
 
+extractor.weasyl.metadata
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    | Fetch extra submission metadata during gallery downloads.
+    | (``comments``, ``description``, ``favorites``, ``folder_name``,
+      ``tags``, ``views``)
+
+    Note: This requires 1 additional HTTP request per submission.
+
+
 extractor.weibo.retweets
 ------------------------
 Type
