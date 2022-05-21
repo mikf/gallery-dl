@@ -2224,7 +2224,7 @@ extractor.twitter.cards
 Type
     ``bool`` or ``string``
 Default
-    ``true``
+    ``false``
 Description
     Controls how to handle `Twitter Cards <https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards>`__.
 

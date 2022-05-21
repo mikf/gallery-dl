@@ -39,7 +39,7 @@ class TwitterExtractor(Extractor):
         self.pinned = self.config("pinned", False)
         self.quoted = self.config("quoted", False)
         self.videos = self.config("videos", True)
-        self.cards = self.config("cards", True)
+        self.cards = self.config("cards", False)
         self._user_cache = {}
         self._init_sizes()
 
