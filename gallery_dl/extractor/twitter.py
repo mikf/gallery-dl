@@ -323,6 +323,9 @@ class TwitterExtractor(Extractor):
         elif userfmt == "media":
             cls = TwitterMediaExtractor
             fmt = (self.root + "/id:{rest_id}/media").format_map
+        elif userfmt == "tweets":
+            cls = TwitterTweetsExtractor
+            fmt = (self.root + "/id:{rest_id}/tweets").format_map
         else:
             cls = None
             fmt = userfmt.format_map
@@ -383,7 +386,7 @@ class TwitterExtractor(Extractor):
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
-    """Extractor for Tweets from a user's timeline"""
+    """Extractor for a Twitter user timeline"""
     subcategory = "timeline"
     pattern = (BASE_PATTERN + r"/(?!search)(?:([^/?#]+)/?(?:$|[?#])"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
@@ -409,18 +412,18 @@ class TwitterTimelineExtractor(TwitterExtractor):
             self.user = "id:" + user_id
 
     def tweets(self):
-        if not self.config("strategy"):
-            return self._tweets_twMediaDownloader()
-        return self.api.user_tweets(self.user)
+        tweets = (self.api.user_tweets(self.user) if self.retweets else
+                  self.api.user_media(self.user))
 
-    def _tweets_twMediaDownloader(self):
+        # yield initial batch of (media) tweets
         tweet = None
-        for tweet in self.api.user_media(self.user):
+        for tweet in tweets:
             yield tweet
 
         if tweet is None:
             return
 
+        # get username
         if not self.user.startswith("id:"):
             username = self.user
         elif "core" in tweet:
@@ -429,14 +432,33 @@ class TwitterTimelineExtractor(TwitterExtractor):
         else:
             username = tweet["user"]["screen_name"]
 
+        # get tweet data
         if "legacy" in tweet:
             tweet = tweet["legacy"]
 
+        # yield search results starting from last tweet id
         yield from self.api.search_adaptive(
             "from:{} include:retweets include:nativeretweets max_id:{} "
             "filter:images OR card_name:animated_gif OR filter:native_video"
             .format(username, tweet["id_str"])
         )
+
+
+class TwitterTweetsExtractor(TwitterExtractor):
+    """Extractor for Tweets from a user's Tweets timeline"""
+    subcategory = "tweets"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/tweets(?!\w)"
+    test = (
+        ("https://twitter.com/supernaturepics/tweets", {
+            "range": "1-40",
+            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
+        }),
+        ("https://mobile.twitter.com/supernaturepics/tweets#t"),
+        ("https://www.twitter.com/id:2976459548/tweets"),
+    )
+
+    def tweets(self):
+        return self.api.user_tweets(self.user)
 
 
 class TwitterRepliesExtractor(TwitterExtractor):

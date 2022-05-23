@@ -208,6 +208,7 @@ SUBCATEGORY_MAP = {
     },
     "twitter": {
         "media": "Media Timelines",
+        "tweets": "",
         "replies": "",
         "list-members": "List Members",
     },
