@@ -2366,6 +2366,7 @@ Description
     Special values:
 
     * ``"timeline"``: ``https://twitter.com/i/user/{rest_id}``
+    * ``"tweets"``: ``https://twitter.com/id:{rest_id}/tweets``
     * ``"media"``: ``https://twitter.com/id:{rest_id}/media``
 
     Note: To allow gallery-dl to follow custom URL formats, set the blacklist__
