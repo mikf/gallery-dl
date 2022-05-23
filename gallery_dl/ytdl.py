@@ -395,9 +395,6 @@ def parse_command_line(module, argv):
         "allow_multiple_audio_streams": opts.allow_multiple_audio_streams,
         "check_formats": getattr(
             opts, "check_formats", None),
-        "listformats": opts.listformats,
-        "listformats_table": getattr(
-            opts, "listformats_table", None),
         "outtmpl": opts.outtmpl,
         "outtmpl_na_placeholder": opts.outtmpl_na_placeholder,
         "paths": getattr(opts, "paths", None),
@@ -448,7 +445,6 @@ def parse_command_line(module, argv):
         "writesubtitles": opts.writesubtitles,
         "writeautomaticsub": opts.writeautomaticsub,
         "allsubtitles": opts.allsubtitles,
-        "listsubtitles": opts.listsubtitles,
         "subtitlesformat": opts.subtitlesformat,
         "subtitleslangs": opts.subtitleslangs,
         "matchtitle": module.decodeOption(opts.matchtitle),
