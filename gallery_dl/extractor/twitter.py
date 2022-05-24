@@ -104,6 +104,7 @@ class TwitterExtractor(Extractor):
 
     def _extract_media(self, tweet, entities, files):
         for media in entities:
+            descr = media.get("ext_alt_text")
             width = media["original_info"].get("width", 0)
             height = media["original_info"].get("height", 0)
 
@@ -112,9 +113,10 @@ class TwitterExtractor(Extractor):
                     files.append({
                         "url": "ytdl:{}/i/web/status/{}".format(
                             self.root, tweet["id_str"]),
-                        "width"    : width,
-                        "height"   : height,
-                        "extension": None,
+                        "width"      : width,
+                        "height"     : height,
+                        "extension"  : None,
+                        "description": descr,
                     })
                 elif self.videos:
                     video_info = media["video_info"]
@@ -123,22 +125,24 @@ class TwitterExtractor(Extractor):
                         key=lambda v: v.get("bitrate", 0),
                     )
                     files.append({
-                        "url"     : variant["url"],
-                        "width"   : width,
-                        "height"  : height,
-                        "bitrate" : variant.get("bitrate", 0),
-                        "duration": video_info.get(
+                        "url"        : variant["url"],
+                        "width"      : width,
+                        "height"     : height,
+                        "bitrate"    : variant.get("bitrate", 0),
+                        "duration"   : video_info.get(
                             "duration_millis", 0) / 1000,
+                        "description": descr,
                     })
             elif "media_url_https" in media:
                 url = media["media_url_https"]
                 base, _, fmt = url.rpartition(".")
                 base += "?format=" + fmt + "&name="
                 files.append(text.nameext_from_url(url, {
-                    "url"      : base + self._size_image,
-                    "width"    : width,
-                    "height"   : height,
-                    "_fallback": self._image_fallback(base),
+                    "url"        : base + self._size_image,
+                    "width"      : width,
+                    "height"     : height,
+                    "_fallback"  : self._image_fallback(base),
+                    "description": descr,
                 }))
             else:
                 files.append({"url": media["media_url"]})
@@ -710,6 +714,10 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/mightbecursed/status/1492954264909479936", {
             "options": (("syndication", True),),
             "count": 1,
+        }),
+        # media alt texts / descriptions (#2617)
+        ("https://twitter.com/my0nruri/status/1528379296041299968", {
+            "keyword": {"description": "oc"}
         }),
     )
 
