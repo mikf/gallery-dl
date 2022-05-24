@@ -265,7 +265,7 @@ class DownloadJob(Job):
 
         # download succeeded
         pathfmt.finalize()
-        self.out.success(pathfmt.path, 0)
+        self.out.success(pathfmt.path)
         self._skipcnt = 0
         if archive:
             archive.add(kwdict)
