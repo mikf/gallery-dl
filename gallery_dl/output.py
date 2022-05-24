@@ -279,7 +279,7 @@ class NullOutput():
     def skip(self, path):
         """Print a message indicating that a download has been skipped"""
 
-    def success(self, path, tries):
+    def success(self, path):
         """Print a message indicating the completion of a download"""
 
     def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
@@ -291,7 +291,7 @@ class PipeOutput(NullOutput):
     def skip(self, path):
         stdout_write(CHAR_SKIP + path + "\n")
 
-    def success(self, path, tries):
+    def success(self, path):
         stdout_write(path + "\n")
 
 
@@ -313,7 +313,7 @@ class TerminalOutput(NullOutput):
     def skip(self, path):
         stdout_write(self.shorten(CHAR_SKIP + path) + "\n")
 
-    def success(self, path, tries):
+    def success(self, path):
         stdout_write("\r" + self.shorten(CHAR_SUCCESS + path) + "\n")
 
     def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
@@ -343,7 +343,7 @@ class ColorOutput(TerminalOutput):
     def skip(self, path):
         stdout_write(self.color_skip + self.shorten(path) + "\033[0m\n")
 
-    def success(self, path, tries):
+    def success(self, path):
         stdout_write(self.color_success + self.shorten(path) + "\033[0m\n")
 
 
