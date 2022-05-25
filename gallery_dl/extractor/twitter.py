@@ -15,7 +15,7 @@ import json
 
 BASE_PATTERN = (
     r"(?:https?://)?(?:www\.|mobile\.)?"
-    r"(?:(?:fx)?twitter\.com|nitter\.net)"
+    r"(?:(?:[fv]x)?twitter\.com|nitter\.net)"
 )
 
 
@@ -407,6 +407,8 @@ class TwitterTimelineExtractor(TwitterExtractor):
         ("https://www.twitter.com/id:2976459548"),
         ("https://twitter.com/i/user/2976459548"),
         ("https://twitter.com/intent/user?user_id=2976459548"),
+        ("https://fxtwitter.com/supernaturepics"),
+        ("https://vxtwitter.com/supernaturepics"),
     )
 
     def __init__(self, match):
