@@ -308,7 +308,7 @@ class InstagramExtractor(Extractor):
                 video = None
                 media = image
 
-            files.append({
+            media = {
                 "num"        : num,
                 "date"       : text.parse_timestamp(item.get("taken_at") or
                                                     media.get("taken_at")),
@@ -319,7 +319,9 @@ class InstagramExtractor(Extractor):
                 "video_url"  : video["url"] if video else None,
                 "width"      : media["width"],
                 "height"     : media["height"],
-            })
+            }
+            self._extract_tagged_users(item, media)
+            files.append(media)
 
         return data
 
@@ -331,19 +333,43 @@ class InstagramExtractor(Extractor):
             "abcdefghijklmnopqrstuvwxyz"
             "0123456789-_")
 
-    def _extract_tagged_users(self, src, dest):
-        if "edge_media_to_tagged_user" not in src:
-            return
-        edges = src["edge_media_to_tagged_user"]["edges"]
+    @staticmethod
+    def _extract_tagged_users(src, dest):
+        dest["tagged_users"] = tagged_users = []
+
+        edges = src.get("edge_media_to_tagged_user")
         if edges:
-            dest["tagged_users"] = tagged_users = []
-            for edge in edges:
+            for edge in edges["edges"]:
                 user = edge["node"]["user"]
-                tagged_users.append({
-                    "id"       : user["id"],
-                    "username" : user["username"],
-                    "full_name": user["full_name"],
-                })
+                tagged_users.append({"id"       : user["id"],
+                                     "username" : user["username"],
+                                     "full_name": user["full_name"]})
+
+        usertags = src.get("usertags")
+        if usertags:
+            for tag in usertags["in"]:
+                user = tag["user"]
+                tagged_users.append({"id"       : user["pk"],
+                                     "username" : user["username"],
+                                     "full_name": user["full_name"]})
+
+        mentions = src.get("reel_mentions")
+        if mentions:
+            for mention in mentions:
+                user = mention["user"]
+                tagged_users.append({"id"       : user.get("pk"),
+                                     "username" : user["username"],
+                                     "full_name": user["full_name"]})
+
+        stickers = src.get("story_bloks_stickers")
+        if stickers:
+            for sticker in stickers:
+                sticker = sticker["bloks_sticker"]
+                if sticker["bloks_sticker_type"] == "mention":
+                    user = sticker["sticker_data"]["ig_mention"]
+                    tagged_users.append({"id"       : user["account_id"],
+                                         "username" : user["username"],
+                                         "full_name": user["full_name"]})
 
     def _extract_shared_data(self, page):
         shared_data, pos = text.extract(
