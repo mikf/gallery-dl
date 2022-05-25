@@ -353,6 +353,14 @@ class InstagramExtractor(Extractor):
                                      "username" : user["username"],
                                      "full_name": user["full_name"]})
 
+        mentions = src.get("reel_mentions")
+        if mentions:
+            for mention in mentions:
+                user = mention["user"]
+                tagged_users.append({"id"       : user.get("pk"),
+                                     "username" : user["username"],
+                                     "full_name": user["full_name"]})
+
         stickers = src.get("story_bloks_stickers")
         if stickers:
             for sticker in stickers:
@@ -362,13 +370,6 @@ class InstagramExtractor(Extractor):
                     tagged_users.append({"id"       : user["account_id"],
                                          "username" : user["username"],
                                          "full_name": user["full_name"]})
-
-        mentions = src.get("reel_mentions")
-        if mentions:
-            for mention in mentions:
-                user = mention["user"]
-                tagged_users.append({"username" : user["username"],
-                                     "full_name": user["full_name"]})
 
     def _extract_shared_data(self, url):
         page = self.request(url).text
