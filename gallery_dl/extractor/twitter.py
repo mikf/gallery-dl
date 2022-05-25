@@ -15,7 +15,7 @@ import json
 
 BASE_PATTERN = (
     r"(?:https?://)?(?:www\.|mobile\.)?"
-    r"(?:(?:fx|vx)?twitter\.com|nitter\.net)"
+    r"(?:(?:[fv]x)?twitter\.com|nitter\.net)"
 )
 
 
