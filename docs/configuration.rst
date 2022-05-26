@@ -399,16 +399,19 @@ Description
 extractor.*.cookies
 -------------------
 Type
-    |Path|_ or ``object``
+    |Path|_ or ``object`` or ``list``
 Default
     ``null``
 Description
-    Source to read additional cookies from. Either as
+    Source to read additional cookies from. This can be
 
-    * the |Path|_ to a Mozilla/Netscape format cookies.txt file or
-    * a JSON ``object`` specifying cookies as a name-to-value mapping
+    * The |Path|_ to a Mozilla/Netscape format cookies.txt file
 
-      Example:
+      .. code:: json
+
+        "~/.local/share/cookies-instagram-com.txt"
+
+    * An ``object`` specifying cookies as name-value pairs
 
       .. code:: json
 
@@ -417,6 +420,17 @@ Description
             "sessionid"  : "14313336321%3AsabDFvuASDnlpb%3A31",
             "isAdult"    : "1"
         }
+
+    * A ``list`` with up to 3 entries specifying a browser profile.
+
+      * The first entry is the browser name
+      * The optional second entry is a profile name or an absolote path to a profile directory
+      * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
+
+      .. code:: json
+
+        ["firefox"]
+        ["chromium", "Private", "kwallet"]
 
 
 extractor.*.cookies-update
@@ -613,9 +627,7 @@ Type
 Example
     ``"{id}_{offset}"``
 Description
-    An alternative `format string`__ to build archive IDs with.
-
-.. __: https://docs.python.org/3/library/string.html#format-string-syntax
+    An alternative `format string`_ to build archive IDs with.
 
 
 extractor.*.archive-prefix
@@ -865,6 +877,21 @@ Description
     Download embedded videos hosted on https://www.blogger.com/
 
 
+extractor.cyberdrop.domain
+--------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Example
+    ``"cyberdrop.to"``
+Description
+    Specifies the domain used by ``cyberdrop`` regardless of input URL.
+
+    Setting this option to ``"auto"``
+    uses the same domain as a given input URL.
+
+
 extractor.danbooru.external
 ---------------------------
 Type
@@ -1075,6 +1102,19 @@ Description
     Setting this option to ``"images"`` only downloads original
     files if they are images and falls back to preview versions for
     everything else (archives, etc.).
+
+
+extractor.deviantart.pagination
+-------------------------------
+Type
+    ``string``
+Default
+    ``"api"``
+Description
+    Controls when to stop paginating over API results.
+
+    * ``"api"``: Trust the API and stop when ``has_more`` is ``false``.
+    * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
 
 
 extractor.deviantart.refresh-token
@@ -1506,6 +1546,20 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.lolisafe.domain
+-------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Specifies the domain used by a ``lolisafe`` extractor
+    regardless of input URL.
+
+    Setting this option to ``"auto"``
+    uses the same domain as a given input URL.
+
+
 extractor.luscious.gif
 ----------------------
 Type
@@ -1637,7 +1691,7 @@ Description
 
 
 extractor.nijie.include
-----------------------------
+-----------------------
 Type
     ``string`` or ``list`` of ``strings``
 Default
@@ -1647,7 +1701,7 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"illustration"``, ``"doujin"``, ``"favorite"``.
+    ``"illustration"``, ``"doujin"``, ``"favorite"``, ``"nuita"``.
 
     You can use ``"all"`` instead of listing all values separately.
 
@@ -1765,18 +1819,28 @@ Description
     Download from video pins.
 
 
-extractor.pixiv.user.avatar
----------------------------
+extractor.pixiv.include
+-----------------------
 Type
-    ``bool``
+    * ``string``
+    * ``list`` of ``strings``
 Default
-    ``false``
+    ``"artworks"``
+Example
+    * ``"avatar,background,artworks"``
+    * ``["avatar", "background", "artworks"]``
 Description
-    Download user avatars.
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"artworks"``, ``"avatar"``, ``"background"``, ``"favorite"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
-extractor.pixiv.user.metadata
------------------------------
+extractor.pixiv.artworks.metadata
+---------------------------------
 Type
     ``bool``
 Default
@@ -1872,6 +1936,19 @@ Description
 
     * ``"stop``: Stop the current extractor run.
     * ``"wait``: Ask the user to solve the CAPTCHA and wait.
+
+
+extractor.readcomiconline.quality
+---------------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Sets the ``quality`` query parameter of issue pages. (``"lq"`` or ``"hq"``)
+
+    ``"auto"`` uses the quality parameter of the input URL
+    or ``"hq"`` if not present.
 
 
 extractor.reddit.comments
@@ -2147,7 +2224,7 @@ extractor.twitter.cards
 Type
     ``bool`` or ``string``
 Default
-    ``true``
+    ``false``
 Description
     Controls how to handle `Twitter Cards <https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards>`__.
 
@@ -2289,6 +2366,7 @@ Description
     Special values:
 
     * ``"timeline"``: ``https://twitter.com/i/user/{rest_id}``
+    * ``"tweets"``: ``https://twitter.com/id:{rest_id}/tweets``
     * ``"media"``: ``https://twitter.com/id:{rest_id}/media``
 
     Note: To allow gallery-dl to follow custom URL formats, set the blacklist__
@@ -2356,6 +2434,20 @@ Default
 Description
     Your `Weasyl API Key <https://www.weasyl.com/control/apikeys>`__,
     to use your account's browsing settings and filters.
+
+
+extractor.weasyl.metadata
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    | Fetch extra submission metadata during gallery downloads.
+    | (``comments``, ``description``, ``favorites``, ``folder_name``,
+      ``tags``, ``views``)
+
+    Note: This requires 1 additional HTTP request per submission.
 
 
 extractor.weibo.retweets
@@ -2843,6 +2935,19 @@ Description
     with a display width greater than 1.
 
 
+output.colors
+-------------
+Type
+    ``object``
+Default
+    ``{"success": "1;32", "skip": "2"}``
+Description
+    Controls the `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#colors--graphics-mode>`__
+    used with |mode: color|__ for successfully downloaded or skipped files.
+
+.. __: `output.mode`_
+
+
 output.skip
 -----------
 Type
@@ -3275,12 +3380,11 @@ Default
 Description
     FFmpeg demuxer to read and process input files with. Possible values are
 
-    * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes)
-    * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, not usable on Windows)
+    * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes for non-uniform frame delays)
+    * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, requires nanosecond file timestamps, i.e. no Windows or macOS)
     * "mkvmerge" (accurate timecodes, only WebM or MKV, requires `mkvmerge <ugoira.mkvmerge-location_>`__)
 
-    `"auto"` will select `mkvmerge` if possible and fall back to `image2` or
-    `concat` depending on the local operating system.
+    `"auto"` will select `mkvmerge` if available and fall back to `concat` otherwise.
 
 
 ugoira.ffmpeg-location
@@ -3791,6 +3895,7 @@ Description
 .. |Postprocessor Configuration| replace:: ``Postprocessor Configuration``
 .. |strptime| replace:: strftime() and strptime() Behavior
 .. |postprocessors| replace:: ``postprocessors``
+.. |mode: color| replace:: ``"mode": "color"``
 
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_

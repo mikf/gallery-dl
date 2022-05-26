@@ -168,11 +168,12 @@ class TestISO639_1(unittest.TestCase):
 
 class TestCookiesTxt(unittest.TestCase):
 
-    def test_load_cookiestxt(self):
+    def test_cookiestxt_load(self):
 
         def _assert(content, expected):
-            cookies = util.load_cookiestxt(io.StringIO(content, None))
-            for c, e in zip(cookies, expected):
+            jar = http.cookiejar.CookieJar()
+            util.cookiestxt_load(io.StringIO(content, None), jar)
+            for c, e in zip(jar, expected):
                 self.assertEqual(c.__dict__, e.__dict__)
 
         _assert("", [])
@@ -218,13 +219,14 @@ class TestCookiesTxt(unittest.TestCase):
         )
 
         with self.assertRaises(ValueError):
-            util.load_cookiestxt("example.org\tTRUE\t/\tTRUE\t0\tname")
+            util.cookiestxt_load("example.org\tTRUE\t/\tTRUE\t0\tname",
+                                 http.cookiejar.CookieJar())
 
-    def test_save_cookiestxt(self):
+    def test_cookiestxt_store(self):
 
         def _assert(cookies, expected):
             fp = io.StringIO(newline=None)
-            util.save_cookiestxt(fp, cookies)
+            util.cookiestxt_store(fp, cookies)
             self.assertMultiLineEqual(fp.getvalue(), expected)
 
         _assert([], "# Netscape HTTP Cookie File\n\n")
@@ -385,8 +387,6 @@ class TestOther(unittest.TestCase):
             expr()
 
     def test_build_duration_func(self, f=util.build_duration_func):
-        for v in (0, 0.0, "", None, (), []):
-            self.assertIsNone(f(v))
 
         def test_single(df, v):
             for _ in range(10):
@@ -397,6 +397,12 @@ class TestOther(unittest.TestCase):
                 v = df()
                 self.assertGreaterEqual(v, lower)
                 self.assertLessEqual(v, upper)
+
+        for v in (0, 0.0, "", None, (), []):
+            self.assertIsNone(f(v))
+
+        for v in (0, 0.0, "", None, (), []):
+            test_single(f(v, 1.0), 1.0)
 
         test_single(f(3), 3)
         test_single(f(3.0), 3.0)

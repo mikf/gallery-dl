@@ -4,12 +4,12 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://www.vogue.it/en/photovogue/"""
+"""Extractors for https://www.vogue.com/photovogue/"""
 
 from .common import Extractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?vogue\.it/(?:en/)?photovogue"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?vogue\.com/photovogue"
 
 
 class PhotovogueUserExtractor(Extractor):
@@ -18,10 +18,10 @@ class PhotovogueUserExtractor(Extractor):
     directory_fmt = ("{category}", "{photographer[id]} {photographer[name]}")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/portfolio/?\?id=(\d+)"
+    pattern = BASE_PATTERN + r"/photographers/(\d+)"
     test = (
-        ("https://www.vogue.it/en/photovogue/portfolio/?id=221252"),
-        ("https://vogue.it/photovogue/portfolio?id=221252", {
+        ("https://www.vogue.com/photovogue/photographers/221252"),
+        ("https://vogue.com/photovogue/photographers/221252", {
             "pattern": r"https://images.vogue.it/Photovogue/[^/]+_gallery.jpg",
             "keyword": {
                 "date": "type:datetime",
@@ -67,7 +67,7 @@ class PhotovogueUserExtractor(Extractor):
             yield Message.Url, url, text.nameext_from_url(url, photo)
 
     def photos(self):
-        url = "https://api.vogue.it/production/photos"
+        url = "https://api.vogue.com/production/photos"
         params = {
             "count": "50",
             "order_by": "DESC",

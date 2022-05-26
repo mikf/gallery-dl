@@ -1,5 +1,69 @@
 # Changelog
 
+## 1.22.0 - 2022-05-25
+### Additions
+- [gelbooru_v01] add `favorite` extractor ([#2546](https://github.com/mikf/gallery-dl/issues/2546))
+- [Instagram] add `tagged_users` to keywords for stories ([#2582](https://github.com/mikf/gallery-dl/issues/2582), [#2584](https://github.com/mikf/gallery-dl/issues/2584))
+- [lolisafe] implement `domain` option ([#2575](https://github.com/mikf/gallery-dl/issues/2575))
+- [naverwebtoon] support (best)challenge comics ([#2542](https://github.com/mikf/gallery-dl/issues/2542))
+- [nijie] support /history_nuita.php listings ([#2541](https://github.com/mikf/gallery-dl/issues/2541))
+- [pixiv] provide more data when `metadata` is enabled ([#2594](https://github.com/mikf/gallery-dl/issues/2594))
+- [shopify] support several more sites by default ([#2089](https://github.com/mikf/gallery-dl/issues/2089))
+- [twitter] extract alt texts as `description` ([#2617](https://github.com/mikf/gallery-dl/issues/2617))
+- [twitter] recognize vxtwitter URLs ([#2621](https://github.com/mikf/gallery-dl/issues/2621))
+- [weasyl] implement `metadata` option ([#2610](https://github.com/mikf/gallery-dl/issues/2610))
+- implement `--cookies-from-browser` ([#1606](https://github.com/mikf/gallery-dl/issues/1606))
+- implement `output.colors` options ([#2532](https://github.com/mikf/gallery-dl/issues/2532))
+- implement string literals in replacement fields
+- support using extended format strings for archive keys
+### Changes
+- [foolfuuka] match 4chan filenames ([#2577](https://github.com/mikf/gallery-dl/issues/2577))
+- [pixiv] implement `include` option
+  - provide `avatar`/`background` downloads as separate extractors ([#2495](https://github.com/mikf/gallery-dl/issues/2495))
+- [twitter] use a better strategy for user URLs
+- [twitter] disable `cards` by default
+- delay directory creation ([#2461](https://github.com/mikf/gallery-dl/issues/2461), [#2474](https://github.com/mikf/gallery-dl/issues/2474))
+- flush writes to stdout/stderr ([#2529](https://github.com/mikf/gallery-dl/issues/2529))
+- build executables on GitHub Actions with Python 3.10
+### Fixes
+- [artstation] use `"browser": "firefox"` by default ([#2527](https://github.com/mikf/gallery-dl/issues/2527))
+- [imgur] prevent exception with empty albums ([#2557](https://github.com/mikf/gallery-dl/issues/2557))
+- [instagram] report redirects to captcha challenges ([#2543](https://github.com/mikf/gallery-dl/issues/2543))
+- [khinsider] fix metadata extraction ([#2611](https://github.com/mikf/gallery-dl/issues/2611))
+- [mangafox] send Referer headers ([#2592](https://github.com/mikf/gallery-dl/issues/2592))
+- [mangahere] send Referer headers ([#2592](https://github.com/mikf/gallery-dl/issues/2592))
+- [mangasee] use randomly generated PHPSESSID cookie ([#2560](https://github.com/mikf/gallery-dl/issues/2560))
+- [pixiv] make retrieving ugoira metadata non-fatal ([#2562](https://github.com/mikf/gallery-dl/issues/2562))
+- [readcomiconline] update deobfuscation code ([#2481](https://github.com/mikf/gallery-dl/issues/2481))
+- [realbooru] fix extraction ([#2530](https://github.com/mikf/gallery-dl/issues/2530))
+- [vk] handle photos without width/height info ([#2535](https://github.com/mikf/gallery-dl/issues/2535))
+- [vk] fix user ID extraction ([#2535](https://github.com/mikf/gallery-dl/issues/2535))
+- [webtoons] extract real episode numbers ([#2591](https://github.com/mikf/gallery-dl/issues/2591))
+- create missing directories for archive files ([#2597](https://github.com/mikf/gallery-dl/issues/2597))
+- detect circular references with `-K` ([#2609](https://github.com/mikf/gallery-dl/issues/2609))
+- replace "\f" in `--filename` arguments with a form feed character ([#2396](https://github.com/mikf/gallery-dl/issues/2396))
+### Removals
+- [gelbooru_v01] remove tlb.booru.org from supported domains
+
+## 1.21.2 - 2022-04-27
+### Additions
+- [deviantart] implement `pagination` option ([#2488](https://github.com/mikf/gallery-dl/issues/2488))
+- [pixiv] implement `background` option ([#623](https://github.com/mikf/gallery-dl/issues/623), [#1124](https://github.com/mikf/gallery-dl/issues/1124), [#2495](https://github.com/mikf/gallery-dl/issues/2495))
+- [postprocessor:ugoira] report ffmpeg/mkvmerge errors ([#2487](https://github.com/mikf/gallery-dl/issues/2487))
+### Fixes
+- [cyberdrop] match cyberdrop.to URLs ([#2496](https://github.com/mikf/gallery-dl/issues/2496))
+- [e621] fix 403 errors ([#2533](https://github.com/mikf/gallery-dl/issues/2533))
+- [issuu] fix extraction ([#2483](https://github.com/mikf/gallery-dl/issues/2483))
+- [mangadex] download from available chapters despite `externalUrl` ([#2503](https://github.com/mikf/gallery-dl/issues/2503))
+- [photovogue] update domain and api endpoint ([#2494](https://github.com/mikf/gallery-dl/issues/2494))
+- [sexcom] add fallback for empty files ([#2485](https://github.com/mikf/gallery-dl/issues/2485))
+- [twitter] improve syndication video selection ([#2354](https://github.com/mikf/gallery-dl/issues/2354))
+- [twitter] fix various syndication issues ([#2499](https://github.com/mikf/gallery-dl/issues/2499), [#2354](https://github.com/mikf/gallery-dl/issues/2354))
+- [vk] fix extraction ([#2512](https://github.com/mikf/gallery-dl/issues/2512))
+- [weibo] fix infinite retries for deleted accounts ([#2521](https://github.com/mikf/gallery-dl/issues/2521))
+- [postprocessor:ugoira] use compatible paths with mkvmerge ([#2487](https://github.com/mikf/gallery-dl/issues/2487))
+- [postprocessor:ugoira] do not auto-select the `image2` demuxer ([#2492](https://github.com/mikf/gallery-dl/issues/2492))
+
 ## 1.21.1 - 2022-04-08
 ### Additions
 - [gofile] add gofile.io extractor ([#2364](https://github.com/mikf/gallery-dl/issues/2364))

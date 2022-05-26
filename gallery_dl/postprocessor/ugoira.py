@@ -49,7 +49,7 @@ class UgoiraPP(PostProcessor):
                     mkvmerge or shutil.which("mkvmerge")):
                 demuxer = "mkvmerge"
             else:
-                demuxer = "concat" if util.WINDOWS else "image2"
+                demuxer = "concat"
 
         if demuxer == "mkvmerge":
             self._process = self._process_mkvmerge
@@ -119,6 +119,9 @@ class UgoiraPP(PostProcessor):
             if self.args:
                 args += self.args
 
+            # ensure target directory exists
+            os.makedirs(pathfmt.realdirectory, exist_ok=True)
+
             # invoke ffmpeg
             try:
                 if self.twopass:
@@ -137,6 +140,8 @@ class UgoiraPP(PostProcessor):
                 self.log.error("Unable to invoke FFmpeg (%s: %s)",
                                exc.__class__.__name__, exc)
                 pathfmt.realpath = pathfmt.temppath
+            except Exception:
+                pathfmt.realpath = pathfmt.temppath
             else:
                 if self.mtime:
                     mtime = pathfmt.kwdict.get("_mtime")
@@ -150,7 +155,13 @@ class UgoiraPP(PostProcessor):
     def _exec(self, args):
         self.log.debug(args)
         out = None if self.output else subprocess.DEVNULL
-        return subprocess.Popen(args, stdout=out, stderr=out).wait()
+        retcode = subprocess.Popen(args, stdout=out, stderr=out).wait()
+        if retcode:
+            print()
+            self.log.error("Non-zero exit status when running %s (%s)",
+                           args, retcode)
+            raise ValueError()
+        return retcode
 
     def _process_concat(self, pathfmt, tempdir):
         rate_in, rate_out = self.calculate_framerate(self._frames)
@@ -215,7 +226,7 @@ class UgoiraPP(PostProcessor):
     def _finalize_mkvmerge(self, pathfmt, tempdir):
         args = [
             self.mkvmerge,
-            "-o", self._realpath,
+            "-o", pathfmt.path,  # mkvmerge does not support "raw" paths
             "--timecodes", "0:" + self._write_mkvmerge_timecodes(tempdir),
         ]
         if self.extension == "webm":

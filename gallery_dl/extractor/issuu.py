@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extractors for https://issuu.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text, util
+from .. import text
 import json
 
 
@@ -22,33 +22,30 @@ class IssuuBase():
 class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
     """Extractor for a single publication"""
     subcategory = "publication"
-    directory_fmt = ("{category}", "{document[userName]}",
-                     "{document[originalPublishDate]} {document[title]}")
+    directory_fmt = ("{category}", "{document[username]}",
+                     "{document[date]:%Y-%m-%d} {document[title]}")
     filename_fmt = "{num:>03}.{extension}"
-    archive_fmt = "{document[id]}_{num}"
+    archive_fmt = "{document[publicationId]}_{num}"
     pattern = r"(?:https?://)?issuu\.com(/[^/?#]+/docs/[^/?#]+)"
     test = ("https://issuu.com/issuu/docs/motions-1-2019/", {
         "pattern": r"https://image.isu.pub/190916155301-\w+/jpg/page_\d+.jpg",
         "count"  : 36,
         "keyword": {
             "document": {
-                "access"        : "public",
-                "articleStories": list,
-                "contentRating" : dict,
+                "access"        : "PUBLIC",
+                "contentRating" : {
+                    "isAdsafe"  : True,
+                    "isExplicit": False,
+                    "isReviewed": True,
+                },
                 "date"          : "dt:2019-09-16 00:00:00",
                 "description"   : "re:Motions, the brand new publication by I",
-                "documentId"    : r"re:\d+-d99ec95935f15091b040cb8060f05510",
                 "documentName"  : "motions-1-2019",
-                "downloadState" : "NOT_AVAILABLE",
-                "id"            : r"re:\d+-d99ec95935f15091b040cb8060f05510",
-                "isConverting"  : False,
-                "isQuarantined" : False,
-                "lang"          : "en",
-                "language"      : "English",
+                "downloadable"  : False,
                 "pageCount"     : 36,
                 "publicationId" : "d99ec95935f15091b040cb8060f05510",
                 "title"         : "Motions by Issuu - Issue 1",
-                "userName"      : "issuu",
+                "username"      : "issuu",
             },
             "extension": "jpg",
             "filename" : r"re:page_\d+",
@@ -58,17 +55,18 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
 
     def metadata(self, page):
         data = json.loads(text.extract(
-            page, 'window.__INITIAL_STATE__ =', ';\n')[0])
+            page, '<script data-json="', '"')[0].replace("&quot;", '"'))
 
-        doc = data["document"]
-        doc["lang"] = doc["language"]
-        doc["language"] = util.code_to_language(doc["language"])
+        doc = data["initialDocumentData"]["document"]
         doc["date"] = text.parse_datetime(
-            doc["originalPublishDate"], "%Y-%m-%d")
+            doc["originalPublishDateInISOString"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
         self._cnt = text.parse_int(doc["pageCount"])
-        self._tpl = "https://{}/{}/jpg/page_{{}}.jpg".format(
-            data["config"]["hosts"]["image"], doc["id"])
+        self._tpl = "https://{}/{}-{}/jpg/page_{{}}.jpg".format(
+            data["config"]["hosts"]["image"],
+            doc["revisionId"],
+            doc["publicationId"],
+        )
 
         return {"document": doc}
 

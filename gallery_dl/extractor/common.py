@@ -285,23 +285,29 @@ class Extractor():
                 cookiefile = util.expand_path(cookies)
                 try:
                     with open(cookiefile) as fp:
-                        cookies = util.load_cookiestxt(fp)
+                        util.cookiestxt_load(fp, self._cookiejar)
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
-                    self._update_cookies(cookies)
                     self._cookiefile = cookiefile
+            elif isinstance(cookies, (list, tuple)):
+                from ..cookies import load_cookies
+                try:
+                    load_cookies(self._cookiejar, cookies)
+                except Exception as exc:
+                    self.log.warning("cookies: %s", exc)
             else:
                 self.log.warning(
-                    "expected 'dict' or 'str' value for 'cookies' option, "
-                    "got '%s' (%s)", cookies.__class__.__name__, cookies)
+                    "Expected 'dict', 'list', or 'str' value for 'cookies' "
+                    "option, got '%s' (%s)",
+                    cookies.__class__.__name__, cookies)
 
     def _store_cookies(self):
         """Store the session's cookiejar in a cookies.txt file"""
         if self._cookiefile and self.config("cookies-update", True):
             try:
                 with open(self._cookiefile, "w") as fp:
-                    util.save_cookiestxt(fp, self._cookiejar)
+                    util.cookiestxt_store(fp, self._cookiejar)
             except OSError as exc:
                 self.log.warning("cookies: %s", exc)
 
@@ -582,17 +588,20 @@ class BaseExtractor(Extractor):
 
     def __init__(self, match):
         if not self.category:
-            for index, group in enumerate(match.groups()):
-                if group is not None:
-                    if index:
-                        self.category, self.root = self.instances[index-1]
-                        if not self.root:
-                            self.root = text.root_from_url(match.group(0))
-                    else:
-                        self.root = group
-                        self.category = group.partition("://")[2]
-                    break
+            self._init_category(match)
         Extractor.__init__(self, match)
+
+    def _init_category(self, match):
+        for index, group in enumerate(match.groups()):
+            if group is not None:
+                if index:
+                    self.category, self.root = self.instances[index-1]
+                    if not self.root:
+                        self.root = text.root_from_url(match.group(0))
+                else:
+                    self.root = group
+                    self.category = group.partition("://")[2]
+                break
 
     @classmethod
     def update(cls, instances):

@@ -104,8 +104,12 @@ class MangadexChapterExtractor(MangadexExtractor):
             "keyword": "6abcbe1e24eeb1049dc931958853cd767ee483fb",
         }),
         # MANGA Plus (#1154)
-        ("https://mangadex.org/chapter/8d50ed68-8298-4ac9-b63d-cb2aea143dd0", {
+        ("https://mangadex.org/chapter/74149a55-e7c4-44ea-8a37-98e879c1096f", {
             "exception": exception.StopExtraction,
+        }),
+        # 'externalUrl', but still downloadable (#2503)
+        ("https://mangadex.org/chapter/364728a4-6909-4164-9eea-6b56354f7c78", {
+            "count": 39,
         }),
     )
 
@@ -116,7 +120,7 @@ class MangadexChapterExtractor(MangadexExtractor):
             chapter = self.api.chapter(self.uuid)
             data = self._transform(chapter)
 
-        if data.get("_external_url"):
+        if data.get("_external_url") and not data["count"]:
             raise exception.StopExtraction(
                 "Chapter %s%s is not available on MangaDex and can instead be "
                 "read on the official publisher's website at %s.",

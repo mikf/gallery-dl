@@ -47,6 +47,7 @@ class WeasylExtractor(Extractor):
         return data
 
     def submissions(self, owner_login, folderid=None):
+        metadata = self.config("metadata")
         url = "{}/api/users/{}/gallery".format(self.root, owner_login)
         params = {
             "nextid"  : None,
@@ -56,6 +57,9 @@ class WeasylExtractor(Extractor):
         while True:
             data = self.request(url, params=params).json()
             for submission in data["submissions"]:
+                if metadata:
+                    submission = self.request_submission(
+                        submission["submitid"])
                 if self.populate_submission(submission):
                     submission["folderid"] = folderid
                     # Do any submissions have more than one url? If so

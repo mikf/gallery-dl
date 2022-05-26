@@ -9,8 +9,7 @@
 """Extractors for https://vk.com/"""
 
 from .common import Extractor, Message
-from .. import text
-import re
+from .. import text, exception
 
 BASE_PATTERN = r"(?:https://)?(?:www\.|m\.)?vk\.com"
 
@@ -25,47 +24,73 @@ class VkExtractor(Extractor):
     request_interval = 1.0
 
     def items(self):
+        sizes = "wzyxrqpo"
+
         data = self.metadata()
         yield Message.Directory, data
+
         for photo in self.photos():
+
+            for size in sizes:
+                size += "_"
+                if size in photo:
+                    break
+            else:
+                self.log.warning("no photo URL found (%s)", photo.get("id"))
+                continue
+
+            try:
+                photo["url"], photo["width"], photo["height"] = photo[size]
+            except ValueError:
+                # photo without width/height entries (#2535)
+                photo["url"] = photo[size + "src"]
+                photo["width"] = photo["height"] = 0
+
+            photo["id"] = photo["id"].rpartition("_")[2]
             photo.update(data)
+
+            text.nameext_from_url(photo["url"], photo)
             yield Message.Url, photo["url"], photo
 
-    def _pagination(self, photos_url, user_id):
-        sub = re.compile(r"/imp[fg]/").sub
-        needle = 'data-id="{}_'.format(user_id)
-
+    def _pagination(self, photos_id):
+        url = self.root + "/al_photos.php"
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "Origin"          : self.root,
-            "Referer"         : photos_url,
+            "Referer"         : self.root + "/" + photos_id,
         }
-        params = {
-            "al"    : "1",
-            "al_ad" : "0",
-            "offset": 0,
-            "part"  : "1",
+        data = {
+            "act"      : "show",
+            "al"       : "1",
+            "direction": "1",
+            "list"     : photos_id,
+            "offset"   : 0,
         }
 
         while True:
             payload = self.request(
-                photos_url, method="POST", headers=headers, data=params
+                url, method="POST", headers=headers, data=data,
             ).json()["payload"][1]
 
-            offset = payload[0]
-            html = payload[1]
+            if len(payload) < 4:
+                self.log.debug(payload)
+                raise exception.AuthorizationError(payload[0])
 
-            cnt = 0
-            for photo in text.extract_iter(html, needle, ')'):
-                cnt += 1
-                pid = photo[:photo.find('"')]
-                url = photo[photo.rindex("(")+1:]
-                url = sub("/", url.partition("?")[0])
-                yield text.nameext_from_url(url, {"url": url, "id": pid})
+            total = payload[1]
+            photos = payload[3]
 
-            if cnt <= 20 or offset == params["offset"]:
+            data["offset"] += len(photos)
+            if data["offset"] >= total:
+                # the last chunk of photos also contains the first few photos
+                # again if 'total' is not a multiple of 10
+                extra = total - data["offset"]
+                if extra:
+                    del photos[extra:]
+
+                yield from photos
                 return
-            params["offset"] = offset
+
+            yield from photos
 
 
 class VkPhotosExtractor(VkExtractor):
@@ -76,8 +101,8 @@ class VkPhotosExtractor(VkExtractor):
                r"|(?!album-?\d+_)([^/?#]+))")
     test = (
         ("https://vk.com/id398982326", {
-            "pattern": r"https://sun\d+-\d+\.userapi\.com/sun\d+-\d+"
-                       r"/c\d+/v\d+/[0-9a-f]+/[\w-]+\.jpg",
+            "pattern": r"https://sun\d+-\d+\.userapi\.com/s/v1/if1"
+                       r"/[\w-]+\.jpg\?size=\d+x\d+&quality=96&type=album",
             "count": ">= 35",
             "keywords": {
                 "id": r"re:\d+",
@@ -90,7 +115,7 @@ class VkPhotosExtractor(VkExtractor):
             },
         }),
         ("https://vk.com/cosplayinrussia", {
-            "range": "75-100",
+            "range": "15-25",
             "keywords": {
                 "id": r"re:\d+",
                 "user": {
@@ -102,6 +127,12 @@ class VkPhotosExtractor(VkExtractor):
                 },
             },
         }),
+        # photos without width/height (#2535)
+        ("https://vk.com/id76957806", {
+            "pattern": r"https://sun\d+-\d+\.userapi\.com/",
+            "range": "1-9",
+            "count": 9,
+        }),
         ("https://m.vk.com/albums398982326"),
         ("https://www.vk.com/id398982326?profile=1"),
         ("https://vk.com/albums-165740836"),
@@ -112,8 +143,7 @@ class VkPhotosExtractor(VkExtractor):
         self.user_id, self.user_name = match.groups()
 
     def photos(self):
-        url = "{}/photos{}".format(self.root, self.user_id)
-        return self._pagination(url, self.user_id)
+        return self._pagination("photos" + self.user_id)
 
     def metadata(self):
         if self.user_id:
@@ -136,7 +166,8 @@ class VkPhotosExtractor(VkExtractor):
                 '<h1 class="page_name">', "<")).replace("  ", " "),
             "info": text.unescape(text.remove_html(extr(
                 '<span class="current_text">', '</span'))),
-            "id"  : extr('<a href="/albums', '"'),
+            "id"  : (extr('<a href="/albums', '"') or
+                     extr('data-from-id="', '"')),
         }}
 
 
@@ -146,11 +177,15 @@ class VkAlbumExtractor(VkExtractor):
     directory_fmt = ("{category}", "{user[id]}", "{album[id]}")
     pattern = BASE_PATTERN + r"/album(-?\d+)_(\d+)$"
     test = (
-        ("https://vk.com/album221469416_0", {
-            "count": 3,
+        ("https://vk.com/album232175027_00", {
+            "count": 8,
         }),
         ("https://vk.com/album-165740836_281339889", {
             "count": 12,
+        }),
+        # "Access denied" (#2556)
+        ("https://vk.com/album-53775183_00", {
+            "exception": exception.AuthorizationError,
         }),
     )
 
@@ -159,8 +194,8 @@ class VkAlbumExtractor(VkExtractor):
         self.user_id, self.album_id = match.groups()
 
     def photos(self):
-        url = "{}/album{}_{}".format(self.root, self.user_id, self.album_id)
-        return self._pagination(url, self.user_id)
+        return self._pagination("album{}_{}".format(
+            self.user_id, self.album_id))
 
     def metadata(self):
         return {

@@ -183,6 +183,9 @@ SUBCATEGORY_MAP = {
     "mangadex": {
         "feed" : "Followed Feed",
     },
+    "nijie": {
+        "nuita" : "Nuita History",
+    },
     "pinterest": {
         "board": "",
         "pinit": "pin.it Links",
@@ -205,6 +208,7 @@ SUBCATEGORY_MAP = {
     },
     "twitter": {
         "media": "Media Timelines",
+        "tweets": "",
         "replies": "",
         "list-members": "List Members",
     },

@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macOS-latest"]
-        python-version: ["3.9"]
+        python-version: ["3.10"]
         architecture: ["x64"]
         include:
         - os: "windows-2019"

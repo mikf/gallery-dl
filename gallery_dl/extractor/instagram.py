@@ -80,12 +80,22 @@ class InstagramExtractor(Extractor):
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
 
-        if response.history and "/accounts/login/" in response.request.url:
-            if self._cursor:
-                self.log.info("Use '-o cursor=%s' to continue downloading "
-                              "from the current position", self._cursor)
-            raise exception.StopExtraction(
-                "HTTP redirect to login page (%s)", response.request.url)
+        if response.history:
+
+            url = response.request.url
+            if "/accounts/login/" in url:
+                page = "login"
+            elif "/challenge/" in url:
+                page = "challenge"
+            else:
+                page = None
+
+            if page:
+                if self._cursor:
+                    self.log.info("Use '-o cursor=%s' to continue downloading "
+                                  "from the current position", self._cursor)
+                raise exception.StopExtraction("HTTP redirect to %s page (%s)",
+                                               page, url.partition("?")[0])
 
         www_claim = response.headers.get("x-ig-set-www-claim")
         if www_claim is not None:
@@ -298,7 +308,7 @@ class InstagramExtractor(Extractor):
                 video = None
                 media = image
 
-            files.append({
+            media = {
                 "num"        : num,
                 "date"       : text.parse_timestamp(item.get("taken_at") or
                                                     media.get("taken_at")),
@@ -309,7 +319,9 @@ class InstagramExtractor(Extractor):
                 "video_url"  : video["url"] if video else None,
                 "width"      : media["width"],
                 "height"     : media["height"],
-            })
+            }
+            self._extract_tagged_users(item, media)
+            files.append(media)
 
         return data
 
@@ -321,22 +333,45 @@ class InstagramExtractor(Extractor):
             "abcdefghijklmnopqrstuvwxyz"
             "0123456789-_")
 
-    def _extract_tagged_users(self, src, dest):
-        if "edge_media_to_tagged_user" not in src:
-            return
-        edges = src["edge_media_to_tagged_user"]["edges"]
-        if edges:
-            dest["tagged_users"] = tagged_users = []
-            for edge in edges:
-                user = edge["node"]["user"]
-                tagged_users.append({
-                    "id"       : user["id"],
-                    "username" : user["username"],
-                    "full_name": user["full_name"],
-                })
+    @staticmethod
+    def _extract_tagged_users(src, dest):
+        dest["tagged_users"] = tagged_users = []
 
-    def _extract_shared_data(self, url):
-        page = self.request(url).text
+        edges = src.get("edge_media_to_tagged_user")
+        if edges:
+            for edge in edges["edges"]:
+                user = edge["node"]["user"]
+                tagged_users.append({"id"       : user["id"],
+                                     "username" : user["username"],
+                                     "full_name": user["full_name"]})
+
+        usertags = src.get("usertags")
+        if usertags:
+            for tag in usertags["in"]:
+                user = tag["user"]
+                tagged_users.append({"id"       : user["pk"],
+                                     "username" : user["username"],
+                                     "full_name": user["full_name"]})
+
+        mentions = src.get("reel_mentions")
+        if mentions:
+            for mention in mentions:
+                user = mention["user"]
+                tagged_users.append({"id"       : user.get("pk"),
+                                     "username" : user["username"],
+                                     "full_name": user["full_name"]})
+
+        stickers = src.get("story_bloks_stickers")
+        if stickers:
+            for sticker in stickers:
+                sticker = sticker["bloks_sticker"]
+                if sticker["bloks_sticker_type"] == "mention":
+                    user = sticker["sticker_data"]["ig_mention"]
+                    tagged_users.append({"id"       : user["account_id"],
+                                         "username" : user["username"],
+                                         "full_name": user["full_name"]})
+
+    def _extract_shared_data(self, page):
         shared_data, pos = text.extract(
             page, "window._sharedData =", ";</script>")
         additional_data, pos = text.extract(
@@ -349,13 +384,15 @@ class InstagramExtractor(Extractor):
         return data
 
     def _extract_profile_page(self, url):
-        data = self._extract_shared_data(url)["entry_data"]
+        page = self.request(url).text
+        data = self._extract_shared_data(page)["entry_data"]
         if "HttpErrorPage" in data:
             raise exception.NotFoundError("user")
         return data["ProfilePage"][0]["graphql"]["user"]
 
     def _extract_post_page(self, url):
-        data = self._extract_shared_data(url)["entry_data"]
+        page = self.request(url).text
+        data = self._extract_shared_data(page)["entry_data"]
         if "HttpErrorPage" in data:
             raise exception.NotFoundError("post")
         return data["PostPage"][0]
@@ -524,7 +561,8 @@ class InstagramTagExtractor(InstagramExtractor):
 
     def posts(self):
         url = "{}/explore/tags/{}/".format(self.root, self.item)
-        page = self._extract_shared_data(url)["entry_data"]["TagPage"][0]
+        page = self._extract_shared_data(
+            self.request(url).text)["entry_data"]["TagPage"][0]
 
         if "data" in page:
             return self._pagination_sections(page["data"]["recent"])
@@ -718,8 +756,12 @@ class InstagramStoriesExtractor(InstagramExtractor):
             reel_id = "highlight:" + self.highlight_id
         else:
             url = "{}/stories/{}/".format(self.root, self.user)
+            with self.request(url, allow_redirects=False) as response:
+                if 300 <= response.status_code < 400:
+                    return ()
+                page = response.text
             try:
-                data = self._extract_shared_data(url)["entry_data"]
+                data = self._extract_shared_data(page)["entry_data"]
                 user = data["StoriesPage"][0]["user"]
             except KeyError:
                 return ()

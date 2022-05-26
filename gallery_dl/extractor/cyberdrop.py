@@ -10,10 +10,10 @@ from . import lolisafe
 from .. import text
 
 
-class CyberdropAlbumExtractor(lolisafe.LolisafelbumExtractor):
+class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
     category = "cyberdrop"
     root = "https://cyberdrop.me"
-    pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.me/a/([^/?#]+)"
+    pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:me|to)/a/([^/?#]+)"
     test = (
         # images
         ("https://cyberdrop.me/a/keKRjm4t", {
@@ -29,7 +29,7 @@ class CyberdropAlbumExtractor(lolisafe.LolisafelbumExtractor):
             },
         }),
         # videos
-        ("https://cyberdrop.me/a/l8gIAXVD", {
+        ("https://cyberdrop.to/a/l8gIAXVD", {
             "pattern": r"https://fs-\d+\.cyberdrop\.to/.*\.mp4$",
             "count": 31,
             "keyword": {

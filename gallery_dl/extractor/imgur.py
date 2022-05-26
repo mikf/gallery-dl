@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -201,17 +201,24 @@ class ImgurAlbumExtractor(ImgurExtractor):
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.HttpError,
         }),
+        ("https://imgur.com/a/pjOnJA0", {  # empty, no 'media' (#2557)
+            "count": 0,
+        }),
         ("https://www.imgur.com/a/TcBmP"),  # www
         ("https://m.imgur.com/a/TcBmP"),  # mobile
     )
 
     def items(self):
         album = self.api.album(self.key)
-        album["date"] = text.parse_datetime(album["created_at"])
 
-        images = album["media"]
+        try:
+            images = album["media"]
+        except KeyError:
+            return
+
         del album["media"]
         count = len(images)
+        album["date"] = text.parse_datetime(album["created_at"])
 
         try:
             del album["ad_url"]

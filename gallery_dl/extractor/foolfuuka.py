@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for 4chan archives based on FoolFuuka"""
+"""Extractors for FoolFuuka 4chan archives"""
 
 from .common import BaseExtractor, Message
 from .. import text
@@ -16,6 +16,7 @@ import itertools
 class FoolfuukaExtractor(BaseExtractor):
     """Base extractor for FoolFuuka based boards/archives"""
     basecategory = "foolfuuka"
+    filename_fmt = "{timestamp_ms} {filename_media}.{extension}"
     archive_fmt = "{board[shortname]}_{num}_{timestamp}"
     external = "default"
 
@@ -40,6 +41,9 @@ class FoolfuukaExtractor(BaseExtractor):
 
             post["filename"], _, post["extension"] = \
                 media["media"].rpartition(".")
+            post["filename_media"] = media["media_filename"].rpartition(".")[0]
+            post["timestamp_ms"] = text.parse_int(
+                media["media_orig"].rpartition(".")[0])
             yield Message.Url, url, post
 
     def metadata(self):
@@ -66,6 +70,7 @@ BASE_PATTERN = FoolfuukaExtractor.update({
     },
     "archivedmoe": {
         "root": "https://archived.moe",
+        "pattern": r"archived\.moe",
     },
     "archiveofsins": {
         "root": "https://archiveofsins.com",
@@ -73,12 +78,15 @@ BASE_PATTERN = FoolfuukaExtractor.update({
     },
     "b4k": {
         "root": "https://arch.b4k.co",
+        "pattern": r"arch\.b4k\.co",
     },
     "desuarchive": {
         "root": "https://desuarchive.org",
+        "pattern": r"desuarchive\.org",
     },
     "fireden": {
         "root": "https://boards.fireden.net",
+        "pattern": r"boards\.fireden\.net",
     },
     "nyafuu": {
         "root": "https://archive.nyafuu.org",
@@ -90,9 +98,11 @@ BASE_PATTERN = FoolfuukaExtractor.update({
     },
     "thebarchive": {
         "root": "https://thebarchive.com",
+        "pattern": r"thebarchive\.com",
     },
     "wakarimasen": {
         "root": "https://archive.wakarimasen.moe",
+        "pattern": r"archive\.wakarimasen\.moe",
     },
 })
 
@@ -101,7 +111,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
     """Base extractor for threads on FoolFuuka based boards/archives"""
     subcategory = "thread"
     directory_fmt = ("{category}", "{board[shortname]}",
-                     "{thread_num}{title:? - //}")
+                     "{thread_num} {title|comment[:50]}")
     pattern = BASE_PATTERN + r"/([^/?#]+)/thread/(\d+)"
     test = (
         ("https://archive.4plebs.org/tg/thread/54059290", {

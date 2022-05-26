@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://nijie.info/"""
+"""Extractors for https://nijie.info/"""
 
 from .common import Extractor, Message, AsynchronousMixin
 from .. import text, exception
@@ -91,6 +91,10 @@ class NijieExtractor(AsynchronousMixin, Extractor):
                 "url": url,
             })
 
+    @staticmethod
+    def _extract_user_name(page):
+        return text.unescape(text.extract(page, "<br />", "<")[0] or "")
+
     def login(self):
         """Login and obtain session cookies"""
         if not self._check_cookies(self.cookienames):
@@ -119,9 +123,8 @@ class NijieExtractor(AsynchronousMixin, Extractor):
         while True:
             page = self.request(url, params=params, notfound="artist").text
 
-            if not self.user_name:
-                self.user_name = text.unescape(text.extract(
-                    page, '<br />', '<')[0] or "")
+            if self.user_name is None:
+                self.user_name = self._extract_user_name(page)
             yield from text.extract_iter(page, 'illust_id="', '"')
 
             if '<a rel="next"' not in page:
@@ -137,11 +140,12 @@ class NijieUserExtractor(NijieExtractor):
     test = ("https://nijie.info/members.php?id=44",)
 
     def items(self):
-        base = "{}/{{}}.php?id={}".format(self.root, self.user_id)
+        fmt = "{}/{{}}.php?id={}".format(self.root, self.user_id).format
         return self._dispatch_extractors((
-            (NijieIllustrationExtractor, base.format("members_illust")),
-            (NijieDoujinExtractor      , base.format("members_dojin")),
-            (NijieFavoriteExtractor    , base.format("user_like_illust_view")),
+            (NijieIllustrationExtractor, fmt("members_illust")),
+            (NijieDoujinExtractor      , fmt("members_dojin")),
+            (NijieFavoriteExtractor    , fmt("user_like_illust_view")),
+            (NijieNuitaExtractor       , fmt("history_nuita")),
         ), ("illustration", "doujin"))
 
 
@@ -151,7 +155,7 @@ class NijieIllustrationExtractor(NijieExtractor):
     pattern = BASE_PATTERN + r"/members_illust\.php\?id=(\d+)"
     test = (
         ("https://nijie.info/members_illust.php?id=44", {
-            "url": "66c4ff94c6e77c0765dd88f2d8c663055fda573e",
+            "url": "1553e5144df50a676f5947d02469299b401ad6c0",
             "keyword": {
                 "artist_id": 44,
                 "artist_name": "ED",
@@ -163,7 +167,7 @@ class NijieIllustrationExtractor(NijieExtractor):
                 "num": int,
                 "tags": list,
                 "title": str,
-                "url": r"re:https://pic.nijie.net/\d+/nijie_picture/.*jpg$",
+                "url": r"re:https://pic.nijie.net/\d+/nijie/.*jpg$",
                 "user_id": 44,
                 "user_name": "ED",
             },
@@ -217,14 +221,44 @@ class NijieFavoriteExtractor(NijieExtractor):
         return data
 
 
+class NijieNuitaExtractor(NijieExtractor):
+    """Extractor for a nijie user's 抜いた list"""
+    subcategory = "nuita"
+    directory_fmt = ("{category}", "nuita", "{user_id}")
+    archive_fmt = "n_{user_id}_{image_id}_{num}"
+    pattern = BASE_PATTERN + r"/history_nuita\.php\?id=(\d+)"
+    test = ("https://nijie.info/history_nuita.php?id=728995", {
+        "range": "1-10",
+        "count": 10,
+        "keyword": {
+            "user_id"  : 728995,
+            "user_name": "莚",
+        },
+    })
+
+    def image_ids(self):
+        return self._pagination("history_nuita")
+
+    def _extract_data(self, page):
+        data = NijieExtractor._extract_data(page)
+        data["user_id"] = self.user_id
+        data["user_name"] = self.user_name
+        return data
+
+    @staticmethod
+    def _extract_user_name(page):
+        return text.unescape(text.extract(
+            page, "<title>", "さんの抜いた")[0] or "")
+
+
 class NijieImageExtractor(NijieExtractor):
     """Extractor for a work/image from nijie.info"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/view(?:_popup)?\.php\?id=(\d+)"
     test = (
         ("https://nijie.info/view.php?id=70720", {
-            "url": "5497f897311397dafa188521258624346a0af2a3",
-            "keyword": "fd12bca6f4402a0c996315d28c65f7914ad70c51",
+            "url": "3d654e890212ba823c9647754767336aebc0a743",
+            "keyword": "41da5d0e178b04f01fe72460185df52fadc3c91b",
             "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
         }),
         ("https://nijie.info/view.php?id=70724", {

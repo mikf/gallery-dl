@@ -9,6 +9,7 @@
 """Extractors for https://danbooru.donmai.us/ and other Danbooru instances"""
 
 from .common import BaseExtractor, Message
+from ..version import __version__
 from .. import text
 import datetime
 
@@ -22,16 +23,7 @@ class DanbooruExtractor(BaseExtractor):
     per_page = 200
 
     def __init__(self, match):
-        BaseExtractor.__init__(self, match)
-
-        self.ugoira = self.config("ugoira", False)
-        self.external = self.config("external", False)
-        self.extended_metadata = self.config("metadata", False)
-
-        username, api_key = self._get_auth_info()
-        if username:
-            self.log.debug("Using HTTP Basic Auth for user '%s'", username)
-            self.session.auth = (username, api_key)
+        self._init_category(match)
 
         instance = INSTANCES.get(self.category) or {}
         iget = instance.get
@@ -42,6 +34,17 @@ class DanbooruExtractor(BaseExtractor):
         self.per_page = iget("per-page", 200)
         self.request_interval_min = iget("request-interval-min", 0.0)
         self._pools = iget("pools")
+
+        BaseExtractor.__init__(self, match)
+
+        self.ugoira = self.config("ugoira", False)
+        self.external = self.config("external", False)
+        self.extended_metadata = self.config("metadata", False)
+
+        username, api_key = self._get_auth_info()
+        if username:
+            self.log.debug("Using HTTP Basic Auth for user '%s'", username)
+            self.session.auth = (username, api_key)
 
     def request(self, url, **kwargs):
         kwargs["headers"] = self.headers
@@ -144,7 +147,8 @@ INSTANCES = {
     "e621": {
         "root": None,
         "pattern": r"e(?:621|926)\.net",
-        "headers": {"User-Agent": "gallery-dl/1.14.0 (by mikf)"},
+        "headers": {"User-Agent": "gallery-dl/{} (by mikf)".format(
+            __version__)},
         "pools": "sort",
         "page-limit": 750,
         "per-page": 320,

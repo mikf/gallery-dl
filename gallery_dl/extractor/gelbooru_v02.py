@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for Gelbooru v0.2 sites"""
+"""Extractors for Gelbooru Beta 0.2 sites"""
 
 from . import booru
 from .. import text, util, exception
@@ -25,6 +25,9 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             self.api_root = INSTANCES[self.category]["api_root"]
         except KeyError:
             self.api_root = self.root
+
+        if self.category == "realbooru":
+            self._file_url = self._file_url_realbooru
 
     def _api_request(self, params):
         url = self.api_root + "/index.php?page=dapi&s=post&q=index"
@@ -60,6 +63,14 @@ class GelbooruV02Extractor(booru.BooruExtractor):
     def _prepare(post):
         post["date"] = text.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")
+
+    def _file_url_realbooru(self, post):
+        url = post["file_url"]
+        if url.count("/") == 5:
+            md5 = post["md5"]
+            url = "{}/images/{}/{}/{}.{}".format(
+                self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
+        return url
 
     def _extended_tags(self, post, page=None):
         if not page:
@@ -105,11 +116,23 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
 
 INSTANCES = {
-    "realbooru": {"root": "https://realbooru.com"},
-    "rule34"   : {"root": "https://rule34.xxx",
-                  "api_root": " https://api.rule34.xxx"},
-    "safebooru": {"root": "https://safebooru.org"},
-    "tbib"     : {"root": "https://tbib.org"},
+    "realbooru": {
+        "root": "https://realbooru.com",
+        "pattern": r"realbooru\.com",
+    },
+    "rule34": {
+        "root": "https://rule34.xxx",
+        "pattern": r"rule34\.xxx",
+        "api_root": "https://api.rule34.xxx",
+    },
+    "safebooru": {
+        "root": "https://safebooru.org",
+        "pattern": r"safebooru\.org",
+    },
+    "tbib": {
+        "root": "https://tbib.org",
+        "pattern": r"tbib\.org",
+    },
 }
 
 BASE_PATTERN = GelbooruV02Extractor.update(INSTANCES)
@@ -147,7 +170,7 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
         return {"search_tags": self.tags}
 
     def posts(self):
-        return self._pagination({"tags" : self.tags})
+        return self._pagination({"tags": self.tags})
 
 
 class GelbooruV02PoolExtractor(GelbooruV02Extractor):
@@ -213,7 +236,7 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
             "count": 2,
         }),
         ("https://realbooru.com/index.php?page=favorites&s=view&id=274", {
-            "count": 4,
+            "count": 2,
         }),
         ("https://tbib.org/index.php?page=favorites&s=view&id=7881", {
             "count": 3,
@@ -279,7 +302,8 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
             },
         }),
         ("https://realbooru.com/index.php?page=post&s=view&id=668483", {
-            "url": "2421b5b0e15d5e20f9067090a8b0fd4114d3e7d9",
+            "pattern": r"https://realbooru\.com/images/dc/b5"
+                       r"/dcb5c0ce9ec0bf74a6930608985f4719\.jpeg",
             "content": "7f5873ce3b6cd295ea2e81fcb49583098ea9c8da",
         }),
         ("https://tbib.org/index.php?page=post&s=view&id=9233957", {

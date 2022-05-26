@@ -39,8 +39,9 @@ class AppendCommandAction(argparse.Action):
 class DeprecatedConfigConstAction(argparse.Action):
     """Set argparse const values as config values + deprecation warning"""
     def __call__(self, parser, namespace, values, option_string=None):
-        print("warning: {} is deprecated. Use {} instead.".format(
-            "/".join(self.option_strings), self.choices), file=sys.stderr)
+        sys.stderr.write(
+            "warning: {} is deprecated. Use {} instead.\n".format(
+                "/".join(self.option_strings), self.choices))
         namespace.options.append(((), self.dest, self.const))
 
 
@@ -62,7 +63,7 @@ class ParseAction(argparse.Action):
 class Formatter(argparse.HelpFormatter):
     """Custom HelpFormatter class to customize help output"""
     def __init__(self, *args, **kwargs):
-        super().__init__(max_help_position=50, *args, **kwargs)
+        super().__init__(max_help_position=30, *args, **kwargs)
 
     def _format_action_invocation(self, action):
         opts = action.option_strings[:]
@@ -117,11 +118,6 @@ def build_parser():
               "('/O' for \"original\" filenames)"),
     )
     general.add_argument(
-        "--cookies",
-        dest="cookies", metavar="FILE", action=ConfigAction,
-        help="File to load additional cookies from",
-    )
-    general.add_argument(
         "--proxy",
         dest="proxy", metavar="URL", action=ConfigAction,
         help="Use the specified proxy",
@@ -136,6 +132,18 @@ def build_parser():
         dest="clear_cache", metavar="MODULE",
         help="Delete cached login sessions, cookies, etc. for MODULE "
              "(ALL to delete everything)",
+    )
+    general.add_argument(
+        "--cookies",
+        dest="cookies", metavar="FILE", action=ConfigAction,
+        help="File to load additional cookies from",
+    )
+    general.add_argument(
+        "--cookies-from_browser",
+        dest="cookies_from_browser", metavar="BROWSER[+KEYRING][:PROFILE]",
+        help=("Name of the browser to load cookies from, "
+              "with optional keyring name prefixed with '+' and "
+              "profile prefixed with ':'"),
     )
 
     output = parser.add_argument_group("Output Options")
