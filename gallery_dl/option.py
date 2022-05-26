@@ -136,7 +136,7 @@ def build_parser():
         help="File to load additional cookies from",
     )
     general.add_argument(
-        "--cookies-from_browser",
+        "--cookies-from-browser",
         dest="cookies_from_browser", metavar="BROWSER[+KEYRING][:PROFILE]",
         help=("Name of the browser to load cookies from, "
               "with optional keyring name prefixed with '+' and "
