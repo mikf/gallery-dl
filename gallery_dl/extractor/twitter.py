@@ -15,7 +15,7 @@ import json
 
 BASE_PATTERN = (
     r"(?:https?://)?(?:www\.|mobile\.)?"
-    r"(?:(?:fx)?twitter\.com|nitter\.net)"
+    r"(?:(?:[fv]x)?twitter\.com|nitter\.net)"
 )
 
 
@@ -39,7 +39,7 @@ class TwitterExtractor(Extractor):
         self.pinned = self.config("pinned", False)
         self.quoted = self.config("quoted", False)
         self.videos = self.config("videos", True)
-        self.cards = self.config("cards", True)
+        self.cards = self.config("cards", False)
         self._user_cache = {}
         self._init_sizes()
 
@@ -104,6 +104,7 @@ class TwitterExtractor(Extractor):
 
     def _extract_media(self, tweet, entities, files):
         for media in entities:
+            descr = media.get("ext_alt_text")
             width = media["original_info"].get("width", 0)
             height = media["original_info"].get("height", 0)
 
@@ -112,9 +113,10 @@ class TwitterExtractor(Extractor):
                     files.append({
                         "url": "ytdl:{}/i/web/status/{}".format(
                             self.root, tweet["id_str"]),
-                        "width"    : width,
-                        "height"   : height,
-                        "extension": None,
+                        "width"      : width,
+                        "height"     : height,
+                        "extension"  : None,
+                        "description": descr,
                     })
                 elif self.videos:
                     video_info = media["video_info"]
@@ -123,22 +125,24 @@ class TwitterExtractor(Extractor):
                         key=lambda v: v.get("bitrate", 0),
                     )
                     files.append({
-                        "url"     : variant["url"],
-                        "width"   : width,
-                        "height"  : height,
-                        "bitrate" : variant.get("bitrate", 0),
-                        "duration": video_info.get(
+                        "url"        : variant["url"],
+                        "width"      : width,
+                        "height"     : height,
+                        "bitrate"    : variant.get("bitrate", 0),
+                        "duration"   : video_info.get(
                             "duration_millis", 0) / 1000,
+                        "description": descr,
                     })
             elif "media_url_https" in media:
                 url = media["media_url_https"]
                 base, _, fmt = url.rpartition(".")
                 base += "?format=" + fmt + "&name="
                 files.append(text.nameext_from_url(url, {
-                    "url"      : base + self._size_image,
-                    "width"    : width,
-                    "height"   : height,
-                    "_fallback": self._image_fallback(base),
+                    "url"        : base + self._size_image,
+                    "width"      : width,
+                    "height"     : height,
+                    "_fallback"  : self._image_fallback(base),
+                    "description": descr,
                 }))
             else:
                 files.append({"url": media["media_url"]})
@@ -323,6 +327,9 @@ class TwitterExtractor(Extractor):
         elif userfmt == "media":
             cls = TwitterMediaExtractor
             fmt = (self.root + "/id:{rest_id}/media").format_map
+        elif userfmt == "tweets":
+            cls = TwitterTweetsExtractor
+            fmt = (self.root + "/id:{rest_id}/tweets").format_map
         else:
             cls = None
             fmt = userfmt.format_map
@@ -383,7 +390,7 @@ class TwitterExtractor(Extractor):
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
-    """Extractor for Tweets from a user's timeline"""
+    """Extractor for a Twitter user timeline"""
     subcategory = "timeline"
     pattern = (BASE_PATTERN + r"/(?!search)(?:([^/?#]+)/?(?:$|[?#])"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
@@ -400,6 +407,8 @@ class TwitterTimelineExtractor(TwitterExtractor):
         ("https://www.twitter.com/id:2976459548"),
         ("https://twitter.com/i/user/2976459548"),
         ("https://twitter.com/intent/user?user_id=2976459548"),
+        ("https://fxtwitter.com/supernaturepics"),
+        ("https://vxtwitter.com/supernaturepics"),
     )
 
     def __init__(self, match):
@@ -407,6 +416,52 @@ class TwitterTimelineExtractor(TwitterExtractor):
         user_id = match.group(2)
         if user_id:
             self.user = "id:" + user_id
+
+    def tweets(self):
+        tweets = (self.api.user_tweets(self.user) if self.retweets else
+                  self.api.user_media(self.user))
+
+        # yield initial batch of (media) tweets
+        tweet = None
+        for tweet in tweets:
+            yield tweet
+
+        if tweet is None:
+            return
+
+        # get username
+        if not self.user.startswith("id:"):
+            username = self.user
+        elif "core" in tweet:
+            username = (tweet["core"]["user_results"]["result"]
+                        ["legacy"]["screen_name"])
+        else:
+            username = tweet["user"]["screen_name"]
+
+        # get tweet data
+        if "legacy" in tweet:
+            tweet = tweet["legacy"]
+
+        # yield search results starting from last tweet id
+        yield from self.api.search_adaptive(
+            "from:{} include:retweets include:nativeretweets max_id:{} "
+            "filter:images OR card_name:animated_gif OR filter:native_video"
+            .format(username, tweet["id_str"])
+        )
+
+
+class TwitterTweetsExtractor(TwitterExtractor):
+    """Extractor for Tweets from a user's Tweets timeline"""
+    subcategory = "tweets"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/tweets(?!\w)"
+    test = (
+        ("https://twitter.com/supernaturepics/tweets", {
+            "range": "1-40",
+            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
+        }),
+        ("https://mobile.twitter.com/supernaturepics/tweets#t"),
+        ("https://www.twitter.com/id:2976459548/tweets"),
+    )
 
     def tweets(self):
         return self.api.user_tweets(self.user)
@@ -661,6 +716,10 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/mightbecursed/status/1492954264909479936", {
             "options": (("syndication", True),),
             "count": 1,
+        }),
+        # media alt texts / descriptions (#2617)
+        ("https://twitter.com/my0nruri/status/1528379296041299968", {
+            "keyword": {"description": "oc"}
         }),
     )
 
@@ -1291,10 +1350,21 @@ class TwitterAPI():
 
         tweet["user"]["description"] = ""
         tweet["user"]["entities"] = {"description": {}}
+        tweet["user_id_str"] = tweet["user"]["id_str"]
+
+        if tweet["id_str"] != tweet_id:
+            tweet["retweeted_status_id_str"] = tweet["id_str"]
+            tweet["id_str"] = retweet_id = tweet_id
+        else:
+            retweet_id = None
 
         if "video" in tweet:
             video = tweet["video"]
-            del video["variants"][:-1]
+            video["variants"] = (max(
+                (v for v in video["variants"] if v["type"] == "video/mp4"),
+                key=lambda v: text.parse_int(
+                    v["src"].split("/")[-2].partition("x")[0])
+            ),)
             video["variants"][0]["url"] = video["variants"][0]["src"]
             tweet["extended_entities"] = {"media": [{
                 "video_info"   : video,
@@ -1313,4 +1383,5 @@ class TwitterAPI():
             "rest_id": tweet["id_str"],
             "legacy" : tweet,
             "user"   : tweet["user"],
+            "_retweet_id_str": retweet_id,
         }

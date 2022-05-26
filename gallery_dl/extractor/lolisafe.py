@@ -25,7 +25,7 @@ BASE_PATTERN = LolisafeExtractor.update({
 })
 
 
-class LolisafelbumExtractor(LolisafeExtractor):
+class LolisafeAlbumExtractor(LolisafeExtractor):
     subcategory = "album"
     pattern = BASE_PATTERN + "/a/([^/?#]+)"
     test = (
@@ -62,6 +62,12 @@ class LolisafelbumExtractor(LolisafeExtractor):
     def __init__(self, match):
         LolisafeExtractor.__init__(self, match)
         self.album_id = match.group(match.lastindex)
+
+        domain = self.config("domain")
+        if domain is None or domain == "auto":
+            self.root = text.root_from_url(match.group(0))
+        else:
+            self.root = text.ensure_http_scheme(domain)
 
     def items(self):
         files, data = self.fetch_album(self.album_id)

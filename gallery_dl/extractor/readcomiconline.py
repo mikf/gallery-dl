@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2021 Mike Fährmann
+# Copyright 2016-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import Extractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
+import binascii
 import re
 
 BASE_PATTERN = r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.(?:li|to)"
@@ -22,6 +23,8 @@ class ReadcomiconlineBase():
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     archive_fmt = "{issue_id}_{page}"
     root = "https://readcomiconline.li"
+    browser = "firefox"
+    request_interval = (1, 9)
 
     def request(self, url, **kwargs):
         """Detect and handle redirects to CAPTCHA pages"""
@@ -46,7 +49,7 @@ class ReadcomiconlineBase():
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     """Extractor for comic-issues from readcomiconline.li"""
     subcategory = "issue"
-    pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?id=(\d+))"
+    pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?)([^#]+)"
     test = ("https://readcomiconline.li/Comic/W-i-t-c-h/Issue-130?id=22289", {
         "url": "30d29c5afc65043bfd384c010257ec2d0ecbafa6",
         "keyword": "2d9ec81ce1b11fac06ebf96ce33cdbfca0e85eb5",
@@ -54,8 +57,18 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, match)
-        self.gallery_url += "&quality=hq"
-        self.issue_id = match.group(2)
+
+        params = text.parse_query(match.group(2))
+        quality = self.config("quality")
+
+        if quality is None or quality == "auto":
+            if "quality" not in params:
+                params["quality"] = "hq"
+        else:
+            params["quality"] = str(quality)
+
+        self.gallery_url += "&".join(k + "=" + v for k, v in params.items())
+        self.issue_id = params.get("id")
 
     def metadata(self, page):
         comic, pos = text.extract(page, "   - Read\r\n    ", "\r\n")
@@ -71,9 +84,9 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
     def images(self, page):
         return [
-            (url, None)
+            (beau(url), None)
             for url in text.extract_iter(
-                page, 'lstImages.push("', '"'
+                page, "lstImages.push('", "'",
             )
         ]
 
@@ -114,3 +127,21 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
                 "lang": "en", "language": "English",
             }))
         return results
+
+
+def beau(url):
+    """https://readcomiconline.li/Scripts/rguard.min.js"""
+    if url.startswith("https"):
+        return url
+
+    url = url.replace("_x236", "d")
+    url = url.replace("_x945", "g")
+
+    containsS0 = "=s0" in url
+    url = url[:-3 if containsS0 else -6]
+    url = url[4:22] + url[25:]
+    url = url[0:-6] + url[-2:]
+    url = binascii.a2b_base64(url).decode()
+    url = url[0:13] + url[17:]
+    url = url[0:-2] + ("=s0" if containsS0 else "=s1600")
+    return "https://2.bp.blogspot.com/" + url

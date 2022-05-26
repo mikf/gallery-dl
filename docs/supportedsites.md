@@ -538,7 +538,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>nijie</td>
     <td>https://nijie.info/</td>
-    <td>Doujin, Favorites, Illustrations, individual Images, User Profiles</td>
+    <td>Doujin, Favorites, Illustrations, individual Images, Nuita History, User Profiles</td>
     <td>Required</td>
 </tr>
 <tr>
@@ -567,7 +567,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>PhotoVogue</td>
-    <td>https://www.vogue.it/en/photovogue/</td>
+    <td>https://www.vogue.com/photovogue/</td>
     <td>User Profiles</td>
     <td></td>
 </tr>
@@ -604,7 +604,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Pixiv</td>
     <td>https://www.pixiv.net/</td>
-    <td>Favorites, Follows, pixiv.me Links, pixivision, Rankings, Search Results, Sketch, User Profiles, individual Images</td>
+    <td>Artworks, Avatars, Backgrounds, Favorites, Follows, pixiv.me Links, pixivision, Rankings, Search Results, Sketch, User Profiles, individual Images</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -930,37 +930,31 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>The /co/llection</td>
     <td>https://the-collection.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>Illusion Game Cards</td>
     <td>https://illusioncards.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>All girl</td>
     <td>https://allgirl.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>Draw Friends</td>
     <td>https://drawfriends.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
     <td>/v/idyart</td>
     <td>https://vidyart.booru.org/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
-    <td>The Loud Booru</td>
-    <td>https://tlb.booru.org/</td>
-    <td>Posts, Tag Searches</td>
+    <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 
@@ -1188,8 +1182,32 @@ Consider all sites to be NSFW unless otherwise known.
     <td colspan="4"><strong>Shopify Instances</strong></td>
 </tr>
 <tr>
+    <td>Chelseacrew</td>
+    <td>https://chelseacrew.com/</td>
+    <td>Collections, Products</td>
+    <td></td>
+</tr>
+<tr>
     <td>Fashion Nova</td>
     <td>https://www.fashionnova.com/</td>
+    <td>Collections, Products</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Loungeunderwear</td>
+    <td>https://loungeunderwear.com/</td>
+    <td>Collections, Products</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Michaelscameras</td>
+    <td>https://michaels.com.au/</td>
+    <td>Collections, Products</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Modcloth</td>
+    <td>https://modcloth.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
@@ -1200,14 +1218,26 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Windsorstore</td>
-    <td>https://www.windsorstore.com/</td>
+    <td>Pinupgirlclothing</td>
+    <td>https://pinupgirlclothing.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
 <tr>
-    <td>Loungeunderwear</td>
-    <td>https://loungeunderwear.com/</td>
+    <td>Raidlondon</td>
+    <td>https://www.raidlondon.com/</td>
+    <td>Collections, Products</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Unique-vintage</td>
+    <td>https://www.unique-vintage.com/</td>
+    <td>Collections, Products</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Windsorstore</td>
+    <td>https://www.windsorstore.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -54,6 +54,7 @@ class MoebooruExtractor(BooruExtractor):
 BASE_PATTERN = MoebooruExtractor.update({
     "yandere": {
         "root": "https://yande.re",
+        "pattern": r"yande\.re",
     },
     "konachan": {
         "root": "https://konachan.com",
@@ -61,6 +62,7 @@ BASE_PATTERN = MoebooruExtractor.update({
     },
     "hypnohub": {
         "root": "https://hypnohub.net",
+        "pattern": r"hypnohub\.net",
     },
     "sakugabooru": {
         "root": "https://www.sakugabooru.com",
@@ -68,6 +70,7 @@ BASE_PATTERN = MoebooruExtractor.update({
     },
     "lolibooru": {
         "root": "https://lolibooru.moe",
+        "pattern": r"lolibooru\.moe",
     },
 })
 

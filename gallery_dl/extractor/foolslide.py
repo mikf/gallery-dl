@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2021 Mike Fährmann
+# Copyright 2016-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -41,6 +41,7 @@ class FoolslideExtractor(BaseExtractor):
 BASE_PATTERN = FoolslideExtractor.update({
     "kireicake": {
         "root": "https://reader.kireicake.com",
+        "pattern": r"reader\.kireicake\.com",
     },
     "powermanga": {
         "root": "https://read.powermanga.org",

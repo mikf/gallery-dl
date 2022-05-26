@@ -22,10 +22,13 @@ __version__ = version.__version__
 def progress(urls, pformat):
     """Wrapper around urls to output a simple progress indicator"""
     if pformat is True:
-        pformat = "[{current}/{total}] {url}"
+        pformat = "[{current}/{total}] {url}\n"
+    else:
+        pformat += "\n"
+
     pinfo = {"total": len(urls)}
     for pinfo["current"], pinfo["url"] in enumerate(urls, 1):
-        print(pformat.format_map(pinfo), file=sys.stderr)
+        output.stderr_write(pformat.format_map(pinfo))
         yield pinfo["url"]
 
 
@@ -119,9 +122,12 @@ def main():
         if args.yamlfiles:
             config.load(args.yamlfiles, strict=True, fmt="yaml")
         if args.filename:
-            if args.filename == "/O":
-                args.filename = "{filename}.{extension}"
-            config.set("__global__", "filename", args.filename)
+            filename = args.filename
+            if filename == "/O":
+                filename = "{filename}.{extension}"
+            elif filename.startswith("\\f"):
+                filename = "\f" + filename[2:]
+            config.set("__global__", "filename", filename)
         if args.directory:
             config.set("__global__", "base-directory", args.directory)
             config.set("__global__", "directory", ())
@@ -131,6 +137,10 @@ def main():
             config.set("__global__", "skip", f"abort:{args.abort}")
         if args.terminate:
             config.set("__global__", "skip", f"terminate:{args.terminate}")
+        if args.cookies_from_browser:
+            browser, _, profile = args.cookies_from_browser.partition(":")
+            browser, _, keyring = browser.partition("+")
+            config.set("__global__", "cookies", (browser, profile, keyring))
         for opts in args.options:
             config.set(*opts)
 
@@ -192,20 +202,23 @@ def main():
                 pass
 
         if args.list_modules:
-            for module_name in extractor.modules:
-                print(module_name)
+            extractor.modules.append("")
+            sys.stdout.write("\n".join(extractor.modules))
+
         elif args.list_extractors:
+            write = sys.stdout.write
+            fmt = "{}\n{}\nCategory: {} - Subcategory: {}{}\n\n".format
+
             for extr in extractor.extractors():
                 if not extr.__doc__:
                     continue
-                print(extr.__name__)
-                print(extr.__doc__)
-                print("Category:", extr.category,
-                      "- Subcategory:", extr.subcategory)
                 test = next(extr._get_tests(), None)
-                if test:
-                    print("Example :", test[0])
-                print()
+                write(fmt(
+                    extr.__name__, extr.__doc__,
+                    extr.category, extr.subcategory,
+                    "\nExample : " + test[0] if test else "",
+                ))
+
         elif args.clear_cache:
             from . import cache
             log = logging.getLogger("cache")

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -58,12 +58,21 @@ class PhilomenaExtractor(BooruExtractor):
 
 
 INSTANCES = {
-    "derpibooru": {"root": "https://derpibooru.org",
-                   "filter_id": "56027"},
-    "ponybooru" : {"root": "https://ponybooru.org",
-                   "filter_id": "2"},
-    "furbooru"  : {"root": "https://furbooru.org",
-                   "filter_id": "2"},
+    "derpibooru": {
+        "root": "https://derpibooru.org",
+        "pattern": r"derpibooru\.org",
+        "filter_id": "56027",
+    },
+    "ponybooru": {
+        "root": "https://ponybooru.org",
+        "pattern": r"ponybooru\.org",
+        "filter_id": "2",
+    },
+    "furbooru": {
+        "root": "https://furbooru.org",
+        "pattern": r"furbooru\.org",
+        "filter_id": "2",
+    },
 }
 
 BASE_PATTERN = PhilomenaExtractor.update(INSTANCES)
@@ -239,5 +248,5 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
     def posts(self):
         gallery_id = "gallery_id:" + self.gallery_id
         url = self.root + "/api/v1/json/search/images"
-        params = {"sd": "desc", "sf": gallery_id, "q" : gallery_id}
+        params = {"sd": "desc", "sf": gallery_id, "q": gallery_id}
         return self._pagination(url, params)

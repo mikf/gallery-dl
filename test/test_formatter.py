@@ -208,6 +208,22 @@ class TestFormatter(unittest.TestCase):
         self.assertRegex(out1, r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)?$")
         self.assertNotEqual(out1, out2)
 
+    def test_literals(self):
+        value = "foo"
+
+        self._run_test("{'foo'}"       , value)
+        self._run_test("{'foo'!u}"     , value.upper())
+        self._run_test("{'f00':R0/o/}" , value)
+        self._run_test("{'foobar'[:3]}", value)
+        self._run_test("{z|'foo'}"     , value)
+        self._run_test("{z|''|'foo'}"  , value)
+
+        self._run_test("{_lit[foo]}"       , value)
+        self._run_test("{_lit[foo]!u}"     , value.upper())
+        self._run_test("{_lit[f00]:R0/o/}" , value)
+        self._run_test("{_lit[foobar][:3]}", value)
+        self._run_test("{z|_lit[foo]}"     , value)
+
     def test_template(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path1 = os.path.join(tmpdirname, "tpl1")
