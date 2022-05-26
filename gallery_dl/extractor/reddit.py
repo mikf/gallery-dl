@@ -144,8 +144,8 @@ class RedditExtractor(Extractor):
 class RedditSubredditExtractor(RedditExtractor):
     """Extractor for URLs from subreddits on reddit.com"""
     subcategory = "subreddit"
-    pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/r/"
-               r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?(?:$|#)")
+    pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com"
+               r"(/r/[^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?(?:$|#)")
     test = (
         ("https://www.reddit.com/r/lavaporn/", {
             "range": "1-20",
@@ -166,6 +166,20 @@ class RedditSubredditExtractor(RedditExtractor):
 
     def submissions(self):
         return self.api.submissions_subreddit(self.subreddit, self.params)
+
+
+class RedditHomeExtractor(RedditSubredditExtractor):
+    """Extractor for submissions from your home feed on reddit.com"""
+    subcategory = "home"
+    pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com"
+               r"((?:/([a-z]+))?)/?(?:\?([^#]*))?(?:$|#)")
+    test = (
+        ("https://www.reddit.com/", {
+            "range": "1-20",
+            "count": ">= 20",
+        }),
+        ("https://old.reddit.com/top/?sort=top&t=month"),
+    )
 
 
 class RedditUserExtractor(RedditExtractor):
@@ -321,7 +335,7 @@ class RedditAPI():
 
     def submissions_subreddit(self, subreddit, params):
         """Collect all (submission, comments)-tuples of a subreddit"""
-        endpoint = "/r/" + subreddit + "/.json"
+        endpoint = subreddit + "/.json"
         params["limit"] = 100
         return self._pagination(endpoint, params)
 

@@ -197,6 +197,9 @@ SUBCATEGORY_MAP = {
         "sketch": "Sketch",
         "work": "individual Images",
     },
+    "reddit": {
+        "home": "Home Feed",
+    },
     "sankaku": {
         "books": "Book Searches",
     },
