@@ -19,6 +19,13 @@ __email__ = "mike_faehrmann@web.de"
 __version__ = version.__version__
 
 
+# Workaround for Windows command prompt that enables its virtual terminal processing
+# https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal/293633#comment124648740_54955094
+import os
+if os.name == 'nt':
+    os.system('')
+
+
 def progress(urls, pformat):
     """Wrapper around urls to output a simple progress indicator"""
     if pformat is True:
@@ -169,7 +176,8 @@ def main():
         elif args.loglevel <= logging.DEBUG:
             import platform
             import subprocess
-            import os.path
+            # Commented out until Windows workaround at the top isn't necessary
+            # import os.path
             import requests
 
             extra = ""
