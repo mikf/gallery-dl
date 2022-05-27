@@ -1311,7 +1311,7 @@ class DeviantartOAuthAPI():
             yield from results
 
             if not data["has_more"] and (
-                    self.strategy != "manual" or not results):
+                    self.strategy != "manual" or not results or not extend):
                 return
 
             if "next_cursor" in data:
