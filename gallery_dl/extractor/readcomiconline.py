@@ -23,8 +23,7 @@ class ReadcomiconlineBase():
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
     archive_fmt = "{issue_id}_{page}"
     root = "https://readcomiconline.li"
-    browser = "firefox"
-    request_interval = (1, 9)
+    request_interval = (3.0, 7.0)
 
     def request(self, url, **kwargs):
         """Detect and handle redirects to CAPTCHA pages"""
