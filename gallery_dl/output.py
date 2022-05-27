@@ -246,25 +246,25 @@ def replace_std_streams(errors="replace"):
 # Downloader output
 
 def select():
-    """Automatically select a suitable output class"""
-    pdict = {
-        "default": PipeOutput,
-        "pipe": PipeOutput,
-        "term": TerminalOutput,
-        "terminal": TerminalOutput,
-        "color": ColorOutput,
-        "null": NullOutput,
-    }
-    omode = config.get(("output",), "mode", "auto").lower()
-    if omode in pdict:
-        output = pdict[omode]()
-    elif omode == "auto":
+    """Select a suitable output class"""
+    mode = config.get(("output",), "mode")
+
+    if mode is None or mode == "auto":
         if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
             output = ColorOutput() if ANSI else TerminalOutput()
         else:
             output = PipeOutput()
+    elif isinstance(mode, dict):
+        output = CustomOutput(mode)
     else:
-        raise Exception("invalid output mode: " + omode)
+        output = {
+            "default" : PipeOutput,
+            "pipe"    : PipeOutput,
+            "term"    : TerminalOutput,
+            "terminal": TerminalOutput,
+            "color"   : ColorOutput,
+            "null"    : NullOutput,
+        }[mode.lower()]()
 
     if not config.get(("output",), "skip", True):
         output.skip = util.identity
@@ -295,7 +295,7 @@ class PipeOutput(NullOutput):
         stdout_write(path + "\n")
 
 
-class TerminalOutput(NullOutput):
+class TerminalOutput():
 
     def __init__(self):
         shorten = config.get(("output",), "shorten", True)
@@ -345,6 +345,68 @@ class ColorOutput(TerminalOutput):
 
     def success(self, path):
         stdout_write(self.color_success + self.shorten(path) + "\033[0m\n")
+
+
+class CustomOutput():
+
+    def __init__(self, options):
+
+        fmt_skip = options.get("skip")
+        fmt_start = options.get("start")
+        fmt_success = options.get("success")
+        off_skip = off_start = off_success = 0
+
+        if isinstance(fmt_skip, list):
+            off_skip, fmt_skip = fmt_skip
+        if isinstance(fmt_start, list):
+            off_start, fmt_start = fmt_start
+        if isinstance(fmt_success, list):
+            off_success, fmt_success = fmt_success
+
+        shorten = config.get(("output",), "shorten", True)
+        if shorten:
+            func = shorten_string_eaw if shorten == "eaw" else shorten_string
+            width = shutil.get_terminal_size().columns
+
+            self._fmt_skip = self._make_func(
+                func, fmt_skip, width - off_skip)
+            self._fmt_start = self._make_func(
+                func, fmt_start, width - off_start)
+            self._fmt_success = self._make_func(
+                func, fmt_success, width - off_success)
+        else:
+            self._fmt_skip = fmt_skip.format
+            self._fmt_start = fmt_start.format
+            self._fmt_success = fmt_success.format
+
+        self._fmt_progress = (options.get("progress") or
+                              "\r{0:>7}B {1:>7}B/s ").format
+        self._fmt_progress_total = (options.get("progress-total") or
+                                    "\r{3:>3}% {0:>7}B {1:>7}B/s ").format
+
+    @staticmethod
+    def _make_func(shorten, format_string, limit):
+        fmt = format_string.format
+        return lambda txt: fmt(shorten(txt, limit, CHAR_ELLIPSIES))
+
+    def start(self, path):
+        stdout_write_flush(self._fmt_start(path))
+
+    def skip(self, path):
+        stdout_write(self._fmt_skip(path))
+
+    def success(self, path):
+        stdout_write(self._fmt_success(path))
+
+    def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
+        bdl = util.format_value(bytes_downloaded)
+        bps = util.format_value(bytes_per_second)
+        if bytes_total is None:
+            stderr_write(self._fmt_progress(bdl, bps))
+        else:
+            stderr_write(self._fmt_progress_total(
+                bdl, bps, util.format_value(bytes_total),
+                bytes_downloaded * 100 // bytes_total))
 
 
 class EAWCache(dict):
