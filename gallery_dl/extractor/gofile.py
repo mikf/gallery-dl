@@ -7,6 +7,7 @@
 from .common import Extractor, Message
 from .. import exception
 from ..cache import memcache
+import re
 
 
 class GofileFolderExtractor(Extractor):
@@ -74,7 +75,8 @@ class GofileFolderExtractor(Extractor):
             token = self._create_account()
         self.session.cookies.set("accountToken", token, domain=".gofile.io")
 
-        folder = self._get_content(self.content_id, token)
+        website_token = self._get_website_token()
+        folder = self._get_content(self.content_id, token, website_token)
         yield Message.Directory, folder
 
         num = 0
@@ -104,11 +106,19 @@ class GofileFolderExtractor(Extractor):
     def _create_account(self):
         return self._api_request("createAccount")["token"]
 
-    def _get_content(self, content_id, token):
+    def _get_website_token(self):
+        response = self.request("https://gofile.io/contents/files.html")
+        regex = r"websiteToken:\s+\"([^\"]*)\""
+        matches = re.findall(regex, response.text)
+        if len(matches) < 1:
+            raise exception.StopExtraction("Could not find websiteToken!")
+        return matches[0]
+
+    def _get_content(self, content_id, token, website_token):
         return self._api_request("getContent", {
-            "contentId"   : content_id,
-            "token"       : token,
-            "websiteToken": "websiteToken",
+            "contentId": content_id,
+            "token": token,
+            "websiteToken": website_token,
         })
 
     def _api_request(self, endpoint, params=None):
