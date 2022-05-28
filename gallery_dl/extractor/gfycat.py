@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -73,7 +73,7 @@ class GfycatUserExtractor(GfycatExtractor):
     """Extractor for gfycat user profiles"""
     subcategory = "user"
     directory_fmt = ("{category}", "{username|userName}")
-    pattern = r"(?:https?://)?gfycat\.com/@([^/?#]+)"
+    pattern = r"(?:https?://)?gfycat\.com/@([^/?#]+)/?(?:$|\?|#)"
     test = ("https://gfycat.com/@gretta", {
         "pattern": r"https://giant\.gfycat\.com/[A-Za-z]+\.mp4",
         "count": ">= 100",
@@ -84,6 +84,34 @@ class GfycatUserExtractor(GfycatExtractor):
 
     def gfycats(self):
         return GfycatAPI(self).user(self.key)
+
+
+class GfycatCollectionExtractor(GfycatExtractor):
+    """Extractor for gfycat collections"""
+    subcategory = "collection"
+    directory_fmt = ("{category}", "{collection_owner}",
+                     "{collection_name|collection_id}")
+    pattern = (r"(?:https?://)?gfycat\.com/@([^/?#]+)/collections"
+               r"/(\w+)(?:/([^/?#]+))?")
+    test = ("https://gfycat.com/@reactions/collections/nHgy2DtE/no-text", {
+        "pattern": r"https://\w+\.gfycat\.com/[A-Za-z]+\.mp4",
+        "count": ">= 100",
+    })
+
+    def __init__(self, match):
+        GfycatExtractor.__init__(self, match)
+        self.collection_id = match.group(2)
+        self.collection_name = match.group(3)
+
+    def metadata(self):
+        return {
+            "collection_owner": self.key,
+            "collection_name" : self.collection_name,
+            "collection_id"   : self.collection_id,
+        }
+
+    def gfycats(self):
+        return GfycatAPI(self).collection(self.key, self.collection_id)
 
 
 class GfycatSearchExtractor(GfycatExtractor):
@@ -185,6 +213,12 @@ class GfycatAPI():
 
     def user(self, user):
         endpoint = "/v1/users/{}/gfycats".format(user.lower())
+        params = {"count": 100}
+        return self._pagination(endpoint, params)
+
+    def collection(self, user, collection):
+        endpoint = "/v1/users/{}/collections/{}/gfycats".format(
+            user, collection)
         params = {"count": 100}
         return self._pagination(endpoint, params)
 
