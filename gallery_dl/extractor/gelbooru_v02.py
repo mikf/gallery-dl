@@ -133,6 +133,10 @@ INSTANCES = {
         "root": "https://tbib.org",
         "pattern": r"tbib\.org",
     },
+    "hypnohub": {
+        "root": "https://hypnohub.net",
+        "pattern": r"hypnohub\.net",
+    },
 }
 
 BASE_PATTERN = GelbooruV02Extractor.update(INSTANCES)
@@ -158,6 +162,9 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
         }),
         ("https://tbib.org/index.php?page=post&s=list&tags=yuyaiyaui", {
             "count": ">= 120",
+        }),
+        ("https://hypnohub.net/index.php?page=post&s=list&tags=gonoike_biwa", {
+            "url": "fe662b86d38c331fcac9c62af100167d404937dc",
         }),
     )
 
@@ -186,6 +193,10 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
             "count": 5,
         }),
         ("https://realbooru.com/index.php?page=pool&s=show&id=1", {
+            "count": 3,
+        }),
+        ("https://hypnohub.net/index.php?page=pool&s=show&id=61", {
+            "url": "d314826280073441a2da609f70ee814d1f4b9407",
             "count": 3,
         }),
     )
@@ -239,6 +250,9 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
             "count": 2,
         }),
         ("https://tbib.org/index.php?page=favorites&s=view&id=7881", {
+            "count": 3,
+        }),
+        ("https://hypnohub.net/index.php?page=favorites&s=view&id=43546", {
             "count": 3,
         }),
     )
@@ -309,6 +323,11 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
         ("https://tbib.org/index.php?page=post&s=view&id=9233957", {
             "url": "5a6ebe07bfff8e6d27f7c30b5480f27abcb577d2",
             "content": "1c3831b6fbaa4686e3c79035b5d98460b1c85c43",
+        }),
+        ("https://hypnohub.net/index.php?page=post&s=view&id=73964", {
+            "pattern": r"https://hypnohub\.net/images/7a/37"
+                       r"/7a37c0ba372f35767fb10c904a398831\.png",
+            "content": "02d5f5a8396b621a6efc04c5f8ef1b7225dfc6ee",
         }),
     )
 

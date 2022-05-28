@@ -60,10 +60,6 @@ BASE_PATTERN = MoebooruExtractor.update({
         "root": "https://konachan.com",
         "pattern": r"konachan\.(?:com|net)",
     },
-    "hypnohub": {
-        "root": "https://hypnohub.net",
-        "pattern": r"hypnohub\.net",
-    },
     "sakugabooru": {
         "root": "https://www.sakugabooru.com",
         "pattern": r"(?:www\.)?sakugabooru\.com",
@@ -101,9 +97,6 @@ class MoebooruPostExtractor(MoebooruExtractor):
             },
         }),
         ("https://konachan.net/post/show/205189"),
-        ("https://hypnohub.net/post/show/73964", {
-            "content": "02d5f5a8396b621a6efc04c5f8ef1b7225dfc6ee",
-        }),
         ("https://www.sakugabooru.com/post/show/125570"),
         ("https://lolibooru.moe/post/show/287835"),
     )
@@ -130,9 +123,6 @@ class MoebooruTagExtractor(MoebooruExtractor):
             "content": "838cfb815e31f48160855435655ddf7bfc4ecb8d",
         }),
         ("https://konachan.net/post?tags=patata"),
-        ("https://hypnohub.net/post?tags=gonoike_biwa", {
-            "url": "072330c34a1e773d0cafd00e64b8060d34b078b6",
-        }),
         ("https://www.sakugabooru.com/post?tags=nichijou"),
         ("https://lolibooru.moe/post?tags=ruu_%28tksymkw%29"),
     )
@@ -163,9 +153,6 @@ class MoebooruPoolExtractor(MoebooruExtractor):
             "content": "cf0546e38a93c2c510a478f8744e60687b7a8426",
         }),
         ("https://konachan.net/pool/show/95"),
-        ("https://hypnohub.net/pool/show/61", {
-            "url": "fd74991c8729e77acd3c35eb6ddc4128ff445adf",
-        }),
         ("https://www.sakugabooru.com/pool/show/54"),
         ("https://lolibooru.moe/pool/show/239"),
     )
@@ -198,10 +185,6 @@ class MoebooruPopularExtractor(MoebooruExtractor):
         }),
         ("https://konachan.com/post/popular_recent"),
         ("https://konachan.net/post/popular_recent"),
-        ("https://hypnohub.net/post/popular_by_month?month=6&year=2014", {
-            "count": 20,
-        }),
-        ("https://hypnohub.net/post/popular_recent"),
         ("https://www.sakugabooru.com/post/popular_recent"),
         ("https://lolibooru.moe/post/popular_recent"),
     )
