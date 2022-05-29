@@ -2948,6 +2948,17 @@ Description
 .. __: `output.mode`_
 
 
+output.ansi
+-----------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    | On Windows, enable ANSI escape sequences and colored output
+    | by setting the ``ENABLE_VIRTUAL_TERMINAL_PROCESSING`` flag for stdout and stderr.
+
+
 output.skip
 -----------
 Type
