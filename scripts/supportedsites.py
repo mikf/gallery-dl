@@ -168,6 +168,9 @@ SUBCATEGORY_MAP = {
     "fanbox": {
         "redirect": "",
     },
+    "gfycat": {
+        "collections": "",
+    },
     "hentaifoundry": {
         "story": "",
     },

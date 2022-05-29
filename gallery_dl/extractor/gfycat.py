@@ -87,7 +87,7 @@ class GfycatUserExtractor(GfycatExtractor):
 
 
 class GfycatCollectionExtractor(GfycatExtractor):
-    """Extractor for gfycat collections"""
+    """Extractor for a gfycat collection"""
     subcategory = "collection"
     directory_fmt = ("{category}", "{collection_owner}",
                      "{collection_name|collection_id}")
@@ -112,6 +112,23 @@ class GfycatCollectionExtractor(GfycatExtractor):
 
     def gfycats(self):
         return GfycatAPI(self).collection(self.key, self.collection_id)
+
+
+class GfycatCollectionsExtractor(GfycatExtractor):
+    """Extractor for a gfycat user's collections"""
+    subcategory = "collections"
+    pattern = r"(?:https?://)?gfycat\.com/@([^/?#]+)/collections/?(?:$|\?|#)"
+    test = ("https://gfycat.com/@sannahparker/collections", {
+        "pattern": GfycatCollectionExtractor.pattern,
+        "count": ">= 20",
+    })
+
+    def items(self):
+        for col in GfycatAPI(self).collections(self.key):
+            url = "https://gfycat.com/@{}/collections/{}/{}".format(
+                col["userId"], col["folderId"], col["linkText"])
+            col["_extractor"] = GfycatCollectionExtractor
+            yield Message.Queue, url, col
 
 
 class GfycatSearchExtractor(GfycatExtractor):
@@ -222,6 +239,11 @@ class GfycatAPI():
         params = {"count": 100}
         return self._pagination(endpoint, params)
 
+    def collections(self, user):
+        endpoint = "/v1/users/{}/collections".format(user)
+        params = {"count": 100}
+        return self._pagination_collections(endpoint, params)
+
     def search(self, query):
         endpoint = "/v1/gfycats/search"
         params = {"search_text": query, "count": 150}
@@ -244,5 +266,14 @@ class GfycatAPI():
 
             if "found" not in data and len(gfycats) < params["count"] or \
                     not data["gfycats"]:
+                return
+            params["cursor"] = data["cursor"]
+
+    def _pagination_collections(self, endpoint, params):
+        while True:
+            data = self._call(endpoint, params)
+            yield from data["gfyCollections"]
+
+            if not data["cursor"]:
                 return
             params["cursor"] = data["cursor"]
