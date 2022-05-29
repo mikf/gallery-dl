@@ -72,15 +72,12 @@ class GfycatExtractor(Extractor):
 class GfycatUserExtractor(GfycatExtractor):
     """Extractor for gfycat user profiles"""
     subcategory = "user"
-    directory_fmt = ("{category}", "{username|userName}")
+    directory_fmt = ("{category}", "{username}")
     pattern = r"(?:https?://)?gfycat\.com/@([^/?#]+)/?(?:$|\?|#)"
     test = ("https://gfycat.com/@gretta", {
         "pattern": r"https://giant\.gfycat\.com/[A-Za-z]+\.mp4",
         "count": ">= 100",
     })
-
-    def metadata(self):
-        return {"userName": self.key}
 
     def gfycats(self):
         return GfycatAPI(self).user(self.key)
@@ -222,7 +219,6 @@ class GfycatAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.headers = {}
 
     def gfycat(self, gfycat_id):
         endpoint = "/v1/gfycats/" + gfycat_id
@@ -242,7 +238,7 @@ class GfycatAPI():
     def collections(self, user):
         endpoint = "/v1/users/{}/collections".format(user)
         params = {"count": 100}
-        return self._pagination_collections(endpoint, params)
+        return self._pagination(endpoint, params, "gfyCollections")
 
     def search(self, query):
         endpoint = "/v1/gfycats/search"
@@ -251,28 +247,12 @@ class GfycatAPI():
 
     def _call(self, endpoint, params=None):
         url = self.API_ROOT + endpoint
-        return self.extractor.request(
-            url, params=params, headers=self.headers).json()
+        return self.extractor.request(url, params=params).json()
 
-    def _pagination(self, endpoint, params):
+    def _pagination(self, endpoint, params, key="gfycats"):
         while True:
             data = self._call(endpoint, params)
-            gfycats = data["gfycats"]
-
-            for gfycat in gfycats:
-                if "gfyName" not in gfycat:
-                    gfycat.update(self.gfycat(gfycat["gfyId"]))
-                yield gfycat
-
-            if "found" not in data and len(gfycats) < params["count"] or \
-                    not data["gfycats"]:
-                return
-            params["cursor"] = data["cursor"]
-
-    def _pagination_collections(self, endpoint, params):
-        while True:
-            data = self._call(endpoint, params)
-            yield from data["gfyCollections"]
+            yield from data[key]
 
             if not data["cursor"]:
                 return
