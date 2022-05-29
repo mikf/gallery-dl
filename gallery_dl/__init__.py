@@ -154,6 +154,21 @@ def main():
                 else:
                     signal.signal(signal_num, signal.SIG_IGN)
 
+        # enable ANSI escape sequences on Windows
+        if util.WINDOWS and config.get(("output",), "ansi"):
+            from ctypes import windll, wintypes, byref
+            kernel32 = windll.kernel32
+            mode = wintypes.DWORD()
+
+            for handle_id in (-11, -12):  # stdout and stderr
+                handle = kernel32.GetStdHandle(handle_id)
+                kernel32.GetConsoleMode(handle, byref(mode))
+                if not mode.value & 0x4:
+                    mode.value |= 0x4
+                    kernel32.SetConsoleMode(handle, mode)
+
+            output.ANSI = True
+
         # extractor modules
         modules = config.get(("extractor",), "modules")
         if modules is not None:
