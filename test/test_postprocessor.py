@@ -329,12 +329,22 @@ class MetadataTest(BasePostprocessorTest):
         path = self.pathfmt.realdirectory + "test_file__meta_.data"
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
+    def test_metadata_stdout(self):
+        self._create({"filename": "-", "indent": None})
+
+        with patch("sys.stdout", Mock()) as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), """\
+{"category": "test", "extension": "ext", "filename": "file"}
+""")
+
     @staticmethod
     def _output(mock):
         return "".join(
             call[1][0]
             for call in mock.mock_calls
-            if call[0] == "().write"
+            if call[0].endswith("write")
         )
 
 

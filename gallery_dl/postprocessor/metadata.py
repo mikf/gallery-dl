@@ -10,6 +10,7 @@
 
 from .common import PostProcessor
 from .. import util, formatter
+import sys
 import os
 
 
@@ -44,8 +45,11 @@ class MetadataPP(PostProcessor):
         filename = options.get("filename")
         extfmt = options.get("extension-format")
         if filename:
-            self._filename = self._filename_custom
-            self._filename_fmt = formatter.parse(filename).format_map
+            if filename == "-":
+                self.run = self._run_stdout
+            else:
+                self._filename = self._filename_custom
+                self._filename_fmt = formatter.parse(filename).format_map
         elif extfmt:
             self._filename = self._filename_extfmt
             self._extension_fmt = formatter.parse(extfmt).format_map
@@ -106,6 +110,9 @@ class MetadataPP(PostProcessor):
             mtime = pathfmt.kwdict.get("_mtime")
             if mtime:
                 util.set_mtime(path, mtime)
+
+    def _run_stdout(self, pathfmt):
+        self.write(sys.stdout, pathfmt.kwdict)
 
     def _directory(self, pathfmt):
         return pathfmt.realdirectory

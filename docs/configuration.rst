@@ -3218,6 +3218,8 @@ Description
     A `format string`_ to build the filenames for metadata files with.
     (see `extractor.filename <extractor.*.filename_>`__)
 
+    Using ``"-"`` as filename will write all output to ``stdout``.
+
     If this option is set, `metadata.extension`_ and
     `metadata.extension-format`_ will be ignored.
 
