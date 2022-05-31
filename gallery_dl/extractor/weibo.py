@@ -28,6 +28,7 @@ class WeiboExtractor(Extractor):
         Extractor.__init__(self, match)
         self.retweets = self.config("retweets", True)
         self.videos = self.config("videos", True)
+        self.livephoto = self.config("livephoto", True)
 
         cookies = _cookie_cache()
         if cookies is not None:
@@ -92,7 +93,8 @@ class WeiboExtractor(Extractor):
                 files = self._files_from_status(status)
 
             for num, file in enumerate(files, 1):
-                text.nameext_from_url(file["url"], file)
+                if "filename" not in file:
+                    text.nameext_from_url(file["url"], file)
                 file["status"] = status
                 file["num"] = num
                 yield Message.Url, file["url"], file
@@ -106,7 +108,14 @@ class WeiboExtractor(Extractor):
         if pic_ids:
             pics = status["pic_infos"]
             for pic_id in pic_ids:
-                yield pics[pic_id]["largest"].copy()
+                pic = pics[pic_id]
+                yield pic["largest"].copy()
+
+                if pic.get("type") == "livephoto" and self.livephoto:
+                    file = {"url": pic["video"]}
+                    file["filehame"], _, file["extension"] = \
+                        pic["video"].rpartition("%2F")[2].rpartition(".")
+                    yield file
 
         if "page_info" in status:
             page_info = status["page_info"]
@@ -194,6 +203,12 @@ class WeiboStatusExtractor(WeiboExtractor):
         ("https://m.weibo.cn/detail/4600272267522211", {
             "options": (("retweets", "original"),),
             "keyword": {"status": {"id": 4600167083287033}},
+        }),
+        # livephoto (#2146)
+        ("https://weibo.com/5643044717/KkuDZ4jAA", {
+            "range": "2,4,6",
+            "pattern": r"https://video\.weibo\.com/media/play\?livephoto="
+                       r"https%3A%2F%2Fus.sinaimg.cn%2F\w+\.mov",
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
