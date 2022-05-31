@@ -2450,6 +2450,16 @@ Description
     Note: This requires 1 additional HTTP request per submission.
 
 
+extractor.weibo.livephoto
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download ``livephoto`` files.
+
+
 extractor.weibo.retweets
 ------------------------
 Type
