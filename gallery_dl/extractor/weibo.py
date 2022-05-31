@@ -10,7 +10,9 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+from ..cache import cache
 import itertools
+import random
 import json
 
 
@@ -19,7 +21,7 @@ class WeiboExtractor(Extractor):
     directory_fmt = ("{category}", "{user[screen_name]}")
     filename_fmt = "{status[id]}_{num:>02}.{extension}"
     archive_fmt = "{status[id]}_{num}"
-    root = "https://m.weibo.cn"
+    root = "https://weibo.com"
     request_interval = (1.0, 2.0)
 
     def __init__(self, match):
@@ -27,10 +29,55 @@ class WeiboExtractor(Extractor):
         self.retweets = self.config("retweets", True)
         self.videos = self.config("videos", True)
 
+        cookies = _cookie_cache()
+        if cookies is not None:
+            self.session.cookies.update(cookies)
+
+    def request(self, url, **kwargs):
+        response = Extractor.request(self, url, **kwargs)
+
+        if not response.history or "passport.weibo.com" not in response.url:
+            return response
+
+        self.log.info("Sina Visitor System")
+
+        passport_url = "https://passport.weibo.com/visitor/genvisitor"
+        headers = {"Referer": response.url}
+        data = {
+            "cb": "gen_callback",
+            "fp": '{"os":"1","browser":"Gecko91,0,0,0","fonts":"undefined",'
+                  '"screenInfo":"1920*1080*24","plugins":""}',
+        }
+
+        page = Extractor.request(
+            self, passport_url, method="POST", headers=headers, data=data).text
+        data = json.loads(text.extract(page, "(", ");")[0])["data"]
+
+        passport_url = "https://passport.weibo.com/visitor/visitor"
+        params = {
+            "a"    : "incarnate",
+            "t"    : data["tid"],
+            "w"    : "2",
+            "c"    : "{:>03}".format(data["confidence"]),
+            "gc"   : "",
+            "cb"   : "cross_domain",
+            "from" : "weibo",
+            "_rand": random.random(),
+        }
+        response = Extractor.request(self, passport_url, params=params)
+
+        _cookie_cache.update("", response.cookies)
+
+        return Extractor.request(self, url, **kwargs)
+
     def items(self):
         original_retweets = (self.retweets == "original")
 
         for status in self.statuses():
+
+            status["date"] = text.parse_datetime(
+                status["created_at"], "%a %b %d %H:%M:%S %z %Y")
+            yield Message.Directory, status
 
             if self.retweets and "retweeted_status" in status:
                 if original_retweets:
@@ -45,55 +92,29 @@ class WeiboExtractor(Extractor):
                 files = self._files_from_status(status)
 
             for num, file in enumerate(files, 1):
-                if num == 1:
-                    status["date"] = text.parse_datetime(
-                        status["created_at"], "%a %b %d %H:%M:%S %z %Y")
-                    yield Message.Directory, status
+                text.nameext_from_url(file["url"], file)
                 file["status"] = status
                 file["num"] = num
                 yield Message.Url, file["url"], file
 
-    def statuses(self):
-        """Returns an iterable containing all relevant 'status' objects"""
-
     def _status_by_id(self, status_id):
-        url = "{}/detail/{}".format(self.root, status_id)
-        page = self.request(url, fatal=False).text
-        data = text.extract(page, "var $render_data = [", "][0] || {};")[0]
-        return json.loads(data)["status"] if data else None
+        url = "{}/ajax/statuses/show?id={}".format(self.root, status_id)
+        return self.request(url).json()
 
     def _files_from_status(self, status):
-        page_info = status.pop("page_info", ())
-        if "pics" in status:
-            if len(status["pics"]) < status["pic_num"]:
-                status = self._status_by_id(status["id"]) or status
-            for image in status.pop("pics"):
-                pid = image["pid"]
-                if "large" in image:
-                    image = image["large"]
-                geo = image.get("geo") or {}
-                yield text.nameext_from_url(image["url"], {
-                    "url"   : image["url"],
-                    "pid"   : pid,
-                    "width" : text.parse_int(geo.get("width")),
-                    "height": text.parse_int(geo.get("height")),
-                })
+        pic_ids = status.get("pic_ids")
+        if pic_ids:
+            pics = status["pic_infos"]
+            for pic_id in pic_ids:
+                yield pics[pic_id]["largest"].copy()
 
-        if self.videos and "media_info" in page_info:
-            info = page_info["media_info"]
-            url = info.get("stream_url_hd") or info.get("stream_url")
-            if url:
-                data = text.nameext_from_url(url, {
-                    "url"   : url,
-                    "pid"   : 0,
-                    "width" : 0,
-                    "height": 0,
-                })
-                if data["extension"] == "m3u8":
-                    data["extension"] = "mp4"
-                    data["url"] = "ytdl:" + url
-                    data["_ytdl_extra"] = {"protocol": "m3u8_native"}
-                yield data
+        if "page_info" in status:
+            page_info = status["page_info"]
+            if "media_info" not in page_info or not self.videos:
+                return
+            media = max(page_info["media_info"]["playback_list"],
+                        key=lambda m: m["meta"]["quality_index"])
+            yield media["play_info"].copy()
 
 
 class WeiboUserExtractor(WeiboExtractor):
@@ -119,22 +140,20 @@ class WeiboUserExtractor(WeiboExtractor):
         self.user_id = match.group(1)[-10:]
 
     def statuses(self):
-        url = self.root + "/api/container/getIndex"
+        url = self.root + "/ajax/statuses/mymblog"
+        params = {
+            "uid": self.user_id,
+            "feature": "0",
+        }
         headers = {
-            "Accept": "application/json, text/plain, */*",
             "X-Requested-With": "XMLHttpRequest",
-            "MWeibo-Pwa": "1",
             "X-XSRF-TOKEN": None,
             "Referer": "{}/u/{}".format(self.root, self.user_id),
-        }
-        params = {
-            "type": "uid",
-            "value": self.user_id,
-            "containerid": "107603" + self.user_id,
         }
 
         while True:
             response = self.request(url, params=params, headers=headers)
+            headers["Accept"] = "application/json, text/plain, */*"
             headers["X-XSRF-TOKEN"] = response.cookies.get("XSRF-TOKEN")
 
             data = response.json()
@@ -144,21 +163,12 @@ class WeiboUserExtractor(WeiboExtractor):
                     raise exception.StopExtraction(
                         '"%s"', data.get("msg") or "unknown error")
 
-            data = data["data"]
-            for card in data["cards"]:
-                if "mblog" in card:
-                    yield card["mblog"]
-
-            info = data.get("cardlistInfo")
-            if not info:
-                # occasionally weibo returns an empty response
-                # repeating the same request usually/eventually yields
-                # the correct response.
-                continue
-
-            params["since_id"] = sid = info.get("since_id")
-            if not sid:
+            statuses = data["data"]["list"]
+            if not statuses:
                 return
+            yield from statuses
+
+            params["since_id"] = statuses[-1]["id"] - 1
 
 
 class WeiboStatusExtractor(WeiboExtractor):
@@ -172,18 +182,18 @@ class WeiboStatusExtractor(WeiboExtractor):
             "keyword": {"status": {"date": "dt:2018-12-30 13:56:36"}},
         }),
         ("https://m.weibo.cn/detail/4339748116375525", {
-            "pattern": r"https?://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_hd",
+            "pattern": r"https?://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_1080p",
         }),
         # unavailable video (#427)
         ("https://m.weibo.cn/status/4268682979207023", {
-            "exception": exception.NotFoundError,
+            "exception": exception.HttpError,
         }),
         # non-numeric status ID (#664)
         ("https://weibo.com/3314883543/Iy7fj4qVg"),
         # original retweets (#1542)
         ("https://m.weibo.cn/detail/4600272267522211", {
             "options": (("retweets", "original"),),
-            "keyword": {"status": {"id": "4600167083287033"}},
+            "keyword": {"status": {"id": 4600167083287033}},
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
@@ -194,7 +204,9 @@ class WeiboStatusExtractor(WeiboExtractor):
         self.status_id = match.group(1)
 
     def statuses(self):
-        status = self._status_by_id(self.status_id)
-        if not status:
-            raise exception.NotFoundError("status")
-        return (status,)
+        return (self._status_by_id(self.status_id),)
+
+
+@cache(maxage=356*86400)
+def _cookie_cache():
+    return None
