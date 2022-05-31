@@ -130,10 +130,18 @@ class WeiboUserExtractor(WeiboExtractor):
     """Extractor for all images of a user on weibo.cn"""
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:www\.|m\.)?weibo\.c(?:om|n)"
-               r"/(?:u|p(?:rofile)?)/(\d+)")
+               r"/(?:(u|n|p(?:rofile)?)/)?([^/?#]+)(?:/home)?/?(?:$|\?|#)")
     test = (
         ("https://m.weibo.cn/u/2314621010", {
-            "range": "1-30",
+            "range": "1-20",
+        }),
+        ("https://weibo.com/zhouyuxi77", {
+            "keyword": {"status": {"user": {"id": 7488709788}}},
+            "range": "1",
+        }),
+        ("https://www.weibo.com/n/周于希Sally", {
+            "keyword": {"status": {"user": {"id": 7488709788}}},
+            "range": "1",
         }),
         # deleted (#2521)
         ("https://weibo.com/u/7500315942", {
@@ -146,18 +154,27 @@ class WeiboUserExtractor(WeiboExtractor):
 
     def __init__(self, match):
         WeiboExtractor.__init__(self, match)
-        self.user_id = match.group(1)[-10:]
+        self.type, self.user = match.groups()
 
     def statuses(self):
+        if self.user.isdecimal():
+            user_id = self.user[-10:]
+        else:
+            url = "{}/ajax/profile/info?{}={}".format(
+                self.root,
+                "screen_name" if self.type == "n" else "custom",
+                self.user)
+            user_id = self.request(url).json()["data"]["user"]["idstr"]
+
         url = self.root + "/ajax/statuses/mymblog"
         params = {
-            "uid": self.user_id,
+            "uid": user_id,
             "feature": "0",
         }
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "X-XSRF-TOKEN": None,
-            "Referer": "{}/u/{}".format(self.root, self.user_id),
+            "Referer": "{}/u/{}".format(self.root, user_id),
         }
 
         while True:
