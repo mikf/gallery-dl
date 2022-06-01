@@ -20,8 +20,14 @@ class LolisafeExtractor(BaseExtractor):
 
 
 BASE_PATTERN = LolisafeExtractor.update({
-    "bunkr": {"root": "https://bunkr.is", "pattern": r"bunkr\.(?:is|to)"},
-    "zzzz" : {"root": "https://zz.ht"   , "pattern": r"zz\.(?:ht|fo)"},
+    "bunkr": {
+        "root": "https://app.bunkr.is",
+        "pattern": r"(?:app\.)?bunkr\.(?:is|to)",
+    },
+    "zzzz" : {
+        "root": "https://zz.ht",
+        "pattern": r"zz\.(?:ht|fo)",
+    },
 })
 
 
@@ -29,7 +35,7 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
     subcategory = "album"
     pattern = BASE_PATTERN + "/a/([^/?#]+)"
     test = (
-        ("https://bunkr.is/a/Lktg9Keq", {
+        ("https://app.bunkr.is/a/Lktg9Keq", {
             "pattern": r"https://cdn\.bunkr\.is/test-テスト-\"&>-QjgneIQv\.png",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
             "keyword": {
@@ -65,7 +71,11 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
 
         domain = self.config("domain")
         if domain is None or domain == "auto":
-            self.root = text.root_from_url(match.group(0))
+            if self.category == "bunkr":
+                self.root = "https://app.bunkr.is"
+            else:
+                self.root = text.root_from_url(match.group(0))
+
         else:
             self.root = text.ensure_http_scheme(domain)
 
