@@ -424,7 +424,7 @@ Description
     * A ``list`` with up to 3 entries specifying a browser profile.
 
       * The first entry is the browser name
-      * The optional second entry is a profile name or an absolote path to a profile directory
+      * The optional second entry is a profile name or an absolute path to a profile directory
       * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
 
       .. code:: json
