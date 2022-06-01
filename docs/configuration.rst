@@ -1355,6 +1355,21 @@ Description
     If not set, a temporary guest token will be used.
 
 
+extractor.gofile.website-token
+------------------------------
+Type
+    ``string``
+Default
+    ``"12345"``
+Description
+    API token value used during API requests.
+
+    A not up-to-date value will result in ``401 Unauthorized`` errors.
+
+    Setting this value to ``null`` will do an extra HTTP request to fetch
+    the current value used by gofile.
+
+
 extractor.gofile.recursive
 --------------------------
 Type

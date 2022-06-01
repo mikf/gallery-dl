@@ -5,7 +5,7 @@
 # published by the Free Software Foundation.
 
 from .common import Extractor, Message
-from .. import exception
+from .. import text, exception
 from ..cache import memcache
 
 
@@ -17,46 +17,45 @@ class GofileFolderExtractor(Extractor):
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?(?:www\.)?gofile\.io/d/([^/?#]+)"
     test = (
-        ("https://gofile.io/d/5qHmQj", {
-            "pattern": r"https://file\d+\.gofile\.io/download"
+        ("https://gofile.io/d/k6BomI", {
+            "pattern": r"https://store\d+\.gofile\.io/download"
                        r"/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
                        r"/test-%E3%83%86%E3%82%B9%E3%83%88-%2522%26!\.png",
             "keyword": {
                 "createTime": int,
-                "directLink": "re:https://store3.gofile.io/download/direct/.+",
+                "directLink": "re:https://store5.gofile.io/download/direct/.+",
                 "downloadCount": int,
                 "extension": "png",
                 "filename": "test-テスト-%22&!",
                 "folder": {
                     "childs": [
-                        "346429cc-aee4-4996-be3f-e58616fe231f",
-                        "765b6b12-b354-4e14-9a45-f763fa455682",
-                        "2a44600a-4a59-4389-addc-4a0d542c457b"
+                        "b0367d79-b8ba-407f-8342-aaf8eb815443",
+                        "7fd4a36a-c1dd-49ff-9223-d93f7d24093f"
                     ],
-                    "code": "5qHmQj",
-                    "createTime": 1648536501,
-                    "id": "45cd45d1-dc78-4553-923f-04091c621699",
-                    "isRoot": True,
+                    "code": "k6BomI",
+                    "createTime": 1654076165,
+                    "id": "fafb59f9-a7c7-4fea-a098-b29b8d97b03c",
                     "name": "root",
                     "public": True,
                     "totalDownloadCount": int,
-                    "totalSize": 364,
+                    "totalSize": 182,
                     "type": "folder"
                 },
                 "id": r"re:\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",
-                "link": r"re:https://file17.gofile.io/download/.+\.png",
+                "link": r"re:https://store5.gofile.io/download/.+\.png",
                 "md5": "re:[0-9a-f]{32}",
                 "mimetype": "image/png",
                 "name": "test-テスト-%22&!.png",
                 "num": int,
-                "parentFolder": "45cd45d1-dc78-4553-923f-04091c621699",
-                "serverChoosen": "file17",
+                "parentFolder": "fafb59f9-a7c7-4fea-a098-b29b8d97b03c",
+                "serverChoosen": "store5",
                 "size": 182,
-                "thumbnail": r"re:https://store3.gofile.io/download/.+\.png",
+                "thumbnail": r"re:https://store5.gofile.io/download/.+\.png",
                 "type": "file"
             },
         }),
-        ("https://gofile.io/d/346429cc-aee4-4996-be3f-e58616fe231f", {
+        ("https://gofile.io/d/7fd4a36a-c1dd-49ff-9223-d93f7d24093f", {
+            "options": (("website-token", None),),
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
         }),
     )
@@ -69,12 +68,17 @@ class GofileFolderExtractor(Extractor):
         recursive = self.config("recursive")
 
         token = self.config("api-token")
-        if token is None:
-            self.log.debug("creating temporary account")
+        if not token:
             token = self._create_account()
         self.session.cookies.set("accountToken", token, domain=".gofile.io")
+        self.api_token = token
 
-        folder = self._get_content(self.content_id, token)
+        token = self.config("website-token", "12345")
+        if not token:
+            token = self._get_website_token()
+        self.website_token = token
+
+        folder = self._get_content(self.content_id)
         yield Message.Directory, folder
 
         num = 0
@@ -102,13 +106,20 @@ class GofileFolderExtractor(Extractor):
 
     @memcache()
     def _create_account(self):
+        self.log.debug("Creating temporary account")
         return self._api_request("createAccount")["token"]
 
-    def _get_content(self, content_id, token):
+    @memcache()
+    def _get_website_token(self):
+        self.log.debug("Fetching website token")
+        page = self.request(self.root + "/contents/files.html").text
+        return text.extract(page, "websiteToken:", ",")[0].strip("\" ")
+
+    def _get_content(self, content_id):
         return self._api_request("getContent", {
             "contentId"   : content_id,
-            "token"       : token,
-            "websiteToken": "websiteToken",
+            "token"       : self.api_token,
+            "websiteToken": self.website_token,
         })
 
     def _api_request(self, endpoint, params=None):
