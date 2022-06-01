@@ -15,7 +15,8 @@ from ..cache import cache
 import collections
 
 BASE_PATTERN = r"(?:https?://)?" \
-    r"(?:sankaku\.app|(?:beta|chan)\.sankakucomplex\.com)"
+    r"(?:(?:chan|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
+    r"(?:/[a-z]{2})?"
 
 
 class SankakuExtractor(BooruExtractor):
@@ -171,8 +172,11 @@ class SankakuPostExtractor(SankakuExtractor):
                 "tags_general": ["key(mangaka)", "key(mangaka)"],
             },
         }),
-        ("https://beta.sankakucomplex.com/post/show/360451"),
         ("https://chan.sankakucomplex.com/post/show/360451"),
+        ("https://chan.sankakucomplex.com/ja/post/show/360451"),
+        ("https://beta.sankakucomplex.com/post/show/360451"),
+        ("https://white.sankakucomplex.com/post/show/360451"),
+        ("https://black.sankakucomplex.com/post/show/360451"),
     )
 
     def __init__(self, match):
