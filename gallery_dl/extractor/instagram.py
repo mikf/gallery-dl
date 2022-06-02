@@ -140,10 +140,21 @@ class InstagramExtractor(Extractor):
             screen_name)
         headers = {
             "Referer": "https://www.instagram.com/{}/".format(screen_name),
+            "X-CSRFToken"     : self.csrf_token,
             "X-IG-App-ID"     : "936619743392459",
+            "X-IG-WWW-Claim"  : self.www_claim,
             "X-Requested-With": "XMLHttpRequest",
         }
-        return self.request(url, headers=headers).json()["graphql"]["user"]
+        cookies = {
+            "csrftoken": self.csrf_token,
+        }
+        return self.request(
+            url, headers=headers, cookies=cookies).json()["graphql"]["user"]
+
+    def _uid_by_screen_name(self, screen_name):
+        if screen_name.startswith("id:"):
+            return screen_name[3:]
+        return self._user_by_screen_name(screen_name)["id"]
 
     def _media_by_id(self, post_id):
         endpoint = "/v1/media/{}/info/".format(post_id)
@@ -450,6 +461,7 @@ class InstagramUserExtractor(InstagramExtractor):
     test = (
         ("https://www.instagram.com/instagram/"),
         ("https://www.instagram.com/instagram/?hl=en"),
+        ("https://www.instagram.com/id:25025320/"),
     )
 
     def items(self):
@@ -475,10 +487,8 @@ class InstagramPostsExtractor(InstagramExtractor):
     })
 
     def posts(self):
-        user = self._user_by_screen_name(self.item)
-
         query_hash = "69cba40317214236af40e7efa697781d"
-        variables = {"id": user["id"], "first": 50}
+        variables = {"id": self._uid_by_screen_name(self.item), "first": 50}
         return self._pagination_graphql(query_hash, variables)
 
 
@@ -497,7 +507,12 @@ class InstagramTaggedExtractor(InstagramExtractor):
     })
 
     def metadata(self):
-        self.user = user = self._user_by_screen_name(self.item)
+        if self.item.startswith("id:"):
+            self.user_id = self.item[3:]
+            return {"tagged_owner_id": self.user_id}
+
+        user = self._user_by_screen_name(self.item)
+        self.user_id = user["id"]
 
         return {
             "tagged_owner_id" : user["id"],
@@ -506,7 +521,7 @@ class InstagramTaggedExtractor(InstagramExtractor):
         }
 
     def posts(self):
-        endpoint = "/v1/usertags/{}/feed/".format(self.user["id"])
+        endpoint = "/v1/usertags/{}/feed/".format(self.user_id)
         params = {"count": 50}
         return self._pagination_api(endpoint, params)
 
@@ -521,10 +536,8 @@ class InstagramChannelExtractor(InstagramExtractor):
     })
 
     def posts(self):
-        user = self._user_by_screen_name(self.item)
-
         query_hash = "bc78b344a68ed16dd5d7f264681c4c76"
-        variables = {"id": user["id"], "first": 50}
+        variables = {"id": self._uid_by_screen_name(self.item), "first": 50}
         return self._pagination_graphql(query_hash, variables)
 
 
@@ -535,10 +548,8 @@ class InstagramSavedExtractor(InstagramExtractor):
     test = ("https://www.instagram.com/instagram/saved/",)
 
     def posts(self):
-        user = self._user_by_screen_name(self.item)
-
         query_hash = "2ce1d673055b99250e93b6f88f878fde"
-        variables = {"id": user["id"], "first": 50}
+        variables = {"id": self._uid_by_screen_name(self.item), "first": 50}
         return self._pagination_graphql(query_hash, variables)
 
 
@@ -739,7 +750,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
         if self.highlight_id:
             reel_id = "highlight:" + self.highlight_id
         else:
-            reel_id = self._user_by_screen_name(self.user)["id"]
+            reel_id = self._uid_by_screen_name(self.item)
 
         endpoint = "/v1/feed/reels_media/"
         params = {"reel_ids": reel_id}
@@ -764,9 +775,8 @@ class InstagramHighlightsExtractor(InstagramExtractor):
     test = ("https://www.instagram.com/instagram/highlights",)
 
     def posts(self):
-        user = self._user_by_screen_name(self.item)
-
-        endpoint = "/v1/highlights/{}/highlights_tray/".format(user["id"])
+        endpoint = "/v1/highlights/{}/highlights_tray/".format(
+            self._uid_by_screen_name(self.item))
         tray = self._request_api(endpoint)["tray"]
         reel_ids = [highlight["id"] for highlight in tray]
 
@@ -795,7 +805,7 @@ class InstagramReelsExtractor(InstagramExtractor):
     def posts(self):
         endpoint = "/v1/clips/user/"
         data = {
-            "target_user_id": self._user_by_screen_name(self.item)["id"],
+            "target_user_id": self._uid_by_screen_name(self.item),
             "page_size"     : "50",
         }
 
