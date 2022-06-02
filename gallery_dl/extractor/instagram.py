@@ -386,13 +386,6 @@ class InstagramExtractor(Extractor):
                 json.loads(additional_data.partition(",")[2])
         return data
 
-    def _extract_post_page(self, url):
-        page = self.request(url).text
-        data = self._extract_shared_data(page)["entry_data"]
-        if "HttpErrorPage" in data:
-            raise exception.NotFoundError("post")
-        return data["PostPage"][0]
-
     def _get_edge_data(self, user, key):
         cursor = self.config("cursor")
         if cursor or not key:
@@ -746,17 +739,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
         if self.highlight_id:
             reel_id = "highlight:" + self.highlight_id
         else:
-            url = "{}/stories/{}/".format(self.root, self.user)
-            with self.request(url, allow_redirects=False) as response:
-                if 300 <= response.status_code < 400:
-                    return ()
-                page = response.text
-            try:
-                data = self._extract_shared_data(page)["entry_data"]
-                user = data["StoriesPage"][0]["user"]
-            except KeyError:
-                return ()
-            reel_id = user["id"]
+            reel_id = self._user_by_screen_name(self.user)["id"]
 
         endpoint = "/v1/feed/reels_media/"
         params = {"reel_ids": reel_id}
