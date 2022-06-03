@@ -263,7 +263,8 @@ class PixivBackgroundExtractor(PixivExtractor):
         url = url.replace("_master1200.", ".")
         work = self._make_work("background", url, detail["user"])
         if url.endswith(".jpg"):
-            work["_fallback"] = (url[:-4] + ".png",)
+            url = url[:-4]
+            work["_fallback"] = (url + ".png", url + ".gif")
         return (work,)
 
 
