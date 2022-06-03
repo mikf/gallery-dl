@@ -856,7 +856,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Weibo</td>
     <td>https://www.weibo.com/</td>
-    <td>Images from Statuses, User Profiles</td>
+    <td>Albums, Articles, Feeds, Images from Statuses, User Profiles, Videos</td>
     <td></td>
 </tr>
 <tr>

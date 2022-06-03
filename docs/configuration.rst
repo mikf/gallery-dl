@@ -2465,6 +2465,23 @@ Description
     Note: This requires 1 additional HTTP request per submission.
 
 
+extractor.weibo.include
+-----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"feed"``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"home"``, ``"feed"``, ``"videos"``, ``"article"``, ``"album"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.weibo.livephoto
 -------------------------
 Type
