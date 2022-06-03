@@ -81,13 +81,21 @@ class WeiboExtractor(Extractor):
             pics = status["pic_infos"]
             for pic_id in pic_ids:
                 pic = pics[pic_id]
-                yield pic["largest"].copy()
+                pic_type = pic.get("type")
 
-                if pic.get("type") == "livephoto" and self.livephoto:
+                if pic_type == "gif" and self.videos:
+                    yield {"url": pic["video"]}
+
+                elif pic_type == "livephoto" and self.livephoto:
+                    yield pic["largest"].copy()
+
                     file = {"url": pic["video"]}
                     file["filehame"], _, file["extension"] = \
                         pic["video"].rpartition("%2F")[2].rpartition(".")
                     yield file
+
+                else:
+                    yield pic["largest"].copy()
 
         if "page_info" in status:
             page_info = status["page_info"]
@@ -318,11 +326,16 @@ class WeiboStatusExtractor(WeiboExtractor):
             "options": (("retweets", "original"),),
             "keyword": {"status": {"id": 4600167083287033}},
         }),
-        # livephoto (#2146)
+        # type == livephoto (#2146)
         ("https://weibo.com/5643044717/KkuDZ4jAA", {
             "range": "2,4,6",
             "pattern": r"https://video\.weibo\.com/media/play\?livephoto="
                        r"https%3A%2F%2Fus.sinaimg.cn%2F\w+\.mov",
+        }),
+        # type == gif
+        ("https://weibo.com/1758989602/LvBhm5DiP", {
+            "pattern": r"http://g\.us\.sinaimg.cn/o0/qNZcaAAglx07Wuf921CM01041"
+                       r"20005tc0E010\.mp4\?label=gif_mp4",
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
