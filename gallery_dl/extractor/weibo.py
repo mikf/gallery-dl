@@ -69,6 +69,8 @@ class WeiboExtractor(Extractor):
                 files = self._files_from_status(status)
 
             for num, file in enumerate(files, 1):
+                if file["url"].startswith("http:"):
+                    file["url"] = "https:" + file["url"][5:]
                 if "filename" not in file:
                     text.nameext_from_url(file["url"], file)
                 file["status"] = status
@@ -256,7 +258,7 @@ class WeiboVideosExtractor(WeiboExtractor):
     subcategory = "videos"
     pattern = USER_PATTERN + r"\?tabtype=newVideo"
     test = ("https://weibo.com/1758989602?tabtype=newVideo", {
-        "pattern": r"http://f\.video\.weibocdn\.com/(../)?\w+\.mp4\?label=mp4",
+        "pattern": r"https://f\.video\.weibocdn\.com/(../)?\w+\.mp4\?label=mp",
         "range": "1-30",
         "count": 30,
     })
