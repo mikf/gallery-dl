@@ -15,6 +15,9 @@ import itertools
 import random
 import json
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.|m\.)?weibo\.c(?:om|n)"
+USER_PATTERN = BASE_PATTERN + r"/(?:(u|n|p(?:rofile)?)/)?([^/?#]+)(?:/home)?"
+
 
 class WeiboExtractor(Extractor):
     category = "weibo"
@@ -26,6 +29,7 @@ class WeiboExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self._prefix, self.user = match.groups()
         self.retweets = self.config("retweets", True)
         self.videos = self.config("videos", True)
         self.livephoto = self.config("livephoto", True)
@@ -37,39 +41,11 @@ class WeiboExtractor(Extractor):
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
 
-        if not response.history or "passport.weibo.com" not in response.url:
-            return response
+        if response.history and "passport.weibo.com" in response.url:
+            self._sina_visitor_system(response)
+            response = Extractor.request(self, url, **kwargs)
 
-        self.log.info("Sina Visitor System")
-
-        passport_url = "https://passport.weibo.com/visitor/genvisitor"
-        headers = {"Referer": response.url}
-        data = {
-            "cb": "gen_callback",
-            "fp": '{"os":"1","browser":"Gecko91,0,0,0","fonts":"undefined",'
-                  '"screenInfo":"1920*1080*24","plugins":""}',
-        }
-
-        page = Extractor.request(
-            self, passport_url, method="POST", headers=headers, data=data).text
-        data = json.loads(text.extract(page, "(", ");")[0])["data"]
-
-        passport_url = "https://passport.weibo.com/visitor/visitor"
-        params = {
-            "a"    : "incarnate",
-            "t"    : data["tid"],
-            "w"    : "2",
-            "c"    : "{:>03}".format(data["confidence"]),
-            "gc"   : "",
-            "cb"   : "cross_domain",
-            "from" : "weibo",
-            "_rand": random.random(),
-        }
-        response = Extractor.request(self, passport_url, params=params)
-
-        _cookie_cache.update("", response.cookies)
-
-        return Extractor.request(self, url, **kwargs)
+        return response
 
     def items(self):
         original_retweets = (self.retweets == "original")
@@ -99,10 +75,6 @@ class WeiboExtractor(Extractor):
                 file["num"] = num
                 yield Message.Url, file["url"], file
 
-    def _status_by_id(self, status_id):
-        url = "{}/ajax/statuses/show?id={}".format(self.root, status_id)
-        return self.request(url).json()
-
     def _files_from_status(self, status):
         pic_ids = status.get("pic_ids")
         if pic_ids:
@@ -125,56 +97,26 @@ class WeiboExtractor(Extractor):
                         key=lambda m: m["meta"]["quality_index"])
             yield media["play_info"].copy()
 
+    def _status_by_id(self, status_id):
+        url = "{}/ajax/statuses/show?id={}".format(self.root, status_id)
+        return self.request(url).json()
 
-class WeiboUserExtractor(WeiboExtractor):
-    """Extractor for all images of a user on weibo.cn"""
-    subcategory = "user"
-    pattern = (r"(?:https?://)?(?:www\.|m\.)?weibo\.c(?:om|n)"
-               r"/(?:(u|n|p(?:rofile)?)/)?([^/?#]+)(?:/home)?/?(?:$|\?|#)")
-    test = (
-        ("https://m.weibo.cn/u/2314621010", {
-            "range": "1-20",
-        }),
-        ("https://weibo.com/zhouyuxi77", {
-            "keyword": {"status": {"user": {"id": 7488709788}}},
-            "range": "1",
-        }),
-        ("https://www.weibo.com/n/周于希Sally", {
-            "keyword": {"status": {"user": {"id": 7488709788}}},
-            "range": "1",
-        }),
-        # deleted (#2521)
-        ("https://weibo.com/u/7500315942", {
-            "count": 0,
-        }),
-        ("https://m.weibo.cn/profile/2314621010"),
-        ("https://m.weibo.cn/p/2304132314621010_-_WEIBO_SECOND_PROFILE_WEIBO"),
-        ("https://www.weibo.com/p/1003062314621010/home"),
-    )
-
-    def __init__(self, match):
-        WeiboExtractor.__init__(self, match)
-        self.type, self.user = match.groups()
-
-    def statuses(self):
+    def _user_id(self):
         if self.user.isdecimal():
-            user_id = self.user[-10:]
+            return self.user[-10:]
         else:
             url = "{}/ajax/profile/info?{}={}".format(
                 self.root,
-                "screen_name" if self.type == "n" else "custom",
+                "screen_name" if self._prefix == "n" else "custom",
                 self.user)
-            user_id = self.request(url).json()["data"]["user"]["idstr"]
+            return self.request(url).json()["data"]["user"]["idstr"]
 
-        url = self.root + "/ajax/statuses/mymblog"
-        params = {
-            "uid": user_id,
-            "feature": "0",
-        }
+    def _pagination(self, endpoint, params):
+        url = self.root + "/ajax" + endpoint
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "X-XSRF-TOKEN": None,
-            "Referer": "{}/u/{}".format(self.root, user_id),
+            "Referer": "{}/u/{}".format(self.root, params["uid"]),
         }
 
         while True:
@@ -189,19 +131,174 @@ class WeiboUserExtractor(WeiboExtractor):
                     raise exception.StopExtraction(
                         '"%s"', data.get("msg") or "unknown error")
 
-            statuses = data["data"]["list"]
+            data = data["data"]
+            statuses = data["list"]
             if not statuses:
                 return
             yield from statuses
 
-            params["since_id"] = statuses[-1]["id"] - 1
+            if "next_cursor" in data:
+                params["cursor"] = data["next_cursor"]
+            elif "page" in params:
+                params["page"] += 1
+            elif data["since_id"]:
+                params["sinceid"] = data["since_id"]
+            else:
+                params["since_id"] = statuses[-1]["id"] - 1
+
+    def _sina_visitor_system(self, response):
+        self.log.info("Sina Visitor System")
+
+        passport_url = "https://passport.weibo.com/visitor/genvisitor"
+        headers = {"Referer": response.url}
+        data = {
+            "cb": "gen_callback",
+            "fp": '{"os":"1","browser":"Gecko91,0,0,0","fonts":"undefined",'
+                  '"screenInfo":"1920*1080*24","plugins":""}',
+        }
+
+        page = Extractor.request(
+            self, passport_url, method="POST", headers=headers, data=data).text
+        data = json.loads(text.extract(page, "(", ");")[0])["data"]
+
+        passport_url = "https://passport.weibo.com/visitor/visitor"
+        params = {
+            "a"    : "incarnate",
+            "t"    : data["tid"],
+            "w"    : "2",
+            "c"    : "{:>03}".format(data["confidence"]),
+            "gc"   : "",
+            "cb"   : "cross_domain",
+            "from" : "weibo",
+            "_rand": random.random(),
+        }
+        response = Extractor.request(self, passport_url, params=params)
+        _cookie_cache.update("", response.cookies)
+
+
+class WeiboUserExtractor(WeiboExtractor):
+    """Extractor for weibo user profiles"""
+    subcategory = "user"
+    pattern = USER_PATTERN + r"(?:$|#)"
+    test = (
+        ("https://weibo.com/1758989602"),
+        ("https://weibo.com/u/1758989602"),
+        ("https://weibo.com/p/1758989602"),
+        ("https://m.weibo.cn/profile/2314621010"),
+        ("https://m.weibo.cn/p/2304132314621010_-_WEIBO_SECOND_PROFILE_WEIBO"),
+        ("https://www.weibo.com/p/1003062314621010/home"),
+    )
+
+    def items(self):
+        base = " {}/u/{}?tabtype=".format(self.root, self._user_id())
+        return self._dispatch_extractors((
+            (WeiboHomeExtractor  , base + "home"),
+            (WeiboFeedExtractor  , base + "feed"),
+            (WeiboVideosExtractor, base + "newVideo"),
+            (WeiboAlbumExtractor , base + "album"),
+        ), ("feed",))
+
+
+class WeiboHomeExtractor(WeiboExtractor):
+    """Extractor for weibo 'home' listings"""
+    subcategory = "home"
+    pattern = USER_PATTERN + r"\?tabtype=home"
+    test = ("https://weibo.com/1758989602?tabtype=home", {
+        "range": "1-30",
+        "count": 30,
+    })
+
+    def statuses(self):
+        endpoint = "/profile/myhot"
+        params = {"uid": self._user_id(), "page": 1, "feature": "2"}
+        return self._pagination(endpoint, params)
+
+
+class WeiboFeedExtractor(WeiboExtractor):
+    """Extractor for weibo user feeds"""
+    subcategory = "feed"
+    pattern = USER_PATTERN + r"\?tabtype=feed"
+    test = (
+        ("https://weibo.com/1758989602?tabtype=feed", {
+            "range": "1-30",
+            "count": 30,
+        }),
+        ("https://weibo.com/zhouyuxi77?tabtype=feed", {
+            "keyword": {"status": {"user": {"id": 7488709788}}},
+            "range": "1",
+        }),
+        ("https://www.weibo.com/n/周于希Sally?tabtype=feed", {
+            "keyword": {"status": {"user": {"id": 7488709788}}},
+            "range": "1",
+        }),
+        # deleted (#2521)
+        ("https://weibo.com/u/7500315942?tabtype=feed", {
+            "count": 0,
+        }),
+    )
+
+    def statuses(self):
+        endpoint = "/statuses/mymblog"
+        params = {"uid": self._user_id(), "feature": "0"}
+        return self._pagination(endpoint, params)
+
+
+class WeiboVideosExtractor(WeiboExtractor):
+    """Extractor for weibo 'newVideo' listings"""
+    subcategory = "videos"
+    pattern = USER_PATTERN + r"\?tabtype=newVideo"
+    test = ("https://weibo.com/1758989602?tabtype=newVideo", {
+        "pattern": r"http://f\.video\.weibocdn\.com/(../)?\w+\.mp4\?label=mp4",
+        "range": "1-30",
+        "count": 30,
+    })
+
+    def statuses(self):
+        endpoint = "/profile/getWaterFallContent"
+        params = {"uid": self._user_id()}
+        return self._pagination(endpoint, params)
+
+
+class WeiboArticleExtractor(WeiboExtractor):
+    """Extractor for weibo 'article' listings"""
+    subcategory = "article"
+    pattern = USER_PATTERN + r"\?tabtype=article"
+    test = ("https://weibo.com/1758989602?tabtype=article", {
+        "count": 0,
+    })
+
+    def statuses(self):
+        endpoint = "/statuses/mymblog"
+        params = {"uid": self._user_id(), "page": 1, "feature": "10"}
+        return self._pagination(endpoint, params)
+
+
+class WeiboAlbumExtractor(WeiboExtractor):
+    """Extractor for weibo 'album' listings"""
+    subcategory = "album"
+    pattern = USER_PATTERN + r"\?tabtype=album"
+    test = ("https://weibo.com/1758989602?tabtype=album", {
+        "pattern": r"https://wx\d+\.sinaimg\.cn/large/\w{32}\.(jpg|png|gif)",
+        "range": "1-3",
+        "count": 3,
+    })
+
+    def statuses(self):
+        endpoint = "/profile/getImageWall"
+        params = {"uid": self._user_id()}
+
+        seen = set()
+        for image in self._pagination(endpoint, params):
+            mid = image["mid"]
+            if mid not in seen:
+                seen.add(mid)
+                yield self._status_by_id(mid)
 
 
 class WeiboStatusExtractor(WeiboExtractor):
     """Extractor for images from a status on weibo.cn"""
     subcategory = "status"
-    pattern = (r"(?:https?://)?(?:www\.|m\.)?weibo\.c(?:om|n)"
-               r"/(?:detail|status|\d+)/(\w+)")
+    pattern = BASE_PATTERN + r"/(detail|status|\d+)/(\w+)"
     test = (
         ("https://m.weibo.cn/detail/4323047042991618", {
             "pattern": r"https?://wx\d+.sinaimg.cn/large/\w+.jpg",
@@ -231,12 +328,8 @@ class WeiboStatusExtractor(WeiboExtractor):
         ("https://m.weibo.cn/5746766133/4339748116375525"),
     )
 
-    def __init__(self, match):
-        WeiboExtractor.__init__(self, match)
-        self.status_id = match.group(1)
-
     def statuses(self):
-        return (self._status_by_id(self.status_id),)
+        return (self._status_by_id(self.user),)
 
 
 @cache(maxage=356*86400)

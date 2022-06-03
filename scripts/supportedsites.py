@@ -228,6 +228,9 @@ SUBCATEGORY_MAP = {
         "journals"   : "",
         "submissions": "",
     },
+    "weibo": {
+        "home": "",
+    },
     "wikiart": {
         "artists": "Artist Listings",
     },
