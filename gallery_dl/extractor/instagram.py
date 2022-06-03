@@ -750,7 +750,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
         if self.highlight_id:
             reel_id = "highlight:" + self.highlight_id
         else:
-            reel_id = self._uid_by_screen_name(self.item)
+            reel_id = self._uid_by_screen_name(self.user)
 
         endpoint = "/v1/feed/reels_media/"
         params = {"reel_ids": reel_id}
