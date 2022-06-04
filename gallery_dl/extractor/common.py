@@ -302,6 +302,7 @@ class Extractor():
         if cookies:
             if isinstance(cookies, dict):
                 self._update_cookies_dict(cookies, self.cookiedomain)
+
             elif isinstance(cookies, str):
                 cookiefile = util.expand_path(cookies)
                 try:
@@ -311,12 +312,27 @@ class Extractor():
                     self.log.warning("cookies: %s", exc)
                 else:
                     self._cookiefile = cookiefile
+
             elif isinstance(cookies, (list, tuple)):
-                from ..cookies import load_cookies
-                try:
-                    load_cookies(self._cookiejar, cookies)
-                except Exception as exc:
-                    self.log.warning("cookies: %s", exc)
+                key = tuple(cookies)
+                cookiejar = _browser_cookies.get(key)
+
+                if cookiejar is None:
+                    from ..cookies import load_cookies
+                    cookiejar = self._cookiejar.__class__()
+                    try:
+                        load_cookies(cookiejar, cookies)
+                    except Exception as exc:
+                        self.log.warning("cookies: %s", exc)
+                    else:
+                        _browser_cookies[key] = cookiejar
+                else:
+                    self.log.debug("Using cached cookies from %s", key)
+
+                setcookie = self._cookiejar.set_cookie
+                for cookie in cookiejar:
+                    setcookie(cookie)
+
             else:
                 self.log.warning(
                     "Expected 'dict', 'list', or 'str' value for 'cookies' "
@@ -692,6 +708,7 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
 
 
 _adapter_cache = {}
+_browser_cookies = {}
 
 
 HTTP_HEADERS = {
