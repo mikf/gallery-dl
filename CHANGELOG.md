@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.22.1 - 2022-06-04
+### Additions
+- [gfycat] add support for collections ([#2629](https://github.com/mikf/gallery-dl/issues/2629))
+- [instagram] support specifying users by ID
+- [paheal] extract more metadata ([#2641](https://github.com/mikf/gallery-dl/issues/2641))
+- [reddit] add `home` extractor ([#2614](https://github.com/mikf/gallery-dl/issues/2614))
+- [weibo] support usernames in URLs ([#1662](https://github.com/mikf/gallery-dl/issues/1662))
+- [weibo] support `livephoto` and `gif` files ([#2146](https://github.com/mikf/gallery-dl/issues/2146))
+- [weibo] add support for several different `tabtype` listings ([#686](https://github.com/mikf/gallery-dl/issues/686), [#2601](https://github.com/mikf/gallery-dl/issues/2601))
+- [postprocessor:metadata] write to stdout by setting filename to "-" ([#2624](https://github.com/mikf/gallery-dl/issues/2624))
+- implement `output.ansi` option ([#2628](https://github.com/mikf/gallery-dl/issues/2628))
+- support user-defined `output.mode` settings ([#2529](https://github.com/mikf/gallery-dl/issues/2529))
+### Changes
+- [readcomiconline] remove default `browser` setting ([#2625](https://github.com/mikf/gallery-dl/issues/2625))
+- [weibo] switch to desktop API ([#2601](https://github.com/mikf/gallery-dl/issues/2601))
+- fix command-line argument name of `--cookies-from-browser` ([#1606](https://github.com/mikf/gallery-dl/issues/1606), [#2630](https://github.com/mikf/gallery-dl/issues/2630))
+### Fixes
+- [bunkr] change domain to `app.bunkr.is` ([#2634](https://github.com/mikf/gallery-dl/issues/2634))
+- [deviantart] fix folder listings with `"pagination": "manual"` ([#2488](https://github.com/mikf/gallery-dl/issues/2488))
+- [gofile] fix 401 Unauthorized errors ([#2632](https://github.com/mikf/gallery-dl/issues/2632))
+- [hypnohub] move to gelbooru_v02 instances ([#2631](https://github.com/mikf/gallery-dl/issues/2631))
+- [instagram] fix and update extractors ([#2644](https://github.com/mikf/gallery-dl/issues/2644))
+- [nozomi] remove slashes from search terms ([#2653](https://github.com/mikf/gallery-dl/issues/2653))
+- [pixiv] include `.gif` in background fallback URLs ([#2495](https://github.com/mikf/gallery-dl/issues/2495))
+- [sankaku] extend URL patterns ([#2647](https://github.com/mikf/gallery-dl/issues/2647))
+- [subscribestar] fix `date` metadata ([#2642](https://github.com/mikf/gallery-dl/issues/2642))
+
 ## 1.22.0 - 2022-05-25
 ### Additions
 - [gelbooru_v01] add `favorite` extractor ([#2546](https://github.com/mikf/gallery-dl/issues/2546))
