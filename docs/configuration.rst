@@ -1761,6 +1761,18 @@ Description
     port than the default.
 
 
+extractor.paheal.metadata
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata (``source``, ``uploader``)
+
+    Note: This requires 1 additional HTTP request per post.
+
+
 extractor.patreon.files
 -----------------------
 Type

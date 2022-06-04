@@ -62,7 +62,7 @@ class PahealExtractor(Extractor):
         post["width"], _, post["height"] = dimensions.partition("x")
         post["size"] = text.parse_bytes(size[:-1])
 
-        return (post,)
+        return post
 
 
 class PahealTagExtractor(PahealExtractor):
@@ -80,6 +80,9 @@ class PahealTagExtractor(PahealExtractor):
     def __init__(self, match):
         PahealExtractor.__init__(self, match)
         self.tags = text.unquote(match.group(1))
+
+        if self.config("metadata"):
+            self._extract_data = self._extract_data_ex
 
     def get_metadata(self):
         return {"search_tags": self.tags}
@@ -114,7 +117,12 @@ class PahealTagExtractor(PahealExtractor):
             "width": width, "height": height,
             "tags": text.unescape(tags),
             "size": text.parse_bytes(size[:-1]),
+            "date": text.parse_datetime(date, "%B %d, %Y; %H:%M"),
         }
+
+    def _extract_data_ex(self, post):
+        pid = post[:post.index('"')]
+        return self._extract_post(pid)
 
 
 class PahealPostExtractor(PahealExtractor):
@@ -162,4 +170,4 @@ class PahealPostExtractor(PahealExtractor):
         self.post_id = match.group(1)
 
     def get_posts(self):
-        return self._extract_post(self.post_id)
+        return (self._extract_post(self.post_id),)
