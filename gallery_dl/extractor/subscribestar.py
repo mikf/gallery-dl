@@ -118,8 +118,8 @@ class SubscribestarExtractor(Extractor):
             "author_id"  : text.parse_int(extr('data-user-id="', '"')),
             "author_name": text.unescape(extr('href="/', '"')),
             "author_nick": text.unescape(extr('>', '<')),
-            "date"       : self._parse_datetime(text.remove_html(extr(
-                'class="post-date">', '</'))),
+            "date"       : self._parse_datetime(extr(
+                'class="post-date">', '</').rpartition(">")[2]),
             "content"    : (extr(
                 '<div class="post-content', '<div class="post-uploads')
                 .partition(">")[2]),
@@ -152,8 +152,6 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
                 "type"   : "re:image|video|attachment",
                 "url"    : str,
                 "?pinned": bool,
-                "?height": int,
-                "?width" : int,
             },
         }),
         ("https://www.subscribestar.com/subscribestar", {
@@ -162,8 +160,8 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
             "range": "1",
         }),
         ("https://subscribestar.adult/kanashiipanda", {
-            "range": "21-40",
-            "count": 20,
+            "range": "1-10",
+            "count": 10,
         }),
     )
 
