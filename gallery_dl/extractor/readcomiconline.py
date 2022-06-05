@@ -130,12 +130,13 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
 
 def beau(url):
     """https://readcomiconline.li/Scripts/rguard.min.js"""
-    if url.startswith("https"):
-        return url
-
     url = url.replace("_x236", "d")
     url = url.replace("_x945", "g")
 
+    if url.startswith("https"):
+        return url
+
+    url, sep, rest = url.partition("?")
     containsS0 = "=s0" in url
     url = url[:-3 if containsS0 else -6]
     url = url[4:22] + url[25:]
@@ -143,4 +144,4 @@ def beau(url):
     url = binascii.a2b_base64(url).decode()
     url = url[0:13] + url[17:]
     url = url[0:-2] + ("=s0" if containsS0 else "=s1600")
-    return "https://2.bp.blogspot.com/" + url
+    return "https://2.bp.blogspot.com/" + url + sep + rest
