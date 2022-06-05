@@ -200,7 +200,7 @@ class WeiboUserExtractor(WeiboExtractor):
     )
 
     def items(self):
-        base = " {}/u/{}?tabtype=".format(self.root, self._user_id())
+        base = "{}/u/{}?tabtype=".format(self.root, self._user_id())
         return self._dispatch_extractors((
             (WeiboHomeExtractor  , base + "home"),
             (WeiboFeedExtractor  , base + "feed"),
