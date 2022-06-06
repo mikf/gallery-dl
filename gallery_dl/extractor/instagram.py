@@ -385,31 +385,6 @@ class InstagramExtractor(Extractor):
                                          "username" : user["username"],
                                          "full_name": user["full_name"]})
 
-    def _extract_shared_data(self, page):
-        shared_data, pos = text.extract(
-            page, "window._sharedData =", ";</script>")
-        additional_data, pos = text.extract(
-            page, "window.__additionalDataLoaded(", ");</script>", pos)
-
-        data = json.loads(shared_data)
-        if additional_data:
-            next(iter(data["entry_data"].values()))[0] = \
-                json.loads(additional_data.partition(",")[2])
-        return data
-
-    def _get_edge_data(self, user, key):
-        cursor = self.config("cursor")
-        if cursor or not key:
-            return {
-                "edges"    : (),
-                "page_info": {
-                    "end_cursor"   : cursor,
-                    "has_next_page": True,
-                    "_virtual"     : True,
-                },
-            }
-        return user[key]
-
     def _pagination_graphql(self, query_hash, variables):
         cursor = self.config("cursor")
         if cursor:
@@ -567,21 +542,7 @@ class InstagramTagExtractor(InstagramExtractor):
         return {"tag": text.unquote(self.item)}
 
     def posts(self):
-        url = "{}/explore/tags/{}/".format(self.root, self.item)
-        page = self._extract_shared_data(
-            self.request(url).text)["entry_data"]["TagPage"][0]
-
-        if "data" in page:
-            return self._pagination_sections(page["data"]["recent"])
-
-        hashtag = page["graphql"]["hashtag"]
-        query_hash = "9b498c08113f1e09617a1703c22b2f32"
-        variables = {"tag_name": hashtag["name"], "first": 50}
-        edge = self._get_edge_data(hashtag, "edge_hashtag_to_media")
-        return self._pagination_graphql(query_hash, variables, edge)
-
-    def _pagination_sections(self, info):
-        endpoint = "/v1/tags/instagram/sections/"
+        endpoint = "/v1/tags/{}/sections/".format(self.item)
         data = {
             "include_persistent": "0",
             "max_id" : None,
@@ -591,6 +552,8 @@ class InstagramTagExtractor(InstagramExtractor):
         }
 
         while True:
+            info = self._request_api(endpoint, method="POST", data=data)
+
             for section in info["sections"]:
                 yield from section["layout_content"]["medias"]
 
@@ -599,21 +562,6 @@ class InstagramTagExtractor(InstagramExtractor):
 
             data["max_id"] = info["next_max_id"]
             data["page"] = info["next_page"]
-            info = self._request_api(endpoint, method="POST", data=data)
-
-    def _pagination_graphql(self, query_hash, variables, data):
-        while True:
-            for edge in data["edges"]:
-                yield edge["node"]
-
-            info = data["page_info"]
-            if not info["has_next_page"]:
-                return
-
-            variables["after"] = self._cursor = info["end_cursor"]
-            self.log.debug("Cursor: %s", self._cursor)
-            data = self._request_graphql(
-                query_hash, variables)["hashtag"]["edge_hashtag_to_media"]
 
 
 class InstagramPostExtractor(InstagramExtractor):
