@@ -288,35 +288,35 @@ class InstagramExtractor(Extractor):
     def _parse_post_api(self, post):
 
         if "media" in post:
-            media = post["media"]
-            owner = media["user"]
+            post = post["media"]
             data = {
-                "post_id" : media["pk"],
-                "post_shortcode": shortcode_from_id(media["pk"]),
+                "post_id" : post["pk"],
+                "post_shortcode": shortcode_from_id(post["pk"]),
             }
 
-            if "carousel_media" in media:
-                post["items"] = media["carousel_media"]
+            if "carousel_media" in post:
+                items = post["carousel_media"]
                 data["sidecar_media_id"] = data["post_id"]
                 data["sidecar_shortcode"] = data["post_shortcode"]
             else:
-                post["items"] = (media,)
+                items = (post,)
 
         else:
+            items = post["items"]
             reel_id = str(post["id"]).rpartition(":")[2]
-            owner = post["user"]
             data = {
                 "expires" : text.parse_timestamp(post.get("expiring_at")),
                 "post_id" : reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
             }
 
+        owner = post["user"]
         data["owner_id"] = owner["pk"]
         data["username"] = owner.get("username")
         data["fullname"] = owner.get("full_name")
         data["_files"] = files = []
 
-        for num, item in enumerate(post["items"], 1):
+        for num, item in enumerate(items, 1):
 
             image = item["image_versions2"]["candidates"][0]
 
@@ -333,7 +333,8 @@ class InstagramExtractor(Extractor):
             media = {
                 "num"        : num,
                 "date"       : text.parse_timestamp(item.get("taken_at") or
-                                                    media.get("taken_at")),
+                                                    media.get("taken_at") or
+                                                    post.get("taken_at")),
                 "media_id"   : item["pk"],
                 "shortcode"  : (item.get("code") or
                                 shortcode_from_id(item["pk"])),
