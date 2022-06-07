@@ -14,6 +14,7 @@ import string
 import _string
 import datetime
 import operator
+import functools
 from . import text, util
 
 _CACHE = {}
@@ -257,7 +258,7 @@ def parse_format_spec(format_spec, conversion):
             "u": str.upper,
             "c": str.capitalize,
             "C": string.capwords,
-            "j": json.dumps,
+            "j": functools.partial(json.dumps, default=str),
             "t": str.strip,
             "T": util.datetime_to_timestamp_string,
             "d": text.parse_timestamp,
