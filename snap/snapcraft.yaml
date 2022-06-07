@@ -104,6 +104,7 @@ parts:
     plugin: nil
     stage-packages:
     - ffmpeg
+    - libslang2
 
 apps:
   gallery-dl:
