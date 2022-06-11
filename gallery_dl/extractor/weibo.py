@@ -52,10 +52,6 @@ class WeiboExtractor(Extractor):
 
         for status in self.statuses():
 
-            status["date"] = text.parse_datetime(
-                status["created_at"], "%a %b %d %H:%M:%S %z %Y")
-            yield Message.Directory, status
-
             if self.retweets and "retweeted_status" in status:
                 if original_retweets:
                     status = status["retweeted_status"]
@@ -67,6 +63,10 @@ class WeiboExtractor(Extractor):
                     )
             else:
                 files = self._files_from_status(status)
+
+            status["date"] = text.parse_datetime(
+                status["created_at"], "%a %b %d %H:%M:%S %z %Y")
+            yield Message.Directory, status
 
             for num, file in enumerate(files, 1):
                 if file["url"].startswith("http:"):
