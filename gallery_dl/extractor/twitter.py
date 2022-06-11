@@ -418,12 +418,15 @@ class TwitterTimelineExtractor(TwitterExtractor):
             self.user = "id:" + user_id
 
     def tweets(self):
-        tweets = (self.api.user_tweets(self.user) if self.retweets else
-                  self.api.user_media(self.user))
+        if self.retweets or self.textonly:
+            tweets = (self.api.user_tweets_and_replies if self.replies else
+                      self.api.user_tweets)
+        else:
+            tweets = self.api.user_media
 
         # yield initial batch of (media) tweets
         tweet = None
-        for tweet in tweets:
+        for tweet in tweets(self.user):
             yield tweet
 
         if tweet is None:
@@ -442,12 +445,17 @@ class TwitterTimelineExtractor(TwitterExtractor):
         if "legacy" in tweet:
             tweet = tweet["legacy"]
 
+        # build search query
+        query = "from:{} max_id:{}".format(username, tweet["id_str"])
+        if self.retweets:
+            query += " include:retweets include:nativeretweets"
+        if not self.textonly:
+            query += (" (filter:images OR"
+                      " filter:native_video OR"
+                      " card_name:animated_gif)")
+
         # yield search results starting from last tweet id
-        yield from self.api.search_adaptive(
-            "from:{} include:retweets include:nativeretweets max_id:{} "
-            "filter:images OR card_name:animated_gif OR filter:native_video"
-            .format(username, tweet["id_str"])
-        )
+        yield from self.api.search_adaptive(query)
 
 
 class TwitterTweetsExtractor(TwitterExtractor):
