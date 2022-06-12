@@ -59,6 +59,10 @@ class TwitterExtractor(Extractor):
         self.api = TwitterAPI(self)
         metadata = self.metadata()
 
+        if self.config("expand"):
+            tweets = self._expand_tweets(self.tweets())
+            self.tweets = lambda : tweets
+
         for tweet in self.tweets():
 
             if "legacy" in tweet:
@@ -337,6 +341,22 @@ class TwitterExtractor(Extractor):
         for user in users:
             user["_extractor"] = cls
             yield Message.Queue, fmt(user), user
+
+    def _expand_tweets(self, tweets):
+        seen = set()
+        for tweet in tweets:
+
+            if "legacy" in tweet:
+                cid = tweet["legacy"]["conversation_id_str"]
+            else:
+                cid = tweet["conversation_id_str"]
+
+            if cid not in seen:
+                seen.add(cid)
+                try:
+                    yield from self.api.tweet_detail(cid)
+                except Exception:
+                    yield tweet
 
     def metadata(self):
         """Return general metadata"""
