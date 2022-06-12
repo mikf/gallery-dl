@@ -191,7 +191,9 @@ class WeiboUserExtractor(WeiboExtractor):
     subcategory = "user"
     pattern = USER_PATTERN + r"(?:$|#)"
     test = (
-        ("https://weibo.com/1758989602"),
+        ("https://weibo.com/1758989602", {
+            "pattern": r"^https://weibo\.com/u/1758989602\?tabtype=feed$",
+        }),
         ("https://weibo.com/u/1758989602"),
         ("https://weibo.com/p/1758989602"),
         ("https://m.weibo.cn/profile/2314621010"),
@@ -202,10 +204,11 @@ class WeiboUserExtractor(WeiboExtractor):
     def items(self):
         base = "{}/u/{}?tabtype=".format(self.root, self._user_id())
         return self._dispatch_extractors((
-            (WeiboHomeExtractor  , base + "home"),
-            (WeiboFeedExtractor  , base + "feed"),
-            (WeiboVideosExtractor, base + "newVideo"),
-            (WeiboAlbumExtractor , base + "album"),
+            (WeiboHomeExtractor    , base + "home"),
+            (WeiboFeedExtractor    , base + "feed"),
+            (WeiboVideosExtractor  , base + "video"),
+            (WeiboNewvideoExtractor, base + "newVideo"),
+            (WeiboAlbumExtractor   , base + "album"),
         ), ("feed",))
 
 
@@ -254,8 +257,27 @@ class WeiboFeedExtractor(WeiboExtractor):
 
 
 class WeiboVideosExtractor(WeiboExtractor):
-    """Extractor for weibo 'newVideo' listings"""
+    """Extractor for weibo 'video' listings"""
     subcategory = "videos"
+    pattern = USER_PATTERN + r"\?tabtype=video"
+    test = ("https://weibo.com/1758989602?tabtype=video", {
+        "pattern": r"https://f\.(video\.weibocdn\.com|us\.sinaimg\.cn)"
+                   r"/(../)?\w+\.mp4\?label=mp",
+        "range": "1-30",
+        "count": 30,
+    })
+
+    def statuses(self):
+        endpoint = "/profile/getprofilevideolist"
+        params = {"uid": self._user_id()}
+
+        for status in self._pagination(endpoint, params):
+            yield status["video_detail_vo"]
+
+
+class WeiboNewvideoExtractor(WeiboExtractor):
+    """Extractor for weibo 'newVideo' listings"""
+    subcategory = "newvideo"
     pattern = USER_PATTERN + r"\?tabtype=newVideo"
     test = ("https://weibo.com/1758989602?tabtype=newVideo", {
         "pattern": r"https://f\.video\.weibocdn\.com/(../)?\w+\.mp4\?label=mp",
@@ -336,8 +358,8 @@ class WeiboStatusExtractor(WeiboExtractor):
         }),
         # type == gif
         ("https://weibo.com/1758989602/LvBhm5DiP", {
-            "pattern": r"http://g\.us\.sinaimg.cn/o0/qNZcaAAglx07Wuf921CM01041"
-                       r"20005tc0E010\.mp4\?label=gif_mp4",
+            "pattern": r"https://g\.us\.sinaimg.cn/o0/qNZcaAAglx07Wuf921CM0104"
+                       r"120005tc0E010\.mp4\?label=gif_mp4",
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
