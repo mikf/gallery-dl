@@ -30,12 +30,16 @@ class UnsplashExtractor(Extractor):
 
     def items(self):
         fmt = self.config("format") or "raw"
+        metadata = self.metadata()
+
         for photo in self.photos():
             util.delete_items(
                 photo, ("current_user_collections", "related_collections"))
             url = photo["urls"][fmt]
             text.nameext_from_url(url, photo)
 
+            if metadata:
+                photo.update(metadata)
             photo["extension"] = "jpg"
             photo["date"] = text.parse_datetime(photo["created_at"])
             if "tags" in photo:
@@ -43,6 +47,10 @@ class UnsplashExtractor(Extractor):
 
             yield Message.Directory, photo
             yield Message.Url, url, photo
+
+    @staticmethod
+    def metadata():
+        return None
 
     def skip(self, num):
         pages = num // self.per_page
@@ -172,16 +180,26 @@ class UnsplashFavoriteExtractor(UnsplashExtractor):
 class UnsplashCollectionExtractor(UnsplashExtractor):
     """Extractor for an unsplash collection"""
     subcategory = "collection"
-    pattern = BASE_PATTERN + r"/collections/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/collections/([^/?#]+)(?:/([^/?#]+))?"
     test = (
         ("https://unsplash.com/collections/3178572/winter", {
             "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
                        r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
+            "keyword": {"collection_id": "3178572",
+                        "collection_title": "winter"},
             "range": "1-30",
             "count": 30,
         }),
+        ("https://unsplash.com/collections/3178572/"),
         ("https://unsplash.com/collections/_8qJQ2bCMWE/2021.05"),
     )
+
+    def __init__(self, match):
+        UnsplashExtractor.__init__(self, match)
+        self.title = match.group(2) or ""
+
+    def metadata(self):
+        return {"collection_id": self.item, "collection_title": self.title}
 
     def photos(self):
         url = "{}/napi/collections/{}/photos".format(self.root, self.item)
