@@ -2489,7 +2489,7 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"home"``, ``"feed"``, ``"videos"``, ``"article"``, ``"album"``.
+    ``"home"``, ``"feed"``, ``"videos"``, ``"newvideo"``, ``"article"``, ``"album"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
 

@@ -230,6 +230,7 @@ SUBCATEGORY_MAP = {
     },
     "weibo": {
         "home": "",
+        "newvideo": "",
     },
     "wikiart": {
         "artists": "Artist Listings",
