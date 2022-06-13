@@ -40,6 +40,7 @@ class TwitterExtractor(Extractor):
         self.quoted = self.config("quoted", False)
         self.videos = self.config("videos", True)
         self.cards = self.config("cards", False)
+        self._user_id = None
         self._user_cache = {}
         self._init_sizes()
 
@@ -79,7 +80,8 @@ class TwitterExtractor(Extractor):
             if "in_reply_to_user_id_str" in data and (
                 not self.replies or (
                     self.replies == "self" and
-                    data["in_reply_to_user_id_str"] != data["user_id_str"]
+                    (self._user_id or data["in_reply_to_user_id_str"]) !=
+                    data["user_id_str"]
                 )
             ):
                 self.log.debug("Skipping %s (reply)", data["id_str"])
@@ -1031,19 +1033,23 @@ class TwitterAPI():
     def _user_id_by_screen_name(self, screen_name):
         if screen_name.startswith("id:"):
             self._user = util.SENTINEL
-            return screen_name[3:]
+            user_id = screen_name[3:]
 
-        user = ()
-        try:
-            user = self._user = self.user_by_screen_name(screen_name)
-            return user["rest_id"]
-        except KeyError:
-            if "unavailable_message" in user:
-                raise exception.NotFoundError("{} ({})".format(
-                    user["unavailable_message"].get("text"),
-                    user.get("reason")), False)
-            else:
-                raise exception.NotFoundError("user")
+        else:
+            user = ()
+            try:
+                user = self._user = self.user_by_screen_name(screen_name)
+                user_id = user["rest_id"]
+            except KeyError:
+                if "unavailable_message" in user:
+                    raise exception.NotFoundError("{} ({})".format(
+                        user["unavailable_message"].get("text"),
+                        user.get("reason")), False)
+                else:
+                    raise exception.NotFoundError("user")
+
+        self.extractor._user_id = user_id
+        return user_id
 
     @cache(maxage=3600)
     def _guest_token(self):
