@@ -873,8 +873,11 @@ class TwitterAPI():
         cookies = extractor.session.cookies
         cookiedomain = extractor.cookiedomain
 
-        # CSRF
-        csrf_token = cookies.get("ct0", domain=cookiedomain)
+        csrf = extractor.config("csrf")
+        if csrf is None or csrf == "cookies":
+            csrf_token = cookies.get("ct0", domain=cookiedomain)
+        else:
+            csrf_token = None
         if not csrf_token:
             csrf_token = util.generate_token()
             cookies.set("ct0", csrf_token, domain=cookiedomain)

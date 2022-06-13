@@ -2271,6 +2271,19 @@ Description
     <https://help.twitter.com/en/using-twitter/twitter-conversations>`__.
 
 
+extractor.twitter.csrf
+----------------------
+Type
+    ``string``
+Default
+    ``"cookies"``
+Description
+    Controls how to handle Cross Site Request Forgery (CSRF) tokens.
+
+    * ``"auto"``: Always auto-generate a token.
+    * ``"cookies"``: Use token given by the ``ct0`` cookie if present.
+
+
 extractor.twitter.size
 ----------------------
 Type
