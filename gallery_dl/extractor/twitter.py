@@ -722,10 +722,10 @@ class TwitterTweetExtractor(TwitterExtractor):
                 "date"      : "dt:2020-08-20 04:00:28",
             },
         }),
-        # all Tweets from a conversation (#1319)
-        ("https://twitter.com/BlankArts_/status/1323314488611872769", {
+        # all Tweets from a 'conversation' (#1319)
+        ("https://twitter.com/supernaturepics/status/604341487988576256", {
             "options": (("conversations", True),),
-            "count": ">= 50",
+            "count": 5,
         }),
         # retweet with missing media entities (#1555)
         ("https://twitter.com/morino_ya/status/1392763691599237121", {
@@ -1256,6 +1256,8 @@ class TwitterAPI():
                     tweets.append(entry)
                 elif esw("cursor-bottom-"):
                     cursor = entry["content"]
+                    if "itemContent" in cursor:
+                        cursor = cursor["itemContent"]
                     if not cursor.get("stopOnEmptyResponse", True):
                         # keep going even if there are no tweets
                         tweet = True
