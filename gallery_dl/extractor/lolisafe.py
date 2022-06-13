@@ -85,6 +85,8 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
         yield Message.Directory, data
         for data["num"], file in enumerate(files, 1):
             url = file["file"]
+            if "_fallback" in file:
+                data["_fallback"] = file["_fallback"]
             text.nameext_from_url(url, data)
             data["name"], sep, data["id"] = data["filename"].rpartition("-")
 
