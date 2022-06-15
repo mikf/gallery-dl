@@ -64,6 +64,7 @@ modules = [
     "inkbunny",
     "instagram",
     "issuu",
+    "itaku",
     "kabeuchi",
     "keenspot",
     "kemonoparty",

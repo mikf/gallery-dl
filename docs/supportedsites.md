@@ -380,6 +380,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Itaku</td>
+    <td>https://itaku.ee/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
     <td>Comics</td>
