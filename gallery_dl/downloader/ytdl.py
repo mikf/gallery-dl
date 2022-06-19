@@ -138,9 +138,14 @@ class YoutubeDLDownloader(DownloaderBase):
     @staticmethod
     def _set_outtmpl(ytdl_instance, outtmpl):
         try:
-            ytdl_instance.outtmpl_dict["default"] = outtmpl
+            ytdl_instance._parse_outtmpl
         except AttributeError:
-            ytdl_instance.params["outtmpl"] = outtmpl
+            try:
+                ytdl_instance.outtmpl_dict["default"] = outtmpl
+            except AttributeError:
+                ytdl_instance.params["outtmpl"] = outtmpl
+        else:
+            ytdl_instance.params["outtmpl"] = {"default": outtmpl}
 
 
 def compatible_formats(formats):
