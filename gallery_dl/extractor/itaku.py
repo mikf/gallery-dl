@@ -20,7 +20,7 @@ class ItakuExtractor(Extractor):
     category = "itaku"
     root = "https://itaku.ee"
     directory_fmt = ("{category}", "{owner_username}")
-    filename_fmt = ("{id}.{extension}")
+    filename_fmt = ("{id}{title:? //}.{extension}")
     archive_fmt = "{id}"
     request_interval = (0.5, 1.5)
 
