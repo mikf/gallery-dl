@@ -1480,6 +1480,16 @@ Description
     Download video files.
 
 
+extractor.itaku.videos
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download video files.
+
+
 extractor.kemonoparty.comments
 ------------------------------
 Type
