@@ -107,6 +107,7 @@ modules = [
     "pixiv",
     "pixnet",
     "plurk",
+    "poipiku",
     "pornhub",
     "pururin",
     "reactor",
