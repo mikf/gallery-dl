@@ -28,6 +28,7 @@ class ItakuExtractor(Extractor):
         Extractor.__init__(self, match)
         self.api = ItakuAPI(self)
         self.item = match.group(1)
+        self.videos = self.config("videos", True)
 
     def items(self):
         for post in self.posts():
@@ -39,7 +40,11 @@ class ItakuExtractor(Extractor):
             post["tags"] = [t["name"] for t in post["tags"]]
             post["sections"] = [s["title"] for s in post["sections"]]
 
-            url = post["image"]
+            if post["video"] and self.videos:
+                url = post["video"]["video"]
+            else:
+                url = post["image"]
+
             yield Message.Directory, post
             yield Message.Url, url, text.nameext_from_url(url, post)
 
@@ -62,53 +67,60 @@ class ItakuGalleryExtractor(ItakuExtractor):
 class ItakuImageExtractor(ItakuExtractor):
     subcategory = "image"
     pattern = BASE_PATTERN + r"/images/(\d+)"
-    test = ("https://itaku.ee/images/100471", {
-        "pattern": r"https://d1wmr8tlk3viaj\.cloudfront\.net/gallery_imgs"
-                   r"/220504_oUNIAFT\.png",
-        "count": 1,
-        "keyword": {
-            "already_pinned": None,
-            "blacklisted": {
-                "blacklisted_tags": [],
-                "is_blacklisted": False
+    test = (
+        ("https://itaku.ee/images/100471", {
+            "pattern": r"https://d1wmr8tlk3viaj\.cloudfront\.net/gallery_imgs"
+                       r"/220504_oUNIAFT\.png",
+            "count": 1,
+            "keyword": {
+                "already_pinned": None,
+                "blacklisted": {
+                    "blacklisted_tags": [],
+                    "is_blacklisted": False
+                },
+                "can_reshare": True,
+                "date_added": "2022-05-05T19:21:17.674148Z",
+                "date_edited": "2022-05-25T14:37:46.220612Z",
+                "description": "sketch from drawpile",
+                "extension": "png",
+                "filename": "220504_oUNIAFT",
+                "hotness_score": 11507.4691939,
+                "id": 100471,
+                "image": "https://d1wmr8tlk3viaj.cloudfront.net/gallery_imgs"
+                         "/220504_oUNIAFT.png",
+                "image_xl": "https://d1wmr8tlk3viaj.cloudfront.net"
+                            "/gallery_imgs/220504_oUNIAFT/xl.jpg",
+                "liked_by_you": False,
+                "maturity_rating": "SFW",
+                "num_comments": 2,
+                "num_likes": 80,
+                "num_reshares": 2,
+                "obj_tags": 136446,
+                "owner": 16775,
+                "owner_avatar": "https://d1wmr8tlk3viaj.cloudfront.net"
+                                "/profile_pics/av2022r_vKYVywc/sm.jpg",
+                "owner_displayname": "Piku",
+                "owner_username": "piku",
+                "reshared_by_you": False,
+                "sections": ["Miku"],
+                "tags": list,
+                "tags_character": ["hatsune_miku"],
+                "tags_copyright": ["vocaloid"],
+                "tags_general"  : ["twintails", "green_hair", "flag", "gloves",
+                                   "green_eyes", "female", "racing_miku"],
+                "title": "Racing Miku 2022 Ver.",
+                "too_mature": False,
+                "uncompressed_filesize": "0.62",
+                "video": None,
+                "visibility": "PUBLIC",
             },
-            "can_reshare": True,
-            "date_added": "2022-05-05T19:21:17.674148Z",
-            "date_edited": "2022-05-25T14:37:46.220612Z",
-            "description": "sketch from drawpile",
-            "extension": "png",
-            "filename": "220504_oUNIAFT",
-            "hotness_score": 11507.4691939,
-            "id": 100471,
-            "image": "https://d1wmr8tlk3viaj.cloudfront.net/gallery_imgs"
-                     "/220504_oUNIAFT.png",
-            "image_xl": "https://d1wmr8tlk3viaj.cloudfront.net/gallery_imgs"
-                        "/220504_oUNIAFT/xl.jpg",
-            "liked_by_you": False,
-            "maturity_rating": "SFW",
-            "num_comments": 2,
-            "num_likes": 80,
-            "num_reshares": 2,
-            "obj_tags": 136446,
-            "owner": 16775,
-            "owner_avatar": "https://d1wmr8tlk3viaj.cloudfront.net"
-                            "/profile_pics/av2022r_vKYVywc/sm.jpg",
-            "owner_displayname": "Piku",
-            "owner_username": "piku",
-            "reshared_by_you": False,
-            "sections": ["Miku"],
-            "tags": list,
-            "tags_character": ["hatsune_miku"],
-            "tags_copyright": ["vocaloid"],
-            "tags_general"  : ["twintails", "green_hair", "flag", "gloves",
-                               "green_eyes", "female", "racing_miku"],
-            "title": "Racing Miku 2022 Ver.",
-            "too_mature": False,
-            "uncompressed_filesize": "0.62",
-            "video": None,
-            "visibility": "PUBLIC",
-        },
-    })
+        }),
+        # video
+        ("https://itaku.ee/images/19465", {
+            "pattern": r"https://d1wmr8tlk3viaj\.cloudfront\.net/gallery_vids"
+                       r"/sleepy_af_OY5GHWw\.mp4",
+        }),
+    )
 
     def posts(self):
         return (self.api.image(self.item),)
