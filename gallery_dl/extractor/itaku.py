@@ -31,6 +31,14 @@ class ItakuExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
+
+            post["date"] = text.parse_datetime(
+                post["date_added"], "%Y-%m-%dT%H:%M:%S.%f")
+            for category, tags in post.pop("categorized_tags").items():
+                post["tags_" + category.lower()] = [t["name"] for t in tags]
+            post["tags"] = [t["name"] for t in post["tags"]]
+            post["sections"] = [s["title"] for s in post["sections"]]
+
             url = post["image"]
             yield Message.Directory, post
             yield Message.Url, url, text.nameext_from_url(url, post)
@@ -65,7 +73,6 @@ class ItakuImageExtractor(ItakuExtractor):
                 "is_blacklisted": False
             },
             "can_reshare": True,
-            "categorized_tags": dict,
             "date_added": "2022-05-05T19:21:17.674148Z",
             "date_edited": "2022-05-25T14:37:46.220612Z",
             "description": "sketch from drawpile",
@@ -89,8 +96,12 @@ class ItakuImageExtractor(ItakuExtractor):
             "owner_displayname": "Piku",
             "owner_username": "piku",
             "reshared_by_you": False,
-            "sections": list,
+            "sections": ["Miku"],
             "tags": list,
+            "tags_character": ["hatsune_miku"],
+            "tags_copyright": ["vocaloid"],
+            "tags_general"  : ["twintails", "green_hair", "flag", "gloves",
+                               "green_eyes", "female", "racing_miku"],
             "title": "Racing Miku 2022 Ver.",
             "too_mature": False,
             "uncompressed_filesize": "0.62",
