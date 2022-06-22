@@ -24,6 +24,8 @@ class PoipikuExtractor(Extractor):
     request_interval = (0.5, 1.5)
 
     def items(self):
+        password = self.config("password", "")
+
         for post_url in self.posts():
             parts = post_url.split("/")
             if post_url[0] == "/":
@@ -68,7 +70,7 @@ class PoipikuExtractor(Extractor):
             data = {
                 "UID": post["user_id"],
                 "IID": post["post_id"],
-                "PAS": "",
+                "PAS": password,
                 "MD" : "0",
                 "TWF": "-1",
             }
