@@ -250,13 +250,35 @@ class InstagramExtractor(Extractor):
         return data
 
     def _parse_post_api(self, post):
-
-        if "media" in post:
-            post = post["media"]
+        if "items" in post:
+            items = post["items"]
+            reel_id = str(post["id"]).rpartition(":")[2]
+            data = {
+                "expires": text.parse_timestamp(post.get("expiring_at")),
+                "post_id": reel_id,
+                "post_shortcode": shortcode_from_id(reel_id),
+            }
+        else:
             data = {
                 "post_id" : post["pk"],
-                "post_shortcode": shortcode_from_id(post["pk"]),
+                "post_shortcode": post["code"],
+                "likes": post["like_count"],
             }
+
+            caption = post["caption"]
+            data["description"] = caption["text"] if caption else ""
+
+            tags = self._find_tags(data["description"])
+            if tags:
+                data["tags"] = sorted(set(tags))
+
+            location = post.get("location")
+            if location:
+                slug = location["short_name"].replace(" ", "-").lower()
+                data["location_id"] = location["pk"]
+                data["location_slug"] = slug
+                data["location_url"] = "{}/explore/locations/{}/{}/".format(
+                    self.root, location["pk"], slug)
 
             if "carousel_media" in post:
                 items = post["carousel_media"]
@@ -265,21 +287,13 @@ class InstagramExtractor(Extractor):
             else:
                 items = (post,)
 
-        else:
-            items = post["items"]
-            reel_id = str(post["id"]).rpartition(":")[2]
-            data = {
-                "expires" : text.parse_timestamp(post.get("expiring_at")),
-                "post_id" : reel_id,
-                "post_shortcode": shortcode_from_id(reel_id),
-            }
-
         owner = post["user"]
         data["owner_id"] = owner["pk"]
         data["username"] = owner.get("username")
         data["fullname"] = owner.get("full_name")
-        data["_files"] = files = []
+        data["post_url"] = "{}/p/{}/".format(self.root, data["post_shortcode"])
 
+        data["_files"] = files = []
         for num, item in enumerate(items, 1):
 
             image = item["image_versions2"]["candidates"][0]
@@ -307,6 +321,10 @@ class InstagramExtractor(Extractor):
                 "width"      : media["width"],
                 "height"     : media["height"],
             }
+
+            if "expiring_at" in item:
+                media["expires"] = text.parse_timestamp(post["expiring_at"])
+
             self._extract_tagged_users(item, media)
             files.append(media)
 
@@ -376,8 +394,7 @@ class InstagramExtractor(Extractor):
     def _pagination_api(self, endpoint, params=None):
         while True:
             data = self._request_api(endpoint, params=params)
-            for item in data["items"]:
-                yield {"media": item}
+            yield from data["items"]
 
             if not data["more_available"]:
                 return
@@ -386,7 +403,8 @@ class InstagramExtractor(Extractor):
     def _pagination_api_post(self, endpoint, params, post=False):
         while True:
             data = self._request_api(endpoint, method="POST", data=params)
-            yield from data["items"]
+            for item in data["items"]:
+                yield item["media"]
 
             info = data["paging_info"]
             if not info["more_available"]:
@@ -520,7 +538,8 @@ class InstagramTagExtractor(InstagramExtractor):
             info = self._request_api(endpoint, method="POST", data=data)
 
             for section in info["sections"]:
-                yield from section["layout_content"]["medias"]
+                for media in section["layout_content"]["medias"]:
+                    yield media["media"]
 
             if not info.get("more_available"):
                 return
