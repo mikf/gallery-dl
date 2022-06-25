@@ -89,7 +89,7 @@ class TestCookiedict(unittest.TestCase):
         self.assertEqual(sorted(cookies.values()), sorted(self.cdict.values()))
 
     def test_domain(self):
-        for category in ["exhentai", "idolcomplex", "nijie"]:
+        for category in ["exhentai", "idolcomplex", "nijie", "horne"]:
             extr = _get_extractor(category)
             cookies = extr.session.cookies
             for key in self.cdict:
@@ -107,7 +107,8 @@ class TestCookieLogin(unittest.TestCase):
         extr_cookies = {
             "exhentai"   : ("ipb_member_id", "ipb_pass_hash"),
             "idolcomplex": ("login", "pass_hash"),
-            "nijie"      : ("nemail", "nlogin"),
+            "nijie"      : ("nijie_tok",),
+            "horne"      : ("horne_tok",),
         }
         for category, cookienames in extr_cookies.items():
             cookies = {name: "value" for name in cookienames}
@@ -199,10 +200,13 @@ class TestCookieUtils(unittest.TestCase):
 
 
 def _get_extractor(category):
-    for extr in extractor.extractors():
-        if extr.category == category and hasattr(extr, "_login_impl"):
-            url = next(extr._get_tests())[0]
-            return extr.from_url(url)
+    URLS = {
+        "exhentai"   : "https://exhentai.org/g/1200119/d55c44d3d0/",
+        "idolcomplex": "https://idol.sankakucomplex.com/post/show/1",
+        "nijie"      : "https://nijie.info/view.php?id=1",
+        "horne"      : "https://horne.red/view.php?id=1",
+    }
+    return extractor.find(URLS[category])
 
 
 if __name__ == "__main__":
