@@ -312,6 +312,7 @@ def setup_test_config():
 
     config.set(("extractor", "nijie")     , "username", email)
     config.set(("extractor", "seiga")     , "username", email)
+    config.set(("extractor", "horne")     , "username", email2)
     config.set(("extractor", "pinterest") , "username", email2)
     config.set(("extractor", "pinterest") , "username", None)  # login broken
 

@@ -542,12 +542,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
-    <td>nijie</td>
-    <td>https://nijie.info/</td>
-    <td>Doujin, Favorites, Illustrations, individual Images, Nuita History, User Profiles</td>
-    <td>Required</td>
-</tr>
-<tr>
     <td>Nozomi.la</td>
     <td>https://nozomi.la/</td>
     <td>Site Index, Posts, Search Results, Tag Searches</td>
@@ -1002,6 +996,22 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://hypnohub.net/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Nijie Instances</strong></td>
+</tr>
+<tr>
+    <td>nijie</td>
+    <td>https://nijie.info/</td>
+    <td>Doujin, Favorites, Illustrations, individual Images, Nuita History, User Profiles</td>
+    <td>Required</td>
+</tr>
+<tr>
+    <td>horne</td>
+    <td>https://horne.red/</td>
+    <td>Doujin, Favorites, Illustrations, individual Images, Nuitas, User Profiles</td>
+    <td>Required</td>
 </tr>
 
 <tr>
