@@ -140,6 +140,12 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code></code></td>
 </tr>
 <tr>
+    <td><code>[&lt;start&gt;:&lt;stop&gt;]</code></td>
+    <td>Applies a <a href="https://python-reference.readthedocs.io/en/latest/docs/brackets/slicing.html">Slicing</a> operation to the current value, similar to <a href="#field-names">Field Names</a></td>
+    <td><code>{foo:[1:-1]}</code></td>
+    <td><code>oo&nbsp;Ba</code></td>
+</tr>
+<tr>
     <td rowspan="2"><code>L&lt;maxlen&gt;/&lt;repl&gt;/</code></td>
     <td rowspan="2">Replaces the entire output with <code>&lt;repl&gt;</code> if its length exceeds <code>&lt;maxlen&gt;</code></td>
     <td><code>{foo:L15/long/}</code></td>
