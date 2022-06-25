@@ -232,18 +232,23 @@ def parse_field_name(field_name):
             func = operator.itemgetter
             try:
                 if ":" in key:
-                    start, _, stop = key.partition(":")
-                    stop, _, step = stop.partition(":")
-                    start = int(start) if start else None
-                    stop = int(stop) if stop else None
-                    step = int(step) if step else None
-                    key = slice(start, stop, step)
+                    key = _slice(key)
             except TypeError:
                 pass  # key is an integer
 
         funcs.append(func(key))
 
     return first, funcs
+
+
+def _slice(indices):
+    start, _, stop = indices.partition(":")
+    stop, _, step = stop.partition(":")
+    return slice(
+        int(start) if start else None,
+        int(stop) if stop else None,
+        int(step) if step else None,
+    )
 
 
 def parse_format_spec(format_spec, conversion):
@@ -283,6 +288,8 @@ def build_format_func(format_spec):
         fmt = format_spec[0]
         if fmt == "?":
             return _parse_optional(format_spec)
+        if fmt == "[":
+            return _parse_slice(format_spec)
         if fmt == "L":
             return _parse_maxlen(format_spec)
         if fmt == "J":
@@ -303,6 +310,16 @@ def _parse_optional(format_spec):
     def optional(obj):
         return before + fmt(obj) + after if obj else ""
     return optional
+
+
+def _parse_slice(format_spec):
+    indices, _, format_spec = format_spec.partition("]")
+    slice = _slice(indices[1:])
+    fmt = build_format_func(format_spec)
+
+    def apply_slice(obj):
+        return fmt(obj[slice])
+    return apply_slice
 
 
 def _parse_maxlen(format_spec):

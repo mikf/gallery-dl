@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -135,6 +135,21 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a[:50:2]}", v[:50:2])
         self._run_test("{a[::]}"   , v)
 
+        self._run_test("{a:[1:10]}"  , v[1:10])
+        self._run_test("{a:[-10:-1]}", v[-10:-1])
+        self._run_test("{a:[5:]}" , v[5:])
+        self._run_test("{a:[50:]}", v[50:])
+        self._run_test("{a:[:5]}" , v[:5])
+        self._run_test("{a:[:50]}", v[:50])
+        self._run_test("{a:[:]}"  , v)
+        self._run_test("{a:[1:10:2]}"  , v[1:10:2])
+        self._run_test("{a:[-10:-1:2]}", v[-10:-1:2])
+        self._run_test("{a:[5::2]}" , v[5::2])
+        self._run_test("{a:[50::2]}", v[50::2])
+        self._run_test("{a:[:5:2]}" , v[:5:2])
+        self._run_test("{a:[:50:2]}", v[:50:2])
+        self._run_test("{a:[::]}"   , v)
+
     def test_maxlen(self):
         v = self.kwdict["a"]
         self._run_test("{a:L5/foo/}" , "foo")
@@ -176,6 +191,9 @@ class TestFormatter(unittest.TestCase):
 
         # join-and-replace
         self._run_test("{l:J-/Rb/E/}", "a-E-c")
+
+        # join and slice
+        self._run_test("{l:J-/[1:-1]}", "-b-")
 
         # optional-and-maxlen
         self._run_test("{d[a]:?</>/L1/too long/}", "<too long>")
