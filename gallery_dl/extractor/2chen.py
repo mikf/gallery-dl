@@ -30,7 +30,7 @@ class _2chenThreadExtractor(Extractor):
         data = self.metadata(page)
         yield Message.Directory, data
         for post in self.posts(page):
-            if post["url"] == None or post["filename"] == None:
+            if post["url"] is None or post["filename"] is None:
                 continue
             url = "https://2chen.moe{}".format(post["url"])
             yield Message.Url, url, post
