@@ -256,7 +256,7 @@ class Extractor():
         else:
             headers["User-Agent"] = self.config("user-agent", (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                "rv:91.0) Gecko/20100101 Firefox/91.0"))
+                "rv:102.0) Gecko/20100101 Firefox/102.0"))
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
             headers["Accept-Encoding"] = "gzip, deflate"
@@ -713,16 +713,21 @@ _browser_cookies = {}
 
 HTTP_HEADERS = {
     "firefox": (
-        ("User-Agent", "Mozilla/5.0 ({}; rv:91.0) "
-                       "Gecko/20100101 Firefox/91.0"),
+        ("User-Agent", "Mozilla/5.0 ({}; rv:102.0) "
+                       "Gecko/20100101 Firefox/102.0"),
         ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
-                   "image/avif,*/*;q=0.8"),
+                   "image/avif,image/webp,*/*;q=0.8"),
         ("Accept-Language", "en-US,en;q=0.5"),
-        ("Accept-Encoding", "gzip, deflate"),
+        ("Accept-Encoding", "gzip, deflate, br"),
         ("Referer", None),
+        ("DNT", "1"),
         ("Connection", "keep-alive"),
         ("Upgrade-Insecure-Requests", "1"),
         ("Cookie", None),
+        ("Sec-Fetch-Dest", "empty"),
+        ("Sec-Fetch-Mode", "no-cors"),
+        ("Sec-Fetch-Site", "same-origin"),
+        ("TE", "trailers"),
     ),
     "chrome": (
         ("Upgrade-Insecure-Requests", "1"),
@@ -755,8 +760,7 @@ SSL_CIPHERS = {
         "AES128-GCM-SHA256:"
         "AES256-GCM-SHA384:"
         "AES128-SHA:"
-        "AES256-SHA:"
-        "DES-CBC3-SHA"
+        "AES256-SHA"
     ),
     "chrome": (
         "TLS_AES_128_GCM_SHA256:"
