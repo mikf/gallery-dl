@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.22.3 - 2022-06-28
+### Changes
+- [twitter] revert strategy changes for user URLs ([#2712](https://github.com/mikf/gallery-dl/issues/2712), [#2710](https://github.com/mikf/gallery-dl/issues/2710))
+- update default User-Agent headers
+
 ## 1.22.2 - 2022-06-27
 ### Additions
 - [cyberdrop] add fallback URLs ([#2668](https://github.com/mikf/gallery-dl/issues/2668))
