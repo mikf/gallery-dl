@@ -440,11 +440,8 @@ class TwitterTimelineExtractor(TwitterExtractor):
             self.user = "id:" + user_id
 
     def tweets(self):
-        if self.retweets or self.textonly:
-            tweets = (self.api.user_tweets_and_replies if self.replies else
-                      self.api.user_tweets)
-        else:
-            tweets = self.api.user_media
+        tweets = (self.api.user_tweets if self.retweets else
+                  self.api.user_media)
 
         # yield initial batch of (media) tweets
         tweet = None
