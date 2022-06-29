@@ -65,7 +65,7 @@ class _2chenBoardExtractor(Extractor):
     """Extractor for 2chen boards"""
     category = "2chen"
     subcategory = "board"
-    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/?(?:catalog/?)?"
+    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/?(?:catalog/?)?$"
     test = (
         ("https://2chen.moe/co/", {
             "pattern": _2chenThreadExtractor.pattern
