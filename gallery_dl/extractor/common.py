@@ -259,6 +259,10 @@ class Extractor():
                 "rv:102.0) Gecko/20100101 Firefox/102.0"))
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
+
+        if BROTLI:
+            headers["Accept-Encoding"] = "gzip, deflate, br"
+        else:
             headers["Accept-Encoding"] = "gzip, deflate"
 
         custom_headers = self.config("headers")
@@ -718,7 +722,7 @@ HTTP_HEADERS = {
         ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
                    "image/avif,image/webp,*/*;q=0.8"),
         ("Accept-Language", "en-US,en;q=0.5"),
-        ("Accept-Encoding", "gzip, deflate, br"),
+        ("Accept-Encoding", None),
         ("Referer", None),
         ("DNT", "1"),
         ("Connection", "keep-alive"),
@@ -736,7 +740,7 @@ HTTP_HEADERS = {
         ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
                    "image/webp,image/apng,*/*;q=0.8"),
         ("Referer", None),
-        ("Accept-Encoding", "gzip, deflate"),
+        ("Accept-Encoding", None),
         ("Accept-Language", "en-US,en;q=0.9"),
         ("Cookie", None),
     ),
@@ -781,6 +785,13 @@ SSL_CIPHERS = {
         "DES-CBC3-SHA"
     ),
 }
+
+
+# detect brotli support
+try:
+    BROTLI = requests.packages.urllib3.response.brotli is not None
+except AttributeError:
+    BROTLI = False
 
 
 # Undo automatic pyOpenSSL injection by requests
