@@ -72,6 +72,8 @@ class NewgroundsExtractor(Extractor):
         """Return general metadata"""
 
     def login(self):
+        if self._check_cookies(self.cookienames):
+            return
         username, password = self._get_auth_info()
         if username:
             self._update_cookies(self._login_impl(username, password))
@@ -81,10 +83,13 @@ class NewgroundsExtractor(Extractor):
         self.log.info("Logging in as %s", username)
 
         url = self.root + "/passport/"
-        page = self.request(url).text
-        headers = {"Origin": self.root, "Referer": url}
+        response = self.request(url)
+        if response.history and response.url.endswith("/social"):
+            return self.session.cookies
 
-        url = text.urljoin(self.root, text.extract(page, 'action="', '"')[0])
+        headers = {"Origin": self.root, "Referer": url}
+        url = text.urljoin(self.root, text.extract(
+            response.text, 'action="', '"')[0])
         data = {
             "username": username,
             "password": password,
