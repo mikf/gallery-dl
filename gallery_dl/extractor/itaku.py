@@ -38,7 +38,15 @@ class ItakuExtractor(Extractor):
             for category, tags in post.pop("categorized_tags").items():
                 post["tags_" + category.lower()] = [t["name"] for t in tags]
             post["tags"] = [t["name"] for t in post["tags"]]
-            post["sections"] = [s["title"] for s in post["sections"]]
+
+            sections = []
+            for s in post["sections"]:
+                group = s["group"]
+                if group:
+                    sections.append(group["title"] + "/" + s["title"])
+                else:
+                    sections.append(s["title"])
+            post["sections"] = sections
 
             if post["video"] and self.videos:
                 url = post["video"]["video"]
@@ -84,7 +92,7 @@ class ItakuImageExtractor(ItakuExtractor):
                 "description": "sketch from drawpile",
                 "extension": "png",
                 "filename": "220504_oUNIAFT",
-                "hotness_score": 11507.4691939,
+                "hotness_score": float,
                 "id": 100471,
                 "image": "https://d1wmr8tlk3viaj.cloudfront.net/gallery_imgs"
                          "/220504_oUNIAFT.png",
@@ -102,7 +110,7 @@ class ItakuImageExtractor(ItakuExtractor):
                 "owner_displayname": "Piku",
                 "owner_username": "piku",
                 "reshared_by_you": False,
-                "sections": ["Miku"],
+                "sections": ["Fanart/Miku"],
                 "tags": list,
                 "tags_character": ["hatsune_miku"],
                 "tags_copyright": ["vocaloid"],
@@ -152,7 +160,7 @@ class ItakuAPI():
         return self._pagination(endpoint, params, self.image)
 
     def image(self, image_id):
-        endpoint = "/galleries/images/" + str(image_id)
+        endpoint = "/galleries/images/{}/".format(image_id)
         return self._call(endpoint)
 
     @memcache()
