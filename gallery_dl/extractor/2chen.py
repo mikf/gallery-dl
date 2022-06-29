@@ -65,7 +65,7 @@ class _2chenBoardExtractor(Extractor):
     """Extractor for 2chen boards"""
     category = "2chen"
     subcategory = "board"
-    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/?(?:catalog)?$"
+    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/?(?:catalog/?)?"
     test = (
         ("https://2chen.moe/co/", {
             "pattern": _2chenThreadExtractor.pattern
@@ -79,7 +79,7 @@ class _2chenBoardExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.board = match.group()
+        self.board = match.group(1)
 
     def items(self):
         url = "https://2chen.moe/{}/catalog".format(self.board)
