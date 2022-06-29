@@ -25,6 +25,7 @@ Optional
 - FFmpeg_: Pixiv Ugoira to WebM conversion
 - yt-dlp_ or youtube-dl_: Video downloads
 - PySocks_: SOCKS proxy support
+- brotli_ or brotlicffi_: Brotli compression support
 
 
 Installation
@@ -332,6 +333,8 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _yt-dlp:     https://github.com/yt-dlp/yt-dlp
 .. _youtube-dl: https://ytdl-org.github.io/youtube-dl/
 .. _PySocks:    https://pypi.org/project/PySocks/
+.. _brotli:     https://github.com/google/brotli
+.. _brotlicffi: https://github.com/python-hyper/brotlicffi
 .. _pyOpenSSL:  https://pyopenssl.org/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
