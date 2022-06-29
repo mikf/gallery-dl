@@ -3567,7 +3567,7 @@ ugoira.mtime
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Set modification times of generated ugoira aniomations.
 
