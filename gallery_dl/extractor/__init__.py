@@ -66,6 +66,7 @@ modules = [
     "instagram",
     "issuu",
     "itaku",
+    "jpgchurch",
     "kabeuchi",
     "keenspot",
     "kemonoparty",
