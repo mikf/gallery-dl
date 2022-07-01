@@ -163,7 +163,7 @@ class ItakuAPI():
         endpoint = "/galleries/images/{}/".format(image_id)
         return self._call(endpoint)
 
-    @memcache()
+    @memcache(keyarg=1)
     def user(self, username):
         return self._call("/user_profiles/{}/".format(username))
 
