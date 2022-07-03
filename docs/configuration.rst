@@ -2415,6 +2415,16 @@ Description
     Extract `TwitPic <https://twitpic.com/>`__ embeds.
 
 
+extractor.twitter.unique
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Ignore previously seen Tweets.
+
+
 extractor.twitter.users
 -----------------------
 Type
