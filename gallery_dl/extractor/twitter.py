@@ -440,12 +440,9 @@ class TwitterTimelineExtractor(TwitterExtractor):
             self.user = "id:" + user_id
 
     def tweets(self):
-        tweets = (self.api.user_tweets if self.retweets else
-                  self.api.user_media)
-
         # yield initial batch of (media) tweets
         tweet = None
-        for tweet in tweets(self.user):
+        for tweet in self._select_tweet_source()(self.user):
             yield tweet
 
         if tweet is None:
@@ -475,6 +472,19 @@ class TwitterTimelineExtractor(TwitterExtractor):
 
         # yield search results starting from last tweet id
         yield from self.api.search_adaptive(query)
+
+    def _select_tweet_source(self):
+        strategy = self.config("strategy")
+        if strategy is None or strategy == "auto":
+            if self.retweets or self.textonly:
+                return self.api.user_tweets
+            else:
+                return self.api.user_media
+        if strategy == "tweets":
+            return self.api.user_tweets
+        if strategy == "with_replies":
+            return self.api.user_tweets_and_replies
+        return self.api.user_media
 
 
 class TwitterTweetsExtractor(TwitterExtractor):
