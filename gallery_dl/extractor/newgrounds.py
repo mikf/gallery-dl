@@ -265,7 +265,11 @@ class NewgroundsExtractor(Extractor):
                     msg = ", ".join(text.unescape(e) for e in data["errors"])
                     raise exception.StopExtraction(msg)
 
-            for year, items in data["items"].items():
+            items = data.get("items")
+            if not items:
+                return
+
+            for year, items in items.items():
                 for item in items:
                     page_url = text.extract(item, 'href="', '"')[0]
                     if page_url[0] == "/":
