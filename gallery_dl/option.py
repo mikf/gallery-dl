@@ -284,6 +284,11 @@ def build_parser():
         help=("Do not download any files")
     )
     downloader.add_argument(
+        "--no-postprocessors",
+        dest="postprocess", nargs=0, action=ConfigConstAction, const=False,
+        help=("Do not run any post processors")
+    )
+    downloader.add_argument(
         "--no-check-certificate",
         dest="verify", nargs=0, action=ConfigConstAction, const=False,
         help="Disable HTTPS certificate validation",

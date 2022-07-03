@@ -439,6 +439,9 @@ class DownloadJob(Job):
             if self.archive:
                 self.archive.check = pathfmt.exists
 
+        if not cfg("postprocess", True):
+            return
+
         postprocessors = extr.config_accumulate("postprocessors")
         if postprocessors:
             self.hooks = collections.defaultdict(list)
