@@ -14,7 +14,7 @@ import datetime
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import formatter  # noqa E402
+from gallery_dl import formatter, text, util  # noqa E402
 
 
 class TestFormatter(unittest.TestCase):
@@ -97,6 +97,14 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{missing.attr}", replacement, default)
         self._run_test("{missing[key]}", replacement, default)
         self._run_test("{missing:?a//}", "a" + default, default)
+
+    def test_fmt_func(self):
+        self._run_test("{t}" , self.kwdict["t"] , None, int)
+        self._run_test("{t}" , self.kwdict["t"] , None, util.identity)
+        self._run_test("{dt}", self.kwdict["dt"], None, util.identity)
+        self._run_test("{ds}", self.kwdict["dt"], None, text.parse_datetime)
+        self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", self.kwdict["dt"],
+                       None, util.identity)
 
     def test_alternative(self):
         self._run_test("{a|z}"    , "hElLo wOrLd")
@@ -316,8 +324,8 @@ def noarg():
         with self.assertRaises(TypeError):
             self.assertEqual(fmt3.format_map(self.kwdict), "")
 
-    def _run_test(self, format_string, result, default=None):
-        fmt = formatter.parse(format_string, default)
+    def _run_test(self, format_string, result, default=None, fmt=format):
+        fmt = formatter.parse(format_string, default, fmt)
         output = fmt.format_map(self.kwdict)
         self.assertEqual(output, result, format_string)
 
