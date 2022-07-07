@@ -225,7 +225,9 @@ class Extractor():
         headers.clear()
         ssl_options = ssl_ciphers = 0
 
-        browser = self.config("browser") or self.browser
+        browser = self.config("browser")
+        if browser is None:
+            browser = self.browser
         if browser and isinstance(browser, str):
             browser, _, platform = browser.lower().partition(":")
 
