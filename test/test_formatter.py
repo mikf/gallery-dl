@@ -9,6 +9,7 @@
 
 import os
 import sys
+import time
 import unittest
 import datetime
 import tempfile
@@ -191,6 +192,31 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", "2010-01-01 00:00:00")
         self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+0100")
         self._run_test("{l:D%Y}", "None")
+
+    def test_offset(self):
+        self._run_test("{dt:O 01:00}", "2010-01-01 01:00:00")
+        self._run_test("{dt:O+02:00}", "2010-01-01 02:00:00")
+        self._run_test("{dt:O-03:45}", "2009-12-31 20:15:00")
+
+        self._run_test("{dt:O12}", "2010-01-01 12:00:00")
+        self._run_test("{dt:O-24}", "2009-12-31 00:00:00")
+
+        self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/O1}", "2010-01-01 01:00:00")
+        self._run_test("{t!d:O2}", "2010-01-01 02:00:00")
+
+        orig_daylight = time.daylight
+        orig_timezone = time.timezone
+        orig_altzone = time.altzone
+        try:
+            time.daylight = False
+            time.timezone = -3600
+            self._run_test("{dt:O}", "2010-01-01 01:00:00")
+            time.timezone = 7200
+            self._run_test("{dt:Olocal}", "2009-12-31 22:00:00")
+        finally:
+            time.daylight = orig_daylight
+            time.timezone = orig_timezone
+            time.altzone = orig_altzone
 
     def test_chain_special(self):
         # multiple replacements
