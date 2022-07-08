@@ -3464,6 +3464,24 @@ Description
     This value must either be a UNIX timestamp or a
     |datetime|_ object.
 
+    Note: This option gets ignored if `mtime.value`_ is set.
+
+
+mtime.value
+-----------
+Type
+    ``string``
+Default
+    ``null``
+Example
+    * ``"{status[date]}"``
+    * ``"{content[0:6]:R22/2022/D%Y%m%d/}"``
+Description
+    A `format string`_ whose value should be used.
+
+    The resulting value must either be a UNIX timestamp or a
+    |datetime|_ object.
+
 
 ugoira.extension
 ----------------

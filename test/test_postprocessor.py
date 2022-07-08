@@ -350,10 +350,6 @@ class MetadataTest(BasePostprocessorTest):
 
 class MtimeTest(BasePostprocessorTest):
 
-    def test_mtime_default(self):
-        pp = self._create()
-        self.assertEqual(pp.key, "date")
-
     def test_mtime_datetime(self):
         self._create(None, {"date": datetime(1980, 1, 1)})
         self._trigger()
@@ -364,8 +360,13 @@ class MtimeTest(BasePostprocessorTest):
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 
-    def test_mtime_custom(self):
+    def test_mtime_key(self):
         self._create({"key": "foo"}, {"foo": 315532800})
+        self._trigger()
+        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
+
+    def test_mtime_value(self):
+        self._create({"value": "{foo}"}, {"foo": 315532800})
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 

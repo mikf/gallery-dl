@@ -9,7 +9,7 @@
 """Use metadata as file modification time"""
 
 from .common import PostProcessor
-from .. import text, util
+from .. import text, util, formatter
 from datetime import datetime
 
 
@@ -17,7 +17,12 @@ class MtimePP(PostProcessor):
 
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
-        self.key = options.get("key", "date")
+        value = options.get("value")
+        if value:
+            self._get = formatter.parse(value, None, util.identity).format_map
+        else:
+            key = options.get("key", "date")
+            self._get = lambda kwdict: kwdict.get(key)
 
         events = options.get("event")
         if events is None:
@@ -27,7 +32,7 @@ class MtimePP(PostProcessor):
         job.register_hooks({event: self.run for event in events}, options)
 
     def run(self, pathfmt):
-        mtime = pathfmt.kwdict.get(self.key)
+        mtime = self._get(pathfmt.kwdict)
         pathfmt.kwdict["_mtime"] = (
             util.datetime_to_timestamp(mtime)
             if isinstance(mtime, datetime) else
