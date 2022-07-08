@@ -10,6 +10,7 @@
 
 import os
 import json
+import time
 import string
 import _string
 import datetime
@@ -323,6 +324,27 @@ def _parse_datetime(format_spec, default):
     return dt
 
 
+def _parse_offset(format_spec, default):
+    offset, _, format_spec = format_spec.partition("/")
+    offset = offset[1:]
+    fmt = _build_format_func(format_spec, default)
+
+    if not offset or offset == "local":
+        is_dst = time.daylight and time.localtime().tm_isdst > 0
+        offset = -(time.altzone if is_dst else time.timezone)
+    else:
+        hours, _, minutes = offset.partition(":")
+        offset = 3600 * int(hours)
+        if minutes:
+            offset += 60 * (int(minutes) if offset > 0 else -int(minutes))
+
+    offset = datetime.timedelta(seconds=offset)
+
+    def off(obj):
+        return fmt(obj + offset)
+    return off
+
+
 def _default_format(format_spec, default):
     def wrap(obj):
         return format(obj, format_spec)
@@ -367,5 +389,6 @@ _FORMAT_SPECIFIERS = {
     "D": _parse_datetime,
     "L": _parse_maxlen,
     "J": _parse_join,
+    "O": _parse_offset,
     "R": _parse_replace,
 }
