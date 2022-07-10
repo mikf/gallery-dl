@@ -34,7 +34,7 @@ class ItakuExtractor(Extractor):
         for post in self.posts():
 
             post["date"] = text.parse_datetime(
-                post["date_added"], "%Y-%m-%dT%H:%M:%S.%f")
+                post["date_added"], "%Y-%m-%dT%H:%M:%S.%fZ")
             for category, tags in post.pop("categorized_tags").items():
                 post["tags_" + category.lower()] = [t["name"] for t in tags]
             post["tags"] = [t["name"] for t in post["tags"]]
@@ -87,6 +87,7 @@ class ItakuImageExtractor(ItakuExtractor):
                     "is_blacklisted": False
                 },
                 "can_reshare": True,
+                "date": "dt:2022-05-05 19:21:17",
                 "date_added": "2022-05-05T19:21:17.674148Z",
                 "date_edited": "2022-05-25T14:37:46.220612Z",
                 "description": "sketch from drawpile",
