@@ -264,7 +264,7 @@ def _build_format_func(format_spec, default):
 
 
 def _parse_optional(format_spec, default):
-    before, after, format_spec = format_spec.split("/", 2)
+    before, after, format_spec = format_spec.split(_SEPARATOR, 2)
     before = before[1:]
     fmt = _build_format_func(format_spec, default)
 
@@ -284,7 +284,7 @@ def _parse_slice(format_spec, default):
 
 
 def _parse_maxlen(format_spec, default):
-    maxlen, replacement, format_spec = format_spec.split("/", 2)
+    maxlen, replacement, format_spec = format_spec.split(_SEPARATOR, 2)
     maxlen = text.parse_int(maxlen[1:])
     fmt = _build_format_func(format_spec, default)
 
@@ -295,7 +295,7 @@ def _parse_maxlen(format_spec, default):
 
 
 def _parse_join(format_spec, default):
-    separator, _, format_spec = format_spec.partition("/")
+    separator, _, format_spec = format_spec.partition(_SEPARATOR)
     separator = separator[1:]
     fmt = _build_format_func(format_spec, default)
 
@@ -305,7 +305,7 @@ def _parse_join(format_spec, default):
 
 
 def _parse_replace(format_spec, default):
-    old, new, format_spec = format_spec.split("/", 2)
+    old, new, format_spec = format_spec.split(_SEPARATOR, 2)
     old = old[1:]
     fmt = _build_format_func(format_spec, default)
 
@@ -315,7 +315,7 @@ def _parse_replace(format_spec, default):
 
 
 def _parse_datetime(format_spec, default):
-    dt_format, _, format_spec = format_spec.partition("/")
+    dt_format, _, format_spec = format_spec.partition(_SEPARATOR)
     dt_format = dt_format[1:]
     fmt = _build_format_func(format_spec, default)
 
@@ -325,7 +325,7 @@ def _parse_datetime(format_spec, default):
 
 
 def _parse_offset(format_spec, default):
-    offset, _, format_spec = format_spec.partition("/")
+    offset, _, format_spec = format_spec.partition(_SEPARATOR)
     offset = offset[1:]
     fmt = _build_format_func(format_spec, default)
 
@@ -363,6 +363,7 @@ class Literal():
 _literal = Literal()
 
 _CACHE = {}
+_SEPARATOR = "/"
 _GLOBALS = {
     "_env": lambda: os.environ,
     "_lit": lambda: _literal,

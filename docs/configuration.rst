@@ -3710,6 +3710,20 @@ Description
     this cache.
 
 
+format-separator
+----------------
+Type
+    ``string``
+Default
+    ``"/"``
+Description
+    Character(s) used as argument separator in format string
+    `format specifiers <formatting.md#format-specifiers>`__.
+
+    For example, setting this option to ``"#"`` would allow a replacement
+    operation to be ``Rold#new#`` instead of the default ``Rold/new/``
+
+
 signals-ignore
 --------------
 Type
