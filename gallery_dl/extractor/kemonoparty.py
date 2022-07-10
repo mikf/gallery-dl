@@ -96,12 +96,14 @@ class KemonopartyExtractor(Extractor):
                 post["num"] += 1
                 post["_http_headers"] = headers
 
+                text.nameext_from_url(file.get("name", url), post)
+                if not post["extension"]:
+                    post["extension"] = text.ext_from_url(url)
+
                 if url[0] == "/":
                     url = self.root + "/data" + url
                 elif url.startswith(self.root):
                     url = self.root + "/data" + url[20:]
-
-                text.nameext_from_url(file.get("name", url), post)
                 yield Message.Url, url, post
 
     def login(self):
@@ -377,12 +379,15 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             for post["num"], file in enumerate(files, 1):
                 post["type"] = file["type"]
                 url = file["path"]
+
+                text.nameext_from_url(file.get("name", url), post)
+                if not post["extension"]:
+                    post["extension"] = text.ext_from_url(url)
+
                 if url[0] == "/":
                     url = self.root + "/data" + url
                 elif url.startswith(self.root):
                     url = self.root + "/data" + url[20:]
-
-                text.nameext_from_url(file["name"], post)
                 yield Message.Url, url, post
 
     def posts(self):
