@@ -110,6 +110,7 @@ class TwitterExtractor(Extractor):
 
             tdata = self._transform_tweet(tweet)
             tdata.update(metadata)
+            tdata["count"] = len(files)
             yield Message.Directory, tdata
             for tdata["num"], file in enumerate(files, 1):
                 file.update(tdata)
