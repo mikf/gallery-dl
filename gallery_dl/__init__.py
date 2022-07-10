@@ -177,6 +177,12 @@ def main():
             extractor.modules = modules
             extractor._module_iter = iter(modules)
 
+        # format string separator
+        separator = config.get((), "format-separator")
+        if separator:
+            from . import formatter
+            formatter._SEPARATOR = separator
+
         # loglevels
         output.configure_logging(args.loglevel)
         if args.loglevel >= logging.ERROR:

@@ -236,6 +236,26 @@ class TestFormatter(unittest.TestCase):
         # parse and format datetime
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/%Y%m%d}", "20100101")
 
+    def test_separator(self):
+        orig_separator = formatter._SEPARATOR
+        try:
+            formatter._SEPARATOR = "|"
+            self._run_test("{a:Rh|C|RE|e|RL|l|}", "Cello wOrld")
+            self._run_test("{d[b]!s:R1|Q|R2|A|R0|Y|}", "Y")
+
+            formatter._SEPARATOR = "##"
+            self._run_test("{l:J-##Rb##E##}", "a-E-c")
+            self._run_test("{l:J-##[1:-1]}", "-b-")
+
+            formatter._SEPARATOR = "\0"
+            self._run_test("{d[a]:?<\0>\0L1\0too long\0}", "<too long>")
+            self._run_test("{d[c]:?<\0>\0L5\0too long\0}", "")
+
+            formatter._SEPARATOR = "?"
+            self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z?%Y%m%d}", "20100101")
+        finally:
+            formatter._SEPARATOR = orig_separator
+
     def test_globals_env(self):
         os.environ["FORMATTER_TEST"] = value = self.kwdict["a"]
 
