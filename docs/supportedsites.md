@@ -1149,12 +1149,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
-    <td>Wakarimasen Archive</td>
-    <td>https://archive.wakarimasen.moe/</td>
-    <td>Boards, Galleries, Search Results, Threads</td>
-    <td></td>
-</tr>
 
 <tr>
     <td colspan="4"><strong>FoOlSlide Instances</strong></td>
