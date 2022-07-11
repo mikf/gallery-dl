@@ -324,7 +324,11 @@ class WeiboAlbumExtractor(WeiboExtractor):
             mid = image["mid"]
             if mid not in seen:
                 seen.add(mid)
-                yield self._status_by_id(mid)
+                status = self._status_by_id(mid)
+                if status.get("ok") != 1:
+                    self.log.debug("Skipping status %s (%s)", mid, status)
+                else:
+                    yield status
 
 
 class WeiboStatusExtractor(WeiboExtractor):
@@ -341,7 +345,7 @@ class WeiboStatusExtractor(WeiboExtractor):
         }),
         # unavailable video (#427)
         ("https://m.weibo.cn/status/4268682979207023", {
-            "exception": exception.HttpError,
+            "exception": exception.NotFoundError,
         }),
         # non-numeric status ID (#664)
         ("https://weibo.com/3314883543/Iy7fj4qVg"),
@@ -366,7 +370,11 @@ class WeiboStatusExtractor(WeiboExtractor):
     )
 
     def statuses(self):
-        return (self._status_by_id(self.user),)
+        status = self._status_by_id(self.user)
+        if status.get("ok") != 1:
+            self.log.debug(status)
+            raise exception.NotFoundError("status")
+        return (status,)
 
 
 @cache(maxage=356*86400)
