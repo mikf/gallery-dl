@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2021 Mike Fährmann
+# Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -49,6 +49,8 @@ class SankakuExtractor(BooruExtractor):
             self.log.warning(
                 "Login required to download 'contentious_content' posts")
             SankakuExtractor._warning = False
+        elif url[8] == "v":
+            url = "https://s.sankakucomplex.com" + url[url.index("/", 8):]
         return url
 
     @staticmethod
@@ -79,8 +81,8 @@ class SankakuTagExtractor(SankakuExtractor):
     test = (
         ("https://sankaku.app/?tags=bonocho", {
             "count": 5,
-            "pattern": r"https://v\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                       r"/[^/]{32}\.\w+\?e=\d+&expires=\d+&m=[^&#]+",
+            "pattern": r"https://s\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
+                       r"/[^/]{32}\.\w+\?e=\d+&(expires=\d+&)?m=[^&#]+",
         }),
         ("https://beta.sankakucomplex.com/?tags=bonocho"),
         ("https://chan.sankakucomplex.com/?tags=bonocho"),
@@ -160,7 +162,7 @@ class SankakuPostExtractor(SankakuExtractor):
         }),
         # 'contentious_content'
         ("https://sankaku.app/post/show/21418978", {
-            "pattern": r"https://v\.sankakucomplex\.com"
+            "pattern": r"https://s\.sankakucomplex\.com"
                        r"/data/13/3c/133cda3bfde249c504284493903fb985\.jpg",
         }),
         # empty tags (#1617)
