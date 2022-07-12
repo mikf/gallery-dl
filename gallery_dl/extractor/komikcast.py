@@ -1,22 +1,24 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters and entire manga from https://komikcast.com/"""
+"""Extractors for https://komikcast.me/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 import re
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?komikcast\.(?:me|com)"
+
 
 class KomikcastBase():
     """Base class for komikcast extractors"""
     category = "komikcast"
-    root = "https://komikcast.com"
+    root = "https://komikcast.me"
 
     @staticmethod
     def parse_chapter_string(chapter_string, data=None):
@@ -44,18 +46,18 @@ class KomikcastBase():
 
 
 class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
-    """Extractor for manga-chapters from komikcast.com"""
-    pattern = r"(?:https?://)?(?:www\.)?komikcast\.com(/chapter/[^/?#]+/)"
+    """Extractor for manga-chapters from komikcast.me"""
+    pattern = BASE_PATTERN + r"(/chapter/[^/?#]+/)"
     test = (
-        (("https://komikcast.com/chapter/"
-          "apotheosis-chapter-02-2-bahasa-indonesia/"), {
-            "url": "f6b43fbc027697749b3ea1c14931c83f878d7936",
+        (("https://komikcast.me/chapter"
+          "/apotheosis-chapter-02-2-bahasa-indonesia/"), {
+            "url": "74eca5c9b27b896816497f9b2d847f2a1fcfc209",
             "keyword": "f3938e1aff9ad1f302f52447e9781b21f6da26d4",
         }),
-        (("https://komikcast.com/chapter/"
-          "solo-spell-caster-chapter-37-bahasa-indonesia/"), {
-            "url": "c3d30de6c796ff6ff36eb86e2e6fa2f8add8e829",
-            "keyword": "ed8a0ff73098776988bf66fb700381a2c748f910",
+        (("https://komikcast.me/chapter"
+          "/soul-land-ii-chapter-300-1-bahasa-indonesia/"), {
+            "url": "243a5250e210b40d17217e83b7547cefea5638bd",
+            "keyword": "cb646cfed3d45105bd645ab38b2e9f7d8c436436",
         }),
     )
 
@@ -74,16 +76,15 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
 
 
 class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
-    """Extractor for manga from komikcast.com"""
+    """Extractor for manga from komikcast.me"""
     chapterclass = KomikcastChapterExtractor
-    pattern = (r"(?:https?://)?(?:www\.)?komikcast\.com"
-               r"(/(?:komik/)?[^/?#]+)/?$")
+    pattern = BASE_PATTERN + r"(/(?:komik/)?[^/?#]+)/?$"
     test = (
-        ("https://komikcast.com/komik/090-eko-to-issho/", {
-            "url": "dc798d107697d1f2309b14ca24ca9dba30c6600f",
+        ("https://komikcast.me/komik/090-eko-to-issho/", {
+            "url": "08204f0a703ec5272121abcf0632ecacba1e588f",
             "keyword": "837a7e96867344ff59d840771c04c20dc46c0ab1",
         }),
-        ("https://komikcast.com/tonari-no-kashiwagi-san/"),
+        ("https://komikcast.me/tonari-no-kashiwagi-san/"),
     )
 
     def chapters(self, page):
