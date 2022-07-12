@@ -134,12 +134,12 @@ class SkebPostExtractor(SkebExtractor):
             "anonymous": False,
             "body": "re:はじめまして。私はYouTubeにてVTuberとして活動をしている湊ラ",
             "client": {
-                "avatar_url": "https://pbs.twimg.com/profile_images"
-                              "/1537488326697287680/yNUbLDgC.jpg",
-                "header_url": "https://pbs.twimg.com/profile_banners"
-                              "/1375007870291300358/1655744756/1500x500",
+                "avatar_url": r"re:https://pbs.twimg.com/profile_images"
+                              r"/\d+/\w+\.jpg",
+                "header_url": r"re:https://pbs.twimg.com/profile_banners"
+                              r"/1375007870291300358/\d+/1500x500",
                 "id": 1196514,
-                "name": "湊ラギ♦️🎀Vtuber🎀次回6/23予定",
+                "name": str,
                 "screen_name": "minato_ragi",
             },
             "completed_at": "2022-02-27T14:03:45.442Z",

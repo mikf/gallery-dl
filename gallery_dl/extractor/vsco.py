@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -119,7 +119,8 @@ class VscoUserExtractor(VscoExtractor):
     pattern = BASE_PATTERN + r"(?:/gallery|/images(?:/\d+)?)?/?(?:$|[?#])"
     test = (
         ("https://vsco.co/missuri/gallery", {
-            "pattern": r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/vsco\w+",
+            "pattern": r"https://image(-aws.+)?\.vsco\.co"
+                       r"/[0-9a-f/]+/[\w-]+\.\w+",
             "range": "1-80",
             "count": 80,
         }),
@@ -150,7 +151,7 @@ class VscoCollectionExtractor(VscoExtractor):
     archive_fmt = "c_{user}_{id}"
     pattern = BASE_PATTERN + r"/collection/"
     test = ("https://vsco.co/vsco/collection/1", {
-        "pattern": r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/vsco\w+\.\w+",
+        "pattern": r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/[\w-]+\.\w+",
         "range": "1-80",
         "count": 80,
     })

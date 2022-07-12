@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,10 +26,10 @@ class _8kunThreadExtractor(Extractor):
             "count": ">= 8",
         }),
         # old-style file URLs (#1101)
-        ("https://8kun.top/d/res/13258.html", {
-            "pattern": r"https://media\.8kun\.top/d/src/\d+(-\d)?\.\w+",
-            "range": "1-20",
-        }),
+        #  ("https://8kun.top/d/res/13258.html", {
+        #      "pattern": r"https://media\.8kun\.top/d/src/\d+(-\d)?\.\w+",
+        #      "range": "1-20",
+        #  }),
     )
 
     def __init__(self, match):

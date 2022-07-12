@@ -95,9 +95,9 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
                r"(/manga/[^/?#]+/?)(?:#.*)?$")
     test = (
         ("https://www.mangahere.cc/manga/aria/", {
-            "url": "dc7f8954efbe87d9fd670c54e5edb5230c01f767",
-            "keyword": "864524eed2dc6a73e366f6ba400b80d894f99b5a",
-            "count": 69,
+            "url": "9c2e54ec42e9a87ad53096c328b33c90750af3e4",
+            "keyword": "71503c682c5d0c277a50409a8c5fd78e871e3d69",
+            "count": 71,
         }),
         ("https://www.mangahere.cc/manga/hiyokoi/#50", {
             "url": "654850570aa03825cd57e2ae2904af489602c523",

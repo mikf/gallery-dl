@@ -181,7 +181,8 @@ class DanbooruTagExtractor(DanbooruExtractor):
         # 'external' option (#1747)
         ("https://danbooru.donmai.us/posts?tags=pixiv_id%3A1476533", {
             "options": (("external", True),),
-            "pattern": r"http://img16.pixiv.net/img/takaraakihito/1476533.jpg",
+            "pattern": r"https://i\.pximg\.net/img-original/img"
+                       r"/2008/08/28/02/35/48/1476533_p0\.jpg",
         }),
         ("https://e621.net/posts?tags=anry", {
             "url": "8021e5ea28d47c474c1ffc9bd44863c4d45700ba",

@@ -147,14 +147,15 @@ class ArtstationUserExtractor(ArtstationExtractor):
                r"/(?!artwork|projects|search)([^/?#]+)(?:/albums/all)?"
                r"|((?!www)\w+)\.artstation\.com(?:/projects)?)/?$")
     test = (
-        ("https://www.artstation.com/gaerikim/", {
+        ("https://www.artstation.com/sungchoi/", {
             "pattern": r"https://\w+\.artstation\.com/p/assets/images"
                        r"/images/\d+/\d+/\d+/(4k|large|medium|small)/[^/]+",
-            "count": ">= 6",
+            "range": "1-10",
+            "count": ">= 10",
         }),
-        ("https://www.artstation.com/gaerikim/albums/all/"),
-        ("https://gaerikim.artstation.com/"),
-        ("https://gaerikim.artstation.com/projects/"),
+        ("https://www.artstation.com/sungchoi/albums/all/"),
+        ("https://sungchoi.artstation.com/"),
+        ("https://sungchoi.artstation.com/projects/"),
     )
 
     def projects(self):
@@ -400,7 +401,7 @@ class ArtstationFollowingExtractor(ArtstationExtractor):
     subcategory = "following"
     pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
                r"/(?!artwork|projects|search)([^/?#]+)/following")
-    test = ("https://www.artstation.com/gaerikim/following", {
+    test = ("https://www.artstation.com/sungchoi/following", {
         "pattern": ArtstationUserExtractor.pattern,
         "count": ">= 50",
     })

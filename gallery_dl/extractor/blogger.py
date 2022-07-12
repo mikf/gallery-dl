@@ -136,9 +136,9 @@ class BloggerPostExtractor(BloggerExtractor):
             "pattern": r"https://.+\.googlevideo\.com/videoplayback",
         }),
         # image URLs with width/height (#1061)
-        ("https://aaaninja.blogspot.com/2020/08/altera-boob-press-2.html", {
-            "pattern": r"https://1.bp.blogspot.com/.+/s0/altera_.+png",
-        }),
+        #  ("https://aaaninja.blogspot.com/2020/08/altera-boob-press-2.html", {
+        #      "pattern": r"https://1.bp.blogspot.com/.+/s0/altera_.+png",
+        #  }),
         # new image domain (#2204)
         (("https://randomthingsthroughmyletterbox.blogspot.com/2022/01"
           "/bitter-flowers-by-gunnar-staalesen-blog.html"), {
