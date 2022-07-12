@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -84,12 +84,12 @@ class HentaifoundryExtractor(Extractor):
                 .replace("\r\n", "\n"), "", "")),
             "ratings"    : [text.unescape(r) for r in text.extract_iter(extr(
                 "class='ratings_box'", "</div>"), "title='", "'")],
-            "media"      : text.unescape(extr("Media</b></td>\t\t<td>", "<")),
             "date"       : text.parse_datetime(extr("datetime='", "'")),
-            "views"      : text.parse_int(extr("Views</b></td>\t\t<td>", "<")),
+            "views"      : text.parse_int(extr(">Views</span>", "<")),
+            "score"      : text.parse_int(extr(">Vote Score</span>", "<")),
+            "media"      : text.unescape(extr(">Media</span>", "<").strip()),
             "tags"       : text.split_html(extr(
-                "<td><b>Keywords</b></td>", "</tr>"))[::2],
-            "score"      : text.parse_int(extr('Score</b></td>\t\t<td>', '<')),
+                ">Tags </span>", "</div>")),
         }
 
         return text.nameext_from_url(data["src"], data)
@@ -292,7 +292,7 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
                 "media"  : "Other digital art",
                 "ratings": ["Sexual content", "Contains female nudity"],
                 "score"  : int,
-                "tags"   : ["kancolle", "kantai", "collection", "shimakaze"],
+                "tags"   : ["collection", "kancolle", "kantai", "shimakaze"],
                 "title"  : "shimakaze",
                 "user"   : "Tenpura",
                 "views"  : int,
