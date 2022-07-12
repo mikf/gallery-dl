@@ -310,7 +310,8 @@ class WeiboAlbumExtractor(WeiboExtractor):
     subcategory = "album"
     pattern = USER_PATTERN + r"\?tabtype=album"
     test = ("https://weibo.com/1758989602?tabtype=album", {
-        "pattern": r"https://wx\d+\.sinaimg\.cn/large/\w{32}\.(jpg|png|gif)",
+        "pattern": r"https://(wx\d+\.sinaimg\.cn/large/\w{32}\.(jpg|png|gif)"
+                   r"|g\.us\.sinaimg\.cn/../\w+\.mp4)",
         "range": "1-3",
         "count": 3,
     })

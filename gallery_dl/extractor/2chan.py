@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,7 +13,7 @@ from .. import text
 
 
 class _2chanThreadExtractor(Extractor):
-    """Extractor for images from threads on www.2chan.net"""
+    """Extractor for 2chan threads"""
     category = "2chan"
     subcategory = "thread"
     directory_fmt = ("{category}", "{board_name}", "{thread}")
@@ -21,9 +21,24 @@ class _2chanThreadExtractor(Extractor):
     archive_fmt = "{board}_{thread}_{tim}"
     url_fmt = "https://{server}.2chan.net/{board}/src/{filename}"
     pattern = r"(?:https?://)?([\w-]+)\.2chan\.net/([^/]+)/res/(\d+)"
-    test = ("http://dec.2chan.net/70/res/4752.htm", {
-        "url": "f49aa31340e9a3429226af24e19e01f5b819ca1f",
-        "keyword": "44599c21b248e79692b2eb2da12699bd0ed5640a",
+    test = ("https://dec.2chan.net/70/res/14565.htm", {
+        "pattern": r"https://dec\.2chan\.net/70/src/\d{13}\.jpg",
+        "count": ">= 3",
+        "keyword": {
+            "board": "70",
+            "board_name": "新板提案",
+            "com": str,
+            "fsize": r"re:\d+",
+            "name": "名無し",
+            "no": r"re:1[45]\d\d\d",
+            "now": r"re:22/../..\(.\)..:..:..",
+            "post": "無題",
+            "server": "dec",
+            "thread": "14565",
+            "tim": r"re:^\d{13}$",
+            "time": r"re:^\d{10}$",
+            "title": "ﾋﾛｱｶ板"
+        },
     })
 
     def __init__(self, match):

@@ -118,11 +118,11 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
                 "source_url": "https://www.deviantart.com/speccysy/art"
                               "/Afternoon-Flight-215193985",
                 "spoilered": False,
-                "tag_count": 42,
+                "tag_count": int,
                 "tag_ids": list,
                 "tags": list,
                 "thumbnails_generated": True,
-                "updated_at": "2021-09-30T20:04:01Z",
+                "updated_at": "2022-04-25T09:30:57Z",
                 "uploader": "Clover the Clever",
                 "uploader_id": 211188,
                 "upvotes": int,

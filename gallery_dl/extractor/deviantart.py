@@ -671,12 +671,12 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     test = (
         (("https://www.deviantart.com/pencilshadings/favourites"
           "/70595441/3D-Favorites"), {
-            "count": ">= 20",
+            "count": ">= 15",
             "options": (("original", False),),
         }),
         (("https://www.deviantart.com/pencilshadings/favourites"
           "/F050486B-CB62-3C66-87FB-1105A7F6379F/3D Favorites"), {
-            "count": ">= 20",
+            "count": ">= 15",
             "options": (("original", False),),
         }),
         ("https://pencilshadings.deviantart.com"
@@ -876,8 +876,9 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         }),
         # GIF (#242)
         (("https://www.deviantart.com/skatergators/art/COM-Moni-781571783"), {
-            "pattern": (r"https://images-wixmp-\w+\.wixmp\.com"
-                        r"/f/[^/]+/[^.]+\.gif\?token="),
+            "pattern": r"https://wixmp-\w+\.wixmp\.com/f/03fd2413-efe9-4e5c-"
+                       r"8734-2b72605b3fbb/dcxbsnb-1bbf0b38-42af-4070-8878-"
+                       r"f30961955bec\.gif\?token=ey...",
         }),
         # Flash animation with GIF preview (#1731)
         ("https://www.deviantart.com/yuumei/art/Flash-Comic-214724929", {

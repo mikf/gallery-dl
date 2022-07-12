@@ -26,18 +26,14 @@ class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
     """Extractor for manga chapters from mangakakalot.tv"""
     pattern = BASE_PATTERN + r"(/chapter/[^/?#]+/chapter[_-][^/?#]+)"
     test = (
-        ("https://ww.mangakakalot.tv/chapter/manga-hl984546/chapter-6", {
+        ("https://ww3.mangakakalot.tv/chapter/manga-jk986845/chapter-34.2", {
             "pattern": r"https://cm\.blazefast\.co"
                        r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
-            "keyword": "e9646a76a210f1eb4a71b4134664814c99d65d48",
-            "count": 14,
+            "keyword": "0f1586ff52f0f9cbbb25306ae64ab718f8a6a633",
+            "count": 9,
         }),
-        (("https://mangakakalot.tv/chapter"
-          "/hatarakanai_futari_the_jobless_siblings/chapter_20.1"), {
-            "keyword": "14c430737ff600b26a3811815905f34dd6a6c8c6",
-            "content": "b3eb1f139caef98d9dcd8ba6a5ee146a13deebc4",
-            "count": 2,
-        }),
+        ("https://mangakakalot.tv/chapter"
+         "/hatarakanai_futari_the_jobless_siblings/chapter_20.1"),
     )
 
     def __init__(self, match):
@@ -81,13 +77,11 @@ class MangakakalotMangaExtractor(MangakakalotBase, MangaExtractor):
     chapterclass = MangakakalotChapterExtractor
     pattern = BASE_PATTERN + r"(/manga/[^/?#]+)"
     test = (
-        ("https://ww.mangakakalot.tv/manga/lk921810", {
-            "url": "654d040c17728c9c8756fce7092b084e8dcf67d2",
-        }),
-        ("https://mangakakalot.tv/manga/manga-jk986845", {
+        ("https://ww3.mangakakalot.tv/manga/manga-jk986845", {
             "pattern": MangakakalotChapterExtractor.pattern,
             "count": ">= 30",
         }),
+        ("https://mangakakalot.tv/manga/lk921810"),
     )
 
     def chapters(self, page):

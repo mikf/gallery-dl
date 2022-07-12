@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,12 +22,12 @@ class HentaihandGalleryExtractor(GalleryExtractor):
         (("https://hentaihand.com/en/comic/c75-takumi-na-muchi-choudenji-hou-"
           "no-aishi-kata-how-to-love-a-super-electromagnetic-gun-toaru-kagaku-"
           "no-railgun-english"), {
-            "pattern": r"https://cdn.hentaihand.com/.*/images/360468/\d+.jpg$",
+            "pattern": r"https://cdn.hentaihand.com/.*/images/37387/\d+.jpg$",
             "count": 50,
             "keyword": {
                 "artists"   : ["Takumi Na Muchi"],
                 "date"      : "dt:2014-06-28 00:00:00",
-                "gallery_id": 360468,
+                "gallery_id": 37387,
                 "lang"      : "en",
                 "language"  : "English",
                 "parodies"  : ["Toaru Kagaku No Railgun"],
