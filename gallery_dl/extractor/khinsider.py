@@ -30,7 +30,8 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
             "album": {
                 "count": 1,
                 "date": "Sep 18th, 2016",
-                "name": "Horizon Riders (Wii)",
+                "name": "Horizon Riders",
+                "platform": "Wii",
                 "size": 26214400,
                 "type": "Gamerip",
             },
@@ -60,6 +61,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
         extr = text.extract_from(page)
         return {"album": {
             "name" : text.unescape(extr("<h2>", "<")),
+            "platform": extr("Platforms: <a", "<").rpartition(">")[2],
             "count": text.parse_int(extr("Number of Files: <b>", "<")),
             "size" : text.parse_bytes(extr("Total Filesize: <b>", "<")[:-1]),
             "date" : extr("Date Added: <b>", "<"),
