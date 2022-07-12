@@ -79,10 +79,9 @@ class SlidesharePresentationExtractor(GalleryExtractor):
         views = extr('content="UserPageVisits:', '"')
 
         if descr.endswith("…"):
-            alt_descr = extr(
-                'id="slideshow-description-text" class="notranslate">', '</p>')
+            alt_descr = extr('id="slideshow-description-text"', '</p>')
             if alt_descr:
-                descr = text.remove_html(alt_descr).strip()
+                descr = text.remove_html(alt_descr.partition(">")[2]).strip()
 
         return {
             "user": self.user,
