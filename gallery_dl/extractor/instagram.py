@@ -186,11 +186,17 @@ class InstagramExtractor(Extractor):
             media = next(self._media_by_id(post["id"]))
             return self._parse_post_api(media)
 
+        pinned = post.get("pinned_for_users", ())
+        if pinned:
+            for index, user in enumerate(pinned):
+                pinned[index] = int(user["id"])
+
         owner = post["owner"]
         data = {
             "typename"   : typename,
             "date"       : text.parse_timestamp(post["taken_at_timestamp"]),
             "likes"      : post["edge_media_preview_like"]["count"],
+            "pinned"     : pinned,
             "owner_id"   : owner["id"],
             "username"   : owner.get("username"),
             "fullname"   : owner.get("full_name"),
@@ -263,6 +269,7 @@ class InstagramExtractor(Extractor):
                 "post_id" : post["pk"],
                 "post_shortcode": post["code"],
                 "likes": post["like_count"],
+                "pinned": post.get("timeline_pinned_user_ids", ()),
             }
 
             caption = post["caption"]
