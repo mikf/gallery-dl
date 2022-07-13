@@ -270,7 +270,7 @@ class TwitterExtractor(Extractor):
                 "nick": u["name"],
             } for u in mentions]
 
-        content = tget("full_text") or tget("text") or ""
+        content = text.unescape(tget("full_text") or tget("text") or "")
         urls = entities.get("urls")
         if urls:
             for url in urls:
