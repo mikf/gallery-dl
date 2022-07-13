@@ -193,25 +193,27 @@ class NozomiSearchExtractor(NozomiExtractor):
         return {"search_tags": self.tags}
 
     def posts(self):
-        index = None
-        result = set()
+        result = None
 
         def nozomi(path):
             url = "https://j.nozomi.la/" + path + ".nozomi"
             return decode_nozomi(self.request(url).content)
 
+        positive, negative = [], []
         for tag in self.tags:
-            tag = tag.replace("/", "")
-            if tag[0] == "-":
-                if not index:
-                    index = set(nozomi("index"))
-                items = index.difference(nozomi("nozomi/" + tag[1:]))
-            else:
-                items = nozomi("nozomi/" + tag)
+            (negative if tag[0] == "-" else positive).append(
+                tag.replace("/", ""))
 
-            if result:
-                result.intersection_update(items)
+        for tag in positive:
+            ids = nozomi("nozomi/" + tag)
+            if result is None:
+                result = set(ids)
             else:
-                result.update(items)
+                result.intersection_update(ids)
 
-        return sorted(result, reverse=True)
+        for tag in negative:
+            if result is None:
+                result = set(nozomi("index"))
+            result.difference_update(nozomi("nozomi/" + tag[1:]))
+
+        return sorted(result, reverse=True) if result else ()
