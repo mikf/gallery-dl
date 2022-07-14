@@ -194,12 +194,13 @@ class NozomiSearchExtractor(NozomiExtractor):
 
     def posts(self):
         result = None
+        positive = []
+        negative = []
 
         def nozomi(path):
             url = "https://j.nozomi.la/" + path + ".nozomi"
             return decode_nozomi(self.request(url).content)
 
-        positive, negative = [], []
         for tag in self.tags:
             (negative if tag[0] == "-" else positive).append(
                 tag.replace("/", ""))
@@ -211,9 +212,9 @@ class NozomiSearchExtractor(NozomiExtractor):
             else:
                 result.intersection_update(ids)
 
+        if result is None:
+            result = set(nozomi("index"))
         for tag in negative:
-            if result is None:
-                result = set(nozomi("index"))
             result.difference_update(nozomi("nozomi/" + tag[1:]))
 
         return sorted(result, reverse=True) if result else ()
