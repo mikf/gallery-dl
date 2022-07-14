@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,6 +11,7 @@
 from .common import PostProcessor
 from .. import util
 import zipfile
+import os
 
 
 class ZipPP(PostProcessor):
@@ -34,30 +35,38 @@ class ZipPP(PostProcessor):
             algorithm = "store"
 
         self.zfile = None
-        self.path = job.pathfmt.realdirectory
-        self.args = (self.path[:-1] + ext, "a",
+        self.path = job.pathfmt.realdirectory[:-1]
+        self.args = (self.path + ext, "a",
                      self.COMPRESSION_ALGORITHMS[algorithm], True)
 
         job.register_hooks({
-            "file":
-            self.write_safe if options.get("mode") == "safe" else self.write,
+            "file": (self.write_safe if options.get("mode") == "safe" else
+                     self.write_fast),
         }, options)
         job.hooks["finalize"].append(self.finalize)
 
-    def write(self, pathfmt, zfile=None):
+    def open(self):
+        try:
+            return zipfile.ZipFile(*self.args)
+        except FileNotFoundError:
+            os.makedirs(os.path.dirname(self.path))
+            return zipfile.ZipFile(*self.args)
+
+    def write(self, pathfmt, zfile):
         # 'NameToInfo' is not officially documented, but it's available
         # for all supported Python versions and using it directly is a lot
         # faster than calling getinfo()
-        if zfile is None:
-            if self.zfile is None:
-                self.zfile = zipfile.ZipFile(*self.args)
-            zfile = self.zfile
         if pathfmt.filename not in zfile.NameToInfo:
             zfile.write(pathfmt.temppath, pathfmt.filename)
             pathfmt.delete = self.delete
 
+    def write_fast(self, pathfmt):
+        if self.zfile is None:
+            self.zfile = self.open()
+        self.write(pathfmt, self.zfile)
+
     def write_safe(self, pathfmt):
-        with zipfile.ZipFile(*self.args) as zfile:
+        with self.open() as zfile:
             self.write(pathfmt, zfile)
 
     def finalize(self, pathfmt, status):
