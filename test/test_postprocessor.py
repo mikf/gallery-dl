@@ -375,21 +375,21 @@ class ZipTest(BasePostprocessorTest):
 
     def test_zip_default(self):
         pp = self._create()
-        self.assertEqual(self.job.hooks["file"][0], pp.write)
-        self.assertEqual(pp.path, self.pathfmt.realdirectory)
+        self.assertEqual(self.job.hooks["file"][0], pp.write_fast)
+        self.assertEqual(pp.path, self.pathfmt.realdirectory[:-1])
         self.assertEqual(pp.delete, True)
         self.assertEqual(pp.args, (
-            pp.path[:-1] + ".zip", "a", zipfile.ZIP_STORED, True,
+            pp.path + ".zip", "a", zipfile.ZIP_STORED, True,
         ))
         self.assertTrue(pp.args[0].endswith("/test.zip"))
 
     def test_zip_safe(self):
         pp = self._create({"mode": "safe"})
         self.assertEqual(self.job.hooks["file"][0], pp.write_safe)
-        self.assertEqual(pp.path, self.pathfmt.realdirectory)
+        self.assertEqual(pp.path, self.pathfmt.realdirectory[:-1])
         self.assertEqual(pp.delete, True)
         self.assertEqual(pp.args, (
-            pp.path[:-1] + ".zip", "a", zipfile.ZIP_STORED, True,
+            pp.path + ".zip", "a", zipfile.ZIP_STORED, True,
         ))
         self.assertTrue(pp.args[0].endswith("/test.zip"))
 
@@ -401,7 +401,7 @@ class ZipTest(BasePostprocessorTest):
         })
         self.assertEqual(pp.delete, False)
         self.assertEqual(pp.args, (
-            pp.path[:-1] + ".cbz", "a", zipfile.ZIP_DEFLATED, True,
+            pp.path + ".cbz", "a", zipfile.ZIP_DEFLATED, True,
         ))
         self.assertTrue(pp.args[0].endswith("/test.cbz"))
 
@@ -440,9 +440,9 @@ class ZipTest(BasePostprocessorTest):
         with zipfile.ZipFile(pp.zfile.filename) as file:
             nti = file.NameToInfo
             self.assertEqual(len(pp.zfile.NameToInfo), 3)
-            self.assertIn("file0.ext", pp.zfile.NameToInfo)
-            self.assertIn("file1.ext", pp.zfile.NameToInfo)
-            self.assertIn("file2.ext", pp.zfile.NameToInfo)
+            self.assertIn("file0.ext", nti)
+            self.assertIn("file1.ext", nti)
+            self.assertIn("file2.ext", nti)
 
         os.unlink(pp.zfile.filename)
 
