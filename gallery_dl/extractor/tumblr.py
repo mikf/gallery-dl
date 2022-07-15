@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.tumblr.com/"""
+"""Extractors for https://www.tumblr.com/"""
 
 from .common import Extractor, Message
 from .. import text, oauth, exception
@@ -35,7 +35,10 @@ POST_TYPES = frozenset((
 
 BASE_PATTERN = (
     r"(?:tumblr:(?:https?://)?([^/]+)|"
-    r"(?:https?://)?([\w-]+\.tumblr\.com))")
+    r"(?:https?://)?"
+    r"(?:www\.tumblr\.com/blog/(?:view/)?([\w-]+)|"
+    r"([\w-]+\.tumblr\.com)))"
+)
 
 
 class TumblrExtractor(Extractor):
@@ -48,9 +51,14 @@ class TumblrExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.blog = match.group(1) or match.group(2)
-        self.api = TumblrAPI(self)
 
+        name = match.group(2)
+        if name:
+            self.blog = name + ".tumblr.com"
+        else:
+            self.blog = match.group(1) or match.group(3)
+
+        self.api = TumblrAPI(self)
         self.types = self._setup_posttypes()
         self.avatar = self.config("avatar", False)
         self.inline = self.config("inline", True)
@@ -232,6 +240,8 @@ class TumblrUserExtractor(TumblrExtractor):
         ("https://demo.tumblr.com/archive"),
         ("tumblr:http://www.b-authentique.com/"),
         ("tumblr:www.b-authentique.com"),
+        ("https://www.tumblr.com/blog/view/smarties-art"),
+        ("https://www.tumblr.com/blog/smarties-art"),
     )
 
     def posts(self):
@@ -241,7 +251,7 @@ class TumblrUserExtractor(TumblrExtractor):
 class TumblrPostExtractor(TumblrExtractor):
     """Extractor for images from a single post on tumblr"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/(?:post|image)/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:post/|image/)?(\d+)"
     test = (
         ("http://demo.tumblr.com/post/459265350", {
             "pattern": (r"https://\d+\.media\.tumblr\.com"
@@ -273,11 +283,12 @@ class TumblrPostExtractor(TumblrExtractor):
             "exception": exception.NotFoundError,  # HTML response (#297)
         }),
         ("http://demo.tumblr.com/image/459265350"),
+        ("https://www.tumblr.com/blog/view/smarties-art/686047436641353728"),
     )
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        self.post_id = match.group(3)
+        self.post_id = match.group(4)
         self.reblogs = True
         self.date_min = 0
 
@@ -293,14 +304,18 @@ class TumblrTagExtractor(TumblrExtractor):
     """Extractor for images from a tumblr-user by tag"""
     subcategory = "tag"
     pattern = BASE_PATTERN + r"/tagged/([^/?#]+)"
-    test = ("http://demo.tumblr.com/tagged/Times%20Square", {
-        "pattern": (r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg"),
-        "count": 1,
-    })
+    test = (
+        ("http://demo.tumblr.com/tagged/Times%20Square", {
+            "pattern": r"https://\d+\.media\.tumblr\.com"
+                       r"/tumblr_[^/_]+_1280.jpg",
+            "count": 1,
+        }),
+        ("https://www.tumblr.com/blog/view/smarties-art/tagged/undertale"),
+    )
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        self.tag = text.unquote(match.group(3).replace("-", " "))
+        self.tag = text.unquote(match.group(4).replace("-", " "))
 
     def posts(self):
         return self.api.posts(self.blog, {"tag": self.tag})
@@ -312,9 +327,12 @@ class TumblrLikesExtractor(TumblrExtractor):
     directory_fmt = ("{category}", "{blog_name}", "likes")
     archive_fmt = "f_{blog[name]}_{id}_{num}"
     pattern = BASE_PATTERN + r"/likes"
-    test = ("http://mikf123.tumblr.com/likes", {
-        "count": 1,
-    })
+    test = (
+        ("http://mikf123.tumblr.com/likes", {
+            "count": 1,
+        }),
+        ("https://www.tumblr.com/blog/view/mikf123/likes"),
+    )
 
     def posts(self):
         return self.api.likes(self.blog)
