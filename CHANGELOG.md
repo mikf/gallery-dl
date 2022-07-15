@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.22.4 - 2022-07-15
+### Additions
+- [instagram] add `pinned` metadata field ([#2752](https://github.com/mikf/gallery-dl/issues/2752))
+- [itaku] categorize sections by group ([#1842](https://github.com/mikf/gallery-dl/issues/1842))
+- [khinsider] extract `platform` metadata
+- [tumblr] support `/blog/view` URLs ([#2760](https://github.com/mikf/gallery-dl/issues/2760))
+- [twitter] implement `strategy` option ([#2712](https://github.com/mikf/gallery-dl/issues/2712))
+- [twitter] add `count` metadata field ([#2741](https://github.com/mikf/gallery-dl/issues/2741))
+- [formatter] implement `O` format specifier ([#2736](https://github.com/mikf/gallery-dl/issues/2736))
+- [postprocessor:mtime] add `value` option ([#2739](https://github.com/mikf/gallery-dl/issues/2739))
+- add `--no-postprocessors` command-line option ([#2725](https://github.com/mikf/gallery-dl/issues/2725))
+- implement `format-separator` option ([#2737](https://github.com/mikf/gallery-dl/issues/2737))
+### Changes
+- [pinterest] handle section pins with separate extractors ([#2684](https://github.com/mikf/gallery-dl/issues/2684))
+- [postprocessor:ugoira] enable `mtime` by default ([#2714](https://github.com/mikf/gallery-dl/issues/2714))
+### Fixes
+- [bunkr] fix extraction ([#2732](https://github.com/mikf/gallery-dl/issues/2732))
+- [hentaifoundry] fix metadata extraction
+- [itaku] fix user caching ([#1842](https://github.com/mikf/gallery-dl/issues/1842))
+- [itaku] fix `date` parsing
+- [kemonoparty] ensure all files have an `extension` ([#2740](https://github.com/mikf/gallery-dl/issues/2740))
+- [komikcast] update domain
+- [mangakakalot] update domain
+- [newgrounds] only attempt to login if necessary ([#2715](https://github.com/mikf/gallery-dl/issues/2715))
+- [newgrounds] prevent exception on empty results ([#2727](https://github.com/mikf/gallery-dl/issues/2727))
+- [nozomi] reduce memory consumption during searches ([#2754](https://github.com/mikf/gallery-dl/issues/2754))
+- [pixiv] fix default `background` filenames
+- [sankaku] rewrite file URLs to s.sankakucomplex.com ([#2746](https://github.com/mikf/gallery-dl/issues/2746))
+- [slideshare] fix `description` extraction
+- [twitter] ignore previously seen Tweets ([#2712](https://github.com/mikf/gallery-dl/issues/2712))
+- [twitter] unescape HTML entities in `content` ([#2757](https://github.com/mikf/gallery-dl/issues/2757))
+- [weibo] handle invalid or broken status objects
+- [postprocessor:zip] ensure target directory exists ([#2758](https://github.com/mikf/gallery-dl/issues/2758))
+- make `brotli` an *optional* dependency ([#2716](https://github.com/mikf/gallery-dl/issues/2716))
+- limit path length for `--write-pages` output on Windows ([#2733](https://github.com/mikf/gallery-dl/issues/2733))
+### Removals
+- [foolfuuka] remove archive.wakarimasen.moe
+
 ## 1.22.3 - 2022-06-28
 ### Changes
 - [twitter] revert strategy changes for user URLs ([#2712](https://github.com/mikf/gallery-dl/issues/2712), [#2710](https://github.com/mikf/gallery-dl/issues/2710))
