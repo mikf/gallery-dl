@@ -110,7 +110,12 @@ class TumblrExtractor(Extractor):
 
                 for photo in photos:
                     post["photo"] = photo
-                    photo.update(photo["original_size"])
+                    best_photo = photo["original_size"]
+                    for alt_photo in photo["alt_sizes"]:
+                        if (alt_photo["height"] > best_photo["height"] or
+                                alt_photo["width"] > best_photo["width"]):
+                            best_photo = alt_photo
+                    photo.update(best_photo)
                     del photo["original_size"]
                     del photo["alt_sizes"]
                     yield self._prepare_image(photo["url"], post)
