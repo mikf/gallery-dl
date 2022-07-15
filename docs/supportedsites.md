@@ -104,6 +104,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Bunkr</td>
+    <td>https://bunkr.is/</td>
+    <td>Albums</td>
+    <td></td>
+</tr>
+<tr>
     <td>Comic Vine</td>
     <td>https://comicvine.gamespot.com/</td>
     <td>Tag Searches</td>
@@ -1260,12 +1266,6 @@ Consider all sites to be NSFW unless otherwise known.
 
 <tr>
     <td colspan="4"><strong>lolisafe and chibisafe</strong></td>
-</tr>
-<tr>
-    <td>Bunkr</td>
-    <td>https://app.bunkr.is/</td>
-    <td>Albums</td>
-    <td></td>
 </tr>
 <tr>
     <td>ZzZz</td>
