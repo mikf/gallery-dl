@@ -20,10 +20,6 @@ class LolisafeExtractor(BaseExtractor):
 
 
 BASE_PATTERN = LolisafeExtractor.update({
-    "bunkr": {
-        "root": "https://app.bunkr.is",
-        "pattern": r"(?:app\.)?bunkr\.(?:is|to)",
-    },
     "zzzz" : {
         "root": "https://zz.ht",
         "pattern": r"zz\.(?:ht|fo)",
@@ -35,25 +31,6 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
     subcategory = "album"
     pattern = BASE_PATTERN + "/a/([^/?#]+)"
     test = (
-        ("https://app.bunkr.is/a/Lktg9Keq", {
-            "pattern": r"https://cdn\.bunkr\.is/test-テスト-\"&>-QjgneIQv\.png",
-            "content": "0c8768055e4e20e7c7259608b67799171b691140",
-            "keyword": {
-                "album_id": "Lktg9Keq",
-                "album_name": 'test テスト "&>',
-                "count": 1,
-                "filename": 'test-テスト-"&>-QjgneIQv',
-                "id": "QjgneIQv",
-                "name": 'test-テスト-"&>',
-                "num": int,
-            },
-        }),
-        # mp4 (#2239)
-        ("https://bunkr.is/a/ptRHaCn2", {
-            "pattern": r"https://media-files\.bunkr\.is/_-RnHoW69L\.mp4",
-            "content": "80e61d1dbc5896ae7ef9a28734c747b28b320471",
-        }),
-        ("https://bunkr.to/a/Lktg9Keq"),
         ("https://zz.ht/a/lop7W6EZ", {
             "pattern": r"https://z\.zz\.fo/(4anuY|ih560)\.png",
             "count": 2,
@@ -71,11 +48,7 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
 
         domain = self.config("domain")
         if domain is None or domain == "auto":
-            if self.category == "bunkr":
-                self.root = "https://app.bunkr.is"
-            else:
-                self.root = text.root_from_url(match.group(0))
-
+            self.root = text.root_from_url(match.group(0))
         else:
             self.root = text.ensure_http_scheme(domain)
 
@@ -89,10 +62,6 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
                 data["_fallback"] = file["_fallback"]
             text.nameext_from_url(url, data)
             data["name"], sep, data["id"] = data["filename"].rpartition("-")
-
-            if data["extension"] == "mp4":
-                url = url.replace(
-                    "//cdn.bunkr.is/", "//media-files.bunkr.is/", 1)
             yield Message.Url, url, data
 
     def fetch_album(self, album_id):
