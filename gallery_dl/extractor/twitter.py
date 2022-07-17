@@ -612,7 +612,26 @@ class TwitterSearchExtractor(TwitterExtractor):
         return {"search": text.unquote(self.user)}
 
     def tweets(self):
-        return self.api.search_adaptive(text.unquote(self.user))
+        query = text.unquote(self.user)
+
+        user = None
+        for item in query.split():
+            item = item.strip("()")
+            if item.startswith("from:"):
+                if user:
+                    user = None
+                    break
+                else:
+                    user = item[5:]
+
+        if user is not None:
+            try:
+                self._user_obj = user = self.api.user_by_screen_name(user)
+            except KeyError:
+                raise exception.NotFoundError("user")
+            self._user = self._transform_user(user)
+
+        return self.api.search_adaptive(query)
 
 
 class TwitterEventExtractor(TwitterExtractor):
