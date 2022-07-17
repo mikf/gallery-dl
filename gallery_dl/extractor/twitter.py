@@ -248,7 +248,7 @@ class TwitterExtractor(Extractor):
             "retweet_id"    : text.parse_int(
                 tget("retweeted_status_id_str")),
             "quote_id"      : text.parse_int(
-                tget("quoted_status_id_str")),
+                tget("quoted_by_id_str")),
             "reply_id"      : text.parse_int(
                 tget("in_reply_to_status_id_str")),
             "date"          : text.parse_datetime(
@@ -284,8 +284,8 @@ class TwitterExtractor(Extractor):
 
         if "in_reply_to_screen_name" in tweet:
             tdata["reply_to"] = tweet["in_reply_to_screen_name"]
-        if "quoted_by_id_str" in tweet:
-            tdata["quote_by"] = text.parse_int(tweet["quoted_by_id_str"])
+        if "quoted_by" in tweet:
+            tdata["quote_by"] = tweet["quoted_by"]
 
         return tdata
 
@@ -1172,7 +1172,7 @@ class TwitterAPI():
                     if quoted:
                         quoted = quoted.copy()
                         quoted["author"] = users[quoted["user_id_str"]]
-                        quoted["user"] = tweet["user"]
+                        quoted["quoted_by"] = tweet["user"]["screen_name"]
                         quoted["quoted_by_id_str"] = tweet["id_str"]
                         yield quoted
 
@@ -1318,6 +1318,9 @@ class TwitterAPI():
                 if "quoted_status_result" in tweet:
                     try:
                         quoted = tweet["quoted_status_result"]["result"]
+                        quoted["legacy"]["quoted_by"] = (
+                            tweet["core"]["user_results"]["result"]
+                            ["legacy"]["screen_name"])
                         quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
                         yield quoted
                     except KeyError:
