@@ -21,6 +21,9 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
     def __init__(self, match):
         booru.BooruExtractor.__init__(self, match)
+        self.api_key = self.config("api-key")
+        self.user_id = self.config("user-id")
+
         try:
             self.api_root = INSTANCES[self.category]["api_root"]
         except KeyError:
