@@ -522,10 +522,13 @@ class InstagramCollectionExtractor(InstagramExtractor):
     """Extractor for ProfilePage saved collection media"""
     subcategory = "collection"
     pattern = USER_PATTERN + r"/saved/([^/?#]+)/([^/?#]+)"
-    test = ("https://www.instagram.com/instagram/saved/collection_name/123456789/",)
-        
-    def posts(self): 
-        collection_id = self.url.split("/")[-2] if self.url[-1] == "/" else self.url.split("/")[-1]
+    test = (
+        "https://www.instagram.com/instagram/saved/collection_name/123456789/",
+    )
+
+    def posts(self):
+        collection_id = self.url.split(
+            "/")[-2] if self.url[-1] == "/" else self.url.split("/")[-1]
         endpoint = "/v1/feed/collection/{}/posts/".format(collection_id)
         for item in self._pagination_api(endpoint, {}):
             yield item["media"]
