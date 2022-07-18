@@ -3319,6 +3319,7 @@ Description
     * ``"tags"``: ``tags`` separated by newlines
     * ``"custom"``: result of applying `metadata.content-format`_
       to a file's metadata dictionary
+    * ``"delete"``: remove metadata entries specified in `metadata.fields`_
 
 
 metadata.filename
@@ -3405,6 +3406,16 @@ Description
     ``post``
         When starting to download all files of a `post`,
         e.g. a Tweet on Twitter or a post on Patreon.
+
+
+metadata.fields
+---------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["blocked", "watching", "status[creator][name]"]``
+Description
+    List of metadata field names to remove for ``"mode": "delete"``.
 
 
 metadata.content-format
