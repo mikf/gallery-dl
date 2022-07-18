@@ -509,13 +509,26 @@ class InstagramChannelExtractor(InstagramExtractor):
 class InstagramSavedExtractor(InstagramExtractor):
     """Extractor for ProfilePage saved media"""
     subcategory = "saved"
-    pattern = USER_PATTERN + r"/saved"
+    pattern = USER_PATTERN + r"/saved/?$"
     test = ("https://www.instagram.com/instagram/saved/",)
 
     def posts(self):
         query_hash = "2ce1d673055b99250e93b6f88f878fde"
         variables = {"id": self._uid_by_screen_name(self.item), "first": 50}
         return self._pagination_graphql(query_hash, variables)
+
+
+class InstagramCollectionExtractor(InstagramExtractor):
+    """Extractor for ProfilePage saved collection media"""
+    subcategory = "collection"
+    pattern = USER_PATTERN + r"/saved/([^/?#]+)/([^/?#]+)"
+    test = ("https://www.instagram.com/instagram/saved/collection_name/123456789/",)
+        
+    def posts(self): 
+        collection_id = self.url.split("/")[-2] if self.url[-1] == "/" else self.url.split("/")[-1]
+        endpoint = "/v1/feed/collection/{}/posts/".format(collection_id)
+        for item in self._pagination_api(endpoint, {}):
+            yield item["media"]
 
 
 class InstagramTagExtractor(InstagramExtractor):
