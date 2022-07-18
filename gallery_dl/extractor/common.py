@@ -795,12 +795,23 @@ SSL_CIPHERS = {
 }
 
 
+urllib3 = requests.packages.urllib3
+
 # detect brotli support
 try:
-    BROTLI = requests.packages.urllib3.response.brotli is not None
+    BROTLI = urllib3.response.brotli is not None
 except AttributeError:
     BROTLI = False
 
+# set (urllib3) warnings filter
+action = config.get((), "warnings", "default")
+if action:
+    try:
+        import warnings
+        warnings.simplefilter(action, urllib3.exceptions.HTTPWarning)
+    except Exception:
+        pass
+del action
 
 # Undo automatic pyOpenSSL injection by requests
 pyopenssl = config.get((), "pyopenssl", False)

@@ -3748,6 +3748,17 @@ Description
     as signal handler for.
 
 
+warnings
+--------
+Type
+    ``string``
+Default
+    ``"default"``
+Description
+    The `Warnings Filter action <https://docs.python.org/3/library/warnings.html#the-warnings-filter>`__
+    used for (urllib3) warnings.
+
+
 pyopenssl
 ---------
 Type
