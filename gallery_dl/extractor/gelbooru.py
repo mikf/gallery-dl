@@ -21,10 +21,15 @@ class GelbooruBase():
     root = "https://gelbooru.com"
 
     def _api_request(self, params):
+        params["api_key"] = self.api_key
+        params["user_id"] = self.user_id
+
         url = self.root + "/index.php?page=dapi&s=post&q=index&json=1"
         data = self.request(url, params=params).json()
+
         if "post" not in data:
             return ()
+
         posts = data["post"]
         if not isinstance(posts, list):
             return (posts,)

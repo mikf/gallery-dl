@@ -1313,6 +1313,18 @@ Description
     * ``"new"``: Expect the *new* site layout
 
 
+extractor.gelbooru.api-key & .user-id
+-------------------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Values from the API Access Credentials section found at the bottom of your
+    `Account Options <https://gelbooru.com/index.php?page=account&s=options>`__
+    page.
+
+
 extractor.generic.enabled
 -------------------------
 Type
