@@ -526,11 +526,19 @@ class InstagramCollectionExtractor(InstagramExtractor):
         "https://www.instagram.com/instagram/saved/collection_name/123456789/",
     )
 
+    def __init__(self, match):
+        InstagramExtractor.__init__(self, match)
+        self.user, self.collection_name, self.collection_id = match.groups()
+
+    def metadata(self):
+        return {
+            "collection_id"  : self.collection_id,
+            "collection_name": text.unescape(self.collection_name),
+        }
+
     def posts(self):
-        collection_id = self.url.split(
-            "/")[-2] if self.url[-1] == "/" else self.url.split("/")[-1]
-        endpoint = "/v1/feed/collection/{}/posts/".format(collection_id)
-        for item in self._pagination_api(endpoint, {}):
+        endpoint = "/v1/feed/collection/{}/posts/".format(self.collection_id)
+        for item in self._pagination_api(endpoint):
             yield item["media"]
 
 
