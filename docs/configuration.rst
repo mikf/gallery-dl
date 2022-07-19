@@ -3312,14 +3312,15 @@ Type
 Default
     ``"json"``
 Description
-    Select how to write metadata.
+    Selects how to process metadata.
 
-    * ``"json"``: all metadata using `json.dump()
+    * ``"json"``: write metadata using `json.dump()
       <https://docs.python.org/3/library/json.html#json.dump>`_
-    * ``"tags"``: ``tags`` separated by newlines
-    * ``"custom"``: result of applying `metadata.content-format`_
+    * ``"tags"``: write ``tags`` separated by newlines
+    * ``"custom"``: write the result of applying `metadata.content-format`_
       to a file's metadata dictionary
-    * ``"delete"``: remove metadata entries specified in `metadata.fields`_
+    * ``"modify"``: add or modify metadata entries
+    * ``"delete"``: remove metadata entries
 
 
 metadata.filename
@@ -3411,11 +3412,27 @@ Description
 metadata.fields
 ---------------
 Type
-    ``list`` of ``strings``
+    * ``list`` of ``strings``
+    * ``object`` (`field name` -> `format string`_)
 Example
-    ``["blocked", "watching", "status[creator][name]"]``
+    * .. code:: json
+
+        ["blocked", "watching", "status[creator][name]"]
+
+    * .. code:: json
+
+        {
+            "blocked"         : "***",
+            "watching"        : "\fE 'yes' if watching else 'no'",
+            "status[username]": "{status[creator][name]!l}"
+        }
+
 Description
-    List of metadata field names to remove for ``"mode": "delete"``.
+    * ``"mode": "delete"``:
+        A list of metadata field names to remove.
+    * ``"mode": "modify"``:
+        An object with metadata field names mapping to a `format string`_
+        whose result is assigned to said field name.
 
 
 metadata.content-format
