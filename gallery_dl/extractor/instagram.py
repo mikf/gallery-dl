@@ -398,7 +398,7 @@ class InstagramExtractor(Extractor):
             variables["after"] = self._cursor = info["end_cursor"]
             self.log.debug("Cursor: %s", self._cursor)
 
-    def _pagination_api(self, endpoint, params=None):
+    def _pagination_api(self, endpoint, params={}):
         while True:
             data = self._request_api(endpoint, params=params)
             yield from data["items"]
