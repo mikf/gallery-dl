@@ -454,7 +454,6 @@ class TwitterTimelineExtractor(TwitterExtractor):
         tweet = None
         for tweet in self._select_tweet_source()(self.user):
             yield tweet
-
         if tweet is None:
             return
 
@@ -463,12 +462,19 @@ class TwitterTimelineExtractor(TwitterExtractor):
             self._user["name"], tweet["rest_id"])
         if self.retweets:
             query += " include:retweets include:nativeretweets"
-        if not self.textonly:
-            query += (" (filter:images OR"
-                      " filter:native_video OR"
-                      " card_name:animated_gif)")
 
-        # yield search results starting from last tweet id
+        if not self.textonly:
+            # try to search for media-only tweets
+            tweet = None
+            for tweet in self.api.search_adaptive(query + (
+                    " (filter:images OR"
+                    " filter:native_video OR"
+                    " card_name:animated_gif)")):
+                yield tweet
+            if tweet is not None:
+                return
+
+        # yield unfiltered search results
         yield from self.api.search_adaptive(query)
 
     def _select_tweet_source(self):
