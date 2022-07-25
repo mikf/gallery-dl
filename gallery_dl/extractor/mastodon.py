@@ -179,12 +179,11 @@ class MastodonAPI():
             try:
                 access_token = INSTANCES[extractor.category]["access-token"]
             except (KeyError, TypeError):
-                raise exception.StopExtraction(
-                    "Missing access token.\n"
-                    "Run 'gallery-dl oauth:mastodon:%s' to obtain one.",
-                    extractor.instance)
-
-        self.headers = {"Authorization": "Bearer " + access_token}
+                pass
+        if access_token:
+            self.headers = {"Authorization": "Bearer " + access_token}
+        else:
+            self.headers = None
 
     def account_id_by_username(self, username):
         if username.startswith("id:"):
@@ -232,6 +231,11 @@ class MastodonAPI():
 
             if code < 400:
                 return response
+            if code == 401:
+                raise exception.StopExtraction(
+                    "Invalid or missing access token.\n"
+                    "Run 'gallery-dl oauth:mastodon:%s' to obtain one.",
+                    self.extractor.instance)
             if code == 404:
                 raise exception.NotFoundError()
             if code == 429:
