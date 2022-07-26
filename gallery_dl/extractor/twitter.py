@@ -466,10 +466,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
         if not self.textonly:
             # try to search for media-only tweets
             tweet = None
-            for tweet in self.api.search_adaptive(query + (
-                    " (filter:images OR"
-                    " filter:native_video OR"
-                    " card_name:animated_gif)")):
+            for tweet in self.api.search_adaptive(query + " filter:links"):
                 yield tweet
             if tweet is not None:
                 return
