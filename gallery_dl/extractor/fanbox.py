@@ -6,6 +6,7 @@
 
 """Extractors for https://www.fanbox.cc/"""
 
+import re
 from .common import Extractor, Message
 from .. import text
 
@@ -78,6 +79,7 @@ class FanboxExtractor(Extractor):
         num = 0
         cover_image = post.get("coverImageUrl")
         if cover_image:
+            cover_image = re.sub("/c/[0-9a-z_]+", "", cover_image)
             final_post = post.copy()
             final_post["isCoverImage"] = True
             final_post["fileUrl"] = cover_image
