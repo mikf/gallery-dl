@@ -398,7 +398,7 @@ class InstagramExtractor(Extractor):
             variables["after"] = self._cursor = info["end_cursor"]
             self.log.debug("Cursor: %s", self._cursor)
 
-    def _pagination_api(self, endpoint, params=None):
+    def _pagination_api(self, endpoint, params={}):
         while True:
             data = self._request_api(endpoint, params=params)
             yield from data["items"]
@@ -509,13 +509,37 @@ class InstagramChannelExtractor(InstagramExtractor):
 class InstagramSavedExtractor(InstagramExtractor):
     """Extractor for ProfilePage saved media"""
     subcategory = "saved"
-    pattern = USER_PATTERN + r"/saved"
+    pattern = USER_PATTERN + r"/saved/?$"
     test = ("https://www.instagram.com/instagram/saved/",)
 
     def posts(self):
         query_hash = "2ce1d673055b99250e93b6f88f878fde"
         variables = {"id": self._uid_by_screen_name(self.item), "first": 50}
         return self._pagination_graphql(query_hash, variables)
+
+
+class InstagramCollectionExtractor(InstagramExtractor):
+    """Extractor for ProfilePage saved collection media"""
+    subcategory = "collection"
+    pattern = USER_PATTERN + r"/saved/([^/?#]+)/([^/?#]+)"
+    test = (
+        "https://www.instagram.com/instagram/saved/collection_name/123456789/",
+    )
+
+    def __init__(self, match):
+        InstagramExtractor.__init__(self, match)
+        self.user, self.collection_name, self.collection_id = match.groups()
+
+    def metadata(self):
+        return {
+            "collection_id"  : self.collection_id,
+            "collection_name": text.unescape(self.collection_name),
+        }
+
+    def posts(self):
+        endpoint = "/v1/feed/collection/{}/posts/".format(self.collection_id)
+        for item in self._pagination_api(endpoint):
+            yield item["media"]
 
 
 class InstagramTagExtractor(InstagramExtractor):
