@@ -40,12 +40,17 @@ class VkExtractor(Extractor):
                 continue
 
             try:
+                photo["url"] = photo[size + "src"]
+            except KeyError:
+                self.log.warning("no photo URL found (%s)", photo.get("id"))
+                continue
+
+            try:
                 _, photo["width"], photo["height"] = photo[size]
             except ValueError:
                 # photo without width/height entries (#2535)
                 photo["width"] = photo["height"] = 0
 
-            photo["url"] = photo[size + "src"]
             photo["id"] = photo["id"].rpartition("_")[2]
             photo.update(data)
 
