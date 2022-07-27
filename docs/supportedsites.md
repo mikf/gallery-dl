@@ -896,6 +896,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Zerochan</td>
+    <td>https://www.zerochan.net/</td>
+    <td>individual Images, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>かべうち</td>
     <td>https://kabe-uchiroom.com/</td>
     <td>User Profiles</td>

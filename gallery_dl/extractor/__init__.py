@@ -150,6 +150,7 @@ modules = [
     "wikieat",
     "xhamster",
     "xvideos",
+    "zerochan",
     "booru",
     "moebooru",
     "foolfuuka",
