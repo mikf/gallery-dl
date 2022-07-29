@@ -2142,6 +2142,16 @@ Description
     Download videos.
 
 
+extractor.skeb.article
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download article images.
+
+
 extractor.skeb.sent-requests
 ----------------------------
 Type
