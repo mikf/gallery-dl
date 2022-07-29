@@ -16,10 +16,10 @@ import json
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkr.is albums"""
     category = "bunkr"
-    root = "https://app.bunkr.is"
+    root = "https://bunkr.is"
     pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:is|to)/a/([^/?#]+)"
     test = (
-        ("https://app.bunkr.is/a/Lktg9Keq", {
+        ("https://bunkr.is/a/Lktg9Keq", {
             "pattern": r"https://cdn\.bunkr\.is/test-テスト-\"&>-QjgneIQv\.png",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
             "keyword": {
@@ -33,7 +33,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             },
         }),
         # mp4 (#2239)
-        ("https://bunkr.is/a/ptRHaCn2", {
+        ("https://app.bunkr.is/a/ptRHaCn2", {
             "pattern": r"https://media-files\.bunkr\.is/_-RnHoW69L\.mp4",
             "content": "80e61d1dbc5896ae7ef9a28734c747b28b320471",
         }),
@@ -70,16 +70,16 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             album = props["album"]
             files = props["files"]
         except Exception as exc:
-            self.log.debug(exc)
+            self.log.debug(exc.__class__.__name__, exc)
             self.root = self.root.replace("bunkr", "app.bunkr", 1)
             return self._fetch_album_api(album_id)
 
         for file in files:
             name = file["name"]
+            cdn = file["cdn"]
             if name.endswith(".mp4"):
-                file["file"] = "https://media-files.bunkr.is/" + name
-            else:
-                file["file"] = file["cdn"] + "/" + name
+                cdn = cdn.replace("//cdn", "//media-files")
+            file["file"] = cdn + "/" + name
 
         return files, {
             "album_id"   : self.album_id,
