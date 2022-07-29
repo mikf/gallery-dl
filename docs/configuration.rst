@@ -377,6 +377,7 @@ Description
     * ``tapas``
     * ``tsumino``
     * ``twitter``
+    * ``zerochan``
 
     These values can also be specified via the
     ``-u/--username`` and ``-p/--password`` command-line options or

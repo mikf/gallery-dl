@@ -9,7 +9,8 @@
 """Extractors for https://www.zerochan.net/"""
 
 from .booru import BooruExtractor
-from .. import text
+from ..cache import cache
+from .. import text, exception
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
@@ -20,6 +21,38 @@ class ZerochanExtractor(BooruExtractor):
     root = "https://www.zerochan.net"
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}"
+    cookiedomain = ".zerochan.net"
+    cookienames = ("z_id", "z_hash")
+
+    def login(self):
+        if not self._check_cookies(self.cookienames):
+            username, password = self._get_auth_info()
+            if username:
+                self._update_cookies(self._login_impl(username, password))
+        # force legacy layout
+        self.session.cookies.set("v3", "0", domain=self.cookiedomain)
+
+    @cache(maxage=90*86400, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/login"
+        headers = {
+            "Origin"  : self.root,
+            "Referer" : url,
+        }
+        data = {
+            "ref"     : "/",
+            "name"    : username,
+            "password": password,
+            "login"   : "Login",
+        }
+
+        response = self.request(url, method="POST", headers=headers, data=data)
+        if not response.history:
+            raise exception.AuthenticationError()
+
+        return response.cookies
 
     def _parse_entry_page(self, entry_id):
         url = "{}/{}".format(self.root, entry_id)
