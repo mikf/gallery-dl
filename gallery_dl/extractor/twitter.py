@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
+import itertools
 import json
 
 BASE_PATTERN = (
@@ -702,7 +703,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         ("https://twitter.com/i/web/status/1424898916156284928", {
             "options": (("replies", "self"),),
-            "count": 0,
+            "count": 1,
         }),
         # "quoted" option (#854)
         ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
@@ -786,19 +787,39 @@ class TwitterTweetExtractor(TwitterExtractor):
 
     def tweets(self):
         if self.config("conversations", False):
-            return self.api.tweet_detail(self.tweet_id)
+            return self._tweets_conversation(self.tweet_id)
+        else:
+            return self._tweets_single(self.tweet_id)
 
+    def _tweets_single(self, tweet_id):
         tweets = []
-        tweet_id = self.tweet_id
+
         for tweet in self.api.tweet_detail(tweet_id):
             if tweet["rest_id"] == tweet_id or \
                     tweet.get("_retweet_id_str") == tweet_id:
+                self._user_obj = tweet["core"]["user_results"]["result"]
+                self._user = self._transform_user(self._user_obj)
                 tweets.append(tweet)
 
                 tweet_id = tweet["legacy"].get("quoted_status_id_str")
                 if not tweet_id:
                     break
+
         return tweets
+
+    def _tweets_conversation(self, tweet_id):
+        tweets = self.api.tweet_detail(tweet_id)
+        buffer = []
+
+        for tweet in tweets:
+            buffer.append(tweet)
+            if tweet["rest_id"] == tweet_id or \
+                    tweet.get("_retweet_id_str") == tweet_id:
+                self._user_obj = tweet["core"]["user_results"]["result"]
+                self._user = self._transform_user(self._user_obj)
+                break
+
+        return itertools.chain(buffer, tweets)
 
 
 class TwitterImageExtractor(Extractor):
@@ -1443,6 +1464,6 @@ class TwitterAPI():
         return {
             "rest_id": tweet["id_str"],
             "legacy" : tweet,
-            "user"   : tweet["user"],
+            "core"   : {"user_results": {"result": tweet["user"]}},
             "_retweet_id_str": retweet_id,
         }
