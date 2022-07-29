@@ -67,9 +67,6 @@ class BloggerExtractor(Extractor):
                         key=lambda x: x["format_id"],
                     )["play_url"])
 
-            if not files:
-                continue
-
             post["author"] = post["author"]["displayName"]
             post["replies"] = post["replies"]["totalItems"]
             post["content"] = text.remove_html(content)
