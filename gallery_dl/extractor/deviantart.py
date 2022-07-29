@@ -1128,11 +1128,18 @@ class DeviantartOAuthAPI():
             self._folders((deviation,))
         return deviation
 
-    def deviation_content(self, deviation_id, public=False):
+    def deviation_content(self, deviation_id, public=True):
         """Get extended content of a single Deviation"""
         endpoint = "/deviation/content"
         params = {"deviationid": deviation_id}
-        return self._call(endpoint, params=params, public=public)
+        content = self._call(endpoint, params=params, public=public)
+        if public and content["html"].startswith(
+                '        <span class=\"username-with-symbol'):
+            if self.refresh_token_key:
+                content = self._call(endpoint, params=params, public=False)
+            else:
+                self.log.warning("Private Journal")
+        return content
 
     def deviation_download(self, deviation_id, public=True):
         """Get the original file download (if allowed)"""
