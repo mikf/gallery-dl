@@ -218,7 +218,8 @@ and optional for
 ``subscribestar``,
 ``tapas``,
 ``tsumino``,
-and ``twitter``.
+``twitter``,
+and ``zerochan``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
