@@ -23,6 +23,7 @@ class SkebExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user_name = match.group(1)
         self.thumbnails = self.config("thumbnails", False)
+        self.article = self.config("article", False)
 
     def items(self):
         for user_name, post_num in self.posts():
@@ -103,6 +104,12 @@ class SkebExtractor(Extractor):
             post["content_category"] = "thumb"
             post["file_id"] = "thumb"
             post["file_url"] = resp["og_image_url"]
+            yield post
+
+        if self.article and "article_image_url" in resp:
+            post["content_category"] = "article"
+            post["file_id"] = "article"
+            post["file_url"] = resp["article_image_url"]
             yield post
 
         for preview in resp["previews"]:
