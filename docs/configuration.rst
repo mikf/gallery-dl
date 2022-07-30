@@ -561,6 +561,20 @@ Description
     with a ``metadata`` post processor, etc.
 
 
+extractor.*.path-metadata
+-------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert a reference to the current `PathFormat <https://github.com/mikf/gallery-dl/blob/v1.22.4/gallery_dl/path.py#L20>`__
+    data structure into metadata dictionaries as the given name.
+
+    For example, setting this option to ``"gdl_path"`` would make it possible
+    to access the current file's filename as ``"[gdl_path.filename}"``.
+
+
 extractor.*.category-transfer
 -----------------------------
 Type

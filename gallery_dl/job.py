@@ -35,10 +35,13 @@ class Job():
         self.status = 0
         self.url_key = extr.config("url-metadata")
 
+        path_key = extr.config("path-metadata")
+        path_proxy = output.PathfmtProxy(self)
+
         self._logger_extra = {
             "job"      : self,
             "extractor": extr,
-            "path"     : output.PathfmtProxy(self),
+            "path"     : path_proxy,
             "keywords" : output.KwdictProxy(self),
         }
         extr.log = self._wrap_logger(extr.log)
@@ -58,6 +61,8 @@ class Job():
         kwdict = extr.config("keywords")
         if kwdict:
             self.kwdict.update(kwdict)
+        if path_key:
+            self.kwdict[path_key] = path_proxy
 
         # predicates
         self.pred_url = self._prepare_predicates("image", True)
