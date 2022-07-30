@@ -99,13 +99,14 @@ class WeiboExtractor(Extractor):
                 else:
                     yield pic["largest"].copy()
 
-        if "page_info" in status:
-            page_info = status["page_info"]
-            if "media_info" not in page_info or not self.videos:
-                return
-            media = max(page_info["media_info"]["playback_list"],
-                        key=lambda m: m["meta"]["quality_index"])
-            yield media["play_info"].copy()
+        if "page_info" in status and self.videos:
+            try:
+                media = max(status["page_info"]["media_info"]["playback_list"],
+                            key=lambda m: m["meta"]["quality_index"])
+            except KeyError:
+                pass
+            else:
+                yield media["play_info"].copy()
 
     def _status_by_id(self, status_id):
         url = "{}/ajax/statuses/show?id={}".format(self.root, status_id)
@@ -365,6 +366,10 @@ class WeiboStatusExtractor(WeiboExtractor):
         ("https://weibo.com/1758989602/LvBhm5DiP", {
             "pattern": r"https://g\.us\.sinaimg.cn/o0/qNZcaAAglx07Wuf921CM0104"
                        r"120005tc0E010\.mp4\?label=gif_mp4",
+        }),
+        # missing 'playback_list' (#2792)
+        ("https://weibo.com/2909128931/4409545658754086", {
+            "count": 9,
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
