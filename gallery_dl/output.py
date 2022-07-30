@@ -73,6 +73,12 @@ class PathfmtProxy():
         pathfmt = object.__getattribute__(self, "job").pathfmt
         return pathfmt.__dict__.get(name) if pathfmt else None
 
+    def __str__(self):
+        pathfmt = object.__getattribute__(self, "job").pathfmt
+        if pathfmt:
+            return pathfmt.path or pathfmt.directory
+        return ""
+
 
 class KwdictProxy():
     __slots__ = ("job",)
