@@ -12,75 +12,37 @@ from .. import text
 BASE_PATTERN = r"(?:https?://)?jpg\.church"
 
 
-class JpgchurchImageExtractor(Extractor):
-    """Base Extractor for Jpgchurch Images"""
-    category = "Jpgchurch"
-    subcategory = "image"
-    directory_fmt = ("{category}", "{user}")
-    filename_fmt = "{filename}"
-    pattern = BASE_PATTERN + r"/img/([\w\d\-\.]+)"
+class JpgchurchExtractor(Extractor):
+    """Base class for Jpgchurch extractors"""
+    category = "jpgchurch"
     root = "https://jpg.church"
-    test = ("https://jpg.church/img/funnymeme.LecXGS",)
+    directory_fmt = ("{category}", "{user}",)
+    archive_fmt = "{filename}"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.image = match.group(1)
 
     def items(self):
-        data = self.metadata()
         for image in self.images():
-            if "album" in image or "user" in image:
-                data.update(image)
-            yield Message.Directory, data
+            yield Message.Directory, image
             yield Message.Url, image["url"], image
-
-    def metadata(self):
-        """Return general metadata"""
-        return {}
 
     def images(self):
         """Return an iterable containing the image(s)"""
-        url = "{}/img/{}".format(self.root, self.image)
-        return [self._get_images(url)]
-
-    def _get_images(self, url):
-        page = self.request(url).text
-        data = self._extract_image(page)
-        data.update({
-            "user": data["user"].split("/")[-1],
-            "extension": text.ext_from_url(data["url"])
-        })
-        return data
 
     @staticmethod
-    def _extract_image(page):
-        _page = text.extract(
-            page,
-            '<div class="header-content-right">', '<span class="user-image')[0]
-        return text.extract_all(_page, (
-            ('url', '<a href="', '" download='),
-            ('filename', '"', '" class'),
-            ('user', '<a href="', '" class="user-image">')))[0]
+    def _extract_user(page):
+        return text.extract(page, 'username: "', '"')[0]
 
-
-class JpgchurchAlbumExtractor(JpgchurchImageExtractor, Extractor):
-    """Extractor for Jpgchurch Albums"""
-    subcategory = "album"
-    directory_fmt = ("{category}", "{user}", "{album}",)
-    pattern = BASE_PATTERN + r"/a(?:lbum)?/([\w\d\-\.]+)"
-    test = ("https://jpg.church/album/CDilP/?sort=date_desc&page=1",)
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.album = match.group(1).split('.')[-1]
-
-    def metadata(self):
-        return {"album": self.album}
-
-    def images(self):
-        url = "{}/a/{}".format(self.root, self.album)
-        for _url in self._get_album_images(url):
-            yield self._get_images(_url)
+    def _extract_image(self, url):
+        page = self.request(url).text
+        data = {
+            "url": text.extract(
+                page, '<meta property="og:image" content="', '" />')[0],
+        }
+        text.nameext_from_url(data["url"], data)
+        data["user"] = self._extract_user(page)
+        return data
 
     def _pagination(self, url):
         """Uses recursion to yield the next page"""
@@ -92,30 +54,114 @@ class JpgchurchAlbumExtractor(JpgchurchImageExtractor, Extractor):
             url = _next
             yield from self._pagination(_next)
 
-    def _get_album_images(self, url):
-        for _url in self._pagination(url):
-            page = self.request(_url).text
-            _page = text.extract_iter(
+    def _get_images(self, url):
+        for url in self._pagination(url):
+            page = self.request(url).text
+            album = text.extract(page, '<a data-text="album-name"', '</h1>')[0]
+            album = text.extract(album, '>', '</a>')[0]
+            page = text.extract_iter(
                 page, '<div class="list-item-image ', 'image-container')
-            for image in _page:
-                yield text.extract(image, '<a href="', '" class')[0]
+            for image in page:
+                image = text.extract(image, '<a href="', '"')[0]
+                data = self._extract_image(image)
+                data["album"] = album
+                yield data
+
+    def _get_albums(self, url):
+        for url in self._pagination(url):
+            page = self.request(url).text
+            album = text.extract(page, '<a data-text="album-name"', '</h1>')[0]
+            album = text.extract(album, '>', '</a>')[0]
+            page = text.extract_iter(
+                page, '<div class="list-item-image ', 'image-container')
+            for image in page:
+                image = text.extract(image, '<a href="', '"')[0]
+                yield image
 
 
-class JpgchurchUserExtractor(JpgchurchAlbumExtractor, Extractor):
-    """Extractor for Jpgchurch Users"""
-    subcategory = "user"
-    directory_fmt = ("{category}", "{user}",)
-    pattern = BASE_PATTERN + r"/(?!img|a(?:lbum)?)([\w\d\-\.]+)"
-    test = ("https://jpg.church/exearco",)
+class JpgchurchImageExtractor(JpgchurchExtractor):
+    """Extractor for Jpgchurch Images"""
+    subcategory = "image"
+    pattern = BASE_PATTERN + r"/img/([^/?#]+)"
+    test = (
+        ("https://jpg.church/img/funnymeme.LecXGS"),
+    )
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user = match.group(1)
-
-    def metadata(self):
-        return {"user": self.user}
+        JpgchurchExtractor.__init__(self, match)
+        self.image = match.group(1)
 
     def images(self):
+        url = "{}/img/{}".format(self.root, self.image)
+        yield self._extract_image(url)
+
+
+class JpgchurchAlbumExtractor(JpgchurchExtractor):
+    """Extractor for Jpgchurch Albums"""
+    subcategory = "album"
+    directory_fmt = ("{category}", "{user}", "{album}",)
+    pattern = BASE_PATTERN + r"/a(?:lbum)?/([^/?#]+)(/sub)?"
+    test = (
+        ("https://jpg.church/album/CDilP/?sort=date_desc&page=1", {
+            "count": 2,
+            "pattern": r"^https://[^/]+/.*\.(jpg|png)",
+        }),
+        ("https://jpg.church/a/gunggingnsk.N9OOI", {
+            "count": 114,
+        }),
+        ("https://jpg.church/a/101-200.aNJ6A/", {
+            "count": 100,
+        }),
+        ("https://jpg.church/a/hannahowo.aNTdH/sub", {
+            "count": 606,
+        }),
+    )
+
+    def __init__(self, match):
+        JpgchurchExtractor.__init__(self, match)
+        self.album = match.group(1)
+        self.is_sub = match.group(2)
+
+    def images(self):
+        url = "{}/a/{}".format(self.root, self.album)
+        if self.is_sub:
+            url += "/sub"
+            for album in self._get_albums(url):
+                yield from self._get_images(album)
+        else:
+            yield from self._get_images(url)
+
+
+class JpgchurchUserExtractor(JpgchurchExtractor):
+    """Extractor for Jpgchurch Users"""
+    subcategory = "user"
+    pattern = BASE_PATTERN + r"/(?!img|a(?:lbum)?)([^/?#]+)(/albums)?"
+    test = (
+        ("https://jpg.church/exearco", {
+            "count": 3,
+        }),
+        ("https://jpg.church/exearco/albums", {
+            "count": 1,
+        }),
+    )
+
+    def __init__(self, match):
+        JpgchurchExtractor.__init__(self, match)
+        self.user = match.group(1)
+        self.is_album = match.group(2)
+
+    def items(self):
         url = "{}/{}".format(self.root, self.user)
-        for _url in self._get_album_images(url):
-            yield self._get_images(_url)
+        if self.is_album:
+            url += "/albums"
+            data = {
+                "_extractor": JpgchurchAlbumExtractor,
+            }
+            for album in self._get_albums(url):
+                yield Message.Queue, album, data
+        else:
+            data = {
+                "_extractor": JpgchurchImageExtractor,
+            }
+            for image in self._get_albums(url):
+                yield Message.Queue, image, data
