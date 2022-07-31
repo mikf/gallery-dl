@@ -73,7 +73,6 @@ modules = [
     "kissgoddess",
     "kohlchan",
     "komikcast",
-    "lensdump",
     "lightroom",
     "lineblog",
     "livedoor",
