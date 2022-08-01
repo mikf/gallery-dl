@@ -57,7 +57,7 @@ class PoipikuExtractor(Extractor):
                 url = text.ensure_http_scheme(thumb[:-8])
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
-            if not extr('</i> show all', '<'):
+            if not extr('> show all', '<'):
                 continue
 
             url = self.root + "/f/ShowAppendFileF.jsp"
