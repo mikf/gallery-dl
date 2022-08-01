@@ -15,6 +15,7 @@ import io
 import random
 import string
 import datetime
+import itertools
 import http.cookiejar
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -555,7 +556,7 @@ class TestOther(unittest.TestCase):
 
         def assertEqual(it1, it2):
             ae = self.assertEqual
-            for i1, i2 in zip(it1, it2, strict=True):
+            for i1, i2 in itertools.zip_longest(it1, it2):
                 ae(i1, i2)
 
         assertEqual(
